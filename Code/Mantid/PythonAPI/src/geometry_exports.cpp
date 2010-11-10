@@ -8,15 +8,10 @@
 #include <MantidGeometry/Quat.h>
 
 #include <MantidGeometry/Instrument/ObjComponent.h>
-#include <MantidGeometry/Instrument/ParObjComponent.h>
 #include <MantidGeometry/Instrument/Component.h>
-#include <MantidGeometry/Instrument/ParametrizedComponent.h>
 #include <MantidGeometry/Instrument/CompAssembly.h>
-#include <MantidGeometry/Instrument/ParCompAssembly.h>
 #include <MantidGeometry/Instrument/Detector.h>
-#include <MantidGeometry/Instrument/ParDetector.h>
 #include <MantidGeometry/Instrument/Instrument.h>
-#include <MantidGeometry/Instrument/ParInstrument.h>
 
 
 namespace Mantid
@@ -79,21 +74,21 @@ namespace Mantid
 
     // Default parameter function overloads
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,Geometry::Component::getParameterNames,0,1);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getParameterNames,Geometry::ParametrizedComponent::getParameterNames,0,1);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getParameterNames,Geometry::ParametrizedComponent::getParameterNames,0,1);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter,Geometry::Component::hasParameter,1,2);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_hasParameter,Geometry::ParametrizedComponent::hasParameter,1,2);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_hasParameter,Geometry::ParametrizedComponent::hasParameter,1,2);
 
     //
     // MG: Ticket #1601 is going to clean up the parameter access mess but the recursion takes precendence.
     //
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getNumberParameter,Geometry::Component::getNumberParameter,1,2);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getNumberParameter,Geometry::ParametrizedComponent::getNumberParameter,1,2);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getNumberParameter,Geometry::ParametrizedComponent::getNumberParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getPositionParameter,Geometry::Component::getPositionParameter,1,2);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getPositionParameter,Geometry::ParametrizedComponent::getPositionParameter,1,2);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getPositionParameter,Geometry::ParametrizedComponent::getPositionParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter,Geometry::Component::getRotationParameter,1,2);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getRotationParameter,Geometry::ParametrizedComponent::getRotationParameter,1,2);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getRotationParameter,Geometry::ParametrizedComponent::getRotationParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Geometry::Component::getStringParameter,1,2);
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getStringParameter,Geometry::ParametrizedComponent::getStringParameter,1,2);
+    //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getStringParameter,Geometry::ParametrizedComponent::getStringParameter,1,2);
     
     void export_components()
     {
@@ -164,17 +159,19 @@ namespace Mantid
         .def("getStringParameter", &Geometry::Component::getStringParameter, Component_getStringParameter())
 
         ;
-      //ParameterizedComponent
-      class_<Geometry::ParametrizedComponent, bases<Geometry::IComponent>, 
-        boost::noncopyable>("ParameterizedComponent", no_init)
-        .def("getParameterNames", &Geometry::ParametrizedComponent::getParameterNames, ParComponent_getParameterNames())
-        .def("hasParameter", &Geometry::ParametrizedComponent::hasParameter, ParComponent_hasParameter())
-        .def("getNumberParameter", &Geometry::ParametrizedComponent::getNumberParameter, ParComponent_getNumberParameter())
-        .def("getPositionParameter", &Geometry::ParametrizedComponent::getPositionParameter, ParComponent_getPositionParameter())
-        .def("getRotationParameter", &Geometry::ParametrizedComponent::getRotationParameter, ParComponent_getRotationParameter())
-        .def("getStringParameter", &Geometry::ParametrizedComponent::getStringParameter, ParComponent_getStringParameter())
 
-        ;
+
+//      //ParameterizedComponent
+//      class_<Geometry::ParametrizedComponent, bases<Geometry::IComponent>,
+//        boost::noncopyable>("ParameterizedComponent", no_init)
+//        .def("getParameterNames", &Geometry::ParametrizedComponent::getParameterNames, ParComponent_getParameterNames())
+//        .def("hasParameter", &Geometry::ParametrizedComponent::hasParameter, ParComponent_hasParameter())
+//        .def("getNumberParameter", &Geometry::ParametrizedComponent::getNumberParameter, ParComponent_getNumberParameter())
+//        .def("getPositionParameter", &Geometry::ParametrizedComponent::getPositionParameter, ParComponent_getPositionParameter())
+//        .def("getRotationParameter", &Geometry::ParametrizedComponent::getRotationParameter, ParComponent_getRotationParameter())
+//        .def("getStringParameter", &Geometry::ParametrizedComponent::getStringParameter, ParComponent_getStringParameter())
+//
+//        ;
 
       /** 
       * The detector classes are prefixed with Mantid due to an unfortunate name clash in an existing user script
@@ -185,19 +182,21 @@ namespace Mantid
       class_<Geometry::Detector, bases<Geometry::IDetector>,
         boost::noncopyable>("MantidDetector", no_init)
         ;
-      //ParDetector
-      class_<Geometry::ParDetector, bases<Geometry::ParametrizedComponent, Geometry::IDetector>,
-        boost::noncopyable>("MantidParDetector", no_init)
-        ;
+
+//      //ParDetector
+//      class_<Geometry::ParDetector, bases<Geometry::ParametrizedComponent, Geometry::IDetector>,
+//        boost::noncopyable>("MantidParDetector", no_init)
+//        ;
 
       //CompAssembly class
       class_<Geometry::CompAssembly, boost::python::bases<Geometry::Component, Geometry::ICompAssembly>, 
         boost::noncopyable>("CompAssembly", no_init)
         ;
-      //ParCompAssembly class
-      class_<Geometry::ParCompAssembly, boost::python::bases<Geometry::ParametrizedComponent,Geometry::ICompAssembly>, 
-        boost::noncopyable>("ParCompAssembly", no_init)
-        ;
+
+//      //ParCompAssembly class
+//      class_<Geometry::ParCompAssembly, boost::python::bases<Geometry::ParametrizedComponent,Geometry::ICompAssembly>,
+//        boost::noncopyable>("ParCompAssembly", no_init)
+//        ;
     }
 
   void export_instrument()
@@ -219,10 +218,12 @@ namespace Mantid
     class_< Geometry::Instrument, boost::python::bases<Geometry::IInstrument, Geometry::CompAssembly>, 
 	    boost::noncopyable>("Instrument", no_init)
       ;
-    //Instrument class
-    class_< Geometry::ParInstrument, boost::python::bases<Geometry::IInstrument, Geometry::ParCompAssembly>, 
-	    boost::noncopyable>("ParInstrument", no_init)
-      ;
+
+//    //Instrument class
+//    class_< Geometry::ParInstrument, boost::python::bases<Geometry::IInstrument, Geometry::ParCompAssembly>,
+//	    boost::noncopyable>("ParInstrument", no_init)
+//      ;
+
   }
 
 

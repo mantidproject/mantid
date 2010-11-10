@@ -85,7 +85,7 @@ public:
     /// Return the size of the map
     inline int size() const { return static_cast<int>(m_map.size()); }
     ///Copy Contructor
-    ParameterMap(const ParameterMap& copy);
+    ParameterMap(ParameterMap& copy);
     /// Clears the map
     void clear()
     {
@@ -299,7 +299,7 @@ public:
 
 private:
   ///Assignment operator
-  ParameterMap& operator=(const ParameterMap& rhs);
+  ParameterMap& operator=(ParameterMap * rhs);
   /// report an error
   void reportError(const std::string& str);
   /// internal parameter map instance
@@ -314,6 +314,9 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
+
+typedef boost::shared_ptr<ParameterMap> ParameterMap_sptr;
+typedef boost::shared_ptr<const ParameterMap> ParameterMap_const_sptr;
 
 } // Namespace Geometry
 

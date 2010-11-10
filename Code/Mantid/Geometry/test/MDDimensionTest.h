@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 #include <cfloat>
+#include <cstring>
 
 using namespace Mantid;
 using namespace Geometry;

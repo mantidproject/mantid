@@ -12,6 +12,7 @@
 #include "Poco/XML/XMLWriter.h"
 #include <sstream>
 #include <vector>
+#include <memory>
 #include "MantidKernel/System.h"
 
 namespace Mantid

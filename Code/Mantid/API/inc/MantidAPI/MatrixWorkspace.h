@@ -215,7 +215,8 @@ namespace Mantid
       bool m_isDistribution;
 
       /// Parameters modifying the base instrument
-      mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
+      //mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
+      mutable Geometry::ParameterMap_sptr m_parmap;
 
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int, MaskList > m_masks;

@@ -10,7 +10,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-//#include "MantidGeometry/Instrument/ParObjComponent.h"
 #include <stdexcept>
 
 
@@ -24,13 +23,13 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( alg.name(), "SetScalingPSD" )
+    TS_ASSERT_EQUALS( alg.name(), "SetScalingPSD" );
   }
 
   void testInit()
   {
     alg.initialize();
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( alg.isInitialized() );
   }
 
   void testLoadMer()
@@ -62,7 +61,7 @@ public:
     alg.setPropertyValue("Workspace", "testWS");
        alg.setPropertyValue("ScalingOption", "2");
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare("testWS"));
   }
 
@@ -97,12 +96,12 @@ public:
       TS_ASSERT_EQUALS(2110001,id);
       V3D pos = det->getPos();
       V3D expectedPos = V3D(-1.00001,-1.51351,2.2913);
-      TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
+      TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5);
       //double sa=det->solidAngle(V3D(0,0,0));
       //TS_ASSERT_DELTA(sa,7.37824e-6,1e-10)
       
       // check that points lie on correct side of the scaled object
-      //boost::shared_ptr<ParObjComponent> pdet= boost::dynamic_pointer_cast<ParObjComponent>(comp);
+      //boost::shared_ptr<ObjComponent> pdet= boost::dynamic_pointer_cast<ObjComponent>(comp);
       //double yHW=0.00143;
       //TS_ASSERT( pdet->isValid(expectedPos) )
       //TS_ASSERT( pdet->isValid(expectedPos+V3D(0,0.99*yHW,0)) )

@@ -4,7 +4,6 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 
 namespace Mantid
 {
@@ -105,9 +104,9 @@ void MoveInstrumentComponent::exec()
 
   //Need to get the address to the base instrument component
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
-  ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
+  Component* pcomp = dynamic_cast<Component*>(comp.get());
   const IComponent* baseComp;
-  if (pcomp)
+  if (pcomp->isParametrized())
   {
       baseComp = pcomp->base();
   }

@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument/ParInstrument.h"
 
 namespace Mantid
 {

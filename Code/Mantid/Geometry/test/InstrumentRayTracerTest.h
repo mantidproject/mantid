@@ -82,7 +82,7 @@ public:
     TS_ASSERT_DELTA(firstIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 0.001, 1e-6);
-    TS_ASSERT_EQUALS(firstIntersect.componentID, sampleComp->getComponentID());
+    TS_ASSERT_EQUALS(firstIntersect.componentID, sampleComp->getComponentID ());
 
     ++resultItr;
     Link secondIntersect = *resultItr;
@@ -94,7 +94,11 @@ public:
     TS_ASSERT_DELTA(secondIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 5.004, 1e-6);
-    TS_ASSERT_EQUALS(secondIntersect.componentID, centralPixel->getComponentID());
+    TS_ASSERT_EQUALS(secondIntersect.componentID, centralPixel->getComponentID ());
+
+    // Results vector should be empty after first getResults call
+    results = tracker.getResults();
+    TS_ASSERT_EQUALS(results.size(), 0);
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();
@@ -110,7 +114,7 @@ public:
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
 
-    IComponent_sptr interceptedPixel = testInst->getComponentByName("pixel-(1,0)");
+    IComponent * interceptedPixel = testInst->getComponentByName("pixel-(1,0)").get();
 
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
@@ -121,7 +125,11 @@ public:
     TS_ASSERT_DELTA(intersect.exitPoint.X(), 0.01, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Z(), 5.003464, 1e-6);
-    TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID());
+    TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID ());
+
+    // Results vector should be empty after first getResults call
+    results = tracker.getResults();
+    TS_ASSERT_EQUALS(results.size(), 0);
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();

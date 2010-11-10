@@ -193,7 +193,7 @@ public:
     units.setPropertyValue("OutputWorkspace", outputSpace);
     units.setPropertyValue("Target", "Wavelength");
     units.setPropertyValue("EMode", "Direct");
-    TS_ASSERT_THROWS_NOTHING(units.execute());
+    units.execute();
     TS_ASSERT( units.isExecuted() );
 
     // reload instrument to test constraint defined in IDF is working

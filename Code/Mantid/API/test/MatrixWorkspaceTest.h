@@ -8,10 +8,12 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidGeometry/IInstrument.h"
 
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace Mantid { namespace DataObjects {
 class WorkspaceTester : public MatrixWorkspace
@@ -120,7 +122,8 @@ public:
     TS_ASSERT_EQUALS( ws->getTitle(), "something" );
     ws->setTitle("");
   }
- void testGetNDIM()
+
+  void testGetNDIM()
   {
     TS_ASSERT_EQUALS( ws->getNumDims(), 2 );
   }
@@ -166,7 +169,7 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws->history() );
     const Mantid::DataObjects::WorkspaceTester wsc;
-    TS_ASSERT_THROWS_NOTHING( const WorkspaceHistory& hh = wsc.getHistory() );
+    const WorkspaceHistory& hh = wsc.getHistory();
   }
 
   void testAxes()
@@ -216,7 +219,7 @@ public:
     // Doesn't throw on invalid spectrum index, just returns false
     TS_ASSERT( !ws2->hasMaskedBins(1) );
     TS_ASSERT( !ws2->hasMaskedBins(-1) );
-    
+
     // Will throw if nothing masked for spectrum
     TS_ASSERT_THROWS( ws2->maskedBins(0), Mantid::Kernel::Exception::IndexError );
     // Will throw if attempting to mask invalid spectrum
@@ -225,7 +228,7 @@ public:
     // ...or an invalid bin
     TS_ASSERT_THROWS( ws2->maskBin(0,-1), Mantid::Kernel::Exception::IndexError );
     TS_ASSERT_THROWS( ws2->maskBin(0,2), Mantid::Kernel::Exception::IndexError );
-    
+
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,1,0.5) );
     TS_ASSERT( ws2->hasMaskedBins(0) );
@@ -234,7 +237,7 @@ public:
     TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 0.5 );
     // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 );
-    
+
     // Now mask a bin earlier than above and check it's sorting properly
     TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) );
     TS_ASSERT( ws2->hasMaskedBins(0) );
@@ -247,19 +250,19 @@ public:
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 );
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 );
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 );
-    
+
     delete ws2;
   }
-  
+
   void testSize()
   {
     MatrixWorkspace *wkspace = new Mantid::DataObjects::WorkspaceTester;
     //Test workspace takes the middle value here as the size of each vector
     wkspace->initialize(1,4,3);
-    
+
     TS_ASSERT_EQUALS(wkspace->blocksize(), 4);
     TS_ASSERT_EQUALS(wkspace->size(), 4);
-    
+
   }
 
   void testBinIndexOf()
@@ -270,11 +273,11 @@ public:
     wkspace->dataX(0)[1] = 2.0;
     wkspace->dataX(0)[2] = 3.0;
     wkspace->dataX(0)[3] = 4.0;
-    
+
     TS_ASSERT_EQUALS(wkspace->getNumberHistograms(), 1);
 
     //First bin
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(1.3), 0);    
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(1.3), 0);
     // Bin boundary
     TS_ASSERT_EQUALS(wkspace->binIndexOf(2.0), 0);
     // Mid range
@@ -285,18 +288,18 @@ public:
     TS_ASSERT_EQUALS(wkspace->binIndexOf(3.1), 2);
     // Last value
     TS_ASSERT_EQUALS(wkspace->binIndexOf(4.0), 2);
-    
+
     // Error handling
 
     // Bad index value
     TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, 1), std::out_of_range);
     TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, -1), std::out_of_range);
-    
+
     // Bad X values
     TS_ASSERT_THROWS(wkspace->binIndexOf(5.), std::out_of_range);
     TS_ASSERT_THROWS(wkspace->binIndexOf(0.), std::out_of_range);
   }
-  
+
   void testMappingFunctions()
   {
     MatrixWorkspace * wsm = new Mantid::DataObjects::WorkspaceTesterWithMaps();

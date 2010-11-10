@@ -4,8 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -58,6 +60,7 @@ namespace Mantid
       ///String description of the type of component
       virtual std::string type() const { return "Instrument"; }
 
+      Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map);
       Instrument();
       Instrument(const std::string& name);
       ///Virtual destructor
@@ -114,9 +117,15 @@ namespace Mantid
       // Allow access by index
       using CompAssembly::getChild;
 
-    private:
-      friend class ParInstrument;
 
+      /// Pointer to the 'real' instrument, for parametrized instruments
+      boost::shared_ptr<Instrument> baseInstrument() const;
+
+      /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
+      Geometry::ParameterMap_sptr getParameterMap() const;
+
+
+    private:
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
       /// Private copy constructor
@@ -151,6 +160,13 @@ namespace Mantid
 
       /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;
+
+      /// Pointer to the "real" instrument, for parametrized Instrument
+      boost::shared_ptr<Instrument> m_instr;
+
+      /// Non-const pointer to the parameter map
+      ParameterMap_sptr m_map_nonconst;
+
     };
 
     /// Shared pointer to an instrument object

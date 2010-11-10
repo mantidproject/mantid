@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax","20"));
     std::string outputFile;
-    outputFile = "GetDetOffsets.cal";
+    outputFile = "./GetDetOffsets.cal";
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("GroupingFileName", outputFile));
 
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );

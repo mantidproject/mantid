@@ -1,12 +1,12 @@
-#ifndef MANTID_TESTParCompAssembly__
-#define MANTID_TESTParCompAssembly__
+#ifndef MANTID_TESTPARCOMPASSEMBLY_H_
+#define MANTID_TESTPARCOMPASSEMBLY_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <iostream>
 #include <string>
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ParCompAssembly.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 
@@ -19,8 +19,8 @@ public:
   {
     CompAssembly q;
 
-    ParameterMap pmap;
-    ParCompAssembly pq(&q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -37,8 +37,8 @@ public:
   {
     CompAssembly q("Name");
 
-    ParameterMap pmap;
-    ParCompAssembly pq(&q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -57,8 +57,8 @@ public:
     //name and parent
     CompAssembly* q = new CompAssembly("Child", parent);
 
-    ParameterMap pmap;
-    ParCompAssembly pq(q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pq(q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
@@ -86,18 +86,19 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    ParameterMap pmap;
-    ParCompAssembly pbank(&bank,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pbank(&bank,pmap); //parametrized one
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
     boost::shared_ptr<IComponent> det1copy;
-    TS_ASSERT_THROWS_NOTHING(det1copy = pbank[0]);
+    det1copy = pbank[0];
+    TS_ASSERT(det1copy);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
     //show that they are the same object
     det1->setName("ChangedName");
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
-    pmap.addV3D(det2,"pos",V3D(1,1,1));
+    pmap->addV3D(det2,"pos",V3D(1,1,1));
     boost::shared_ptr<IComponent> det2copy;
     TS_ASSERT_THROWS_NOTHING(det2copy = pbank[1]);
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());
@@ -109,33 +110,36 @@ public:
 
     CompAssembly q("Child", &parent);
 
-    ParameterMap pmap;
-    ParCompAssembly pq(&q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pq(&q,pmap);
 
     TS_ASSERT(pq.getParent());
     TS_ASSERT_EQUALS(pq.getParent()->getName(), parent.getName());
     TS_ASSERT_EQUALS(pq.getParent()->getPos(), V3D(1, 1, 1));
     TS_ASSERT_EQUALS(pq.getParent()->getRelativeRot(), Quat(1, 1, 1, 1));
-  }
+
+    //Get the position again - this'll retrieve from the cache
+    TS_ASSERT_EQUALS(pq.getParent()->getPos(), V3D(1, 1, 1));
+}
 
   void testType()
   {
     CompAssembly comp;
 
-    ParameterMap pmap;
-    ParCompAssembly pcomp(&comp,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    CompAssembly pcomp(&comp,pmap);
 
-    TS_ASSERT_EQUALS(pcomp.type(), "ParCompAssembly");
+    TS_ASSERT_EQUALS(pcomp.type(), "CompAssembly");
   }
 
   //void test_That_The_Bounding_Box_Is_In_The_Correct_Position()
   //{
-  //  ParCompAssembly *bank = createTestParAssembly();
+  //  CompAssembly *bank = createTestParAssembly();
   //}
 
   //private:
 
-  //  ParCompAssembly * createTestParAssembly()
+  //  CompAssembly * createTestParAssembly()
   //  {
   //    boost::shared_ptr<CompAssembly> bank = boost::shared_ptr<CompAssembly>(new CompAssembly("Bank"));
   //    m_det1 = boost::shared_ptr<Component>(new Component("Det1Name"));

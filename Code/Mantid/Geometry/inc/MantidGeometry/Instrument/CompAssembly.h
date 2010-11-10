@@ -56,6 +56,8 @@ public:
   virtual std::string type() const { return "CompAssembly";}
   //! Empty constructor
   CompAssembly();
+  ///Constructor for parametrized version
+  CompAssembly(const IComponent* base, ParameterMap_const_sptr map);
   //! Constructor with a name and parent reference
   CompAssembly(const std::string&, IComponent* reference=0);
   //! Copy constructor
@@ -75,6 +77,11 @@ public:
   boost::shared_ptr<IComponent> getChild(const int i) const;
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
+
+  V3D getPos() const;
+
+  const Quat getRotation() const;
+
 
   /// Get the bounding box for this component and store it in the given argument
   virtual void getBoundingBox(BoundingBox& boundingBox) const;

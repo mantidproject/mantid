@@ -2,7 +2,9 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include <algorithm>
 #include <iostream>
 
@@ -25,16 +27,62 @@ namespace Mantid
       m_defaultViewAxis("Z+")
     {}
 
+    /** Constructor to create a parametrized instrument
+     *
+     *
+     **/
+    Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
+    : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map ),
+      m_instr(instr),
+      m_map_nonconst(map)
+    {
+    }
+
+
+    /// Pointer to the 'real' instrument, for parametrized instruments
+    boost::shared_ptr<Instrument> Instrument::baseInstrument() const
+    {
+      if (isParametrized())
+        return m_instr;
+      else
+        throw std::runtime_error("Instrument::baseInstrument() called for a non-parametrized instrument.");
+    }
+
+    /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
+    Geometry::ParameterMap_sptr Instrument::getParameterMap() const
+    {
+      if (isParametrized())
+        return m_map_nonconst;
+      else
+        throw std::runtime_error("Instrument::getParameterMap() called for a non-parametrized instrument.");
+    }
+
+
+
+
 
     /**	return reference to detector cache 
     * @returns a map of the detectors hold by the instrument
     */
     std::map<int, Geometry::IDetector_sptr> Instrument::getDetectors() const
     { 
-      std::map<int, Geometry::IDetector_sptr> res;
-      for(std::map<int, Geometry::IDetector*>::const_iterator it=_detectorCache.begin();it!=_detectorCache.end();it++)
-        res.insert(std::pair<int, Geometry::IDetector_sptr>(it->first,Geometry::IDetector_sptr(it->second,NoDeleting())));
-      return res;
+      if (isParametrized())
+      {
+        //Get the base instrument detectors
+        std::map<int, IDetector_sptr> res, dets = dynamic_cast<const Instrument*>(m_base)->getDetectors();
+        //And turn them into parametrized versions
+        for(std::map<int, IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)
+          res.insert(std::pair<int, IDetector_sptr>
+          (it->first,IDetector_sptr( new Detector( dynamic_cast<Detector*>(it->second.get()), m_map ))));
+        return res;
+      }
+      else
+      {
+        std::map<int, Geometry::IDetector_sptr> res;
+        for(std::map<int, Geometry::IDetector*>::const_iterator it=_detectorCache.begin();it!=_detectorCache.end();it++)
+          res.insert(std::pair<int, Geometry::IDetector_sptr>(it->first,Geometry::IDetector_sptr(it->second,NoDeleting())));
+        return res;
+      }
     }
 
     /**	Gets a pointer to the source
@@ -42,9 +90,16 @@ namespace Mantid
     */
     Geometry::IObjComponent_sptr Instrument::getSource() const
     {
-      if ( !_sourceCache )
-        g_log.warning("In Instrument::getSource(). No source has been set.");
-      return boost::shared_ptr<Geometry::IObjComponent>(_sourceCache,NoDeleting());
+      if (isParametrized())
+      {
+        return IObjComponent_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->_sourceCache,m_map));
+      }
+      else
+      {
+        if ( !_sourceCache )
+          g_log.warning("In Instrument::getSource(). No source has been set.");
+        return boost::shared_ptr<Geometry::IObjComponent>(_sourceCache,NoDeleting());
+      }
     }
 
     /**	Gets a pointer to the Sample Position
@@ -52,9 +107,16 @@ namespace Mantid
     */
     Geometry::IObjComponent_sptr Instrument::getSample() const
     {
-      if ( !_sampleCache )
-        g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-      return boost::shared_ptr<Geometry::IObjComponent>(_sampleCache,NoDeleting());
+      if (isParametrized())
+      {
+        return IObjComponent_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->_sampleCache,m_map));
+      }
+      else
+      {
+        if ( !_sampleCache )
+          g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
+        return boost::shared_ptr<Geometry::IObjComponent>(_sampleCache,NoDeleting());
+      }
     }
 
     /**  Get a shared pointer to a component by its ID
@@ -63,7 +125,11 @@ namespace Mantid
     */
     boost::shared_ptr<Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)
     {
-      return boost::shared_ptr<Geometry::IComponent>((Geometry::IComponent*)id,NoDeleting());
+      IComponent* base = (IComponent*)(id);
+      if (isParametrized())
+        return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
+      else
+        return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
     }
 
     /**	Gets a pointer to the detector from its ID
@@ -76,20 +142,29 @@ namespace Mantid
     */
     Geometry::IDetector_sptr Instrument::getDetector(const int &detector_id) const
     {
-      std::map<int, Geometry::IDetector*>::const_iterator it;
-
-      it = _detectorCache.find(detector_id);
-
-      if ( it == _detectorCache.end() )
+      if (isParametrized())
       {
-        g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
-        std::stringstream readInt;
-        readInt << detector_id;
-        throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
+        boost::shared_ptr<Detector> det = boost::dynamic_pointer_cast<Detector>(dynamic_cast<const Instrument*>(m_base)->getDetector(detector_id));
+        return IDetector_sptr(new Geometry::Detector(det.get(),m_map));
       }
+      else
+      {
+        std::map<int, Geometry::IDetector*>::const_iterator it;
 
-      return Geometry::IDetector_sptr(it->second,NoDeleting());
+        it = _detectorCache.find(detector_id);
+
+        if ( it == _detectorCache.end() )
+        {
+          g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
+          std::stringstream readInt;
+          readInt << detector_id;
+          throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
+        }
+
+        return Geometry::IDetector_sptr(it->second,NoDeleting());
+      }
     }
+
 
     /**	Gets a pointer to the monitor from its ID
     *  @param   detector_id The requested detector ID
@@ -98,6 +173,8 @@ namespace Mantid
     */
     Geometry::IDetector_sptr Instrument::getMonitor(const int &detector_id)const
     {
+      //No parametrized monitors - I guess ....
+
       std::vector<int>::const_iterator itr;
       itr=find(m_monitorCache.begin(),m_monitorCache.end(),detector_id);
       if ( itr == m_monitorCache.end() )
@@ -111,6 +188,8 @@ namespace Mantid
 
       return monitor;
     }
+
+
     /**	Gets a pointer to the requested child component
     * @param name the name of the object requested (case insensitive)
     * @returns a pointer to the component
@@ -124,6 +203,7 @@ namespace Mantid
       int noOfChildren = this->nelements();
       for (int i = 0; i < noOfChildren; i++)
       {
+        //The proper (parametrized or not) component will be returned by [i] operator.
         Geometry::IComponent *loopPtr = (*this)[i].get();
         std::string loopName = loopPtr->getName();
         std::transform(loopName.begin(), loopName.end(), loopName.begin(), toupper);
@@ -141,6 +221,8 @@ namespace Mantid
       return retVal;
     }
 
+
+
     /** Mark a Component which has already been added to the Instrument (as a child component)
     * to be 'the' samplePos Component. For now it is assumed that we have
     * at most one of these.
@@ -149,6 +231,9 @@ namespace Mantid
     */
     void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
     {
+      if (isParametrized())
+        throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
+
       if ( !_sampleCache )
         _sampleCache = comp;
       else
@@ -163,6 +248,9 @@ namespace Mantid
     */
     void Instrument::markAsSource(Geometry::ObjComponent* comp)
     {
+      if (isParametrized())
+        throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
+
       if ( !_sourceCache )
         _sourceCache = comp;
       else
@@ -177,6 +265,9 @@ namespace Mantid
     */
     void Instrument::markAsDetector(Geometry::IDetector* det)
     {
+      if (isParametrized())
+        throw std::runtime_error("Instrument::markAsDetector() called on a parametrized Instrument object.");
+
       if ( !_detectorCache.insert( std::map<int, Geometry::IDetector*>::value_type(det->getID(), det) ).second )
       {
         std::stringstream convert;
@@ -195,6 +286,9 @@ namespace Mantid
     */
     void Instrument::markAsMonitor(Geometry::IDetector* det)
     {
+      if (isParametrized())
+        throw std::runtime_error("Instrument::markAsMonitor() called on a parametrized Instrument object.");
+
       // attempt to add monitor to instrument detector cache
       markAsDetector(det);
 
@@ -210,13 +304,20 @@ namespace Mantid
         throw std::invalid_argument("The IDetector pointer does not point to a Detector object");
       }
     }
+
+
     /** This method returns monitor detector ids
     *@return a vector holding detector ids of  monitors
     */
     const std::vector<int> Instrument::getMonitors()const
     {
-      return m_monitorCache;
+      //Monitors cannot be parametrized. So just return the base.
+      if (isParametrized())
+        return dynamic_cast<const Instrument*>(m_base)->m_monitorCache;
+      else
+        return m_monitorCache;
     }
+
 
    /**
     * Get the bounding box for this instrument. It is simply the sum of the bounding boxes of its children excluding the source
@@ -224,35 +325,90 @@ namespace Mantid
     */
     void Instrument::getBoundingBox(BoundingBox & assemblyBox) const
     {
-      if( !m_cachedBoundingBox )
+      if (isParametrized())
       {
-        m_cachedBoundingBox = new BoundingBox();
-        ComponentID sourceID = getSource()->getComponentID();
-        // Loop over the children and define a box large enough for all of them
-        for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
+        // Check cache for assembly
+        if( m_map->getCachedBoundingBox(this, assemblyBox ) )
         {
-          BoundingBox compBox;
-          IComponent *component = *it;
-          if(component && component->getComponentID() != sourceID)
+          return;
+        }
+        // Loop over the children and define a box large enough for all of them
+        ComponentID sourceID = getSource()->getComponentID();
+        assemblyBox = BoundingBox();
+        int nchildren = nelements();
+        for(int i = 0; i < nchildren; ++i)
+        {
+          IComponent_sptr comp = this->getChild(i);
+          if( comp && comp->getComponentID() != sourceID )
           {
-            component->getBoundingBox(compBox);
-            m_cachedBoundingBox->grow(compBox);
+            BoundingBox compBox;
+            comp->getBoundingBox(compBox);
+            assemblyBox.grow(compBox);
           }
         }
+        //Set the cache
+        m_map->setCachedBoundingBox(this, assemblyBox);
+
       }
-      // Use cached box
-      assemblyBox = *m_cachedBoundingBox;
+      else
+      {
+
+        if( !m_cachedBoundingBox )
+        {
+          m_cachedBoundingBox = new BoundingBox();
+          ComponentID sourceID = getSource()->getComponentID();
+          // Loop over the children and define a box large enough for all of them
+          for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
+          {
+            BoundingBox compBox;
+            IComponent *component = *it;
+            if(component && component->getComponentID() != sourceID)
+            {
+              component->getBoundingBox(compBox);
+              m_cachedBoundingBox->grow(compBox);
+            }
+          }
+        }
+        // Use cached box
+        assemblyBox = *m_cachedBoundingBox;
+
+      }
     }
 
 
     IInstrument::plottables_const_sptr Instrument::getPlottable() const
     {
-      boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
-        new std::vector<Geometry::IObjComponent_const_sptr> );
-      res->reserve(_detectorCache.size()+10);
-      appendPlottable(*this,*res);
-      return res;
+      if (isParametrized())
+      {
+        // Get the 'base' plottable components
+        IInstrument::plottables_const_sptr objs = dynamic_cast<const Instrument*>(m_base)->getPlottable();
+
+        // Get a reference to the underlying vector, casting away the constness so that we
+        // can modify it to get our result rather than creating another long vector
+        IInstrument::plottables & res = const_cast<IInstrument::plottables&>(*objs);
+        const plottables::size_type total = res.size();
+        for(plottables::size_type i = 0; i < total; ++i)
+        {
+          if ( boost::dynamic_pointer_cast<const Detector>(objs->at(i)) )
+            res[i] = IObjComponent_const_sptr(new Detector(dynamic_cast<const Detector*>(objs->at(i).get()),m_map));
+          else
+            res[i] = IObjComponent_const_sptr(new ObjComponent(dynamic_cast<const ObjComponent*>(objs->at(i).get()),m_map));
+        }
+        return objs;
+
+      }
+      else
+      {
+        // Base instrument
+        boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
+          new std::vector<Geometry::IObjComponent_const_sptr> );
+        res->reserve(_detectorCache.size()+10);
+        appendPlottable(*this,*res);
+        return res;
+      }
+
     }
+
 
     void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst) const
     {

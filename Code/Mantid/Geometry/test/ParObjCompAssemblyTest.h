@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/V3D.h"
@@ -22,8 +22,8 @@ public:
   {
     ObjCompAssembly q("Name");
 
-    ParameterMap pmap;
-    ParObjCompAssembly pq(&q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    ObjCompAssembly pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -42,8 +42,8 @@ public:
     //name and parent
     ObjCompAssembly* q = new ObjCompAssembly("Child", parent);
 
-    ParameterMap pmap;
-    ParObjCompAssembly pq(q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    ObjCompAssembly pq(q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
@@ -71,20 +71,21 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    ParameterMap pmap;
-    ParObjCompAssembly pbank(&bank,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    ObjCompAssembly pbank(&bank,pmap);
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
     boost::shared_ptr<IComponent> det1copy;
-    TS_ASSERT_THROWS_NOTHING(det1copy = pbank[0]);
+    det1copy = pbank[0];
+
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
     //show that they are the same object
     det1->setName("ChangedName");
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
-    pmap.addV3D(det2,"pos",V3D(1,1,1));
+    pmap->addV3D(det2,"pos",V3D(1,1,1));
     boost::shared_ptr<IComponent> det2copy;
-    TS_ASSERT_THROWS_NOTHING(det2copy = pbank[1]);
+    det2copy = pbank[1];
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());
   }
 
@@ -94,8 +95,8 @@ public:
 
     ObjCompAssembly q("Child", &parent);
 
-    ParameterMap pmap;
-    ParObjCompAssembly pq(&q,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    ObjCompAssembly pq(&q,pmap);
 
     TS_ASSERT(pq.getParent());
     TS_ASSERT_EQUALS(pq.getParent()->getName(), parent.getName());
@@ -107,10 +108,10 @@ public:
   {
     ObjCompAssembly comp("name");
 
-    ParameterMap pmap;
-    ParObjCompAssembly pcomp(&comp,pmap);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    ObjCompAssembly pcomp(&comp,pmap);
 
-    TS_ASSERT_EQUALS(pcomp.type(), "ParObjCompAssembly");
+    TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
 
   void testCreateOutlineCylinder()
@@ -146,9 +147,9 @@ public:
     TS_ASSERT_EQUALS(radius,0.1);
     TS_ASSERT_EQUALS(height,0.6);
 
-    ParameterMap pmap;
-    boost::shared_ptr<ParObjCompAssembly> pcomp(new ParObjCompAssembly(&bank,pmap));
-    boost::shared_ptr<IComponent> ic = boost::dynamic_pointer_cast<IComponent>(pcomp);
+    ParameterMap_sptr pmap( new ParameterMap() );
+    boost::shared_ptr<ObjCompAssembly> pcomp(new ObjCompAssembly(&bank,pmap));
+    boost::shared_ptr<Component> ic = boost::dynamic_pointer_cast<Component>(pcomp);
     boost::shared_ptr<ICompAssembly> ica = boost::dynamic_pointer_cast<ICompAssembly>(ic);
   }
 

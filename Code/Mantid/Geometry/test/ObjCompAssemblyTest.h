@@ -227,25 +227,25 @@ void testAdd()
     TS_ASSERT_EQUALS(q.getRelativeRot(), rot3);
   }
 
-  void testCopyRot()
-  {
-    Quat rot1(1, 0, 0, 0);
-    Quat rot2(-1, 0.01, -0.01, 9999);
-    ObjCompAssembly p("testSetRot");
-    p.setPos(V3D(1, 1, 1));
-    p.setRot(rot1);
-    ObjCompAssembly q("testCopyRot2");
-    q.setPos(V3D(2, 2, 2));
-    q.setRot(rot2);
-    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
-    TS_ASSERT_EQUALS(q.getRelativeRot(), rot2);
-    q.copyRot(p);
-    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
-    TS_ASSERT_EQUALS(q.getRelativeRot(), rot1);
-    //check it just copied the rotation and not everything else
-    TS_ASSERT_EQUALS(q.getPos(), V3D(2, 2, 2));
-    TS_ASSERT_EQUALS(q.getName(), "testCopyRot2");
-  }
+//  void testCopyRot() //CopyRot is unused
+//  {
+//    Quat rot1(1, 0, 0, 0);
+//    Quat rot2(-1, 0.01, -0.01, 9999);
+//    ObjCompAssembly p("testSetRot");
+//    p.setPos(V3D(1, 1, 1));
+//    p.setRot(rot1);
+//    ObjCompAssembly q("testCopyRot2");
+//    q.setPos(V3D(2, 2, 2));
+//    q.setRot(rot2);
+//    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
+//    TS_ASSERT_EQUALS(q.getRelativeRot(), rot2);
+//    q.copyRot(p);
+//    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
+//    TS_ASSERT_EQUALS(q.getRelativeRot(), rot1);
+//    //check it just copied the rotation and not everything else
+//    TS_ASSERT_EQUALS(q.getPos(), V3D(2, 2, 2));
+//    TS_ASSERT_EQUALS(q.getName(), "testCopyRot2");
+//  }
 
   void testTranslate()
   {

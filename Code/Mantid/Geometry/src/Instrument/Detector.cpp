@@ -8,6 +8,17 @@ namespace Geometry
 // Get a reference to the logger
 Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
 
+
+/** Constructor for a parametrized Detector
+ * @param base: the base (un-parametrized) IComponent
+ * @param map: pointer to the ParameterMap
+ * */
+Detector::Detector(const IComponent* base, ParameterMap_const_sptr map)
+: ObjComponent(base,map), m_id(0), m_isMonitor(false)
+{
+
+}
+
 /** Constructor
  *  @param name The name of the component
  *  @param parent The parent component
@@ -51,7 +62,10 @@ void Detector::setID(int det_id)
  */
 int Detector::getID() const
 {
-	return m_id;
+  if (isParametrized())
+    return dynamic_cast<const Detector *>(m_base)->getID();
+  else
+    return m_id;
 }
 
 // IDetector methods. Just pull in Component implementation
@@ -95,21 +109,32 @@ double Detector::solidAngle(const V3D& observer) const
 	return ObjComponent::solidAngle(observer);
 }
 
-/** This method will only be called if this detector is not part of a parameterized instrument,
- *  in which case there are no masked detectors.
+/** Returns true if the detector is masked. Only Parametrized instruments
+ * can have masked detectors.
  *  @return false
  */
 bool Detector::isMasked() const
 {
-  // If you get to here, instead of the ParDetector method, then it isn't masked
-  return false;
+  if (isParametrized())
+  {
+    Parameter_sptr par = m_map->get(m_base,"masked");
+    return par ? true : false;
+  }
+  else
+  {
+    // If you get to here, instead of the Detector method, then it isn't masked
+    return false;
+  }
 }
 
 /// Is the detector a monitor?
 ///@return true if it is a monitor
 bool Detector::isMonitor() const
 {
-  return m_isMonitor;
+  if (isParametrized())
+    return dynamic_cast<const Detector*>(m_base)->isMonitor();
+  else
+    return m_isMonitor;
 }
 
 /** Sets the flag for whether this detector object is a monitor

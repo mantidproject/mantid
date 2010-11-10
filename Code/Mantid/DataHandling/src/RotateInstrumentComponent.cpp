@@ -4,7 +4,6 @@
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 
 namespace Mantid
 {

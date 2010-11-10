@@ -13,11 +13,23 @@ namespace Mantid
   namespace Geometry
   {
 
+    /** Constructor for a parametrized ObjComponent
+     * @param base: the base (un-parametrized) IComponent
+     * @param map: pointer to the ParameterMap
+     * */
+    ObjComponent::ObjComponent(const IComponent* base, ParameterMap_const_sptr map)
+    : Component(base,map), m_shape()
+    {
+
+    }
+
+
     /** Constructor
     *  @param name   The name of the component
     *  @param parent The Parent geometry object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, IComponent* parent) : IObjComponent(),Component(name,parent), m_shape()
+    ObjComponent::ObjComponent(const std::string& name, IComponent* parent)
+    : IObjComponent(), Component(name,parent), m_shape()
     {
     }
 
@@ -26,8 +38,8 @@ namespace Mantid
     *  @param shape  A pointer to the object describing the shape of this component
     *  @param parent The Parent geometry object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent) :
-    IObjComponent(),Component(name,parent), m_shape(shape)
+    ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent)
+    : IObjComponent(), Component(name,parent), m_shape(shape)
     {
     }
 
@@ -42,22 +54,37 @@ namespace Mantid
     {
     }
 
+
+    /** Return the shape of the component
+     */
+    const boost::shared_ptr<const Object> ObjComponent::shape()const
+    {
+      if (isParametrized())
+        return dynamic_cast<const ObjComponent*>(m_base)->m_shape;
+      else
+        return m_shape;
+    }
+
+
     /// Does the point given lie within this object component?
     bool ObjComponent::isValid(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!m_shape) return (this->getPos() == point);
+      if (!shape()) return (this->getPos() == point);
+
       // Otherwise pass through the shifted point to the Object::isValid method
-      return m_shape->isValid( factorOutComponentPosition(point) );
+      V3D scaleFactor = V3D(1,1,1); //=this->getScaleFactorP();
+      return shape()->isValid( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
     /// Does the point given lie on the surface of this object component?
     bool ObjComponent::isOnSide(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!m_shape) return (this->getPos() == point);
+      if (!shape()) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isOnSide method
-      return m_shape->isOnSide( factorOutComponentPosition(point) );
+      V3D scaleFactor = V3D(1,1,1); // = this->getScaleFactorP();
+      return shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
     /** Checks whether the track given will pass through this Component.
@@ -68,13 +95,14 @@ namespace Mantid
     int ObjComponent::interceptSurface(Track& track) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface","shape");
 
+      //TODO: If scaling parameters are ever enabled, would they need need to be used here?
       V3D trkStart = factorOutComponentPosition(track.startPoint());
       V3D trkDirection = takeOutRotation(track.direction());
 
       Track probeTrack(trkStart, trkDirection);
-      int intercepts = m_shape->interceptSurface(probeTrack);
+      int intercepts = shape()->interceptSurface(probeTrack);
 
       Track::LType::const_iterator it;
       for (it = probeTrack.begin(); it != probeTrack.end(); ++it)
@@ -103,13 +131,13 @@ namespace Mantid
     double ObjComponent::solidAngle(const V3D& observer) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
-      // Otherwise pass through the shifted point to the Object::solidAngle method, if non-unity
-      // scaling also pass the scaling vector
-      if((m_ScaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
-        return m_shape->solidAngle( factorOutComponentPosition(observer) );
+      if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
+      // Otherwise pass through the shifted point to the Object::solidAngle method
+      V3D scaleFactor=this->getScaleFactorP();
+      if((scaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
+        return shape()->solidAngle( factorOutComponentPosition(observer) );
       else
-        return m_shape->solidAngle( factorOutComponentPosition(observer)*m_ScaleFactor, m_ScaleFactor);
+        return shape()->solidAngle( factorOutComponentPosition(observer)*scaleFactor, scaleFactor );
     }
 
     /**
@@ -128,8 +156,9 @@ namespace Mantid
     */
     void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
     {
-      Geometry::V3D min(xmin,ymin,zmin),
-        max(xmax,ymax,zmax);
+      if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::getBoundingBox","shape");
+
+      Geometry::V3D min(xmin,ymin,zmin),        max(xmax,ymax,zmax);
 
       min-=this->getPos();
       max-=this->getPos();
@@ -144,7 +173,7 @@ namespace Mantid
       inverse.rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
 
       // pass bounds to getBoundingBox
-      m_shape->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
+      shape()->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
 
       //Apply scale factor
       min*=m_ScaleFactor;
@@ -167,7 +196,7 @@ namespace Mantid
     void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
       // Start with the box in the shape's coordinates
-      const BoundingBox & shapeBox = m_shape->getBoundingBox();
+      const BoundingBox & shapeBox = shape()->getBoundingBox();
       absoluteBB = BoundingBox(shapeBox);
       if ( shapeBox.isNull() ) return;
       // modify in place for speed
@@ -199,21 +228,18 @@ namespace Mantid
     int ObjComponent::getPointInObject(V3D& point) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
       // Call the Object::getPointInObject method, which may give a point in Object coordinates
-      int result= m_shape->getPointInObject( point );
+      int result= shape()->getPointInObject( point );
       // transform point back to component space
       if(result)
       {
         //Scale up
-        point*=m_ScaleFactor;
+        V3D scaleFactor=this->getScaleFactorP();
+        point*=scaleFactor;
         Quat Rotate = this->getRotation();
         Rotate.rotate(point);
         point+=this->getPos();
-      }
-      else // scale back the point
-      {
-        point*=m_ScaleFactor;
       }
       return result;
     }
@@ -235,10 +261,37 @@ namespace Mantid
       // Now rotate our point by the angle calculated above
       unRotate.rotate(point);
 
+      // Can not Consider scaling factor here as this transform used by solidAngle as well
+      // as IsValid etc. While this would work for latter, breaks former
+      //TODO: What is the answere here? ObjComponentTest needs these lines IN!
+
       //Consider scaling factor
       point/=m_ScaleFactor;
+      //point/=getScaleFactorP();
+
       return point;
     }
+
+
+
+    /** Get ScaleFactor of the object
+    * @returns A vector of the scale factors (1,1,1) if not set
+    */
+    V3D ObjComponent::getScaleFactorP() const
+    {
+      if (isParametrized())
+      {
+        Parameter_sptr par = m_map->get(m_base,"sca");
+        if (par)
+        {
+          //Return the parametrized scaling
+          return par->value<V3D>();
+        }
+      }
+      //Not parametrized; or, no parameter for "sca" aka scale
+      return m_ScaleFactor;
+    }
+
 
     /**
     * Draws the objcomponent, If the handler is not set then this function does nothing.
@@ -255,8 +308,8 @@ namespace Mantid
     */
     void ObjComponent::drawObject() const
     {
-      if(m_shape!=NULL)
-        m_shape->draw();
+      if(shape()!=NULL)
+        shape()->draw();
     }
 
     /**
@@ -266,8 +319,8 @@ namespace Mantid
     {
       if(Handle()==NULL)return;
       //Render the ObjComponent and then render the object
-      if(m_shape!=NULL)
-        m_shape->initDraw();
+      if(shape()!=NULL)
+        shape()->initDraw();
       Handle()->Initialize();
     }
 

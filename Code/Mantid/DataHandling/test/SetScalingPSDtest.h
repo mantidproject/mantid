@@ -10,7 +10,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/ParObjComponent.h"
 #include <stdexcept>
 
 
@@ -25,13 +24,13 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( alg.name(), "SetScalingPSD" )
+    TS_ASSERT_EQUALS( alg.name(), "SetScalingPSD" );
   }
 
   void testInit()
   {
     alg.initialize();
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( alg.isInitialized() );
   }
 
   void testLoadMer()
@@ -64,7 +63,7 @@ public:
     //alg.setPropertyValue("ScalingFileName", "../../../../Test/AutoTestData/merlin_detector_partial.sca");
     alg.setPropertyValue("Workspace", "testWS");
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare("testWS"));
   }
 
@@ -80,7 +79,7 @@ public:
       TS_ASSERT_EQUALS(2110001,id0);
       V3D pos0 = det0->getPos();
       V3D expectedPos0 = V3D(-0.99999,-1.46357,2.29129);
-      TS_ASSERT_DELTA((pos0-expectedPos0).norm(),0.0,1e-5)
+      TS_ASSERT_DELTA((pos0-expectedPos0).norm(),0.0,1e-5);
 
       try 
       {
@@ -102,10 +101,10 @@ public:
       TS_ASSERT_EQUALS(2110001,id);
       V3D pos = det->getPos();
       V3D expectedPos = V3D(-1.0,-1.51453,2.29129);
-      TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
+      TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5);
       
       // check that points lie on correct side of the scaled object
-      boost::shared_ptr<ParObjComponent> pdet= boost::dynamic_pointer_cast<ParObjComponent>(det);
+      boost::shared_ptr<ObjComponent> pdet= boost::dynamic_pointer_cast<ObjComponent>(det);
       //double yHW=0.00003;
       //TS_ASSERT( pdet->isValid(expectedPos) )
       //TS_ASSERT( pdet->isValid(expectedPos+V3D(0,0.99*yHW,0)) )

@@ -175,21 +175,6 @@ public:
     TS_ASSERT_EQUALS(q.getRelativeRot(),rot3);
   }
 
-  void testCopyRot()
-  {
-    Quat rot1(1,0,0,0);
-    Quat rot2(-1,0.01,-0.01,9999);
-    Component p("testCopyRot",V3D(1,1,1),rot1);
-    Component q("testCopyRot2",V3D(2,2,2),rot2);
-    TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);
-    TS_ASSERT_EQUALS(q.getRelativeRot(),rot2);
-    q.copyRot(p);
-    TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);
-    TS_ASSERT_EQUALS(q.getRelativeRot(),rot1);
-    //check it just copied the rotation and not everything else
-    TS_ASSERT_EQUALS(q.getPos(),V3D(2,2,2));
-    TS_ASSERT_EQUALS(q.getName(),"testCopyRot2");
-  }
 
   void testTranslate()
   {
@@ -235,10 +220,11 @@ public:
     Component comp("testSetRot",V3D(1,1,1),rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1*rot2);
+    Quat rot12 = rot1*rot2;
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot12);
 
     // Rotate by angle+axis not implemented yet. Check for exception throw
-    TS_ASSERT_THROWS(comp.rotate(45,V3D(1,1,1)), Mantid::Kernel::Exception::NotImplementedError )
+    TS_ASSERT_THROWS(comp.rotate(45,V3D(1,1,1)), Mantid::Kernel::Exception::NotImplementedError );
   }
 
   void testRelativeRotate()
@@ -270,15 +256,15 @@ public:
     Quat rot2(45,V3D(1,0,0));
     Component parent("c1",V3D(2,0,0),rot1);
     Component child("c2",V3D(1,0,0),rot2,&parent);
-    TS_ASSERT_EQUALS( child.getRotation(), Quat(90,V3D(1,0,0)) )
+    TS_ASSERT_EQUALS( child.getRotation(), Quat(90,V3D(1,0,0)) );
     // Check we get back just the child's rotation if we set the parent's to none
     parent.setRot(Quat(1,0,0,0));
-    TS_ASSERT_EQUALS( child.getRotation(), rot2 )
-    TS_ASSERT_EQUALS( child.getRotation(), child.getRelativeRot() )
+    TS_ASSERT_EQUALS( child.getRotation(), rot2 );
+    TS_ASSERT_EQUALS( child.getRotation(), child.getRelativeRot() );
     // Or indeed remove the parent completely
     child.setParent(NULL);
-    TS_ASSERT_EQUALS( child.getRotation(), rot2 )
-    TS_ASSERT_EQUALS( child.getRotation(), child.getRelativeRot() )
+    TS_ASSERT_EQUALS( child.getRotation(), rot2 );
+    TS_ASSERT_EQUALS( child.getRotation(), child.getRelativeRot() );
   }
 
   void testGetDistance()
@@ -297,8 +283,8 @@ public:
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp1),10);
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp2),10);
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp3),5);
-    TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001)
-    TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001)
+    TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001);
+    TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001);
   }
 
   void testType()

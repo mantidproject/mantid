@@ -10,7 +10,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -1634,12 +1633,13 @@ namespace Mantid
 
         for (unsigned int i = 0; i < sharedIComp.size(); i++)
         {
-          if ( sharedIComp[i] != boost::shared_ptr<Geometry::IComponent>() )
+          boost::shared_ptr<Geometry::Component> sharedComp = boost::dynamic_pointer_cast<Geometry::Component>(sharedIComp[i]);
+          if ( sharedComp )
           {
-            if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp[i]) )
+            //Not empty Component
+            if (sharedComp->isParametrized())
             {
-              boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp[i]);
-              setLogfile(sharedParamComp->base(), pLinkElem, instrument->getLogfileCache());
+              setLogfile(sharedComp->base(), pLinkElem, instrument->getLogfileCache());
             }
             else
             {

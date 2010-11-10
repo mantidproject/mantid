@@ -3,11 +3,6 @@
 	<name>PythonAPI</name>
 	<comment></comment>
 	<projects>
-		<project>API</project>
-		<project>DataHandling</project>
-		<project>DataObjects</project>
-		<project>Geometry</project>
-		<project>Kernel</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -28,7 +23,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>-j</value>
+					<value>-j7</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>

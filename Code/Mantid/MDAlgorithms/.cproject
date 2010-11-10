@@ -26,7 +26,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.1807695009." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.837997740" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1096950108" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
-							<builder buildPath="${workspace_loc:/MDAlgorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1086945440" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<builder buildPath="${workspace_loc:/MDAlgorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1086945440" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="7" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1371053142" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.1935889305" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
@@ -69,9 +69,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.so.debug.1807695009.284633942" name="ParameterParser.cpp" rcbsApplicability="disable" resourcePath="src/ParameterParser.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1280638142">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1280638142" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="src/ParameterParser.cpp|src/CenterpieceRebinning.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>

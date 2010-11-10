@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidGeometry/Instrument/ParInstrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/cow_ptr.h"
@@ -37,47 +36,47 @@ public:
 
   void testType()
   {
-    ParInstrument pinstrument(instrument,pmap);
-    TS_ASSERT_EQUALS( pinstrument.type(), "ParInstrument" )
+    Instrument pinstrument(instrument,pmap);
+    TS_ASSERT_EQUALS( pinstrument.type(), "Instrument" );
   }
 
   void testDetector()
   {
-    ParInstrument pinstrument(instrument,pmap);
-    TS_ASSERT_THROWS( pinstrument.getDetector(0), Exception::NotFoundError )
-        TS_ASSERT_EQUALS( pinstrument.getDetector(1)->getID(), det->getID() )
-    TS_ASSERT_THROWS( pinstrument.getDetector(2), Exception::NotFoundError )
+    Instrument pinstrument(instrument,pmap);
+    TS_ASSERT_THROWS( pinstrument.getDetector(0), Exception::NotFoundError );
+    TS_ASSERT_EQUALS( pinstrument.getDetector(1)->getID(), det->getID() );
+    TS_ASSERT_THROWS( pinstrument.getDetector(2), Exception::NotFoundError );
     Detector *d = new Detector("det",0);
     d->setID(2);
-    TS_ASSERT_THROWS_NOTHING( instrument->markAsDetector(d) )
-        TS_ASSERT_EQUALS( pinstrument.getDetector(2)->getID(), d->getID() )
+    TS_ASSERT_THROWS_NOTHING( instrument->markAsDetector(d) );
+    TS_ASSERT_EQUALS( pinstrument.getDetector(2)->getID(), d->getID() );
     delete d;
   }
 
   void testCasts()
   {
-    ParInstrument *pi = new ParInstrument(instrument,pmap);
-    TS_ASSERT( dynamic_cast<ICompAssembly*>(pi) )
-    TS_ASSERT( dynamic_cast<IComponent*>(pi) )
+    Instrument *pi = new Instrument(instrument,pmap);
+    TS_ASSERT( dynamic_cast<ICompAssembly*>(pi) );
+    TS_ASSERT( dynamic_cast<Component*>(pi) );
     delete pi;
   }
 
   void testIDs()
   {
-      ComponentID id1 = det->getComponentID();
-      TS_ASSERT_EQUALS(det->getName(), instrument->getComponentByID(id1)->getName() )
+    ComponentID  id1 = det->getComponentID ();
+    TS_ASSERT_EQUALS(det->getName(), instrument->getComponentByID(id1)->getName() );
 
-      ComponentID id2 = det2->getComponentID();
-      TS_ASSERT_EQUALS(det2->getName(), instrument->getComponentByID(id2)->getName() )
+    ComponentID  id2 = det2->getComponentID ();
+    TS_ASSERT_EQUALS(det2->getName(), instrument->getComponentByID(id2)->getName() );
 
-      ComponentID id3 = det3->getComponentID();
-      TS_ASSERT_EQUALS(det3->getName(), instrument->getComponentByID(id3)->getName() )
-
+    ComponentID  id3 = det3->getComponentID ();
+    TS_ASSERT_EQUALS(det3->getName(), instrument->getComponentByID(id3)->getName() );
   }
 
 private:
   boost::shared_ptr<Instrument> instrument;
-  Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
+  //Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
+  Mantid::Geometry::ParameterMap_sptr pmap;
   boost::shared_ptr<Detector> det, det2, det3;
 };
 

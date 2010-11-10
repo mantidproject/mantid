@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
@@ -19,11 +20,25 @@ public:
     }
 };
 
+
+
 /*! Empty constructor
  */
 CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(NULL)
 {
 }
+
+
+/** Constructor for a parametrized CompAssembly
+ * @param base: the base (un-parametrized) IComponent
+ * @param map: pointer to the ParameterMap
+ * */
+CompAssembly::CompAssembly(const IComponent* base, ParameterMap_const_sptr map)
+: Component(base,map), m_children(), m_cachedBoundingBox(NULL)
+{
+
+}
+
 
 /*! Valued constructor
  *  @param n :: name of the assembly
@@ -93,12 +108,16 @@ IComponent* CompAssembly::clone() const
  */
 int CompAssembly::add(IComponent* comp)
 {
+  if (isParametrized())
+    throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
+    //return static_cast<int>(m_children.size());
+
   if (comp)
   {
     comp->setParent(this);
     m_children.push_back(comp);
   }
-  return m_children.size();
+  return static_cast<int>(m_children.size());
 }
 
 /*! AddCopy method
@@ -111,6 +130,9 @@ int CompAssembly::add(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp)
 {
+  if (isParametrized())
+    throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
+
   if (comp)
   {
     IComponent* newcomp=comp->clone();
@@ -131,6 +153,9 @@ int CompAssembly::addCopy(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
+  if (isParametrized())
+    throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
+
   if (comp)
   {
     IComponent* newcomp=comp->clone();
@@ -146,7 +171,10 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int CompAssembly::nelements() const
 {
-  return static_cast<int>(m_children.size());
+  if (isParametrized())
+    return dynamic_cast<const CompAssembly*>(m_base)->nelements();
+  else
+    return static_cast<int>(m_children.size());
 }
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
@@ -160,11 +188,22 @@ int CompAssembly::nelements() const
  */
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
-  if( i < 0 || i > static_cast<int>(m_children.size()-1) )
+
+  if (isParametrized())
   {
-    throw std::runtime_error("CompAssembly::getChild() range not valid");
+    //Get the child of the base (unparametrized) assembly
+    boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->getChild(i);
+    //And build up a parametrized version of it using the factory, and return that
+    return ParComponentFactory::create(child_base,m_map);
   }
-  return boost::shared_ptr<IComponent>(m_children[i],NoDeleting());
+  else
+  {
+    if( i < 0 || i > static_cast<int>(m_children.size()-1) )
+    {
+      throw std::runtime_error("CompAssembly::getChild() range not valid");
+    }
+    return boost::shared_ptr<IComponent>(m_children[i],NoDeleting());
+  }
 }
 
 /*! Overloaded index access operator. \link getChild(const int)
@@ -183,22 +222,49 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
  */
 void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
 {
-  if( !m_cachedBoundingBox )
+  if (isParametrized())
   {
-    m_cachedBoundingBox = new BoundingBox();
-    // Loop over the children and define a box large enough for all of them
-    for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
+    // Check cache for assembly, inside the ParameterMap
+    if( m_map->getCachedBoundingBox(this, assemblyBox ) )
     {
+      return;
+    }
+
+    // Loop over the children and define a box large enough for all of them
+    assemblyBox = BoundingBox();
+    int nchildren = nelements();
+    for(int i = 0; i < nchildren; ++i)
+    {
+      IComponent_sptr comp = this->operator[](i);
       BoundingBox compBox;
-      if (*it)
+      comp->getBoundingBox(compBox);
+      assemblyBox.grow(compBox);
+    }
+    //Set the cache
+    m_map->setCachedBoundingBox(this, assemblyBox);
+  }
+
+  else
+  {
+    //Not parametrized
+    if( !m_cachedBoundingBox )
+    {
+      m_cachedBoundingBox = new BoundingBox();
+      // Loop over the children and define a box large enough for all of them
+      for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
       {
-        (*it)->getBoundingBox(compBox);
-        m_cachedBoundingBox->grow(compBox);
+        BoundingBox compBox;
+        if (*it)
+        {
+          (*it)->getBoundingBox(compBox);
+          m_cachedBoundingBox->grow(compBox);
+        }
       }
     }
+    // Use cached box
+    assemblyBox = *m_cachedBoundingBox;
+
   }
-  // Use cached box
-  assemblyBox = *m_cachedBoundingBox;
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -209,12 +275,12 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
  */
 void CompAssembly::printChildren(std::ostream& os) const
 {
-  //std::vector<IComponent*>::const_iterator it;
-  int i=0;
-  for (const_comp_it it=m_children.begin();it!=m_children.end();it++)
+  std::vector<IComponent*>::const_iterator it;
+  for (int i=0;i<nelements();i++)
   {
-    os << "Component " << i++ <<" : **********" <<std::endl;
-    (*it)->printSelf(os);
+      boost::shared_ptr<IComponent> it = (*this)[i];
+      os << "Component " << i <<" : **********" <<std::endl;
+      it->printSelf(os);
   }
 }
 
@@ -226,12 +292,12 @@ void CompAssembly::printChildren(std::ostream& os) const
  */
 void CompAssembly::printTree(std::ostream& os) const
 {
-  //std::vector<IComponent*>::const_iterator it;
-  int i=0;
-  for (const_comp_it it=m_children.begin();it!=m_children.end();it++)
+  std::vector<IComponent*>::const_iterator it;
+  for (int i=0;i<nelements();i++)
   {
-    const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
-    os << "Element " << i++ << " in the assembly. ";
+    boost::shared_ptr<IComponent> it = (*this)[i];
+    const CompAssembly* test=dynamic_cast<CompAssembly*>(it.get());
+    os << "Element " << i++ << " in the assembly : ";
     if (test)
     {
       os << test->getName() << std::endl;
@@ -239,9 +305,51 @@ void CompAssembly::printTree(std::ostream& os) const
       test->printTree(os);
     }
     else
-    os << (*it)->getName() << std::endl;
+    os << it->getName() << std::endl;
   }
 }
+
+
+/** Gets the absolute position of the Parametrized CompAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+V3D CompAssembly::getPos() const
+{
+  if (!isParametrized())
+    return Component::getPos();
+  else
+  {
+    V3D pos;
+    if (!m_map->getCachedLocation(m_base,pos))
+    {
+      pos = Component::getPos();
+      m_map->setCachedLocation(m_base,pos);
+    }
+    return pos;
+  }
+}
+
+/** Gets the absolute position of the Parametrized CompAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+const Quat CompAssembly::getRotation() const
+{
+  if (!isParametrized())
+    return Component::getRotation();
+  else
+  {
+    Quat rot;
+    if (!m_map->getCachedRotation(m_base,rot))
+    {
+      rot = Component::getRotation();
+      m_map->setCachedRotation(m_base,rot);
+    }
+    return rot;
+  }
+}
+
 
 /*! Print information about elements in the assembly to a stream
  *  Overload the operator <<

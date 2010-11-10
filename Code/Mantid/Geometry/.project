@@ -3,7 +3,6 @@
 	<name>Geometry</name>
 	<comment></comment>
 	<projects>
-		<project>Kernel</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -24,7 +23,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>-j4</value>
+					<value>-j7</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>

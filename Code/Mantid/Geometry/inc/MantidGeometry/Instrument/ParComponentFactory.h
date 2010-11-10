@@ -39,7 +39,7 @@ class DLLExport ParComponentFactory
 {
 public:
   ///String description of the type of component
-  static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, const ParameterMap &);
+  static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, ParameterMap_const_sptr);
 
 };
 

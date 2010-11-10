@@ -25,7 +25,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.270937520." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1955431517" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1423703484" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
-							<builder buildPath="${workspace_loc:/PythonAPI/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.2018917007" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="-1" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<builder buildPath="${workspace_loc:/PythonAPI/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.2018917007" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="7" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
 							<tool command="g++" id="cdt.managedbuild.tool.gnu.archiver.base.1745042826" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.301457512" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.134059517" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
@@ -35,10 +35,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Kernel/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/API/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/include/python2.4"/>
+									<listOptionValue builtIn="false" value="/usr/include/python2.6"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.527357656" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.998689906" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.998689906" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1320159777" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -57,7 +57,7 @@
 									<listOptionValue builtIn="false" value="MantidKernel"/>
 									<listOptionValue builtIn="false" value="MantidGeometry"/>
 									<listOptionValue builtIn="false" value="MantidAPI"/>
-									<listOptionValue builtIn="false" value="python2.4"/>
+									<listOptionValue builtIn="false" value="python2.6"/>
 									<listOptionValue builtIn="false" value="boost_python"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.2119564089" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
@@ -533,7 +533,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/python2.4"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1847290194" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1377006987" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1377006987" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1782755649" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>

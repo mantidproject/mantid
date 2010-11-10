@@ -7,7 +7,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IRectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ParCompAssembly.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 
 namespace Mantid
 {
@@ -44,11 +44,11 @@ class CompAssembly;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ParRectangularDetector : public ParCompAssembly, public IRectangularDetector, public IObjComponent
+class DLLExport ParRectangularDetector : public CompAssembly, public IRectangularDetector, public IObjComponent
 {
 public:
   /// Constructors
-  ParRectangularDetector(const RectangularDetector* base, const ParameterMap& map);
+  ParRectangularDetector(const RectangularDetector* base, ParameterMap_const_sptr map);
   ParRectangularDetector(const ParRectangularDetector & other);
 
   //! Destructor
@@ -126,7 +126,7 @@ private:
 
 };
 
-//DLLExport std::ostream& operator<<(std::ostream&, const ParCompAssembly&);
+//DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
 
 } //Namespace Geometry
 } //Namespace Mantid

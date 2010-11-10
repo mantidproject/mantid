@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/V3D.h"
 
@@ -76,7 +77,7 @@ public:
 		for(Track::LType::const_iterator it=A.begin();it!=A.end();++it){
 			TS_ASSERT_DELTA(it->distFromStart,7,0.0001);
 			TS_ASSERT_DELTA(it->distInsideObject,4,0.0001);
-			TS_ASSERT_EQUALS(it->componentID,(ComponentID)NULL);
+			TS_ASSERT_EQUALS(it->componentID, (Component *)NULL);
 			TS_ASSERT_EQUALS(it->entryPoint,V3D(-5.0,-2.0,0.0));
 			TS_ASSERT_EQUALS(it->exitPoint,V3D(-5.0,2.0,0.0));
 			index++;

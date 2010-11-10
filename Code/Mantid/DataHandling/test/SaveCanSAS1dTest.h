@@ -22,7 +22,7 @@ public:
   //set up the workspace that will be loaded
   SaveCanSAS1DTest() : m_workspace1("SaveCanSAS1DTest_in1"),
     m_workspace2("SaveCanSAS1DTest_in2"),
-    m_filename("../../../../Test/AutoTestData/savecansas1d.xml")
+    m_filename("./savecansas1d.xml")
 
   {
     LoadRaw3 loader;
@@ -79,9 +79,13 @@ public:
   
   void testCanSAS1dXML()
   {
+    this->testExecute();
+
     // read the generated xml file and compare first few lines of the file
     std::ifstream testFile(m_filename.c_str(), std::ios::in);
     TS_ASSERT ( testFile );
+    if (!testFile)
+      return;
 
     //testing the first few lines of the xml file
     std::string fileLine;

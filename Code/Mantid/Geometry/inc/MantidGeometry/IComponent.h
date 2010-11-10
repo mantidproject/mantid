@@ -66,7 +66,7 @@ namespace Mantid
     {
     public:
       /// Returns a string representation of the IComponent type
-      virtual std::string type() const {return "LogicalIComponent";}
+      virtual std::string type() const {return "LogicalComponent";}
       //! Return a clone to the current object
       virtual IComponent* clone() const=0;
       /// Destructor
@@ -92,7 +92,7 @@ namespace Mantid
       //! Set the orientation quaternion relative to parent (if present) otherwise absolute
       virtual void setRot(const Quat&) = 0;
       //! Copy the Rotation from another IComponent
-      virtual void copyRot(const IComponent&) = 0;
+      //virtual void copyRot(const IComponent&) = 0;
       //! Translate the IComponent (vector form). This is relative to parent if present.
       virtual void translate(const V3D&) = 0;
       //! Translate the IComponent (x,y,z form). This is relative to parent if present.

@@ -6,7 +6,6 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
 #include <fstream>
@@ -322,9 +321,9 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
     
       //Need to get the address to the base instrument component
       Geometry::ParameterMap& pmap = WS->instrumentParameters();
-      ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
+      Component* pcomp = dynamic_cast<Component*>(comp.get());
       const IComponent* baseComp;
-      if (pcomp)
+      if (pcomp->isParametrized())
       {
           baseComp = pcomp->base();
       }

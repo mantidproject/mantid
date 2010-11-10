@@ -53,6 +53,9 @@ public:
   virtual std::string type() const { return "ObjCompAssembly";}
   //! Empty constructor
   //ObjCompAssembly();
+
+  ObjCompAssembly(const IComponent* base, ParameterMap_const_sptr map);
+
   //! Constructor with a name and parent reference
   ObjCompAssembly(const std::string&, Component* reference=0);
   //! Copy constructor
@@ -75,6 +78,10 @@ public:
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
+
+  const Quat getRotation() const;
+  V3D getPos() const;
+
   //! Set the outline of the assembly
   boost::shared_ptr<Object> createOutline();
   void setOutline(boost::shared_ptr<const Object> obj);

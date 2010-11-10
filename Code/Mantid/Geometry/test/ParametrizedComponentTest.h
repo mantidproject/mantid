@@ -5,18 +5,24 @@
 #include <cmath>
 #include <iostream>
 #include <string>
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidKernel/Exception.h"
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 
+/** This test used to refer to ParametrizedComponent, a
+ * class that has (as of Nov 2010) been folded back into
+ * Component.
+ */
 class testParComponent : public CxxTest::TestSuite
 {
 public:
 
-  testParComponent() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(NULL),
+  testParComponent() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(),
   m_strName("StringParam"), m_strValue("test-string"), m_dblName("DblParam"), m_dblValue(10.0),
   m_posName("PosParam"), m_posValue(1,1,1), m_quatName("QuatParam"),
   m_quatValue(2,3,4,5)
@@ -27,8 +33,8 @@ public:
   {
     Component q;
 
-    ParameterMap pmap;
-    ParametrizedComponent pq(&q,pmap);
+    ParameterMap_const_sptr pmap( new ParameterMap() );
+    Component pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(),"");
     TS_ASSERT(!pq.getParent());
@@ -36,6 +42,17 @@ public:
     TS_ASSERT_EQUALS(pq.getRelativeRot(),Quat(1,0,0,0));
     //as there is no parent GetPos should equal getRelativePos
     TS_ASSERT_EQUALS(pq.getRelativePos(),pq.getPos());
+
+  }
+
+  void testIsParametrized()
+  {
+    Component q;
+    ParameterMap_const_sptr pmap( new ParameterMap() );
+    Component pq(&q,pmap);
+
+    TS_ASSERT(!q.isParametrized());
+    TS_ASSERT(pq.isParametrized());
   }
 
   void testNameLocationOrientationParentValueConstructor()
@@ -43,8 +60,8 @@ public:
     Component parent("Parent",V3D(1,1,1));
     //name and parent
     Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
-    ParameterMap pmap;
-    ParametrizedComponent pq(&q,pmap);
+    ParameterMap_const_sptr pmap( new ParameterMap() );
+    Component pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(),"Child");
     //check the parent
@@ -58,20 +75,21 @@ public:
 
   void testGetParameter()
   {
-    ParametrizedComponent * paramComp = createSingleParameterizedComponent();
-
+    Component * paramComp = createSingleParameterizedComponent();
+    TS_ASSERT_EQUALS(paramComp->getStringParameter(m_strName).size(), 1);
     TS_ASSERT_EQUALS(paramComp->getStringParameter(m_strName)[0], m_strValue);
     TS_ASSERT_EQUALS(paramComp->getNumberParameter(m_dblName)[0], m_dblValue);
     TS_ASSERT_EQUALS(paramComp->getPositionParameter(m_posName)[0], m_posValue);
     TS_ASSERT_EQUALS(paramComp->getRotationParameter(m_quatName)[0], m_quatValue);
-    
-    cleanUpParametrizedComponent();
+
+    cleanUpComponent();
   }
+
 
   void testThatNonRecursiveGetParameterOnlySearchesCurrentComponent()
   {
     createParameterizedTree();
-    ParametrizedComponent *grandchild = new ParametrizedComponent(m_childTwoComp, *m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
 
     TS_ASSERT_EQUALS(grandchild->getStringParameter(m_strName,false).size(), 0);
     TS_ASSERT_EQUALS(grandchild->getNumberParameter(m_dblName, false).size(), 0);
@@ -79,7 +97,7 @@ public:
     TS_ASSERT_EQUALS(grandchild->getRotationParameter(m_quatName, false).size(), 0);
 
     std::vector<std::string> params = grandchild->getStringParameter(m_strName+"_child2", false);
-    const size_t nparams = params.size(); 
+    const size_t nparams = params.size();
     TS_ASSERT_EQUALS(nparams, 1);
     if( nparams > 0 )
     {
@@ -87,26 +105,26 @@ public:
     }
 
     delete grandchild;
-    cleanUpParametrizedComponent();
+    cleanUpComponent();
   }
 
   void testThatCorrectParametersAreListed()
   {
-    ParametrizedComponent * paramComp = createSingleParameterizedComponent();
+    Component * paramComp = createSingleParameterizedComponent();
     std::set<std::string> paramNames = paramComp->getParameterNames();
 
     TS_ASSERT_EQUALS(paramNames.size(), 4);
     checkBaseParameterNamesExist(paramNames);
-    cleanUpParametrizedComponent();
+    cleanUpComponent();
   }
 
   void testThatRecursiveParameterSearchReturnsNamesOfAllParentParameters()
   {
     createParameterizedTree();
-    ParametrizedComponent *parent = new ParametrizedComponent(m_parentComp, *m_paramMap);
-    ParametrizedComponent *child = new ParametrizedComponent(m_childOneComp, *m_paramMap);
-    ParametrizedComponent *grandchild = new ParametrizedComponent(m_childTwoComp, *m_paramMap);
-    
+    Component *parent = new Component(m_parentComp, m_paramMap);
+    Component *child = new Component(m_childOneComp, m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
+
     //Parent
     std::set<std::string> paramNames = parent->getParameterNames();
     TS_ASSERT_EQUALS(paramNames.size(), 4);
@@ -126,32 +144,32 @@ public:
     delete parent;
     delete child;
     delete grandchild;
-    cleanUpParametrizedComponent();
+    cleanUpComponent();
   }
 
   void testThatNonRecursiveParameterSearchReturnsOnlyComponentParameters()
   {
     createParameterizedTree();
-    ParametrizedComponent *child = new ParametrizedComponent(m_childOneComp, *m_paramMap);
+    Component *child = new Component(m_childOneComp, m_paramMap);
     std::set<std::string> paramNames = child->getParameterNames(false);
     TS_ASSERT_EQUALS(paramNames.size(), 1);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child1"), paramNames.end());
 
-    ParametrizedComponent *grandchild = new ParametrizedComponent(m_childTwoComp, *m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
     paramNames = grandchild->getParameterNames(false);
     TS_ASSERT_EQUALS(paramNames.size(), 1);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child2"), paramNames.end());
 
     delete child;
     delete grandchild;
-    cleanUpParametrizedComponent();
+    cleanUpComponent();
   }
 
   void testThatParComponentHasDefinedParameter()
   {
     createParameterizedTree();
-    ParametrizedComponent *child = new ParametrizedComponent(m_childOneComp, *m_paramMap);
-    ParametrizedComponent *grandchild = new ParametrizedComponent(m_childTwoComp, *m_paramMap);
+    Component *child = new Component(m_childOneComp, m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
 
     TS_ASSERT_EQUALS(child->hasParameter(m_strName + "_child1"), true);
     TS_ASSERT_EQUALS(grandchild->hasParameter(m_strName + "_child2"), true);
@@ -162,11 +180,13 @@ public:
 
     delete child;
     delete grandchild;
-    cleanUpParametrizedComponent();
+    cleanUpComponent();
   }
 
+
+
 private:
-  
+
   void checkBaseParameterNamesExist(const std::set<std::string> & paramNames)
   {
     TS_ASSERT_DIFFERS(paramNames.find(m_strName), paramNames.end());
@@ -175,23 +195,24 @@ private:
     TS_ASSERT_DIFFERS(paramNames.find(m_quatName), paramNames.end());
   }
 
-  ParametrizedComponent * createSingleParameterizedComponent()
+  Component * createSingleParameterizedComponent()
   {
     m_parentComp = new Component("Parent",V3D(1,1,1));
-    m_paramMap = new ParameterMap;
+    m_paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
     m_paramMap->add("V3D", m_parentComp, m_posName, m_posValue);
     m_paramMap->add("Quat", m_parentComp, m_quatName, m_quatValue);
 
-    return new ParametrizedComponent(m_parentComp, *m_paramMap);
+    ParameterMap_const_sptr const_pmap = boost::dynamic_pointer_cast<const ParameterMap>(m_paramMap);
+    return new Component(m_parentComp, const_pmap);
   }
 
   void createParameterizedTree()
   {
     m_parentComp = new Component("Parent",V3D(1,1,1));
-    m_paramMap = new ParameterMap;
+    m_paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
@@ -205,7 +226,7 @@ private:
   }
 
 
-  void cleanUpParametrizedComponent()
+  void cleanUpComponent()
   {
     delete m_parentComp;
     m_parentComp = NULL;
@@ -213,12 +234,11 @@ private:
     m_childOneComp = NULL;
     delete m_childTwoComp;
     m_childTwoComp = NULL;
-    delete m_paramMap;
-    m_paramMap = NULL;
+    //delete m_paramMap;    m_paramMap = NULL;
   }
 
   Component *m_parentComp,*m_childOneComp,*m_childTwoComp;
-  ParameterMap *m_paramMap;
+  ParameterMap_sptr m_paramMap;
 
   const std::string m_strName;
   const std::string m_strValue;

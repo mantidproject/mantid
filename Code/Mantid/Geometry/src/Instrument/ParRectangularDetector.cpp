@@ -1,7 +1,7 @@
 #include "MantidGeometry/Instrument/ParRectangularDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ParCompAssembly.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidGeometry/IRectangularDetector.h"
@@ -14,15 +14,15 @@ namespace Mantid
 namespace Geometry
 {
 
-ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, const ParameterMap& map)
-      :ParCompAssembly(base,map), IObjComponent(NULL),  mBase(base), m_cachedBoundingBox(NULL)
+ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, ParameterMap_const_sptr map)
+      :CompAssembly(base,map), IObjComponent(NULL),  mBase(base), m_cachedBoundingBox(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
 /** Copy constructor */
 ParRectangularDetector::ParRectangularDetector(const ParRectangularDetector & other)
-      :ParCompAssembly(other.mBase, other.m_map), IObjComponent(NULL), mBase(other.mBase), m_cachedBoundingBox(NULL)
+      :CompAssembly(other.mBase, other.m_map), IObjComponent(NULL), mBase(other.mBase), m_cachedBoundingBox(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
@@ -47,7 +47,7 @@ boost::shared_ptr<Detector> ParRectangularDetector::getAtXY(int X, int Y) const
 void ParRectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
 {
   //TODO: Male this more efficient
-  ParCompAssembly::getBoundingBox(assemblyBox);
+  CompAssembly::getBoundingBox(assemblyBox);
 //  if( !m_cachedBoundingBox )
 //  {
 //    m_cachedBoundingBox = new BoundingBox();

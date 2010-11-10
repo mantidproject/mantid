@@ -18,7 +18,7 @@ namespace Geometry
 {
 
 /** IInstrument class. The abstract instrument class it is the base for 
-    Instrument and ParInstrument classes.
+    Instrument and Instrument classes.
 
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007

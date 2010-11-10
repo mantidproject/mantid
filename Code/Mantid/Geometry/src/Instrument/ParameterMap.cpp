@@ -32,7 +32,7 @@ namespace Mantid
      * Copy constructor
      * @param copy A reference to the object whose contents should be copied.
      */
-    ParameterMap::ParameterMap(const ParameterMap& copy)
+    ParameterMap::ParameterMap(ParameterMap& copy)
       :m_map(copy.m_map)
     {
     }
@@ -64,7 +64,7 @@ namespace Mantid
     {
       const ComponentID id = comp->getComponentID();
       pmap_cit it_found = m_map.find(id);
-      if (it_found == m_map.end()) 
+      if (it_found == m_map.end())
       {
         return Parameter_sptr();
       }
@@ -85,6 +85,10 @@ namespace Mantid
       return Parameter_sptr();
     }
 
+    /** Find a parameter by name, recursively going up the component tree
+     * to higher parents.
+     * Returns the first matching parameter.
+     */
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, const std::string & type)const
     {
       boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
@@ -97,7 +101,7 @@ namespace Mantid
         }
         compInFocus = compInFocus->getParent();
       }
-
+      //Nothing was found!
       return Parameter_sptr();
     }
 
@@ -142,7 +146,7 @@ namespace Mantid
       std::set<std::string> paramNames;
       const ComponentID id = comp->getComponentID();
       pmap_cit it_found = m_map.find(id);
-      if (it_found == m_map.end()) 
+      if (it_found == m_map.end())
       {
         return paramNames;
       }

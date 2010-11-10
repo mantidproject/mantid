@@ -65,11 +65,10 @@ public:
     TS_ASSERT( ! det.isMonitor() );
   }
 
-void testGetNumberParameter()
+  void testGetNumberParameter()
   {
     Detector det("det",0);
     TS_ASSERT_EQUALS(det.getNumberParameter("testparam").size(), 0);
-
   }
 
   void testGetPositionParameter()

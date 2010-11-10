@@ -2,7 +2,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <algorithm>
 #include <functional>

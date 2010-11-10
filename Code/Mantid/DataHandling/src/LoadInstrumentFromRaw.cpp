@@ -76,8 +76,8 @@ void LoadInstrumentFromRaw::exec()
   boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
   if (instrument.get() == 0)
   {
-      g_log.error("Trying to use ParInstrument as an Instrument.");
-      throw std::runtime_error("Trying to use ParInstrument as an Instrument.");
+      g_log.error("Trying to use a Parametrized Instrument as an Instrument.");
+      throw std::runtime_error("Trying to use a Parametrized Instrument as an Instrument.");
   }
   instrument->setName(iraw.i_inst);
 

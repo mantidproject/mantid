@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument/ParInstrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -78,18 +78,14 @@ namespace Mantid
     void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
     {
       boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
-      if (tmp)
+      if (tmp->isParametrized())
       {
-        sptr_instrument=tmp;
+        sptr_instrument = tmp->baseInstrument();
+        m_parmap = tmp->getParameterMap();
       }
       else
       {
-        boost::shared_ptr<ParInstrument> tmp = boost::dynamic_pointer_cast<ParInstrument>(instr);
-        if (tmp)
-        {
-          sptr_instrument = tmp->baseInstrument();
-          m_parmap = tmp->getParameterMap();
-        }
+        sptr_instrument=tmp;
       }
     }
 
@@ -389,11 +385,15 @@ namespace Mantid
     */
     IInstrument_sptr MatrixWorkspace::getInstrument()const
     {
-      if( m_parmap->empty() )
-      {  
-        return sptr_instrument;
+      //Return a Parametrized Instrument if there is a parameter map and it isn't empty
+      if (m_parmap)
+      {
+        if( !m_parmap->empty() )
+        {
+          return boost::shared_ptr<Instrument>(new Instrument(sptr_instrument,m_parmap));
+        }
       }
-      return boost::shared_ptr<ParInstrument>(new ParInstrument(sptr_instrument,m_parmap));
+      return sptr_instrument;
     }
 
     /** Get a shared pointer to the instrument associated with this workspace
@@ -410,11 +410,44 @@ namespace Mantid
     */
     Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
     {
-      return m_parmap.access();
+      //If you requrest instrument parameters but the pointer is empty,
+      //  create them for the first time.
+      if (!m_parmap)
+        m_parmap = ParameterMap_sptr(new ParameterMap());
+
+      //TODO: Here duplicates cow_ptr. Figure out if there's a better way
+
+      // Use a double-check for sharing so that we only
+      // enter the critical region if absolutely necessary
+      if (!m_parmap.unique())
+      {
+        PARALLEL_CRITICAL(cow_ptr_access)
+        {
+          // Check again because another thread may have taken copy
+          // and dropped reference count since previous check
+          if (!m_parmap.unique())
+          {
+            ParameterMap_sptr oldData=m_parmap;
+            m_parmap.reset();
+            m_parmap = ParameterMap_sptr(new ParameterMap(*oldData));
+          }
+        }
+      }
+
+      return *m_parmap;
+
+      //return m_parmap.access(); //old cow_ptr thing
     }
+
+
 
     const Geometry::ParameterMap& MatrixWorkspace::constInstrumentParameters() const
     {
+      //If you requrest instrument parameters but the pointer is empty,
+      //  create them for the first time.
+      if (!m_parmap)
+        m_parmap = ParameterMap_sptr(new ParameterMap());
+
       return *m_parmap;
     }
 

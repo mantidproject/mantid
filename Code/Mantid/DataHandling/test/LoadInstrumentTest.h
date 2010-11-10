@@ -797,7 +797,7 @@ public:
 
 
 //    /** Compare the old and new PG3 instrument definitions **/
-//    void testExecPG3Comparison_SLOW() // This test is slow!
+//    void xtestExecPG3Comparison_SLOW() // This test is slow!
 //    {
 //      LoadInstrument * loaderIDF2;
 //      MatrixWorkspace_sptr output;

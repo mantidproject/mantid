@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h" 
 #include "MantidGeometry/Instrument/ObjComponent.h" 
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
@@ -22,6 +23,17 @@ public:
     (void)p;
   }
 };
+
+
+
+/** Constructor for a parametrized ObjComponent
+ * @param base: the base (un-parametrized) IComponent
+ * @param map: pointer to the ParameterMap
+ * */
+ObjCompAssembly::ObjCompAssembly(const IComponent* base, ParameterMap_const_sptr map)
+: ObjComponent(base,map)
+{
+}
 
 
 /*! Valued constructor
@@ -96,6 +108,9 @@ IComponent* ObjCompAssembly::clone() const
  */
 int ObjCompAssembly::add(IComponent* comp)
 {
+  if (isParametrized())
+    throw std::runtime_error("ObjCompAssembly::add() called on a Parametrized object.");
+
   if (comp)
   {
     ObjComponent* c =  dynamic_cast<ObjComponent*>(comp);
@@ -119,6 +134,9 @@ int ObjCompAssembly::add(IComponent* comp)
  */
 int ObjCompAssembly::addCopy(IComponent* comp)
 {
+  if (isParametrized())
+    throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
+
   if (comp)
   {
     IComponent* newcomp=comp->clone();
@@ -144,6 +162,9 @@ int ObjCompAssembly::addCopy(IComponent* comp)
  */
 int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
+  if (isParametrized())
+    throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
+
   if (comp)
   {
     IComponent* newcomp=comp->clone();
@@ -164,7 +185,10 @@ int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int ObjCompAssembly::nelements() const
 {
-  return group.size();
+  if (isParametrized())
+    return dynamic_cast<const ObjCompAssembly *>(m_base)->nelements();
+  else
+    return group.size();
 }
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
@@ -178,9 +202,21 @@ int ObjCompAssembly::nelements() const
  */
 boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const
 {
-  if (i<0 || i> static_cast<int>(group.size()-1))
-  throw std::runtime_error("ObjCompAssembly::operator[] range not valid");
-  return boost::shared_ptr<IComponent>(group[i],NoDeleting());
+  if (i<0 || i> nelements()-1)
+  {
+      throw std::runtime_error("ObjCompAssembly::operator[] range not valid");
+  }
+
+  if (isParametrized())
+  {
+    boost::shared_ptr<IComponent> child_base = dynamic_cast<const ObjCompAssembly*>(m_base)->operator[](i);
+    return ParComponentFactory::create(child_base,m_map);
+  }
+  else
+  {
+    //Unparamterized - return the normal one
+    return boost::shared_ptr<IComponent>(group[i],NoDeleting());
+  }
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -193,10 +229,10 @@ void ObjCompAssembly::printChildren(std::ostream& os) const
 {
   //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (const_comp_it it=group.begin();it!=group.end();it++)
+  for (i=0; i<this->nelements(); i++)
   {
-    os << "Component " << i++ <<" : **********" <<std::endl;
-    (*it)->printSelf(os);
+    os << "Component " << i <<" : **********" <<std::endl;
+    this->operator [](i)->printSelf(os);
   }
 }
 
@@ -210,10 +246,10 @@ void ObjCompAssembly::printTree(std::ostream& os) const
 {
   //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (const_comp_it it=group.begin();it!=group.end();it++)
+  for (i=0; i<this->nelements(); i++)
   {
-    const ObjCompAssembly* test=dynamic_cast<ObjCompAssembly*>(*it);
-    os << "Element " << i++ << " in the assembly : ";
+    boost::shared_ptr<const ObjCompAssembly> test = boost::dynamic_pointer_cast<const ObjCompAssembly>( this->operator [](i) );
+    os << "Element " << i << " in the assembly : ";
     if (test)
     {
       os << test->getName() << std::endl;
@@ -221,9 +257,52 @@ void ObjCompAssembly::printTree(std::ostream& os) const
       test->printTree(os);
     }
     else
-    os << (*it)->getName() << std::endl;
+    os << this->operator [](i)->getName() << std::endl;
   }
 }
+
+
+/** Gets the absolute position of the Parametrized ObjCompAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+V3D ObjCompAssembly::getPos() const
+{
+  if (isParametrized())
+  {
+    V3D pos;
+    if (!m_map->getCachedLocation(m_base,pos))
+    {
+      pos = Component::getPos();
+      m_map->setCachedLocation(m_base,pos);
+    }
+    return pos;
+  }
+  else
+    return Component::getPos();
+}
+
+/** Gets the absolute position of the Parametrized ObjCompAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+const Quat ObjCompAssembly::getRotation() const
+{
+  if (isParametrized())
+  {
+    Quat rot;
+    if (!m_map->getCachedRotation(m_base,rot))
+    {
+      rot = Component::getRotation();
+      m_map->setCachedRotation(m_base,rot);
+    }
+    return rot;
+  }
+  else
+    return Component::getRotation();
+}
+
+
 
 /*! Set the outline of the assembly. Creates an Object and sets m_shape point to it.
  *  All child components must be detectors and positioned along a straight line and have the same shape.

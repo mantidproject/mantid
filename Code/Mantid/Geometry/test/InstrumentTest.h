@@ -110,13 +110,13 @@ public:
 
   void testIDs()
   {
-      ComponentID id1 = det->getComponentID();
+      ComponentID  id1 = det->getComponentID();
       TS_ASSERT_EQUALS(det->getName(), instrument.getComponentByID(id1)->getName() );
 
-      ComponentID id2 = det2->getComponentID();
+      ComponentID  id2 = det2->getComponentID();
       TS_ASSERT_EQUALS(det2->getName(), instrument.getComponentByID(id2)->getName() );
 
-      ComponentID id3 = det3->getComponentID();
+      ComponentID  id3 = det3->getComponentID();
       TS_ASSERT_EQUALS(det3->getName(), instrument.getComponentByID(id3)->getName() );
 
   }
