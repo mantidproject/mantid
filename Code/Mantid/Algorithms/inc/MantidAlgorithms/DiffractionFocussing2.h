@@ -109,6 +109,7 @@ private:
   
   /// Shared pointer to the input workspace
   API::MatrixWorkspace_const_sptr inputW;
+  /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;
 
   /// Shared pointer to the event workspace

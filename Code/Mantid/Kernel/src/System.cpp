@@ -38,17 +38,11 @@ namespace Mantid
   }
 }
 
-/**
- * Return what we consider to be an empty integer
- */
 int Mantid::EMPTY_INT()
 {
   return INT_MAX;
 }
 
-/**
- * Return what we consider to be an empty double
- */
 double Mantid::EMPTY_DBL()
 {
   return DBL_MAX/2;

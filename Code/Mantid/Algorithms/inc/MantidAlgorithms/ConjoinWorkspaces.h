@@ -74,8 +74,10 @@ private:
 
   /// Progress reporting object
   API::Progress *m_progress;
-  /// Event workspace inputs.
-  DataObjects::EventWorkspace_const_sptr event_ws1, event_ws2;
+  /// First event workspace input.
+  DataObjects::EventWorkspace_const_sptr event_ws1;
+  /// Second event workspace input.
+  DataObjects::EventWorkspace_const_sptr event_ws2;
 
 };
 
