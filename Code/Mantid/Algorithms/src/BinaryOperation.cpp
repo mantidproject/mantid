@@ -171,7 +171,11 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /** Execute a binary operation on events. Should be overridden. */
+    /**
+     * Execute a binary operation on events. Should be overridden.
+     * @param lhs left-hand event workspace
+     * @param rhs right-hand event workspace
+     */
     void BinaryOperation::execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs )
     {
       (void) lhs;(void) rhs; //Avoid compiler warnings
@@ -182,8 +186,13 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /** Return true if the two workspaces are compatible for this operation
-     * Virtual: will be overridden as needed. */
+    /**
+     * Return true if the two workspaces are compatible for this operation
+     * Virtual: will be overridden as needed.
+     * @param lhs left-hand workspace to check
+     * @param rhs right-hand workspace to check
+     * @return flag for the compatibility to the two workspaces
+     */
     bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       Unit_const_sptr lhs_unit = Unit_sptr();
@@ -220,7 +229,8 @@ namespace Mantid
     /** Return true if the two workspaces can be treated as event workspaces
      * for the binary operation. If so, execEvent() will be called.
      * (e.g. Plus algorithm will concatenate event lists)
-     *
+     * @param lhs left-hand event workspace to check
+     * @param rhs right-hand event workspace to check
      * @return false by default; will be overridden by specific algorithms
      */
     bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
@@ -305,12 +315,9 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------------------------
-    /** Called when the rhs operand is a single value. 
+    /**
+     * Called when the rhs operand is a single value.
      *  Loops over the lhs workspace calling the abstract binary operation function with a single number as the rhs operand.
-     *
-     *  @param lhs The workspace which is the left hand operand
-     *  @param rhs The workspace which is the right hand operand
-     *  @param out The result workspace
      */
     void BinaryOperation::doSingleValue()
     {
@@ -358,10 +365,6 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /** Called when the m_rhs operand is a 2D workspace of single values.
      *  Loops over the workspaces calling the abstract binary operation function with a single number as the m_rhs operand.
-     *
-     *  @param m_lhs The workspace which is the left hand operand
-     *  @param m_rhs The workspace which is the right hand operand
-     *  @param m_out The result workspace
      */
     void BinaryOperation::doSingleColumn()
     {
@@ -420,10 +423,6 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /** Called when the m_rhs operand is a single spectrum.
      *  Loops over the lhs workspace calling the abstract binary operation function.
-     *
-     *  @param lhs The workspace which is the left hand operand
-     *  @param m_rhs The workspace which is the right hand operand
-     *  @param m_out The result workspace
      */
     void BinaryOperation::doSingleSpectrum()
     {
@@ -512,9 +511,6 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /** Called when the two workspaces are the same size. 
      *  Loops over the workspaces extracting the appropriate spectra and calling the abstract binary operation function. 
-     *  @param m_lhs The workspace which is the left hand operand
-     *  @param m_rhs The workspace which is the right hand operand
-     *  @param m_out The result workspace#include "MantidAPI/WorkspaceProperty.h"
      */
     void BinaryOperation::do2D()
     {
@@ -684,14 +680,13 @@ namespace Mantid
 
     // ------- Default implementations of Event binary operations --------
 
-    /** Carries out the binary operation IN-PLACE on a single EventList,
+    /**
+     * Carries out the binary operation IN-PLACE on a single EventList,
      * with another EventList as the right-hand operand.
      * The event lists simply get appended.
      *
      *  @param lhs Reference to the EventList that will be modified in place.
      *  @param rhs Const reference to the EventList on the right hand side.
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
      */
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -700,7 +695,8 @@ namespace Mantid
       throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
     }
 
-    /** Carries out the binary operation IN-PLACE on a single EventList,
+    /**
+     * Carries out the binary operation IN-PLACE on a single EventList,
      * with another (histogrammed) spectrum as the right-hand operand.
      *
      *  @param lhs Reference to the EventList that will be modified in place.
@@ -716,7 +712,8 @@ namespace Mantid
       throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
     }
 
-    /** Carries out the binary operation IN-PLACE on a single EventList,
+    /**
+     * Carries out the binary operation IN-PLACE on a single EventList,
      * with a single (double) value as the right-hand operand
      *
      *  @param lhs Reference to the EventList that will be modified in place.
@@ -734,7 +731,9 @@ namespace Mantid
 
 
     //---------------------------------------------------------------------------------------------
-    /** Get the type of operand from a workspace
+    /**
+     * Get the type of operand from a workspace
+     * @param ws workspace to check
      * @return OperandType describing what type of workspace it will be operated as.
      */
     OperandType BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr ws)

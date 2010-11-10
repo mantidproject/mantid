@@ -140,8 +140,6 @@ namespace Mantid
        *
        *  @param lhs Reference to the EventList that will be modified in place.
        *  @param rhs Const reference to the EventList on the right hand side.
-       *  @param rhsY The vector of rhs data values
-       *  @param rhsE The vector of rhs error values
        */
       virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
           const DataObjects::EventList & rhs);
@@ -204,19 +202,19 @@ namespace Mantid
       virtual void checkRequirements();
 
       // ------- Workspaces being worked on --------
-      //Left-hand side workspace
+      /// Left-hand side workspace
       API::MatrixWorkspace_const_sptr m_lhs;
-      //Left-hand side EventWorkspace
+      /// Left-hand side EventWorkspace
       DataObjects::EventWorkspace_const_sptr m_elhs;
 
-      //Right-hand side workspace
+      /// Right-hand side workspace
       API::MatrixWorkspace_const_sptr m_rhs;
-      //Right-hand side EventWorkspace
+      /// Right-hand side EventWorkspace
       DataObjects::EventWorkspace_const_sptr m_erhs;
 
-      //Output workspace
+      /// Output workspace
       API::MatrixWorkspace_sptr m_out;
-      //Output EventWorkspace
+      /// Output EventWorkspace
       DataObjects::EventWorkspace_sptr m_eout;
 
 
@@ -228,9 +226,7 @@ namespace Mantid
       /// flipSides set to true if the rhs and lhs operands should be flipped - for commutative binary operations, normally.
       bool m_flipSides;
 
-      /// keepEventWorkspace set to true if the operation allows the output to stay as an EventWorkspace.
-      ///        if this returns false, any EventWorkspace will be converted to Workspace2D.
-      ///        This is ignored if the lhs operand is not an EventWorkspace.
+      /// Variable set to true if the operation allows the output to stay as an EventWorkspace. If this returns false, any EventWorkspace will be converted to Workspace2D. This is ignored if the lhs operand is not an EventWorkspace.
       bool m_keepEventWorkspace;
 
     private:
