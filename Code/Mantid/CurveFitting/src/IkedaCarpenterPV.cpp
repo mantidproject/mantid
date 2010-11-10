@@ -31,6 +31,7 @@ double IkedaCarpenterPV::centre()const
   return getParameter("X0");
 }
 
+
 void IkedaCarpenterPV::setHeight(const double h) 
 {
   // calculate height of peakshape function corresponding to intensity = 1
@@ -60,26 +61,13 @@ double IkedaCarpenterPV::height()const
 
 double IkedaCarpenterPV::width()const 
 {
-  double eta = getParameter("Eta");
-
-  // if eta bigger than or equal to one then for sure the Gaussian part does not contribute 
-  if ( eta >= 1 )
-    return sqrt(getParameter("SigmaSquared"));
-  // if eta smaller than or equal to zero then for sure the Lorentzian part does not contribute
-  if ( eta <= 0 )
-    return getParameter("Gamma");
-
-  return sqrt(getParameter("SigmaSquared"))+getParameter("Gamma");
+  return sqrt(8.0*M_LN2*getParameter("SigmaSquared"))+getParameter("Gamma");
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
-  double eta = getParameter("Eta");
-
-  if ( eta < 1 && eta >= 0 )
-    setParameter("SigmaSquared", (1-eta)*w*(1-eta)*w);
-  if ( eta > 0 && eta <= 1 )
-    setParameter("Gamma", eta*w);
+  setParameter("SigmaSquared", w*w/(32.0*M_LN2));  // used 4.0 * 8.0 = 32.0
+  setParameter("Gamma", w/2.0);
 };
 
 void IkedaCarpenterPV::setCentre(const double c) 
@@ -97,7 +85,6 @@ void IkedaCarpenterPV::init()
   declareParameter("Kappa",46.0);
   declareParameter("SigmaSquared",1.0);
   declareParameter("Gamma",1.0);
-  declareParameter("Eta",0.5);   // which means initially half gauss half lorentzian
   declareParameter("X0",0.0);
 }
 
@@ -148,6 +135,32 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
   }
 }
 
+
+/** convert voigt params to pseudo voigt params
+ *
+ *  @param voigtSigmaSq voigt param
+ *  @param voigtGamma voigt param
+ *  @param H pseudo voigt param
+ *  @param eta pseudo voigt param
+ */
+void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
+  double& H, double& eta) const
+{
+  double fwhmGsq = 8.0 * M_LN2 * voigtSigmaSq;
+  double fwhmG = sqrt(fwhmGsq);
+  double fwhmG4 = fwhmGsq*fwhmGsq;
+  double fwhmL = voigtGamma;
+  double fwhmLsq = voigtGamma*voigtGamma;
+  double fwhmL4 = fwhmLsq*fwhmLsq;
+
+  H = pow(fwhmG4*fwhmG+2.69269*fwhmG4*fwhmL+2.42843*fwhmGsq*fwhmG*fwhmLsq
+    +4.47163*fwhmGsq*fwhmLsq*fwhmL+0.07842*fwhmG*fwhmL4+fwhmL4*fwhmL, 0.2);
+
+  double tmp = fwhmL/H;
+
+  eta = 1.36603*tmp - 0.47719*tmp*tmp + 0.11116*tmp*tmp*tmp;
+}
+
 void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const int& nData) const
 {
     const double& I = getParameter("I");
@@ -155,10 +168,15 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
     const double& alpha1 = getParameter("Alpha1");
     const double& beta0 = getParameter("Beta0");
     const double& kappa = getParameter("Kappa");
-    const double& sigmaSquared = getParameter("SigmaSquared");
-    const double& gamma = getParameter("Gamma");
-    const double& eta = getParameter("Eta");
+    const double& voigtsigmaSquared = getParameter("SigmaSquared");
+    const double& voigtgamma = getParameter("Gamma");
     const double& X0 = getParameter("X0");
+
+    // cal pseudo voigt sigmaSq and gamma and eta
+    double gamma = 1.0; // dummy initialization
+    double eta = 0.5;   // dummy initialization
+    convertVoigtToPseudo(voigtsigmaSquared, voigtgamma, gamma, eta);
+    double sigmaSquared = gamma*gamma/(8.0*M_LN2); 
 
     const double beta = 1/beta0;
 
@@ -231,17 +249,22 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
 }
 
-void IkedaCarpenterPV::function(double* out, const double* xValues, const int& nData)const
+void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const int& nData)const
 {
     const double& I = getParameter("I");
     const double& alpha0 =getParameter("Alpha0");
     const double& alpha1 = getParameter("Alpha1");
     const double& beta0 = getParameter("Beta0");
     const double& kappa = getParameter("Kappa");
-    const double& sigmaSquared = getParameter("SigmaSquared");
-    const double& gamma = getParameter("Gamma");
-    const double& eta = getParameter("Eta");
+    const double& voigtsigmaSquared = getParameter("SigmaSquared");
+    const double& voigtgamma = getParameter("Gamma");
     const double& X0 = getParameter("X0");
+
+    // cal pseudo voigt sigmaSq and gamma and eta
+    double gamma = 1.0; // dummy initialization
+    double eta = 0.5;   // dummy initialization
+    convertVoigtToPseudo(voigtsigmaSquared, voigtgamma, gamma, eta);
+    double sigmaSquared = gamma*gamma/(8.0*M_LN2); 
 
     const double beta = 1/beta0;
 
@@ -313,7 +336,7 @@ void IkedaCarpenterPV::function(double* out, const double* xValues, const int& n
     }
 }
 
-void IkedaCarpenterPV::functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
 {
   calNumericalDeriv(out, xValues, nData);
 }

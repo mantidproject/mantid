@@ -150,10 +150,7 @@ public:
     icpv->tie("Kappa", "46.025921");
     icpv->tie("SigmaSquared", "100.0");
     icpv->setParameter("X0",45.0);
-    icpv->tie("Eta", "0.0");
     icpv->tie("Gamma", "1.0");
-
-    //alg2.setFunction(icpv);
 
     alg2.setPropertyValue("Function",*icpv);
 
@@ -180,7 +177,6 @@ public:
     TS_ASSERT_DELTA( icpv->getParameter("Kappa"), 46.025921 ,0.0001);
     TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 100.0 ,0.001);
     TS_ASSERT_DELTA( icpv->getParameter("Gamma"), 1.0 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Eta"), 0.0 ,0.001);
     TS_ASSERT_DELTA( icpv->getParameter("X0"), 50.0 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
@@ -216,9 +212,9 @@ public:
     icpv->tie("Alpha1", "1.496805");
     icpv->tie("Beta0", "31.891718");
     icpv->tie("Kappa", "46.025921");
+    icpv->setParameter("SigmaSquared",100);
     icpv->tie("SigmaSquared", "100.0");
     icpv->tie("X0", "79400");
-    icpv->tie("Eta", "0.0");
     icpv->tie("Gamma", "1.0");
 
     alg2.setFunction(icpv);
@@ -278,8 +274,6 @@ public:
 
     icpv->setParameter("I",25094.45);
     icpv->setParameter("X0",7316);
-    //icpv->setParameter("Eta",0);
-    //icpv->tie("Eta", "0");
     //icpv->setParameter("Gamma",1);
     //icpv->tie("Gamma", "1");
 
@@ -298,7 +292,7 @@ public:
 
     icpv->function(&out[0], &testing[0], testing.size());
 
-    TS_ASSERT_DELTA( out[0], 0.1018,0.001);
+    TS_ASSERT_DELTA( out[0], 0.2694,0.001);
 
     AnalysisDataService::Instance().remove(wsname);
     // Append value of date-time tag inside the geometry file to the constructor handle 
@@ -345,8 +339,6 @@ public:
 
     icpv->setParameter("I",106860.45);
     icpv->setParameter("X0",7326.34);
-    icpv->setParameter("Eta",0);
-    icpv->tie("Eta", "0");
     icpv->setParameter("Gamma",1);
     icpv->tie("Gamma", "1");
 
@@ -370,16 +362,15 @@ public:
     // test the output from fit is what you expect
     // note this test will never produce good fit because it assumes no background
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.798,0.01);
+    TS_ASSERT_DELTA( dummy, 0.831,0.01);
 
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,1);
+    TS_ASSERT_DELTA( icpv->getParameter("I"), 69562 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3634.1 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("X0"), 7300.5 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("Eta"), 0 ,0.1);
+    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3567 ,1);
+    TS_ASSERT_DELTA( icpv->getParameter("X0"), 7301 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Gamma"), 1 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 93.0 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 90.0 ,1);
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.000000001); 
 
     AnalysisDataService::Instance().remove(wsname);
@@ -461,8 +452,6 @@ public:
 
     icpv->setParameter("SigmaSquared",10075.96);
     icpv->setParameter("X0",7326.34);
-    icpv->setParameter("Eta",0);
-    icpv->tie("Eta", "0");
     icpv->setParameter("Gamma",1);
     icpv->tie("Gamma", "1");
 
@@ -481,16 +470,15 @@ public:
     // test the output from fit is what you expect
     // note this test will never produce good fit because it assumes no background
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.798,0.01);
+    TS_ASSERT_DELTA( dummy, 0.831,0.01);
 
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,1);
+    TS_ASSERT_DELTA( icpv->getParameter("I"), 69562 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3634.1 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("X0"), 7300.5 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("Eta"), 0 ,0.1);
+    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3567 ,1);
+    TS_ASSERT_DELTA( icpv->getParameter("X0"), 7301 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Gamma"), 1 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 93.0 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 90.0 ,1);
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.000000001); 
 
     AnalysisDataService::Instance().remove("GEM38370");

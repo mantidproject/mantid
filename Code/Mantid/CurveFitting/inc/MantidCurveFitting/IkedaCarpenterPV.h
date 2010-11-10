@@ -63,23 +63,22 @@ namespace Mantid
       virtual void setActiveParameter(int i,double value);
       virtual double activeParameter(int i)const;
 
-      ///calculate the const function
-      void constFunction(double* out, const double* xValues, const int& nData) const;
-
-      virtual void function(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+      // define these instead of functionLocal if you want to custom specify the calculation 
+      // domain for this function
+      //virtual void function(double* out, const double* xValues, const int& nData)const;
+      //virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
     protected:
 
-      virtual void functionLocal(double* out, const double* xValues, const int& nData)const
-      {
-        (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-      }
+      virtual void functionLocal(double* out, const double* xValues, const int& nData)const;
+      //{
+      //  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+      //}
 
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
-      {
-        (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-      }
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData);
+      //{
+      //  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+      //}
 
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
@@ -92,8 +91,15 @@ namespace Mantid
       /// used for unit testing where a workspace may not be available
       bool m_waveLengthFixed;
 
+      /// calculate the const function
+      void constFunction(double* out, const double* xValues, const int& nData) const;
+
       /// method for updating m_waveLength
       void calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const;
+
+      /// convert voigt params to pseudo voigt params
+      void convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
+                                double& H, double& eta) const;
 
 	    /// Static reference to the logger class
 	    static Kernel::Logger& g_log;
