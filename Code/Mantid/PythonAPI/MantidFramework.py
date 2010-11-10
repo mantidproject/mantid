@@ -237,18 +237,6 @@ class WorkspaceProxy(ProxyObject):
         Return an object describing properties of the run
         """
         return RunProxy(self._getHeldObject().getRun())
-    
-#---------------------------------------------------------------
-# Deprecated
-
-    def getSampleDetails(self):
-        """
-        Return an object describing properties of the run
-        """
-        warnings.warn("getSampleDetails is deprecated, use getRun instead.", DeprecationWarning)
-        return RunProxy(self._getHeldObject().getSampleDetails())
-#---------------------------------------------------------------
-
 
 #-------------------------------------------------------------------------------
 class RunProxy(ProxyObject):
