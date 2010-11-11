@@ -83,7 +83,7 @@ double Function::getParameter(int i)const
  * Sets a new value to a parameter by name.
  * @param name The name of the parameter.
  * @param value The new value
- * @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ * @param explicitlySet A boolean flagging the parameter as explicitly set (by user)
  */
 void Function::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
