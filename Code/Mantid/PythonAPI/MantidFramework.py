@@ -252,7 +252,7 @@ class RunProxy(ProxyObject):
         self.__properties = {}
         props = runobj.getProperties()
         for prop in props:
-            self.__properties[prop.name()] = prop
+            self.__properties[prop.name] = prop
 
     def keys(self):
         """
@@ -273,7 +273,7 @@ class RunProxy(ProxyObject):
         If the key is not contained within the property list
         then a KeyValueError is raised
         """
-        return self.__properties[key].value()
+        return self.__properties[key]
 
     def get(self, key, default=None):
         """
@@ -281,16 +281,9 @@ class RunProxy(ProxyObject):
         the key does not exist
         """
         if key in self.__properties:
-            return self[key].value()
+            return self[key]
         else:
             return default
-
-    def _getRawProperty(self, key):
-        """
-        Returns a property for the given key
-        """
-        return self.__properties[key]
-            
 
 #-------------------------------------------------------------------------------
 
@@ -366,7 +359,7 @@ class IAlgorithmProxy(ProxyObject):
                                   # 0 - input
                                   # 1 - output
         for prop in ialg.getProperties():
-            self.__propertynames[prop.name()] = prop.direction()
+            self.__propertynames[prop.name] = prop.direction
         
     def workspace(self):
         return self._retrieveWorkspaceByIndex(0)
@@ -409,11 +402,11 @@ class IAlgorithmProxy(ProxyObject):
         # Create a list for the output workspaces
         props = self._getHeldObject().getProperties()
         for p in props:
-            if p.direction() != 1:
+            if p.direction != 1:
                 continue
             if isinstance(p, MatrixWorkspaceProperty) or isinstance(p, TableWorkspaceProperty) or \
               isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
-               self.__wkspnames.append(p.value())
+               self.__wkspnames.append(p.value)
         self.__havelist = True
 
 #---------------------------------------------------------------------------------------

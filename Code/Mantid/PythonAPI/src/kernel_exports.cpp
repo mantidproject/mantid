@@ -9,6 +9,8 @@
 #include<MantidKernel/MandatoryValidator.h>
 #include<MantidKernel/ListValidator.h>
 #include<MantidKernel/Logger.h>
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <MantidPythonAPI/stl_proxies.h>
 
@@ -36,13 +38,25 @@ namespace PythonAPI
       ;
     
     class_< Mantid::Kernel::Property, boost::noncopyable>("Property", no_init)
-      .def("name", &Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>())
-      .def("isValid", &Mantid::Kernel::Property::isValid)
-      .def("value", &Mantid::Kernel::Property::value)
-      .def("allowedValues", &Mantid::Kernel::Property::allowedValues)
-      .def("direction", &Mantid::Kernel::Property::direction)
+      .add_property("name", make_function(&Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>()))
+      .add_property("isValid", &Mantid::Kernel::Property::isValid)
+      .add_property("value", &Mantid::Kernel::Property::value)
+      .add_property("allowedValues", &Mantid::Kernel::Property::allowedValues)
+      .add_property("direction", &Mantid::Kernel::Property::direction)
+      .add_property("units", &Mantid::Kernel::Property::units)
+      .add_property("isDefault", &Mantid::Kernel::Property::isDefault)
       ;
 
+    class_<Mantid::Kernel::PropertyWithValue<double>, \
+           bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_dbl", no_init)
+               .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<double>::operator(), return_value_policy<copy_const_reference>()))
+               ;
+
+    class_<Mantid::Kernel::TimeSeriesProperty<double>, \
+           bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
+              .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
+              .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::pulseTimesAsVector)
+    	      ;
   }
   
   void export_validators()
