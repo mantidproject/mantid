@@ -180,6 +180,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ArrayBoundedValidator.cpp" />
     <ClCompile Include="src\ArrayProperty.cpp" />
     <ClCompile Include="src\BinFinder.cpp" />
     <ClCompile Include="src\ConfigService.cpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="src\VectorHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidKernel\ArrayBoundedValidator.h" />
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h" />
     <ClInclude Include="inc\MantidKernel\BinaryFile.h" />
     <ClInclude Include="inc\MantidKernel\BinFinder.h" />
