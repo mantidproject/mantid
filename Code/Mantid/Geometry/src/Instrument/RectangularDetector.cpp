@@ -20,6 +20,7 @@ namespace Geometry
  *  Overload the operator <<
  * @param os  :: output stream
  * @param ass :: component assembly
+ * @return stream representation of rectangular detector
  *
  *  Loops through all components in the assembly
  *  and call printSelf(os).
@@ -91,6 +92,7 @@ IComponent* RectangularDetector::clone() const
  *
  * @param X index from 0..xPixels-1
  * @param Y index from 0..yPixels-1
+ * @return a pointer to the component in the assembly at the (X,Y) pixel position
  * @throws runtime_error if the x/y pixel width is not set, or X/Y are out of range
  */
 boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
@@ -112,6 +114,7 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
+/// @return number of X pixels
 int RectangularDetector::xpixels() const
 {
   return this->xPixels;
@@ -120,6 +123,7 @@ int RectangularDetector::xpixels() const
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
+/// @return number of y pixels
 int RectangularDetector::ypixels() const
 {
   return this->yPixels;
@@ -300,8 +304,14 @@ int RectangularDetector::getPointInObject(V3D& point) const
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Return the bounding box (as 6 double values)
- *
+/**
+ * Return the bounding box (as 6 double values)
+ * @param xmax maximum x of the bounding box
+ * @param ymax maximum y of the bounding box
+ * @param zmax maximum z of the bounding box
+ * @param xmin minimum x of the bounding box
+ * @param ymin minimum y of the bounding box
+ * @param zmin minimum z of the bounding box
  */
 void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 {
@@ -341,6 +351,8 @@ void RectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
 /**
  * Return the number of pixels to make a texture in, given the
  * desired pixel size. A texture has to have 2^n pixels per side.
+ * @param desired the requested pixel size
+ * @return number of pixels for texture
  */
 int getOneTextureSize(int desired)
 {
@@ -355,6 +367,8 @@ int getOneTextureSize(int desired)
 /**
  * Return the number of pixels to make a texture in, given the
  * desired pixel size. A texture has to have 2^n pixels per side.
+ * @param xsize pixel texture size in x direction
+ * @param ysize pixel texture size in y direction
  */
 void RectangularDetector::getTextureSize(int & xsize, int & ysize) const
 {

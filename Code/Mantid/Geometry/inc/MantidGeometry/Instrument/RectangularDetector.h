@@ -138,9 +138,18 @@ private:
   /// The number of pixels in the Y (vertical) direction;
   int yPixels;
 
-  double m_xsize, m_ysize;
-  double m_xstart, m_ystart;
-  double m_xstep, m_ystep;
+  /// Size in X of the detector
+  double m_xsize;
+  /// Size in Y of the detector
+  double m_ysize;
+  /// X position of the 0-th pixel
+  double m_xstart;
+  /// Y position of the 0-th pixel
+  double m_ystart;
+  /// Step size in the X direction of detector
+  double m_xstep;
+  /// Step size in the Y direction of detector
+  double m_ystep;
 
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<Object> mShape;
