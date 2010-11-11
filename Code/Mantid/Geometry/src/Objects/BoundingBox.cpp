@@ -190,6 +190,7 @@ namespace Mantid
      * Print out the bounding box values to a stream.
      * @param os The output stream
      * @param box A reference to the bounding box to print out.
+     * @return the stream representation of the bounding box
      */
     std::ostream& operator<<(std::ostream& os, const BoundingBox& box)
     {

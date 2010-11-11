@@ -164,7 +164,7 @@ namespace Mantid
       int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
       CompGrp* procComp(Rule*) const;
       int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
-      BoundingBox m_boundingBox;
+      BoundingBox m_boundingBox; ///< Object's bounding box
 
       // -- DEPRECATED --
       mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache

@@ -449,8 +449,8 @@ namespace Mantid
 
     /**
     * Determines is Pt is within the object or on the surface
-    * param Pt :: Point to be tested
-    * returns 1 if true and 0 if false
+    * @param Pt :: Point to be tested
+    * @returns 1 if true and 0 if false
     */
     bool Object::isValid(const Geometry::V3D& Pt) const
     {
@@ -460,10 +460,10 @@ namespace Mantid
     }
     
     /**
-    * Determines is group of surface maps are valid
-    * @param SMap :: map of SurfaceNumber : status
-    * @eturns 1 if true and 0 if false
-    */
+     * Determines is group of surface maps are valid
+     * @param SMap :: map of SurfaceNumber : status
+     * @returns 1 if true and 0 if false
+     */
     bool Object::isValid(const std::map<int, int>& SMap) const
     {
       if (!TopRule)
