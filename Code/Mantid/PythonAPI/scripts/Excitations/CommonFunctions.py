@@ -28,9 +28,12 @@ def load_run(prefix, run_number, output_name, ext='', name_suffix='', time_bins=
     else:
         # strip any possible file paths
         output_name = os.path.basename(output_name)
-    if ext.startswith(".n"):
+    if filename.endswith("_event.nxs"):
+        loader = LoadSNSEventNexus(Filename=filename, OutputWorkspace=output_name) 
+        return mtd[output_name], None      
+    elif ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
-    elif ext.startswith(".dat"):
+    elif filename.endswith("_event.dat"):
         #load the events
         loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
         det_info_file = prefix + "_detector.sca"        
@@ -91,6 +94,16 @@ def LoadNexRaw(filename, workspace):
   partitions = filename.split('.')
   if len(partitions) != 2:
     raise RuntimeError('Incorrect filename format encountered "' + filename + '"')
+
+  # Dirty check for SNS
+  if filename.endswith("_event.nxs"):
+        loader = LoadSNSEventNexus(filename, workspace) 
+        return mtd[workspace], None
+  elif filename.endswith("_event.dat"):
+        #load the events
+        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=workspace, PadEmptyPixels=True)   
+        return loader.workspace(), None
+
   extension = filename.split('.')[1]
   if (extension.lower() == 'raw'):
     loader = LoadRaw(filename, workspace)
