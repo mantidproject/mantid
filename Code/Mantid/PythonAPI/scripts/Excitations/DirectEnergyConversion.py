@@ -79,19 +79,23 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
     
-    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_path=None, Tzero=None):
+    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_ei=None, abs_white_run=None, save_path=None, Tzero=None):
         '''
         Convert mono-chromatic run to deltaE
         '''
+        
+        
         # Check if we need to perform the absolute normalisation first
         if not abs_mono_run is None:
             if abs_ei is None:
                 abs_ei = ei
             mapping_file = self.abs_map_file
             spectrum_masks = self.spectra_masks 
-            abs_norm_wkspace = self.do_conversion(abs_mono_run, abs_white_run, abs_ei,mapping_file, spectrum_masks)
+            abs_norm_wkspace = self.do_conversion(abs_mono_run, abs_ei, abs_white_run, mapping_file, spectrum_masks)
             abs_average_factor = self.abs_average(abs_norm_wkspace)
-            if (self.van_rmm != "" or self.van_mas !=""):# TODO: check for masses
+            
+            # TODO: Need a better check than this...
+            if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
                 absnorm_factor = abs_average_factor
             else:
@@ -99,7 +103,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 # Perform Abs Units...
                 absnorm_factor = (self.van_rmm/self.van_mass) * abs_average_factor
                 #  Scale by vanadium cross-section which is energy dependent up to a point
-                ei_value = float(abs_norm_wkspace.getSampleDetails().getLogData('Ei').value())
+                ei_value = float(abs_norm_wkspace.getRun().getLogData('Ei').value())
                 if ei_value >= 200.0:
                     xsection = 421.0
                 else:
@@ -122,7 +126,8 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         # Main run file conversion
         sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, resultws_name, Tzero)
         if not absnorm_factor is None:
-            absnorm_factor *= (self.abs_mass/self.abs_rmm)
+            if (abs_white_run is not None):
+                absnorm_factor *= (self.abs_mass/self.abs_rmm)
             sample_wkspace /= absnorm_factor
         
         if save_path is None:
@@ -171,7 +176,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             monitor_ws = loader.workspace()
             alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
-            ei_value = float(monitor_ws.getSampleDetails().getLogData("Ei").value())
+            ei_value = float(monitor_ws.getRun().getLogData("Ei").value())
             if (self.fix_ei):
                 ei_value = ei_guess
             if (Tzero is None):
