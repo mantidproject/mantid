@@ -67,6 +67,8 @@ public:
     void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3 
     void getPointData(std::vector<point3D> & image_data)const;
+    /// returns the size of the Image array as 1D array;
+    size_t getDataSize(void)const{return data_size;}
  //****************************************************************************************************** 
 // IMD workspace interface functions
   /// return ID specifying the workspace kind
@@ -90,7 +92,7 @@ public:
         alloc_mdd_arrays(Description);
     }
     /// get acces to the internal image dataset for further modifications; throws if dataset is undefinded;
-    MD_image_point * get_pData(void);
+    MD_image_point      * get_pData(void);
     MD_image_point const* get_const_pData(void)const;
 protected:
     size_t data_size;               ///< size of the data points array

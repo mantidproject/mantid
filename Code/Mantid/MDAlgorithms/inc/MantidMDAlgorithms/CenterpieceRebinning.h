@@ -79,6 +79,8 @@ private:
     */
     size_t rebin_dataset4D(const MDDataObjects::transf_matrix &rescaled_transf, const MDDataObjects::sqw_pixel *source_pix, size_t nPix, MDDataObjects::MD_image_point *data,
                            double boxMin[],double boxMax[]);
+    // finalsizes rebinoing operations; e.g. calculates averages and calculates location of pixels (filesystem)
+    size_t finalise_rebinning(MDDataObjects::MD_image_point *data,size_t data_size);
 };
 }
 }

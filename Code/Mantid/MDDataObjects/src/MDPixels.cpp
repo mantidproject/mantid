@@ -82,10 +82,11 @@ MDPixels::~MDPixels()
 {
     if(pix_array){
         delete [] pix_array;
+        pix_array = NULL;
     }
 }
 size_t 
-MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer)
+MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<sqw_pixel> &pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer)
 {
     if(!this->theFile){
         throw(std::bad_alloc("MDPixels::read_selected_pix: file reader has not been defined"));
@@ -93,32 +94,6 @@ MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start
     return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,pix_buf_size,n_pix_in_buffer);
 }
 //***************************************************************************************
-
-void
-MDPixels::finalise_rebinning()
-{
-size_t i;
-// normalize signal and error of the dnd object;
-if(this->data[0].npix>0){
-    this->data[0].s   /= this->data[0].npix;
-    this->data[0].err /=(this->data[0].npix*this->data[0].npix);
-}
-// and calculate cells location for pixels;
-this->data[0].chunk_location=0;
-
-// counter for the number of retatined pixels;
-size_t nPix = this->data[0].npix;
-for(i=1;i<this->data_size;i++){   
-    this->data[i].chunk_location=this->data[i-1].chunk_location+this->data[i-1].npix; // the next cell starts from the the boundary of the previous one
-                                              // plus the number of pixels in the previous cell
-    if(this->data[i].npix>0){
-        nPix              +=this->data[i].npix;
-        this->data[i].s   /=this->data[i].npix;
-        this->data[i].err /=(this->data[i].npix*this->data[i].npix);
-    }
-};
-this->nPixels=nPix;
-}//***************************************************************************************
 
 /*
 //***************************************************************************************

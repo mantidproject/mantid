@@ -597,7 +597,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
 }
 
 size_t 
-MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPix_buf_size,size_t &n_pix_in_buffer)
+MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<sqw_pixel> &pix_buf, size_t &nPix_buf_size,size_t &n_pix_in_buffer)
 {
 // open pixel dataset and dataspace if it has not been opened before;
     n_pix_in_buffer=0;
@@ -630,10 +630,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
         }else{
             // if one cell does not fit the buffer, we should increase buffer size .     
             if(i==starting_cell){
-                if(pix_buf){
-                    delete [] pix_buf;
-                }
-                pix_buf       = new sqw_pixel[max_npix_in_buffer];
+                pix_buf.resize(max_npix_in_buffer);
                 nPix_buf_size = max_npix_in_buffer;
                 n_selected_cells=i;
                 n_cells_processed=1;
@@ -645,8 +642,8 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
     }
     
 
-    if(!pix_buf){
-        pix_buf       = new sqw_pixel[max_npix_in_buffer];
+    if(pix_buf.capacity()<max_npix_in_buffer){
+        pix_buf.resize(max_npix_in_buffer);
         nPix_buf_size = max_npix_in_buffer;
     }
 
@@ -686,7 +683,6 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
             cells_preselection_buf[ic]=pixel_num;
             ic++;
          }
-        n_cells_processed++;
     }
     herr_t err=H5Sselect_elements(this->pixel_dataspace_h, H5S_SELECT_SET,ic,&cells_preselection_buf[0]);
      if(err<0){

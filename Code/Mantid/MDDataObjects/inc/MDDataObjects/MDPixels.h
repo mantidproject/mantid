@@ -95,15 +95,14 @@ public:
     void read_pix(void);
 
    /// read the the pixels corresponding to cells in the vector cell_num
-    size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer);
+    size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<sqw_pixel> &pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer);
  
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
    // rebin pixels in the pix_aray and add them to the current dataset ;
   //  size_t rebin_dataset4D(const transf_matrix &transf, const sqw_pixel *pix_array, size_t nPix_cell);
 protected:
-     void finalise_rebinning(void);
-    //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
+     //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
    // usually it is file based and memory used for small datasets, debugging or in a future when PC are big

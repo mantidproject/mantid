@@ -93,7 +93,7 @@ public:
     void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
 private:
     void init_empty_dimensions(const std::vector<DimensionID> &tags);
-
+    /// internal function returning the number of the dimension with the supplied tag in the dimensions stack 
     int  getDimNum(const std::string &tag,bool do_throw=true)const;
     /// the map used for fast search of a dumension from its tag. 
     std::map<size_t,int> dimensions_map;

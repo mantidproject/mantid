@@ -53,6 +53,7 @@ MDWorkspace_sptr inputWS;
      }
 
      pSlicing->build_from_geometry(*inputWS);
+     pSlicing=NULL; // should remain in Property
 }
 /*
 void
@@ -100,7 +101,7 @@ CenterpieceRebinning::exec()
      outputWS = getProperty("Result");
      if(!outputWS){
         outputWS      = MDWorkspace_sptr(new MDWorkspace(4));
-        AnalysisDataService::Instance().add("OutWorkspace", outputWS);
+        setProperty("Result", outputWS);
      }
   }else{
         throw(std::runtime_error("output workspace has to be created "));
@@ -109,17 +110,18 @@ CenterpieceRebinning::exec()
       throw(std::runtime_error("input and output workspaces have to be different"));
   }
 
-  // get slicing data from property manager. These data has been already shaped to proper form . 
-  MDGeometryDescription *pSlicing;
-  if(existsProperty("SlicingData")){
-    pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
+ 
+  MDPropertyGeometry  *pSlicing; 
+  if(existsProperty("SlicingData")){ 
+ // get slicing data from property manager. These data has to bebeen shaped to proper form . 
+    pSlicing = dynamic_cast< MDPropertyGeometry *>((Property *)(this->getProperty("SlicingData")));
     if(!pSlicing){
                 throw(std::runtime_error("can not obtain slicing property from the property manager"));
     }
   }else{
         throw(std::runtime_error("slising property has to exist and has to be defined "));
   }
-  
+ 
  
   // transform output workspace to the target shape and allocate memory for resulting matrix
   outputWS->alloc_mdd_arrays(*pSlicing);
@@ -128,38 +130,41 @@ CenterpieceRebinning::exec()
 
   std::vector<size_t> preselected_cells_indexes;
   size_t  n_precelected_pixels(0);
+
   this->preselect_cells(*inputWS,*pSlicing,preselected_cells_indexes,n_precelected_pixels);
   if(n_precelected_pixels == 0)return;
 
   unsigned int n_hits = n_precelected_pixels/PIX_BUFFER_SIZE+1;
 
-  sqw_pixel *pix_buf(NULL);
   size_t    n_pixels_read(0),
             n_pixels_selected(0),
             n_pix_in_buffer(0),pix_buffer_size(PIX_BUFFER_SIZE);
   
-  pix_buf = new sqw_pixel[PIX_BUFFER_SIZE];
-  // start reading and rebinning;
-  size_t n_starting_cell(0);
+  std::vector<sqw_pixel> pix_buf;
+  pix_buf.resize(PIX_BUFFER_SIZE);
+  
 
   // get pointer for data to rebin to; 
-  MD_image_point *pImage = outputWS->get_pData();
+  MD_image_point *pImage    = outputWS->get_pData();
+  // and the number of elements the image has;
+  size_t         image_size=  outputWS->getDataSize();
  //
   double boxMin[4],boxMax[4];
   boxMin[0]=boxMin[1]=boxMin[2]=boxMin[3]=FLT_MAX;
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
 
   transf_matrix trf = this->build_scaled_transformation_matrix(*inputWS,*pSlicing);
-  for(unsigned int i=0;i<n_hits;i++){
+// start reading and rebinning;
+  size_t n_starting_cell(0);
+  for(unsigned int i=0;i<1;i++){
       n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,pix_buffer_size,n_pix_in_buffer);
-      n_pixels_read+=n_pix_in_buffer;
+      n_pixels_read  +=n_pix_in_buffer;
       
-      n_pixels_selected+=this->rebin_dataset4D(trf,pix_buf,n_pix_in_buffer,pImage,boxMin,boxMax);
-  }
-  outputWS->finalise_rebinning();
-  if(pix_buf){
-      delete [] pix_buf;
-  }
+      n_pixels_selected+=this->rebin_dataset4D(trf,&pix_buf[0],n_pix_in_buffer,pImage,boxMin,boxMax);
+  } 
+  this->finalise_rebinning(pImage,image_size);
+
+  pix_buf.clear();
 
 
 }
@@ -594,6 +599,33 @@ omp_set_num_threads(num_OMP_Threads);
 
 return nPixel_retained;
 }
+//
+size_t
+CenterpieceRebinning::finalise_rebinning(MDDataObjects::MD_image_point *data,size_t data_size)
+{
+size_t i;
+// normalize signal and error of the dnd object;
+if(data[0].npix>0){
+    data[0].s   /= data[0].npix;
+    data[0].err /=(data[0].npix*data[0].npix);
+}
+// and calculate cells location for pixels;
+data[0].chunk_location=0;
+
+// counter for the number of retatined pixels;
+size_t nPix = data[0].npix;
+for(i=1;i<data_size;i++){   
+    data[i].chunk_location=data[i-1].chunk_location+data[i-1].npix; // the next cell starts from the the boundary of the previous one
+                                              // plus the number of pixels in the previous cell
+    if(data[i].npix>0){
+        nPix        +=data[i].npix;
+        data[i].s   /=data[i].npix;
+        data[i].err /=(data[i].npix*data[i].npix);
+    }
+};
+return nPix;
+}//***************************************************************************************
+
 
 } //namespace MDAlgorithms
 } //namespace Mantid

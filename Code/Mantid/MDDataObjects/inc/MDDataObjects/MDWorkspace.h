@@ -46,7 +46,7 @@ class DLLExport MDWorkspace :  public MDPixels
      virtual ~MDWorkspace(void){};
 
      void alloc_mdd_arrays(const MDGeometryDescription &transf){MDData::alloc_mdd_arrays(transf);}
-     void finalise_rebinning(void){MDPixels::finalise_rebinning();}
+   
   
 };
 

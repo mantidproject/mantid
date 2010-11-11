@@ -12,8 +12,8 @@ using namespace MDDataObjects;
 class testMDPixels :    public CxxTest::TestSuite
 {
     MDWorkspace  *pSQW;
-    sqw_pixel    *pix_buf;
-    size_t        buf_size;
+    std::vector<sqw_pixel> pix_buf;
+    size_t                buf_size;
 public:
     void testSQWConstructor(void){
         TS_ASSERT_THROWS_NOTHING(pSQW=new MDWorkspace(5));
@@ -41,7 +41,9 @@ public:
     void testSQWreadEmptySelection(void){
              std::vector<size_t> selected_cells(1,0);
              selected_cells[0]=987;
-             pix_buf = new sqw_pixel[PIX_BUFFER_SIZE];
+           
+             pix_buf.resize(PIX_BUFFER_SIZE);
+
              buf_size= PIX_BUFFER_SIZE;
              size_t start_cell(0),n_pix_in_buffer(0);
 
@@ -64,7 +66,7 @@ public:
     testMDPixels(void):pSQW(NULL),pix_buf(NULL){};
     ~testMDPixels(void){
         if(pSQW)delete pSQW;
-        if(pix_buf)delete [] pix_buf;
+   
     }
 };
 
