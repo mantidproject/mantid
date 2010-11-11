@@ -103,7 +103,7 @@ namespace Mantid
     */
     ComponentID Component::getComponentID()const
     {
-      if (isParametrized())
+      if (m_isParametrized)
         return ComponentID(m_base);
       else
         return ComponentID(this);
@@ -122,7 +122,7 @@ namespace Mantid
     */
     boost::shared_ptr<const IComponent> Component::getParent() const
     {
-      if (isParametrized())
+      if (this->m_isParametrized) //(isParametrized())
       {
         boost::shared_ptr<const IComponent> parent = m_base->getParent();
         return ParComponentFactory::create(parent,m_map);
@@ -139,7 +139,7 @@ namespace Mantid
     {
       std::vector<boost::shared_ptr<const IComponent> > ancs;
 
-      if (isParametrized())
+      if (m_isParametrized)
       {
         throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
 //        //TODO! Navigate properly
@@ -171,7 +171,7 @@ namespace Mantid
     */
     void Component::setName(const std::string& s)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         this->name = s;
       else
         throw Kernel::Exception::NotImplementedError("Component::setName (for Parametrized Component)");
@@ -182,7 +182,7 @@ namespace Mantid
     */
     std::string Component::getName() const
     {
-      if (isParametrized())
+      if (m_isParametrized)
         return m_base->getName();
       else
         return name;
@@ -196,7 +196,7 @@ namespace Mantid
     */
     void Component::setPos(double x, double y, double z)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         pos(x,y,z);
       else
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
@@ -208,7 +208,7 @@ namespace Mantid
     */
     void Component::setPos(const V3D& v)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         pos = v;
       else
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
@@ -220,7 +220,7 @@ namespace Mantid
     */
     void Component::setRot(const Quat& q)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         rot = q;
       else
         throw Kernel::Exception::NotImplementedError("Component::setRot (for Parametrized Component)");
@@ -234,7 +234,7 @@ namespace Mantid
     */
     void Component::translate(double x, double y, double z)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
       {
         pos[0]+=x;
         pos[1]+=y;
@@ -249,7 +249,7 @@ namespace Mantid
     */
     void Component::translate(const V3D& v)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         pos+=v;
       else
         throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
@@ -260,7 +260,7 @@ namespace Mantid
     */
     void Component::rotate(const Quat& r)
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         rot=rot*r;
       else
         throw Kernel::Exception::NotImplementedError("Component::rotate (for Parametrized Component)");
@@ -282,7 +282,7 @@ namespace Mantid
     */
     V3D Component::getRelativePos() const
     {
-      if (!isParametrized())
+      if (!m_isParametrized)
         return pos;
       else
       {
@@ -300,7 +300,7 @@ namespace Mantid
     */
     V3D Component::getScaleFactorP() const
     {
-      if (isParametrized())
+      if (m_isParametrized)
       {
         Parameter_sptr par = m_map->get(m_base,"sca");
         if (par)
@@ -316,7 +316,7 @@ namespace Mantid
     */
     V3D Component::getPos() const
     {
-      if (isParametrized())
+      if (this->m_isParametrized) //(isParametrized())
       {
         boost::shared_ptr<const IComponent> parent = getParent();
         if (!parent)
@@ -352,7 +352,7 @@ namespace Mantid
     */
     const Quat& Component::getRelativeRot() const
     {
-      if (isParametrized())
+      if (m_isParametrized)
       {
         Parameter_sptr par = m_map->get(m_base,"rot");
         if (par)
@@ -364,21 +364,32 @@ namespace Mantid
         return rot;
     }
 
+
     /** Returns the absolute rotation of the Component
     *  @return A quaternion representing the total rotation
     */
     const Quat Component::getRotation() const
     {
-      boost::shared_ptr<const IComponent> parent = getParent();
-      if (!parent)
+      //Note: This split into the two versions (parameter/no parameter) makes
+      // a significant speed difference in getPos() vs using getParent() and getRelativeRot()...
+      if (m_isParametrized)
       {
-        return getRelativeRot();
+        boost::shared_ptr<const IComponent> parent = getParent();
+        if (!parent)
+          return getRelativeRot();
+        else
+          return parent->getRotation()*getRelativeRot();
       }
       else
       {
-        return parent->getRotation()*getRelativeRot();
+        // Not parametrized
+        if (!parent)
+          return rot;
+        else
+          return parent->getRotation()*rot;
       }
     }
+
 
     /** Gets the distance between two Components
     *  @param comp The Component to measure against
@@ -405,7 +416,7 @@ namespace Mantid
     */
     std::set<std::string> Component::getParameterNames(bool recursive) const
     {
-      if (!isParametrized()) return std::set<std::string>();
+      if (!m_isParametrized) return std::set<std::string>();
 
       std::set<std::string> names = m_map->names(this);
       if( recursive )
@@ -429,7 +440,7 @@ namespace Mantid
      */
     bool Component::hasParameter(const std::string & name, bool recursive) const
     {
-      if (!isParametrized()) return false;
+      if (!m_isParametrized) return false;
 
       bool match_found(false);
       if( m_map->contains(this, name) )

@@ -229,7 +229,7 @@ namespace Mantid
       template <class TYPE>
       std::vector<TYPE> getParameter(const std::string & p_name, bool recursive) const
       {
-        if (isParametrized())
+        if (m_isParametrized)
         {
           Parameter_sptr param = Parameter_sptr(); //Null shared pointer
           if( recursive )

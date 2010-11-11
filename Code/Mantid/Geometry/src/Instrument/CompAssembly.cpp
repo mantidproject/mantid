@@ -108,7 +108,7 @@ IComponent* CompAssembly::clone() const
  */
 int CompAssembly::add(IComponent* comp)
 {
-  if (isParametrized())
+  if (m_isParametrized)
     throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
     //return static_cast<int>(m_children.size());
 
@@ -130,7 +130,7 @@ int CompAssembly::add(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp)
 {
-  if (isParametrized())
+  if (m_isParametrized)
     throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp)
@@ -153,7 +153,7 @@ int CompAssembly::addCopy(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
-  if (isParametrized())
+  if (m_isParametrized)
     throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp)
@@ -171,7 +171,7 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int CompAssembly::nelements() const
 {
-  if (isParametrized())
+  if (m_isParametrized)
     return dynamic_cast<const CompAssembly*>(m_base)->nelements();
   else
     return static_cast<int>(m_children.size());
@@ -189,7 +189,7 @@ int CompAssembly::nelements() const
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
 
-  if (isParametrized())
+  if (m_isParametrized)
   {
     //Get the child of the base (unparametrized) assembly
     boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->getChild(i);
@@ -222,7 +222,7 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
  */
 void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
 {
-  if (isParametrized())
+  if (m_isParametrized)
   {
     // Check cache for assembly, inside the ParameterMap
     if( m_map->getCachedBoundingBox(this, assemblyBox ) )
@@ -316,7 +316,7 @@ void CompAssembly::printTree(std::ostream& os) const
  */
 V3D CompAssembly::getPos() const
 {
-  if (!isParametrized())
+  if (!m_isParametrized)
     return Component::getPos();
   else
   {
@@ -336,7 +336,7 @@ V3D CompAssembly::getPos() const
  */
 const Quat CompAssembly::getRotation() const
 {
-  if (!isParametrized())
+  if (!m_isParametrized)
     return Component::getRotation();
   else
   {

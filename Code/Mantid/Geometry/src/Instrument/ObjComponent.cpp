@@ -59,7 +59,7 @@ namespace Mantid
      */
     const boost::shared_ptr<const Object> ObjComponent::shape()const
     {
-      if (isParametrized())
+      if (m_isParametrized)
         return dynamic_cast<const ObjComponent*>(m_base)->m_shape;
       else
         return m_shape;
@@ -279,7 +279,7 @@ namespace Mantid
     */
     V3D ObjComponent::getScaleFactorP() const
     {
-      if (isParametrized())
+      if (m_isParametrized)
       {
         Parameter_sptr par = m_map->get(m_base,"sca");
         if (par)

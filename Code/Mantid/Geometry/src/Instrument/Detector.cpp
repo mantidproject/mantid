@@ -62,17 +62,18 @@ void Detector::setID(int det_id)
  */
 int Detector::getID() const
 {
-  if (isParametrized())
+  if (m_isParametrized)
     return dynamic_cast<const Detector *>(m_base)->getID();
   else
     return m_id;
 }
 
-// IDetector methods. Just pull in Component implementation
-V3D Detector::getPos() const
-{
-  return ObjComponent::getPos();
-}
+//// IDetector methods. Just pull in Component implementation
+//V3D Detector::getPos() const
+//{
+//  return ObjComponent::getPos();
+//}
+
 
 ///Get the distance between the detector and another component
 ///@param comp The other component
@@ -115,7 +116,7 @@ double Detector::solidAngle(const V3D& observer) const
  */
 bool Detector::isMasked() const
 {
-  if (isParametrized())
+  if (m_isParametrized)
   {
     Parameter_sptr par = m_map->get(m_base,"masked");
     return par ? true : false;
@@ -131,7 +132,7 @@ bool Detector::isMasked() const
 ///@return true if it is a monitor
 bool Detector::isMonitor() const
 {
-  if (isParametrized())
+  if (m_isParametrized)
     return dynamic_cast<const Detector*>(m_base)->isMonitor();
   else
     return m_isMonitor;

@@ -141,7 +141,7 @@ namespace Mantid
       void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst)const;
 
       /// Map which holds detector-IDs and pointers to detector components
-      std::map<int, Geometry::IDetector*> _detectorCache;
+      std::map<int, Geometry::IDetector_sptr > _detectorCache;
 
       /// Purpose to hold copy of source component. For now assumed to
       /// be just one component
