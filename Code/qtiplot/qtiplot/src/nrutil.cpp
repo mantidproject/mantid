@@ -13,7 +13,7 @@ int IMIN(int ia, int ib)
 		return ib;
 	}
 
-void nrerror(char error_text[])
+void nrerror(const char * error_text)
 {//Numerical Recipes standard error handler
 fprintf(stderr,"Numerical Recipes run-time error...\n");
 fprintf(stderr,"%s\n",error_text);
@@ -44,7 +44,10 @@ return m;
 }
 
 void free_matrix(double **m, long nrl, long nrh, long ncl, long nch)
-{//free a double matrix allocated by matrix()
+{
+(void)nrh;
+(void)nch;
+//free a double matrix allocated by matrix()
 free((FREE_ARG) (m[nrl]+ncl-NR_END));
 free((FREE_ARG) (m+nrl-NR_END));
 }
@@ -59,7 +62,7 @@ if (!v)
 return v-nl+NR_END;
 }
 
-void free_vector(double *v, long nl, long nh)
+void free_vector(double *v, long nl, long)
 {// free a double vector allocated with vector()
 free((FREE_ARG) (v+nl-NR_END));
 }
@@ -72,7 +75,7 @@ if (!v) nrerror("allocation failure in ivector()");
 return v-nl+NR_END;
 }
 
-void free_ivector(size_t *v, long nl, long nh)
+void free_ivector(size_t *v, long nl, long)
 {
 free((FREE_ARG) (v+nl-NR_END));
 }
@@ -85,7 +88,7 @@ if (!v) nrerror("allocation failure in intvector()");
 return v-nl+NR_END;
 }
 
-void free_intvector(int*v, long nl, long nh)
+void free_intvector(int*v, long nl, long)
 {
 free((FREE_ARG) (v+nl-NR_END));
 }
@@ -162,7 +165,7 @@ free_intvector(indx,1,m+1);
 **************************************************************/
 void ludcmp(double **a, int n, int *indx, double *d)
 {
-int i,imax,j,k;
+int i(0),imax(0),j(0),k(0);
 double big,dum,sum,temp;
 double *vv=vector(1,n);
 *d=1.0;

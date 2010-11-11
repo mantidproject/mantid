@@ -29,8 +29,8 @@
 #ifndef PYTHON_SCRIPTING_H
 #define PYTHON_SCRIPTING_H
 
-#include "ScriptingEnv.h"
 #include "PythonScript.h"
+#include "ScriptingEnv.h"
 
 class QObject;
 class QString;

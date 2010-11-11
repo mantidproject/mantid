@@ -26,6 +26,18 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+// M. Gigg. Python is slightly special in that is better to include it before 
+// any system headers are included.
+#ifdef SCRIPTING_PYTHON
+#include "PythonScript.h"
+#include "PythonScripting.h"
+#endif
+
+#ifdef SCRIPTING_MUPARSER
+#include "muParserScript.h"
+#include "muParserScripting.h"
+#endif
+
 #include "ScriptingEnv.h"
 #include "Script.h"
 
@@ -35,14 +47,6 @@
 #include <QDateTime>
 #include "MantidKernel/ConfigService.h"
 
-#ifdef SCRIPTING_MUPARSER
-#include "muParserScript.h"
-#include "muParserScripting.h"
-#endif
-#ifdef SCRIPTING_PYTHON
-#include "PythonScript.h"
-#include "PythonScripting.h"
-#endif
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
   : QObject(0, langName), d_initialized(false), d_parent(parent), d_refcount(0),

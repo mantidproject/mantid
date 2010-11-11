@@ -29,8 +29,8 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-#include "Script.h"
 #include "PythonSystemHeader.h"
+#include "Script.h"
 
 class QObject;
 class QString;
