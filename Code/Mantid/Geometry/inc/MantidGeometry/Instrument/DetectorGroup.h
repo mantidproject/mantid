@@ -61,6 +61,7 @@ public:
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double getPhi() const;
   double solidAngle(const V3D& observer) const; 
+  bool isParametrized() const;
   bool isMasked() const;
   bool isMonitor() const;
   bool isValid(const V3D& point) const;

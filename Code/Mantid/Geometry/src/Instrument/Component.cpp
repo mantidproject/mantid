@@ -16,9 +16,9 @@ namespace Mantid
     Component::Component(const IComponent* base,  ParameterMap_const_sptr map)
       : m_base(base), m_map(map), m_isParametrized(true)
     {
-      const Component * comp_base = dynamic_cast<const Component *>(base);
-      if (!comp_base)
-        throw std::invalid_argument("Component: parametrized constructor called with a pure virtual IComponent base!");
+//      const Component * comp_base = dynamic_cast<const Component *>(base);
+//      if (!comp_base)
+//        throw std::invalid_argument("Component: parametrized constructor called with a pure virtual IComponent base!");
     }
 
     /// Copy constructor
@@ -109,6 +109,7 @@ namespace Mantid
         return ComponentID(this);
     }
 
+    //-------------------------------------------------------------------------------
     /*! Set the parent. Previous parenting is lost.
     *  @param comp :: the parent Component
     */
@@ -117,12 +118,14 @@ namespace Mantid
       parent=comp;
     }
 
+
+    //--------------------------------------------------------------------------------------------
     /*! Get a pointer to the parent.
     *  @return this.parent
     */
     boost::shared_ptr<const IComponent> Component::getParent() const
     {
-      if (this->m_isParametrized) //(isParametrized())
+      if (this->m_isParametrized)
       {
         boost::shared_ptr<const IComponent> parent = m_base->getParent();
         return ParComponentFactory::create(parent,m_map);
@@ -131,6 +134,7 @@ namespace Mantid
         return boost::shared_ptr<const IComponent>(parent, NoDeleting());
     }
 
+    //--------------------------------------------------------------------------------------------
     /*! Returns an array of all ancestors of this component,
      *  starting with the direct parent and moving up
      *  @return An array of pointers to ancestor components
@@ -141,20 +145,25 @@ namespace Mantid
 
       if (m_isParametrized)
       {
-        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
+        boost::shared_ptr<const IComponent> current = this->getParent();
+        while (current)
+        {
+          ancs.push_back( current );
+          current = current->getParent();
+        }
+
+//        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
 //        //TODO! Navigate properly
 //        std::vector<boost::shared_ptr<const IComponent> > ancs;
 //        boost::shared_ptr<const Component> current = boost::dynamic_pointer_cast<const Component>( dynamic_cast<const Component *>(m_base)->parent );
 //        while (current)
 //        {
 //          ancs.push_back( ParComponentFactory::create(current,m_map) );
-//          current = current->m_base->parent;
+        //          current = current->m_base->parent;
 //        }
 //        return ancs;
       }
-
       else
-
       {
         boost::shared_ptr<const IComponent> current = this->getParent();
         while (current)
@@ -163,9 +172,11 @@ namespace Mantid
           current = current->getParent();
         }
       }
+
       return ancs;
     }
 
+    //--------------------------------------------------------------------------------------------
     /*! Set the name of the Component (currently does nothing)
     *  @param s :: name string
     */
@@ -177,6 +188,7 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::setName (for Parametrized Component)");
     }
 
+    //--------------------------------------------------------------------------------------------
     /*! Get the name of the Component
     *  @return this.name
     */
@@ -316,20 +328,28 @@ namespace Mantid
     */
     V3D Component::getPos() const
     {
-      if (this->m_isParametrized) //(isParametrized())
+      if (this->m_isParametrized)
       {
-        boost::shared_ptr<const IComponent> parent = getParent();
-        if (!parent)
-        {
-          return getRelativePos();
-        }
-        else
-        {
-          V3D temp(getRelativePos());
-          parent->getRotation().rotate(temp);
-          temp+=parent->getPos();
-          return temp;
-        }
+        V3D temp;
+//        // --- Look for a cached position ----
+//        if (!m_map->getCachedLocation(m_base,temp))
+//        {
+//          //Ooops, no cache. Let's make it instead.
+          boost::shared_ptr<const IComponent> parent = getParent();
+          if (!parent)
+          {
+            return getRelativePos();
+          }
+          else
+          {
+            temp = getRelativePos();
+            parent->getRotation().rotate(temp);
+            temp+=parent->getPos();
+          }
+//          //And we save it to the cache for next time
+//          m_map->setCachedLocation(m_base,temp);
+//        }
+        return temp;
       }
       else
       {

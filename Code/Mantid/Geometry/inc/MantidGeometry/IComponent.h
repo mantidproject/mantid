@@ -71,6 +71,8 @@ namespace Mantid
       virtual IComponent* clone() const=0;
       /// Destructor
       virtual ~IComponent(){}
+      //! Returns true if the Component is parametrized (has a parameter map)
+      virtual bool isParametrized() const = 0;
       //! Returns the ComponentID - a unique identifier of the component.
       virtual ComponentID getComponentID()const = 0;
       //! Assign a parent IComponent. Previous parent link is lost

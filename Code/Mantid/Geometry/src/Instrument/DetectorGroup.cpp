@@ -168,6 +168,18 @@ namespace Mantid
       return isMasked;
     }
 
+    /** Return true if any detector in the group is parametrized.
+     *
+     */
+    bool DetectorGroup::isParametrized() const
+    {
+      DetCollection::const_iterator it;
+      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+        if( (*it).second->isParametrized()) return true;
+      return false;
+
+    }
+
     /** Indicates whether this is a monitor.
     *  Will return false if even one member of the group is not flagged as a monitor
     */

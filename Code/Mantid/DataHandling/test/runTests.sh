@@ -42,6 +42,6 @@ echo
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-rm -f *.properties
+#rm -f *.properties
 #rm -f *Test.log
 echo "Done."
