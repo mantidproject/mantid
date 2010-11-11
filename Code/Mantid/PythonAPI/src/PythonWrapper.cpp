@@ -35,6 +35,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   MantidVecHelper::initializeDependencies();
   // Export some frequently used stl containers
   vector_proxy<int>::wrap("cpp_list_int");
+  vector_proxy<long>::wrap("cpp_list_long");
   vector_proxy<double>::wrap("cpp_list_dbl");
   vector_proxy<bool>::wrap("cpp_list_bool");
   vector_proxy<std::string>::wrap("cpp_list_str");
