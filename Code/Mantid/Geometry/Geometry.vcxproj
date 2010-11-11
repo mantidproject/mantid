@@ -170,8 +170,6 @@
     <ClCompile Include="src\IInstrument.cpp" />
     <ClCompile Include="src\Instrument\Instrument.cpp" />
     <ClCompile Include="src\Instrument\ObjCompAssembly.cpp" />
-    <ClCompile Include="src\Instrument\ParInstrument.cpp" />
-    <ClCompile Include="src\Instrument\ParObjCompAssembly.cpp" />
     <ClCompile Include="src\Instrument\ParRectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\XMLlogfile.cpp" />
@@ -224,11 +222,7 @@
     <ClCompile Include="src\Rendering\OCGeometryRenderer.cpp" />
     <ClCompile Include="src\Instrument\Parameter.cpp" />
     <ClCompile Include="src\Instrument\ParameterMap.cpp" />
-    <ClCompile Include="src\Instrument\ParametrizedComponent.cpp" />
-    <ClCompile Include="src\Instrument\ParCompAssembly.cpp" />
     <ClCompile Include="src\Instrument\ParComponentFactory.cpp" />
-    <ClCompile Include="src\Instrument\ParDetector.cpp" />
-    <ClCompile Include="src\Instrument\ParObjComponent.cpp" />
     <ClCompile Include="src\Surfaces\Plane.cpp" />
     <ClCompile Include="src\Math\PolyBase.cpp" />
     <ClCompile Include="src\Math\PolyFunction.cpp" />

@@ -111,19 +111,7 @@
     <ClCompile Include="src\Instrument\ParameterMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Instrument\ParametrizedComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Instrument\ParCompAssembly.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Instrument\ParComponentFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Instrument\ParDetector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Instrument\ParObjComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Surfaces\Plane.cpp">
@@ -210,12 +198,6 @@
     <ClCompile Include="src\Instrument\XMLlogfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Instrument\ParInstrument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Instrument\ParObjCompAssembly.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Instrument\ObjCompAssembly.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -223,6 +205,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\InstrumentRayTracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDDimension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDDimensionRes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDGeometryBasis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDGeometryDescription.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -579,6 +576,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\InstrumentRayTracerTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimensionRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryBasis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryDescription.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDWorkspaceConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
