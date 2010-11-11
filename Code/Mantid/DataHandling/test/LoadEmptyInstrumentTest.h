@@ -348,6 +348,29 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 1, 0.0001);
 
+    // testing r-position, t-position and p-position parameters
+    boost::shared_ptr<IComponent> ptrRTP_Test = i->getComponentByName("rtpTest1");
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 20.0, 0.0001);
+    ptrRTP_Test = i->getComponentByName("rtpTest2");
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 12.0, 0.0001);
+    ptrRTP_Test = i->getComponentByName("rtpTest3");
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 12.0, 0.0001);
+    ptrRTP_Test = i->getComponentByName("rtpTest4");
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 12.0, 0.0001);
+    ptrRTP_Test = i->getComponentByName("rtpTest5");
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 0.0, 0.0001);
+
+
     AnalysisDataService::Instance().remove(wsName);
   }
 

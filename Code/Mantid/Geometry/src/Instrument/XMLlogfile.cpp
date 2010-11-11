@@ -61,7 +61,7 @@ namespace Mantid
     */
     double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     {
-      // If this parameter is a <look-up-table> or <formula> return 0.0. These parameter types are 
+      // If this parameter is a <look-up-table> or <formula> return 0.0. Such parameter types are 
       // associated with 'fitting' parameters. In some sense this method should never be called
       // for such parameters since they return values from other attributes and only during (or just
       // before) 'fitting'. But include the statement below for safety.
