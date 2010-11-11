@@ -129,7 +129,6 @@ public:
         std::string outws_name = "cncs";
         ld.initialize();
         ld.setPropertyValue("OutputWorkspace",outws_name);
-        //ld.setPropertyValue("Filename","/home/janik/data/PG3_732_event.nxs");
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
         ld.setPropertyValue("FilterByTime_Start", "300.0");
         ld.setPropertyValue("FilterByTime_Stop", "600.0");
