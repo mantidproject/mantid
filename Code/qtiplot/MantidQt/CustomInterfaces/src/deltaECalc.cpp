@@ -148,9 +148,13 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     pyCode += QString("mono_sample.map_file = r'%1'\n").arg(mapFile);
   }
+  QString absMapFile = m_sets.absMapFile->getFirstFilename();
   if( m_sets.ckRunAbsol->isChecked() )
   {
-    pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(m_sets.absMapFile->getFirstFilename());
+    if ( !absMapFile.isEmpty() )
+    {
+        pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(absMapFile);
+    }
   }
 }
 
