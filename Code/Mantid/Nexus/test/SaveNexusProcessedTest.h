@@ -268,6 +268,7 @@ void testExecOnMuonXml()
     // Now set required filename and output workspace name
     inputFile = "../../../../Test/AutoTestData/emu00006473.nxs";
     nxLoad.setPropertyValue("Filename", inputFile);
+    inputFile = nxLoad.getPropertyValue("Filename"); //Get the absolute path
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     //
@@ -303,10 +304,13 @@ void testExecOnMuonXml()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-	// try writing data again
+    // try writing data again
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
-    if(clearfiles) Poco::File(outputFile).remove();
+    if(clearfiles)
+    {
+      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+    }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
 #endif /*_WIN64*/

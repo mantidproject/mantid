@@ -64,8 +64,9 @@ public:
     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    const std::string outputFile("testNXSPE.nxspe");
+    std::string outputFile("testNXSPE.nxspe");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+    outputFile = saver->getPropertyValue("Filename");//get absolute path
 
     TS_ASSERT_THROWS_NOTHING( saver->setProperty("Efixed", 0.0));
     TS_ASSERT_THROWS_NOTHING( saver->setProperty("psi", 0.0));

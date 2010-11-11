@@ -51,12 +51,12 @@ public:
 
 
     // Test proton charge from the sample block
-    TS_ASSERT_DELTA(matrix_ws->run().getProtonCharge(), 30.14816, 1e-5)
+    TS_ASSERT_DELTA(matrix_ws->run().getProtonCharge(), 30.14816, 1e-5);
 
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
     int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
+    TS_ASSERT_EQUALS(nalgs, 4);
       
     if( nalgs == 4 )
     {
@@ -97,7 +97,7 @@ public:
     TS_ASSERT( matrix_ws.get() );
 
 	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3)
+   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     // Test proton charge from the sample block
     //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
@@ -106,7 +106,7 @@ public:
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
     int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
+    TS_ASSERT_EQUALS(nalgs, 4);
       
     if( nalgs == 4 )
     {
@@ -146,7 +146,7 @@ public:
     TS_ASSERT( matrix_ws.get() );
 
 	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),4)
+   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),4);
 
     // Test proton charge from the sample block
     //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
@@ -155,7 +155,7 @@ public:
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
     int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
+    TS_ASSERT_EQUALS(nalgs, 4);
       
     if( nalgs == 4 )
     {
@@ -196,7 +196,7 @@ public:
     TS_ASSERT( matrix_ws.get() );
 
 	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),5)
+   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),5);
 
     // Test proton charge from the sample block
     //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
@@ -205,7 +205,7 @@ public:
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
     int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
+    TS_ASSERT_EQUALS(nalgs, 4);
       
     if( nalgs == 4 )
     {
@@ -244,7 +244,7 @@ public:
     TS_ASSERT( matrix_ws.get() );
 
 	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3)
+   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     // Test proton charge from the sample block
     //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
@@ -264,8 +264,8 @@ public:
     }
     
     boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
    }
 
@@ -292,12 +292,12 @@ public:
     TS_ASSERT( matrix_ws.get() );
 
 	//Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3)
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
     int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
+    TS_ASSERT_EQUALS(nalgs, 4);
       
     if( nalgs == 4 )
     {
@@ -308,8 +308,8 @@ public:
     }
     
     boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
    }
 
@@ -323,6 +323,8 @@ public:
      TS_ASSERT( alg.isInitialized() );
      testFile="../../../../Test/AutoTestData/focussed.nxs";
      alg.setProperty("Filename", testFile);
+     testFile = alg.getPropertyValue("Filename");
+
      alg.setPropertyValue("OutputWorkspace", output_ws);
 
      TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -342,19 +344,21 @@ public:
      SaveNexusProcessed save;
      save.initialize();
      save.setPropertyValue("InputWorkspace",output_ws);
-     save.setPropertyValue("Filename","LoadNexusProcessed_tmp.nxs");
+     std::string filename = "LoadNexusProcessed_tmp.nxs";
+     save.setPropertyValue("Filename",filename);
+     filename = save.getPropertyValue("Filename");
      save.execute();
 
      LoadNexusProcessed load;
      load.initialize();
-     load.setPropertyValue("Filename","LoadNexusProcessed_tmp.nxs");
+     load.setPropertyValue("Filename",filename);
      load.setPropertyValue("OutputWorkspace",output_ws);
      load.execute();
 
      workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws) );
      TS_ASSERT( workspace.get() );
 
-     TS_ASSERT_EQUALS(workspace->getNumberHistograms(),6)
+     TS_ASSERT_EQUALS(workspace->getNumberHistograms(),6);
 
      TS_ASSERT(workspace->hasMaskedBins(0));
      TS_ASSERT(workspace->hasMaskedBins(1));

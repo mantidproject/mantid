@@ -17,6 +17,8 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "Poco/File.h"
+#include <fstream>
+#include <cstring>
 #include <vector>
 
 using namespace Mantid::API;
@@ -51,6 +53,7 @@ public:
     std::string outputFile;
     outputFile = "./INES_test.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);
+    outputFile = testerCAL.getPropertyValue("GroupingFileName");
     testerCAL.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());

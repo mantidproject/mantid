@@ -61,6 +61,7 @@ public:
     std::string outputFile;
     outputFile = "./GetDetOffsets.cal";
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("GroupingFileName", outputFile));
+    outputFile = offsets.getPropertyValue("GroupingFileName");
 
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );

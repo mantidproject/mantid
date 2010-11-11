@@ -36,25 +36,24 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( saver->name(), "SaveSPE" )
+    TS_ASSERT_EQUALS( saver->name(), "SaveSPE" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( saver->version(), 1 )
+    TS_ASSERT_EQUALS( saver->version(), 1 );
   }
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( saver->category(), "DataHandling" )
+    TS_ASSERT_EQUALS( saver->category(), "DataHandling" );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( saver->initialize() )
-    TS_ASSERT( saver->isInitialized() )
-    
-    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 2 )
+    TS_ASSERT_THROWS_NOTHING( saver->initialize() );
+    TS_ASSERT( saver->isInitialized() );
+    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 2 );
   }
 
   void testExec()
@@ -63,14 +62,15 @@ public:
     std::string WSName = "saveSPETest_input";
     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
     
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) )
-    const std::string outputFile("testSPE.spe");
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) )
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
+    std::string outputFile("testSPE.spe");
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+    outputFile = saver->getPropertyValue("Filename"); //get abs path
 
-    TS_ASSERT_THROWS_NOTHING( saver->execute() )
-    TS_ASSERT( saver->isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( saver->execute() );
+    TS_ASSERT( saver->isExecuted() );
     
-    TS_ASSERT( Poco::File(outputFile).exists() )
+    TS_ASSERT( Poco::File(outputFile).exists() );
     std::ifstream file(outputFile.c_str());
     
     std::string tmp;
@@ -133,15 +133,16 @@ public:
     std::string WSName = "saveSPETestB_input";
     MatrixWorkspace_sptr input = makeWorkspaceWithNumericAxis(WSName);
     
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) )
-    const std::string outputFile("testSPE_Axis.spe");
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) )
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
+    std::string outputFile("testSPE_Axis.spe");
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+    outputFile = saver->getPropertyValue("Filename"); //get abs path
     saver->setRethrows(true);
     saver->execute();
-    TS_ASSERT( saver->isExecuted() )
+    TS_ASSERT( saver->isExecuted() );
     
-    TS_ASSERT( Poco::File(outputFile).exists() )
-    if( Poco::File(outputFile).exists() )
+    TS_ASSERT( Poco::File(outputFile).exists() );
+    if( Poco::File(outputFile).exists() );
     {    
       Poco::File(outputFile).remove();  
     }
@@ -205,7 +206,7 @@ private:
     boost::shared_ptr<Instrument> instru = inputWS->getBaseInstrument();
     Geometry::Detector* toMask =
       dynamic_cast<Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
-    TS_ASSERT(toMask)
+    TS_ASSERT(toMask);
     m_Pmap->addBool(toMask, "masked", true);
 
     // required to get it passed the algorthms validator

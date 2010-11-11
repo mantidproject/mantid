@@ -44,10 +44,11 @@ public:
      const std::string name = "LoadSaveAsciiWS_0";
      AnalysisDataService::Instance().add(name, wsToSave);
 
-    const std::string filename = "LoadSaveAsciiTestFile.dat";
+     std::string filename = "LoadSaveAsciiTestFile.dat";
      SaveAscii save;
      save.initialize();
      save.setPropertyValue("Filename", filename);
+     filename = save.getPropertyValue("Filename"); //Get absolute path
      save.setPropertyValue("Workspace", name);
      TS_ASSERT_THROWS_NOTHING(save.execute());
 

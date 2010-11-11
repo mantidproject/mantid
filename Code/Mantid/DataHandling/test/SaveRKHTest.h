@@ -47,6 +47,7 @@ public:
 
     testAlgorithm1.setPropertyValue("InputWorkspace", "testInputOne");
     testAlgorithm1.setPropertyValue("Filename", outputFile);
+    outputFile = testAlgorithm1.getPropertyValue("Filename"); //get absolute path
     testAlgorithm2.setProperty<bool>("Append", false);
 
     //Execute the algorithm
@@ -113,6 +114,7 @@ public:
 
     testAlgorithm2.setPropertyValue("InputWorkspace", "testInputTwo");
     testAlgorithm2.setPropertyValue("Filename", outputFile);
+    outputFile = testAlgorithm2.getPropertyValue("Filename"); //get absolute path
     testAlgorithm2.setProperty<bool>("Append", false);
 
     //Execute the algorithm
