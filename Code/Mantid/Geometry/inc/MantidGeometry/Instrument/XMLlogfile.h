@@ -23,7 +23,7 @@ namespace Mantid
     //--------------------------------------------------------------------------
     class IComponent;
 
-    /*
+    /**
     This class links parameters defined in ISIS log files to components of the instrument tree
     defined in the instrument definition.
 
@@ -63,8 +63,7 @@ namespace Mantid
       /// Destructor
       ~XMLlogfile() {}
 
-
-      /// log file XML attributes from instrument definition file
+      // log file XML attributes from instrument definition file
       const std::string m_logfileID;  ///< logfile id
       const std::string m_value;  ///< rather then extracting value from logfile, specify a value directly
       const std::string m_paramName;  ///< parameter name

@@ -143,16 +143,13 @@ namespace Mantid
       /// Map which holds detector-IDs and pointers to detector components
       std::map<int, Geometry::IDetector_sptr > _detectorCache;
 
-      /// Purpose to hold copy of source component. For now assumed to
-      /// be just one component
+      /// Purpose to hold copy of source component. For now assumed to be just one component
       Geometry::ObjComponent* _sourceCache;
 
-      /// Purpose to hold copy of samplePos component. For now assumed to
-      /// be just one component
+      /// Purpose to hold copy of samplePos component. For now assumed to be just one component
       Geometry::ObjComponent* _sampleCache;
 
-      /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs,
-      /// which equals logfile filename minus the run number and file extension
+      /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
 
       /// a vector holding detector ids of monitor s

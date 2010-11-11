@@ -28,8 +28,8 @@ namespace Mantid
     {}
 
     /** Constructor to create a parametrized instrument
-     *
-     *
+     * @param instr instrument for parameter inclusion
+     * @param map parameter map to include
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
     : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map ),
@@ -48,7 +48,10 @@ namespace Mantid
         throw std::runtime_error("Instrument::baseInstrument() called for a non-parametrized instrument.");
     }
 
-    /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
+    /**
+     * Pointer to the ParameterMap holding the parameters of the modified instrument components.
+     * @return parameter map from modified instrument components
+     */
     Geometry::ParameterMap_sptr Instrument::getParameterMap() const
     {
       if (m_isParametrized)
