@@ -137,14 +137,33 @@ namespace Mantid
      */
     std::vector<boost::shared_ptr<const IComponent> > Component::getAncestors() const
     {
-        std::vector<boost::shared_ptr<const IComponent> > ancs;
+      std::vector<boost::shared_ptr<const IComponent> > ancs;
+
+      if (isParametrized())
+      {
+        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
+//        //TODO! Navigate properly
+//        std::vector<boost::shared_ptr<const IComponent> > ancs;
+//        boost::shared_ptr<const Component> current = boost::dynamic_pointer_cast<const Component>( dynamic_cast<const Component *>(m_base)->parent );
+//        while (current)
+//        {
+//          ancs.push_back( ParComponentFactory::create(current,m_map) );
+//          current = current->m_base->parent;
+//        }
+//        return ancs;
+      }
+
+      else
+
+      {
         boost::shared_ptr<const IComponent> current = this->getParent();
         while (current)
         {
-          ancs.push_back( ParComponentFactory::create(current,m_map) );
+          ancs.push_back( current );
           current = current->getParent();
         }
-        return ancs;
+      }
+      return ancs;
     }
 
     /*! Set the name of the Component (currently does nothing)

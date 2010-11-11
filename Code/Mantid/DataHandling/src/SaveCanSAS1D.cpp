@@ -519,7 +519,10 @@ void SaveCanSAS1D::writeHeader(const std::string & fileName)
         const std::vector<boost::shared_ptr<const IComponent> > ancs = det->getAncestors();
         // The one we want is the penultimate one
         // Shouldn't ever happen, but protect against detector having no ancestors
-        detectorName = (ancs.size() > 1) ? ancs[ancs.size()-2]->getName() : det->getName();
+        if (ancs.size() > 1)
+          detectorName = ancs[ancs.size()-2]->getName();
+        else
+          detectorName = det->getName();
         //look for xml special characters and replace with entity refrence
         searchandreplaceSpecialChars(detectorName);
       }
