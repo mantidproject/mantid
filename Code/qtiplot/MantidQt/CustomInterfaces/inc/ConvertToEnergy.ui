@@ -2314,7 +2314,7 @@ p, li { white-space: pre-wrap; }
      </widget>
      <widget class="QWidget" name="tabAbsoluteUnits" >
       <attribute name="title" >
-       <string>Absolute Units</string>
+       <string>Normalisation</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_11" >
        <item>
@@ -2323,7 +2323,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="text" >
-          <string>Absolute Units</string>
+          <string>Perform Normalisation</string>
          </property>
          <property name="checked" >
           <bool>false</bool>
@@ -2373,6 +2373,9 @@ p, li { white-space: pre-wrap; }
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
             </property>
+            <property name="optional" stdset="0">
+            	<bool>true</bool>
+            </property>
             <property name="algorithmAndProperty" stdset="0" >
              <string>GroupDetectors|MapFile</string>
             </property>
@@ -2389,10 +2392,13 @@ p, li { white-space: pre-wrap; }
              </rect>
             </property>
             <property name="label" stdset="0" >
-             <string>White Beam</string>
+             <string>White Beam (Abs Units)</string>
             </property>
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
+            </property>
+            <property name="optional" stdset="0">
+            	<bool>true</bool>
             </property>
            </widget>
           </item>
@@ -2407,7 +2413,7 @@ p, li { white-space: pre-wrap; }
             <string notr="true" />
            </property>
            <property name="title" >
-            <string>Integration</string>
+            <string>Integration (meV)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_17" >
             <item row="2" column="1" >
@@ -2561,7 +2567,7 @@ p, li { white-space: pre-wrap; }
             </sizepolicy>
            </property>
            <property name="title" >
-            <string>Masses</string>
+            <string>Masses (for Absolute Units)</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_18" >
             <item row="0" column="1" >
