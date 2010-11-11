@@ -35,13 +35,13 @@ g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I
 echo
 
 echo "Running the tests..."
-#ln ../../Build/Tests/*.properties .
+ln ../../Build/Tests/*.properties .
 LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./runner.exe
 echo
 
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-#rm -f *.properties
+rm -f *.properties
 #rm -f *Test.log
 echo "Done."
