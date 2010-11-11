@@ -30,6 +30,7 @@ operator<<(std::ostream& OX,const Algebra& A)
     Write to standard stream
     \param OX :: Output stream
     \param A :: Algebra to write
+    \return stream representation
    */
 {
   OX<<A.display();
@@ -190,6 +191,7 @@ Algebra::writeMCNPX() const
     since the SrufMap is the wrong way round.
     This also has the problem that Algebra uses
     intersection as master but MCNPX uses union 
+    \return string representation of MCNPX
   */
 {
   std::string Out=F.display();

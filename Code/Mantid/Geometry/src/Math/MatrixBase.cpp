@@ -146,6 +146,7 @@ MatrixBase<T>::operator=(const MatrixBase<T>& A)
   /*!
     Simple assignment operator
     \param A :: Object to copy
+    \return the copied object
   */
 {
   if (&A!=this)
@@ -598,6 +599,7 @@ MatrixBase<T>::bDiagonal(const std::vector<T>& Dvec) const
     This * A, where A is made into a diagonal
     matrix.
     \param Dvec :: diagonal matrix (just centre points)
+    \return the matrix result
   */
 {
   // Note:: nx,ny zeroed so setMem always works

@@ -93,6 +93,7 @@ Matrix<T>::operator=(const Matrix<T>& A)
   /*! 
     Simple assignment operator 
     \param A :: Object to copy
+    \return the copied object
   */
 {
   if (&A!=this)
@@ -640,6 +641,7 @@ int
 Matrix<int>::GaussJordan(Geometry::Matrix<int>&)
   /*!
     Not valid for Integer
+    \return zero
   */
 {
   return 0;
@@ -653,6 +655,7 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
     form such that if A.x=B then  solve to generate x.  
     This requires that B is B[A.nx][Any]
     The result is placed back in B
+    \return the calculation result
    */
 {
   // check for input errors
@@ -838,6 +841,7 @@ Matrix<T>::factor()
      Gauss jordan diagonal factorisation 
      The diagonal is left as the values, 
      the lower part is zero.
+     \return the factored matrix
   */
 {
   if (nx!=ny || nx<1)
