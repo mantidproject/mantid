@@ -29,7 +29,7 @@ public:
 /** Constructor for a parametrized ObjComponent
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
- * */
+ */
 ObjCompAssembly::ObjCompAssembly(const IComponent* base, ParameterMap_const_sptr map)
 : ObjComponent(base,map)
 {
@@ -307,7 +307,7 @@ const Quat ObjCompAssembly::getRotation() const
 /*! Set the outline of the assembly. Creates an Object and sets m_shape point to it.
  *  All child components must be detectors and positioned along a straight line and have the same shape.
  *  The shape can be either a box or a cylinder.
- *  @param type The shsape of the outline: "cylinder", "box", ...
+ *  @return The shape of the outline: "cylinder", "box", ...
  */
 boost::shared_ptr<Object> ObjCompAssembly::createOutline()
 {
@@ -556,7 +556,7 @@ void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj)
  *  Overload the operator <<
  * @param os  :: output stream 
  * @param ass :: component assembly 
- * 
+ * @return the stream representation of the object component assembly
  *  Loops through all components in the assembly 
  *  and call printSelf(os). 
  *  Also output the number of children

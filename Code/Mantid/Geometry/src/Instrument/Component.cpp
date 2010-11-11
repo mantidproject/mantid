@@ -10,8 +10,7 @@ namespace Mantid
 
   /** Constructor for a parametrized Component.
    * @param base a Component that is the base (un-parametrized) component
-   * @param
-   *
+   * @param map a ParameterMap to parameterize the component
    */
     Component::Component(const IComponent* base,  ParameterMap_const_sptr map)
       : m_base(base), m_map(map), m_isParametrized(true)

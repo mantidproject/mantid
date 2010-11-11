@@ -69,6 +69,7 @@ namespace Geometry
     Get parameter value. The default parameter 'at' is ignored expect if
     the value of the parameter is determined from a look up table or a formula.
     @param at number to return the value at
+    @return the value of the fit parameter
   */
   double FitParameter::getValue(const double& at) const
   { 
@@ -119,6 +120,7 @@ namespace Geometry
 
   /**
     Get parameter value.
+    @return the value of the fit parameter
   */
   double FitParameter::getValue() const
   { 

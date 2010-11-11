@@ -199,6 +199,7 @@ namespace Mantid
       /// Reference to the map containing the parameters
       ParameterMap_const_sptr m_map;
 
+      /// Flag to determine if component is parameterized
       const bool m_isParametrized;
 
       //! Name of the component

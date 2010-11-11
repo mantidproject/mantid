@@ -47,7 +47,6 @@ namespace Mantid
      * Trace a given track from the instrument source in the given direction. For performance reasons the 
      * results are accumulated within the object and can be returned using getResults.
      * @param dir A directional vector. The starting point is defined by the instrument source.
-     * @param resultRay A ray with the accumlated results of the intersections
      */
     void InstrumentRayTracer::trace(const V3D & dir) const
     {

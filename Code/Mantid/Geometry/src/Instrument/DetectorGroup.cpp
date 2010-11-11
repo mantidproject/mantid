@@ -72,6 +72,7 @@ namespace Mantid
     *  or more of the detectors is masked). Also, no regard is made to whether a
     *  constituent detector is itself a DetectorGroup - it's just treated as a single,
     *  pointlike object with the same weight as any other detector.
+    *  @return a V3D object of the detector group position
     */
     V3D DetectorGroup::getPos() const
     {
@@ -182,6 +183,7 @@ namespace Mantid
 
     /** Indicates whether this is a monitor.
     *  Will return false if even one member of the group is not flagged as a monitor
+    *  @return is detector group a monitor
     */
     bool DetectorGroup::isMonitor() const
     {
