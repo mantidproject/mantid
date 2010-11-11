@@ -314,7 +314,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabSofQW));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTimeSlice));
     m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
-    m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Absolute Units");
+    m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Normalisation");
     if ( m_directInstruments == NULL )
     {
       m_directInstruments = new Homer(qobject_cast<QWidget*>(this->parent()), m_uiForm);
