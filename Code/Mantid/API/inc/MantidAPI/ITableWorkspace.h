@@ -183,6 +183,7 @@ public:
          @param index Element's opsition in the column.
          @tparam T Type of the data in the column. If it doesn't match the actual type 
            a runtime_error exception is thrown.
+         @return the reference to the data element
      */
     T& getRef(const std::string& name, int index)
     {
@@ -202,6 +203,7 @@ public:
          @param col Column number
          @tparam T Type of the data in the column. If it doesn't match the actual type 
            a runtime_error exception is thrown.
+         @return the reference to the requested cell
      */
     template<class T>
     T& cell(int row,int col)
@@ -221,29 +223,34 @@ public:
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row Row number
          @param col Column number
+         @return the reference of a requested cell if it's an integer
      */
     int& Int(int row,int col){return cell<int>(row,col);}
     /**  Get the reference to the element in row \c row and column \c col if its type is \c double.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row Row number
          @param col Column number
+         @return the reference of a requested cell if it's a double
      */
     double& Double(int row,int col){return cell<double>(row,col);}
     /**  Get the reference to the element in row \c row and column \c col if its type is \c bool.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row Row number
          @param col Column number
+         @return the reference of a requested cell if it's a boolean
      */
     Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
     /**  Get the reference to the element in row \a row and column \a col if its type is \c std::string.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row Row number
          @param col Column number
+         @return the reference of a requested cell if it's a string
      */
     std::string& String(int row,int col){return cell<std::string>(row,col);}
 
     /**  Creates a TableRow object for row \a row.
          @param row Row number
+         @return the requested row
      */
     TableRowHelper getRow(int row){return TableRowHelper(this,row);}
     /**  Creates a TableRow object for the first row (\c row == 0).
@@ -317,6 +324,7 @@ public:
     }
     /** Get the element
         @param i Element's position
+        @return the column at the requested index
      */
     T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
     /// Size of the vector

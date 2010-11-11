@@ -66,8 +66,7 @@ namespace Mantid
        * @param pads Padding to make indentation
        */
       void logPrint(const std::string& pads = "")const;
-      /// Returns this expression as a string. It does not simply returns the input string 
-      /// but recreates it.
+      /// Returns this expression as a string. It does not simply returns the input string but recreates it.
       std::string str()const;
       /// Returns true if the expression is a function (i.e. has arguments)
       bool isFunct()const{return m_terms.size() > 0;}
@@ -75,8 +74,7 @@ namespace Mantid
       std::string name()const{return m_funct;}
       /// Returns the the expression's binary operator on its left. Can be an empty string.
       std::string operator_name()const{return m_op;}
-      /// Returns the top level terms of the expression (function arguments). For a variable
-      /// it empty.
+      /// Returns the top level terms of the expression (function arguments). For a variable it empty.
       const std::vector<Expression>& terms()const{return m_terms;}
       /// Returns the number of argumens
       int size()const{return static_cast<int>(m_terms.size());}
@@ -87,8 +85,11 @@ namespace Mantid
       iterator begin()const{return m_terms.begin();}
       /// An iterator pointing to the end of the expressions
       iterator end()const{return m_terms.end();}
-      /// Gets the Expression at the specified index
-      /// @param i the index
+      /**
+       * Gets the Expression at the specified index
+       * @param i the index
+       * @return Expression at the given index
+       */
       const Expression& operator[](int i)const{return m_terms.at(i);}
       /// If the expression has 1 argument and empty function name it means it is wrapped in brackets
       /// This method returns first sub-expression without brackets
