@@ -63,7 +63,7 @@ CompAssembly::CompAssembly(const std::string& n, IComponent* reference) :
 }
 
 /*! Copy constructor
- *  @param ass :: assembly to copy
+ *  @param assem :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly& assem) :
   Component(assem), m_children(assem.m_children), m_cachedBoundingBox(assem.m_cachedBoundingBox)
@@ -206,9 +206,9 @@ boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
   }
 }
 
-/*! Overloaded index access operator. \link getChild(const int)
+/*! Overloaded index access operator. \link getChild() \endlink
  * @param i Element i within the component assembly
- * @returns A shared pointer to the ith component
+ * @return A shared pointer to the ith component
  * @throws std:runtime_error if i is out of range 
  */
 boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
@@ -355,6 +355,7 @@ const Quat CompAssembly::getRotation() const
  *  Overload the operator <<
  * @param os  :: output stream 
  * @param ass :: component assembly 
+ * @return stream representation of component assembly
  * 
  *  Loops through all components in the assembly 
  *  and call printSelf(os). 
