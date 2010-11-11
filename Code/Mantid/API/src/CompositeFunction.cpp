@@ -292,7 +292,7 @@ double CompositeFunction::activeParameter(int i)const
 void CompositeFunction::setActiveParameter(int i, double value)
 {
   int iFun = functionIndexActive(i);
-  return m_functions[ iFun ]->setActiveParameter(i - m_activeOffsets[iFun],value);
+  m_functions[ iFun ]->setActiveParameter(i - m_activeOffsets[iFun],value);
 }
 
 /// Update parameters after a fitting iteration

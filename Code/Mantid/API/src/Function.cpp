@@ -97,7 +97,7 @@ void Function::setParameter(const std::string& name, const double& value, bool e
     msg << "Function parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
-  return setParameter(it - m_parameterNames.begin(),value,explicitlySet);
+  setParameter(it - m_parameterNames.begin(),value,explicitlySet);
 }
 
 /**
