@@ -664,7 +664,7 @@ namespace Mantid
       // and "p-position" are encounted then at the end of this method act on this
       std::set<const IComponent*> rtp_positionComp;
       struct l_entry { l_entry(std::string& name, double val) : paramName(name), value(val) {} std::string paramName; double value; };
-      std::multimap<const IComponent*, boost::shared_ptr<l_entry> > rtp_positionEntry;
+      std::multimap<const IComponent*, l_entry > rtp_positionEntry;
 
       // loop over all logfiles and see if any of these are associated with parameters in the
       // IDF
@@ -696,8 +696,8 @@ namespace Mantid
           {
             rtp_positionComp.insert(((*it).second)->m_component);
             rtp_positionEntry.insert( 
-              std::pair<const IComponent*, boost::shared_ptr<l_entry> >(
-                ((*it).second)->m_component, boost::shared_ptr<l_entry>(new l_entry(paramN, value))));
+              std::pair<const IComponent*, l_entry >(
+                ((*it).second)->m_component, l_entry(paramN, value)));
           }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
@@ -741,8 +741,8 @@ namespace Mantid
           {
             rtp_positionComp.insert(((*it).second)->m_component);
             rtp_positionEntry.insert( 
-              std::pair<const IComponent*, boost::shared_ptr<l_entry> >(
-                ((*it).second)->m_component, boost::shared_ptr<l_entry>(new l_entry(paramN, value))));
+              std::pair<const IComponent*, l_entry >(
+                ((*it).second)->m_component, l_entry(paramN, value)));
           }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
@@ -751,11 +751,11 @@ namespace Mantid
 
       // check if parameters with names "r-position", "t-position"
       // and "p-position" were encounted
-      std::pair<std::multimap<const IComponent*, boost::shared_ptr<l_entry> >::iterator,
-        std::multimap<const IComponent*, boost::shared_ptr<l_entry> >::iterator> retComp;
+      std::pair<std::multimap<const IComponent*, l_entry >::iterator,
+        std::multimap<const IComponent*, l_entry >::iterator> retComp;
       double deg2rad = (M_PI/180.0);
       std::set<const IComponent*>::iterator itComp;
-      std::multimap<const IComponent*, boost::shared_ptr<l_entry> > :: const_iterator itRTP;
+      std::multimap<const IComponent*, l_entry > :: const_iterator itRTP;
       for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
       {
         retComp = rtp_positionEntry.equal_range(*itComp);
@@ -765,19 +765,19 @@ namespace Mantid
         double pVal=0.0;
         for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
         {
-          std::string paramN = ((*itRTP).second)->paramName;  
+          std::string paramN = ((*itRTP).second).paramName;  
           if ( paramN.compare("r-position")==0 )
           {
             rSet = true;
-            rVal = ((*itRTP).second)->value;
+            rVal = ((*itRTP).second).value;
           }
           if ( paramN.compare("t-position")==0 )
           {
-            tVal = deg2rad*((*itRTP).second)->value;
+            tVal = deg2rad*((*itRTP).second).value;
           }
           if ( paramN.compare("p-position")==0 )
           {
-            pVal = deg2rad*((*itRTP).second)->value;
+            pVal = deg2rad*((*itRTP).second).value;
           }
         }
         if ( rSet )
