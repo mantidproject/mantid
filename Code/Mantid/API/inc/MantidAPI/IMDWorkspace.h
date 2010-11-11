@@ -14,6 +14,7 @@ namespace Mantid
   namespace Geometry
   {
     class MDGeometryDescription;
+    struct l_entry { l_entry(std::string& name, double val) : paramName(name), value(val) {} std::string paramName; double value; };
   }
 
   namespace API

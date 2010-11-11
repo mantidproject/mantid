@@ -659,6 +659,11 @@ namespace Mantid
       std::pair<std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator,
         std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator> ret;
 
+      // In order to allow positions to be set with r-position, t-position and p-position parameters
+      // The idea is here to simply first check if parameters with names "r-position", "t-position"
+      // and "p-position" are encounted then at the end of this method act on this
+      std::set<const IComponent*> rtp_positionComp;
+      std::multimap<const IComponent*, l_entry > rtp_positionEntry;
 
       // loop over all logfiles and see if any of these are associated with parameters in the
       // IDF
@@ -685,6 +690,13 @@ namespace Mantid
           else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
           {
             paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
+          }
+          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
+          {
+            rtp_positionComp.insert(((*it).second)->m_component);
+            rtp_positionEntry.insert( 
+              std::pair<const IComponent*, l_entry >(
+                ((*it).second)->m_component, l_entry(paramN, value)));
           }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
@@ -724,11 +736,61 @@ namespace Mantid
             paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
           else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )        
             paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
+          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
+          {
+            rtp_positionComp.insert(((*it).second)->m_component);
+            rtp_positionEntry.insert( 
+              std::pair<const IComponent*, l_entry >(
+                ((*it).second)->m_component, l_entry(paramN, value)));
+          }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
         }
       }
 
+      // check if parameters with names "r-position", "t-position"
+      // and "p-position" were encounted
+      std::pair<std::multimap<const IComponent*, l_entry >::iterator,
+        std::multimap<const IComponent*, l_entry >::iterator> retComp;
+      double deg2rad = (M_PI/180.0);
+      std::set<const IComponent*>::iterator itComp;
+      std::multimap<const IComponent*, l_entry > :: const_iterator itRTP;
+      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
+      {
+        retComp = rtp_positionEntry.equal_range(*itComp);
+        bool rSet = false;
+        double rVal=0.0;
+        double tVal=0.0;
+        double pVal=0.0;
+        for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
+        {
+          std::string paramN = ((*itRTP).second).paramName;  
+          if ( paramN.compare("r-position")==0 )
+          {
+            rSet = true;
+            rVal = ((*itRTP).second).value;
+          }
+          if ( paramN.compare("t-position")==0 )
+          {
+            tVal = deg2rad*((*itRTP).second).value;
+          }
+          if ( paramN.compare("p-position")==0 )
+          {
+            pVal = deg2rad*((*itRTP).second).value;
+          }
+        }
+        if ( rSet )
+        {
+          // convert spherical coordinates to cartesian coordinate values
+          double x = rVal*sin(tVal)*cos(pVal);
+          double y = rVal*sin(tVal)*sin(pVal);
+          double z = rVal*cos(tVal);
+          
+          paramMap.addPositionCoordinate(*itComp, "x", x);
+          paramMap.addPositionCoordinate(*itComp, "y", y);
+          paramMap.addPositionCoordinate(*itComp, "z", z);
+        }
+      }
     }
 
     /**
