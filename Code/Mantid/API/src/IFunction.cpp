@@ -298,6 +298,7 @@ double IFunction::activeParameter(int i)const
 
 /** Create a new tie. IFunctions can have their own types of ties.
  * @param parName The parameter name for this tie
+ * @return a new parameter tie
  */
 ParameterTie* IFunction::createTie(const std::string& parName)
 {
@@ -308,6 +309,7 @@ ParameterTie* IFunction::createTie(const std::string& parName)
  * Ties a parameter to other parameters
  * @param parName The name of the parameter to tie.
  * @param expr    A math expression 
+ * @return newly ties parameters
  */
 ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
 {
@@ -332,7 +334,7 @@ ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
 
 /** Removes the tie off a parameter. The parameter becomes active
  * This method can be used when constructing and editing the IFunction in a GUI
- * @param parName The name of the paramter which ties will be removed.
+ * @param parName The name of the parameter which ties will be removed.
  */
 void IFunction::removeTie(const std::string& parName)
 {
@@ -353,6 +355,7 @@ void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, c
 
 /**
  * Writes a string that can be used in Fit.IFunction to create a copy of this IFunction
+ * @return string representation of the function
  */
 std::string IFunction::asString()const
 {

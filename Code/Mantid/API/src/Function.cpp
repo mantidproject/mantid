@@ -68,6 +68,7 @@ void Function::setParameter(int i, const double& value, bool explicitlySet)
 
 /** Get the i-th parameter.
  *  @param i The parameter index
+ *  @return the value of the requested parameter
  */
 double Function::getParameter(int i)const
 {
@@ -102,6 +103,7 @@ void Function::setParameter(const std::string& name, const double& value, bool e
 /**
  * Parameters by name.
  * @param name The name of the parameter.
+ * @return the value of the named parameter
  */
 double Function::getParameter(const std::string& name)const
 {
@@ -121,6 +123,7 @@ double Function::getParameter(const std::string& name)const
 /**
  * Returns the index of the parameter named name.
  * @param name The name of the parameter.
+ * @return the index of the named parameter
  */
 int Function::parameterIndex(const std::string& name)const
 {
@@ -139,6 +142,7 @@ int Function::parameterIndex(const std::string& name)const
 
 /** Returns the name of parameter i
  * @param i The index of a parameter
+ * @return the name of the parameter at the requested index
  */
 std::string Function::parameterName(int i)const
 {
@@ -175,6 +179,7 @@ void Function::declareParameter(const std::string& name,double initValue )
 /**
  * Returns the "global" index of an active parameter.
  * @param i The index of an active parameter
+ * @return the global index of the requested parameter
  */
 int Function::indexOfActive(int i)const
 {
@@ -187,6 +192,7 @@ int Function::indexOfActive(int i)const
 /**
  * Returns the name of an active parameter.
  * @param i The index of an active parameter
+ * @return the name of the active parameter
  */
 std::string Function::nameOfActive(int i)const
 {
@@ -194,8 +200,9 @@ std::string Function::nameOfActive(int i)const
 }
 
 /**
- * Returns true if parameter i is active
+ * query if the parameter is active
  * @param i The index of a declared parameter
+ * @return true if parameter i is active
  */
 bool Function::isActive(int i)const
 {

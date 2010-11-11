@@ -64,6 +64,7 @@ void CompositeFunction::init()
  *      // write NewFunction's own ties and constraints
  *      // ostr << ";constraints=(" << ... <<")";
  *   }
+ * @return the string representation of the composite function
  */
 std::string CompositeFunction::asString()const
 {
@@ -196,6 +197,7 @@ void CompositeFunction::setParameter(int i, const double& value, bool explicitly
 
 /** Get the i-th parameter.
  *  @param i The parameter index
+ *  @return value of the requested parameter
  */
 double CompositeFunction::getParameter(int i)const
 {
@@ -225,6 +227,7 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
 /**
  * Parameters by name.
  * @param name The name of the parameter.
+ * @return value of the requested named parameter
  */
 double CompositeFunction::getParameter(const std::string& name)const
 {
@@ -248,6 +251,7 @@ int CompositeFunction::nParams()const
 /**
  * 
  * @param name The name of a parameter
+ * @return index of the requested named parameter
  */
 int CompositeFunction::parameterIndex(const std::string& name)const
 {
@@ -318,8 +322,9 @@ std::string CompositeFunction::nameOfActive(int i)const
 }
 
 /**
- * Returns true if parameter i is active
+ * query to see in the function is active
  * @param i The index of a declared parameter
+ * @return true if parameter i is active
  */
 bool CompositeFunction::isActive(int i)const
 {
@@ -610,6 +615,7 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
 
 /**
  * @param i The index of the function
+ * @return function at the requested index
  */
 IFunction* CompositeFunction::getFunction(int i)const
 {
@@ -623,6 +629,7 @@ IFunction* CompositeFunction::getFunction(int i)const
 /**
  * Get the index of the function to which parameter i belongs
  * @param i The parameter index
+ * @return function index of the requested parameter
  */
 int CompositeFunction::functionIndex(int i)const
 {
@@ -636,6 +643,7 @@ int CompositeFunction::functionIndex(int i)const
 /**
  * Get the index of the function to which parameter i belongs
  * @param i The active parameter index
+ * @return active function index of the requested parameter
  */
 int CompositeFunction::functionIndexActive(int i)const
 {
@@ -817,8 +825,9 @@ void CompositeFunction::removeConstraint(const std::string& parName)
   getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
 }
 
-/** Chexcks if a constraint has been explicitly set
+/** Checks if a constraint has been explicitly set
  *  @param i The parameter index
+ *  @return true if the function is explicitly set
  */
 bool CompositeFunction::isExplicitlySet(int i)const
 {
