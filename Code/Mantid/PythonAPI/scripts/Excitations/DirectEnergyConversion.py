@@ -17,7 +17,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         '''
         Attach analysis arguments that are particular to the ElasticConversion 
         '''
-        self.save_formats = ['.spe','.nxs']
+        self.save_formats = ['.spe','.nxs','.nxspe']
         self.fix_ei=False
         self.energy_bins = None
         self.background = False
@@ -28,7 +28,13 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         if (self.file_prefix == "CNCS" or self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
-            self.file_ext = '.dat'
+            #self.file_ext = '_event.nxs'
+            #self.file_ext = '.dat'
+            
+        
+        # The Ei requested
+        self.ei_requested = None
+        self.monitor_workspace = None
         
         self.time_bins = None
                 
@@ -84,14 +90,21 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             mapping_file = self.abs_map_file
             spectrum_masks = self.spectra_masks 
             abs_norm_wkspace = self.do_conversion(abs_mono_run, abs_white_run, abs_ei,mapping_file, spectrum_masks)
-            absnorm_factor = (self.van_rmm/self.van_mass) * self.abs_average(abs_norm_wkspace)
-            #  Scale by vanadium cross-section which is energy dependent up to a point
-            ei_value = float(abs_norm_wkspace.getSampleDetails().getLogData('Ei').value())
-            if ei_value >= 200.0:
-                xsection = 421.0
+            abs_average_factor = self.abs_average(abs_norm_wkspace)
+            if (self.van_rmm != "" or self.van_mas !=""):# TODO: check for masses
+                self.log("Performing Normalisation to Mono Vanadium.")
+                absnorm_factor = abs_average_factor
             else:
-                xsection = 400.0 + (ei_value/10.0)
-            absnorm_factor /= xsection
+                self.log("Performing Absolute Units Normalisation.")
+                # Perform Abs Units...
+                absnorm_factor = (self.van_rmm/self.van_mass) * abs_average_factor
+                #  Scale by vanadium cross-section which is energy dependent up to a point
+                ei_value = float(abs_norm_wkspace.getSampleDetails().getLogData('Ei').value())
+                if ei_value >= 200.0:
+                    xsection = 421.0
+                else:
+                    xsection = 400.0 + (ei_value/10.0)
+                absnorm_factor /= xsection
             mtd.deleteWorkspace(abs_norm_wkspace.getName())
         else:
             absnorm_factor = None
@@ -144,14 +157,18 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             	tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
             else:
             	tzero = Tzero
+            # apply T0 shift
             ChangeBinOffset(result_ws, result_ws, -tzero)
             mon1_peak = 0.0
-            self.applyDetectorEfficiency = False
+            self.applyDetectorEfficiency = True
         elif (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             #self.log("***** ARCS/SEQUOIA *****")
-            self.log(mono_run)
-            InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-            loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+            #self.log(mono_run)
+            if mono_run.endswith("_event.nxs"):
+                loader=LoadNexusMonitors(Filename=mono_run, OutputWorksapce="monitor_ws")    
+            elif mono_run.endswith("_event.dat"):
+                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
+                loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             monitor_ws = loader.workspace()
             alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
             ei_value = float(monitor_ws.getSampleDetails().getLogData("Ei").value())
@@ -164,14 +181,15 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             else:	
             	tzero = Tzero
             mon1_peak = 0.0
+            # apply T0 shift
             ChangeBinOffset(result_ws, result_ws, -tzero)
-            self.applyDetectorEfficiency = False
+            self.applyDetectorEfficiency = True
         else:
             # Do ISIS stuff for Ei
             ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
             
         # For event mode, we are going to histogram in energy first, then go back to TOF
-        if (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA" or self.file_prefix == "CNCS"):
+        if (self.facility == "SNS"):
             # Convert to Et
             ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
             RenameWorkspace("_tmp_energy_ws", result_ws)
@@ -193,14 +211,26 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
     
         self.normalise(result_ws, self.normalise_method, range_offset=bin_offset)
         
-        LoadDetectorInfo(result_ws, det_info_file)
         ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
         if not self.energy_bins is None:
             Rebin(result_ws, result_ws, self.energy_bins)
         
         if self.applyDetectorEfficiency:
-            CorrectKiKf(result_ws, result_ws, EMode='Direct')
-            DetectorEfficiencyCor(result_ws, result_ws)
+            if (self.facility == "SNS"):
+                # Need to be in lambda for detector efficiency correction
+                ConvertUnits(result_ws, result_ws, Target="Wavelength", EMode="Direct")
+                He3TubeEfficiency(result_ws, result_ws)
+                ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
+            else:
+                LoadDetectorInfo(result_ws, det_info_file)
+                DetectorEfficiencyCor(result_ws, result_ws)
+
+        # Ki/Kf Scaling...
+        CorrectKiKf(result_ws, result_ws, EMode='Direct')
+
+        # Make sure that our binning is consistent
+        if not self.energy_bins is None:
+            Rebin(result_ws, result_ws, self.energy_bins)
         
         self.apply_masking(result_ws, spectra_masks, map_file)
 
