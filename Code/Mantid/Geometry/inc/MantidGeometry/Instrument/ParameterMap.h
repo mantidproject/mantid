@@ -212,19 +212,22 @@ public:
     /**  Return the value of a parameter as a string
          @param comp Component to which parameter is related
          @param name Parameter name
+         @return string representation of the parameter
      */
     std::string getString(const IComponent* comp,const std::string& name);
 
     /**  Returns a string parameter as vector's first element if exists and an empty vector if it doesn't
          @param compName Component name
          @param name Parameter name
+         @return single element vector of a string parameter of an existing parameter
      */
     std::vector<std::string> getString(const std::string& compName,const std::string& name)const {return getType<std::string>(compName,name);}
 
     /**  Get the shared pointer to the parameter with name \a name belonging to component \a comp.
          @param comp Component
          @param name Parameter name
-         @param type, i.e. is it a fitting parameter
+         @param type i.e. is it a fitting parameter
+         @return the requested parameter
      */
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name, const std::string & type = "")const;
 
@@ -232,6 +235,7 @@ public:
          @param comp Component
          @param name Parameter name
          @param type Parameter type, i.e. is it a fitting parameter or something else
+         @return the requested parameter
      */
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, const std::string & type = "")const;
 
@@ -239,6 +243,7 @@ public:
      *  @tparam The parameter type
      *  @param compName The name of the component
      *  @param name The name of the parameter
+     *  @return all component values from the given component name
      */
     template<class T>
     std::vector<T> getType(const std::string& compName,const std::string& name)const
@@ -261,12 +266,14 @@ public:
     /**  Returns a double parameter as vector's first element if exists and an empty vector if it doesn't
          @param compName Component name
          @param name Parameter name
+         @return a double parameter from component with the requested name
      */
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
 
     /**  Returns a V3D parameter as vector's first element if exists and an empty vector if it doesn't
          @param compName Component name
          @param name Parameter name
+         @return a V3D parameter from component with the requested name
      */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
 
@@ -315,7 +322,9 @@ private:
   static Kernel::Logger& g_log;
 };
 
+/// ParameterMap shared pointer typedef
 typedef boost::shared_ptr<ParameterMap> ParameterMap_sptr;
+/// ParameterMap constant shared pointer typedef
 typedef boost::shared_ptr<const ParameterMap> ParameterMap_const_sptr;
 
 } // Namespace Geometry
