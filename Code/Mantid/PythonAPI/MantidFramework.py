@@ -383,7 +383,7 @@ class IAlgorithmProxy(ProxyObject):
             if value in self.__wkspnames:
                 return self.__framework[value]
             else:
-                return value
+                return self._getHeldObject().getProperty(key)
         else:
             return self._retrieveWorkspaceByIndex(key)
 

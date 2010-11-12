@@ -206,9 +206,6 @@ protected:
       declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
   }
 
-  /// Get a property by name
-  virtual Property* getPointerToProperty(const std::string &name) const = 0;
-
   /// Get a property by an index
   virtual Property* getPointerToPropertyOrdinal(const int &index) const = 0;
 
@@ -267,6 +264,8 @@ protected:
 public:
   /// Get the value of a property
   virtual TypedValue getProperty(const std::string &name) const = 0;
+  /// Get a pointer to property by name
+  virtual Property* getPointerToProperty(const std::string &name) const = 0;
 
 };
 

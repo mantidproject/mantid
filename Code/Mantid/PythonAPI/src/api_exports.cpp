@@ -92,6 +92,7 @@ namespace PythonAPI
       .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
       .def("getProperties", &API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
+      .def("getProperty", &API::IAlgorithm::getPointerToProperty, return_value_policy<return_by_value>())
       ;
 
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
