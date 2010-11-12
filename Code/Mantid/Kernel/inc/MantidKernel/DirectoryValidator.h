@@ -1,10 +1,11 @@
-#ifndef MANTID_KERNEL_FILEVALIDATOR_H_
-#define MANTID_KERNEL_FILEVALIDATOR_H_
+#ifndef MANTID_KERNEL_DirectoryValidator_H_
+#define MANTID_KERNEL_DirectoryValidator_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "IValidator.h"
+#include "MantidKernel/FileValidator.h"
 #include <vector>
 
 namespace Mantid
@@ -12,12 +13,11 @@ namespace Mantid
 namespace Kernel
 {
 
-bool has_ending(const std::string &value, const std::string & ending);
 
-/** FileValidator is a validator that checks that a filepath is valid.
+/** DirectoryValidator is a validator that checks that a directory path is valid.
 
-    @author Matt Clarke, ISIS.
-    @date 25/06/2008
+    @author Janik Zikovsky, SNS
+    @date Nov 12, 2010
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,24 +39,17 @@ bool has_ending(const std::string &value, const std::string & ending);
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FileValidator : public IValidator<std::string>
+class DLLExport DirectoryValidator : public FileValidator
 {
 public:
-  FileValidator();
-  explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
-  virtual ~FileValidator();
+  DirectoryValidator();
+  explicit DirectoryValidator(bool testDirectoryExists = true);
+  virtual ~DirectoryValidator();
   virtual std::set<std::string> allowedValues() const;
   virtual IValidator<std::string>* clone();
 
-protected:
-  /// The list of permitted extensions
-  const std::set<std::string> m_extensions;
-  /// Flag indicating whether to test for existence of filename
-  bool m_fullTest;
-  
 private:
   virtual std::string checkValidity(const std::string &value) const;
-  bool endswith(const std::string &value) const;
 
   /// A reference to the logger
   static Logger & g_log;
@@ -65,4 +58,4 @@ private:
 } // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_FILEVALIDATOR_H_*/
+#endif /*MANTID_KERNEL_DirectoryValidator_H_*/
