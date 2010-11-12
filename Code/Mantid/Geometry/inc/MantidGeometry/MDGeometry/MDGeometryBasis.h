@@ -173,7 +173,7 @@ private:
     // unique name of workspace as an assembly of a sorted dimension tags plus some ID for nDims and nReciprocalDims
     std::string workspace_name;
     /// checks if nDimensions consistent with n_reciprocal_dimensions; throws if not
-    void MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
+    void check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
     };
     } // namespace Geometry
 }  // namespace MANTID
