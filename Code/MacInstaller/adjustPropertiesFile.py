@@ -12,7 +12,7 @@ replacements = {
     "parameterDefinition.directory":"parameterDefinition.directory = ../../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../../scripts/Crystallography;../../scripts/Disordered Materials;../../scripts/Engineering;\\
 ../../scripts/Excitations;../../scripts/Large Scale Structures;../../scripts/Molecular Spectroscopy;\\
-../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS""",
+../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS;../../scripts/""",
     "pythonscripts.directory":"pythonscripts.directory = ../../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../../scripts",
     "pythonalgorithms.directories":"pythonalgorithms.directories = ../../plugins/PythonAlgs"
