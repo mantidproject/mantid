@@ -12,8 +12,8 @@ logs = rawWS.getSampleDetails().getLogData()
 
 # Print all of the log information
 for i in range(0, len(logs)):
-	print "----- " + logs[i].name() + " -------\n" +  logs[i].value()
+	print "----- " + logs[i].name() + " -------\n" +  logs[i].value
 
 # Just get a single log by name
 status = rawWS.getSampleDetails().getLogData("status")
-print status.value()
+print status.value

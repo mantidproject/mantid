@@ -69,7 +69,7 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
         MonitorWS = timeRegime(inWS=ws_names[i], Smooth=Smooth)
         monitorEfficiency(MonitorWS, area, thickness)
         # Get Run no, crop file
-        runNo = ws_list[i].getRun().getLogData("run_number").value()
+        runNo = ws_list[i].getRun().getLogData("run_number").value
         runNos.append(runNo)
         savefile = root[:3] + runNo + '_dem'
         CropWorkspace(ws_names[i], ws_names[i], StartWorkspaceIndex=(first-1),
@@ -97,7 +97,7 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         LoadNexus(file, root)
-        run = mtd[root].getRun().getLogData("run_number").value()
+        run = mtd[root].getRun().getLogData("run_number").value
         savefile = root[:3] + run + root[8:-3]
         if ( len(eRange) == 4 ):
             ElasticWindow(root, savefile+'eq1', savefile+'eq2',eRange[0],
@@ -137,7 +137,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Integration('sam_data', 'sam_int')
         Divide('sam_fft', 'sam_int', 'sam')
         # Create save file name.
-        runNo = mtd['sam_data'].getRun().getLogData("run_number").value()
+        runNo = mtd['sam_data'].getRun().getLogData("run_number").value
         savefile = root[:3] + runNo + root[8:-3] + 'iqt'
         outWSlist.append(savefile)
         Divide('sam', 'res', savefile)

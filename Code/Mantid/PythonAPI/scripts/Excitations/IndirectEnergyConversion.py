@@ -170,7 +170,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             applyParameterFile(ws, analyser, reflection)
         if adjustTOF(ws):
             TofCorrection(ws, ws)
-        runNo = mtd[ws].getRun().getLogData("run_number").value()
+        runNo = mtd[ws].getRun().getLogData("run_number").value
         runNos.append(runNo)
         name = ws[:3].lower() + runNo + '_' + analyser + reflection
         MonitorWS_n = timeRegime(inWS = ws)
@@ -248,7 +248,7 @@ def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument,
         if energy.search(workspace):
             int_list.append(workspace)
     for cte in int_list:
-        runNo = mtd[cte].getRun().getLogData("run_number").value()
+        runNo = mtd[cte].getRun().getLogData("run_number").value
         runNos.append(runNo)
         if ( rebinParam != ''):
             rebin = rebinData(rebinParam, inWS_n=cte)
@@ -306,7 +306,7 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax,
     CreateSingleValuedWorkspace('avg', value)
     Divide(outWS_n, 'avg', outWS_n)
     mantid.deleteWorkspace('avg')
-    runNo = mtd[outWS_n].getRun().getLogData("run_number").value()
+    runNo = mtd[outWS_n].getRun().getLogData("run_number").value
     savesuffix = root[:3] + runNo + suffix
     savefile = os.path.join(savepath, savesuffix)
     SaveNexusProcessed(outWS_n, savefile, 'Calibration')
@@ -328,7 +328,7 @@ def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True,
             analyser=analyser, reflection=reflection)
     iconWS = workspace_list[0]
     if Res:
-        run = mtd[workspace_list[0]].getRun().getLogData("run_number").value()
+        run = mtd[workspace_list[0]].getRun().getLogData("run_number").value
         name = root[:3].lower() + run + '_' + suffix + '_res'
         Rebin(iconWS, iconWS, rebinParam)
         FFTSmooth(iconWS,iconWS,0)
@@ -376,7 +376,7 @@ def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
         nhist = mtd[root].getNumberHistograms()
         if calib != '':
             useCalib(calib, inWS_n=root, outWS_n=root)
-        run = mtd[root].getRun().getLogData("run_number").value()
+        run = mtd[root].getRun().getLogData("run_number").value
         sfile = root[:3].lower() + run + '_' + suffix + '_slt'
         if (len(xrange) == 2):
             Integration(root, sfile, xrange[0], xrange[1], 0, nhist-1)

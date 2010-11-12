@@ -709,7 +709,7 @@ class LoadSample(LoadRun):
 
         self.uncropped  = self.SCATTER_SAMPLE.getName()
         p_run_ws = mantid[self.uncropped]
-        run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
+        run_num = str(p_run_ws.getSampleDetails().getLogData('run_number').value)
         reducer.instrument.set_up_for_run(run_num)
 
         logvalues = None

@@ -103,7 +103,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 # Perform Abs Units...
                 absnorm_factor = (self.van_rmm/self.van_mass) * abs_average_factor
                 #  Scale by vanadium cross-section which is energy dependent up to a point
-                ei_value = float(abs_norm_wkspace.getRun().getLogData('Ei').value())
+                ei_value = abs_norm_wkspace.getRun().getLogData('Ei').value
                 if ei_value >= 200.0:
                     xsection = 421.0
                 else:
@@ -176,7 +176,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             monitor_ws = loader.workspace()
             alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
-            ei_value = float(monitor_ws.getRun().getLogData("Ei").value())
+            ei_value = monitor_ws.getRun().getLogData("Ei").value
             if (self.fix_ei):
                 ei_value = ei_guess
             if (Tzero is None):
@@ -275,7 +275,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         alg = GetEi(input_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, fix_ei)
         mon1_peak = float(alg.getPropertyValue("FirstMonitorPeak"))
         mon1_index = int(alg.getPropertyValue("FirstMonitorIndex"))
-        ei = float(input_ws.getSampleDetails().getLogData("Ei").value())
+        ei = input_ws.getSampleDetails().getLogData("Ei").value
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(input_ws, input_ws, -mon1_peak)
         mon1_det = input_ws.getDetector(mon1_index)
