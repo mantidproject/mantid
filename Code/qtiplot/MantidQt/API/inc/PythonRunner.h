@@ -1,7 +1,7 @@
 #ifndef MANTIDQTAPI_PYTHONRUNNER_H_
 #define MANTIDQTAPI_PYTHONRUNNER_H_
 
-#include <QObject>
+#include <QWidget>
 #include "DllOption.h"
 #include <QString>
 
@@ -39,13 +39,13 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-    class EXPORT_OPT_MANTIDQT_API PythonRunner : public QObject
+    class EXPORT_OPT_MANTIDQT_API PythonRunner : public QWidget
     {
     Q_OBJECT
 
     public:
       /// Default constructor
-      PythonRunner() : QObject(){}
+      PythonRunner() : QWidget(){}
 
       /// Run python code
       QString runPythonCode(const QString & code, bool no_output = false);
