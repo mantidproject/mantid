@@ -60,21 +60,19 @@ namespace PythonAPI
     EXPORT_PROP_W_VALUE(int,int);
     EXPORT_PROP_W_VALUE(bool,bool);
 #undef EXPORT_PROP_W_VALUE
-// TODO template DLLExport class PropertyWithValue<bool>;
 // TODO template DLLExport class PropertyWithValue<std::string>;
 
     // property with value - vectors
-//#define EXPORT_PROP_W_VALUE_V(type, suffix)   \
-//	class_<Mantid::Kernel::PropertyWithValue<type>, \
-//	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, no_init) \
-//	           .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<std::vector<type> >::operator(), return_value_policy<copy_const_reference>())) \
-//	           ;
-//    EXPORT_PROP_W_VALUE_V(double,dbl);
-//#undef EXPORT_PROP_W_VALUE_V
-// TODO template DLLExport class PropertyWithValue<std::vector<int> >;
-// TODO template DLLExport class PropertyWithValue<std::vector<double> >;
+#define EXPORT_PROP_W_VALUE_V(type, suffix)   \
+	class_<Mantid::Kernel::PropertyWithValue<std::vector<type> >, \
+	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, no_init) \
+	           .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<std::vector<type> >::operator(), return_value_policy<copy_const_reference>())) \
+	           ;
+    EXPORT_PROP_W_VALUE_V(double,dbl);
+    EXPORT_PROP_W_VALUE_V(int,int);
+    EXPORT_PROP_W_VALUE_V(long,long);
+#undef EXPORT_PROP_W_VALUE_V
 // TODO template DLLExport class PropertyWithValue<std::vector<std::string> >;
-// TODO template DLLExport class PropertyWithValue<std::vector<long long> >;
 
     class_<Mantid::Kernel::TimeSeriesProperty<double>, \
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
