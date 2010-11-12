@@ -7,11 +7,10 @@ using namespace MantidQt::API;
 * Default constructor
 * @param parent The parent widget
 */
-MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent)
+MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent), m_pyRunner()
 {
-  m_pyRunner = boost::shared_ptr<PythonRunner>(new PythonRunner());
   // re-emit the run Python code from m_pyRunner, to work this signal must reach the slot in QtiPlot
-  connect(m_pyRunner.get(), SIGNAL(runAsPythonScript(const QString&)),
+  connect(&m_pyRunner, SIGNAL(runAsPythonScript(const QString&)),
     this, SIGNAL(runAsPythonScript(const QString&)));
 }
 
@@ -22,5 +21,5 @@ MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent)
 */
 QString MantidWidget::runPythonCode(const QString & code, bool no_output)
 {
-  return m_pyRunner->runPythonCode(code, no_output);
+  return m_pyRunner.runPythonCode(code, no_output);
 }

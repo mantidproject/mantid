@@ -59,7 +59,7 @@ namespace MantidQt
 
     private:
       /// This object implements the runPythonCode() function, by emitting the code as a runAsPythonScript signal
-      boost::shared_ptr<PythonRunner> m_pyRunner;
+      PythonRunner m_pyRunner;
     };
   }
 }
