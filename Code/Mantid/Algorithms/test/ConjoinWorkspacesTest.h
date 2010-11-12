@@ -44,7 +44,7 @@ public:
     //Now some event workspaces
     loader = new Mantid::DataHandling::LoadEventPreNeXus;
     loader->initialize();
-    loader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/VULCAN_2916_neutron0_event.dat");
+    loader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/VULCAN_2916_neutron0_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan0");
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );
@@ -52,7 +52,7 @@ public:
 
     loader = new Mantid::DataHandling::LoadEventPreNeXus;
     loader->initialize();
-    loader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/VULCAN_2916_neutron1_event.dat");
+    loader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/VULCAN_2916_neutron1_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan1");
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );
