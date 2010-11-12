@@ -221,6 +221,13 @@ namespace Mantid
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int, MaskList > m_masks;
 
+      /// Used for storing info about "r-position", "t-position" and "p-position" parameters
+      /// as all parameters are processed  
+      struct m_PositionEntry 
+      { m_PositionEntry(std::string& name, double val) : paramName(name), value(val) {} 
+        std::string paramName; 
+        double value; };
+
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
     };

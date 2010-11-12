@@ -663,7 +663,7 @@ namespace Mantid
       // The idea is here to simply first check if parameters with names "r-position", "t-position"
       // and "p-position" are encounted then at the end of this method act on this
       std::set<const IComponent*> rtp_positionComp;
-      std::multimap<const IComponent*, l_entry > rtp_positionEntry;
+      std::multimap<const IComponent*, m_PositionEntry > rtp_positionEntry;
 
       // loop over all logfiles and see if any of these are associated with parameters in the
       // IDF
@@ -695,8 +695,8 @@ namespace Mantid
           {
             rtp_positionComp.insert(((*it).second)->m_component);
             rtp_positionEntry.insert( 
-              std::pair<const IComponent*, l_entry >(
-                ((*it).second)->m_component, l_entry(paramN, value)));
+              std::pair<const IComponent*, m_PositionEntry >(
+                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
           }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
@@ -740,8 +740,8 @@ namespace Mantid
           {
             rtp_positionComp.insert(((*it).second)->m_component);
             rtp_positionEntry.insert( 
-              std::pair<const IComponent*, l_entry >(
-                ((*it).second)->m_component, l_entry(paramN, value)));
+              std::pair<const IComponent*, m_PositionEntry >(
+                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
           }
           else
             paramMap.addDouble(((*it).second)->m_component, paramN, value);
@@ -750,11 +750,11 @@ namespace Mantid
 
       // check if parameters with names "r-position", "t-position"
       // and "p-position" were encounted
-      std::pair<std::multimap<const IComponent*, l_entry >::iterator,
-        std::multimap<const IComponent*, l_entry >::iterator> retComp;
+      std::pair<std::multimap<const IComponent*, m_PositionEntry >::iterator,
+        std::multimap<const IComponent*, m_PositionEntry >::iterator> retComp;
       double deg2rad = (M_PI/180.0);
       std::set<const IComponent*>::iterator itComp;
-      std::multimap<const IComponent*, l_entry > :: const_iterator itRTP;
+      std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
       for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
       {
         retComp = rtp_positionEntry.equal_range(*itComp);
