@@ -12,7 +12,7 @@ from scripter import BaseScriptElement
 try:
     from MantidFramework import *
     mtd.initialise(False)
-    from HFIRCommandInterface import *
+    from reduction.instruments.sans.hfir_command_interface import *
     HAS_MANTID = True
 except:
     HAS_MANTID = False  

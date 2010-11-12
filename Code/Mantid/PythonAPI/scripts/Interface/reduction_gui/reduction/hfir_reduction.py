@@ -25,7 +25,7 @@ class HFIRReductionScripter(BaseReductionScripter):
         
         script += "from MantidFramework import *\n"
         script += "mtd.initialise(False)\n"
-        script += "from HFIRCommandInterface import *\n"
+        script += "from reduction.instruments.sans.hfir_command_interface import *\n"
         script += "\n"
         
         for item in self._observers:
