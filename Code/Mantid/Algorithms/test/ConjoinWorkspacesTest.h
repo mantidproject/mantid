@@ -23,7 +23,7 @@ public:
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "top");
     loader->setPropertyValue("SpectrumMin","1");
     loader->setPropertyValue("SpectrumMax","10");
@@ -33,7 +33,7 @@ public:
 
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "bottom");
     loader->setPropertyValue("SpectrumMin","11");
     loader->setPropertyValue("SpectrumMax","25");
