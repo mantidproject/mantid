@@ -39,7 +39,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-    class EXPORT_OPT_MANTIDQT_API PythonRunner : public virtual QObject
+    class EXPORT_OPT_MANTIDQT_API PythonRunner : public QObject
     {
     Q_OBJECT
 

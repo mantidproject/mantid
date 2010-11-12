@@ -2,6 +2,7 @@
 #include <QTemporaryFile>
 #include <QDir>
 #include <QTextStream>
+#include <stdexcept>
 
 using namespace MantidQt::API;
 
