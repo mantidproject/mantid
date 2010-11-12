@@ -58,18 +58,18 @@ public:
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load);
 
     // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "")
+    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
+    TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
 
     ///Test a GEM file in the test directory
     const std::string test_file = "GEM38370.raw";
     std::string msg = fp->setValue(test_file);
-    TS_ASSERT_EQUALS(msg, "")
+    TS_ASSERT_EQUALS(msg, "");
 
     // Absolute path
     Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
     msg = fp->setValue(test_dir.resolve(Poco::Path(test_file)).toString());
-    TS_ASSERT_EQUALS(msg, "")    
+    TS_ASSERT_EQUALS(msg, "");
 
     delete fp;
   }
@@ -80,15 +80,15 @@ public:
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, exts);
     // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
-    TS_ASSERT_EQUALS(fp->isOptional(), false)
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw")
+    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
+    TS_ASSERT_EQUALS(fp->isOptional(), false);
+    TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw");
 
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("GEM38370.raw");
-    TS_ASSERT_EQUALS(msg, "")    
+    TS_ASSERT_EQUALS(msg, "");
     msg = fp->setValue("ALF15739.raw");
-    TS_ASSERT_EQUALS(msg, "")    
+    TS_ASSERT_EQUALS(msg, "");
 
     //Check different extension
     msg = fp->setValue("48098.Q");
@@ -110,21 +110,21 @@ public:
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::OptionalLoad, exts);
     // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
-    TS_ASSERT_EQUALS(fp->isOptional(), true)
+    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
+    TS_ASSERT_EQUALS(fp->isOptional(), true);
 
     std::string msg = fp->setValue("GEM38370.raw");
-    TS_ASSERT_EQUALS(msg, "")    
+    TS_ASSERT_EQUALS(msg, "");
     // I'm using part of the file's path to check that the property really has found the file, with OptionalLoad the property returns valid whether it finds the file or not
-    TS_ASSERT(fp->value().find("AutoTestData") != std::string::npos)
+    TS_ASSERT(fp->value().find("AutoTestData") != std::string::npos);
     // do this in parts making no assumptions about the identity of the slash that separates directories
-    TS_ASSERT(fp->value().find("Test") != std::string::npos)
+    TS_ASSERT(fp->value().find("Test") != std::string::npos);
 
     msg = fp->setValue("GEM38371.raw");
-    TS_ASSERT_EQUALS(msg, "")
+    TS_ASSERT_EQUALS(msg, "");
 
     msg = fp->setValue("");
-    TS_ASSERT_EQUALS(msg, "")
+    TS_ASSERT_EQUALS(msg, "");
     TS_ASSERT_EQUALS(fp->value(), "");
 
     delete fp;
@@ -135,11 +135,11 @@ public:
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Save);
     // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), false)
+    TS_ASSERT_EQUALS(fp->isLoadProperty(), false);
 
     //Test for some random file name as this doesn't need to exist here
     std::string msg = fp->setValue("filepropertytest.sav");
-    TS_ASSERT_EQUALS(msg, "")
+    TS_ASSERT_EQUALS(msg, "");
     
     delete fp;
   }
@@ -164,6 +164,50 @@ public:
     TS_ASSERT(fp->value().find("ALF15739") != std::string::npos);
   }
 
+  void testOptionalDirectory()
+  {
+    Mantid::API::FileProperty *fp =
+      new Mantid::API::FileProperty("SavePath","", Mantid::API::FileProperty::OptionalDirectory);
+    // Check type
+    TS_ASSERT_EQUALS(fp->isDirectoryProperty(), true);
+
+    //Test for some random directory that does not need to exist
+    std::string msg = fp->setValue("my_nonexistent_folder");
+    TS_ASSERT_EQUALS(msg, "");
+
+    delete fp;
+  }
+
+  void testDirectoryFailsIfNonExistent()
+  {
+    Mantid::API::FileProperty *fp =
+      new Mantid::API::FileProperty("SavePath","", Mantid::API::FileProperty::Directory);
+    //This will fail because this folder does not exist
+    std::string TestDir("my_nonexistent_folder");
+    std::string msg = fp->setValue(TestDir);
+    //It gives an error message starting "Directory "X" not found".
+    TS_ASSERT_EQUALS(msg.substr(0,3), "Dir");
+
+    delete fp;
+  }
+
+  void testDirectoryPasses()
+  {
+    std::string TestDir("./MyTestFolder");
+    Poco::File dir(TestDir);
+    dir.createDirectory();
+
+    Mantid::API::FileProperty *fp =
+      new Mantid::API::FileProperty("SavePath","", Mantid::API::FileProperty::Directory);
+    TS_ASSERT_EQUALS(fp->isDirectoryProperty(), true);
+
+    //The directory exists, so no failure
+    std::string msg = fp->setValue(TestDir);
+    TS_ASSERT_EQUALS(msg, "");
+
+    delete fp;
+    dir.remove(); //clean up your folder
+  }
 };
 
 #endif

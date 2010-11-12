@@ -172,8 +172,10 @@ void GenericDialog::initLayout()
           else {}
         }
 
+        //Is this a FileProperty?
         if( fileType )
         {
+          //Make a browser button
           QPushButton *browseBtn = new QPushButton(tr("Browse"));
           connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
           m_signalMapper->setMapping(browseBtn, textBox);

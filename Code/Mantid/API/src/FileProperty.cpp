@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "Poco/Path.h"
@@ -18,6 +19,8 @@ namespace API
 
 using namespace Mantid::Kernel;
 
+
+
 //-----------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------
@@ -30,12 +33,21 @@ using namespace Mantid::Kernel;
  * @param direction     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-			   const std::vector<std::string> & exts, unsigned int direction) 
-  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action == FileProperty::Load) ), direction), 
-    m_action(action), m_defaultExt(""), m_runFileProp(false)
+         const std::vector<std::string> & exts, unsigned int direction)
+  : PropertyWithValue<std::string>(name, default_value,
+      /* Create either a FileValidator or a DirectoryValidator, depending on Action */
+      (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
+          new DirectoryValidator(action == FileProperty::Directory) :
+          new FileValidator(exts, (action == FileProperty::Load) )
+      , direction),
+    m_action(action),
+    m_defaultExt(""),
+    m_runFileProp(false)
 {
   setUp((exts.size() > 0) ? exts.front() : "");
 }
+
+
 
 /**
  * Constructor
@@ -48,19 +60,46 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
          const std::string & ext, unsigned int direction)
   : PropertyWithValue<std::string>(name, default_value,
-           new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) ), direction),
-    m_action(action), m_defaultExt(ext), m_runFileProp(false)
+      /* Create either a FileValidator or a DirectoryValidator, depending on Action */
+      (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
+          new DirectoryValidator(action == FileProperty::Directory) :
+          new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) )
+      , direction),
+    m_action(action),
+    m_defaultExt(ext),
+    m_runFileProp(false)
 {
   setUp(ext);
 }
 
+
+
 /**
  * Check if this is a load property
- * @returns True if the property is a Load property and false if a Save type
+ * @returns True if the property is a Load property and false otherwise
  */
 bool FileProperty::isLoadProperty() const
 {
   return m_action == Load || m_action == OptionalLoad;
+}
+
+/**
+ * Check if this is a Save property
+ * @returns True if the property is a Save property and false otherwise
+ */
+bool FileProperty::isSaveProperty() const
+{
+  return m_action == Save || m_action == OptionalSave;
+}
+
+
+/**
+ * Check if this is a directory selection property
+ * @returns True if the property is a Directory property
+ */
+bool FileProperty::isDirectoryProperty() const
+{
+  return m_action == Directory || m_action == OptionalDirectory;
 }
 
 /**
@@ -98,7 +137,7 @@ std::string FileProperty::setValue(const std::string & propValue)
   if( Poco::Path(propValue).isAbsolute() )
   {
     std::string error("");
-    if( !isLoadProperty() )
+    if( isSaveProperty() )
     {
        error = createDirectory(propValue);
        if( !error.empty() ) return error;

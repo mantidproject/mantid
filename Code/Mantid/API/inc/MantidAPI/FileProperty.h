@@ -18,6 +18,10 @@ namespace API
      When attempting to load a file this class handles searching the specified paths and, 
      if found, the <code>value()</code> method returns the full path to the file. For 
      saving, Mantid's default save directory is used when a relative path is encountered.
+
+     This class can also be used to browse for a Directory, by specify the appropriate
+       FileAction type parameter in the constructor.
+
    */
 class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string>
 {
@@ -29,7 +33,9 @@ public:
     Save = 0,              ///< to specify a file to write to, the file may or may not exist
     OptionalSave = 1,      ///< to specify a file to write to but an empty string is allowed here which will be passed to the algorithm
     Load = 2,              ///< to specify a file to open for reading, the file must exist
-    OptionalLoad = 3        ///< to specify a file to read but the file doesn't have to exist
+    OptionalLoad = 3,      ///< to specify a file to read but the file doesn't have to exist
+    Directory = 4,         ///< to specify a directory that must exist
+    OptionalDirectory = 5  ///< to specify a directory that does not have to exist
   };
 
   ///Constructor
@@ -44,6 +50,10 @@ public:
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
+  /// Check if this is a save type property.
+  bool isSaveProperty() const;
+  /// Check if this is a directory type property.
+  bool isDirectoryProperty() const;
   /// Check if this property is optional
   bool isOptional() const;
   ///Overridden setValue method

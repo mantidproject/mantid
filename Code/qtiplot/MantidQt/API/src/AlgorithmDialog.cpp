@@ -263,6 +263,7 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     QString filter;
     if( !exts.empty() )
     {
+      // --------- Load a File -------------
       filter = "Files (";
       
       std::set<std::string>::const_iterator iend = exts.end();
@@ -279,8 +280,9 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
 
     filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
-  else
+  else if ( prop->isSaveProperty() )
   {
+    // --------- Save a File -------------
     //Have each filter on a separate line
     QString filter("");
     std::set<std::string>::const_iterator iend = exts.end();
@@ -298,8 +300,16 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     {
       filename += selectedFilter;
     }
-
   }
+  else if ( prop->isDirectoryProperty() )
+  {
+    filename = QFileDialog::getExistingDirectory(this, "Choose a Directory", AlgorithmInputHistory::Instance().getPreviousDirectory() );
+  }
+  else
+  {
+    throw std::runtime_error("Invalid type of file property! This should not happen.");
+  }
+
 
   if( !filename.isEmpty() ) 
   {
