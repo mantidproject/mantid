@@ -140,7 +140,7 @@ public:
     std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/CNCS_11514/CNCS_11514_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", this->inputSpace);
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
