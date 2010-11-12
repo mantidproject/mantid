@@ -67,8 +67,14 @@ public:
 
 private:
 
-  /// Load the resolution from a file.
+  /// Call the appropriate load function
   void load(const std::string& fname);
+
+  /// Load the resolution from an ASCII file
+  void loadAscii(const std::string& fname);
+
+  /// Load the resolution from a NeXuS file
+  void loadNexus(const std::string& fname);
 
   /// Size of the data
   int size()const{return m_yData.size();}

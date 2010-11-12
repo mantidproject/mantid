@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Resolution.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidAPI/Algorithm.h"
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -100,16 +101,37 @@ void Resolution::setAttribute(const std::string& attName,const IFunction::Attrib
 }
 
 /**
- * Load the resolution data from an ascii file. The file has three columns with
- * x,y and ignored data.
+ * Decide whether to load the file as an ASCII file or as a Nexus file.
  * @param fname The file name
  */
 void Resolution::load(const std::string& fname)
 {
-  std::ifstream fil(fname.c_str());
-  std::string str;
   m_xData.clear();
   m_yData.clear();
+
+  size_t format = fname.find(".nxs");
+  if ( format != std::string::npos )
+  {
+    loadNexus(fname);
+  }
+  else
+  {
+    loadAscii(fname);
+  }
+
+  m_xStart = m_xData.front();
+  m_xEnd   = m_xData.back();
+}
+
+/**
+ * Load input file as an Ascii file.
+ * @param fname The file name
+ */
+void Resolution::loadAscii(const std::string& fname)
+{
+  std::ifstream fil(fname.c_str());
+  std::string str;
+
   while(getline(fil,str))
   {
     str += ' ';
@@ -126,12 +148,39 @@ void Resolution::load(const std::string& fname)
 
   if (m_xData.size() < 2)
   {
+    m_xData.clear();
+    m_yData.clear();
     throw std::runtime_error("Resolution: too few data points");
   }
+}
 
-  m_xStart = m_xData.front();
-  m_xEnd   = m_xData.back();
+/**
+ * Load input file as a Nexus file.
+ * @param fname The file name
+ */
+void Resolution::loadNexus(const std::string& fname)
+{
+  IAlgorithm_sptr loadNxs = Mantid::API::AlgorithmFactory::Instance().create("LoadNexus", -1);
+  loadNxs->initialize();
+  loadNxs->setChild(true);
+  loadNxs->setPropertyValue("Filename", fname);
+  loadNxs->setPropertyValue("OutputWorkspace", "_resolution_fit_data_");
+  loadNxs->execute();
+  
+  Workspace_sptr ws = loadNxs->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr resData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  
+  const bool hist = resData->isHistogramData();
+  const int nbins = resData->blocksize();
 
+  for ( int i = 0; i < nbins; i++ )
+  {
+    double x = 0.0;
+    m_yData.push_back(resData->readY(0)[i]);
+    if ( hist ) x = ( resData->readX(0)[i] + resData->readX(0)[i+1] ) / 2;
+    else x = resData->readX(0)[i];
+    m_xData.push_back(x);
+  }
 }
 
 } // namespace CurveFitting
