@@ -176,7 +176,7 @@ void SANSRunWindow::initLayout()
 void SANSRunWindow::initLocalPython()
 {
   // Import the SANS module and set the correct instrument
-  QString result = runPythonCode("try:\n\timport ISISReducer\n\t__GUI_only_reduce=ISISReducer.ISISReducer()\nexcept (ImportError,SyntaxError), details:\tprint 'Error importing ISISReducer: ' + str(details)\n");
+  QString result = runPythonCode("try:\n\timport isis_reducer\n\t__GUI_only_reduce=isis_reducer.ISISReducer()\nexcept (ImportError,SyntaxError), details:\tprint 'Error importing isis_reducer: ' + str(details)\n");
   if( result.trimmed().isEmpty() )
   {
     m_have_reducemodule = true;
@@ -187,10 +187,10 @@ void SANSRunWindow::initLocalPython()
     m_have_reducemodule = false;
     setProcessingState(true, -1);    
   }
-  runPythonCode("import ISISCommands\nimport copy");
+  runPythonCode("import isis_commands\nimport copy");
   QString initInstrCom = m_uiForm.inst_opt->itemData(
                               m_uiForm.inst_opt->currentIndex()).toString();
-  runPythonCode("import SANSInsts\nimport ISISReductionSteps");
+  runPythonCode("import isis_instrument\nimport isis_reduction_steps");
   handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
 }
 /** Initialise some of the data and signal connections in the save box
@@ -699,8 +699,8 @@ bool SANSRunWindow::loadUserFile()
 
   // Use python function to read the file and then extract the fields
   runReduceScriptFunction(
-//    "__GUI_only_reduce.user_settings = ISISReductionSteps.UserFile(r'"+filetext+"')\n");
-      "__GUI_only_reduce.user_settings = ISISReductionSteps.UserFile(r'"+filetext+"')");//r'"+
+//    "__GUI_only_reduce.user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')\n");
+      "__GUI_only_reduce.user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");//r'"+
 
   QString status = runReduceScriptFunction(
       "print __GUI_only_reduce.user_settings.execute(__GUI_only_reduce, None)").trimmed();
@@ -1153,8 +1153,8 @@ bool SANSRunWindow::isUserFileLoaded() const
 void SANSRunWindow::addUserMaskStrings(QString & exec_script)
 {
   //Clear current
-  exec_script += "ISISCommands.Mask('MASK/CLEAR', __GUI_only_reduce)\n";
-  exec_script += "ISISCommands.Mask('MASK/CLEAR/TIME', __GUI_only_reduce)\n";
+  exec_script += "isis_commands.Mask('MASK/CLEAR', __GUI_only_reduce)\n";
+  exec_script += "isis_commands.Mask('MASK/CLEAR/TIME', __GUI_only_reduce)\n";
 
   //Pull in the table details first, skipping the first two rows
   int nrows = m_uiForm.mask_table->rowCount();
@@ -1165,7 +1165,7 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
       continue;
     }
     //Details are in the third column
-    exec_script += "ISISCommands.Mask('MASK";
+    exec_script += "isis_commands.Mask('MASK";
     if( m_uiForm.mask_table->item(row, 0)->text() == "time")
     {
       exec_script += "/TIME";
@@ -1196,12 +1196,12 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
     QString item = sitr.next().trimmed();
     if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
     {
-      exec_script += "ISISCommands.Mask('MASK/" + item + "', __GUI_only_reduce)\n";
+      exec_script += "isis_commands.Mask('MASK/" + item + "', __GUI_only_reduce)\n";
     }
     else if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) ||
         item.startsWith('V', Qt::CaseInsensitive) )
     {
-      exec_script += "ISISCommands.Mask('MASK " + item + "', reducer=__GUI_only_reduce)\n";
+      exec_script += "isis_commands.Mask('MASK " + item + "', reducer=__GUI_only_reduce)\n";
     }
     else
     {
@@ -1226,7 +1226,7 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
       int ndetails = item.split(" ").count();
       if( ndetails == 3 || ndetails == 2 )
       {
-        exec_script += "ISISCommands.Mask('/TIME" + item + "', reducer=__GUI_only_reduce)\n";
+        exec_script += "isis_commands.Mask('/TIME" + item + "', reducer=__GUI_only_reduce)\n";
       }
       else
       {
@@ -1443,7 +1443,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
       markError(m_uiForm.dist_can_ms_s2d);
     }
 
-    QString marked_dets = runReduceScriptFunction("print ISISCommands.GetMismatchedDetList(__GUI_only_reduce),").trimmed();
+    QString marked_dets = runReduceScriptFunction("print isis_commands.GetMismatchedDetList(__GUI_only_reduce),").trimmed();
     trimPyMarkers(marked_dets);
     if( !marked_dets.isEmpty() )
     {
@@ -2054,7 +2054,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', __GUI_only_reduce)\n";
 
-  exec_reduce += "ISISCommands.LimitsWav(" + m_uiForm.wav_min->text().trimmed() + "," + m_uiForm.wav_max->text() + "," +
+  exec_reduce += "isis_commands.LimitsWav(" + m_uiForm.wav_min->text().trimmed() + "," + m_uiForm.wav_max->text() + "," +
     m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() +
     "', reducer=__GUI_only_reduce)\n";
   if( m_uiForm.q_dq_opt->currentIndex() == 2 )
@@ -2067,11 +2067,11 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
       m_uiForm.q_min->text()+" "+m_uiForm.q_max->text()+" "+m_uiForm.q_dq->text()+"/"+
       m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "', reducer=__GUI_only_reduce)\n";
   }
-  exec_reduce += "ISISCommands.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
+  exec_reduce += "isis_commands.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
     m_uiForm.qy_dqy->text().trimmed() + ",'"
     + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() +
     "', reducer=__GUI_only_reduce)\n" +
-    "ISISCommands.LimitsPhi(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
+    "isis_commands.LimitsPhi(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
   if ( m_uiForm.mirror_phi->isChecked() )
   {
     exec_reduce += ", True";
@@ -2083,18 +2083,18 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += ", reducer=__GUI_only_reduce)\n";
   QString floodFile =
     m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
-  exec_reduce += "ISISCommands.SetDetectorFloodFile('"+floodFile+"', reducer=__GUI_only_reduce)\n";
+  exec_reduce += "isis_commands.SetDetectorFloodFile('"+floodFile+"', reducer=__GUI_only_reduce)\n";
 
   //Transmission behaviour
-  exec_reduce += "ISISCommands.TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "','" +
+  exec_reduce += "isis_commands.TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "','" +
     m_uiForm.trans_min->text().trimmed() + "','" + m_uiForm.trans_max->text().trimmed() +
     "', reducer=__GUI_only_reduce)\n";
 
   //Centre values
-  exec_reduce += "ISISCommands.SetCentre('" + m_uiForm.beam_x->text() + "','" +
+  exec_reduce += "isis_commands.SetCentre('" + m_uiForm.beam_x->text() + "','" +
     m_uiForm.beam_y->text() + "', reducer=__GUI_only_reduce)\n";
   //Gravity correction
-  exec_reduce += "ISISCommands.Gravity(";
+  exec_reduce += "isis_commands.Gravity(";
   if( m_uiForm.gravity_check->isChecked() )
   {
     exec_reduce += "True";
@@ -2105,15 +2105,15 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   }
   exec_reduce += ", reducer=__GUI_only_reduce)\n";
   //Sample offset
-  exec_reduce += "ISISCommands.SetSampleOffset('" + m_uiForm.smpl_offset->text() +
+  exec_reduce += "isis_commands.SetSampleOffset('" + m_uiForm.smpl_offset->text() +
     "', reducer=__GUI_only_reduce)\n";
 
   //Monitor spectrum
-  exec_reduce += "ISISCommands.SetMonitorSpectrum('" + m_uiForm.monitor_spec->text().trimmed() + "',";
+  exec_reduce += "isis_commands.SetMonitorSpectrum('" + m_uiForm.monitor_spec->text().trimmed() + "',";
   exec_reduce += m_uiForm.monitor_interp->isChecked() ? "True" : "False";
   exec_reduce += ", reducer=__GUI_only_reduce)\n";
   //the monitor to normalise the tranmission spectrum against
-  exec_reduce += "ISISCommands.SetTransSpectrum('" + m_uiForm.trans_monitor->text().trimmed() + "',";
+  exec_reduce += "isis_commands.SetTransSpectrum('" + m_uiForm.trans_monitor->text().trimmed() + "',";
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ", reducer=__GUI_only_reduce)\n";
   //mask strings that the user has entered manually on to the GUI
@@ -2262,18 +2262,18 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
-    py_code += "\nreduced = ISISCommands.WavRangeReduction(full_trans_wav=" + full_trans_range + ", reducer=__GUI_only_reduce)\n";
+    py_code += "\nreduced = isis_commands.WavRangeReduction(full_trans_wav=" + full_trans_range + ", reducer=__GUI_only_reduce)\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
     py_code += "print '"+PYTHON_SEP+"'+reduced";
     py_code += "\n__user_settings_copy = copy.deepcopy(__GUI_only_reduce.user_settings)";
-    py_code += "\n__GUI_only_reduce = ISISReducer.ISISReducer()";
+    py_code += "\n__GUI_only_reduce = isis_reducer.ISISReducer()";
     int index = m_uiForm.inst_opt->currentIndex();
-    py_code += "\n__GUI_only_reduce.set_instrument(SANSInsts."+m_uiForm.inst_opt->itemData(index).toString()+")";
+    py_code += "\n__GUI_only_reduce.set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
     py_code += "\n__GUI_only_reduce.user_settings = __user_settings_copy";
     py_code += "\n__GUI_only_reduce.user_settings.execute(__GUI_only_reduce)";
     if( m_uiForm.plot_check->isChecked() )
     {
-      py_code += "\nISISCommands.PlotResult(reduced, reducer=__GUI_only_reduce)";
+      py_code += "\nisis_commands.PlotResult(reduced, reducer=__GUI_only_reduce)";
     }
   }
   else
@@ -2556,7 +2556,7 @@ void SANSRunWindow::handleInstrumentChange(const int index)
   //Inform the Python objects of the change
   QString instClass =
     m_uiForm.inst_opt->itemData(index).toString();
-  runReduceScriptFunction("__GUI_only_reduce.set_instrument(SANSInsts."+instClass+")");
+  runReduceScriptFunction("__GUI_only_reduce.set_instrument(isis_instrument."+instClass+")");
 
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
@@ -2762,11 +2762,11 @@ void SANSRunWindow::verboseMode(int state)
 {
   if( state == Qt::Checked )
   {
-    runReduceScriptFunction("ISISCommands.SetVerboseMode(True)");
+    runReduceScriptFunction("isis_commands.SetVerboseMode(True)");
   }
   else if( state == Qt::Unchecked )
   {
-    runReduceScriptFunction("ISISCommands.SetVerboseMode(False)");
+    runReduceScriptFunction("isis_commands.SetVerboseMode(False)");
   }
   else {}
 }
@@ -2845,11 +2845,11 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     QString assign_fn;
     if( is_can )
     {
-      assign_fn = "ISISCommands.TransmissionCan";
+      assign_fn = "isis_commands.TransmissionCan";
     }
     else
     {
-      assign_fn = "ISISCommands.TransmissionSample";
+      assign_fn = "isis_commands.TransmissionSample";
     }
     assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key));
@@ -2895,11 +2895,11 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     QString assign_fn;
     if( is_can )
     {
-      assign_fn = "ISISCommands.AssignCan";
+      assign_fn = "isis_commands.AssignCan";
     }
     else
     {
-      assign_fn = "ISISCommands.AssignSample";
+      assign_fn = "isis_commands.AssignSample";
     }
     assign_fn += "('" + run_number + "', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key));

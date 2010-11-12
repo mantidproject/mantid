@@ -16270,10 +16270,6 @@ void ApplicationWindow::runPythonScript(const QString & code)
 
   m_iface_script->setCode(code);
   m_iface_script->exec();
-
-  // Start with a fresh script each time
-  delete m_iface_script;
-  m_iface_script = NULL;
 }
 
 void ApplicationWindow::loadCustomActions()
