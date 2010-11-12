@@ -5,11 +5,11 @@
 """
 import os
 
-import SANSInsts
-from CommandInterface import *
-import ISISReductionSteps
-import SANSReductionSteps
-import ISISReducer
+import isis_instrument
+from reduction.command_interface import *
+import reduction.instruments.sans.sans_reduction_steps
+import isis_reduction_steps
+import isis_reducer
 
 #remove the following
 DEL__FINDING_CENTRE_ = False
@@ -76,7 +76,7 @@ def issueWarning(msg):
         Issues a Mantid message
         @param msg: message to be issued
     """
-    ISISReductionSteps._issueWarning(msg)
+    isis_reduction_steps._issueWarning(msg)
                 
 def UserPath(path):
     _printMessage('UserPath("' + path + '") #Will look for mask file here')
@@ -84,13 +84,13 @@ def UserPath(path):
         
 def SANS2D(reducer=None):
     _printMessage('SANS2D()', no_console=reducer)
-    instrument = SANSInsts.SANS2D()
+    instrument = isis_instrument.SANS2D()
         
     _active_red(reducer).set_instrument(instrument)
 
 def LOQ(reducer=None):
     _printMessage('LOQ()', no_console=reducer)
-    instrument = SANSInsts.LOQ()
+    instrument = isis_instrument.LOQ()
 
     _active_red(reducer).set_instrument(instrument)
     
@@ -104,7 +104,7 @@ def Mask(details, reducer=None):
     
 def MaskFile(file_name):
     _printMessage('#Opening "'+file_name+'"')
-    ReductionSingleton().user_settings = ISISReductionSteps.UserFile(
+    ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
     status = ReductionSingleton().user_settings.execute(
         ReductionSingleton(), None)
@@ -160,7 +160,7 @@ def AssignSample(sample_run, reload = True, period = -1, reducer=None):
     _printMessage('AssignSample("' + sample_run + '")', no_console=reducer)
     reducer = _active_red(reducer)
 
-    reducer.data_loader = ISISReductionSteps.LoadSample(
+    reducer.data_loader = isis_reduction_steps.LoadSample(
                                             sample_run)
     reducer.load_set_options(reload, period)
 
@@ -172,7 +172,7 @@ def AssignSample(sample_run, reload = True, period = -1, reducer=None):
 def SetCentre(XVAL, YVAL, reducer=None):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')', no_console=reducer)
 
-    _active_red(reducer).set_beam_finder(SANSReductionSteps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
+    _active_red(reducer).set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
 
 
 def SetSampleOffset(value, reducer=None):
@@ -472,7 +472,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         
     return script
 
-ReductionSingleton.clean(ISISReducer.ISISReducer)
+ReductionSingleton.clean(isis_reducer.ISISReducer)
 
 #this is like a #define I'd like to get rid of it because it means nothing here
 DefaultTrans = 'True'

@@ -3,6 +3,6 @@
     be run. It links them to a reducer object, the object in Reductionsingleton()
 """
 
-from ISISCommands import *
+from isis_commands import *
 
 use_singleton()

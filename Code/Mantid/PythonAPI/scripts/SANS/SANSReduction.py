@@ -20,7 +20,7 @@
 # from top right, and start at 9 after 8 monitors !
 #
 import SANSUtility
-import SANSInsts
+import isis_instrument as SANSInsts
 import math
 from mantidsimple import *
 ##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
@@ -77,7 +77,7 @@ INSTR_DIR = mtd.getConfigProperty('instrumentDefinition.directory')
 
 # Instrument object. Start with a default
 #TODO: get rid of all those globals
-INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
+INSTRUMENT = SANSInsts.SANS2D()
 
 # Beam centre in metres
 XBEAM_CENTRE = None
@@ -207,7 +207,7 @@ def printParameter(var):
 def SANS2D():
     _printMessage('SANS2D()')
     global INSTRUMENT, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
-    INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
+    INSTRUMENT = SANSInsts.SANS2D()
 
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.0
     TRANS_WAV2_FULL = TRANS_WAV2 = 14.0
@@ -216,7 +216,7 @@ def SANS2D():
 def LOQ():
     _printMessage('LOQ()')
     global INSTRUMENT, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
-    INSTRUMENT = SANSInsts.instrument_factory("LOQ")
+    INSTRUMENT = SANSInsts.LOQ()
 
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.2
     TRANS_WAV2_FULL = TRANS_WAV2 = 10.0

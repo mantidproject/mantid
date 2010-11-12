@@ -5,10 +5,10 @@
     understand what's happening and how best to fit it in the Reducer design. 
      
 """
-from SANSReducer import SANSReducer
-from Reducer import ReductionStep
-import SANSReductionSteps
-import ISISReductionSteps
+from reduction import ReductionStep
+from reduction.instruments.sans.sans_reducer import SANSReducer
+import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
+import isis_reduction_steps
 import SANSUtility
 from mantidsimple import *
 
@@ -88,26 +88,26 @@ class ISISReducer(SANSReducer):
         
         self.data_loader =     None
         self.user_settings =   None
-        self.place_det_sam =   ISISReductionSteps.MoveComponents()
-        self.geometry =       SANSReductionSteps.GetSampleGeom()
-        self._out_name =       ISISReductionSteps.GetOutputName()
-        self.flood_file =      ISISReductionSteps.CorrectToFileISIS(
+        self.place_det_sam =   isis_reduction_steps.MoveComponents()
+        self.geometry =       sans_reduction_steps.GetSampleGeom()
+        self._out_name =       isis_reduction_steps.GetOutputName()
+        self.flood_file =      isis_reduction_steps.CorrectToFileISIS(
             '', 'SpectrumNumber','Divide', self._out_name.name_holder)
-        self.crop_detector =   ISISReductionSteps.CropDetBank(
+        self.crop_detector =   isis_reduction_steps.CropDetBank(
             self._out_name.name_holder)
         self.samp_trans_load = None
         self.can_trans_load =  None
-        self.mask =self._mask= ISISReductionSteps.Mask_ISIS()
-        self.to_wavelen =      ISISReductionSteps.UnitsConvert('Wavelength')
-        self.norm_mon =        ISISReductionSteps.NormalizeToMonitor()
+        self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
+        self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
+        self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
         self.transmission_calculator =\
-                               ISISReductionSteps.TransmissionCalc(loader=None)
-        self._corr_and_scale = ISISReductionSteps.ISISCorrections()
-        self.to_Q =            ISISReductionSteps.ConvertToQ()
+                               isis_reduction_steps.TransmissionCalc(loader=None)
+        self._corr_and_scale = isis_reduction_steps.ISISCorrections()
+        self.to_Q =            isis_reduction_steps.ConvertToQ()
         self.background_subtracter = None
-        self._geo_corr =       SANSReductionSteps.SampleGeomCor(self.geometry)
-        self._zero_errors =    ISISReductionSteps.ReplaceErrors()
-        self._rem_zeros =      SANSReductionSteps.StripEndZeros()
+        self._geo_corr =       sans_reduction_steps.SampleGeomCor(self.geometry)
+        self._zero_errors =    isis_reduction_steps.ReplaceErrors()
+        self._rem_zeros =      sans_reduction_steps.StripEndZeros()
         
         #if set to an integer only that period will be extracted from the run file and processed 
         self._period_num = None
@@ -136,7 +136,7 @@ class ISISReducer(SANSReducer):
     user_file_path = property(get_user_path, set_user_path, None, None)
 
     def load_set_options(self, reload=True, period=-1):
-        if not issubclass(self.data_loader.__class__, ISISReductionSteps.LoadSample):
+        if not issubclass(self.data_loader.__class__, isis_reduction_steps.LoadSample):
             raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
         self.data_loader.set_options(reload, period)
         if period > 0:
@@ -149,7 +149,7 @@ class ISISReducer(SANSReducer):
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
         """
-        wrkspc, _, _, filename = ISISReductionSteps.extract_workspace_name(
+        wrkspc, _, _, filename = isis_reduction_steps.extract_workspace_name(
                             data_file, False, self.instrument.name(), self.instrument.run_number_width)
         if workspace is None:
             workspace = wrkspc
@@ -167,21 +167,21 @@ class ISISReducer(SANSReducer):
         if can_run is None:
             self.background_subtracter = None
         else:
-            self.background_subtracter = ISISReductionSteps.CanSubtraction(can_run, reload=reload, period=period)
+            self.background_subtracter = isis_reduction_steps.CanSubtraction(can_run, reload=reload, period=period)
 
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
         self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method, override=True)
         self.transmission_calculator.enabled = True
         
     def set_trans_sample(self, sample, direct, reload=True, period=-1):
-        if not issubclass(self.samp_trans_load.__class__, SANSReductionSteps.BaseTransmission):
-            self.samp_trans_load = ISISReductionSteps.LoadTransmissions()
+        if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
+            self.samp_trans_load = isis_reduction_steps.LoadTransmissions()
         self.samp_trans_load.set_run(sample, direct, reload, period)
         self.transmission_calculator.set_loader(self.samp_trans_load)
 
     def set_trans_can(self, can, direct, reload = True, period = -1):
-        if not issubclass(self.can_trans_load.__class__, SANSReductionSteps.BaseTransmission):
-            self.can_trans_load = ISISReductionSteps.LoadTransmissions(is_can=True)
+        if not issubclass(self.can_trans_load.__class__, sans_reduction_steps.BaseTransmission):
+            self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True)
         self.can_trans_load.set_run(can, direct, reload, period)
         
     def set_monitor_spectrum(self, specNum, interp=False, override=True):
