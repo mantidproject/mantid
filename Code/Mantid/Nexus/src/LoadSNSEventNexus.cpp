@@ -48,12 +48,12 @@ void LoadSNSEventNexus::init()
       "range of times-of-flight and/or a time interval.");
 
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
+  this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS" );
 
-  declareProperty(
-    new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "", Direction::Output),
+  this->declareProperty(
+    new WorkspaceProperty<IEventWorkspace>("OutputWorkspace", "", Direction::Output),
     "The name of the output EventWorkspace in which to load the EventNexus file." );
 
   declareProperty(
@@ -298,7 +298,7 @@ void LoadSNSEventNexus::exec()
   WS->setAllX(axis);
 
   //Save output
-  this->setProperty<EventWorkspace_sptr>("OutputWorkspace", WS);
+  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
 
   // Clear any large vectors to free up memory.
   this->pulseTimes.clear();
