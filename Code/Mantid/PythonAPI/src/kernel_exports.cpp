@@ -2,6 +2,8 @@
 // Wrappers for classes in the Mantid::Kernel namespace
 //
 #include <boost/python.hpp>
+#include <string>
+#include <vector>
 #include <MantidPythonAPI/kernel_exports.h>
 //Kernel
 #include<MantidKernel/Property.h>
@@ -47,10 +49,32 @@ namespace PythonAPI
       .add_property("isDefault", &Mantid::Kernel::Property::isDefault)
       ;
 
-    class_<Mantid::Kernel::PropertyWithValue<double>, \
-           bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_dbl", no_init)
-               .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<double>::operator(), return_value_policy<copy_const_reference>()))
-               ;
+
+    // property with value - scalars
+#define EXPORT_PROP_W_VALUE(type, suffix)   \
+	class_<Mantid::Kernel::PropertyWithValue<type>, \
+	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, no_init) \
+	           .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(), return_value_policy<copy_const_reference>())) \
+	           ;
+    EXPORT_PROP_W_VALUE(double,dbl);
+    EXPORT_PROP_W_VALUE(int,int);
+    EXPORT_PROP_W_VALUE(bool,bool);
+#undef EXPORT_PROP_W_VALUE
+// TODO template DLLExport class PropertyWithValue<bool>;
+// TODO template DLLExport class PropertyWithValue<std::string>;
+
+    // property with value - vectors
+//#define EXPORT_PROP_W_VALUE_V(type, suffix)   \
+//	class_<Mantid::Kernel::PropertyWithValue<type>, \
+//	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, no_init) \
+//	           .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<std::vector<type> >::operator(), return_value_policy<copy_const_reference>())) \
+//	           ;
+//    EXPORT_PROP_W_VALUE_V(double,dbl);
+//#undef EXPORT_PROP_W_VALUE_V
+// TODO template DLLExport class PropertyWithValue<std::vector<int> >;
+// TODO template DLLExport class PropertyWithValue<std::vector<double> >;
+// TODO template DLLExport class PropertyWithValue<std::vector<std::string> >;
+// TODO template DLLExport class PropertyWithValue<std::vector<long long> >;
 
     class_<Mantid::Kernel::TimeSeriesProperty<double>, \
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
