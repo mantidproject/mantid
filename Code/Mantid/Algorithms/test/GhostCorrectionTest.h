@@ -197,7 +197,7 @@ public:
     eventLoader->setMaxEventsToLoad(100000);
     TS_ASSERT( eventLoader->execute() );
 
-    std::string groupingFile("../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
+    std::string groupingFile("../../../../Test/AutoTestData/pg3_mantid_det.cal");
 
     //----- Now do ghost correction ------
     GhostCorrection gc;
@@ -206,7 +206,7 @@ public:
     gc.setPropertyValue("OutputWorkspace",outwsName);
     gc.setPropertyValue("BinParams", "0.0, 0.1, 5.0");
     gc.setPropertyValue("GroupingFilename", groupingFile);
-    gc.setPropertyValue("GhostCorrectionFilename", "../../../../Test/Data/sns_event_prenexus/PG3_D664_ghostmap_2010_03_17.dat");
+    gc.setPropertyValue("GhostCorrectionFilename", "../../../../Test/AutoTestData/PG3_D664_ghostmap_2010_03_17.dat");
 
     gc.execute();
     TS_ASSERT(gc.isExecuted());
