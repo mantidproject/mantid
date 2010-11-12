@@ -317,6 +317,8 @@ namespace PythonAPI
       .value("OptionalSave", FileProperty::OptionalSave)
       .value("Load", FileProperty::Load)
       .value("OptionalLoad", FileProperty::OptionalLoad)
+      .value("Directory", FileProperty::Directory)
+      .value("OptionalDirectory", FileProperty::OptionalDirectory)
       ;
   }
 
