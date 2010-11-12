@@ -152,15 +152,16 @@ CenterpieceRebinning::exec()
   double boxMin[4],boxMax[4];
   boxMin[0]=boxMin[1]=boxMin[2]=boxMin[3]=FLT_MAX;
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
+  std::vector<size_t> strides = outputWS->getStrides();
 
   transf_matrix trf = this->build_scaled_transformation_matrix(*inputWS,*pSlicing);
 // start reading and rebinning;
   size_t n_starting_cell(0);
-  for(unsigned int i=0;i<1;i++){
+  for(unsigned int i=0;i<n_hits;i++){
       n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,pix_buffer_size,n_pix_in_buffer);
       n_pixels_read  +=n_pix_in_buffer;
       
-      n_pixels_selected+=this->rebin_dataset4D(trf,&pix_buf[0],n_pix_in_buffer,pImage,boxMin,boxMax);
+      n_pixels_selected+=this->rebin_dataset4D(trf,strides,&pix_buf[0],n_pix_in_buffer,pImage,boxMin,boxMax);
   } 
   this->finalise_rebinning(pImage,image_size);
 
@@ -212,7 +213,7 @@ CenterpieceRebinning::build_scaled_transformation_matrix(const Geometry::MDGeome
     trf.cut_min.assign(nDims,-1);
     trf.cut_max.assign(nDims,1);
     trf.axis_step.assign(nDims,1);
-    trf.stride.assign(nDims,0);
+  //  trf.stride.assign(nDims,0);
 
     MDDimension *pDim(NULL);
     // for convenience can use dimension accessors from source
@@ -223,7 +224,7 @@ CenterpieceRebinning::build_scaled_transformation_matrix(const Geometry::MDGeome
         trf.axis_step[i]=(target.cutMax(i)-target.cutMin(i))/target.numBins(i);
         trf.cut_max[i]  = target.cutMax(i)/trf.axis_step[i];
         trf.cut_min[i]  = target.cutMin(i)/trf.axis_step[i];
-        trf.stride[i]   = target.getStride(i);
+     //   trf.stride[i]   = target.getStride(i);
     }
     std::vector<double> rot = target.getRotations();
     std::vector<double> basis[3]; // not used at the momemnt;
@@ -428,7 +429,7 @@ CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const
 }
 //
 size_t  
-CenterpieceRebinning::rebin_dataset4D(const transf_matrix &rescaled_transf, const sqw_pixel *source_pix, size_t nPix,MDDataObjects::MD_image_point *data, double boxMin[],double boxMax[])
+CenterpieceRebinning::rebin_dataset4D(const transf_matrix &rescaled_transf,const std::vector<size_t> &stride, const sqw_pixel *source_pix, size_t nPix,MDDataObjects::MD_image_point *data, double boxMin[],double boxMax[])
 {
 // set up auxiliary variables and preprocess them. 
 double xt,yt,zt,xt1,yt1,zt1,Et,Inf(0),
@@ -463,9 +464,10 @@ int num_OMP_Threads(1);
 bool keep_pixels(false);
 
 //int nRealThreads;
+
 size_t i,indl;
 int    indX,indY,indZ,indE;
-size_t  nDimX(rescaled_transf.stride[0]),nDimY(rescaled_transf.stride[1]),nDimZ(rescaled_transf.stride[2]),nDimE(rescaled_transf.stride[3]); // reduction dimensions; if 0, the dimension is reduced;
+size_t  nDimX(stride[0]),nDimY(stride[1]),nDimZ(stride[2]),nDimE(stride[3]); // reduction dimensions; if 0, the dimension is reduced;
 
 
 // min-max value initialization

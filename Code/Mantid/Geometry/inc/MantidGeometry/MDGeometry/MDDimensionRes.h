@@ -30,6 +30,12 @@ namespace Mantid{
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+      /** enum describes reciprocal dimension numbers and reflects the request to up to three reciprocal dimensions */
+      enum rec_dim{
+        q1,
+        q2,
+        q3
+      }; 
 
 class DLLExport MDDimensionRes :   public MDDimension
 {
@@ -38,12 +44,17 @@ class DLLExport MDDimensionRes :   public MDDimension
 public:
     virtual ~MDDimensionRes(void);
 
+  /// it is reciprocal dimension -> convenience function
+    virtual bool isReciprocal(void)const{return true;}
+ /// 
     virtual std::vector<double> const & getCoord(void)const{return this->coord;}
 protected:
-    MDDimensionRes(const DimensionID &ID);
+    MDDimensionRes(const std::string &ID,const rec_dim nDim);
 private:
     // function sets the coordinates of the dimension;
     virtual void setCoord(const std::vector<double> &theCoord);
+    /// number of this reciprocal dimension (one of 3)
+    rec_dim nRecDim; 
 };
 } // MDDataObjects
 } // Mantid

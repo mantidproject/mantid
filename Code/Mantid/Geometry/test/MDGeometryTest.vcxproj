@@ -20,8 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MDGeometryBasisTest.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test: %(Filename)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --runner=ParenPrinter -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test for: %(Filename)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --runner=ParenPrinter -o "%(Filename).cpp" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test: %(Filename)</Message>
@@ -35,15 +35,15 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="MDGeometryTest.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test: %(Filename)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test: %(Filename)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building test: %(Filename)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building test: %(Filename)</Message>
+    <CustomBuild Include="MDDimensionTest.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building test for: %(Filename)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp</Outputs>
@@ -51,16 +51,42 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="MDDimensionTest.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --runner=ParenPrinter -o "%(Filename).cpp" "%(FullPath)"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for: %(Filename)</Message>
+    <ClCompile Include="MDDimensionTest.cpp" />
+    <ClCompile Include="MDGeometryBasisTest.cpp" />
+    <ClCompile Include="MDGeometryDescriptionTest.cpp" />
+    <ClCompile Include="MDGeometryTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="MDGeometryTest.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building test for: %(Filename)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cpp</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MDDimensionTest.cpp" />
-    <ClCompile Include="MDGeometryBasisTest.cpp" />
-    <ClCompile Include="MDGeometryTest.cpp" />
+    <CustomBuild Include="MDGeometryDescriptionTest.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building test for: %(Filename)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building test for: %(Filename)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cpp</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8D1C3555-5A0F-48E0-95E3-DFEB025DE53F}</ProjectGuid>

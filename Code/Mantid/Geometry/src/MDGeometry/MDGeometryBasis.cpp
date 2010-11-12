@@ -11,42 +11,19 @@ namespace Mantid
     {
      using namespace Kernel;
 
-    /// hasher;
-      boost::hash<std::string> hash_string;
+  Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
 
-void
-DimensionID::setDimensionIDValues(int newNum,const std::string &newTag,bool if_recipocal)
-{
-      iDimID       = newNum;
-      DimensionTag.assign(newTag);
-      is_reciprocal =if_recipocal; 
-
-     // boost::hash<std::string> hash_string;
-      tagHash=hash_string(DimensionTag);
-}
-
-
-Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
  // default names for Dimensions used by default constructor; length should match the size of the MAX_MD_DIMENSIONS_NUM
  const char *DefaultDimTags[]={"q1","q2","q3","en","u1","u2","u3","u4","u5","u6","u7"};
- // Protected constructor;
+
+// Protected constructor;
 MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions):
 n_total_dim(nDimensions),
 n_reciprocal_dimensions(nReciprocalDimensions),
 unit(1,1)
 {
-    if(nReciprocalDimensions<1||nReciprocalDimensions>3){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted"<<nReciprocalDimensions<<std::endl;
-        throw(std::invalid_argument("This constructor can not be used to buid low dimension datasets geometry"));
-    }
-    if(nDimensions>MAX_MD_DIMS_POSSIBLE||nDimensions<1){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): This constructor attempts to initiate wrong number of dimensions\n";
-        throw(std::invalid_argument("This constructor attempts to initiate more than allowed number of dimensions"));
-    }
-    if(nDimensions<nReciprocalDimensions){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): Attempting to initiate total dimensions less than reciprocal dimensions\n";
-        throw(std::invalid_argument("Number of reciprocal dimensions is bigger than the total number of dimensions"));
-    }
+    this->check_nDims(nDimensions,nReciprocalDimensions);
+
     // assign default tags to the array of string;
     std::vector<std::string> DIMS(nDimensions,"");
     unsigned int ic(0);
@@ -58,29 +35,55 @@ unit(1,1)
         ic++;
     }
 
- 
     this->reinit_GeometryBasis(DIMS,nReciprocalDimensions);
 
 }
 //
-size_t
-MDGeometryBasis::getDimHash(const std::string &tag)const
+MDGeometryBasis::MDGeometryBasis(const std::vector<std::string> &tags_list,unsigned int nReciprocalDimensions):
+n_total_dim(0),
+n_reciprocal_dimensions(nReciprocalDimensions),
+unit(1,1)
 {
-     
-    int dim_num=findTag(tag, true);
-    return DimensionIDs[dim_num].getDimHash();
+  unsigned int nDimensions = tags_list.size();
+  n_total_dim =nDimensions;
+
+  this->check_nDims(nDimensions,nReciprocalDimensions);
+ 
+  this->reinit_GeometryBasis(tags_list,nReciprocalDimensions);
+}
+//
+void 
+MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions)
+{
+   if(nReciprocalDimensions<1||nReciprocalDimensions>3){
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted"<<nReciprocalDimensions<<std::endl;
+        throw(std::invalid_argument("This constructor can not be used to buid low dimension datasets geometry"));
+  }
+    if(nDimensions>MAX_MD_DIMS_POSSIBLE||nDimensions<1){
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): This constructor attempts to initiate wrong number of dimensions\n";
+        throw(std::invalid_argument("This constructor attempts to initiate more than allowed number of dimensions"));
+    }
+    if(nDimensions<nReciprocalDimensions){
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): Attempting to initiate total dimensions less than reciprocal dimensions\n";
+        throw(std::invalid_argument("Number of reciprocal dimensions is bigger than the total number of dimensions"));
+    }
 }
 //
 bool 
-MDGeometryBasis::calculateTagsCompartibility(const std::vector<std::string> &newTags)const
+MDGeometryBasis::checkTagsCompartibility(const std::vector<std::string> &newTags)const
 {
     // if size is different, tags are not compartible;
     if(newTags.size()!=this->getNumDims())return false;
+    DimensionID id;
+    std::set<DimensionID>::const_iterator it;
 
-    int ind;
+
     for(unsigned int i=0;i<newTags.size();i++){
         // if one new tag is not among the old one -- the tags lists are not compartible
-        if((ind=getDimIDNum(newTags[i],false))<0)return false;
+       id.setDimensionIDValues(-1,newTags[i]);
+
+        it = DimensionIDs.find(id);
+        if(it==DimensionIDs.end())return false;
     }
     return true;
 }
@@ -92,21 +95,16 @@ MDGeometryBasis::reinit_GeometryBasis(const std::vector<std::string> &tag_list,u
     unsigned int i;    
     this->n_reciprocal_dimensions= nReciprocalDims;
     this->n_total_dim            = tag_list.size();
+    this->check_nDims(n_total_dim,n_reciprocal_dimensions);
 
-    if(n_total_dim<1||n_total_dim>MAX_MD_DIMS_POSSIBLE){
-        g_log.error()<<"WorkspaceGeometry::reinit_class: Attemted to create workspace with "<<n_total_dim<<"  is out of the limits allowed\n";
-        throw(std::out_of_range("WorkspaceGeometry::reinit_class: too many dimensions requested"));
-     }
-    if(this->n_reciprocal_dimensions<1||this->n_reciprocal_dimensions>3){
-        g_log.error()<<"WorkspaceGeometry::reinit_class: number of reciprocal dimensions out of range (nr-dim<1||nr-dim>3)\n";
-            throw(std::out_of_range("WorkspaceGeometry::reinit_class: number of reciprocal dimensions out of range (nr-dim<1||nr-dim>3)"));
-    }
-    // clear contents of previous map if it was any
-    dim_list.clear();
+    // clear contents of previous map and set if it was any
+    this->dim_names.clear();
+    this->DimensionIDs.clear();
+    std::pair<std::set<DimensionID>::iterator,bool> ret;
+    
 
     // default geometry assumes all resiprocal dimensions at the beginning and all other orthogonal dimensions after that.
-    std::vector<DimensionID> DIMS(n_total_dim,DimensionID());
-    size_t tagHash;
+    DimensionID id;
     bool  isReciprocal(true);
     for(i=0;i<n_total_dim;i++){
         if(i<nReciprocalDims){
@@ -114,36 +112,37 @@ MDGeometryBasis::reinit_GeometryBasis(const std::vector<std::string> &tag_list,u
         }else{
             isReciprocal=false;
         }
-        DIMS[i].setDimensionIDValues(i,tag_list[i],isReciprocal);
-   
-      
+ 
+        id.setDimensionIDValues(i,tag_list[i],isReciprocal);
+        // remember the id;
+        ret=this->DimensionIDs.insert(id);
+        if(!ret.second){
+          g_log.error()<<" all tags have to be unique but the list of imput tags have some equivalent elements\n";
+          throw(std::invalid_argument("Imput tags have equivalent elements"));
+        }
+       // specify the map to find the name by index
+        dim_names.insert(std::pair<int,std::string>(i,tag_list[i]));
     }
 
     // initiate all real orts to 0
     for(i=0;i<nReciprocalDims;i++){
         this->lattice_ort[i].assign(3,0);
     }
- 
-
     // default reciprocal lattice: cubic Define three orthogonal unit vectors. 
     this->buildCubicGeometry();
 
-    // the WorkspaceGeometry has to have all their dimensions sorted properly. 
-    //sort(DIMS.begin(),DIMS.end());
- 
-     
+  
+  
+
+    // build workspace name 
     for(i=0;i<n_total_dim;i++){
-        tagHash = DIMS[i].getDimHash();
-        dim_list[tagHash]=i;
-
-        workspace_name+=tag_list[i];
+         workspace_name+=tag_list[i]+":";
     }
-
     std::stringstream  n_rec_dim;   
-    n_rec_dim<<"_rcd"<<this->n_reciprocal_dimensions;
+    n_rec_dim<<"_NDIM_"<<this->n_total_dim<<"x"<<this->n_reciprocal_dimensions;
     workspace_name+=n_rec_dim.str();
  
-    this->DimensionIDs=DIMS;
+    this->DimensionIDs;
 
 }
 //
@@ -152,24 +151,48 @@ MDGeometryBasis::getBasisTags(void)const
 {
     std::vector<std::string> tmp(this->getNumDims(),"");
     for(unsigned int i=0;i<this->getNumDims();i++){
-        tmp[i].assign(this->DimensionIDs[i].getDimensionTag());
+         tmp[i].assign(dim_names.find(i)->second);
     }
     return tmp;
 }
+//
+std::vector<MDGeometryBasis::DimensionID> 
+MDGeometryBasis::getDimIDs(void)const
+{
+  DimensionID id; 
+  std::string tag;
+  std::vector<MDGeometryBasis::DimensionID> IDs(this->n_total_dim,id);
+  std::set<DimensionID>::const_iterator it;
+  for(unsigned int i=0;i<IDs.size();i++){
+    tag = dim_names.find(i)->second;
+    id.setDimensionIDValues(-1,tag);
 
-// copy constructr
-MDGeometryBasis::MDGeometryBasis(const MDGeometryBasis &orgn){
-    
-    this->n_total_dim=orgn.n_total_dim;
-    /// vector of dimensions id-s, specific for current architecture, the size of dimensions is n_total_dimensions,
-    this->DimensionIDs=orgn.DimensionIDs;
- 
-
-    for(int i=0;i<3;i++){
-        this->lattice_ort[i]=orgn.lattice_ort[i];
-    }   
-
+    it = DimensionIDs.find(id);
+    IDs[i] = *it;
+  }
+  return IDs;
 }
+// get the list of the column numbers for the list of column names
+std::vector<int>  
+MDGeometryBasis::getColumnNumbers(const std::vector<std::string> &tag_list)const
+{
+  size_t n_elements=tag_list.size();
+  std::vector<int> nums(n_elements,-1);
+  std::set<DimensionID>::const_iterator it;
+  DimensionID id;
+
+  for(unsigned int i=0;i<tag_list.size();i++){
+      id.setDimensionIDValues(-1,tag_list[i]);
+      it = DimensionIDs.find(id);
+      if(it==DimensionIDs.end()){
+        g_log.error()<<" dimension with name: "<<tag_list[i]<<" can not be found among the basis\n";
+        throw(std::invalid_argument("MDGeometryBasis::getOrt: argument out of range")); 
+      }
+      nums[i]=it->getDimNum();
+  }
+  return nums;
+}
+
 /*
 const std::vector<double> & 
 MDGeometryBasis::getOrt(const std::string &tag)const
@@ -196,53 +219,34 @@ MDGeometryBasis::getOrt(unsigned int dimNum)const
 */
 //
 std::string
-MDGeometryBasis::getTag(unsigned int dimNum)const
+MDGeometryBasis::getColumnName(unsigned int dimNum)const
 {
     if(dimNum>=this->n_total_dim){
         g_log.error()<<"WorkspaceGeometry::getOrt: Workspace has "<<this->n_total_dim<<" dimensions but the coordinate for Dimension N: "<<dimNum<<" reqested\n";
         throw(std::invalid_argument("MDGeometryBasis::getOrt: argument out of range")); 
     }
-    return this->DimensionIDs[dimNum].getDimensionTag();
+
+    return dim_names.find(dimNum)->second;
 }
 //
 int 
-MDGeometryBasis::getDimIDNum(const std::string &tag, bool do_throw)const
-{
-    int ind = findTag(tag,do_throw);
-    if(ind>-1){
-        return DimensionIDs[ind].getDimID();
-    }
-    return -1;
-}
-/*
-int 
 MDGeometryBasis::getDimNum(const std::string &tag, bool do_throw)const
 {
-    int ind = findTag(tag,do_throw);
-    if(ind>0){
-        return DimensionIDs[ind].getDimNum();
+  int i(-1);
+  DimensionID id(-1,tag.c_str());
+  std::set<DimensionID>::iterator it = this->DimensionIDs.find(id);
+  if(it != DimensionIDs.end()){
+    i=it->getDimNum();
+  }else{
+    if(do_throw){
+      g_log.error()<<"tag "<<tag<<" does not exist in these dimensions\n";
+      throw(std::invalid_argument("Wrong tag requested"));
     }
-    return -1;
+  }
+  return i;
 }
-*/
-int
-MDGeometryBasis::findTag(const std::string &tag, bool do_throw)const
-{
-   int rez=-1;
-    std::map<size_t,int>::const_iterator it;
-    size_t hash = hash_string(tag);
-    it = this->dim_list.find(hash);
-    if(it==dim_list.end()){
-        if(do_throw){
-             g_log.error()<<"MDGeometryBasis::getDimIDNum: the tag: "<<tag<<" does not belong to current geometry\n";
-             throw(std::out_of_range("MDGeometryBasis::getDimRefNum: the tag requested does not belong to current geometry"));
-         }
-    }else{
-        rez = it->second;
-    }
-    return rez;
 
-}
+
 /** Build cubic geometry of three orthogonal vectors. 
 */
 void

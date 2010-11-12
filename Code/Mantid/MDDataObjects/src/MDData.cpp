@@ -279,6 +279,18 @@ MDData::~MDData()
 {
     this->clear_class();
 }
+
+std::vector<size_t> 
+MDData::getStrides(void)const
+{
+  unsigned int nDims = this->getNumDims();
+  std::vector<size_t> strides(nDims,0);
+  for(unsigned int i=0;i<nDims;i++){
+      strides[i] = this->getDimension(i)->getStride();
+  }
+  return strides;
+
+}
 //
 void 
 MDData::identify_SP_points_locations()

@@ -18,10 +18,13 @@
     <CustomBuild Include="MDGeometryBasisTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="MDDimensionTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="MDGeometryTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="MDDimensionTest.h">
+    <CustomBuild Include="MDGeometryDescriptionTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -33,6 +36,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MDGeometryTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MDGeometryDescriptionTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

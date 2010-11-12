@@ -35,13 +35,13 @@ void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
 
-    std::vector<std::string> tag  = origin.getBasisTags();
+
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
 
     for(unsigned int i=0;i<nReciprocalDimensions;i++){
       this->coordinates[i].assign(3,0);
-      MDDimension * pDim = origin.getDimension(tag[i]);
+      MDDimension * pDim = origin.getDimension(i);
       if(pDim){
            this->coordinates[i] = pDim->getCoord();
       }
@@ -51,21 +51,16 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
     this->data.assign(nDimensions,any);    
   
     unsigned int i;
-    TagIndex curTag;
-
-    this->DimTags.clear();
     for(i=0;i<nDimensions;i++){
-        MDDimension *pDim = origin.getDimension(i);
-        this->data[i].trans_bott_left=0;
-        this->data[i].cut_min  = pDim->getMinimum();
-        this->data[i].cut_max  = pDim->getMaximum();
-        this->data[i].nBins    = pDim->getNBins();
-        this->data[i].stride   = pDim->getStride();
-        this->data[i].AxisName = pDim->getName();
 
-        curTag.index=i;
-        curTag.Tag  =pDim->getDimensionTag();
-        this->DimTags.push_back(curTag);
+        MDDimension *pDim = origin.getDimension(i);
+        this->data[i].Tag            = pDim->getDimensionTag();
+        this->data[i].trans_bott_left= 0;
+        this->data[i].cut_min        = pDim->getMinimum();
+        this->data[i].cut_max        = pDim->getMaximum();
+        this->data[i].nBins          = pDim->getNBins();
+        this->data[i].AxisName       = pDim->getName();
+
     }
 
 }
@@ -73,12 +68,14 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 int 
 MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
     int iTagNum=-1;
-    std::list<TagIndex>::const_iterator it;
-    for(it=DimTags.begin();it!=DimTags.end();it++){
+    int ic(0);
+    it_const_data it;
+    for(it=data.begin();it!=data.end();it++){
         if(it->Tag.compare(Tag)==0){
-            iTagNum=it->index;
-            break;
+          iTagNum=ic;
+          break;
         }
+        ic++;
     }
     if(iTagNum<0 && do_throw){
         g_log.error()<<" Tag "<<Tag<<" does not exist\n";
@@ -90,36 +87,40 @@ MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
 //****** SET *******************************************************************************
 
 void 
-MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag)
+MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag) 
 {
+
    this->check_index(i,"setPAxis");
 
-   unsigned int ic(0);
+// move existing dimension structure, described by the tag into new position, described by the index i;
+   unsigned int ic(0),old_place_index;
    
-   std::list<TagIndex>::iterator it,old_place, new_place;
-   old_place = DimTags.end();
-   for(it=DimTags.begin();it!=old_place;it++){
+   it_data it,old_place, new_place;
+   old_place = data.end();
+   for(it=data.begin();it!=old_place;it++){
        if(it->Tag.compare(Tag)==0){
-            old_place=it;
-            if(ic >i)break;
+            old_place      = it;
+            old_place_index= ic;
+            if(ic >i){
+              old_place_index=ic+1; // after insertion it will be one index higher
+              break;
+            }
        }
        if(ic == i){
            new_place=it;
-           if(old_place!=DimTags.end())break;
+          if(old_place!=data.end())break;
        }
        ic++;
     }
-    if(old_place==DimTags.end()){
+    if(old_place==data.end()){
         g_log.error()<<" Tag "<<Tag<<" does not exist\n";
         throw(std::invalid_argument(" The requested tag does not exist"));
     }
     if(new_place!=old_place){
-        DimTags.insert(new_place,*old_place);
-        DimTags.erase(old_place);
-        this->sortAxisTags();
+        data.insert(new_place,*old_place); //  this invalidates old iterators
+        old_place = data.begin()+old_place_index;
+        data.erase(old_place);
     }
-
-   
  
 }
 //
@@ -148,6 +149,7 @@ MDGeometryDescription::setNumBins(unsigned int i,unsigned int Val)
     if(Val>MAX_REASONABLE_BIN_NUMBER){
         throw(std::invalid_argument("SlicingProperty::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
     }
+    if(Val==0)Val=1;
     this->data[i].nBins=Val;
 }
 void
@@ -201,46 +203,27 @@ MDGeometryDescription::getAxisName(unsigned int i)const
     this->check_index(i,"getAxisName");
     return (this->data[i].AxisName);
 }
-
-void
-MDGeometryDescription::sortAxisTags(void)
+std::string 
+MDGeometryDescription::getTag(unsigned int i)const
 {
-  
-    std::list<TagIndex>::iterator it;
-    std::vector<SlicingData> sorted_data(nDimensions,SlicingData());
-    unsigned int ic(0);
-    SlicingData Current;
-    for(it=this->DimTags.begin();it!=DimTags.end();it++){
-        sorted_data[ic]=data[it->index];
-        it->index      = ic;
-        ic++;
-    }
-    this->data=sorted_data;
+    this->check_index(i,"getTag");
+    return (this->data[i].Tag);
 }
 
-
 std::vector<std::string> 
-MDGeometryDescription::getAxisTags(void)const
+MDGeometryDescription::getDimensionsTags(void)const
 {
     std::vector<std::string> tags(this->nDimensions,"");
 
-    std::list<TagIndex>::const_iterator it;
+    it_const_data it;
     unsigned int ic(0);
-    for(it=this->DimTags.begin();it!=DimTags.end();it++){
+    for(it=this->data.begin();it!=data.end();it++){
          tags[ic] = it->Tag;
          ic++;
     }
     return tags;
 }
 
-/*
-DimensionsID 
-SlicingProperty::getPAxis(unsigned int i)const
-{
-    this->check_index(i,"getPAxis");
-    return this->pAxis[i];
-}
-*/
 
 MDGeometryDescription::MDGeometryDescription(unsigned int numDims,unsigned int numRecDims):
 nDimensions(numDims),
@@ -299,7 +282,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     defaults.cut_max = 1;
     defaults.nBins   = 1;
     defaults.AxisName.assign("");
-    defaults.stride  = 0;
+
 
     this->data.assign(nDimensions,defaults);
  
@@ -307,15 +290,11 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
         this->coordinates[i].assign(3,0);
         this->coordinates[i].at(i)= 1;
     }
-    DimTags.clear();
-    TagIndex cur;
+  
+  
     for(i=0;i<nDimensions;i++){
-        cur.index=i;
-        cur.Tag  = def_tags[i];
-        this->DimTags.push_back(cur);
-        this->data[i].AxisName = def_tags[i];
-
-
+      data[i].Tag =def_tags[i]; 
+      this->data[i].AxisName = def_tags[i];
    }
 
 }

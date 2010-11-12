@@ -918,7 +918,7 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
   pDoc->release();
 }
 
-/** Get the default facility
+/** Get the default `
  */
 const FacilityInfo& ConfigServiceImpl::Facility() const
 {

@@ -1,13 +1,13 @@
 #ifndef MDGEOMETRY_DESCRIPTION_H
 #define MDGEOMETRY_DESCRIPTION_H
 
-#include <list>
+#include <deque>
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 
 
 /** class describes slicing and rebinning matrix and the geometry of the MD workspace
 * 
-* it is possible that such class should be just the MD-geometry as it actually describes it. 
+* it is possible that such class should be just the MD-geometry as it actually describes it, thoug each class has set of its unique features
 
     @author Alex Buts (ISIS, RAL)
     @date 05/10/2010
@@ -36,30 +36,18 @@
 namespace Mantid{
     namespace Geometry {
     //
-    struct TagIndex{
-        int index;
-        std::string Tag;
-    };
     /// class descries data in one dimension;
-
+    // 
     class SlicingData{
     public:
+        std::string Tag;           //< unuque dimension identifier (tag)
         double trans_bott_left;    //< shift in all directions (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
         double cut_min;            //< min limits to extract data;
         double cut_max;            //< max limits to extract data;
         unsigned int nBins;        //< number of bins in each direction, bins of size 1 are integrated (collased);
-        size_t  stride;            //< the step this dimension index makes in 1D array, when this dimension index changes by one; should be 0 for integrated dimensions;
         std::string AxisName;      //< new names for axis; 
-        SlicingData():trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
-        SlicingData &operator=(const SlicingData &source) {
-            this->trans_bott_left= source.trans_bott_left;
-            this->cut_min        = source.cut_min;            
-            this->cut_max        = source.cut_max;            
-            this->nBins          = source.nBins;
-            this->stride         = source.stride;
-            this->AxisName.assign(source.AxisName);
-            return *this;
-        }
+        SlicingData():Tag(""),trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
+   
     };
 
 
@@ -70,7 +58,8 @@ public:
     MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);
     MDGeometryDescription(const MDGeometry &origin);
     virtual ~MDGeometryDescription(void);
-   unsigned int getNumDims(void)const{return nDimensions;}
+    unsigned int getNumDims(void)const{return nDimensions;}
+
    /// the function sets the rotation matrix which allows to transform vector inumber i into the basis;
    // TO DO : it is currently a stub returning argument independant unit matrix; has to be written propely
    std::vector<double> setRotations(unsigned int i,const std::vector<double> basis[3]);
@@ -90,12 +79,12 @@ public:
    unsigned int numBins(unsigned int i)const;
    bool isAxisNamePresent(unsigned int i)const;
    std::string getAxisName(unsigned int i)const;
-   std::string getPAxisTag(unsigned int i)const;  
-   size_t getStride(unsigned int i)const{return data[i].stride;}
-
+   std::string getTag(unsigned int i)const;  
+ 
+   /// finds the location of the dimension, defined by the tag in the list of all dimensions;
    int getTagNum(const std::string &Tag, bool do_throw=false)const;
-   /// returns the list of the axis tags sorted in the order requested for view 
-   std::vector<std::string> getAxisTags(void)const;
+   ///returns the list of the axis tags sorted in the order requested for view 
+   std::vector<std::string> getDimensionsTags(void)const;
 
 
 
@@ -132,7 +121,7 @@ public:
  *
  * The requested tag is deleted from old location and inserted into the new location, leaving all other data as before. 
  * the tag has to be present in the array initially -> throws otherwise */
-   void setPAxis(unsigned int i, const std::string &tagID);
+   void setPAxis(unsigned int i, const std::string &tag);
 private:
 
     unsigned int nDimensions;               /**< real number of dimensions in the target dataset. 
@@ -140,9 +129,6 @@ private:
     unsigned int nReciprocalDimensions;    // number of reciprocal dimensions from the nDimensions
 
     std::vector<double> coordinates[3];     //< The coordinates of the target dataset in the WorkspaceGeometry system of coordinates (define the rotation matrix for qx,qy,qz coordinates;) 
-    std::vector<SlicingData> data;          //< data describes one dimension;
-    std::list<TagIndex>      DimTags;       // the list of size Ndimensions, which describes the order of the dimensions in the final object;
-
     std::vector<double>     rotations;
  
     /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/
@@ -153,9 +139,11 @@ private:
  /// logger -> to provide logging, for MD workspaces
     static Kernel::Logger& g_log;
 
- 
-   // sort data arrays in accordence with the tags supplied earlier -> this allows the functions which ask a data as a function of a dimension index work properly
-   void sortAxisTags(void);
+    std::deque<SlicingData> data;  //< data describes one dimension;
+
+typedef std::deque<SlicingData>::iterator       it_data;
+typedef std::deque<SlicingData>::const_iterator it_const_data;
+
 };
 
 } // Geometry

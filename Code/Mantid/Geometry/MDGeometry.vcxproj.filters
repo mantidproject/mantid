@@ -41,10 +41,10 @@
     <ClCompile Include="src\MDGeometry\MDDimensionRes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MDGeometry\MDGeometry.cpp">
+    <ClCompile Include="src\MDGeometry\MDGeometryBasis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MDGeometry\MDGeometryBasis.cpp">
+    <ClCompile Include="src\MDGeometry\MDGeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MDGeometry\MDGeometryDescription.cpp">

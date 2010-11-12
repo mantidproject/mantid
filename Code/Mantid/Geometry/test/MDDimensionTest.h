@@ -12,7 +12,7 @@ using namespace Geometry;
 class tDimension: public MDDimension
 {
 public:
-    tDimension(const DimensionID &ID):MDDimension(ID){};
+    tDimension(const std::string &ID):MDDimension(ID){};
     virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1){
         MDDimension::setRange(rMin,rMax,nBins);
     }
@@ -34,7 +34,7 @@ public:
 class tDimensionRes: public MDDimensionRes
 {
 public:
-   tDimensionRes(const DimensionID &ID):MDDimensionRes(ID){}; 
+   tDimensionRes(const std::string &ID,const rec_dim nDim):MDDimensionRes(ID,nDim){}; 
    virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1){
         MDDimensionRes::setRange(rMin,rMax,nBins);
     }
@@ -56,12 +56,10 @@ class testMDDimension :    public CxxTest::TestSuite
     tDimension    *pOrtDim;
 public:
     void testDimensionConstructor(void){
-        DimensionID res(0,"x");
-        DimensionID ort(3,"T");
         // define one reciprocal 
-       TS_ASSERT_THROWS_NOTHING(pResDim = new tDimensionRes(res));
+       TS_ASSERT_THROWS_NOTHING(pResDim = new tDimensionRes("x",q1));
        // and one orthogonal dimension
-       TS_ASSERT_THROWS_NOTHING(pOrtDim = new tDimension(ort));
+       TS_ASSERT_THROWS_NOTHING(pOrtDim = new tDimension("en"));
     }
     void testSetRanges(){
         if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
@@ -83,9 +81,23 @@ public:
           TS_ASSERT_DELTA(pOrtDim->getMaximum(), 200,FLT_EPSILON);
 
           // check axis name
-          const char *NAME="T";
-          TS_ASSERT_SAME_DATA(pOrtDim->getName().c_str(),NAME,1);
+          TS_ASSERT_EQUALS(pOrtDim->getName(),"en");
     }
+    void testGetX(){
+      double x;
+      if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
+      TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(0));
+      TS_ASSERT_DELTA(x,pOrtDim->getMinimum(),FLT_EPSILON);
+      unsigned int nBins;
+      TS_ASSERT_THROWS_NOTHING(nBins = pOrtDim->getNBins());
+
+      TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(nBins));
+      TS_ASSERT_DELTA(x,pOrtDim->getMaximum(),FLT_EPSILON);
+      // out of range request
+      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(-1));
+      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(nBins+1));
+    }
+
     void testSetAxisName(){
         if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
           // set axis name
@@ -126,10 +138,9 @@ public:
     }
 
     void testDimensionRes(void){
-        DimensionID res(1,"yy");
 
 
-        tDimensionRes dimY(res);
+        tDimensionRes dimY("yy",q2);
         std::vector<double> e0;
         TS_ASSERT_THROWS_NOTHING(e0=dimY.getCoord());
 

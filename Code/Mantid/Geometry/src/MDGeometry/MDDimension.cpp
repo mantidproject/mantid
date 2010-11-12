@@ -17,23 +17,24 @@ MDDimension::getAxisPoints(std::vector<double>  &rez)const
 }
 
 // default dimension is always integrated (it has one point and limits) 
-MDDimension::MDDimension(const DimensionID &ID):
-DimensionID(ID),
+MDDimension::MDDimension(const std::string &ID):
+dimTag(ID),
 latticeParam(1),
 isIntegrated(true),
 coord(1,1),
-nStride(1)
+nStride(0),
+nBins(1)
 {
     // default name coinside with the tag but can be overwritten later
    this->setRange();
-   this->setName(DimensionID::getDimensionTag());
+   this->setName(dimTag);
 
 }
 /// this function sets Linear range. 
 void  MDDimension::setRange(double rxMin,double rxMax,unsigned int nxBins)
 {
     if(rxMin>rxMax){
-        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->DimensionID::getDimensionTag()<<std::endl;
+        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->dimTag<<std::endl;
         g_log.error()<< "setting MinVal: "<<rxMin<<" MaxVal: "<<rxMax<<std::endl;
 
         throw(std::invalid_argument("setRange: wrong argument"));
@@ -59,13 +60,13 @@ void
 MDDimension::check_ranges(double rxMin,double rxMax)
 {
    if(rxMin>rxMax){
-        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->DimensionID::getDimensionTag()<<std::endl;
+        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->dimTag<<std::endl;
         g_log.error()<< "setting MinVal: "<<rxMin<<" MaxVal: "<<rxMax<<std::endl;
 
         throw(std::invalid_argument("checkRanges: rMin>rMax"));
     }
     if(rxMin>this->rMax||rxMax<this->rMin){
-        g_log.error()<< "Attempting to set integration limits outside the data range in Dimension ID N: "<<this->DimensionID::getDimensionTag()<<std::endl;
+        g_log.error()<< "Attempting to set integration limits outside the data range in Dimension ID N: "<<this->dimTag<<std::endl;
         g_log.error()<< "existing MinVal: "<<this->rMin<<" MaxVal: "<<this->rMax<<" Setting: minVal: "<<rxMin<<" maxVal: "<<rxMax<<std::endl;
         throw(std::invalid_argument("checkRanges: wrong rMin or rMax"));
 
@@ -76,7 +77,7 @@ void
 MDDimension::setExpanded(unsigned int nxBins)
 {
     if(nxBins<1||nxBins>MAX_REASONABLE_BIN_NUMBER){
-        g_log.error()<< "Setting number of bins="<<nxBins<<" our of range  for Dimension tag: "<<this->DimensionID::getDimensionTag()<<std::endl;
+        g_log.error()<< "Setting number of bins="<<nxBins<<" our of range  for Dimension tag: "<<this->dimTag<<std::endl;
         throw(std::invalid_argument("setExpanded: wrong number of bin"));
     }
     if(nxBins> 1){
@@ -94,14 +95,16 @@ MDDimension::setExpanded(unsigned int nxBins)
         r=this->rMin+i*Delta;
         this->Axis.push_back(r);
     }
-
+// but all this is not enough -- > stride has to be set extrenaly, on the basis of other dimensions which were or were not integrated;
+// stide is undefined here
 }
 /// clear dimension and sets integrated sign;
 void
 MDDimension::setIntegrated(void)
 {
   this->isIntegrated=true;
-  this->nBins=1;
+  this->nBins  =1;
+  this->nStride=0;  // the stride of neighboring dimensions has to change accordingly
   this->Axis.clear();
   this->Axis.assign(2,0);
   this->Axis[0] = this->rMin;
@@ -110,7 +113,7 @@ MDDimension::setIntegrated(void)
 void
 MDDimension::setIntegrated(double rxMin){
     if(rxMin>this->rMax){
-        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->DimensionID::getDimensionTag()<<std::endl;
+        g_log.error()<< "Attempting to set minimal integration limit higer then maximal for Dimension tag: "<<this->dimTag<<std::endl;
         g_log.error()<< "existing MaxVal: "<<this->rMax<<" setting minVal: "<<rxMin<<std::endl;
         throw(std::invalid_argument("setIntegrated: new min integration limit is higer than existing max integration limit"));
     }

@@ -65,7 +65,7 @@ public:
         std::vector<double> cut_min;        // min limits to extract data;
         std::vector<double> cut_max;       // max limits to extract data;
         std::vector<double> axis_step;     // (cut_max-cut_min)/(nBins);
-        std::vector<size_t> stride;
+        //std::vector<size_t> stride;
 };
 //
 

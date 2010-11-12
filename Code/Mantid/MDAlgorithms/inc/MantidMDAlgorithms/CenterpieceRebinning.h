@@ -47,7 +47,7 @@ private:
       bool ignore_nan,ignore_inf;
 
   // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
-    void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
+   // void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
   
 
 /*! function returns the list of the cell numbers which can contribute into the cut described by transformation matrix
@@ -77,7 +77,7 @@ private:
     *   @param  nPix              number of points in the buffer
     *   @param  *data             the pointer to the structure with Image data;
     */
-    size_t rebin_dataset4D(const MDDataObjects::transf_matrix &rescaled_transf, const MDDataObjects::sqw_pixel *source_pix, size_t nPix, MDDataObjects::MD_image_point *data,
+    size_t rebin_dataset4D(const MDDataObjects::transf_matrix &rescaled_transf, const std::vector<size_t> &strides,const MDDataObjects::sqw_pixel *source_pix, size_t nPix, MDDataObjects::MD_image_point *data,
                            double boxMin[],double boxMax[]);
     // finalsizes rebinoing operations; e.g. calculates averages and calculates location of pixels (filesystem)
     size_t finalise_rebinning(MDDataObjects::MD_image_point *data,size_t data_size);

@@ -3,19 +3,12 @@ namespace Mantid{
     namespace Geometry{
 
 
-MDDimensionRes::MDDimensionRes(const DimensionID &ID):
-MDDimension(ID)
+MDDimensionRes::MDDimensionRes(const std::string &ID,const rec_dim nRecDim0):
+MDDimension(ID),
+nRecDim(nRecDim0)
 {
- 
-  
-   int id= MDDimension::getDimID();
-   if(id<0||id>=3){ 
-       g_log.error()<<"MDDimensionRes: dimension ID exceeds the acceptable range; Are you trying to initiate an resiprocal dimension using ortogonal dimension using constructor?";
-       throw(std::out_of_range("dimension ID exceeds the acceptable range; Are you trying to initiate an resiprocal dimension using ortogonal dimension using constructor?"));
-   }
-
     this->coord.assign(3,0);
-    this->coord[id]=1;
+    this->coord[nRecDim]=1;
 }
 void 
 MDDimensionRes::setCoord(const std::vector<double> &theCoord)

@@ -55,11 +55,14 @@ public:
     MDDimension & getTDimension(void)const;
     std::vector<MDDimension *> getIntegratedDimensions(void);
 
+    /// returns the number of expanded (non-integrated) dimensions
+    unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
+
     /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
     /// asking for DimX, Y and Z;
     MDDimension *  getDimension(unsigned int i)const;
-    /// functions return the pointer to the dimension requested by the dimension tag. throws if no such dimension is present in the Geometry ;
-    MDDimension *  getDimension(const std::string &tag)const;
+    /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
+    MDDimension *  getDimension(const std::string &tag,bool do_throw=true)const;
 
     /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 
     /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;
@@ -92,11 +95,9 @@ public:
     void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
     void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
 private:
-    void init_empty_dimensions(const std::vector<DimensionID> &tags);
-    /// internal function returning the number of the dimension with the supplied tag in the dimensions stack 
-    int  getDimNum(const std::string &tag,bool do_throw=true)const;
-    /// the map used for fast search of a dumension from its tag. 
-    std::map<size_t,int> dimensions_map;
+    void init_empty_dimensions();
+     /// the map used for fast search of a dumension from its tag. 
+    std::map<std::string,MDDimension *> dimensions_map;
 };
 }  // Geometry
 }  // Mantid

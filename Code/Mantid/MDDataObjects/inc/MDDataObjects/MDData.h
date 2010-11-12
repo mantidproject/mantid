@@ -69,6 +69,8 @@ public:
     void getPointData(std::vector<point3D> & image_data)const;
     /// returns the size of the Image array as 1D array;
     size_t getDataSize(void)const{return data_size;}
+    /// returns dimension strides e.g. the changes of a position in 1D array when an M-th dimension index changes by 1;
+    std::vector<size_t> getStrides(void)const;
  //****************************************************************************************************** 
 // IMD workspace interface functions
   /// return ID specifying the workspace kind

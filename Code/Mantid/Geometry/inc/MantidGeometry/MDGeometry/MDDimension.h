@@ -46,15 +46,17 @@
 namespace Mantid{
     namespace Geometry{
 
-class DLLExport MDDimension:public DimensionID
+class DLLExport MDDimension
 {
 public:
      virtual ~MDDimension();
 /// function returns the name of the axis in this direction
     std::string const &getName()const{return AxisName;}
-/// function return the unique dimension ID, identifying the current dimension among others <-inherited
-//    std::string getDimensionTag(void)const{return DimensionID::getDimensionTag;}
+/// function return the unique dimension ID, identifying the current dimension among others 
+    std::string getDimensionTag(void)const{return dimTag;}
+/// get maximal value along the dimension
     double       getMaximum(void)const{return rMax;}
+/// get minimal value along the dimension
     double       getMinimum(void)const{return rMin;}
 /// range of data along this axis
     double       getRange(void)const{return (rMax-rMin);}
@@ -76,8 +78,10 @@ public:
     /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
     size_t       getStride(void)const{return nStride;}
   
-    //Throws through vector if ind out of range? (hope so TO DO: check)
+    //Get coordinate for index; Throws through vector if ind out of range 
     double getX(unsigned int ind){return Axis.at(ind);}
+    /// it is not reciprocal dimension -> convenience function
+    virtual bool isReciprocal(void)const{return false;}
 protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
@@ -104,9 +108,9 @@ protected:
     /// differs from setRange by the fact that the limits has to be within the existing ranges
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
    // dodgy constructor has to be hidden from clients except the childs. 
-    MDDimension(const DimensionID &ID);
+    MDDimension(const std::string &ID);
 
-  /// should not be public to everybody as chanded by  MDGeometry while reshaping or shaping;
+  /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
 /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is. 
     std::vector<double> coord;
@@ -115,6 +119,8 @@ protected:
 private:
      /// name of the axis;
     std::string AxisName;
+    /// the name of the dimension in the dimensions basis;
+    std::string dimTag;
 
 
     /// The parameter, which specify if the axis is integraged. If it is, nBins =1;
@@ -130,8 +136,8 @@ private:
     /// lattice sacale in this direction
     double latticeParam;
 
-   // *************  should be private:
-    MDDimension(const MDDimension &);
+   // *************  should be prohibited?:
+    MDDimension(const MDDimension &){};
     MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);
