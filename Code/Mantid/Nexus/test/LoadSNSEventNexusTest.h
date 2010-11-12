@@ -187,13 +187,13 @@ public:
       TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
     }
 
-//    void testExec_SNAP()
+//    void testExec_TOPAZ()
 //    {
 //      Mantid::API::FrameworkManager::Instance();
 //      LoadSNSEventNexus ld;
-//      std::string outws_name = "snap";
+//      std::string outws_name = "TOPAZ_1715";
 //      ld.initialize();
-//      ld.setPropertyValue("Filename","/home/8oz/data/SNAP_4105_event.nxs");
+//      ld.setPropertyValue("Filename","/home/8oz/data/TOPAZ_1715_event.nxs");
 //      ld.setPropertyValue("OutputWorkspace",outws_name);
 //      ld.setPropertyValue("FilterByTof_Min", "-1e10");
 //      ld.setPropertyValue("FilterByTof_Max", "1e10");
@@ -207,12 +207,8 @@ public:
 //      //Valid WS and it is an EventWorkspace
 //      TS_ASSERT( WS );
 //      //Pixels have to be padded
-//      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 18);
-//
-//      V3D pos = WS->getInstrument()->getDetector(720896)->getPos();
-//      TS_ASSERT_DELTA( pos.X(), -21.6, 0.0000001);
-//      std::cout << "A pixel in E1 is at " << pos << "\n";
-//
+//      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 15);
+//      TS_ASSERT_EQUALS( WS->getNumberEvents(), 2942639);
 //    }
 
 

@@ -239,13 +239,13 @@ void LoadSNSEventNexus::exec()
     //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL())
     {
-      filter_time_start = pulseTimes[0] + filter_time_start_sec*1e9; //TODO: Use a function in Kernel::DateAndTime::
+      filter_time_start = Kernel::DateAndTime::addPulseTime(pulseTimes[0], filter_time_start_sec);
       is_time_filtered = true;
     }
 
     if (filter_time_stop_sec != EMPTY_DBL())
     {
-      filter_time_stop = pulseTimes[0] + filter_time_stop_sec*1e9; //TODO: Use a function in Kernel::DateAndTime::
+      filter_time_stop = Kernel::DateAndTime::addPulseTime(pulseTimes[0], filter_time_stop_sec);
       is_time_filtered = true;
     }
 
@@ -264,7 +264,7 @@ void LoadSNSEventNexus::exec()
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
-  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+  //PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     prog2.report("Loading " + bankNames[i]);
@@ -348,6 +348,17 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     }
     file.closeData();
 
+    // Look for the sign that the bank is empty
+    if (event_index.size()==1)
+    {
+      if (event_index[0] == 0)
+      {
+        //One entry, only zero. This means NO events in this bank.
+        loadError = true;
+        g_log.debug() << "Bank " << entry_name << " is empty.\n";
+      }
+    }
+
     if (!loadError)
     {
       bool old_nexus_file_names = false;
@@ -410,7 +421,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     //Close up the file
     file.closeGroup();
     file.close();
-  }
+  } // END of critical block.
 
   //Abort if anything failed
   if (loadError)
