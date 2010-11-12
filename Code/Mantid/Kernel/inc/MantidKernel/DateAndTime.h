@@ -19,9 +19,37 @@ typedef boost::posix_time::ptime dateAndTime;
 typedef boost::posix_time::time_duration time_duration;
 
 /** Typedef of the data structure used to store the pulse times. A signed 64-bit int
- * of the # of milliseconds since Jan 1, 1990.
+ * of the # of nanoseconds since Jan 1, 1990.
  */
 typedef int64_t PulseTimeType;
+
+
+
+
+//=============================================================================================
+/** Class for holding the date and time in Mantid.
+ * It is stored as a signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
+ * This allows nano-second resolution time while allowing +- 292 years around 1990.
+ * (boost::posix_time at nanosecond resolution uses 96 bits).
+ *
+ * @author Janik Zikovsky, SNS
+ * @date November 12, 2010
+ *
+ *
+ * */
+#pragma pack(push, 1) //Make the compiler pack the data size aligned to 1-byte, to use as little space as possible
+class mtdTime
+{
+public:
+  mtdTime() {}
+
+private:
+  ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
+  int64_t _nanoseconds;
+};
+#pragma pack(pop)
+
+
 
 
 
@@ -33,6 +61,19 @@ static const uint32_t EPOCH_DIFF = 631152000;
 
 /// The epoch for GPS times.
 static const dateAndTime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+
+/// Approximate maximum date that can be represented a PulseTimeType
+static const dateAndTime PULSETIME_MAX_DATE(boost::gregorian::date(2282, 1, 1));
+
+/// Maximum PulseTimeType value
+static const PulseTimeType PULSETIME_MAX(+6e17);
+
+/// Approximate minimum date that can be represented a a PulseTimeType
+static const dateAndTime PULSETIME_MIN_DATE(boost::gregorian::date(1698, 1, 1));
+
+/// Minimum PulseTimeType value
+static const PulseTimeType PULSETIME_MIN(-6e17);
+
 
 /// The epoch for Unix times.
 static const dateAndTime UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
@@ -75,6 +116,8 @@ DLLExport PulseTimeType get_from_absolute_time(dateAndTime time);
 
 DLLExport PulseTimeType getMaximumPulseTime();
 DLLExport PulseTimeType getMinimumPulseTime();
+
+DLLExport PulseTimeType addPulseTime(PulseTimeType a, double seconds);
 
 }
 

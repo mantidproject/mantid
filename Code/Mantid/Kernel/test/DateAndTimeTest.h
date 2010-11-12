@@ -29,6 +29,12 @@ class DateAndTimeTest: public CxxTest::TestSuite
 {
 public:
 
+  void test_dataSizes()
+  {
+    //Must occupy 8 bytes!
+    TS_ASSERT_EQUALS( sizeof( mtdTime ), 8 );
+  }
+
   void testCurrentTime()
   {
     //Use the c-method to get current (local) time
@@ -94,14 +100,6 @@ public:
 
   }
 
-  /* Ensure that exceptions thrown by boost date_time conversions are caught where they
-     may cause problems. */
-  void testNotADateTime()
-  {
-    boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
-    TS_ASSERT_THROWS(std::tm tm = boost::posix_time::to_tm(time), std::out_of_range);
-    TS_ASSERT_THROWS_NOTHING(std::tm tm2 = Mantid::Kernel::DateAndTime::to_tm(time));
-  }
 
   void test_ISO8601_string_with_timezones()
   {
@@ -189,20 +187,75 @@ public:
 
     dt2 = dt + DateAndTime::duration_from_seconds(152.345);
     TS_ASSERT_DELTA( DateAndTime::durationInSeconds(dt2-dt), 152.345, 1e-9 );
-
   }
 
-  void test_limits()
+
+  /* Ensure that exceptions thrown by boost date_time conversions are caught where they
+     may cause problems. */
+  void testNotADateTime()
+  {
+    boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
+    TS_ASSERT_THROWS(std::tm tm = boost::posix_time::to_tm(time), std::out_of_range);
+    TS_ASSERT_THROWS_NOTHING(std::tm tm2 = Mantid::Kernel::DateAndTime::to_tm(time));
+  }
+
+  void test_duration_limits()
+  {
+    dateAndTime a,b,c,d;
+    time_duration td;
+    a = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T14:12:51.562");
+    // Only about 290 years time difference are supported (2^63 nanoseconds)!
+    b = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2300-03-24T14:12:51.562");
+    td = b-a;
+    c = a + td;
+    TS_ASSERT_EQUALS( c, b);
+  }
+
+  void test_addPulseTime()
+  {
+    PulseTimeType a = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T12:00:00") );
+    PulseTimeType b = DateAndTime::addPulseTime(a, 86400.0);
+    PulseTimeType c = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-25T12:00:00") );
+    TS_ASSERT_EQUALS( b, c);
+
+//    //What if you go out of bounds positive?
+//    b = DateAndTime::addPulseTime(a, 1e20);
+//    TS_ASSERT_LESS_THAN( a, b );
+//    //What if you go out of bounds negative?
+//    b = DateAndTime::addPulseTime(a, -1e20);
+//    TS_ASSERT_LESS_THAN( b, a );
+  }
+
+
+
+  void test_duration_from_seconds_Extremes()
+  {
+    time_duration onesec = time_duration(0,0,1,0);
+    time_duration extreme;
+    extreme = DateAndTime::duration_from_seconds(1e20);
+    TS_ASSERT_LESS_THAN(onesec, extreme);
+
+    extreme = DateAndTime::duration_from_seconds(-1e20);
+    TS_ASSERT_LESS_THAN(extreme, onesec);
+  }
+
+  void test_pulsetime_limits()
   {
     PulseTimeType in,back;
-    in = Kernel::DateAndTime::getMaximumPulseTime();
-    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
-    TS_ASSERT_EQUALS( in, back );
+//    in = Kernel::DateAndTime::getMaximumPulseTime();
+//    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
+//    TS_ASSERT_EQUALS( in, back );
+//
+//    in = Kernel::DateAndTime::getMinimumPulseTime();
+//    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
+//    TS_ASSERT_EQUALS( in, back );
 
-    in = Kernel::DateAndTime::getMinimumPulseTime();
-    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
-    TS_ASSERT_EQUALS( in, back );
-
+    // Now try the extremes the other way
+    dateAndTime realDate, backDate;
+    realDate = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2510-03-24T14:12:51.562");
+    in = Kernel::DateAndTime::get_from_absolute_time( realDate );
+    backDate = Kernel::DateAndTime::get_time_from_pulse_time(in);
+    //std::cout << backDate << "\n";
   }
 
 

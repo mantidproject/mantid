@@ -124,16 +124,21 @@ double durationInSeconds(time_duration duration)
  */
 time_duration duration_from_seconds(double duration)
 {
+  long secs = static_cast<long>(  duration  );
+
+  //Limit the seconds to the range of long (avoid overflows)
+  if (duration >= std::numeric_limits<int>::max())
+    return boost::posix_time::time_duration( boost::posix_time::max_date_time );
+  else if (duration <= std::numeric_limits<int>::min())
+    return boost::posix_time::time_duration( boost::posix_time::min_date_time );
 
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
   long fracsecs = long ( 1e9 * fmod(duration, 1.0) );
-  long secs = static_cast<long>(  duration  );
   return boost::posix_time::time_duration(0,0,secs, fracsecs);
 #else
   // Microsecond resolution
   long fracsecs = long ( 1e6 * fmod(duration, 1.0) );
-  long secs = static_cast<long>(  duration  );
   return boost::posix_time::time_duration(0,0,secs, fracsecs);
 #endif
 
@@ -298,8 +303,6 @@ dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse)
 #endif
 
   return GPS_EPOCH + td;
-
-//  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nanosec);
 }
 
 
@@ -307,6 +310,12 @@ dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse)
  */
 PulseTimeType get_from_absolute_time(dateAndTime time)
 {
+  //Check for limits
+  if (time >= PULSETIME_MAX_DATE)
+    return getMaximumPulseTime();
+  else  if (time <= PULSETIME_MIN_DATE)
+    return getMinimumPulseTime();
+
   //Our reference is the GPS epoch.
   boost::posix_time::time_duration td = time - GPS_EPOCH;
 
@@ -325,19 +334,30 @@ PulseTimeType get_from_absolute_time(dateAndTime time)
 /// Returns the maximum value the PulseTime can take.
 PulseTimeType getMaximumPulseTime()
 {
-  //return std::numeric_limits<int64_t>::max()-1;
+  return PULSETIME_MAX;
   //return std::numeric_limits<int64_t>::max();
-  return static_cast<int64_t>( 1e18 );
+  //return static_cast<int64_t>( 1e18 );
 }
 
 /// Returns the minimum value the PulseTime can take.
 PulseTimeType getMinimumPulseTime()
 {
+  return PULSETIME_MIN;
   //return std::numeric_limits<int64_t>::min()+1;
-  return static_cast<int64_t>( -1e18 );
+  //return static_cast<int64_t>( -1e18 );
 }
 
 
+//-----------------------------------------------------------------------------------------------
+/** Add some seconds to a pulse time type.
+ * @a PulseTimeType to start with
+ * @seconds double, seconds to add to this.
+ */
+PulseTimeType addPulseTime(PulseTimeType a, double seconds)
+{
+  return get_from_absolute_time(
+      get_time_from_pulse_time(a) + duration_from_seconds(seconds));
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Returns the current dateAndTime, in UTC time, with microsecond precision
