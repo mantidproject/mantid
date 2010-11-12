@@ -1,10 +1,6 @@
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidKernel/Exception.h"
 
-#include <QTemporaryFile>
-#include <QTextStream>
-#include <QDir>
-
 using namespace MantidQt::API;
 
 /**
@@ -13,6 +9,10 @@ using namespace MantidQt::API;
 */
 MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent)
 {
+  m_pyRunner = boost::shared_ptr<PythonRunner>(new PythonRunner());
+  // re-emit the run Python code from m_pyRunner, to work this signal must reach the slot in QtiPlot
+  connect(m_pyRunner.get(), SIGNAL(runAsPythonScript(const QString&)),
+    this, SIGNAL(runAsPythonScript(const QString&)));
 }
 
 /** Run a piece of python code and return any output that it writes to stdout
@@ -22,34 +22,5 @@ MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent)
 */
 QString MantidWidget::runPythonCode(const QString & code, bool no_output)
 {
-  if( no_output )
-  {
-    emit runAsPythonScript(code);
-    return QString();
-  }
-  
-  // Otherwise we need to gather the information from stdout. This is achieved by redirecting the stdout stream
-  // to a temproary file and then reading its contents
-  // A QTemporaryFile object is used since the file is automatically deleted when the object goes out of scope
-  QTemporaryFile tmp_file;
-  if( !tmp_file.open() )
-  {
-    throw std::runtime_error("An error occurred opening a temporary file in " + QDir::tempPath().toStdString());
-  }
-  //The file name is only valid when the file is open
-   QString tmpstring = tmp_file.fileName();
-   tmp_file.close();
-   QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
-
-   emit runAsPythonScript(code_to_run);
-
-   //Now get the output
-   tmp_file.open();
-   QTextStream stream(&tmp_file);
-   tmpstring.clear();
-   while( !stream.atEnd() )
-   {
-     tmpstring.append(stream.readLine().trimmed() + "\n");
-   }
-   return tmpstring;
+  return m_pyRunner->runPythonCode(code, no_output);
 }

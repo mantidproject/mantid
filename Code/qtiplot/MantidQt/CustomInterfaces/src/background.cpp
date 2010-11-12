@@ -23,7 +23,7 @@ using namespace MantidQt::CustomInterfaces;
  *  @param parent used by QT
  */
 Background::Background(QWidget *parent) :
-  API::MantidQtDialog(parent), m_ckDoRemove(new QCheckBox),
+  API::MantidDialog(parent), m_ckDoRemove(new QCheckBox),
   m_leStart(new QLineEdit), m_leEnd(new QLineEdit), m_rangeMin(-1.0), 
   m_rangeMax(-1.0), m_doRemoval(false)
 {

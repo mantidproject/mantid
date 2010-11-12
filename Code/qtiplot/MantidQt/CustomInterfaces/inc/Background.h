@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_BACKGROUND_H_
 #define MANTIDQTCUSTOMINTERFACES_BACKGROUND_H_
 
-#include "MantidQtAPI/MantidQtDialog.h"
+#include "MantidQtAPI/MantidDialog.h"
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPair>
@@ -17,7 +17,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    class Background : public API::MantidQtDialog
+    class Background : public API::MantidDialog
     {
       Q_OBJECT
 

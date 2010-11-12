@@ -66,7 +66,7 @@ const QString DiagResults::TESTS[DiagResults::NUMTESTS] =
 // Public member functions
 //----------------------
 ///Constructor
-DiagResults::DiagResults(QWidget *parent): MantidQtDialog(parent),
+DiagResults::DiagResults(QWidget *parent): MantidDialog(parent),
   m_Grid(new QGridLayout), m_ListMapper(new QSignalMapper(this)),
   m_ViewMapper(new QSignalMapper(this))
 {

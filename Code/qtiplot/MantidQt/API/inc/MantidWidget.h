@@ -1,8 +1,10 @@
 #ifndef MANTIDQTAPI_MANTIDWIDGET_H_
 #define MANTIDQTAPI_MANTIDWIDGET_H_
 
+#include "MantidQtAPI/PythonRunner.h"
 #include <QWidget>
 #include "DllOption.h"
+#include <boost/shared_ptr.hpp>
 
 /** The ase class from which mantid custom widgets are derived it contains
 *  some useful functions
@@ -43,15 +45,21 @@ namespace MantidQt
     Q_OBJECT
 
     public:
-      //
+      /// empty virtual destructor
+      ~MantidWidget(){}
+
     signals:
       void runAsPythonScript(const QString& code);
 
     protected:
       /// Default constructor
       MantidWidget(QWidget *parent = NULL);
-      /// Run python code
+      /// Run python code that is passed to it and, optionally, return anything it wrote to standard output as a string
       QString runPythonCode(const QString & code, bool no_output = false);
+
+    private:
+      /// This object implements the runPythonCode() function, by emitting the code as a runAsPythonScript signal
+      boost::shared_ptr<PythonRunner> m_pyRunner;
     };
   }
 }

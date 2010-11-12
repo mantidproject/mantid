@@ -170,7 +170,7 @@ AlgHistScriptButton::~AlgHistScriptButton()
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(ApplicationWindow *w,const std::vector<AlgorithmHistory> &algHist,const EnvironmentHistory& envHist):
-MantidQtDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_algName(""),m_nVersion(0)
+MantidDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_algName(""),m_nVersion(0)
 {
     setWindowTitle(tr("Algorithm History"));
 	setMinimumHeight(400);

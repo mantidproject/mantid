@@ -28,7 +28,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/MantidQtDialog.h"
+#include "MantidQtAPI/MantidDialog.h"
 #include "../ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
 #include "QMessageBox"
@@ -111,13 +111,13 @@ public:
 };
 
 class AlgHistoryProperties;
-class AlgorithmHistoryWindow: public MantidQt::API::MantidQtDialog //QDialog 
+class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
 {
 	Q_OBJECT
 signals:
 	void updateAlgorithmHistoryWindow(QString algName);
 public:
-	AlgorithmHistoryWindow(QWidget*w) : MantidQt::API::MantidQtDialog(w){}
+  AlgorithmHistoryWindow(QWidget*w) : MantidQt::API::MantidDialog(w){}
 	AlgorithmHistoryWindow(ApplicationWindow *w,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
 	                       const Mantid::Kernel::EnvironmentHistory&);
   ~AlgorithmHistoryWindow();

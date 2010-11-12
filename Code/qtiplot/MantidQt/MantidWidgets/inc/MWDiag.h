@@ -9,7 +9,6 @@
 #include <QSettings>
 #include <QStringList>
 #include <QComboBox>
-#include "boost/shared_ptr.hpp"
 
 namespace MantidQt
 {

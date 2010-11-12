@@ -27,7 +27,7 @@ using namespace MantidQt::CustomInterfaces;
  * Default constructor
  */
 SANSPlotDialog::SANSPlotDialog(QWidget *parent) : 
-  API::MantidQtDialog(parent), m_workspaces()
+  API::MantidDialog(parent), m_workspaces()
 {
   setWindowTitle("SANS - Plot Dialog");
 

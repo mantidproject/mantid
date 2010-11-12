@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 #define MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 
-#include "MantidQtAPI/MantidQtDialog.h"
+#include "MantidQtAPI/MantidDialog.h"
 #include "WidgetDllOption.h"
 #include <QHash>
 #include <QSignalMapper>
@@ -42,7 +42,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SaveWorkspaces : public API::MantidQtDialog
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SaveWorkspaces : public API::MantidDialog
     {
       Q_OBJECT
 

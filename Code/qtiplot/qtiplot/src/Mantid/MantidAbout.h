@@ -5,8 +5,7 @@
 // Includes
 //----------------------
 #include "ui_MantidAbout.h"
-#include <MantidQtAPI/MantidQtDialog.h>
-#include <qdialog.h>
+#include <MantidQtAPI/MantidDialog.h>
 
 	/** 
     This class implements About MantidPlot dialog for mnatid help menu.
@@ -35,7 +34,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-class MantidAbout : public MantidQt::API::MantidQtDialog
+class MantidAbout : public MantidQt::API::MantidDialog
 	{
 
 	Q_OBJECT

@@ -17,7 +17,7 @@ extern const char * release_date;
  * @param parent The parent widget
  */
 
-MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidQtDialog(parent)
+MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)
 {
 	m_uiForm.setupUi(this);
 

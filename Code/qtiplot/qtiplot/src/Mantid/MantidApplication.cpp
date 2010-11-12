@@ -2,7 +2,7 @@
 //MantidApplciation definitions
 //==============================
 #include "MantidApplication.h"
-#include "MantidQtAPI/MantidQtDialog.h"
+#include "MantidQtAPI/MantidDialog.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -25,7 +25,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   catch(std::exception& e) 
   {
 
-      if (MantidQt::API::MantidQtDialog::handle(receiver,e))
+      if (MantidQt::API::MantidDialog::handle(receiver,e))
           return true; // stops event propagation
 
     g_log.fatal()<<"Unexpected exception: "<<e.what()<<"\n";

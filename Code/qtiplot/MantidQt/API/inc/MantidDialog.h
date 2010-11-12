@@ -1,12 +1,13 @@
-#ifndef MANTIDQT_API_MANTIDQTDIALOG_H_
-#define MANTIDQT_API_MANTIDQTDIALOG_H_
+#ifndef MANTIDQT_API_MANTIDDIALOG_H_
+#define MANTIDQT_API_MANTIDDIALOG_H_
 
 //----------------------------------
 // Includes
 //----------------------------------
 #include "DllOption.h"
-
+#include "MantidQtAPI/PythonRunner.h"
 #include <QDialog>
+#include <boost/shared_ptr.hpp>
 
 //----------------------------------
 // Qt Forward declarations
@@ -32,7 +33,7 @@ namespace API
             }
             catch(std::exception& e)
             {
-                if (MantidQt::API::MantidQtDialog::handle(receiver,e))
+                if (MantidQt::API::MantidDialog::handle(receiver,e))
                     return true; // stops event propagation
                 else
                    // do somethig else ... 
@@ -66,7 +67,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API MantidQtDialog : public QDialog
+class EXPORT_OPT_MANTIDQT_API MantidDialog : public QDialog
 {
   
   Q_OBJECT
@@ -74,19 +75,30 @@ class EXPORT_OPT_MANTIDQT_API MantidQtDialog : public QDialog
 public:
 
   /// DefaultConstructor
-  MantidQtDialog(QWidget* parent = 0);
+  MantidDialog(QWidget* parent = 0);
   /// Destructor
-  virtual ~MantidQtDialog();
+  virtual ~MantidDialog();
 
   /// Handles the exception caught in an event handler.
   static bool handle( QObject* receiver, const std::exception& e );
 
-  // Override this method to handle an exception in a derived class.
+
+signals:
+  void runAsPythonScript(const QString& code);
+
+protected:
+  /// Run python code that is passed to it and, optionally, return anything it wrote to standard output as a string
+  QString runPythonCode(const QString & code, bool no_output = false);
+
+  /// Override this method to handle an exception in a derived class.
   virtual void handleException( const std::exception& e );
 
+private:
+  /// This object implements the runPythonCode() function, by emitting the code as a runAsPythonScript signal
+  boost::shared_ptr<PythonRunner> m_pyRunner;
 };
 
 }
 }
 
-#endif //MANTIDQT_API_MANTIDQTDIALOG_H_
+#endif //MANTIDQT_API_MANTIDDIALOG_H_

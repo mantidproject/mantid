@@ -20,6 +20,7 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
+  $$SRCDIR/PythonRunner.cpp \
   $$SRCDIR/MantidWidget.cpp \
   $$SRCDIR/InterfaceFactory.cpp \
   $$SRCDIR/InterfaceManager.cpp \
@@ -27,11 +28,12 @@ SOURCES = \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
   $$SRCDIR/UserSubWindow.cpp \
-  $$SRCDIR/MantidQtDialog.cpp \
+  $$SRCDIR/MantidDialog.cpp \
   $$SRCDIR/ManageUserDirectories.cpp
 
   
 HEADERS = \
+  $$HEADERDIR/PythonRunner.h \
   $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/DllOption.h \
   $$HEADERDIR/InterfaceFactory.h \
@@ -40,7 +42,7 @@ HEADERS = \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \
   $$HEADERDIR/UserSubWindow.h \
-  $$HEADERDIR/MantidQtDialog.h \
+  $$HEADERDIR/MantidDialog.h \
   $$HEADERDIR/FileDialogHandler.h \
   $$HEADERDIR/ManageUserDirectories.h
 

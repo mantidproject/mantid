@@ -34,7 +34,7 @@ using namespace Mantid::API;
  *  @param defSavs sets which boxes are ticked
  */
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
-  API::MantidQtDialog(parent)
+  API::MantidDialog(parent)
 {
   setWindowTitle("Save Workspaces");
 
