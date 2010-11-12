@@ -460,18 +460,22 @@ class WeightedAzimuthalAverage(ReductionStep):
     def execute(self, reducer, workspace):
         # Q range                        
         beam_ctr = reducer._beam_finder.get_beam_center()
-        
         if self._binning is None:
-            # Wavelength
-            x = mtd[workspace].dataX(0)
-            wavelength = (x[0]+x[1])/2.0
+            # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
+            x = mtd[workspace].dataX(1)
+            x_length = len(x)
+            if x_length < 2:
+                raise RuntimeError, "Azimuthal averaging expects at least one wavelength bin"
+            wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
+            wavelength_min = (x[0]+x[1])/2.0
                     
             # Q min is one pixel from the center
-            qmin = 4*math.pi/wavelength*math.sin(0.5*math.atan(reducer.instrument.pixel_size_x/reducer.instrument.sample_detector_distance))
-            dxmax = max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
-            dymax = max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
+            mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
+            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/reducer.instrument.sample_detector_distance))
+            dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
+            dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
             maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-            qmax = 4*math.pi/wavelength*math.sin(0.5*math.atan(reducer.instrument.pixel_size_x*maxdist/reducer.instrument.sample_detector_distance))
+            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/reducer.instrument.sample_detector_distance))
             qstep = (qmax-qmin)/self._nbins
             
             f_step = (qmax-qmin)/qstep
