@@ -6,6 +6,7 @@
 #include <vector>
 #include <MantidPythonAPI/kernel_exports.h>
 //Kernel
+#include "MantidKernel/ArrayProperty.h"
 #include<MantidKernel/Property.h>
 #include<MantidKernel/BoundedValidator.h>
 #include<MantidKernel/MandatoryValidator.h>
@@ -68,11 +69,22 @@ namespace PythonAPI
 	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, no_init) \
 	           .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<std::vector<type> >::operator(), return_value_policy<copy_const_reference>())) \
 	           ;
+
     EXPORT_PROP_W_VALUE_V(double,dbl);
     EXPORT_PROP_W_VALUE_V(int,int);
     EXPORT_PROP_W_VALUE_V(long,long);
 #undef EXPORT_PROP_W_VALUE_V
 // TODO template DLLExport class PropertyWithValue<std::vector<std::string> >;
+
+    // array property
+#define EXPORT_ARRAY_PROP(type, suffix) \
+    class_<Mantid::Kernel::ArrayProperty<type>, \
+           bases<Mantid::Kernel::PropertyWithValue<std::vector<type> > >, boost::noncopyable>("ArrayProperty_"#suffix, no_init);
+
+    EXPORT_ARRAY_PROP(double,dbl);
+    EXPORT_ARRAY_PROP(int,int);
+#undef EXPORT_ARRAY_PROP
+// TODO template DLLExport class ArrayProperty<std::string>;
 
     class_<Mantid::Kernel::TimeSeriesProperty<double>, \
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
