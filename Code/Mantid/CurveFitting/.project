@@ -3,6 +3,7 @@
 	<name>CurveFitting</name>
 	<comment></comment>
 	<projects>
+		<project>Algorithms</project>
 		<project>API</project>
 		<project>DataObjects</project>
 		<project>Geometry</project>

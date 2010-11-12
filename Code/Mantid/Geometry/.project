@@ -3,6 +3,7 @@
 	<name>Geometry</name>
 	<comment></comment>
 	<projects>
+		<project>Kernel</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
