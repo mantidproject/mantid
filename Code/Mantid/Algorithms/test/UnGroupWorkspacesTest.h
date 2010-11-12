@@ -49,7 +49,7 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/Data/EVS13895.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/EVS13895.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","EVS13895"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
@@ -81,7 +81,7 @@ public:
 	{
 	  	LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/Data/LOQ48098.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48098.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48098"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
