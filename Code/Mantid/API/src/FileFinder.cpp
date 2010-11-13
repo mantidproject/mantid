@@ -239,11 +239,11 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
     // Quick check for a filename
     bool fileSuspected = false;
     // Assume if the hint contains either a "/" or "\" it is a filename..
-    if ((*h).find("\\") == std::string::npos)
+    if ((*h).find("\\") != std::string::npos)
     {
       fileSuspected = true;
     }
-    if ((*h).find("/") == std::string::npos)
+    if ((*h).find("/") != std::string::npos)
     {
       fileSuspected = true;
     }
