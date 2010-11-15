@@ -25,11 +25,6 @@ namespace Kernel
 /// Initialize the logger
 Logger& DirectoryValidator::g_log = Logger::get("DirectoryValidator");
 
-/// Default constructor.
-DirectoryValidator::DirectoryValidator()
-  : FileValidator()
-{}
-
 /** Constructor
  *  @param testDirectoryExists Flag indicating whether to test for existence of directory (default: yes)
  */

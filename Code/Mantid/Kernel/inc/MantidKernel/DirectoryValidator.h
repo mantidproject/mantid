@@ -42,7 +42,6 @@ namespace Kernel
 class DLLExport DirectoryValidator : public FileValidator
 {
 public:
-  DirectoryValidator();
   explicit DirectoryValidator(bool testDirectoryExists = true);
   virtual ~DirectoryValidator();
   virtual std::set<std::string> allowedValues() const;

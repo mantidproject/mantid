@@ -144,6 +144,9 @@
     <ClCompile Include="src\ArrayBoundedValidator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\DirectoryValidator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h">
@@ -374,10 +377,16 @@
     <ClInclude Include="inc\MantidKernel\LogParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\DateAndTimeTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="inc\MantidKernel\NeutronAtom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidKernel\ArrayBoundedValidator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\DirectoryValidator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
