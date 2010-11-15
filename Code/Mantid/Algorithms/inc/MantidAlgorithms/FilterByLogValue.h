@@ -62,8 +62,6 @@ private:
   void init();
   void exec();
 
-  void execEvent();
-
   /// Pointer for an event workspace
   EventWorkspace_const_sptr eventW;
 };

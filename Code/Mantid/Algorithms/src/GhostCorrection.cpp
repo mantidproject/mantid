@@ -142,10 +142,11 @@ namespace Mantid
 
 
     //=============================================================================
-    /*
+    /**
      * Loads a ghost mapping file from disk. Does a lot of the
      * work of mapping what ghost pixels should go were.
      * this->inputW needs to be set first!
+     * @param ghostMapFile the filename containing the ghost mapping
      */
     void GhostCorrection::loadGhostMap(std::string ghostMapFile)
     {

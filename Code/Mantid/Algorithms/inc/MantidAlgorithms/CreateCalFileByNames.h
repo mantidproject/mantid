@@ -78,16 +78,14 @@ private:
   std::string m_filename;
   /// Determine whether the grouping file already exists.
   /// @param filename GroupingFilename (extension .cal)
+  /// @return true if the grouping file exists
   bool groupingFileDoesExist(const std::string& filename) const;
   void saveGroupingFile(const std::string&,bool overwrite) const;
   static void writeCalEntry(std::ostream& os, int number, int udet, double offset, int select, int group);
   void writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const;
   /// The names of the groups
   std::string groups;
-  /// Calibration map used if the *.cal file exist.
-  /// All entries in the *.cal file are registered with
-  /// the udet number as the key and the <Number,Offset,Select,Group> as the
-  /// tuple value.
+  /// Calibration map used if the *.cal file exist. All entries in the *.cal file are registered with the udet number as the key and the <Number,Offset,Select,Group> as the tuple value.
   instrcalmap instrcalib;
   /// Number of groups
   int group_no;

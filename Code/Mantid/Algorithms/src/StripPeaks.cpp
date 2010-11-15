@@ -69,6 +69,7 @@ void StripPeaks::exec()
 
 /** Calls FindPeaks as a sub-algorithm.
  *  @param WS The workspace to search
+ *  @return list of found peaks
  */
 API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {

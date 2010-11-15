@@ -81,8 +81,7 @@ public:
   virtual const std::string category() const { return "Diagnostics"; }
 
 private:
-	/// Map containing the detector entries found in the *.cal file. The key is the udet number,
-	/// the value of is a pair of <group,selected>.
+	/// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
 	#ifndef HAS_UNORDERED_MAP_H
 	typedef std::map<int,std::pair<int,int> > calmap;
 	#else
@@ -100,8 +99,7 @@ private:
   /// this is determine by the mantid instrument.directory
   /// @return Shared pointer to the 2D workspace
   DataObjects::Workspace2D_sptr loadEmptyInstrument(const std::string& instrument_xml_name);
-  /// Calibration map containing the detector entries found in the *.cal file. The key is the udet number,
-	/// the value of is a pair of <group,selected>.
+  /// Calibration map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
   calmap calibration;
 };
 

@@ -70,9 +70,7 @@ private:
   void buildAdditionTables();
 
 
-  //An addition table is a list of pairs:
-  //  First int = workspace index in the EW being added
-  //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
+  /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
   typedef std::vector< std::pair<int, int> >  AdditionTable;
 
   // Methods called by exec()
@@ -88,9 +86,9 @@ private:
 
   /// List of input workspaces
   std::list<Mantid::API::MatrixWorkspace_sptr> inWS;
-  //List of input EVENT workspaces
+  /// List of input EVENT workspaces
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> inEventWS;
-  //Addition tables for event workspaces
+  /// Addition tables for event workspaces
   std::vector<AdditionTable *> tables;
 
 

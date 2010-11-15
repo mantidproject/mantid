@@ -132,11 +132,11 @@ protected:
   // Overridden Algorithm methods
   void init();
   virtual void exec();
-  void execWrong();
+//  void execWrong();
 //  void execSerial();
   void loadGhostMap(std::string ghostMapFile);
   void readGroupingFile(const std::string& groupingFilename);
-  void initializeTofToD();
+//  void initializeTofToD();
 
   // --- For grouping ---
 // This map does not need to be ordered, just a lookup for udet
