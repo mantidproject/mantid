@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTUNITS_H_
-#define MANTID_ALGORITHMS_CONVERTUNITS_H_
+#ifndef MANTID_ALGORITHMS_EXTRACTMASKING_H_
+#define MANTID_ALGORITHMS_EXTRACTMASKING_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -75,4 +75,4 @@ namespace Mantid
   }
 }
 
-#endif // MANTID_ALGORITHMS_CONVERTUNITS_H_
+#endif // MANTID_ALGORITHMS_EXTRACTMASKING_H_

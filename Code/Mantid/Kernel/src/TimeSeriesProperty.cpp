@@ -17,6 +17,13 @@ namespace Kernel
 
 /// @cond
 
+template<class TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics()
+{
+  throw Exception::NotImplementedError("Cannot calculate statistics for this type");
+}
+
+
 template<>
 TimeSeriesPropertyStatistics TimeSeriesProperty<double>::getStatistics()
 {

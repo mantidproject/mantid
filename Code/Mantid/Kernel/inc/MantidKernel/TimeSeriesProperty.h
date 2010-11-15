@@ -901,11 +901,7 @@ public:
    * Return a TimeSeriesPropertyStatistics struct containing the
    * statistics of this TimeSeriesProperty object.
    */
-  TimeSeriesPropertyStatistics getStatistics()
-  {
-  	throw Exception::NotImplementedError("Cannot calculate statistics for this type");
-  }
-
+  TimeSeriesPropertyStatistics getStatistics();
 };
 
 } // namespace Kernel
