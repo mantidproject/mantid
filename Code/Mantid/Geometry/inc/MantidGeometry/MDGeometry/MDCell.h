@@ -42,7 +42,7 @@ namespace Mantid
     class DLLExport MDCell : public MDPoint
     {
     public:
-      virtual std::vector<boost::shared_ptr<MDPoint*>> getContributingPoints() const = 0;
+      virtual std::vector<boost::shared_ptr<MDPoint*> > getContributingPoints() const = 0;
     };
   }
 }
