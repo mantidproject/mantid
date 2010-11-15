@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
-    <height>388</height>
+    <width>453</width>
+    <height>367</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -24,130 +24,6 @@
      <property name="currentIndex" >
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabSettings" >
-      <attribute name="title" >
-       <string>Initial Settings</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_7" >
-       <item>
-        <layout class="QGridLayout" name="gridLayout_3" >
-         <item row="0" column="0" >
-          <widget class="QLabel" name="set_lbInst" >
-           <property name="text" >
-            <string>Instrument</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" >
-          <widget class="QLabel" name="set_lbAnalyser" >
-           <property name="text" >
-            <string>Analyser</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3" >
-          <widget class="QComboBox" name="set_cbAnalyser" />
-         </item>
-         <item row="0" column="1" >
-          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
-           <property name="techniques" >
-            <stringlist>
-             <string>TOF Indirect Geometry Spectroscopy</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="4" >
-          <widget class="QLabel" name="set_lbReflection" >
-           <property name="text" >
-            <string>Reflection</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5" >
-          <widget class="QComboBox" name="set_cbReflection" />
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_5" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2" >
-         <item>
-          <widget class="QLabel" name="set_lbEFixed" >
-           <property name="text" >
-            <string>EFixed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="set_leEFixed" />
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_10" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_11" >
-         <item>
-          <widget class="QLabel" name="label" >
-           <property name="text" >
-            <string>Spectra Min</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="set_leSpecMin" />
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
-            <string>Spectra Max</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="set_leSpecMax" />
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_6" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tabElwin" >
       <attribute name="title" >
        <string>Elwin</string>
@@ -809,6 +685,160 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabConFit" >
+      <attribute name="title" >
+       <string>ConvFit</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9" >
+       <item>
+        <layout class="QHBoxLayout" name="config_layoutInput" >
+         <item>
+          <widget class="QComboBox" name="confit_cbInputType" >
+           <item>
+            <property name="text" >
+             <string>File</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="confit_swInput" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex" >
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_3" >
+            <layout class="QHBoxLayout" name="horizontalLayout_28" >
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" >
+               <property name="findRunFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="label" stdset="0" >
+                <string/>
+               </property>
+               <property name="multipleFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="fileExtensions" >
+                <stringlist>
+                 <string>_red.nxs</string>
+                </stringlist>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_4" >
+            <layout class="QHBoxLayout" name="horizontalLayout_29" >
+             <item>
+              <widget class="QComboBox" name="confit_cbWorkspace" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="confit_pbRefresh" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="confit_pbPlotInput" >
+           <property name="text" >
+            <string>Plot Input</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="cf_horizontalLayout_24" >
+         <item>
+          <layout class="QVBoxLayout" name="confit_layoutProperties" >
+           <item>
+            <layout class="QVBoxLayout" name="confit_layoutFitType" >
+             <item>
+              <widget class="QLabel" name="confit_lbFitType" >
+               <property name="text" >
+                <string>Fit Type:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="confit_cbFitType" >
+               <item>
+                <property name="text" >
+                 <string>One Lorentzian</string>
+                </property>
+               </item>
+               <item>
+                <property name="text" >
+                 <string>Two Lorentzian</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="confit_properties" />
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="confit_layoutMiniPlot" >
+           <item>
+            <layout class="QHBoxLayout" name="confit_plot" />
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="confit_layoutSpectra" >
+             <item>
+              <widget class="QLabel" name="confit_lbSpecNo" >
+               <property name="text" >
+                <string>Spectra No:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="confit_leSpecNo" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabAbsorption" >
       <attribute name="title" >
        <string>Absorption</string>
@@ -830,6 +860,11 @@
          </property>
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
+         </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>_red.nxs</string>
+          </stringlist>
          </property>
         </widget>
        </item>
@@ -1217,17 +1252,11 @@
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>fury_leELow</tabstop>
   <tabstop>fury_leEWidth</tabstop>
   <tabstop>fury_leEHigh</tabstop>
-  <tabstop>set_cbAnalyser</tabstop>
  </tabstops>
  <resources/>
  <connections/>

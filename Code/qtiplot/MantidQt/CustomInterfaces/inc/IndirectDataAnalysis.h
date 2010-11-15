@@ -11,9 +11,17 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <QIntValidator>
 #include <QDoubleValidator>
+
+// Editor Factories
+#include "DoubleEditorFactory.h"
+#include "StringDialogEditorFactory.h"
+#include <QtCheckBoxFactory>
+
+#include <Poco/NObserver.h>
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -49,6 +57,7 @@ namespace MantidQt
       void setupElwin();
       void setupMsd();
       void setupFuryFit();
+      void setupConFit();
 
       // Validation of user inputs
       bool validateElwin();
@@ -64,9 +73,12 @@ namespace MantidQt
       void absorptionRun();
 
       Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
-      QtProperty* createLorentzian();
+      Mantid::API::CompositeFunction* confitCreateFunction();
+      QtProperty* createLorentzian(QString);
       QtProperty* createExponential();
       QtProperty* createStretchedExp();
+      void populateFunction(Mantid::API::IFunction*, QtProperty*);
+      QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index);
       
       virtual void closeEvent(QCloseEvent* close);
 
@@ -74,11 +86,7 @@ namespace MantidQt
 
     private slots:
       // Generic
-      void instrumentChanged(int index);
-      void analyserSelected(int index);
-      void reflectionSelected(int index);
       void refreshWSlist();
-
       void run();
 
       // ElasticWindow
@@ -112,6 +120,14 @@ namespace MantidQt
       void furyfitPlotGuess(QtProperty*);
 
       // Convolution Fit
+      void confitRun();
+      void confitTypeSelection(int index);
+      void confitInputType(int index);
+      void confitPlotInput();
+      void confitMinChanged(double);
+      void confitMaxChanged(double);
+      void confitUpdateRS(QtProperty*, double);
+      void confitCheckBoxUpdate(QtProperty*, bool);
 
       // Absorption (Basic)
       void absorptionShape(int index);
@@ -130,7 +146,11 @@ namespace MantidQt
 
       bool m_furyResFileType;
 
-
+      // Editor Factories
+      DoubleEditorFactory *m_dblEdFac;
+      StringDialogEditorFactory *m_strEdFac;
+      QtCheckBoxFactory *m_blnEdFac;
+      
       // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
       QwtPlot* m_elwPlot;
       MantidWidgets::RangeSelector* m_elwR1;
@@ -167,6 +187,21 @@ namespace MantidQt
       std::string m_ffInputWSName;
       QString m_furyfitTies;
       QString m_furyfitConstraints;
+
+      // Confit (prefix: 'm_cf')
+      QtTreePropertyBrowser* m_cfTree;
+      QwtPlot* m_cfPlot;
+      QMap<QString, QtProperty*> m_cfProp;
+      MantidWidgets::RangeSelector* m_cfRangeS;
+      MantidWidgets::RangeSelector* m_cfBackgS;
+      QtGroupPropertyManager* m_cfGrpMng;
+      QtDoublePropertyManager* m_cfDblMng;
+      QtBoolPropertyManager* m_cfBlnMng;
+      QtStringPropertyManager* m_cfStrMng;
+      QwtPlotCurve* m_cfDataCurve;
+      QwtPlotCurve* m_cfCalcCurve;
+      Mantid::API::MatrixWorkspace_const_sptr m_cfInputWS;
+      std::string m_cfInputWSName;
 
       /// Change Observer for ConfigService (monitors user directories)
       Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;

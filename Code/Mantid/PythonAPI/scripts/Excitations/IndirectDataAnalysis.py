@@ -17,11 +17,20 @@ def absflat(inWS_n, outWS_n, efixed, sample, can):
         ElementSize=can[3])
     mantid.deleteWorkspace('wlength')
 
-def absorption(input, mode, sample, can, efixed, Save=False, Verbose=False,
+def absorption(input, mode, sample, can, Save=False, Verbose=False,
         Plot=False):
     (direct, filename) = os.path.split(input)
     (root, ext) = os.path.splitext(filename)
     LoadNexusProcessed(input, root)
+    ws = mtd[root]
+    det = ws.getDetector(0)
+    efixed = 0.0
+    try:
+        efixed = det.getNumberParameter('Efixed')[0]
+    except AttributeError: # detector group
+        ids = det.getDetectorIDs()
+        det = ws.getInstrument().getDetector(ids[0])
+        efixed = det.getNumberParameter('Efixed')[0]
     outWS_n = root[:-3] + 'abs'
     if mode == 'Flat Plate':
         absflat(root, outWS_n, efixed, sample, can)
