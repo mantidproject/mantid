@@ -293,7 +293,7 @@ public:
     TS_ASSERT( log->addValue("2007-11-30T16:18:40",11) );
     TS_ASSERT_EQUALS( log->realSize(), 11);
 
-    TimeSeriesPropertyStatistics stats = getTimeSeriesPropertyStatistics( log );
+    TimeSeriesPropertyStatistics stats = log->getStatistics();
 
     TS_ASSERT_DELTA( stats.minimum, 1.0, 1e-3);
     TS_ASSERT_DELTA( stats.maximum, 11.0, 1e-3);
