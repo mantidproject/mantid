@@ -92,10 +92,9 @@ private:
   std::vector<boost::shared_ptr<MantidVec> > m_timeChannels; ///< Time bins
   std::map<int,int> m_specTimeRegimes;   ///< Stores the time regime for each spectrum
 
-  /** For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
-      of false if it must be read from the RAW file.
-      The block's index = startIndex / m_vectorsPerBlock.
-   */
+  // For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
+  // of false if it must be read from the RAW file.
+  // The block's index = startIndex / m_vectorsPerBlock.
   std::vector<bool> m_changedBlock;  ///< Flags for modified blocks. Modified blocks are accessed through ManagedWorkspace2D interface
   static int g_uniqueID;             ///< Counter used to create unique file names
   std::string m_tempfile;            ///< The temporary file name

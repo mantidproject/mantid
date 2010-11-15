@@ -127,9 +127,10 @@ namespace Mantid
     }
 
     /**reads the histogram from raw file
-    *@param file - pointer to the raw file
-    *@param hist - postion in the file to read
-    */
+     * @param file - pointer to the raw file
+     * @param hist - postion in the file to read
+     * @return flag is data is read
+     */
     bool LoadRawHelper::readData(FILE* file,int hist)
     {
       return isisRaw->readData(file, hist);
@@ -157,12 +158,11 @@ namespace Mantid
       run.addLogData( new PropertyWithValue<std::string>("run_number", run_num) );
     }
     /**reads workspace dimensions,number of periods etc from raw data
-    *@param numberOfSpectra number of spectrums
-    *@param numberOfPeriods number of periods
-    *@param lengthIn size of workspace vectors 
-    *@param noTimeRegimes number of time regime.
-
-    */
+     * @param numberOfSpectra number of spectrums
+     * @param numberOfPeriods number of periods
+     * @param lengthIn size of workspace vectors
+     * @param noTimeRegimes number of time regime.
+     */
     void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int & noTimeRegimes )
     {
       // Read in the number of spectra in the RAW file
@@ -177,11 +177,12 @@ namespace Mantid
       noTimeRegimes = isisRaw->daep.n_tr_shift;
     }
     /**This method creates shared pointer to a workspace 
-    *@param ws_sptr shared pointer to the parent workspace
-    *@param nVectors number of histograms in the workspace
-    *@param xLengthIn size of workspace X vector
-    *@param yLengthIn size of workspace Y vector
-    */
+     * @param ws_sptr shared pointer to the parent workspace
+     * @param nVectors number of histograms in the workspace
+     * @param xLengthIn size of workspace X vector
+     * @param yLengthIn size of workspace Y vector
+     * @return an empty workspace of the given parameters
+     */
     DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
       int nVectors,int xLengthIn,int yLengthIn)
     {
@@ -290,8 +291,9 @@ namespace Mantid
 
 
     /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
-    *  @param period The data period
-    */
+     *  @param period The data period
+     *  @return the times when requested period was active
+     */
     Kernel::Property*  LoadRawHelper::createPeriodLog(int period)const
     {
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
@@ -795,7 +797,10 @@ namespace Mantid
 
       }
     }
-    /// Calculates the total number of spectra in the workspace, given the input properties
+    /**
+     * Calculates the total number of spectra in the workspace, given the input properties
+     * @return the size of the workspace (number of spectra)
+     */
     int LoadRawHelper::calculateWorkspaceSize()
     {
       int total_specs(0);

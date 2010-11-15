@@ -136,11 +136,8 @@ namespace Mantid
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
                                 std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
-      /// Holds all the xml elements that have a \<parameter\> child element.
-      /// added purely for the purpose of computing speed and is used in setLogFile()
-      /// for the purpose of quickly accessing if a component have a parameter/logfile
-      /// associated with it or not - instead of using the comparatively slow poco
-      /// call getElementsByTagName() (or getChildElement)
+
+      /// Holds all the xml elements that have a \<parameter\> child element. Added purely for the purpose of computing speed and is used in setLogFile() for the purpose of quickly accessing if a component have a parameter/logfile associated with it or not - instead of using the comparatively slow poco call getElementsByTagName() (or getChildElement)
       std::vector<Poco::XML::Element*> hasParameterElement;
       /// has hasParameterElement been set - used when public method setComponentLinks is used
       bool hasParameterElement_beenSet;
@@ -156,9 +153,7 @@ namespace Mantid
       /// map which maps the type name to a shared pointer to a geometric shape
       std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
 
-      /// Container to hold all detectors and monitors added to the instrument. Used for
-      /// 'facing' these to component specified under \<defaults\>
-      /// NOTE: Seems unused, ever.
+      /// Container to hold all detectors and monitors added to the instrument. Used for 'facing' these to component specified under \<defaults\>. NOTE: Seems unused, ever.
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
       /// Parse position of facing element to V3D

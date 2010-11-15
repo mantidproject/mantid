@@ -390,6 +390,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
 /** The function expects that the string passed to it contains an integer number,
 *  it reads the number and returns it
 *  @param line a line read from the file, we'll interpret this
+*  @return the integer read from the line, error code if not readable
 *  @throws invalid_argument when the line contains more just an integer
 *  @throws boost::bad_lexical_cast when the string can't be interpreted as an integer
 */
@@ -533,7 +534,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
 }
 /** Called while reading input file to report progress (doesn't update m_FracCompl ) and
 *  check for algorithm cancel messages, doesn't look at file size to estimate progress
-*  @param numGroupsRead number of groups read from the file so far (not the numer of spectra)
+*  @param numGroupsRead number of groups read from the file so far (not the number of spectra)
 *  @param numInHists the total number of histograms in the input workspace
 *  @return estimate of the amount of algorithm progress obtained by reading from the file
 */
@@ -552,7 +553,8 @@ double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
 /** Move the user selected spectra in the input workspace into groups in the output workspace
 *  @param inputWS user selected input workspace for the algorithm
 *  @param outputWS user selected output workspace for the algorithm
-*  @param prog4Copy the amount of algorith progress to atribute to moving a single spectra
+*  @param prog4Copy the amount of algorithm progress to attribute to moving a single spectra
+*  @return number of new grouped spectra
 */
 int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, const double prog4Copy)
 {

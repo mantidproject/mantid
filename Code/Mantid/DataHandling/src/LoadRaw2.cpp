@@ -287,9 +287,10 @@ namespace Mantid
       fclose(file);
     }
 
-	/** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
- *  @param period The data period
- */
+    /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
+     *  @param period The data period
+     *  @return the times when requested period was active
+     */
 Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
 {
     Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
