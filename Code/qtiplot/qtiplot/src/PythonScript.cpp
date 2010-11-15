@@ -94,7 +94,6 @@ PythonScript::~PythonScript()
  */
 void PythonScript::updatePath(const QString & filename, bool append)
 {
-  std::cerr << "Testing \"" << filename.toStdString() << "\"\n";
   if( filename.isEmpty() ) return;
   QString scriptPath = QFileInfo(filename).absolutePath();
   QString pyCode;
@@ -106,7 +105,6 @@ void PythonScript::updatePath(const QString & filename, bool append)
   {
     pyCode = "sys.path.remove(r'%1')";
   }
-  std::cerr << "Testing \"" << pyCode.arg(scriptPath).toStdString() << "\"\n";
   setCode(pyCode.arg(scriptPath));
   exec();
 }
