@@ -51,7 +51,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class ExtractMasking : public Mantid::API::Algorithm
+    class DLLExport ExtractMasking : public Mantid::API::Algorithm
     {
     public:
       /// Constructor
