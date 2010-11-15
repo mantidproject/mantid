@@ -7,7 +7,7 @@ import os
 
 import isis_instrument
 from reduction.command_interface import *
-import reduction.instruments.sans.sans_reduction_steps
+import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
 

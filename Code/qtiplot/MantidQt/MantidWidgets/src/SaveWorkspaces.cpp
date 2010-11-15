@@ -274,8 +274,13 @@ void SaveWorkspaces::saveSel()
       }
     }//end if save in this format
   }//end loop over formats
+
   saveCommands += "print 'success'";
-  emit runAsPythonScript(saveCommands);
+  QString status(runPythonCode(saveCommands).trimmed()); 
+  if ( status != "success" )
+  {
+    QMessageBox::critical(this, "Error saving workspace", "One of the workspaces couldnot be saved, was it deleted from Mantid?");
+  }
 }
 /** Sets the filename to the name of the selected workspace
 */

@@ -1154,6 +1154,7 @@ class UserFile(ReductionStep):
             
         # Re-initializes default values
         self._initialize_mask(reducer)
+        reducer.flood_file.set_filename("")
     
         file_handle = open(user_file, 'r')
         for line in file_handle:

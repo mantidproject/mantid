@@ -781,6 +781,7 @@ bool SANSRunWindow::loadUserFile()
 
   QString file = runReduceScriptFunction(
       "print __GUI_only_reduce.flood_file.get_filename()");
+  file = file.trimmed();
   //Check if the file name is set to Python's None object
   file = file == "None" ? "" : file;
   m_uiForm.floodFile->setFileText(file);
