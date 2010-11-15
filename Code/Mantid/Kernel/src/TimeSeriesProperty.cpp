@@ -40,12 +40,12 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<double>::getStatistics()
   if (num <= 0)
     return out;
 
-  std::map<dateAndTime, double> map = this->valueAsMap();
+  std::map<dateAndTime, double> map = this->valueAsCorrectMap();
   std::map<dateAndTime, double>::iterator it;
 
   //First you need the mean
   int counter = 0;
-  double total = 0;
+  double total = 0.;
   double min = std::numeric_limits<double>::max();
   double max = -min;
   for (it = map.begin(); it != map.end(); it++)
