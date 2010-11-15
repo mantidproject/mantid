@@ -59,9 +59,6 @@
     <ClInclude Include="inc\MDDataObjects\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="test\test_sqw.h">
-      <Filter>tests</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>

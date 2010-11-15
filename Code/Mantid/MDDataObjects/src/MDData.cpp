@@ -2,6 +2,7 @@
 #include "MDDataObjects/MDData.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfV1.h"
+#include "MantidGeometry/MDGeometry/MDCell.h"
 
 namespace Mantid{
     namespace MDDataObjects{
@@ -9,6 +10,68 @@ namespace Mantid{
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
     
+    
+    unsigned int MDData::getNPoints() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::IMDDimension& MDData::getDimension(std::string id) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDPoint * MDData::getPoint(long index) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MDData::getCell(long dim1Increment) const 
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MDData::getCell(long dim1Increment, long dim2Increment) const 
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MDData::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MDData::getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MDData::getCell(...)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::IMDDimension& MDData::getXDimension() const
+    {
+      return MDGeometry::getXDimension();
+    }
+
+    Mantid::Geometry::IMDDimension& MDData::getYDimension() const
+    {
+      return MDGeometry::getYDimension();
+    }
+
+    Mantid::Geometry::IMDDimension& MDData::getZDimension() const
+    {
+      return MDGeometry::getZDimension();
+    }
+
+     Mantid::Geometry::IMDDimension& MDData::gettDimension() const
+    {
+      return MDGeometry::getTDimension();
+    }
+
+
     Kernel::Logger& MDData::g_log =Kernel::Logger::get("MDWorkspaces");
 void
 MDData::getPointData(std::vector<point3D> &image_points)const{

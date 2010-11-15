@@ -13,7 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
-
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 /*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
 *
 *   A multidimensional dataset has N such dimensions and usual problem would have maximal number of 
@@ -46,12 +46,17 @@
 namespace Mantid{
     namespace Geometry{
 
-class DLLExport MDDimension
+class DLLExport MDDimension : public IMDDimension
 {
 public:
+
+  virtual std::string getDimensionId() const;
+
+  virtual bool getIsIntegrated() const;
+
      virtual ~MDDimension();
 /// function returns the name of the axis in this direction
-    std::string const &getName()const{return AxisName;}
+    std::string getName()const{return AxisName;}
 /// function return the unique dimension ID, identifying the current dimension among others 
     std::string getDimensionTag(void)const{return dimTag;}
 /// get maximal value along the dimension

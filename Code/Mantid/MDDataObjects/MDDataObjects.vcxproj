@@ -190,7 +190,6 @@
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
     <ClInclude Include="inc\MDDataObjects\point3D.h" />
     <ClInclude Include="inc\MDDataObjects\stdafx.h" />
-    <ClInclude Include="test\test_sqw.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />

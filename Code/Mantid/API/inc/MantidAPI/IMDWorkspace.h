@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 namespace Mantid
 {
@@ -13,6 +14,8 @@ namespace Mantid
   //--------------------------------------------------------------------
   namespace Geometry
   {
+    class MDCell;
+    class MDPoint;
     class MDGeometryDescription;
   }
 
@@ -47,13 +50,26 @@ namespace Mantid
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
+
     class DLLExport IMDWorkspace : public Workspace
     {
     public:
-      /// interface  to get number of dimensions in the worspace
-      virtual unsigned int getNumDims()const=0;
-      /// Initialize the concrete implementation
-      virtual void initialize(const Geometry::MDGeometryDescription &) {} 
+      //virtual std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension*>> getDimensions() const = 0;
+      virtual Mantid::Geometry::IMDDimension& getXDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension& getYDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension& getZDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension& gettDimension() const = 0;
+      virtual unsigned int getNPoints() const = 0;
+      virtual Mantid::Geometry::MDPoint * getPoint(long index) const = 0;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const = 0;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const = 0;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const = 0;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const = 0;
+      virtual Mantid::Geometry::MDCell * getCell(...) const = 0;
+
+      virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const = 0;
+      virtual ~IMDWorkspace(){}
     };
     
     /// Shared pointer to the matrix workspace base class

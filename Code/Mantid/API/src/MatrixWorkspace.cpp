@@ -1,5 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h" 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -11,6 +11,8 @@
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidGeometry/MDGeometry/MDCell.h"
+#include "MantidGeometry/MDGeometry/MDPoint.h"
 
 namespace Mantid
 {
@@ -826,7 +828,65 @@ namespace Mantid
       return hops - 1;
     }
 
+    Mantid::Geometry::IMDDimension& MatrixWorkspace::getXDimension() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
+    Mantid::Geometry::IMDDimension& MatrixWorkspace::getYDimension() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::IMDDimension& MatrixWorkspace::getZDimension() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+     Mantid::Geometry::IMDDimension& MatrixWorkspace::gettDimension() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    unsigned int MatrixWorkspace::getNPoints() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::IMDDimension& MatrixWorkspace::getDimension(std::string id) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(long index) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
+
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(...)  const
+    {
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
   } // namespace API
 } // Namespace Mantid
 
@@ -871,7 +931,6 @@ namespace Mantid
         throw std::runtime_error(message);
       }
     }
-
 
   } // namespace Kernel
 } // namespace Mantid

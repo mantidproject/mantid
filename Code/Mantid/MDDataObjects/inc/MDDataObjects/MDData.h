@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+//#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidAPI/IMDWorkspace.h"
 
@@ -54,7 +54,21 @@ using namespace Mantid::Geometry;
 class DLLExport MDData:public MDGeometry,public IMDWorkspace
 {
 public:
-    // default constructor
+
+  virtual unsigned int getNPoints() const;
+  virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const;
+  virtual Mantid::Geometry::MDPoint * getPoint(long index) const;
+  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(...) const;
+  virtual Mantid::Geometry::IMDDimension& getXDimension() const;
+  virtual Mantid::Geometry::IMDDimension& getYDimension() const;
+  virtual Mantid::Geometry::IMDDimension& getZDimension() const;
+  virtual Mantid::Geometry::IMDDimension& gettDimension() const;
+
+  // default constructor
      MDData(unsigned int nDims=4);
     // destructor
     ~MDData();
@@ -76,8 +90,7 @@ public:
   /// return ID specifying the workspace kind
     virtual const std::string id() const { return "MD-Workspace"; }
   
-    /// 
-  virtual unsigned int getNumDims(void) const{return Geometry::MDGeometry::getNumDims();}
+
 //****************************************************************************************************** 
    bool read_mdd(void){if(this->theFile){
                            this->theFile->read_mdd(*this); return true;

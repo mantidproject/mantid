@@ -1,5 +1,5 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
-#define MANTID_API_MATRIXWORKSPACE_H_
+#define MANTID_API_MATRIXWORKSPACE_H_ 
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,6 +22,12 @@
 
 namespace Mantid
 {
+  //Forward Decs
+  namespace Geometry
+  {
+    class MDCell;
+    class MDPoint;
+  }
 
   namespace API
   {
@@ -65,8 +71,19 @@ namespace Mantid
     class DLLExport MatrixWorkspace : public IMDWorkspace //, public Workspace
     {
     public:
-      /// the function returns number of dimensions in matrix workspace;
-      virtual unsigned int getNumDims() const { return 2; }
+      virtual Mantid::Geometry::IMDDimension& getXDimension() const;
+      virtual Mantid::Geometry::IMDDimension& getYDimension() const;
+      virtual Mantid::Geometry::IMDDimension& getZDimension() const;
+      virtual Mantid::Geometry::IMDDimension& gettDimension() const;
+      virtual unsigned int getNPoints() const;
+      virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const;
+      virtual Mantid::Geometry::MDPoint * getPoint(long index) const ;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const;
+      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const;
+      virtual Mantid::Geometry::MDCell * getCell(...) const;
+
       // The Workspace Factory create-from-parent method needs direct access to the axes.
       friend class WorkspaceFactoryImpl;
       /// Typedef for the workspace_iterator to use with a Workspace
