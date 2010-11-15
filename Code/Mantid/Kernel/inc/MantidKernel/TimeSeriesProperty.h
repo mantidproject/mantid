@@ -42,8 +42,60 @@ struct TimeSeriesPropertyStatistics
   double duration;
 };
 
+//================================================================================================
+/**
+ * Function for getting the statistics on the values of a time series property.
+ */
+template<typename TYPE>
+TimeSeriesPropertyStatistics getDataStatistics(const std::vector<TYPE> &data)
+{
+  throw Exception::NotImplementedError("Cannot calculate statistics for this type");
+}
 
+template<>
+inline TimeSeriesPropertyStatistics getDataStatistics<double>(const std::vector<double> &data)
+{
 
+  TimeSeriesPropertyStatistics out;
+  int num = static_cast<int>(data.size());
+  if (num <= 0)
+    return out;
+
+  //First you need the mean
+  int counter = 0;
+  double total = 0.;
+  double min = std::numeric_limits<double>::max();
+  double max = -min;
+  double val;
+  for (std::vector<double>::const_iterator it = data.begin(); it != data.end(); it++)
+  {
+    val = (*it);
+    //We will also find the limits and median at the same time.
+    if (val < min) min = val;
+    if (val > max) max = val;
+    if (counter == num/2)
+      out.median = val;
+    total += val;
+    counter++;
+  }
+  out.maximum=max;
+  out.minimum=min;
+
+  //Now the mean
+  double mean = total/num;
+  out.mean = mean;
+
+  //Now the standard deviation
+  total = 0;
+  for (std::vector<double>::const_iterator it = data.begin(); it != data.end(); it++)
+  {
+    val = (*it)-mean;
+    total += val*val;
+  }
+  out.standard_deviation = sqrt( double( total / num ) );
+
+  return out;
+}
 
 //================================================================================================
 /** 
@@ -901,7 +953,17 @@ public:
    * Return a TimeSeriesPropertyStatistics struct containing the
    * statistics of this TimeSeriesProperty object.
    */
-  TimeSeriesPropertyStatistics getStatistics();
+  TimeSeriesPropertyStatistics getStatistics()
+  {
+    TimeSeriesPropertyStatistics out = getDataStatistics(this->valuesAsVector());
+
+    //Duration: the last - the first times
+    std::map<dateAndTime, TYPE> map = this->valueAsCorrectMap();
+    out.duration = DateAndTime::durationInSeconds(  map.rbegin()->first - map.begin()->first  );
+
+    return out;
+  }
+
 };
 
 } // namespace Kernel

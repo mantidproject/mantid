@@ -277,7 +277,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void xtest_statistics()
+  void test_statistics()
   {
     TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
     TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
