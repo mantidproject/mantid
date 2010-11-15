@@ -897,8 +897,14 @@ public:
   ///Not used in this class and always returns false
   bool isDefault() const { return false; }
 
-  TimeSeriesPropertyStatistics getStatistics();
-
+  /**
+   * Return a TimeSeriesPropertyStatistics struct containing the
+   * statistics of this TimeSeriesProperty object.
+   */
+  TimeSeriesPropertyStatistics getStatistics()
+  {
+  	throw Exception::NotImplementedError("Cannot calculate statistics for this type");
+  }
 
 };
 

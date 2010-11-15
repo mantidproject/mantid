@@ -17,20 +17,6 @@ namespace Kernel
 
 /// @cond
 
-template DLLExport class TimeSeriesProperty<double>;
-template DLLExport class TimeSeriesProperty<std::string>;
-
-template<typename TYPE>
-TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics()
-{
-	throw Exception::NotImplementedError("Cannot calculate statistics for this type");
-}
-
-//================================================================================================
-/** Return a TimeSeriesPropertyStatistics struct containing the
- * statistics of this TimeSeriesProperty object.
- * @param tsp TimeSeriesProperty<double> pointer to calculate.
- */
 template<>
 TimeSeriesPropertyStatistics TimeSeriesProperty<double>::getStatistics()
 {
@@ -81,6 +67,9 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<double>::getStatistics()
   return out;
 }
 
+
+template DLLExport class TimeSeriesProperty<double>;
+template DLLExport class TimeSeriesProperty<std::string>;
 
 /// @endcond
 
