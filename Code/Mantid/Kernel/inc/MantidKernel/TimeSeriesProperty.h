@@ -897,13 +897,10 @@ public:
   ///Not used in this class and always returns false
   bool isDefault() const { return false; }
 
+  TimeSeriesPropertyStatistics getStatistics();
+
+
 };
-
-
-
-//================================================================================================
-DLLExport TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(const TimeSeriesProperty<double> * tsp);
-
 
 } // namespace Kernel
 } // namespace Mantid

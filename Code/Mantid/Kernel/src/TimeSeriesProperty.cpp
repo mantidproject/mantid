@@ -20,24 +20,27 @@ namespace Kernel
 template DLLExport class TimeSeriesProperty<double>;
 template DLLExport class TimeSeriesProperty<std::string>;
 
+template<typename TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics()
+{
+	throw Exception::NotImplementedError("Cannot calculate statistics for this type");
+}
 
 //================================================================================================
 /** Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
  * @param tsp TimeSeriesProperty<double> pointer to calculate.
  */
-//template<typename TYPE>
-TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(const TimeSeriesProperty<double> * tsp)
+template<>
+TimeSeriesPropertyStatistics TimeSeriesProperty<double>::getStatistics()
 {
-  if(!tsp)
-    throw std::invalid_argument("NULL pointer given to getTimeSeriesPropertyStatistics.");
 
   TimeSeriesPropertyStatistics out;
-  int num = static_cast<int>(tsp->size());
+  int num = static_cast<int>(this->size());
   if (num <= 0)
     return out;
 
-  std::map<dateAndTime, double> map = tsp->valueAsMap();
+  std::map<dateAndTime, double> map = this->valueAsMap();
   std::map<dateAndTime, double>::iterator it;
 
   //First you need the mean
