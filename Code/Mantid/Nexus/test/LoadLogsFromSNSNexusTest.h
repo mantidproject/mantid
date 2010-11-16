@@ -77,7 +77,7 @@ public:
         TS_ASSERT_DELTA( tsp->nthValue(1), 10915, 20);
 
         //The time diff between the 0th and 1st entry is 2.172 seconds
-        TS_ASSERT_DELTA( Kernel::DateAndTime::durationInSeconds(tsp->nthInterval(0).length()), 2.17, 0.01);
+        TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 2.17, 0.01);
 
         //Now the stats
 

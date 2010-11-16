@@ -24,8 +24,8 @@ LogFilter::LogFilter(const Property* tsp)
     if (ini)
     {
         TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>("tmp");
-        std::map<dateAndTime, int> pmap = ini->valueAsMap();
-        for(std::map<dateAndTime, int>::iterator it = pmap.begin();it!=pmap.end();it++)
+        std::map<DateAndTime, int> pmap = ini->valueAsMap();
+        for(std::map<DateAndTime, int>::iterator it = pmap.begin();it!=pmap.end();it++)
             p->addValue(it->first,double(it->second));
         m_prop.reset(p);
         return;
@@ -35,8 +35,8 @@ LogFilter::LogFilter(const Property* tsp)
     if (inb)
     {
         TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>("tmp");
-        std::map<dateAndTime, bool> pmap = inb->valueAsMap();
-        for(std::map<dateAndTime, bool>::iterator it = pmap.begin();it!=pmap.end();it++)
+        std::map<DateAndTime, bool> pmap = inb->valueAsMap();
+        for(std::map<DateAndTime, bool>::iterator it = pmap.begin();it!=pmap.end();it++)
             p->addValue(it->first,double(it->second));
         m_prop.reset(p);
         return;

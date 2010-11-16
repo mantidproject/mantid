@@ -91,7 +91,7 @@ namespace Mantid
     bool Algorithm::execute()
     {
       m_notificationCenter.postNotification(new StartedNotification(this));
-      Mantid::Kernel::dateAndTime start_time;
+      Mantid::Kernel::DateAndTime start_time;
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
@@ -481,7 +481,7 @@ namespace Mantid
      *  @param duration a double defining the length of duration of the algorithm
      *  @param  uexecCount an unsigned int for defining the excution order of algorithm
      */
-    void Algorithm::fillHistory(Mantid::Kernel::dateAndTime start,double duration,unsigned int uexecCount)
+    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,unsigned int uexecCount)
     {
       // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
       std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;

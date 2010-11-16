@@ -319,7 +319,7 @@ void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,
     //std::time_t atime=to_time_t(pt);
     //atime+=time;
     logTime=static_cast<std::time_t>(time)+startTime_time_t;
-    //dateAndTime="2008-08-12T09:00:01"; //test
+    //DateAndTime="2008-08-12T09:00:01"; //test
     value=logValues[logNumber][logSequence];
 }
 int MuonNexusReader::numberOfLogs() const

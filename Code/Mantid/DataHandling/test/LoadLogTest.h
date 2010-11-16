@@ -307,23 +307,23 @@ void testloadlogwithalternatedatastream()
 
     Property* string_property = output->run().getLogData( std::string("RF1Ampon") );
 	TimeSeriesProperty<std::string> *l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
-	std::map<dateAndTime, std::string> vmap=l_timeSeriesString1->valueAsMap();
-	std::map<dateAndTime, std::string>::const_iterator itr;
+	std::map<DateAndTime, std::string> vmap=l_timeSeriesString1->valueAsMap();
+	std::map<DateAndTime, std::string>::const_iterator itr;
 	for(itr=vmap.begin();itr!=vmap.end();++itr)
 	{TS_ASSERT_EQUALS( itr->second, "False" );
 	}
 
 	string_property = output->run().getLogData( std::string("ShutterStatus") );
 	l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
-	std::map<dateAndTime, std::string> vmap1=l_timeSeriesString1->valueAsMap();
+	std::map<DateAndTime, std::string> vmap1=l_timeSeriesString1->valueAsMap();
 	for(itr=vmap1.begin();itr!=vmap1.end();++itr)
 	{TS_ASSERT_EQUALS( itr->second, "OPEN" );
 	}
     
 	 Property* double_property = output->run().getLogData( std::string("b2v2") );
 	TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(double_property);
-	std::map<dateAndTime,double> vmapb2v2=l_timeSeriesDouble1->valueAsMap();
-	std::map<dateAndTime,double>::const_iterator vmapb2v2itr;
+	std::map<DateAndTime,double> vmapb2v2=l_timeSeriesDouble1->valueAsMap();
+	std::map<DateAndTime,double>::const_iterator vmapb2v2itr;
 	for(vmapb2v2itr=vmapb2v2.begin();vmapb2v2itr!=vmapb2v2.end();++vmapb2v2itr)
 	{TS_ASSERT_EQUALS( vmapb2v2itr->second, -0.004 );}
 

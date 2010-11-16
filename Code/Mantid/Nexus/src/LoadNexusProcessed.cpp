@@ -753,8 +753,9 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::
       //API::AlgorithmHistory alg_hist(algname, version, start_timedate.timestamp().epochTime(), dur);
 
       ++exeCount;
-      //Convert the timestamp to time_t to dateAndTime
-      Mantid::Kernel::dateAndTime utc_start = Mantid::Kernel::DateAndTime::from_time_t( start_timedate.timestamp().epochTime() );
+      //Convert the timestamp to time_t to DateAndTime
+      Mantid::Kernel::DateAndTime utc_start;
+      utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
       //Create the algorithm history
       API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,exeCount);
 

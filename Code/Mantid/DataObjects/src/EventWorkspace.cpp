@@ -620,14 +620,14 @@ namespace DataObjects
    * @return the time of the first pulse
    * @throw runtime_error if the log is not found; or if it is empty.
    */
-  Kernel::PulseTimeType EventWorkspace::getFirstPulseTime() const
+  Kernel::DateAndTime EventWorkspace::getFirstPulseTime() const
   {
     TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
     if (!log)
       throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
-    dateAndTime startDate = log->firstTime();
-    //Return as PulseTimeType.
-    return DateAndTime::get_from_absolute_time(startDate);
+    DateAndTime startDate = log->firstTime();
+    //Return as DateAndTime.
+    return startDate;
   }
 
 

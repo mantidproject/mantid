@@ -65,7 +65,7 @@ AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox()
 		m_execDateTimeEdit=NULL;
 	}
 }
-void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kernel::dateAndTime execDate)
+void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate)
 {
 	QString dur("");
 	dur.setNum(execDuration,'g',6);
@@ -74,7 +74,7 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
 	if(execDurationEdit)execDurationEdit->setText(dur);
 	
 	//Get the timeinfo structure, but converting from UTC to local time
-	std::tm t = Mantid::Kernel::DateAndTime::to_localtime_tm( execDate ) ;
+	std::tm t = execDate.to_localtime_tm() ;
 	QTime qt(t.tm_hour,t.tm_min,t.tm_sec);
 	QDate qd(t.tm_year+1900,t.tm_mon+1,t.tm_mday);
 	QDateTime datetime(qd,qt,Qt::LocalTime );
@@ -227,7 +227,7 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
 		{
 			double duration=0;
 			duration=(*algIter).executionDuration();
-			Mantid::Kernel::dateAndTime date=(*algIter).executionDate();
+			Mantid::Kernel::DateAndTime date=(*algIter).executionDate();
 			pgrpBox->setData(duration,date);
 		}
 		return pgrpBox;
@@ -515,7 +515,7 @@ void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,cons
 	if((algName==name.c_str())&& (nVer==version))
 	{
 		double duration=algHist.executionDuration();
-		Mantid::Kernel::dateAndTime date=algHist.executionDate();
+		Mantid::Kernel::DateAndTime date=algHist.executionDate();
 		if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
 	}
 }

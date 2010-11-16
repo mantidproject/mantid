@@ -147,9 +147,9 @@ void LoadSNSEventNexus::exec()
 
     //If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-    std::vector<Kernel::dateAndTime> temp = log->timesAsVector();
+    std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
     for (size_t i =0; i < temp.size(); i++)
-      pulseTimes.push_back( Kernel::DateAndTime::get_from_absolute_time( temp[i] ) );
+      pulseTimes.push_back( temp[i] );
   }
   catch (...)
   {
@@ -231,21 +231,21 @@ void LoadSNSEventNexus::exec()
 
   //Default to ALL pulse times
   bool is_time_filtered = false;
-  filter_time_start = -1e18; // Kernel::DateAndTime::getMinimumPulseTime();
-  filter_time_stop = +1e18; // Kernel::DateAndTime::getMaximumPulseTime();
+  filter_time_start = Kernel::DateAndTime::minimum();
+  filter_time_stop = Kernel::DateAndTime::maximum();
 
   if (pulseTimes.size() > 0)
   {
     //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL())
     {
-      filter_time_start = Kernel::DateAndTime::addPulseTime(pulseTimes[0], filter_time_start_sec);
+      filter_time_start = pulseTimes[0] + filter_time_start_sec;
       is_time_filtered = true;
     }
 
     if (filter_time_stop_sec != EMPTY_DBL())
     {
-      filter_time_stop = Kernel::DateAndTime::addPulseTime(pulseTimes[0], filter_time_stop_sec);
+      filter_time_stop = pulseTimes[0] + filter_time_stop_sec;
       is_time_filtered = true;
     }
 
@@ -276,10 +276,8 @@ void LoadSNSEventNexus::exec()
 
   if (is_time_filtered)
   {
-    //Now filter out the run, using the dateAndTime type.
-    WS->mutableRun().filterByTime(
-        Kernel::DateAndTime::get_time_from_pulse_time(filter_time_start),
-        Kernel::DateAndTime::get_time_from_pulse_time(filter_time_stop) );
+    //Now filter out the run, using the DateAndTime type.
+    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
   }
 
   //Info reporting
@@ -435,7 +433,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   }
 
   //Default pulse time (if none are found)
-  Mantid::Kernel::PulseTimeType pulsetime = 0;
+  Mantid::Kernel::DateAndTime pulsetime = 0;
 
   // Index into the pulse array
   int pulse_i = 0;

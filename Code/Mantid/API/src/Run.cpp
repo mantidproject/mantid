@@ -78,7 +78,7 @@ using namespace Kernel;
    * @param start Absolute start time. Any log entries at times >= to this time are kept.
    * @param stop Absolute stop time. Any log entries at times < than this time are kept.
    */
-  void Run::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+  void Run::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
     //The propery manager operator will make all timeseriesproperties filter.
     m_manager.filterByTime(start, stop);

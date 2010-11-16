@@ -6,7 +6,21 @@ namespace Mantid
 namespace Kernel
 {
 
-namespace DateAndTime
+
+/// Max allowed nanoseconds in the time; 2^62-1
+static int64_t MAX_NANOSECONDS  = 4611686018427387903;
+
+/// Max allowed seconds in the time
+static int64_t MAX_SECONDS      = 4611686017;
+
+/// Min allowed nanoseconds in the time; -2^62+1
+static int64_t MIN_NANOSECONDS  = -4611686018427387903;
+
+/// Min allowed seconds in the time
+static int64_t MIN_SECONDS      = -4611686017;
+
+
+namespace DateAndTimeHelpers
 {
 
 //-----------------------------------------------------------------------------------------------
@@ -103,50 +117,278 @@ time_t utc_mktime(struct tm *utctime)
 }
 
 
-//-----------------------------------------------------------------------------------------------
-/**
- * Return the number of seconds in a duration, as a double, including fractional seconds.
+
+
+} //namespace DateAndTimeHelpers
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------
+/** Default, empty constructor */
+DateAndTime::DateAndTime() : _nanoseconds(0)
+{}
+
+//------------------------------------------------------------------------------------------------
+/** Construct a date from nanoseconds.
+ * @param total_nanoseconds nanoseconds since Jan 1, 1990 (our epoch).
  */
-double durationInSeconds(time_duration duration)
+DateAndTime::DateAndTime(const long int total_nanoseconds)
 {
-#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  // Nanosecond resolution
-  return static_cast<double>(duration.total_nanoseconds()) / 1e9;
-#else
-  // Microsecond resolution
-  return static_cast<double>(duration.total_microseconds()) / 1e6;
-#endif
+  //Make sure that you cannot construct a date that is beyond the limits...
+  if (total_nanoseconds > MAX_NANOSECONDS)
+    _nanoseconds = MAX_NANOSECONDS;
+  else if (total_nanoseconds < MIN_NANOSECONDS)
+    _nanoseconds = MIN_NANOSECONDS;
+  else
+    _nanoseconds = total_nanoseconds;
+  }
+
+//------------------------------------------------------------------------------------------------
+/** Construct a time from an ISO8601 string
+ *
+ * @param ISO8601_string: and ISO8601 formatted string.
+ *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a space,
+ *    and the time is optional, as is the time-zone specification.
+ */
+DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0)
+{
+  this->set_from_ISO8601_string(ISO8601_string);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Construct time from a boost::posix_time::ptime.
+ * @param _ptime boost::posix_time::ptime
+ */
+DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime) : _nanoseconds(0)
+{
+  this->set_from_ptime(_ptime);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
+ * @param seconds seconds since Jan 1, 1990.
+ * @param nanoseconds nanoseconds to add to the number of seconds
+ */
+DateAndTime::DateAndTime(const double seconds, const double nanoseconds)
+{
+  double nano = seconds * 1e9 + nanoseconds;
+  //Limit times
+  if (nano > MAX_NANOSECONDS)
+    _nanoseconds = MAX_NANOSECONDS;
+  else if (nano < MIN_NANOSECONDS)
+    _nanoseconds = MIN_NANOSECONDS;
+  else
+    _nanoseconds = nano;
+}
+
+/** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
+ * @param seconds seconds since Jan 1, 1990.
+ * @param nanoseconds nanoseconds to add to the number of seconds
+ */
+DateAndTime::DateAndTime(const long seconds, const long nanoseconds)
+{
+  if (seconds >= MAX_SECONDS)
+    _nanoseconds = MAX_NANOSECONDS;
+  else if (seconds <= MIN_SECONDS)
+    _nanoseconds = MIN_NANOSECONDS;
+  else
+    _nanoseconds = seconds * 1e9 + nanoseconds;;
+}
+
+/** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
+ * @param seconds seconds since Jan 1, 1990.
+ * @param nanoseconds nanoseconds to add to the number of seconds
+ */
+DateAndTime::DateAndTime(const int seconds, const int nanoseconds)
+{
+  if (seconds >= MAX_SECONDS)
+    _nanoseconds = MAX_NANOSECONDS;
+  else if (seconds <= MIN_SECONDS)
+    _nanoseconds = MIN_NANOSECONDS;
+  else
+    _nanoseconds = seconds * 1e9 + nanoseconds;;
+}
+
+
+//===========================================================================================
+//===========================================================================================
+
+//------------------------------------------------------------------------------------------------
+/** Get the time as a boost::posix_time::ptime.
+ * @return a boost::posix_time::ptime.
+ */
+boost::posix_time::ptime DateAndTime::to_ptime() const
+{
+  return DateAndTimeHelpers::GPS_EPOCH + duration_from_nanoseconds(_nanoseconds);
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Sets the date and time using a boost::posix_time::ptime
+ *
+ * @param _ptime boost::posix_time::ptime date and time.
+ */
+void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime)
+{
+  if (_ptime.is_special())
+  {
+    // --- SPECIAL VALUES! ----
+    if (_ptime.is_infinity() || _ptime.is_pos_infinity())
+      _nanoseconds = MAX_NANOSECONDS;
+    if (_ptime.is_neg_infinity())
+      _nanoseconds = MIN_NANOSECONDS;
+    if (_ptime.is_not_a_date_time())
+      _nanoseconds = MIN_NANOSECONDS;
+  }
+  else
+  {
+    _nanoseconds = nanoseconds_from_duration(_ptime - DateAndTimeHelpers::GPS_EPOCH);
+
+    //Check for overflow
+    if (_nanoseconds < 0)
+    {
+      if (_ptime.date().year() >= 1990)
+      {
+        //nanoseconds is negative despite the year being higher than 1990
+        // ... means overflow occured
+        this->set_to_maximum();
+      }
+    }
+    else if (_nanoseconds > 0)
+    {
+      if (_ptime.date().year() < 1990)
+      {
+        //Nanoseconds is positive but the year is below 1990 = it should be negative!
+        this->set_to_minimum();
+      }
+    }
+  }
+
+}
+
+
+//===========================================================================================
+//========================== time_t support =================================================
+//===========================================================================================
+//------------------------------------------------------------------------------------------------
+/** Sets the date and time using a std::time_t
+ *
+ * @param _timet std::time_t to set to
+ */
+void DateAndTime::set_from_time_t(std::time_t _timet)
+{
+  this->set_from_ptime( boost::posix_time::from_time_t( _timet ) );
+}
+
+//------------------------------------------------------------------------------------------------
+/** Get the time as a std::time_t
+ * @return a std::time_t
+ */
+std::time_t DateAndTime::to_time_t() const
+{
+  std::tm as_tm = boost::posix_time::to_tm(this->to_ptime());
+  std::time_t to_time_t = DateAndTimeHelpers::utc_mktime( &as_tm );
+  return to_time_t;
+}
+
+
+//-----------------------------------------------------------------------------------------------
+/** Convert a DateAndTime object to a std::tm time structure, using whatever time zone in the
+ * dateAndtime (should be UTC) .
+ */
+std::tm DateAndTime::to_tm() const
+{
+  std::tm as_tm;
+  try
+  {
+    as_tm = boost::posix_time::to_tm(this->to_ptime());
+  } catch ( std::out_of_range & )
+  { // MW 26/10 - above code throws on some setups, create "dummy" date object
+    as_tm.tm_year = 0;
+    as_tm.tm_mon = 0;
+    as_tm.tm_mday = 1;
+    as_tm.tm_hour = 0;
+    as_tm.tm_min = 0;
+    as_tm.tm_sec = 0;
+    as_tm.tm_wday = 0;
+    as_tm.tm_yday = 0;
+    as_tm.tm_isdst = 0;
+  }
+  return as_tm;
 }
 
 //-----------------------------------------------------------------------------------------------
-/**
- * Return a time_duration object with the given the number of seconds
+/** Convert a DateAndTime object (in UTC) to a std::tm time structure, using the locat time zone.
  */
-time_duration duration_from_seconds(double duration)
+std::tm DateAndTime::to_localtime_tm() const
 {
-  long secs = static_cast<long>(  duration  );
+  //Get the time_t in UTC
+  std::time_t my_time_t = this->to_time_t();
+  std::tm result;
 
-  //Limit the seconds to the range of long (avoid overflows)
-  if (duration >= std::numeric_limits<int>::max())
-    return boost::posix_time::time_duration( boost::posix_time::max_date_time );
-  else if (duration <= std::numeric_limits<int>::min())
-    return boost::posix_time::time_duration( boost::posix_time::min_date_time );
-
-#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  // Nanosecond resolution
-  long fracsecs = long ( 1e9 * fmod(duration, 1.0) );
-  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+#ifdef _WIN32
+  //Windows version
+  localtime_s(&result, &my_time_t);
 #else
-  // Microsecond resolution
-  long fracsecs = long ( 1e6 * fmod(duration, 1.0) );
-  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+  //Unix implementation
+  localtime_r(&my_time_t, &result);
 #endif
 
+  return result;
 }
 
 //-----------------------------------------------------------------------------------------------
-/// Create dateAndTime instance from a ISO 8601 yyyy-mm-ddThh:mm:ss[Z+-]tz:tz input string
-dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str)
+/** Convert a DateAndTime object (in UTC time) to std::time_t, in the LOCAL timezone.
+ */
+std::time_t DateAndTime::to_localtime_t() const
+{
+  std::tm as_tm = this->to_tm();
+  std::time_t to_time_t = mktime( &as_tm );
+  return to_time_t;
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Sets the date and time to the maximum allowed value */
+void DateAndTime::set_to_maximum()
+{
+  _nanoseconds = MAX_NANOSECONDS; //+2^62, or around the year 2136
+}
+
+/** Sets the date and time to the minimum allowed value */
+void DateAndTime::set_to_minimum()
+{
+  _nanoseconds = MIN_NANOSECONDS; //-2^62, or around the year 1843
+}
+
+/** Return the maximum time possible */
+DateAndTime DateAndTime::maximum()
+{
+  return DateAndTime(MAX_NANOSECONDS);
+}
+
+/** Return the minimum time possible */
+DateAndTime DateAndTime::minimum()
+{
+  return DateAndTime(MIN_NANOSECONDS);
+}
+
+/// A default date and time to use when time is not specified
+const DateAndTime DateAndTime::defaultTime()
+{
+  return DateAndTime("1970-01-01T00:00:00");
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Sets the date and time using an ISO8601-formatted string
+ *
+ * @param str ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ */
+void DateAndTime::set_from_ISO8601_string(const std::string str)
 {
   //Make a copy
   std::string time = str;
@@ -224,227 +466,441 @@ dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str)
   //The boost conversion will convert the string, then we subtract the time zone offset
   if (positive_offset)
     //The timezone is + so we need to subtract the hours
-    return boost::posix_time::time_from_string(time) - tz_offset;
+    this->set_from_ptime( boost::posix_time::time_from_string(time) - tz_offset );
   else
     //The timezone is - so we need to ADD the hours
-    return boost::posix_time::time_from_string(time) + tz_offset;
-
-}
-
-//-----------------------------------------------------------------------------------------------
-/// Create a ISO 8601 yyyy-mm-ddThh:mm:ss string from a time
-std::string create_ISO8601_String(const dateAndTime &time)
-{
-  return to_string(time, "%Y-%m-%dT%H:%M:%S");
+    this->set_from_ptime( boost::posix_time::time_from_string(time) + tz_offset );
 }
 
 
-//-----------------------------------------------------------------------------------------------
-/** Convert a dateAndTime object to a std::tm time structure, using whatever time zone in the
- * dateAndtime (should be UTC) .
- */
-std::tm to_tm(const dateAndTime &time)
-{
-  std::tm as_tm;
-  try
-  {
-    as_tm = boost::posix_time::to_tm(time);
-  } catch ( std::out_of_range & )
-  { // MW 26/10 - above code throws on some setups, create "dummy" date object
-    as_tm.tm_year = 0;
-    as_tm.tm_mon = 0;
-    as_tm.tm_mday = 1;
-    as_tm.tm_hour = 0;
-    as_tm.tm_min = 0;
-    as_tm.tm_sec = 0;
-    as_tm.tm_wday = 0;
-    as_tm.tm_yday = 0;
-    as_tm.tm_isdst = 0;
-  }
-  return as_tm;
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Convert a dateAndTime object (in UTC) to a std::tm time structure, using the locat time zone.
- */
-std::tm to_localtime_tm(const dateAndTime &time)
-{
-  //Get the time_t in UTC
-  std::time_t my_time_t = to_time_t(time);
-  std::tm result;
-
-#ifdef _WIN32
-  //Windows version
-  localtime_s(&result, &my_time_t);
-#else
-  //Unix implementation
-  localtime_r(&my_time_t, &result);
-#endif
-
-  return result;
-}
-
-
-//-----------------------------------------------------------------------------------------------
-/** Returns the dateAndTime, in UTC time, corresponding to the pulse time
- * (which is specified in nanoseconds since Jan 1, 1990)
- */
-dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse)
-{
-  PulseTimeType sec = pulse / 1000000000;
-  PulseTimeType nanosec = pulse % 1000000000;
-
-#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  // Nanosecond resolution
-  boost::posix_time::time_duration td(0,0, sec, nanosec);
-#else
-  // Microsecond resolution
-  boost::posix_time::time_duration td(0,0, sec, nanosec/1000);
-#endif
-
-  return GPS_EPOCH + td;
-}
-
-
-/** Return the pulse time, as PulseTimeType, from an absolute time given.
- */
-PulseTimeType get_from_absolute_time(dateAndTime time)
-{
-  //Check for limits
-  if (time >= PULSETIME_MAX_DATE)
-    return getMaximumPulseTime();
-  else  if (time <= PULSETIME_MIN_DATE)
-    return getMinimumPulseTime();
-
-  //Our reference is the GPS epoch.
-  boost::posix_time::time_duration td = time - GPS_EPOCH;
-
-#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  // Nanosecond resolution
-  PulseTimeType nanosec = td.total_nanoseconds();
-  return nanosec;
-#else
-  // Microsecond resolution
-  PulseTimeType nanosec = td.total_microseconds() * 1000;
-#endif
-  //Total in nanoseconds since 1990.
-  return nanosec;
-}
-
-/// Returns the maximum value the PulseTime can take.
-PulseTimeType getMaximumPulseTime()
-{
-  return PULSETIME_MAX;
-  //return std::numeric_limits<int64_t>::max();
-  //return static_cast<int64_t>( 1e18 );
-}
-
-/// Returns the minimum value the PulseTime can take.
-PulseTimeType getMinimumPulseTime()
-{
-  return PULSETIME_MIN;
-  //return std::numeric_limits<int64_t>::min()+1;
-  //return static_cast<int64_t>( -1e18 );
-}
-
-
-//-----------------------------------------------------------------------------------------------
-/** Add some seconds to a pulse time type.
- * @a PulseTimeType to start with
- * @seconds double, seconds to add to this.
- */
-PulseTimeType addPulseTime(PulseTimeType a, double seconds)
-{
-  return get_from_absolute_time(
-      get_time_from_pulse_time(a) + duration_from_seconds(seconds));
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Returns the current dateAndTime, in UTC time, with microsecond precision
+//------------------------------------------------------------------------------------------------
+/** Return the date and time as a simple string,
+ * for example, "19-Feb-2010 11:23:34.456000000"
  *
  */
-dateAndTime get_current_time()
+std::string DateAndTime::to_simple_string() const
 {
-  return boost::posix_time::microsec_clock::universal_time();
+  return boost::posix_time::to_simple_string(this->to_ptime());
 }
 
-
-//-----------------------------------------------------------------------------------------------
-/** Returns a dateAndTime object made from a time_t input.
- * If the input time_t is in UTC, then the output will be as well.
+//------------------------------------------------------------------------------------------------
+/** Return the date and time as a string, using formatting of strftime().
+ * Default format gives "1990-Jan-02 03:04:05"
+ *
+ * @format : format for strftime(). Default "%Y-%b-%d %H:%M:%S"
  */
-dateAndTime from_time_t(const std::time_t &time)
+std::string DateAndTime::to_string(const std::string format) const
 {
-  return boost::posix_time::from_time_t( time );
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Convert a dateAndTime object (in UTC time) to std::time_t, in UTC time.
- */
-std::time_t to_time_t(const dateAndTime &time)
-{
-  std::tm as_tm = boost::posix_time::to_tm(time);
-  std::time_t as_time_t = utc_mktime( &as_tm );
-  return as_time_t;
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Convert a dateAndTime object (in UTC time) to std::time_t, in the LOCAL timezone.
- */
-std::time_t to_localtime_t(const dateAndTime &time)
-{
-  std::tm as_tm = boost::posix_time::to_tm(time);
-  std::time_t as_time_t = mktime( &as_tm );
-  return as_time_t;
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Return time as string in simple format CCYY-mmm-dd hh:mm:ss
- */
-std::string to_simple_string(const dateAndTime &time)
-{
-  return boost::posix_time::to_simple_string(time);
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Return time as string in the specified format, using strftime().
- * Note: Can't do fractional seconds!
- * @param time dateAndTime to output
- * @param format string for the format, e.g. "%Y-%m-%d %H:%M:%S"
- */
-std::string to_string(const dateAndTime &time, const char *format)
-{
-  char buffer [100]; //max 100 characters in the format
-  std::tm time_tm;
-  try
-  {
-    time_tm = boost::posix_time::to_tm(time); //turn into that struct
-  } catch ( std::out_of_range & )
-  {
-    time_tm.tm_year = 0;
-    time_tm.tm_mon = 0;
-    time_tm.tm_mday = 1;
-    time_tm.tm_hour = 0;
-    time_tm.tm_min = 0;
-    time_tm.tm_sec = 0;
-    time_tm.tm_wday = 0;
-    time_tm.tm_yday = 0;
-    time_tm.tm_isdst = 0;
-  }
-
-  strftime (buffer, 100, format, &time_tm); //Make into a string
+  char buffer [25];
+  std::tm date_as_tm = this->to_tm();
+  strftime (buffer, 25, format.c_str(), &date_as_tm);
   return std::string(buffer);
 }
 
+//------------------------------------------------------------------------------------------------
+/** Return the date and time as an ISO8601-formatted string without fractional seconds.
+ * @return string
+ */
+std::string DateAndTime::to_ISO8601_string() const
+{
+  return this->to_string("%Y-%m-%dT%H:%M:%S");
+}
 
-} //namespace  DateAndTime
+
+///** Stream operator
+// */
+//std::ostream& DateAndTime::operator<<(std::ostream& s)
+//{
+//  s << this->to_simple_string();
+//  return s;
+//}
+
+//------------------------------------------------------------------------------------------------
+/** Get the year of this date.
+ * @return the year
+ */
+int DateAndTime::year() const
+{
+  return to_ptime().date().year();
+}
+
+/** Get the month of this date.
+ * @return the month
+ */
+int DateAndTime::month() const
+{
+  return to_ptime().date().month();
+}
+
+/** Get the day (of the month) of this date.
+ * @return the day
+ */
+int DateAndTime::day() const
+{
+  return to_ptime().date().day();
+}
+
+/** Get the hour (0-24) of this time.
+ * @return the hour
+ */
+int DateAndTime::hour() const
+{
+  return to_ptime().time_of_day().hours();
+}
+
+/** Get the minute (0-60) of this time.
+ * @return the minute
+ */
+int DateAndTime::minute() const
+{
+  return to_ptime().time_of_day().minutes();
+}
+
+/** Get the seconds (0-60) of this time.
+ * @return the second
+ */
+int DateAndTime::second() const
+{
+  return to_ptime().time_of_day().seconds();
+}
+
+/** Get the nanoseconds (remainder, < 1 second) of this time.
+ * @return the nanoseconds
+ */
+int DateAndTime::nanoseconds() const
+{
+  return (_nanoseconds % 1000000000);
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+/** == operator
+ * @param rhs DateAndTime to compare
+ * @return true if equals
+ */
+bool DateAndTime::operator==(const DateAndTime& rhs) const
+{
+  return _nanoseconds == rhs._nanoseconds;
+}
+
+/** == operator for boost::posix_time::ptime
+ * @param rhs boost::posix_time::ptime to compare
+ * @return true if equals
+ */
+bool DateAndTime::operator==(const boost::posix_time::ptime& rhs) const
+{
+  return this->to_ptime() == rhs;
+}
+
+
+/** != operator
+ * @param rhs DateAndTime to compare
+ * @return true if not equals
+ */
+bool DateAndTime::operator!=(const DateAndTime& rhs) const
+{
+  return _nanoseconds != rhs._nanoseconds;
+}
+
+/** < operator
+ * @param rhs DateAndTime to compare
+ * @return true if less than
+ */
+bool DateAndTime::operator<(const DateAndTime& rhs) const
+{
+  return _nanoseconds < rhs._nanoseconds;
+}
+
+/** <= operator
+ * @param rhs DateAndTime to compare
+ * @return true if less than or equals
+ */
+bool DateAndTime::operator<=(const DateAndTime& rhs) const
+{
+  return _nanoseconds <= rhs._nanoseconds;
+}
+
+/** > operator
+ * @param rhs DateAndTime to compare
+ * @return true if greater than
+ */
+bool DateAndTime::operator>(const DateAndTime& rhs) const
+{
+  return _nanoseconds > rhs._nanoseconds;
+}
+
+/** >= operator
+ * @param rhs DateAndTime to compare
+ * @return true if greater than or equals
+ */
+bool DateAndTime::operator>=(const DateAndTime& rhs) const
+{
+  return _nanoseconds >= rhs._nanoseconds;
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+/** + operator to add time.
+ * @param nanosec number of nanoseconds to add
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator+(const int64_t nanosec) const
+{
+  return DateAndTime(_nanoseconds + nanosec);
+}
+
+/** += operator to add time.
+ * @param nanosec number of nanoseconds to add
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator+=(const int64_t nanosec)
+{
+  _nanoseconds += nanosec;
+  if (_nanoseconds > MAX_NANOSECONDS) _nanoseconds = MAX_NANOSECONDS;
+  else if (_nanoseconds < MIN_NANOSECONDS) _nanoseconds = MIN_NANOSECONDS;
+  return *this;
+}
+
+/** - operator to subtract time.
+ * @param nanosec number of nanoseconds to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator-(const int64_t nanosec) const
+{
+  return DateAndTime(_nanoseconds - nanosec);
+}
+
+/** -= operator to subtract time.
+ * @param nanosec number of nanoseconds to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator-=(const int64_t nanosec)
+{
+  _nanoseconds -= nanosec;
+  if (_nanoseconds > MAX_NANOSECONDS) _nanoseconds = MAX_NANOSECONDS;
+  else if (_nanoseconds < MIN_NANOSECONDS) _nanoseconds = MIN_NANOSECONDS;
+  return *this;
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** + operator to add time.
+ * @param td time_duration to add
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator+(const time_duration& td) const
+{
+  return this->operator +(nanoseconds_from_duration(td));
+}
+
+/** += operator to add time.
+ * @param td time_duration to add
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator+=(const time_duration& td)
+{
+  return this->operator +=(nanoseconds_from_duration(td));
+}
+
+/** - operator to subtract time.
+ * @param td time_duration to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator-(const time_duration& td) const
+{
+  return this->operator -(nanoseconds_from_duration(td));
+}
+
+/** -= operator to subtract time.
+ * @param td time_duration to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator-=(const time_duration& td)
+{
+  return this->operator -=(nanoseconds_from_duration(td));
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** + operator to add time.
+ * @param sec duration to add
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator+(const double sec) const
+{
+  return this->operator +(nanoseconds_from_seconds(sec));
+}
+
+/** += operator to add time.
+ * @param sec duration to add
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator+=(const double sec)
+{
+  return this->operator +=(nanoseconds_from_seconds(sec));
+}
+
+/** - operator to subtract time.
+ * @param sec duration to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime DateAndTime::operator-(const double sec) const
+{
+  return this->operator -(nanoseconds_from_seconds(sec));
+}
+
+/** -= operator to subtract time.
+ * @param sec duration to subtract
+ * @return modified DateAndTime.
+ */
+DateAndTime& DateAndTime::operator-=(const double sec)
+{
+  return this->operator -=(nanoseconds_from_seconds(sec));
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+/** Subtract two times.
+ * @return a time_duration
+ */
+time_duration DateAndTime::operator-(const DateAndTime& rhs) const
+{
+  return this->to_ptime() - rhs.to_ptime();
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+/** Returns the current DateAndTime, in UTC time, with microsecond precision
+ * @return the current time.
+ */
+DateAndTime DateAndTime::get_current_time()
+{
+  return DateAndTime(boost::posix_time::microsec_clock::universal_time());
+}
+
+
+
+//-----------------------------------------------------------------------------------------------
+/**
+ * Return the number of seconds in a time_duration, as a double, including fractional seconds.
+ */
+double DateAndTime::seconds_from_duration(time_duration duration)
+{
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  return static_cast<double>(duration.total_nanoseconds()) / 1e9;
+#else
+  // Microsecond resolution
+  return static_cast<double>(duration.total_microseconds()) / 1e6;
+#endif
+}
+
+//-----------------------------------------------------------------------------------------------
+/**
+ * Return a time_duration object with the given the number of seconds
+ */
+time_duration DateAndTime::duration_from_seconds(double duration)
+{
+  long secs = static_cast<long>(  duration  );
+
+  //Limit the seconds to the range of long (avoid overflows)
+  if (duration >= std::numeric_limits<int>::max())
+    return boost::posix_time::time_duration( boost::posix_time::max_date_time );
+  else if (duration <= std::numeric_limits<int>::min())
+    return boost::posix_time::time_duration( boost::posix_time::min_date_time );
+
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  long fracsecs = long ( 1e9 * fmod(duration, 1.0) );
+  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+#else
+  // Microsecond resolution
+  long fracsecs = long ( 1e6 * fmod(duration, 1.0) );
+  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+#endif
+
+}
+
+
+//-----------------------------------------------------------------------------------------------
+/** time duration in nanoseconds. Duration is limited to
+ * MAX_NANOSECONDS and MIN_NANOSECONDS to avoid overflows.
+ * @param td time_duration instance.
+ * @Return an int64 of the number of nanoseconds
+ */
+int64_t DateAndTime::nanoseconds_from_duration(const time_duration & td)
+{
+  int64_t nano;
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  nano = td.total_nanoseconds();
+#else
+  // Microsecond resolution
+  nano = (td.total_microseconds()*1000);
+#endif
+  //Use these limits to avoid integer overflows
+  if (nano >MAX_NANOSECONDS)
+    return MAX_NANOSECONDS;
+  else if (nano < MIN_NANOSECONDS)
+    return MIN_NANOSECONDS;
+  else
+    return nano;
+}
+
+//-----------------------------------------------------------------------------------------------
+/** time duration from nanoseconds
+ * @param dur duration in nanoseconds, as an int
+ * @return a time_duration type
+ */
+time_duration DateAndTime::duration_from_nanoseconds(int64_t dur)
+{
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  return boost::posix_time::time_duration(0,0,0,dur);
+#else
+  // Microsecond resolution
+  return boost::posix_time::time_duration(0,0,0,dur/1000);
+#endif
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Nanoseconds from seconds, with limits
+ * @param dur duration in seconds, as a double
+ * @return int64 of the number of nanoseconds
+ */
+int64_t DateAndTime::nanoseconds_from_seconds(double sec)
+{
+  double nano = sec * 1e9;
+  //Use these limits to avoid integer overflows
+  if (nano >MAX_NANOSECONDS)
+    return MAX_NANOSECONDS;
+  else if (nano < MIN_NANOSECONDS)
+    return MIN_NANOSECONDS;
+  else
+    return int64_t(nano);
+}
 
 
 
 
 
 
-TimeInterval::TimeInterval(const dateAndTime& from, const dateAndTime& to)
+
+
+
+
+
+
+
+
+
+
+
+TimeInterval::TimeInterval(const DateAndTime& from, const DateAndTime& to)
 :m_begin(from)
 {
     if (to > from) m_end = to;
@@ -453,18 +909,18 @@ TimeInterval::TimeInterval(const dateAndTime& from, const dateAndTime& to)
 }
 
 /**  Returns an intersection of this interval with \a ti
-     @param ti Time interval 
-     @return A valid time interval if this interval intersects with \a ti or 
+     @param ti Time interval
+     @return A valid time interval if this interval intersects with \a ti or
              an empty interval otherwise.
  */
 TimeInterval TimeInterval::intersection(const TimeInterval& ti)const
 {
     if (!isValid() || !ti.isValid()) return TimeInterval();
 
-    dateAndTime t1 = begin();
+    DateAndTime t1 = begin();
     if (ti.begin() > t1) t1 = ti.begin();
 
-    dateAndTime t2 = end();
+    DateAndTime t2 = end();
     if (ti.end() < t2) t2 = ti.end();
 
     return t1 < t2? TimeInterval(t1,t2) : TimeInterval();
@@ -474,21 +930,33 @@ TimeInterval TimeInterval::intersection(const TimeInterval& ti)const
 /// String representation of the begin time
 std::string TimeInterval::begin_str()const
 {
-  return boost::posix_time::to_simple_string(this->m_begin);
+  return boost::posix_time::to_simple_string(this->m_begin.to_ptime());
 }
 
 /// String representation of the end time
 std::string TimeInterval::end_str()const
 {
-  return boost::posix_time::to_simple_string(this->m_end);
+  return boost::posix_time::to_simple_string(this->m_end.to_ptime());
 }
 
 
 } // namespace Kernel
+
 } // namespace Mantid
 
+
+
+
+/** Stream output operator  */
 std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
 {
   s << t.begin() << " - " << t.end();
+  return s;
+}
+
+/** Stream output operator  */
+std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::DateAndTime& t)
+{
+  s << t.to_simple_string();
   return s;
 }

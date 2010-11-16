@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/DateAndTime.h"
 #include <functional>
 #include <math.h>
 
@@ -14,7 +15,7 @@ namespace Mantid
 namespace DataObjects
 {
 using Kernel::Exception::NotImplementedError;
-using Kernel::PulseTimeType;
+using Kernel::DateAndTime;
 
 //==========================================================================
 /// --------------------- TofEvent stuff ----------------------------------
@@ -23,7 +24,7 @@ using Kernel::PulseTimeType;
    * @param tof time of flight, in microseconds
    * @param pulsetime absolute pulse time of the neutron.
    */
-  TofEvent::TofEvent(const double tof, const PulseTimeType pulsetime) :
+  TofEvent::TofEvent(const double tof, const DateAndTime pulsetime) :
               m_tof(tof), m_pulsetime(pulsetime)
   {
   }
@@ -75,7 +76,7 @@ using Kernel::PulseTimeType;
   }
 
   /// Return the frame id
-  PulseTimeType TofEvent::pulseTime() const
+  DateAndTime TofEvent::pulseTime() const
   {
 	  return this->m_pulsetime;
   }
@@ -86,7 +87,7 @@ using Kernel::PulseTimeType;
    */
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
-    os << event.m_tof << "," << event.m_pulsetime;
+    os << event.m_tof << "," << event.m_pulsetime.to_simple_string();
     return os;
   }
 
@@ -104,7 +105,7 @@ using Kernel::PulseTimeType;
    * @param weight: weight of this neutron event.
    * @param errorSquared: the square of the error on the event
    */
-  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float errorSquared)
+  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared)
   : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(errorSquared)
   {
   }
@@ -202,7 +203,7 @@ using Kernel::PulseTimeType;
    */
   ostream& operator<<(ostream &os, const WeightedEvent &event)
   {
-    os << event.m_tof << "," << event.m_pulsetime << " (W" << event.m_weight << " +- " << event.error() << ")";
+    os << event.m_tof << "," << event.m_pulsetime.to_simple_string() << " (W" << event.m_weight << " +- " << event.error() << ")";
     return os;
   }
 
@@ -1620,7 +1621,7 @@ using Kernel::PulseTimeType;
    * @param stop end time (absolute)
    * @param output reference to an event list that will be output.
    */
-  void EventList::filterByPulseTime(PulseTimeType start, PulseTimeType stop, EventList & output) const
+  void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop, EventList & output) const
   {
     //Start by sorting the event list by pulse time.
     this->sortPulseTime();
@@ -1697,7 +1698,7 @@ using Kernel::PulseTimeType;
 
     //Iterate through the splitter at the same time
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
-    PulseTimeType start, stop;
+    DateAndTime start, stop;
     int index;
 
 

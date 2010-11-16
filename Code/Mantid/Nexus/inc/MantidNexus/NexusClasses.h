@@ -599,7 +599,7 @@ namespace Mantid
         {
           start_time = "2000-01-01T00:00:00";
         }
-        Kernel::dateAndTime start_t = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(start_time);
+        Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
         NXInfo vinfo = getDataSetInfo("value");
         if (!vinfo) return NULL;
 
@@ -614,7 +614,7 @@ namespace Mantid
           value.load();
           for(int i=0;i<value.dim0();i++)
           {
-            Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+            Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
             for(int j=0;j<value.dim1();j++)
             {
               char* c = &value(i,j);
@@ -634,7 +634,7 @@ namespace Mantid
             value.load();
             for(int i = 0; i < value.dim0(); i++)
             {
-              Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+              Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
               logv->addValue( t, (value[i] == 0 ? false : true) );
             }
             return logv;
@@ -662,7 +662,7 @@ namespace Mantid
       ///@param times the array of time offsets
       ///@returns a property pointer
       template<class NX_TYPE,class TIME_TYPE>
-      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, Kernel::dateAndTime start_t,TIME_TYPE times)
+      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, Kernel::DateAndTime start_t,TIME_TYPE times)
       {
           value.openLocal();
           Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
@@ -672,7 +672,7 @@ namespace Mantid
           {
             if (i == 0 || value[i] != value[i-1] || times[i] != times[i-1])
             {
-              Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+              Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
               logv->addValue(t,value[i]);
               prev_index = i;
             }

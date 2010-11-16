@@ -683,7 +683,7 @@ namespace Mantid
     {
 
       std::string stime = getNexusString("start_time");
-      Kernel::dateAndTime start_t = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(stime);
+      Kernel::DateAndTime start_t = Kernel::DateAndTime(stime);
 
       openNexusGroup("runlog","IXrunlog"); // open group - collection of logs
 
@@ -724,7 +724,7 @@ namespace Mantid
                 getNexusData(value.get());
                 for(int i=0;i<vinfo.dims[0];i++)
                 {
-                  Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+                  Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
                   for(int j=0;j<vinfo.dims[1];j++)
                   {
                     char* c = value.get()+i*vinfo.dims[1] + j;
@@ -749,7 +749,7 @@ namespace Mantid
                 getNexusData(value.get());
                 for(int i=0;i<vinfo.dims[0];i++)
                 {
-                  Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+                  Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
                   logv->addValue(t,value[i]);
                 }
                 ws->mutableRun().addLogData(logv);
@@ -761,7 +761,7 @@ namespace Mantid
                 getNexusData(value.get());
                 for(int i=0;i<vinfo.dims[0];i++)
                 {
-                  Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
+                  Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
                   logv->addValue(t,value[i]);
                 }
                 ws->mutableRun().addLogData(logv);

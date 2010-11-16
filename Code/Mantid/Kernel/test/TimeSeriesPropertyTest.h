@@ -30,17 +30,17 @@ public:
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") );
     TS_ASSERT( ! iProp->documentation().compare("") );
-    TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, int> ) == *iProp->type_info()  );
+    TS_ASSERT( typeid( std::multimap<DateAndTime, int> ) == *iProp->type_info()  );
     //TS_ASSERT( iProp->isDefault() )
 
     TS_ASSERT( ! dProp->name().compare("doubleProp") );
     TS_ASSERT( ! dProp->documentation().compare("") );
-    TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, double> ) == *dProp->type_info()  );
+    TS_ASSERT( typeid( std::multimap<DateAndTime, double> ) == *dProp->type_info()  );
     ///TS_ASSERT( dProp->isDefault() )
 
     TS_ASSERT( ! sProp->name().compare("stringProp") );
     TS_ASSERT( ! sProp->documentation().compare("") );
-    TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, std::string> ) == *sProp->type_info()  );
+    TS_ASSERT( typeid( std::multimap<DateAndTime, std::string> ) == *sProp->type_info()  );
     //TS_ASSERT( sProp->isDefault() )
   }
 
@@ -120,8 +120,8 @@ public:
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
     TS_ASSERT_EQUALS( log->getTotalValue(), 21);
-    dateAndTime start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
-    dateAndTime stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
 
     //Since the filter is < stop, the last one is not counted, so there are  3 taken out.
 
@@ -150,19 +150,19 @@ public:
 
     TS_ASSERT_EQUALS( splitter.size(), 2);
     SplittingInterval s;
-    dateAndTime t;
+    DateAndTime t;
 
     s = splitter[0];
-    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:09");
-    TS_ASSERT_DELTA( s.start(), DateAndTime::get_from_absolute_time(t), 1000);
-    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:11");
-    TS_ASSERT_DELTA( s.stop(), DateAndTime::get_from_absolute_time(t), 1000);
+    t = DateAndTime("2007-11-30T16:17:09");
+    TS_ASSERT_DELTA( s.start(), t, 1e-3);
+    t = DateAndTime("2007-11-30T16:17:11");
+    TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
     s = splitter[1];
-    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:29");
-    TS_ASSERT_DELTA( s.start(), DateAndTime::get_from_absolute_time(t), 1000);
-    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:41");
-    TS_ASSERT_DELTA( s.stop(), DateAndTime::get_from_absolute_time(t), 1000);
+    t = DateAndTime("2007-11-30T16:17:29");
+    TS_ASSERT_DELTA( s.start(), t, 1e-3);
+    t = DateAndTime("2007-11-30T16:17:41");
+    TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
 
   }
@@ -199,26 +199,26 @@ public:
     }
 
     //Make a splitter
-    dateAndTime start, stop;
+    DateAndTime start, stop;
     TimeSplitterType splitter;
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
+    start = DateAndTime("2007-11-30T16:17:10");
+    stop = DateAndTime("2007-11-30T16:17:40");
     splitter.push_back( SplittingInterval(start, stop, 0) );
 
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:55");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:56");
+    start = DateAndTime("2007-11-30T16:17:55");
+    stop = DateAndTime("2007-11-30T16:17:56");
     splitter.push_back( SplittingInterval(start, stop, 1) );
 
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:56");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:01");
+    start = DateAndTime("2007-11-30T16:17:56");
+    stop = DateAndTime("2007-11-30T16:18:01");
     splitter.push_back( SplittingInterval(start, stop, 2) ); //just one entry
 
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:09");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:21");
+    start = DateAndTime("2007-11-30T16:18:09");
+    stop = DateAndTime("2007-11-30T16:18:21");
     splitter.push_back( SplittingInterval(start, stop, 3) );
 
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:45");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:22:50");
+    start = DateAndTime("2007-11-30T16:18:45");
+    stop = DateAndTime("2007-11-30T16:22:50");
     splitter.push_back( SplittingInterval(start, stop, 4) );
 
     log->splitByTime(splitter, outputs);
@@ -260,14 +260,14 @@ public:
     }
 
     //Make a splitter
-    dateAndTime start, stop;
+    DateAndTime start, stop;
     TimeSplitterType splitter;
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
+    start = DateAndTime("2007-11-30T16:17:10");
+    stop = DateAndTime("2007-11-30T16:17:40");
     splitter.push_back( SplittingInterval(start, stop, 0) );
 
-    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:35");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:59");
+    start = DateAndTime("2007-11-30T16:17:35");
+    stop = DateAndTime("2007-11-30T16:17:59");
     splitter.push_back( SplittingInterval(start, stop, 0) );
 
     log->splitByTime(splitter, outputs);

@@ -463,15 +463,17 @@ namespace Mantid
       std::vector<std::string> dV=s_timeSeries->time_tValue();
       std::vector<std::string> values;
       std::vector<double> times;
-      Kernel::dateAndTime t0;
+      Kernel::DateAndTime t0;
       bool first=true;
       for(size_t i=0;i<dV.size();i++)
       {
         std::stringstream ins;
         std::string val;
-        Kernel::dateAndTime time;
+        Kernel::DateAndTime time;
         ins << dV[i];
-        ins >> time;
+        boost::posix_time::ptime _ptime;
+        ins >> _ptime;
+        time.set_from_ptime(_ptime);
         /** MG 27/07/2010: The comment below was here when refactored. As the code is being used heavily and no bug has
             been reported about chopped off entries, nothing was changed. */
         // this is wrong, val only gets first word from string
@@ -487,7 +489,7 @@ namespace Mantid
           t0=time; // start time of log
           first=false;
         }
-        times.push_back(Kernel::DateAndTime::durationInSeconds(time-t0));
+        times.push_back(Kernel::DateAndTime::seconds_from_duration(time-t0));
       }
       // create log
       status=NXmakegroup(fileID,logName.c_str(),"NXlog");
@@ -498,7 +500,7 @@ namespace Mantid
       std::vector<std::string> attributes,avalues;
       writeNxStringArray("value", values,  attributes, avalues);
       // get ISO time, if t0 valid
-      avalues.push_back(Kernel::DateAndTime::create_ISO8601_String(t0));
+      avalues.push_back( t0.to_ISO8601_string());
 
       writeNxFloatArray("time", times,  attributes, avalues);
       status=NXclosegroup(fileID);

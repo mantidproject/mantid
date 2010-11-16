@@ -22,9 +22,9 @@ public:
   virtual ~fill2d() {}
   const std::string name() const { return "fill2d";}
   int version() const  { return 1;}
-  dateAndTime executionDate() const 
+  DateAndTime executionDate() const 
   {
-    dateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
+    DateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
 	  return dt;
   }
 
@@ -62,9 +62,9 @@ public:
   virtual ~add2d() {}
   const std::string name() const { return "add2d";}
   int version() const  { return 1;}
-  dateAndTime executionDate() const
+  DateAndTime executionDate() const
   {
-    dateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
+    DateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
 	  return dt;
   }
 
@@ -118,11 +118,11 @@ public:
 
   void testExecute()
   {
- /* //for debugging purpose 
+    /* //for debugging purpose
     std::string str;
 	std::getline(std::cin,str);*/
 
-	fill2d myAlg1,myAlg2, myAlg3;
+    fill2d myAlg1,myAlg2, myAlg3;
     add2d  manip;
     // create workspace to hold manipulate
     myAlg1.initialize();
@@ -137,10 +137,10 @@ public:
     TS_ASSERT_EQUALS( A_AH.size(), 1);
     TS_ASSERT_EQUALS( "fill2d", A_AH[0].name());
     TS_ASSERT_EQUALS( 1, A_AH[0].version());
-	// range of values is tested as execution duration,date is calculated
-	// inside the algorithm execute method using clock
-	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg1.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
+    // range of values is tested as execution duration,date is calculated
+    // inside the algorithm execute method using clock
+    TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
+    TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::seconds_from_duration( ( myAlg1.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
 
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& A_AP = A_AH[0].getProperties());
     const std::vector<PropertyHistory>& A_AP = A_AH[0].getProperties();
@@ -175,10 +175,10 @@ public:
     TS_ASSERT_EQUALS( B_AH.size(), 1);
     TS_ASSERT_EQUALS( "fill2d", B_AH[0].name());
     TS_ASSERT_EQUALS( 1, B_AH[0].version());
-	// range of values is tested as execution duration,date is calculated
-	// inside the algorithm execute method using clock
-	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg2.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
+    // range of values is tested as execution duration,date is calculated
+    // inside the algorithm execute method using clock
+    TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
+    TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::seconds_from_duration( ( myAlg2.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
 
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& B_AP = B_AH[0].getProperties());
     const std::vector<PropertyHistory>& B_AP = B_AH[0].getProperties();
@@ -220,11 +220,11 @@ public:
     TS_ASSERT_EQUALS( C_AH.size(), 4);
     TS_ASSERT_EQUALS( "add2d", C_AH[3].name());
     TS_ASSERT_EQUALS( 1, C_AH[3].version());
-	// range of values is tested as execution duration,date is calculated
-	// inside the algorithm execute method using clock
-	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg3.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
-	
+    // range of values is tested as execution duration,date is calculated
+    // inside the algorithm execute method using clock
+    TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
+    TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::seconds_from_duration( ( myAlg3.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
+
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& C_AP = C_AH[0].getProperties());
     const std::vector<PropertyHistory>& C_AP = C_AH[3].getProperties();
     TS_ASSERT_EQUALS(C_AP.size(), 3);

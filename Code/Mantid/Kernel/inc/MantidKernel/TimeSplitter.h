@@ -15,7 +15,7 @@ namespace Kernel
  * Class holding a start/end time and a destination for splitting
  * event lists and logs.
  *
- * The start/stop times are saved internally as PulseTimeType, for
+ * The start/stop times are saved internally as DateAndTime, for
  * fastest event list splitting.
  *
  * Author: Janik Zikovsky, SNS
@@ -28,15 +28,10 @@ public:
 
   SplittingInterval(const SplittingInterval& other);
 
-  SplittingInterval(const dateAndTime& start, const dateAndTime& stop, const int index);
+  SplittingInterval(const DateAndTime& start, const DateAndTime& stop, const int index);
 
-  SplittingInterval(const PulseTimeType& start, const PulseTimeType& stop, const int index);
-
-  PulseTimeType start() const;
-  PulseTimeType stop() const;
-
-  dateAndTime startDate() const;
-  dateAndTime stopDate() const;
+  DateAndTime start() const;
+  DateAndTime stop() const;
 
   double duration() const;
 
@@ -50,9 +45,9 @@ public:
 
 private:
     /// begin
-    PulseTimeType m_start;
+    DateAndTime m_start;
     /// end
-    PulseTimeType m_stop;
+    DateAndTime m_stop;
     /// Index of the destination
     int m_index;
 };

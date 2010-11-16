@@ -122,7 +122,7 @@ namespace Mantid
      * @param start Absolute start time. Any log entries at times >= to this time are kept.
      * @param stop Absolute stop time. Any log entries at times < than this time are kept.
      */
-    void PropertyManager::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+    void PropertyManager::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
     {
       //Iterate through all properties
       PropertyMap::const_iterator it;

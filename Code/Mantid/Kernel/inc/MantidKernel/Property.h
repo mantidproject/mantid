@@ -123,7 +123,7 @@ public:
 
   /// Add to this
   virtual Property& operator+=( Property * rhs );
-  virtual void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+  virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
   virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
 
   virtual int size() const;

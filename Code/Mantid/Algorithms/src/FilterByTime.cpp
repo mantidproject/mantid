@@ -96,7 +96,7 @@ void FilterByTime::exec()
 
 
   // ---- Find the start/end times ----
-  PulseTimeType start, stop;
+  DateAndTime start, stop;
 
   double start_dbl, stop_dbl;
   start_dbl = getProperty("StartTime");
@@ -109,16 +109,16 @@ void FilterByTime::exec()
   if ((start_str!="") && (stop_str!="") && (stop_dbl<=0.0) && (stop_dbl<=0.0))
   {
     //Use the absolute string
-    start = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String( start_str ) );
-    stop  = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String( stop_str ) );
+    start = DateAndTime( start_str );
+    stop  = DateAndTime( stop_str );
   }
   else
   if ((start_str=="") && (stop_str=="") && (stop_dbl> 0.0) && (stop_dbl> 0.0))
   {
     //Use the relative times in seconds.
-    PulseTimeType first = inputWS->getFirstPulseTime();
-    start = first + start_dbl*1000000000;
-    stop = first + stop_dbl*1000000000;
+    DateAndTime first = inputWS->getFirstPulseTime();
+    start = first + start_dbl;
+    stop = first + stop_dbl;
   }
   else
   {
@@ -178,10 +178,8 @@ void FilterByTime::exec()
 
   outputWS->doneAddingEventLists();
 
-  //Now filter out the run, using the dateAndTime type.
-  outputWS->mutableRun().filterByTime(
-      Kernel::DateAndTime::get_time_from_pulse_time(start),
-      Kernel::DateAndTime::get_time_from_pulse_time(stop) );
+  //Now filter out the run, using the DateAndTime type.
+  outputWS->mutableRun().filterByTime(start, stop);
 
 }
 

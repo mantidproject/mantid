@@ -46,7 +46,7 @@ public:
   }
 
 
-  void testTooManyParams()
+  void xtestTooManyParams()
   {
     setUp_Event();
     //Do the filtering now.
@@ -110,8 +110,6 @@ public:
 
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
-
-//    std::cout << Mantid::Kernel::DateAndTime::to_simple_string( Mantid::Kernel::DateAndTime::get_time_from_pulse_time( WS->getFirstPulseTime() ) ) << "\n";
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;

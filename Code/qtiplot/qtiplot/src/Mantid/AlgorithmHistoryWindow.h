@@ -68,7 +68,7 @@ public:
 	AlgExecSummaryGrpBox(QWidget*w):QGroupBox(w){}
 	AlgExecSummaryGrpBox(QString,QWidget*w);
 	~AlgExecSummaryGrpBox();
-	void setData(const double execDuration,const Mantid::Kernel::dateAndTime execDate);
+	void setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate);
 private:
 	QLineEdit* getAlgExecDurationCtrl()const {return m_execDurationEdit;}
 	QLineEdit* getAlgExecDateCtrl() const{ return m_execDateTimeEdit;}

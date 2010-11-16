@@ -197,7 +197,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
 
     //Get the times
     vector<double> time_double;
-    vector<dateAndTime> times;
+    vector<DateAndTime> times;
 
     try {
       file.openData("time");
@@ -230,7 +230,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     }
 
     //Convert to date and time
-    Kernel::dateAndTime start_time = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(start);
+    Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
 
     std::string time_units;
     file.getAttr("units", time_units);

@@ -237,9 +237,9 @@ void LoadLog::exec()
         inLogFile.close();
         continue;
       }
-      std::string dateAndTime;
+      std::string DateAndTime;
       std::stringstream ins(aLine);
-      ins >> dateAndTime;
+      ins >> DateAndTime;
 
       // read in what follows the date-time string in the log file and figure out
       // what type it is

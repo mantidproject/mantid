@@ -947,8 +947,8 @@ public:
     for (int i=0; i < events.size(); i++)
     {
       //Check that the times are within the given limits.
-      TS_ASSERT_LESS_THAN_EQUALS( 100, events[i].pulseTime());
-      TS_ASSERT_LESS_THAN( events[i].pulseTime(), 200);
+      TS_ASSERT_LESS_THAN_EQUALS( DateAndTime(100), events[i].pulseTime());
+      TS_ASSERT_LESS_THAN( events[i].pulseTime(), DateAndTime(200));
     }
   }
 
@@ -964,7 +964,7 @@ public:
     std::vector<WeightedEvent> eventsIn = el.getWeightedEvents();
     int numGood = 0;
     for (int i=0; i < eventsIn.size(); i++)
-      if ((eventsIn[i].pulseTime() >= 100) && (eventsIn[i].pulseTime() < 200))
+      if ((eventsIn[i].pulseTime() >= DateAndTime(100)) && (eventsIn[i].pulseTime() < DateAndTime(200)))
         numGood++;
 
     //Good # of events.
@@ -974,8 +974,8 @@ public:
     for (int i=0; i < events.size(); i++)
     {
       //Check that the times are within the given limits.
-      TS_ASSERT_LESS_THAN_EQUALS( 100, events[i].pulseTime());
-      TS_ASSERT_LESS_THAN( events[i].pulseTime(), 200);
+      TS_ASSERT_LESS_THAN_EQUALS( DateAndTime(100), events[i].pulseTime());
+      TS_ASSERT_LESS_THAN( events[i].pulseTime(), DateAndTime(200));
     }
   }
 
@@ -1168,7 +1168,7 @@ public:
     }
   }
 
-  void fake_data_only_two_times(PulseTimeType time1, PulseTimeType time2)
+  void fake_data_only_two_times(DateAndTime time1, DateAndTime time2)
   {
     //Clear the list
     el = EventList();

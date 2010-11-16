@@ -132,7 +132,7 @@ class DLLExport TimeSeriesProperty: public Property
 {
 private:
   /// typedef for the storage of a TimeSeries
-  typedef std::multimap<dateAndTime, TYPE> timeMap;
+  typedef std::multimap<DateAndTime, TYPE> timeMap;
   /// Holds the time series data 
   timeMap m_propertySeries;
 
@@ -181,12 +181,12 @@ public:
    * @param start Absolute start time. Any log entries at times >= to this time are kept.
    * @param stop Absolute stop time. Any log entries at times < than this time are kept.
    */
-  void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+  void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
     typename timeMap::iterator it;
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); /*increment within loop*/)
     {
-      dateAndTime t = it->first;
+      DateAndTime t = it->first;
 	  // Avoid iterator invalidation by caching current value and incrementing ahead of erase.
       typename timeMap::iterator it_current = it;
 	  ++it;
@@ -239,14 +239,14 @@ public:
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
     //Info of each splitter
-    dateAndTime start, stop;
+    DateAndTime start, stop;
     int index;
 
     while (itspl != splitter.end())
     {
       //Get the splitting interval times and destination
-      start = itspl->startDate();
-      stop = itspl->stopDate();
+      start = itspl->start();
+      stop = itspl->stop();
       index = itspl->index();
 
       //Skip the events before the start of the time
@@ -302,8 +302,8 @@ public:
     bool isGood;
     time_duration tol = DateAndTime::duration_from_seconds( TimeTolerance );
     int numgood = 0;
-    dateAndTime lastTime, t;
-    PulseTimeType start, stop;
+    DateAndTime lastTime, t;
+    DateAndTime start, stop;
 //    int count = 0;
 
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
@@ -331,7 +331,7 @@ public:
         if (isGood)
         {
           //Start of a good section
-          start = DateAndTime::get_from_absolute_time( t - tol );
+          start = t - tol;
         }
         else
         {
@@ -339,13 +339,13 @@ public:
           if (numgood == 1)
           {
             //There was only one point with the value. Use the last time, + the tolerance, as the end time
-            stop = DateAndTime::get_from_absolute_time( lastTime + tol );
+            stop = lastTime + tol;
             split.push_back( SplittingInterval(start, stop, 0) );
           }
           else
           {
             //At least 2 good values. Save the end time
-            stop = DateAndTime::get_from_absolute_time( lastTime + tol );
+            stop = lastTime + tol;
             split.push_back( SplittingInterval(start, stop, 0) );
           }
           //Reset the number of good ones, for next time
@@ -358,7 +358,7 @@ public:
     if (numgood > 0)
     {
       //The log ended on "good" so we need to close it using the last time we found
-      stop = DateAndTime::get_from_absolute_time( t + tol );
+      stop = t + tol;
       split.push_back( SplittingInterval(start, stop, 0) );
       numgood = 0;
     }
@@ -366,14 +366,14 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
-  /**  Return the time series as a correct C++ map<dateAndTime, TYPE>. All values
+  /**  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
    * are included.
    *
    * @return time series property values as map
    */
-  std::map<dateAndTime, TYPE> valueAsCorrectMap() const
+  std::map<DateAndTime, TYPE> valueAsCorrectMap() const
   {
-    std::map<dateAndTime, TYPE> asMap;
+    std::map<DateAndTime, TYPE> asMap;
     if (m_propertySeries.size() == 0)
       return asMap;
     typename timeMap::const_iterator p = m_propertySeries.begin();
@@ -399,11 +399,11 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**  Return the time series's times as a vector<dateAndTime>
+  /**  Return the time series's times as a vector<DateAndTime>
     */
-  std::vector<dateAndTime> timesAsVector() const
+  std::vector<DateAndTime> timesAsVector() const
   {
-    std::vector<dateAndTime> out;
+    std::vector<DateAndTime> out;
     if (m_propertySeries.size() == 0)
       return out;
     typename timeMap::const_iterator p = m_propertySeries.begin();
@@ -413,29 +413,12 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**  Return the time series's times as a vector<PulseTimeType>; converts from
-   * the dateAndTime type (internal) to PulseTimeType
-    */
-  std::vector<PulseTimeType> pulseTimesAsVector() const
-  {
-    std::vector<PulseTimeType> out;
-    if (m_propertySeries.size() == 0)
-      return out;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    for (; p != m_propertySeries.end(); p++)
-      out.push_back( DateAndTime::get_from_absolute_time(p->first) );
-    return out;
-  }
-
-
-
-  //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
    *  @param time The time as a boost::posix_time::ptime value
    *  @param value The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
-  bool addValue(const Kernel::dateAndTime &time, const TYPE value)
+  bool addValue(const Kernel::DateAndTime &time, const TYPE value)
   {
     m_size++;
     return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
@@ -449,7 +432,7 @@ public:
    */
   bool addValue(const std::string &time, const TYPE value)
   {
-    return addValue(Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(time), value);
+    return addValue(Kernel::DateAndTime(time), value);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -460,7 +443,9 @@ public:
    */
   bool addValue(const std::time_t &time, const TYPE value)
   {
-    return addValue(Kernel::DateAndTime::from_time_t(time), value);
+    Kernel::DateAndTime dt;
+    dt.set_from_time_t(time);
+    return addValue(dt, value);
   }
 
 
@@ -468,7 +453,7 @@ public:
   /** Returns the last time
    *  @return Value
    */
-  dateAndTime lastTime() const
+  DateAndTime lastTime() const
   {
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
@@ -492,7 +477,7 @@ public:
   /** Returns the first time
    *  @return Value
    */
-  dateAndTime firstTime() const
+  DateAndTime firstTime() const
   {
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
@@ -548,7 +533,8 @@ public:
     {
       try
       {
-        ins << p->first << "  " << p->second << std::endl;
+        ins << p->first.to_simple_string();
+        ins << "  " << p->second << std::endl;
       }
       catch (...)
       {
@@ -576,7 +562,7 @@ public:
     while (p != m_propertySeries.end())
     {
       std::stringstream line;
-      line << p->first << " " << p->second;
+      line << p->first.to_simple_string() << " " << p->second;
       values.push_back(line.str());
       p++;
     }
@@ -585,15 +571,15 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**  Return the time series as a C++ map<dateAndTime, TYPE>
+  /**  Return the time series as a C++ map<DateAndTime, TYPE>
    *
    * WARNING: THIS ONLY RETURNS UNIQUE VALUES, AND SKIPS ANY REPEATED VALUES!
    *   USE AT YOUR OWN RISK! Try valueAsCorrectMap() instead.
    * @return time series property values as map
    */
-  std::map<dateAndTime, TYPE> valueAsMap() const
+  std::map<DateAndTime, TYPE> valueAsMap() const
   {
-    std::map<dateAndTime, TYPE> asMap;
+    std::map<DateAndTime, TYPE> asMap;
     if (m_propertySeries.size() == 0)
       return asMap;
     typename timeMap::const_iterator p = m_propertySeries.begin();
@@ -629,7 +615,7 @@ public:
    *  @param new_values A vector of values, each corresponding to the time offset in time_sec.
    *    Vector sizes must match.
    */
-  void create(const Kernel::dateAndTime &start_time, std::vector<double> time_sec, const std::vector<TYPE> new_values)
+  void create(const Kernel::DateAndTime &start_time, std::vector<double> time_sec, const std::vector<TYPE> new_values)
   {
     if (time_sec.size() != new_values.size())
       throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
@@ -638,9 +624,7 @@ public:
     size_t num = new_values.size();
     for (size_t i=0; i < num; i++)
     {
-      Kernel::dateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( time_sec[i] );
-      //Kernel::dateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( i );
-      //std::cout << i << ":" << Kernel::DateAndTime::to_simple_string(time) << "\n";
+      Kernel::DateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( time_sec[i] );
       this->addValue(time, new_values[i]);
     }
   }
@@ -650,7 +634,7 @@ public:
    *  @param t time
    *  @return Value at time \a t
    */
-  TYPE getSingleValue(const dateAndTime& t) const
+  TYPE getSingleValue(const DateAndTime& t) const
   {
     typename timeMap::const_reverse_iterator it = m_propertySeries.rbegin();
     for (; it != m_propertySeries.rend(); it++)
@@ -723,7 +707,7 @@ public:
       throw std::runtime_error("TimeSeriesProperty is empty");
 
     typename timeMap::const_iterator it = m_propertySeries.begin();
-    dateAndTime t = it->first;
+    DateAndTime t = it->first;
     for (int j = 0; it != m_propertySeries.end(); it++)
     {
       if (m_propertySeries.count(it->first) > 1)
@@ -746,7 +730,7 @@ public:
           time_duration d = it->first - it2->first;
 
           //Make up an end time.
-          dateAndTime endTime = it->first + d;
+          DateAndTime endTime = it->first + d;
           return TimeInterval(it->first, endTime);
         }
         if (it1 != m_propertySeries.end() && it1->first == it->first)
@@ -768,8 +752,8 @@ public:
    */
   void filterWith(const TimeSeriesProperty<bool>* filter)
   {
-    std::map<dateAndTime, bool> fmap = filter->valueAsMap();
-    std::map<dateAndTime, bool>::const_iterator f = fmap.begin();
+    std::map<DateAndTime, bool> fmap = filter->valueAsMap();
+    std::map<DateAndTime, bool>::const_iterator f = fmap.begin();
 	if(fmap.empty()) return;
     typename timeMap::iterator it = m_propertySeries.begin();
     if (f->first < it->first)// expand this series
@@ -867,13 +851,13 @@ public:
   /// Restores the property to the unsorted state
   void clearFilter()
   {
-    std::map<dateAndTime, TYPE> pmap = valueAsMap();
+    std::map<DateAndTime, TYPE> pmap = valueAsMap();
     m_propertySeries.clear();
     m_size = 0;
     if (pmap.size() == 0)
       return;
     TYPE val = pmap.begin()->second;
-    typename std::map<dateAndTime, TYPE>::const_iterator it = pmap.begin();
+    typename std::map<DateAndTime, TYPE>::const_iterator it = pmap.begin();
     addValue(it->first, it->second);
     for (; it != pmap.end(); it++)
     {
@@ -958,8 +942,8 @@ public:
     TimeSeriesPropertyStatistics out = getDataStatistics(this->valuesAsVector());
 
     //Duration: the last - the first times
-    std::map<dateAndTime, TYPE> map = this->valueAsCorrectMap();
-    out.duration = DateAndTime::durationInSeconds(  map.rbegin()->first - map.begin()->first  );
+    std::map<DateAndTime, TYPE> map = this->valueAsCorrectMap();
+    out.duration = DateAndTime::seconds_from_duration(  map.rbegin()->first - map.begin()->first  );
 
     return out;
   }

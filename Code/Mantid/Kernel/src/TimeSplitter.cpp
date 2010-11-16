@@ -15,15 +15,8 @@ SplittingInterval::SplittingInterval() :
 
 }
 
-/// Constructor using dateAndTime
-SplittingInterval::SplittingInterval(const dateAndTime& start, const dateAndTime& stop, const int index) :
-    m_start( DateAndTime::get_from_absolute_time(start) ), m_stop( DateAndTime::get_from_absolute_time(stop) ), m_index(index)
-{
-
-}
-
-/// Constructor using PulseTimeType
-SplittingInterval::SplittingInterval(const PulseTimeType& start, const PulseTimeType& stop, const int index) :
+/// Constructor using DateAndTime
+SplittingInterval::SplittingInterval(const DateAndTime& start, const DateAndTime& stop, const int index) :
     m_start(start), m_stop(stop), m_index(index)
 {
 }
@@ -35,33 +28,21 @@ SplittingInterval::SplittingInterval(const SplittingInterval& other) :
 }
 
 /// Return the start time
-PulseTimeType SplittingInterval::start() const
+DateAndTime SplittingInterval::start() const
 {
   return m_start;
 }
 
 /// Return the stop time
-PulseTimeType SplittingInterval::stop() const
+DateAndTime SplittingInterval::stop() const
 {
   return m_stop;
-}
-
-/// Return the start time
-dateAndTime SplittingInterval::startDate() const
-{
-  return DateAndTime::get_time_from_pulse_time(m_start);
-}
-
-/// Return the stop time
-dateAndTime SplittingInterval::stopDate() const
-{
-  return DateAndTime::get_time_from_pulse_time(m_stop);
 }
 
 /// Returns the duration in seconds
 double SplittingInterval::duration() const
 {
-  return DateAndTime::durationInSeconds( stopDate() - startDate() );
+  return DateAndTime::seconds_from_duration( m_stop - m_start );
 }
 
 /// Return the index (destination of this split time block)
@@ -215,8 +196,8 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
   while (it != a.end())
   {
     //All following intervals will start at or after this one
-    PulseTimeType start = it->start();
-    PulseTimeType stop = it->stop();
+    DateAndTime start = it->start();
+    DateAndTime stop = it->stop();
 
     //Keep looking for the next interval where there is a gap (start > old stop);
     while ((it != a.end()) && (it->start() <= stop))
@@ -276,7 +257,7 @@ TimeSplitterType operator ~(const TimeSplitterType& a)
   //No entries: then make a "filter" that keeps everything
   if ((temp.size()==0) )
   {
-    out.push_back( SplittingInterval(DateAndTime::getMinimumPulseTime(), DateAndTime::getMaximumPulseTime(), 0 ) );
+    out.push_back( SplittingInterval(DateAndTime::minimum(), DateAndTime::maximum(), 0 ) );
     return out;
   }
 
@@ -285,16 +266,16 @@ TimeSplitterType operator ~(const TimeSplitterType& a)
   if (ait != temp.end())
   {
     //First entry; start at -infinite time
-    out.push_back( SplittingInterval( DateAndTime::getMinimumPulseTime(), ait->start(), 0) );
+    out.push_back( SplittingInterval( DateAndTime::minimum(), ait->start(), 0) );
     //Now start at the second entry
     while (ait != temp.end())
     {
-      PulseTimeType start, stop;
+      DateAndTime start, stop;
       start = ait->stop();
       ait++;
       if (ait==temp.end())
       { //Reached the end - go to inf
-        stop = DateAndTime::getMaximumPulseTime();
+        stop = DateAndTime::maximum();
       }
       else
       { //Stop at the start of the next entry

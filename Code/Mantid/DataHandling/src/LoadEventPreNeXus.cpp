@@ -67,9 +67,6 @@ static const PixelType ERROR_PID = 0x80000000;
 /// The maximum possible tof as native type
 static const uint32_t MAX_TOF_UINT32 = std::numeric_limits<uint32_t>::max();
 
-/// The number of nanoseconds in a second.
-static const uint32_t NANO_TO_SEC = 1000000000;
-
 /// Conversion factor between 100 nanoseconds and 1 microsecond.
 static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
@@ -479,7 +476,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   uint32_t period;
 
   //Starting pulse time
-  PulseTimeType pulsetime = 0;
+  DateAndTime pulsetime = 0;
   int pulse_i = 0;
   int numPulses = static_cast<int>(this->pulsetimes.size());
   if (static_cast<int>(event_indices.size()) < numPulses)
@@ -587,9 +584,8 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
   {
-    //Get an absolute time from the pulse time
-    Mantid::Kernel::dateAndTime time = Mantid::Kernel::DateAndTime::get_time_from_pulse_time( this->pulsetimes[i] );
-    log->addValue(time, this->proton_charge[i]);
+    //Add the time and associated charge to the log
+    log->addValue(this->pulsetimes[i], this->proton_charge[i]);
   }
 
   /// TODO set the units for the log
@@ -660,27 +656,6 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
 
 }
 
-//-----------------------------------------------------------------------------
-/** Get the pulse time with nanosecond resolution, as int64_t from GPS_EPOCH
- * @param sec seconds
- * @param nano nanoseconds
- */
-static PulseTimeType getTime(uint32_t seconds, uint32_t nanoseconds)
-{
-  // push the nanoseconds to be less than one second
-  PulseTimeType sec = seconds;
-  PulseTimeType nano = nanoseconds;
-
-  if (nano / NANO_TO_SEC > 0)
-  {
-    //Add to the # of seconds
-    sec += nano / NANO_TO_SEC;
-    nano = nano % NANO_TO_SEC;
-  }
-
-  //Time is returned as the number of nanoseconds since GPS_EPOCH (Jan 1, 1990)
-  return sec * NANO_TO_SEC + nano;
-}
 
 //-----------------------------------------------------------------------------
 /** Read a pulse ID file
@@ -727,7 +702,7 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool 
   double temp;
   for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)
   {
-    this->pulsetimes.push_back(getTime((*it).seconds, (*it).nanoseconds));
+    this->pulsetimes.push_back( DateAndTime( (long int) (*it).seconds, (long int) (*it).nanoseconds));
     this->event_indices.push_back((*it).event_index);
     temp = (*it).pCurrent;
     this->proton_charge.push_back(temp);

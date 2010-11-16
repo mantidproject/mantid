@@ -52,7 +52,7 @@
 using namespace std;
 
 using namespace Mantid::API;
-using Mantid::Kernel::dateAndTime;
+using Mantid::Kernel::DateAndTime;
 namespace MantidException = Mantid::Kernel::Exception;
 
 
@@ -1807,7 +1807,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   //Get a map of time/value. This greatly speeds up display.
   // NOTE: valueAsMap() skips repeated values.
-  std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
+  std::map<DateAndTime, double> time_value_map = flt.data()->valueAsMap();
   int rowcount = time_value_map.size();
   int colCount = 2;
   Table* t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "", appWindow(), 0);
@@ -1819,14 +1819,14 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   label.replace("_","-");
 
   //Get the starting time of the log.
-  Mantid::Kernel::dateAndTime startTime;
+  Mantid::Kernel::DateAndTime startTime;
   if (time_value_map.size() > 0)
   {
     startTime = time_value_map.begin()->first;
   }
 
   //Make a unique title, and put in the start time of the log
-  QString title = label + QString::fromStdString( " (" + Mantid::Kernel::DateAndTime::to_simple_string(startTime) + ")" );
+  QString title = label + QString::fromStdString( " (" + startTime.to_simple_string() + ")" );
   appWindow()->initTable(t, appWindow()->generateUniqueName(title));
 
   //Toggle to switch between using the real date or the change in seconds.
@@ -1949,12 +1949,12 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   }
 
-  Mantid::Kernel::dateAndTime lastTime;
+  Mantid::Kernel::DateAndTime lastTime;
   double lastValue;
 
   //Iterate through the time-value map.
   int i = 0;
-  std::map<dateAndTime, double>::iterator it = time_value_map.begin();
+  std::map<DateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
     for (; it!=time_value_map.end(); it++)
@@ -1967,14 +1967,13 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       if (useAbsoluteDate)
       {
         //Convert time into string
-        //std::string time_string = Mantid::Kernel::DateAndTime::to_string(lastTime, "%Y-%b-%d %H:%M:%S" );
-        std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
+        std::string time_string = lastTime.to_simple_string();
       }
       else
       {
         //How many seconds elapsed?
         Mantid::Kernel::time_duration elapsed = lastTime - startTime;
-        double seconds = Mantid::Kernel::DateAndTime::durationInSeconds(elapsed);
+        double seconds = Mantid::Kernel::DateAndTime::seconds_from_duration(elapsed);
 
         //Output with 6 decimal points
         std::ostringstream oss;
@@ -1996,7 +1995,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     {
       rowcount = time_value_map.size();
       if (rowcount == t->numRows()) t->addRows(1);
-      std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(flt.filter()->lastTime());
+      std::string time_string = flt.filter()->lastTime().to_simple_string();
       t->setText(rowcount,0,QString::fromStdString(time_string));
       t->setCell(rowcount,1,lastValue);
     }
@@ -2031,8 +2030,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   // Set x-axis label format
   if (useAbsoluteDate)
   {
-    Mantid::Kernel::dateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
-    QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_localtime_t( label_as_ptime ) );
+    Mantid::Kernel::DateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
+    QDateTime dt = QDateTime::fromTime_t( label_as_ptime.to_localtime_t() );
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
     g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
   }

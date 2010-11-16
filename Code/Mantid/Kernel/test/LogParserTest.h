@@ -45,25 +45,25 @@ public:
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
-        std::map<dateAndTime, double> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, double>::iterator v= vmap.begin();
+        std::map<DateAndTime, double> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, double>::iterator v= vmap.begin();
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, 1);
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
 
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
-        std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
+        std::map<DateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
+        ti_data = rv->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),8.4904, 0.001);
@@ -92,26 +92,26 @@ public:
         Property* p1 = lp.createLogProperty(log_num_late.path(),"late");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
-        std::map<dateAndTime, double> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, double>::iterator v= vmap.begin();
+        std::map<DateAndTime, double> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, double>::iterator v= vmap.begin();
 
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 8);
         TS_ASSERT_EQUALS(v->second, 2);
 
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
-        std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
+        std::map<DateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
+        ti_data = rv->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),8.4941, 0.001);
@@ -127,25 +127,25 @@ public:
         Property* p1 = lp.createLogProperty(log_num_early.path(),"early");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
-        std::map<dateAndTime, double> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, double>::iterator v= vmap.begin();
+        std::map<DateAndTime, double> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, double>::iterator v= vmap.begin();
 
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 8);
         TS_ASSERT_EQUALS(v->second, 1);
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
-        std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
+        std::map<DateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 8);
-        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
+        ti_data = rv->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 23);
         TS_ASSERT_DELTA(timeMean(p1),4.9090, 0.001);
@@ -161,13 +161,13 @@ public:
         Property* p1 = lp.createLogProperty(log_num_single.path(),"single");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
-        std::map<dateAndTime, double> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, double>::iterator v= vmap.begin();
+        std::map<DateAndTime, double> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, double>::iterator v= vmap.begin();
 
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 1);
         TS_ASSERT_EQUALS(v->second, 4);
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         //Can't get a valid mean with a single time and no intervals in it.
@@ -184,24 +184,24 @@ public:
         Property* p1 = lp.createLogProperty(log_str.path(),"str");
         TS_ASSERT(p1);
         TimeSeriesProperty<std::string>* tp1 = dynamic_cast<TimeSeriesProperty<std::string>*>(p1);
-        std::map<dateAndTime, std::string> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, std::string>::iterator v= vmap.begin();
+        std::map<DateAndTime, std::string> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, std::string>::iterator v= vmap.begin();
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, "   line 1");
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;
         // time 4
         TS_ASSERT_EQUALS(v->second, "   line 4");
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
-        std::map<dateAndTime, std::string>::reverse_iterator rv = vmap.rbegin();
+        std::map<DateAndTime, std::string>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, "   line 9");
-        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
+        ti_data = rv->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         // assert_throws(timeMean(p1));
@@ -216,22 +216,22 @@ public:
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
-        std::map<dateAndTime, double> vmap = tp1->valueAsMap();
-        std::map<dateAndTime, double>::iterator v= vmap.begin();
+        std::map<DateAndTime, double> vmap = tp1->valueAsMap();
+        std::map<DateAndTime, double>::iterator v= vmap.begin();
 
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, 1);
-        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+        ti_data = v->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(!isNaN(v->second));
         // last time
-        std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
+        std::map<DateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
+        ti_data = rv->first.to_tm(); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),8.4904, 0.001);

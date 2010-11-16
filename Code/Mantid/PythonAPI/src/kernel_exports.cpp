@@ -99,7 +99,7 @@ namespace PythonAPI
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
               .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<double>::getStatistics)
               .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
-              .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::pulseTimesAsVector)
+              .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
     	      ;
   }
   

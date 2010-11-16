@@ -179,7 +179,7 @@ Property& Property::operator+=( Property * rhs )
  * @param start the beginning time to filter from
  * @param stop the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
 {
   (void) start; //Avoid compiler warning
   (void) stop; //Avoid compiler warning

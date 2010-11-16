@@ -10,7 +10,7 @@ namespace API
 {
 
 using Kernel::Property;
-using Kernel::dateAndTime;
+using Kernel::DateAndTime;
 
 /** Constructor
  *  @param alg      A pointer to the algorithm for which the history should be constructed
@@ -18,7 +18,7 @@ using Kernel::dateAndTime;
  *  @param duration The time (in seconds) that it took to run this algorithm (optional)
  *  @param uexeccount an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start, const double& duration,unsigned int uexeccount) :
+AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
@@ -42,7 +42,7 @@ AlgorithmHistory::~AlgorithmHistory()
     \param duration The time (in seconds) that it took to run this algorithm (optional).
 	 \param uexeccount  an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start, const double& duration,unsigned int uexeccount) :
+AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
   m_executionDuration(duration),m_execCount(uexeccount)
 {
@@ -62,7 +62,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
  *  @param start    The start time of the algorithm execution
  *  @param duration The time (in seconds) that it took to run this algorithm
  */
-void AlgorithmHistory::addExecutionInfo(const dateAndTime& start, const double& duration)
+void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& duration)
 {
   m_executionDate = start;
   m_executionDuration = duration;
@@ -88,12 +88,9 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
   os << std::string(indent,' ') << "Algorithm: " << m_name;
   os << std::string(indent,' ') << " v" << m_version << std::endl;
-  if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime)
+  if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime())
   {
-    char buffer [25];
-    std::tm date_as_tm = Mantid::Kernel::DateAndTime::to_tm( m_executionDate );
-    strftime (buffer,25,"%Y-%b-%d %H:%M:%S", &date_as_tm);
-    os << std::string(indent,' ') << "Execution Date: " << buffer<<std::endl;
+    os << std::string(indent,' ') << "Execution Date: " << m_executionDate.to_string() <<std::endl;
     os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
   }
   std::vector<Kernel::PropertyHistory>::const_iterator it;

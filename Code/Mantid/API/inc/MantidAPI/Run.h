@@ -55,7 +55,7 @@ namespace Mantid
       /// Addition
       Run& operator+=(const Run& rhs);
 
-      void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+      void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
 
       /// Add data to the object in the form of a property

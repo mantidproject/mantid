@@ -78,21 +78,20 @@ public:
 
           //Let's compare the proton_charge logs
           Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-          std::map<dateAndTime, double> logMap = log->valueAsCorrectMap();
+          std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
           Kernel::TimeSeriesProperty<double> * log2 = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS2->mutableRun().getProperty("proton_charge") );
-          std::map<dateAndTime, double> logMap2 = log2->valueAsCorrectMap();
-          std::map<dateAndTime, double>::iterator it, it2;
+          std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
+          std::map<DateAndTime, double>::iterator it, it2;
 
           it = logMap.begin();
           it2 = logMap2.begin();
-          Kernel::PulseTimeType start = DateAndTime::get_from_absolute_time(it->first);
+          Kernel::DateAndTime start = it->first;
           for (; it != logMap.end(); )
           {
-            //std::cout << DateAndTime::to_simple_string( it->first) << " --- " << DateAndTime::to_simple_string( it2->first) <<  "\n";
             //Same times within a millisecond
             //TS_ASSERT_DELTA( it->first, it2->first, DateAndTime::duration_from_seconds(1e-3));
             //Same times?
-            TS_ASSERT_LESS_THAN( fabs(DateAndTime::durationInSeconds(it->first - it2->first)), 1); //TODO: Fix the nexus file times here
+            TS_ASSERT_LESS_THAN( fabs(DateAndTime::seconds_from_duration(it->first - it2->first)), 1); //TODO: Fix the nexus file times here
             //Same proton charge?
             TS_ASSERT_DELTA( it->second, it2->second, 1e-5);
             it++;

@@ -178,15 +178,15 @@ public:
 
     //Get the start time of all pulses
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( ew->mutableRun().getProperty("proton_charge") );
-    std::map<dateAndTime, double> logMap = log->valueAsMap();
-    std::map<dateAndTime, double>::iterator it, it2;
+    std::map<DateAndTime, double> logMap = log->valueAsMap();
+    std::map<DateAndTime, double>::iterator it, it2;
     it = logMap.begin();
-    Kernel::PulseTimeType start = DateAndTime::get_from_absolute_time(it->first);
+    Kernel::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getEventListPtr(1000)->getEvents();
     for (int i=0; i < events1.size(); i++)
     {
-      std::cout << (events1[i].pulseTime()-start)/1e9 << " sec \n";
+      std::cout << (events1[i].pulseTime()-start) << " sec \n";
     }
   }
 

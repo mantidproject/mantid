@@ -50,13 +50,13 @@ protected:
    * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
    *
    * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
-   * @return a PulseTimeType
+   * @return a DateAndTime
    */
-  Mantid::Kernel::PulseTimeType m_pulsetime;
+  Mantid::Kernel::DateAndTime m_pulsetime;
 
 public:
   /// Constructor, specifying the time of flight and the frame id
-  TofEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime);
+  TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
 
   /// Constructor, copy from another TofEvent object
   TofEvent(const TofEvent&);
@@ -77,7 +77,7 @@ public:
   double tof() const;
 
   /// Return the frame id
-  Mantid::Kernel::PulseTimeType pulseTime() const;
+  Mantid::Kernel::DateAndTime pulseTime() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
@@ -111,7 +111,7 @@ private:
 public:
 
   /// Constructor, full
-  WeightedEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float errorSquared);
+  WeightedEvent(double time_of_flight, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared);
 
   WeightedEvent(const TofEvent&, float weight, float errorSquared);
 
@@ -284,7 +284,7 @@ public:
 
   void reverse();
 
-  void filterByPulseTime(Kernel::PulseTimeType start, Kernel::PulseTimeType stop, EventList & output) const;
+  void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
   void splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const;
 

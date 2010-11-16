@@ -103,7 +103,7 @@ public:
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
-    std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
+    std::map<DateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),37);
     TS_ASSERT_EQUALS(l_timeSeriesDouble->nthValue(10),180.0);
     std::string timeSeriesString = l_timeSeriesDouble->value();
@@ -343,7 +343,7 @@ public:
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
-    std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
+    std::map<DateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),42);
     TS_ASSERT_DELTA(l_timeSeriesDouble->nthValue(10),7.3146,0.0001);
     std::string timeSeriesString = l_timeSeriesDouble->value();
@@ -445,7 +445,7 @@ public:
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
-    std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
+    std::map<DateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),31);
     TS_ASSERT_DELTA(l_timeSeriesDouble->nthValue(10),10.644,0.0001);
     std::string timeSeriesString = l_timeSeriesDouble->value();

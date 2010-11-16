@@ -89,9 +89,9 @@ namespace Mantid
       double filter_tof_max;
 
       /// Filter by start time
-      Kernel::PulseTimeType filter_time_start;
+      Kernel::DateAndTime filter_time_start;
       /// Filter by stop time
-      Kernel::PulseTimeType filter_time_stop;
+      Kernel::DateAndTime filter_time_stop;
 
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
@@ -102,7 +102,7 @@ namespace Mantid
       double shortest_tof;
 
       /// List of the absolute time of each pulse
-      std::vector<Kernel::PulseTimeType> pulseTimes;
+      std::vector<Kernel::DateAndTime> pulseTimes;
 
       void loadBankEventData(std::string entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);

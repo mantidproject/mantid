@@ -40,8 +40,8 @@ namespace Mantid
       std::ifstream file(eventFName.c_str());
       if (!file)
       {
-        periods->addValue(Kernel::dateAndTime() + Kernel::DateAndTime::oneSecond, 1);
-        status->addValue(Kernel::dateAndTime() + Kernel::DateAndTime::oneSecond,true);
+        periods->addValue(Kernel::DateAndTime() + Kernel::DateAndTimeHelpers::oneSecond, 1);
+        status->addValue(Kernel::DateAndTime() + Kernel::DateAndTimeHelpers::oneSecond,true);
         g_log.warning()<<"Cannot open ICPevent file "<<eventFName<<". Period 1 assumed for all data.\n";
         return;
       }
@@ -112,8 +112,8 @@ namespace Mantid
       const Kernel::TimeSeriesProperty<std::string>* icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string>*>(log);
       if (!icpLog || icpLog->size() == 0)
       {
-        periods->addValue(Kernel::dateAndTime(),1);
-        status->addValue(Kernel::dateAndTime(),true);
+        periods->addValue(Kernel::DateAndTime(),1);
+        status->addValue(Kernel::DateAndTime(),true);
         g_log.warning()<<"Cannot process ICPevent log. Period 1 assumed for all data.\n";
         return;
       }
@@ -132,8 +132,8 @@ namespace Mantid
 
       m_nOfPeriods = 1;
 
-      std::map<Kernel::dateAndTime, std::string> logm = icpLog->valueAsMap();
-      std::map<Kernel::dateAndTime, std::string>::const_iterator it = logm.begin();
+      std::map<Kernel::DateAndTime, std::string> logm = icpLog->valueAsMap();
+      std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
 
       for(;it!=logm.end();it++)
       {
@@ -266,8 +266,8 @@ namespace Mantid
       std::ostringstream ostr;
       ostr<<period;
       Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
-      std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
-      std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
+      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
       if (it->second != period)
         p->addValue(it->first,false);
       for(;it!=pMap.end();it++)
@@ -281,8 +281,8 @@ namespace Mantid
     {
       Kernel::TimeSeriesProperty<int>* p = new Kernel::TimeSeriesProperty<int> ("periods");
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
-      std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
-      std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
+      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
       for(;it!=pMap.end();it++)
         p->addValue(it->first, it->second);
       return p;
@@ -325,10 +325,10 @@ namespace Mantid
         Kernel::TimeInterval t = dp->nthInterval(i);
         Kernel::time_duration dt = t.length();
         total += dt;
-        res += dp->nthValue(i) * Kernel::DateAndTime::durationInSeconds(dt);
+        res += dp->nthValue(i) * Kernel::DateAndTime::seconds_from_duration(dt);
       }
 
-      double total_seconds = Kernel::DateAndTime::durationInSeconds(total);
+      double total_seconds = Kernel::DateAndTime::seconds_from_duration(total);
       if (total_seconds > 0) res /= total_seconds;
 
       return res;

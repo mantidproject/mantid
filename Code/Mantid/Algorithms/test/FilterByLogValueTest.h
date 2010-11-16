@@ -80,12 +80,6 @@ public:
     outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
     TS_ASSERT( outWS ); //workspace is loaded
 
-//    TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> * >(outWS->run().getProperty("proton_charge"));
-//    std::vector<dateAndTime> times = log->timesAsVector();
-//    for (std::size_t i=0; i<times.size(); i++)
-//      std::cout << times[i] << " = " << DateAndTime::get_from_absolute_time(times[i]) << "\n";
-
-
     //Things that haven't changed
     TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), WS->getNumberHistograms());

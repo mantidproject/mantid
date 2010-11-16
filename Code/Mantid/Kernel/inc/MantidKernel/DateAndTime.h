@@ -12,18 +12,8 @@ namespace Mantid
 namespace Kernel
 {
 
-/// The date-and-time is currently stored as a boost::posix_time::ptime
-typedef boost::posix_time::ptime dateAndTime;
-
 /// Durations and time intervals
 typedef boost::posix_time::time_duration time_duration;
-
-/** Typedef of the data structure used to store the pulse times. A signed 64-bit int
- * of the # of nanoseconds since Jan 1, 1990.
- */
-typedef int64_t PulseTimeType;
-
-
 
 
 //=============================================================================================
@@ -37,11 +27,80 @@ typedef int64_t PulseTimeType;
  *
  *
  * */
-#pragma pack(push, 1) //Make the compiler pack the data size aligned to 1-byte, to use as little space as possible
-class mtdTime
+
+//Make the compiler pack the data size aligned to 1-byte, to use as little space as possible
+#pragma pack(push, 1)
+DLLExport class DateAndTime
 {
 public:
-  mtdTime() {}
+  explicit DateAndTime();
+  DateAndTime(const long int total_nanoseconds);
+  DateAndTime(const std::string ISO8601_string);
+  DateAndTime(const boost::posix_time::ptime _ptime);
+  DateAndTime(const double seconds, const double nanoseconds);
+  DateAndTime(const long seconds, const long nanoseconds);
+  DateAndTime(const int seconds, const int nanoseconds);
+
+  void set_from_ptime(boost::posix_time::ptime _ptime);
+  boost::posix_time::ptime to_ptime() const;
+
+  void set_from_time_t(std::time_t _timet);
+  std::time_t to_time_t() const;
+  std::tm to_localtime_tm() const;
+  std::time_t to_localtime_t() const;
+  std::tm to_tm() const;
+
+  void set_from_ISO8601_string(const std::string str);
+  std::string to_simple_string() const;
+  std::string to_string(const std::string format = "%Y-%b-%d %H:%M:%S") const;
+  std::string to_ISO8601_string() const;
+
+  void set_to_maximum();
+  void set_to_minimum();
+
+  int year() const;
+  int month() const;
+  int day() const;
+  int hour() const;
+  int minute() const;
+  int second() const;
+  int nanoseconds() const;
+
+  bool operator==(const DateAndTime& rhs) const;
+  bool operator==(const boost::posix_time::ptime& rhs) const;
+  bool operator!=(const DateAndTime& rhs) const;
+  bool operator<(const DateAndTime& rhs) const;
+  bool operator<=(const DateAndTime& rhs) const;
+  bool operator>(const DateAndTime& rhs) const;
+  bool operator>=(const DateAndTime& rhs) const;
+
+  DateAndTime operator+(const int64_t nanosec) const;
+  DateAndTime& operator+=(const int64_t nanosec);
+  DateAndTime operator-(const int64_t nanosec) const;
+  DateAndTime& operator-=(const int64_t nanosec);
+
+  DateAndTime operator+(const time_duration& td) const;
+  DateAndTime& operator+=(const time_duration& td);
+  DateAndTime operator-(const time_duration& td) const;
+  DateAndTime& operator-=(const time_duration& td);
+
+  DateAndTime operator+(const double seconds) const;
+  DateAndTime& operator+=(const double seconds);
+  DateAndTime operator-(const double seconds) const;
+  DateAndTime& operator-=(const double seconds);
+
+  time_duration operator-(const DateAndTime& rhs) const;
+
+  //-------------- STATIC FUNCTION -----------------------
+  static DateAndTime get_current_time();
+  static DateAndTime maximum();
+  static DateAndTime minimum();
+  static double seconds_from_duration(time_duration td);
+  static time_duration duration_from_seconds(double seconds);
+  static int64_t nanoseconds_from_duration(const time_duration & td);
+  static int64_t nanoseconds_from_seconds(double sec);
+  static time_duration duration_from_nanoseconds(int64_t dur);
+  static const DateAndTime defaultTime();
 
 private:
   ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
@@ -53,77 +112,25 @@ private:
 
 
 
-namespace DateAndTime
+
+namespace DateAndTimeHelpers
 {
 
 /// The difference in seconds between standard unix and gps epochs.
 static const uint32_t EPOCH_DIFF = 631152000;
 
 /// The epoch for GPS times.
-static const dateAndTime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
-
-/// Approximate maximum date that can be represented a PulseTimeType
-static const dateAndTime PULSETIME_MAX_DATE(boost::gregorian::date(2282, 1, 1));
-
-/// Maximum PulseTimeType value
-static const PulseTimeType PULSETIME_MAX = PulseTimeType(+6e17);
-
-/// Approximate minimum date that can be represented a a PulseTimeType
-static const dateAndTime PULSETIME_MIN_DATE(boost::gregorian::date(1698, 1, 1));
-
-/// Minimum PulseTimeType value
-static const PulseTimeType PULSETIME_MIN = PulseTimeType(-6e17);
-
-
-/// The epoch for Unix times.
-static const dateAndTime UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
+static const boost::posix_time::ptime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
 
 /// Const of one second time duration
 static const time_duration oneSecond = boost::posix_time::time_duration(0,0,1,0);
 
-/// A default date and time to use when time is not specified
-static const dateAndTime defaultTime = boost::posix_time::ptime( boost::gregorian::date(1970,1,1) );
-
-DLLExport double durationInSeconds(time_duration duration);
-
-DLLExport time_duration duration_from_seconds(double duration);
-
 DLLExport time_t utc_mktime(struct tm *utctime);
-
-DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str);
-
-DLLExport std::string create_ISO8601_String(const dateAndTime &time);
-
-DLLExport std::string to_simple_string(const dateAndTime &time);
-
-DLLExport std::string to_string(const dateAndTime &time, const char *format);
-
-DLLExport std::time_t to_time_t(const dateAndTime &time);
-
-DLLExport std::time_t to_localtime_t(const dateAndTime &time);
-
-DLLExport dateAndTime from_time_t(const std::time_t &time);
-
-DLLExport std::tm to_tm(const dateAndTime &time);
-
-DLLExport std::tm to_localtime_tm(const dateAndTime &time);
-
-DLLExport dateAndTime get_current_time();
-
-DLLExport dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse);
-
-DLLExport PulseTimeType get_from_absolute_time(dateAndTime time);
-
-DLLExport PulseTimeType getMaximumPulseTime();
-DLLExport PulseTimeType getMinimumPulseTime();
-
-DLLExport PulseTimeType addPulseTime(PulseTimeType a, double seconds);
 
 }
 
-typedef boost::posix_time::ptime dateAndTime;
 
-/** Represents a time interval. 
+/** Represents a time interval.
 
     @author Roman Tolchenov, Tessella plc,
     @date 25/03/2009
@@ -144,7 +151,7 @@ typedef boost::posix_time::ptime dateAndTime;
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -154,11 +161,11 @@ public:
     /// Default constructor
     TimeInterval():m_begin(),m_end(){}
     /// Constructor
-    TimeInterval(const dateAndTime& from, const dateAndTime& to);
+    TimeInterval(const DateAndTime& from, const DateAndTime& to);
     /// Beginning of the interval
-    dateAndTime begin()const{return m_begin;}
+    DateAndTime begin()const{return m_begin;}
     /// End of the interval
-    dateAndTime end()const{return m_end;}
+    DateAndTime end()const{return m_end;}
     /// True if the interval is not empty
     bool isValid()const{return m_end > m_begin;}
 
@@ -166,7 +173,7 @@ public:
     time_duration length()const{return m_end - m_begin;}
 
     /// True if the interval contains \a t.
-    bool contains(const dateAndTime& t)const{return t >= begin() && t < end();}
+    bool contains(const DateAndTime& t)const{return t >= begin() && t < end();}
     /// Returns an intersection of two intervals
     TimeInterval intersection(const TimeInterval& ti)const;
     /// Returns true if this interval ends before \a ti starts
@@ -177,16 +184,19 @@ public:
     std::string end_str()const;
 private:
     /// begin
-    dateAndTime m_begin;
+    DateAndTime m_begin;
     /// end
-    dateAndTime m_end;
+    DateAndTime m_end;
 };
 
 
 } // namespace Kernel
 } // namespace Mantid
 
-DLLExport std::ostream& operator<<(std::ostream&,const Mantid::Kernel::TimeInterval&);
+//DLLExport std::ostream& operator<<(std::ostream&,const Mantid::Kernel::TimeInterval&);
+
+// Stream outputting of DateAndTime
+DLLExport std::ostream& operator<<(std::ostream&, const Mantid::Kernel::DateAndTime&);
 
 #endif // DATE_AND_TIME_H
 

@@ -301,8 +301,8 @@ namespace Mantid
       std::ostringstream ostr;
       ostr<<period;
       Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
-      std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
-      std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
+      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
       if (it->second != period)
         p->addValue(it->first,false);
       for(;it!=pMap.end();it++)
