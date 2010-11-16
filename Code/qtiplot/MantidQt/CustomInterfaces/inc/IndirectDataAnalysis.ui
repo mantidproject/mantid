@@ -32,7 +32,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="elwin_inputFile" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
              <horstretch>0</horstretch>
@@ -48,7 +48,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0" >
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -119,7 +119,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="msd_inputFile" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
              <horstretch>0</horstretch>
@@ -135,7 +135,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0" >
             <stringlist>
              <string>_eq1.nxs</string>
              <string>_eq2.nxs</string>
@@ -200,7 +200,7 @@
        <item>
         <layout class="QGridLayout" name="fury_layoutFiles" >
          <item row="2" column="1" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="fury_resFile" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
              <horstretch>0</horstretch>
@@ -216,7 +216,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0" >
             <stringlist>
              <string>_res.nxs</string>
             </stringlist>
@@ -279,7 +279,7 @@
              <widget class="QWidget" name="page_3" >
               <layout class="QVBoxLayout" name="verticalLayout_9" >
                <item>
-                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
+                <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="fury_iconFile" >
                  <property name="sizePolicy" >
                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                    <horstretch>0</horstretch>
@@ -295,7 +295,7 @@
                  <property name="multipleFiles" stdset="0" >
                   <bool>true</bool>
                  </property>
-                 <property name="fileExtensions" >
+                 <property name="fileExtensions" stdset="0" >
                   <stringlist>
                    <string>_red.nxs</string>
                   </stringlist>
@@ -472,7 +472,7 @@
            <widget class="QWidget" name="page" >
             <layout class="QHBoxLayout" name="horizontalLayout_19" >
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="furyfit_inputFile" >
                <property name="sizePolicy" >
                 <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                  <horstretch>0</horstretch>
@@ -488,7 +488,7 @@
                <property name="multipleFiles" stdset="0" >
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0" >
                 <stringlist>
                  <string>_iqt.nxs</string>
                 </stringlist>
@@ -720,7 +720,7 @@
            <widget class="QWidget" name="page_3" >
             <layout class="QHBoxLayout" name="horizontalLayout_28" >
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="confit_inputFile" >
                <property name="findRunFiles" stdset="0" >
                 <bool>false</bool>
                </property>
@@ -730,7 +730,7 @@
                <property name="multipleFiles" stdset="0" >
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0" >
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -777,25 +777,41 @@
            <item>
             <layout class="QVBoxLayout" name="confit_layoutFitType" >
              <item>
-              <widget class="QLabel" name="confit_lbFitType" >
+              <widget class="QCheckBox" name="confit_ckPlotGuess" >
                <property name="text" >
-                <string>Fit Type:</string>
+                <string>Plot Guess</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="confit_cbFitType" >
+              <layout class="QHBoxLayout" name="horizontalLayout_2" >
                <item>
-                <property name="text" >
-                 <string>One Lorentzian</string>
-                </property>
+                <widget class="QLabel" name="confit_lbFitType" >
+                 <property name="text" >
+                  <string>Fit Type:</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text" >
-                 <string>Two Lorentzian</string>
-                </property>
+                <widget class="QComboBox" name="confit_cbFitType" >
+                 <item>
+                  <property name="text" >
+                   <string>Zero Lorentzians</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>One Lorentzian</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>Two Lorentzians</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
-              </widget>
+              </layout>
              </item>
             </layout>
            </item>
@@ -845,7 +861,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_10" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abs_inputFile" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="abs_inputFile" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
            <horstretch>0</horstretch>
@@ -861,7 +877,7 @@
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
          </property>
-         <property name="fileExtensions" >
+         <property name="fileExtensions" stdset="0" >
           <stringlist>
            <string>_red.nxs</string>
           </stringlist>

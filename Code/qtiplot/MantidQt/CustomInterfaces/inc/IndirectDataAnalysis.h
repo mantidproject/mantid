@@ -51,7 +51,6 @@ namespace MantidQt
       virtual void initLocalPython();
 
       void loadSettings();
-      void saveSettings();
 
       // Tab-specific setup stages (mainly miniplots)
       void setupElwin();
@@ -70,17 +69,18 @@ namespace MantidQt
       void msdRun();
       void furyRun();
       void furyfitRun();
+      void confitRun();
       void absorptionRun();
 
       Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
-      Mantid::API::CompositeFunction* confitCreateFunction();
+      Mantid::API::CompositeFunction* confitCreateFunction(bool tie=false);
       QtProperty* createLorentzian(QString);
       QtProperty* createExponential();
       QtProperty* createStretchedExp();
-      void populateFunction(Mantid::API::IFunction*, QtProperty*);
+      void populateFunction(Mantid::API::IFunction*, Mantid::API::IFunction*, QtProperty*, int, bool tie=false);
       QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index);
       
-      virtual void closeEvent(QCloseEvent* close);
+      virtual void closeEvent(QCloseEvent*);
 
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
@@ -120,12 +120,13 @@ namespace MantidQt
       void furyfitPlotGuess(QtProperty*);
 
       // Convolution Fit
-      void confitRun();
       void confitTypeSelection(int index);
       void confitInputType(int index);
       void confitPlotInput();
+      void confitPlotGuess(QtProperty*);
       void confitMinChanged(double);
       void confitMaxChanged(double);
+      void confitBackgLevel(double);
       void confitUpdateRS(QtProperty*, double);
       void confitCheckBoxUpdate(QtProperty*, bool);
 
@@ -138,9 +139,7 @@ namespace MantidQt
       
     private:
       Ui::IndirectDataAnalysis m_uiForm;
-      QString m_settingsGroup;
-      QString m_dataDir;
-      QString m_saveDir;
+      int m_nDec;
       QIntValidator *m_valInt;
       QDoubleValidator *m_valDbl;
 
@@ -176,13 +175,12 @@ namespace MantidQt
       QtDoublePropertyManager* m_doubleManager;
       QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
       QMap<QString, QtProperty*> m_ffProp;
-      QwtPlot* m_furyFitPlotWindow;
+      QwtPlot* m_ffPlot;
       QwtPlotCurve* m_ffDataCurve;
       QwtPlotCurve* m_ffFitCurve;
       MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
       MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
-      /// keep a pointer to the input workspace once it's loaded so we don't have to
-      Mantid::API::MatrixWorkspace_const_sptr m_ffInputWS; ///< load it again and again etc
+      Mantid::API::MatrixWorkspace_const_sptr m_ffInputWS;
       Mantid::API::MatrixWorkspace_const_sptr m_ffOutputWS;
       std::string m_ffInputWSName;
       QString m_furyfitTies;
