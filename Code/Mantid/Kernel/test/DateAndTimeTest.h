@@ -64,20 +64,43 @@ public:
 
   void test_limits_on_construction()
   {
+    //direct nanoseconds constructor
     DateAndTime a,b,c;
     a = DateAndTime(6917529027641081856);
     TS_ASSERT_EQUALS( a, DateAndTime::maximum());
     a = DateAndTime(-6917529027641081856);
+
+    //Double constructor
     TS_ASSERT_EQUALS( a, DateAndTime::minimum());
     a = DateAndTime(1e20, 0.2);
     TS_ASSERT_EQUALS( a, DateAndTime::maximum());
     a = DateAndTime(-1e20, 0.2);
     TS_ASSERT_EQUALS( a, DateAndTime::minimum());
 
+    //long int constructor
+    long int li = 1000000000000000000;
+    long int li2 = 2000000;
+    a = DateAndTime(li, li2);
+    TS_ASSERT_EQUALS( a, DateAndTime::maximum());
+    a = DateAndTime(-li, li2);
+    TS_ASSERT_EQUALS( a, DateAndTime::minimum());
+
+    //String constructors
     a = DateAndTime("2490-01-02 00:01:02.345");
     TS_ASSERT_EQUALS( a, DateAndTime::maximum());
     a = DateAndTime("1600-01-02 00:01:02.345");
     TS_ASSERT_EQUALS( a, DateAndTime::minimum());
+
+    //ptime constructor
+    boost::posix_time::ptime p;
+    p = boost::posix_time::from_iso_string("24000102T000102");
+    a = DateAndTime(p);
+    TS_ASSERT_EQUALS( a, DateAndTime::maximum());
+    p = boost::posix_time::from_iso_string("16000102T000102");
+    a = DateAndTime(p);
+    TS_ASSERT_EQUALS( a, DateAndTime::minimum());
+
+    //time_t and int constructors can't overflow on 32-bits at least
   }
 
   void test_year_month_etc()
@@ -101,6 +124,7 @@ public:
     TS_ASSERT_EQUALS( s.substr(0,20), "1990-Jan-02 03:04:05");
     TS_ASSERT_EQUALS( a.to_string(), "1990-Jan-02 03:04:05");
     TS_ASSERT_EQUALS( a.to_string("%Y-%m-%d"), "1990-01-02");
+    TS_ASSERT_EQUALS( a.to_ISO8601_string(), "1990-01-02T03:04:05");
   }
 
   void test_stream_operator()
@@ -131,6 +155,41 @@ public:
     TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(60345000000) );
   }
 
+  void test_subtraction_of_times_limits()
+  {
+    DateAndTime a,b,c;
+    boost::posix_time::ptime p;
+    time_duration td;
+
+    a = DateAndTime("2200-01-02 00:01:02.345");
+    b = DateAndTime("1800-01-02 00:01:02.345");
+    td = a-b;
+    //The difference won't be correct, but it is positive and ~2**62 nanoseconds
+    TS_ASSERT_LESS_THAN( 4.6e9, DateAndTime::seconds_from_duration(td) );
+
+    td = b-a;
+    //The difference won't be correct, but it is negative
+    TS_ASSERT_LESS_THAN( DateAndTime::seconds_from_duration(td), -4.6e9 );
+  }
+
+
+  void test_addition_and_subtraction_operators_nanoseconds_as_int()
+  {
+    DateAndTime a,b,c;
+    a = DateAndTime("1990-01-02 00:00:02.000");
+    b = DateAndTime("1990-01-02 00:01:02.345");
+    c = a + 60345000000;
+    TS_ASSERT_EQUALS( c, b);
+    a += 60345000000;
+    TS_ASSERT_EQUALS( a, b);
+
+    a = DateAndTime("1990-01-02 00:00:02.000");
+    b = DateAndTime("1990-01-02 00:01:02.345");
+    c = b - 60345000000;
+    TS_ASSERT_EQUALS( c, a);
+    b -= 60345000000;
+    TS_ASSERT_EQUALS( b, a);
+  }
 
   void test_addition_and_subtraction_operators_time_duration()
   {
@@ -149,7 +208,6 @@ public:
     b -= DateAndTime::duration_from_nanoseconds(60345000000);
     TS_ASSERT_EQUALS( b, a);
   }
-
 
 
   void test_addition_and_subtraction_operators_double()
@@ -346,9 +404,11 @@ public:
     time_duration onesec = time_duration(0,0,1,0);
     time_duration extreme;
     extreme = DateAndTime::duration_from_seconds(1e20);
+    //Output value is positive
     TS_ASSERT_LESS_THAN(onesec, extreme);
 
     extreme = DateAndTime::duration_from_seconds(-1e20);
+    //Output value is negative
     TS_ASSERT_LESS_THAN(extreme, onesec);
   }
 
