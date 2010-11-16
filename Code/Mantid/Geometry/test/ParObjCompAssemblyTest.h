@@ -23,7 +23,7 @@ public:
     ObjCompAssembly q("Name");
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    ObjCompAssembly pq(&q,pmap);
+    ObjCompAssembly pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -43,7 +43,7 @@ public:
     ObjCompAssembly* q = new ObjCompAssembly("Child", parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    ObjCompAssembly pq(q,pmap);
+    ObjCompAssembly pq(q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
@@ -72,7 +72,7 @@ public:
     bank.add(det3);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    ObjCompAssembly pbank(&bank,pmap);
+    ObjCompAssembly pbank(&bank,pmap.get());
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
     boost::shared_ptr<IComponent> det1copy;
@@ -96,7 +96,7 @@ public:
     ObjCompAssembly q("Child", &parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    ObjCompAssembly pq(&q,pmap);
+    ObjCompAssembly pq(&q,pmap.get());
 
     TS_ASSERT(pq.getParent());
     TS_ASSERT_EQUALS(pq.getParent()->getName(), parent.getName());
@@ -109,7 +109,7 @@ public:
     ObjCompAssembly comp("name");
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    ObjCompAssembly pcomp(&comp,pmap);
+    ObjCompAssembly pcomp(&comp,pmap.get());
 
     TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
@@ -148,7 +148,7 @@ public:
     TS_ASSERT_EQUALS(height,0.6);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    boost::shared_ptr<ObjCompAssembly> pcomp(new ObjCompAssembly(&bank,pmap));
+    boost::shared_ptr<ObjCompAssembly> pcomp(new ObjCompAssembly(&bank,pmap.get()));
     boost::shared_ptr<Component> ic = boost::dynamic_pointer_cast<Component>(pcomp);
     boost::shared_ptr<ICompAssembly> ica = boost::dynamic_pointer_cast<ICompAssembly>(ic);
   }

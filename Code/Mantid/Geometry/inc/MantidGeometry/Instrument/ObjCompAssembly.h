@@ -54,7 +54,7 @@ public:
   //! Empty constructor
   //ObjCompAssembly();
 
-  ObjCompAssembly(const IComponent* base, ParameterMap_const_sptr map);
+  ObjCompAssembly(const IComponent* base, const ParameterMap * map);
 
   //! Constructor with a name and parent reference
   ObjCompAssembly(const std::string&, Component* reference=0);

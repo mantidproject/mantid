@@ -30,7 +30,7 @@ public:
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  */
-ObjCompAssembly::ObjCompAssembly(const IComponent* base, ParameterMap_const_sptr map)
+ObjCompAssembly::ObjCompAssembly(const IComponent* base, const ParameterMap * map)
 : ObjComponent(base,map)
 {
 }

@@ -20,7 +20,7 @@ public:
     CompAssembly q;
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pq(&q,pmap);
+    CompAssembly pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -38,7 +38,7 @@ public:
     CompAssembly q("Name");
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pq(&q,pmap);
+    CompAssembly pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
     TS_ASSERT_THROWS(pq[0], std::runtime_error);
@@ -58,7 +58,7 @@ public:
     CompAssembly* q = new CompAssembly("Child", parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pq(q,pmap);
+    CompAssembly pq(q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
@@ -87,7 +87,7 @@ public:
     bank.add(det3);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pbank(&bank,pmap); //parametrized one
+    CompAssembly pbank(&bank,pmap.get()); //parametrized one
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
     boost::shared_ptr<IComponent> det1copy;
@@ -111,7 +111,7 @@ public:
     CompAssembly q("Child", &parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pq(&q,pmap);
+    CompAssembly pq(&q,pmap.get());
 
     TS_ASSERT(pq.getParent());
     TS_ASSERT_EQUALS(pq.getParent()->getName(), parent.getName());
@@ -127,7 +127,7 @@ public:
     CompAssembly comp;
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    CompAssembly pcomp(&comp,pmap);
+    CompAssembly pcomp(&comp,pmap.get());
 
     TS_ASSERT_EQUALS(pcomp.type(), "CompAssembly");
   }

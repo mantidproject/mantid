@@ -15,7 +15,8 @@ namespace Mantid
 namespace Geometry
 {
 
-boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<const IComponent> base, ParameterMap_const_sptr map)
+boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<const IComponent> base, 
+							  const ParameterMap * map)
 {
     if (base)
     {

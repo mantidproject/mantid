@@ -57,7 +57,7 @@ public:
   //! Empty constructor
   CompAssembly();
   ///Constructor for parametrized version
-  CompAssembly(const IComponent* base, ParameterMap_const_sptr map);
+  CompAssembly(const IComponent* base, const ParameterMap * map);
   //! Constructor with a name and parent reference
   CompAssembly(const std::string&, IComponent* reference=0);
   //! Copy constructor

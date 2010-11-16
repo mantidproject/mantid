@@ -17,7 +17,7 @@ namespace Mantid
      * @param base: the base (un-parametrized) IComponent
      * @param map: pointer to the ParameterMap
      * */
-    ObjComponent::ObjComponent(const IComponent* base, ParameterMap_const_sptr map)
+    ObjComponent::ObjComponent(const IComponent* base, const ParameterMap * map)
     : Component(base,map), m_shape()
     {
 

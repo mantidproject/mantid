@@ -54,7 +54,7 @@ namespace Mantid
     {
     public:
       /// Constructor for parametrized component
-      Component(const IComponent* base, ParameterMap_const_sptr map);
+      Component(const IComponent* base, const ParameterMap * map);
 
       //! Create Empty Component at Origin, with no orientation and null parent
       Component();
@@ -196,8 +196,8 @@ namespace Mantid
       /// The base component - this is the unmodifed component (without the parameters)
       const IComponent* m_base;
 
-      /// Reference to the map containing the parameters
-      ParameterMap_const_sptr m_map;
+      /// A const pointer to a const ParameterMap containing the parameters
+      const ParameterMap * const m_map;
 
       /// Flag to determine if component is parameterized
       const bool m_isParametrized;

@@ -6,85 +6,18 @@ from mantidsimple import *
 
 #-------------- ElasticConversion class -------------
 class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
-    '''
+    """
     Performs a convert to energy assuming the provided instrument is an elastic instrument
-    '''
+    """
     
     def __init__(self, prefix):
         super(self.__class__, self).__init__(prefix)
-        
-    def init_params(self):
-        '''
-        Attach analysis arguments that are particular to the ElasticConversion 
-        '''
-        self.save_formats = ['.spe','.nxs','.nxspe']
-        self.fix_ei=False
-        self.energy_bins = None
-        self.background = False
-        self.normalise_method = 'monitor-1'
-#        self.normalise_method = 'current'
-        self.map_file = None
-        
-        if (self.file_prefix == "CNCS" or self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
-            self.facility = "SNS"
-            self.normalise_method  = 'current'
-            #self.file_ext = '_event.nxs'
-            #self.file_ext = '.dat'
-            
-        
-        # The Ei requested
-        self.ei_requested = None
-        self.monitor_workspace = None
-        
-        self.time_bins = None
-                
-        # Detector diagnosis
-        self.spectra_masks = None
-        
-        # Absolute normalisation
-        self.abs_map_file = None
-        self.abs_spectra_masks = None
-        self.abs_mass = 1.0
-        self.abs_rmm = 1.0
-        self.applyDetectorEfficiency = True
-     
-    def init_idf_params(self):
-        '''
-        Initialise the parameters from the IDF file
-        '''
-        self.ei_mon_spectra = [int(self.get_default_parameter("ei-mon1-spec")), int(self.get_default_parameter("ei-mon2-spec"))]
-        self.scale_factor = self.get_default_parameter("scale-factor")
-        self.wb_scale_factor = self.get_default_parameter("wb-scale-factor")
-        self.wb_integr_range = [self.get_default_parameter("wb-integr-min"), self.get_default_parameter("wb-integr-max")]
-        self.mon1_norm_spec = int(self.get_default_parameter("norm-mon1-spec"))
-        self.mon1_norm_range = [self.get_default_parameter("norm-mon1-min"), self.get_default_parameter("norm-mon1-max")]
-        self.background_range = [self.get_default_parameter("bkgd-range-min"), self.get_default_parameter("bkgd-range-max")]
-        self.monovan_integr_range = [self.get_default_parameter("monovan-integr-min"), self.get_default_parameter("monovan-integr-max")]
-        self.van_mass = self.get_default_parameter("vanadium-mass")
-        self.van_rmm = self.get_default_parameter("vanadium-rmm")
 
-        self.abs_min_value = self.get_default_parameter('abs-average-min')
-        self.abs_max_value = self.get_default_parameter('abs-average-max')
-        self.abs_median_lbound = self.get_default_parameter('abs-median-lbound')
-        self.abs_median_ubound = self.get_default_parameter('abs-median-ubound')
-        self.abs_median_frac_low = self.get_default_parameter('abs-median-lo-frac')
-        self.abs_median_frac_hi = self.get_default_parameter('abs-median-hi-frac')
-        self.abs_median_sig = self.get_default_parameter('abs-median-signif')
-
-    def get_default_parameter(self, name):
-        if self.instrument is None:
-            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
-        values = self.instrument.getNumberParameter(name)
-        if len(values) != 1:
-            raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
-        return values[0]
-    
-    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_ei=None, abs_white_run=None, save_path=None, Tzero=None):
-        '''
+    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None,\
+                          abs_ei=None, abs_white_run=None, save_path=None, Tzero=None):
+        """
         Convert mono-chromatic run to deltaE
-        '''
-        
-        
+        """
         # Check if we need to perform the absolute normalisation first
         if not abs_mono_run is None:
             if abs_ei is None:
@@ -124,35 +57,26 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 resultws_name = None
 
         # Main run file conversion
-        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, resultws_name, Tzero)
+        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file,
+                                            self.spectra_masks, resultws_name, Tzero)
         if not absnorm_factor is None:
             if (abs_white_run is not None):
                 absnorm_factor *= (self.abs_mass/self.abs_rmm)
             sample_wkspace /= absnorm_factor
-        
-        if save_path is None:
-            save_path = sample_wkspace.getName()
-        elif os.path.isdir(save_path):
-            save_path = os.path.join(save_path, sample_wkspace.getName())
-            
+
         self.save_results(sample_wkspace, save_path)
+
         return sample_wkspace
         
-    def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, resultws_name = None, Tzero=None):
+    def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None,
+                      spectra_masks=None, resultws_name = None, Tzero=None):
         """
         Convert units of a mono-chromatic run to deltaE, including normalisation to a white-beam vanadium run.
         If multiple run files are passed to this function, they are summed into a run and then processed
         """
-        if type(mono_run) == list:
-            result_ws, det_info_file = self.load_data(mono_run[0], resultws_name)
-            if len(mono_run) > 1:
-                del mono_run[0]
-                common.sum_files(result_ws, mono_run, self.file_prefix)
-        elif type(str):
-            result_ws, det_info_file = self.load_data(mono_run, resultws_name)
-        else:
-            raise TypeError("Run number must be a list or a string")
-            
+        # Load data
+        result_ws = self.load_data(mono_run, resultws_name)
+          
         # Special load monitor stuff.    
         if (self.file_prefix == "CNCS"):
             #self.log("--- CNCS ---")
@@ -215,7 +139,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             ConvertFromDistribution(result_ws)  
     
         self.normalise(result_ws, self.normalise_method, range_offset=bin_offset)
-        
+
         ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
         if not self.energy_bins is None:
             Rebin(result_ws, result_ws, self.energy_bins)
@@ -227,7 +151,6 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 He3TubeEfficiency(result_ws, result_ws)
                 ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
             else:
-                LoadDetectorInfo(result_ws, det_info_file)
                 DetectorEfficiencyCor(result_ws, result_ws)
 
         # Ki/Kf Scaling...
@@ -248,14 +171,29 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         # Overall scale factor
         result_ws *= self.scale_factor
         return result_ws
+
     
-    def load_data(self, run_num, output_name):
-        '''
-        Load a run number or sum a set of run numbers
-        '''
-        data = common.load_run(self.file_prefix, run_num, output_name, self.file_ext)
-        self.setup_mtd_instrument(data[0])
-        return data
+    def load_data(self, runs, output_name):
+        """
+        Load a run or list of runs. If a list of runs is given then
+        they are summed.
+        """
+        if type(runs) == list:
+            result_ws, det_info_file = common.load_run(self.file_prefix, runs[0], output_name, self.file_ext)
+            if len(runs) > 1:
+                del runs[0]
+                common.sum_files(output_name, runs, self.file_prefix)
+        elif type(str):
+            result_ws, det_info_file = common.load_run(self.file_prefix, runs, output_name, self.file_ext)
+        else:
+            raise TypeError("Run number must be a list or a string")
+
+        self.setup_mtd_instrument(result_ws)
+        # Load the detector info if required while still in TOF
+        if self.facility != 'SNS' and self.applyDetectorEfficiency:
+            LoadDetectorInfo(output_name, det_info_file)
+
+        return result_ws
        
     def get_ei(self, input_ws, ei_guess):
         """
@@ -285,18 +223,18 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         return ei, mon1_peak
 
     def apply_masking(self, result_ws, spec_masks, map_file):
-        '''
+        """
         Mask and group detectors based on input parameters
-        '''
+        """
         if not spec_masks is None:
             MaskDetectors(result_ws, SpectraList=spec_masks)
         if not map_file is None:
             GroupDetectors(result_ws, result_ws, map_file, KeepUngroupedSpectra=0)
 
     def convert_white(self, white_run, spectra_masks, map_file): 
-        '''
+        """
         Normalise to a specified white-beam run
-        '''
+        """
         white_ws = common.load_run(self.file_prefix, white_run, '_tmp_white_', self.file_ext)[0]
         self.normalise(white_ws, self.normalise_method)
        
@@ -315,9 +253,9 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         return white_ws
 
     def normalise(self, data_ws, method, range_offset=0.0):
-        '''
+        """
         Apply normalisation using specified source
-        '''
+        """
         method = method.lower()
         if method == 'monitor-1':
             range_min = self.mon1_norm_range[0] + range_offset
@@ -331,7 +269,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, peak or none')
             
     def abs_average(self, data_ws):
-        '''
+        """
         Compute the average Y value of a workspace.
         
         The average is computed by collapsing the workspace to a single bin per spectra then masking
@@ -341,7 +279,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             average = sum(Yvalue[i]*weight[i]) / sum(weights)
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
-        '''
+        """
 
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
@@ -381,7 +319,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         return average_value
     
     def mask_detectors_outside_range(self, data_ws, min_value, max_value,median_lbound, median_ubound, median_frac_lo, median_frac_hi, median_sig):
-        '''
+        """
         Masks detecrors on the given workspace according the ranges given where:
             min_value - lower bound of meaningful value;
             max_value - upper bound of meaningful value;
@@ -391,7 +329,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             median_frac_hi - upper acceptable bound as fraction of median value;
             media_sig - error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                         difference with respect to the median value must also exceed this number of error bars.
-        '''
+        """
         # Limit test
         median_tests_ws = '_tmp_abs_median_tests'
         fdol_alg = FindDetectorsOutsideLimits(data_ws, median_tests_ws, HighThreshold=max_value, LowThreshold=min_value)
@@ -404,12 +342,19 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         mtd.deleteWorkspace(median_tests_ws)
 
     def save_results(self, workspace, save_path, formats = None):
-        '''
+        """
         Save the result workspace to the specfied filename using the list of formats specified in 
-        self.save_formats
-        '''
-        if save_path == '':
+        formats. If formats is None then the default list is used
+        """
+        if save_path is None:
+            save_path = workspace.getName()
+        elif os.path.isdir(save_path):
+            save_path = os.path.join(save_path, workspace.getName())
+        elif save_path == '':
             raise ValueError('Empty filename is not allowed for saving')
+        else:
+            pass
+
         if formats is None:
             formats = self.save_formats
         if type(formats) == str:
@@ -426,4 +371,73 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 SaveNXSPE(workspace, filename)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
+
+    #---------------------------------------------------------------------------
+    # Behind the scenes stuff
+    #---------------------------------------------------------------------------
+        
+    def init_params(self):
+        """
+        Attach analysis arguments that are particular to the ElasticConversion 
+        """
+        self.save_formats = ['.spe','.nxs','.nxspe']
+        self.fix_ei=False
+        self.energy_bins = None
+        self.background = False
+        self.normalise_method = 'monitor-1'
+        self.map_file = None
+        
+        if (self.file_prefix == "CNCS" or self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
+            self.facility = "SNS"
+            self.normalise_method  = 'current'
+        else:
+            self.facility = str(mtd.settings.facility())
+        
+        # The Ei requested
+        self.ei_requested = None
+        self.monitor_workspace = None
+        
+        self.time_bins = None
+                
+        # Detector diagnosis
+        self.spectra_masks = None
+        
+        # Absolute normalisation
+        self.abs_map_file = None
+        self.abs_spectra_masks = None
+        self.abs_mass = 1.0
+        self.abs_rmm = 1.0
+        self.applyDetectorEfficiency = True
+     
+    def init_idf_params(self):
+        """
+        Initialise the parameters from the IDF file
+        """
+        self.ei_mon_spectra = [int(self.get_default_parameter("ei-mon1-spec")), int(self.get_default_parameter("ei-mon2-spec"))]
+        self.scale_factor = self.get_default_parameter("scale-factor")
+        self.wb_scale_factor = self.get_default_parameter("wb-scale-factor")
+        self.wb_integr_range = [self.get_default_parameter("wb-integr-min"), self.get_default_parameter("wb-integr-max")]
+        self.mon1_norm_spec = int(self.get_default_parameter("norm-mon1-spec"))
+        self.mon1_norm_range = [self.get_default_parameter("norm-mon1-min"), self.get_default_parameter("norm-mon1-max")]
+        self.background_range = [self.get_default_parameter("bkgd-range-min"), self.get_default_parameter("bkgd-range-max")]
+        self.monovan_integr_range = [self.get_default_parameter("monovan-integr-min"), self.get_default_parameter("monovan-integr-max")]
+        self.van_mass = self.get_default_parameter("vanadium-mass")
+        self.van_rmm = self.get_default_parameter("vanadium-rmm")
+
+        self.abs_min_value = self.get_default_parameter('abs-average-min')
+        self.abs_max_value = self.get_default_parameter('abs-average-max')
+        self.abs_median_lbound = self.get_default_parameter('abs-median-lbound')
+        self.abs_median_ubound = self.get_default_parameter('abs-median-ubound')
+        self.abs_median_frac_low = self.get_default_parameter('abs-median-lo-frac')
+        self.abs_median_frac_hi = self.get_default_parameter('abs-median-hi-frac')
+        self.abs_median_sig = self.get_default_parameter('abs-median-signif')
+
+    def get_default_parameter(self, name):
+        if self.instrument is None:
+            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
+        values = self.instrument.getNumberParameter(name)
+        if len(values) != 1:
+            raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
+        return values[0]
+    
 #-----------------------------------------------------------------

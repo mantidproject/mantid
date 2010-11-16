@@ -14,7 +14,7 @@ namespace Mantid
 namespace Geometry
 {
 
-ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, ParameterMap_const_sptr map)
+ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, const ParameterMap * map)
       :CompAssembly(base,map), IObjComponent(NULL),  mBase(base), m_cachedBoundingBox(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));

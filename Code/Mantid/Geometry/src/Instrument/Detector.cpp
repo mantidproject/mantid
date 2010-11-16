@@ -13,7 +13,7 @@ Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-Detector::Detector(const IComponent* base, ParameterMap_const_sptr map)
+Detector::Detector(const IComponent* base, const ParameterMap * map)
 : ObjComponent(base,map), m_id(0), m_isMonitor(false)
 {
 

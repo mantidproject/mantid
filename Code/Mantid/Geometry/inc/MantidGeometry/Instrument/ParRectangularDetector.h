@@ -48,7 +48,7 @@ class DLLExport ParRectangularDetector : public CompAssembly, public IRectangula
 {
 public:
   /// Constructors
-  ParRectangularDetector(const RectangularDetector* base, ParameterMap_const_sptr map);
+  ParRectangularDetector(const RectangularDetector* base, const ParameterMap * map);
   ParRectangularDetector(const ParRectangularDetector & other);
 
   //! Destructor

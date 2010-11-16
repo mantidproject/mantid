@@ -12,12 +12,9 @@ namespace Mantid
    * @param base a Component that is the base (un-parametrized) component
    * @param map a ParameterMap to parameterize the component
    */
-    Component::Component(const IComponent* base,  ParameterMap_const_sptr map)
+    Component::Component(const IComponent* base,  const ParameterMap * map)
       : m_base(base), m_map(map), m_isParametrized(true)
     {
-//      const Component * comp_base = dynamic_cast<const Component *>(base);
-//      if (!comp_base)
-//        throw std::invalid_argument("Component: parametrized constructor called with a pure virtual IComponent base!");
     }
 
     /// Copy constructor
@@ -35,7 +32,7 @@ namespace Mantid
      *  Create a component with null parent
      */
     Component::Component()
-      : m_map(), m_isParametrized(false), name(), pos(), rot(), parent(NULL)
+      : m_map(NULL), m_isParametrized(false), name(), pos(), rot(), parent(NULL)
     {
     }
 
@@ -44,7 +41,7 @@ namespace Mantid
      *  @param parent :: parent Component (optional)
      */
     Component::Component(const std::string& name, IComponent* parent)
-      : m_map(), m_isParametrized(false), name(name), pos(), rot(), parent(parent)
+      : m_map(NULL), m_isParametrized(false), name(name), pos(), rot(), parent(parent)
     {
     }
 
@@ -55,7 +52,7 @@ namespace Mantid
      *  @param parent :: parent Component
      */
     Component::Component(const std::string& name, const V3D& position, IComponent* parent)
-      : m_map(), m_isParametrized(false), name(name), pos(position), rot(), parent(parent)
+      : m_map(NULL), m_isParametrized(false), name(name), pos(position), rot(), parent(parent)
     {
     }
 
@@ -66,15 +63,13 @@ namespace Mantid
      *  @param parent :: parent Component (optional)
      */
     Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
-      : m_map(), m_isParametrized(false), name(name),pos(position),rot(rotation),parent(parent)
+      : m_map(NULL), m_isParametrized(false), name(name),pos(position),rot(rotation),parent(parent)
     {
     }
 
     /// Destructor
     Component::~Component()
     {
-    	//std::cout << "Component '" << this->name << "' being deleted.\n";
-      //if (m_map)        delete m_map;
     }
 
 

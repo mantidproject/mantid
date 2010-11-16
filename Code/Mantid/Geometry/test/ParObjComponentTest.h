@@ -22,7 +22,7 @@ public:
     ObjComponent objComp("objComp1");
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pobjComp(&objComp,pmap);
+    ObjComponent pobjComp(&objComp,pmap.get());
 
     TS_ASSERT_EQUALS(pobjComp.getName(),"objComp1");
     TS_ASSERT(!pobjComp.getParent());
@@ -34,7 +34,7 @@ public:
     ObjComponent objComp("objComp1", &parent);
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pobjComp(&objComp,pmap);
+    ObjComponent pobjComp(&objComp,pmap.get());
 
     TS_ASSERT_EQUALS(pobjComp.getName(),"objComp1");
     TS_ASSERT(pobjComp.getParent());
@@ -45,7 +45,7 @@ public:
     ObjComponent objComp("objComp");
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pobjComp(&objComp,pmap);
+    ObjComponent pobjComp(&objComp,pmap.get());
 
     TS_ASSERT_EQUALS(objComp.type(),"PhysicalComponent");
   }
@@ -55,7 +55,7 @@ public:
     ObjComponent ocyl("ocyl", createCappedCylinder());
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pocyl(&ocyl,pmap);
+    ObjComponent pocyl(&ocyl,pmap.get());
 
     ocyl.setPos(10,0,0);
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
@@ -89,7 +89,7 @@ public:
     ObjComponent comp("noShape");
     comp.setPos(1,2,3);
 
-    ObjComponent pcomp(&comp,pmap);
+    ObjComponent pcomp(&comp,pmap.get());
 
     // Check the exact point passes
     TS_ASSERT( pcomp.isValid(V3D(1,2,3)) );
@@ -104,7 +104,7 @@ public:
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pocyl(&ocyl,pmap);
+    ObjComponent pocyl(&ocyl,pmap.get());
 
     TS_ASSERT( pocyl.isOnSide(V3D(10.5,0,0)) );
     TS_ASSERT( pocyl.isOnSide(V3D(9.5,0,0)) );
@@ -138,7 +138,7 @@ public:
     ObjComponent comp("noShape");
     comp.setPos(1,2,3);
 
-    ObjComponent pcomp(&comp,pmap);
+    ObjComponent pcomp(&comp,pmap.get());
 
     // Check the exact point passes
     TS_ASSERT( pcomp.isOnSide(V3D(1,2,3)) );
@@ -154,7 +154,7 @@ public:
     Track track(V3D(0,0,0),V3D(1,0,0));
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pocyl(&ocyl,pmap);
+    ObjComponent pocyl(&ocyl,pmap.get());
 
     TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 1 );
     Track::LType::const_iterator it = track.begin();
@@ -181,7 +181,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will throw
     ObjComponent comp("noShape");
 
-    ObjComponent pcomp(&comp,pmap);
+    ObjComponent pcomp(&comp,pmap.get());
 
     TS_ASSERT_THROWS( pcomp.interceptSurface(track), Exception::NullPointerException );
   }
@@ -195,7 +195,7 @@ public:
 
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pA(&A,pmap);
+    ObjComponent pA(&A,pmap.get());
 
     TS_ASSERT_DELTA(pA.solidAngle(V3D(10,1.7,0)),1.840302,satol);
     // Surface point
@@ -216,7 +216,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will throw
     ObjComponent B("noShape");
 
-    ObjComponent pB(&B,pmap);
+    ObjComponent pB(&B,pmap.get());
 
     TS_ASSERT_THROWS( pB.solidAngle(V3D(1,2,3)), Exception::NullPointerException );
   }
@@ -230,7 +230,7 @@ public:
     A.setRot(Quat(90.0,V3D(0,0,1)));
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->addV3D(&A,"pos",V3D(11,0,0));
-    ObjComponent pA(&A,pmap);
+    ObjComponent pA(&A,pmap.get());
 
     BoundingBox absoluteBox;
     pA.getBoundingBox(absoluteBox);
@@ -253,7 +253,7 @@ public:
     A.setRot(Quat(90.0,V3D(0,0,1)));
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    ObjComponent pA(&A,pmap);
+    ObjComponent pA(&A,pmap.get());
 
     V3D point;
     TS_ASSERT_EQUALS(pA.getPointInObject(point),1);
@@ -276,7 +276,7 @@ public:
     D.setPos(10,0,0);
     D.setRot(Quat(90.0,V3D(0,0,1)));
 
-    ObjComponent pD(&D,pmap);
+    ObjComponent pD(&D,pmap.get());
 
     TS_ASSERT_EQUALS(pD.getPointInObject(point),1);
     TS_ASSERT_DELTA(point.X(),31.5,1e-6);

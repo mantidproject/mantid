@@ -16,7 +16,7 @@ public:
     Detector det("det1",0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT_EQUALS(pdet.getName(),"det1");
     TS_ASSERT(!pdet.getParent());
@@ -31,7 +31,7 @@ public:
     Detector det("det1", &parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT_EQUALS(pdet.getName(),"det1");
     TS_ASSERT(pdet.getParent());
@@ -47,7 +47,7 @@ public:
     Detector det("det1",0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT_EQUALS(pdet.getID(),0);
     det.setID(id1);
@@ -61,7 +61,7 @@ public:
     Detector det("det",0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT_EQUALS(pdet.type(),"DetectorComponent");
   }
@@ -71,7 +71,7 @@ public:
     Detector det("det",0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT( ! pdet.isMasked() );
     pmap->addBool(&det,"masked",true);
@@ -83,7 +83,7 @@ public:
     Detector det("det",0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
 
     TS_ASSERT( ! pdet.isMonitor() );
     TS_ASSERT_THROWS_NOTHING( det.markAsMonitor() );
@@ -98,7 +98,7 @@ public:
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("double", &det, "testparam", 5.0);
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
     IDetector *idet = static_cast<IDetector*>(&pdet);
 
     TS_ASSERT_EQUALS(idet->getNumberParameter("testparam").size(), 1);
@@ -112,7 +112,7 @@ public:
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("V3D", &det, "testparam", Mantid::Geometry::V3D(0.5, 1.0, 1.5));
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
     IDetector *idet = static_cast<IDetector*>(&pdet);
 
     std::vector<Mantid::Geometry::V3D> pos = idet->getPositionParameter("testparam");
@@ -130,7 +130,7 @@ public:
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("Quat", &det, "testparam", Mantid::Geometry::Quat(1.0, 0.25, 0.5, 0.75));
-    Detector pdet(&det,pmap);
+    Detector pdet(&det,pmap.get());
     IDetector *idet = static_cast<IDetector*>(&pdet);
 
     std::vector<Mantid::Geometry::Quat> rot = idet->getRotationParameter("testparam");

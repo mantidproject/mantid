@@ -138,7 +138,7 @@ public:
     //name and parent
     Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    Component pq(&q,pmap);
+    Component pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(),"Child");
     TS_ASSERT(pq.isParametrized() );

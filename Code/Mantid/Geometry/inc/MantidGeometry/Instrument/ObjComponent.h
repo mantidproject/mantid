@@ -57,7 +57,7 @@ public:
   virtual std::string type() {return "PhysicalComponent";}
 
   /// Constructor for parametrized component
-  ObjComponent(const IComponent* base, ParameterMap_const_sptr map);
+  ObjComponent(const IComponent* base, const ParameterMap * map);
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, IComponent* parent=0);
   explicit ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent=0);

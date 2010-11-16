@@ -34,7 +34,7 @@ public:
     Component q;
 
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    Component pq(&q,pmap);
+    Component pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(),"");
     TS_ASSERT(!pq.getParent());
@@ -49,7 +49,7 @@ public:
   {
     Component q;
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    Component pq(&q,pmap);
+    Component pq(&q,pmap.get());
 
     TS_ASSERT(!q.isParametrized());
     TS_ASSERT(pq.isParametrized());
@@ -61,7 +61,7 @@ public:
     //name and parent
     Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
     ParameterMap_const_sptr pmap( new ParameterMap() );
-    Component pq(&q,pmap);
+    Component pq(&q,pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(),"Child");
     //check the parent
@@ -89,7 +89,7 @@ public:
   void testThatNonRecursiveGetParameterOnlySearchesCurrentComponent()
   {
     createParameterizedTree();
-    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap.get());
 
     TS_ASSERT_EQUALS(grandchild->getStringParameter(m_strName,false).size(), 0);
     TS_ASSERT_EQUALS(grandchild->getNumberParameter(m_dblName, false).size(), 0);
@@ -121,9 +121,9 @@ public:
   void testThatRecursiveParameterSearchReturnsNamesOfAllParentParameters()
   {
     createParameterizedTree();
-    Component *parent = new Component(m_parentComp, m_paramMap);
-    Component *child = new Component(m_childOneComp, m_paramMap);
-    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
+    Component *parent = new Component(m_parentComp, m_paramMap.get());
+    Component *child = new Component(m_childOneComp, m_paramMap.get());
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap.get());
 
     //Parent
     std::set<std::string> paramNames = parent->getParameterNames();
@@ -150,12 +150,12 @@ public:
   void testThatNonRecursiveParameterSearchReturnsOnlyComponentParameters()
   {
     createParameterizedTree();
-    Component *child = new Component(m_childOneComp, m_paramMap);
+    Component *child = new Component(m_childOneComp, m_paramMap.get());
     std::set<std::string> paramNames = child->getParameterNames(false);
     TS_ASSERT_EQUALS(paramNames.size(), 1);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child1"), paramNames.end());
 
-    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap.get());
     paramNames = grandchild->getParameterNames(false);
     TS_ASSERT_EQUALS(paramNames.size(), 1);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child2"), paramNames.end());
@@ -168,8 +168,8 @@ public:
   void testThatParComponentHasDefinedParameter()
   {
     createParameterizedTree();
-    Component *child = new Component(m_childOneComp, m_paramMap);
-    Component *grandchild = new Component(m_childTwoComp, m_paramMap);
+    Component *child = new Component(m_childOneComp, m_paramMap.get());
+    Component *grandchild = new Component(m_childTwoComp, m_paramMap.get());
 
     TS_ASSERT_EQUALS(child->hasParameter(m_strName + "_child1"), true);
     TS_ASSERT_EQUALS(grandchild->hasParameter(m_strName + "_child2"), true);
@@ -206,7 +206,7 @@ private:
     m_paramMap->add("Quat", m_parentComp, m_quatName, m_quatValue);
 
     ParameterMap_const_sptr const_pmap = boost::dynamic_pointer_cast<const ParameterMap>(m_paramMap);
-    return new Component(m_parentComp, const_pmap);
+    return new Component(m_parentComp, const_pmap.get());
   }
 
   void createParameterizedTree()

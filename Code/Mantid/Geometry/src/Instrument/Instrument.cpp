@@ -32,7 +32,7 @@ namespace Mantid
      * @param map parameter map to include
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
-    : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map ),
+    : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map.get() ),
       m_instr(instr),
       m_map_nonconst(map)
     {
@@ -76,7 +76,7 @@ namespace Mantid
         //And turn them into parametrized versions
         for(std::map<int, IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)
           res.insert(std::pair<int, IDetector_sptr>
-            (it->first, IDetector_sptr( new Detector( dynamic_cast<Detector*>(it->second.get()), m_map ))));
+	     (it->first, IDetector_sptr( new Detector( dynamic_cast<Detector*>(it->second.get()), m_map_nonconst.get() ))));
         return res;
       }
       else

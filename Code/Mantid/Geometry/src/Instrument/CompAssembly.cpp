@@ -33,7 +33,7 @@ CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(NU
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-CompAssembly::CompAssembly(const IComponent* base, ParameterMap_const_sptr map)
+CompAssembly::CompAssembly(const IComponent* base, const ParameterMap * map)
 : Component(base,map), m_children(), m_cachedBoundingBox(NULL)
 {
 
