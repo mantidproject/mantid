@@ -808,7 +808,7 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------------------------------
-    /** Calculate the position of comp relative to its parent from info provided by <location> element.
+    /** Calculate the position of comp relative to its parent from info provided by \<location\> element.
     *
     *  @param comp To set position/location off
     *  @param pElem  Poco::XML element that points a location element in the XML doc
