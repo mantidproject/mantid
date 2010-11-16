@@ -75,8 +75,10 @@ private:
 	/// The filename of the output file
 	std::string filename;
 
-	/// Some constants to be written for masked values.
+	// Some constants to be written for masked values.
+	/// Value for data if pixel is masked
 	static const double MASK_FLAG;
+	/// Value for error if pixel is masked
 	static const double MASK_ERROR;
 };
 

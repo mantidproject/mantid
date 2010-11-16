@@ -78,8 +78,7 @@ namespace Mantid
       void exec();
 
 
-      /// The name and path of an input file. This may be the filename of a
-      /// raw datafile or the name of a specific log file.
+      /// The name and path of an input file. This may be the filename of a raw datafile or the name of a specific log file.
       std::string m_filename;
 
       /// convert string to lower case

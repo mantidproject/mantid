@@ -104,12 +104,18 @@ namespace Mantid
       /// The sample name read from Nexus
       std::string m_samplename;
 
+      /// The number of spectra
+      int m_numberOfSpectra;
       /// The number of spectra in the raw file
-      int m_numberOfSpectra, m_numberOfSpectraInFile;
+      int m_numberOfSpectraInFile;
+      /// The number of periods
+      int m_numberOfPeriods;
       /// The number of periods in the raw file
-      int m_numberOfPeriods, m_numberOfPeriodsInFile;
+      int m_numberOfPeriodsInFile;
       /// The nuber of time chanels per spectrum
-      int m_numberOfChannels, m_numberOfChannelsInFile;
+      int m_numberOfChannels;
+      /// The nuber of time chanels per spectrum in the raw file
+      int m_numberOfChannelsInFile;
       /// Is there a detector block
       bool m_have_detector;
 

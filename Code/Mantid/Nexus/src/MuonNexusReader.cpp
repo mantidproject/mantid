@@ -337,8 +337,10 @@ bool MuonNexusReader::logTypeNumeric(const int i) const
     return(logType[i]);
 }
 
-/// return log name of i'th NXlog section
-/// @param i :: the number of the NXlog section find name of.
+/** return log name of i'th NXlog section
+ * @param i :: the number of the NXlog section find name of.
+ * @return the log name at the given index
+ */
 std::string MuonNexusReader::getLogName(const int i) const
 {
     return(logNames[i]);
