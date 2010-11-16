@@ -506,11 +506,21 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
  */
 void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace)
 {
-  // determine the instrument parameter file
-  string instrument = Poco::Path(nexusfilename).getFileName();
-  size_t pos = instrument.find("_"); // get rid of everything after the first _
-  instrument = instrument.substr(0, pos);
+  string instrument;
 
+  // Get the instrument name
+  ::NeXus::File nxfile(nexusfilename);
+  //Start with the base entry
+  nxfile.openGroup("entry", "NXentry");
+  // Open the instrument
+  nxfile.openGroup("instrument", "NXinstrument");
+  nxfile.openData("name");
+  instrument = nxfile.getStrData();
+  g_log.debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
+  // Now let's close the file as we don't need it anymore to load the instrument.
+  nxfile.close();
+
+  // determine the instrument parameter file
   string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
   if (filename.empty())
     return;
