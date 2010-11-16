@@ -8,16 +8,16 @@ namespace Kernel
 
 
 /// Max allowed nanoseconds in the time; 2^62-1
-static int64_t MAX_NANOSECONDS  = 4611686018427387903;
+#define MAX_NANOSECONDS 4611686018427387903
 
 /// Max allowed seconds in the time
-static int64_t MAX_SECONDS      = 4611686017;
+#define MAX_SECONDS     4611686017
 
 /// Min allowed nanoseconds in the time; -2^62+1
-static int64_t MIN_NANOSECONDS  = -4611686018427387903;
+#define MIN_NANOSECONDS -4611686018427387903
 
 /// Min allowed seconds in the time
-static int64_t MIN_SECONDS      = -4611686017;
+#define MIN_SECONDS     -4611686017
 
 
 namespace DateAndTimeHelpers
