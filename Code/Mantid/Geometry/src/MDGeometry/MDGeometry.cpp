@@ -201,7 +201,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
         this->theDimension[ind+i]->setStride(0);
     }
 
-};
+}
 //
 MDDimension & 
 MDGeometry::getYDimension(void)const
