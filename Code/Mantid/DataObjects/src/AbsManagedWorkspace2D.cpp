@@ -223,9 +223,10 @@ Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const int index) const
 }
 
 /** Returns the number of histograms.
-For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
-being virtual so it now just calls this private (and virtual) method which does the work.
-*/
+ *  For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
+ *  being virtual so it now just calls this private (and virtual) method which does the work.
+ *  @return the number of histograms associated with the workspace
+ */
 int AbsManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;

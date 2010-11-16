@@ -261,6 +261,7 @@ MantidVecPtr ManagedDataBlock2D::refX(const int index) const
 /** Output file stream operator.
  *  @param fs The stream to write to
  *  @param data The object to write to file
+ *  @return stream representation of data
  */
 std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
 {
@@ -295,6 +296,7 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
 /** Input file stream operator.
  *  @param fs The stream to read from
  *  @param data The object to fill with the read-in data
+ *  @return stream representation of data
  */
 std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
 { 

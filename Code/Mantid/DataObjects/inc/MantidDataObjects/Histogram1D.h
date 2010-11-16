@@ -41,9 +41,9 @@ class DLLExport Histogram1D
 {
 public:
 
-  /// The data storage type used internally in a Histogram1D
+  // The data storage type used internally in a Histogram1D
   // typedef std::vector<double> MantidVec; //Removed redundant typedef
-  /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
+  // Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   //typedef Kernel::cow_ptr<MantidVec > MantidVecPtr;
   
 private:

@@ -54,7 +54,9 @@ namespace Mantid
       return Histogram1D::size();
     }
 
-    ///get the size of each vector
+    /** get the size of each vector
+     * @return the blocksize of the workspace
+     */
     int Workspace1D::blocksize() const
     {
       int retVal = 1000000000;

@@ -116,6 +116,7 @@ long int CompressedWorkspace2D::getMemorySize() const
 /**
  *  @param block Pointer to the source block for compression
  *  @param startIndex The starting index of the block
+ *  @return pointer to the compressed block
  */
 CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,int startIndex) const
 {

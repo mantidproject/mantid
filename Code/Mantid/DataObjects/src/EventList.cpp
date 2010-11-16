@@ -102,7 +102,7 @@ using Kernel::PulseTimeType;
    * @param tof: tof in microseconds.
    * @param pulsetime: absolute pulse time
    * @param weight: weight of this neutron event.
-   * @param error: the square of the error on the event
+   * @param errorSquared: the square of the error on the event
    */
   WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float errorSquared)
   : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(errorSquared)
@@ -112,7 +112,7 @@ using Kernel::PulseTimeType;
   /** Constructor, copy from a TofEvent object but add weights
    * @param rhs: TofEvent to copy into this.
    * @param weight: weight of this neutron event.
-   * @param error: the square of the error on the event
+   * @param errorSquared: the square of the error on the event
   */
   WeightedEvent::WeightedEvent(const TofEvent& rhs, float weight, float errorSquared)
   : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(weight), m_errorSquared(errorSquared)
