@@ -565,6 +565,9 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
       char last = *(file_line.end() - 1);
       if (last == '\\')
       {
+	// If we are not in line continuation mode then need
+	// a fresh start line
+	if( !line_continuing ) output = "";
         line_continuing = true;
         output += file_line + "\n";
         continue;
