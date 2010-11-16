@@ -736,6 +736,39 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+
+  void test_BIOSANS_Instrument()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/BIOSANS_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadBIOSANS";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    IDetector_sptr det = ws->getDetector(1);
+    TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
+
+    IInstrument_sptr inst = ws->getInstrument();
+    TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels")).size(), 1);
+    TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels"))[0], 192);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+
+
 void testCheckIfVariousInstrumentsLoad()
   {
     LoadEmptyInstrument loader;
