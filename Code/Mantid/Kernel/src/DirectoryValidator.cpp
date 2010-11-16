@@ -22,7 +22,7 @@ namespace Mantid
 namespace Kernel
 {
 
-/// Initialize the logger
+// Initialize the logger
 Logger& DirectoryValidator::g_log = Logger::get("DirectoryValidator");
 
 /** Constructor

@@ -156,8 +156,7 @@ class ThreadSafeLogStream;
 
     /// Internal handle to third party logging objects
     Poco::Logger* m_log;
-    /// A Log stream to allow streaming operations.  This pointer is owned by this class, initialized 
-    /// in the constructor and deleted in the destructor
+    /// A Log stream to allow streaming operations.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
     ThreadSafeLogStream* m_logStream;
     /// Name of this logging object
     std::string m_name;

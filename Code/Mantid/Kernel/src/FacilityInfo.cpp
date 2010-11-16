@@ -139,6 +139,7 @@ void FacilityInfo::addExtension(const std::string& ext)
 /**
   * Returns instruments with given name
   * @param  iName Instrument name
+  * @return the instrument information object
   * @throws NotFoundError if iName was not found
   */
 const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
@@ -180,6 +181,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
 /**
   * Returns a list of instruments of given technique
   * @param tech Technique name
+  * @return a list of instrument information objects
   */
 std::vector<InstrumentInfo> FacilityInfo::Instruments(const std::string& tech)const
 {

@@ -277,8 +277,7 @@ private:
 	/// Private, unimplemented copy assignment operator
 	DataService& operator=(const DataService&);
 
-  /// DataService name. This is set only at construction.
-  /// DataService name should be provided when construction of derived classes
+  /// DataService name. This is set only at construction. DataService name should be provided when construction of derived classes
   std::string svc_name;
   
   /// functor for the less binary function that compares strings alphabetically without taking account of case

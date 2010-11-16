@@ -128,6 +128,7 @@ const PropertyHistory Property::createHistory() const
 /** Return the size of this property.
  * Single-Value properties return 1.
  * TimeSeriesProperties return the # of entries.
+ * @return the size of the property
  */
 int Property::size() const
 {
@@ -135,9 +136,10 @@ int Property::size() const
 }
 
 //-------------------------------------------------------------------------------------------------
-/* Returns the units of the property, if any, as a string.
+/** Returns the units of the property, if any, as a string.
  * Units are optional, and will return empty string if they have
  * not been set before.
+ * @return the property's units
  */
 std::string Property::units() const
 {
@@ -145,7 +147,7 @@ std::string Property::units() const
 }
 
 //-------------------------------------------------------------------------------------------------
-/* Sets the units of the property, as a string. This is optional.
+/** Sets the units of the property, as a string. This is optional.
  *
  * @param unit string to set for the units.
  */
@@ -159,6 +161,8 @@ void Property::setUnits(std::string unit)
 
 //-------------------------------------------------------------------------------------------------
 /** Add to the property.
+ * @param rhs the property to get more information
+ * @return the augmented property
  * @throw NotImplementedError always, since this should have been overridden
  */
 Property& Property::operator+=( Property * rhs )
@@ -171,7 +175,10 @@ Property& Property::operator+=( Property * rhs )
 
 
 //-------------------------------------------------------------------------------------------------
-/** Filter out a property by time. Will be overridden by TimeSeriesProperty (only) */
+/** Filter out a property by time. Will be overridden by TimeSeriesProperty (only)
+ * @param start the beginning time to filter from
+ * @param stop the ending time to filter to
+ * */
 void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
 {
   (void) start; //Avoid compiler warning
@@ -184,7 +191,9 @@ void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateA
 //-----------------------------------------------------------------------------------------------
 /** Split a property by time. Will be overridden by TimeSeriesProperty (only)
  * For any other property type, this does nothing.
- * */
+ * @param splitter time splitter
+ * @param outputs holder for splitter output
+ */
 void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
 {
   (void) splitter; //Avoid compiler warning

@@ -256,9 +256,10 @@ namespace Mantid
       return 0;
     }
 
-    /** Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active.
-    *  @param period The data period
-    */
+    /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
+     *  @param period The data period
+     *  @return times requested period was active
+     */
     Kernel::Property* LogParser::createPeriodLog(int period)const
     {
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());

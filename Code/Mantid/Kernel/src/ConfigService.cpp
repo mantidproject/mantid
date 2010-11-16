@@ -922,6 +922,7 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 }
 
 /** Get the default `
+ * @return the facility information object
  */
 const FacilityInfo& ConfigServiceImpl::Facility() const
 {
@@ -953,6 +954,7 @@ void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer)co
 /**
  * Get a facility
  * @param fName Facility name
+ * @return the facility information object
  * @throws NotFoundException if the facility is not found
  */
 const FacilityInfo& ConfigServiceImpl::Facility(const std::string& fName) const

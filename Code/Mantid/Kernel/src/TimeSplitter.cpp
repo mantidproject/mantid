@@ -91,6 +91,7 @@ SplittingInterval SplittingInterval::operator &(const SplittingInterval& b) cons
   return out;
 }
 
+/// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::operator |(const SplittingInterval& b) const
 {
   SplittingInterval out(*this);
@@ -171,6 +172,7 @@ TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b
  *
  * @param a TimeSplitterType filter or Splitter.
  * @param b TimeSplitterType filter.
+ * @return the ANDed filter
  */
 TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b)
 {
@@ -239,6 +241,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
  *
  * @param a TimeSplitterType filter.
  * @param b TimeSplitterType filter.
+ * @return the ORed filter
  */
 TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b)
 {

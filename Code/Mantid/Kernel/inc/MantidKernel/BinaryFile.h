@@ -103,6 +103,7 @@ public:
 
   //-----------------------------------------------------------------------------
   /** Get the size of a file as a multiple of a particular data type
+   * @return the size of the file normalized to the data type
    * @throw runtime_error if the file size is not compatible
    * @throw runtime_error if the handle is not open.
    * */
@@ -148,6 +149,7 @@ public:
   //-----------------------------------------------------------------------------
   /** Get a buffer size for loading blocks of data.
    * @param num_items
+   * @return the buffer size
    */
   size_t getBufferSize(const size_t num_items)
   {
@@ -161,6 +163,7 @@ public:
   /**
    * Loads the entire contents of the file into a pointer to a std::vector.
    * The file is closed once done.
+   * @return file contents in a vector
    */
   std::vector<T> * loadAll()
   {

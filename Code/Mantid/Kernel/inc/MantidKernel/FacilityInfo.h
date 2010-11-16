@@ -85,8 +85,8 @@ private:
   int m_zeroPadding;                           ///< default zero padding for this facility
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
   std::set<std::string> m_archiveSearch;       ///< names of the archive search interface
-  std::vector<InstrumentInfo> m_instruments;   ///< list of istruments of thsi facility
-  std::string m_catalogName;
+  std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
+  std::string m_catalogName;                   ///< name of the catalog system of this facilty
   static Logger& g_log;                        ///< logger
 };
 

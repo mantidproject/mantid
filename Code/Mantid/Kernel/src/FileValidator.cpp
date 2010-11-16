@@ -22,7 +22,7 @@ namespace Mantid
 namespace Kernel
 {
 
-/// Initialize the logger
+// Initialize the logger
 Logger& FileValidator::g_log = Logger::get("FileValidator");
 
 /// Default constructor.
@@ -112,8 +112,11 @@ bool has_ending(const std::string &value, const std::string & ending)
   return (result == 0); // only care if it matches
 }
 
-///Checks the extension of a filename
-///@param value the filename to check
+/**
+ * Checks the extension of a filename
+ * @param value the filename to check
+ * @return flag that true if the extension matches in the filename
+ */
 bool FileValidator::endswith(const std::string &value) const
 {
   if (m_extensions.empty()) // automatically match a lack of extensions
