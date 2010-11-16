@@ -231,8 +231,8 @@ void LoadSNSEventNexus::exec()
 
   //Default to ALL pulse times
   bool is_time_filtered = false;
-  filter_time_start = Kernel::DateAndTime::getMinimumPulseTime();
-  filter_time_stop = Kernel::DateAndTime::getMaximumPulseTime();
+  filter_time_start = -1e18; // Kernel::DateAndTime::getMinimumPulseTime();
+  filter_time_stop = +1e18; // Kernel::DateAndTime::getMaximumPulseTime();
 
   if (pulseTimes.size() > 0)
   {
