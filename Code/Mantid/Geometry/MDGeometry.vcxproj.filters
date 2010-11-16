@@ -33,6 +33,9 @@
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryDescription.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\IMDDimension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\MDGeometry\MDDimension.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MDGeometry\MDGeometryDescription.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry\IMDDimension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

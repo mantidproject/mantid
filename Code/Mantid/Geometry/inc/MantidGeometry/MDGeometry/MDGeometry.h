@@ -54,6 +54,8 @@ public:
     MDDimension & getZDimension(void)const;
     MDDimension & getTDimension(void)const;
     std::vector<MDDimension *> getIntegratedDimensions(void);
+    /// obtains pointers to all dimensions defined in the geometry
+    std::vector<MDDimension *> getDimensions(void)const{return theDimension;}
 
     /// returns the number of expanded (non-integrated) dimensions
     unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
@@ -71,8 +73,7 @@ public:
     ~MDGeometry(void);
 
     MDGeometry(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);
-    //Defaults should do:?
-   // MDGeometry& operator=(const MDGeometry&);    
+   
  protected: 
    /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
     unsigned int n_expanded_dim;
@@ -98,6 +99,8 @@ private:
     void init_empty_dimensions();
      /// the map used for fast search of a dumension from its tag. 
     std::map<std::string,MDDimension *> dimensions_map;
+ //Defaults should do: ->NO?
+   MDGeometry& operator=(const MDGeometry&);    
 };
 }  // Geometry
 }  // Mantid

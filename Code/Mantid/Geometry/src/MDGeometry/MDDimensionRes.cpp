@@ -22,5 +22,26 @@ MDDimensionRes::setCoord(const std::vector<double> &theCoord)
 MDDimensionRes::~MDDimensionRes(void)
 {
 }
+//********************************************************************************************************************************************
+MDDimDummy::MDDimDummy(unsigned int nRecDim):
+MDDimensionRes("DUMMY REC_DIM",(rec_dim)nRecDim)
+{ 
+  // set 1 bin and the dimension integrated;
+  this->setRange(0,1,1);
+  this->setName("DUMMY AXIS NAME");
+}
+  //Get coordinate for index; Throws  if ind is out of range 
+double 
+MDDimDummy::getX(unsigned int ind)
+{
+      switch(ind){
+      case(0): return 0;
+      case(1): return 1;
+      default: throw(std::out_of_range("Dummy dimension index is out of range (0,1) "));
+      }
+}
+
+
+
 }
 }

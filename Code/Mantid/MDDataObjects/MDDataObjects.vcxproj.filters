@@ -18,19 +18,22 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MDData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MD_File_hdfMatlab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MDPixels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hexahedron.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MDWorkspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MD_File_hdfMatlab4D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IMD_FileFormat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDDataPoints.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDImageData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,16 +44,7 @@
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MDData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MDPixels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\point3D.h">
@@ -60,6 +54,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab4D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDDataPoints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDImageData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -132,7 +132,7 @@ MDGeometryBasis::reinit_GeometryBasis(const std::vector<std::string> &tag_list,u
     this->buildCubicGeometry();
 
   
-  
+     workspace_name.clear();
 
     // build workspace name 
     for(i=0;i<n_total_dim;i++){

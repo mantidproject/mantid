@@ -3,7 +3,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-#include "MDDataObjects/MDData.h"
+#include "MDDataObjects/MDImageData.h"
 #include "find_mantid.h"
 
 
@@ -15,7 +15,7 @@ class testPoint3D :    public CxxTest::TestSuite
 {
 
 public:
-    
+
     void testPoint3DGetPosistion(void)
 	{
 			MDDataObjects::point3D point(0,1,2);

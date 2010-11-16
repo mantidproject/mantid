@@ -8,7 +8,7 @@ namespace Mantid{
   struct MD_image_point{
         double s;      // signal 
         double err;   // error
-        unsigned long npix;  // numer of 
+        unsigned long npix;  // numer of data points (pixels) contributed into this point;
         size_t  chunk_location;
     };
 //

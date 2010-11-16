@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace Mantid{
     namespace MDAlgorithms{
@@ -258,19 +259,23 @@ minmax(double &rMin,double &rMax,const std::vector<double> &box)
     }
 }
 //
-void
+void 
 CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix)
 {
-// this algorithm can be substantially enhanced;
-    int i;
+// this algoithm can be substantially enhanced 
+  // a) by implementing fast search within the limits;
+  // b) by selecting the sells which lie entirely within the cut and the sells which can be cut through;
+  // c) should we try to use deque to avoid multiple insertions for the same indexes? (correct equalities will eliminate them anyway)
+    unsigned int i;
     n_preselected_pix=0;
     //transf_matrix scaled_trf = this->build_scaled_transformation_matrix(Source,target);
 
    // transform the grid into new system of coordinate and calculate cell indexes, which contribute into the 
    // dataset;
-   int j,k,l,m,mp,mm,sizem;
+   unsigned int j,k,l,mp,mm,sizem;
    double xt1,yt1,zt1,Etm,Etp;
    MDDimension *pDim(NULL);
+   //TO DO: this will be obtained from the taget
    double rotations[9];
    rotations[0]=rotations[1]=rotations[2]=rotations[3]=rotations[4]=rotations[5]=rotations[6]=rotations[7]=rotations[8]=0;
    rotations[0]=rotations[4]=rotations[8]=1;
@@ -279,32 +284,50 @@ CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const
    const MD_image_point  *const data = Source.get_const_pData();
 
    // evaluate the capacity of the orthogonal dimensions;
-   unsigned int  nReciprocalDims= Source.getNumReciprocalDims();
-   unsigned int nOrthogonal     = Source.getNumDims()-nReciprocalDims;
-   std::vector<std::string> tag=Source.getBasisTags();
-   long ind,orthoSize=1;
- 
+   unsigned int  nReciprocal    = Source.getNumReciprocalDims();
+   unsigned int nOrthogonal     = Source.getNumDims()-nReciprocal;
+
+   std::vector<MDDimension *> pAllDim  = Source.getDimensions();
+   std::vector<MDDimension *> pOrthogonal(nOrthogonal,NULL);
+   std::vector<MDDimension *> pReciprocal(nReciprocal,NULL);
+   unsigned int nr(0),no(0);
+
+   // get the orthogonal and reciprocal dimensions separately
+   for(i=0;i<Source.getNumDims();i++){
+     if(pAllDim[i]->isReciprocal()){
+       pReciprocal[nr]=pAllDim[i];
+       nr++;
+     }else{
+       pOrthogonal[no]=pAllDim[i];
+       no++;
+     }
+   }
+   // get the names for the dimensions  (do we need it here?)
+   std::vector<std::string> tag = Source.getBasisTags();
+   size_t ind,orthoSize=1;
+
    size_t stride;
    int  nContributed(0);
    // this is the array of vectors to keep orthogonal indexes;
-   std::vector<size_t> *enInd = new std::vector<size_t>[nOrthogonal];
-   for(l=nReciprocalDims;l<Source.getNumDims();l++){
+   std::vector<std::vector<size_t>> enInd(nReciprocal,std::vector<size_t>(0,0));
+ 
+   for(i=0;i<nReciprocal;i++){
        nContributed=0;
-       pDim   = Source.getDimension(tag[l]);
+       pDim   = pOrthogonal[i];
        sizem  = pDim->getNBins();
        stride = pDim->getStride();
-       for(m=0;m<sizem;m++){
+       for(mm=0;mm<sizem;mm++){
            // is rightmpst for min or leftmost for max in range?
-              mp=m+1; 
-              mm=m-1; if(mm<0)    mm=0;
+              mp=mm+1; 
             // check if it can be in ranges
               Etp=pDim->getX(mp);
               Etm=pDim->getX(mm);
 
-           if(Etp<target.cutMin(l)||Etm>=target.cutMax(l)) continue;
+           if(Etp<target.cutMin(i)||Etm>=target.cutMax(i)) continue;
             // remember the index of THIS axis 
-            enInd[l-nReciprocalDims].push_back(m*stride);
-            nContributed++;
+            enInd[i].push_back(mm*stride);
+            // increase the counter of the cells, contributed into cut
+            nReciprocal++;
        }
        orthoSize*=nContributed;
        if(nContributed==0){  // no cells contribute into the cut; Return
@@ -312,38 +335,48 @@ CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const
        }
 
    }
-   // multiply all orthogonal vectors providing size(en)*size(ga1)*size(ga2)*size(ga3) matrix;
-   std::vector<long> *orthoInd = new std::vector<long>;
-   orthoInd->reserve(orthoSize);
+   // multiply all orthogonal vectors providing size(en)*size(ga1)*size(ga2)*size(ga3)*... matrix of indexes;
+   std::vector<size_t> orthoInd(orthoSize,0);
    for(i=0;i<enInd[0].size();i++){
-       orthoInd->push_back(enInd[0].at(i));
+       orthoInd.push_back(enInd[0].at(i));
    }
    for(l=1;l<nOrthogonal;l++){
-       size_t orthSize=orthoInd->size();
+       size_t orthSize=orthoInd.size();
        for(j=0;j<orthSize;j++){
-           long indDim0=orthoInd->at(j);
+           size_t indDim0=orthoInd.at(j);
            for(i=0;enInd[l].size();i++){
-               orthoInd->push_back(indDim0+enInd[l].at(i));
+               orthoInd.push_back(indDim0+enInd[l].at(i));
            }
        }
    }
-   delete [] enInd;
-
-// evaluate the capacity of the 3D space;
-// Define 3D subspace and transform it into the coordinate system of the new box;
+  enInd.clear();
+  boost::ptr_vector<MDDimension *> rec_dim(3);
+// evaluate the capacity of the real space (3D or less);
+// Define (1<=N<=3)D subspace and transform it into the coordinate system of the new cut;
    size_t size3D(1);
-   std::vector<MDDimension* const>rec_dim(nReciprocalDims,NULL);
-   for(i=0;i<nReciprocalDims;i++){
-       rec_dim[i] = Source.getDimension(tag[i]);
-       size3D    *= (rec_dim[i]->getNBins()+1);
+   std::vector<double> cut_min(3,0);
+   std::vector<double> cut_max(3,0);
+   for(i=0;i<nReciprocal;i++){
+       size3D    *= (pReciprocal[i]->getNBins()+1);
+       rec_dim[i] = pReciprocal[i];
+       cut_min[i] = target.cutMin(i);
+       cut_max[i] = target.cutMax(i);
    }
-   /*
-   // dummy dimension is always integrated and 
-   MDDimension Dummy();
-   for(i=nReciprocalDims;i<3;i++){
-       rec_dim[i]=&Dummy;
+   // if there are less then 3 reciprocal dimensions, lets make 3 now to make the algorithm generic
+   for(i=nReciprocal;i<3;i++){
+      rec_dim[i] =  new MDDimDummy(i);
+      // we should know the limits the dummy dimensions have
+      cut_min[i] = rec_dim[i]->getMinimum();
+      cut_max[i] = rec_dim[i]->getMinimum()*(1-FLT_EPSILON);
+
+      //TO DO: deal with rotations in case they have not been dealt with before;
+     //  for(j=nReciprocal;j<3;j++){
+     //    rotations[3*i+j]=0;
+     //    rotations[3*j+i]=0;
+     // }
+     // rotations[3*i+i] = 1;
    }
-   */
+
    std::vector<double> rx,ry,rz,xx,yy,zz;
    rx.assign(size3D,0); xx.assign(size3D,0);
    ry.assign(size3D,0); yy.assign(size3D,0);
@@ -374,45 +407,40 @@ CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const
    nCell3D sh(rec_dim[0]->getNBins()+1,rec_dim[1]->getNBins()+1);
 //           ind3D(this->dim_sizes[u1],this->dim_sizes[u2]);
    double rMin,rMax;
-   unsigned int box_dim=1;
-   for(i=0;i<nReciprocalDims;i++){
-       box_dim*=2;
-   }
-   std::vector<double> r(box_dim,0);
+   std::vector<double> r(8,0);
    size_t ind3;
 
-   for(k=0;k<rec_dim[2]->getNBins();k++){
-       km=k-1; if(km<0)            km=0;
+   for(km=0;km<rec_dim[2]->getNBins();km++){
        kp=k+1; 
-       for(j=0;j<rec_dim[1]->getNBins();j++){
-           jm=j-1; if(jm<0)            jm=0;
-           jp=j+1; 
+       for(jm=0;jm<rec_dim[1]->getNBins();jm++){
+          jp=j+1; 
 
-           for(i=0;i<rec_dim[0]->getNBins();i++){
-               im=i-1; if(im<0)            im=0;
+           for(im=0;im<rec_dim[0]->getNBins();im++){
                ip=i+1; 
 
                r[0]=xx[sh.nCell(im,jm,km)]; r[1]=xx[sh.nCell(ip,jm,km)]; r[2]=xx[sh.nCell(im,jp,km)]; r[3]=xx[sh.nCell(ip,jp,km)];
                r[4]=xx[sh.nCell(im,jm,kp)]; r[5]=xx[sh.nCell(ip,jm,kp)]; r[6]=xx[sh.nCell(im,jp,kp)]; r[7]=xx[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<target.cutMin(0)||rMin>=target.cutMax(0))continue;
+               // unlike the cut over point, we select cells with points on the upper boundary
+               if(rMax<cut_min[0]||rMin>=cut_max[0])continue;
 
                r[0]=yy[sh.nCell(im,jm,km)];  r[1]=yy[sh.nCell(ip,jm,km)];r[2]=yy[sh.nCell(im,jp,km)];  r[3]=yy[sh.nCell(ip,jp,km)];
                r[4]=yy[sh.nCell(im,jm,kp)];  r[5]=yy[sh.nCell(ip,jm,kp)];r[6]=yy[sh.nCell(im,jp,kp)];  r[7]=yy[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<target.cutMin(1)||rMin>=target.cutMax(1))continue;
+               if(rMax<cut_min[1]||rMin>=cut_max[1])continue;
 
                r[0]=zz[sh.nCell(im,jm,km)];  r[1]=zz[sh.nCell(ip,jm,km)];r[2]=zz[sh.nCell(im,jp,km)];  r[3]=zz[sh.nCell(ip,jp,km)];
                r[4]=zz[sh.nCell(im,jm,kp)];  r[5]=zz[sh.nCell(ip,jm,kp)];r[6]=zz[sh.nCell(im,jp,kp)];  r[7]=zz[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<target.cutMin(2)||rMin>=target.cutMax(2))continue;
+               if(rMax<cut_min[2]||rMin>=cut_max[2])continue;
 
                ind3=i*rec_dim[0]->getStride()+j*rec_dim[1]->getStride()+k*rec_dim[2]->getStride();
-               for(l=0;l<orthoInd->size();l++){
-                   ind = ind3+orthoInd->at(l);
+               // multiply reciprocal indexes by orthogonal indexes and srore all indexes for selection
+               for(l=0;l<orthoInd.size();l++){
+                   ind = ind3+orthoInd.at(l);
                    if(data[ind].npix>0){
                         cells_to_select.push_back(ind);
                         n_preselected_pix+=data[ind].npix;
@@ -423,7 +451,7 @@ CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const
            }
        }
     }
-    delete orthoInd;
+   orthoInd.clear();
 
 
 }

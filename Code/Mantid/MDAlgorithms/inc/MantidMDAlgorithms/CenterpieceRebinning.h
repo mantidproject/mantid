@@ -48,17 +48,17 @@ private:
 
   // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
    // void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
-  
 
+  // the function protected for testing purposes; they are actually private to this algorithm.
+protected:
 /*! function returns the list of the cell numbers which can contribute into the cut described by transformation matrix
  *  input arguments:
  @param source           -- the geometry of the initial workspace
- @paran data             -- the pointer to the image data 
- @param target           -- the transformation matrix which describes the cut.
+ @param target           -- the description class, which describes final geometry and the cut.
  @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
  @param n_preselected_pix-- number of pixels contributed into the cells. 
 */
-    void preselect_cells(const MDDataObjects::MDData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
+    void preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
 /// internal helper class to identify the indexes on an auxilary 3D lattice;
     class nCell3D
     {

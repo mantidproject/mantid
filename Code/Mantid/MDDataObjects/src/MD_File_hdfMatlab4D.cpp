@@ -1,10 +1,10 @@
 #include "MDDataObjects/stdafx.h"
-#include "MDDataObjects/MD_File_hdfMatlab.h"
+#include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MDWorkspace.h"
 
 namespace Mantid{
     namespace MDDataObjects{
-//        using namespace Mantid::Kernel;
+
 
 
 /// enum to identify fields, used in MATALB Horace DND-hdf file
@@ -21,10 +21,8 @@ enum matlab_mdd_attributes_list{
     axis,
     N_MATLAB_FIELD_ATTRIBUTES
 };
-
 //***************************************************************************************
-
-MD_File_hdfMatlab::MD_File_hdfMatlab(const char *file_name):
+MD_File_hdfMatlab4D::MD_File_hdfMatlab4D(const char *file_name):
 file_access_mode(H5P_DEFAULT),
 pixel_dataset_h(-1),
 file_handler(-1),
@@ -36,17 +34,21 @@ pixel_dataspace_h(-1)
     htri_t rez=H5Fis_hdf5(File_name.c_str());
     if (rez<=0){
         if (rez==0){
-            throw("the file is not an hdf5 file");
+          f_log.error()<<" file "<<File_name<<" is not an hdf5 file\n";
+          throw("the file is not an hdf5 file");
         }else{
-            throw(" error processing existing hdf file");
+          f_log.error()<<" error while processing existing hdf5 file: "<<File_name<<" \n";
+          throw(" error processing existing hdf file");
         }
     }
     if(!H5Zfilter_avail(H5Z_FILTER_DEFLATE)){
+        f_log.error()<<" can not obtain deflate filter (szip or zip) to read MATLAB-hdf file: "<<File_name<<" \n";
         throw("can not obtain deflate filter to read MATLAB-hdf datatypes");
     }
 /// actually opens the file
     this->file_handler = H5Fopen(File_name.c_str(),H5F_ACC_RDONLY,file_access_mode);
     if (file_handler<0){
+        f_log.error()<<" error opening existing hdf5 file: "<<File_name<<" \n";
         throw(" error opening existing hdf5 file");
     }
 /// mdd dataset names in MATLAB HDF file;
@@ -62,15 +64,17 @@ pixel_dataspace_h(-1)
     this->mdd_attrib_names[axis].assign("p");
  
 }
+//***************************************************************************************
 
 //***************************************************************************************
 bool 
-MD_File_hdfMatlab::check_or_open_pix_dataset(void)
+MD_File_hdfMatlab4D::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
     if(this->pixel_dataset_h<0){
         this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
         if(this->pixel_dataset_h<0){
+            f_log.error()<<" MD_File_hdfMatlab::check_or_open_pix_dataset  Can not open pixels dataset "<< this->mdd_field_names[Pixels]<<" in file: "<<File_name<<" \n";
             throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open pixels dataset",this->File_name));
         }
     }else{
@@ -80,13 +84,14 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
     return was_opened;
 }
 void 
-MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
+MD_File_hdfMatlab4D::read_mdd(MDImageData & dnd)
 {
   // get pointer to MD structure which should be read from memory
    MD_DATA *pMD_struct  = dnd.get_pMDData();
 // The function accepts full 4D dataset only!!!
     hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
     if (h_signal_DSID<0){
+        f_log.error()<<" MD_File_hdfMatlab::check_or_open_pix_dataset  Can not open mdd dataset "<< this->mdd_field_names[DatasetName]<<" in file: "<<File_name<<" \n";
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
     }
     std::vector<int> arr_dims_vector;
@@ -103,6 +108,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
     if(!ok){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading signal dimensions attribute: "<<mdd_attrib_names[nDND_dims]<<std::endl;
+        f_log.error()<<err.str();
         throw(Exception::FileError(err.str(),this->File_name));
     }
     nDims= arr_dims_vector[0];
@@ -121,6 +127,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
     if (descriptors_DSID<0){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the the data descriptors field in the dataset: "<<mdd_attrib_names[DataDescriptor]<<std::endl;
+        f_log.error()<<err.str();
         throw(Exception::FileError(err.str(),this->File_name));
     }
     // read data limits
@@ -128,6 +135,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
     if(!ok){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading mdd data range attribute: "<<mdd_attrib_names[range]<<std::endl;
+        f_log.error()<<err.str();
         throw(Exception::FileError(err.str(),this->File_name));
     }
     for(i=0;i<nDims;i++){
@@ -142,6 +150,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
     if(!ok){
        std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading mdd data axis attribute: "<<mdd_attrib_names[axis]<<std::endl;
+        f_log.error()<<err.str();
         throw(Exception::FileError(err.str(),this->File_name));
     }
     if (kind!=double_cellarray){
@@ -152,7 +161,8 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
     double filler = *((double *)(data)+nData);
     std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
     if(MAX_MD_DIMS_POSSIBLE<=arr_dims_vector[0]){
-        throw(Exception::FileError("file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
+      f_log.error()<<"file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE\n";
+      throw(Exception::FileError("file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
     }
     /* This is absolutely unnesessary for linear axis as n-bins has been already defined;
         for(i=0;i<nDims;i++){
@@ -171,7 +181,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
 // iax,iint and variable number of p and process them properly;
 
 
-    dnd.alloc_mdd_arrays(dnd_shape);
+    dnd.initialize(dnd_shape);
 
 //-------------------------------------------------------------------------
 // read the dataset itself
@@ -211,7 +221,7 @@ H5Dclose(h_signal_DSID);
 //***************************************************************************************
 
 hsize_t
-MD_File_hdfMatlab::getNPix(void)
+MD_File_hdfMatlab4D::getNPix(void)
 {
     if(this->file_handler<0)return -1;
 
@@ -241,14 +251,13 @@ MD_File_hdfMatlab::getNPix(void)
 //***************************************************************************************
 
 bool
-MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
+MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
 { 
 
     unsigned long i;
-    matlab_attrib_kind kind;
+
     std::vector<int> arr_dims_vector;
 
-    void *data;
     // pixels dims dataset is the 1D dataset of the array datatype
     hsize_t  pix_dims[1],pix_dims_max[1];
 // the variable was_opened identify if we have to close dataset after finishing with it (may be not if partial IO operations expected)
@@ -263,27 +272,36 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
         throw(Exception::FileError("MD_File_hdfMatlab::read_pix: the pixel dataspace format differs from the one expected",this->File_name));
     }
     H5Sget_simple_extent_dims(pixel_dataspace_h,pix_dims,pix_dims_max);    
-// Find and read n-pixels attribute to indentify number of the pixels contributed into the mdd dataset
-    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind,this->File_name);
-    if(!ok){
-        throw(Exception::FileError("MD_File_hdfMatlab::read_pix: Error reading npix sqw attribute",this->File_name));
+
+// this file-reader deals with 9 of 4 bit-fields only;
+    sqw.numFields()     = DATA_PIX_WIDTH;
+
+    // pixel array has to be allocated earlier when image data were read; It is possible then it was less than the pixel buffer. In this case this function has to fail as it is 
+    // not possible to read all pixels into memory;
+    sqw_pixel *pix_array = (sqw_pixel *)sqw.get_pBuffer();
+    if(!pix_array){
+      f_log.fatal()<<" pixel array has not been properly allocated\n";
+      throw(std::bad_alloc("pixels array has not been allocated properly"));
     }
-// checks if proper parameter has been read are needed
-    sqw.nPixels=(unsigned long)*((double*)(data));
-    delete [] data;
-    arr_dims_vector.clear();
-
-
-    if(pix_dims[0]!=sqw.nPixels){
+    size_t n_pix_inDataset  = sqw.getNumPixels();
+    if(pix_dims[0]!=n_pix_inDataset){
         std::stringstream err;
-        err<<"MD_File_hdfMatlab::read_pix: Number of pixels contributed into mdd dataset= "<<sqw.nPixels<<" and does not correspond to number of sqw pixels: "<<pix_dims[0]<<std::endl;
+        err<<"MD_File_hdfMatlab::read_pix: Number of pixels contributed into mdd dataset= "<<sqw.getNumPixels()<<" and does not correspond to number of sqw pixels: "<<pix_dims[0]<<std::endl;
         throw(std::invalid_argument(err.str()));
     }
+    // let's verify if we indeed can read pixels into the buffer;
+    size_t buf_size = sqw.get_pix_bufSize();
+
+    if(buf_size<n_pix_inDataset){
+      return false;
+    }
+
+
     hid_t type      = H5Dget_type(this->pixel_dataset_h);
     if(type<0){
         throw(Exception::FileError("MD_File_hdfMatlab::read_pix: can not obtain pixels dataset datatype",this->File_name));
     }
-    void *pix_buf;
+ 
     bool data_double;
     hid_t data_type=H5Tget_native_type(type,H5T_DIR_ASCEND);
     if(data_type<0){
@@ -291,6 +309,7 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
     }
 
     bool type_error(false);
+    void *pix_buf;
     try{
         // this does not work so we are not using double data to write pixel information
        // if(data_type==H5T_NATIVE_FLOAT){
@@ -308,6 +327,7 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
        // }
     }catch(...){
         if(type_error){
+            delete [] pix_buf;
             throw(Exception::FileError("pixel dataset uses datatype different from native float or native double",this->File_name));
         }else{
             return false; // bad alloc thrown
@@ -316,40 +336,35 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
     
     herr_t err=H5Dread(this->pixel_dataset_h, type,H5S_ALL, H5S_ALL, this->file_access_mode,pix_buf);   
     if(err){
+        delete [] pix_buf;
         throw(Exception::FileError("Error reading the pixels dataset",this->File_name));
     }
     size_t nCellPic(0);
     size_t nPixel(0);
+
   
-    sqw_pixel null;
-    null.En=0;
-    null.err=0;
-    null.idet=0;
-    null.ien=0;
-    null.irun=0;
-    null.s=0;
- 
+  
     for(i=0;i<sqw.getNumPixels();i++){
         if (data_double){
-           sqw.pix_array[i].qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-           sqw.pix_array[i].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-           sqw.pix_array[i].qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-           sqw.pix_array[i].En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-           sqw.pix_array[i].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-           sqw.pix_array[i].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-           sqw.pix_array[i].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-           sqw.pix_array[i].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-           sqw.pix_array[i].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+           pix_array[i].qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+           pix_array[i].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+           pix_array[i].qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+           pix_array[i].En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+           pix_array[i].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+           pix_array[i].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+           pix_array[i].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+           pix_array[i].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+           pix_array[i].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
          }else{
-            sqw.pix_array[i].qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-            sqw.pix_array[i].qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-            sqw.pix_array[i].qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-            sqw.pix_array[i].En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-            sqw.pix_array[i].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-            sqw.pix_array[i].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-            sqw.pix_array[i].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-            sqw.pix_array[i].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-            sqw.pix_array[i].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+            pix_array[i].qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+            pix_array[i].qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+            pix_array[i].qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+            pix_array[i].En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+            pix_array[i].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+            pix_array[i].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+            pix_array[i].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+            pix_array[i].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+            pix_array[i].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
         }
 
        nPixel++;
@@ -367,12 +382,15 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
 }
 
 size_t 
-MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<sqw_pixel> &pix_buf, size_t &nPix_buf_size,size_t &n_pix_in_buffer)
+MD_File_hdfMatlab4D::read_pix_subset(const MDWorkspace &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_raw_buf, size_t &n_pix_in_buffer)
 {
 // open pixel dataset and dataspace if it has not been opened before;
-    n_pix_in_buffer=0;
+  
     this->check_or_open_pix_dataset();
     bool pixel_dataspece_opened(false);
+
+     n_pix_in_buffer=0;
+     size_t nPix_buf_size = pix_raw_buf.size()/sizeof(sqw_pixel);
 
     // get access to pixels allocation table;
     const MD_image_point * pData = SQW.get_const_pData();
@@ -402,7 +420,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
         }else{
             // if one cell does not fit the buffer, we should increase buffer size .     
             if(i==starting_cell){
-                pix_buf.resize(max_npix_in_buffer);
+                pix_raw_buf.resize(max_npix_in_buffer*sizeof(sqw_pixel));
                 nPix_buf_size = max_npix_in_buffer;
                 n_selected_cells=i;
                 n_cells_processed=1;
@@ -414,8 +432,8 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     }
     
 
-    if(pix_buf.capacity()<max_npix_in_buffer){
-        pix_buf.resize(max_npix_in_buffer);
+    if(pix_raw_buf.capacity()<max_npix_in_buffer*sizeof(sqw_pixel)){
+        pix_raw_buf.resize(max_npix_in_buffer*sizeof(sqw_pixel));
         nPix_buf_size = max_npix_in_buffer;
     }
 
@@ -468,7 +486,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     time(&end);     //***********************************************<<<<
     std::stringstream message; 
     message<<" Dataset preselected in: "<<difftime (end,start)<<" sec\n";
-    MDData::g_log.debug(message.str());
+    f_log.debug(message.str());
 
 
     time(&start);  //***********************************************>>>
@@ -483,7 +501,9 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     time(&end); //***********************************************<<<<
     message.clear();
     message<<" Dataset read  in: "<<difftime (end,start)<<" sec\n";
-    MDData::g_log.debug(message.str());
+    f_log.debug(message.str());
+
+    sqw_pixel *pix_buf =(sqw_pixel *)(&pix_raw_buf[0]);
 
     time(&start);  //***********************************************>>>
     for(i=0;i<max_npix_selected;i++){
@@ -503,7 +523,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     
     message.clear();
     message<<" Dataset converted in: "<<difftime (end,start)<<" sec\n";
-    MDData::g_log.debug(message.str());
+    f_log.debug(message.str());
 
     time(&start);  //***********************************************>>>
 
@@ -521,12 +541,12 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
 
     message.clear();
     message<<" closing all while returning from file_hdf_read : "<<difftime (end,start)<<" sec\n";
-    MDData::g_log.debug(message.str());
+    f_log.debug(message.str());
 
     return n_cells_processed;
 }
 
-MD_File_hdfMatlab::~MD_File_hdfMatlab(void)
+MD_File_hdfMatlab4D::~MD_File_hdfMatlab4D(void)
 {
     if(this->pixel_dataspace_h>0){  H5Sclose(pixel_dataspace_h);
     }

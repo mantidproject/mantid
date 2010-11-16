@@ -50,44 +50,44 @@ class DLLExport MDDimension : public IMDDimension
 {
 public:
 
-  virtual std::string getDimensionId() const;
+    virtual std::string getDimensionId() const;
 
-  virtual bool getIsIntegrated() const;
+    virtual bool getIsIntegrated() const;
 
-     virtual ~MDDimension();
+    virtual ~MDDimension();
 /// function returns the name of the axis in this direction
-    std::string getName()const{return AxisName;}
+   virtual std::string getName()const{return AxisName;}
 /// function return the unique dimension ID, identifying the current dimension among others 
-    std::string getDimensionTag(void)const{return dimTag;}
+    virtual std::string getDimensionTag(void)const{return dimTag;}
 /// get maximal value along the dimension
-    double       getMaximum(void)const{return rMax;}
+    virtual double       getMaximum(void)const{return rMax;}
 /// get minimal value along the dimension
-    double       getMinimum(void)const{return rMin;}
+    virtual double       getMinimum(void)const{return rMin;}
 /// range of data along this axis
-    double       getRange(void)const{return (rMax-rMin);}
+    virtual double       getRange(void)const{return (rMax-rMin);}
 /// scale of the data along this axis 
     /// TO DO: what is this scale and what constraint we want to apply on it? 
-    double getScale(void)const{return latticeParam;}
+    virtual double getScale(void)const{return latticeParam;}
 /*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
  *   coinsiding with min and max values rMin and rMax; */
-    bool        getIntegrated(void)const{return isIntegrated;}
+    virtual bool        getIntegrated(void)const{return isIntegrated;}
 /// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
     virtual std::vector<double>const & getCoord(void)const{return coord;}
     /// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
     /// the function returns the center points of the axis bins; There are nBins of such points 
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
-    void getAxisPoints(std::vector<double>  &)const;
+    virtual void getAxisPoints(std::vector<double>  &)const;
     /// function returns number of the bins this dimension has
-    unsigned int getNBins(void)const{return nBins;}
+    virtual unsigned int getNBins(void)const{return nBins;}
     /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
-    size_t       getStride(void)const{return nStride;}
+    virtual size_t       getStride(void)const{return nStride;}
   
     //Get coordinate for index; Throws through vector if ind out of range 
-    double getX(unsigned int ind){return Axis.at(ind);}
+    virtual double getX(unsigned int ind){return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
-    
+   
     MDDimension(const std::string &ID);
 protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
@@ -142,7 +142,7 @@ private:
     double latticeParam;
 
    // *************  should be prohibited?:
-    MDDimension(const MDDimension &){};
+    MDDimension(const MDDimension &);
     MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);

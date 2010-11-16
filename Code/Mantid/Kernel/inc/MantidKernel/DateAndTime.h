@@ -66,13 +66,13 @@ static const dateAndTime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
 static const dateAndTime PULSETIME_MAX_DATE(boost::gregorian::date(2282, 1, 1));
 
 /// Maximum PulseTimeType value
-static const PulseTimeType PULSETIME_MAX(+6e17);
+static const PulseTimeType PULSETIME_MAX = PulseTimeType(+6e17);
 
 /// Approximate minimum date that can be represented a a PulseTimeType
 static const dateAndTime PULSETIME_MIN_DATE(boost::gregorian::date(1698, 1, 1));
 
 /// Minimum PulseTimeType value
-static const PulseTimeType PULSETIME_MIN(-6e17);
+static const PulseTimeType PULSETIME_MIN = PulseTimeType(-6e17);
 
 
 /// The epoch for Unix times.

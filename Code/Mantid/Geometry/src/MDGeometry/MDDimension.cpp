@@ -8,15 +8,15 @@ namespace Mantid
     Kernel::Logger& MDDimension::g_log=Kernel::Logger::get("MDWorkspaces");
 //
 
-    std::string MDDimension::getDimensionId() const
-    {
+std::string MDDimension::getDimensionId() const
+{
       return this->dimTag; //TODO, dimension id string member required for this type.
-    }
+}
 
-    bool MDDimension::getIsIntegrated() const
-    {
+bool MDDimension::getIsIntegrated() const
+{
       return this->isIntegrated;
-    }
+}
 
 void
 MDDimension::getAxisPoints(std::vector<double>  &rez)const

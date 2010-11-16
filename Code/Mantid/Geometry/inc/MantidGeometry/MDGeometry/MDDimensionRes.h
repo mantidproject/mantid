@@ -30,12 +30,12 @@ namespace Mantid{
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-      /** enum describes reciprocal dimension numbers and reflects the request to up to three reciprocal dimensions */
-      enum rec_dim{
+ /** enum describes reciprocal dimension numbers and reflects the request to up to three reciprocal dimensions */
+ enum rec_dim{
         q1,
         q2,
         q3
-      }; 
+ }; 
 
 class DLLExport MDDimensionRes :   public MDDimension
 {
@@ -55,6 +55,52 @@ private:
     virtual void setCoord(const std::vector<double> &theCoord);
     /// number of this reciprocal dimension (one of 3)
     rec_dim nRecDim; 
+};
+
+/**  The class is used in algorithms when number of reciprocal dimensions is less then 3 to provide meaningfull representation of missing reciprocal dimensions
+*/
+class DLLExport MDDimDummy : public MDDimensionRes
+{
+public:
+  MDDimDummy(unsigned int nRecDim);
+ ~MDDimDummy(){};
+// these functions are implemented through the parent
+// function returns the name of the axis in this direction
+//    virtual std::string const &getName()const{return "DUMMY AXIS";}
+/// function return the unique dimension ID, identifying the current dimension among others 
+//    virtual std::string getDimensionTag(void)const{return "DUMMY REC_DIM";}
+// get Axis data; 
+//    std::vector<double> const &  getAxis(void)const{std::vector<double> tmp(2,0); tmp[1]=1; return tmp;}
+
+/// get maximal value along the dimension
+    virtual double       getMaximum(void)const{return 1;}
+/// get minimal value along the dimension
+    virtual double       getMinimum(void)const{return 0;}
+/// range of data along this axis
+    virtual double       getRange(void)const{return (1);}
+/// scale of the data along this axis 
+    /// TO DO: what is this scale and what constraint we want to apply on it? 
+    virtual double getScale(void)const{return 1;}
+/*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
+ *   coinsiding with min and max values rMin and rMax; */
+    bool        getIntegrated(void)const{return true;}
+/// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
+    virtual std::vector<double>const & getCoord(void)const{return coord;}
+    /// the function returns the center points of the axis bins; There are nBins of such points 
+    /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
+    virtual void getAxisPoints(std::vector<double>  &p)const{std::vector<double> tmp(1,0.5);p=tmp;}
+    /// function returns number of the bins this dimension has
+    virtual unsigned int getNBins(void)const{return 1;}
+    /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
+    virtual size_t       getStride(void)const{return 0;}
+  
+    //Get coordinate for index; Throws  if ind is out of range 
+    virtual double getX(unsigned int ind);
+    /// it is not reciprocal dimension -> convenience function
+    virtual bool isReciprocal(void)const{return true;}
+    // no mutator allowed
+private:
+
 };
 } // MDDataObjects
 } // Mantid
