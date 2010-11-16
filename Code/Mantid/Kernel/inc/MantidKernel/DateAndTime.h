@@ -30,7 +30,7 @@ typedef boost::posix_time::time_duration time_duration;
 
 //Make the compiler pack the data size aligned to 1-byte, to use as little space as possible
 #pragma pack(push, 1)
-DLLExport class DateAndTime
+class DLLExport DateAndTime
 {
 public:
   explicit DateAndTime();
