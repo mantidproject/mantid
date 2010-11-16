@@ -60,7 +60,7 @@ namespace Mantid
       ///String description of the type of component
       virtual std::string type() const { return "Instrument"; }
 
-      Instrument(const boost::shared_ptr<Instrument> instr, Kernel::cow_ptr<ParameterMap> map);
+      Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map);
       Instrument();
       Instrument(const std::string& name);
       ///Virtual destructor
@@ -122,7 +122,7 @@ namespace Mantid
       boost::shared_ptr<Instrument> baseInstrument() const;
 
       /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
-      Kernel::cow_ptr<ParameterMap> getParameterMap() const;
+      Geometry::ParameterMap_sptr getParameterMap() const;
 
 
     private:
@@ -162,7 +162,7 @@ namespace Mantid
       boost::shared_ptr<Instrument> m_instr;
 
       /// Non-const pointer to the parameter map
-      Kernel::cow_ptr<ParameterMap> m_map_nonconst;
+      ParameterMap_sptr m_map_nonconst;
 
     };
 

@@ -75,7 +75,8 @@ public:
 
 private:
   boost::shared_ptr<Instrument> instrument;
-  Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
+  //Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
+  Mantid::Geometry::ParameterMap_sptr pmap;
   boost::shared_ptr<Detector> det, det2, det3;
 };
 

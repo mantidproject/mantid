@@ -388,7 +388,7 @@ namespace Mantid
     IInstrument_sptr MatrixWorkspace::getInstrument()const
     {
       //Return a Parametrized Instrument if there is a parameter map and it isn't empty
-      if (m_parmap.operator->() == NULL)
+      if (m_parmap)
       {
         if( !m_parmap->empty() )
         {
@@ -410,14 +410,35 @@ namespace Mantid
     /**  Returns a new copy of the instrument parameters
     *    @return a (new) copy of the instruments parameter map
     */
-    Geometry::ParameterMap& MatrixWorkspace::instrumentParameters() const
+    Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
     {
       //If you requrest instrument parameters but the pointer is empty,
       //  create them for the first time.
-      if (m_parmap.operator ->() == NULL)
+      if (!m_parmap)
         m_parmap = ParameterMap_sptr(new ParameterMap());
 
-      return m_parmap.access(); //old cow_ptr thing
+      //TODO: Here duplicates cow_ptr. Figure out if there's a better way
+
+      // Use a double-check for sharing so that we only
+      // enter the critical region if absolutely necessary
+      if (!m_parmap.unique())
+      {
+        PARALLEL_CRITICAL(cow_ptr_access)
+        {
+          // Check again because another thread may have taken copy
+          // and dropped reference count since previous check
+          if (!m_parmap.unique())
+          {
+            ParameterMap_sptr oldData=m_parmap;
+            m_parmap.reset();
+            m_parmap = ParameterMap_sptr(new ParameterMap(*oldData));
+          }
+        }
+      }
+
+      return *m_parmap;
+
+      //return m_parmap.access(); //old cow_ptr thing
     }
 
 
@@ -426,7 +447,7 @@ namespace Mantid
     {
       //If you requrest instrument parameters but the pointer is empty,
       //  create them for the first time.
-      if (m_parmap.operator ->() == NULL)
+      if (!m_parmap)
         m_parmap = ParameterMap_sptr(new ParameterMap());
 
       return *m_parmap;
