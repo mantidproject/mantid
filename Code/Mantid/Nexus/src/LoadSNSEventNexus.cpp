@@ -264,7 +264,7 @@ void LoadSNSEventNexus::exec()
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
-  //PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     prog2.report("Loading " + bankNames[i]);
