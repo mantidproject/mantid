@@ -327,7 +327,7 @@ MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
        // }
     }catch(...){
         if(type_error){
-            delete [] pix_buf;
+            //delete [] pix_buf;
             throw(Exception::FileError("pixel dataset uses datatype different from native float or native double",this->File_name));
         }else{
             return false; // bad alloc thrown

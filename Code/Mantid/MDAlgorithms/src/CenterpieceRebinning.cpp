@@ -38,13 +38,16 @@ MDWorkspace_sptr inputWS;
     }else{
        throw(std::runtime_error("input workspace has to be availible through properties"));
     }
+
    std::string filename;
+   filename = "../../../../Test/VATES/fe_demo.sqw";
+/*
    if(existsProperty("Filename")){
       filename= getProperty("Filename");
    }else{
       throw(std::runtime_error("filename property can not be found"));
    }
-
+*/
     inputWS->read_mdd(filename.c_str());
 
     // set up slicing property to the shape of current workspace;
@@ -70,7 +73,7 @@ CenterpieceRebinning::init()
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
 
       declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
-      declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load), "The file containing input MD dataset");
+    //  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load), "The file containing input MD dataset");
 
 
       m_progress = new Progress(this,0,1,10);
@@ -141,9 +144,9 @@ CenterpieceRebinning::exec()
             n_pixels_selected(0),
             n_pix_in_buffer(0),pix_buffer_size(PIX_BUFFER_SIZE);
   
-  std::vector<sqw_pixel> pix_buf;
-  pix_buf.resize(PIX_BUFFER_SIZE);
-  
+  std::vector<char  > pix_buf;
+  pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
+ 
 
   // get pointer for data to rebin to; 
   MD_image_point *pImage    = outputWS->get_pData();
@@ -159,10 +162,10 @@ CenterpieceRebinning::exec()
 // start reading and rebinning;
   size_t n_starting_cell(0);
   for(unsigned int i=0;i<n_hits;i++){
-      n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,pix_buffer_size,n_pix_in_buffer);
+      n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
       n_pixels_read  +=n_pix_in_buffer;
       
-      n_pixels_selected+=this->rebin_dataset4D(trf,strides,&pix_buf[0],n_pix_in_buffer,pImage,boxMin,boxMax);
+      n_pixels_selected+=this->rebin_dataset4D(trf,strides,(sqw_pixel *)(&pix_buf[0]),n_pix_in_buffer,pImage,boxMin,boxMax);
   } 
   this->finalise_rebinning(pImage,image_size);
 
@@ -260,7 +263,7 @@ minmax(double &rMin,double &rMax,const std::vector<double> &box)
 }
 //
 void 
-CenterpieceRebinning::preselect_cells(const MDDataObjects::MDData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix)
+CenterpieceRebinning::preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix)
 {
 // this algoithm can be substantially enhanced 
   // a) by implementing fast search within the limits;
