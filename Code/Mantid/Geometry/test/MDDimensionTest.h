@@ -55,6 +55,15 @@ class testMDDimension :    public CxxTest::TestSuite
     tDimensionRes *pResDim;
     tDimension    *pOrtDim;
 public:
+
+    void testPublicConstructor()
+	{
+	 using namespace Mantid::Geometry;
+	 std::string id = "1";
+	 MDDimension dim(id); //Will cause compilation error if constructor is hidden.
+	 TSM_ASSERT_EQUALS("Id getter not wired-up correctly.", "1", dim.getDimensionId());
+	}
+
     void testDimensionConstructor(void){
         // define one reciprocal 
        TS_ASSERT_THROWS_NOTHING(pResDim = new tDimensionRes("x",q1));

@@ -87,6 +87,8 @@ public:
     double getX(unsigned int ind){return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
+    
+    MDDimension(const std::string &ID);
 protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
@@ -112,8 +114,6 @@ protected:
     void   setExpanded(unsigned int nBins);
     /// differs from setRange by the fact that the limits has to be within the existing ranges
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
-   // dodgy constructor has to be hidden from clients except the childs. 
-    MDDimension(const std::string &ID);
 
   /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
