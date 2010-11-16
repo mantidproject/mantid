@@ -50,6 +50,8 @@ SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash
    
   setLayout(dialogLayout);
   setAttribute(Qt::WA_DeleteOnClose);
+
+
 }
 /// Set up the dialog layout
 void SaveWorkspaces::initLayout()
@@ -279,7 +281,7 @@ void SaveWorkspaces::saveSel()
   QString status(runPythonCode(saveCommands).trimmed()); 
   if ( status != "success" )
   {
-    QMessageBox::critical(this, "Error saving workspace", "One of the workspaces couldnot be saved, was it deleted from Mantid?");
+    QMessageBox::critical(this, "Error saving workspace", "One of the workspaces could not be saved in one of the selected formats");
   }
 }
 /** Sets the filename to the name of the selected workspace

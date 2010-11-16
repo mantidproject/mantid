@@ -55,7 +55,6 @@ namespace MantidQt
 
     signals:
       void closing();
-      void runAsPythonScript(const QString&);
 
     private:
       QLineEdit *m_fNameEdit;
