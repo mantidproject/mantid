@@ -125,6 +125,7 @@ namespace Mantid
 
     /** Get a vector of detectors ids contributing to a spectrum
      * @param spectrum_number The # of the spectrum you are looking for.
+     * @return list of detector ids in map
      */
     std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {

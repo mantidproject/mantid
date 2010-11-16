@@ -56,6 +56,7 @@ void TextAxis::setValue(const int& index, const double& value)
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to
+ *  @return true if self and other axis are equal
  */
 bool TextAxis::operator==(const Axis& axis2) const
 {

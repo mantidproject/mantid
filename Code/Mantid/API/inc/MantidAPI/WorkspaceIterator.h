@@ -83,8 +83,7 @@ private:
   };
   /// @endcond
   
-  /// Makes the underlying std::vector<double> iterator be const or not according to whether
-  /// the workspace_iterator is (or not).
+  /// Makes the underlying std::vector<double> iterator be const or not according to whether the workspace_iterator is (or not).
   typedef typename internal_iterator_type<_Iterator*>::iterator_type iterator_type;
   
   ///Internal cache of X iterator for current datablock

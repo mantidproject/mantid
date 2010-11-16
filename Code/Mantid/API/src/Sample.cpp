@@ -25,8 +25,9 @@ Sample::Sample(const Sample& copy) :
 }
 
 /**  assignment operator 
-  * @param rhs const reference to the sample object
-*/
+ * @param rhs const reference to the sample object
+ * @return copy of sample object
+ */
   const Sample& Sample::operator=(const Sample&rhs)
 {
   if (this == &rhs) return *this;

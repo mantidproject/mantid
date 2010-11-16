@@ -126,6 +126,7 @@ public:
 
     /**  Templated method to access the element col in the row. The internal pointer moves to point to the element after col.
          @param col Element's position in the row
+         @return cell of the template type
      */
     template<class T>
     T& cell(int col)

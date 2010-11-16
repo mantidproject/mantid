@@ -138,6 +138,7 @@ void SpectraAxis::populateSimple(int end)
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to
+ *  @return true is self and second axis are equal
  */
 bool SpectraAxis::operator==(const Axis& axis2) const
 {
@@ -156,6 +157,7 @@ bool SpectraAxis::operator==(const Axis& axis2) const
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
  *  @param index The index of an axis value
+ *  @return label of requested axis index
  */
 std::string SpectraAxis::label(const int& index)const
 {

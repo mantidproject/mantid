@@ -123,6 +123,7 @@ void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotificat
 
 /**
  * This method returns true if the workspace group is empty
+ * @return true if workspace is empty
  */
 bool WorkspaceGroup::isEmpty()
 {

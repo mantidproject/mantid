@@ -61,8 +61,7 @@ public:
   void add(const std::string& wsName);
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
-  /// Returns the workspaces that make up this group. Note that this returns a copy as the internal vector 
-  /// can mutate while the vector is being iterated over.
+  /// Returns the workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
   std::vector<std::string> getNames() const { return m_wsNames; }
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }

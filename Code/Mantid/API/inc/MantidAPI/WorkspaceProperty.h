@@ -89,8 +89,10 @@ namespace Mantid
         return *this;
       }
 
-      /// Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
-      /// @param value The value to set to
+      /** Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
+       * @param value The value to set to
+       * @return assigned PropertyWithValue
+       */
       virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
       {
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
@@ -233,6 +235,7 @@ namespace Mantid
 
       /** Returns the current contents of the AnalysisDataService for input workspaces.
        *  For output workspaces, an empty set is returned
+       *  @return set of objects in AnalysisDataService
        */
       virtual std::set<std::string> allowedValues() const
       {
@@ -299,7 +302,7 @@ namespace Mantid
           Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
             boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
         }
-        catch (Kernel::Exception::NotFoundError)
+        catch (Kernel::Exception::NotFoundError &)
         {
           // Set to null property if not found
           this->clear();

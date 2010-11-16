@@ -36,7 +36,8 @@ namespace API
   /** Static callback function used by MuParser to initialize variables implicitly
    * @param varName The name of a new variable
    * @param palg Pointer to this ParameterTie
-  */
+   * @return pointer to added variable
+   */
   double* ParameterTie::AddVariable(const char *varName, void *palg)
   {
     ParameterTie& tie = *(ParameterTie*)palg;
@@ -126,8 +127,9 @@ namespace API
   }
 
   /**
+   * All parameters in the tie must be parameters of fun.
    * @param fun Function that can re-create the tie from the output string.
-   *   All parameters in the tie must be parameters of fun.
+   * @return string representation of function
    */
   std::string ParameterTie::asString(const IFunction* fun)const
   {

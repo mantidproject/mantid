@@ -47,8 +47,7 @@ public:
   /// return value reflects the centre of the peak
   virtual double centre()const = 0;
 
-  /// Returns the height of the function. For a background function this may return an average
-  /// height of the background. For a peak function this return value is the height of the peak
+  /// Returns the height of the function. For a background function this may return an average height of the background. For a peak function this return value is the height of the peak
   virtual double height()const = 0;
 
   /// Sets the parameters such that centre == c

@@ -61,6 +61,7 @@ void NumericAxis::setValue(const int& index, const double& value)
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to
+ *  @return true if self and second axis are equal
  */
 bool NumericAxis::operator==(const Axis& axis2) const
 {
@@ -79,6 +80,7 @@ bool NumericAxis::operator==(const Axis& axis2) const
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
  *  @param index The index of an axis value
+ *  @return the label of the requested axis
  */
 std::string NumericAxis::label(const int& index)const
 {

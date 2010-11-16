@@ -107,6 +107,7 @@ WorkspaceTracerImpl::~WorkspaceTracerImpl()
 /**
  * Executes in a separate thread
  * @param wsname The name of the replaced workspace
+ * @return nothing
  */
 Poco::Void WorkspaceTracerImpl::executeTraceImpl(const std::string & wsname)
 {

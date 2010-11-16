@@ -68,6 +68,7 @@ void RefAxis::setValue(const int& index, const double& value)
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to
+ *  @return true is self and second axis are equal
  */
 bool RefAxis::operator==(const Axis& axis2) const
 {

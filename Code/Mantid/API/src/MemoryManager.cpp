@@ -42,6 +42,7 @@ MemoryManagerImpl::~MemoryManagerImpl()
     @param XLength the size of the X vector
     @param YLength the size of the Y vector
     @param isCompressedOK The address of a boolean indicating if the compression succeeded or not
+    @return true is managed workspace is needed
  */
 bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength, bool* isCompressedOK)
 {

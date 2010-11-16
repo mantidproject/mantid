@@ -366,6 +366,9 @@ template <typename TYPE = MatrixWorkspace>
 class DLLExport SpectraAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
+  /** Class constructor with parameter.
+   * @param axisNumber set the axis number to validate
+   */
   SpectraAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
   virtual ~SpectraAxisValidator() {}
 
@@ -397,6 +400,9 @@ template <typename TYPE = MatrixWorkspace>
 class DLLExport NumericAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
+  /** Class constructor with parameter.
+   * @param axisNumber set the axis number to validate
+   */
   NumericAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
   virtual ~NumericAxisValidator() {}
 

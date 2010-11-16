@@ -73,6 +73,7 @@ const TableRow& TableRow::operator>>(bool& t)const
 /**  Output stream operator
      @param s Output stream
      @param row The TableRow
+     @return stream representation of row
  */  
 std::ostream& operator<<(std::ostream& s,const TableRow& row)
 {
