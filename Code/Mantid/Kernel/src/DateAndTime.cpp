@@ -8,16 +8,16 @@ namespace Kernel
 
 
 /// Max allowed nanoseconds in the time; 2^62-1
-static int64_t MAX_NANOSECONDS = int64_t(4611686018427387903);
+static int64_t MAX_NANOSECONDS = int64_t(4611686018427387903L);
 
 /// Max allowed seconds in the time
-static int64_t MAX_SECONDS      = int64_t(4611686017);
+static int64_t MAX_SECONDS      = int64_t(4611686017L);
 
 /// Min allowed nanoseconds in the time; -2^62+1
-static int64_t MIN_NANOSECONDS  = int64_t(-4611686018427387903);
+static int64_t MIN_NANOSECONDS  = int64_t(-4611686018427387903L);
 
 /// Min allowed seconds in the time
-static int64_t MIN_SECONDS      = int64_t(-4611686017);
+static int64_t MIN_SECONDS      = int64_t(-4611686017L);
 
 
 namespace DateAndTimeHelpers
