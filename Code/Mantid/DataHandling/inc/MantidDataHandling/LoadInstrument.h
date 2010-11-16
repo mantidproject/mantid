@@ -211,8 +211,8 @@ namespace Mantid
       /// get name of location element
       std::string getNameOfLocationElement(Poco::XML::Element* pElem);
 
-	  /// Calculate the position of comp relative to its parent from info provided by <location> element
-	  Geometry::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
+      /// Calculate the position of comp relative to its parent from info provided by \verbatim <location> \endverbatim element
+      Geometry::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
     };
 
   } // namespace DataHandling
