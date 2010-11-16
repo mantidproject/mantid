@@ -808,24 +808,17 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------------------------------
-    /** Set location (position) of comp as specified in XML location element.
+    /** Calculate the position of comp relative to its parent from info provided by <location> element.
     *
     *  @param comp To set position/location off
     *  @param pElem  Poco::XML element that points a location element in the XML doc
     *
-    *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
+    *  @return  Thrown if second argument is not a pointer to a 'location' XML element
     */
-    void LoadInstrument::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem)
+    Geometry::V3D LoadInstrument::getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem)
     {
-      // Require that pElem points to an element with tag name 'location'
 
-      if ( (pElem->tagName()).compare("location") )
-      {
-        g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
-        throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
-      }
-
-      Geometry::V3D pos;  // position for <location>
+      Geometry::V3D retVal;  // position relative to parent
 
       // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
       if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
@@ -851,7 +844,14 @@ namespace Mantid
           // Get the parent's absolute position (if the component has a parent)
           if ( comp->getParent() )
           {
-            SphVec parent = m_tempPosHolder[comp->getParent().get()];
+            std::map<const Geometry::IComponent*, SphVec>::iterator it;
+            it = m_tempPosHolder.find(comp);
+            SphVec parent;
+            if ( it == m_tempPosHolder.end() )
+              parent = m_tempPosHolder[comp->getParent().get()];
+            else
+              parent = it->second;
+
             // Add to the current component to get its absolute position
             R     += parent.r;
             theta += parent.theta;
@@ -871,15 +871,12 @@ namespace Mantid
           absPos.spherical(R,theta,phi);
 
           // Subtract the two V3D's to get what we want (child's relative position in x,y,z)
-          Geometry::V3D relPos;
-          relPos = absPos - parentPos;
-          comp->translate(relPos);
+          retVal = absPos - parentPos;
         }
         else
         {
           // In this case, the value given represents a vector from the parent to the child
-          pos.spherical(R,theta,phi);
-          comp->translate(pos);
+          retVal.spherical(R,theta,phi);
         }
 
       }
@@ -891,9 +888,36 @@ namespace Mantid
         if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
         if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
-        pos(x,y,z);
-        comp->translate(pos);
+        retVal(x,y,z);
+	  }
+
+	  return retVal;
+	}
+	
+
+    //-----------------------------------------------------------------------------------------------------------------------
+    /** Set location (position) of comp as specified in XML location element.
+    *
+    *  @param comp To set position/location off
+    *  @param pElem  Poco::XML element that points a location element in the XML doc
+    *
+    *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
+    */
+    void LoadInstrument::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem)
+    {
+      // Require that pElem points to an element with tag name 'location'
+
+      if ( (pElem->tagName()).compare("location") )
+      {
+        g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
+        throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
       }
+
+      //Geometry::V3D pos;  // position for <location>
+
+
+      comp->translate(getRelativeTranslation(comp, pElem));
+      
 
 
       // Rotate coordinate system of this component
@@ -917,17 +941,12 @@ namespace Mantid
       }
 
 
-
-
       // Check if sub-elements <trans> or <rot> of present - for now ignore these if m_deltaOffset = true
 
       Element* pRecursive = pElem;
-      if ( !m_deltaOffsets )
+      bool stillTransElement = true;
+      while ( stillTransElement )
       {
-        bool stillTransElement = true;
-        //Geometry::V3D posTrans;
-        while ( stillTransElement )
-        {
           // figure out if child element is <trans> or <rot> or none of these
 
           Element* tElem = pRecursive->getChildElement("trans");
@@ -935,83 +954,57 @@ namespace Mantid
 
           if (tElem && rElem)
           {
-            // if both a <trans> and <rot> child element present. Ignore <rot> element
-            rElem = NULL;
+          // if both a <trans> and <rot> child element present. Ignore <rot> element
+          rElem = NULL;
           }
 
           if (!tElem && !rElem)
           {
-            stillTransElement = false;
+          stillTransElement = false;
           }
 
           Geometry::V3D posTrans;
 
           if (tElem)
           {
-            // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
-            if ( tElem->hasAttribute("r") || tElem->hasAttribute("t") || tElem->hasAttribute("p") ||
-              tElem->hasAttribute("R") || tElem->hasAttribute("theta") || tElem->hasAttribute("phi") )
-            {
-              double R=0.0, theta=0.0, phi=0.0;
+		        posTrans = getRelativeTranslation(comp, tElem);
 
-              if ( tElem->hasAttribute("r") ) R = atof((tElem->getAttribute("r")).c_str());
-              if ( tElem->hasAttribute("t") ) theta = atof((tElem->getAttribute("t")).c_str());
-              if ( tElem->hasAttribute("p") ) phi = atof((tElem->getAttribute("p")).c_str());
+          // to get the change in translation relative to current rotation of comp
+          Geometry::CompAssembly compToGetRot;
+          Geometry::CompAssembly compRot;
+          compRot.setRot(comp->getRotation());
+          compToGetRot.setParent(&compRot);
+          compToGetRot.setPos(posTrans);
 
-              if ( tElem->hasAttribute("R") ) R = atof((tElem->getAttribute("R")).c_str());
-              if ( tElem->hasAttribute("theta") ) theta = atof((tElem->getAttribute("theta")).c_str());
-              if ( tElem->hasAttribute("phi") ) phi = atof((tElem->getAttribute("phi")).c_str());      
+          // Apply translation
+          comp->translate(compToGetRot.getPos());   
 
-              posTrans.spherical(R,theta,phi);
-            }
-            else
-            {
-              double x=0.0, y=0.0, z=0.0;
-
-              if ( tElem->hasAttribute("x") ) x = atof((tElem->getAttribute("x")).c_str());
-              if ( tElem->hasAttribute("y") ) y = atof((tElem->getAttribute("y")).c_str());
-              if ( tElem->hasAttribute("z") ) z = atof((tElem->getAttribute("z")).c_str());
-
-              posTrans(x,y,z);
-            }
-
-            // to get the change in translation relative to current rotation of comp
-            Geometry::CompAssembly compToGetRot;
-            Geometry::CompAssembly compRot;
-            compRot.setRot(comp->getRotation());
-            compToGetRot.setParent(&compRot);
-            compToGetRot.setPos(posTrans);
-
-            // Apply translation
-            comp->translate(compToGetRot.getPos());   
-
-            // for recursive action
-            pRecursive = tElem; 
+          // for recursive action
+          pRecursive = tElem; 
           }  // end translation
 
           if (rElem) 
           {
-            double rotAngle = atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
+          double rotAngle = atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
 
-            double axis_x = 0.0;
-            double axis_y = 0.0;
-            double axis_z = 1.0;
+          double axis_x = 0.0;
+          double axis_y = 0.0;
+          double axis_z = 1.0;
 
-            if ( rElem->hasAttribute("axis-x") )
+          if ( rElem->hasAttribute("axis-x") )
               axis_x = atof( (rElem->getAttribute("axis-x")).c_str() );
-            if ( rElem->hasAttribute("axis-y") )
+          if ( rElem->hasAttribute("axis-y") )
               axis_y = atof( (rElem->getAttribute("axis-y")).c_str() );
-            if ( rElem->hasAttribute("axis-z") )
+          if ( rElem->hasAttribute("axis-z") )
               axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
 
-            comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
+          comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
 
-            // for recursive action
-            pRecursive = rElem; 
+          // for recursive action
+          pRecursive = rElem; 
           }
 
-        } // end while
-      } //  end if ( !m_deltaOffsets )
+      } // end while
 
     }
 

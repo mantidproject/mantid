@@ -298,6 +298,30 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 8.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
 
+    ptrDet1 = i->getDetector(1010);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation8");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 8.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1011);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation9");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), -8.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1012);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation10");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 8.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1013);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation11");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
     // test parameter rotation
     ptrDet1 = i->getDetector(1200);
     TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
@@ -369,6 +393,119 @@ public:
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 20.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 0.0, 0.0001);
+
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  // Tests specific to when  <offsets spherical="delta" /> is set in IDF
+  void testIDFwhenSphericalOffsetSet()
+  {
+
+    LoadEmptyInstrument loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+
+    // check if combined translation works
+    boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1001);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translationA");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 10.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1002);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translationB");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1003);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1003);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1004);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation2");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1004);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 25.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1005);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation3");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1005);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 28.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1006);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation4");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1006);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 28.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1007);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation5");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1007);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 28.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1008);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation6");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1008);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 28.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1009);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation7");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1009);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 19.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1010);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation8");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 8.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1011);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation9");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), -8.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1012);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation10");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 8.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1013);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation11");
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
 
 
     AnalysisDataService::Instance().remove(wsName);
