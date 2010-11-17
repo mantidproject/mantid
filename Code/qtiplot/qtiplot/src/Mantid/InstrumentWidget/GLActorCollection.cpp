@@ -79,7 +79,7 @@ int  GLActorCollection::getNumberOfActors()
  */
 GLActor* GLActorCollection::getActor(int index)
 {
-	if(index<0||index>mActorsList.size())return NULL;
+	if(index<0||index> static_cast<int>(mActorsList.size()) )return NULL;
 	return mActorsList.at(index);
 }
 

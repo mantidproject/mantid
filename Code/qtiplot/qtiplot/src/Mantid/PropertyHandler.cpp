@@ -180,7 +180,7 @@ void PropertyHandler::initAttributes()
     m_item->property()->removeSubProperty(m_attributes[i]);
   }
   m_attributes.clear();
-  for(int i=0;i<attNames.size();i++)
+  for(size_t i=0;i<attNames.size();i++)
   {
     QString aName = QString::fromStdString(attNames[i]);
     Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
@@ -325,7 +325,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
       {
         const Mantid::MantidVec& X = ws->readX(wi);
         double istart = 0, iend = 0;
-        for(int i=0;i<X.size()-1;++i)
+        for(int i=0; i < static_cast<int>(X.size())-1; ++i)
         {
           double x = X[i];
           if (x < m_browser->startX())

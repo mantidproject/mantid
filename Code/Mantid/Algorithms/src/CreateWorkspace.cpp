@@ -57,7 +57,7 @@ void CreateWorkspace::exec()
   const std::string yUnit = getProperty("UnitY");
   const std::vector<std::string> yAxis = getProperty("YAxisValues");
 
-  if ( ( yUnit != "" ) && ( yAxis.size() != nSpec ) )
+  if ( ( yUnit != "" ) && ( static_cast<int>(yAxis.size()) != nSpec ) )
   {
     throw std::invalid_argument("Number of y-axis labels must match number of histograms.");
   }
@@ -73,7 +73,7 @@ void CreateWorkspace::exec()
   }
   int ySize = dataY.size() / nSpec;
   int xSize = dataX.size() / nSpec;
-  if ( ySize != ( dataE.size() / nSpec ) )
+  if ( ySize != ( static_cast<int>(dataE.size()) / nSpec ) )
   {
     throw std::runtime_error("DataY and DataE must have the same dimensions");
   }
@@ -112,7 +112,7 @@ void CreateWorkspace::exec()
     {
       Mantid::API::TextAxis* const newAxis = new Mantid::API::TextAxis(yAxis.size());
       outputWS->replaceAxis(1, newAxis);
-      for ( int i = 0; i < yAxis.size(); i++ )
+      for ( size_t i = 0; i < yAxis.size(); i++ )
       {
         newAxis->setLabel(i, yAxis[i]);
       }
@@ -122,7 +122,7 @@ void CreateWorkspace::exec()
       Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(yAxis.size());
       newAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create(yUnit);
       outputWS->replaceAxis(1, newAxis);
-      for ( int i = 0; i < yAxis.size(); i++ )
+      for ( size_t i = 0; i < yAxis.size(); i++ )
       {
         try
         {

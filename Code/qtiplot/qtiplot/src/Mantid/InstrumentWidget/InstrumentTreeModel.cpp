@@ -50,6 +50,7 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
 	catch(...)
 	{
 	  //std::cout<<"Exception :: columnCount"<<std::endl;
+	  return 0;
 	}
 }
 
@@ -74,6 +75,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
 	catch(...)
 	{
 	  //std::cout<<" Exception: in data"<<std::endl;
+	  return 0;
 	}
 }
 

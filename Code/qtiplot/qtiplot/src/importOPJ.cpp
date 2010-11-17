@@ -1157,7 +1157,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 			vector<text> texts=opj.layerTexts(g, l);
 			if(style != Graph::Pie)
 			{
-				for(int i=0; i<texts.size(); ++i)
+				for(size_t i=0; i<texts.size(); ++i)
 				{
 					addText(texts[i], graph, 0, layerRect, fFontScaleFactor, fXScale, fYScale);
 				}
@@ -1167,7 +1167,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				addText(opj.layerLegend(g,l), graph, legend, layerRect, fFontScaleFactor, fXScale, fYScale);
 
 			vector<line> lines = opj.layerLines(g, l);
-			for(int i=0; i<lines.size(); ++i)
+			for(size_t i=0; i<lines.size(); ++i)
 			{
 				ArrowMarker mrk;
 				mrk.setStartPoint(lines[i].begin.x, lines[i].begin.y);
@@ -1208,7 +1208,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 			}
 
 			vector<bitmap> bitmaps=opj.layerBitmaps(g, l);
-			for(int i=0; i<bitmaps.size(); ++i)
+			for(size_t i=0; i<bitmaps.size(); ++i)
 			{
 				QPixmap bmp;
 				bmp.loadFromData(bitmaps[i].data, bitmaps[i].size, "BMP");

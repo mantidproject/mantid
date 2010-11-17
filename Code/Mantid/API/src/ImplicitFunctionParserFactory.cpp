@@ -39,7 +39,7 @@ namespace Mantid
       NodeList* functionParserNodes = pRootElem->getChildElement("FunctionParserFactoryList")->childNodes();
 
       ImplicitFunctionParser* functionParser = NULL;
-      for(int i = 0; i < functionParserNodes->length(); i++)
+      for(size_t i = 0; i < functionParserNodes->length(); i++)
       {
         std::string functionParserName = functionParserNodes->item(i)->innerText();
         ImplicitFunctionParser* childParamParser = this->createUnwrapped(functionParserName);
