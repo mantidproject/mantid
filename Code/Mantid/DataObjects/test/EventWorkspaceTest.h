@@ -36,7 +36,7 @@ using namespace boost::posix_time;
 
 
 
-#include <sys/time.h>
+#include <time.h>
 typedef struct {
   timeval start;
   timeval stop;
