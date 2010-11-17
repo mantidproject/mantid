@@ -189,8 +189,8 @@ elif platform.system() == 'Linux':
 	
 	libDirList.append(USRLIB)
 elif platform.system() == 'Darwin':
-	cppPaths.append(third_party+'/include')
-	cppPaths.append(third_party+'/include/muParser')
+	env.Append(CXXFLAGS=['-isystem '+third_party+'/include'])
+	env.Append(CXXFLAGS=['-isystem '+third_party+'/include/muParser'])
 	env.Append(SHLINKFLAGS='-install_name @executable_path/./${TARGET.file}')
 	# Get the version as a tuple
 	mac_version = tuple(platform.mac_ver()[0].split(".")[0:2])
