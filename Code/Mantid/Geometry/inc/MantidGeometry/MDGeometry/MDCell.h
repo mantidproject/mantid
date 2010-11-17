@@ -39,10 +39,21 @@ namespace Mantid
 {
   namespace Geometry
   {
-    class DLLExport MDCell : public MDPoint
+    class DLLExport MDCell : public SignalAggregate
     {
+    private:
+      double m_cachedSignal;
+      double m_cachedError;
+      std::vector<coordinate> m_vertexes;
+      std::vector<boost::shared_ptr<SignalAggregate> > m_contributingPoints;
+      inline void calculateCachedValues();
     public:
-      virtual std::vector<boost::shared_ptr<MDPoint*> > getContributingPoints() const = 0;
+      MDCell(std::vector<boost::shared_ptr<SignalAggregate> > pContributingPoints, std::vector<coordinate> vertexes);
+      std::vector<coordinate> getVertexes() const;
+      double getSignal() const;
+      double getError() const;
+      std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const;
+      ~MDCell();
     };
   }
 }

@@ -13,6 +13,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
+#include "MantidGeometry/MDGeometry/MDDimension.h"
 
 namespace Mantid
 {
@@ -828,29 +829,31 @@ namespace Mantid
       return hops - 1;
     }
 
-    Mantid::Geometry::IMDDimension& MatrixWorkspace::getXDimension() const
+    Mantid::Geometry::IMDDimension* MatrixWorkspace::getXDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+       Axis* xAxis = this->getAxis(0);
+       return new Mantid::Geometry::MDDimension(xAxis->title());
     }
 
-    Mantid::Geometry::IMDDimension& MatrixWorkspace::getYDimension() const
+    Mantid::Geometry::IMDDimension* MatrixWorkspace::getYDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      Axis* xAxis = this->getAxis(1);
+       return new Mantid::Geometry::MDDimension(xAxis->title());
     }
 
-    Mantid::Geometry::IMDDimension& MatrixWorkspace::getZDimension() const
+    Mantid::Geometry::IMDDimension* MatrixWorkspace::getZDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
     }
 
-     Mantid::Geometry::IMDDimension& MatrixWorkspace::gettDimension() const
+     Mantid::Geometry::IMDDimension* MatrixWorkspace::gettDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      throw std::logic_error("MatrixWorkspaces do not have a time dimension mapping.");
     }
 
-    unsigned int MatrixWorkspace::getNPoints() const
+    int MatrixWorkspace::getNPoints() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      return this->size();
     }
 
     Mantid::Geometry::IMDDimension& MatrixWorkspace::getDimension(std::string id) const
@@ -875,17 +878,17 @@ namespace Mantid
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      throw std::logic_error("Cannot access higher dimensions");
     }
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment)  const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      throw std::logic_error("Cannot access higher dimensions");
     }
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(...)  const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      throw std::logic_error("Cannot access higher dimensions");
     }
   } // namespace API
 } // Namespace Mantid

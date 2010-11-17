@@ -10,6 +10,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -29,8 +30,11 @@ namespace Mantid { namespace DataObjects {
     {
       vec.resize(j,1.0);
       // Put an 'empty' axis in to test the getAxis method
-      m_axes.resize(1);
+      m_axes.resize(2);
       m_axes[0] = new NumericAxis(1);
+      m_axes[0]->title() = "1";
+      m_axes[1] = new NumericAxis(1);
+      m_axes[1]->title() = "2";
     }
     int size() const {return vec.size();}
     int blocksize() const {return vec.size();}
@@ -61,16 +65,24 @@ public:
   void testGetXDimension() 
   {
     using namespace Mantid::DataObjects;
+    using namespace Mantid::API;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getXDimension(), std::runtime_error);
+    matrixWS.init(1, 1, 1);
+    Mantid::Geometry::IMDDimension const * const dimension = matrixWS.getXDimension();
+    std::string id = dimension->getDimensionId();
+    TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.", "1", id);
   }
 
   //Characterisation test. 
   void testGetYDimension()
   {
     using namespace Mantid::DataObjects;
+    using namespace Mantid::API;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getXDimension(), std::runtime_error);
+    matrixWS.init(1, 1, 1);
+    Mantid::Geometry::IMDDimension const * const dimension = matrixWS.getYDimension();
+    std::string id = dimension->getDimensionId();
+    TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.", "2", id);
   }
 
   //Characterisation test. 
@@ -78,7 +90,7 @@ public:
   {
     using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getXDimension(), std::runtime_error);
+    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getZDimension(), std::logic_error);
   }
 
   //Characterisation test. 
@@ -86,7 +98,7 @@ public:
   {
     using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getXDimension(), std::runtime_error);
+    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.gettDimension(), std::logic_error);
   }
 
   //Characterisation test. 
@@ -110,7 +122,8 @@ public:
   {
     using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getNPoints(), std::runtime_error);
+	matrixWS.init(5, 5, 5);
+    TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 5, matrixWS.getNPoints());
   }
 
   //Characterisation test. 
@@ -130,27 +143,13 @@ public:
   }
 
   //Characterisation test. 
-  void testGetCellTripleParameterVersion()
-  {
-    using namespace Mantid::DataObjects;
-    MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getCell(1, 1, 1), std::runtime_error);
-  }
-
-  //Characterisation test. 
-  void testGetCellFourParameterVersion()
-  {
-    using namespace Mantid::DataObjects;
-    MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getCell(1, 1, 1, 1), std::runtime_error);
-  }
-
-  //Characterisation test. 
   void testGetCellElipsisParameterVersion()
   {
     using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::runtime_error);
+	TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1), std::logic_error);
+	TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1), std::logic_error);
+    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::logic_error);
   }
 
 

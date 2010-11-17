@@ -56,11 +56,11 @@ namespace Mantid
     {
     public:
       //virtual std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension*>> getDimensions() const = 0;
-      virtual Mantid::Geometry::IMDDimension& getXDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension& getYDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension& getZDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension& gettDimension() const = 0;
-      virtual unsigned int getNPoints() const = 0;
+      virtual Mantid::Geometry::IMDDimension * getXDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension * getYDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension * getZDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension * gettDimension() const = 0;
+      virtual int getNPoints() const = 0;
       virtual Mantid::Geometry::MDPoint * getPoint(long index) const = 0;
       virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const = 0;
       virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const = 0;

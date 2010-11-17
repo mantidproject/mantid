@@ -38,25 +38,46 @@
 
 namespace Mantid
 {
+
+
   namespace Geometry
   {
-
-    struct coordinate
+    struct DLLExport coordinate
     {
       double x;
       double y;
       double z;
+      double t;
     };
 
-    class DLLExport MDPoint
+    //TODO: relocate once name is stable.
+    class DLLExport SignalAggregate
     {
     public:
       virtual std::vector<coordinate> getVertexes() const = 0;
       virtual double getSignal() const = 0;
       virtual double getError() const = 0;
-      virtual IDetector_sptr getDetectors() const = 0;
-      virtual IInstrument_sptr getInstrument() const = 0;
+      virtual std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const = 0;
+      virtual ~SignalAggregate(){};
+    };
+
+    class DLLExport MDPoint : public SignalAggregate
+    {
+    private:
+      double m_signal;
+      double m_error;
+      IInstrument_sptr m_instrument;
+      IDetector_sptr m_detector;
+      std::vector<coordinate> m_vertexes;
+    public:
+      MDPoint(double signal, double error, std::vector<coordinate> vertexes, IDetector_sptr detector, IInstrument_sptr instrument);
+      std::vector<coordinate> getVertexes() const;
+      double getSignal() const;
+      double getError() const;
+      IDetector_sptr getDetector() const;
+      IInstrument_sptr getInstrument() const;
       virtual ~MDPoint();
+      std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const;
       //virtual Mantid::API::Run getRun();
     };
   }

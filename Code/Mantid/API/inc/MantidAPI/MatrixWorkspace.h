@@ -71,11 +71,11 @@ namespace Mantid
     class DLLExport MatrixWorkspace : public IMDWorkspace //, public Workspace
     {
     public:
-      virtual Mantid::Geometry::IMDDimension& getXDimension() const;
-      virtual Mantid::Geometry::IMDDimension& getYDimension() const;
-      virtual Mantid::Geometry::IMDDimension& getZDimension() const;
-      virtual Mantid::Geometry::IMDDimension& gettDimension() const;
-      virtual unsigned int getNPoints() const;
+      virtual Mantid::Geometry::IMDDimension* getXDimension() const;
+      virtual Mantid::Geometry::IMDDimension* getYDimension() const;
+      virtual Mantid::Geometry::IMDDimension* getZDimension() const;
+      virtual Mantid::Geometry::IMDDimension* gettDimension() const;
+      virtual int getNPoints() const;
       virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const;
       virtual Mantid::Geometry::MDPoint * getPoint(long index) const ;
       virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const;

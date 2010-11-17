@@ -14,7 +14,7 @@ namespace Mantid{
     Kernel::Logger& MDImageData::g_log =Kernel::Logger::get("MDWorkspaces");
 
 
-    unsigned int MDImageData::getNPoints() const
+    int MDImageData::getNPoints() const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
@@ -54,24 +54,24 @@ namespace Mantid{
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension& MDImageData::getXDimension() const
+    Mantid::Geometry::IMDDimension* MDImageData::getXDimension() const
     {
-      return MDGeometry::getXDimension();
+      throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension& MDImageData::getYDimension() const
+    Mantid::Geometry::IMDDimension* MDImageData::getYDimension() const
     {
-      return MDGeometry::getYDimension();
+      throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension& MDImageData::getZDimension() const
+    Mantid::Geometry::IMDDimension* MDImageData::getZDimension() const
     {
-      return MDGeometry::getZDimension();
+      throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-     Mantid::Geometry::IMDDimension& MDImageData::gettDimension() const
+     Mantid::Geometry::IMDDimension* MDImageData::gettDimension() const
     {
-      return MDGeometry::getTDimension();
+      throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
 
