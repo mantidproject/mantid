@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SIMPLEINTEGRATION_H_
-#define MANTID_ALGORITHMS_SIMPLEINTEGRATION_H_
+#ifndef MANTID_ALGORITHMS_INTEGRATION_H_
+#define MANTID_ALGORITHMS_INTEGRATION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,13 +10,13 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes a workspace as input and sums each Histogram1D contained within
-    it, storing the result as a Workspace of Histogram1Ds with one Y & E value
+/** Takes a workspace as input and sums each spectrum contained within
+    it, storing the result as a workspace of spectra with one Y & E value
     and two X values indicating the range which the integration covers.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> InputWorkspace - The name of the workspace to take as input. Must be a histogram. </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     </UL>
 
@@ -26,12 +26,9 @@ namespace Algorithms
     <LI> Range_upper - The X value to integrate to (default max)</LI>
     <LI> StartWorkspaceIndex - Workspace index number to integrate from (default 0)</LI>
     <LI> EndWorkspaceIndex - Workspace index number to integrate to (default max)</LI>
+    <LI> IncludePartialBins - If true then partial bins from the beginning and end of the input range are also included in the integration (default false)</LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 05/10/2007
-	  @author L C Chapon, ISIS, Rutherford Appleton Laboratory
-	  @date 01/03/2009 Modified to account for distribution.
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -52,13 +49,13 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SimpleIntegration : public API::Algorithm
+class DLLExport Integration : public API::Algorithm
 {
 public:
   /// Default constructor
-  SimpleIntegration() : API::Algorithm() {};
+  Integration() : API::Algorithm() {};
   /// Destructor
-  virtual ~SimpleIntegration() {};
+  virtual ~Integration() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Integration";}
   /// Algorithm's version for identification overriding a virtual method
@@ -85,4 +82,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SIMPLEINTEGRATION_H_*/
+#endif /*MANTID_ALGORITHMS_INTEGRATION_H_*/

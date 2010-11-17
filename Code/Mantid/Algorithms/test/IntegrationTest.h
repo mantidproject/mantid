@@ -1,9 +1,9 @@
-#ifndef SIMPLEINTEGRATIONTEST_H_
-#define SIMPLEINTEGRATIONTEST_H_
+#ifndef INTEGRATIONTEST_H_
+#define INTEGRATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SimpleIntegration.h"
+#include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -13,11 +13,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class SimpleIntegrationTest : public CxxTest::TestSuite
+class IntegrationTest : public CxxTest::TestSuite
 {
 public:
 
-  SimpleIntegrationTest()
+  IntegrationTest()
   {
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
@@ -41,7 +41,7 @@ public:
 
   }
 
-  ~SimpleIntegrationTest()
+  ~IntegrationTest()
   {}
 
   void testInit()
@@ -91,7 +91,7 @@ public:
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     int max;
-    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
     double yy[3] = {36,51,66};
     for (int i = 0; i < max; ++i)
     {
@@ -99,7 +99,7 @@ public:
       Mantid::MantidVec &y = output2D->dataY(i);
       Mantid::MantidVec &e = output2D->dataE(i);
 
-      TS_ASSERT_EQUALS( x.size(), 2 )
+      TS_ASSERT_EQUALS( x.size(), 2 );
       TS_ASSERT_EQUALS( y.size(), 1 );
       TS_ASSERT_EQUALS( e.size(), 1 );
 
@@ -125,7 +125,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS( output2D->dataX(0)[0], 0 );
     TS_ASSERT_EQUALS( output2D->dataX(0)[1], 5 );
     TS_ASSERT_EQUALS( output2D->dataY(0)[0], 10 );
@@ -145,7 +145,7 @@ public:
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     int max;
-    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
     const double yy[3] = {52.,74.,96.};
     const double ee[3] = {6.899,8.240,9.391};
     for (int i = 0; i < max; ++i)
@@ -154,7 +154,7 @@ public:
       Mantid::MantidVec &y = output2D->dataY(i);
       Mantid::MantidVec &e = output2D->dataE(i);
 
-      TS_ASSERT_EQUALS( x.size(), 2 )
+      TS_ASSERT_EQUALS( x.size(), 2 );
       TS_ASSERT_EQUALS( y.size(), 1 );
       TS_ASSERT_EQUALS( e.size(), 1 );
 
@@ -177,14 +177,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out3"));
 
     output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
     for (int i = 0; i < max; ++i)
     {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
       Mantid::MantidVec &e = output2D->dataE(i);
 
-      TS_ASSERT_EQUALS( x.size(), 2 )
+      TS_ASSERT_EQUALS( x.size(), 2 );
       TS_ASSERT_EQUALS( y.size(), 1 );
       TS_ASSERT_EQUALS( e.size(), 1 );
 
@@ -197,10 +197,10 @@ public:
 
 
 private:
-  SimpleIntegration alg;   // Test with range limits
-  SimpleIntegration alg2;  // Test without limits
-  SimpleIntegration alg3; // Test with range and partial bins
+  Integration alg;   // Test with range limits
+  Integration alg2;  // Test without limits
+  Integration alg3; // Test with range and partial bins
   std::string outputSpace;
 };
 
-#endif /*SIMPLEINTEGRATIONTEST_H_*/
+#endif /*INTEGRATIONTEST_H_*/

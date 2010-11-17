@@ -139,10 +139,11 @@ public:
       Detector *det = new Detector("det",shape, NULL);
       det->setPos(i,i+1,1);
       det->setID(i);
-      instrument->markAsDetector(det);     
+      instrument->add(det);
+      instrument->markAsDetector(det);
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
       {
- 	pmap.addBool(det,"masked",true);
+        pmap.addBool(det,"masked",true);
       }
     }
     return workspace;

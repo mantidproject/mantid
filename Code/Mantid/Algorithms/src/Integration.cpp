@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SimpleIntegration.h"
+#include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
@@ -13,7 +13,7 @@ namespace Algorithms
 {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(SimpleIntegration)
+DECLARE_ALGORITHM(Integration)
 
 using namespace Kernel;
 using namespace API;
@@ -22,7 +22,7 @@ using namespace API;
 /** Initialisation method.
  *
  */
-void SimpleIntegration::init()
+void Integration::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
@@ -42,7 +42,7 @@ void SimpleIntegration::init()
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void SimpleIntegration::exec()
+void Integration::exec()
 {
   // Try and retrieve the optional properties
   m_MinRange = getProperty("RangeLower");
@@ -94,6 +94,15 @@ void SimpleIntegration::exec()
     const MantidVec& X = localworkspace->readX(i);
     const MantidVec& Y = localworkspace->readY(i);
     const MantidVec& E = localworkspace->readE(i);
+
+    // If doing partial bins, we want to set the bin boundaries to the specified values
+    // regardless of whether they're 'in range' for this spectrum
+    // Have to do this here, ahead of the 'continue' a bit down from here.
+    if ( incPartBins )
+    {
+      outputWorkspace->dataX(j)[0] = m_MinRange;
+      outputWorkspace->dataX(j)[1] = m_MaxRange;
+    }
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
@@ -154,9 +163,6 @@ void SimpleIntegration::exec()
         const double eval = E[distmax];
         sumE += eval * eval * fraction * fraction;
       }
-      
-      outputWorkspace->dataX(j)[0] = m_MinRange;
-      outputWorkspace->dataX(j)[1] = m_MaxRange;
     }
     else
     {
