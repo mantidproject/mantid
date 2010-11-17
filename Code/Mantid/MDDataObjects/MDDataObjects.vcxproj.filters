@@ -27,9 +27,6 @@
     <ClCompile Include="src\MD_File_hdfMatlab4D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IMD_FileFormat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\MDDataPoints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

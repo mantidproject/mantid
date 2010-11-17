@@ -173,8 +173,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="IMD_FileFormat.cpp" />
     <ClCompile Include="src\Hexahedron.cpp" />
+    <ClCompile Include="src\IMD_FileFormat.cpp" />
     <ClCompile Include="src\MDDataPoints.cpp" />
     <ClCompile Include="src\MDImageData.cpp" />
     <ClCompile Include="src\MDWorkspace.cpp" />
