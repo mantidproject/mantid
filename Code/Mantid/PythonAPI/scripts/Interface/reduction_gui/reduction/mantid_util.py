@@ -4,9 +4,9 @@ import sys
 try:
     from MantidFramework import *
     mtd.initialise(False)
-    from SANSReductionSteps import LoadRun
-    from SANSReducer import SANSReducer
-    import HFIRInstrument
+    from reduction.instruments.sans.sans_reduction_steps import LoadRun
+    from reduction.instruments.sans.sans_reducer import SANSReducer
+    import reduction.instruments.sans.hfir_instrument as hfir_instrument
     HAS_MANTID = True
 except:
     HAS_MANTID = False 
@@ -32,7 +32,7 @@ class DataFileProxy(object):
         if HAS_MANTID:
             try:
                 reducer = SANSReducer()
-                reducer.set_instrument(HFIRInstrument.HFIRSANS())
+                reducer.set_instrument(hfir_instrument.HFIRSANS())
                 loader = LoadRun(str(data_file))
                 loader.execute(reducer, "raw_data_file")
                 x = mtd["raw_data_file"].dataX(0)
