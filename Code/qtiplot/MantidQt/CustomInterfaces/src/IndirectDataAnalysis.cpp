@@ -384,12 +384,6 @@ void IndirectDataAnalysis::setupConFit()
   // m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); // < Not by default
   m_cfTree->addProperty(m_cfProp["DeltaFunction"]);
 
-  // Resolution Function
-  m_cfProp["ResolutionFunction"] = m_cfGrpMng->addProperty("Resolution Function");
-  m_cfProp["ResFuncFile"] = m_cfStrMng->addProperty("File");
-  m_cfProp["ResolutionFunction"]->addSubProperty(m_cfProp["ResFuncFile"]);
-  m_cfTree->addProperty(m_cfProp["ResolutionFunction"]);
-
   m_cfProp["Lorentzian1"] = createLorentzian("Lorentzian 1");
   m_cfProp["Lorentzian2"] = createLorentzian("Lorentzian 2");
 
@@ -1544,31 +1538,37 @@ void IndirectDataAnalysis::confitRun()
   m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
   m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
 
+  int noLorentz = m_uiForm.confit_cbFitType->currentIndex();
+
   int funcIndex = 1;
+  QString prefBase = "f1.f";
+  if ( noLorentz > 1 || ( noLorentz > 0 && m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) ) )
+  {
+    prefBase += "1.f";
+    funcIndex--;
+  }
 
   if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
   {
-    m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters["f1.Height"]);
+    QString key = prefBase+QString::number(funcIndex)+".Height";
+    m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
     funcIndex++;
   }
 
-  // Increment for Resolution
-  funcIndex++;
-
-  if ( m_uiForm.confit_cbFitType->currentIndex() > 0 )
+  if ( noLorentz > 0 )
   {
     // One Lorentz
-    QString pref = "f" + QString::number(funcIndex) + ".";
+    QString pref = prefBase + QString::number(funcIndex) + ".";
     m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Height"], parameters[pref+"Height"]);
     m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
     m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], parameters[pref+"HWHM"]);
     funcIndex++;
   }
 
-  if ( m_uiForm.confit_cbFitType->currentIndex() == 2 )
+  if ( noLorentz > 1 )
   {
     // Two Lorentz
-    QString pref = "f" + QString::number(funcIndex) + ".";
+    QString pref = prefBase + QString::number(funcIndex) + ".";
     m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Height"], parameters[pref+"Height"]);
     m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
     m_cfDblMng->setValue(m_cfProp["Lorentzian 2.HWHM"], parameters[pref+"HWHM"]);
@@ -1597,9 +1597,19 @@ void IndirectDataAnalysis::confitTypeSelection(int index)
 
 Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool tie)
 {
-  // Mantid::API::CompositeFunction* conv = Mantid::API::FunctionFactory::Instance().createFunction("Convolution");
+  Mantid::API::CompositeFunction* conv = dynamic_cast<Mantid::API::CompositeFunction*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
   Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
+  Mantid::API::CompositeFunction* comp = new Mantid::API::CompositeFunction();
   int index = 0;
+
+  // 1 - CompositeFunction A
+  // - - 1 LinearBackground
+  // - - 2 Convolution Function
+  // - - - - 1 Resolution
+  // - - - - 2 CompositeFunction B
+  // - - - - - - DeltaFunction (yes/no)
+  // - - - - - - Lorentzian 1 (yes/no)
+  // - - - - - - Lorentzian 2 (yes/no)
 
   Mantid::API::IFunction* func;
 
@@ -1618,21 +1628,21 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool 
     else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
   }
 
+  // Resolution
+  func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
+  index = conv->addFunction(func);
+  Mantid::API::IFunction::Attribute attr(m_uiForm.confit_resInput->getFirstFilename().toStdString()); //m_cfProp["ResFuncFile"]->valueText().toStdString()
+  func->setAttribute("FileName", attr);
+
   // Delta Function
   if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
   {
     func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-    index = result->addFunction(func);
-    if ( tie ) { result->tie("f1.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() ); }
+    index = comp->addFunction(func);
+    if ( tie ) { comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() ); }
     else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
   }
 
-  // Resolution
-  func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
-  index = result->addFunction(func);
-  Mantid::API::IFunction::Attribute attr(m_cfProp["ResFuncFile"]->valueText().toStdString());
-  func->setAttribute("FileName", attr);
-  
   // Lorentzians
   switch ( m_uiForm.confit_cbFitType->currentIndex() )
   {
@@ -1640,31 +1650,32 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool 
     break;
   case 1: // 1 Lorentzian
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = result->addFunction(func);
-    populateFunction(func, result, m_cfProp["Lorentzian1"], index, tie);
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
     break;
   case 2: // 2 Lorentzian
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = result->addFunction(func);
-    populateFunction(func, result, m_cfProp["Lorentzian1"], index, tie);
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = result->addFunction(func);
-    populateFunction(func, result, m_cfProp["Lorentzian2"], index, tie);
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian2"], index, tie);
     // Tie PeakCentres together
     if ( ! tie )
     {
       QString tieL = "f" + QString::number(index-1) + ".PeakCentre";
       QString tieR = "f" + QString::number(index) + ".PeakCentre";
-      result->tie(tieL.toStdString(), tieR.toStdString());
+      comp->tie(tieL.toStdString(), tieR.toStdString());
     }
     break;
   }
 
+  conv->addFunction(comp);
+  result->addFunction(conv);
+
   if ( tie ) { result->applyTies(); }
 
   return result;
-  // conv->addFunction(result);
-  // return conv;
 }
 
 void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction* func, Mantid::API::IFunction* comp, QtProperty* group, int index, bool tie)
