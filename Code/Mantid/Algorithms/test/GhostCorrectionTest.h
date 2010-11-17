@@ -192,7 +192,6 @@ public:
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/PG3_732_neutron_event.dat");
-//    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", wsName);
     eventLoader->setMaxEventsToLoad(100000);
     TS_ASSERT( eventLoader->execute() );

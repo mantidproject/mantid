@@ -219,7 +219,7 @@ public:
 
 
   //Warning: can be a slow test.
-  void xtestEventWorkspace_PG3()
+  void testEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 
@@ -238,7 +238,7 @@ public:
     //Check on the input workspace
     EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>
             (AnalysisDataService::Instance().retrieve(outputws));
-    int numpixels_with_events = 14616;
+    int numpixels_with_events = 14233;
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), numpixels_with_events);
 
     // Have to align because diffraction focussing wants d-spacing
