@@ -83,8 +83,8 @@ namespace Mantid{
         double getError  (size_t n_point)const{return *(reinterpret_cast<double *>(pDataBuffer+ n_point*MDPointStride +pError));}
         uint16_t getIndex(unsigned int nf,size_t n_point)const{return *(reinterpret_cast<uint16_t *>(pDataBuffer+n_point*MDPointStride+field_loc[PixIndex+nf]));}
         // these two are hardcoded for particular type of experiments -> number of runs <~2^9, number of pixels <~ 2^(23)
-        uint32_t getNrun(size_t n_point)const{return   0x01FF&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));}
-        uint32_t getNPix(size_t n_point)const{return ((0x07FFFF)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>9);}
+        uint32_t getRunID(size_t n_point)const{return   0x01FF&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));}
+        uint32_t getPixID(size_t n_point)const{return ((0x07FFFF)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>9);}
         // function specialized for Horace data e.g. expetcs no more than 2^9 runs and no more than 2^23 pixels (unique detectors)
         void setData(unsigned int ind,T dim_fields[],double SignalFields[],int iFiels[]){
           unsigned int i,i0;

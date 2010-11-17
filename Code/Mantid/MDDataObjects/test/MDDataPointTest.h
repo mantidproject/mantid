@@ -15,6 +15,10 @@ struct data5D{
   double S,Err;
   int   iRun,iPix,iEn,iT;
 };
+struct eventData4D{
+  float q1,q2,q3,En;
+  int   iRun,iPix,iEn;
+};
 
 
 
@@ -64,8 +68,8 @@ public:
         TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
         TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
         TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
-        TS_ASSERT_EQUALS(PackUnpacker.getNrun(i), testData[i].iRun);
-        TS_ASSERT_EQUALS(PackUnpacker.getNPix(i), testData[i].iPix);
+        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
 
         TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
 
@@ -119,8 +123,8 @@ public:
         TS_ASSERT_EQUALS(PackUnpacker.getDataField(4,i),testData[i].T);
         TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
         TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
-        TS_ASSERT_EQUALS(PackUnpacker.getNrun(i), testData[i].iRun);
-        TS_ASSERT_EQUALS(PackUnpacker.getNPix(i), testData[i].iPix);
+        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
 
         TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
         TS_ASSERT_EQUALS(PackUnpacker.getIndex(3,i), testData[i].iT);
@@ -130,6 +134,49 @@ public:
 
   }
 
+ void testEventData4D(void){
+    const int nPix = 10;
+    int i;
+    eventData4D testData[nPix];
+    char   testBuffer[nPix*(4*sizeof(float)+sizeof(uint32_t)+2)];
+    for(i=0;i<10;i++){
+      testData[i].q1  =(float)(i+1);
+      testData[i].q2  =(float)(i+1)*2;
+      testData[i].q3  =(float)(i+1)*3;
+      testData[i].En  =(float)(i+1)*4;
+      testData[i].iRun=(i+1)*7;
+      testData[i].iPix=(i+1)*8;
+      testData[i].iEn =(i+1)*9; 
+    }
+    MDDataPoint<float>  PackUnpacker(testBuffer,4,0,3);
+
+    float  Dim[4];
+    double SE[2];
+    int    Ind[3];
+    for(i=0;i<nPix;i++){
+      Dim[0]=testData[i].q1;
+      Dim[1]=testData[i].q2;
+      Dim[2]=testData[i].q3;
+      Dim[3]=testData[i].En;
+      Ind[0] =testData[i].iRun ;
+      Ind[1] =testData[i].iPix ;
+      Ind[2] =testData[i].iEn ;
+      PackUnpacker.setData(i,Dim,SE,Ind);
+
+    }
+
+    for(i=0;i<nPix;i++){
+        TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+        TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+        TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+        TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+
+        TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
+
+    }
+  }
 };
 
 #endif
