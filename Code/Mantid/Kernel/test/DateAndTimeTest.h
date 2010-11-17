@@ -276,8 +276,9 @@ public:
   void test_time_t_support()
   {
     DateAndTime t;
-    t.set_from_time_t( 5 );
-    TS_ASSERT_EQUALS( 5, t.to_time_t() );
+    std::time_t current = time (NULL);
+    t.set_from_time_t( current );
+    TS_ASSERT_EQUALS( current, t.to_time_t() );
   }
 
   void testCurrentTime()
