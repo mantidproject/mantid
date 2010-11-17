@@ -29,7 +29,6 @@
 #include <QButtonGroup>
 #include <QTextCursor>
 
-
 //***************************************************************************
 //
 // ScriptManagerWidget class
@@ -64,6 +63,8 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
     connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
     connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor, 
 	    SLOT(displayOutput(const QString&,bool)));
+     connect(editor, SIGNAL(compile(const QString&)), this, SLOT(compile(const QString &)));
+      connect(editor, SIGNAL(executeMultiLine()), this, SLOT(executeMultiLine()));
     group = "ScriptInterpreter";
 
   }
@@ -475,6 +476,25 @@ void ScriptManagerWidget::executeInterpreter(const QString & code)
   setFocus();  
 }
 
+/** 
+ * Execute multi line code
+ */
+void ScriptManagerWidget::executeMultiLine()
+{
+  ScriptEditor *editor = currentEditor();
+  if(!editor)
+  {
+    return;
+  }
+  runMultiLineCode();
+  editor->append("\n");
+  int marker_handle= editor->markerDefine(QsciScintilla::ThreeRightArrows);
+  editor->setMarkerHandle(marker_handle);
+  /*editor->markerAdd(editor->lines()-1,marker_handle);
+  editor->setCursorPosition(editor->lines()-1,0);*/
+  editor->newInputLine();
+  setFocus(); 
+}
 
 /**
  * Run a piece of code in the current environment
@@ -519,13 +539,56 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
   return success;
 }
 
+/**
+ * Compile a piece of code in the current environment
+ * @param code the code to compile
+ */
+void ScriptManagerWidget::compile(const QString & code)
+{
+   // Get the correct script runner
+  Script * runner = m_script_runners.value(this->currentIndex());
+  runner->setCode(code);
+ 
+  emit ScriptIsActive(true);
+   
+  bool success = runner->compile(true);
+  emit ScriptIsActive(false);
+  ScriptEditor *editor = currentEditor();
+  if(!editor)
+  {
+    return ;
+  }
+  if(success)
+  {
+    editor->setCompilationStatus(true);
+  }
+  else
+  { 
+    editor->setCompilationStatus(false);
+  }
+ 
+}
+/**
+ * Run the code
+ * @returns true if executed successfully
+ */
+bool ScriptManagerWidget::runMultiLineCode()
+{
+  // Get the correct script runner
+  Script * runner = m_script_runners.value(this->currentIndex());
+  emit ScriptIsActive(true);
+  
+  bool success = runner->exec();
+  emit ScriptIsActive(false);
+  return success;
+}
 /** 
  * Display an output message
  * @param msg The message string
  * @param timestamp Whether to display a timestamp
  */
 void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
-{
+{  
   //Forward to helper
   emit MessageToPrint(msg, false, timestamp);
 }
@@ -536,7 +599,7 @@ void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
  * @param timestamp Whether to display a timestamp
  */
 void ScriptManagerWidget::displayError(const QString & msg, bool timestamp)
-{
+{ 
   //Forward to helper
   emit MessageToPrint(msg, true, timestamp);
 }

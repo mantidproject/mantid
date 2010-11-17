@@ -117,7 +117,9 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
-  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL),m_previousKey(0)
+  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL),m_previousKey(0),
+  m_bmulti_line(false),m_originalIndent(0),m_multi_line_count(0),m_compiled(false)
+
 {
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
@@ -311,7 +313,6 @@ void ScriptEditor::setText(int lineno, const QString& txt,int index)
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
-
   if( isListActive() || !m_interpreter_mode )
   {
     forwardKeyPressToBase(event);
@@ -335,17 +336,53 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
     setEditingState(lines() - 1);
   }
   m_previousKey=key;
-   
-
+    
   bool handled(false);
   int last_line = lines() - 1;
+ 
   if( key == Qt::Key_Return || key == Qt::Key_Enter )
-  {
-    executeCodeAtLine(last_line);
-    handled = true;
+  { 
+    //if multi line started
+    if(isStartOfMultiLine())
+    {              
+      ++m_multi_line_count;
+      m_bmulti_line=true; 
+     // add the command to history
+      m_history.add(text(last_line)); 
+      //define a marker with three dots
+      m_marker_handle = markerDefine(QsciScintilla::ThreeDots);
+      m_need_newline=true;
+      newInputLine();
+      //append the multiline command
+      m_multiCmd+=text(last_line);
+      if(m_multi_line_count==1)
+      {
+        m_originalIndent=indentation(last_line);
+      }
+      
+      return;
+    }
+    if(isMultiLineStatement())
+    {
+       //append the multiline command
+      m_multiCmd+=text(last_line);
+      m_history.add(text(last_line));
+      m_multiCmd+="\n";
+      //interpret the command
+      interpretMultiLineCode(last_line,m_multiCmd);
+      return;
+    }
+    else
+    { 
+      //at this point the command is single line command
+      executeCodeAtLine(last_line);
+      handled = true;
+     }
+       
   }
   else if( key == Qt::Key_Up )
   {
+   
     if( m_history.hasPrevious() )
     {
       QString cmd = m_history.getPrevious();
@@ -378,6 +415,50 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
   return;
 }
 
+/**
+ * reset multi line parameters
+ */
+void ScriptEditor::resetMultiLineParams()
+{
+  m_multi_line_count=0;
+  m_bmulti_line=false;
+  m_multiCmd="";
+}
+
+/**
+ * returns true if it's start of multi line
+ */
+bool ScriptEditor::isStartOfMultiLine()
+{
+   return (text(lines() - 1).remove('\r').remove('\n').endsWith(":")?true:false);
+}
+
+/**
+ * returns true if it's  multi line statement
+ */
+bool ScriptEditor::isMultiLineStatement()
+{
+ return (m_bmulti_line?true:false);
+ 
+}
+
+/**
+ *if it's end end of multi line
+ *@param lineNum - number of the line to check
+ *@returns true if it's end of multi line
+ */
+bool ScriptEditor::isEndOfMultiLine(int lineNum)
+{
+  if(!getMultiLineStatus())
+  {
+    return false;
+  }
+  int indent=indentation(lineNum);
+ 
+  bool bstart_space=text(lineNum).startsWith(' ');
+  return (((indent==m_originalIndent)&& !bstart_space)?true:false);
+
+}
 /**
  * checks the shortcut key for copy pressed
  * @param prevKey -code corresponding to the previous key 
@@ -435,10 +516,9 @@ void ScriptEditor::newInputLine()
     append("\n");
   }
   else
-  {
+  {    
     cursorline -= 1;
   }
-
   markerAdd(cursorline, m_marker_handle);
   setCursorPosition(cursorline, 0);
 }
@@ -610,7 +690,6 @@ void ScriptEditor::executeCodeAtLine(int lineno)
   QString cmd = text(lineno).remove('\r').remove('\n');
   // I was seeing strange behaviour with the first line marker disappearing after
   // entering some text, removing it and retyping then pressing enter
-  
   if( cmd.isEmpty() )
   {
     return;
@@ -622,6 +701,44 @@ void ScriptEditor::executeCodeAtLine(int lineno)
   emit executeLine(cmd);
 }
 
+/**
+  *compiles multi line code and if end of multi line executes the code
+  *@param line - number of line
+  *@param multiCmd - text to inpterpret
+*/
+void ScriptEditor::interpretMultiLineCode(const int line,const QString & multiCmd)
+{   
+  emit compile(multiCmd);
+  bool success=getCompilationStatus();
+  if(success)
+  {
+    if(isEndOfMultiLine(line))
+    {        
+      executeMultiLineCode();
+      resetMultiLineParams();
+    }
+    else
+    {      
+      m_marker_handle=markerDefine(QsciScintilla::ThreeDots);
+      newInputLine();
+    }
+  }
+  else
+  {
+    m_marker_handle=markerDefine(QsciScintilla::ThreeRightArrows);
+    m_need_newline=true;
+    newInputLine();
+    resetMultiLineParams();
+  }
+  
+}
+
+/**executes multine line code
+*/
+void ScriptEditor::executeMultiLineCode()
+{ 
+  emit executeMultiLine();
+}
 /**
  * Disable several default key bindings, such as Ctrl+A, that Scintilla provides.
  */

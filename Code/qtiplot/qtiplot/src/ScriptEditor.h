@@ -148,7 +148,36 @@ public:
   {
     return m_completer;
   }
-
+  ///set the marker handle to marker_handle
+  void setMarkerHandle(int marker_handle)
+  { 
+    m_marker_handle= marker_handle;
+  }
+  /// this returns true if the code to be interpreted is multine line
+  bool getMultiLineStatus()
+  {
+    return m_bmulti_line;
+  }
+  /// sets true if the line is multine line
+  void setMultiLineStatus(bool b_multi_line)
+  {
+    m_bmulti_line=b_multi_line;
+  }
+  
+  /// reset the multiline params
+  void resetMultiLineParams();
+ 
+  /// sets the code compilation status
+  void setCompilationStatus(bool status)
+  {
+    m_compiled=status;
+  }
+ /// get teh compilation status
+  bool getCompilationStatus()
+  {
+    return m_compiled;
+  }
+  
 public slots:
   /// Update the editor
   void update();
@@ -164,10 +193,7 @@ public slots:
   void displayOutput(const QString& msg, bool error);
   /// Overrride the paste command when in interpreter mode
   void paste();
-  ///this method checks the shortcut key for the copy command (Ctrl+C) pressed
-  bool isCtrlCPressed(const int prevKey,const int curKey);
-  /// this method checks the short cut key for the command cut(Ctrl+X) is pressed
-  bool isCtrlXPressed(const int prevKey,const int curKey);
+ 
   
 signals:
   /// Inform observers that undo information is available
@@ -176,6 +202,10 @@ signals:
   void redoAvailable(bool);
   /// Notify manager that there is code to execute (only used in interpreter mode)
   void executeLine(const QString&);
+  /// signal script manager that there is code to compile(only used in multine line interpreter mode processing)
+  void compile(const QString&);
+  /// signal script manager that there is code to execute(only used in multine line interpreter mode processing)
+  void executeMultiLine();
 
 private:
   ///Execute the code at a given line
@@ -184,7 +214,23 @@ private:
   void remapWindowEditingKeys();
   /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
+    ///this method checks the shortcut key for the copy command (Ctrl+C) pressed
+  bool isCtrlCPressed(const int prevKey,const int curKey);
+  /// this method checks the short cut key for the command cut(Ctrl+X) is pressed
+  bool isCtrlXPressed(const int prevKey,const int curKey);
   
+  /// if it's start of multi line
+  bool isStartOfMultiLine();
+
+  /// if it's multiline statement
+  bool isMultiLineStatement();
+  ///if it's end of multi line
+  bool isEndOfMultiLine(int lineNum);
+
+  /// interpret multi line
+  void interpretMultiLineCode(const int last_line,const QString & multiCmd);
+  ///execute multi line
+  void executeMultiLineCode();
   /// The file name associated with this editor
   QString m_filename;
 
@@ -208,6 +254,17 @@ private:
   static QColor g_error_colour;
   /// previous key
   int m_previousKey;
+  ///boolean flag used for multiline processing
+  bool m_bmulti_line;
+  //count used to implment multi lines
+  int  m_multi_line_count;
+  /// multi line code
+  QString m_multiCmd;
+  ///original indent of multi line start
+  int m_originalIndent;
+ /// boolean used used for compilation status
+  bool m_compiled;
+
  
 };
 

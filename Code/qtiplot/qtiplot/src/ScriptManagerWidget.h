@@ -115,6 +115,9 @@ public slots:
   /// Show the find dialog
   void showFindDialog(bool replace = true);
 
+  /// comiple the code
+  void compile(const QString &);
+
   /** @name Execute members.*/
   //@{
   /// Execute
@@ -128,6 +131,9 @@ public slots:
   //@}
   ///Run script code
   bool runScriptCode(const QString & code, const int line_offset = 0);
+
+  /// run mutli line code
+  bool runMultiLineCode();
 
   ///Format an output message with an optional timestamp
   void displayOutput(const QString & msg, bool timestamp = false);
@@ -153,6 +159,8 @@ private slots:
   void toggleCodeCompletion(bool on);
   /// Toggle call tips
   void toggleCallTips(bool on);
+  ///execute multi line code
+  void executeMultiLine();
 
 private:
   /// Initialize the actions relevant to this object
