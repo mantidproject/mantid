@@ -17,7 +17,6 @@ namespace Mantid
     using namespace Kernel;
 
     Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
-    double XMLlogfile::angleConvertConst = 1.0;
 
     /** Constructor
     *  @param logfileID The logfile id -- the part of the file name which identifies the log 

@@ -83,10 +83,6 @@ namespace Mantid
       ///Returns parameter value as generated using possibly equation expression etc
       double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData);
 
-      /// when this const equal 1 it means that angle=degree (default) is set in IDF
-      /// otherwise if this const equal 180/pi it means that angle=radian is set in IDF 
-      static double angleConvertConst; 
-
     private:
 
       ///static reference to the logger class
@@ -94,11 +90,8 @@ namespace Mantid
 
     };
 
-
   } // namespace Geometry
 } // namespace Mantid
-
-
 
 #endif /*MANTID_GEOMETRY_XMLLOGFILE_H_*/
 
