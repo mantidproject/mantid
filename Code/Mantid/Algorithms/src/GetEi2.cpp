@@ -60,6 +60,7 @@ void GetEi2::init()
   declareProperty("IncidentEnergy", -1.0, Direction::Output);
   declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
   declareProperty("FirstMonitorIndex", 0, Direction::Output);
+  declareProperty("Tzero", EMPTY_DBL(), Direction::Output);
 
 }
 
@@ -131,7 +132,7 @@ double GetEi2::calculateEi(const double initial_guess)
     const double t_max = (1.0 + m_tof_window)*peak_guess;
     g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << " microseconds\n";
     peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
-    g_log.information() << "Peak for monitor " << (i+1) << " = " << peak_times[i] << " microseconds\n";
+    g_log.information() << "Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
     if( i == 0 )
     {  
       //Store for later adjustment of bins
@@ -146,6 +147,13 @@ double GetEi2::calculateEi(const double initial_guess)
   else
   {
     double mean_speed = (det_distances[1] - det_distances[0])/(peak_times[1] - peak_times[0]);
+    
+    double tzero = peak_times[1] - ((1.0/mean_speed)*det_distances[1]);
+    setProperty("Tzero", tzero);
+    
+    g_log.debug() << "Mean Speed = " << mean_speed << std::endl;
+    g_log.debug() << "Energy (meV) = " << mean_speed*mean_speed*m_t_to_mev << std::endl;
+        
     return mean_speed*mean_speed*m_t_to_mev;
   }
 }
