@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "WorkspaceCreationHelper.hh"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -202,6 +203,57 @@ public:
 
     AnalysisDataService::Instance().remove(inputSpace);
     AnalysisDataService::Instance().remove(outputSpace1);
+  }
+
+  void testExecEvent_inplace()
+  {
+    dotestExecEvent("testEvent", "testEvent", "5,10-15");
+  }
+
+  void testExecEvent_copy()
+  {
+    dotestExecEvent("testEvent", "testEvent2", "5,10-15");
+  }
+
+  void testExecEvent_going_too_far()
+  {
+    dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600");
+  }
+
+  void dotestExecEvent(std::string inName, std::string outName, std::string indices_list)
+  {
+    int numPixels = 100;
+    int numBins = 20;
+    int numEvents = 20;
+    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numEvents);
+    AnalysisDataService::Instance().add(inName, input);
+
+    SumSpectra alg2;
+    TS_ASSERT_THROWS_NOTHING( alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // Set the properties
+    alg2.setPropertyValue("InputWorkspace",inName);
+    alg2.setPropertyValue("OutputWorkspace",outName);
+    alg2.setProperty("IncludeMonitors",false);
+    alg2.setPropertyValue("ListOfWorkspaceIndices", indices_list);
+    alg2.setPropertyValue("StartWorkspaceIndex","4") ;
+    alg2.setPropertyValue("EndWorkspaceIndex","6") ;
+    //This list has 9 entries: 4,5,6, 10,11,12,13,14,15
+
+    alg2.execute();
+    TS_ASSERT(alg2.isExecuted());
+
+    EventWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outName));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 9 * numEvents);
+    TS_ASSERT_EQUALS(input->readX(0).size(), output->readX(0).size());
+
+    AnalysisDataService::Instance().remove(inName);
+    if (inName != outName)
+      AnalysisDataService::Instance().remove(outName);
   }
 
 private:

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -67,11 +68,16 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace, std::set<int> &indices);
 
   /// The spectrum to start the integration from
   int m_MinSpec;
   /// The spectrum to finish the integration at
   int m_MaxSpec;
+  /// Set true to keep monitors
+  bool keepMonitors;
+  /// numberOfSpectra in the input
+  int numberOfSpectra;
 };
 
 } // namespace Algorithm
