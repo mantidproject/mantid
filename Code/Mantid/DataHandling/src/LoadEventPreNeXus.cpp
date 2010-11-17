@@ -476,7 +476,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   uint32_t period;
 
   //Starting pulse time
-  DateAndTime pulsetime = 0;
+  DateAndTime pulsetime;
   int pulse_i = 0;
   int numPulses = static_cast<int>(this->pulsetimes.size());
   if (static_cast<int>(event_indices.size()) < numPulses)
@@ -702,7 +702,7 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool 
   double temp;
   for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)
   {
-    this->pulsetimes.push_back( DateAndTime( (long int) (*it).seconds, (long int) (*it).nanoseconds));
+    this->pulsetimes.push_back( DateAndTime( (int64_t) (*it).seconds, (int64_t) (*it).nanoseconds));
     this->event_indices.push_back((*it).event_index);
     temp = (*it).pCurrent;
     this->proton_charge.push_back(temp);

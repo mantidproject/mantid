@@ -200,16 +200,16 @@ public:
     DateAndTime a,b,c;
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = a + 60345000000LL;
+    c = a + int64_t(60345000000LL);
     TS_ASSERT_EQUALS( c, b);
-    a += 60345000000LL;
+    a += int64_t(60345000000LL);
     TS_ASSERT_EQUALS( a, b);
 
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = b - 60345000000LL;
+    c = b - int64_t(60345000000LL);
     TS_ASSERT_EQUALS( c, a);
-    b -= 60345000000LL;
+    b -= int64_t(60345000000LL);
     TS_ASSERT_EQUALS( b, a);
   }
 

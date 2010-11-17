@@ -433,7 +433,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   }
 
   //Default pulse time (if none are found)
-  Mantid::Kernel::DateAndTime pulsetime = 0;
+  Mantid::Kernel::DateAndTime pulsetime;
 
   // Index into the pulse array
   int pulse_i = 0;
