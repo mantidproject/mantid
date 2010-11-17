@@ -78,23 +78,7 @@ public:
 
   void testFullConstructor()
   {
-
-    // --- Create a cuboid shape for your pixels ----
-    double szX=0.5;
-    double szY=szX;
-    double szZ=szX;
-    std::ostringstream xmlShapeStream;
-    xmlShapeStream
-        << " <cuboid id=\"detector-shape\"> "
-        << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
-        << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> "
-        << "<left-back-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
-        << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
-        << "</cuboid>";
-
-    std::string xmlCuboidShape(xmlShapeStream.str());
-    Geometry::ShapeFactory shapeCreator;
-    boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+    boost::shared_ptr<Geometry::Object> cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 
     RectangularDetector *det = new RectangularDetector("MyRectangle");
     det->setPos(1000., 2000., 3000.);

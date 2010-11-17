@@ -39,6 +39,8 @@ namespace ComponentCreationHelper
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
+
+  //----------------------------------------------------------------------------------------------
   /**
    * Create a capped cylinder object
    */
@@ -56,6 +58,8 @@ namespace ComponentCreationHelper
     return shapeMaker.createShape(xml.str());
   }
   
+
+  //----------------------------------------------------------------------------------------------
   /**
    * Create a sphere object
    */
@@ -71,6 +75,31 @@ namespace ComponentCreationHelper
     return shapeMaker.createShape(xml.str());
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Create a cuboid shape for your pixels */
+  Object_sptr createCuboid(double side_length)
+  {
+    double szX=side_length;
+    double szY=szX;
+    double szZ=szX;
+    std::ostringstream xmlShapeStream;
+    xmlShapeStream
+    << " <cuboid id=\"detector-shape\"> "
+    << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+    << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> "
+    << "<left-back-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+    << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
+    << "</cuboid>";
+
+    std::string xmlCuboidShape(xmlShapeStream.str());
+    ShapeFactory shapeCreator;
+    Object_sptr cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+    return cuboidShape;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /**
   * Create a component assembly at the origin made up of 4 cylindrical detectors
   */
@@ -90,6 +119,7 @@ namespace ComponentCreationHelper
     return bank;
   }
 
+  //----------------------------------------------------------------------------------------------
   /**
    * Create a detector group containing 5 detectors
    */
@@ -112,6 +142,8 @@ namespace ComponentCreationHelper
     return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
   }
 
+
+  //----------------------------------------------------------------------------------------------
   /**
    * Create a group of two monitors
    */
@@ -132,34 +164,56 @@ namespace ComponentCreationHelper
     return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
   }
 
+
+  //----------------------------------------------------------------------------------------------
   /**
-   * Create an test instrument with a panel of 9 cylindrical detectors, a source and spherical sample shape.
+   * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.
+   *
+   * @param num_banks: number of 9-cylinder banks to create
+   * @param verbose: prints out the instrument after creation.
    */
-  static IInstrument_sptr createTestInstrument(bool verbose = false)
+  static IInstrument_sptr createTestInstrumentCylindrical(int num_banks,
+      bool verbose = false)
   {
-    CompAssembly *bank = new CompAssembly("Bank1");
+    boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
+
     const double cylRadius(0.004);
     const double cylHeight(0.0002);
     // One object
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape"); 
-    // Four object components
-    for( int i = -1; i < 2; ++i )
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
+
+    //Just increment pixel ID's
+    int pixelID = 1;
+
+    for (int banknum=1; banknum <= num_banks; banknum++)
     {
-      for( int j = -1; j < 2; ++j )
+      //Make a new bank
+      std::ostringstream bankname;
+      bankname << "bank" << banknum;
+      CompAssembly *bank = new CompAssembly(bankname.str());
+
+      // Four object components
+      for( int i = -1; i < 2; ++i )
       {
-        std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
-        ObjComponent * physicalPixel = new ObjComponent(lexer.str(), pixelShape);
-        const double xpos = j*cylRadius*2.0;
-        const double ypos = i*cylHeight;
-        physicalPixel->setPos(xpos, ypos,0.0);
-        bank->add(physicalPixel);
+        for( int j = -1; j < 2; ++j )
+        {
+          std::ostringstream lexer;
+          lexer << "pixel-(" << j << "," << i << ")";
+          Detector * physicalPixel = new Detector(lexer.str(), pixelShape, bank);
+          const double xpos = j*cylRadius*2.0;
+          const double ypos = i*cylHeight;
+          physicalPixel->setPos(xpos, ypos,0.0);
+          physicalPixel->setID(pixelID);
+          pixelID++;
+          bank->add(physicalPixel);
+          testInst->markAsDetector(physicalPixel);
+        }
       }
+
+      testInst->add(bank);
+      bank->setPos(V3D(0.0, 0.0, 5.0*banknum));
     }
 
-    boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
-    testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, 5.0));
     //Define a source component
     ObjComponent *source = new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
     source->setPos(V3D(0.0, 0.0, -10.));

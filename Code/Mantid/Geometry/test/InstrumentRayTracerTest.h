@@ -142,7 +142,8 @@ private:
   {
     if( !m_testInst )
     {
-      m_testInst = ComponentCreationHelper::createTestInstrument();
+      //9 cylindrical detectors
+      m_testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     }
     return m_testInst;
   }
