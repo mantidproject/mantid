@@ -540,16 +540,9 @@ namespace DataObjects
   {
     //Ok, we need to take the data_map, and turn it into a data[] vector.
 
-    //Let's make the vector big enough.
-    if (static_cast<int>(this->data_map.size()) < m_noVectors)
-    {
-      //Too many vectors! Why did you initialize it bigger than you needed to, silly?
-      for (int i=this->data_map.size(); i<m_noVectors; i++)
-      {
-        //Delete the offending EventList so as to avoid memory leaks.
-        delete this->data[i];
-      }
-    }
+    //Clear and delete any old EventList's
+    this->clearData();
+
     //Now resize
     m_noVectors = this->data_map.size();
     this->data.resize(m_noVectors, NULL);
