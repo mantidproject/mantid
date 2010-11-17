@@ -201,9 +201,6 @@
     <ClCompile Include="src\Instrument\ObjCompAssembly.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Instrument\ParRectangularDetector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\InstrumentRayTracer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

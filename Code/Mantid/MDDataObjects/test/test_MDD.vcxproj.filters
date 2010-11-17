@@ -24,6 +24,9 @@
     <ClCompile Include="MDPixelsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MDDataPointTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="test_sqw.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="MDPixelsTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MDDataPointTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -170,7 +170,6 @@
     <ClCompile Include="src\IInstrument.cpp" />
     <ClCompile Include="src\Instrument\Instrument.cpp" />
     <ClCompile Include="src\Instrument\ObjCompAssembly.cpp" />
-    <ClCompile Include="src\Instrument\ParRectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\XMLlogfile.cpp" />
     <ClCompile Include="src\Math\Acomp.cpp" />
