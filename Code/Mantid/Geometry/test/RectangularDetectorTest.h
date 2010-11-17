@@ -49,9 +49,13 @@ public:
 
   void testNameParentValueConstructor()
   {
-    RectangularDetector *parent = new RectangularDetector("Parent");
+    CompAssembly *parent = new CompAssembly("Parent");
+    parent->setPos(1,2,3);
+
     //name and parent
     RectangularDetector *q = new RectangularDetector("Child", parent);
+    q->setPos(1,1,1);
+
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
     TS_ASSERT_THROWS((*q)[0], std::runtime_error);
@@ -59,10 +63,16 @@ public:
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
 
-    TS_ASSERT_EQUALS(q->getPos(), V3D(0, 0, 0));
+    //1,1,1 is added to (1,2,3)
+    TS_ASSERT_EQUALS(q->getPos(), V3D(2, 3, 4));
     TS_ASSERT_EQUALS(q->getRelativeRot(), Quat(1, 0, 0, 0));
-    //as the parent is at 0,0,0 GetPos should equal getRelativePos
-    TS_ASSERT_EQUALS(q->getRelativePos(), q->getPos());
+
+    // Now test the parametrized version of that
+    ParameterMap_sptr pmap( new ParameterMap() );
+    RectangularDetector *pq = new RectangularDetector(q, pmap.get());
+    TS_ASSERT_EQUALS(pq->getPos(), V3D(2, 3, 4));
+    TS_ASSERT_EQUALS(pq->getRelativeRot(), Quat(1, 0, 0, 0));
+
     delete parent;
   }
 
@@ -91,6 +101,33 @@ public:
 
     //Initialize with these parameters
     det->initialize(cuboidShape, 100, -50.0, 1.0,   200, -100.0, 1.0, 1000000, true, 1000 );
+
+    do_test_on(det);
+
+    // --- Now make a parametrized version ----
+    ParameterMap_sptr pmap( new ParameterMap() );
+    RectangularDetector *parDet = new RectangularDetector(det, pmap.get());
+
+    do_test_on(parDet);
+
+    delete det;
+    delete parDet;
+  }
+
+
+  /** Test on a rectangular detector that will be
+   * repeated on an un-moved parametrized version.
+   */
+  void do_test_on(RectangularDetector *det)
+  {
+    TS_ASSERT_EQUALS( det->xpixels(), 100);
+    TS_ASSERT_EQUALS( det->xstart(), -50);
+    TS_ASSERT_EQUALS( det->xstep(), 1.0);
+    TS_ASSERT_EQUALS( det->xsize(), 100.0);
+    TS_ASSERT_EQUALS( det->ypixels(), 200);
+    TS_ASSERT_EQUALS( det->ystart(), -100);
+    TS_ASSERT_EQUALS( det->ystep(), 1.0);
+    TS_ASSERT_EQUALS( det->ysize(), 200.0);
 
     //Go out of bounds
     TS_ASSERT_THROWS(det->getAtXY(-1,0), std::runtime_error);
@@ -132,7 +169,6 @@ public:
     TS_ASSERT_DELTA(box.yMax(), 1902.5, 1e-08);
     TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
   }
-
 
 
 };

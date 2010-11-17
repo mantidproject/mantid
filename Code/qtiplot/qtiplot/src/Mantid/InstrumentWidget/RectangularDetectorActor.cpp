@@ -23,7 +23,7 @@ static const bool VERBOSE = false;
  *
  * @param withDisplayList :: true to create a display list
  */
-RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::IRectangularDetector> rectDet)
+RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet)
 :
     ObjComponentActor(NULL, boost::dynamic_pointer_cast<IObjComponent>( rectDet ), false),
     mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)

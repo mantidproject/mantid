@@ -16,25 +16,6 @@ namespace Geometry
 
 
 
-/*! Print information about elements in the assembly to a stream
- *  Overload the operator <<
- * @param os  :: output stream
- * @param ass :: component assembly
- * @return stream representation of rectangular detector
- *
- *  Loops through all components in the assembly
- *  and call printSelf(os).
- *  Also output the number of children
- */
-std::ostream& operator<<(std::ostream& os, const RectangularDetector& ass)
-{
-  ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
-  ass.printChildren(os);
-  return os;
-}
-
 
 /*! Empty constructor
  */
@@ -42,6 +23,18 @@ RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
+
+
+/** Constructor for a parametrized RectangularDetector
+ * @param base: the base (un-parametrized) RectangularDetector
+ * @param map: pointer to the ParameterMap
+ * */
+RectangularDetector::RectangularDetector(const RectangularDetector* base, const ParameterMap * map)
+ : CompAssembly(base,map), IObjComponent(NULL), m_rectBase(base)
+{
+  setGeometryHandler(new BitmapGeometryHandler(this));
+}
+
 
 /*! Valued constructor
  *  @param n :: name of the assembly
@@ -59,14 +52,14 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
-/*! Copy constructor
- *  @param other :: RectangularDetector to copy
- */
-RectangularDetector::RectangularDetector(const RectangularDetector& other) :
-  CompAssembly(other), IObjComponent(other), IRectangularDetector(other)
-{
-  //TODO: Copy other fields here
-}
+///*! Copy constructor
+// *  @param other :: RectangularDetector to copy
+// */
+//RectangularDetector::RectangularDetector(const RectangularDetector& other) :
+//  CompAssembly(other), IObjComponent(other)
+//{
+//  //TODO: Copy other fields here
+//}
 
 /*! Destructor
  */
@@ -90,50 +83,57 @@ IComponent* RectangularDetector::clone() const
 /** Return a pointer to the component in the assembly at the
  * (X,Y) pixel position.
  *
- * @param X index from 0..xPixels-1
- * @param Y index from 0..yPixels-1
+ * @param X index from 0..m_xpixels-1
+ * @param Y index from 0..m_ypixels-1
  * @return a pointer to the component in the assembly at the (X,Y) pixel position
  * @throws runtime_error if the x/y pixel width is not set, or X/Y are out of range
  */
 boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
 {
-  if ((xPixels <= 0) || (yPixels <= 0))
-  {
-    //std::cout << "xPixels " << xPixels << " yPixels " << yPixels << "\n";
+  if ((xpixels() <= 0) || (ypixels() <= 0))
     throw std::runtime_error("RectangularDetector::getAtXY: invalid X or Y width set in the object.");
-  }
-  if ((X < 0) || (X >= xPixels))
+  if ((X < 0) || (X >= xpixels()))
     throw std::runtime_error("RectangularDetector::getAtXY: X specified is out of range.");
-  if ((Y < 0) || (Y >= yPixels))
+  if ((Y < 0) || (Y >= ypixels()))
     throw std::runtime_error("RectangularDetector::getAtXY: Y specified is out of range.");
+
   //Find the index and return that.
-  int i = X*yPixels + Y;
+  int i = X*ypixels() + Y;
+
+  //Use the [] operator to return it (or create the parametrized version if needed)
   return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
 /// @return number of X pixels
 int RectangularDetector::xpixels() const
 {
-  return this->xPixels;
+  if (m_isParametrized)
+    return m_rectBase->m_xpixels;
+  else
+    return this->m_xpixels;
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
 /// @return number of y pixels
 int RectangularDetector::ypixels() const
 {
-  return this->yPixels;
+  if (m_isParametrized)
+    return m_rectBase->m_ypixels;
+  else
+    return this->m_ypixels;
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the step size in the X direction
 double RectangularDetector::xstep() const
 {
-  return this->m_xstep;
+  if (m_isParametrized)
+    return m_rectBase->m_xstep;
+  else
+    return this->m_xstep;
 }
 
 
@@ -141,16 +141,68 @@ double RectangularDetector::xstep() const
 /// Returns the step size in the Y direction
 double RectangularDetector::ystep() const
 {
-  return this->m_ystep;
+  if (m_isParametrized)
+    return m_rectBase->m_ystep;
+  else
+    return this->m_ystep;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the start position in the X direction
+double RectangularDetector::xstart() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_xstart;
+  else
+    return this->m_xstart;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the start position in the Y direction
+double RectangularDetector::ystart() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_ystart;
+  else
+    return this->m_ystart;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the size in the X direction
+double RectangularDetector::xsize() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_xsize;
+  else
+    return this->m_xsize;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the size in the Y direction
+double RectangularDetector::ysize() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_ysize;
+  else
+    return this->m_ysize;
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the position of the center of the pixel at x,y, relative to the center
- * of the RectangularDetector.
+ * of the RectangularDetector, in the plain X,Y coordinates of the
+ * pixels (i.e. unrotated).
+ * @param x x pixel integer
+ * @param y y pixel integer
+ * @return a V3D vector of the relative position
  */
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
 {
-  return V3D( m_xstart + m_xstep * x, m_ystart + m_ystep * y, 0);
+  if (m_isParametrized)
+    return m_rectBase->getRelativePosAtXY(x,y);
+  else
+    return V3D( m_xstart + m_xstep * x, m_ystart + m_ystep * y, 0);
 }
 
 
@@ -180,8 +232,11 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
     int idstart, bool idfillbyfirst_y, int idstepbyrow
     )
 {
-  xPixels = xpixels;
-  yPixels = ypixels;
+  if (m_isParametrized)
+    throw std::runtime_error("RectangularDetector::initialize() called for a parametrized RectangularDetector");
+
+  m_xpixels = xpixels;
+  m_ypixels = ypixels;
   m_xsize = xpixels * xstep;
   m_ysize = ypixels * ystep;
   m_xstart = xstart;
@@ -195,8 +250,8 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
 
   //Loop through all the pixels
   int ix, iy;
-  for (ix=0; ix<xPixels; ix++)
-    for (iy=0; iy<yPixels; iy++)
+  for (ix=0; ix<m_xpixels; ix++)
+    for (iy=0; iy<m_ypixels; iy++)
     {
       //Make the name
       std::ostringstream oss;
@@ -420,22 +475,22 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const
   //throw Kernel::Exception::NotImplementedError("RectangularDetector::Shape() is not implemented.");
 
 
-      // --- Create a cuboid shape for your pixels ----
-      double szX=xPixels;
-      double szY=yPixels;
-      double szZ=0.5;
-      std::ostringstream xmlShapeStream;
-      xmlShapeStream
-          << " <cuboid id=\"detector-shape\"> "
-          << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
-          << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> "
-          << "<left-back-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
-          << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
-          << "</cuboid>";
+  // --- Create a cuboid shape for your pixels ----
+  double szX=m_xpixels;
+  double szY=m_ypixels;
+  double szZ=0.5;
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream
+      << " <cuboid id=\"detector-shape\"> "
+      << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+      << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> "
+      << "<left-back-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+      << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
+      << "</cuboid>";
 
-      std::string xmlCuboidShape(xmlShapeStream.str());
-      Geometry::ShapeFactory shapeCreator;
-      boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+  std::string xmlCuboidShape(xmlShapeStream.str());
+  Geometry::ShapeFactory shapeCreator;
+  boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
 
   //TODO: Create the object of the right shape
   //Geometry::Object baseObj();
@@ -463,6 +518,26 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
+
+
+/*! Print information about elements in the assembly to a stream
+ *  Overload the operator <<
+ * @param os  :: output stream
+ * @param ass :: component assembly
+ * @return stream representation of rectangular detector
+ *
+ *  Loops through all components in the assembly
+ *  and call printSelf(os).
+ *  Also output the number of children
+ */
+std::ostream& operator<<(std::ostream& os, const RectangularDetector& ass)
+{
+  ass.printSelf(os);
+  os << "************************" << std::endl;
+  os << "Number of children :" << ass.nelements() << std::endl;
+  ass.printChildren(os);
+  return os;
+}
 
 
 } // Namespace Geometry

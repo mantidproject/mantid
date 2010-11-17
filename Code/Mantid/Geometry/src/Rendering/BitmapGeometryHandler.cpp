@@ -1,6 +1,5 @@
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/IRectangularDetector.h"
 
 #include <climits>
 #ifdef _WIN32
@@ -15,7 +14,7 @@ namespace Geometry
 {
 
 
-  BitmapGeometryHandler::BitmapGeometryHandler(IRectangularDetector *comp)
+  BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
   : GeometryHandler(dynamic_cast<IObjComponent*>(comp))
   {
     //Save the rectangular detector link for later.

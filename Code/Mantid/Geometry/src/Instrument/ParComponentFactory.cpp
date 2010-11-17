@@ -7,7 +7,6 @@
 #include "MantidGeometry/Instrument/Detector.h" 
 #include "MantidGeometry/Instrument/Detector.h" 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ParRectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h" 
 
 namespace Mantid
@@ -26,7 +25,7 @@ boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<cons
 
       const RectangularDetector* rd = dynamic_cast<const RectangularDetector*>(base.get());
       if (rd)
-        return boost::shared_ptr<IComponent>(new ParRectangularDetector(rd,map));
+        return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
 
       const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
       if (ac)

@@ -7,7 +7,6 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/IRectangularDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
@@ -24,7 +23,7 @@ using Mantid::Geometry::ObjCompAssembly;
 //using Mantid::Geometry::ParObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
-using Mantid::Geometry::IRectangularDetector;
+using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::Object;
 
@@ -167,7 +166,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
     {
       boost::shared_ptr<IComponent> ChildCompPtr=(*CompAssemPtr)[i];
       boost::shared_ptr<ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<ICompAssembly>(ChildCompPtr);
-      boost::shared_ptr<IRectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<IRectangularDetector>(ChildCompPtr);
+      boost::shared_ptr<RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
 
       if (ChildRDPtr)
       {

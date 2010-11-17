@@ -6,7 +6,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/IRectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "boost/weak_ptr.hpp"
 #include "MantidGeometry/Objects/Object.h"
 namespace Mantid
@@ -53,7 +53,7 @@ namespace Mantid
 			static Kernel::Logger& PLog;           ///< The official logger
 
 			/// The RectangularDetector object being plotted.
-			IRectangularDetector * mRectDet;
+			RectangularDetector * mRectDet;
 
 		protected:
 			IObjComponent	*ObjComp;              ///< ObjComponent that uses this geometry handler
@@ -62,7 +62,7 @@ namespace Mantid
 			bool			boolIsInitialized;     ///< state of the geometry initialization for rendering
 
 		public:
-			BitmapGeometryHandler(IRectangularDetector *comp);
+			BitmapGeometryHandler(RectangularDetector *comp);
 			BitmapGeometryHandler();
 			//
 			//			BitmapGeometryHandler(IObjComponent *comp);   ///< Constructor

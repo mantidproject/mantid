@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/IRectangularDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IObjComponent.h"
 
@@ -45,7 +44,7 @@ namespace Geometry
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport RectangularDetector : public CompAssembly, public IObjComponent, public IRectangularDetector
+class DLLExport RectangularDetector : public CompAssembly, public IObjComponent
 {
 public:
   ///String description of the type of component
@@ -56,6 +55,9 @@ public:
   //! Constructor with a name and parent reference
   RectangularDetector(const std::string&, IComponent* reference=0);
 
+  //! Parametrized constructor
+  RectangularDetector(const RectangularDetector* base, const ParameterMap * map);
+
   /// Create all the detector pixels of this rectangular detector.
   void initialize(boost::shared_ptr<Object> shape,
       int xpixels, double xstart, double xstep,
@@ -63,22 +65,30 @@ public:
       int idstart, bool idfillbyfirst_y, int idstepbyrow
       );
 
-  //! Copy constructor
-  RectangularDetector(const RectangularDetector&);
+//  //! Copy constructor
+//  RectangularDetector(const RectangularDetector&);
   virtual ~RectangularDetector();
   //! Make a clone of the present component
   virtual IComponent* clone() const;
 
   /// Get a detector at given XY indices.
   boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
-  /// Return the number of pixels in the X direction
+
   int xpixels() const;
-  /// Return the number of pixels in the Y direction
   int ypixels() const;
   
   double xstep() const;
   double ystep() const;
 
+  double xstart() const;
+  double ystart() const;
+
+  ///Size in X of the detector
+  double xsize() const;
+  ///Size in Y of the detector
+  double ysize() const;
+
+  V3D getRelativePosAtXY(int x, int y) const;
   void getTextureSize(int & xsize, int & ysize) const;
 
 
@@ -122,30 +132,27 @@ public:
   // ------------ End of IObjComponent methods ----------------
 
 
-  ///Size in X of the detector
-  double xsize() const { return m_xsize; }
-  ///Size in Y of the detector
-  double ysize() const { return m_xsize; }
-
-  V3D getRelativePosAtXY(int x, int y) const;
-
 private:
+  /// Pointer to the base RectangularDetector, for parametrized instruments
+  const RectangularDetector * m_rectBase;
   /// Private copy assignment operator
   RectangularDetector& operator=(const ICompAssembly&);
 
   /// The number of pixels in the X (horizontal) direction;
-  int xPixels;
+  int m_xpixels;
   /// The number of pixels in the Y (vertical) direction;
-  int yPixels;
+  int m_ypixels;
 
   /// Size in X of the detector
   double m_xsize;
   /// Size in Y of the detector
   double m_ysize;
+
   /// X position of the 0-th pixel
   double m_xstart;
   /// Y position of the 0-th pixel
   double m_ystart;
+
   /// Step size in the X direction of detector
   double m_xstep;
   /// Step size in the Y direction of detector

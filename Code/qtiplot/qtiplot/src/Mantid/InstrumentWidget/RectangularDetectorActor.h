@@ -3,7 +3,7 @@
 #include "GLActor.h"
 #include "ObjComponentActor.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IRectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/V3D.h"
 /*!
   \class  RectangularDetectorActor
@@ -56,7 +56,7 @@ class RectangularDetectorActor : public ObjComponentActor
 {
 public:
   /// Constructor
-  RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::IRectangularDetector> rectDet);
+  RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet);
   /// Destructor
   virtual ~RectangularDetectorActor();
 
@@ -74,7 +74,7 @@ protected:
 
   int mColorStartID;                                       ///< Starting picking colorid for the subcomponents to CompAssembly
 
-  boost::shared_ptr<Mantid::Geometry::IRectangularDetector> mDet;
+  boost::shared_ptr<Mantid::Geometry::RectangularDetector> mDet;
 
   void init();
   void redraw();

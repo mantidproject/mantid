@@ -106,13 +106,13 @@ void SumNeighbours::exec()
   Progress prog(this,0.0,1.0,inst->nelements());
 
   //Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<IRectangularDetector> > detList;
+  std::vector<boost::shared_ptr<RectangularDetector> > detList;
   for (int i=0; i < inst->nelements(); i++)
   {
-    boost::shared_ptr<IRectangularDetector> det;
+    boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;
 
-    det = boost::dynamic_pointer_cast<IRectangularDetector>( (*inst)[i] );
+    det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
     if (det)
       detList.push_back(det);
     else
@@ -124,7 +124,7 @@ void SumNeighbours::exec()
       {
         for (int j=0; j < assem->nelements(); j++)
         {
-          det = boost::dynamic_pointer_cast<IRectangularDetector>( (*assem)[j] );
+          det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
           if (det) detList.push_back(det);
         }
       }
@@ -139,7 +139,7 @@ void SumNeighbours::exec()
   for (int i=0; i < static_cast<int>(detList.size()); i++)
   {
     std::string det_name("");
-    boost::shared_ptr<IRectangularDetector> det;
+    boost::shared_ptr<RectangularDetector> det;
     det = detList[i];
     if (det)
     {
