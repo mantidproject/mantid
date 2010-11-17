@@ -55,12 +55,12 @@ def getFirstMonFirstDet(inWS):
 def timeRegime(inWS='Rawfile', outWS_n='MonWS', Smooth=True):
     workspace = mtd[inWS]
     FirstMon, FirstDet = getFirstMonFirstDet(inWS)
-    LRef = getReferenceLength(inWS, FirstDet)
     SpecMon = workspace.readX(FirstMon)[0]
     SpecDet = workspace.readX(FirstDet)[0]
     CropWorkspace(inWS, 'MonIn', StartWorkspaceIndex = FirstMon,
              EndWorkspaceIndex = FirstMon)
     if ( SpecMon == SpecDet ):
+        LRef = getReferenceLength(inWS, FirstDet)
         alg = Unwrap('MonIn', outWS_n, LRef = LRef)
         join = float(alg.getPropertyValue('JoinWavelength'))
         RemoveBins(outWS_n, outWS_n, join-0.001, join+0.001, 
@@ -120,9 +120,10 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
     if adjustTOF(inWS_n):
-        ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect')
+        ConvertUnits(inWS_n, outWS_n, 'Energy', 'Indirect') # TRC interested in Energy rather than DeltaE
     else:
         ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
+        CorrectKiKf(OutWS_n, outWS_n, 'Indirect', efixed)
     return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
@@ -191,7 +192,6 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             mtd.sendLogMessage('>> Converting workspace '+normalised+' to \
                     units of deltaE.')
         cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
-        CorrectKiKf(cte, cte, 'Indirect', efixed)
         if ( rebinParam != ''):
             if Verbose:
                 mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with \
