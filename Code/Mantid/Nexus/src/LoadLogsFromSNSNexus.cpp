@@ -49,10 +49,8 @@ void LoadLogsFromSNSNexus::init()
 		  "The name (including its full or relative path) of the Nexus file to\n"
 		  "attempt to load the instrument from. The file extension must either be\n"
 		  ".nxs or .NXS" );
+  declareProperty(new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input));
 }
-
-
-
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
@@ -117,6 +115,9 @@ void LoadLogsFromSNSNexus::exec()
  */
 void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_name, std::string entry_class)
 {
+  // whether or not to overwrite logs on workspace
+  bool overwritelogs = this->getProperty("OverwriteLogs");
+
   file.openGroup(entry_name, entry_class);
 
   // Validate the NX log class.
@@ -262,7 +263,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       TimeSeriesProperty<int> * tsp = new TimeSeriesProperty<int>(entry_name);
       tsp->create(start_time, time_double, values_int);
       tsp->setUnits( units );
-      WS->mutableRun().addLogData( tsp );
+      WS->mutableRun().addProperty( tsp, overwritelogs );
     }
     else
     {
@@ -270,7 +271,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(entry_name);
       tsp->create(start_time, time_double, values);
       tsp->setUnits( units );
-      WS->mutableRun().addLogData( tsp );
+      WS->mutableRun().addProperty( tsp, overwritelogs );
     }
 
   }
