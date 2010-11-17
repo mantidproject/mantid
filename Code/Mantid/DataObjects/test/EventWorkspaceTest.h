@@ -16,6 +16,8 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "../../Geometry/test/ComponentCreationHelpers.hh"
 
+#include "MantidKernel/Timer.h"
+
 #ifndef _WIN32
   #include <sys/resource.h>
 #endif
@@ -35,14 +37,6 @@ using std::endl;
 using namespace boost::posix_time;
 
 
-
-#include <time.h>
-typedef struct {
-  timeval start;
-  timeval stop;
-} stopWatch;
-
-
 //==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite
 {
@@ -51,25 +45,6 @@ private:
   int NUMPIXELS, NUMBINS, NUMEVENTS, BIN_DELTA;
 
 public:
-
-public:
-  stopWatch timer;
-
-  void startTimer( ) {
-    gettimeofday(&(timer.start),NULL);
-  }
-
-  void stopTimer( ) {
-    gettimeofday(&(timer.stop),NULL);
-  }
-
-  double getElapsedTime() {
-    timeval res;
-    timersub(&(timer.stop),&(timer.start),&res);
-    return res.tv_sec + res.tv_usec/1000000.0; // 10^6 uSec per second
-  }
-
-
 
   EventWorkspaceTest()
   {
@@ -243,10 +218,9 @@ public:
     //Make an instrument with lots of pixels
     ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
 
-    startTimer();
+    Timer timer;
     ew->padPixels(false);
-    stopTimer();
-    if (timing) std::cout << "\n" << getElapsedTime() << " seconds for padPixels(false).\n";
+    if (timing) std::cout << "\n" << timer.elapsed() << " seconds for padPixels(false).\n";
 
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
     int badcount = 0;
@@ -266,10 +240,9 @@ public:
     if (timing)
     {
       ew->clearData();
-      startTimer();
+      Timer timer2;
       ew->padPixels(true);
-      stopTimer();
-      std::cout << "\n" << getElapsedTime() << " seconds for padPixels(true).\n";
+      std::cout << "\n" << timer2.elapsed() << " seconds for padPixels(true).\n";
 
       padPixels_manually_timing(numpixels);
     }
@@ -284,7 +257,7 @@ public:
     //Make an instrument with lots of pixels
     ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
 
-    startTimer();
+    Timer timer;
 
     std::map<int, Geometry::IDetector_sptr> detector_map = ew->getInstrument()->getDetectors();
     std::map<int, Geometry::IDetector_sptr>::iterator it;
@@ -299,8 +272,7 @@ public:
     }
     ew->doneLoadingData();
 
-    stopTimer();
-    std::cout << "\n" << getElapsedTime() << " seconds for padPixels done manually.\n";
+    std::cout << "\n" << timer.elapsed() << " seconds for padPixels done manually.\n";
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
   }
 
