@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "../../Geometry/test/ComponentCreationHelpers.hh"
 
 #ifndef _WIN32
   #include <sys/resource.h>
@@ -35,6 +36,13 @@ using namespace boost::posix_time;
 
 
 
+#include <sys/time.h>
+typedef struct {
+  timeval start;
+  timeval stop;
+} stopWatch;
+
+
 //==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite
 {
@@ -43,6 +51,25 @@ private:
   int NUMPIXELS, NUMBINS, NUMEVENTS, BIN_DELTA;
 
 public:
+
+public:
+  stopWatch timer;
+
+  void startTimer( ) {
+    gettimeofday(&(timer.start),NULL);
+  }
+
+  void stopTimer( ) {
+    gettimeofday(&(timer.stop),NULL);
+  }
+
+  double getElapsedTime() {
+    timeval res;
+    timersub(&(timer.stop),&(timer.start),&res);
+    return res.tv_sec + res.tv_usec/1000000.0; // 10^6 uSec per second
+  }
+
+
 
   EventWorkspaceTest()
   {
@@ -203,6 +230,81 @@ public:
     TS_ASSERT_EQUALS( el.dataE()->size(), 0);
 
   }
+
+
+
+  //------------------------------------------------------------------------------
+  void test_padPixels()
+  {
+    bool timing = false;
+    ew = createEventWorkspace(1, 0);
+
+    int numpixels = timing ? 900000 : 1800;
+    //Make an instrument with lots of pixels
+    ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
+
+    startTimer();
+    ew->padPixels(false);
+    stopTimer();
+    if (timing) std::cout << "\n" << getElapsedTime() << " seconds for padPixels(false).\n";
+
+    TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
+    int badcount = 0;
+    for (int i=0; i < numpixels; i++)
+    {
+      bool b = ew->getEventList(i).hasDetectorID(i+1);
+      TSM_ASSERT("ew->getEventList(i).hasDetectorID(i+1)", b);
+      if (b)
+        if (badcount++ > 40) break;
+    }
+
+    IndexToIndexMap *map = ew->getWorkspaceIndexToDetectorIDMap();
+    TS_ASSERT_EQUALS(map->size(), numpixels);
+    TS_ASSERT_EQUALS((*map)[50], 51); //for example
+    delete map;
+
+    if (timing)
+    {
+      ew->clearData();
+      startTimer();
+      ew->padPixels(true);
+      stopTimer();
+      std::cout << "\n" << getElapsedTime() << " seconds for padPixels(true).\n";
+
+      padPixels_manually_timing(numpixels);
+    }
+
+  }
+
+  //------------------------------------------------------------------------------
+  void padPixels_manually_timing(int numpixels)
+  {
+    EventWorkspace_sptr ew(new EventWorkspace);
+    ew->initialize(NUMPIXELS,1,1);
+    //Make an instrument with lots of pixels
+    ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
+
+    startTimer();
+
+    std::map<int, Geometry::IDetector_sptr> detector_map = ew->getInstrument()->getDetectors();
+    std::map<int, Geometry::IDetector_sptr>::iterator it;
+    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    {
+      //Go through each pixel in the map, but forget monitors.
+      if (!it->second->isMonitor())
+      {
+        // and simply get the event list. It will be created if it was not there already.
+        ew->getEventListAtPixelID(it->first); //it->first is detector ID #
+      }
+    }
+    ew->doneLoadingData();
+
+    stopTimer();
+    std::cout << "\n" << getElapsedTime() << " seconds for padPixels done manually.\n";
+    TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
+  }
+
+
 
 
   //------------------------------------------------------------------------------
@@ -518,6 +620,12 @@ public:
     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
   }
+
+
+
+
+
+
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */

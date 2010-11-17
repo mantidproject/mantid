@@ -70,6 +70,9 @@ public:
   void populate(const int* _spec, const int* _udet, int nentries);
   /// Populate with a simple 1-1 correspondance between spec and udet; from start (inclusive) to end (exclusive).
   void populateSimple(const int start, const int end);
+  /// Populate with a vector of pixel IDs
+  void populateWithVector(const std::vector<int>& udetList);
+
   /// Link a list of UDETs to the given spectrum
   void addSpectrumEntries(const int spectrum, const std::vector<int>& udetList);
   void addSpectrumEntries(const int spectrum, const std::set<int>& detectorIDs);

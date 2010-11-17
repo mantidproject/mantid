@@ -104,7 +104,7 @@ namespace Mantid
       /// List of the absolute time of each pulse
       std::vector<Kernel::DateAndTime> pulseTimes;
 
-      void loadBankEventData(std::string entry_name);
+      void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void runLoadMonitors();
 

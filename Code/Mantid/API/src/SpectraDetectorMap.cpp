@@ -55,6 +55,20 @@ namespace Mantid
     }
 
 
+    /** Fill the SpectraDetectorMap with a simple list of pixel ids,
+     * where the nth entry in the vector has a single detector, specified
+     * by the value at that entry in the vector.
+     * @param  udetList list of ints where the index = spectrum number; value = pixel ID.
+
+     */
+    void SpectraDetectorMap::populateWithVector(const std::vector<int>& udetList)
+    {
+      for (size_t i=0; i < udetList.size(); i++)
+      {
+        m_s2dmap.insert(std::pair<int,int>(i, udetList[i]));
+      }
+    }
+
     /** Links a list of UDETs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
      *  @param spectrum The spectrum number to which detectors should be added

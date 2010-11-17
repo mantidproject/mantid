@@ -191,6 +191,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Get or add an EventList
   EventList& getOrAddEventList(const int workspace_index);
 
+  /// Pad pixels in the workspace using the detectors in the instrument.
+  void padPixels(bool parallel);
+
   /// Make all the mapping stuff
   void makeSpectraMap();
   void makeAxis1();
@@ -210,6 +213,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   int MRUSize() const;
 
   void clearMRU() const;
+
+  void clearData();
 
   /// Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog);

@@ -200,27 +200,14 @@ void LoadSNSEventNexus::exec()
   prog.report(1, "Initializing all pixels");
 
   //----------------- Pad Empty Pixels -------------------------------
-  if (true)
+  if (!this->instrument_loaded_correctly)
   {
-    //We want to pad out empty pixels.
-    if (!this->instrument_loaded_correctly)
-    {
-      g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
-    }
-    else
-    {
-      std::map<int, Geometry::IDetector_sptr> detector_map = WS->getInstrument()->getDetectors();
-      std::map<int, Geometry::IDetector_sptr>::iterator it;
-      for (it = detector_map.begin(); it != detector_map.end(); it++)
-      {
-        //Go through each pixel in the map, but forget monitors.
-        if (!it->second->isMonitor())
-        {
-          // and simply get the event list. It will be created if it was not there already.
-          WS->getEventListAtPixelID(it->first); //it->first is detector ID #
-        }
-      }
-    }
+    g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
+  }
+  else
+  {
+    //Pad pixels; parallel flag is off because it is actually slower :(
+    WS->padPixels( false );
   }
 
 
@@ -261,6 +248,9 @@ void LoadSNSEventNexus::exec()
 
   Progress prog2(this,0.3,1.0, bankNames.size());
 
+  //This map will be used to find the workspace index
+  IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
+
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
@@ -268,11 +258,14 @@ void LoadSNSEventNexus::exec()
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     prog2.report("Loading " + bankNames[i]);
-    this->loadBankEventData(bankNames[i]);
+    this->loadBankEventData(bankNames[i], pixelID_to_wi_map);
   }
 
   //Now all the event lists have been made for all pixel ids
-  WS->doneLoadingData();
+  //WS->doneLoadingData();
+
+  //Don't need the map anymore.
+  delete pixelID_to_wi_map;
 
   if (is_time_filtered)
   {
@@ -309,8 +302,9 @@ void LoadSNSEventNexus::exec()
 /**
  * Load one of the banks' event data from the nexus file
  * @param entry_name The pathname of the bank to load
+ * @param pixelID_to_wi_map a map where key = pixelID and value = the workpsace index to use.
  */
-void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
+void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map)
 {
   //Local tof limits
   double my_shortest_tof, my_longest_tof;
@@ -475,8 +469,9 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
         //The event TOF passes the filter.
         TofEvent event(tof, pulsetime);
 
-        //Add it to the list at that pixel ID
-        WS->getEventListAtPixelID( event_id[i] ).addEventQuickly( event );
+        //Add it to the list at the workspace index corresponding to that pixel ID
+        WS->getEventList((*pixelID_to_wi_map)[event_id[i]]).addEventQuickly( event );
+        //WS->getEventListAtPixelID( event_id[i] ).addEventQuickly( event );
 
         //Local tof limits
         if (tof < my_shortest_tof) { my_shortest_tof = tof;}
