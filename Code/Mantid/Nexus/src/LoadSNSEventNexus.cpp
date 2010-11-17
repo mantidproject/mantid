@@ -123,14 +123,14 @@ void LoadSNSEventNexus::exec()
 
   //Initialize progress reporting.
   //3 calls for the first part, 4 if monitors are loaded
-  int reports = 3;
+  int reports = 4;
   if (load_monitors)
   {
     reports++;
   }
   Progress prog(this,0.0,0.3,  reports);
 
-  prog.report(1, "Loading DAS logs");
+  prog.report("Loading DAS logs");
 
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
@@ -156,22 +156,23 @@ void LoadSNSEventNexus::exec()
     g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
   }
 
-  prog.report(1, "Loading instrument");
+
+  prog.report("Loading instrument");
 
   //Load the instrument
   runLoadInstrument(m_filename, WS);
 
+  if (!this->instrument_loaded_correctly)
+      throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
+
   if (load_monitors)
   {
-    prog.report(1, "Loading monitors");
+    prog.report("Loading monitors");
     this->runLoadMonitors();
   }
 
   // top level file information
   ::NeXus::File file(m_filename);
-  //g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
-
-  //TODO: Here load any other data?
 
   //Start with the base entry
   file.openGroup("entry", "NXentry");
@@ -188,7 +189,6 @@ void LoadSNSEventNexus::exec()
     if ((entry_class == "NXevent_data"))
     {
       bankNames.push_back( entry_name );
-      //TODO: Load the pulse times (once)
     }
   }
 
@@ -197,7 +197,7 @@ void LoadSNSEventNexus::exec()
   file.close();
 
 
-  prog.report(1, "Initializing all pixels");
+  prog.report("Initializing all pixels");
 
   //----------------- Pad Empty Pixels -------------------------------
   if (!this->instrument_loaded_correctly)
@@ -260,9 +260,6 @@ void LoadSNSEventNexus::exec()
     prog2.report("Loading " + bankNames[i]);
     this->loadBankEventData(bankNames[i], pixelID_to_wi_map);
   }
-
-  //Now all the event lists have been made for all pixel ids
-  //WS->doneLoadingData();
 
   //Don't need the map anymore.
   delete pixelID_to_wi_map;
