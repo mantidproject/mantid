@@ -92,12 +92,19 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             self.applyDetectorEfficiency = True
         elif (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             #self.log("***** ARCS/SEQUOIA *****")
-            #self.log(mono_run)
-            if mono_run.endswith("_event.nxs"):
-                loader=LoadNexusMonitors(Filename=mono_run, OutputWorksapce="monitor_ws")    
-            elif mono_run.endswith("_event.dat"):
-                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
+
+            # Quick fix to check for a list.
+            if type(mono_run) == list:
+                datafile = str(mono_run[0])
+            else:
+                datafile = str(mono_run)
+                 
+            if datafile.endswith("_event.nxs"):
+                loader=LoadNexusMonitors(Filename=datafile, OutputWorksapce="monitor_ws")    
+            elif datafile.endswith("_event.dat"):
+                InfoFilename = datafile.replace("_neutron_event.dat", "_runinfo.xml")
                 loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+            # Actually load the monitors...
             monitor_ws = loader.workspace()
             alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
             ei_value = monitor_ws.getRun().getLogData("Ei").value
@@ -315,7 +322,9 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             average_value += y_value * weight
             weight_sum += weight
 
-        average_value /= weight_sum
+        if (weight_sum != 0.0):
+            average_value /= weight_sum
+            
         return average_value
     
     def mask_detectors_outside_range(self, data_ws, min_value, max_value,median_lbound, median_ubound, median_frac_lo, median_frac_hi, median_sig):
