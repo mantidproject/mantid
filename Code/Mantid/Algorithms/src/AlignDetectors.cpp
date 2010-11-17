@@ -114,7 +114,12 @@ std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_co
   IInstrument_const_sptr instrument = inputWS->getInstrument();
 
   // Get some positions
-  const Geometry::V3D sourcePos = instrument->getSource()->getPos();
+  const Geometry::IObjComponent_sptr sourceObj = instrument->getSource();
+  if (sourceObj == NULL)
+  {
+	  throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
+  }
+  const Geometry::V3D sourcePos = sourceObj->getPos();
   const Geometry::V3D samplePos = instrument->getSample()->getPos();
   const Geometry::V3D beamline = samplePos-sourcePos;
   const double beamline_norm=2.0*beamline.norm();
