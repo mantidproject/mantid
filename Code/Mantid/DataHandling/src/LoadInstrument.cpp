@@ -415,6 +415,14 @@ namespace Mantid
       {
         m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
       }
+
+      // check if angle=radian has been set
+      Element* angleUnit = defaults->getChildElement("angle");
+      if (angleUnit)
+      {
+        if (angleUnit->getAttribute("unit") == "radian")
+          XMLlogfile::angleConvertConst = 180.0/M_PI;
+      }
     }
 
 
@@ -827,12 +835,12 @@ namespace Mantid
         double R=0.0, theta=0.0, phi=0.0;
 
         if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-        if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
-        if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
+        if ( pElem->hasAttribute("t") ) theta = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("t")).c_str());
+        if ( pElem->hasAttribute("p") ) phi = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("p")).c_str());
 
         if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-        if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-        if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
+        if ( pElem->hasAttribute("theta") ) theta = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("theta")).c_str());
+        if ( pElem->hasAttribute("phi") ) phi = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("phi")).c_str());
 
         if ( m_deltaOffsets )
         {
@@ -924,7 +932,7 @@ namespace Mantid
 
       if ( pElem->hasAttribute("rot") )
       {
-        double rotAngle = atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+        double rotAngle = XMLlogfile::angleConvertConst*atof( (pElem->getAttribute("rot")).c_str() );
 
         double axis_x = 0.0;
         double axis_y = 0.0;
@@ -985,7 +993,7 @@ namespace Mantid
 
           if (rElem) 
           {
-          double rotAngle = atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
+          double rotAngle = XMLlogfile::angleConvertConst*atof( (rElem->getAttribute("val")).c_str() ); 
 
           double axis_x = 0.0;
           double axis_y = 0.0;
@@ -1248,12 +1256,12 @@ namespace Mantid
         double R=0.0, theta=0.0, phi=0.0;
 
         if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-        if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
-        if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
+        if ( pElem->hasAttribute("t") ) theta = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("t")).c_str());
+        if ( pElem->hasAttribute("p") ) phi = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("p")).c_str());
 
         if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-        if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-        if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
+        if ( pElem->hasAttribute("theta") ) theta = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("theta")).c_str());
+        if ( pElem->hasAttribute("phi") ) phi = XMLlogfile::angleConvertConst*atof((pElem->getAttribute("phi")).c_str());
 
         retV3D.spherical(R,theta,phi);
       }
@@ -1297,7 +1305,7 @@ namespace Mantid
 
         if ( facingElem->hasAttribute("rot") )
         {
-          double rotAngle = atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+          double rotAngle = XMLlogfile::angleConvertConst*atof( (facingElem->getAttribute("rot")).c_str() ); 
           comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
         }
 
