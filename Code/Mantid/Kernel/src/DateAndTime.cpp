@@ -135,7 +135,7 @@ DateAndTime::DateAndTime() : _nanoseconds(0)
 /** Construct a date from nanoseconds.
  * @param total_nanoseconds nanoseconds since Jan 1, 1990 (our epoch).
  */
-DateAndTime::DateAndTime(const long int total_nanoseconds)
+DateAndTime::DateAndTime(const int64_t total_nanoseconds)
 {
   //Make sure that you cannot construct a date that is beyond the limits...
   if (total_nanoseconds > MAX_NANOSECONDS)
@@ -144,7 +144,7 @@ DateAndTime::DateAndTime(const long int total_nanoseconds)
     _nanoseconds = MIN_NANOSECONDS;
   else
     _nanoseconds = total_nanoseconds;
-  }
+}
 
 //------------------------------------------------------------------------------------------------
 /** Construct a time from an ISO8601 string
@@ -184,11 +184,13 @@ DateAndTime::DateAndTime(const double seconds, const double nanoseconds)
     _nanoseconds = nano;
 }
 
+//------------------------------------------------------------------------------------------------
+
 /** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
  * @param seconds seconds since Jan 1, 1990.
  * @param nanoseconds nanoseconds to add to the number of seconds
  */
-DateAndTime::DateAndTime(const long seconds, const long nanoseconds)
+DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds)
 {
   if (seconds >= MAX_SECONDS)
     _nanoseconds = MAX_NANOSECONDS;
@@ -198,11 +200,13 @@ DateAndTime::DateAndTime(const long seconds, const long nanoseconds)
     _nanoseconds = seconds * 1e9 + nanoseconds;;
 }
 
+//------------------------------------------------------------------------------------------------
+
 /** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
  * @param seconds seconds since Jan 1, 1990.
  * @param nanoseconds nanoseconds to add to the number of seconds
  */
-DateAndTime::DateAndTime(const int seconds, const int nanoseconds)
+DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds)
 {
   if (seconds >= MAX_SECONDS)
     _nanoseconds = MAX_NANOSECONDS;
@@ -211,7 +215,6 @@ DateAndTime::DateAndTime(const int seconds, const int nanoseconds)
   else
     _nanoseconds = seconds * 1e9 + nanoseconds;;
 }
-
 
 //===========================================================================================
 //===========================================================================================

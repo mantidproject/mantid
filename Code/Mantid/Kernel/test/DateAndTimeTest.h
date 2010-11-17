@@ -36,7 +36,7 @@ public:
     DateAndTime d;
     //1day, 1 minute, 2 seconds, 0.345 seconds = 86462345000000 nanosec
     //Nanoseconds constructor
-    d = DateAndTime( int64_t(86462345000000) );
+    d = DateAndTime( int64_t(86462345000000LL) );
     TS_ASSERT_EQUALS(d, expected);
 
     //Second, nanosec constructor
@@ -66,9 +66,9 @@ public:
   {
     //direct nanoseconds constructor
     DateAndTime a,b,c;
-    a = DateAndTime(int64_t(6917529027641081856));
+    a = DateAndTime(int64_t(6917529027641081856LL));
     TS_ASSERT_EQUALS( a, DateAndTime::maximum());
-    a = DateAndTime(int64_t(-6917529027641081856));
+    a = DateAndTime(int64_t(-6917529027641081856LL));
 
     //Double constructor
     TS_ASSERT_EQUALS( a, DateAndTime::minimum());
@@ -78,8 +78,8 @@ public:
     TS_ASSERT_EQUALS( a, DateAndTime::minimum());
 
     //long int constructor
-    long int li = 1000000000000000000;
-    long int li2 = 2000000;
+    int64_t li = 1000000000000000000LL;
+    int64_t li2 = 2000000LL;
     a = DateAndTime(li, li2);
     TS_ASSERT_EQUALS( a, DateAndTime::maximum());
     a = DateAndTime(-li, li2);
@@ -168,13 +168,13 @@ public:
     a = DateAndTime("1990-01-02 00:01:02.345");
     b = DateAndTime("1990-01-02 00:00:02.000");
     td = a-b;
-    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000)) );
+    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL)) );
 
     a = DateAndTime("1990-01-02 00:01:02.345");
     p = boost::posix_time::from_iso_string("19900102T000002.000");
     //boost ptime gets converted to ptime implicitely
     td = a-p;
-    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000)) );
+    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL)) );
   }
 
   void test_subtraction_of_times_limits()
@@ -200,16 +200,16 @@ public:
     DateAndTime a,b,c;
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = a + 60345000000;
+    c = a + 60345000000LL;
     TS_ASSERT_EQUALS( c, b);
-    a += 60345000000;
+    a += 60345000000LL;
     TS_ASSERT_EQUALS( a, b);
 
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = b - 60345000000;
+    c = b - 60345000000LL;
     TS_ASSERT_EQUALS( c, a);
-    b -= 60345000000;
+    b -= 60345000000LL;
     TS_ASSERT_EQUALS( b, a);
   }
 
@@ -218,16 +218,16 @@ public:
     DateAndTime a,b,c;
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = a + DateAndTime::duration_from_nanoseconds(int64_t(60345000000));
+    c = a + DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( c, b);
-    a += DateAndTime::duration_from_nanoseconds(int64_t(60345000000));
+    a += DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( a, b);
 
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = b - DateAndTime::duration_from_nanoseconds(int64_t(60345000000));
+    c = b - DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( c, a);
-    b -= DateAndTime::duration_from_nanoseconds(int64_t(60345000000));
+    b -= DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( b, a);
   }
 
