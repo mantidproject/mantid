@@ -9,26 +9,19 @@ class MDCellTest :    public CxxTest::TestSuite
 {
 
 private:
-  
   //TODO: replace with gmock versions in future.
-  class SignalAggregateFake : public  Mantid::Geometry::SignalAggregate
+  class FakeMDPoint : public  Mantid::Geometry::MDPoint
   {
   public:
-    virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
-    {
-      throw std::runtime_error("Overriden function call NA.");
-    }
-    virtual double getSignal() const
+    
+    double getSignal() const
     {
       return 1;
     }
-    virtual double getError() const
+
+    double getError() const
     {
       return 0.1;
-    }
-    virtual std::vector<boost::shared_ptr< Mantid::Geometry::SignalAggregate> > getContributingPoints() const
-    {
-      throw std::runtime_error("Overriden function call NA.");
     }
   };
 
@@ -44,9 +37,9 @@ private:
     c.t = 1;
     vertexes.push_back(c);
 
-    std::vector<boost::shared_ptr<SignalAggregate> > points;
-    points.push_back(boost::shared_ptr<SignalAggregate>(new SignalAggregateFake));
-    points.push_back(boost::shared_ptr<SignalAggregate>(new SignalAggregateFake));
+    std::vector<boost::shared_ptr<MDPoint> > points;
+    points.push_back(boost::shared_ptr<MDPoint>(new FakeMDPoint));
+    points.push_back(boost::shared_ptr<MDPoint>(new FakeMDPoint));
 
     return std::auto_ptr<MDCell>(new MDCell(points, vertexes));
   }
@@ -71,7 +64,7 @@ public:
   {
     using namespace Mantid::Geometry;
     std::auto_ptr<MDCell> point = constructMDCell();
-    std::vector<boost::shared_ptr<SignalAggregate> > contributingPoints = point->getContributingPoints();
+    std::vector<boost::shared_ptr<MDPoint> > contributingPoints = point->getContributingPoints();
     TSM_ASSERT_EQUALS("Wrong number of contributing points returned", 2, contributingPoints.size());
     TSM_ASSERT("First contributing point is null", NULL != contributingPoints.at(0).get());
     TSM_ASSERT("Second contributing point is null", NULL != contributingPoints.at(1).get());

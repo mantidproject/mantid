@@ -45,14 +45,14 @@ namespace Mantid
       double m_cachedSignal;
       double m_cachedError;
       std::vector<coordinate> m_vertexes;
-      std::vector<boost::shared_ptr<SignalAggregate> > m_contributingPoints;
+      std::vector<boost::shared_ptr<MDPoint> > m_contributingPoints;
       inline void calculateCachedValues();
     public:
-      MDCell(std::vector<boost::shared_ptr<SignalAggregate> > pContributingPoints, std::vector<coordinate> vertexes);
+      MDCell(std::vector<boost::shared_ptr<MDPoint> > pContributingPoints, std::vector<coordinate> vertexes);
       std::vector<coordinate> getVertexes() const;
       double getSignal() const;
       double getError() const;
-      std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const;
+      std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;
       ~MDCell();
     };
   }

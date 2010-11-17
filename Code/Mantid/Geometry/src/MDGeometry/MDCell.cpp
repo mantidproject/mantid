@@ -6,7 +6,7 @@ namespace Mantid
   namespace Geometry
   {
 
-    MDCell::MDCell(std::vector<boost::shared_ptr<SignalAggregate> > pContributingPoints, std::vector<coordinate> vertexes) 
+    MDCell::MDCell(std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > pContributingPoints, std::vector<coordinate> vertexes) 
       : m_contributingPoints(pContributingPoints),
       m_vertexes(vertexes),
       m_cachedError(0),
@@ -30,7 +30,7 @@ namespace Mantid
     {
       return this->m_cachedError;
     }
-    std::vector<boost::shared_ptr<SignalAggregate> > MDCell::getContributingPoints() const
+    std::vector<boost::shared_ptr<MDPoint> > MDCell::getContributingPoints() const
     {
       return this->m_contributingPoints;
     }

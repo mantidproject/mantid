@@ -51,13 +51,14 @@ namespace Mantid
     };
 
     //TODO: relocate once name is stable.
+    class MDPoint;
     class DLLExport SignalAggregate
     {
     public:
       virtual std::vector<coordinate> getVertexes() const = 0;
       virtual double getSignal() const = 0;
       virtual double getError() const = 0;
-      virtual std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const = 0;
+      virtual std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const = 0;
       virtual ~SignalAggregate(){};
     };
 
@@ -77,8 +78,10 @@ namespace Mantid
       IDetector_sptr getDetector() const;
       IInstrument_sptr getInstrument() const;
       virtual ~MDPoint();
-      std::vector<boost::shared_ptr<SignalAggregate> > getContributingPoints() const;
+      std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;
       //virtual Mantid::API::Run getRun();
+    protected:
+      MDPoint(){};
     };
   }
 }

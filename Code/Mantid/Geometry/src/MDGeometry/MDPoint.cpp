@@ -38,7 +38,7 @@ namespace Mantid
         return this->m_instrument;
       }
 
-      std::vector<boost::shared_ptr<SignalAggregate> > MDPoint::getContributingPoints() const
+      std::vector<boost::shared_ptr<MDPoint> > MDPoint::getContributingPoints() const
       {
         throw std::logic_error("A Point is indivisible, cannot have contributing Points to a Point.");
       }
