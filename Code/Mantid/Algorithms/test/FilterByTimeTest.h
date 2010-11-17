@@ -151,11 +151,14 @@ public:
     //------------------ Comparing both -----------------------
     //Similar total number of events
     TS_ASSERT_DELTA( outWS->getNumberEvents(), outWS2->getNumberEvents(), 10 );
+    int count = 0;
     for (int i=0; i<outWS->getNumberHistograms(); i++)
     {
       double diff = fabs(double(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents()));
       //No more than 2 events difference because of rounding to second
       TS_ASSERT_LESS_THAN( diff, 3);
+      if (diff > 3) count++;
+      if (count > 50) break;
     }
 
     //Almost same proton charge
