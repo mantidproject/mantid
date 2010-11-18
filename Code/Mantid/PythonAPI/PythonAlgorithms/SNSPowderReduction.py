@@ -77,6 +77,9 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("VanadiumSmoothNumPoints", 11)
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
+        self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
+        self.declareProperty("FilterMinimumValue", 0.0, Description="Minimum log value for which to keep events.")
+        self.declareProperty("FilterMaximumValue", 0.0, Description="Maximum log value for which to keep events.")
         self.declareProperty("SaveAs", "gsas", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
@@ -86,17 +89,6 @@ class SNSPowderReduction(PythonAlgorithm):
         result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
                               Extension=extension)
         return result["ResultPath"].value
-
-    #def getExtensions(self):
-    #    extProperty = self.getProperty("FileType")
-    #    if extProperty == "Event NeXus":
-    #        return ["_event.nxs"]
-    #    else:
-    #        if self._instrument == "PG3":
-    #            return ["_neutron_event.dat"]
-    #        else:
-    #            raise RuntimeError("Do not know the extensions for %s" \
-    #                               % self._instrument)
 
     def _loadPreNeXusData(self, runnumber, extension):
         # find the file to load
@@ -143,16 +135,24 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _focus(self, wksp, calib, info):
+    def _focus(self, wksp, calib, info, filterLogs=None):
         if wksp is None:
             return None
-        # take care of removing bad pulses
+        # take care of filtering events
         if self._filterBadPulses:
             frequency = wksp.getRun()['proton_charge']
             frequency = frequency.getStatistics().mean
-            FilterByLogValue(InputWorkspace=wksp, OutputWorkspace="temp", LogName="proton_charge",
+            FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName="proton_charge",
                              MinimumValue=.95*frequency, MaximumValue=2.*frequency)
-            RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(wksp)) # TODO inplace
+        if filterLogs is not None:
+            try:
+                logparam = wksp.getRun()[filterLogs[0]]
+                if logparam is not None:
+                    FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
+                                     MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
+            except KeyError, e:
+                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
+                                   % (filterLogs[0], str(wksp)))
         
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
@@ -201,6 +201,12 @@ class SNSPowderReduction(PythonAlgorithm):
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
+        filterLogs = self.getProperty("FilterByLogValue")
+        if len(filterLogs.strip()) <= 0:
+            filterLogs = None
+        else:
+            filterLogs = [filterLogs, 
+                          self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
         self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
         self._vanSmoothPoints = self.getProperty("VanadiumSmoothNumPoints")
         calib = self.getProperty("CalibrationFile")
@@ -212,7 +218,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # first round of processing the sample 
             samRun = self._loadData(samRun, SUFFIX)
             info = self._getinfo(samRun)
-            samRun = self._focus(samRun, calib, info)
+            samRun = self._focus(samRun, calib, info, filterLogs)
 
             # process the container
             if info.can > 0:
