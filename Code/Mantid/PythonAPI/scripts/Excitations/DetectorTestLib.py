@@ -84,16 +84,17 @@ def single_white_van(wbrf, tiny, huge, median_hi, median_lo, error_bars, prevLis
 
   #emtpy list will be filled with numbers of spectra known to be bad before this analysis started, or left empty if that information is not there
   try:
-    common.LoadNexRaw(wbrf, SINGLE_WHITE_WS)
+    data_ws = common.load_run(wbrf, 'white-beam')
     #----------------Calculations Start------------
+    #--the integrated workspace will be much smaller so do this as soon as possible
+    Integration(data_ws, SINGLE_WHITE_WS)                                                                 
+    (fileOut, numFound) = SingleWBV( SINGLE_WHITE_WS, outWS, huge, tiny,
+                                     median_hi, median_lo, error_bars, oFile )
+
     if len(prevList) > 0:
       MD = MaskDetectors(Workspace=SINGLE_WHITE_WS, SpectraList=prevList)
-      prevList = MD.getPropertyValue('SpectraList')                                                                    #the algorithm expands out any ranges specified with '-'
-      
-    Integration(SINGLE_WHITE_WS, SINGLE_WHITE_WS)                                                                 #--the integrated workspace will be much smaller so do this as soon as possible
-
-    (fileOut, numFound) = SingleWBV( SINGLE_WHITE_WS, outWS, huge, tiny,\
-      median_hi, median_lo, error_bars, oFile )
+      #the algorithm expands out any ranges specified with '-'
+      prevList = MD.getPropertyValue('SpectraList')
 
 #--Calculations End---the rest of this script is about outputing the data and dealing with errors and clearing up
 
@@ -135,18 +136,18 @@ def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,previous_wb_w
   # Python 2.4 does not support try...except...finally blocks so resort to nested try...except
   try:
     try:
-      common.LoadNexRaw(wbrf, COMP_WHITE_WS)
+      data_ws = common.load_run(wbrf)
 
 #--------------------------Calculations Start---
       #--the integrated workspace will be much smaller so do this as soon as possible
-      Integration(COMP_WHITE_WS, COMP_WHITE_WS)
+      Integration(data_ws, COMP_WHITE_WS)
   
       if len(prevList) > 0 :                                                                                                                                                                        
         MD = MaskDetectors(Workspace=COMP_WHITE_WS, SpectraList=prevList)
         prevList = MD.getPropertyValue('SpectraList')                                                                                                            
 
-      (sWBVResults, iiUNUSEDii) = SingleWBV(COMP_WHITE_WS, outWS, huge, tiny, \
-        median_hi, median_lo, error_bars, oFile)
+      (sWBVResults, iiUNUSEDii) = SingleWBV(COMP_WHITE_WS, outWS, huge, tiny,
+                                            median_hi, median_lo, error_bars, oFile)
       #--this will overwrite the outWS with the cumulative list of bad detectors
       DEV = DetectorEfficiencyVariation(previous_wb_ws, COMP_WHITE_WS, outWS, Variation=r, OutputFile=DEVFile)
 
@@ -205,8 +206,8 @@ def bgTest(inst_prefix, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, er
   try:
     try:
       # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
-      common.loadRun(inst_prefix, run_nums[0], TEMPBIG)
-      instrument = mtd[TEMPBIG].getInstrument()
+      data_ws = common.load_run(run_nums[0], 'mono-sample')
+      instrument = data_ws.getInstrument()
       if TOFLow < -9.9e7:
         #this means that (the start of the background range) wasn't specified, use the default
         bmin = float(instrument.getNumberParameter('bkgd-range-min')[0])
@@ -214,14 +215,14 @@ def bgTest(inst_prefix, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, er
         bmax = float(instrument.getNumberParameter('bkgd-range-max')[0])
 
       # integrate the counts as soon as possible to reduce the size of the workspace
-      Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)
+      Integration(InputWorkspace=data_ws, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)
       if len(run_nums) > 1 :
         for toAdd in run_nums[ 1 : ] :
             # save the memory by overwriting the old workspaces
-            common.loadRun(inst_prefix, toAdd, '_FindBadDetects loading')
-            Integration('_FindBadDetects loading', '_FindBadDetects loading', TOFLow, TOFHigh)
-            Plus(SUM, '_FindBadDetects loading', SUM)
-        mantid.deleteWorkspace(TEMPBIG)
+            temp = common.load_run(toAdd)
+            Integration(temp, temp, TOFLow, TOFHigh)
+            Plus(SUM, temp, SUM)
+            mantid.deleteWorkspace(temp)
 
       if len(prevList) > 0 :
         MD = MaskDetectors(Workspace=SUM, SpectraList=prevList)
@@ -294,22 +295,26 @@ def bgTest(inst_prefix, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, er
 
 def diagnose(inst_prefix='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',out_asc='', prevList='', tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,bmin=-1e8,bmax=-1e8, previousWS='', outWS = OUTPUTWS) :
   
+  # Set the default instrument so that Mantid can search for the runs correctly
+  old_inst = mtd.settings["default.instrument"]
+  mtd.settings["default.instrument"] = inst_prefix
+
   try:
     failed = common.listToString(prevList)                                                      #failed will be a running total of all the bad detectors
     if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
     
     #--load input workspace and files and get the names of the output workspace and files
     if maskFile != '':
-      failed = common.loadMask(maskFile)
+      failed = common.load_mask(maskFile)
       if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
       outputWSName = OUT_WS_PREFIX+maskFile
     #---the white beam vanadium file takes precendence over the mask file for naming
     if wbrf != '':
       #--Import the file and give it an obsure workspace name because we require that a workspace with that name doesn't exist and we'll remove it at the end
-      outputWSName = OUT_WS_PREFIX+'1WBV_'+common.getRunName(wbrf)
+      outputWSName = OUT_WS_PREFIX+'1WBV_'+ common.create_resultname(wbrf, inst_prefix)
     #--the outfile name has the highest precendence
     if out_asc != '':
-      outputWSName = OUT_WS_PREFIX+'1WBV_'+common.getRunName(out_asc)
+      outputWSName = OUT_WS_PREFIX+'1WBV_' + common.create_resultname(out_asc, inst_prefix)
       outFile=open(out_asc, 'w')
       if len(failed) > 0:
         outFile.write('--Hard Mask File List--\n')
@@ -320,13 +325,11 @@ def diagnose(inst_prefix='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',ou
       outFile.close()
 
     #of the three detector functioning tests run the ones that there are data for
-    if wbrf != '':
-      wbrf = common.getFileName(inst_prefix, wbrf)
+    if str(wbrf) != '':
       failed = single_white_van(wbrf, tiny=tiny, huge=huge, median_lo=median_lo, median_hi=median_hi, error_bars=sv_sig, prevList=failed, oFile=out_asc, outWS=outWS)
       if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
     
-    if wbrf2 != '':
-      wbrf2 = common.getFileName(inst_prefix,wbrf2)
+    if str(wbrf2) != '':
       failed = second_white_van(wbrf2, tiny=tiny, huge=huge, median_lo=median_lo, median_hi=median_hi, error_bars=sv_sig, oFile=out_asc,\
           prevList=failed, previous_wb_ws=SINGLE_WHITE_WS, outWS=outWS)
       if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
@@ -337,7 +340,9 @@ def diagnose(inst_prefix='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',ou
             prevList=failed, wb_ws_comp=previousWS,  oFile=out_asc, outWS=outWS)
 
     #pass back the list of those that failed but do nice, if tedious, things with the commas
+    mtd.settings["default.instrument"] = old_inst
     return common.stringToList(failed)
   except Exception, reason:
+    mtd.settings["default.instrument"] = old_inst
     if reason != 'A discription of the error has been printed' :
       printProblem(reason, 'diagnose()')

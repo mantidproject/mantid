@@ -1,11 +1,25 @@
 from mantidsimple import *
 import os
 
-def create_filename(prefix, run_number, ext, padding=5):
-    return prefix + str(run_number).zfill(padding) + ext
-    
-def create_outputname(prefix, run_number, suffix=''):
-    if type(run_number) == int:
+def find_file(run_number):
+    """Use Mantid to search for the given run.
+    """    
+    file_hint = str(run_number)
+    found = FileFinder.findRuns(file_hint)
+    if len(found) > 0:
+        return found[0]
+    else:
+        message = 'Cannot find file matching hint "%s" on current search paths\n'
+        'for instrument "%s"'
+        raise ValueError( message % (file_hint, mtd.settings['default.instrument']))
+
+def create_resultname(run_number, prefix='', suffix=''):
+    """Create a string based on the run number and optional prefix and 
+    suffix.    
+    """
+    if type(run_number) == list:
+        name = create_resultname(run_number[0], prefix,suffix)
+    elif type(run_number) == int:
         name = prefix + str(run_number) + '.spe' + suffix
     else:
         name = os.path.basename(run_number)
@@ -15,48 +29,114 @@ def create_outputname(prefix, run_number, suffix=''):
             name = os.path.splitext(name)[0] + '.spe' + suffix
     return name
 
-def load_run(prefix, run_number, output_name, ext='', name_suffix='', time_bins=None):
-    '''
-    Load a single run into the given workspace
-    '''
+# Keeps track of loaded files for each piece of the diagnosis/reduction
+# so that the raw data files don't stack up and can be deleted when necessary
+_loaded_files = \
+    {
+    'mono-sample': '',
+    'white-beam': '',
+    'mono-van': '',
+    }
+# This is temporary so that the correct file can be picked up for LoadDetectorInfo
+# When the algorithm is updated it can be moved to where LoadRaw takes place
+_last_mono = None
+
+def loaded_file(file_type):
+    """Returns the full file path of the loaded
+    file. If the file has not been loaded or the file_type
+    is unrecognized then it returns an empty string.
+    """
+    global _last_mono, _loaded_files
+    try:
+        if file_type == 'mono':
+            if _last_mono is None:
+                raise ValueError("A mono run cannot be retrieved, none has been loaded yet")
+            file_type = _last_mono
+        prev_file = _loaded_files[file_type]
+    except KeyError:
+        mtd.sendLogMessage('Unknown file_type "%s" passed to load_run' % (file_type))
+        prev_file = ''
+    return prev_file
+
+def load_run(run_number, file_type='mono-sample',force=False):
+    """Loads run/runs into the given workspace. The file_type is
+    used to keep track the loaded data for various parts of the reduction.
+    This ensures that multiple requests to load the same file into the same
+    type will result in only a single load.
+
+    If force is true then the file is loaded regardless of whether
+    its workspace exists already.
+    """
+    global _last_mono, _loaded_files
+    try:
+        prev_file = _loaded_files[file_type]
+    except KeyError:
+        mtd.sendLogMessage("Unknown file type, forcing load of file")
+        force = True
+        prev_file = ''
+    
     if type(run_number) == int: 
-        filename = create_filename(prefix, run_number, ext)
+        filename = find_file(run_number)
     else:
-        filename = run_number
-    if output_name is None:
-        output_name = create_outputname(prefix, run_number, name_suffix)
-    else:
-        # strip any possible file paths
-        output_name = os.path.basename(output_name)
+        # Check if it exists, else tell Mantid to try and 
+        # find it
+        if os.path.exists(run_number):
+            filename = run_number
+        else:
+            filename = find_file(run_number)
+
+    # The output name 
+    output_name = os.path.basename(filename)
+    if force == False and filename == prev_file and \
+       mtd.workspaceExists(output_name):
+        mtd.sendLogMessage("%s already loaded" % filename)
+        return mtd[output_name]
+
+    # Don't have the file already so load it but first the delete the old one
+    if mtd.workspaceExists(os.path.basename(prev_file)):
+        mtd.deleteWorkspace(os.path.basename(prev_file))
+
+    ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
         loader = LoadSNSEventNexus(Filename=filename, OutputWorkspace=output_name) 
-        return mtd[output_name], None      
+        return mtd[output_name]
     elif ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
     elif filename.endswith("_event.dat"):
         #load the events
         loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
         det_info_file = prefix + "_detector.sca"        
-        return loader.workspace(), det_info_file
+        return loader.workspace()
     else:
-        loader = LoadRaw(filename, output_name)
-    
-    return loader.workspace(), loader.getPropertyValue("Filename")
+        LoadRaw(filename, output_name)
+        #LoadDetectorInfo(output_name, filename)
 
-#Sum a current workspace and a list of files
+    mtd.sendLogMessage("Loaded %s" % filename)
+    _loaded_files[file_type] = filename
+    if file_type.startswith('mono'): 
+        _last_mono = file_type
+
+    return mtd[output_name]
+
 def sum_files(accumulator, files, prefix):
+    """
+    Sum a current workspace and a list of files, acculating the results in the
+    given workspace
+    """
     if type(files) == list:
         tmp_suffix = '_plus_tmp'
-        for file in files:
-            temp = load_run(prefix, file, tmp_suffix)[0]
+        for filename in files:
+            temp = load_run(filename, force=True)
             Plus(accumulator, temp, accumulator)
             mantid.deleteWorkspace(temp.getName())
     else:
         pass
 
+# -- TODO: Remove this stuff in favour of the mask workspace concept --
+
 # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
 def listToString(list):
-  stringIt = str(list).strip()                                                   #remove any white space from the front and end
+  stringIt = str(list).strip()
   
   if stringIt == '' : return ''
   if stringIt[0] == '[' or stringIt[0] == '(' :
@@ -84,104 +164,29 @@ def stringToList(commaSeparated):
       theList.append(quoted)                       
   return theList
     
-
-  
-#-- Functions to do with input files
-# uses the extension to decide whether use LoadNexus or LoadRaw
-def LoadNexRaw(filename, workspace):
-  filename = filename.strip()                                                   #remove any white space from the front or end of the name
-  # this removes everything after the last '.'  (rpartition always returns three strings)
-  partitions = filename.split('.')
-  if len(partitions) != 2:
-    raise RuntimeError('Incorrect filename format encountered "' + filename + '"')
-
-  # Dirty check for SNS
-  if filename.endswith("_event.nxs"):
-        loader = LoadSNSEventNexus(filename, workspace) 
-        return mtd[workspace], None
-  elif filename.endswith("_event.dat"):
-        #load the events
-        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=workspace, PadEmptyPixels=True)   
-        return loader.workspace(), None
-
-  extension = filename.split('.')[1]
-  if (extension.lower() == 'raw'):
-    loader = LoadRaw(filename, workspace)
-  elif (extension.lower() == 'nxs'):
-    #return the first property from the algorithm, which for LoadNexus is the output workspace
-    loader = LoadNexus(filename, workspace)
-  else:
-    raise Exception("Could not find a load function for file " + filename + ", *.raw and *.nxs accepted")
-  return loader.workspace(), loader.getPropertyValue("Filename")
-
-# guess the filename from run number using the instrument code
-def getFileName(instrumentPref, runNumber):
-  runNumber = str(runNumber)
-  try:
-    number = int(runNumber)
-  except ValueError:
-    # means we weren't passed a number assume it is a valid file name and return it unprocessed
-    return runNumber
-  #only raw files are supported at the moment
-  return instrumentPref + runNumber.zfill(5) + '.raw'
-
-def loadRun(prefix, runNum, workspace):
-  return LoadNexRaw(getFileName(prefix, runNum), workspace)
-  
-def loadMask(MaskFilename):
-  inFile = open(MaskFilename)
-  spectraList = ""
-  for line in inFile:                                             # for each line separate all the numbers (or words) into array
-    numbers = line.split()
-    if len(numbers) > 0 :                                         # ignore empty lines
-      if numbers[0][0].isdigit() :                                # any non-numeric character at the start of the line marks a comment, check the first character of the first word
+def load_mask(hard_mask):
+    """
+    Load the hard mask file
+    """
+    inFile = open(hard_mask)
+    spectraList = ""
+    for line in inFile:
+        numbers = line.split()
+        if len(numbers) == 0:
+            continue
+        # Any non-numeric character at the start of the line marks a comment, 
+        # check the first character of the first word
+        if not numbers[0][0].isdigit():
+            continue
         for specNumber in numbers :
-          if specNumber == '-' :
-            spectraList[len(spectraList) - 1] = spectraList + '-'   #if there is a hyphen we don't need commas 
-          else : spectraList = spectraList + "," + specNumber
+            # If there is a hyphen we don't need commas 
+            if specNumber == '-' :
+                spectraList[len(spectraList) - 1] = spectraList + '-'   
+            else: 
+                spectraList = spectraList + "," + specNumber
 
-  if len(spectraList) < 1 :
-    mantid.sendLogMessage('Only comment lines found in mask file ' + MaskFilename)
-    return ''
-  return spectraList[1:]                                          #return everything after the very first comma we added in the line above
-
-def getRunName(path):
-  # get the string after the last /
-  filename = path.split('/')
-  filename = filename[len(filename) - 1]
-  # and the last \
-  filename = filename.split('\\')
-  filename = filename[len(filename) - 1]
-  # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
-  parts = filename.rsplit('.')
-  if len(parts) > 0:
-      return parts[0]
-  else:
-      return filename
-
-def loadRun(prefix, runNum, workspace):
-    return LoadNexRaw(getFileName(prefix,runNum), workspace)
-
-#-- Holds data about the defaults used for diferent instruments (MARI, MAPS ...)
-class defaults:
-  # set the defaults for a default machine. These default values for defaults won't work and so they must be overriden by the correct values for the machine when this is run
-  def __init__(self, background_range=(-1.0, -1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0, -1.0), \
-                scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale=1.0, getei_monitors=(-1, -1)):
-    self.background_range = background_range
-    self.normalization = normalization
-    self.instrument_pref = instrument_pref
-    self.white_beam_integr = white_beam_integr
-    self.scale_factor = scale_factor
-    self.monitor1_integr = monitor1_integr
-    self.white_beam_scale = white_beam_scale
-    self.getei_monitors = getei_monitors
-      
-  # guess the filename from run number assuming global_getFileName_instrument_pref is setup
-  def getFileName(self, runNumber):
-    try :
-      number = int(str(runNumber), 10)
-    except Exception :
-      # means we weren't passed a number assume it is a valid file name and return it unprocessed
-      return runNumber
-    return getFileName(self.instrument_pref, number)
-    
+    if len(spectraList) < 1:
+        mantid.sendLogMessage('Only comment lines found in mask file ' + hard_mask)
+        return ''
+    # Return everything after the very first comma we added in the line above
+    return spectraList[1:]
