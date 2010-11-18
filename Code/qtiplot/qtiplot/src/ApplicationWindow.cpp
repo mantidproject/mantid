@@ -1440,12 +1440,12 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
   }
 
   // Go through PyQt interfaces
-  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories"));
+  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
   QStringListIterator pyqt_itr(pyqt_interfaces);
   while( pyqt_itr.hasNext() )
   {
     QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + itemName;
+    QString scriptPath = scriptsDir + '/' + itemName;
 
     if( QFileInfo(scriptPath).exists() ) {
       QString baseName = QFileInfo(scriptPath).baseName();
