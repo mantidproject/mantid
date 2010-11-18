@@ -850,7 +850,6 @@ class ConvertToQ(ReductionStep):
 
     def execute(self, reducer, workspace):
         self.set_defaults()
-        #Steve, I'm not sure this contains good error values 
         if self._Q_alg == 'Q1D':
             if self.error_est_1D is None:
                 raise RuntimeError('Could not find the workspace containing error estimates')
@@ -1342,11 +1341,12 @@ class UserFile(ReductionStep):
             parts = details.split("=")
             if len(parts) == 2:
                 filepath = parts[1].rstrip()
+                #for VMS compatibility ignore anything in "[]", those are normally VMS drive specifications
                 if '[' in filepath:
                     idx = filepath.rfind(']')
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
-                    filepath = os.path.join(reducer.user_file_path, filepath)
+                    filepath = reducer.user_file_path+'/'+filepath
                 type = parts[0]
                 parts = type.split("/")
                 if len(parts) == 1:
