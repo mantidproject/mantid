@@ -27,13 +27,13 @@ class FilterByLogValueTest : public CxxTest::TestSuite
 public:
   FilterByLogValueTest()
   {
+    inputWS = "eventWS";
   }
 
 
   /** Setup for loading raw data */
   void setUp_Event()
   {
-    inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();
     std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
@@ -48,14 +48,20 @@ public:
 
 
 
-  void testExec()
+  void doTest(std::string outputWS)
   {
-    std::string outputWS;
-    this->setUp_Event();
-
     //Retrieve Workspace
-    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    try
+    {
+      WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError)
+    {
+      this->setUp_Event();
+      WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    }
     TS_ASSERT( WS ); //workspace is loaded
+
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
     TS_ASSERT( num_events > 0 );
@@ -64,7 +70,6 @@ public:
     FilterByLogValue * alg = new FilterByLogValue();
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", inputWS);
-    outputWS = "eventWS_relative";
     alg->setPropertyValue("OutputWorkspace", outputWS);
     alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
@@ -92,10 +97,23 @@ public:
 
     //Proton charge is lower
     TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
+
+    //Still has a spectraDetectorMap;
+    outWS->spectraMap();
+
   }
 
+  void test_exec_renamed()
+  {
+    doTest(inputWS + "_filtered");
+  }
 
-
+  void test_exec_inplace()
+  {
+    doTest(inputWS);
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputWS + "_filtered");
+  }
 
 
   void setUp_Event2()

@@ -47,7 +47,7 @@ void FilterByLogValue::init()
 {
   this->setOptionalMessage(
       "Filter out (delete) events based on if they occured at times\n"
-      "where a given log value is within a given range (min <= value < max).");
+      "where a given log value is outside of a given range (value < min OR value > max).");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
@@ -94,24 +94,13 @@ void FilterByLogValue::exec()
     throw std::invalid_argument("Input workspace is not an EventWorkspace. Aborting.");
   }
 
-  // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  //Make a brand new EventWorkspace for the output; it will overwrite the original if filtering in-place
   EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else
-  {
-    //Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    //But we don't copy the data.
-
-    //Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
-  }
+  outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+  //Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+  //But we don't copy the data.
 
   // Get the properties.
   double min = getProperty("MinimumValue");
@@ -168,6 +157,9 @@ void FilterByLogValue::exec()
   std::vector< Run *> output_runs;
   output_runs.push_back( &outputWS->mutableRun() );
   inputWS->run().splitByTime(splitter, output_runs);
+
+  //Cast the outputWS to the matrixOutputWS and save it
+  this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
 
 }
 
