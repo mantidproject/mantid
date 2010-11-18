@@ -30,7 +30,7 @@ public:
     const int nPix = 10;
     int i;
     data4D testData[nPix];
-    char   testBuffer[nPix*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+2)];
+    char   testBuffer[(nPix+1)*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t))];
     for(i=0;i<10;i++){
       testData[i].q1  =(float)(i+1);
       testData[i].q2  =(float)(i+1)*2;
@@ -42,7 +42,63 @@ public:
       testData[i].iPix=(i+1)*8;
       testData[i].iEn =(i+1)*9; 
     }
-    MDDataPoint<float>  PackUnpacker(testBuffer,4,2,3);
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,4,2,3,10);
+
+    float  Dim[4];
+    double SE[2];
+    int    Ind[3];
+    for(i=0;i<nPix;i++){
+      Dim[0]=testData[i].q1;
+      Dim[1]=testData[i].q2;
+      Dim[2]=testData[i].q3;
+      Dim[3]=testData[i].En;
+      SE[0] =testData[i].S ;
+      SE[1] =testData[i].Err ;
+      Ind[0] =testData[i].iRun ;
+      Ind[1] =testData[i].iPix ;
+      Ind[2] =testData[i].iEn ;
+      PackUnpacker.setData(i,Dim,SE,Ind);
+    }
+    // testing maximal index and run number
+    Ind[0]=(uint32_t)std::pow(2.,10)-1; //1023=(2^10-1)
+    Ind[1]=(uint32_t)std::pow(2.,32-10)-1; // 4194303 = (2^22-1)
+    PackUnpacker.setData(nPix,Dim,SE,Ind);
+    TS_ASSERT_EQUALS(PackUnpacker.getRunID(nPix), Ind[0]);
+    TS_ASSERT_EQUALS(PackUnpacker.getPixID(nPix), Ind[1]);
+
+    for(i=0;i<nPix;i++){
+         TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+         TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+         TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+         TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+         TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
+         TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
+         TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+         TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+
+         TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
+
+     }
+
+
+  }
+  void test4DAccess32bitIndex(void){
+    const int nPix = 10;
+    int i;
+    data4D testData[nPix];
+    char   testBuffer[nPix*(4*sizeof(float)+2*sizeof(double)+2*sizeof(uint32_t))];
+    for(i=0;i<10;i++){
+      testData[i].q1  =(float)(i+1);
+      testData[i].q2  =(float)(i+1)*2;
+      testData[i].q3  =(float)(i+1)*3;
+      testData[i].En  =(float)(i+1)*4;
+      testData[i].S   =(double)(i+1)*5;
+      testData[i].Err =(double)(i+1)*6;
+      testData[i].iRun=(i+1)*7;
+      testData[i].iPix=(i+1)*8;
+      testData[i].iEn =(i+1)*9; 
+    }
+    MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,4,2,3);
 
     float  Dim[4];
     double SE[2];
@@ -94,7 +150,7 @@ public:
       testData[i].iEn =(i)*10; 
       testData[i].iT  =(i)*11; 
     }
-    MDDataPoint<float>  PackUnpacker(testBuffer,5,2,4);
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,5,2,4);
 
     float  Dim[5];
     double SE[2];
@@ -138,7 +194,7 @@ public:
     const int nPix = 10;
     int i;
     eventData4D testData[nPix];
-    char   testBuffer[nPix*(4*sizeof(float)+sizeof(uint32_t)+2)];
+    char   testBuffer[nPix*(4*sizeof(float)+sizeof(uint32_t)+sizeof(uint16_t))];
     for(i=0;i<10;i++){
       testData[i].q1  =(float)(i+1);
       testData[i].q2  =(float)(i+1)*2;
@@ -148,7 +204,7 @@ public:
       testData[i].iPix=(i+1)*8;
       testData[i].iEn =(i+1)*9; 
     }
-    MDDataPoint<float>  PackUnpacker(testBuffer,4,0,3);
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,4,0,3);
 
     float  Dim[4];
     double SE[2];
