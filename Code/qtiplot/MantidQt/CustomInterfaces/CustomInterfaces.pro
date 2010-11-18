@@ -34,7 +34,8 @@ SOURCES = \
   $$SRCDIR/Indirect.cpp \
   $$SRCDIR/IndirectDataAnalysis.cpp \
   $$SRCDIR/MuonAnalysis.cpp \
-  $$SRCDIR/IO_MuonGrouping.cpp
+  $$SRCDIR/IO_MuonGrouping.cpp \
+  $$SRCDIR/IndirectDiffractionReduction.cpp
 
 
 HEADERS = \
@@ -48,7 +49,8 @@ HEADERS = \
   $$HEADERDIR/Indirect.h \
   $$HEADERDIR/IndirectDataAnalysis.h \
   $$HEADERDIR/MuonAnalysis.h \
-  $$HEADERDIR/IO_MuonGrouping.h
+  $$HEADERDIR/IO_MuonGrouping.h \
+  $$HEADERDIR/IndirectDiffractionReduction.h
   
 UI_DIR = $$HEADERDIR
 
@@ -56,7 +58,8 @@ FORMS = \
   $$HEADERDIR/SANSRunWindow.ui \
   $$HEADERDIR/ConvertToEnergy.ui \
   $$HEADERDIR/IndirectDataAnalysis.ui \
-  $$HEADERDIR/MuonAnalysis.ui
+  $$HEADERDIR/MuonAnalysis.ui \
+  $$HEADERDIR/IndirectDiffractionReduction.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
 
