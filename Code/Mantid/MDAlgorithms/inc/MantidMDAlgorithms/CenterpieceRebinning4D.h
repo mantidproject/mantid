@@ -1,5 +1,5 @@
-#ifndef H_CENTERPIECE_REBINNING
-#define H_CENTERPIECE_REBINNING
+#ifndef CENTERPIECE_REBINNING4D_H
+#define CENTERPIECE_REBINNING4D_H
 
 
 #include "MantidAPI/MDPropertyGeometry.h"
@@ -18,17 +18,17 @@ namespace Mantid
     namespace MDAlgorithms
 {
 
-class DLLExport CenterpieceRebinning: public API::Algorithm
+class DLLExport CenterpieceRebinning4D: public API::Algorithm
 {
     
 public:
 
-    CenterpieceRebinning(void);
+    CenterpieceRebinning4D(void);
 
-    virtual ~CenterpieceRebinning(void);
+    virtual ~CenterpieceRebinning4D(void);
 
   /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CenterpieceRebinning";}
+      virtual const std::string name() const { return "CenterpieceRebinning4D";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -54,8 +54,15 @@ private:
   // the function protected for testing purposes; they are actually private to this algorithm.
 protected:
 
-    size_t rebin_dataset(const transf_matrix &rescaled_transf, const std::vector<size_t> &strides,const char *source_pix_buf, size_t nPix, MDDataObjects::MD_DATA *data);
-
+     /** rebinning 4D dataset
+    *   @param rescaled_transf    the data describing the final geometry of the cut
+    *   @param *source_pix        the pointer to the start of the buffer with source points for rebinning
+    *   @param  nPix              number of points in the buffer
+    *   @param  *data             the pointer to the structure with Image data;
+    */
+    size_t rebin_dataset4D(const transf_matrix &rescaled_transf, const std::vector<size_t> &strides,const MDDataObjects::sqw_pixel *source_pix, size_t nPix, MDDataObjects::MD_image_point *data,
+                           double boxMin[],double boxMax[]);
+ 
 };
 }
 }

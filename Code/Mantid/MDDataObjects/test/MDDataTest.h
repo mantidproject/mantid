@@ -44,10 +44,18 @@ public:
          TS_ASSERT_THROWS_NOTHING( ws = API::WorkspaceFactory::Instance().create("MDWorkspacet",data));
  
     }
+    void testDNDPrivateReadNew(void){
+ 
+        // read correct object
+        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str()),false);
+
+        TS_ASSERT_EQUALS(pDND->getNumDims(),4);
+    }
+
     void testDNDPrivateRead(void){
  
         // read correct object
-        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str()));
+        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str()),true);
 
         TS_ASSERT_EQUALS(pDND->getNumDims(),4);
     }

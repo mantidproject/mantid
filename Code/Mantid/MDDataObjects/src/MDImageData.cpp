@@ -1,6 +1,7 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDImageData.h"
 #include "MDDataObjects/MD_File_hdfMatlab4D.h"
+#include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfV1.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 
@@ -56,22 +57,22 @@ namespace Mantid{
 
     Mantid::Geometry::IMDDimension* MDImageData::getXDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      return & MDGeometry::getXDimension();
     }
 
     Mantid::Geometry::IMDDimension* MDImageData::getYDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+     return & MDGeometry::getYDimension();
     }
 
     Mantid::Geometry::IMDDimension* MDImageData::getZDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      return & MDGeometry::getZDimension();
     }
 
      Mantid::Geometry::IMDDimension* MDImageData::gettDimension() const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+     return & MDGeometry::getTDimension();
     }
 
 
@@ -190,10 +191,10 @@ MDImageData::read_mdd(void)
 }
 /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
 void
-MDImageData::read_mdd(const char *file_name)
+MDImageData::read_mdd(const char *file_name,bool useOld4Dformat)
 {
    // select a file reader which corresponds to the proper file format of the data file
-   this->select_file_reader(file_name);
+   this->select_file_reader(file_name,useOld4Dformat);
   // read the actual data using the file reader selected
    this->read_mdd();
   // idetyfy pixels locations
@@ -203,7 +204,7 @@ MDImageData::read_mdd(const char *file_name)
 //****************************************
 
 void
-MDImageData::select_file_reader(const char *file_name)
+MDImageData::select_file_reader(const char *file_name,bool old4DMatlabReader)
 {
 
 // check if the file exist;
@@ -223,7 +224,11 @@ MDImageData::select_file_reader(const char *file_name)
         }
     }else{
         // ***> to do:: identify internal hdf5 format; only MATLAB is supported at the moment;
-        this->theFile= new MD_File_hdfMatlab4D(file_name);
+      if(old4DMatlabReader){
+          this->theFile= new MD_File_hdfMatlab4D(file_name);
+      }else{
+         this->theFile= new MD_File_hdfMatlab(file_name);
+      }
     }
 
 }

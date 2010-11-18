@@ -1,5 +1,5 @@
-#ifndef H_FILE_HDF_MATLAB
-#define H_FILE_HDF_MATLAB
+#ifndef FILE_HDF_MATLAB_4D_H
+#define FILE_HDF_MATLAB_4D_H
 //
 #include <hdf5.h>
 #include "MDDataObjects/IMD_FileFormat.h"

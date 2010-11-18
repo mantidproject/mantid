@@ -92,6 +92,10 @@ struct sqw_pixel{
 };
 bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
 void ** transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
+//********************************************************************************************************************************************************************
+
+
+
 } // MDDataObjects
 } // Mantid;
 #endif

@@ -1,8 +1,9 @@
-#ifndef H_FILE_HDF_MATLAB
-#define H_FILE_HDF_MATLAB
+#ifndef FILE_HDF_MATLAB_ND_H
+#define FILE_HDF_MATLAB_ND_H
 //
 #include <hdf5.h>
 #include "MDDataObjects/IMD_FileFormat.h"
+#include "MDDataObjects/MDDataPoint.h"
 
 
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
@@ -50,7 +51,7 @@ public:
     virtual bool read_pix(MDWorkspace & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
-    virtual size_t read_pix_subset(const MDWorkspace &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &buf_size,size_t &n_pix_in_buffer);
+    virtual size_t read_pix_subset(const MDWorkspace &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
@@ -80,7 +81,7 @@ private:
 // not used at the moment
 //   static std::stringstream ErrBuf;
 // private copy constructor and assighnment
-   MD_File_hdfMatlab(const MD_File_hdfMatlab& p){};
+   MD_File_hdfMatlab(const MD_File_hdfMatlab& p);
    MD_File_hdfMatlab & operator = (const MD_File_hdfMatlab & other);
 
    // function checks if pixel dataset is opened and if not opens it. true if it was already opened, false if did nothing

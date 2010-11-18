@@ -57,7 +57,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
         this->data[i].Tag            = pDim->getDimensionTag();
         this->data[i].trans_bott_left= 0;
         this->data[i].cut_min        = pDim->getMinimum();
-        this->data[i].cut_max        = pDim->getMaximum();
+        this->data[i].cut_max        = pDim->getMaximum()*(1+FLT_EPSILON);
         this->data[i].nBins          = pDim->getNBins();
         this->data[i].AxisName       = pDim->getName();
 

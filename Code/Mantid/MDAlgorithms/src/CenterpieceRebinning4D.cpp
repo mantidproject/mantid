@@ -1,5 +1,4 @@
-#include "MantidMDAlgorithms/CenterpieceRebinning.h"
-#include <boost/ptr_container/ptr_vector.hpp>
+#include "MantidMDAlgorithms/CenterpieceRebinning4D.h"
 
 namespace Mantid{
     namespace MDAlgorithms{
@@ -11,13 +10,13 @@ namespace Mantid{
 
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(CenterpieceRebinning)
+DECLARE_ALGORITHM(CenterpieceRebinning4D)
 
-CenterpieceRebinning::CenterpieceRebinning(void): API::Algorithm(), m_progress(NULL) 
+CenterpieceRebinning4D::CenterpieceRebinning4D(void): API::Algorithm(), m_progress(NULL) 
 {}
 
 /** Destructor     */
-CenterpieceRebinning::~CenterpieceRebinning()
+CenterpieceRebinning4D::~CenterpieceRebinning4D()
 {
     if( m_progress ){
             delete m_progress;
@@ -25,7 +24,7 @@ CenterpieceRebinning::~CenterpieceRebinning()
     }
 }
 void 
-CenterpieceRebinning::init_source(MDWorkspace_sptr inputWSX)
+CenterpieceRebinning4D::init_source(MDWorkspace_sptr inputWSX)
 {
 MDWorkspace_sptr inputWS;
   // Get the input workspace
@@ -67,7 +66,7 @@ CenterpieceRebinning::set_from_VISIT(const std::string &slicing_description,cons
 }
 */
 void
-CenterpieceRebinning::init()
+CenterpieceRebinning4D::init()
 {
       declareProperty(new WorkspaceProperty<MDWorkspace>("Input","",Direction::Input),"initial MD workspace");
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
@@ -82,7 +81,7 @@ CenterpieceRebinning::init()
 }
 //
 void 
-CenterpieceRebinning::exec()
+CenterpieceRebinning4D::exec()
 {
  MDWorkspace_sptr inputWS;
  MDWorkspace_sptr outputWS;
@@ -149,9 +148,7 @@ CenterpieceRebinning::exec()
  
 
   // get pointer for data to rebin to; 
-  MD_DATA       *pMDData    = outputWS->get_pMDData();
-  MD_image_point*pImage     = outputWS->get_pData();
-
+  MD_image_point *pImage    = outputWS->get_pData();
   // and the number of elements the image has;
   size_t         image_size=  outputWS->getDataSize();
  //
@@ -167,7 +164,7 @@ CenterpieceRebinning::exec()
       n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
       n_pixels_read  +=n_pix_in_buffer;
       
-      n_pixels_selected+=rebin_dataset(trf,strides,&pix_buf[0],n_pix_in_buffer,pMDData);
+      n_pixels_selected+=this->rebin_dataset4D(trf,strides,(sqw_pixel *)(&pix_buf[0]),n_pix_in_buffer,pImage,boxMin,boxMax);
   } 
   finalise_rebinning(pImage,image_size);
 
@@ -178,10 +175,10 @@ CenterpieceRebinning::exec()
 //
 
 void 
-CenterpieceRebinning::set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition)
+CenterpieceRebinning4D::set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition)
 {  
 
-//double originX, originY, originZ, normalX, normalY, normalZ;
+double originX, originY, originZ, normalX, normalY, normalZ;
 /*
 Mantid::API::ImplicitFunction* ifunc = Mantid::API::Instance().ImplicitFunctionFactory(xmlDefinitions, xmlInstructions);
   PlaneImplicitFunction* plane = dynamic_cast<PlaneImplicitFunction*>(ifunc);
@@ -204,8 +201,14 @@ for(int i = 0; i < compFunction->getNFunctions() ; i++)
 }
 */
 }
+
+
+
+
+
+//
 size_t  
-CenterpieceRebinning::rebin_dataset(const transf_matrix &rescaled_transf,const std::vector<size_t> &stride, const char *source_pix_buf, size_t nPix, MDDataObjects::MD_DATA *MDdata)
+CenterpieceRebinning4D::rebin_dataset4D(const transf_matrix &rescaled_transf,const std::vector<size_t> &stride, const sqw_pixel *source_pix, size_t nPix,MDDataObjects::MD_image_point *data, double boxMin[],double boxMax[])
 {
 // set up auxiliary variables and preprocess them. 
 double xt,yt,zt,xt1,yt1,zt1,Et,Inf(0),
@@ -213,15 +216,7 @@ double xt,yt,zt,xt1,yt1,zt1,Et,Inf(0),
 size_t nPixel_retained(0);
 
 
-unsigned int nDims    = rescaled_transf.nDimensions;
-unsigned int nRecDims = 3;
-
-std::vector<double> boxMin(nDims,0);
-std::vector<double> boxMax(nDims,0);
-std::vector<double> rN(nDims,0);
-
-std::vector<size_t> strides(nDims,0);
-
+unsigned int nDims = rescaled_transf.nDimensions;
 double rotations_ustep[9];
 std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
 bool  ignore_something,ignote_all,ignore_nan(this->ignore_nan),ignore_inf(this->ignore_inf);
@@ -231,21 +226,15 @@ ignote_all      =ignore_nan&ignore_inf;
 if(ignore_inf){
     Inf=std::numeric_limits<double>::infinity();
 }
-MD_image_point *data = MDdata->data;
 
 
 for(unsigned int ii=0;ii<nDims;ii++){
-  
-    boxMin[ii]       = MDdata->min_value[ii];
-    boxMax[ii]       = MDdata->max_value[ii];
-
     axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
+}
+for(int ii=0;ii<rescaled_transf.nDimensions;ii++){
     shifts[ii]   =rescaled_transf.trans_bott_left[ii];
     min_limit[ii]=rescaled_transf.cut_min[ii];
     max_limit[ii]=rescaled_transf.cut_max[ii];
-
-// reduction dimensions; if stride = 0, the dimension is reduced;
-    strides[ii]  = stride[ii];
 }
 for(int ii=0;ii<9;ii++){
     rotations_ustep[ii]=rescaled_transf.rotations[ii];
@@ -256,11 +245,10 @@ bool keep_pixels(false);
 //int nRealThreads;
 
 size_t i,indl;
-int    j,indX,indY,indZ,indE;
-double s,err; 
-size_t nDimX(strides[0]),nDimY(strides[1]),nDimZ(strides[2]);
+int    indX,indY,indZ,indE;
+size_t  nDimX(stride[0]),nDimY(stride[1]),nDimZ(stride[2]),nDimE(stride[3]); // reduction dimensions; if 0, the dimension is reduced;
 
-MDDataObjects::MDDataPoint<> unPacker(const_cast<char *>(source_pix_buf),nDims,2,3);
+
 // min-max value initialization
 
 pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
@@ -288,52 +276,42 @@ omp_set_num_threads(num_OMP_Threads);
 
 #pragma omp for schedule(static,1)
     for(i=0;i<nPix;i++){
+        sqw_pixel pix=source_pix[i];
 
-          s  = unPacker.getSignal(i);
-          err= unPacker.getError(i);
       // Check for the case when either data.s or data.e contain NaNs or Infs, but data.npix is not zero.
       // and handle according to options settings.
             if(ignore_something){
                 if(ignote_all){
-                    if(s==Inf||isNaN(s)||
-                    err==Inf ||isNaN(err)){
+                    if(pix.s==Inf||isNaN(pix.s)||
+                    pix.err==Inf ||isNaN(pix.err)){
                             continue;
                     }
                 }else if(ignore_nan){
-                    if(isNaN(s)||isNaN(err)){
+                    if(isNaN(pix.s)||isNaN(pix.err)){
                         continue;
                     }
                 }else if(ignore_inf){
-                    if(s==Inf||err==Inf){
+                    if(pix.s==Inf||pix.err==Inf){
                         continue;
                     }
                 }
             }
-            indl=0;
-            bool out(false);
-            for(j=nRecDims;j<nDims;j++){
-           // transform orthogonal dimensions
-              Et=(unPacker.getDataField(j,i)-shifts[j])*axis_step_inv[j];
-
-              if(Et<min_limit[j]||Et>=max_limit[j]){
-                  out = true;
-                  continue;
-              }else{
-                  indE=(unsigned int)floor(Et-min_limit[3]);
-              }
-              indl+=indE*strides[j];
-              rN[j]=Et;
-            }
-            if(out)continue;
-
 
       // Transform the coordinates u1-u4 into the new projection axes, if necessary
       //    indx=[(v(1:3,:)'-repmat(trans_bott_left',[size(v,2),1]))*rot_ustep',v(4,:)'];  % nx4 matrix
-            xt1=unPacker.getDataField(0,i)   -shifts[0];
-            yt1=unPacker.getDataField(1,i)   -shifts[1];
-            zt1=unPacker.getDataField(2,i)   -shifts[2];
+            xt1=pix.qx    -shifts[0];
+            yt1=pix.qy    -shifts[1];
+            zt1=pix.qz    -shifts[2];
 
- 
+            // transform energy
+            Et=(pix.En    -shifts[3])*axis_step_inv[3];
+
+//  ok = indx(:,1)>=cut_range(1,1) & indx(:,1)<=cut_range(2,1) & indx(:,2)>=cut_range(1,2) & indx(:,2)<=urange_step(2,2) & ...
+//       indx(:,3)>=cut_range(1,3) & indx(:,3)<=cut_range(2,3) & indx(:,4)>=cut_range(1,4) & indx(:,4)<=cut_range(2,4);
+            if(Et<min_limit[3]||Et>=max_limit[3]){
+                continue;
+            }
+
             xt=xt1*rotations_ustep[0]+yt1*rotations_ustep[3]+zt1*rotations_ustep[6];
             if(xt<min_limit[0]||xt>=max_limit[0]){
                 continue;
@@ -356,14 +334,14 @@ omp_set_num_threads(num_OMP_Threads);
             indX=(int)floor(xt-min_limit[0]);
             indY=(int)floor(yt-min_limit[1]);
             indZ=(int)floor(zt-min_limit[2]);
-          
+            indE=(int)floor(Et-min_limit[3]);
 //
-            indl += indX*nDimX+indY*nDimY+indZ*nDimZ;
+            indl  = indX*nDimX+indY*nDimY+indZ*nDimZ+indE*nDimE;
  // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
 #pragma omp atomic
-            data[indl].s   +=s;  
+            data[indl].s   +=pix.s;  
 #pragma omp atomic
-            data[indl].err +=err;
+            data[indl].err +=pix.err;
 #pragma omp atomic
             data[indl].npix++;
 #pragma omp atomic
@@ -381,7 +359,8 @@ omp_set_num_threads(num_OMP_Threads);
             if(zt<pix_Zmin)pix_Zmin=zt;
             if(zt>pix_Zmax)pix_Zmax=zt;
 
-     
+            if(Et<pix_Emin)pix_Emin=Et;
+            if(Et>pix_Emax)pix_Emax=Et;
 
     } // end for i -- imlicit barrier;
 #pragma omp critical
@@ -389,26 +368,19 @@ omp_set_num_threads(num_OMP_Threads);
         if(boxMin[0]>pix_Xmin/axis_step_inv[0])boxMin[0]=pix_Xmin/axis_step_inv[0];
         if(boxMin[1]>pix_Ymin/axis_step_inv[1])boxMin[1]=pix_Ymin/axis_step_inv[1];
         if(boxMin[2]>pix_Zmin/axis_step_inv[2])boxMin[2]=pix_Zmin/axis_step_inv[2];
-  
+        if(boxMin[3]>pix_Emin/axis_step_inv[3])boxMin[3]=pix_Emin/axis_step_inv[3];
 
         if(boxMax[0]<pix_Xmax/axis_step_inv[0])boxMax[0]=pix_Xmax/axis_step_inv[0];
         if(boxMax[1]<pix_Ymax/axis_step_inv[1])boxMax[1]=pix_Ymax/axis_step_inv[1];
         if(boxMax[2]<pix_Zmax/axis_step_inv[2])boxMax[2]=pix_Zmax/axis_step_inv[2];
-
-        for(j=nRecDims;j<nDims;j++){
-            if(boxMin[j]>rN[j]/axis_step_inv[j])boxMin[j]=rN[j]/axis_step_inv[j];
-            if(boxMax[j]<rN[j]/axis_step_inv[j])boxMax[j]=rN[j]/axis_step_inv[j];
-        }
+        if(boxMax[3]<pix_Emax/axis_step_inv[3])boxMax[3]=pix_Emax/axis_step_inv[3];
     }
 } // end parallel region
 
-for(unsigned int ii=0;ii<nDims;ii++){
-    MDdata->min_value[ii] = boxMin[ii];
-    MDdata->max_value[ii] = boxMax[ii];
-}
 
 return nPixel_retained;
 }
+// ***********************************************************************************
 
 
 } //namespace MDAlgorithms

@@ -118,11 +118,11 @@ public:
     void alloc_mdd_arrays(const MDGeometryDescription &transf);
  protected:
     MD_DATA  MDStruct;
-    MD_image_point *pData;
+    MD_image_point *pData; // the additional pointer to data structure in MDStruct;
 
     virtual long getMemorySize()const{return MDStruct.data_size*sizeof(MD_image_point);}
 
-    // dimensions strides in linear order; formulated in this way for faster access
+    // dimensions strides in linear order; formulated in this way for faster access<- looks like obsolete;
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;
 
 
@@ -139,10 +139,10 @@ public:
 /// function reads the multidimensional data using existing file reader; returns false if the files
     bool read_mdd(void);
 /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-    void read_mdd(const char *file_name);
+    void read_mdd(const char *file_name,bool old4DMatlabReader=false);
 //  function selects the file reader given existing mdd or sqw file and sets up above pointer to the proper file reader;
 //  throws if can not find the file, the file format is not supported or any other error;
-    void select_file_reader(const char *file_name);
+    void select_file_reader(const char *file_name,bool old4DMatlabReader=false);
      /// build allocation table of sparce data points (pixels)
     void identify_SP_points_locations();
 //*************************************************

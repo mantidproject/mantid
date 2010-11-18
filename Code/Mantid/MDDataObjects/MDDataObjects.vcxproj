@@ -178,15 +178,18 @@
     <ClCompile Include="src\MDDataPoints.cpp" />
     <ClCompile Include="src\MDImageData.cpp" />
     <ClCompile Include="src\MDWorkspace.cpp" />
+    <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab4D.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\Hexahedron.h" />
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
+    <ClInclude Include="inc\MDDataObjects\MDDataPoint.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h" />
     <ClInclude Include="inc\MDDataObjects\MDImageData.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab4D.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
     <ClInclude Include="inc\MDDataObjects\point3D.h" />
