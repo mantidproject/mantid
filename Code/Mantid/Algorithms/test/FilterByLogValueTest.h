@@ -41,6 +41,7 @@ public:
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("PadEmptyPixels", "0");
     loader.setPropertyValue("OutputWorkspace", inputWS);
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
@@ -51,15 +52,8 @@ public:
   void doTest(std::string outputWS)
   {
     //Retrieve Workspace
-    try
-    {
-      WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
-    }
-    catch (Mantid::Kernel::Exception::NotFoundError)
-    {
-      this->setUp_Event();
-      WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
-    }
+    this->setUp_Event();
+    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     TS_ASSERT( WS ); //workspace is loaded
 
     size_t start_blocksize = WS->blocksize();
@@ -106,13 +100,14 @@ public:
   void test_exec_renamed()
   {
     doTest(inputWS + "_filtered");
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputWS + "_filtered");
   }
 
   void test_exec_inplace()
   {
     doTest(inputWS);
     AnalysisDataService::Instance().remove(inputWS);
-    AnalysisDataService::Instance().remove(inputWS + "_filtered");
   }
 
 
