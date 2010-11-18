@@ -296,7 +296,6 @@
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
-    <ClInclude Include="inc\MantidAlgorithms\SubtractTimeFinal.h" />
     <ClInclude Include="inc\MantidAlgorithms\SumNeighbours.h" />
     <ClInclude Include="inc\MantidAlgorithms\TofCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\Transpose.h" />
