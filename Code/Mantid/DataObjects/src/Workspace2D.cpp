@@ -56,8 +56,7 @@ namespace Mantid
     \param histnumber :: Index to the histogram
     \param Vec :: Shared ptr base object
     */
-    void
-      Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
+    void Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
     {
     
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -73,8 +72,7 @@ namespace Mantid
     \param histnumber :: Index to the histogram
     \param PA :: Reference counted histogram
     */
-    void
-      Workspace2D::setX(const int histnumber, const MantidVecPtr& PA)
+    void Workspace2D::setX(const int histnumber, const MantidVecPtr& PA)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
@@ -89,8 +87,7 @@ namespace Mantid
     \param histnumber The histogram to be set
     \param PY A reference counted data range
     */
-    void
-      Workspace2D::setData(const int histnumber, const MantidVecPtr& PY)
+    void Workspace2D::setData(const int histnumber, const MantidVecPtr& PY)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
@@ -133,8 +130,7 @@ namespace Mantid
     /** Gets the number of histograms
     \return Integer
     */
-    int
-      Workspace2D::getNumberHistograms() const
+    int Workspace2D::getNumberHistograms() const
     {
       return getHistogramNumberHelper();
     }
@@ -144,8 +140,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the x data
     */
-    const MantidVec&
-      Workspace2D::dataX(const int index) const
+    const MantidVec& Workspace2D::dataX(const int index) const
     {
       if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataX, histogram number out of range");
@@ -158,8 +153,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the y data
     */
-    const MantidVec&
-      Workspace2D::dataY(const int index) const
+    const MantidVec& Workspace2D::dataY(const int index) const
     {
       if (index<0 || index>=m_noVectors)
       {
@@ -175,8 +169,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the error data
     */
-    const MantidVec&
-      Workspace2D::dataE(const int index) const
+    const MantidVec& Workspace2D::dataE(const int index) const
     {
       if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataE, histogram number out of range");
