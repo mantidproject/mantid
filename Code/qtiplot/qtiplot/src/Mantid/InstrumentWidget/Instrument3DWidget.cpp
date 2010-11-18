@@ -8,6 +8,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Timer.h"
 
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -34,6 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 static const QRgb BLACK = qRgb(0,0,0);
+static const bool SHOWTIMING = false;
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
@@ -147,6 +149,8 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
  */
 void Instrument3DWidget::setWorkspace(const QString& wsName)
 {
+  Timer timer;
+
   MatrixWorkspace_sptr output = 
     boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   if( !output )
@@ -176,6 +180,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   calculateBinRange(output);
   calculateColorCounts(output);
 
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::setWorkspace() took " << timer.elapsed() << " seconds\n";
 }
 
 
@@ -268,18 +273,26 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
  */
 void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 {
+  Timer timer;
   if( !workspace ) return;
 
   // This looks like a strange way of doing this but the CompAssemblyActor needs the colours in the same
   // order as it fills its detector lists!
   if (detector_list.size() == 0)
   {
+    Timer timerID;
     //Only load the detector ID list once per instance
     mInstrumentActor->getDetectorIDList(detector_list);
+    if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): mInstrumentActor->getDetectorIDList() took " << timerID.elapsed() << " seconds\n";
   }
 
   if( detector_list.empty() ) return;
   createWorkspaceIndexList(detector_list);
+
+
+  //TODO: Make this part in parallel if possible!
+
+  Timer timer2;
 
   const int n_spec = m_workspace_indices.size();
   std::vector<double> integrated_values(n_spec, 0.0);
@@ -311,6 +324,8 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   //No need to store these now
   m_workspace_indices.clear();
   m_detector_ids.clear();
+
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts():Integrating workspace took " << timer2.elapsed() << " seconds\n";
 
   // No preset value
   if( mDataMinEdited == false )
@@ -358,7 +373,12 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     }
     colorlist[idx] = mColorMap.getColor(c_index);
   }
+
+  Timer timerCols;
   mInstrumentActor->setDetectorColors(colorlist);
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): mInstrumentActor->setDetectorColors() took " << timerCols.elapsed() << " seconds\n";
+
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts() took " << timer.elapsed() << " seconds\n";
 }
 
 
@@ -420,6 +440,7 @@ void Instrument3DWidget::recount()
  */
 void Instrument3DWidget::updateColorsForNewMap()
 {
+  Timer timer;
 
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
   const short ncols = mColorMap.getTopCIndex() + 1;
@@ -456,6 +477,8 @@ void Instrument3DWidget::updateColorsForNewMap()
   mInstrumentActor->setDetectorColors(colorlist);
   mInstrumentActor->refresh();
   update();
+
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::updateColorsForNewMap() took " << timer.elapsed() << " seconds\n";
 }
 
 
@@ -508,6 +531,8 @@ void Instrument3DWidget::setDataMaxEdited(bool state)
  */
 void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids)
 {
+  Timer timer;
+
   if( det_ids.empty() ) return;
   m_workspace_indices.clear();
   m_detector_ids = det_ids;
@@ -539,6 +564,8 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
       m_workspace_indices.push_back(-1);
     }
   }
+
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::createWorkspaceIndexList() took " << timer.elapsed() << " seconds\n";
 
 }
 
