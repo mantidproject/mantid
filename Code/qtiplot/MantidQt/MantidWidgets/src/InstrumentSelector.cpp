@@ -41,8 +41,6 @@ namespace MantidWidgets
 
       Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
       config.addObserver(m_changeObserver);
-
-      connect(this, SIGNAL(configValueChanged(const QString&, const QString&, const QString&)), this, SLOT(handleConfigChangeSlot(const QString&, const QString&, const QString&)));
     }
   }
 
