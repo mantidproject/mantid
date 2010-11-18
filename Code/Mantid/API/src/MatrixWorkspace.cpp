@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidAPI/MatrixWSIndexCalculator.h"
 
 namespace Mantid
 {
@@ -831,14 +832,14 @@ namespace Mantid
 
     Mantid::Geometry::IMDDimension* MatrixWorkspace::getXDimension() const
     {
-       Axis* xAxis = this->getAxis(0);
-       return new Mantid::Geometry::MDDimension(xAxis->title());
+      Axis* xAxis = this->getAxis(0);
+      return new Mantid::Geometry::MDDimension(xAxis->title());
     }
 
     Mantid::Geometry::IMDDimension* MatrixWorkspace::getYDimension() const
     {
-      Axis* xAxis = this->getAxis(1);
-       return new Mantid::Geometry::MDDimension(xAxis->title());
+      Axis* yAxis = this->getAxis(1); //Will throw if 1D Workspace.
+      return new Mantid::Geometry::MDDimension(getDimensionIdFromAxis(yAxis));
     }
 
     Mantid::Geometry::IMDDimension* MatrixWorkspace::getZDimension() const
@@ -856,24 +857,107 @@ namespace Mantid
       return this->size();
     }
 
-    Mantid::Geometry::IMDDimension& MatrixWorkspace::getDimension(std::string id) const
+    Mantid::Geometry::IMDDimension* MatrixWorkspace::getDimension(std::string id) const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      int nAxes = this->axes();
+      IMDDimension* dim = NULL;
+      for(int i = 0; i < nAxes; i++)
+      {
+        Axis* xAxis = this->getAxis(i);
+        const std::string& title = getDimensionIdFromAxis(xAxis);
+        if(title == id)
+        {
+          dim = new Mantid::Geometry::MDDimension(id);
+          break;
+        }
+      }
+      if(NULL == dim)
+      {
+        std::string message = "Cannot find id : " + id;
+        throw std::overflow_error(message);
+      }
+      return dim;
     }
 
     Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(long index) const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      MatrixWSIndexCalculator indexCalculator(this->blocksize());
+      long j = indexCalculator.getHistogramIndex(index);
+      long i = indexCalculator.getBinIndex(index, j);
+      return getPoint(j, i);
+    }
+
+    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(long histogram, long bin) const
+    {
+      std::vector<Mantid::Geometry::coordinate> verts;
+
+      double x = this->dataX(histogram).at(bin);
+      double signal = this->dataY(histogram).at(bin);
+      double error = this->dataE(histogram).at(bin);
+      
+      coordinate vert1, vert2, vert3, vert4;
+
+      if(isHistogramData()) //TODO. complete vertex generating cases.
+      {
+        vert1.y = histogram;
+        vert2.y = histogram;
+        vert3.y = histogram+1;
+        vert4.y = histogram+1;
+        vert1.x = x;
+        vert2.x = this->dataX(histogram).at(bin+1);
+        vert3.x = x;
+        vert4.x = this->dataX(histogram).at(bin+1);
+      }
+
+      verts.push_back(vert1);
+      verts.push_back(vert2);
+      verts.push_back(vert3);
+      verts.push_back(vert4);
+
+      
+      IDetector_sptr detector;
+      try
+      {
+        detector = this->getDetector(histogram);
+      }
+      catch(std::exception&)
+      {
+        //Swallow exception and continue processing.
+      }
+
+      return new Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
     }
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment)  const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      if (dim1Increment<0 || dim1Increment >= this->dataX(0).size())
+      {
+        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
+      }
+
+      MDPoint* point = this->getPoint(dim1Increment);
+
+      std::vector<boost::shared_ptr<MDPoint> > contributingPoints;
+      contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
+
+      //wrap a cell around the returned point.
+      return new MDCell(contributingPoints, point->getVertexes());
     }
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment)  const
     {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+      if (dim1Increment<0 || dim1Increment >= this->dataX(0).size())
+      {
+        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
+      }
+
+      MDPoint* point = this->getPoint(dim1Increment, dim2Increment);
+
+      std::vector<boost::shared_ptr<MDPoint> > contributingPoints;
+      contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
+
+      //wrap a cell around the returned point.
+      return new MDCell(contributingPoints, point->getVertexes());
     }
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
@@ -890,6 +974,12 @@ namespace Mantid
     {
       throw std::logic_error("Cannot access higher dimensions");
     }
+
+    std::string MatrixWorkspace::getDimensionIdFromAxis(Axis const * const axis) const
+    {
+      return axis->title(); //Seam. single point where we configure how an axis maps to a dimension id.
+    }
+
   } // namespace API
 } // Namespace Mantid
 

@@ -61,14 +61,13 @@ namespace Mantid
       virtual Mantid::Geometry::IMDDimension * getZDimension() const = 0;
       virtual Mantid::Geometry::IMDDimension * gettDimension() const = 0;
       virtual int getNPoints() const = 0;
-      virtual Mantid::Geometry::MDPoint * getPoint(long index) const = 0;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const = 0;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const = 0;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const = 0;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const = 0;
-      virtual Mantid::Geometry::MDCell * getCell(...) const = 0;
-
-      virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const = 0;
+      virtual Mantid::Geometry::MDPoint* getPoint(long index) const = 0;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment) const = 0;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment) const = 0;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment, long dim3Increment) const = 0;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const = 0;
+      virtual Mantid::Geometry::MDCell* getCell(...) const = 0;
+      virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const = 0;
       virtual ~IMDWorkspace(){}
     };
     

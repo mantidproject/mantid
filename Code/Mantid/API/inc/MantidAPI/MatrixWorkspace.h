@@ -41,7 +41,6 @@ namespace Mantid
     // Forward Declaration
     //----------------------------------------------------------------------
     class SpectraDetectorMap;
-
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
 
@@ -68,21 +67,24 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+    
     class DLLExport MatrixWorkspace : public IMDWorkspace //, public Workspace
     {
     public:
+
       virtual Mantid::Geometry::IMDDimension* getXDimension() const;
       virtual Mantid::Geometry::IMDDimension* getYDimension() const;
       virtual Mantid::Geometry::IMDDimension* getZDimension() const;
       virtual Mantid::Geometry::IMDDimension* gettDimension() const;
       virtual int getNPoints() const;
-      virtual Mantid::Geometry::IMDDimension& getDimension(std::string id) const;
-      virtual Mantid::Geometry::MDPoint * getPoint(long index) const ;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(...) const;
+      virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const;
+      virtual Mantid::Geometry::MDPoint* getPoint(long index) const ;
+      virtual Mantid::Geometry::MDPoint* getPoint(long histogram, long bin) const;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment) const;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment) const;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment, long dim3Increment) const;
+      virtual Mantid::Geometry::MDCell* getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const;
+      virtual Mantid::Geometry::MDCell* getCell(...) const;
 
       // The Workspace Factory create-from-parent method needs direct access to the axes.
       friend class WorkspaceFactoryImpl;
@@ -247,6 +249,8 @@ namespace Mantid
 
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
+
+      std::string getDimensionIdFromAxis(Axis const * const axis) const;
     };
 
     ///shared pointer to the matrix workspace base class
@@ -256,5 +260,7 @@ namespace Mantid
 
   } // namespace API
 } // namespace Mantid
+
+
 
 #endif /*MANTID_API_MATRIXWORKSPACE_H_*/

@@ -19,9 +19,9 @@ namespace Mantid{
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension& MDImageData::getDimension(std::string id) const
+    Mantid::Geometry::IMDDimension* MDImageData::getDimension(std::string id) const
     {
-      return *(Mantid::Geometry::MDGeometry::getDimension(id,true));
+      return Mantid::Geometry::MDGeometry::getDimension(id,true);
     }
 
     Mantid::Geometry::MDPoint * MDImageData::getPoint(long index) const
