@@ -1,5 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
-#include <cfloat>
+#include <float.h>
 
 
 namespace Mantid{
