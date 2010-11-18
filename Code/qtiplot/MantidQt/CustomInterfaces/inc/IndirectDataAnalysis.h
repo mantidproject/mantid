@@ -124,11 +124,14 @@ namespace MantidQt
       void confitInputType(int index);
       void confitPlotInput();
       void confitPlotGuess(QtProperty*);
+      void confitSequential();
       void confitMinChanged(double);
       void confitMaxChanged(double);
       void confitBackgLevel(double);
       void confitUpdateRS(QtProperty*, double);
       void confitCheckBoxUpdate(QtProperty*, bool);
+      void confitHwhmChanged(double);
+      void confitHwhmUpdateRS(double);
 
       // Absorption (Basic)
       void absorptionShape(int index);
@@ -192,6 +195,7 @@ namespace MantidQt
       QMap<QString, QtProperty*> m_cfProp;
       MantidWidgets::RangeSelector* m_cfRangeS;
       MantidWidgets::RangeSelector* m_cfBackgS;
+      MantidWidgets::RangeSelector* m_cfHwhmRange;
       QtGroupPropertyManager* m_cfGrpMng;
       QtDoublePropertyManager* m_cfDblMng;
       QtBoolPropertyManager* m_cfBlnMng;

@@ -147,6 +147,7 @@ void IndirectDataAnalysis::loadSettings()
   m_uiForm.fury_resFile->readSettings(settings.group());
   m_uiForm.furyfit_inputFile->readSettings(settings.group());
   m_uiForm.confit_inputFile->readSettings(settings.group());
+  m_uiForm.confit_resInput->readSettings(settings.group());
   m_uiForm.abs_inputFile->readSettings(settings.group());
   settings.endGroup();
 }
@@ -176,7 +177,7 @@ void IndirectDataAnalysis::setupElwin()
   m_elwProp["R2E"] = m_elwDblMng->addProperty("End");
   m_elwDblMng->setDecimals(m_elwProp["R2E"], m_nDec);
 
-  m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges and Subtract");
+  m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges");
 
   m_elwProp["Range1"] = m_elwGrpMng->addProperty("Range One");
   m_elwProp["Range1"]->addSubProperty(m_elwProp["R1S"]);
@@ -354,6 +355,8 @@ void IndirectDataAnalysis::setupConFit()
     MantidQt::MantidWidgets::RangeSelector::YSINGLE);
   m_cfBackgS->setColour(Qt::darkGreen);
   m_cfBackgS->setRange(0.0, 1.0);
+  m_cfHwhmRange = new MantidQt::MantidWidgets::RangeSelector(m_cfPlot);
+  m_cfHwhmRange->setColour(Qt::red);
 
   // Populate Property Widget
 
@@ -391,10 +394,15 @@ void IndirectDataAnalysis::setupConFit()
   connect(m_cfRangeS, SIGNAL(minValueChanged(double)), this, SLOT(confitMinChanged(double)));
   connect(m_cfRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(confitMaxChanged(double)));
   connect(m_cfBackgS, SIGNAL(minValueChanged(double)), this, SLOT(confitBackgLevel(double)));
+  connect(m_cfHwhmRange, SIGNAL(minValueChanged(double)), this, SLOT(confitHwhmChanged(double)));
+  connect(m_cfHwhmRange, SIGNAL(maxValueChanged(double)), this, SLOT(confitHwhmChanged(double)));
   connect(m_cfDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(confitUpdateRS(QtProperty*, double)));
   connect(m_cfBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(confitCheckBoxUpdate(QtProperty*, bool)));
 
   connect(m_cfDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(confitPlotGuess(QtProperty*)));
+
+  // Have HWHM Range linked to Fit Start/End Range
+  connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
 
   confitTypeSelection(m_uiForm.confit_cbFitType->currentIndex());
 
@@ -406,6 +414,7 @@ void IndirectDataAnalysis::setupConFit()
   connect(m_uiForm.confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitInputType(int)));
   connect(m_uiForm.confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
   connect(m_uiForm.confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(confitPlotInput()));
+  connect(m_uiForm.confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
 }
 
 bool IndirectDataAnalysis::validateElwin()
@@ -643,7 +652,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         // create user function
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
-        std::string formula = "Intensity*exp(-Exponent*(x^Beta))";
+        std::string formula = "Intensity*exp(-Tau*(x^Beta))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
@@ -655,7 +664,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         // create user function
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
-        std::string formula = "Intensity*exp(-(x*Exponent))";
+        std::string formula = "Intensity*exp(-(x*Tau))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
@@ -698,7 +707,7 @@ QtProperty* IndirectDataAnalysis::createExponential()
   QtProperty* expA0 = m_doubleManager->addProperty("Intensity");
   m_doubleManager->setRange(expA0, 0.0, 1.0); // 0 < Height < 1
   m_doubleManager->setDecimals(expA0, m_nDec);
-  QtProperty* expA1 = m_doubleManager->addProperty("Exponent");
+  QtProperty* expA1 = m_doubleManager->addProperty("Tau");
   m_doubleManager->setDecimals(expA1, m_nDec);
   expGroup->addSubProperty(expA0);
   expGroup->addSubProperty(expA1);
@@ -710,7 +719,7 @@ QtProperty* IndirectDataAnalysis::createStretchedExp()
   QtProperty* prop = m_groupManager->addProperty("Stretched Exponential");
   QtProperty* stA0 = m_doubleManager->addProperty("Intensity");
   m_doubleManager->setRange(stA0, 0.0, 1.0);  // 0 < Height < 1
-  QtProperty* stA1 = m_doubleManager->addProperty("Exponent");
+  QtProperty* stA1 = m_doubleManager->addProperty("Tau");
   QtProperty* stA2 = m_doubleManager->addProperty("Beta");
   m_doubleManager->setDecimals(stA0, m_nDec);
   m_doubleManager->setDecimals(stA1, m_nDec);
@@ -1121,7 +1130,7 @@ void IndirectDataAnalysis::furyfitRun()
         subprops[subs[i]->propertyName()] = subs[i];
       }
       m_doubleManager->setValue(subprops["Intensity"], params["f1.Intensity"]);
-      m_doubleManager->setValue(subprops["Exponent"], params["f1.Exponent"]);
+      m_doubleManager->setValue(subprops["Tau"], params["f1.Tau"]);
       break;
       }
     case 2:
@@ -1133,7 +1142,7 @@ void IndirectDataAnalysis::furyfitRun()
         subprops[subs[i]->propertyName()] = subs[i];
       }
       m_doubleManager->setValue(subprops["Intensity"], params["f1.Intensity"]);
-      m_doubleManager->setValue(subprops["Exponent"], params["f1.Exponent"]);
+      m_doubleManager->setValue(subprops["Tau"], params["f1.Tau"]);
       m_doubleManager->setValue(subprops["Beta"], params["f1.Beta"]);
       break;
       }
@@ -1150,7 +1159,7 @@ void IndirectDataAnalysis::furyfitRun()
         subprops[subs[i]->propertyName()] = subs[i];
       }
       m_doubleManager->setValue(subprops["Intensity"], params["f2.Intensity"]);
-      m_doubleManager->setValue(subprops["Exponent"], params["f2.Exponent"]);
+      m_doubleManager->setValue(subprops["Tau"], params["f2.Tau"]);
       break;
       }
     case 3: // 1 Exp & 1 Stretched Exp
@@ -1162,7 +1171,7 @@ void IndirectDataAnalysis::furyfitRun()
         subprops[subs[i]->propertyName()] = subs[i];
       }
       m_doubleManager->setValue(subprops["Intensity"], params["f2.Intensity"]);
-      m_doubleManager->setValue(subprops["Exponent"], params["f2.Exponent"]);
+      m_doubleManager->setValue(subprops["Tau"], params["f2.Tau"]);
       m_doubleManager->setValue(subprops["Beta"], params["f2.Beta"]);
       break;
       }
@@ -1574,6 +1583,14 @@ void IndirectDataAnalysis::confitRun()
     m_cfDblMng->setValue(m_cfProp["Lorentzian 2.HWHM"], parameters[pref+"HWHM"]);
   }
 
+  // Plot Output
+  if ( m_uiForm.confit_ckPlotOutput->isChecked() )
+  {
+    QString pyInput =
+      "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
+    QString pyOutput = runPythonCode(pyInput);
+  }
+
 }
 
 void IndirectDataAnalysis::confitTypeSelection(int index)
@@ -1584,13 +1601,16 @@ void IndirectDataAnalysis::confitTypeSelection(int index)
   switch ( index )
   {
   case 0:
+    m_cfHwhmRange->setVisible(false);
     break;
   case 1:
     m_cfTree->addProperty(m_cfProp["Lorentzian1"]);
+    m_cfHwhmRange->setVisible(true);
     break;
   case 2:
     m_cfTree->addProperty(m_cfProp["Lorentzian1"]);
     m_cfTree->addProperty(m_cfProp["Lorentzian2"]);
+    m_cfHwhmRange->setVisible(true);
     break;
   }    
 }
@@ -1852,6 +1872,28 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
   m_cfPlot->replot();
 }
 
+void IndirectDataAnalysis::confitSequential()
+{
+  if ( m_cfInputWS == NULL )
+  {
+    return;
+  }
+
+  Mantid::API::CompositeFunction* func = confitCreateFunction();
+  std::string function = std::string(*func);
+  QString stX = m_cfProp["StartX"]->valueText();
+  QString enX = m_cfProp["EndX"]->valueText();
+
+  QString pyInput =
+    "from IndirectDataAnalysis import confitSeq\n"
+    "input = '" + QString::fromStdString(m_cfInputWSName) + "'\n"
+    "func = r'" + QString::fromStdString(function) + "'\n"
+    "startx = " + stX + "\n"
+    "endx = " + enX + "\n"
+    "confitSeq(input, func, startx, endx)\n";
+  QString pyOutput = runPythonCode(pyInput);
+}
+
 void IndirectDataAnalysis::confitMinChanged(double val)
 {
   m_cfDblMng->setValue(m_cfProp["StartX"], val);
@@ -1860,6 +1902,20 @@ void IndirectDataAnalysis::confitMinChanged(double val)
 void IndirectDataAnalysis::confitMaxChanged(double val)
 {
   m_cfDblMng->setValue(m_cfProp["EndX"], val);
+}
+
+void IndirectDataAnalysis::confitHwhmChanged(double val)
+{
+  const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
+  // Always want HWHM to display as positive.
+  if ( val > peakCentre )
+  {
+    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], val-peakCentre);
+  }
+  else
+  {
+    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], peakCentre-val);
+  }
 }
 
 void IndirectDataAnalysis::confitBackgLevel(double val)
@@ -1872,6 +1928,14 @@ void IndirectDataAnalysis::confitUpdateRS(QtProperty* prop, double val)
   if ( prop == m_cfProp["StartX"] ) { m_cfRangeS->setMinimum(val); }
   else if ( prop == m_cfProp["EndX"] ) { m_cfRangeS->setMaximum(val); }
   else if ( prop == m_cfProp["BGA0"] ) { m_cfBackgS->setMinimum(val); }
+  else if ( prop == m_cfProp["Lorentzian 1.HWHM"] ) { confitHwhmUpdateRS(val); }
+}
+
+void IndirectDataAnalysis::confitHwhmUpdateRS(double val)
+{
+  const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
+  m_cfHwhmRange->setMinimum(peakCentre-val);
+  m_cfHwhmRange->setMaximum(peakCentre+val);
 }
 
 void IndirectDataAnalysis::confitCheckBoxUpdate(QtProperty* prop, bool checked)

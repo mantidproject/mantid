@@ -60,7 +60,6 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plo
   setMax(200);
 
   /// Setup pen with default values
-  /// @todo Add constructor options for pen settings and other functions to change it
   m_pen = new QPen();
   m_pen->setColor(Qt::blue);
   m_pen->setStyle(Qt::DashDotLine);
@@ -271,6 +270,7 @@ void RangeSelector::setMinimum(double val)
 {
   setMin(val);
 }
+
 void RangeSelector::setMaximum(double val)
 {
   setMax(val);
@@ -315,14 +315,20 @@ void RangeSelector::setVisible(bool state)
 
 void RangeSelector::setMin(double val)
 {
-  m_min = val;
-  emit minValueChanged(val);
+  if ( val != m_min )
+  {
+    m_min = val;
+    emit minValueChanged(val);
+  }
 }
 
 void RangeSelector::setMax(double val)
 {
-  m_max = val;
-  emit maxValueChanged(val);
+  if ( val != m_max )
+  {
+    m_max = val;
+    emit maxValueChanged(val);
+  }
 }
 
 bool RangeSelector::changingMin(double x, double dx)
