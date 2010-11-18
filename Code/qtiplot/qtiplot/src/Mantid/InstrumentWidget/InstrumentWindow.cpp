@@ -62,7 +62,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mSelectButton = new QPushButton(tr("Pick"));
   mSelectColormap = new QPushButton(tr("Select ColorMap"));
   QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
-  mBinMapDialog = new BinDialog(this);
+  mBinDialog = new BinDialog(this);
   mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   //Save control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -160,7 +160,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
 
   connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-  connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
+  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double,bool)));
   connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
   connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
 
@@ -214,8 +214,12 @@ void InstrumentWindow::modeSelectButtonClicked()
 
 void InstrumentWindow::selectBinButtonClicked()
 {
-  mBinMapDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue());
-  mBinMapDialog->exec();
+  //At this point (only) do we calculate the bin ranges.
+  this->mInstrumentDisplay->calculateBinRange();
+  //Set the values found + the bool for entire range
+  mBinDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue(), mInstrumentDisplay->getBinEntireRange());
+  //Show the dialog
+  mBinDialog->exec();
 }
 
 /**
@@ -542,9 +546,10 @@ void InstrumentWindow::setupColorBarScaling()
   }
 }
 
-void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue)
+
+void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue,bool entireRange)
 {
-  mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue);
+  mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue, entireRange);
 }
 
 /**

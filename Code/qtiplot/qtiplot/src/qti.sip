@@ -1711,7 +1711,7 @@ public:
   void setColorMapMinValue(double);
   void setColorMapMaxValue(double);
   void setColorMapRange(double, double);
-  void setDataMappingIntegral(double, double) /PyName = setBinRange/;
+  void setDataMappingIntegral(double, double, bool) /PyName = setBinRange/;
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
 private:

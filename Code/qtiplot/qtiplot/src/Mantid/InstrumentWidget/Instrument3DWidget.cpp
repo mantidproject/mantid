@@ -35,13 +35,15 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 static const QRgb BLACK = qRgb(0,0,0);
-static const bool SHOWTIMING = false;
+static const bool SHOWTIMING = true;
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
   mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)),
   mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX),
-  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mDataMinEdited(false), mDataMaxEdited(false),
+  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX),
+  mBinEntireRange(true),
+  mDataMinEdited(false), mDataMaxEdited(false),
   mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
   mWorkspaceName(""), mWorkspace(), mScaledValues(0)
 {
@@ -177,7 +179,6 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   defaultProjection(); // Calculate and set projection
 
   // Calculate bin values, data ranges and integrate data
-  calculateBinRange(output);
   calculateColorCounts(output);
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::setWorkspace() took " << timer.elapsed() << " seconds\n";
@@ -190,64 +191,65 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
  */
 void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument> ins)
 {
+  Timer timer;
   makeCurrent();
   boost::shared_ptr<GLActorCollection> scene = boost::shared_ptr<GLActorCollection>(new GLActorCollection);
   mInstrumentActor = new InstrumentActor(ins, mFastRendering);
   scene->addActor(mInstrumentActor);
   this->setActorCollection(scene);
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::ParseInstrumentGeometry() took " << timer.elapsed() << " seconds\n";
 }
 
 //------------------------------------------------------------------------------------------------
 /**
  * Calculate the minimum and maximum values of the bins for the set workspace
  */
-void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr workspace)
+void Instrument3DWidget::calculateBinRange()
 {
-  const int nHist = workspace->getNumberHistograms();
-  mWkspBinMin = DBL_MAX;
-  mWkspBinMax = -DBL_MAX;
-  for (int i = 0; i < nHist; ++i)
-  {
-    const Mantid::MantidVec & values = workspace->readX(i);
-    double xtest = values.front();
-    if( xtest != std::numeric_limits<double>::infinity() )
-    {
-    
-      if( xtest < mWkspBinMin )
-      {
-        mWkspBinMin = xtest;
-      }
-      else if( xtest > mWkspBinMax )
-      {
-        mWkspBinMax = xtest;
-      }
-      else {}
-    }
+  Mantid::API::MatrixWorkspace_sptr workspace = mWorkspace;
+  Timer timer;
 
-    xtest = values.back();
-    if( xtest != std::numeric_limits<double>::infinity() )
-    {
-      if( xtest < mWkspBinMin )
-      {
-        mWkspBinMin = xtest;
-      }
-      else if( xtest > mWkspBinMax )
-      {
-        mWkspBinMax = xtest;
-      }
-      else {}
-    }
-  }
 
-  // Value has not been preset
-  if( std::fabs(mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 )
+  // Value has not been preset?
+  if (( std::fabs(mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 ) && ( (mBinMaxValue + DBL_MAX)/DBL_MAX < 1e-08 ))
   {
+    //Then we need to calculate
+    const int nHist = workspace->getNumberHistograms();
+    mWkspBinMin = DBL_MAX;
+    mWkspBinMax = -DBL_MAX;
+    for (int i = 0; i < nHist; ++i)
+    {
+      const Mantid::MantidVec & values = workspace->readX(i);
+      double xtest = values.front();
+      if( xtest != std::numeric_limits<double>::infinity() )
+      {
+
+        if( xtest < mWkspBinMin )
+        {
+          mWkspBinMin = xtest;
+        }
+        else if( xtest > mWkspBinMax )
+        {
+          mWkspBinMax = xtest;
+        }
+        else {}
+      }
+
+      xtest = values.back();
+      if( xtest != std::numeric_limits<double>::infinity() )
+      {
+        if( xtest < mWkspBinMin )
+        {
+          mWkspBinMin = xtest;
+        }
+        else if( xtest > mWkspBinMax )
+        {
+          mWkspBinMax = xtest;
+        }
+        else {}
+      }
+    }
     mBinMinValue = mWkspBinMin;
-  }
-
-  // Value has not been preset
-  if( (mBinMaxValue + DBL_MAX)/DBL_MAX < 1e-08 )
-  {
     mBinMaxValue = mWkspBinMax;
   }
 
@@ -262,6 +264,7 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
     mBinMaxValue = mWkspBinMax;
   }
 
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateBinRange() took " << timer.elapsed() << " seconds\n";
 
 }
 
@@ -296,6 +299,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
   const int n_spec = m_workspace_indices.size();
   std::vector<double> integrated_values(n_spec, 0.0);
+
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
   for( int i = 0; i < n_spec; ++i )
@@ -395,19 +399,28 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 		return 0.0;
 
 	// Get Handle to data
-	const Mantid::MantidVec& x=workspace->readX(wksp_index);
-	const Mantid::MantidVec& y=workspace->readY(wksp_index);
-	// If it is a 1D workspace, no need to integrate
-	if (x.size()==2)
-		return y[0];
-	// Iterators for limits
-	Mantid::MantidVec::const_iterator lowit=x.begin(),highit=x.end()-1;
-	// If the first element is lower that the xmin then search for new lowit
-	if ((*lowit) < mBinMinValue)
-		lowit = std::lower_bound(x.begin(),x.end(),mBinMinValue);
-	// If the last element is higher that the xmax then search for new lowit
-	if ((*highit) > mBinMaxValue)
-		highit = std::upper_bound(lowit,x.end(),mBinMaxValue);
+  const Mantid::MantidVec& x=workspace->readX(wksp_index);
+  const Mantid::MantidVec& y=workspace->readY(wksp_index);
+  // If it is a 1D workspace, no need to integrate
+  if (x.size()==2)
+    return y[0];
+
+  // Iterators for limits - whole range by default
+  Mantid::MantidVec::const_iterator lowit, highit;
+  lowit=x.begin();
+  highit=x.end()-1;
+
+  //But maybe we don't want the entire range?
+  if (!this->mBinEntireRange)
+	{
+    // If the first element is lower that the xmin then search for new lowit
+    if ((*lowit) < mBinMinValue)
+      lowit = std::lower_bound(x.begin(),x.end(),mBinMinValue);
+    // If the last element is higher that the xmax then search for new lowit
+    if ((*highit) > mBinMaxValue)
+      highit = std::upper_bound(lowit,x.end(),mBinMaxValue);
+	}
+
 	// Get the range for the y vector
 	Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
 	Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
@@ -517,7 +530,7 @@ void Instrument3DWidget::setDataMinEdited(bool state)
 //------------------------------------------------------------------------------------------------
 /**
  * Mark the min data as bein user edited
- * @param If true the data min value has been set by the user
+ * @param If true the data max value has been set by the user
  */
 void Instrument3DWidget::setDataMaxEdited(bool state)
 {
@@ -642,17 +655,25 @@ double Instrument3DWidget::getDataMaxValue() const
 	return this->mDataMaxValue;
 }
 
-/**
- * Returns the current minimum bin value
+/** Returns the current minimum bin value
  */
 double Instrument3DWidget::getBinMinValue() const
 {
   return this->mBinMinValue;
 }
 
+/** Returns the current maximum bin value
+ */
 double Instrument3DWidget::getBinMaxValue() const
 {
     return this->mBinMaxValue;
+}
+
+/** Returns the current value for integrating all the bins (entire range)
+ */
+bool Instrument3DWidget::getBinEntireRange() const
+{
+    return this->mBinEntireRange;
 }
 
 /**
@@ -663,10 +684,11 @@ void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
 	mDataMapping=dmType;
 }
 
-void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue)
+void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue, bool entireRange)
 {
   this->mBinMinValue = minValue;
   this->mBinMaxValue = maxValue;
+  this->mBinEntireRange = entireRange;
   setDataMappingType(INTEGRAL);
   if( this->isVisible() )
   {

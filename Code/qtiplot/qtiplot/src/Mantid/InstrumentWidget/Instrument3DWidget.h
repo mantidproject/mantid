@@ -66,6 +66,7 @@ public:
   double getDataMaxValue() const;
   double getBinMinValue() const;
   double getBinMaxValue() const;
+  bool getBinEntireRange() const;
   void setDataMappingType(DataMappingType);
   void setView(const Mantid::Geometry::V3D&,double,double,double,double,double,double);
   void setAxis(const Mantid::Geometry::V3D &direction);
@@ -91,7 +92,7 @@ public slots:
   void setTimeBin(int value);
   void setColorMapMinValue(double minValue);
   void setColorMapMaxValue(double maxValue);
-  void setDataMappingIntegral(double minValue,double maxValue);
+  void setDataMappingIntegral(double minValue,double maxValue, bool entireRange);
   void setDataMappingSingleBin(int binNumber);
   void setViewDirectionXPositive();
   void setViewDirectionYPositive();
@@ -104,9 +105,11 @@ signals:
   void detectorsSelected();
   void actionDetectorHighlighted(int,int,int);
 
+public:
+  void calculateBinRange();
+
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument>);
-  void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
   void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
   double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);
 
@@ -133,13 +136,17 @@ private:
   Mantid::Geometry::V3D mAxisDirection;
   Mantid::Geometry::V3D mAxisUpVector;
 
-  // The user requested data and bin ranges
+  /// The user requested data and bin ranges
   double mDataMinValue, mDataMaxValue;
   double mBinMinValue, mBinMaxValue;
 
+  /// Bool set to true if you keep all the bins, no matter what. Defaults to true.
+  bool mBinEntireRange;
+
+  /// If true the data min or maxvalue has been set by the user
   bool mDataMinEdited, mDataMaxEdited;
 
-  // The workspace data and bin range limits
+  /// The workspace data and bin range limits
   double mWkspDataMin, mWkspDataMax;
   double mWkspBinMin, mWkspBinMax;
 

@@ -81,7 +81,7 @@ public:
   void setColorMapMinValue(double minValue);
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
-  void setDataMappingIntegral(double minValue,double maxValue);
+  void setDataMappingIntegral(double minValue,double maxValue,bool entireRange);
   void selectComponent(const QString & name);
   void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project
@@ -142,7 +142,7 @@ private:
   QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
   QComboBox *mScaleOptions;
   QComboBox *mAxisCombo;           ///< the user can select an axis to view the instrument from, this combo box stores the list of axis names and (behind the scenes) the coordinates of the different axises
-  BinDialog*   mBinMapDialog;
+  BinDialog*   mBinDialog;
   InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
   QCheckBox *m3DAxesToggle; ///< A tick box to toggle the 3D axes in the instrument view
 

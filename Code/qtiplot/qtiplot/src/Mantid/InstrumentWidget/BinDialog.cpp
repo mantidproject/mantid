@@ -28,12 +28,17 @@ BinDialog::BinDialog(QWidget* parent):QDialog(parent)
 	mIntegralMaxValue = new QLineEdit();
 	mIntegralMaxValue->setValidator(validator);
 
+	//Checkbco
+	mEntireRange = new QCheckBox("Use the entire X range", this);
+  connect(mEntireRange,SIGNAL(toggled(bool)),this,SLOT(mEntireRange_toggled(bool)));
+
 	//Create a grid layout
 	QGridLayout  *gridbox = new QGridLayout;
 	gridbox->addWidget(new QLabel("Min X Value:"),0,0);
 	gridbox->addWidget(mIntegralMinValue,0,1);
-	gridbox->addWidget(new QLabel("Max X Value:"),1,0);
-	gridbox->addWidget(mIntegralMaxValue,1,1);
+  gridbox->addWidget(new QLabel("Max X Value:"),1,0);
+  gridbox->addWidget(mIntegralMaxValue,1,1);
+  gridbox->addWidget(mEntireRange,2,1);
 	groupBox->setLayout(gridbox);
 
 	//create a frame for Ok and Cancel btn
@@ -59,15 +64,30 @@ BinDialog::~BinDialog()
 {
 }
 
-void BinDialog::setIntegralMinMax(double minBin,double maxBin)
+/** Set the values in the GUI. */
+void BinDialog::setIntegralMinMax(double minBin,double maxBin, bool useEverything)
 {
 	QString strBinNum;
 	mIntegralMinValue->setText(strBinNum.setNum(minBin));
 	mIntegralMaxValue->setText(strBinNum.setNum(maxBin));
+	//And the checkbox
+	mEntireRange->setChecked(useEverything);
+	this->mEntireRange_toggled(useEverything);
 }
 
+
+/** Called when the OK button is pressed. */
 void BinDialog::btnOKClicked()
 {
-	emit IntegralMinMax( mIntegralMinValue->displayText().toDouble(),mIntegralMaxValue->displayText().toDouble());
+	emit IntegralMinMax( mIntegralMinValue->displayText().toDouble(),mIntegralMaxValue->displayText().toDouble(), mEntireRange->isChecked());
 	accept();
+}
+
+/** Called when the mEntireRange checkbox state toggles.
+ * Disables the textboxes if the checkbox is on.
+ * */
+void BinDialog::mEntireRange_toggled(bool on)
+{
+  this->mIntegralMaxValue->setEnabled(!on);
+  this->mIntegralMinValue->setEnabled(!on);
 }
