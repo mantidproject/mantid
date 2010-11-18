@@ -163,9 +163,17 @@ void Resolution::loadNexus(const std::string& fname)
   IAlgorithm_sptr loadNxs = Mantid::API::AlgorithmFactory::Instance().create("LoadNexus", -1);
   loadNxs->initialize();
   loadNxs->setChild(true);
-  loadNxs->setPropertyValue("Filename", fname);
-  loadNxs->setPropertyValue("OutputWorkspace", "_resolution_fit_data_");
-  loadNxs->execute();
+  loadNxs->setLogging(false);
+  try
+  {
+    loadNxs->setPropertyValue("Filename", fname);
+    loadNxs->setPropertyValue("OutputWorkspace", "_resolution_fit_data_");
+    loadNxs->execute();
+  }
+  catch ( std::runtime_error & )
+  {
+    throw std::runtime_error("Unable to load Nexus file for resolution function.");
+  }
   
   Workspace_sptr ws = loadNxs->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr resData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
@@ -173,13 +181,20 @@ void Resolution::loadNexus(const std::string& fname)
   const bool hist = resData->isHistogramData();
   const int nbins = resData->blocksize();
 
+  double first = resData->readX(0)[0];
+  double last;
+  if ( hist ) { last = resData->readX(0)[nbins]; }
+  else { last = resData->readX(0)[nbins-1]; }
+  double adjustX = ( first + last ) / 2;
+
+
   for ( int i = 0; i < nbins; i++ )
   {
     double x = 0.0;
     m_yData.push_back(resData->readY(0)[i]);
     if ( hist ) x = ( resData->readX(0)[i] + resData->readX(0)[i+1] ) / 2;
     else x = resData->readX(0)[i];
-    m_xData.push_back(x);
+    m_xData.push_back(x-adjustX);
   }
 }
 
