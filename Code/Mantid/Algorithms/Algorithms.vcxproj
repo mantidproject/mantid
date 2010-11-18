@@ -186,6 +186,7 @@
     <ClCompile Include="src\CreateWorkspace.cpp" />
     <ClCompile Include="src\CropWorkspace.cpp" />
     <ClCompile Include="src\CrossCorrelate.cpp" />
+    <ClCompile Include="src\CuboidGaugeVolumeAbsorption.cpp" />
     <ClCompile Include="src\CylinderAbsorption.cpp" />
     <ClCompile Include="src\DetectorEfficiencyCor.cpp" />
     <ClCompile Include="src\DetectorEfficiencyVariation.cpp" />
@@ -196,6 +197,7 @@
     <ClCompile Include="src\Exponential.cpp" />
     <ClCompile Include="src\ExponentialCorrection.cpp" />
     <ClCompile Include="src\ExtractFFTSpectrum.cpp" />
+    <ClCompile Include="src\ExtractMasking.cpp" />
     <ClCompile Include="src\ExtractSingleSpectrum.cpp" />
     <ClCompile Include="src\FFT.cpp" />
     <ClCompile Include="src\FFTSmooth.cpp" />
@@ -216,6 +218,7 @@
     <ClCompile Include="src\He3TubeEfficiency.cpp" />
     <ClCompile Include="src\HRPDSlabCanAbsorption.cpp" />
     <ClCompile Include="src\InputWSDetectorInfo.cpp" />
+    <ClCompile Include="src\Integration.cpp" />
     <ClCompile Include="src\InterpolatingRebin.cpp" />
     <ClCompile Include="src\Logarithm.cpp" />
     <ClCompile Include="src\MaskBins.cpp" />
@@ -253,7 +256,6 @@
     <ClCompile Include="src\RenameWorkspace.cpp" />
     <ClCompile Include="src\ReplaceSpecialValues.cpp" />
     <ClCompile Include="src\Scale.cpp" />
-    <ClCompile Include="src\SimpleIntegration.cpp" />
     <ClCompile Include="src\SmoothData.cpp" />
     <ClCompile Include="src\SofQW.cpp" />
     <ClCompile Include="src\SolidAngle.cpp" />
@@ -261,6 +263,7 @@
     <ClCompile Include="src\Sort.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
     <ClCompile Include="src\StripVanadiumPeaks.cpp" />
+    <ClCompile Include="src\SubtractTimeFinal.cpp" />
     <ClCompile Include="src\SumNeighbours.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />
@@ -278,18 +281,22 @@
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
     <ClInclude Include="inc\MantidAlgorithms\CorrectKiKf.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
+    <ClInclude Include="inc\MantidAlgorithms\CuboidGaugeVolumeAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
+    <ClInclude Include="inc\MantidAlgorithms\ExtractMasking.h" />
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h" />
     <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\He3TubeEfficiency.h" />
+    <ClInclude Include="inc\MantidAlgorithms\Integration.h" />
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
+    <ClInclude Include="inc\MantidAlgorithms\SubtractTimeFinal.h" />
     <ClInclude Include="inc\MantidAlgorithms\SumNeighbours.h" />
     <ClInclude Include="inc\MantidAlgorithms\TofCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\Transpose.h" />
@@ -426,8 +433,6 @@
     <ClInclude Include="inc\MantidAlgorithms\ReplaceSpecialValues.h" />
     <ClInclude Include="test\ReplaceSpecialValuesTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\Scale.h" />
-    <ClInclude Include="inc\MantidAlgorithms\SimpleIntegration.h" />
-    <ClInclude Include="test\SimpleIntegrationTest.h" />
     <ClInclude Include="test\SimpleRebinTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\SmoothData.h" />
     <ClInclude Include="test\SmoothDataTest.h" />

@@ -243,9 +243,6 @@
     <ClCompile Include="src\Scale.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SimpleIntegration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\SmoothData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -343,6 +340,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ElasticWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CuboidGaugeVolumeAbsorption.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExtractMasking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Integration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SubtractTimeFinal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -722,12 +731,6 @@
     <ClInclude Include="inc\MantidAlgorithms\Scale.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidAlgorithms\SimpleIntegration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\SimpleIntegrationTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\SimpleRebinTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -873,6 +876,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\CuboidGaugeVolumeAbsorption.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\ExtractMasking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\Integration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\SubtractTimeFinal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
