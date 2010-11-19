@@ -238,9 +238,9 @@ public:
       switch( bin_no )
       {
       case 1:
-        TS_ASSERT_DELTA(x, 2.0, m_tol);
-        TS_ASSERT_DELTA(y, 4.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
+        TS_ASSERT_DELTA(x, 2.0, m_tol); //center of the bin
+        TS_ASSERT_DELTA(y, 4.0, m_tol); // width (2.0) * value (2.0)
+        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol); //error (sqrt(2) * bin width (2.0)
         break;
       case 2:
         TS_ASSERT_DELTA(x, 4.0, m_tol);
@@ -267,6 +267,83 @@ public:
     AnalysisDataService::Instance().remove("test_in_3");
     AnalysisDataService::Instance().remove("test_in_4");
   }
+
+
+
+  void testSaveGSSWorkspaceGroups_dont_multiply_bin_width()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+    workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+    work_in1->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
+    if(wsSptr)
+    {
+      AnalysisDataService::Instance().add("test_in", wsSptr);
+      AnalysisDataService::Instance().add("test_in_1", work_in1);
+      wsSptr->add("test_in_1");
+    }
+    Mantid::DataHandling::SaveGSS saveGSS;
+    TS_ASSERT_THROWS_NOTHING( saveGSS.initialize());
+    TS_ASSERT_EQUALS( saveGSS.isInitialized(), true);
+
+    saveGSS.setPropertyValue("InputWorkspace", "test_in");
+    std::string filename("SaveGSS.txt");
+    saveGSS.setPropertyValue("Filename", filename);
+    filename = saveGSS.getPropertyValue("Filename"); //absolute path
+    saveGSS.setPropertyValue("SplitFiles", "False");
+    saveGSS.setPropertyValue("Append", "0");
+    saveGSS.setPropertyValue("MultiplyByBinWidth", "0");
+
+    TS_ASSERT_THROWS_NOTHING( saveGSS.execute());
+    Poco::File focusfile(filename);
+    TS_ASSERT_EQUALS( focusfile.exists(), true );
+
+    std::ifstream filestrm(filename.c_str());
+    std::string line;
+    int bin_no(1);
+    while( getline(filestrm, line) )
+    {
+      if(line.empty()) continue;
+      if( line[0] == '#' ) continue;
+      std::string str=line.substr(0,4);
+      if(str=="BANK") continue;
+      double x(0.0), y(0.0), e(0.);
+      std::istringstream is(line);
+      is >> x >> y >> e;
+      switch( bin_no )
+      {
+      case 1:
+        TS_ASSERT_DELTA(x, 2.0, m_tol); //center of the bin
+        TS_ASSERT_DELTA(y, 2.0, m_tol); // width (2.0)
+        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol); //error (sqrt(2)
+        break;
+      case 2:
+        TS_ASSERT_DELTA(x, 4.0, m_tol);
+        TS_ASSERT_DELTA(y, 2.0, m_tol);
+        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol);
+        break;
+      case 3:
+        TS_ASSERT_DELTA(x, 6.0, m_tol);
+        TS_ASSERT_DELTA(y, 2.0, m_tol);
+        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol);
+        break;
+      default:
+        TS_ASSERT( false );
+      }
+      ++bin_no;
+      if(bin_no==4)
+        bin_no=1;
+    }
+    filestrm.close();
+    focusfile.remove();
+    AnalysisDataService::Instance().remove("test_in");
+  }
+
 
 
   void testDistribution()
