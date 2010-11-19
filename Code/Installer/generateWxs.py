@@ -712,8 +712,8 @@ scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",I
 # Here we just remove the pyc files so should be left with an empty directory
 # TODO: Put in a custom command to remove it if it is empty after install. This sounds simply but alas is not...
 addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
-addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
-addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes'})
+addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del /q "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
+addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
 addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
 
 #-----------------------------------------------------------------------
