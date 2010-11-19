@@ -25,6 +25,11 @@ data_buffer(NULL)
   this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
   this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
 
+  this->box_min.assign(nDims,FLT_MAX);
+  this->box_max.assign(nDims,-FLT_MAX);
+
+
+
 }
 size_t
 MDDataPoints::getNumPixels(void)

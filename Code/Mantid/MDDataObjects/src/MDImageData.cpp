@@ -338,6 +338,9 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
         this->pData[j].err =0;
         this->pData[j].npix=0;
     }
+    this->MDStruct.min_value.assign(this->getNumDims(), FLT_MAX);
+    this->MDStruct.max_value.assign(this->getNumDims(),-FLT_MAX);
+
 
 }
 //

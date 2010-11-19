@@ -44,15 +44,15 @@ public:
  
      /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
-    /// function returns numnber of pixels contributiong into the MD-data
+    /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
     size_t getNumPixels(void);
 
 
     // Accessors & Mutators used mainly for IO Operations on the dataset
     /// function returns minimal value for dimension i
-    double &rMin(unsigned int i){return *(&box_min[0]+i);}
+    double &rPixMin(unsigned int i){return *(&box_min[0]+i);}
     /// function returns maximal value for dimension i
-    double &rMax(unsigned int i){return *(&box_max[0]+i);}
+    double &rPixMax(unsigned int i){return *(&box_max[0]+i);}
     /// in-out -- returns or allow to set-up the number of data fields in the dataPoint
     unsigned int &numFields(void){return n_fields;}
      /// returns the pointer to the location of the data buffer; the data has to be processed through MDDataPoint then

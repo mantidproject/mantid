@@ -157,7 +157,7 @@ CenterpieceRebinning4D::exec()
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
   std::vector<size_t> strides = outputWS->getStrides();
 
-  transf_matrix trf = build_scaled_transformation_matrix(*inputWS,*pSlicing);
+  transf_matrix trf = build_scaled_transformation_matrix(*inputWS,*pSlicing,this->ignore_inf,this->ignore_nan);
 // start reading and rebinning;
   size_t n_starting_cell(0);
   for(unsigned int i=0;i<n_hits;i++){
@@ -219,7 +219,7 @@ size_t nPixel_retained(0);
 unsigned int nDims = rescaled_transf.nDimensions;
 double rotations_ustep[9];
 std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
-bool  ignore_something,ignote_all,ignore_nan(this->ignore_nan),ignore_inf(this->ignore_inf);
+bool  ignore_something,ignote_all,ignore_nan(rescaled_transf.ignore_NaN),ignore_inf(rescaled_transf.ignore_Inf);
 
 ignore_something=ignore_nan|ignore_inf;
 ignote_all      =ignore_nan&ignore_inf;

@@ -11,6 +11,7 @@ class transf_matrix
 public:
         int nDimensions;                     // real number of dimensions in a dataset???
         double rotations[9];                 // rotation matrix for qx,qy,qz coordinates; 
+        bool ignore_NaN,ignore_Inf;
         std::vector<double> trans_bott_left; // shift in all directions (tans_elo is 4th element of transf_bott_left
         std::vector<double> cut_min;         // min limits to extract data;
         std::vector<double> cut_max;         // max limits to extract data;
@@ -39,10 +40,12 @@ public:
     void preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
 
   /// build transformation matrix from the slicing data;
-    transf_matrix build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target);
+    transf_matrix build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target,bool ignoreNaN,bool ignoreInf);
 
    // finalsizes rebinoing operations; e.g. calculates averages and calculates location of pixels (filesystem)
     size_t finalise_rebinning(MDDataObjects::MD_image_point *data,size_t data_size);
- 
-    }
+
+
+   size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source_pix_buf, size_t nPix, MDDataObjects::MDWorkspace &TargetWorkspace);
+} //namespaceAlgorithms
 }

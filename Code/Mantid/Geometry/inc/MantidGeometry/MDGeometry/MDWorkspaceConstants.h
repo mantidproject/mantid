@@ -34,7 +34,7 @@
 
 /** We define maximal number of dimensionsMAX_MD_DIMS_POSSIBLE  which a MD dataset can have because 
    \li a) every additional dimension will be expensive to process 
-   \li b) minimal size of the visualisation dataset is 2^MAX_NDIMS_POSSIBLE, so this number has to be reasonable and any bigger number is probably because of unsigned int  error; 
+   \li b) minimal size of the visualisation dataset is 2^MAX_NDIMS_POSSIBLE, so this number has to be reasonable and any bigger number is probably because of an  error; 
    \li c) if we need to increase the number of dimensions, it can be easy done here
 */
 #define MAX_MD_DIMS_POSSIBLE 11
@@ -44,7 +44,7 @@
 #define MAX_REASONABLE_BIN_NUMBER 1000000
 //* MDPixels
 /// the size of the buffer to read pixels while reading parts of datasets --should be optimized for performance and moved out of here;
-#define PIX_BUFFER_SIZE 1000000
+#define PIX_BUFFER_SIZE 10000000
 //***********************************************************************************************************************************
 
 

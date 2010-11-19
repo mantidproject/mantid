@@ -149,25 +149,19 @@ CenterpieceRebinning::exec()
  
 
   // get pointer for data to rebin to; 
-  MD_DATA       *pMDData    = outputWS->get_pMDData();
   MD_image_point*pImage     = outputWS->get_pData();
 
   // and the number of elements the image has;
   size_t         image_size=  outputWS->getDataSize();
  //
-  double boxMin[4],boxMax[4];
-  boxMin[0]=boxMin[1]=boxMin[2]=boxMin[3]=FLT_MAX;
-  boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
-  std::vector<size_t> strides = outputWS->getStrides();
-
-  transf_matrix trf = build_scaled_transformation_matrix(*inputWS,*pSlicing);
+  transf_matrix trf = build_scaled_transformation_matrix(*inputWS,*pSlicing,this->ignore_inf,this->ignore_nan);
 // start reading and rebinning;
   size_t n_starting_cell(0);
   for(unsigned int i=0;i<n_hits;i++){
       n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
       n_pixels_read  +=n_pix_in_buffer;
       
-      n_pixels_selected+=rebin_dataset(trf,strides,&pix_buf[0],n_pix_in_buffer,pMDData);
+      n_pixels_selected+=rebin_Nx3dataset(trf,&pix_buf[0],n_pix_in_buffer,*outputWS);
   } 
   finalise_rebinning(pImage,image_size);
 
@@ -204,212 +198,6 @@ for(int i = 0; i < compFunction->getNFunctions() ; i++)
 }
 */
 }
-size_t  
-CenterpieceRebinning::rebin_dataset(const transf_matrix &rescaled_transf,const std::vector<size_t> &stride, const char *source_pix_buf, size_t nPix, MDDataObjects::MD_DATA *MDdata)
-{
-// set up auxiliary variables and preprocess them. 
-double xt,yt,zt,xt1,yt1,zt1,Et,Inf(0),
-       pix_Xmin,pix_Ymin,pix_Zmin,pix_Emin,pix_Xmax,pix_Ymax,pix_Zmax,pix_Emax;
-size_t nPixel_retained(0);
-
-
-unsigned int nDims    = rescaled_transf.nDimensions;
-unsigned int nRecDims = 3;
-
-std::vector<double> boxMin(nDims,0);
-std::vector<double> boxMax(nDims,0);
-std::vector<double> rN(nDims,0);
-
-std::vector<size_t> strides(nDims,0);
-
-double rotations_ustep[9];
-std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
-bool  ignore_something,ignote_all,ignore_nan(this->ignore_nan),ignore_inf(this->ignore_inf);
-
-ignore_something=ignore_nan|ignore_inf;
-ignote_all      =ignore_nan&ignore_inf;
-if(ignore_inf){
-    Inf=std::numeric_limits<double>::infinity();
-}
-MD_image_point *data = MDdata->data;
-
-
-for(unsigned int ii=0;ii<nDims;ii++){
-  
-    boxMin[ii]       = MDdata->min_value[ii];
-    boxMax[ii]       = MDdata->max_value[ii];
-
-    axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
-    shifts[ii]   =rescaled_transf.trans_bott_left[ii];
-    min_limit[ii]=rescaled_transf.cut_min[ii];
-    max_limit[ii]=rescaled_transf.cut_max[ii];
-
-// reduction dimensions; if stride = 0, the dimension is reduced;
-    strides[ii]  = stride[ii];
-}
-for(int ii=0;ii<9;ii++){
-    rotations_ustep[ii]=rescaled_transf.rotations[ii];
-}
-int num_OMP_Threads(1);
-bool keep_pixels(false);
-
-//int nRealThreads;
-
-size_t i,indl;
-int    j,indX,indY,indZ,indE;
-double s,err; 
-size_t nDimX(strides[0]),nDimY(strides[1]),nDimZ(strides[2]);
-
-MDDataObjects::MDDataPoint<> unPacker(const_cast<char *>(source_pix_buf),nDims,2,3);
-// min-max value initialization
-
-pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
-pix_Xmax=pix_Ymax=pix_Zmax=pix_Emax=- std::numeric_limits<double>::max();
-//
-// work at least for MSV 2008
-#ifdef _OPENMP  
-omp_set_num_threads(num_OMP_Threads);
-
-
-#pragma omp parallel default(none), private(i,j0,xt,yt,zt,xt1,yt1,zt1,Et,indX,indY,indZ,indE), \
-     shared(actual_pix_range,this->pix,ok,ind, \
-     this->nPixels,newsqw), \
-     firstprivate(pix_Xmin,pix_Ymin,pix_Zmin,pix_Emin, pix_Xmax,pix_Ymax,pix_Zmax,pix_Emax,\
-                  ignote_all,ignore_nan,ignore_inf,ignore_something,transform_energy,
-                  ebin_inv,Inf,trf,\
-                  nDimX,nDimY,nDimZ,nDimE), \
-     reduction(+:nPixel_retained)
-#endif
-{
-//	#pragma omp master
-//{
-//    nRealThreads= omp_get_num_threads()
-//	 mexPrintf(" n real threads %d :\n",nRealThread);}
-
-#pragma omp for schedule(static,1)
-    for(i=0;i<nPix;i++){
-
-          s  = unPacker.getSignal(i);
-          err= unPacker.getError(i);
-      // Check for the case when either data.s or data.e contain NaNs or Infs, but data.npix is not zero.
-      // and handle according to options settings.
-            if(ignore_something){
-                if(ignote_all){
-                    if(s==Inf||isNaN(s)||
-                    err==Inf ||isNaN(err)){
-                            continue;
-                    }
-                }else if(ignore_nan){
-                    if(isNaN(s)||isNaN(err)){
-                        continue;
-                    }
-                }else if(ignore_inf){
-                    if(s==Inf||err==Inf){
-                        continue;
-                    }
-                }
-            }
-            indl=0;
-            bool out(false);
-            for(j=nRecDims;j<nDims;j++){
-           // transform orthogonal dimensions
-              Et=(unPacker.getDataField(j,i)-shifts[j])*axis_step_inv[j];
-
-              if(Et<min_limit[j]||Et>=max_limit[j]){
-                  out = true;
-                  continue;
-              }else{
-                  indE=(unsigned int)floor(Et-min_limit[3]);
-              }
-              indl+=indE*strides[j];
-              rN[j]=Et;
-            }
-            if(out)continue;
-
-
-      // Transform the coordinates u1-u4 into the new projection axes, if necessary
-      //    indx=[(v(1:3,:)'-repmat(trans_bott_left',[size(v,2),1]))*rot_ustep',v(4,:)'];  % nx4 matrix
-            xt1=unPacker.getDataField(0,i)   -shifts[0];
-            yt1=unPacker.getDataField(1,i)   -shifts[1];
-            zt1=unPacker.getDataField(2,i)   -shifts[2];
-
- 
-            xt=xt1*rotations_ustep[0]+yt1*rotations_ustep[3]+zt1*rotations_ustep[6];
-            if(xt<min_limit[0]||xt>=max_limit[0]){
-                continue;
-            }
-
-            yt=xt1*rotations_ustep[1]+yt1*rotations_ustep[4]+zt1*rotations_ustep[7];
-            if(yt<min_limit[1]||yt>=max_limit[1]){
-                continue;
-            }
-
-            zt=xt1*rotations_ustep[2]+yt1*rotations_ustep[5]+zt1*rotations_ustep[8];
-            if(zt<min_limit[2]||zt>=max_limit[2]) {
-                continue;
-            }
-            nPixel_retained++;
-
-
-
-//     indx=indx(ok,:);    % get good indices (including integration axes and plot axes with only one bin)
-            indX=(int)floor(xt-min_limit[0]);
-            indY=(int)floor(yt-min_limit[1]);
-            indZ=(int)floor(zt-min_limit[2]);
-          
-//
-            indl += indX*nDimX+indY*nDimY+indZ*nDimZ;
- // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
-#pragma omp atomic
-            data[indl].s   +=s;  
-#pragma omp atomic
-            data[indl].err +=err;
-#pragma omp atomic
-            data[indl].npix++;
-#pragma omp atomic
-            // this request substantial thinking -- will not do it this way as it is very slow
-           // this->pix_array[indl].cell_memPixels.push_back(pix);
-
-//
-//    actual_pix_range = [min(actual_pix_range(1,:),min(indx,[],1));max(actual_pix_range(2,:),max(indx,[],1))];  % true range of data
-            if(xt<pix_Xmin)pix_Xmin=xt;
-            if(xt>pix_Xmax)pix_Xmax=xt;
-
-            if(yt<pix_Ymin)pix_Ymin=yt;
-            if(yt>pix_Ymax)pix_Ymax=yt;
-
-            if(zt<pix_Zmin)pix_Zmin=zt;
-            if(zt>pix_Zmax)pix_Zmax=zt;
-
-     
-
-    } // end for i -- imlicit barrier;
-#pragma omp critical
-    {
-        if(boxMin[0]>pix_Xmin/axis_step_inv[0])boxMin[0]=pix_Xmin/axis_step_inv[0];
-        if(boxMin[1]>pix_Ymin/axis_step_inv[1])boxMin[1]=pix_Ymin/axis_step_inv[1];
-        if(boxMin[2]>pix_Zmin/axis_step_inv[2])boxMin[2]=pix_Zmin/axis_step_inv[2];
-  
-
-        if(boxMax[0]<pix_Xmax/axis_step_inv[0])boxMax[0]=pix_Xmax/axis_step_inv[0];
-        if(boxMax[1]<pix_Ymax/axis_step_inv[1])boxMax[1]=pix_Ymax/axis_step_inv[1];
-        if(boxMax[2]<pix_Zmax/axis_step_inv[2])boxMax[2]=pix_Zmax/axis_step_inv[2];
-
-        for(j=nRecDims;j<nDims;j++){
-            if(boxMin[j]>rN[j]/axis_step_inv[j])boxMin[j]=rN[j]/axis_step_inv[j];
-            if(boxMax[j]<rN[j]/axis_step_inv[j])boxMax[j]=rN[j]/axis_step_inv[j];
-        }
-    }
-} // end parallel region
-
-for(unsigned int ii=0;ii<nDims;ii++){
-    MDdata->min_value[ii] = boxMin[ii];
-    MDdata->max_value[ii] = boxMax[ii];
-}
-
-return nPixel_retained;
-}
-
 
 } //namespace MDAlgorithms
 } //namespace Mantid

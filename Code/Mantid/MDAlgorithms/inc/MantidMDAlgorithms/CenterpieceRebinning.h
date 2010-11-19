@@ -11,7 +11,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 
-#include "CenterpieceRebinningFunctions.h"
+#include "MantidMDAlgorithms/CenterpieceRebinningFunctions.h"
 
 namespace Mantid
 {
@@ -54,7 +54,7 @@ private:
   // the function protected for testing purposes; they are actually private to this algorithm.
 protected:
 
-    size_t rebin_dataset(const transf_matrix &rescaled_transf, const std::vector<size_t> &strides,const char *source_pix_buf, size_t nPix, MDDataObjects::MD_DATA *data);
+ 
 
 };
 }
