@@ -16,6 +16,8 @@
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 
+#include <numeric>
+
 namespace Mantid
 {
   namespace API
@@ -73,6 +75,7 @@ namespace Mantid
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
     }
+
 
     //---------------------------------------------------------------------------------------
     /** Set the instrument
@@ -287,6 +290,67 @@ namespace Mantid
     }
 
 
+
+
+    //---------------------------------------------------------------------------------------
+    /** Integrate all the spectra in the matrix workspace within the range given.
+     * Default implementation, can be overridden by base classes if they know something smarter!
+     *
+     * @param out returns the vector where there is one entry per spectrum in the workspace. Same
+     *            order as the workspace indices.
+     * @param minX minimum X bin to use in integrating.
+     * @param maxX maximum X bin to use in integrating.
+     * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+     */
+    void MatrixWorkspace::getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const
+    {
+      //Start with empty vector
+      out.resize(this->getNumberHistograms(), 0.0);
+
+      //Run in parallel if the implementation is threadsafe
+      PARALLEL_FOR_IF( this->threadSafe() )
+      for (int wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
+      {
+        // Get Handle to data
+        const Mantid::MantidVec& x=this->readX(wksp_index);
+        const Mantid::MantidVec& y=this->readY(wksp_index);
+        // If it is a 1D workspace, no need to integrate
+        if (x.size()==2)
+        {
+          out[wksp_index] = y[0];
+        }
+        else
+        {
+          // Iterators for limits - whole range by default
+          Mantid::MantidVec::const_iterator lowit, highit;
+          lowit=x.begin();
+          highit=x.end()-1;
+
+          //But maybe we don't want the entire range?
+          if (!entireRange)
+          {
+            // If the first element is lower that the xmin then search for new lowit
+            if ((*lowit) < minX)
+              lowit = std::lower_bound(x.begin(),x.end(),minX);
+            // If the last element is higher that the xmax then search for new lowit
+            if ((*highit) > maxX)
+              highit = std::upper_bound(lowit,x.end(),maxX);
+          }
+
+          // Get the range for the y vector
+          Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
+          Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
+          double sum(0.0);
+          if( distmin <= distmax )
+          {
+            // Integrate
+            sum = std::accumulate(y.begin() + distmin,y.begin() + distmax,0.0);
+          }
+          //Save it in the vector
+          out[wksp_index] = sum;
+        }
+      }
+    }
 
     //---------------------------------------------------------------------------------------
     /** Get a constant reference to the Sample associated with this workspace.
@@ -930,7 +994,7 @@ namespace Mantid
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment)  const
     {
-      if (dim1Increment<0 || dim1Increment >= this->dataX(0).size())
+      if (dim1Increment<0 || dim1Increment >= static_cast<long>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -946,7 +1010,7 @@ namespace Mantid
 
     Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment)  const
     {
-      if (dim1Increment<0 || dim1Increment >= this->dataX(0).size())
+      if (dim1Increment<0 || dim1Increment >= static_cast<long>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }

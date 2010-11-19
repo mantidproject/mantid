@@ -174,6 +174,10 @@ namespace Mantid
       virtual Kernel::cow_ptr<MantidVec> refX(const int index) const = 0;
       /// Set the specified X array to point to the given existing array
       virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) = 0;
+
+      /// Return a vector with the integrated counts for all spectra withing the given range
+      virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
+
       //----------------------------------------------------------------------
 
       int axes() const;

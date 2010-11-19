@@ -48,6 +48,16 @@ using Kernel::DateAndTime;
   {
   }
 
+  /** () operator: return the tof (X value) of the event.
+   * This is useful for std operations like comparisons
+   * and std::lower_bound
+   */
+  double TofEvent::operator()() const
+  {
+    return this->m_tof;
+  }
+
+
   /** Copy from another TofEvent object
    * @param rhs Other TofEvent to copy.
    * @return reference to this.
@@ -62,12 +72,27 @@ using Kernel::DateAndTime;
   /** Comparison operator.
    * @param rhs: the other TofEvent to compare.
    * @return true if the TofEvent's are identical.*/
-  bool TofEvent::operator==(const TofEvent & rhs)
+  bool TofEvent::operator==(const TofEvent & rhs) const
   {
     return  (this->m_tof == rhs.m_tof) &&
             (this->m_pulsetime == rhs.m_pulsetime);
   }
 
+  /** < comparison operator, using the TOF to do the comparison.
+   * @param rhs: the other TofEvent to compare.
+   * @return true if this->m_tof < rhs.m_tof*/
+  bool TofEvent::operator<(const TofEvent & rhs) const
+  {
+    return (this->m_tof < rhs.m_tof);
+  }
+
+  /** < comparison operator, using the TOF to do the comparison.
+   * @param rhs_tof: the other time of flight to compare.
+   * @return true if this->m_tof < rhs.m_tof*/
+  bool TofEvent::operator<(const double rhs_tof) const
+  {
+    return (this->m_tof < rhs_tof);
+  }
 
   /// Return the time of flight, as a double, in nanoseconds.
   double TofEvent::tof() const
@@ -216,16 +241,25 @@ using Kernel::DateAndTime;
    * @param e1 first event
    * @param e2 second event
    *  */
-  bool compareEventTof(TofEvent e1, TofEvent e2)
+  bool compareEventTof(const TofEvent & e1, const TofEvent& e2)
   {
     return (e1.tof() < e2.tof());
   }
+
+//  /** Compare two events' TOF, return true if e1 should be before e2.
+//   * @param e1 first event
+//   * @param e2_tof second event's time of flight
+//   *  */
+//  bool compareEventTof(const TofEvent & e1, const double e2_tof)
+//  {
+//    return (e1.tof() < e2.tof());
+//  }
 
   /** Compare two events' FRAME id, return true if e1 should be before e2.
   * @param e1 first event
   * @param e2 second event
   *  */
-  bool compareEventPulseTime(TofEvent e1, TofEvent e2)
+  bool compareEventPulseTime(const TofEvent& e1, const TofEvent& e2)
   {
     return (e1.pulseTime() < e2.pulseTime());
   }
@@ -1106,6 +1140,94 @@ using Kernel::DateAndTime;
 
   }
 
+
+
+  // --------------------------------------------------------------------------
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param minX minimum X bin to use in integrating.
+   * @param maxX maximum X bin to use in integrating.
+   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @return the integrated number of events.
+   */
+  double EventList::integrate(const double minX, const double maxX, const bool entireRange) const
+  {
+    //The event list must be sorted by TOF!
+    this->sortTof();
+
+    if (has_weights)
+    {
+      //Nothing in the list?
+      if (weightedEvents.size() == 0)
+        return 0.0;
+
+      // Iterators for limits - whole range by default
+      std::vector<WeightedEvent>::iterator lowit, highit;
+      lowit=weightedEvents.begin();
+      highit=weightedEvents.end();
+
+      //But maybe we don't want the entire range?
+      if (!entireRange)
+      {
+        //If a silly range was given, return 0.
+        if (maxX < minX)
+          return 0.0;
+
+        // If the first element is lower that the xmin then search for new lowit
+        if (lowit->tof() < minX)
+          lowit = std::lower_bound(weightedEvents.begin(),weightedEvents.end(),minX);
+        // If the last element is higher that the xmax then search for new lowit
+        if ((highit-1)->tof() > maxX)
+        {
+          highit = std::upper_bound(lowit,weightedEvents.end(), TofEvent(maxX, 0), compareEventTof);
+        }
+      }
+
+      // Sum up all the weights
+      double sum(0.0);
+      std::vector<WeightedEvent>::iterator it;
+      for (it = lowit; it != highit; it++)
+        sum += it->weight();
+
+      //Give it
+      return sum;
+    }
+    else
+    {
+      //Nothing in the list?
+      if (events.size() == 0)
+        return 0.0;
+
+      // Iterators for limits - whole range by default
+      std::vector<TofEvent>::iterator lowit, highit;
+      lowit=events.begin();
+      highit=events.end();
+
+      //But maybe we don't want the entire range?
+      if (!entireRange)
+      {
+        //If a silly range was given, return 0.
+        if (maxX < minX)
+          return 0.0;
+
+        // If the first element is lower that the xmin then search for new lowit
+        if (lowit->tof() < minX)
+          lowit = std::lower_bound(events.begin(),events.end(),minX);
+        // If the last element is higher that the xmax then search for new lowit
+        if ((highit-1)->tof() > maxX)
+        {
+          highit = std::upper_bound(lowit,events.end(), TofEvent(maxX, 0), compareEventTof);
+        }
+      }
+
+      // The distance between the two iterators (they are NOT inclusive) = the number of events
+      double sum = std::distance(lowit, highit);
+
+      //Give it
+      return sum;
+    }
+
+  }
 
 
 

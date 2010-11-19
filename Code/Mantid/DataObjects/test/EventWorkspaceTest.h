@@ -100,6 +100,40 @@ public:
   }
 
 
+  /** Create event workspace with:
+   * 500 pixels
+   * 1000 histogrammed bins.
+   * 2 events per bin
+   */
+  EventWorkspace_sptr createFlatEventWorkspace()
+  {
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(NUMPIXELS,1,1);
+
+    //Make fake events
+    for (int pix=0; pix<NUMPIXELS; pix++)
+    {
+      for (int i=0; i<NUMBINS-1; i++)
+      {
+        //Two events per bin
+        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+      }
+    }
+    retVal->doneLoadingData();
+
+    //Create the x-axis for histogramming.
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(NUMBINS);
+    for (int i = 0; i < NUMBINS; ++i)
+      xRef[i] = i*BIN_DELTA;
+    //Set all the histograms at once.
+    retVal->setAllX(axis);
+    return retVal;
+  }
+
+
 
   EventWorkspace_sptr CreateRandomEventWorkspace(int numbins, int numpixels)
   {
@@ -170,7 +204,7 @@ public:
     ew->doneAddingEventLists();
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 1023+1);
     //but there are still only 500 entries in the spectra map, since only 500 of them have detectors
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), 500);
+    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), NUMPIXELS);
 
   }
 
@@ -413,6 +447,48 @@ public:
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
     TS_ASSERT_EQUALS( (*el1.dataY())[1], 2);
   }
+
+
+  void testIntegrateSpectra_entire_range()
+  {
+    EventWorkspace_sptr ws = createFlatEventWorkspace();
+    MantidVec sums;
+    ws->getIntegratedSpectra(sums, 0, 0, true);
+    for (int i = 0; i < NUMPIXELS; ++i)
+    {
+      TS_ASSERT_EQUALS( sums[i], (NUMBINS-1) * 2.0 );;
+    }
+  }
+  void testIntegrateSpectra_empty_range()
+  {
+    EventWorkspace_sptr ws = createFlatEventWorkspace();
+    MantidVec sums;
+    ws->getIntegratedSpectra(sums, 10, 5, false);
+    for (int i = 0; i < NUMPIXELS; ++i)
+    {
+      TS_ASSERT_EQUALS( sums[i], 0.0 );;
+    }
+  }
+
+  void testIntegrateSpectra_partial_range()
+  {
+    EventWorkspace_sptr ws = createFlatEventWorkspace();
+    MantidVec sums;
+    //This will include a single bin
+    ws->getIntegratedSpectra(sums, BIN_DELTA*1.9, BIN_DELTA*3.1, false);
+    for (int i = 0; i < NUMPIXELS; ++i)
+    {
+      TS_ASSERT_EQUALS( sums[i], 2 );;
+    }
+  }
+
+
+
+
+
+
+
+
 
   //------------------------------------------------------------------------------
   /// Linux-only method for getting memory usage

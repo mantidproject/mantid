@@ -221,6 +221,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   Kernel::DateAndTime getFirstPulseTime() const;
 
+  virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
+
 private:
   /// NO COPY ALLOWED
   EventWorkspace(const EventWorkspace&);

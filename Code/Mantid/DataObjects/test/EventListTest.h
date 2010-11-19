@@ -835,7 +835,39 @@ public:
     TS_ASSERT_EQUALS(old_num, this->el.getWeightedEvents().size());
     TS_ASSERT_EQUALS(this->el.getWeightedEvents()[0].tof(), 250.0);
     TS_ASSERT_EQUALS(this->el.getWeightedEvents()[1].tof(), 12750.0);
+  }
 
+
+  void test_integrate()
+  {
+    this->fake_uniform_data();
+    TS_ASSERT_EQUALS( el.integrate(0, MAX_TOF, false),  el.getNumberEvents() );
+    TS_ASSERT_EQUALS( el.integrate(10, 1, true),  el.getNumberEvents() );
+    //Two events per bin
+    TS_ASSERT_EQUALS( el.integrate(0, BIN_DELTA, false),  2 );
+    TS_ASSERT_EQUALS( el.integrate(BIN_DELTA*10, BIN_DELTA*20, false),  20 );
+    //Exactly on the first event's TOF?
+    TS_ASSERT_EQUALS( el.integrate(100, 100, false),  1 );
+    //Go past the ends?
+    TS_ASSERT_EQUALS( el.integrate(-MAX_TOF, MAX_TOF*2, false), el.getNumberEvents()  );
+    //Give max < min ?
+    TS_ASSERT_EQUALS( el.integrate(1000, 100, false),  0 );
+  }
+
+  void test_integrate_weighted()
+  {
+    this->fake_uniform_data_weights();
+    TS_ASSERT_EQUALS( el.integrate(0, MAX_TOF, false),  el.getNumberEvents()*2.0 );
+    TS_ASSERT_EQUALS( el.integrate(10, 1, true),  el.getNumberEvents()*2.0 );
+    //Two events per bin
+    TS_ASSERT_EQUALS( el.integrate(0, BIN_DELTA, false),  2*2.0 );
+    TS_ASSERT_EQUALS( el.integrate(BIN_DELTA*10, BIN_DELTA*20, false),  20*2.0 );
+    //Exactly on the first event's TOF?
+    TS_ASSERT_EQUALS( el.integrate(100, 100, false),  1*2.0 );
+    //Go past the ends?
+    TS_ASSERT_EQUALS( el.integrate(-MAX_TOF, MAX_TOF*2, false), el.getNumberEvents()*2.0  );
+    //Give max < min ?
+    TS_ASSERT_EQUALS( el.integrate(1000, 100, false),  0 );
   }
 
 
@@ -1129,6 +1161,7 @@ public:
     }
   }
 
+  /** Create a uniform event list with no weights*/
   void fake_uniform_data()
   {
     //Clear the list
@@ -1141,6 +1174,8 @@ public:
       el += TofEvent( tof, rand()%1000);
     }
   }
+
+  /** Create a uniform event list with each event weight of 2.0, error 2.5 */
   void fake_uniform_data_weights()
   {
     //Clear the list

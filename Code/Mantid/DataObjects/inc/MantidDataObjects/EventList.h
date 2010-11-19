@@ -70,7 +70,10 @@ public:
   /// Copy from another TofEvent object
   TofEvent& operator=(const TofEvent&rhs);
 
-  bool operator==(const TofEvent & rhs);
+  double operator()() const;
+  bool operator==(const TofEvent & rhs) const;
+  bool operator<(const TofEvent & rhs) const;
+  bool operator<(const double rhs_tof) const;
 
 
   /// Return the time of flight, as a double, in nanoseconds.
@@ -269,6 +272,8 @@ public:
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 
   void generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
+
+  double integrate(const double minX, const double maxX, const bool entireRange) const;
 
   void convertTof(const double factor, const double offset=0.);
 
