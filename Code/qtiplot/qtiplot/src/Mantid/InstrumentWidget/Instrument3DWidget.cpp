@@ -35,7 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 static const QRgb BLACK = qRgb(0,0,0);
-static const bool SHOWTIMING = false;
+static const bool SHOWTIMING = true;
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
@@ -298,36 +298,58 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   Timer timer2;
 
   const int n_spec = m_workspace_indices.size();
-  std::vector<double> integrated_values(n_spec, 0.0);
+  std::vector<double> integrated_values( n_spec, -1.0 );
+  std::vector<double> integrated_values_per_workspace_index;
+
+  //Use the workspace function to get the integrated spectra
+  mWorkspace->getIntegratedSpectra(integrated_values_per_workspace_index, (this->mBinMinValue), (this->mBinMaxValue), (this->mBinEntireRange));
 
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
-  for( int i = 0; i < n_spec; ++i )
+
+  //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
+  for (int i=0; i < n_spec; i++)
   {
     int widx = m_workspace_indices[i];
     if( widx != -1 )
     {
-      double sum = integrateSingleSpectra(workspace, widx);
+      double sum = integrated_values_per_workspace_index[widx];
       integrated_values[i] = sum;
-      if( sum < mWkspDataMin )
-      {
-        mWkspDataMin = sum;
-      }
-      else if( sum > mWkspDataMax )
-      {
-        mWkspDataMax = sum;
-      }
-      else continue;
-
-    }
-    else
-    {
-      integrated_values[i] = -1.0;
+        if( sum < mWkspDataMin )
+          mWkspDataMin = sum;
+        else if( sum > mWkspDataMax )
+          mWkspDataMax = sum;
     }
   }
-  //No need to store these now
-  m_workspace_indices.clear();
-  m_detector_ids.clear();
+
+//  //std::cout << "Number of threads: " << omp_get_num_threads() << "\n";
+//  //PARALLEL_FOR_NO_WSP_CHECK() //1(mWorkspace)
+//  for( int i = 0; i < n_spec; ++i )
+//  {
+  //    int widx = m_workspace_indices[i];
+  //    if( widx != -1 )
+//    {
+//      double sum = integrateSingleSpectra(workspace, widx);
+//      integrated_values[i] = sum;
+//      if( sum < mWkspDataMin )
+//      {
+//        mWkspDataMin = sum;
+//      }
+//      else if( sum > mWkspDataMax )
+//      {
+//        mWkspDataMax = sum;
+//      }
+//      else continue;
+//
+//    }
+//    else
+//    {
+//      integrated_values[i] = -1.0;
+//    }
+//  }
+//  //No need to store these now
+//  m_workspace_indices.clear();
+//  m_detector_ids.clear();
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts():Integrating workspace took " << timer2.elapsed() << " seconds\n";
 
@@ -348,9 +370,9 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   QwtDoubleInterval wksp_interval(mWkspDataMin, mWkspDataMax);
   QwtDoubleInterval user_interval(mDataMinValue, mDataMaxValue);
 
-  std::vector<double>::const_iterator val_end = integrated_values.end();
+  std::vector<double>::iterator val_end = integrated_values.end();
   int idx(0);
-  for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end;
+  for( std::vector<double>::iterator val_itr = integrated_values.begin(); val_itr != val_end;
       ++val_itr, ++idx )
   {
     unsigned char c_index(mColorMap.getTopCIndex());
@@ -539,8 +561,11 @@ void Instrument3DWidget::setDataMaxEdited(bool state)
 
 //------------------------------------------------------------------------------------------------
 /**
- * This method returns the Spectra Index list for the input dectector id list.
- * @param idDecVec is list of detector id's
+ * This method returns the workspace index list for the input dectector id list:
+ *  i.e. the detector at index i of det_ids has a spectrum at workspace index given in
+ *      m_workspace_indices[i].
+ *
+ * @param det_ids is list of detector id's
  */
 void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids)
 {
