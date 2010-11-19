@@ -86,9 +86,6 @@ private slots:
   void runFrontGroupGroupPairComboBox(int index);
 
   ///
-  void runHomePeriodBox1(const QString& text);
-
-  ///
   void muonAnalysisHelpClicked();
 
   ///
@@ -177,10 +174,6 @@ private:
   /// name of workspace
   std::string m_workspace_name;
 
-  /// period. when set to zero means no period (no workspace grouping)
-  /// use it to create a workspace name
-  int m_period;
-
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;
 
@@ -223,7 +216,11 @@ private:
   int getPairNumberFromRow(int row);
 
   /// first good bin returend in ms
+  /// returned as the absolute value of first-good-bin minus time zero
   QString firstGoodBin();
+
+  /// time zero returned in ms
+  QString timeZero();
 
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 

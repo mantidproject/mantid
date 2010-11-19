@@ -69,7 +69,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
 {
 }
@@ -128,9 +128,6 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
-  // front select 1st period combobox
-  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runHomePeriodBox1(const QString&)));
-
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
   connect(m_uiForm.muonAnalysisHelpGrouping, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpGroupingClicked()));
@@ -148,16 +145,6 @@ void MuonAnalysis::initLayout()
 
 
   connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
-}
-
-
-/**
-* Muon Analysis help (slot)
-*/
-void MuonAnalysis::runHomePeriodBox1(const QString& text)
-{
-  std::stringstream str(text.toStdString());
-  str >> m_period;
 }
 
 
@@ -386,7 +373,6 @@ void MuonAnalysis::runLoadCurrent()
 
     Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
-    m_period = 1;
   }
   else
   {
@@ -613,6 +599,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
  * Pair table changed, e.g. if:         (slot)
  *
  *    1) user changed alpha value
+ *    2) pair name changed
  *
  * @param row 
  * @param column
@@ -827,7 +814,6 @@ void MuonAnalysis::inputFileChanged()
 
     Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
-    m_period = 1;
   }
   else
   {
@@ -922,7 +908,7 @@ void MuonAnalysis::exitClicked()
 }
 
 /**
- * Guess Alpha (slot)
+ * Guess Alpha (slot). It cal
  */
 void MuonAnalysis::guessAlphaClicked()
 {
@@ -941,11 +927,10 @@ void MuonAnalysis::guessAlphaClicked()
     if (!idsF || !idsB)
       return;
 
-    QString periodStr = "";
-    if (m_period > 0)  
-      periodStr += QString("_") + iToString(m_period).c_str();
+    QString inputWS = m_workspace_name.c_str() + QString("Grouped");
+    if ( m_uiForm.homePeriodBox2->isEnabled() )
+      inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 
-    QString inputWS = m_workspace_name.c_str() + periodStr;
 
     QString pyString;
 
@@ -1696,7 +1681,21 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 
 
  /**
+ * Time zero returend in ms
+ */
+QString MuonAnalysis::timeZero()
+{
+  std::stringstream str(m_uiForm.timeZeroFront->text().toStdString()); 
+  double fgb;
+  str >> fgb;
+  fgb /= 1000.0;  // convert from ns to ms
+
+  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+}
+
+ /**
  * first good bin returend in ms
+ * returned as the absolute value of first-good-bin minus time zero
  */
 QString MuonAnalysis::firstGoodBin()
 {
@@ -1705,7 +1704,17 @@ QString MuonAnalysis::firstGoodBin()
   str >> fgb;
   fgb /= 1000.0;  // convert from ns to ms
 
-  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+  std::stringstream str2(m_uiForm.timeZeroFront->text().toStdString()); 
+  double tz;
+  str2 >> tz;
+  tz /= 1000.0;  // convert from ns to ms
+
+  double retVal = fgb - tz;
+  if (retVal < 0)
+    retVal = 0.0;
+
+
+  return QString((boost::lexical_cast<std::string>(retVal)).c_str());
 }
 
 
