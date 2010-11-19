@@ -342,27 +342,5 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xVal
 }
 
 
-void IkedaCarpenterPV::setActiveParameter(int i,double value)
-{
-  int j = indexOfActive(i);
-
-  if (parameterName(j) == "Eta") 
-    setParameter(j,tanh(value)/2.0+0.5,false);                            ///sqrt(1./value),false);
-  else
-    setParameter(j,value,false);
-}
-
-double IkedaCarpenterPV::activeParameter(int i)const
-{
-  int j = indexOfActive(i);
-
-  if (parameterName(j) == "Sigma") 
-    return gsl_atanh(2.0*(getParameter(j)-0.5)); //1./pow(getParameter(j),2);
-  else
-    return getParameter(j);
-}
-
-
-
 } // namespace CurveFitting
 } // namespace Mantid

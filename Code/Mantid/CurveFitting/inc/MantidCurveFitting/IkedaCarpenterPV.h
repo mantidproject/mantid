@@ -59,9 +59,6 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "IkedaCarpenterPV";}
-      //virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
-      virtual void setActiveParameter(int i,double value);
-      virtual double activeParameter(int i)const;
 
       // define these instead of functionLocal if you want to custom specify the calculation 
       // domain for this function
@@ -71,14 +68,7 @@ namespace Mantid
     protected:
 
       virtual void functionLocal(double* out, const double* xValues, const int& nData)const;
-      //{
-      //  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-      //}
-
       virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData);
-      //{
-      //  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-      //}
 
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
