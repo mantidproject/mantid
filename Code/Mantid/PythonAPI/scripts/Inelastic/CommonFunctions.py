@@ -48,7 +48,7 @@ def loaded_file(file_type):
     """
     global _last_mono, _loaded_files
     try:
-        if file_type == 'mono':
+        if file_type.startswith('mono'):
             if _last_mono is None:
                 raise ValueError("A mono run cannot be retrieved, none has been loaded yet")
             file_type = _last_mono
@@ -98,15 +98,12 @@ def load_run(run_number, file_type='mono-sample',force=False):
 
     ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
-        loader = LoadSNSEventNexus(Filename=filename, OutputWorkspace=output_name) 
-        return mtd[output_name]
+        LoadSNSEventNexus(Filename=filename, OutputWorkspace=output_name) 
     elif ext.startswith(".n"):
-        loader = LoadNexus(filename, output_name)
+        LoadNexus(filename, output_name)
     elif filename.endswith("_event.dat"):
         #load the events
-        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
-        det_info_file = prefix + "_detector.sca"        
-        return loader.workspace()
+        LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)       
     else:
         LoadRaw(filename, output_name)
         #LoadDetectorInfo(output_name, filename)

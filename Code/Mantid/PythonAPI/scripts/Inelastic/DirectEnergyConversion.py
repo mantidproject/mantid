@@ -119,7 +119,7 @@ class DirectEnergyConversion(object):
             else:
             	tzero = Tzero
             # apply T0 shift
-            ChangeBinOffset(raw_data, result_name, -tzero)
+            ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
             self.apply_detector_eff = True
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
@@ -150,7 +150,7 @@ class DirectEnergyConversion(object):
             	tzero = Tzero
             mon1_peak = 0.0
             # apply T0 shift
-            ChangeBinOffset(raw_data, result_name, -tzero)
+            ChangeBinOffset(data_ws, result_name, -tzero)
             self.apply_detector_eff = True
         else:
             # Do ISIS stuff for Ei
