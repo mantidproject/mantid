@@ -1445,7 +1445,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
   while( pyqt_itr.hasNext() )
   {
     QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + '/' + itemName;
+    QString scriptPath = qApp->applicationDirPath() + '/' + scriptsDir + '/' + itemName;
 
     if( QFileInfo(scriptPath).exists() ) {
       QString baseName = QFileInfo(scriptPath).baseName();
