@@ -319,7 +319,7 @@ def createPropertiesFile(filename):
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../instrument",
     "parameterDefinition.directory":"parameterDefinition.directory = ../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../scripts/Crystallography;../scripts/Disordered Materials;../scripts/Engineering;\\
-../scripts/Excitations;../scripts/Large Scale Structures;../scripts/Molecular Spectroscopy;\\
+../scripts/Inelastic;../scripts/Large Scale Structures;../scripts/Molecular Spectroscopy;\\
 ../scripts/Muons;../scripts/Neutrinos;../scripts/SANS;../scripts/""",
     "pythonscripts.directory":"pythonscripts.directory = ../scripts",
     "mantidqt.python_interfaces_directory":"mantidqt.python_interfaces_directory = ../scripts",
@@ -706,6 +706,16 @@ addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/Python
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
 scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",InstallDir)[0]
+
+# M. Gigg 2010-11-19: The Excitations directory was renamed. Unfortunately this causes the directory for the new installer to get left around
+# on certain setups that have used the scripts.  I could force a delete of the folder but if a user has added their own scripts then that would remove them too.
+# Here we just remove the pyc files so should be left with an empty directory
+# TODO: Put in a custom command to remove it if it is empty after install. This sounds simply but alas is not...
+addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
+addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
+addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes'})
+addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
+
 #-----------------------------------------------------------------------
 
 #-------------------------- Colormaps ------------------------------------

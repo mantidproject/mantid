@@ -2,8 +2,8 @@
 if "%1" == "" goto usage
 
 SETLOCAL
-if /i %1 == x86 SET MSI_NAME="Mantid.msi" && SET WIX_LIB="C:\Program Files\Windows Installer XML\bin\wixui.wixlib"
-if /i %1 == amd64 SET MSI_NAME="Mantid64.msi" && SET WIX_LIB="C:\Program Files (x86)\Windows Installer XML\bin\wixui.wixlib"
+if /i %1 == x86 SET MSI_NAME="Mantid.msi" && SET WIX_LOC="C:\Program Files\Windows Installer XML\bin"
+if /i %1 == amd64 SET MSI_NAME="Mantid64.msi" && SET WIX_LOC="C:\Program Files (x86)\Windows Installer XML\bin"
 
 if /i not %1 == x86 (
     if /i not %1 == amd64 (
@@ -18,7 +18,7 @@ python generateWxs.py
 if errorlevel 1 goto wxs_error
 candle tmp.wxs  
 if errorlevel 1 goto candle_error
-light -out %MSI_NAME% tmp.wixobj %WIX_LIB% -loc WixUI_en-us.wxl
+light -out %MSI_NAME% tmp.wixobj %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib  -loc WixUI_en-us.wxl
 if errorlevel 1 goto light_error
 python msiSize.py %MSI_NAME%
 ENDLOCAL

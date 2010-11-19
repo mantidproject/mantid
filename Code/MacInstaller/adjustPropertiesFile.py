@@ -11,7 +11,7 @@ replacements = {
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../../instrument",
     "parameterDefinition.directory":"parameterDefinition.directory = ../../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../../scripts/Crystallography;../../scripts/Disordered Materials;../../scripts/Engineering;\\
-../../scripts/Excitations;../../scripts/Large Scale Structures;../../scripts/Molecular Spectroscopy;\\
+../../scripts/Inelastic;../../scripts/Large Scale Structures;../../scripts/Molecular Spectroscopy;\\
 ../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS;../../scripts/""",
     "pythonscripts.directory":"pythonscripts.directory = ../../scripts",
     "mantidqt.python_interfaces_directory":"mantidqt.python_interfaces_directory = ../../scripts",
