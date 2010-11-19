@@ -44,7 +44,7 @@ whiteBeam1::whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings
   // load the Python function that will be run
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   QString pythonFileName =
-    scriptsdir.absoluteFilePath("Excitations/DetectorTestLib.py");
+    scriptsdir.absoluteFilePath("Inelastic/DetectorTestLib.py");
   loadFile(pythonFileName);
  
   // validate the user entries and create the Python script for this analysis
@@ -91,7 +91,7 @@ whiteBeam2::whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings
 {  // load the Python function that will be run
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   QString pythonFileName =
-    scriptsdir.absoluteFilePath("Excitations/DetectorTestLib.py");
+    scriptsdir.absoluteFilePath("Inelastic/DetectorTestLib.py");
   loadFile(pythonFileName);
   
   // validate the user entries and create the Python script for this analysis
@@ -161,7 +161,7 @@ backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, co
   // load the Python function that will be run
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   QString pythonFileName =
-    scriptsdir.absoluteFilePath("Excitations/DetectorTestLib.py");
+    scriptsdir.absoluteFilePath("Inelastic/DetectorTestLib.py");
   loadFile(pythonFileName);
  
   // validate the user entries and create the Python script for this analysis
