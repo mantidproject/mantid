@@ -179,19 +179,19 @@ public:
   {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
-    Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in1->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in2->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    Workspace2D_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    Workspace2D_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in3->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in4->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
@@ -217,6 +217,7 @@ public:
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
     saveGSS.setPropertyValue("SplitFiles", "False");
     saveGSS.setPropertyValue("Append", "0");
+    saveGSS.setPropertyValue("MultiplyByBinWidth", "1");
 
     TS_ASSERT_THROWS_NOTHING( saveGSS.execute());
     Poco::File focusfile(filename);
@@ -237,19 +238,19 @@ public:
       switch( bin_no )
       {
       case 1:
-        TS_ASSERT_DELTA(x, 1.5, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356, m_tol);
+        TS_ASSERT_DELTA(x, 2.0, m_tol);
+        TS_ASSERT_DELTA(y, 4.0, m_tol);
+        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
         break;
       case 2:
-        TS_ASSERT_DELTA(x, 2.5, m_tol);
+        TS_ASSERT_DELTA(x, 4.0, m_tol);
         TS_ASSERT_DELTA(y, 4.0, m_tol);
-        TS_ASSERT_DELTA(e, 2.82842712, m_tol);
+        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
         break;
       case 3:
-        TS_ASSERT_DELTA(x, 3.5, m_tol);
-        TS_ASSERT_DELTA(y, 6.0, m_tol);
-        TS_ASSERT_DELTA(e, 4.24264069, m_tol);
+        TS_ASSERT_DELTA(x, 6.0, m_tol);
+        TS_ASSERT_DELTA(y, 4.0, m_tol);
+        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
         break;
       default:
         TS_ASSERT( false );
