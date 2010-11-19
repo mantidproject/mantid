@@ -175,16 +175,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FitPeakExampleLorentzian.cpp" />
-    <ClCompile Include="FitPeakExampleLorentzianUseDerivatives.cpp" />
     <ClCompile Include="HelloWorldAlgorithm.cpp" />
     <ClCompile Include="ModifyData.cpp" />
     <ClCompile Include="PropertyAlgorithm.cpp" />
     <ClCompile Include="WorkspaceAlgorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FitPeakExampleLorentzian.h" />
-    <ClInclude Include="FitPeakExampleLorentzianUseDerivatives.h" />
     <ClInclude Include="HelloWorldAlgorithm.h" />
     <ClInclude Include="ModifyData.h" />
     <ClInclude Include="PropertyAlgorithm.h" />

@@ -15,12 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FitPeakExampleLorentzian.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FitPeakExampleLorentzianUseDerivatives.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HelloWorldAlgorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,12 +29,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FitPeakExampleLorentzian.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FitPeakExampleLorentzianUseDerivatives.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HelloWorldAlgorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
