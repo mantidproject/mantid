@@ -1152,8 +1152,11 @@ using Kernel::DateAndTime;
    */
   double EventList::integrate(const double minX, const double maxX, const bool entireRange) const
   {
-    //The event list must be sorted by TOF!
-    this->sortTof();
+    if (!entireRange)
+    {
+      //The event list must be sorted by TOF!
+      this->sortTof();
+    }
 
     if (has_weights)
     {

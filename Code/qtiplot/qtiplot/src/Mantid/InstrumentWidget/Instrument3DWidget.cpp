@@ -35,7 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 static const QRgb BLACK = qRgb(0,0,0);
-static const bool SHOWTIMING = true;
+static const bool SHOWTIMING = false;
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
