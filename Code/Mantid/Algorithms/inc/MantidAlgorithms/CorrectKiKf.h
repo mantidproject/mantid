@@ -22,7 +22,7 @@ namespace Algorithms
     <UL>
     <LI> InputWorkspace  	- The name of the input workspace. </LI>
     <LI> OutputWorkspace 	- The name of the output workspace. </LI>
-	  <LI> Emode  			    - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry) </LI>
+	  <LI> Emode  			    - The energy mode (1=direct geometry, 2=indirect geometry) </LI>
     <LI> Efixed 			    - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
     </UL>
 

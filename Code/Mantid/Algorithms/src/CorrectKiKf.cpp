@@ -18,6 +18,7 @@ DECLARE_ALGORITHM(CorrectKiKf)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace Geometry;
 
 /// Default constructor
 CorrectKiKf::CorrectKiKf() : Algorithm()
@@ -71,38 +72,74 @@ void CorrectKiKf::exec()
     g_log.information() << "Executing CorrectKiKf for event workspace" << std::endl;
     this->execEvent();
   }  
+  
 
-  const unsigned int size = inputWS->blocksize();
+  const unsigned int size = this->inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = inputWS->size() / size;
-  Progress prog(this,0.0,0.5,numberOfSpectra);
-  const bool histogram = inputWS->isHistogramData();
+  const int numberOfSpectra = this->inputWS->size() / size;
+  Progress prog(this,0.0,1.0,numberOfSpectra);
+  const bool histogram = this->inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
     
   const std::string emodeStr = getProperty("EMode");
   double efixedProp = getProperty("EFixed");
+
   if( efixedProp == EMPTY_DBL() )
   {
-    // Check if it has been store on the run object for this workspace
-    if( inputWS->run().hasProperty("Ei") )
+    if (emodeStr == "Direct")
     {
-      Kernel::Property* eiprop = inputWS->run().getProperty("Ei");
-      efixedProp = boost::lexical_cast<double>(eiprop->value());
-      g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
+      // Check if it has been store on the run object for this workspace
+      if( this->inputWS->run().hasProperty("Ei"))
+      {
+        Kernel::Property* eiprop = this->inputWS->run().getProperty("Ei");
+        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
+      }
+      else
+      {
+        throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+      }
     }
     else
     {
-      throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+      // If not specified, will try to get Ef from the parameter file for indirect geometry, 
+      // but it will be done for each spectrum separately, in case of different analyzer crystals
     }
   }
-  
 
-  // There are 4 cases: (direct, indirect) * (histogram,no_histogram)
 
   PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) 
   {
     PARALLEL_START_INTERUPT_REGION 
+    double Efi = 0;
+    // Now get the detector object for this histogram to check if monitor
+    // or to get Ef for indirect geometry
+    if (emodeStr == "Indirect") 
+    {
+      if ( efixedProp != EMPTY_DBL()) Efi = efixedProp;
+      else try 
+      {
+        IDetector_sptr det = inputWS->getDetector(i);  
+        if (!det->isMonitor())
+        {
+          std::vector< double >  wsProp=det->getNumberParameter("Efixed");
+          if ( wsProp.size() > 0 )
+          {
+            Efi=wsProp.at(0);
+            g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     
+          }
+          else
+          { 
+            g_log.information() <<"Ef not found for spectrum "<< i << std::endl;
+            throw std::invalid_argument("No Ef value has been set or found.");
+          }
+        }
+
+      }
+      catch(std::runtime_error&) { g_log.information() << "Spectrum " << i << ": cannot find detector" << "\n"; }
+    }
+
     MantidVec& yOut = outputWS->dataY(i);
     MantidVec& eOut = outputWS->dataE(i);
     const MantidVec& xIn = inputWS->readX(i);
@@ -115,24 +152,25 @@ void CorrectKiKf::exec()
       const double deltaE = histogram ? 0.5*(xIn[j]+xIn[j+1]) : xIn[j];
       double Ei=0.;
       double Ef=0.;
-      double kioverkf = 0.;
+      double kioverkf = 1.;
       if (emodeStr == "Direct")  //Ei=Efixed
       {
-        Ei=efixedProp;
-        Ef=efixedProp - deltaE;
+        Ei = efixedProp;
+        Ef = Ei - deltaE;
       } else                     //Ef=Efixed
-      {
-        Ef=efixedProp;
-        Ei=efixedProp + deltaE;
+      { 
+        Ef = Efi;
+        Ei = Efi + deltaE;
       }
       // if Ei or Ef is negative, it should be a warning
       // however, if the intensity is 0 (histogram goes to energy transfer higher than Ei) it is still ok, so no warning.
-      if ((Ei < 0)||(Ef < 0))
+      if ((Ei <= 0)||(Ef <= 0))
       {
         kioverkf=0.;
-        if (yIn[j]!=0) negativeEnergyWarning=true;//g_log.information() <<"Ef < 0!!!! Spectrum:"<<i<<std::endl;
+        if (yIn[j]!=0) negativeEnergyWarning=true;
       } 
       else kioverkf = std::sqrt( Ei / Ef );
+
       yOut[j] = yIn[j]*kioverkf;
       eOut[j] = eIn[j]*kioverkf;
     }
@@ -141,7 +179,8 @@ void CorrectKiKf::exec()
   }//end for i 
   PARALLEL_CHECK_INTERUPT_REGION
 
-  if (negativeEnergyWarning) g_log.information() <<"Ef < 0 or Ei <0 in at least one spectrum!!!!"<<std::endl;
+  if (negativeEnergyWarning) g_log.information() <<"Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"<<std::endl;
+  if ((negativeEnergyWarning) && ( efixedProp == EMPTY_DBL())) g_log.information()<<"Try to set fixed energy"<<std::endl ;
   this->setProperty("OutputWorkspace",this->outputWS);
   return;
 }

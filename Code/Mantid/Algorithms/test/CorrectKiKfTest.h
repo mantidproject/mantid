@@ -7,7 +7,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -145,9 +146,58 @@ public:
   }
 
 
- 
+  void testReadEffromIDF()
+  {
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/IRS38633.raw");
+    const std::string initialWS("IRS");
+    const std::string intermediaryWS("IRSenergy");
+    const std::string finalWS("Corrected");
+    loader.setPropertyValue("OutputWorkspace",initialWS);
+    loader.setPropertyValue("SpectrumList","3");
+    loader.setPropertyValue("LoadMonitors","Exclude");
+    loader.execute();
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setPropertyValue("InputWorkspace",initialWS);
+    convert.setPropertyValue("OutputWorkspace",intermediaryWS);
+    convert.setPropertyValue("Target","DeltaE");
+    convert.setPropertyValue("EMode","Indirect");
+    convert.setPropertyValue("EFixed","1.845");
+    convert.execute();
+
+    CorrectKiKf alg1; //I use alg1 because I cannot remove Efixed property
+    alg1.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("InputWorkspace",intermediaryWS) );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("OutputWorkspace",finalWS) );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("EMode","Indirect"));
+    TS_ASSERT_THROWS_NOTHING( alg1.execute() );
+    TS_ASSERT( alg1.isExecuted() );
+    
+    MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Workspace2D>
+                                (AnalysisDataService::Instance().retrieve(finalWS)) );
+   
+    TS_ASSERT_DELTA( result->readX(0)[1976], 1.18785, 0.0001 );
+    TS_ASSERT_DELTA( result->readX(0)[1977], 1.18912, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0)[1976], 1.28225, 0.0001 );
+
+    //Ef=1.845, Ei=Ef+0.5*(x[1977]+x[1976]), Y [1976] uncorrected=1, ki/kf=sqrt(Ei/Ef)
+    TS_ASSERT_DELTA( sqrt(((result->readX(0)[1976]+result->readX(0)[1977])*0.5+1.845)/1.845), result->readY(0)[1976], 0.0001 );
+    
+    AnalysisDataService::Instance().remove(initialWS);
+    AnalysisDataService::Instance().remove(intermediaryWS);
+    AnalysisDataService::Instance().remove(finalWS);
+
+  }
+
+
+
 private:
-  CorrectKiKf alg;
+  CorrectKiKf alg; 
   std::string inputWSname;
   std::string inputEvWSname;
   std::string outputWSname;
