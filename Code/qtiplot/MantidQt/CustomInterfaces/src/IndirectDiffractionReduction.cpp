@@ -15,8 +15,6 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   DECLARE_SUBWINDOW(IndirectDiffractionReduction);
-}
-}
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -167,4 +165,7 @@ void IndirectDiffractionReduction::loadSettings()
 bool IndirectDiffractionReduction::validateDemon()
 {
   return m_uiForm.dem_rawFiles->isValid();
+}
+
+}
 }

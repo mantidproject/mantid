@@ -51,8 +51,6 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   DECLARE_SUBWINDOW(MuonAnalysis);
-}
-}
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -1818,4 +1816,7 @@ void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
     }
   }
 
+}
+
+}
 }
