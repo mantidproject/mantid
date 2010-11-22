@@ -140,10 +140,10 @@ class SNSPowderReduction(PythonAlgorithm):
             return None
         # take care of filtering events
         if self._filterBadPulses:
-            frequency = wksp.getRun()['proton_charge']
-            frequency = frequency.getStatistics().mean
+            pcharge = wksp.getRun()['proton_charge']
+            pcharge = pcharge.getStatistics().mean
             FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName="proton_charge",
-                             MinimumValue=.95*frequency, MaximumValue=2.*frequency)
+                             MinimumValue=.95*pcharge, MaximumValue=2.*pcharge)
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -167,7 +167,7 @@ class SNSPowderReduction(PythonAlgorithm):
     def _getinfo(self, wksp):
         logs = wksp.getRun()
         # get the frequency
-        frequency = logs['frequency']
+        frequency = logs['SpeedRequest1']
         if frequency.units != "Hz":
             raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
         frequency = frequency.getStatistics().mean
