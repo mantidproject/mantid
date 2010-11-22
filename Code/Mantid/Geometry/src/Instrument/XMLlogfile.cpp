@@ -40,11 +40,12 @@ namespace Mantid
       const std::string& type, const std::string& tie, 
       const std::vector<std::string>& constraint, std::string& penaltyFactor, 
       const std::string& fitFunc, const std::string& extractSingleValueAs, 
-      const std::string& eq, const Geometry::IComponent* comp)
+      const std::string& eq, const Geometry::IComponent* comp, double angleConvertConst)
       : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type), m_tie(tie),
       m_constraint(constraint), m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc),
       m_formula(formula), m_formulaUnit(formulaUnit), m_resultUnit(resultUnit), m_interpolation(interpolation),
-      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
+      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
+      m_angleConvertConst(angleConvertConst)
     {
     }
 

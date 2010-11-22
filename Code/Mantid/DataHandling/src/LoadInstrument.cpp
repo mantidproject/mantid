@@ -72,6 +72,8 @@ namespace Mantid
         "definition file");
       declareProperty("MonitorList", std::vector<int>(), new NullValidator< std::vector<int> >,
         "List of detector ids of monitors loaded in to the workspace", Direction::Output);
+
+      m_angleConvertConst = 1.0;
     }
 
 
@@ -414,6 +416,18 @@ namespace Mantid
       if (defaultView)
       {
         m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
+      }
+
+      // check if angle=radian has been set
+      Element* angleUnit = defaults->getChildElement("angle");
+      if (angleUnit)
+      {
+        if (angleUnit->getAttribute("unit") == "radian")
+        {
+          m_angleConvertConst = 180.0/M_PI;
+          std::map<std::string, std::string>& units = m_instrument->getLogfileUnit();
+          units["angle"] = "radian";
+        }
       }
     }
 
@@ -827,12 +841,12 @@ namespace Mantid
         double R=0.0, theta=0.0, phi=0.0;
 
         if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-        if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
-        if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
+        if ( pElem->hasAttribute("t") ) theta = m_angleConvertConst*atof((pElem->getAttribute("t")).c_str());
+        if ( pElem->hasAttribute("p") ) phi = m_angleConvertConst*atof((pElem->getAttribute("p")).c_str());
 
         if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-        if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-        if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
+        if ( pElem->hasAttribute("theta") ) theta = m_angleConvertConst*atof((pElem->getAttribute("theta")).c_str());
+        if ( pElem->hasAttribute("phi") ) phi = m_angleConvertConst*atof((pElem->getAttribute("phi")).c_str());
 
         if ( m_deltaOffsets )
         {
@@ -924,7 +938,7 @@ namespace Mantid
 
       if ( pElem->hasAttribute("rot") )
       {
-        double rotAngle = atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+        double rotAngle = m_angleConvertConst*atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
 
         double axis_x = 0.0;
         double axis_y = 0.0;
@@ -967,7 +981,7 @@ namespace Mantid
 
           if (tElem)
           {
-		        posTrans = getRelativeTranslation(comp, tElem);
+	     posTrans = getRelativeTranslation(comp, tElem);
 
           // to get the change in translation relative to current rotation of comp
           Geometry::CompAssembly compToGetRot;
@@ -985,7 +999,7 @@ namespace Mantid
 
           if (rElem) 
           {
-          double rotAngle = atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
+          double rotAngle = m_angleConvertConst*atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
 
           double axis_x = 0.0;
           double axis_y = 0.0;
@@ -1248,12 +1262,12 @@ namespace Mantid
         double R=0.0, theta=0.0, phi=0.0;
 
         if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-        if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
-        if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
+        if ( pElem->hasAttribute("t") ) theta = m_angleConvertConst*atof((pElem->getAttribute("t")).c_str());
+        if ( pElem->hasAttribute("p") ) phi = m_angleConvertConst*atof((pElem->getAttribute("p")).c_str());
 
         if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-        if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-        if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
+        if ( pElem->hasAttribute("theta") ) theta = m_angleConvertConst*atof((pElem->getAttribute("theta")).c_str());
+        if ( pElem->hasAttribute("phi") ) phi = m_angleConvertConst*atof((pElem->getAttribute("phi")).c_str());
 
         retV3D.spherical(R,theta,phi);
       }
@@ -1297,7 +1311,7 @@ namespace Mantid
 
         if ( facingElem->hasAttribute("rot") )
         {
-          double rotAngle = atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+          double rotAngle = m_angleConvertConst*atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
           comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
         }
 
@@ -1600,7 +1614,7 @@ namespace Mantid
 
 
           boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit, 
-            paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp));
+	    paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst));
           logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
         } // end of if statement
       }
@@ -1618,6 +1632,17 @@ namespace Mantid
     {
       NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
       unsigned int numberLinks = pNL_link->length();
+
+
+      // check if any logfile cache units set. As of this writing the only unit to check is if "angle=radian"
+      std::map<std::string, std::string>& units = instrument->getLogfileUnit();
+      std::map<std::string, std::string>::iterator unit_it;
+      unit_it = units.find("angle");
+      if ( unit_it != units.end() )
+        if ( unit_it->second == "radian" )
+          m_angleConvertConst = 180.0/M_PI;
+      
+
       for (unsigned int iLink = 0; iLink < numberLinks; iLink++)
       {
         Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));

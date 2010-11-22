@@ -107,8 +107,11 @@ namespace Mantid
       /// Returns a shared pointer to a component
       boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
 
-      /// Get information about the parameters described in the instrument definition file
+      /// Get information about the parameters described in the instrument definition file and associated parameter files
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
+
+      /// Get information about the units used for parameters described in the IDF and associated parameter files
+      std::map<std::string, std::string>& getLogfileUnit() {return _logfileUnit;}
 
       /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
       std::string getDefaultAxis() const {return m_defaultViewAxis;}
@@ -151,6 +154,14 @@ namespace Mantid
 
       /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
+
+      /// Store units used by users to specify angles in IDFs and associated parameter files.
+      /// By default this one is empty meaning that the default of angle=degree etc are used
+      /// see <http://www.mantidproject.org/InstrumentDefinitionFile>
+      /// However if map below contains e.g. <"angle", "radian"> it means
+      /// that all "angle"-parameters in the _logfileCache are assumed to have been specified
+      /// by the user in radian (not degrees)    
+      std::map<std::string, std::string> _logfileUnit;
 
       /// a vector holding detector ids of monitor s
       std::vector<int> m_monitorCache;

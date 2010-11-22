@@ -58,7 +58,7 @@ namespace Mantid
         const std::string& type, const std::string& tie, 
         const std::vector<std::string>& constraint, std::string& penaltyFactor, 
         const std::string& fitFunc, const std::string& extractSingleValueAs, 
-        const std::string& eq, const Geometry::IComponent* comp);
+        const std::string& eq, const Geometry::IComponent* comp, double angleConvertConst);
 
       /// Destructor
       ~XMLlogfile() {}
@@ -82,6 +82,10 @@ namespace Mantid
 
       ///Returns parameter value as generated using possibly equation expression etc
       double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData);
+
+      /// when this const equals 1 it means that angle=degree (default) is set in IDF
+      /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 
+      double m_angleConvertConst; 
 
     private:
 
