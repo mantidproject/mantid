@@ -327,34 +327,6 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     }
   }
 
-//  //std::cout << "Number of threads: " << omp_get_num_threads() << "\n";
-//  //PARALLEL_FOR_NO_WSP_CHECK() //1(mWorkspace)
-//  for( int i = 0; i < n_spec; ++i )
-//  {
-  //    int widx = m_workspace_indices[i];
-  //    if( widx != -1 )
-//    {
-//      double sum = integrateSingleSpectra(workspace, widx);
-//      integrated_values[i] = sum;
-//      if( sum < mWkspDataMin )
-//      {
-//        mWkspDataMin = sum;
-//      }
-//      else if( sum > mWkspDataMax )
-//      {
-//        mWkspDataMax = sum;
-//      }
-//      else continue;
-//
-//    }
-//    else
-//    {
-//      integrated_values[i] = -1.0;
-//    }
-//  }
-//  //No need to store these now
-//  m_workspace_indices.clear();
-//  m_detector_ids.clear();
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts():Integrating workspace took " << timer2.elapsed() << " seconds\n";
 
@@ -368,6 +340,8 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   {
     mDataMaxValue = mWkspDataMax;
   }
+
+  Timer timerColLists;
 
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
   mScaledValues = std::vector<unsigned char>(n_spec, 0);
@@ -404,6 +378,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     }
     colorlist[idx] = mColorMap.getColor(c_index);
   }
+  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): making the colorlist took " << timerColLists.elapsed() << " seconds\n";
 
   Timer timerCols;
   mInstrumentActor->setDetectorColors(colorlist);
