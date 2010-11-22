@@ -180,6 +180,16 @@ def furyfitSeq(inputWS,func,startx,endx):
     PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
     procSeqParToWS(outNm)
 
+def confitSeq(inputWS, func, startX, endX):
+    # Create input workspace index list
+    input = inputWS+',i0'
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(1, nHist):
+        input += ';'+inputWS+',i'+str(i)
+    outNm = inputWS + '_fitParameters'
+    PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
+    procSeqParToWS(outNm)
+	
 def procSeqParToWS(inputWS):
     ws = mtd[inputWS]
     dataX = []
