@@ -88,6 +88,9 @@
     <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinningFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\SimulateMDD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DimensionParameter.cpp">
@@ -148,6 +151,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CenterpieceRebinningFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SimulateMDD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

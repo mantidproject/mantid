@@ -153,6 +153,7 @@
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\SimulateMDD.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\Topology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="test\testCPrebinning.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\PlaneFunctionBuilder.cpp" />
     <ClCompile Include="src\PlaneImplicitFunction.cpp" />
     <ClCompile Include="src\PlaneImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\SimulateMDD.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
