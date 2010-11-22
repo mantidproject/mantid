@@ -26,7 +26,9 @@ namespace Mantid
      */
     void MersenneTwister::setSeed(long seedValue)
     {
-      m_generator.seed(seedValue);
+      // Bug in earlier versions of this implementation meant
+      // that a long could not be past to the seed function
+      m_generator.seed((boost::mt19937::result_type)seedValue);
     }
 
     /**
