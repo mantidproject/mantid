@@ -7,7 +7,7 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_type(type), m_visible(true)
+RangeSelector::RangeSelector(QwtPlot* plot, SelectType type, bool visible, bool infoOnly) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_type(type), m_visible(visible), m_infoOnly(infoOnly)
 {
   m_canvas->installEventFilter(this);
 
@@ -72,7 +72,7 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plo
 bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
 {
   // Do not handle the event if the widget is set to be invisible
-  if ( !m_visible )
+  if ( !m_visible || m_infoOnly )
   {
     return false;
   }
@@ -295,6 +295,11 @@ void RangeSelector::setColour(QColor colour)
     m_mrkMin->setLinePen(*m_pen);
     break;
   }
+}
+
+void RangeSelector::setInfoOnly(bool state)
+{
+  m_infoOnly = state;
 }
 
 void RangeSelector::setVisible(bool state)

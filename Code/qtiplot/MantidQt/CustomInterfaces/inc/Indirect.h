@@ -150,14 +150,13 @@ namespace MantidQt
       MantidWidgets::RangeSelector* m_calCalR1;
       MantidWidgets::RangeSelector* m_calCalR2;
       MantidWidgets::RangeSelector* m_calResR1;
+      MantidWidgets::RangeSelector* m_calResR2;
       QwtPlotCurve* m_calCalCurve;
       QwtPlotCurve* m_calResCurve;
       QtTreePropertyBrowser* m_calCalTree;
       QtTreePropertyBrowser* m_calResTree;
       QMap<QString, QtProperty*> m_calCalProp;
       QMap<QString, QtProperty*> m_calResProp;
-      QtDoublePropertyManager* m_calCalDblMng;
-      QtDoublePropertyManager* m_calResDblMng;
       QtDoublePropertyManager* m_calDblMng;
       QtGroupPropertyManager* m_calGrpMng;
 

@@ -124,8 +124,16 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         eq2.append(savefile+'eq2')
         mantid.deleteWorkspace(root)
     if Plot:
+        nBins = mtd[eq1[0]].getNumberBins()
+        lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
         graph1 = plotSpectrum(eq1, 0)
+        layer = graph1.activeLayer()
+        layer.setScale(Layer.Bottom, 0.0, lastXeq1)
+        nBins = mtd[eq2[0]].getNumberBins()
+        lastXeq2 = mtd[eq2[0]].readX(0)[nBins-1]
         graph2 = plotSpectrum(eq2, 0)
+        layer = graph2.activeLayer()
+        layer.setScale(Layer.Bottom, 0.0, lastXeq2)
     return eq1, eq2
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
@@ -255,10 +263,9 @@ def mut(inWS_n, deltaW, filename, efixed):
 def plotFury(inWS_n, spec):
     inWS = mtd[inWS_n[0]]
     nbins = inWS.getNumberBins()
-    lastValueZero = False
     graph = plotSpectrum(inWS_n, spec)
     layer = graph.activeLayer()
-    layer.setScale(0, 0, 1.0)
+    layer.setScale(Layer.Left, 0, 1.0)
 
 def plotRaw(inputfiles,spectra=[]):
     if len(spectra) != 2:

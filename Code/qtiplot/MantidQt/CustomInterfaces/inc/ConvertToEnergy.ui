@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>507</width>
-    <height>609</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -172,14 +172,6 @@
                 </property>
                 <item>
                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
-                  <property name="geometry" >
-                   <rect>
-                    <x>26</x>
-                    <y>59</y>
-                    <width>244</width>
-                    <height>41</height>
-                   </rect>
-                  </property>
                   <property name="label" stdset="0" >
                    <string>Runs          </string>
                   </property>
@@ -196,14 +188,6 @@
               </item>
               <item>
                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
-                <property name="geometry" >
-                 <rect>
-                  <x>70</x>
-                  <y>117</y>
-                  <width>244</width>
-                  <height>41</height>
-                 </rect>
-                </property>
                 <property name="findRunFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
@@ -223,14 +207,6 @@
               </item>
               <item>
                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
-                <property name="geometry" >
-                 <rect>
-                  <x>114</x>
-                  <y>175</y>
-                  <width>244</width>
-                  <height>41</height>
-                 </rect>
-                </property>
                 <property name="label" stdset="0" >
                  <string>White beam</string>
                 </property>
@@ -252,14 +228,6 @@
                  <layout class="QVBoxLayout" name="verticalLayout_6" >
                   <item>
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
-                    <property name="geometry" >
-                     <rect>
-                      <x>158</x>
-                      <y>233</y>
-                      <width>244</width>
-                      <height>41</height>
-                     </rect>
-                    </property>
                     <property name="sizePolicy" >
                      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                       <horstretch>0</horstretch>
@@ -275,14 +243,6 @@
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
                     <property name="enabled" >
                      <bool>false</bool>
-                    </property>
-                    <property name="geometry" >
-                     <rect>
-                      <x>202</x>
-                      <y>291</y>
-                      <width>244</width>
-                      <height>41</height>
-                     </rect>
                     </property>
                     <property name="sizePolicy" >
                      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
@@ -400,14 +360,6 @@
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
                      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
-                      <property name="geometry" >
-                       <rect>
-                        <x>26</x>
-                        <y>59</y>
-                        <width>244</width>
-                        <height>41</height>
-                       </rect>
-                      </property>
                       <property name="sizePolicy" >
                        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                         <horstretch>0</horstretch>
@@ -1562,14 +1514,6 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_18" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
-              <property name="geometry" >
-               <rect>
-                <x>92</x>
-                <y>146</y>
-                <width>244</width>
-                <height>41</height>
-               </rect>
-              </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1754,14 +1698,6 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_36" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
-              <property name="geometry" >
-               <rect>
-                <x>158</x>
-                <y>233</y>
-                <width>244</width>
-                <height>41</height>
-               </rect>
-              </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1807,14 +1743,6 @@ p, li { white-space: pre-wrap; }
               <property name="enabled" >
                <bool>false</bool>
               </property>
-              <property name="geometry" >
-               <rect>
-                <x>202</x>
-                <y>291</y>
-                <width>244</width>
-                <height>41</height>
-               </rect>
-              </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1837,50 +1765,6 @@ p, li { white-space: pre-wrap; }
                <stringlist>
                 <string>_calib.nxs</string>
                </stringlist>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_41" >
-            <item>
-             <widget class="QLabel" name="slice_lbSpecMin" >
-              <property name="text" >
-               <string>Spectra Min</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="slice_leSpecMin" />
-            </item>
-            <item>
-             <widget class="QLabel" name="slice_valSpecMin" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 0);</string>
-              </property>
-              <property name="text" >
-               <string>*</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="slice_lbSpecMax" >
-              <property name="text" >
-               <string>Spectra Max</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="slice_leSpecMax" />
-            </item>
-            <item>
-             <widget class="QLabel" name="slice_valSpecMax" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 0);</string>
-              </property>
-              <property name="text" >
-               <string>*</string>
               </property>
              </widget>
             </item>
@@ -2005,14 +1889,6 @@ p, li { white-space: pre-wrap; }
                <layout class="QVBoxLayout" name="verticalLayout_21" >
                 <item>
                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
-                  <property name="geometry" >
-                   <rect>
-                    <x>48</x>
-                    <y>88</y>
-                    <width>244</width>
-                    <height>41</height>
-                   </rect>
-                  </property>
                   <property name="sizePolicy" >
                    <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
@@ -2278,6 +2154,73 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_22" >
+         <item>
+          <widget class="QLabel" name="label_4" >
+           <property name="text" >
+            <string>Plot Output:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="sqw_cbPlotType" >
+           <item>
+            <property name="text" >
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Contour</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Spectra</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_23" >
+         <item>
+          <spacer name="horizontalSpacer_4" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="sqw_ckSave" >
+           <property name="text" >
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -2341,14 +2284,6 @@ p, li { white-space: pre-wrap; }
          <layout class="QVBoxLayout" name="verticalLayout_31" >
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
-            <property name="geometry" >
-             <rect>
-              <x>136</x>
-              <y>204</y>
-              <width>244</width>
-              <height>41</height>
-             </rect>
-            </property>
             <property name="label" stdset="0" >
              <string>Mono Van</string>
             </property>
@@ -2356,14 +2291,6 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
-            <property name="geometry" >
-             <rect>
-              <x>180</x>
-              <y>262</y>
-              <width>244</width>
-              <height>41</height>
-             </rect>
-            </property>
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -2373,8 +2300,8 @@ p, li { white-space: pre-wrap; }
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
             </property>
-            <property name="optional" stdset="0">
-            	<bool>true</bool>
+            <property name="optional" stdset="0" >
+             <bool>true</bool>
             </property>
             <property name="algorithmAndProperty" stdset="0" >
              <string>GroupDetectors|MapFile</string>
@@ -2383,22 +2310,14 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
-            <property name="geometry" >
-             <rect>
-              <x>26</x>
-              <y>59</y>
-              <width>244</width>
-              <height>41</height>
-             </rect>
-            </property>
             <property name="label" stdset="0" >
              <string>White Beam (Abs Units)</string>
             </property>
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
             </property>
-            <property name="optional" stdset="0">
-            	<bool>true</bool>
+            <property name="optional" stdset="0" >
+             <bool>true</bool>
             </property>
            </widget>
           </item>

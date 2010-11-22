@@ -24,7 +24,7 @@ namespace MantidWidgets
   public:
     enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
-    RangeSelector(QwtPlot* plot, SelectType type=XMINMAX);
+    RangeSelector(QwtPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
     ~RangeSelector() {};
 
     bool eventFilter(QObject*, QEvent*);
@@ -48,6 +48,7 @@ namespace MantidWidgets
     void setMaximum(double); ///< outside setting of value
     void reapply(); ///< re-apply the range selector lines
     void setColour(QColor colour);
+    void setInfoOnly(bool state);
     void setVisible(bool state);
 
   private:
@@ -74,6 +75,7 @@ namespace MantidWidgets
     bool m_minChanging;
     bool m_maxChanging;
 
+    bool m_infoOnly;
     bool m_visible;
 
     /** Strictly UI options and settings below this point **/

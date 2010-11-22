@@ -123,7 +123,7 @@ def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
         ConvertUnits(inWS_n, outWS_n, 'Energy', 'Indirect') # TRC interested in Energy rather than DeltaE
     else:
         ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
-        CorrectKiKf(OutWS_n, outWS_n, 'Indirect', efixed)
+        CorrectKiKf(outWS_n, outWS_n, 'Indirect', efixed)
     return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):

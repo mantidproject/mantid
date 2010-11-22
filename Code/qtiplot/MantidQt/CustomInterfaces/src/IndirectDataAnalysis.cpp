@@ -359,7 +359,6 @@ void IndirectDataAnalysis::setupConFit()
   m_cfHwhmRange->setColour(Qt::red);
 
   // Populate Property Widget
-
   m_cfProp["FitRange"] = m_cfGrpMng->addProperty("Fitting Range");
   m_cfProp["StartX"] = m_cfDblMng->addProperty("StartX");
   m_cfDblMng->setDecimals(m_cfProp["StartX"], m_nDec);
@@ -415,6 +414,9 @@ void IndirectDataAnalysis::setupConFit()
   connect(m_uiForm.confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
   connect(m_uiForm.confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(confitPlotInput()));
   connect(m_uiForm.confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
+
+  // Set default values
+  m_cfDblMng->setValue(m_cfProp["Lorentzian1.HWHM"], 0.02);
 }
 
 bool IndirectDataAnalysis::validateElwin()
@@ -1417,11 +1419,11 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
       std::string formula;
       if ( funcName == "Exponential" )
       {
-        formula = "Intensity*exp(-(x*Exponent))";
+        formula = "Intensity*exp(-(x*Tau))";
       }
       else if ( funcName == "Stretched Exponential" )
       {
-        formula = "Intensity*exp(-Exponent*(x^Beta))";
+        formula = "Intensity*exp(-Tau*(x^Beta))";
       }
       // Create subfunction object with specified formula
       Mantid::API::IFunction::Attribute att(formula);
