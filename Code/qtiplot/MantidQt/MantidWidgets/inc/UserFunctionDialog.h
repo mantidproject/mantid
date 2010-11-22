@@ -47,6 +47,7 @@ namespace MantidQt
       QString getComment(const QString& cat,const QString& fun)const;
       void setFunction(const QString& cat,const QString& fun,const QString& expr,const QString& comment = "");
       bool isBuiltin(const QString& cat)const;
+      void saveToFile();
     private:
 
       /// Container for prerecorded functions: key = category.name, value = formula

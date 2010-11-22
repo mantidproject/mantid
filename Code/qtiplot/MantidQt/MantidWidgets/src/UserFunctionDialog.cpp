@@ -45,20 +45,7 @@ UserFunctionDialog::UserFunctionDialog(QWidget *parent,const QString& formula)
  */
 UserFunctionDialog::~UserFunctionDialog()
 {
-  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getBaseDir()) + "Mantid.user.functions");
-  if (funFile.open(QIODevice::WriteOnly | QIODevice::Text))
-  {
-    QMap<QString,QString>::const_iterator it = m_funs.begin();
-    for(; it != m_funs.end(); ++it)
-    {
-      QTextStream out(&funFile);
-      QStringList cn = it.key().split('.');
-      if (cn[0] != "Base" && cn[0] != "Built-in")
-      {
-        out << it.key() << "=" << it.value() <<'\n';
-      }
-    }
-  }
+  saveToFile();
 }
 
 /**
@@ -367,6 +354,25 @@ void UserFunctionDialog::saveFunction()
     setFunction(cat,fun,expr,comment);
     updateCategories();
   }//QDialog::Accepted
+  saveToFile();
+}
+
+void UserFunctionDialog::saveToFile()
+{
+  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getBaseDir()) + "Mantid.user.functions");
+  if (funFile.open(QIODevice::WriteOnly | QIODevice::Text))
+  {
+    QMap<QString,QString>::const_iterator it = m_funs.begin();
+    for(; it != m_funs.end(); ++it)
+    {
+      QTextStream out(&funFile);
+      QStringList cn = it.key().split('.');
+      if (cn[0] != "Base" && cn[0] != "Built-in")
+      {
+        out << it.key() << "=" << it.value() <<'\n';
+      }
+    }
+  }
 }
 
 /**
