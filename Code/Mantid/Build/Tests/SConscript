@@ -13,9 +13,31 @@ libDirList = env['MYLIBDIRLIST']
 cppPath = env['CPPPATH']
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
-myenv.Append(LIBS=libList)
-myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
 myenv.Append(CPPPATH=cppPath + ['../../../Third_Party/src/cxxtest'])
+
+# Add the location of the gmock library
+third_party_path = '../../../Third_Party/lib/'
+
+if platform.dist()[2] == 'Tikanga':
+    third_party_path += 'rhel5'
+elif sys.platform == 'darwin':
+    # Get the version as a tuple
+    mac_version = tuple(platform.mac_ver()[0].split(".")[0:2])
+    snow_leopard = ('10', '6')
+    if mac_version >= snow_leopard:
+        third_party_path += 'mac-10.6'
+    else:
+        third_party_path += 'mac'
+elif os.name == 'nt':
+    if platform.architecture()[0] == '64bit':
+        third_party_path += 'win64'
+    else:
+        third_party_path += 'win32'
+else:
+    raise RuntimeError('Cannot find third party libraries. Unsupported build platform.')
+
+myenv.Append(LIBPATH=libDirList+[third_party_path])
+myenv.Append(LIBS=libList+['gmock'])
 
 #GET LIST OF TESTS
 path = '../../'
