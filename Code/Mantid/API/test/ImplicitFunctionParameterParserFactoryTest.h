@@ -9,7 +9,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include <boost/shared_ptr.hpp>
-
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite
 {
@@ -17,22 +18,16 @@ class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite
   
   class MockImplicitFunctionParameter : public Mantid::API::ImplicitFunctionParameter
   {
-    std::string getName() const
-	{
-	  return "MockImplicitFunctionParameter";
-	}
-	bool isValid() const
-	{
-	  return true;
-	}
-
-    virtual std::string toXMLString() const
-	{
-	  return "";
-	}	
-
-	protected:
-            virtual ImplicitFunctionParameter* cloneImp() const { return new MockImplicitFunctionParameter;}
+  public:
+    MOCK_CONST_METHOD0(getName, std::string());
+    MOCK_CONST_METHOD0(isValid, bool());
+    MOCK_CONST_METHOD0(toXMLString, std::string());
+    ~MockImplicitFunctionParameter(){}
+    protected:
+    virtual ImplicitFunctionParameter* cloneImp() const 
+    { 
+      return new MockImplicitFunctionParameter;
+    }
   };
   
   //TODO, use mocking framework instead!
