@@ -75,7 +75,7 @@ public:
   virtual int  setStartingReferenceColor(int rgb) = 0;
   virtual std::string type()const {return "ICompAssemblyActor";} ///< Type of the GL object
   //virtual void define() = 0;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  const int  getNumberOfDetectors() const{return mNumberOfDetectors;}
+  int getNumberOfDetectors() const { return mNumberOfDetectors;}
   virtual void drawUsingColorID() = 0;
   void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
 

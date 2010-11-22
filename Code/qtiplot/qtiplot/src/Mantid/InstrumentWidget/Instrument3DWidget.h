@@ -110,7 +110,7 @@ public:
 
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument>);
-  void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
+  void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation);
   double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);
 
 
@@ -121,7 +121,7 @@ private:
 
 private:
   /// Convert the list of detector ids to a list of workspace indices and store them
-  void createWorkspaceIndexList(const std::vector<int> & idlist);
+  void createWorkspaceIndexList(const std::vector<int> & idlist, bool forceNew);
   boost::shared_ptr<Mantid::API::MatrixWorkspace> getMatrixWorkspace(QString ) const;
 
   bool mFastRendering;

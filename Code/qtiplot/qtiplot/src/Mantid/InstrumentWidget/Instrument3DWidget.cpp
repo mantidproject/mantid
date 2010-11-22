@@ -84,7 +84,7 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
     }
   }
   if( detectorIds.empty() ) return;
-  createWorkspaceIndexList(detectorIds);
+  createWorkspaceIndexList(detectorIds, false);
   emit detectorsSelected();
 
 //   if( detectorIds.size() == 1)
@@ -124,7 +124,7 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
   {
     //convert detector id to spectra index id
     std::vector<int> idDecVec(1, iDecId);
-    createWorkspaceIndexList(idDecVec);
+    createWorkspaceIndexList(idDecVec, false);
     int spectrumNumber(1);
     int index = m_workspace_indices.front();
     try
@@ -179,7 +179,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   defaultProjection(); // Calculate and set projection
 
   // Calculate bin values, data ranges and integrate data
-  calculateColorCounts(output);
+  calculateColorCounts(output, true);
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::setWorkspace() took " << timer.elapsed() << " seconds\n";
 }
@@ -273,8 +273,11 @@ void Instrument3DWidget::calculateBinRange()
  * Integrate the workspace. This calculates the total counts
  * in all spectra and makes the color list for each pixel, using
  * the current color map.
+ * @param workspace new workspace being set.
+ * @param firstCalculation set to true when changing the workspace; false is simply changing the color scale
+ *
  */
-void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
+void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation)
 {
   Timer timer;
   if( !workspace ) return;
@@ -290,7 +293,9 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   }
 
   if( detector_list.empty() ) return;
-  createWorkspaceIndexList(detector_list);
+
+  //Make the workspace index list, and force a new one if needed.
+  createWorkspaceIndexList(detector_list, firstCalculation);
 
 
   //TODO: Make this part in parallel if possible!
@@ -462,7 +467,7 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
  */
 void Instrument3DWidget::recount()
 {
-  calculateColorCounts(mWorkspace);
+  calculateColorCounts(mWorkspace, false);
   mInstrumentActor->refresh();
   update();
 }
@@ -566,15 +571,23 @@ void Instrument3DWidget::setDataMaxEdited(bool state)
  *      m_workspace_indices[i].
  *
  * @param det_ids is list of detector id's
+ * @param forceNew set to true to force the creation of a new list; otherwise, the old one will be reused
+ * if possible.
  */
-void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids)
+void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids, bool forceNew)
 {
   Timer timer;
 
   if( det_ids.empty() ) return;
+  if (!forceNew)
+  {
+    //Don't force a new one, and the sizes match. We assume it is good.
+    if (m_workspace_indices.size() == det_ids.size())
+      return;
+  }
   m_workspace_indices.clear();
   m_detector_ids = det_ids;
-
+  
   // There is no direct way of getting histogram index from the spectra id,
   // get the spectra axis and convert from index to spectra number and create
   // a map.
@@ -602,6 +615,27 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
       m_workspace_indices.push_back(-1);
     }
   }
+  
+//  // There is no direct way of getting histogram index from the spectra id,
+//  // get the spectra axis and convert from index to spectra number and create
+//  // a map.
+//  IndexToIndexMap * index_map = mWorkspace->getDetectorIDToWorkspaceIndexMap(false);
+//
+//  std::vector<int>::const_iterator d_itr_end = m_detector_ids.end();
+//  for( std::vector<int>::const_iterator d_itr = m_detector_ids.begin(); d_itr != d_itr_end; ++d_itr )
+//  {
+//    int detector_id = *d_itr;
+//    if( (detector_id) != -1 )
+//    {
+//      m_workspace_indices.push_back( index_map->operator[](detector_id) );
+//    }
+//    else
+//    {
+//      m_workspace_indices.push_back(-1);
+//    }
+//  }
+//
+//  delete index_map;
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::createWorkspaceIndexList() took " << timer.elapsed() << " seconds\n";
 
@@ -717,7 +751,7 @@ void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue,
   setDataMappingType(INTEGRAL);
   if( this->isVisible() )
   {
-    calculateColorCounts(mWorkspace);
+    calculateColorCounts(mWorkspace, false);
     mInstrumentActor->refresh();
     update();
   }

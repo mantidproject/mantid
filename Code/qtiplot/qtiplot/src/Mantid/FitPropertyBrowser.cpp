@@ -78,6 +78,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
 :QDockWidget("Fit Function",parent),
 m_appWindow((ApplicationWindow*)parent),
 m_currentHandler(0),
+m_logValue(NULL),
 m_compositeFunction(0),
 m_defaultFunction("Gaussian"),
 m_defaultPeak("Gaussian"),
@@ -87,9 +88,8 @@ m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
-m_logValue(NULL),
-m_decimals(-1),
-m_autoBackground(NULL)
+m_autoBackground(NULL),
+m_decimals(-1)
 {
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");

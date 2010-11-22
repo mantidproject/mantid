@@ -125,6 +125,7 @@ void ObjCompAssemblyActor::drawUsingColorID()
 */
 void ObjCompAssemblyActor::initChilds(bool withDisplayList)
 {
+  (void) withDisplayList; //Avoid compiler warnings
   Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
   mNumberOfDetectors = objAss->nelements();
   for(int i=0;i<getNumberOfDetectors();++i)
