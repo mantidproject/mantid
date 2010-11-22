@@ -47,9 +47,13 @@ class IMD_FileFormat
 public:
     IMD_FileFormat(void){};
     virtual bool is_open(void)const{return false;}
-    virtual void read_mdd(MDImageData &)=0;
+    /// reads the MD-image part of the dataset
+    virtual void read_mdd(MDImageData &)=0; 
+    /// tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
     virtual bool read_pix(MDWorkspace &)=0; 
+    /// read part of the dataset, specified by the vector of MDImage cell numbers. 
     virtual size_t read_pix_subset(const MDWorkspace &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0; 
+    /// obtain the number of data points (pixels) stored in the dataset;
     virtual hsize_t getNPix(void)=0;
     virtual void write_mdd(const MDWorkspace &)=0;
     virtual ~IMD_FileFormat(void){};
@@ -90,6 +94,7 @@ struct sqw_pixel{
                  //    changes from run to run
     int    ien ; //    Energy bin number for the pixel in the array in the (irun)th header |-> 4th coordinate dimension
 };
+// function used to understand Horace written Matlab dataset.
 bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
 void ** transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
 //********************************************************************************************************************************************************************

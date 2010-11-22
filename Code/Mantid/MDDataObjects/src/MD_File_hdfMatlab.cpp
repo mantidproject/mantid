@@ -324,7 +324,10 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
     float  DimFields[4];
     double signalFields[2];
     int    ind_fields[3];
-    MDDataPoint<>  packer(pix_array,4,2,3);
+
+    MDPointDescriptor defaults;
+    MDPixelSignature  pix(defaults);
+    MDDataPoint<>  packer(pix_array,pix);
    
     for(i=0;i<sqw.getNumPixels();i++){
           DimFields[0] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0)); //  sqw.pix_array[i].qx   
@@ -377,7 +380,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     size_t max_npix_in_buffer(0),max_npix_selected(0),npix_tt;
     size_t i,j,n_selected_cells,n_cells_processed(0);
     size_t n_cells_final(selected_cells.size());
-    size_t nPix_buf_size = pix_buf.size()/packer.sizeofDataPoint();
+    size_t nPix_buf_size = pix_buf.size()/packer.sizeofMDDataPoint();
 
     n_selected_cells=n_cells_final-1;     
     for(i=starting_cell;i<n_cells_final;i++){
@@ -390,7 +393,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
         }else{
             // if one cell does not fit the buffer, we should increase buffer size .     
             if(i==starting_cell){
-                pix_buf.resize(max_npix_in_buffer*packer.sizeofDataPoint());
+                pix_buf.resize(max_npix_in_buffer*packer.sizeofMDDataPoint());
                 nPix_buf_size = max_npix_in_buffer;
                 n_selected_cells=i;
                 n_cells_processed=1;
@@ -402,8 +405,8 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     }
     
 
-    if(pix_buf.capacity()<max_npix_in_buffer*packer.sizeofDataPoint()){
-        pix_buf.resize(max_npix_in_buffer*packer.sizeofDataPoint());
+    if(pix_buf.capacity()<max_npix_in_buffer*packer.sizeofMDDataPoint()){
+        pix_buf.resize(max_npix_in_buffer*packer.sizeofMDDataPoint());
     }
 
 

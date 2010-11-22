@@ -42,7 +42,7 @@ class DLLExport MDWorkspace :  public MDDataPoints
     public:
      
      virtual long getMemorySize(void)const{return MDImageData::getMemorySize();} // + mdPixels memory size
-     MDWorkspace(unsigned int nDimensions=4):MDDataPoints(nDimensions){};
+     MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3):MDDataPoints(nDimensions){};
      virtual ~MDWorkspace(void){};
  
      /// read the the pixels corresponding to cells in the vector cell_num

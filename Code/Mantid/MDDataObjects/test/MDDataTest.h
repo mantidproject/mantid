@@ -16,7 +16,7 @@ class tDND : public MDImageData
 {
 public:
     tDND(unsigned int nDims):MDImageData(nDims){};  
-    void read_mdd(const char *file_name){MDImageData::read_mdd(file_name);}
+    void read_mdd(const char *file_name,bool oldMatlabFormat=false){MDImageData::read_mdd(file_name,oldMatlabFormat);}
 };
 
 class testDND :    public CxxTest::TestSuite
@@ -46,16 +46,16 @@ public:
     }
     void testDNDPrivateReadNew(void){
  
-        // read correct object
-        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str()),false);
+        // read correct object, new 4D matlab format reader
+        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str(),false));
 
         TS_ASSERT_EQUALS(pDND->getNumDims(),4);
     }
 
     void testDNDPrivateRead(void){
  
-        // read correct object
-        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str()),true);
+        // read correct object old 4D matlab format reader
+        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str(),true));
 
         TS_ASSERT_EQUALS(pDND->getNumDims(),4);
     }

@@ -276,11 +276,10 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
    unsigned int i;
 
    // all paxis in the transformation matrix have to be defined properly and in accordance with the transformation data.
+   // also sets the the dimension limits and object limits as the limits from transf class
    this->reinit_Geometry(transf);
 
-   // set the this object limits as the limits from transf class
-   this->setRanges(transf);
-
+   
    this->MDStruct.dimSize.assign(this->n_total_dim,0);
    this->MDStruct.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
@@ -291,7 +290,7 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
     for(i=0;i<this->n_total_dim;i++){
         pDim                 = this->MDGeometry::getDimension(i);
         stride               = pDim->getStride();
-        this->MDStruct.dimSize[i]    = pDim->getNBins();
+        this->MDStruct.dimSize[i]    =  pDim->getNBins();
         this->MDStruct.data_size     *= this->MDStruct.dimSize[i];
 
         if(stride != this->MDStruct.dimStride[i]){
@@ -344,8 +343,8 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 
 }
 //
-MDImageData::MDImageData(unsigned int nDims):
-MDGeometry(nDims),
+MDImageData::MDImageData(unsigned int nDims,unsigned int nRecDims):
+MDGeometry(nDims,nRecDims),
 pData(NULL),
 theFile(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)

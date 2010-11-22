@@ -39,7 +39,7 @@ namespace Mantid{
 class DLLExport MDDataPoints :  public MDImageData
 {
 public:
-     MDDataPoints(unsigned int nDims);
+     MDDataPoints(unsigned int nDims=4,unsigned int nRecDims=3);
     ~MDDataPoints();
  
      /// check if the pixels are all in memory;
@@ -47,6 +47,7 @@ public:
     /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
     size_t getNumPixels(void);
 
+    virtual long getMemorySize()const{return MDImageData::getMemorySize()+data_buffer_size*1;}
 
     // Accessors & Mutators used mainly for IO Operations on the dataset
     /// function returns minimal value for dimension i
@@ -80,18 +81,14 @@ private:
    std::vector<unsigned int> field_start;   //< location of data points field from the start of the field (roughly sum of field_length-es, but padding has to be considered for efficiency)
    std::vector<std::string>  field_tag;     //< name of each data field in the pixels array;
    //
-   size_t  data_buffer_size;              // in pixels (data_points) rather then in char;
+   unsigned int pixel_size;              //<the size of the pixel (DataPoint)(single point of data in reciprocal space) in bytes
+   size_t  data_buffer_size;             //< size the data buffer in pixels (data_points) rather then in char;
    void *data_buffer;
 
-   // boolean values identifying the way to treat NaN-s and Inf-s in the pixel data
-   bool   ignore_inf,ignore_nan;     
-// private for the time being but may be needed in a future
+  // private for the time being but may be needed in a future
    MDDataPoints(const MDDataPoints& p);
    MDDataPoints & operator = (const MDDataPoints & other);
-// rebin pixels in the pix_aray and add them to the current dataset ;
-//    long rebin_dataset4D(const SlicingProperty &transf, const sqw_pixel *pix_array, long nPix_cell);
 
-//    void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
 };
     }
 }

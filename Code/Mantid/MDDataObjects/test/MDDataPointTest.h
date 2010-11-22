@@ -20,12 +20,69 @@ struct eventData4D{
   int   iRun,iPix,iEn;
 };
 
-
-
-
+ 
+ 
 class testMDDataPoints :    public CxxTest::TestSuite
 {
+  std::vector<std::string> fieldNames4D;
+  std::vector<std::string> fieldNames5D;
+  MDPointDescriptor descriptor4D;
+  MDPointDescriptor descriptor5D;
+  MDPixelSignature *pix4D,*pix5D;
 public:
+  void testMDPointDescriptionConstructors(){
+    // default constructor builing 4x3 pixel description for histohram data and default tags
+    TS_ASSERT_THROWS_NOTHING(MDPixelSignature defSig());
+
+    // and here we have default 4x3 histohram data itself 
+    MDPointDescriptor defaultPoint;
+    // and build pixel description from the default point using default tags; 
+    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint));
+    // now let's have "non-default" tags
+    std::vector<std::string> tags = fieldNames4D;
+    // define the pixel from these tags and 
+    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint,tags));
+
+    // let's set default point for describing expanded event data
+    defaultPoint.NumDataFields = 0;
+    // should be ok
+    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint));
+    // names and fields are not-consistent
+    TS_ASSERT_THROWS_ANYTHING(MDPixelSignature def(defaultPoint,tags));
+    tags.erase(tags.begin()+4,tags.begin()+6);
+    // now it should work;
+    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint,tags));
+
+  }
+  void testMDPointConstructors(){
+    MDDataPoint<float,uint16_t> *pPoint;
+    MDDataPoint<float,uint8_t>  *pPoints;
+    char *dataBuf(NULL);
+   
+    TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,4,1,2)));
+    
+    TS_ASSERT_EQUALS(pPoints->getColumnNames().size(),pPoints->getNumPointFields());
+    TS_ASSERT_EQUALS(pPoints->getNumDimensions(),4);
+    TS_ASSERT_EQUALS(pPoints->getNumSignals(),1);
+    TS_ASSERT_EQUALS(pPoints->getNumDimIndex(),2);
+    TS_ASSERT_EQUALS(pPoints->sizeofMDDataPoint(),4*sizeof(float)+1*sizeof(double)+sizeof(uint32_t));
+
+    delete pPoints;
+    pPoints=NULL;
+
+    MDPointDescriptor defaultPoint;
+    MDPixelSignature sig(defaultPoint,fieldNames4D);
+
+    TS_ASSERT_THROWS_NOTHING(pPoint = (new MDDataPoint<float,uint16_t>(dataBuf,sig)));
+    TS_ASSERT_EQUALS(pPoint->sizeofMDDataPoint(),4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t));
+    TS_ASSERT_EQUALS(pPoint->getColumnNames().size(),pPoint->getNumPointFields());
+    TS_ASSERT_EQUALS(pPoint->getNumDimensions(),4);
+    TS_ASSERT_EQUALS(pPoint->getNumSignals(),2);
+    TS_ASSERT_EQUALS(pPoint->getNumDimIndex(),3);
+
+
+    delete pPoint;
+  }
   void test4DAccess(void){
     const int nPix = 10;
     int i;
@@ -42,7 +99,10 @@ public:
       testData[i].iPix=(i+1)*8;
       testData[i].iEn =(i+1)*9; 
     }
-    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,4,2,3,10);
+
+    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPixelSignature(descriptor4D,fieldNames4D));
+
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix4D);
 
     float  Dim[4];
     double SE[2];
@@ -98,7 +158,10 @@ public:
       testData[i].iPix=(i+1)*8;
       testData[i].iEn =(i+1)*9; 
     }
-    MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,4,2,3);
+
+
+   
+    MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,*pix4D);
 
     float  Dim[4];
     double SE[2];
@@ -150,7 +213,10 @@ public:
       testData[i].iEn =(i)*10; 
       testData[i].iT  =(i)*11; 
     }
-    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,5,2,4);
+
+    TS_ASSERT_THROWS_NOTHING(pix5D = new MDPixelSignature(descriptor5D,fieldNames5D));
+
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix5D);
 
     float  Dim[5];
     double SE[2];
@@ -204,7 +270,15 @@ public:
       testData[i].iPix=(i+1)*8;
       testData[i].iEn =(i+1)*9; 
     }
-    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,4,0,3);
+    delete pix4D;
+    descriptor4D.NumDataFields=0;
+    pix4D  = NULL;
+    fieldNames4D.erase(fieldNames4D.begin()+4,fieldNames4D.begin()+6);
+
+    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPixelSignature(descriptor4D,fieldNames4D));
+    if(!pix4D)return;
+
+    MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix4D);
 
     float  Dim[4];
     double SE[2];
@@ -233,6 +307,22 @@ public:
 
     }
   }
+ 
+
+ testMDDataPoints()
+ {
+   const char *cfieldNames4D[]={"q1","q2","q3","En","S","Err","iRun","iPix","iEn"};
+   const char *cfieldNames5D[]={"q1","q2","q3","En","T","S","Err","iRun","iPix","iEn","iT"};
+   fieldNames4D.assign(cfieldNames4D,(cfieldNames4D+9));
+   fieldNames5D.assign(cfieldNames5D,(cfieldNames5D+11));
+
+   descriptor5D.NumDimensions=5;
+   descriptor5D.NumDimIDs= 4;
+ }
+ ~testMDDataPoints(){
+   delete pix4D;
+   delete pix5D;
+ }
 };
 
 #endif

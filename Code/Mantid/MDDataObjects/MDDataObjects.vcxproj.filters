@@ -39,6 +39,12 @@
     <ClCompile Include="src\MD_File_hdfMatlab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MDWorkspaceMockData10.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDDataPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\Hexahedron.h">
@@ -72,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDDataPoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDWorkspaceHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

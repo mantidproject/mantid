@@ -8,10 +8,8 @@ namespace Mantid{
 
  // default names for signal and error fields
  const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
-MDDataPoints::MDDataPoints(unsigned int nDims):
-MDImageData(nDims),
-ignore_inf(false),
-ignore_nan(true),
+MDDataPoints::MDDataPoints(unsigned int nDims,unsigned int nRecDims):
+MDImageData(nDims,nRecDims),
 memBased(false),
 n_data_points(0),
 n_fields(9),

@@ -1,0 +1,71 @@
+#include "MDDataObjects/MDDataPoint.h"
+#include <sstream>
+
+
+namespace Mantid
+{
+namespace MDDataObjects
+{
+
+MDPixelSignature::MDPixelSignature():
+PixDescriptor()
+{
+  buildDefaultTags(this->PixDescriptor);
+}
+
+MDPixelSignature::MDPixelSignature(const MDPointDescriptor &pixInfo,const std::vector<std::string> &IndataTags):
+dataTags(IndataTags),PixDescriptor(pixInfo)
+{
+  unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
+  if(dataTags.size()!=nFields){
+    throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
+  }
+}
+//
+void 
+MDPixelSignature::buildDefaultTags(const MDPointDescriptor &pixInfo)
+{
+
+  unsigned int nFields = pixInfo.NumDimensions+pixInfo.NumDataFields+pixInfo.NumDimIDs;
+  std::stringstream buf;
+  std::vector<std::string> tags(nFields,"");
+  unsigned int i0(0),i1(pixInfo.NumRecDimensions),i;
+  for(i=0;i<i1;i++){
+    buf<<i;
+    tags[i]="q"+buf.str();
+    buf.clear();
+  }
+  i0=i1;
+  i1=pixInfo.NumDataFields;
+  for(i=i0;i<i1;i++){
+    buf<<i;
+    tags[i]="u"+buf.str();
+    buf.clear();
+  }
+  i0=i1;
+  i1=pixInfo.NumDataFields;
+  for(i=0;i<i1;i++){
+    buf<<i;
+    tags[i0+i]="S"+buf.str();
+    buf.clear();
+  }
+  i0+=i1;
+  i1=pixInfo.NumDimIDs;
+  for(i=0;i<i1;i++){
+    buf<<i;
+    tags[i0+i]="Ind"+buf.str();
+    buf.clear();
+  }
+  this->dataTags = tags;
+}
+
+MDPixelSignature::MDPixelSignature(const MDPointDescriptor &pixInfo):
+PixDescriptor(pixInfo)
+{
+ 
+
+
+}
+//
+} // namespaces
+}

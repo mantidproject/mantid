@@ -81,7 +81,7 @@ public:
   virtual Mantid::Geometry::IMDDimension* gettDimension() const;
 
     // default constructor
-     MDImageData(unsigned int nDims=4);
+     MDImageData(unsigned int nDims=4,unsigned int nRecDims=3);
     // destructor
     ~MDImageData();
     /** function returns vector of points left after the selection has been applied to the multidimensinal dataset

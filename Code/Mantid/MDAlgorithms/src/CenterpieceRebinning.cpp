@@ -134,7 +134,7 @@ CenterpieceRebinning::exec()
 
   std::vector<size_t> preselected_cells_indexes;
   size_t  n_precelected_pixels(0);
-
+  // identify MDImageCells which may contribute into cut
   preselect_cells(*inputWS,*pSlicing,preselected_cells_indexes,n_precelected_pixels);
   if(n_precelected_pixels == 0)return;
 
@@ -145,6 +145,7 @@ CenterpieceRebinning::exec()
             n_pix_in_buffer(0),pix_buffer_size(PIX_BUFFER_SIZE);
   
   std::vector<char  > pix_buf;
+  //TO DO: Give correct pixel size from the workspace method
   pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
  
 
@@ -158,10 +159,10 @@ CenterpieceRebinning::exec()
 // start reading and rebinning;
   size_t n_starting_cell(0);
   for(unsigned int i=0;i<n_hits;i++){
-      n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
-      n_pixels_read  +=n_pix_in_buffer;
+      n_starting_cell  += inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
+      n_pixels_read    += n_pix_in_buffer;
       
-      n_pixels_selected+=rebin_Nx3dataset(trf,&pix_buf[0],n_pix_in_buffer,*outputWS);
+      n_pixels_selected+= rebin_Nx3dataset(trf,&pix_buf[0],n_pix_in_buffer,*outputWS);
   } 
   finalise_rebinning(pImage,image_size);
 
