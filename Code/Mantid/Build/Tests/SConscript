@@ -13,30 +13,21 @@ libDirList = env['MYLIBDIRLIST']
 cppPath = env['CPPPATH']
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
-myenv.Append(CPPPATH=cppPath + ['../../../Third_Party/src/cxxtest'])
+myenv.Append(CPPPATH=['../../../Third_Party/src/cxxtest'])
 
 # Add the location of the gmock library
-third_party_path = '../../../Third_Party/lib/'
+myenv.Append(CPPPATH=['../../../TestingTools/include'])
+third_party_path = '../../../TestingTools/lib/'
 
-if platform.dist()[2] == 'Tikanga':
-    third_party_path += 'rhel5'
-elif sys.platform == 'darwin':
-    # Get the version as a tuple
-    mac_version = tuple(platform.mac_ver()[0].split(".")[0:2])
-    snow_leopard = ('10', '6')
-    if mac_version >= snow_leopard:
-        third_party_path += 'mac-10.6'
-    else:
-        third_party_path += 'mac'
-elif os.name == 'nt':
-    if platform.architecture()[0] == '64bit':
-        third_party_path += 'win64'
-    else:
-        third_party_path += 'win32'
-else:
-    raise RuntimeError('Cannot find third party libraries. Unsupported build platform.')
+# For Windows and Mac, the gmock library is in Third_Party
+# which is already in the path. Just add the path for linux.
 
-myenv.Append(LIBPATH=libDirList+[third_party_path])
+dist = platform.dist()[2]
+if dist == 'Tikanga':\
+    myenv.Append(LIBPATH=[third_party_path+'rhel5'])
+elif dist == 'maverick':
+    myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.10'])
+
 myenv.Append(LIBS=libList+['gmock'])
 
 #GET LIST OF TESTS
