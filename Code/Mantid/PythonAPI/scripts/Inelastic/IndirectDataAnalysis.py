@@ -60,7 +60,7 @@ def concatWSs(workspaces, unit, name):
         UnitX=unit)
 
 def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
-        Verbose=False, Plot=False, Save=True):
+        Verbose=False, Plot='None', Save=True):
     ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
     runNos = []
     workspaces = []
@@ -80,7 +80,7 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
         # Get Run no, crop file
         runNo = ws_list[i].getRun().getLogData("run_number").value
         runNos.append(runNo)
-        savefile = root[:3] + runNo + '_dem'
+        savefile = root[:3].lower() + runNo + '_diff'
         CropWorkspace(ws_names[i], ws_names[i], StartWorkspaceIndex=(first-1),
                 EndWorkspaceIndex = (last-1) )
         # Normalise to Monitor
@@ -93,10 +93,13 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
             mantid.deleteWorkspace(ws_names[i])
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
-    if Plot:
+    if ( Plot != 'None' ):
         for demon in workspaces:
-            nspec = mtd[demon].getNumberHistograms()
-            plotSpectrum(demon, range(0, nspec))
+            if ( Plot == 'Contour' ):
+                importMatrixWorkspace(demon).plotGraph2D()
+            else:
+                nspec = mtd[demon].getNumberHistograms()
+                plotSpectrum(demon, range(0, nspec))
     return workspaces, runNos
 
 def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):

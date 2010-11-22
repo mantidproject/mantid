@@ -5,12 +5,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>424</width>
-    <height>212</height>
+    <width>381</width>
+    <height>228</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>DEMON</string>
+   <string>Indirect Diffraction</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" >
    <item>
@@ -40,7 +40,7 @@
          </item>
          <item row="0" column="1" >
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
-           <property name="techniques" stdset="0" >
+           <property name="techniques" >
             <stringlist>
              <string>TOF Indirect Geometry Spectroscopy</string>
             </stringlist>
@@ -60,7 +60,7 @@
         </layout>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="dem_rawFiles" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
            <horstretch>0</horstretch>
@@ -74,19 +74,6 @@
           <bool>true</bool>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_5" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_11" >
@@ -113,17 +100,34 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_6" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <item>
+          <widget class="QLabel" name="lbPlotType" >
+           <property name="text" >
+            <string>Plot Type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbPlotType" >
+           <item>
+            <property name="text" >
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Contour</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Spectra</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_22" >
@@ -134,13 +138,6 @@
            </property>
            <property name="text" >
             <string>Verbose</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="dem_ckPlot" >
-           <property name="text" >
-            <string>Plot Result</string>
            </property>
           </widget>
          </item>

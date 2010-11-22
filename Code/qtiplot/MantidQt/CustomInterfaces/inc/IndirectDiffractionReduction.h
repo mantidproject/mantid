@@ -17,7 +17,7 @@ class IndirectDiffractionReduction : public MantidQt::API::UserSubWindow
 
 public:
   /// The name of the interface as registered into the factory
-  static std::string name() { return "DEMON"; }
+  static std::string name() { return "Indirect Diffraction"; }
 
 public:
   /// Default Constructor

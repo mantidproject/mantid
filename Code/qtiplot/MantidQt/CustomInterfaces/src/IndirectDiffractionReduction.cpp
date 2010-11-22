@@ -38,15 +38,14 @@ void IndirectDiffractionReduction::demonRun()
       "first = " +m_uiForm.set_leSpecMin->text()+"\n"
       "last = " +m_uiForm.set_leSpecMax->text()+"\n";
 
+    pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
+
     if ( m_uiForm.dem_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( m_uiForm.dem_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
-
     if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
-
+    
     pyInput += "ws, rn = demon(files, first, last, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
