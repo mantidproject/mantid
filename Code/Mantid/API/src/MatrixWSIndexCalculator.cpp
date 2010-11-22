@@ -4,16 +4,16 @@ namespace Mantid
 {
   namespace API
   {
-    MatrixWSIndexCalculator::MatrixWSIndexCalculator(long blockSize) : m_blockSize(blockSize)
+    MatrixWSIndexCalculator::MatrixWSIndexCalculator(int blockSize) : m_blockSize(blockSize)
     {
     }
 
-    long MatrixWSIndexCalculator::getHistogramIndex(long index)
+    int MatrixWSIndexCalculator::getHistogramIndex(int index)
     {
       return index / m_blockSize;
     }
 
-    long MatrixWSIndexCalculator::getBinIndex(long index, long histogram)
+    int MatrixWSIndexCalculator::getBinIndex(int index, int histogram)
     {
       return index  - (histogram * m_blockSize);
     }

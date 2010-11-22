@@ -943,21 +943,21 @@ namespace Mantid
       return dim;
     }
 
-    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(long index) const
+    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(int index) const
     {
       MatrixWSIndexCalculator indexCalculator(this->blocksize());
-      long j = indexCalculator.getHistogramIndex(index);
-      long i = indexCalculator.getBinIndex(index, j);
+      int j = indexCalculator.getHistogramIndex(index);
+      int  i = indexCalculator.getBinIndex(index, j);
       return getPoint(j, i);
     }
 
-    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(long histogram, long bin) const
+    Mantid::Geometry::MDPoint * MatrixWorkspace::getPoint(int histogram, int bin) const
     {
       std::vector<Mantid::Geometry::coordinate> verts;
 
-      double x = this->dataX(histogram).at(bin);
-      double signal = this->dataY(histogram).at(bin);
-      double error = this->dataE(histogram).at(bin);
+      double x = this->dataX(histogram)[bin];
+      double signal = this->dataY(histogram)[bin];
+      double error = this->dataE(histogram)[bin];
       
       coordinate vert1, vert2, vert3, vert4;
 
@@ -968,9 +968,9 @@ namespace Mantid
         vert3.y = histogram+1;
         vert4.y = histogram+1;
         vert1.x = x;
-        vert2.x = this->dataX(histogram).at(bin+1);
+        vert2.x = this->dataX(histogram)[bin+1];
         vert3.x = x;
-        vert4.x = this->dataX(histogram).at(bin+1);
+        vert4.x = this->dataX(histogram)[bin+1];
       }
 
       verts.push_back(vert1);
@@ -992,9 +992,9 @@ namespace Mantid
       return new Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment)  const
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(int  dim1Increment)  const
     {
-      if (dim1Increment<0 || dim1Increment >= static_cast<long>(this->dataX(0).size()))
+      if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1008,9 +1008,13 @@ namespace Mantid
       return new MDCell(contributingPoints, point->getVertexes());
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment)  const
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(int dim1Increment, int dim2Increment)  const
     {
-      if (dim1Increment<0 || dim1Increment >= static_cast<long>(this->dataX(0).size()))
+      if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
+      {
+        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
+      }
+      if (dim2Increment<0 || dim2Increment >= static_cast<int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1024,12 +1028,12 @@ namespace Mantid
       return new MDCell(contributingPoints, point->getVertexes());
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment)  const
     {
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment)  const
+    Mantid::Geometry::MDCell * MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
     {
       throw std::logic_error("Cannot access higher dimensions");
     }

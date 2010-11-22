@@ -39,15 +39,15 @@ namespace Mantid
     {
     private:
 
-      long m_blockSize;
+      int m_blockSize;
 
     public:
 
-      MatrixWSIndexCalculator(long blockSize);
+      MatrixWSIndexCalculator(int blockSize);
 
-      long getHistogramIndex(long index);
+      int getHistogramIndex(int index);
 
-      long getBinIndex(long index, long histogram);
+      int getBinIndex(int index, int histogram);
     };
 
   }

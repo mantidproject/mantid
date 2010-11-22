@@ -69,11 +69,11 @@ public:
 
   virtual int getNPoints() const;
   virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const;
-  virtual Mantid::Geometry::MDPoint * getPoint(long index) const;
-  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment) const;
+  virtual Mantid::Geometry::MDPoint * getPoint(int index) const;
+  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
   virtual Mantid::Geometry::MDCell * getCell(...) const;
   virtual Mantid::Geometry::IMDDimension* getXDimension() const;
   virtual Mantid::Geometry::IMDDimension* getYDimension() const;

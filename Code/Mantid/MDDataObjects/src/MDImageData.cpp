@@ -25,27 +25,27 @@ namespace Mantid{
       return Mantid::Geometry::MDGeometry::getDimension(id,true);
     }
 
-    Mantid::Geometry::MDPoint * MDImageData::getPoint(long index) const
+    Mantid::Geometry::MDPoint * MDImageData::getPoint(int index) const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDImageData::getCell(long dim1Increment) const 
+    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment) const 
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDImageData::getCell(long dim1Increment, long dim2Increment) const 
+    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment) const 
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDImageData::getCell(long dim1Increment, long dim2Increment, long dim3Increment)  const
+    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment, int dim3Increment)  const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDImageData::getCell(long dim1Increment, long dim2Increment, long dim3Increment, long dim4Increment)  const
+    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
