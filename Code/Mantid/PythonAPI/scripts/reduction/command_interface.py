@@ -28,10 +28,30 @@ class ReductionSingleton:
             ReductionSingleton.__instance = reducer_cls()
         
     @classmethod
+    def replace(cls, red):
+        """
+            Set the object pointed to by the singleton with
+            the one passed
+            @param red: reducer object
+        """
+        if issubclass(red.__class__, Reducer):
+            ReductionSingleton.__instance = red
+        else:
+            raise RuntimeError, 'The object passed to ReductionSingleton.replace() must be of type Reducer'
+
+        
+    @classmethod
     def run(cls):
-        if ReductionSingleton.__instance is not None:
-            ReductionSingleton.__instance._reduce()
-        ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
+        """
+            Execute the reducer and then clean it (regardless of
+            if it throws) to ensure that a partially run reducer is
+            not left behind
+        """
+        try:
+            if ReductionSingleton.__instance is not None:
+                return ReductionSingleton.__instance._reduce()
+        finally:
+            ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
         
     def __getattr__(self, attr):
         """ Delegate access to implementation """

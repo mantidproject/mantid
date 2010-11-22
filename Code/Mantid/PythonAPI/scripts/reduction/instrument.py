@@ -68,7 +68,7 @@ class Instrument(object):
         if workspace_name is None:
             workspace_name = self._NAME+'_instrument_view'
             mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
-        elif not mantid.workspaceExists(workspace_name):
+        elif not MantidFramework.mtd.workspaceExists(workspace_name):
             mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
         
 

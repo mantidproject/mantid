@@ -209,7 +209,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, r
         use_singleton()
     else:
         result = reduction_chain._reduce()    
-        
+
     return result
 
     

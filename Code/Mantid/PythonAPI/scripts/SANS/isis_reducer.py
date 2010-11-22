@@ -232,7 +232,7 @@ class ISISReducer(SANSReducer):
 
     def _reduce(self):
         """
-            Go through the list of reduction steps
+            Execute the list of all reduction steps
         """
         # Check that an instrument was specified
         if self.instrument is None:
