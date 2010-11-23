@@ -866,6 +866,16 @@ const std::string ConfigServiceImpl::getInstrumentFilename(const std::string& in
   std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
   std::string fullPathIDF = directoryName + "/" + instrument + "_Definition.xml";
 
+  // Special hack to look for long name versions
+  if (!Poco::File(fullPathIDF).exists())
+  {
+    if (instrument == "SEQ")
+      return this->getInstrumentFilename("SEQUOIA");
+    if (instrument == "PG3")
+      return this->getInstrumentFilename("POWGEN");
+
+  }
+
   return fullPathIDF;
 }
 
