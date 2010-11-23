@@ -52,9 +52,10 @@ public:
 	void mouseReleased(Qt::MouseButtons buttons, const QPoint & pos); 
 	QRgb pickPoint(int x, int y);
 	std::set<QRgb> getListOfColorsPicked();
-private:
+
 	QImage mDisplayImage;  ///< This image is used for rendering in the window.
 	QImage mPickImage;     ///< This image is used for picking the objects.
+private:
 	std::set<QRgb> mColorSet;
 	int    mBoxStartPtX; ///< X-dim value of start point in Rectangular Box for the pick selection
 	int    mBoxEndPtX; ///< X-dim value of end point in Rectangular Box for the pick selection

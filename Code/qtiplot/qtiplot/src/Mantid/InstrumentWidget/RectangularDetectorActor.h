@@ -2,6 +2,7 @@
 #define RECTANGULAR_DETECTOR_ACTOR__H_
 #include "GLActor.h"
 #include "ObjComponentActor.h"
+#include "ICompAssemblyActor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/V3D.h"
@@ -52,7 +53,7 @@ namespace API
 class MantidObject;
 class ObjComponentActor;
 
-class RectangularDetectorActor : public ObjComponentActor
+class RectangularDetectorActor : public ICompAssemblyActor //ObjComponentActor
 {
 public:
   /// Constructor
@@ -61,31 +62,47 @@ public:
   virtual ~RectangularDetectorActor();
 
 private:
-  int mNumberOfDetectors;          ///< The number of detectors in the Component assembly 
-  Mantid::Geometry::V3D minBoundBox;
-  Mantid::Geometry::V3D maxBoundBox;
   void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
 
 protected:
-  /// Component ID of the RectangularDetector
-  Mantid::Geometry::ComponentID mId;
-  /// Instrument
-  boost::shared_ptr<Mantid::API::IInstrument> mInstrument;
-
-  int mColorStartID;                                       ///< Starting picking colorid for the subcomponents to CompAssembly
-
+  /// The rectangular detector
   boost::shared_ptr<Mantid::Geometry::RectangularDetector> mDet;
 
   void init();
   void redraw();
   int findDetectorIDUsingColor(int rgb);
+  virtual void initChilds(bool) {}
 
 public:
   virtual std::string type()const {return "RectangularDetectorActor";} ///< Type of the GL object
+
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+
   void appendObjCompID(std::vector<int>& idList);
   int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list);
+  int genTexture(char * & image_data, std::vector<boost::shared_ptr<GLColor> >::iterator& list, bool useDetectorIDs);
+  void uploadTexture(char * & image_data);
   void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+
+  virtual int  setStartingReferenceColor(int rgb);
+  virtual void drawUsingColorID();
+
+  virtual MantidObject* getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>, bool)
+  {
+    return NULL;
+  }
+
+private:
+  /// Texture ID that holds the texture.
+  unsigned int mTextureID;
+
+  /// Pointer to the array holding the texture color data
+  char * image_data;
+
+  /// Pointer to the array holding the color data for picking the scene
+  char * pick_data;
+
+
 };
 
 #endif /*RECTANGULAR_DETECTOR_ACTOR__H_*/

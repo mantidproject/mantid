@@ -91,6 +91,8 @@ public:
   V3D getRelativePosAtXY(int x, int y) const;
   void getTextureSize(int & xsize, int & ysize) const;
 
+  unsigned int getTextureID() const;
+  void setTextureID(unsigned int textureID);
 
   // This should inherit the getBoundingBox implementation from  CompAssembly but
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
@@ -158,8 +160,12 @@ private:
   /// Step size in the Y direction of detector
   double m_ystep;
 
+  /// Texture ID to use in rendering
+  unsigned int mTextureID;
+
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<Object> mShape;
+
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);

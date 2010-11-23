@@ -57,10 +57,11 @@ public:
   void setName(const std::string& name);
   /// Get the name of the GLObject
   std::string getName() const;
+  /// Re-construct the opengl scene
+  void construct();
 protected:
   /// Name
   std::string mName;
-  void construct();
   GLuint mDisplayListId;                   ///< OpengGL Display list id
   bool mChanged;                         ///< Flag holding the change in the object
 };

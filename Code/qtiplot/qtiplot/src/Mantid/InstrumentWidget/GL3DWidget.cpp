@@ -274,17 +274,25 @@ void GL3DWidget::drawPickingScene()
  */
 void GL3DWidget::switchToPickingMode()
 {
+  //First we draw the regular scene and save it to display
   drawDisplayScene();
   glReadBuffer(GL_BACK);
   mPickBox->setDisplayImage(grabFrameBuffer(false));
+
+  mPickBox->mDisplayImage.save("/home/8oz/Desktop/display.png");
+
+  // Now we draw the picking scene with the special colors
+
   glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
   glDisable(GL_NORMALIZE);
   drawPickingScene();
   mPickBox->setPickImage(grabFrameBuffer(false));
   glEnable(GL_MULTISAMPLE);   //enable antialiasing
   mPickingDraw=false;
-  //mPickBox->mPickImage.save("C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\pick.png");
+
+  mPickBox->mPickImage.save("/home/8oz/Desktop/pick.png");
 }
+
 
 /**
  * This is overridden function which is called by Qt when the widget needs to be repainted.

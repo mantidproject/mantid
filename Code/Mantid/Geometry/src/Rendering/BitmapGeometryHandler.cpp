@@ -77,7 +77,7 @@ namespace Geometry
     glEnable (GL_TEXTURE_2D); // enable texture mapping
 
     //Point to the ID of the texture that was created before - in RectangularDetectorActor.
-    int texture_id = mRectDet->getAtXY(0,0)->getID();
+    int texture_id = mRectDet->getTextureID();
     int texx, texy;
     mRectDet->getTextureSize(texx, texy);
     double tex_frac_x = (1.0 * mRectDet->xpixels()) / (texx);

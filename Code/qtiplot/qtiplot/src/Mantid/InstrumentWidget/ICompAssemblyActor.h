@@ -86,6 +86,10 @@ public:
   virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list) = 0;
   virtual int findDetectorIDUsingColor(int rgb) = 0;
 
+  /// Return the starting color ID (for picking)
+  virtual int getColorStartID()
+  { return mColorStartID; }
+
 };
 
 #endif /*GLTRIANGLE_H_*/

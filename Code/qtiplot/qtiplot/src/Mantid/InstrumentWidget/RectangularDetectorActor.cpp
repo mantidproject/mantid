@@ -25,16 +25,18 @@ static const bool VERBOSE = false;
  */
 RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet)
 :
-    ObjComponentActor(NULL, boost::dynamic_pointer_cast<IObjComponent>( rectDet ), false),
-    mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
+    ICompAssemblyActor(false), mTextureID(0)
 {
+  mNumberOfDetectors = 0;
   mDet = rectDet;
+  image_data = NULL;
+  pick_data = NULL;
 
   if (mDet)
   {
     BoundingBox compBox;
     mDet->getBoundingBox(compBox);
-    //std::cout << " RectangularDetectorActor : bounding box is " << compBox.minPoint() << " " << compBox.maxPoint() << "\n";
+    mNumberOfDetectors = mDet->nelements();
     this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
   }
 
@@ -58,7 +60,33 @@ RectangularDetectorActor::~RectangularDetectorActor()
 void RectangularDetectorActor::define()
 {
   if (VERBOSE) std::cout << "RectangularDetectorActor::define() called for " << mDet->getName() << "\n";
-  ObjComponentActor::define();
+
+  glPushMatrix();
+  // Translation first
+  V3D pos = mDet->getPos();
+  if (!(pos.nullVector()))
+  {
+    glTranslated(pos[0],pos[1],pos[2]);
+  }
+  //Rotation
+  Quat rot = mDet->getRotation();
+  if (!(rot.isNull()))
+  {
+    double deg,ax0,ax1,ax2;
+    rot.getAngleAxis(deg,ax0,ax1,ax2);
+    glRotated(deg,ax0,ax1,ax2);
+  }
+  //Scale
+  V3D scaleFactor = mDet->getScaleFactor();
+  if (!(scaleFactor==V3D(1,1,1)))
+  {
+    glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
+  }
+
+  // RectangularDetector will use.
+  mDet->draw();
+
+  glPopMatrix();
 }
 
 
@@ -100,6 +128,39 @@ void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
 }
 
 
+
+//------------------------------------------------------------------------------------------------
+/**
+ * Set the starting color reference for CompAssembly
+ * @param rgb :: input color id
+ * @return  the number of color ids that are used.
+ */
+int RectangularDetectorActor::setStartingReferenceColor(int rgb)
+{
+  if (VERBOSE) std::cout << "RectangularDetectorActor::setStartingReferenceColor() called for " << mDet->getName() << " with rgb = " << rgb << "\n";
+  mColorStartID=rgb;
+  return this->getNumberOfDetectors();
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
+ * detector is not found then returns -1.
+ * @param  rgb :: input color id
+ * @return the detector id of the input rgb color.if detector id not found then returns -1
+ */
+int RectangularDetectorActor::findDetectorIDUsingColor(int rgb)
+{
+  if (VERBOSE) std::cout << "RectangularDetectorActor::findDetectorIDUsingColor() called for " << mDet->getName() << "\n";
+  //The row and column of the detector can be found from the color
+  int diff_rgb = rgb - mColorStartID;
+  int y = diff_rgb / mDet->xpixels();
+  int x = diff_rgb % mDet->xpixels();
+  //And now we return that ID :)
+  return mDet->getAtXY(x,y)->getID();
+}
+
+
 //------------------------------------------------------------------------------------------------
 /**
  * The colors are set using the iterator of the color list. The order of the detectors
@@ -110,15 +171,40 @@ void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
  */
 int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list)
 {
+  int num = this->genTexture(image_data, list, false);
+  this->uploadTexture(image_data);
+  return num;
+}
+
+
+//------------------------------------------------------------------------------------------------
+/**
+ * Generate a texture for the RectangularDetector
+ *
+ * @param image_data :: pointer to where the image data will be filled in.
+ * @param list :: Color list iterator. Only used if useDetectorIDs is false.
+ * @param useDetectorIDs :: set to true to make a fake texture using the detector IDs. If false, the iterator is used.
+ *
+ */
+int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost::shared_ptr<GLColor> >::iterator& list, bool useDetectorIDs)
+{
   int num = mDet->xpixels() * mDet->ypixels();
 
   //The texture size must be 2^n power.
   int text_x_size, text_y_size;
   mDet->getTextureSize(text_x_size, text_y_size);
 
+  //For using color IDs
+  int rgb = this->mColorStartID;
+
   //------ Create the image data buffer -------
-  char * image_data;
-  image_data = new char[3*text_x_size*text_y_size];
+  if (!image_data)
+  {
+    //Delete the old memory
+    delete [] image_data;
+    image_data = new char[3*text_x_size*text_y_size];
+  }
+  //Pointer to where we are in it.
   char * image_data_ptr = image_data;
 
   //Fill with 0 (black) everywhere
@@ -129,21 +215,33 @@ int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::share
     for (int x=0; x < mDet->xpixels() ; x++)
     {
       //Use black as the default color (for going off the edges)
-      char r=0, g=0, b=0;
-      //Get the current color
-      float rf, gf, bf, af;
-      (*list)->get(rf,gf,bf,af);
-      //Convert to bytes
-      r = (char) (255*rf);
-      g = (char) (255*gf);
-      b = (char) (255*bf);
-      //Go to the next color
-      list++;
+      char r, g, b;
 
-//      //TEMP: way to show the colors
-//      r=x;
-//      g=y;
-//      b=x;
+      if (useDetectorIDs)
+      {
+        //Use the rgb int that is incremented for each detector
+        r=(rgb/65536);
+        g=((rgb%65536)/256);
+        b=((rgb%65536)%256);
+        rgb++;
+      }
+      else
+      {
+        //Get the current color
+        float rf, gf, bf, af;
+        (*list)->get(rf,gf,bf,af);
+        //Convert to bytes
+        r = (char) (255*rf);
+        g = (char) (255*gf);
+        b = (char) (255*bf);
+        //Go to the next color
+        list++;
+      }
+
+        //      //TEMP: way to show the colors
+        //      r=x;
+        //      g=y;
+        //      b=x;
 
       //Save the color data to the buffer
       *image_data_ptr = r;
@@ -154,13 +252,37 @@ int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::share
       image_data_ptr++;
 
     }
+
     //Skip any padding in x. 3 bytes per pixel
     image_data_ptr += 3*(text_x_size-mDet->xpixels());
-  }
+   }
+
+  if (VERBOSE) std::cout << "RectangularDetectorActor::genTexture() called for " << mDet->getName() << " with " << num << " entries set\n";
+
+  return num;
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Upload the texture to the video card. */
+void RectangularDetectorActor::uploadTexture(char * & image_data)
+{
+  if (!image_data)
+    throw std::runtime_error("Empty pointer passed to RectangularDetectorActor::uploadTexture()!");
+
+  //The texture size must be 2^n power.
+  int text_x_size, text_y_size;
+  mDet->getTextureSize(text_x_size, text_y_size);
 
   // Set up before uploading a texture
-  int texture_id = mDet->getAtXY(0,0)->getID();
-  glBindTexture(GL_TEXTURE_2D, texture_id);
+  if (mTextureID > 0)
+    glDeleteTextures(1,&mTextureID);
+  glGenTextures(1, &mTextureID);          // Create The Texture
+  if (VERBOSE) std::cout << mDet->getName() << " is drawing with texture id " << mTextureID << "\n";
+  mDet->setTextureID(mTextureID);
+
+  glBindTexture(GL_TEXTURE_2D, mTextureID);
+
   if (glGetError()>0) std::cout << "OpenGL error in glBindTexture \n";
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -178,26 +300,38 @@ int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::share
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, text_x_size, text_y_size, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
   if (glGetError()>0) std::cout << "OpenGL error in glTexImage2D \n";
 
-  if (VERBOSE) std::cout << "RectangularDetectorActor::setInternalDetectorColors() called for " << mDet->getName() << " with " << num << " entries set\n";
-  //Free memory - the bitmap has been uploaded to video memory.
-
-  delete [] image_data;
-
-  return num;
-
-
-//  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector =
-//      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(this->getObjComponent());
-//  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-//  {
-//    this->setColor((*list));
-//    list++;
-//    return 1;
-//  }
-//  else
-//    return 0;
-
 }
+
+//
+///** Swaps between the image_data and pick_data in order
+// * to swap the texture between the real one and the pick-color-one.
+// */
+//void RectangularDetectorActor::swapTexture()
+//{
+//  char * temp = pick_data;
+//  pick_data = image_data;
+//  image_data = temp;
+//}
+
+
+
+//------------------------------------------------------------------------------------------------
+/**
+ * This method draws the children with the ColorID rather than the children actual color. used in picking the component
+ */
+void RectangularDetectorActor::drawUsingColorID()
+{
+  std::vector<boost::shared_ptr<GLColor> >::iterator dummy_iterator;
+  this->genTexture(pick_data, dummy_iterator, true);
+  this->uploadTexture(pick_data);
+
+  //And now draw it with the newly defined texture.
+  this->define();
+
+  //Re-upload the good data from before.
+  this->uploadTexture(image_data);
+}
+
 
 
 

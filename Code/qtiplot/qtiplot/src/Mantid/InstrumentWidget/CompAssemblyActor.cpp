@@ -166,29 +166,23 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
     {
       boost::shared_ptr<IComponent> ChildCompPtr=(*CompAssemPtr)[i];
       boost::shared_ptr<ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<ICompAssembly>(ChildCompPtr);
-      boost::shared_ptr<RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
 
-      if (ChildRDPtr)
-      {
-        //If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
-        boost::shared_ptr<IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
-        if (ChildObjPtr)
-        {
-          RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr);
-          iActor->getBoundingBox(minBound,maxBound);
-          AppendBoundingBox(minBound,maxBound);
-          mChildObjCompActors.push_back(iActor);
-        }
-        else
-          std::cout << " ChildObjPtr is null for " << ChildRDPtr->getName() << "\n";
-      }
       //If the child is a CompAssembly then create a CompAssemblyActor for the child
-      else
       if(ChildCAPtr!=boost::shared_ptr<ICompAssembly>())
       {
         boost::shared_ptr<ObjCompAssembly> ChildOCAPtr=boost::dynamic_pointer_cast<ObjCompAssembly>(ChildCompPtr);
-        //boost::shared_ptr<ParObjCompAssembly> ChildPOCAPtr=boost::dynamic_pointer_cast<ParObjCompAssembly>(ChildCompPtr);
-        if (ChildOCAPtr)
+        boost::shared_ptr<RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
+
+        if (ChildRDPtr)
+        {
+          //If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
+          RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr);
+          iActor->getBoundingBox(minBound,maxBound);
+          AppendBoundingBox(minBound,maxBound);
+          mNumberOfDetectors+=iActor->getNumberOfDetectors();
+          mChildCompAssemActors.push_back(iActor);
+        }
+        else if (ChildOCAPtr)
         {
           ObjCompAssemblyActor* iActor =
               new ObjCompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
@@ -243,29 +237,6 @@ MantidObject*	CompAssemblyActor::getMantidObject(const boost::shared_ptr<const M
     return retObj;
   }
   return (*iObj).second;
-}
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * Set the starting color reference for CompAssembly
- * @param rgb :: input color id
- * @return  the number of color ids that are used.
- */
-int CompAssemblyActor::setStartingReferenceColor(int rgb)
-{
-  mColorStartID=rgb;
-  int val = rgb;
-  for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
-    {
-      (*itrObjComp)->setStartingReferenceColor(val);
-      val++;
-    }
-  for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
-    {
-      val+=(*itrObjAssem)->setStartingReferenceColor(val);
-    }
-  return val-rgb;
 }
 
 
@@ -343,6 +314,29 @@ void CompAssemblyActor::redraw()
 
 //------------------------------------------------------------------------------------------------
 /**
+ * Set the starting color reference for CompAssembly
+ * @param rgb :: input color id
+ * @return  the number of color ids that are used.
+ */
+int CompAssemblyActor::setStartingReferenceColor(int rgb)
+{
+  mColorStartID=rgb;
+  int val = rgb;
+  for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
+    {
+      (*itrObjComp)->setStartingReferenceColor(val);
+      val++;
+    }
+  for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    {
+      val+=(*itrObjAssem)->setStartingReferenceColor(val);
+    }
+  return val-rgb;
+}
+
+
+//------------------------------------------------------------------------------------------------
+/**
  * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
  * detector is not found then returns -1.
  * @param  rgb :: input color id
@@ -351,23 +345,21 @@ void CompAssemblyActor::redraw()
 int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
 {
   int n_comp_actors = static_cast<int>(mChildObjCompActors.size());
-  if(rgb > 0 && rgb <= n_comp_actors)
+  int diff_rgb = rgb - this->mColorStartID;
+  if(diff_rgb >= 0 && diff_rgb < n_comp_actors)
   {
-    const boost::shared_ptr<IDetector>  iDec= boost::dynamic_pointer_cast<IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
+    const boost::shared_ptr<IDetector>  iDec= boost::dynamic_pointer_cast<IDetector>((mChildObjCompActors[diff_rgb])->getObjComponent());
     if(iDec!=boost::shared_ptr<IDetector>())
     {
       return iDec->getID();
     }
   }
-  rgb -= n_comp_actors;
 
   for(std::vector<ICompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
   {
-    if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
-    {
+    int colorStart = (*iAssem)->getColorStartID();
+    if(rgb >= colorStart && rgb < (*iAssem)->getNumberOfDetectors()+colorStart )
       return (*iAssem)->findDetectorIDUsingColor(rgb);
-    }
-    rgb -= (*iAssem)->getNumberOfDetectors();
   }
   return -1;
 }

@@ -91,33 +91,6 @@ void ObjCompAssemblyActor::define()
   }
 }
 
-/**
-* This method draws the children with the ColorID rather than the children actual color. used in picking the component
-*/
-void ObjCompAssemblyActor::drawUsingColorID()
-{
-  //Check whether this assembly and its child components can be drawn
-  if(mVisible)
-  {
-    m_tex->swap(); // swap to pick texture
-    //Iterate throught the children with the starting reference color mColorStartID and incrementing
-    int rgb=mColorStartID;
-    int r,g,b;
-    for(int i = 0;i < getNumberOfDetectors();++i)
-    {
-      r=(rgb/65536);
-      g=((rgb%65536)/256);
-      b=((rgb%65536)%256);
-      GLColor c(r/255.0,g/255.0,b/255.0);
-      m_tex->setDetectorColor(i,c);
-      rgb++;
-    }
-    m_tex->generateTexture();
-    define();
-    m_tex->swap(); // swap to show the data
-    m_tex->generateTexture();
-  }
-}
 
 /**
 * Initialises the CompAssembly Children and creates actors for each children
@@ -222,15 +195,45 @@ void ObjCompAssemblyActor::redraw()
   construct();
 }
 
+
+
+/**
+* This method draws the children with the ColorID rather than the children actual color. used in picking the component
+*/
+void ObjCompAssemblyActor::drawUsingColorID()
+{
+  //Check whether this assembly and its child components can be drawn
+  if(mVisible)
+  {
+    m_tex->swap(); // swap to pick texture
+    //Iterate throught the children with the starting reference color mColorStartID and incrementing
+    int rgb=mColorStartID;
+    int r,g,b;
+    for(int i = 0;i < getNumberOfDetectors();++i)
+    {
+      r=(rgb/65536);
+      g=((rgb%65536)/256);
+      b=((rgb%65536)%256);
+      GLColor c(r/255.0,g/255.0,b/255.0);
+      m_tex->setDetectorColor(i,c);
+      rgb++;
+    }
+    m_tex->generateTexture();
+    define();
+    m_tex->swap(); // swap to show the data
+    m_tex->generateTexture();
+  }
+}
+
 /**
 * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
 * detector is not found then returns -1.
-* @param  rgb :: input color id  ? I am not sure what it is ? It looks like an index of a child component + 1
-* @return the detector id of the input rgb color.if detector id not found then returns -1
+* @param  rgb :: input color id; this is the color that was set for the given detector ID in drawUsingColorID()
+* @return the detector id of the input rgb color. If detector id not found then returns -1
 */
 int ObjCompAssemblyActor::findDetectorIDUsingColor(int rgb)
 {
-  int i = rgb - 1;
+  int i = rgb - mColorStartID;
   if (i >= 0 && i < getNumberOfDetectors())
   {
     Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);

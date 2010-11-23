@@ -433,6 +433,19 @@ void RectangularDetector::getTextureSize(int & xsize, int & ysize) const
 
 
 
+/** Set the texture ID to use when rendering the RectangularDetector
+ */
+void RectangularDetector::setTextureID(unsigned int textureID)
+{
+  mTextureID = textureID;
+}
+
+/** Return the texture ID to be used in plotting . */
+unsigned int RectangularDetector::getTextureID() const
+{
+ return mTextureID;
+}
+
 /**
  * Draws the objcomponent, If the handler is not set then this function does nothing.
  */
