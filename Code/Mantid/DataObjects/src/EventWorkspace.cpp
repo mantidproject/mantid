@@ -673,8 +673,17 @@ namespace DataObjects
 
       //Now use that to get E -- Y values are generated from another function
       MantidVec Y;
-      el->generateCountsHistogram( *(el->getRefX()), Y);
-      el->generateErrorsHistogram( Y, data->m_data);
+      if (el->hasWeights())
+      {
+        //This function does both at once. This is more efficient than calling the individual ones below.
+        el->generateHistogramsForWeights(*(el->getRefX()), Y, data->m_data);
+      }
+      else
+      {
+        //This only works for non-weighted event lists.
+        el->generateCountsHistogram( *(el->getRefX()), Y);
+        el->generateErrorsHistogram( Y, data->m_data);
+      }
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);

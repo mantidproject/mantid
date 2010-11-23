@@ -725,9 +725,35 @@ public:
     }
   }
 
+  void test_histogram_weights_simple()
+  {
+    // 5 events per bin, simple non-weighted
+    this->fake_uniform_data(5.0);
+    this->test_setX();
+
+    // Multiply by a simple scalar
+    el *= 3.2;
+
+    TS_ASSERT( el.hasWeights() );
+
+    MantidVec X, Y, E;
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    X = el3.dataX();
+    Y = *el3.dataY();
+    E = *el3.dataE();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    for (int i=0; i<Y.size(); i++)
+    {
+      // 5 events, each with a weight of 3.2
+      TS_ASSERT_DELTA(Y[i], 5 * 3.2, 1e-6);
+      // Error should be scaled the same, by a factor of 3.2 - maintaining the same signal/error ratio.
+      TS_ASSERT_DELTA(E[i], sqrt(5) * 3.2, 1e-6);
+    }
+  }
+
   void test_histogram_weights()
   {
-    //This one has a weight of
+    //This one has a weight of 2.0, error is 2.5
     this->fake_uniform_data_weights();
 
     this->test_setX(); //Set it up
@@ -746,6 +772,7 @@ public:
       TS_ASSERT_DELTA(E[i], sqrt(2 * 2.5*2.5), 1e-5);
     }
   }
+
 
 
   void test_histogram_with_first_bin_higher_than_first_event()
@@ -1194,13 +1221,13 @@ public:
   }
 
   /** Create a uniform event list with no weights*/
-  void fake_uniform_data()
+  void fake_uniform_data( double events_per_bin = 2)
   {
     //Clear the list
     el = EventList();
     //Create some mostly-reasonable fake data.
     srand(1234); //Fixed random seed
-    for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/2)
+    for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/events_per_bin)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       el += TofEvent( tof, rand()%1000);
