@@ -235,10 +235,20 @@ namespace DataObjects
 //    g_log.information(out.str());
 //    std::cout << out.str() << "\n";
 
-    //Add up the two buffers and the events.
-    return ((this->m_bufferedDataY.size() + this->m_bufferedDataE.size()) * this->blocksize() * sizeof(double)
-        + this->m_cachedNumberOfEvents * sizeof(TofEvent)
-        + this->getNumberHistograms() * sizeof(EventList) ) / 1024;
+    long int  total = 0;
+
+    //Add up the two buffers
+    total += (this->m_bufferedDataY.size() + this->m_bufferedDataE.size()) * this->blocksize() * sizeof(double);
+
+    // Add the memory from all the event lists
+    for (EventListVector::const_iterator it = this->data.begin();
+        it != this->data.end(); it++)
+    {
+      total += (*it)->getMemorySize();
+    }
+
+    // Return in KB
+    return total / 1024;
   }
 
   //-----------------------------------------------------------------------------

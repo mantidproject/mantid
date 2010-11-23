@@ -265,6 +265,8 @@ public:
 
   virtual std::size_t getNumberEvents() const;
 
+  long int getMemorySize() const;
+
   virtual size_t histogram_size() const;
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;

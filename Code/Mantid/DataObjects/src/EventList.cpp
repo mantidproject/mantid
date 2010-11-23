@@ -793,6 +793,17 @@ using Kernel::DateAndTime;
 
 
   // --------------------------------------------------------------------------
+  /** Return the memory used by the EventList. */
+  long int EventList::getMemorySize() const
+  {
+    if (has_weights)
+      return this->weightedEvents.size() * sizeof(WeightedEvent) + sizeof(EventList);
+    else
+      return this->events.size() * sizeof(TofEvent) + sizeof(EventList);
+  }
+
+
+  // --------------------------------------------------------------------------
   /** Return the size of the histogram data.
    * @return the size of the histogram representation of the data (size of Y) **/
   size_t EventList::histogram_size() const
