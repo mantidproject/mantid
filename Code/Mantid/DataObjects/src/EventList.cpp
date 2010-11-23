@@ -949,6 +949,30 @@ using Kernel::DateAndTime;
 
   // --------------------------------------------------------------------------
   /** Generates both the Y and E (error) histograms
+   * for an EventList with or without WeightedEvents.
+   *
+   * @param X: x-bins supplied
+   * @param Y: counts returned
+   * @param E: errors returned
+   */
+  void EventList::generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E) const
+  {
+    if (has_weights)
+    {
+      // Make both, with weights
+      this->generateHistogramsForWeights(X, Y, E);
+    }
+    else
+    {
+      // Make the single ones
+      this->generateCountsHistogram(X, Y);
+      this->generateErrorsHistogram(Y, E);
+    }
+  }
+
+
+  // --------------------------------------------------------------------------
+  /** Generates both the Y and E (error) histograms
    * for an EventList with WeightedEvents.
    *
    * @param X: x-bins supplied
@@ -1503,10 +1527,14 @@ using Kernel::DateAndTime;
   /** Multiply the weights in this event list by a scalar.
    * The event list switches to WeightedEvent's if needed.
    *
-   * The error propagation formula used is,
-   *  (where A is the weight, and B is the scalar multiplier, \f$\sigma_X \f$ is the variance of the given variable):
+   * Given:
+   *  - A is the weight, variance \f$\sigma_A \f$
+   *  - B is the scalar multiplier, variance \f$\sigma_B \f$
+   *
+   * The error propagation formula used is:
    *
    * \f[ \left(\frac{\sigma_f}{f}\right)^2 = \left(\frac{\sigma_A}{A}\right)^2 + \left(\frac{\sigma_B}{B}\right)^2 + 2\frac{\sigma_A\sigma_B}{AB}\rho_{AB} \f]
+   *
    * \f$ \rho_{AB} \f$ is the covariance between A and B, which we take to be 0 (uncorrelated variables).
    * Therefore, this reduces to:
    * \f[ \sigma_{AB}^2 = B \sigma_A^2 / A + A \sigma_B ^ 2 / B \f]

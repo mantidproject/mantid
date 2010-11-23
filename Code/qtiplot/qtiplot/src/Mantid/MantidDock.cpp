@@ -328,8 +328,10 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QTreeWidgetItem *ws_item = new QTreeWidgetItem(QStringList(ws_name));
+
   // Need to add a child so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
-  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(workspace->id().c_str()));
+  std::string workspace_type = workspace->id();
+  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(workspace_type.c_str()));
   wsid_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(wsid_item);
   return ws_item;
@@ -422,7 +424,9 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   Mantid::API::IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace> ( workspace );
   if (eventWS)
   {
-    data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents())));
+    std::string extra("");
+    if (eventWS->eventsHaveWeights()) extra = " (weighted)";
+    data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents()) + extra.c_str() ));
     data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(data_item);
   }

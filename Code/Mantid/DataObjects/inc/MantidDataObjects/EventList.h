@@ -271,6 +271,8 @@ public:
 
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 
+  void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
+
   void generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
 
   double integrate(const double minX, const double maxX, const bool entireRange) const;

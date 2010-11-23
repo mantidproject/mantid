@@ -169,8 +169,25 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
+  /** Do the events have weights anywhere?
+   *
+   * @return true if any event list has weights.
+   */
+  bool EventWorkspace::eventsHaveWeights() const
+  {
+    for (EventListVector::const_iterator it = this->data.begin();
+        it != this->data.end(); it++)
+    {
+      if ((*it)->hasWeights())
+        return true;
+    }
+    return false;
+  }
+
+
+  //-----------------------------------------------------------------------------
   /// Returns true always - an EventWorkspace always represents histogramm-able data
-  /// @returns If the data is a histogtram - always true for an eventWorkspace
+  /// @returns If the data is a histogram - always true for an eventWorkspace
   bool EventWorkspace::isHistogramData() const
   {
     return true;
@@ -673,17 +690,7 @@ namespace DataObjects
 
       //Now use that to get E -- Y values are generated from another function
       MantidVec Y;
-      if (el->hasWeights())
-      {
-        //This function does both at once. This is more efficient than calling the individual ones below.
-        el->generateHistogramsForWeights(*(el->getRefX()), Y, data->m_data);
-      }
-      else
-      {
-        //This only works for non-weighted event lists.
-        el->generateCountsHistogram( *(el->getRefX()), Y);
-        el->generateErrorsHistogram( Y, data->m_data);
-      }
+      el->generateHistogram(*(el->getRefX()), Y, data->m_data);
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);
