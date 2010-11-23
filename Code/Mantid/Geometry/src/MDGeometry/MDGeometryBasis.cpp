@@ -172,79 +172,8 @@ MDGeometryBasis::getDimIDs(void)const
   }
   return IDs;
 }
-// get the list of the column numbers for the list of column names
-std::vector<int>  
-MDGeometryBasis::getColumnNumbers(const std::vector<std::string> &tag_list)const
-{
-  size_t n_elements=tag_list.size();
-  std::vector<int> nums(n_elements,-1);
-  std::set<DimensionID>::const_iterator it;
-  DimensionID id;
 
-  for(unsigned int i=0;i<tag_list.size();i++){
-      id.setDimensionIDValues(-1,tag_list[i]);
-      it = DimensionIDs.find(id);
-      if(it==DimensionIDs.end()){
-        g_log.error()<<" dimension with name: "<<tag_list[i]<<" can not be found among the basis\n";
-        throw(std::invalid_argument("MDGeometryBasis::getOrt: argument out of range")); 
-      }
-      nums[i]=it->getDimNum();
-  }
-  return nums;
-}
 
-/*
-const std::vector<double> & 
-MDGeometryBasis::getOrt(const std::string &tag)const
-{
-    unsigned int nDim=this->getDimIDNum(tag,true);  // throws if not found
-    return getOrt(nDim);
-}
-//
-const std::vector<double> &
-MDGeometryBasis::getOrt(unsigned int dimNum)const
-{
-
-    if(dimNum>=this->n_total_dim){
-        g_log.error()<<"WorkspaceGeometry::getOrt: Workspace has "<<this->n_total_dim<<" dimensions but the coordinate for Dimension N: "<<dimNum<<" reqested\n";
-        throw(std::invalid_argument("MDGeometryBasis::getOrt: argument out of range"));
-    }
-
-    if(dimNum<this->getNumReciprocalDims()){
-        return this->lattice_ort[dimNum];
-    }else{
-        return this->unit;
-    }
-}
-*/
-//
-std::string
-MDGeometryBasis::getColumnName(unsigned int dimNum)const
-{
-    if(dimNum>=this->n_total_dim){
-        g_log.error()<<"WorkspaceGeometry::getOrt: Workspace has "<<this->n_total_dim<<" dimensions but the coordinate for Dimension N: "<<dimNum<<" reqested\n";
-        throw(std::invalid_argument("MDGeometryBasis::getOrt: argument out of range")); 
-    }
-
-    return dim_names.find(dimNum)->second;
-}
-//
-int 
-MDGeometryBasis::getDimNum(const std::string &tag, bool do_throw)const
-{
-  int i(-1);
-  DimensionID id(-1,tag.c_str());
-  std::set<DimensionID>::iterator it = this->DimensionIDs.find(id);
-  if(it != DimensionIDs.end()){
-    i=it->getDimNum();
-  }else{
-    if(do_throw){
-      g_log.error()<<"tag "<<tag<<" does not exist in these dimensions\n";
-      throw(std::invalid_argument("Wrong tag requested"));
-    }
-  }
-  return i;
-}
 
 
 /** Build cubic geometry of three orthogonal vectors. 

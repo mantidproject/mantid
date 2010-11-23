@@ -45,7 +45,7 @@ namespace Mantid{
    
    class  MDGeometryDescription;
 
-class DLLExport MDGeometry :   public MDGeometryBasis
+class DLLExport MDGeometry
 {
 public:
     // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
@@ -73,7 +73,12 @@ public:
     ~MDGeometry(void);
 
     MDGeometry(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);
-   
+   /// return the numbers of dimensions in current geometry; 
+    unsigned int getNumDims(void)const{return m_basis.getNumDims();}
+    /// returns the number of reciprocal dimensions
+    unsigned int getNumReciprocalDims(void)const{return m_basis.getNumReciprocalDims();};
+    ///
+    std::vector<std::string> getBasisTags(void)const{return m_basis.getBasisTags();}
  protected: 
    /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
     unsigned int n_expanded_dim;
@@ -96,11 +101,15 @@ public:
     void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
     void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
 private:
+    MDGeometryBasis m_basis;
     void init_empty_dimensions();
      /// the map used for fast search of a dumension from its tag. 
     std::map<std::string,MDDimension *> dimensions_map;
  //Defaults should do: ->NO?
-   MDGeometry& operator=(const MDGeometry&);    
+   MDGeometry& operator=(const MDGeometry&);   
+  /// logger -> to provide logging, for MD workspaces
+   static Kernel::Logger& g_log;
+    
 };
 }  // Geometry
 }  // Mantid

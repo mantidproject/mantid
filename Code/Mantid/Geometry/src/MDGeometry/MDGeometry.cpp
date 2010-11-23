@@ -10,14 +10,14 @@ namespace Mantid{
     namespace Geometry{
        
 //----------------------------------------------------------------
-
+ Logger& MDGeometry::g_log=Kernel::Logger::get("MDWorkspaces");
 void
 MDGeometry::setRanges(MDGeometryDescription const &trf)
 {
     unsigned int i;
     unsigned int n_new_dims=trf.getNumDims();
     MDDimension *pDim;
-    if(n_new_dims>this->n_total_dim){
+    if(n_new_dims>m_basis.getNumDims()){
       g_log.error()<<" MDGeometry::setRanges transformation sets more ranges then already defined\n";
       throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
     }
@@ -36,7 +36,7 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
 
     }
     this->n_expanded_dim=0;
-    for(i=0;i<this->n_total_dim;i++){
+    for(i=0;i<m_basis.getNumDims();i++){
           pDim=this->getDimension(i);
           if(!pDim->getIntegrated()){
               this->n_expanded_dim++;
@@ -81,14 +81,14 @@ MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags,unsign
    
 
     // are the old geometry congruent to the new geometry? e.g the same nuber of dimensions and the same dimension tags;
-    if(DimensionTags.size()!=this->getNumDims()||nReciprocalDims!=this->getNumReciprocalDims()){
+    if(DimensionTags.size()!=m_basis.getNumDims()||nReciprocalDims!=m_basis.getNumReciprocalDims()){
         congruent_geometries=false;
     }else{
-        congruent_geometries=checkTagsCompartibility(DimensionTags);
+        congruent_geometries=m_basis.checkTagsCompartibility(DimensionTags);
     }
 
     if(!congruent_geometries){
-        this->reinit_GeometryBasis(DimensionTags,nReciprocalDims);
+        m_basis.reinit_GeometryBasis(DimensionTags,nReciprocalDims);
     
         // clear old dimensions if any
         for(i=0;i<this->theDimension.size();i++){
@@ -110,16 +110,16 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
     unsigned int n_new_dims=tags.size();
     unsigned int i;
 
-    if(n_new_dims>this->getNumDims()){
+    if(n_new_dims>m_basis.getNumDims()){
         g_log.error()<<"Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined \n";
         throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
     }
 
 
     // array to keep final expanded dimensions
-    std::vector<MDDimension *> pExpandedDims(this->n_total_dim,NULL);    
+    std::vector<MDDimension *> pExpandedDims(m_basis.getNumDims(),NULL);    
     // array to keep final collapsed dimensions which sould be placed after expanded
-    std::vector<MDDimension *> pCollapsedDims(this->n_total_dim,NULL);  
+    std::vector<MDDimension *> pCollapsedDims(m_basis.getNumDims(),NULL);  
     // array to keep thd initial dimensions which were not mentioned in transformation
     std::vector<MDDimension *> pCurrentDims(this->theDimension);  
     
@@ -171,7 +171,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 
     this->n_expanded_dim=n_expanded_dimensions;
     // total number of dimensions should not change;
-    if(n_expanded_dimensions+n_collapsed_dimensions!=this->getNumDims()){
+    if(n_expanded_dimensions+n_collapsed_dimensions!=m_basis.getNumDims()){
         g_log.error()<<"Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error";
         throw(Exception::NotImplementedError("Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error"));
     }
@@ -206,7 +206,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 MDDimension & 
 MDGeometry::getYDimension(void)const
 {
-    if(this->n_total_dim<2){
+    if(m_basis.getNumDims()<2){
         throw(std::invalid_argument("No Y dimension is defined in this workspace"));
     }
     return *(theDimension[1]);
@@ -215,7 +215,7 @@ MDGeometry::getYDimension(void)const
 MDDimension & 
 MDGeometry::getZDimension(void)const
 {
-    if(this->n_total_dim<3){
+    if(m_basis.getNumDims()<3){
         throw(std::invalid_argument("No Z dimension is defined in this workspace"));
     }
     return *(theDimension[2]);
@@ -224,7 +224,7 @@ MDGeometry::getZDimension(void)const
 MDDimension & 
 MDGeometry::getTDimension(void)const
 {
-    if(this->n_total_dim<4){
+    if(m_basis.getNumDims()<4){
         throw(std::invalid_argument("No T dimension is defined in this workspace"));
     }
     return *(theDimension[3]);
@@ -235,7 +235,7 @@ MDGeometry::getIntegratedDimensions(void)
 {
     std::vector<MDDimension *> tmp;
 
-    if(this->n_expanded_dim!=this->n_total_dim){
+    if(this->n_expanded_dim!=m_basis.getNumDims()){
         std::vector<MDDimension *>::iterator it;
         it=theDimension.begin()+this->n_expanded_dim;
 
@@ -247,7 +247,7 @@ MDGeometry::getIntegratedDimensions(void)
 MDDimension *  
 MDGeometry::getDimension(unsigned int i)const
 {
-    if(i>=this->getNumDims()){
+    if(i>=m_basis.getNumDims()){
         g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
         throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
     }
@@ -271,31 +271,8 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)const
 }
 
 
-
-/*
-std::vector<double> 
-MDGeometry::getOrt(DimensionsID id)const
-{
-    if(id>3||id<0){
-        throw(std::out_of_range("Geometry::getOrt dimension ID out of range "));
-    }
-    std::vector<double> tmp(this->WorkspaceGeometry::getOrt(id));
-    Dimension *pDim = this->getDimension(id);
-    std::vector<double> coord=pDim->getCoord();
-//TO DO : this is for orthogonal system of coordinates only; need write proper stuff for non-orthogonal
-    tmp[0]*=coord[0];
-    tmp[1]*=coord[1];
-    tmp[2]*=coord[2];
-    double norma=sqrt(tmp[0]*tmp[0]+tmp[1]*tmp[1]+tmp[2]*tmp[2]);
-    tmp[0]/=norma;
-    tmp[1]/=norma;
-    tmp[2]/=norma;
-    return tmp;
-}
-*/
-
 MDGeometry::MDGeometry(unsigned int nDimensions,unsigned int nReciprocalDimensions):
-MDGeometryBasis(nDimensions,nReciprocalDimensions),
+m_basis(nDimensions,nReciprocalDimensions),
 n_expanded_dim(0)
 {
     this->theDimension.assign(nDimensions,NULL);
@@ -306,7 +283,7 @@ n_expanded_dim(0)
 void 
 MDGeometry::init_empty_dimensions()
  {
-    std::vector<MDGeometryBasis::DimensionID> ID=this->getDimIDs();
+    std::vector<MDGeometryBasis::DimensionID> ID=m_basis.getDimIDs();
     std::string tag;
     unsigned int i;
     unsigned int nRec_count(0);
@@ -330,7 +307,7 @@ MDGeometry::init_empty_dimensions()
 MDGeometry::~MDGeometry(void)
 {
     unsigned int i;
-    for(i=0;i<this->n_total_dim;i++){
+    for(i=0; i<m_basis.getNumDims(); i++){
         delete this->theDimension[i];
 
     }
