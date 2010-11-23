@@ -1458,6 +1458,11 @@ using Kernel::DateAndTime;
   /** Multiply the weights in this event list by an error-less scalar
    * The event list switches to WeightedEvent's if needed.
    *
+   * Given A = the weight; the scalar = a.
+   *
+   *  - The weight is simply \f$ aA \f$
+   *  - The error \f$ \sigma_A \f$ becomes \f$ \sigma_{aA} = a \sigma_{A} \f$
+   *
    * @param value: multiply all weights by this amount.
    */
   void EventList::multiply(const double value)
@@ -1468,11 +1473,14 @@ using Kernel::DateAndTime;
     //Square of the value's error
     double valSquared = value * value;
 
-    std::vector<WeightedEvent>::iterator iter;
-    for (iter = this->weightedEvents.begin(); iter != this->weightedEvents.end(); iter++)
+    std::vector<WeightedEvent>::iterator itev;
+    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
     {
-      iter->m_errorSquared = (iter->m_errorSquared * valSquared);
-      iter->m_weight *= value;
+//      itev->m_errorSquared = (value * itev->m_errorSquared / itev->m_weight);
+//      itev->m_weight *= value;
+
+      itev->m_errorSquared = (itev->m_errorSquared * valSquared);
+      itev->m_weight *= value;
     }
   }
 

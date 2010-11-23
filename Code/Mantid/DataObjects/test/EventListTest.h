@@ -747,7 +747,7 @@ public:
       // 5 events, each with a weight of 3.2
       TS_ASSERT_DELTA(Y[i], 5 * 3.2, 1e-6);
       // Error should be scaled the same, by a factor of 3.2 - maintaining the same signal/error ratio.
-      TS_ASSERT_DELTA(E[i], sqrt(5) * 3.2, 1e-6);
+      TS_ASSERT_DELTA(E[i], sqrt((double)5.0) * 3.2, 1e-6);
     }
   }
 
