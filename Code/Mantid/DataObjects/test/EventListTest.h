@@ -344,30 +344,51 @@ public:
   //==================================================================================
   //--- Multiplying  ----
   //==================================================================================
+
+  void test_multiply_scalar_simple()
+  {
+    //No weights
+    this->fake_uniform_data();
+    //Perform the multiply; no error on the scalar
+    el.multiply(2.0, 0.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 2.0, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 2.0, 1e-5);
+
+    this->fake_uniform_data();
+    //Multiply by zero with error
+    el.multiply(0.0, 1.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 0.0, 1e-5);
+    // Gives zero error. Relative error no longer has a meaning.
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 0.0, 1e-5);
+  }
+
+
   void test_multiply_scalar()
   {
-    //Weight 2, error sqrt(2.5)
+    //Weight 2, error (2.5)
     this->fake_uniform_data_weights();
     //Perform the multiply
     el.multiply(2.0, 0.5);
 
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
-    //Error^2 = 2*2 * 2.5 + (2*0.5)^2 = 11
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 11.0, 1e-5);
+    //Error^2 = 2*2.5^2/2 + 2*(0.5^2) / 2  = 6.5
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 6.5, 1e-5);
 
     //Try it with no scalar error
     this->fake_uniform_data_weights();
     el.multiply(2.0);
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
-    //Error^2 = 2*2 * 2.5 + 0 = 10
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 10.0, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 1.25*4.0, 1e-5);
 
     // *= operator
     this->fake_uniform_data_weights();
     el *= 2.0;
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 10.0, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 1.25*4.0, 1e-5);
   }
+
+
+
 
   void test_multiply_histogram()
   {
@@ -402,35 +423,47 @@ public:
         double errorsquared = value;
         //Check the formulae for value and error
         TS_ASSERT_DELTA( rwel[i].weight(), 2.0*value, 1e-6);
-        TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5*value*value + 2.0*2.0*errorsquared, 1e-6);
+        TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5*2.5*value/2.0 + 2.0 * errorsquared / value, 1e-6);
       }
     }
+  }
+
+  void test_divide_scalar_simple()
+  {
+    this->fake_uniform_data();
+    el.divide(2.0, 0.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 0.5, 1e-5);
+
+    this->fake_uniform_data();
+    el.divide(2.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 0.5, 1e-5);
   }
 
 
   void test_divide_scalar()
   {
-    //Weight 2, error sqrt(2.5)
+    //Weight 2, error 2.5
     this->fake_uniform_data_weights();
-    //Perform the multiply
     el.divide(2.0, 0.5);
 
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
-    //Error^2 = 2.5/(2*2) + (2*0.5)^2/(2^4) = 0.6875
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.6875, 1e-5);
+    // Relative errors sum, so (sqrt(2.5)/2)^2+0.25^2 = 1.625; error is sqrt(1.625 * 1.0)
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), sqrt(1.625), 1e-5);
 
     //Try it with no scalar error
     this->fake_uniform_data_weights();
     el.divide(2.0);
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
-    //Error^2 = 2.5/(2*2) = 0.625
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.625, 1e-5);
+    //Same relative error of 1.25
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 1.25, 1e-5);
 
     // *= operator
     this->fake_uniform_data_weights();
     el /= 2.0;
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.625, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 1.25, 1e-5);
   }
 
   void test_divide_by_zero()
@@ -460,8 +493,8 @@ public:
       if (i == 6)
         Y.push_back( 0.0 );
       else
-        Y.push_back( 1.0 * (i+1));
-      E.push_back( sqrt(double(1.0 * (i+1))) );
+        Y.push_back( 2.0 );
+      E.push_back( 0.5 );
     }
 
     //Make the data and multiply
@@ -485,11 +518,10 @@ public:
         }
         else
         {
-          //Check the formulae for value and error
-          TS_ASSERT_DELTA( rwel[i].weight(), 2.0/value, 1e-6);
-          TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5/(value*value) + 2.0*2.0*errorsquared/(value*value*value*value), 1e-6);
+          //Same weight error as dividing by a scalar before, since we divided by 2+-0.5 again
+          TS_ASSERT_DELTA( rwel[i].weight(), 1.0, 1e-5);
+          TS_ASSERT_DELTA( rwel[i].error(), sqrt(1.625), 1e-5);
         }
-
       }
     }
   }
@@ -710,8 +742,8 @@ public:
     for (int i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 4.0);
-      //Two errors of sqrt(2.5) adds up to sqrt(5.0)
-      TS_ASSERT_DELTA(E[i], sqrt(5.0), 1e-5);
+      //Two errors of (2.5) adds up to sqrt(2 * 2.5*2.5)
+      TS_ASSERT_DELTA(E[i], sqrt(2 * 2.5*2.5), 1e-5);
     }
   }
 
@@ -1186,7 +1218,7 @@ public:
     for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/2)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-      el += WeightedEvent( tof, rand()%1000, 2.0, 2.5);
+      el += WeightedEvent( tof, rand()%1000, 2.0, 2.5*2.5);
     }
   }
 
