@@ -263,7 +263,6 @@
     <ClCompile Include="src\Sort.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
     <ClCompile Include="src\StripVanadiumPeaks.cpp" />
-    <ClCompile Include="src\SubtractTimeFinal.cpp" />
     <ClCompile Include="src\SumNeighbours.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />

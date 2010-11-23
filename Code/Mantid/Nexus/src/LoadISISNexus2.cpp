@@ -733,10 +733,15 @@ namespace Mantid
           selog.openLocal("IXseblock");
           NXLog nxLog(selog,"value_log");
           bool ok = nxLog.openLocal();
+          std::string propName = it->nxname;
+          if (ws->run().hasProperty(propName))
+          {
+            propName = "selog_"+propName;
+          }
 
           if (ok)
           {
-            Kernel::Property* logv = nxLog.createTimeSeries("","selog_"+it->nxname);
+            Kernel::Property* logv = nxLog.createTimeSeries("",propName);
             if (!logv)
             {
               nxLog.close();
@@ -745,6 +750,12 @@ namespace Mantid
             }
             ws->mutableRun().addLogData(logv);
             nxLog.close();
+          }
+          else
+          {
+            NXFloat value = selog.openNXFloat("value");
+            value.load();
+            ws->mutableRun().addProperty(propName,(double)*value());
           }
           selog.close();
         }
