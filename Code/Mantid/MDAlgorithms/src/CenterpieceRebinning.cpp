@@ -56,7 +56,7 @@ MDWorkspace_sptr inputWS;
             throw(std::runtime_error("can not obtain slicing property from the property manager"));
      }
 
-     pSlicing->build_from_geometry(*inputWS);
+    pSlicing->build_from_geometry(*(inputWS->getGeometry()));
      pSlicing=NULL; // should remain in Property
 }
 /*
@@ -155,7 +155,7 @@ CenterpieceRebinning::exec()
   // and the number of elements the image has;
   size_t         image_size=  outputWS->getDataSize();
  //
-  transf_matrix trf = build_scaled_transformation_matrix(*inputWS,*pSlicing,this->ignore_inf,this->ignore_nan);
+  transf_matrix trf = build_scaled_transformation_matrix(*(inputWS->getGeometry()),*pSlicing,this->ignore_inf,this->ignore_nan);
 // start reading and rebinning;
   size_t n_starting_cell(0);
   for(unsigned int i=0;i<n_hits;i++){

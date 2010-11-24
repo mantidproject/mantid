@@ -10,6 +10,7 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MDDataObjects/point3D.h"
+#include <boost/shared_ptr.hpp>
 
 //#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
 
@@ -59,11 +60,12 @@ struct MD_DATA{
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
     std::vector<double> min_value;  ///< min value in the selected dimension
     std::vector<double> max_value;  ///< max value in the selected dimension
+    MD_DATA():data(NULL){}
 
 };
 
 //
-class DLLExport MDImageData:public MDGeometry,public IMDWorkspace
+class DLLExport MDImageData: public IMDWorkspace
 {
 public:
 
@@ -81,7 +83,8 @@ public:
   virtual Mantid::Geometry::IMDDimension* gettDimension() const;
 
     // default constructor
-     MDImageData(unsigned int nDims=4,unsigned int nRecDims=3);
+  MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry, boost::shared_ptr<IMD_FileFormat> spFile);
+     MDImageData(); // HACK
     // destructor
     ~MDImageData();
     /** function returns vector of points left after the selection has been applied to the multidimensinal dataset
@@ -102,8 +105,8 @@ public:
   /// return ID specifying the workspace kind
     virtual const std::string id() const { return "MD-Workspace"; }
 
-    ///
-  virtual unsigned int getNumDims(void) const{return Geometry::MDGeometry::getNumDims();}
+   ///
+  virtual unsigned int getNumDims(void) const{return m_pMDGeometry->getNumDims();}
 //******************************************************************************************************
    virtual void initialize(const Geometry::MDGeometryDescription &Description){
         alloc_mdd_arrays(Description);
@@ -116,6 +119,9 @@ public:
 
     // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
     void alloc_mdd_arrays(const MDGeometryDescription &transf);
+
+/// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
+    void read_mdd(const char *file_name,bool old4DMatlabReader=false);
  protected:
     MD_DATA  MDStruct;
     MD_image_point *pData; // the additional pointer to data structure in MDStruct;
@@ -135,11 +141,8 @@ public:
 /// the name of the file with DND and SQW data;
     std::string fileName;
 // the pointer to a class with describes correspondent mdd file format;
-    IMD_FileFormat *theFile;
-/// function reads the multidimensional data using existing file reader; returns false if the files
-    bool read_mdd(void);
-/// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-    void read_mdd(const char *file_name,bool old4DMatlabReader=false);
+    boost::shared_ptr<IMD_FileFormat> theFile;
+
 //  function selects the file reader given existing mdd or sqw file and sets up above pointer to the proper file reader;
 //  throws if can not find the file, the file format is not supported or any other error;
     void select_file_reader(const char *file_name,bool old4DMatlabReader=false);
@@ -166,12 +169,16 @@ public:
    /// the pointer for vector returning the image points for visualisation
 
 private:
- //*************************************************
-   // probably temporary
-     MDImageData & operator = (const MDImageData & other);
-    // copy constructor;
-     MDImageData(const MDImageData & other);
+  //*************************************************
 
+  boost::shared_ptr<MDGeometry> m_pMDGeometry;
+  // probably temporary
+  MDImageData & operator = (const MDImageData & other);
+  // copy constructor;
+  MDImageData(const MDImageData & other);
+
+  /// function reads the multidimensional data using existing file reader; returns false if the files
+  bool read_mdd(void);
 
 };
 //

@@ -28,7 +28,7 @@ minmax(double &rMin,double &rMax,const std::vector<double> &box)
 
 //*********************************************************************
 void 
-preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix)
+preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix)
 {
 // this algoithm can be substantially enhanced 
   // a) by implementing fast search within the limits;
@@ -50,12 +50,13 @@ preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeom
 
    // get pointer to the image data;
    const MD_image_point  *const data = Source.get_const_pData();
+   boost::shared_ptr<MDGeometry> pGeom = Source.getGeometry();
 
    // evaluate the capacity of the orthogonal dimensions;
-   unsigned int  nReciprocal    = Source.getNumReciprocalDims();
-   unsigned int  nOrthogonal    = Source.getNumDims()-nReciprocal;
+   unsigned int  nReciprocal    = pGeom->getNumReciprocalDims();
+   unsigned int  nOrthogonal    = pGeom->getNumDims()-nReciprocal;
 
-   std::vector<MDDimension *> pAllDim  = Source.getDimensions();
+   std::vector<MDDimension *> pAllDim  = pGeom->getDimensions();
    std::vector<MDDimension *> pOrthogonal(nOrthogonal,NULL);
    std::vector<MDDimension *> pReciprocal(nReciprocal,NULL);
    unsigned int nr(0),no(0);

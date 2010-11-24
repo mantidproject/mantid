@@ -79,6 +79,15 @@ public:
     unsigned int getNumReciprocalDims(void)const{return m_basis.getNumReciprocalDims();};
     ///
     std::vector<std::string> getBasisTags(void)const{return m_basis.getBasisTags();}
+    ///
+    unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
+
+   /** function resets MDGeometryBasis and MDGeometry to new state;
+    *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
+    *   when the structure is indeed 
+    */
+    void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
+    void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
  protected: 
    /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
     unsigned int n_expanded_dim;
@@ -94,12 +103,7 @@ public:
    /* function returns tne location of the dimension specified by the tag, in the array theDimension (in the MDGeomerty)
        negative value specifies that the requested dimension is not present in the array. */
   //  int getDimNum(const std::string &tag,bool do_trow=false)const;
-    /** function resets MDGeometryBasis and MDGeometry to new state;
-    *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
-    *   when the structure is indeed 
-    */
-    void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
-    void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
+ 
 private:
     MDGeometryBasis m_basis;
     void init_empty_dimensions();

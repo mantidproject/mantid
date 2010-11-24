@@ -1,6 +1,7 @@
 #ifndef H_MD_WORKSPACE
 #define H_MD_WORKSPACE
 #include "MDDataObjects/MDDataPoints.h"
+#include "MDDataObjects/MDImageData.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 
@@ -37,17 +38,18 @@ namespace Mantid
     namespace MDDataObjects
 {
 
-class DLLExport MDWorkspace :  public MDDataPoints
+class DLLExport MDWorkspace :  public MDDataPoints, public MDImageData //HACK
 {
     public:
      
      virtual long getMemorySize(void)const{return MDImageData::getMemorySize();} // + mdPixels memory size
-     MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3):MDDataPoints(nDimensions){};
+     MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3):MDDataPoints(){};
      virtual ~MDWorkspace(void){};
  
      /// read the the pixels corresponding to cells in the vector cell_num
      size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
  
+     boost::shared_ptr<Mantid::Geometry::MDGeometry> getGeometry() const;
 
      void alloc_mdd_arrays(const MDGeometryDescription &transf){MDImageData::alloc_mdd_arrays(transf);}
      /// identify proper file reader which corresponds to the file name and read memory resident part of the workspace into memory
@@ -64,7 +66,7 @@ class DLLExport MDWorkspace :  public MDDataPoints
      }
   
 private:
-  
+      static Kernel::Logger& g_log; 
 
 };
 

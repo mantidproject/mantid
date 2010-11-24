@@ -8,6 +8,10 @@ namespace Mantid{
     // Register the workspace into the WorkspaceFactory
     DECLARE_WORKSPACE(MDWorkspace)
 
+
+// logger for MD workspaces  
+    Kernel::Logger& MDWorkspace::g_log =Kernel::Logger::get("MDWorkspaces");
+
 // 
 void 
 MDWorkspace::read_mdd(const char *file_name)
@@ -48,7 +52,11 @@ MDWorkspace::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &st
     return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,n_pix_in_buffer);
 } 
 
-
+boost::shared_ptr<Mantid::Geometry::MDGeometry> 
+MDWorkspace::getGeometry() const
+{
+  return boost::shared_ptr<Mantid::Geometry::MDGeometry>(new MDGeometry()); //Hack : Should be returning the member geometry.
+}
 }
 }
 //*********************************************************************************************************************************************************************************
@@ -87,5 +95,6 @@ namespace Mantid
         throw std::runtime_error(message);
       }
     }
+
   } // namespace Kernel
 } // name

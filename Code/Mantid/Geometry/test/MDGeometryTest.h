@@ -5,24 +5,23 @@
 using namespace Mantid;
 using namespace Geometry;
 
-// class accessor to protected properties;
-class tMDGeometry: public MDGeometry
+class tMDGeometry : public MDGeometry
 {
 public:
-    tMDGeometry(unsigned int nDims=4):MDGeometry(nDims){};
-    void setRanges(MDGeometryDescription &slice){MDGeometry::setRanges(slice);}
-    void reinit_Geometry(const MDGeometryDescription &slice){MDGeometry::reinit_Geometry(slice);}
-
+  void setRanges(MDGeometryDescription& rDescription)
+  {
+    MDGeometry::setRanges(rDescription);
+  }
 };
 
 class testMDGeometry : public CxxTest::TestSuite
 {
-    tMDGeometry *tDND_geometry;
+    MDGeometry *tDND_geometry;
     MDGeometryDescription *pSlice;
 public:
     void testGeometryConstr(void)
     {
-        TS_ASSERT_THROWS_NOTHING(tDND_geometry= new tMDGeometry());
+        TS_ASSERT_THROWS_NOTHING(tDND_geometry= new MDGeometry());
     }
     void testMDGeometryDimAccessors(void){
           TS_ASSERT_THROWS_NOTHING(tDND_geometry->getXDimension());
@@ -81,6 +80,8 @@ public:
 
     }
     void testMDGeomSetFromSlice1(void){
+         tMDGeometry * tDND_geometry;
+         TS_ASSERT_THROWS_NOTHING(tDND_geometry = new tMDGeometry());
          TS_ASSERT_THROWS_NOTHING(tDND_geometry->setRanges(*pSlice));
          unsigned int i,ic;
            
@@ -105,9 +106,7 @@ public:
          }
          )
 
-
-
-         for(i=0;i<tDND_geometry->getNumDims();i++){
+        for(i=0;i<tDND_geometry->getNumDims();i++){
                    TS_ASSERT_THROWS_NOTHING(pDim = tDND_geometry->getDimension(i));
                    TS_ASSERT_EQUALS(pDim->getDimensionTag(),expanded_tags[i]);
          }
@@ -142,14 +141,31 @@ public:
          TS_ASSERT_THROWS_NOTHING(pDim = tDND_geometry->getDimension(2));
          TS_ASSERT_EQUALS(pDim->getStride(),0);
          TS_ASSERT_EQUALS(pDim->getIntegrated(),true);
-    }
-    
+   }
 
-    testMDGeometry(void):tDND_geometry(NULL),pSlice(NULL){};
-    ~testMDGeometry(void){
-        if(tDND_geometry){
-            delete tDND_geometry;
-            tDND_geometry=NULL;
+   void testgetNumDims()
+   {
+     MDGeometry geom(4, 3);
+     TSM_ASSERT_EQUALS("The number of dimensions returned is not equal to the expected value.", 4, geom.getNumDims());
+   }
+   /// returns the number of reciprocal dimensions
+   void  testGetNumReciprocalDims()
+   {
+     MDGeometry geom(4, 3);
+     TSM_ASSERT_EQUALS("The number of reciprocal dimensions returned is not equal to the expected value.", 3, geom.getNumReciprocalDims());
+   }
+
+   void testGetNumExpandedDims()
+   {
+     MDGeometry geom(4, 3);
+     TSM_ASSERT_EQUALS("The number of expanded dimensions returned is not equal to the expected value.", 0, geom.getNumExpandedDims());
+   }
+
+   testMDGeometry(void):tDND_geometry(NULL),pSlice(NULL){};
+   ~testMDGeometry(void){
+     if(tDND_geometry){
+       delete tDND_geometry;
+       tDND_geometry=NULL;
         }
         if(pSlice){
             delete pSlice;

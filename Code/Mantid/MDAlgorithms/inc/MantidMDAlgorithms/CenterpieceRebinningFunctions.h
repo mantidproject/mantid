@@ -37,7 +37,7 @@ public:
  @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
  @param n_preselected_pix-- number of pixels contributed into the cells. 
 */
-    void preselect_cells(const MDDataObjects::MDImageData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
+    void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
 
   /// build transformation matrix from the slicing data;
     transf_matrix build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target,bool ignoreNaN,bool ignoreInf);

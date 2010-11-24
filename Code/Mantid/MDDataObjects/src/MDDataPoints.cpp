@@ -6,10 +6,14 @@ namespace Mantid{
     namespace MDDataObjects{
         using namespace Mantid::Kernel;
 
+// logger for MD workspaces  
+    Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
  // default names for signal and error fields
  const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
-MDDataPoints::MDDataPoints(unsigned int nDims,unsigned int nRecDims):
-MDImageData(nDims,nRecDims),
+
+MDDataPoints::MDDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry, boost::shared_ptr<IMD_FileFormat> spFile):
+m_spFile(spFile),
+m_spMDGeometry(spMDGeometry),
 memBased(false),
 n_data_points(0),
 n_fields(9),
@@ -17,28 +21,47 @@ data_buffer_size(0),
 data_buffer(NULL)
 {
   
-  std::vector<std::string> dim_tags=this->getBasisTags();
+  std::vector<std::string> dim_tags= m_spMDGeometry->getBasisTags();
   std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);
   this->field_tag.reserve(n_fields);
   this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
   this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
 
+  int nDims = m_spMDGeometry->getNumDims();
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);
-
-
-
 }
+
+MDDataPoints::MDDataPoints():
+m_spMDGeometry(boost::shared_ptr<Mantid::Geometry::MDGeometry>(new Geometry::MDGeometry())),
+memBased(false),
+n_data_points(0),
+n_fields(9),
+data_buffer_size(0),
+data_buffer(NULL)
+{
+  
+  std::vector<std::string> dim_tags= m_spMDGeometry->getBasisTags();
+  std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);
+  this->field_tag.reserve(n_fields);
+  this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
+  this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
+
+  int nDims = m_spMDGeometry->getNumDims();
+  this->box_min.assign(nDims,FLT_MAX);
+  this->box_max.assign(nDims,-FLT_MAX);
+}
+
 size_t
 MDDataPoints::getNumPixels(void)
 {
     if(this->n_data_points>0){   return n_data_points;
     }
 
-    if(this->theFile){
-        this->n_data_points=this->theFile->getNPix();
+    if(this->m_spFile.get()){
+        this->n_data_points=this->m_spFile->getNPix();
     }else{
-        MDImageData::g_log.information("MDPixels::getNumPixels: Attemting to get number of pixels from undefined dataset");
+        this->g_log.information("MDPixels::getNumPixels: Attemting to get number of pixels from undefined dataset");
         n_data_points = 0;
         throw(Kernel::Exception::NullPointerException("getNumPixels","File reader has not beed defined yet"));
     }
@@ -74,7 +97,7 @@ MDDataPoints::alloc_pix_array()
       return;
     }
   }
-   unsigned int nDims = this->getNumDims();
+  unsigned int nDims = this->m_spMDGeometry->getNumDims();
 
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);
@@ -103,30 +126,5 @@ MDDataPoints::~MDDataPoints()
 
 }
 
-//***************************************************************************************
-
-/*
-//***************************************************************************************
-void
-SQW::extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted)
-{
-    long i,ind,ic(0);
-    size_t j,npix;
-    for(i=0;i<selected_cells.size();i++){
-        ind=selected_cells[i];
-        npix=this->pix_array[ind].cell_memPixels.size();
-        for(j=0;j<npix;j++){
-            pix_extracted[ic]=this->pix_array[ind].cell_memPixels[j];
-            ic++;
-#ifdef _DEBUG
-            if(ic>nPix){
-                throw("extract_pixels_from_memCells::Algorithm error=> there are more real pixels then was estimated during preselection");
-            }
-#endif
-        }
-    }
-}
-
-*/
 }
 }

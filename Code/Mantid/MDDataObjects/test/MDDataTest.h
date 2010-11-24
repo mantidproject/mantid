@@ -5,95 +5,117 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MDDataObjects/MDImageData.h"
-#include "find_mantid.h"
+#include "MantidAPI/FileFinder.h"
+#include "Poco/Path.h"
 
 using namespace Mantid;
 using namespace API;
 using namespace MDDataObjects;
 
-class tDND : public MDImageData
+class tesMDImageData :    public CxxTest::TestSuite
 {
+  MDImageData *pDND;
+  std::vector<point3D> img;
+  std::vector<unsigned int> selection;
+  std::string test_file;
+// std::string findTestFileLocation(void);
 public:
-    tDND(unsigned int nDims):MDImageData(nDims){};  
-    void read_mdd(const char *file_name,bool oldMatlabFormat=false){MDImageData::read_mdd(file_name,oldMatlabFormat);}
-};
+  void testMDDataContstructor(void){
+    std::string path=FileFinder::Instance().getFullPath("Mantid.properties");
+    std::cout << " test properties location: "<< path<< std::endl;
 
-class testDND :    public CxxTest::TestSuite
-{
-    tDND *pDND;
-    std::vector<point3D> img;
-    std::vector<unsigned int> selection;
-    std::string test_file;
-public:
-    void testMDDataContstructor(void){
-        std::string path=FileFinder::Instance().getFullPath("Mantid.properties");
-        std::cout << " test properties location: "<< path<< std::endl;
+    test_file=this->findTestFileLocation();
+    
+    pDND=new MDImageData();
 
-        test_file=findTestFileLocation();
- 
-      // define an 5D (wrong) object 
-        TS_ASSERT_THROWS_NOTHING(pDND=new tDND(5));
+    // 5-dim object;
+    TSM_ASSERT_EQUALS("The expected number of dimensions were not found.", pDND->getNumDims(), 4);
+  }
 
-       // 5-dim object;
-        TS_ASSERT_EQUALS(pDND->getNumDims(),5);
-    }
-    void testIMDRegistration(){
-         IMDWorkspace_sptr ws;
-         MDGeometryDescription data;
-         TS_ASSERT_THROWS_NOTHING( ws = API::WorkspaceFactory::Instance().create("MDWorkspacet",data));
- 
-    }
-    void testDNDPrivateReadNew(void){
- 
-        // read correct object, new 4D matlab format reader
-        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str(),false));
+  void testRead_mdd(void){
+    
+    // read correct object, new 4D matlab format reader
+    pDND->read_mdd(test_file.c_str(),false);
 
-        TS_ASSERT_EQUALS(pDND->getNumDims(),4);
-    }
+    TS_ASSERT_EQUALS(pDND->getNumDims(),4);
+  }
 
-    void testDNDPrivateRead(void){
- 
-        // read correct object old 4D matlab format reader
-        TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str(),true));
+  void testMDImageDataPrivateRead(void){
 
-        TS_ASSERT_EQUALS(pDND->getNumDims(),4);
-    }
-    void testDNDGet2DData(void){
-        this->selection.assign(2,1);
-   
-        // returns 2D image
-        TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
-        TS_ASSERT_EQUALS(img.size(),2500);
+    // read correct object old 4D matlab format reader
+    TS_ASSERT_THROWS_NOTHING(pDND->read_mdd(test_file.c_str(),true));
 
-        // fails as we select 5 dimensions but the dataset is actually 4-D
-        selection.assign(5,20);
-        TS_ASSERT_THROWS_ANYTHING(pDND->getPointData(selection,img) );
-    }
-    void testGet3DData(void){
+    TS_ASSERT_EQUALS(pDND->getNumDims(),4);
+  }
 
-        // returns 3D image with 4-th dimension selected at 20;
-        selection.assign(1,20);
-        TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
-        TS_ASSERT_EQUALS(img.size(),50*50*50); 
-    }
-    void testGet1Ddata(void){
-        // this should return single point at (20,20,20,20)
-        selection.assign(4,20);
-        TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
-        TS_ASSERT_EQUALS(img.size(),1);
-    }
-   void testGet2Ddata(void){
-        // this should return line of size 50 
-        selection.assign(3,10);
-        TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
-        TS_ASSERT_EQUALS(img.size(),50);
-    }
- 
-     testDND(void):pDND(NULL){}
-    ~testDND(void){
-        if(this->pDND)delete pDND;
-        pDND=NULL;
-    }
+  void testMDImageDataGet2DData(void){
+    this->selection.assign(2,1);
+
+    // returns 2D image
+    TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
+    TS_ASSERT_EQUALS(img.size(),2500);
+
+    // fails as we select 5 dimensions but the dataset is actually 4-D
+    selection.assign(5,20);
+    TS_ASSERT_THROWS_ANYTHING(pDND->getPointData(selection,img) );
+  }
+  void testGet3DData(void){
+
+    // returns 3D image with 4-th dimension selected at 20;
+    selection.assign(1,20);
+    TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
+    TS_ASSERT_EQUALS(img.size(),50*50*50); 
+  }
+  void testGet1Ddata(void){
+    // this should return single point at (20,20,20,20)
+    selection.assign(4,20);
+    TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
+    TS_ASSERT_EQUALS(img.size(),1);
+  }
+  void testGet2Ddata(void){
+    // this should return line of size 50 
+    selection.assign(3,10);
+    TS_ASSERT_THROWS_NOTHING(pDND->getPointData(selection,img) );
+    TS_ASSERT_EQUALS(img.size(),50);
+  }
+
+  void test_alloc_mdd_arrays()
+  {
+    MDImageData imageData;
+    MDGeometryDescription tt;
+
+    imageData.alloc_mdd_arrays(tt);
+    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", imageData.get_pMDData() != NULL);
+    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", imageData.get_pData() != NULL);
+  }
+
+  tesMDImageData(void):pDND(NULL){}
+  ~tesMDImageData(void){
+    if(this->pDND)delete pDND;
+    pDND=NULL;
+  }
+private:
+  std::string findTestFileLocation(void){
+
+       std::string path = Mantid::Kernel::getDirectoryOfExecutable();
+        
+        char pps[2];
+        pps[0]=Poco::Path::separator();
+        pps[1]=0; 
+        std::string sps(pps);
+
+        std::string root_path;
+        size_t   nPos = path.find("Mantid"+sps+"Code");
+        if(nPos==std::string::npos){
+            std::cout <<" can not identify application location\n";
+            root_path="../../../../Test/VATES/fe_demo.sqw";
+        }else{
+            root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
+        }
+        std::cout << " test file location: "<< root_path<< std::endl;
+        return root_path;
+}
 };
 #endif
