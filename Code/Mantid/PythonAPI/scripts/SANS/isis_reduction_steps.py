@@ -80,9 +80,9 @@ class LoadRun(ReductionStep):
         if run_string == '' or run_string.startswith('.'):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
 
-        wkspname, run_no, logname, data_file = extract_workspace_name(run_string, is_trans, 
-                                                            prefix=reducer.instrument.name(), 
-                                                            run_number_width=reducer.instrument.run_number_width)
+        wkspname, run_no, logname, data_file = extract_workspace_name(
+            run_string, is_trans, prefix=reducer.instrument.name(), 
+            run_number_width=reducer.instrument.run_number_width)
 
         if run_no == '':
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1

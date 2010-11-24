@@ -9,18 +9,16 @@ from reduction.command_interface import *
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
-
+import MantidFramework
 
 #remove the following
 DEL__FINDING_CENTRE_ = False
 # disable plotting if running outside Mantidplot
 try:
-    from mantidplot import plotSpectrum, mergePlots
+    import mantidplot
 except ImportError:
-    def plotSpectrum(a,b):
-        pass
-    def mergePlots(a,b):
-        pass
+    #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
+    pass
 
 try:
     from PyQt4.QtGui import qApp
@@ -355,11 +353,11 @@ def CalculateResidue():
                         
     try :
         if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
-            RESIDUE_GRAPH = plotSpectrum('Left', 0)
-            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
-            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
+            RESIDUE_GRAPH = mantidplot.plotSpectrum('Left', 0)
+            mantidplot.mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
+            mantidplot.mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
         RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-    except :
+    except:
         #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
         pass
         
@@ -367,10 +365,19 @@ def CalculateResidue():
     return residueX, residueY
 
 def PlotResult(workspace):
-    if ReductionSingleton().to_Q.output_type == '1D':
-        plotSpectrum(workspace,0)
-    else:
-        qApp.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
+    try:
+        numSpecs = workspace.getNumberHistograms()
+    except AttributeError:
+        numSpecs = MantidFramework.mtd[workspace].getNumberHistograms()
+
+    try:
+        if numSpecs == 1:
+            mantidplot.plotSpectrum(workspace,0)
+        else:        
+            mantidplot.importMatrixWorkspace(workspace).plotGraph2D()
+
+    except NameError:
+        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
 
 ##################### View mask details #####################################################
 

@@ -409,6 +409,10 @@ void SANSRunWindow::readSettings()
   //The instrument definition directory
   m_ins_defdir = QString::fromStdString(ConfigService::Instance().getString("instrumentDefinition.directory"));
 
+  // Set allowed extensions
+  m_uiForm.file_opt->clear();
+  m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
+  m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   //Set old file extension
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
 
@@ -2266,11 +2270,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     //the following line runs the reduction and then resets it
     py_code += "\nreduced = i.WavRangeReduction(full_trans_wav=" + full_trans_range + ")\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
-    py_code += "print '"+PYTHON_SEP+"'+reduced+'"+PYTHON_SEP+"'";
-    int index = m_uiForm.inst_opt->currentIndex();
-    py_code += "\ni.ReductionSingleton().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
-    py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
-    py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
+    py_code += "\nprint '"+PYTHON_SEP+"'+reduced+'"+PYTHON_SEP+"'";
     if( m_uiForm.plot_check->isChecked() )
     {
       py_code += "\ni.PlotResult(reduced)";
@@ -2311,8 +2311,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   setProcessingState(true, idtype);
   m_lastreducetype = idtype;
 
-  g_log.debug() << "Executing Python: " << py_code.toStdString() << std::endl;
-  QString pythonStdOut = runPythonCode(py_code, false);
+  QString pythonStdOut = runReduceScriptFunction(py_code);
+
+  //create a new reducer object for another run
+  const int index = m_uiForm.inst_opt->currentIndex();
+  py_code = "i.ReductionSingleton().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
+  //restore the settings from the user file
+  py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
+  py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
+  runReduceScriptFunction(py_code);
+
   if ( runMode == SingleMode )
   {
     QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
@@ -2321,10 +2329,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       QString reducedWS = pythonDiag[1];
       reducedWS = reducedWS.split("\n")[0];
       resetDefaultOutput(reducedWS);
-    }
-    else
-    {
-      QMessageBox::critical(this, "Reduction aborted", "Error running script "+pythonStdOut);
     }
   }
 
@@ -2567,30 +2571,21 @@ void SANSRunWindow::handleInstrumentChange(const int index)
     m_uiForm.detbank_sel->setCurrentIndex(ind);
   }
 
+  m_uiForm.beam_rmin->setText("60");
   if( instClass == "LOQ()" )
   {
-    m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("200");
     
     m_uiForm.geom_stack->setCurrentIndex(0);
 
-    // Set allowed extensions
-    m_uiForm.file_opt->clear();
-    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
   else if ( instClass == "SANS2D()" )
   { 
-    m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("280");
 
     m_uiForm.geom_stack->setCurrentIndex(1);
 
-    //File extensions
-    m_uiForm.file_opt->clear();
-    m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
-    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
-
   m_cfg_loaded = false;
 }
 /** Record if the user has changed the default filename, because then we don't
@@ -2770,18 +2765,27 @@ void SANSRunWindow::verboseMode(int state)
   }
   else {}
 }
-
-/**
- * Update the transmission range boxes if the "Use Transmission defaults is checked"
+/**Respond to the "Use default transmission" check box being clicked. If
+ * the box is checked the transmission fit wavelength maximum and minimum
+ * boxs with be set to the defaults for the instrument and disabled.
+ * Otherwise they are enabled
+ * @param state equal to Qt::Checked or not
  */
 void SANSRunWindow::updateTransInfo(int state)
 {
   if( state == Qt::Checked )
-  {
+  {//"Use default transmission" means use the full range for the instrument
     m_uiForm.trans_min->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MIN"));
+        "print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
     m_uiForm.trans_max->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MAX"));
+        "print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
+    m_uiForm.trans_min->setEnabled(false);
+    m_uiForm.trans_max->setEnabled(false);
+  }
+  else
+  {//use the user selected wavelengh range for the transmission calculation
+    m_uiForm.trans_min->setEnabled(true);
+    m_uiForm.trans_max->setEnabled(true);
   }
 }
 /** Record the output workspace name, if there is no output
