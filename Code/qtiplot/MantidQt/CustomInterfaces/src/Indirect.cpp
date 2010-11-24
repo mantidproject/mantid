@@ -275,7 +275,6 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput +=
       "fileFormats = []\n"
       "ins = ''\n"
-      "directory = ''\n"
       "suffix = ''\n";
   }
 
@@ -298,14 +297,14 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   else if ( isDirtyRebin() )
   {
     pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
-      "fileFormats, directory, CleanUp = clean, Verbose=verbose)\n";
+      "fileFormats, CleanUp = clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
   {
     pyInput +=
       "import re\n"
       "wslist = mantid.getWorkspaceNames()\n"
-      "save_ws = re.compile(r'_'+ana+ref+'$')\n"
+      "save_ws = re.compile(r'_'+ana+ref+'_red')\n"
       "ws_list = []\n"
       "runNos = []\n"
       "for workspace in wslist:\n"
@@ -337,8 +336,6 @@ void Indirect::runConvertToEnergy(bool tryToSave)
         "  ws = importMatrixWorkspace(ws_list[0])\n"
         "  ws.plotGraph2D()\n";
     }
-    break;
-  default: // Do nothing
     break;
   }
 
@@ -976,10 +973,13 @@ void Indirect::setupCalibration()
   QtProperty* resRB = m_calGrpMng->addProperty("Rebinning");
   m_calResProp["ELow"] = m_calDblMng->addProperty("Low");
   m_calDblMng->setDecimals(m_calResProp["ELow"], noDec);
+  m_calDblMng->setValue(m_calResProp["ELow"], -0.2);
   m_calResProp["EWidth"] = m_calDblMng->addProperty("Width");
   m_calDblMng->setDecimals(m_calResProp["EWidth"], noDec);
+  m_calDblMng->setValue(m_calResProp["EWidth"], 0.002);
   m_calResProp["EHigh"] = m_calDblMng->addProperty("High");
   m_calDblMng->setDecimals(m_calResProp["EHigh"], noDec);
+  m_calDblMng->setValue(m_calResProp["EHigh"], 0.2);
   resRB->addSubProperty(m_calResProp["ELow"]);
   resRB->addSubProperty(m_calResProp["EWidth"]);
   resRB->addSubProperty(m_calResProp["EHigh"]);
@@ -991,15 +991,15 @@ void Indirect::setupCalibration()
   m_uiForm.cal_plotRes->addWidget(m_calResPlot);
   m_calResPlot->setCanvasBackground(Qt::white);
 
-  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
-  connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-  connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-
+  // Create ResR2 first so ResR1 is drawn above it.
   m_calResR2 = new MantidWidgets::RangeSelector(m_calResPlot, 
     MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
   m_calResR2->setColour(Qt::darkGreen);
+  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
+
+  connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
   connect(m_calResR1, SIGNAL(rangeChanged(double, double)), m_calResR2, SLOT(setRange(double, double)));
-  
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
@@ -1193,22 +1193,18 @@ void Indirect::mappingOptionSelected(const QString& groupType)
   if ( groupType == "File" )
   {
     m_uiForm.swMapping->setCurrentIndex(0);
-    m_uiForm.swMapping->setEnabled(true);
   }
   else if ( groupType == "All" )
   {
     m_uiForm.swMapping->setCurrentIndex(2);
-    m_uiForm.swMapping->setEnabled(false);
   }
   else if ( groupType == "Individual" )
   {
     m_uiForm.swMapping->setCurrentIndex(2);
-    m_uiForm.swMapping->setEnabled(false);
   }
   else if ( groupType == "Groups" )
   {
     m_uiForm.swMapping->setCurrentIndex(1);
-    m_uiForm.swMapping->setEnabled(true);
   }
 
   isDirtyRebin(true);

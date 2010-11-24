@@ -173,7 +173,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             TofCorrection(ws, ws)
         runNo = mtd[ws].getRun().getLogData("run_number").value
         runNos.append(runNo)
-        name = ws[:3].lower() + runNo + '_' + analyser + reflection
+        name = ws[:3].lower() + runNo + '_' + analyser + reflection + '_red'
         MonitorWS_n = timeRegime(inWS = ws)
         MonWS_n = monitorEfficiency('MonWS', area, thickness)
         if Verbose:
@@ -233,7 +233,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
     return output_workspace_names, runNos
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, 
-        savesuffix, saveFormats, savedir, CleanUp=False, Verbose=False):
+        savesuffix, saveFormats, CleanUp=False, Verbose=False):
     ws_list = mantid.getWorkspaceNames()
     energy = re.compile('_'+analyser+reflection+r'_intermediate$')
     int_list = []
@@ -265,7 +265,7 @@ def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument,
         output_workspace_names.append(scale)
     if ( saveFormats != [] ):
         saveItems(output_workspace_names, runNos, saveFormats, instrument, 
-                savesuffix, directory = savedir)
+                savesuffix)
 
 def createMappingFile(groupFile, ngroup, nspec, first):
     filename = mtd.getConfigProperty('defaultsave.directory')

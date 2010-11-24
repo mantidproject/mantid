@@ -137,7 +137,6 @@
            </property>
            <property name="fileExtensions" >
             <stringlist>
-             <string>_eq1.nxs</string>
              <string>_eq2.nxs</string>
             </stringlist>
            </property>
@@ -642,6 +641,13 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_26" >
          <item>
+          <widget class="QCheckBox" name="furyfit_ckPlotOutput" >
+           <property name="text" >
+            <string>Plot Output</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_8" >
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
@@ -655,31 +661,11 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="furyfit_pbPlotOutput" >
-           <property name="text" >
-            <string>Plot Output</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="furyfit_pbSeqFit" >
            <property name="text" >
             <string>Sequential Fit</string>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_9" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -881,6 +867,13 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6" >
          <item>
+          <widget class="QCheckBox" name="confit_ckPlotOutput" >
+           <property name="text" >
+            <string>Plot Output</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer" >
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
@@ -894,31 +887,11 @@
           </spacer>
          </item>
          <item>
-          <widget class="QCheckBox" name="confit_ckPlotOutput" >
-           <property name="text" >
-            <string>Plot Output</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="confit_pbSequential" >
            <property name="text" >
             <string>Sequential Fit</string>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>

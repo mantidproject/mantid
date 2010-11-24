@@ -319,7 +319,6 @@ void IndirectDataAnalysis::setupFuryFit()
   connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
   connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
   connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
   connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // apply validators - furyfit
   m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
@@ -654,7 +653,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         // create user function
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
-        std::string formula = "Intensity*exp(-Tau*(x^Beta))";
+        std::string formula = "Intensity*exp(-(x/Tau)^Beta)";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
@@ -666,7 +665,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         // create user function
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
-        std::string formula = "Intensity*exp(-(x*Tau))";
+        std::string formula = "Intensity*exp(-(x/Tau))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
@@ -1037,94 +1036,94 @@ void IndirectDataAnalysis::furyPlotInput()
 /* FURY FIT TAB */
 void IndirectDataAnalysis::furyfitRun()
 {
-    // First create the function
-    Mantid::API::CompositeFunction* function = createFunction(m_ffTree);
+  // First create the function
+  Mantid::API::CompositeFunction* function = createFunction(m_ffTree);
 
-    // uncheck "plot guess"
-    m_uiForm.furyfit_ckPlotGuess->setChecked(false);
+  // uncheck "plot guess"
+  m_uiForm.furyfit_ckPlotGuess->setChecked(false);
 
-    // Background level
-    m_furyfitTies = "f0.A1 = 0";
-    
-    if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
-    {
-      switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
-      {
-      case 0: // 1 Exp
-      case 2: // 1 Str
-        m_furyfitTies += ", f1.Intensity = 1-f0.A0";
-        break;
-      case 1: // 2 Exp
-      case 3: // 1 Exp & 1 Str
-        m_furyfitTies += ",f1.Intensity=1-f2.Intensity-f0.A0";
-        break;
-      default:
-        break;
-      }
-    }
+  // Background level
+  m_furyfitTies = "f0.A1 = 0";
 
-    // the plotInput function handles loading the workspace, no need to duplicate that code here
-    furyfitPlotInput();
-    // however if it doesn't a workspace we don't want to continue, so...
-    if ( m_ffInputWS == NULL )
-    {
-      return;
-    }
-    
-    std::string output = m_ffInputWSName + "_fit_s" + m_uiForm.furyfit_leSpecNo->text().toStdString();
-    // Create the Fit Algorithm
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
-    alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
-    alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
-    alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
-    alg->setProperty("Ties", m_furyfitTies.toStdString());
-    alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
-    alg->setPropertyValue("Function", *function);
-    alg->setPropertyValue("Output",output);
-    alg->execute();
-
-    if ( ! alg->isExecuted() )
-    {
-      QString msg = "There was an error executing the fitting algorithm. Please see the "
-        "Results Log pane for more details.";
-      showInformationBox(msg);
-      return;
-    }
-
-    // Now show the fitted curve of the mini plot
-    m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, output+"_Workspace", 1);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_ffFitCurve->setPen(fitPen);
-    m_ffPlot->replot();
-
-    /// Get the "*_Parameters" TableWorkspace created by the Fit function (@todo change this to use the more succint parameters?)
-    Mantid::API::ITableWorkspace_sptr table = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(output+"_Parameters"));
-    std::map<std::string,double> params;
-    int nRow = table->rowCount();
-    for ( int i = 0; i < nRow; i++ )
-    {
-      Mantid::API::TableRow row = table->getRow(i);
-      std::string key = "";
-      double value = 0.0;
-      row >> key >> value;
-      params[key] = value;
-    }
-
-    // Background is in all functions
-    m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], params["f0.A0"]);
-
-    QMap<QString,QtProperty*> subprops;
-    QtProperty* exp;
-    QList<QtProperty*> subs;
-
+  if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
+  {
     switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
     {
-    case 0:
-    case 1:
-    case 3:
-      {
+    case 0: // 1 Exp
+    case 2: // 1 Str
+      m_furyfitTies += ", f1.Intensity = 1-f0.A0";
+      break;
+    case 1: // 2 Exp
+    case 3: // 1 Exp & 1 Str
+      m_furyfitTies += ",f1.Intensity=1-f2.Intensity-f0.A0";
+      break;
+    default:
+      break;
+    }
+  }
+
+  // the plotInput function handles loading the workspace, no need to duplicate that code here
+  furyfitPlotInput();
+  // however if it doesn't a workspace we don't want to continue, so...
+  if ( m_ffInputWS == NULL )
+  {
+    return;
+  }
+
+  std::string output = m_ffInputWSName + "_fit_s" + m_uiForm.furyfit_leSpecNo->text().toStdString();
+  // Create the Fit Algorithm
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+  alg->initialize();
+  alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
+  alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
+  alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
+  alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
+  alg->setProperty("Ties", m_furyfitTies.toStdString());
+  alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
+  alg->setPropertyValue("Function", *function);
+  alg->setPropertyValue("Output",output);
+  alg->execute();
+
+  if ( ! alg->isExecuted() )
+  {
+    QString msg = "There was an error executing the fitting algorithm. Please see the "
+      "Results Log pane for more details.";
+    showInformationBox(msg);
+    return;
+  }
+
+  // Now show the fitted curve of the mini plot
+  m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, output+"_Workspace", 1);
+  QPen fitPen(Qt::red, Qt::SolidLine);
+  m_ffFitCurve->setPen(fitPen);
+  m_ffPlot->replot();
+
+  /// Get the "*_Parameters" TableWorkspace created by the Fit function (@todo change this to use the more succint parameters?)
+  Mantid::API::ITableWorkspace_sptr table = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(output+"_Parameters"));
+  std::map<std::string,double> params;
+  int nRow = table->rowCount();
+  for ( int i = 0; i < nRow; i++ )
+  {
+    Mantid::API::TableRow row = table->getRow(i);
+    std::string key = "";
+    double value = 0.0;
+    row >> key >> value;
+    params[key] = value;
+  }
+
+  // Background is in all functions
+  m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], params["f0.A0"]);
+
+  QMap<QString,QtProperty*> subprops;
+  QtProperty* exp;
+  QList<QtProperty*> subs;
+
+  switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+  {
+  case 0:
+  case 1:
+  case 3:
+    {
       exp = m_ffProp["Exponential1"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
@@ -1134,9 +1133,9 @@ void IndirectDataAnalysis::furyfitRun()
       m_doubleManager->setValue(subprops["Intensity"], params["f1.Intensity"]);
       m_doubleManager->setValue(subprops["Tau"], params["f1.Tau"]);
       break;
-      }
-    case 2:
-      {
+    }
+  case 2:
+    {
       exp = m_ffProp["StretchedExp"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
@@ -1147,13 +1146,13 @@ void IndirectDataAnalysis::furyfitRun()
       m_doubleManager->setValue(subprops["Tau"], params["f1.Tau"]);
       m_doubleManager->setValue(subprops["Beta"], params["f1.Beta"]);
       break;
-      }
     }
+  }
 
-    switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+  switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+  {
+  case 1: // 2 Exp
     {
-    case 1: // 2 Exp
-      {
       exp = m_ffProp["Exponential2"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
@@ -1163,9 +1162,9 @@ void IndirectDataAnalysis::furyfitRun()
       m_doubleManager->setValue(subprops["Intensity"], params["f2.Intensity"]);
       m_doubleManager->setValue(subprops["Tau"], params["f2.Tau"]);
       break;
-      }
-    case 3: // 1 Exp & 1 Stretched Exp
-      {
+    }
+  case 3: // 1 Exp & 1 Stretched Exp
+    {
       exp = m_ffProp["StretchedExp"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
@@ -1176,12 +1175,19 @@ void IndirectDataAnalysis::furyfitRun()
       m_doubleManager->setValue(subprops["Tau"], params["f2.Tau"]);
       m_doubleManager->setValue(subprops["Beta"], params["f2.Beta"]);
       break;
-      }
-    case 0:
-      break;
-    case 2:
-      break;
     }
+  case 0:
+    break;
+  case 2:
+    break;
+  }
+
+  if ( m_uiForm.furyfit_ckPlotOutput->isChecked() )
+  {
+    QString pyInput = "from mantidplot import *\n"
+      "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
+    QString pyOutput = runPythonCode(pyInput);
+  }
 }
 /** ...  */
 void IndirectDataAnalysis::furyfitTypeSelection(int index)
@@ -1306,21 +1312,6 @@ void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
 void IndirectDataAnalysis::furyfitInputType(int index)
 {
   m_uiForm.furyfit_swInput->setCurrentIndex(index);
-}
-/** ...  */
-void IndirectDataAnalysis::furyfitPlotOutput()
-{
-  if ( m_ffOutputWS == NULL )
-  {
-    showInformationBox("No output found for FuryFit");
-    return;
-  }
-
-  std::string name = m_ffOutputWS->getName();
-
-  QString pyInput = "from mantidplot import *\n"
-    "plotSpectrum('" + QString::fromStdString(name) + "', [0,1,2])\n";
-  QString pyOutput = runPythonCode(pyInput);
 }
 /** ...  */
 void IndirectDataAnalysis::furyfitSequential()

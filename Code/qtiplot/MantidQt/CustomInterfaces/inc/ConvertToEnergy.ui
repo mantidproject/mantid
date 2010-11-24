@@ -328,7 +328,7 @@
                   </property>
                   <item>
                    <property name="text" >
-                    <string>All</string>
+                    <string>Individual</string>
                    </property>
                   </item>
                   <item>
@@ -338,7 +338,7 @@
                   </item>
                   <item>
                    <property name="text" >
-                    <string>Individual</string>
+                    <string>All</string>
                    </property>
                   </item>
                   <item>

@@ -187,38 +187,87 @@ def furyfitSeq(inputWS,func,startx,endx):
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(1,nHist):
         input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_fitParameters'
+    outNm = inputWS + '_furyfit_seq_Parameters'
     PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
-    procSeqParToWS(outNm)
+    furyfitParsToWS(outNm, inputWS)
 
 def confitSeq(inputWS, func, startX, endX):
-    # Create input workspace index list
     input = inputWS+',i0'
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(1, nHist):
         input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_fitParameters'
+    outNm = inputWS + '_convfit_seq_Parameters'
     PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
-    procSeqParToWS(outNm)
-	
-def procSeqParToWS(inputWS):
-    ws = mtd[inputWS]
+    confitParsToWS(outNm, inputWS)
+
+def confitParsToWS(Table, Data):
     dataX = []
+    ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
+    Transpose('inq', 'inq')
+    readX = mtd['inq'].readX(0)
+    nBins = len(readX)
+    for i in range(0,nBins):
+        dataX.append(readX[i])
+    mtd.deleteWorkspace('inq')
+    xAxisVals = []
     dataY = []
     dataE = []
+    names = []
+    ws = mtd[Table]
     cCount = ws.getColumnCount()
     rCount = ws.getRowCount()
     cName =  ws.getColumnNames()
     nSpec = ( cCount - 1 ) / 2
     xAxis = cName[0]
     for spec in range(0,nSpec):
+        xAxisVals += dataX
         yAxis = cName[(spec*2)+1]
+        names.append(yAxis)
         eAxis = cName[(spec*2)+2]
         for row in range(0, rCount):
-            dataX.append(ws.getDouble(xAxis,row))
             dataY.append(ws.getDouble(yAxis,row))
             dataE.append(ws.getDouble(eAxis,row))
-    CreateWorkspace(inputWS+'_matrix', dataX, dataY, dataE, nSpec)
+    CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
+        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
+
+def createFuryFitXAxis(inputWS):
+    result = []
+    ws = mtd[inputWS]
+    nHist = ws.getNumberHistograms()
+    inst = ws.getInstrument()
+    samplePos = inst.getSample().getPos()
+    beamPos = samplePos - inst.getSource().getPos()
+    for i in range(0,nHist):
+        detector = ws.getDetector(i)
+        efixed = detector.getNumberParameter("Efixed")[0]
+        theta = detector.getTwoTheta(samplePos, beamPos) / 2
+        lamda = math.sqrt(81.787/efixed)
+        q = 4 * math.pi * math.sin(theta) / lamda
+        result.append(q)
+    return result
+
+def furyfitParsToWS(Table, Data):
+    dataX = createFuryFitXAxis(Data)
+    dataY = []
+    dataE = []
+    names = []
+    xAxisVals = []
+    ws = mtd[Table]
+    cCount = ws.getColumnCount()
+    rCount = ws.getRowCount()
+    cName =  ws.getColumnNames()
+    nSpec = ( cCount - 1 ) / 2
+    xAxis = cName[0]
+    for spec in range(0,nSpec):
+        xAxisVals += dataX
+        yAxis = cName[(spec*2)+1]
+        names.append(yAxis)
+        eAxis = cName[(spec*2)+2]
+        for row in range(0, rCount):
+            dataY.append(ws.getDouble(yAxis,row))
+            dataE.append(ws.getDouble(eAxis,row))
+    CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
+        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     output = []

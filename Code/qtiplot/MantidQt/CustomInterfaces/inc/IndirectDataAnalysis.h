@@ -115,7 +115,6 @@ namespace MantidQt
       void furyfitBackgroundSelected(double val);
       void furyfitRangePropChanged(QtProperty*, double);
       void furyfitInputType(int index);
-      void furyfitPlotOutput();
       void furyfitSequential();
       void furyfitPlotGuess(QtProperty*);
 
