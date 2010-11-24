@@ -65,25 +65,12 @@ struct MD_DATA{
 };
 
 //
-class DLLExport MDImageData: public IMDWorkspace
+class DLLExport MDImageData
 {
 public:
 
-  virtual int getNPoints() const;
-  virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const;
-  virtual Mantid::Geometry::MDPoint * getPoint(int index) const;
-  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
-  virtual Mantid::Geometry::MDCell * getCell(...) const;
-  virtual Mantid::Geometry::IMDDimension* getXDimension() const;
-  virtual Mantid::Geometry::IMDDimension* getYDimension() const;
-  virtual Mantid::Geometry::IMDDimension* getZDimension() const;
-  virtual Mantid::Geometry::IMDDimension* gettDimension() const;
-
     // default constructor
-  MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry, boost::shared_ptr<IMD_FileFormat> spFile);
+  MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry);
      MDImageData(); // HACK
     // destructor
     ~MDImageData();
@@ -101,12 +88,6 @@ public:
     /// returns dimension strides e.g. the changes of a position in 1D array when an M-th dimension index changes by 1;
     std::vector<size_t> getStrides(void)const;
  //******************************************************************************************************
-// IMD workspace interface functions
-  /// return ID specifying the workspace kind
-    virtual const std::string id() const { return "MD-Workspace"; }
-
-   ///
-  virtual unsigned int getNumDims(void) const{return m_pMDGeometry->getNumDims();}
 //******************************************************************************************************
    virtual void initialize(const Geometry::MDGeometryDescription &Description){
         alloc_mdd_arrays(Description);
@@ -121,12 +102,15 @@ public:
     void alloc_mdd_arrays(const MDGeometryDescription &transf);
 
 /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-    void read_mdd(const char *file_name,bool old4DMatlabReader=false);
+  //  void read_mdd(boost::shared_ptr<IMD_FileFormat> spFile,bool old4DMatlabReader=false);
+    
+    virtual long getMemorySize()const{return MDStruct.data_size*sizeof(MD_image_point);}
+  /// build allocation table of sparce data points (pixels)
+    void identify_SP_points_locations();
  protected:
     MD_DATA  MDStruct;
     MD_image_point *pData; // the additional pointer to data structure in MDStruct;
 
-    virtual long getMemorySize()const{return MDStruct.data_size*sizeof(MD_image_point);}
 
     // dimensions strides in linear order; formulated in this way for faster access<- looks like obsolete;
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;
@@ -137,17 +121,8 @@ public:
     void clear_class();
 
 //*************************************************
-// FILE OPERATIONS:
-/// the name of the file with DND and SQW data;
-    std::string fileName;
-// the pointer to a class with describes correspondent mdd file format;
-    boost::shared_ptr<IMD_FileFormat> theFile;
 
-//  function selects the file reader given existing mdd or sqw file and sets up above pointer to the proper file reader;
-//  throws if can not find the file, the file format is not supported or any other error;
-    void select_file_reader(const char *file_name,bool old4DMatlabReader=false);
-     /// build allocation table of sparce data points (pixels)
-    void identify_SP_points_locations();
+   
 //*************************************************
  //
  // location of cell in 1D data array shaped as 4 or less dimensional array;
@@ -176,9 +151,6 @@ private:
   MDImageData & operator = (const MDImageData & other);
   // copy constructor;
   MDImageData(const MDImageData & other);
-
-  /// function reads the multidimensional data using existing file reader; returns false if the files
-  bool read_mdd(void);
 
 };
 //

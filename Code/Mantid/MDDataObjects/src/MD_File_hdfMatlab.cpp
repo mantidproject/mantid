@@ -241,7 +241,7 @@ MD_File_hdfMatlab::getNPix(void)
 //***************************************************************************************
 
 bool
-MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
+MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 { 
 
     unsigned long i;
@@ -282,12 +282,8 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
       f_log.fatal()<<" pixel array has not been properly allocated\n";
       throw(std::bad_alloc("pixels array has not been allocated properly"));
     }
-    size_t n_pix_inDataset  = sqw.getNumPixels();
-    if(pix_dims[0]!=n_pix_inDataset){
-        std::stringstream err;
-        err<<"MD_File_hdfMatlab::read_pix: Number of pixels contributed into mdd dataset= "<<sqw.getNumPixels()<<" and does not correspond to number of sqw pixels: "<<pix_dims[0]<<std::endl;
-        throw(std::invalid_argument(err.str()));
-    }
+    size_t n_pix_inDataset  = this->getNPix();
+  
     // let's verify if we indeed can read pixels into the buffer;
     size_t buf_size = sqw.get_pix_bufSize();
 
@@ -329,7 +325,7 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
     MDPixelSignature  pix(defaults);
     MDDataPoint<>  packer(pix_array,pix);
    
-    for(i=0;i<sqw.getNumPixels();i++){
+    for(i=0;i<n_pix_inDataset;i++){
           DimFields[0] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0)); //  sqw.pix_array[i].qx   
           DimFields[1] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1)); // sqw.pix_array[i].qy 
           DimFields[2] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2)); // sqw.pix_array[i].qz
@@ -355,7 +351,7 @@ MD_File_hdfMatlab::read_pix(MDWorkspace & sqw)
 }
 
 size_t 
-MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
+MD_File_hdfMatlab::read_pix_subset(const MDImageData &DND,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
 {
 // open pixel dataset and dataspace if it has not been opened before;
     n_pix_in_buffer=0;
@@ -363,7 +359,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDWorkspace &SQW,const std::vector<size
     bool pixel_dataspece_opened(false);
 
     // get access to pixels allocation table;
-    const MD_image_point * pData = SQW.get_const_pData();
+    const MD_image_point * pData = DND.get_const_pData();
     // get pixel dataspece and open it if it has not been done before;
     if(this->pixel_dataspace_h<0){
     

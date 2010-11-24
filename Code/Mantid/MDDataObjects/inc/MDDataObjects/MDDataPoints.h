@@ -41,14 +41,13 @@ namespace Mantid{
       class DLLExport MDDataPoints
       {
       public:
-        MDDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry, boost::shared_ptr<IMD_FileFormat> spFile);
-        MDDataPoints(); //HACK, default constructor leads to the potential for invalid states.
+        MDDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry);
         ~MDDataPoints();
        
         /// check if the pixels are all in memory;
         bool isMemoryBased(void)const{return memBased;}
         /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
-        size_t getNumPixels(void);
+        size_t getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile);
 
         size_t getMemorySize()const{return data_buffer_size*1;}
 
@@ -67,7 +66,7 @@ namespace Mantid{
         std::vector<unsigned int> get_field_length(void)const{return field_length;} //TODO: refactor out.
         std::vector<unsigned int> get_field_start(void)const {return field_start;} //TODO: refactor out.
         // initiates memory for part of the pixels, which should be located in memory;  
-        void alloc_pix_array();
+        void alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile);
       protected:
         // the parameter identify if the class data are file or memory based
         // usually it is le based and memory used for small datasets, debugging or in a future when PC are big
@@ -92,7 +91,6 @@ namespace Mantid{
         MDDataPoints(const MDDataPoints& p);
         MDDataPoints & operator = (const MDDataPoints & other);
 
-        boost::shared_ptr<IMD_FileFormat> m_spFile;
         boost::shared_ptr<Mantid::Geometry::MDGeometry> m_spMDGeometry;
 
           static Kernel::Logger& g_log;

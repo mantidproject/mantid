@@ -3,7 +3,7 @@
 //
 #include <hdf5.h>
 #include "MDDataObjects/IMD_FileFormat.h"
-#include "MDDataObjects/MDDataPoint.h"
+#include "MDDataObjects/MDDataPoints.h"
 
 
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
@@ -48,14 +48,14 @@ public:
     virtual void read_mdd(MDImageData & mdd);
    
     /// read whole pixels information in memory; usually impossible, then returns false;
-    virtual bool read_pix(MDWorkspace & sqw);
+    virtual bool read_pix(MDDataPoints & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
-    virtual size_t read_pix_subset(const MDWorkspace &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
+    virtual size_t read_pix_subset(const MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDWorkspace & dnd){throw(Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
+    virtual void write_mdd(const MDImageData & dnd){throw(Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
     
     virtual ~MD_File_hdfMatlab(void);
 private:

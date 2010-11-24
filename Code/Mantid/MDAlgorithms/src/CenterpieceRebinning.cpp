@@ -48,7 +48,7 @@ MDWorkspace_sptr inputWS;
       throw(std::runtime_error("filename property can not be found"));
    }
 
-    inputWS->read_mdd(filename.c_str());
+    inputWS->read_mdd();
 
     // set up slicing property to the shape of current workspace;
     MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
@@ -150,10 +150,10 @@ CenterpieceRebinning::exec()
  
 
   // get pointer for data to rebin to; 
-  MD_image_point*pImage     = outputWS->get_pData();
+  MD_image_point*pImage     = outputWS->get_spMDImage()->get_pData();
 
   // and the number of elements the image has;
-  size_t         image_size=  outputWS->getDataSize();
+  size_t         image_size=  outputWS->get_const_spMDImage()->getDataSize();
  //
   transf_matrix trf = build_scaled_transformation_matrix(*(inputWS->getGeometry()),*pSlicing,this->ignore_inf,this->ignore_nan);
 // start reading and rebinning;

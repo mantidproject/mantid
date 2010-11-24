@@ -49,8 +49,8 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
    rotations[0]=rotations[4]=rotations[8]=1;
 
    // get pointer to the image data;
-   const MD_image_point  *const data = Source.get_const_pData();
-   boost::shared_ptr<MDGeometry> pGeom = Source.getGeometry();
+   const MD_image_point  *const data   = Source.get_const_spMDImage()->get_const_pData();
+   boost::shared_ptr<MDGeometry const> pGeom = Source.get_const_spMDGeometry();
 
    // evaluate the capacity of the orthogonal dimensions;
    unsigned int  nReciprocal    = pGeom->getNumReciprocalDims();
@@ -325,7 +325,7 @@ std::vector<double> boxMax(nDims,0);
 std::vector<double> rN(nDims,0);
 
 // reduction dimensions; if stride = 0, the dimension is reduced;
-std::vector<size_t> strides = TargetWorkspace.getStrides();
+std::vector<size_t> strides = TargetWorkspace.get_const_spMDImage()->getStrides();
 
 double rotations_ustep[9];
 std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
@@ -336,13 +336,13 @@ ignote_all      =ignore_nan&ignore_inf;
 if(ignore_inf){
     Inf=std::numeric_limits<double>::infinity();
 }
-MD_image_point *data = TargetWorkspace.get_pData();
+MD_image_point *data = TargetWorkspace.get_spMDImage()->get_pData();
 
 
 for(unsigned int ii=0;ii<nDims;ii++){
   
-    boxMin[ii]       = TargetWorkspace.get_pMDData()->min_value[ii];
-    boxMax[ii]       = TargetWorkspace.get_pMDData()->max_value[ii];
+    boxMin[ii]       = TargetWorkspace.get_spMDImage()->get_pMDData()->min_value[ii];
+    boxMax[ii]       = TargetWorkspace.get_spMDImage()->get_pMDData()->max_value[ii];
 
     axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
     shifts[ii]   =rescaled_transf.trans_bott_left[ii];
@@ -507,8 +507,8 @@ omp_set_num_threads(num_OMP_Threads);
 } // end parallel region
 
 for(unsigned int ii=0;ii<nDims;ii++){
-    TargetWorkspace.rPixMin(ii) = boxMin[ii];
-    TargetWorkspace.rPixMax(ii) = boxMax[ii];
+    TargetWorkspace.get_spMDDPoints()->rPixMin(ii) = boxMin[ii];
+    TargetWorkspace.get_spMDDPoints()->rPixMax(ii) = boxMax[ii];
 }
 
 return nPixel_retained;

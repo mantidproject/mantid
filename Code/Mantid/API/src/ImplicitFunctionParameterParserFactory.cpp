@@ -38,7 +38,7 @@ namespace Mantid
       NodeList* paramParserNodes = pRootElem->getChildElement("ParameterParserFactoryList")->childNodes();
 
       ImplicitFunctionParameterParser* paramParser = NULL;
-      for(size_t i = 0; i < paramParserNodes->length(); i++)
+      for(int i = 0; i < paramParserNodes->length(); i++)
       {
         std::string paramParserName = paramParserNodes->item(i)->innerText();
         ImplicitFunctionParameterParser* childParamParser = this->createUnwrapped(paramParserName);

@@ -37,9 +37,9 @@ public:
     virtual ~MD_File_hdfV1(void){};
     virtual bool is_open(void)const{return false;}
     virtual void read_mdd(MDImageData &){};
-    virtual void write_mdd(const MDWorkspace &){};
-    virtual bool read_pix(MDWorkspace &){return false; }
-    virtual size_t read_pix_subset(const MDWorkspace &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<sqw_pixel> &pix_buf, size_t &buf_size,size_t &n_pix_in_buffer){
+    virtual void write_mdd(const MDImageData &){};
+    virtual bool read_pix(MDDataPoints &){return false; }
+    virtual size_t read_pix_subset(const MDImageData &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<sqw_pixel> &pix_buf, size_t &buf_size,size_t &n_pix_in_buffer){
         return 0;}
     virtual hsize_t getNPix(void){return 0;}
 

@@ -251,7 +251,7 @@ MD_File_hdfMatlab4D::getNPix(void)
 //***************************************************************************************
 
 bool
-MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
+MD_File_hdfMatlab4D::read_pix(MDDataPoints & sqw)
 { 
 
     unsigned long i;
@@ -283,13 +283,8 @@ MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
       f_log.fatal()<<" pixel array has not been properly allocated\n";
       throw(std::bad_alloc("pixels array has not been allocated properly"));
     }
-    size_t n_pix_inDataset  = sqw.getNumPixels();
-    if(pix_dims[0]!=n_pix_inDataset){
-        std::stringstream err;
-        err<<"MD_File_hdfMatlab::read_pix: Number of pixels contributed into mdd dataset= "<<sqw.getNumPixels()<<" and does not correspond to number of sqw pixels: "<<pix_dims[0]<<std::endl;
-        throw(std::invalid_argument(err.str()));
-    }
-    // let's verify if we indeed can read pixels into the buffer;
+    size_t n_pix_inDataset  = this->getNPix();
+   // let's verify if we indeed can read pixels into the buffer;
     size_t buf_size = sqw.get_pix_bufSize();
 
     if(buf_size<n_pix_inDataset){
@@ -344,7 +339,7 @@ MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
 
   
   
-    for(i=0;i<sqw.getNumPixels();i++){
+    for(i=0;i<n_pix_inDataset;i++){
         if (data_double){
            pix_array[i].qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
            pix_array[i].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
@@ -382,7 +377,7 @@ MD_File_hdfMatlab4D::read_pix(MDWorkspace & sqw)
 }
 
 size_t 
-MD_File_hdfMatlab4D::read_pix_subset(const MDWorkspace &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_raw_buf, size_t &n_pix_in_buffer)
+MD_File_hdfMatlab4D::read_pix_subset(const MDImageData &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_raw_buf, size_t &n_pix_in_buffer)
 {
 // open pixel dataset and dataspace if it has not been opened before;
   

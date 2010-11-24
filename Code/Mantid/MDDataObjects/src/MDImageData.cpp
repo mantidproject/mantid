@@ -15,66 +15,6 @@ namespace Mantid{
     Kernel::Logger& MDImageData::g_log =Kernel::Logger::get("MDWorkspaces");
 
 
-    int MDImageData::getNPoints() const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::IMDDimension* MDImageData::getDimension(std::string id) const
-    {
-      return this->m_pMDGeometry->getDimension(id,true);
-    }
-
-    Mantid::Geometry::MDPoint * MDImageData::getPoint(int index) const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment) const 
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment) const 
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment, int dim3Increment)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::MDCell * MDImageData::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::MDCell * MDImageData::getCell(...)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
-
-    Mantid::Geometry::IMDDimension* MDImageData::getXDimension() const
-    {
-      return & this->m_pMDGeometry->getXDimension();
-    }
-
-    Mantid::Geometry::IMDDimension* MDImageData::getYDimension() const
-    {
-     return & this->m_pMDGeometry->getYDimension();
-    }
-
-    Mantid::Geometry::IMDDimension* MDImageData::getZDimension() const
-    {
-      return & this->m_pMDGeometry->getZDimension();
-    }
-
-     Mantid::Geometry::IMDDimension* MDImageData::gettDimension() const
-    {
-     return & this->m_pMDGeometry->getTDimension();
-    }
-
 
 
 void
@@ -179,59 +119,12 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
 
 }
 //
-bool
-MDImageData::read_mdd(void)
-{
-  if(this->theFile){
-    this->theFile->read_mdd(*this);
-    return true;
-  }else{
-    return false;
-  }
-}
-/// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-void
-MDImageData::read_mdd(const char *file_name,bool useOld4Dformat)
-{
-   // select a file reader which corresponds to the proper file format of the data file
-   this->select_file_reader(file_name,useOld4Dformat);
-  // read the actual data using the file reader selected
-   this->read_mdd();
-  // idetyfy pixels locations
-   this->identify_SP_points_locations();
-}
+
+
 
 //****************************************
 
-void
-MDImageData::select_file_reader(const char *file_name,bool old4DMatlabReader)
-{
 
-// check if the file exist;
-    std::ifstream infile;
-    infile.open(file_name);
-    infile.close();
-    if (infile.fail()){
-        throw(Exception::FileError("MDData::select_file_reader: Error->can not found or open",file_name));
-    }
-// check if it is hdf5
-    htri_t rez=H5Fis_hdf5(file_name);
-    if (rez<=0){
-        if (rez==0){
-            throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));
-        }else{
-            throw(Exception::FileError("MDData::select_file_reader: Error->unspecified hdf5 error ",file_name));
-        }
-    }else{
-        // ***> to do:: identify internal hdf5 format; only MATLAB is supported at the moment;
-      if(old4DMatlabReader){
-          this->theFile= boost::shared_ptr<IMD_FileFormat>(new MD_File_hdfMatlab4D(file_name)); //HACK should be provided via dependency injection.
-      }else{
-         this->theFile= boost::shared_ptr<IMD_FileFormat>(new MD_File_hdfMatlab(file_name)); //HACK should be provided via dependency injection.
-      }
-    }
-
-}
 //
 MD_image_point *
 MDImageData::get_pData(void)
@@ -280,14 +173,14 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
    this->m_pMDGeometry->reinit_Geometry(transf);
 
    
-   this->MDStruct.dimSize.assign(this->getNumDims(),0);
+   this->MDStruct.dimSize.assign(this->m_pMDGeometry->getNumDims(),0);
    this->MDStruct.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
     MDDimension *pDim;
     this->MDStruct.dimStride[0] = 0;
     this->MDStruct.data_size    = 1;
     size_t  stride(1);
-    for(i=0;i<this->getNumDims();i++){
+    for(i=0;i<this->m_pMDGeometry->getNumDims();i++){
       pDim                 = this->m_pMDGeometry->getDimension(i);
         stride               = pDim->getStride();
         this->MDStruct.dimSize[i]    =  pDim->getNBins();
@@ -334,8 +227,8 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
         this->pData[j].err =0;
         this->pData[j].npix=0;
     }
-    this->MDStruct.min_value.assign(this->getNumDims(), FLT_MAX);
-    this->MDStruct.max_value.assign(this->getNumDims(),-FLT_MAX);
+    this->MDStruct.min_value.assign(this->m_pMDGeometry->getNumDims(), FLT_MAX);
+    this->MDStruct.max_value.assign(this->m_pMDGeometry->getNumDims(),-FLT_MAX);
     
 
 }
@@ -349,9 +242,8 @@ pData(NULL)
 }
 
 //
-MDImageData::MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry, boost::shared_ptr<IMD_FileFormat> spFile):
+MDImageData::MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry):
 m_pMDGeometry(spMDGeometry),
-  theFile(spFile),
 pData(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
 {
@@ -375,7 +267,7 @@ MDImageData::~MDImageData()
 std::vector<size_t>
 MDImageData::getStrides(void)const
 {
-  unsigned int nDims = this->getNumDims();
+  unsigned int nDims = this->m_pMDGeometry->getNumDims();
   std::vector<size_t> strides(nDims,0);
   for(unsigned int i=0;i<nDims;i++){
     strides[i] = m_pMDGeometry->getDimension(i)->getStride();
@@ -407,10 +299,10 @@ MDImageData::clear_class(void)
         pData = NULL;
         //MDStruct.data = NULL;
     }
-    this->MDStruct.dimSize.assign(this->getNumDims(),0);
-    this->MDStruct.dimStride.assign(this->getNumDims()+1,0);
-    this->MDStruct.min_value.assign(this->getNumDims(), FLT_MAX);
-    this->MDStruct.max_value.assign(this->getNumDims(),-FLT_MAX);
+    this->MDStruct.dimSize.assign(this->m_pMDGeometry->getNumDims(),0);
+    this->MDStruct.dimStride.assign(this->m_pMDGeometry->getNumDims()+1,0);
+    this->MDStruct.min_value.assign(this->m_pMDGeometry->getNumDims(), FLT_MAX);
+    this->MDStruct.max_value.assign(this->m_pMDGeometry->getNumDims(),-FLT_MAX);
 
 
 }
