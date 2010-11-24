@@ -62,7 +62,20 @@ namespace Mantid
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
+
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const DataObjects::EventList & rhs);
+
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
+
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const double& rhsY, const double& rhsE);
+
+      void checkRequirements();
       
+
+
     };
 
   } // namespace Algorithm

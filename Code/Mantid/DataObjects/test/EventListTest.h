@@ -362,6 +362,15 @@ public:
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 0.0, 1e-5);
   }
 
+  void test_multiply_by_one_doesnt_give_weights()
+  {
+    //No weights
+    this->fake_uniform_data();
+    //Perform the multiply by one without error.
+    el.multiply(1.0, 0.0);
+    TS_ASSERT( !el.hasWeights() );
+  }
+
 
   void test_multiply_scalar()
   {

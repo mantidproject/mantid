@@ -62,7 +62,13 @@ namespace Mantid
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const DataObjects::EventList & rhs);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const double& rhsY, const double& rhsE);
+
+      void checkRequirements();
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+
     };
 
   } // namespace Algorithm

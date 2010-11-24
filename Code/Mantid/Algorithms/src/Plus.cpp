@@ -113,7 +113,6 @@ namespace Mantid
         // Use the default behaviour
         BinaryOperation::checkRequirements();
       }
-
     }
 
 

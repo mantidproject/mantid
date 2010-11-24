@@ -1502,6 +1502,10 @@ using Kernel::DateAndTime;
    */
   void EventList::multiply(const double value)
   {
+    // Do nothing if multiplying by exactly one
+    if (value == 1.0)
+      return;
+
     //Switch to weights if needed.
     this->switchToWeightedEvents();
 
@@ -1522,7 +1526,7 @@ using Kernel::DateAndTime;
 
   //------------------------------------------------------------------------------------------------
   /** Operator to multiply the weights in this EventList by an error-less scalar.
-   * Use multiply(value,error) if your scalar has an error!
+   * Use multiply(value,error) if you wish to multiply by a real variable with an error!
    *
    * @param value multiply by this
    * @return reference to this

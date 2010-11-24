@@ -126,14 +126,14 @@ public:
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
 
     Minus alg;
-    std::string wsName1 = "test_in1D2D21";
-    std::string wsName2 = "test_in1D2D22";
+    std::string wsName_EW = "test_in1D2D21";
+    std::string wsName_2D = "test_in1D2D22";
     std::string wsNameOut = "test_out1D2D";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+    AnalysisDataService::Instance().add(wsName_2D, work_in2);
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_2D);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -142,8 +142,8 @@ public:
 
     checkData(work_in1, work_in2, work_out1);
 
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsName_EW);
+    AnalysisDataService::Instance().remove(wsName_2D);
     AnalysisDataService::Instance().remove(wsNameOut);
 
   }
@@ -157,14 +157,14 @@ public:
 
     Minus alg;
 
-    std::string wsName1 = "test_in1D2Dv1";
-    std::string wsName2 = "test_in1D2Dv2";
+    std::string wsName_EW = "test_in1D2Dv1";
+    std::string wsName_2D = "test_in1D2Dv2";
     std::string wsNameOut = "test_out1D2Dv";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+    AnalysisDataService::Instance().add(wsName_2D, work_in2);
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_2D);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -173,8 +173,8 @@ public:
 
     checkData(work_in1, work_in2, work_out1);
 
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsName_EW);
+    AnalysisDataService::Instance().remove(wsName_2D);
     AnalysisDataService::Instance().remove(wsNameOut);
   }
 
@@ -187,14 +187,14 @@ public:
 
     Minus alg;
 
-    std::string wsName1 = "test_in2D1Dv1";
-    std::string wsName2 = "test_in2D1Dv2";
+    std::string wsName_EW = "test_in2D1Dv1";
+    std::string wsName_2D = "test_in2D1Dv2";
     std::string wsNameOut = "test_out2D1Dv";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+    AnalysisDataService::Instance().add(wsName_2D, work_in2);
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_2D);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -203,8 +203,8 @@ public:
 
     checkData(work_in1, work_in2, work_out1);
 
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsName_EW);
+    AnalysisDataService::Instance().remove(wsName_2D);
     AnalysisDataService::Instance().remove(wsNameOut);
   }
 
@@ -258,14 +258,14 @@ public:
 
     Minus alg;
 
-    std::string wsName1 = "test_in2D1D21";
-    std::string wsName2 = "test_in2D1D22";
+    std::string wsName_EW = "test_in2D1D21";
+    std::string wsName_2D = "test_in2D1D22";
     std::string wsNameOut = "test_out2D1D";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+    AnalysisDataService::Instance().add(wsName_2D, work_in2);
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_2D);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -274,8 +274,8 @@ public:
 
     checkData(work_in1, work_in2, work_out1);
 
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsName_EW);
+    AnalysisDataService::Instance().remove(wsName_2D);
     AnalysisDataService::Instance().remove(wsNameOut);
 
   }
@@ -293,16 +293,22 @@ public:
     TS_ASSERT_EQUALS(a,b);
   }
 
+  int numBins;
+  int numPixels;
+  std::string wsName_EW, wsName_2D, wsNameOut;
+  EventWorkspace_sptr work_in1;
+  Workspace2D_sptr work_in2;
 
-  void testEventWorkspace()
+
+  void EventSetup()
   {
-    int numBins = 100;
-    int numPixels = 500;
+    numBins = 100;
+    numPixels = 500;
     //Workspace with 2 events per bin; 100 bins from 0 to 100
-    EventWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
 
-    //2D workspace with 1.0 in each bin.
-    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(numPixels, numBins, 0.0, 1.0);
+    //2D workspace with 0.5 in each bin.
+    work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(numPixels, numBins, 0.0, 1.0);
     for (int pix=0; pix < numPixels; pix++)
     {
       work_in2->dataY(pix).assign(numBins, 0.5);
@@ -310,26 +316,30 @@ public:
     }
 
     //Put the stuff in the data service
-    std::string wsName1 = "test_inA";
-    std::string wsName2 = "test_inB";
-    std::string wsNameOut = "test_out";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    wsName_EW = "test_inA";
+    wsName_2D = "test_inB";
+    wsNameOut = "test_out";
+    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+    AnalysisDataService::Instance().add(wsName_2D, work_in2);
+  }
 
-    //Rebin the input event workspace
-    Rebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", wsName1);
-    rebin.setPropertyValue("OutputWorkspace", wsName1);
-    rebin.setPropertyValue("Params", "0.0,1.0,100.0");
-    rebin.execute();
-    TS_ASSERT( rebin.isExecuted() );
+  void EventTeardown()
+  {
+    AnalysisDataService::Instance().remove(wsName_EW);
+    AnalysisDataService::Instance().remove(wsName_2D);
+    AnalysisDataService::Instance().remove(wsNameOut);
+  }
+
+
+  void test_EventWorkspace_minus_Workspace2D()
+  {
+    EventSetup();
 
     //Do the minus
     Minus alg;
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_2D);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -337,8 +347,11 @@ public:
     //The output!
     MatrixWorkspace_const_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    // The output is NOT an EventWorkspace
+    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
+    TS_ASSERT(!eventOut);
     MatrixWorkspace_const_sptr work_in1_const;
-    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName1)));
+    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
 
     //Compare
     for (int pix=0; pix < numPixels; pix+=499)
@@ -354,11 +367,96 @@ public:
         TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
       }
 
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);
-
+    EventTeardown();
   }
+
+  void test_Workspace2D_minus_EventWorkspace()
+  {
+    EventSetup();
+
+    //Do the minus
+    Minus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",wsName_2D);
+    alg.setPropertyValue("RHSWorkspace",wsName_EW);
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    //The output!
+    MatrixWorkspace_const_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    // The output is NOT an EventWorkspace
+    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
+    TS_ASSERT(!eventOut);
+    MatrixWorkspace_const_sptr work_in1_const;
+    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
+
+    //Compare
+    for (int pix=0; pix < numPixels; pix+=499)
+      for (int i=0; i < numBins; i++)
+      {
+        //0.5-2 = -1.5
+        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], -1.50, 1e-5);
+        //And the error is the sum of the square of the incoming errors
+        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(2.50), 1e-5);
+        //Incoming event workspace should still have 2.0 for values
+        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
+        //And error
+        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
+      }
+
+    EventTeardown();
+  }
+
+
+
+  void test_EventWorkspace_minus_EventWorkspace()
+  {
+    EventSetup();
+
+    //Do the minus
+    Minus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",wsName_EW);
+    alg.setPropertyValue("RHSWorkspace",wsName_EW);
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    //The output!
+    MatrixWorkspace_const_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    //And it is still an EventWorkspace?
+    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
+    TS_ASSERT(eventOut);
+    if (eventOut)
+    {
+      TS_ASSERT_EQUALS( eventOut->getNumberEvents(), numBins * numPixels * 2 * 2 );
+      TS_ASSERT( eventOut->eventsHaveWeights() );
+    }
+
+    MatrixWorkspace_const_sptr work_in1_const;
+    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
+
+    //Compare
+    for (int pix=0; pix < numPixels; pix+=49)
+      for (int i=0; i < numBins; i+=7)
+      {
+        //Output should be 1.5 everywhere
+        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 0.0, 1e-5);
+        //And the error is the sum of the square of the incoming errors
+        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.0), 1e-5);
+
+        //Incoming event workspace should still have 2.0 for values
+        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
+        //And error
+        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
+      }
+
+    EventTeardown();
+  }
+
 
 
 private:

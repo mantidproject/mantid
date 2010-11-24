@@ -85,7 +85,7 @@ namespace Mantid
 
         if (m_out == m_lhs)
         {
-          //Will be modifying the EventWorkspace in place on the lhs. Good.
+          //Will be modifying the EventWorkspace in-place on the lhs. Good.
           if (!m_eout)
             throw std::runtime_error("BinaryOperation:: the output was set to be lhs, and to be an EventWorkspace (m_keepEventWorkspace == true), but the output is not an EventWorkspace. There must be a mistake in the algorithm. Contact the developers.");
         }

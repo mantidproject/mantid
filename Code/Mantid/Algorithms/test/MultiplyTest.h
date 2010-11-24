@@ -28,9 +28,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument )
-    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") )
+    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") );
   }
 
   void testExec1D1D()
@@ -297,6 +297,208 @@ public:
     TS_ASSERT_EQUALS(a,b);
   }
   
+
+
+
+
+
+
+
+
+
+
+  // ==================================================================================================================
+
+  void EventSetup()
+  {
+    // 3 pixels, 100 events, starting at 0.5 in steps of +1.0.
+    AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 3)));
+
+    // 3 pixels, 200 events, (two each) starting at 0.5 in steps of +1.0.
+    AnalysisDataService::Instance().addOrReplace("ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 2)));
+
+    //200 events per spectrum, but the spectra are at different pixel ids
+    AnalysisDataService::Instance().addOrReplace("ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 2, 100)));
+    //Make one with weird units
+    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
+    ev4->setYUnit("Microfurlongs per Megafortnights");
+    AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
+    //Different # of spectra
+    AnalysisDataService::Instance().addOrReplace("ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(5,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
+    //a 2d workspace with the value 2 in each bin
+    AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
+
+    //A single value workspace with the value 3 +- 0.0
+    MatrixWorkspace_sptr single_value = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(3, 0.0);
+    AnalysisDataService::Instance().add("three", single_value);
+
+
+  }
+
+  void EventTeardown()
+  {
+    AnalysisDataService::Instance().remove("ev1");
+    AnalysisDataService::Instance().remove("ev2");
+    AnalysisDataService::Instance().remove("ev3");
+    AnalysisDataService::Instance().remove("ev4_weird_units");
+    AnalysisDataService::Instance().remove("ev5");
+    AnalysisDataService::Instance().remove("in2D");
+    AnalysisDataService::Instance().remove("evOUT");
+    AnalysisDataService::Instance().remove("out2D");
+    AnalysisDataService::Instance().remove("three");
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExecOneEvent_times_single_value()
+  {
+    EventWorkspace_sptr in1, in2, out;
+
+    EventSetup();
+    Multiply alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","three");
+    alg.setPropertyValue("OutputWorkspace", "evOUT");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
+    TS_ASSERT(out); // still Eventworkspace
+    // Still has events, 300 total
+    TS_ASSERT_EQUALS( out->getNumberEvents(), 300);
+    for (int wi=0; wi < 3; wi++)
+    {
+      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
+      TS_ASSERT_DELTA( rwel[0].weight(), 3.0, 1e-5); // weight is 3
+      TS_ASSERT_DELTA( rwel[0].error(), 3.0, 1e-5); // error is 3
+
+      for (int i=0; i<out->blocksize(); i++)
+      {
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3.0); // weight is 3
+        TS_ASSERT_EQUALS( out->readE(wi)[i], 3.0); // error is also 3
+      }
+    }
+
+    EventTeardown();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  void testExecTwoEvents_times_single_value()
+  {
+    EventWorkspace_sptr in1, in2, out;
+
+    EventSetup();
+    Multiply alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev2");
+    alg.setPropertyValue("RHSWorkspace","three");
+    alg.setPropertyValue("OutputWorkspace", "evOUT");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
+    TS_ASSERT(out); // still Eventworkspace
+    for (int wi=0; wi < 3; wi++)
+    {
+      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
+      TS_ASSERT_DELTA( rwel[0].weight(), 3.0, 1e-5); // weight is 3
+      TS_ASSERT_DELTA( rwel[0].error(), 3.0, 1e-5); // error is 3
+
+      for (int i=0; i<out->blocksize(); i++)
+      {
+        TS_ASSERT_DELTA( out->readY(wi)[i], 6.0, 1e-6); // two events, so 6
+        TS_ASSERT_DELTA( out->readE(wi)[i], sqrt(2.0) * 3.0, 1e-6); // relative error is 2 / sqrt(2), since there are two events
+      }
+    }
+
+    EventTeardown();
+  }
+
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  void testExecOneEvent_times_histogram()
+  {
+    EventWorkspace_sptr in1, in2, out;
+    EventSetup();
+
+    Multiply alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","in2D");
+    alg.setPropertyValue("OutputWorkspace", "evOUT");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
+    TS_ASSERT(out); // still Eventworkspace
+    TS_ASSERT_EQUALS( out->getNumberEvents(), 300); // Still has events, 300 total
+    for (int wi=0; wi < 3; wi++)
+    {
+      // The histogram was 2 +- sqrt(2) at all bins...
+
+      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
+      TS_ASSERT_DELTA( rwel[0].weight(), 2.0, 1e-5); // weight is twice
+      TS_ASSERT_DELTA( rwel[0].errorSquared(), 2.0+1, 1e-5); //error is sqrt(3)
+
+      for (int i=0; i<out->blocksize(); i++)
+      {
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 2.0);
+        TS_ASSERT_EQUALS( out->readE(wi)[i], sqrt(3.0));
+      }
+    }
+
+    EventTeardown();
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  void testExecOneEvent_times_TwoEvents()
+  {
+    EventWorkspace_sptr in1, in2, out;
+    EventSetup();
+
+    Multiply alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","ev2");
+    alg.setPropertyValue("OutputWorkspace", "evOUT");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
+    TS_ASSERT(out); // still Eventworkspace
+    TS_ASSERT_EQUALS( out->getNumberEvents(), 300); // Still has events, 300 total
+    for (int wi=0; wi < 3; wi++)
+    {
+      // The histogram was 2 +- sqrt(2) at all bins...
+
+      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
+      TS_ASSERT_DELTA( rwel[0].weight(), 2.0, 1e-5); // weight is twice
+      TS_ASSERT_DELTA( rwel[0].errorSquared(), 2.0+1, 1e-5); //error is sqrt(3)
+
+      for (int i=0; i<out->blocksize(); i++)
+      {
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 2.0);
+        TS_ASSERT_EQUALS( out->readE(wi)[i], sqrt(3.0));
+      }
+    }
+
+    EventTeardown();
+  }
+
+
+
+
+
+
+
+
 private:
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1)
   {

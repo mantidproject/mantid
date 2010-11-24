@@ -176,6 +176,12 @@ public:
     return retVal;
   }
 
+  static WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value, double error)
+  {
+    WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value, error));
+    return retVal;
+  }
+
   /** Create event workspace with:
    * 500 pixels
    * 1000 histogrammed bins.
