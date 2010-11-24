@@ -27,6 +27,9 @@
     <ClCompile Include="WorkspaceAlgorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LorentzianTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelloWorldAlgorithm.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkspaceAlgorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LorentzianTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

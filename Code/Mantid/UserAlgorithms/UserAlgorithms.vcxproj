@@ -176,12 +176,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="HelloWorldAlgorithm.cpp" />
+    <ClCompile Include="LorentzianTest.cpp" />
     <ClCompile Include="ModifyData.cpp" />
     <ClCompile Include="PropertyAlgorithm.cpp" />
     <ClCompile Include="WorkspaceAlgorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelloWorldAlgorithm.h" />
+    <ClInclude Include="LorentzianTest.h" />
     <ClInclude Include="ModifyData.h" />
     <ClInclude Include="PropertyAlgorithm.h" />
     <ClInclude Include="WorkspaceAlgorithm.h" />

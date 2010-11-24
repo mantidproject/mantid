@@ -22,7 +22,7 @@ namespace Mantid
     <UL>
     <LI> Height - height of peak (default 0.0)</LI>
     <LI> PeakCentre - centre of peak (default 0.0)</LI>
-    <LI> Sigma - standard deviation (default 1.0)</LI>
+    <LI> Sigma - standard deviation (default 0.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

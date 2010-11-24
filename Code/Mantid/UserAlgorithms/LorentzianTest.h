@@ -11,21 +11,34 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Provide lorentzian peak shape function interface to IPeakFunction.
-    I.e. the function: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ).
+    This is a copy of the Lorentzian peak shape function in Mantid. 
+
+    This copy is here used to demonstrate how to add a user defined Fit Function.
+
+    The instructions here complement the instruction at <http://http://www.mantidproject.org/Writing_a_Fit_Function>
+
+    1) Rename LorentzianTest.h and LorentzianTest.cpp to the name of your new Fit Function, say MyFit.h and MyFit.cpp
+    2) Open MyFit.h and substitute LORENTZIANTEST with MYFIT and LorentzianTest with MyFit. 
+    3) Open MyFit.cpp and substitute LorentzianTest with MyFit
+    4) Check that MyFit, see <http://http://www.mantidproject.org/Writing_a_Fit_Function> for instructions
+    5) Now the fun bit, modify the sections in MyFit.h and MyFit.cpp which includes the header: ** MODIFY THIS **
 
 
-    LorentzianTest parameters:
+    Note for information about the Mantid implementation of the Lorentzian Fit Function see 
+    <http://http://www.mantidproject.org/Lorentzian>. It has three fitting 
+    parameters and its formula is: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ).
+
+    In more detail the Lorentzian fitting parameters are:
     <UL>
     <LI> Height - height of peak (default 0.0)</LI>
     <LI> PeakCentre - centre of peak (default 0.0)</LI>
-    <LI> HWHM - half-width half-maximum (default 1.0)</LI>
+    <LI> HWHM - half-width half-maximum (default 0.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 27/10/2009
+    @date 21/11/2010
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -48,11 +61,33 @@ namespace Mantid
     class DLLExport LorentzianTest : public API::IPeakFunction
     {
     public:
-      /// Destructor
-      virtual ~LorentzianTest() {};
 
-
-      /// overwrite IPeakFunction base class methods
+      // ** MODIFY THIS **
+      // These methods are used by the MantidPlot GUI to allow users to
+      // graphically adjust the e.g. the peak width and translate such an
+      // adjustments to width fit parameter(s)
+      // 
+      // This implementation of a Lorentzian has three fitting parameters
+      // PeakCentre, Height and HWHM as described above and declared in 
+      // the init() method in the .cpp file
+      // 
+      // From the fitting parameters of your function use these to give
+      // a best estimate of how to calculate the centre (in the case of
+      // an exponential function this might be set to the start value of 
+      // the function), the height and width. Note these should just be
+      // best estimates and is only used Fit GUI for given a better user
+      // feel when using your fit function
+      //
+      // Initially you may set these as follows:
+      //
+      //       virtual double centre()const {return 0.0;}
+      //       virtual double height()const {return 1.0;}
+      //       virtual double width()const {return 0.0;}
+      //       virtual void setCentre(const double c) {}
+      //       virtual void setHeight(const double h) {}
+      //       virtual void setWidth(const double w) {}
+      //
+      // I.e. replace the below 6 lines of code with the above 6 lines
       virtual double centre()const {return getParameter("PeakCentre");}
       virtual double height()const {return getParameter("Height");}
       virtual double width()const {return 2*getParameter("HWHM");}
@@ -61,12 +96,14 @@ namespace Mantid
       virtual void setWidth(const double w) {setParameter("HWHM",w/2.0);}
 
 
-      /// Here specify name of function as it will appear
+      // ** MODIFY THIS **
+      /// The name of the fitting function
       std::string name()const{return "LorentzianTest";}
+
+
     protected:
       virtual void functionLocal(double* out, const double* xValues, const int& nData)const;
       virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData);
-      /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
 
     };
