@@ -1490,11 +1490,13 @@ using Kernel::DateAndTime;
 
 
   //------------------------------------------------------------------------------------------------
-  /** Multiply the weights in this event list by an error-less scalar
+  /** Multiply the weights in this event list by an error-less scalar.
+   * Use multiply(value,error) if you wish to multiply by a real variable with an error!
+   *
    * The event list switches to WeightedEvent's if needed.
+   * Note that if the multiplier is exactly 1.0, the list is NOT switched to WeightedEvents - nothing happens.
    *
    * Given A = the weight; the scalar = a.
-   *
    *  - The weight is simply \f$ aA \f$
    *  - The error \f$ \sigma_A \f$ becomes \f$ \sigma_{aA} = a \sigma_{A} \f$
    *
@@ -1528,6 +1530,9 @@ using Kernel::DateAndTime;
   /** Operator to multiply the weights in this EventList by an error-less scalar.
    * Use multiply(value,error) if you wish to multiply by a real variable with an error!
    *
+   * The event list switches to WeightedEvent's if needed.
+   * Note that if the multiplier is exactly 1.0, the list is NOT switched to WeightedEvents - nothing happens.
+   *
    * @param value multiply by this
    * @return reference to this
    */
@@ -1539,8 +1544,12 @@ using Kernel::DateAndTime;
 
 
   //------------------------------------------------------------------------------------------------
-  /** Multiply the weights in this event list by a scalar.
+  /** Multiply the weights in this event list by a scalar variable with an error.
+   * If the error is exactly 0.0, multiply(value) is called instead, which
+   * uses the different error propagation formula for an error-less scalar.
+   *
    * The event list switches to WeightedEvent's if needed.
+   * Note that if the multiplier is exactly 1.0 and the error is exactly 0.0, the list is NOT switched to WeightedEvents - nothing happens.
    *
    * Given:
    *  - A is the weight, variance \f$\sigma_A \f$
