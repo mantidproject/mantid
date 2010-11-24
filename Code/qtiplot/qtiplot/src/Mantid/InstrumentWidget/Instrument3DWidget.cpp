@@ -45,7 +45,8 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   mBinEntireRange(true),
   mDataMinEdited(false), mDataMaxEdited(false),
   mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
-  mWorkspaceName(""), mWorkspace(), mScaledValues(0)
+  mWorkspaceName(""), mWorkspace(), mScaledValues(0),
+  m_detID_to_wi_map(NULL)
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
@@ -54,6 +55,8 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
 Instrument3DWidget::~Instrument3DWidget()
 {
 	makeCurrent();
+	if (m_detID_to_wi_map)
+	  delete m_detID_to_wi_map;
 }
 
 /**
@@ -116,29 +119,34 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 {
   if(pickedColor == BLACK)
   {
-    emit actionDetectorHighlighted(-1,-1,-1);
+    emit actionDetectorHighlighted(-1,-1,-1,-1);
     return;
   }
-  int iDecId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
-  if(iDecId != -1)
+  int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
+  if(iDetId != -1)
   {
-    //convert detector id to spectra index id
-    std::vector<int> idDecVec(1, iDecId);
-    createWorkspaceIndexList(idDecVec, false);
-    int spectrumNumber(1);
-    int index = m_workspace_indices.front();
-    try
+    int workspaceIndex = -1;
+    int spectrumNumber = -1;
+    double sum = 0;
+    if (m_detID_to_wi_map)
     {
-      spectrumNumber = mWorkspace->getAxis(1)->spectraNo(index);
-    }
-    catch(Mantid::Kernel::Exception::IndexError&)
-    {
-      //Not a Workspace2D
+      //convert detector id to workspace index id
+      try
+      {
+        workspaceIndex = (*m_detID_to_wi_map)[iDetId];
+        spectrumNumber = mWorkspace->getAxis(1)->spectraNo(workspaceIndex);
+      }
+      catch (...)
+      {
+        workspaceIndex = -1;
+        spectrumNumber = -1;
+      }
+
+      sum = integrateSingleSpectra(mWorkspace, workspaceIndex);
     }
 
-    double sum = integrateSingleSpectra(mWorkspace, index);
-    //emit the detector id, spectrum number and count to display in the window
-    emit actionDetectorHighlighted(iDecId, spectrumNumber, std::floor(sum));
+    //emit the detector id, workspace index and count to display in the window
+    emit actionDetectorHighlighted(iDetId, workspaceIndex, spectrumNumber, std::floor(sum));
   }
 
 }
@@ -563,54 +571,53 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
   m_workspace_indices.clear();
   m_detector_ids = det_ids;
   
-  // There is no direct way of getting histogram index from the spectra id,
-  // get the spectra axis and convert from index to spectra number and create
-  // a map.
-  const std::vector<int> spectraList = mWorkspace->spectraMap().getSpectra(m_detector_ids);
-  Axis* spectraAxis = mWorkspace->getAxis(1);
-  std::map<int,int> index_map;
-  int n_hist = mWorkspace->getNumberHistograms();
-  for (int i = 0; i < n_hist; ++i)
-  {
-    int current_spectrum = spectraAxis->spectraNo(i);
-    index_map[current_spectrum] = i;
-  }
-
-  std::vector<int>::const_iterator spec_end = spectraList.end();
-  std::vector<int>::const_iterator d_itr = m_detector_ids.begin();
-  for( std::vector<int>::const_iterator spec_itr = spectraList.begin(); spec_itr != spec_end;
-       ++spec_itr, ++d_itr )
-  {
-    if( (*d_itr) != -1 )
-    {
-      m_workspace_indices.push_back(index_map[*spec_itr]);
-    }
-    else
-    {
-      m_workspace_indices.push_back(-1);
-    }
-  }
-  
 //  // There is no direct way of getting histogram index from the spectra id,
 //  // get the spectra axis and convert from index to spectra number and create
 //  // a map.
-//  IndexToIndexMap * index_map = mWorkspace->getDetectorIDToWorkspaceIndexMap(false);
-//
-//  std::vector<int>::const_iterator d_itr_end = m_detector_ids.end();
-//  for( std::vector<int>::const_iterator d_itr = m_detector_ids.begin(); d_itr != d_itr_end; ++d_itr )
+//  const std::vector<int> spectraList = mWorkspace->spectraMap().getSpectra(m_detector_ids);
+//  Axis* spectraAxis = mWorkspace->getAxis(1);
+//  std::map<int,int> * index_map;
+//  int n_hist = mWorkspace->getNumberHistograms();
+//  for (int i = 0; i < n_hist; ++i)
 //  {
-//    int detector_id = *d_itr;
-//    if( (detector_id) != -1 )
+//    int current_spectrum = spectraAxis->spectraNo(i);
+//    index_map[current_spectrum] = i;
+//  }
+//
+//  std::vector<int>::const_iterator spec_end = spectraList.end();
+//  std::vector<int>::const_iterator d_itr = m_detector_ids.begin();
+//  for( std::vector<int>::const_iterator spec_itr = spectraList.begin(); spec_itr != spec_end;
+//       ++spec_itr, ++d_itr )
+//  {
+//    if( (*d_itr) != -1 )
 //    {
-//      m_workspace_indices.push_back( index_map->operator[](detector_id) );
+//      m_workspace_indices.push_back(index_map[*spec_itr]);
 //    }
 //    else
 //    {
 //      m_workspace_indices.push_back(-1);
 //    }
 //  }
-//
-//  delete index_map;
+
+  // There is no direct way of getting histogram index from the spectra id,
+  // get the spectra axis and convert from index to spectra number and create
+  // a map.
+  if (m_detID_to_wi_map) delete m_detID_to_wi_map;
+  m_detID_to_wi_map = mWorkspace->getDetectorIDToWorkspaceIndexMap(false);
+
+  std::vector<int>::const_iterator d_itr_end = m_detector_ids.end();
+  for( std::vector<int>::const_iterator d_itr = m_detector_ids.begin(); d_itr != d_itr_end; ++d_itr )
+  {
+    int detector_id = *d_itr;
+    if( (detector_id) != -1 )
+    {
+      m_workspace_indices.push_back( m_detID_to_wi_map->operator[](detector_id) );
+    }
+    else
+    {
+      m_workspace_indices.push_back(-1);
+    }
+  }
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::createWorkspaceIndexList() took " << timer.elapsed() << " seconds\n";
 

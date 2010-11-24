@@ -6,6 +6,7 @@
 #include "boost/shared_ptr.hpp"
 #include <vector>
 #include "MantidGeometry/V3D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 /*!
   \class  GL3DWidget
@@ -103,7 +104,7 @@ public slots:
 
 signals:
   void detectorsSelected();
-  void actionDetectorHighlighted(int,int,int);
+  void actionDetectorHighlighted(int,int,int,int);
 
 public:
   void calculateBinRange();
@@ -158,6 +159,8 @@ private:
 
   std::vector<int> m_detector_ids;
   std::vector<int> m_workspace_indices;
+  // A map from detector ID to workspace Index.
+  Mantid::API::IndexToIndexMap * m_detID_to_wi_map;
 
 };
 

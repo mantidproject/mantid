@@ -90,7 +90,7 @@ public:
 public slots:
   void modeSelectButtonClicked();
   void selectBinButtonClicked();
-  void detectorHighlighted(int detectorId,int spectraid,int count);
+  void detectorHighlighted(int detectorId, int workspaceIndex, int spectrumNumber, int count);
   void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();
