@@ -48,4 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\qtiplot\qtiplot.sln">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
