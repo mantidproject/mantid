@@ -127,7 +127,16 @@ void LoadGSS::exec()
         double yValue;
         double eValue;
 
-        double xPrev = X->back();
+        double xPrev;
+
+        if ( X->size() != 0 )
+        {
+          xPrev = X->back();
+        }
+        else
+        {
+          throw Mantid::Kernel::Exception::NotImplementedError("LoadGSS: File was not in expected format.");
+        }
 
         std::istringstream inputLine(currentLine, std::ios::in);
         inputLine >> xValue >> yValue >> eValue;
