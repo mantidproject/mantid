@@ -17,13 +17,16 @@ public:
   testMulitDimensionalGeometry()
   {
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("qx", true, 1));
-    basisDimensions.insert(MDBasisDimension("qy", true, 2));
-    basisDimensions.insert(MDBasisDimension("qz", true, 4));
-    basisDimensions.insert(MDBasisDimension("p", false, 0));
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 4));
+    basisDimensions.insert(MDBasisDimension("u1", false, 0));
+
+    MDGeometryDescription description;
+
 
     UnitCell cell;
-    tDND_geometry= std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    tDND_geometry= std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell),description));
   }
 
   void testMDGeometryDimAccessors(void){
@@ -44,7 +47,7 @@ public:
     MDDimension *pDim;
     // get pointer to the dimension 0
     TS_ASSERT_THROWS_NOTHING(pDim=tDND_geometry->getDimension(0));
-    TS_ASSERT_EQUALS(pDim->getDimensionTag(),"qx");
+    TS_ASSERT_EQUALS(pDim->getDimensionTag(),"q1");
     MDDimension *pDim0;
     // no such dimension
     TS_ASSERT_THROWS_ANYTHING(pDim0=tDND_geometry->getDimension(8));
@@ -53,27 +56,27 @@ public:
     //        TS_ASSERT_EQUALS(pDim0,NULL);
 
     // the same dimension as above
-    TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("qx"));
+    TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("q1"));
     TS_ASSERT_EQUALS(pDim0,pDim);
   }
   void testSlicingProperty(void){
     pSlice = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*tDND_geometry));
 
     //       we want these data to be non-integrated;
-    TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("p",100));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("u1",100));
     // wrong tag
     TS_ASSERT_THROWS_ANYTHING(pSlice->setNumBins("eh",200));
     // right tag
-    TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("qx",200));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("q1",200));
 
     // we want first (0) axis to be energy 
-    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"p"));
-    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"p"));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"u1"));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"u1"));
     // and the third (2) ->el (z-axis) 
-    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"qz"));
-    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(2,"qz"));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"q3"));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(2,"q3"));
 
-    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"qx"));
+    TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"q1"));
 
     std::vector<std::string> names = pSlice->getDimensionsTags();
     for(unsigned int i=0;i<names.size();i++){

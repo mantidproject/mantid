@@ -48,7 +48,8 @@ public:
     IMD_FileFormat(void){};
     virtual bool is_open(void)const{return false;}
     /// reads the MD-image part of the dataset
-    virtual void read_mdd(MDImageData &)=0; 
+
+    virtual MDImageData* read_mdd()=0; 
     /// tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
     virtual bool read_pix(MDDataPoints &)=0; 
     /// read part of the dataset, specified by the vector of MDImage cell numbers. 

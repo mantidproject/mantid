@@ -82,27 +82,26 @@ public:
     void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3
     void getPointData(std::vector<point3D> & image_data)const;
-    /// returns the size of the Image array as 1D array;
-    size_t getDataSize(void)const{return MDStruct.data_size;}
     /// returns dimension strides e.g. the changes of a position in 1D array when an M-th dimension index changes by 1;
     std::vector<size_t> getStrides(void)const;
  //******************************************************************************************************
 //******************************************************************************************************
-   virtual void initialize(const Geometry::MDGeometryDescription &Description){
-        alloc_mdd_arrays(Description);
-    }
+//   virtual void initialize(const Geometry::MDGeometryDescription &Description){
+//        alloc_mdd_arrays(Description);
+//    }
     /// get acces to the internal image dataset for further modifications; throws if dataset is undefinded;
     MD_image_point      * get_pData(void);
     MD_image_point const* get_const_pData(void)const;
     /// get acces to the whole MD structure;
     MD_DATA            * get_pMDData(void){return (&MDStruct);}
 
-    // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
-    void alloc_mdd_arrays(const MDGeometryDescription &transf);
-
+ 
 /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
   //  void read_mdd(boost::shared_ptr<IMD_FileFormat> spFile,bool old4DMatlabReader=false);
-    
+
+    /// returns the size of the Image array as 1D array;
+    size_t getDataSize(void)const{return MDStruct.data_size;}
+    /// 
     virtual long getMemorySize()const{return MDStruct.data_size*sizeof(MD_image_point);}
   /// build allocation table of sparce data points (pixels)
     void identify_SP_points_locations();
@@ -116,15 +115,12 @@ public:
 
 
 
-/// clear all allocated memory as in the destructor; neded for reshaping the object for e.g. changing from defaults to something else. generally this is bad desighn.
-    void clear_class();
-
 //*************************************************
 
    
 //*************************************************
  //
- // location of cell in 1D data array shaped as 4 or less dimensional array;
+ // location of cell in 1D data array shaped as 4 or less dimensional array; <- looks like obsolete
      size_t nCell(int i)                    const{ return (i);}
      size_t nCell(int i,int j)              const{ return (i+j*nd2); }
      size_t nCell(int i,int j,int k)        const{ return (i+j*nd2+k*nd3); }
@@ -150,6 +146,12 @@ private:
   MDImageData & operator = (const MDImageData & other);
   // copy constructor;
   MDImageData(const MDImageData & other);
+   ///  full not collapsed mdd dataset
+    void alloc_mdd_arrays();
+
+/// clear all allocated memory as in the destructor; neded for reshaping the object for e.g. changing from defaults to something else. generally this is bad desighn.
+    void clear_class();
+
 
 };
 //

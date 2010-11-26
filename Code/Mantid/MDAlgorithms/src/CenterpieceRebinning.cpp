@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include "MDDataObjects/IMD_FileFormat.h"
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace Mantid{
@@ -128,7 +129,11 @@ CenterpieceRebinning::exec()
  
  
   // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->alloc_mdd_arrays(*pSlicing);
+  MDGeometryBasis originalBasis = inputWS->getGeometry()->getMDGeometryBasis();
+  MDGeometry* geom = new MDGeometry(originalBasis, *pSlicing);
+  IMD_FileFormat* file = NULL; //Hack
+
+  outputWS->init(boost::shared_ptr<IMD_FileFormat>(file), boost::shared_ptr<MDGeometry>(geom));
 
  
 

@@ -14,28 +14,40 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace Mantid;
-using namespace API;
-using namespace MDDataObjects;
+using namespace Mantid::API;
+using namespace Mantid::MDDataObjects;
 
 class tesMDImageData :    public CxxTest::TestSuite
 {
 
 private:
+   static boost::shared_ptr<MDGeometry> getMDGeometry()
+  {
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 3));
+    basisDimensions.insert(MDBasisDimension("u1", false, 5));
+
+    MDGeometryDescription description;
+    for(unsigned int i=0;i<4;i++){
+      description.setNumBins(i,50);
+    }
+    UnitCell cell;
+    return boost::shared_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell),description));
+  } 
 
   class MockFileFormat : public IMD_FileFormat
   {
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    virtual void read_mdd(Mantid::MDDataObjects::MDImageData& dnd)
+    virtual MDImageData* read_mdd()
     {
-       Mantid::Geometry::MDGeometryDescription dnd_shape(4);
-       for(int i=0;i<4;i++){
-         dnd_shape.setNumBins(i,50);
-       }
-       dnd.alloc_mdd_arrays(dnd_shape);
+      boost::shared_ptr<MDGeometry> geometry = getMDGeometry();
+      return new MDImageData(geometry);
     }
+
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
     size_t read_pix_subset(const MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
@@ -48,17 +60,7 @@ private:
     virtual ~MockFileFormat(void){};
   };
 
-  static boost::shared_ptr<MDGeometry> getMDGeometry()
-  {
-    std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("q1", true, 1));
-    basisDimensions.insert(MDBasisDimension("q2", true, 2));
-    basisDimensions.insert(MDBasisDimension("q3", true, 3));
-    basisDimensions.insert(MDBasisDimension("u1", false, 5));
-
-    UnitCell cell;
-    return boost::shared_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
-  } 
+ 
 
   std::vector<point3D> img;
   std::vector<unsigned int> selection;
@@ -68,12 +70,11 @@ public:
   void testMDImageDataGet2DData(void){
 
     this->selection.assign(2,1);
-    boost::shared_ptr<MDGeometry> pGeometry = getMDGeometry();
-
-    std::auto_ptr<MDImageData>pDND=std::auto_ptr<MDImageData>(new MDImageData(pGeometry));
+    
     MockFileFormat file;
-    file.read_mdd(*pDND);
+    std::auto_ptr<MDImageData> pDND=  std::auto_ptr<MDImageData>(file.read_mdd());
 
+   
     // returns 2D image
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),2500);
@@ -87,9 +88,13 @@ public:
 
     // returns 3D image with 4-th dimension selected at 20;
     selection.assign(1,20);
-    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData( getMDGeometry()));
+
     MockFileFormat file;
-    file.read_mdd(*pDND);
+    std::auto_ptr<MDImageData>pDND= std::auto_ptr<MDImageData>(file.read_mdd());
+
+//    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData( getMDGeometry()));
+//    MockFileFormat file;
+//    file.read_mdd(*pDND);
 
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50*50*50); 
@@ -97,31 +102,29 @@ public:
   void testGet1Ddata(void){
     // this should return single point at (20,20,20,20)
     selection.assign(4,20);
-    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
+    //std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
+    //MockFileFormat file;
+    //file.read_mdd(*pDND);
+
     MockFileFormat file;
-    file.read_mdd(*pDND);
+    std::auto_ptr<MDImageData>pDND= std::auto_ptr<MDImageData>(file.read_mdd());
+
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),1);
   }
   void testGet2Ddata(void){
     // this should return line of size 50 
     selection.assign(3,10);
-    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
+    //std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
+    //MockFileFormat file;
+    //file.read_mdd(*pDND);
     MockFileFormat file;
-    file.read_mdd(*pDND);
+    std::auto_ptr<MDImageData>pDND= std::auto_ptr<MDImageData>(file.read_mdd());
+
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
 
-  void test_alloc_mdd_arrays()
-  {
-    std::auto_ptr<MDImageData>pMDImageData = std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
-    MDGeometryDescription tt;
-
-    pMDImageData->alloc_mdd_arrays(tt);
-    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImageData->get_pMDData() != NULL);
-    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImageData->get_pData() != NULL);
-  }
 
 private:
   std::string findTestFileLocation(void){

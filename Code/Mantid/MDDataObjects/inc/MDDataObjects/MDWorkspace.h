@@ -83,7 +83,6 @@ namespace Mantid
 
       boost::shared_ptr<Mantid::Geometry::MDGeometry> getGeometry() const;
 
-      void alloc_mdd_arrays(const MDGeometryDescription &transf){m_spImageData->alloc_mdd_arrays(transf);}
       /// identify proper file reader which corresponds to the file name and read memory resident part of the workspace into memory
       void read_mdd();
       /// read the whole pixels dataset in the memory
@@ -95,6 +94,7 @@ namespace Mantid
       boost::shared_ptr<Mantid::Geometry::MDGeometry const>        get_const_spMDGeometry() const {return m_spGeometry;}
       boost::shared_ptr<Mantid::MDDataObjects::MDImageData const>  get_const_spMDImage()  const {return m_spImageData;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints const> get_const_spMDDPoints() const {return m_spDataPoints;}
+    
 
       boost::shared_ptr<Mantid::Geometry::MDGeometry>       get_spMDGeometry(){return m_spGeometry;}
       boost::shared_ptr<Mantid::MDDataObjects::MDImageData> get_spMDImage()  {return m_spImageData;}

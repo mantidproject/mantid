@@ -44,9 +44,9 @@ public:
     MD_File_hdfMatlab4D(const char *file_name);
 
     virtual bool is_open(void)const{return (this->file_handler>0)?true:false;}
+    virtual MDImageData* read_mdd(){throw(std::runtime_error("read_mdd() method is non implemented on MD_File_hdfMatlab4D"));}
 
-    virtual void read_mdd(MDImageData & mdd);
-   
+    virtual void read_mdd(MDImageData &);
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDDataPoints & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 

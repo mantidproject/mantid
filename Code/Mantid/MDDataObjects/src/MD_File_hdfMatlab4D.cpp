@@ -181,7 +181,7 @@ MD_File_hdfMatlab4D::read_mdd(MDImageData & dnd)
 // iax,iint and variable number of p and process them properly;
 
 
-    dnd.initialize(dnd_shape);
+    //dnd.initialize(dnd_shape);
 
 //-------------------------------------------------------------------------
 // read the dataset itself

@@ -72,7 +72,8 @@ namespace Mantid{
 
       ~MDGeometry(void);
 
-      MDGeometry(MDGeometryBasis basis);
+      MDGeometry(MDGeometryBasis basis, MDGeometryDescription description);
+
       /// return the numbers of dimensions in current geometry; 
       unsigned int getNumDims(void)const{return m_basis.getNumDims();}
       /// returns the number of reciprocal dimensions
@@ -81,13 +82,17 @@ namespace Mantid{
       std::vector<std::string> getBasisTags(void)const;
       ///
       unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
+      ///
+      size_t getDataSize()const{return data_size;}
 
       /** function resets MDGeometryBasis and MDGeometry to new state;
       *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
       *   when the structure is indeed 
       */
       void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
-      void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
+   
+      MDGeometryBasis getMDGeometryBasis(){return this->m_basis;}
+
     protected: 
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
       unsigned int n_expanded_dim;
@@ -117,6 +122,10 @@ namespace Mantid{
       static Kernel::Logger& g_log;
 
       void init_empty_dimensions();
+      /// to describe the size of data which whole expanded MD-geometry would occupy in memory namely (n-Bins-in-dimensions)^N_dimensions
+      size_t data_size;
+      //
+      void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
     };
   }  // Geometry
 }  // Mantid

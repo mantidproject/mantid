@@ -36,13 +36,16 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
+
     basisDimensions.insert(MDBasisDimension("q1", true, 1));
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
-    basisDimensions.insert(MDBasisDimension("q3", true, 3));
-    basisDimensions.insert(MDBasisDimension("u1", false, 4));
+    basisDimensions.insert(MDBasisDimension("q3", true, 4));
+    basisDimensions.insert(MDBasisDimension("u1", false, 0));
+
+    MDGeometryDescription description;
 
     UnitCell cell;
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell),description));
   }
 
 public:
