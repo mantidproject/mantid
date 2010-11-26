@@ -1,5 +1,6 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include <float.h>
+#include <sstream>
 
 
 namespace Mantid{
@@ -273,8 +274,19 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     rotations[0]=rotations[4]=rotations[8]=1;
 
     nDimensions=nDims;
-    MDGeometry DefBasis(nDimensions,nReciprocalDimensions);
-    std::vector<std::string> def_tags=DefBasis.getBasisTags();
+    
+    std::vector<std::string> def_tags;
+    
+    for(unsigned int i=0;i<nDims;i++){
+      std::stringstream buf;
+      if(i<nRecDims){
+        buf<<"q"<<i+1;
+      }else{
+        buf<<"u"<<i-nRecDims+1;
+      }
+      def_tags.push_back(buf.str());
+
+    }
 
     unsigned int i;
     SlicingData defaults;
@@ -286,8 +298,8 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
 
 
     this->data.assign(nDimensions,defaults);
- 
-    for(i=0;i<nReciprocalDimensions;i++){
+    
+    for(i=0;i<nReciprocalDimensions;i++){ //
         this->coordinates[i].assign(3,0);
         this->coordinates[i].at(i)= 1;
     }
@@ -295,7 +307,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
   
     for(i=0;i<nDimensions;i++){
       data[i].Tag =def_tags[i]; 
-      this->data[i].AxisName = def_tags[i];
+      this->data[i].AxisName = def_tags[i]; //
    }
 
 }

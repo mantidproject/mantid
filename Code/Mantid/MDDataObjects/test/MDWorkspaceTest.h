@@ -8,17 +8,13 @@
 #include "MDDataObjects/MDImageData.h"
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include <hdf5.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-
 class tesMDWorkspace :    public CxxTest::TestSuite
 {
 private:
-
-
 
   //Helper mock type for file format.
   class MockFileFormat : public Mantid::MDDataObjects::IMD_FileFormat
@@ -36,6 +32,20 @@ private:
     MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImageData&));
   };
 
+  //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.
+  static std::auto_ptr<Mantid::Geometry::MDGeometry> constructMDGeometry()
+  {
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 3));
+    basisDimensions.insert(MDBasisDimension("u1", false, 4));
+
+    UnitCell cell;
+    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+  }
+
   //Helper stock constructional method.
   static std::auto_ptr<Mantid::MDDataObjects::MDWorkspace> constructMDWorkspace()
   {
@@ -44,14 +54,17 @@ private:
 
     MDWorkspace* workspace = new MDWorkspace;
     MockFileFormat* mockFile = new MockFileFormat;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
     return std::auto_ptr<MDWorkspace>(workspace);
   }
 
+  //Helper constructional method provides mdworkspace as IMDWorkspace in order to test this axis of the implementation.
   static std::auto_ptr<Mantid::API::IMDWorkspace> constructMDWorkspaceAsIMDWorkspace()
   {
     return std::auto_ptr<Mantid::API::IMDWorkspace>(constructMDWorkspace().release());
   }
+
+
 
 public:
 
@@ -167,7 +180,7 @@ public:
     using namespace Mantid::API;
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
     Mantid::Geometry::IMDDimension* dimension = workspace->gettDimension();
-    TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "en", dimension->getDimensionId());
+    TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u1", dimension->getDimensionId());
   }
 
   void testGetMemorySize()
@@ -200,7 +213,7 @@ public:
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, read_pix_subset(testing::_, testing::_, testing::_, testing::_, testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
     size_t size_param = 1;
     workspace->read_pix_selection(std::vector<size_t>(), size_param, std::vector<char>(), size_param);
     TSM_ASSERT("MDWorkspace::read_pix_selection failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
@@ -211,7 +224,7 @@ public:
     using namespace Mantid::MDDataObjects;
     std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
     size_t size_param = 1;
     TSM_ASSERT_THROWS("The file has not been provided, so should throw bad allocation", workspace->read_pix_selection(std::vector<size_t>(), size_param, std::vector<char>(), size_param), std::bad_alloc);
   }
@@ -225,7 +238,7 @@ public:
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, read_pix(testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
 
     workspace->read_pix();
     TSM_ASSERT("MDWorkspace::read_pix() failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
@@ -236,7 +249,7 @@ public:
     using namespace Mantid::MDDataObjects;
     std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
 
     TSM_ASSERT_THROWS("The file reader has not been provided, so should throw bad allocation", workspace->read_pix(), std::bad_alloc);
   }
@@ -249,7 +262,7 @@ public:
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, write_mdd(testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
 
     workspace->write_mdd();
     TSM_ASSERT("MDWorkspace::read_pix() failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
@@ -260,7 +273,7 @@ public:
     using namespace Mantid::MDDataObjects;
     std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(new MDGeometry));
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(constructMDGeometry().release()));
 
     TSM_ASSERT_THROWS("The file reader has not been provided, so should throw bad allocation", workspace->write_mdd(), std::bad_alloc);
   }
@@ -272,7 +285,7 @@ public:
     std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat();
-    MDGeometry* geometry = new MDGeometry();
+    MDGeometry* geometry = constructMDGeometry().release();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), boost::shared_ptr<MDGeometry>(geometry));
 

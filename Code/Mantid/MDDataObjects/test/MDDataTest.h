@@ -48,7 +48,17 @@ private:
     virtual ~MockFileFormat(void){};
   };
 
-   
+  static boost::shared_ptr<MDGeometry> getMDGeometry()
+  {
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 3));
+    basisDimensions.insert(MDBasisDimension("u1", false, 5));
+
+    UnitCell cell;
+    return boost::shared_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+  } 
 
   std::vector<point3D> img;
   std::vector<unsigned int> selection;
@@ -56,9 +66,11 @@ private:
 public:
 
   void testMDImageDataGet2DData(void){
+
     this->selection.assign(2,1);
-    
-    MDImageData* pDND=new MDImageData(boost::shared_ptr<MDGeometry>(new MDGeometry()));
+    boost::shared_ptr<MDGeometry> pGeometry = getMDGeometry();
+
+    std::auto_ptr<MDImageData>pDND=std::auto_ptr<MDImageData>(new MDImageData(pGeometry));
     MockFileFormat file;
     file.read_mdd(*pDND);
 
@@ -75,7 +87,7 @@ public:
 
     // returns 3D image with 4-th dimension selected at 20;
     selection.assign(1,20);
-    MDImageData* pDND=new MDImageData(boost::shared_ptr<MDGeometry>(new MDGeometry()));
+    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData( getMDGeometry()));
     MockFileFormat file;
     file.read_mdd(*pDND);
 
@@ -85,7 +97,7 @@ public:
   void testGet1Ddata(void){
     // this should return single point at (20,20,20,20)
     selection.assign(4,20);
-    MDImageData* pDND=new MDImageData(boost::shared_ptr<MDGeometry>(new MDGeometry()));
+    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
     MockFileFormat file;
     file.read_mdd(*pDND);
     pDND->getPointData(selection,img);
@@ -94,7 +106,7 @@ public:
   void testGet2Ddata(void){
     // this should return line of size 50 
     selection.assign(3,10);
-    MDImageData* pDND=new MDImageData(boost::shared_ptr<MDGeometry>(new MDGeometry()));
+    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
     MockFileFormat file;
     file.read_mdd(*pDND);
     pDND->getPointData(selection,img);
@@ -103,12 +115,12 @@ public:
 
   void test_alloc_mdd_arrays()
   {
-    MDImageData imageData;
+    std::auto_ptr<MDImageData>pMDImageData = std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry()));
     MDGeometryDescription tt;
 
-    imageData.alloc_mdd_arrays(tt);
-    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", imageData.get_pMDData() != NULL);
-    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", imageData.get_pData() != NULL);
+    pMDImageData->alloc_mdd_arrays(tt);
+    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImageData->get_pMDData() != NULL);
+    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImageData->get_pData() != NULL);
   }
 
 private:

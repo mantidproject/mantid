@@ -3,7 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
+#include <set>
 #include <cfloat>
+#include <sstream>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -11,129 +13,120 @@ using namespace Geometry;
 
 class testWorkspaceGm :   public CxxTest::TestSuite
 {
-    MDGeometryBasis *pGeometry5x3;
-    MDGeometryBasis *pGeom4x2;
-    std::vector<std::string> names;
-    std::vector<std::string> default_tags;
- 
+private:
+
+  //Helper method to construct a MDGeometryBasis schenario.
+  static std::auto_ptr<MDGeometryBasis> constructMDGeometryBasis()
+  {
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("qx", true, 1));
+    basisDimensions.insert(MDBasisDimension("qy", true, 2));
+    basisDimensions.insert(MDBasisDimension("qz", true, 4));
+    basisDimensions.insert(MDBasisDimension("p", false, 5));
+
+    UnitCell cell;
+    MDGeometryBasis* basisDimension = new MDGeometryBasis(basisDimensions, cell);
+    return std::auto_ptr<MDGeometryBasis>(basisDimension);
+  }
+
 public:
-    void test2x4Basis(){
-      std::vector<std::string> non_default_tags(4,"");
-      non_default_tags[0]="aa";
-      non_default_tags[1]="bb";
-      non_default_tags[2]="bb";
-      non_default_tags[3]="dddd";
-      // equivalent tags would not initiate
-      TS_ASSERT_THROWS_ANYTHING(pGeom4x2= new MDGeometryBasis(non_default_tags,2));
 
-      // now should be ok;
-      non_default_tags[2]="cc";
-      TS_ASSERT_THROWS_NOTHING(pGeom4x2= new MDGeometryBasis(non_default_tags,2));
-        // get workspace name;
-        std::string ws_name;
-        TS_ASSERT_THROWS_NOTHING(ws_name=pGeom4x2->getWorkspaceIDname());
-        TS_ASSERT_EQUALS(ws_name,"aa:bb:cc:dddd:_NDIM_4x2");
+  void testConstructionWithDuplicateColumnsThrows()
+  {
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("qx", true, 1));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1));
+
+    UnitCell cell;
+    TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions, cell), std::logic_error);
+  }
+
+  void testGetReciprocalDimensions()
+  {
+    using namespace Mantid::Geometry;
+    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    std::set<MDBasisDimension> reciprocalDimensions = basisDimension->getReciprocalDimensions();
+    TSM_ASSERT_LESS_THAN_EQUALS("Too many reciprocal dimensions.", 3, reciprocalDimensions.size());
+    TSM_ASSERT("Expect to have at least 1 reciprocal dimension.", reciprocalDimensions.size() > 0);  
+  }
+
+  void testGetNonReciprocalDimensions()
+  {
+    using namespace Mantid::Geometry;
+    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    std::set<MDBasisDimension> nonReciprocalDimensions = basisDimension->getNonReciprocalDimensions();
+    TSM_ASSERT_EQUALS("Wrong number of non-reciprocal dimensions returned.", 1, nonReciprocalDimensions.size());
+  }
+
+    void testGetAllBasisDimensions()
+  {
+    using namespace Mantid::Geometry;
+    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    std::set<MDBasisDimension> allBasisDimensions = basisDimension->getBasisDimensions();
+    TSM_ASSERT_EQUALS("Wrong number of basis dimensions returned.", 4, allBasisDimensions.size());
+  }
+
+  
+  void testConsistentNDimensions()
+  {
+    using namespace Mantid::Geometry;
+    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    std::set<MDBasisDimension> allBasisDimensions = basisDimension->getBasisDimensions(); 
+    TSM_ASSERT_EQUALS("The number of dimensions returned via the getter should be the same as the actual number of dimensions present.", basisDimension->getNumDims(), allBasisDimensions.size());
+  }
+
+  void testTooManyDimensionsThrows()
+  {
+    std::set<MDBasisDimension> basisDimensions;
+
+    std::stringstream stream;
+    for(int i = 0; i < 22; i++)
+    { 
+      stream << i;
+      basisDimensions.insert(MDBasisDimension(stream.str(), false, i));
     }
-    void testWorkspaceGeometryConstructor(void){
-
-        // we can not define such dimensions
-        TS_ASSERT_THROWS_ANYTHING(MDGeometryBasis  space1(-1));
-
-        TS_ASSERT_THROWS_ANYTHING(MDGeometryBasis  space1(22));
-        TS_ASSERT_THROWS_ANYTHING(MDGeometryBasis  space1(4,4));
-        TS_ASSERT_THROWS_ANYTHING(MDGeometryBasis  space1(5,4));
-        // the geometry which you can not initiate number of real dimensions lower than number of reciprocal dimensions
-        TS_ASSERT_THROWS_ANYTHING(MDGeometryBasis space(2));
-
-        // now we do define 5-d workspace
-        TS_ASSERT_THROWS_NOTHING(pGeometry5x3 = new MDGeometryBasis(5));
-        std::string default_name("q1:q2:q3:en:u1:_NDIM_5x3");
-        TS_ASSERT_EQUALS(pGeometry5x3->getWorkspaceIDname(),default_name);
-
-        TS_ASSERT_THROWS_NOTHING(default_tags=pGeometry5x3->getBasisTags());
    
-    }
+    UnitCell cell;
+    TSM_ASSERT_THROWS("Cannot have this many basis dimensions.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
+  }
 
-    void testDIMIDS(){
-         if(!pGeom4x2)TS_FAIL("MDGeomBasis class has not been constructed");
-         if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
+  void testTooManyReciprocalDimensionsThrows()
+  {
+    std::set<MDBasisDimension> basisDimensions;
 
-         std::vector<MDGeometryBasis::DimensionID> dimIDs;
-
-
-         TS_ASSERT_THROWS_NOTHING(dimIDs=pGeometry5x3->getDimIDs());
-         for(unsigned int i=0;i<dimIDs.size();i++){
-           TS_ASSERT_EQUALS(dimIDs[i].getDimensionTag(),default_tags[i]);
-           if(i<3){
-             TS_ASSERT_EQUALS(dimIDs[i].isReciprocal(),true);
-           }else{
-             TS_ASSERT_EQUALS(dimIDs[i].isReciprocal(),false);
-           }
-         }
-
+    std::stringstream stream;
+    for(int i = 0; i < 4; i++)
+    { 
+      stream << i;
+      basisDimensions.insert(MDBasisDimension(stream.str(), true, i));
     }
    
-    void testTagsCompartibility(){
-      if(!pGeom4x2)TS_FAIL("MDGeomBasis class has not been constructed");
-      std::vector<std::string> new_tags(4,"");
-      new_tags[0]="cc";
-      new_tags[1]="bb";
-      new_tags[2]="aa";
-      new_tags[3]="dddd";
-      TS_ASSERT_EQUALS(pGeom4x2->checkTagsCompartibility(new_tags),true);
-      new_tags[0]="q1";
-      TS_ASSERT_EQUALS(pGeom4x2->checkTagsCompartibility(new_tags),false);
+    UnitCell cell;
+    TSM_ASSERT_THROWS("Cannot have this many reciprocal basis dimensions.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
+  }
 
-    }
-    void testNDim(){
-        if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
+  void testIDCompartibility(){
 
-          // we have defined  5 dimension above
-        TS_ASSERT_EQUALS(pGeometry5x3->getNumDims(),5);
-        TS_ASSERT_EQUALS(pGeometry5x3->getNumReciprocalDims(),3);
-        // and 4x2
-        if(!pGeom4x2)TS_FAIL("MDGeomBasis class has not been constructed");
-        TS_ASSERT_EQUALS(pGeom4x2->getNumDims(),4);
-        TS_ASSERT_EQUALS(pGeom4x2->getNumReciprocalDims(),2);
+    std::vector<std::string> new_ids(4,"");
+    new_ids[0]="qx";
+    new_ids[1]="qy";
+    new_ids[2]="qz";
+    new_ids[3]="p";
 
-    }
-    void testDefaultNames(){
-        if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
+    std::auto_ptr<MDGeometryBasis> basis = constructMDGeometryBasis();
+    TS_ASSERT_EQUALS(basis->checkIdCompartibility(new_ids),true);
 
-        TS_ASSERT_THROWS_NOTHING(names=pGeometry5x3->getBasisTags());
-        // these tags are:
-        const char *defaultTags[]={"q1","q2","q3","en","u1"};
-        const char *nondef4x2Tags[]={"aa","bb","cc","dddd"};
+    new_ids[0]="k"; //some unknown id value
+    TS_ASSERT_EQUALS(basis->checkIdCompartibility(new_ids),false);
+  }
 
-        for(int i=0;i<5;i++){
-            TS_ASSERT_EQUALS(names[i],defaultTags[i]);
-        }
-        TS_ASSERT_THROWS_NOTHING(names=pGeom4x2->getBasisTags());
-        for(int i=0;i<4;i++){
-            TS_ASSERT_EQUALS(names[i],nondef4x2Tags[i]);
-        }
-    }
-    void testSimpleDimensionID(){
-      // this class should be usually unavaile to users
-        MDGeometryBasis::DimensionID ID1(0,"aa",true);
-        MDGeometryBasis::DimensionID ID2(1,"bb",true);
+  ~testWorkspaceGm()
+  {
+  }
 
-        TS_ASSERT_EQUALS(ID1.getDimNum("bb"),-1);
-        TS_ASSERT_EQUALS(ID1.getDimNum("aa"),0);
 
-       TS_ASSERT_EQUALS(ID2.getDimNum("blabla"),-1);
-       TS_ASSERT_EQUALS(ID2.getDimNum("x"),-1);
-       TS_ASSERT_EQUALS(ID2.getDimNum("bb"),1);
-       TS_ASSERT_EQUALS(ID2.getDimensionTag(),"bb");
-    }
-
-    testWorkspaceGm():pGeometry5x3(NULL),pGeom4x2(NULL){}
-    ~testWorkspaceGm(){
-        if( pGeometry5x3){     delete pGeometry5x3;
-        }
-        if (pGeom4x2){      delete pGeom4x2;
-        }
-    }
 };
 
 

@@ -176,6 +176,7 @@
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
     <ClCompile Include="src\MDGeometry\IMDDimension.cpp" />
+    <ClCompile Include="src\MDGeometry\MDBasisDimension.cpp" />
     <ClCompile Include="src\MDGeometry\MDCell.cpp" />
     <ClCompile Include="src\MDGeometry\MDDimension.cpp" />
     <ClCompile Include="src\MDGeometry\MDDimensionRes.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="inc\MantidGeometry\IRectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\IMDDimension.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDBasisDimension.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDCell.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimension.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimensionRes.h" />

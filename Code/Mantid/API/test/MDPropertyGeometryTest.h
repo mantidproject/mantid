@@ -30,7 +30,20 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
       using PropertyManager::setProperty;
       using PropertyManager::getPointerToProperty;
   };
+  
+  //Helper constructional method.
+  static std::auto_ptr<Mantid::Geometry::MDGeometry> constructMDGeometry()
+  {
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 3));
+    basisDimensions.insert(MDBasisDimension("u1", false, 4));
 
+    UnitCell cell;
+    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+  }
 
 public:
   MDPropertyGeometryTest():wsp1(NULL),wsp2(NULL)
@@ -53,10 +66,10 @@ public:
 //    TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
   }
   void testServices(){
-      MDGeometry Geom;
+      std::auto_ptr<MDGeometry> pGeom= constructMDGeometry();
       
       TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geometryDescription","ws1",Direction::Input),"this property describes the geometry obtained from string"));
-      TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geom2Description",Geom,Direction::Input),"this property describes the geometry obtained from object"));
+      manager.declareProperty( new MDPropertyGeometry("geom2Description",*pGeom,Direction::Input),"this property describes the geometry obtained from object");
       TS_ASSERT_EQUALS(manager.existsProperty("geometryDescription"),true);
       const std::vector< Property*> prop = manager.getProperties();
       // property is indeed the MD property 

@@ -228,6 +228,9 @@
     <ClCompile Include="src\MDGeometry\MDPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MDGeometry\MDBasisDimension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h">
@@ -609,6 +612,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDPoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDBasisDimension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

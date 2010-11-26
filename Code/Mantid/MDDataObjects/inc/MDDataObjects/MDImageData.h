@@ -71,7 +71,6 @@ public:
 
     // default constructor
   MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry);
-     MDImageData(); // HACK
     // destructor
     ~MDImageData();
     /** function returns vector of points left after the selection has been applied to the multidimensinal dataset

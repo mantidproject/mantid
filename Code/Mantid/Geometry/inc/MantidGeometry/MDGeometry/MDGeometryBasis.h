@@ -7,10 +7,11 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <set>
+#include <boost/unordered_set.hpp>
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
+#include "MantidGeometry/MDGeometry/MDBasisDimension.h"
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  
@@ -50,122 +51,54 @@ namespace Mantid
   namespace Geometry
   {
 
+
+    class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
+    {
+    };
+
     //****************************************************************************************************************************************
     class DLLExport MDGeometryBasis
     {
     public:
 
-      /**  The class DimensionID describes one of the set of the dimensions, which can be present in dataset;
-      *    it has just keeps the name of the dimension and the number which identifies, what data column corresponds to this tag  
-      */
-      class DimensionID
-      {
-      public:
-        /*! class constructor:; Protected as GeometryBasis should not exist alone 
-        *  @param nDimensions -- maximal number of the dimensions all datasets will have
-        *                        Default is 4 dimensions for crystall e.g. 3 wave-vectors (coordinates in reciprocal space) and energy
-        *                        or 2 for powder (angle and energy or n_detector and energy or |Q| and energy)
-        */
+      //MDGeometryBasis(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);  
 
-        /// returns  the symbol tag of this dimension ID;
-        std::string getDimensionTag(void)const{return DimensionTag;}
-        /// returns true if this dimension is reciprocal
-        bool isReciprocal(void)const{return is_reciprocal;}
-        /// all dimensions has to be arranged in the order of incrreased ascii string value;
-        bool operator <(const DimensionID &other)const{return ((this->DimensionTag.compare(other.DimensionTag)< 0)?true:false);}
-        bool operator<=(const DimensionID &other)const{return ((this->DimensionTag.compare(other.DimensionTag)<=0)?true:false);}
-        bool operator> (const DimensionID &other)const{return ((this->DimensionTag.compare(other.DimensionTag)> 0)?true:false);}
-        bool operator>=(const DimensionID &other)const{return ((this->DimensionTag.compare(other.DimensionTag)>=0)?true:false);}
-        bool operator==(const DimensionID &other)const{return ((this->DimensionTag.compare(other.DimensionTag)==0)?true:false);}
-        /// copy constructor and operator()= are public
-        /// to initate array, which has to be reset as meaningless and not checked against this later
-        DimensionID(int iDimNum0=-1,const char *name0="",bool if_reciprocal=true):
-        iDimNum(iDimNum0),is_reciprocal(if_reciprocal),DimensionTag(name0){}; 
-        /// function compares the tag of this DimensionID with the input tag and returns the numeric value of the ID if the names coinside or -1 if not. 
-        int getDimNum(const std::string &aTag)const{return (this->DimensionTag.compare(aTag)==0)?this->iDimNum:-1;}
-        /// this should be prviate or protected?;
-        int getDimNum(void)const{return iDimNum;}
-        /// this should be reserved to friends?
-        void setDimensionIDValues(int newNum,const std::string &newTag,bool recipocal=false){
-          iDimNum=newNum;is_reciprocal=recipocal;DimensionTag.assign(newTag);}
-      private:
-        /// actual Dimension number used to identify the dimension; Strictly internal or shared with MDGeometryBasis
-        int iDimNum; 
-        /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
-        bool is_reciprocal;
-        /// default dimension name used to identify a dimension among others;
-        std::string DimensionTag;
+      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, UnitCell cell);
 
-      };
-      //************* ACCESSORS    **************************************************************************************** 
-
-      MDGeometryBasis(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);  
-      /// the constructor which builds dimensions from the list of its names; 
-      MDGeometryBasis(const std::vector<std::string> &tags,unsigned int nReciprocal_dims=3);  
-      /// init the class with new number of dimensions and new dimensions types regardless of previous initialisation (which will be lost); Both constructors
-      /// refer to this class for its initiation; Reciprocal dimensions will be names by the names, located in the beginning of the list of tags;
-
-      ///  the function used by MDGeometry to obtain exisiting dimension ID and to initiate real dimensions in accordance with dimension basis
-      std::vector<DimensionID> getDimIDs(void)const;
+      std::set<MDBasisDimension> getNonReciprocalDimensions() const;
+      std::set<MDBasisDimension> getReciprocalDimensions() const;
+      std::set<MDBasisDimension> getBasisDimensions() const;
      
       ~MDGeometryBasis(void);
       /// return the numbers of dimensions in current geometry; 
-      unsigned int getNumDims(void)const{return n_total_dim;}
+      unsigned int getNumDims(void)const{return this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
       unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
 
-      /// function returns the vector of the names of the dimensions, which are defined in the workspace
-      std::vector<std::string> getBasisTags(void)const;
-      /// function returns the workspace ID, which defines the workspace with particular kind of dimensions
-      std::string getWorkspaceIDname()const{return workspace_name;}
-
-      //TO DO: Define this operations better on the basis of algorithm to build MD from Mantid Workspaces;
-      // ort of the dimension. Initial are reciprocal (up to 3), returning {x,y,z}, x^2+y^2+z^2=1; and other are orthogonal {1}. (or may be should be scaled?)
-      //const std::vector<double> & getOrt(unsigned int nDim)const;
-      //const std::vector<double> & getOrt(const std::string &tag)const;
-      // 
-      //double getScale(unsigned int nDim);
-
-      /// function checks if the tags supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
-      bool checkTagsCompartibility(const std::vector<std::string> &newTags)const;
+      /// function checks if the ids supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
+      bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
       ///
-      void reinit_GeometryBasis(const std::vector<std::string> &tags,unsigned int nReciprocal_dims=3);
-    protected: 
- 
+     
 
-      
 
+    private:
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
       /// number of total dimensions in dataset;
       unsigned int n_total_dim;
       /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
       unsigned int n_reciprocal_dimensions;
-    private:
 
-
-      // this are the vectors of the primitive cell of the reciprocal lattice
-      // expressed in the framework of ???; All other vectors are orthogonal to this triplet
-      std::vector<double> lattice_ort[3];
-      std::vector<double> unit;
-
-      /// vector of dimensions id-s, specific for current architecture, the size of dimensions is n_total_dimensions,
-      std::set<DimensionID> DimensionIDs;
-      std::map<unsigned int,std::string> dim_names;
-
-      // build default geometry based on cubic lattice. 
-      void buildCubicGeometry(void);
-      /// default copy constructor exist
-      //MDGeometryBasis(const MDGeometryBasis&);                 
+      const std::set<MDBasisDimension> m_mdBasisDimensions;
+      UnitCell m_cell;
 
       /// it is unclear what is the meaning of =
       MDGeometryBasis& operator=(const MDGeometryBasis&){return *this;}
 
-
-      // unique name of workspace as an assembly of a sorted dimension tags plus some ID for nDims and nReciprocalDims
-      std::string workspace_name;
       /// checks if nDimensions consistent with n_reciprocal_dimensions; throws if not
       void check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
+
+      void checkInputBasisDimensions(const MDBasisDimension& dimension);
     };
   } // namespace Geometry
 }  // namespace MANTID

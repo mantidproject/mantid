@@ -67,7 +67,7 @@ namespace Mantid{
     boost::shared_ptr<Mantid::Geometry::MDGeometry> 
       MDWorkspace::getGeometry() const
     {
-      return boost::shared_ptr<Mantid::Geometry::MDGeometry>(new MDGeometry()); //Hack : Should be returning the member geometry.
+      return this->m_spGeometry; 
     }
 
     long MDWorkspace::getMemorySize(void) const

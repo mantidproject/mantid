@@ -233,14 +233,6 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 
 }
 
-MDImageData::MDImageData():
-pData(NULL)
-{
-  this->m_pMDGeometry = boost::shared_ptr<MDGeometry>(new MDGeometry()); //HACK
-  MDGeometryDescription tt(*(m_pMDGeometry));
-  this->alloc_mdd_arrays(tt);
-}
-
 //
 MDImageData::MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry):
 m_pMDGeometry(spMDGeometry),
