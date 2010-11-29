@@ -110,7 +110,7 @@ EXCLUDE                = ../Nexus/src/NeXusException.cpp \
 			../Nexus/inc/MantidNexus/NeXusStream.hpp \
 			../Nexus/inc/MantidNexus/NeXusFile.hpp \
 			../Nexus/inc/MantidNexus/NeXusException.hpp \
-            ../Kernel/inc/ANN \
+            ../Kernel/inc/MantidKernel/ANN \
             ../Kernel/src/ANN
 
 EXCLUDE_SYMLINKS       = NO
