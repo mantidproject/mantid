@@ -91,7 +91,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_KERNEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_KERNEL=1;DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -142,7 +142,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_KERNEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_KERNEL=1;DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -180,6 +180,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ANN\ANN.cpp" />
+    <ClCompile Include="src\ANN\bd_fix_rad_search.cpp" />
+    <ClCompile Include="src\ANN\bd_pr_search.cpp" />
+    <ClCompile Include="src\ANN\bd_search.cpp" />
+    <ClCompile Include="src\ANN\bd_tree.cpp" />
+    <ClCompile Include="src\ANN\brute.cpp" />
+    <ClCompile Include="src\ANN\kd_dump.cpp" />
+    <ClCompile Include="src\ANN\kd_fix_rad_search.cpp" />
+    <ClCompile Include="src\ANN\kd_pr_search.cpp" />
+    <ClCompile Include="src\ANN\kd_search.cpp" />
+    <ClCompile Include="src\ANN\kd_split.cpp" />
+    <ClCompile Include="src\ANN\kd_tree.cpp" />
+    <ClCompile Include="src\ANN\kd_util.cpp" />
+    <ClCompile Include="src\ANN\perf.cpp" />
     <ClCompile Include="src\ArrayBoundedValidator.cpp" />
     <ClCompile Include="src\ArrayProperty.cpp" />
     <ClCompile Include="src\BinFinder.cpp" />
@@ -226,6 +240,9 @@
     <ClCompile Include="src\VectorHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidKernel\ANN\ANN.h" />
+    <ClInclude Include="inc\MantidKernel\ANN\ANNperf.h" />
+    <ClInclude Include="inc\MantidKernel\ANN\ANNx.h" />
     <ClInclude Include="inc\MantidKernel\ArrayBoundedValidator.h" />
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h" />
     <ClInclude Include="inc\MantidKernel\BinaryFile.h" />
@@ -237,6 +254,15 @@
     <ClInclude Include="inc\MantidKernel\LogParser.h" />
     <ClInclude Include="inc\MantidKernel\NeutronAtom.h" />
     <ClInclude Include="inc\MantidKernel\TimeSplitter.h" />
+    <ClInclude Include="src\ANN\bd_tree.h" />
+    <ClInclude Include="src\ANN\kd_fix_rad_search.h" />
+    <ClInclude Include="src\ANN\kd_pr_search.h" />
+    <ClInclude Include="src\ANN\kd_search.h" />
+    <ClInclude Include="src\ANN\kd_split.h" />
+    <ClInclude Include="src\ANN\kd_tree.h" />
+    <ClInclude Include="src\ANN\kd_util.h" />
+    <ClInclude Include="src\ANN\pr_queue.h" />
+    <ClInclude Include="src\ANN\pr_queue_k.h" />
     <ClInclude Include="test\ArrayPropertyTest.h" />
     <ClInclude Include="inc\MantidKernel\BoundedValidator.h" />
     <ClInclude Include="test\BoundedValidatorTest.h" />

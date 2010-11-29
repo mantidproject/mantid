@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Source Files\ANN">
+      <UniqueIdentifier>{63b48b20-412b-4e20-9360-eb52fac28fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ANN">
+      <UniqueIdentifier>{0f13ff70-5cc0-4d75-bf00-aaab838fa004}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ArrayProperty.cpp">
@@ -146,6 +152,48 @@
     </ClCompile>
     <ClCompile Include="src\DirectoryValidator.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\ANN.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\bd_fix_rad_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\bd_pr_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\bd_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\bd_tree.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_util.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_tree.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_split.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_pr_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_fix_rad_search.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\kd_dump.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\perf.cpp">
+      <Filter>Source Files\ANN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANN\brute.cpp">
+      <Filter>Source Files\ANN</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -388,6 +436,42 @@
     </ClInclude>
     <ClInclude Include="inc\MantidKernel\DirectoryValidator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\bd_tree.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_util.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_tree.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_split.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_search.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_pr_search.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\kd_fix_rad_search.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\pr_queue.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANN\pr_queue_k.h">
+      <Filter>Source Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\ANN\ANNx.h">
+      <Filter>Header Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\ANN\ANNperf.h">
+      <Filter>Header Files\ANN</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\ANN\ANN.h">
+      <Filter>Header Files\ANN</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

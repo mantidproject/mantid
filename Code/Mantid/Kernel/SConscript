@@ -10,7 +10,8 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 #Import environment
 Import('env')
 myenv = env.Clone()
-myenv.Append(CPPDEFINES=[('IN_MANTID_KERNEL',1)])
+# DLL_EXPORTS macro for ANN library
+myenv.Append(CPPDEFINES=[('IN_MANTID_KERNEL',1), 'DLL_EXPORTS'])
 
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
