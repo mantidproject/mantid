@@ -792,7 +792,7 @@ void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid:
 *  @throws runtime_error if there was an error creating the spectra index to detector index map
 */
 Instrument3DWidget::DetInfo::DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace, const std::vector<double> * const counts) :
-    m_integrals(counts), m_workspace(workspace)
+    m_integrals(counts), m_workspace(workspace), m_firstDet(NO_INDEX), m_lastDet(NO_INDEX)
 {
   if (m_workspace)
   {
