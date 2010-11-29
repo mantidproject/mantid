@@ -103,12 +103,15 @@ FILE_PATTERNS          =
 RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
+# Third party library ANN in Kernel is not doxygenised.
 EXCLUDE                = ../Nexus/src/NeXusException.cpp \
 			../Nexus/src/NeXusFile.cpp \
 			../Nexus/src/NeXusStream.cpp \
 			../Nexus/inc/MantidNexus/NeXusStream.hpp \
 			../Nexus/inc/MantidNexus/NeXusFile.hpp \
-			../Nexus/inc/MantidNexus/NeXusException.hpp 
+			../Nexus/inc/MantidNexus/NeXusException.hpp \
+            ../Kernel/inc/ANN \
+            ../Kernel/src/ANN
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
