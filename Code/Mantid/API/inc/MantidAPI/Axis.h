@@ -64,6 +64,8 @@ public:
   virtual bool isSpectra() const{return false;}
   /// Returns true if the axis is numeric
   virtual bool isNumeric() const{return false;}
+  /// Returns true if the axis is Text
+  virtual bool isText() const{return false;}
 
   /// Returns the value at a specified index
   /// @param index the index

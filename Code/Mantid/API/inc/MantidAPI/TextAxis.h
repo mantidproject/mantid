@@ -53,6 +53,8 @@ public:
   virtual ~TextAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
   virtual int length() const{return static_cast<int>(m_values.size());}
+  /// If this is a TextAxis, always return true for this class
+  virtual bool isText() const{return true;}
   virtual double operator()(const int& index, const int& verticalIndex = 0) const;
   virtual void setValue(const int& index, const double& value);
   virtual bool operator==(const Axis&) const;
