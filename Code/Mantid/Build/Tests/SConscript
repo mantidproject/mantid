@@ -28,6 +28,8 @@ if dist == 'Tikanga':\
     myenv.Append(LIBPATH=[third_party_path+'rhel5'])
 elif dist == 'maverick':
     myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.10'])
+elif dist == 'lucid':
+    myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.04'])
 
 myenv.Append(LIBS=libList+['gmock'])
 
