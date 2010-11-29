@@ -178,7 +178,6 @@ namespace Mantid{
         throw(Exception::NotImplementedError("Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error"));
       }
 
-      this->data_size = 0;
       size_t dimension_stride=1;
       // deal with expanded dimensions
       for(i=0;i<this->n_expanded_dim;i++){
@@ -193,8 +192,6 @@ namespace Mantid{
         dimension_stride     *= this->theDimension[i]->getNBins();
 
       }
-      this->data_size = dimension_stride;
-
       // now with collapsed dimensions;
       unsigned int ind(n_expanded_dim);
       for(i=0;i<n_collapsed_dimensions;i++){
@@ -276,15 +273,12 @@ namespace Mantid{
     }
 
 
-    MDGeometry::MDGeometry(MDGeometryBasis basis, MDGeometryDescription description) :
+    MDGeometry::MDGeometry(MDGeometryBasis basis):
     m_basis(basis),
-    n_expanded_dim(0),
-    data_size(0)
+      n_expanded_dim(0)
     {
-
       this->theDimension.assign(basis.getNumDims(), NULL);
       this->init_empty_dimensions();
-      this->reinit_Geometry(description);
     }
 
     

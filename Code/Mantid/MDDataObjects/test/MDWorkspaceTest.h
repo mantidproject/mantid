@@ -22,7 +22,7 @@ private:
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    MOCK_METHOD0(read_mdd, Mantid::MDDataObjects::MDImageData*()); 
+    MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImageData&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
     MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
     hsize_t getNPix()
@@ -41,9 +41,9 @@ private:
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
     basisDimensions.insert(MDBasisDimension("q3", true, 3));
     basisDimensions.insert(MDBasisDimension("u1", false, 4));
-    MDGeometryDescription description;
+
     UnitCell cell;
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell), description));
+    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
   }
 
   //Helper stock constructional method.

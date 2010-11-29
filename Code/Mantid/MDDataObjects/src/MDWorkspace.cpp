@@ -37,7 +37,7 @@ namespace Mantid{
     MDWorkspace::read_mdd()
     {
       //  read image part of the data
-      this->m_spImageData = boost::shared_ptr<MDImageData>(this->m_spFile->read_mdd());
+      this->m_spFile->read_mdd(*this->m_spImageData);
       // alocate memory for pixels;
       m_spDataPoints->alloc_pix_array(m_spFile);
       m_spImageData->identify_SP_points_locations();

@@ -45,7 +45,7 @@ public:
 
     virtual bool is_open(void)const{return (this->file_handler>0)?true:false;}
 
-    virtual MDImageData* read_mdd();
+    virtual void read_mdd(MDImageData & mdd);
    
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDDataPoints & sqw);

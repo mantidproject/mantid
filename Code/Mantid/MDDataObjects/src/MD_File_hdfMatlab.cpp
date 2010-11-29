@@ -79,12 +79,11 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
 
     return was_opened;
 }
-
-MDImageData* 
-MD_File_hdfMatlab::read_mdd()
+void 
+MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
 {
   // get pointer to MD structure which should be read from memory
-//   MD_DATA *pMD_struct  = dnd.get_pMDData();
+   MD_DATA *pMD_struct  = dnd.get_pMDData();
 // The function accepts full 4D dataset only!!!
     hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
     if (h_signal_DSID<0){
@@ -97,7 +96,7 @@ MD_File_hdfMatlab::read_mdd()
     herr_t err;
     matlab_attrib_kind kind;
     bool ok;
-    //new
+
 
     // find and read the dimensions of the mdd dataset
     ok=read_matlab_field_attr(h_signal_DSID,this->mdd_attrib_names[nDND_dims].c_str(),data,arr_dims_vector,rank,kind,this->File_name);
@@ -170,20 +169,11 @@ MD_File_hdfMatlab::read_mdd()
 
 // ***> because of this operator the function accepts full 4D dataset only; if we want accept 1,2 and 3D dataset we need to read pax 
 // iax,iint and variable number of p and process them properly;
-    using namespace Mantid::Geometry;
-    std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("q1", true, 0));
-    basisDimensions.insert(MDBasisDimension("q2", true, 1));
-    basisDimensions.insert(MDBasisDimension("q3", true, 2));
-    basisDimensions.insert(MDBasisDimension("en", false, 3));
 
-    UnitCell cell;
-    MDGeometryBasis* basisDimension = new MDGeometryBasis(basisDimensions, cell);
-    boost::shared_ptr<MDGeometry> pMDGeometry= boost::shared_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell), dnd_shape));
 
-    MDImageData *pImage = new MDImageData(pMDGeometry);
-    MD_DATA *pMD_struct  = pImage->get_pMDData();
-  //-------------------------------------------------------------------------
+    dnd.alloc_mdd_arrays(dnd_shape);
+
+//-------------------------------------------------------------------------
 // read the dataset itself
 // 1) create mem datatype to read data into. 
 
@@ -215,8 +205,8 @@ for(unsigned long i=0;i<pMD_struct->data_size;i++){
 delete [] buf;
 H5Tclose(memtype);
 
-  H5Dclose(h_signal_DSID);
- return pImage;
+H5Dclose(h_signal_DSID);
+
 }
 //***************************************************************************************
 

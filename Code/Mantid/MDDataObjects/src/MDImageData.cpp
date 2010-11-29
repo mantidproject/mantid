@@ -204,19 +204,19 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
     return MDStruct.data_size;
 }
 void
-MDImageData::alloc_mdd_arrays()
+MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 {
 
 // initiate initial dimensions
    if(this->pData){
-     throw(std::logic_error("this funcion should not be called on initated class"));
+       this->clear_class();
    }
- 
+   this->MDStruct.data_size=this->reshape_geometry(transf);
+
 
 
 // allocate main data array;
-   MDStruct.data_size = m_pMDGeometry->getDataSize();
-   pData = new MD_image_point[MDStruct.data_size];
+    pData = new MD_image_point[MDStruct.data_size];
     if (!pData){
         throw(std::bad_alloc("Can not allocate memory to keep Multidimensional dataset"));
     }
@@ -244,24 +244,11 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
     throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
   }
 
-  
+  this->MDStruct.data_size = 0;
   this->MDStruct.dimSize.assign(nDims,0);
   this->MDStruct.dimStride.assign(nDims+1,0);
   this->MDStruct.min_value.assign(nDims, FLT_MAX);
   this->MDStruct.max_value.assign(nDims,-FLT_MAX);
-
-  this->alloc_mdd_arrays();
-
-  std::vector<MDDimension *> dims = m_pMDGeometry->getDimensions();
-
-  for(unsigned int i=0;i<dims.size();i++){
-    this->MDStruct.dimSize[i]=dims[i]->getNBins();
-    this->MDStruct.dimStride[i]=dims[i]->getStride();
-    this->MDStruct.min_value[i]=dims[i]->getMinimum();
-    this->MDStruct.max_value[i]=dims[i]->getMaximum();
-  }
-
-
 }
 //
 MDImageData::~MDImageData()
