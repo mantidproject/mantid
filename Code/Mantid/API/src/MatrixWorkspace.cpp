@@ -304,7 +304,6 @@ namespace Mantid
      */
     void MatrixWorkspace::getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const
     {
-      //Start with empty vector
       out.resize(this->getNumberHistograms(), 0.0);
 
       //Run in parallel if the implementation is threadsafe

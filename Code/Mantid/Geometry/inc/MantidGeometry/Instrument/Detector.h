@@ -53,7 +53,7 @@ public:
 	Detector(const std::string& name, IComponent* parent);
   Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent);
 	virtual ~Detector();
-	//empty functions inherited from IObjectComponent
+	// functions inherited from IObjectComponent
 	virtual Component* clone() const {return new Detector(*this);}
 	void setID(int);
 

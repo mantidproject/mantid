@@ -38,10 +38,6 @@
 */
 namespace Mantid
 {
-  namespace API
-  {
-    class MatrixWorkspace;
-  }
   namespace Geometry
   {
     class IInstrument;
@@ -57,6 +53,37 @@ class Instrument3DWidget : public GL3DWidget
   enum Handedness { LEFT, RIGHT };
 
 public:
+  /// Contains summary information about detectors for display to users
+  class DetInfo : public std::unary_function<int, int>
+  {
+  public:
+    /** Returns the index number of the spectrum for the given detector
+    *  @param someDetID id of detector to be queried
+    */
+    int operator()(const int someDetID) const{return getIndexOf(someDetID);}
+    /// Get pointers to the workspace that contain informtion about detectors
+    DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace=Mantid::API::MatrixWorkspace_const_sptr(), const std::vector<double> * const counts=NULL);
+    /// set the object to contain data for only one detector
+    void setDet(const int detID);
+    /** specify a range of detectors by giving the id of a detector at the end of the range
+    *  @param detID id number of detector to add
+    */
+    void setEndRange(const int detID) {m_lastDet = detID;}
+    QString display() const;                                      ///< Creates a string with the object's data in a human readable form
+  private:
+    static const int NO_INDEX = -1;                               ///< Value used to indicaate missing ddata, detectors, spectra, etc...
+    Mantid::API::MatrixWorkspace_const_sptr m_workspace;
+    const std::vector<double> * m_integrals;
+    boost::shared_ptr<const Mantid::API::IndexToIndexMap> m_detID_to_wi_map;
+    int m_firstDet;                                               ///< id number of the detector that was selected first
+    int m_lastDet;                                                ///< if more than one detector is selected this is the id number of the one selected last otherwise the NO_DATA value
+
+    int getIndexOf(const int someDetID) const;                    ///< Gets the index number of the spectrum for the given detector
+    void printDetData(std::ostringstream & output) const;         ///< Retrieves information about the deteector's location and associated spectra
+    void printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const;///< Writes a position vector in a nice way
+
+  };
+
   Instrument3DWidget(QWidget* parent=0); ///< Constructor
   virtual ~Instrument3DWidget();         ///< Destructor
   void setWorkspace(const QString& name);
@@ -86,10 +113,11 @@ public:
 
   const std::vector<int> & getSelectedDetectorIDs() const { return m_detector_ids; }
   const std::vector<int> & getSelectedWorkspaceIndices() const { return m_workspace_indices; }
-			
+
 public slots:
   void fireDetectorsPicked(const std::set<QRgb>& );
   void fireDetectorHighligted(QRgb);
+  void detectorsHighligted(QRgb);
   void setTimeBin(int value);
   void setColorMapMinValue(double minValue);
   void setColorMapMaxValue(double maxValue);
@@ -104,7 +132,7 @@ public slots:
 
 signals:
   void detectorsSelected();
-  void actionDetectorHighlighted(int,int,int,int);
+  void actionDetectorHighlighted(const Instrument3DWidget::DetInfo &);
 
 public:
   void calculateBinRange();
@@ -112,15 +140,12 @@ public:
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument>);
   void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation);
-  double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);
-
 
   void drawSceneUsingColorID();
   void setSceneLowResolution();
   void setSceneHighResolution();
   void getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound);
 
-private:
   /// Convert the list of detector ids to a list of workspace indices and store them
   void createWorkspaceIndexList(const std::vector<int> & idlist, bool forceNew);
   boost::shared_ptr<Mantid::API::MatrixWorkspace> getMatrixWorkspace(QString ) const;
@@ -159,8 +184,11 @@ private:
 
   std::vector<int> m_detector_ids;
   std::vector<int> m_workspace_indices;
-  // A map from detector ID to workspace Index.
-  Mantid::API::IndexToIndexMap * m_detID_to_wi_map;
+  /// integrated number of counts in each spectrum
+  std::vector<double> m_specIntegrs;
+
+  /// Contains information about selected detectors, when there is a selection
+  DetInfo m_detInfo;
 
 };
 

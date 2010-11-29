@@ -90,7 +90,7 @@ public:
 public slots:
   void modeSelectButtonClicked();
   void selectBinButtonClicked();
-  void detectorHighlighted(int detectorId, int workspaceIndex, int spectrumNumber, int count);
+  void detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos);
   void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();

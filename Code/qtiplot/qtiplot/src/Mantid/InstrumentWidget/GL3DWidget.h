@@ -61,6 +61,7 @@ public:
 signals:
   void actorsPicked(const std::set<QRgb>& );
   void actorHighlighted( QRgb );
+  void increaseSelection(QRgb);                   ///< emitted while the user is draging with the left mouse button clicked over detectors
 
 public slots:
   void enableLighting(bool);

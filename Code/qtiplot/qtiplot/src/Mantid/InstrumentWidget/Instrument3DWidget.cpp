@@ -19,8 +19,6 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
-#include "boost/shared_ptr.hpp"
-
 #include <QTimer>
 #include <QMessageBox>
 #include <QString>
@@ -34,7 +32,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-static const QRgb BLACK = qRgb(0,0,0);
 static const bool SHOWTIMING = false;
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
@@ -45,18 +42,16 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   mBinEntireRange(true),
   mDataMinEdited(false), mDataMaxEdited(false),
   mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
-  mWorkspaceName(""), mWorkspace(), mScaledValues(0),
-  m_detID_to_wi_map(NULL)
+  mWorkspaceName(""), mWorkspace(), mScaledValues(0)
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
+  connect(this, SIGNAL(increaseSelection(QRgb)),this,SLOT(detectorsHighligted(QRgb)));
 }
 
 Instrument3DWidget::~Instrument3DWidget()
 {
-	makeCurrent();
-	if (m_detID_to_wi_map)
-	  delete m_detID_to_wi_map;
+  makeCurrent();
 }
 
 /**
@@ -88,27 +83,9 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
   }
   if( detectorIds.empty() ) return;
   createWorkspaceIndexList(detectorIds, false);
+
   emit detectorsSelected();
-
-//   if( detectorIds.size() == 1)
-//   {
-//     //emit the detector id
-//     emit actionDetectorSelected(detectorIds.front());
-//     //emit the spectra id
-//     emit actionSpectraSelected(spectraIndices.front());
-//   }
-//   else // If more than one detector selected
-//   {
-//     std::set<int> spectralist(spectraIndices.begin(), spectraIndices.end());
-//     //emit the detector ids
-//     emit actionDetectorSelectedList(detectorIds);
-//     //emit the spectra ids
-//     emit actionSpectraSelectedList(spectralist);
-//   }
-
 }
-
-
 //------------------------------------------------------------------------------------------------
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
@@ -117,41 +94,29 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
  */
 void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 {
-  if(pickedColor == BLACK)
-  {
-    emit actionDetectorHighlighted(-1,-1,-1,-1);
-    return;
-  }
-  int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
-  if(iDetId != -1)
-  {
-    int workspaceIndex = -1;
-    int spectrumNumber = -1;
-    double sum = 0;
-    if (m_detID_to_wi_map)
-    {
-      //convert detector id to workspace index id
-      try
-      {
-        workspaceIndex = (*m_detID_to_wi_map)[iDetId];
-        spectrumNumber = mWorkspace->getAxis(1)->spectraNo(workspaceIndex);
-      }
-      catch (...)
-      {
-        workspaceIndex = -1;
-        spectrumNumber = -1;
-      }
+  //get the data for the detector currently under the cursor
+  const int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
 
-      sum = integrateSingleSpectra(mWorkspace, workspaceIndex);
-    }
-
-    //emit the detector id, workspace index and count to display in the window
-    emit actionDetectorHighlighted(iDetId, workspaceIndex, spectrumNumber, std::floor(sum));
-  }
-
+  //retrieve information about the selected detector
+  m_detInfo.setDet(iDetId);
+  //send this detector information off
+  emit actionDetectorHighlighted(m_detInfo);
 }
+/**
+ * This method is the slot when the detector is highlighted using mouse move. This method emits
+ * signals the id of the detector and the spectra index(not spectra number).
+ * @param pickedActor the input passed by the the signal.
+ */
+void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
+{
+  //get the data for the detector currently under the cursor
+  const int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
 
-
+  //retrieve information about the selected detector
+  m_detInfo.setEndRange(iDetId);
+  //send this detector information off
+  emit actionDetectorHighlighted(m_detInfo);
+}
 //------------------------------------------------------------------------------------------------
 /**
  * This method sets the workspace name input to the widget.
@@ -312,10 +277,9 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
   const int n_spec = m_workspace_indices.size();
   std::vector<double> integrated_values( n_spec, -1.0 );
-  std::vector<double> integrated_values_per_workspace_index;
 
   //Use the workspace function to get the integrated spectra
-  mWorkspace->getIntegratedSpectra(integrated_values_per_workspace_index, (this->mBinMinValue), (this->mBinMaxValue), (this->mBinEntireRange));
+  mWorkspace->getIntegratedSpectra(m_specIntegrs, (this->mBinMinValue), (this->mBinMaxValue), (this->mBinEntireRange));
 
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
@@ -326,7 +290,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     int widx = m_workspace_indices[i];
     if( widx != -1 )
     {
-      double sum = integrated_values_per_workspace_index[widx];
+      double sum = m_specIntegrs[widx];
       integrated_values[i] = sum;
         if( sum < mWkspDataMin )
           mWkspDataMin = sum;
@@ -394,56 +358,6 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts() took " << timer.elapsed() << " seconds\n";
 }
-
-
-//------------------------------------------------------------------------------------------------
-/** Returns the sum of all bins in a given spectrum
- *
- * @param workspace workspace to use.
- * @param wksp_index index into the workspace to sum up.
- */
-double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_sptr workspace, const int wksp_index)
-{
-	// If the index is not valid for this workspace
-	if (wksp_index < 0 || wksp_index > workspace->getNumberHistograms())
-		return 0.0;
-
-	// Get Handle to data
-  const Mantid::MantidVec& x=workspace->readX(wksp_index);
-  const Mantid::MantidVec& y=workspace->readY(wksp_index);
-  // If it is a 1D workspace, no need to integrate
-  if (x.size()==2)
-    return y[0];
-
-  // Iterators for limits - whole range by default
-  Mantid::MantidVec::const_iterator lowit, highit;
-  lowit=x.begin();
-  highit=x.end()-1;
-
-  //But maybe we don't want the entire range?
-  if (!this->mBinEntireRange)
-	{
-    // If the first element is lower that the xmin then search for new lowit
-    if ((*lowit) < mBinMinValue)
-      lowit = std::lower_bound(x.begin(),x.end(),mBinMinValue);
-    // If the last element is higher that the xmax then search for new lowit
-    if ((*highit) > mBinMaxValue)
-      highit = std::upper_bound(lowit,x.end(),mBinMaxValue);
-	}
-
-	// Get the range for the y vector
-	Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
-	Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
-	double sum(0.0);
-	if( distmin <= distmax )
-	{
-	  // Integrate
-	  sum = std::accumulate(y.begin() + distmin,y.begin() + distmax,0.0);
-	}
-	return sum;
-}
-
-
 //------------------------------------------------------------------------------------------------
 /**
  * Run a recount for the current workspace
@@ -568,56 +482,23 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
     if (m_workspace_indices.size() == det_ids.size())
       return;
   }
-  m_workspace_indices.clear();
+  m_workspace_indices.resize(det_ids.size());
   m_detector_ids = det_ids;
-  
-//  // There is no direct way of getting histogram index from the spectra id,
-//  // get the spectra axis and convert from index to spectra number and create
-//  // a map.
-//  const std::vector<int> spectraList = mWorkspace->spectraMap().getSpectra(m_detector_ids);
-//  Axis* spectraAxis = mWorkspace->getAxis(1);
-//  std::map<int,int> * index_map;
-//  int n_hist = mWorkspace->getNumberHistograms();
-//  for (int i = 0; i < n_hist; ++i)
-//  {
-//    int current_spectrum = spectraAxis->spectraNo(i);
-//    index_map[current_spectrum] = i;
-//  }
-//
-//  std::vector<int>::const_iterator spec_end = spectraList.end();
-//  std::vector<int>::const_iterator d_itr = m_detector_ids.begin();
-//  for( std::vector<int>::const_iterator spec_itr = spectraList.begin(); spec_itr != spec_end;
-//       ++spec_itr, ++d_itr )
-//  {
-//    if( (*d_itr) != -1 )
-//    {
-//      m_workspace_indices.push_back(index_map[*spec_itr]);
-//    }
-//    else
-//    {
-//      m_workspace_indices.push_back(-1);
-//    }
-//  }
 
-  // There is no direct way of getting histogram index from the spectra id,
-  // get the spectra axis and convert from index to spectra number and create
-  // a map.
-  if (m_detID_to_wi_map) delete m_detID_to_wi_map;
-  m_detID_to_wi_map = mWorkspace->getDetectorIDToWorkspaceIndexMap(false);
+  //the DetInfo object will collect information about selected detectors from the pointers and references passed
+  m_detInfo = DetInfo(mWorkspace, &m_specIntegrs);
 
-  std::vector<int>::const_iterator d_itr_end = m_detector_ids.end();
-  for( std::vector<int>::const_iterator d_itr = m_detector_ids.begin(); d_itr != d_itr_end; ++d_itr )
+  //the DetInfo object can convert from detector IDs to spectra indices and so this creates a vector of spectra indices
+  std::transform(m_detector_ids.begin(), m_detector_ids.end(),
+                 m_workspace_indices.begin(), m_detInfo);
+  /*
+  std::vector<int>::const_iterator detIDsIn = m_detector_ids.begin();
+  std::vector<int>::iterator specIndsOut = m_workspace_indices.begin();
+  std::vector<int>::const_iterator end = m_detector_ids.end();
+  for( ; detIDsIn != end; ++detIDsIn, ++specIndsOut)
   {
-    int detector_id = *d_itr;
-    if( (detector_id) != -1 )
-    {
-      m_workspace_indices.push_back( m_detID_to_wi_map->operator[](detector_id) );
-    }
-    else
-    {
-      m_workspace_indices.push_back(-1);
-    }
-  }
+    *specIndsOut = m_detInfo.getIndexOf(*detIDsIn);
+  }*/
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::createWorkspaceIndexList() took " << timer.elapsed() << " seconds\n";
 
@@ -901,4 +782,117 @@ void Instrument3DWidget::setSceneHighResolution()
 void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound)
 {
 	mInstrumentActor->getBoundingBox(minBound,maxBound);
+}
+
+/** Set pointers to the workspace data that is needed to obtain information about
+*  detectors
+*  @param DetID id number of the detector to retrieve information for
+*  @param workspace the workspace with counts data for the detector
+*  @param counts integral of the number of counts in each spectrum
+*  @throws runtime_error if there was an error creating the spectra index to detector index map
+*/
+Instrument3DWidget::DetInfo::DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace, const std::vector<double> * const counts) :
+    m_integrals(counts), m_workspace(workspace)
+{
+  if (m_workspace)
+  {
+    m_detID_to_wi_map = boost::shared_ptr<const IndexToIndexMap>(
+        m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+  }
+}
+/// set the object to contain data for only one detector
+void Instrument3DWidget::DetInfo::setDet(const int detID)
+{
+  m_firstDet = detID;
+  m_lastDet = NO_INDEX;
+}
+/** Returns a string containing all this object's data in a human readable
+* form
+* @return all this objects data labeled and formated for user display
+*/
+QString Instrument3DWidget::DetInfo::display() const
+{
+  std::ostringstream out;
+  out << "Detector ID:  " << m_firstDet;
+  if ( m_firstDet > -1 )
+  {
+    printDetData(out);
+  }
+
+  return QString::fromStdString(out.str());
+}
+/** Returns the index number of the spectrum generated by the detector whose ID number
+*  was passed or -1 on error
+*  @param someDetID an ID of a detector that exists in the workspace
+*  @return the index number of the spectrum associated with that detector or -1
+*/
+int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const
+{
+  IndexToIndexMap::const_iterator it(m_detID_to_wi_map->find(someDetID));
+  if ( it != m_detID_to_wi_map->end() )
+  {
+    return it->second;
+  }
+  else return -1;
+}
+/** Writes the detector's location and information about its associated spectra
+*  in a human readble form to the stream that is passed to it
+*  @param output information will be writen to this stream
+*/
+void Instrument3DWidget::DetInfo::printDetData(std::ostringstream & output) const
+{
+  int workspaceIndex = getIndexOf(m_firstDet);
+  int spectrumNumber;
+  try
+  {
+    spectrumNumber = m_workspace->getAxis(1)->spectraNo(workspaceIndex);
+  }
+  catch (...)
+  {
+    //if some information couldn't be retrieved, default values will be displayed
+  }
+
+  if (workspaceIndex != spectrumNumber && spectrumNumber != -1 )
+    output << "    Spectrum number: " << spectrumNumber << "  WSIndex: " << workspaceIndex;
+  else
+    output << "    Spectrum number: " << spectrumNumber;
+  output << "    Count:  ";
+
+  if (m_integrals)
+  {
+    output << m_integrals->operator[](workspaceIndex);
+  }
+  else
+  {
+    output << "-";
+  }
+
+  try
+  {
+    IDetector_const_sptr locInfo =
+      m_workspace->getInstrument()->getDetector(m_firstDet);
+    V3D pos = locInfo->getPos();
+    output << "\nposition:  ";
+    printV(pos, output);
+
+    locInfo = m_workspace->getInstrument()->getDetector(m_lastDet);
+    V3D endPos = locInfo->getPos();
+    output << " -> ";
+    printV(endPos, output);
+    output << " = ";
+    printV(pos-endPos, output);
+  }
+  catch(Exception::NotFoundError &)
+  {
+    //don't display data when there is an error retreiving it
+  }
+  output << " mm";
+}
+/** Writes a position vector in a nice way
+*  @param[in] pos coordinates to print
+*  @param[out] output information will be writen to this stream
+*/
+void Instrument3DWidget::DetInfo::printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const
+{
+  out << "(" << pos.X() << "," << pos.Y() << "," << pos.Z() << ")";
 }

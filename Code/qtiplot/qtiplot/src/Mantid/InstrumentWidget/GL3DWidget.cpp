@@ -279,8 +279,6 @@ void GL3DWidget::switchToPickingMode()
   glReadBuffer(GL_BACK);
   mPickBox->setDisplayImage(grabFrameBuffer(false));
 
-  mPickBox->mDisplayImage.save("/home/8oz/Desktop/display.png");
-
   // Now we draw the picking scene with the special colors
 
   glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
@@ -289,8 +287,6 @@ void GL3DWidget::switchToPickingMode()
   mPickBox->setPickImage(grabFrameBuffer(false));
   glEnable(GL_MULTISAMPLE);   //enable antialiasing
   mPickingDraw=false;
-
-  mPickBox->mPickImage.save("/home/8oz/Desktop/pick.png");
 }
 
 
@@ -396,7 +392,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 }
 
 /**
- * Called when a custom context menu event is recieved
+ * Called when a context menu event is recieved
  */
 void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
 {
@@ -428,7 +424,14 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
   {
     setCursor(Qt::CrossCursor);
     QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
-    emit actorHighlighted(tmpColor);
+    if (event->buttons() & Qt::LeftButton)
+    {
+      emit increaseSelection(tmpColor);
+    }
+    else
+    {
+      emit actorHighlighted(tmpColor);
+    }
     mPickBox->mouseMoveEvent(event);
     update();
   }
