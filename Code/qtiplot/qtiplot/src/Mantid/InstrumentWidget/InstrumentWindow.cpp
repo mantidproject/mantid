@@ -155,7 +155,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
   connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 
-  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int,int)),this,SLOT(detectorHighlighted(int,int,int,int)));
+  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
   connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
 
@@ -270,22 +270,13 @@ void InstrumentWindow::showPickOptions()
   }
 
   context.exec(QCursor::pos());
-}
-
-/**
+}  /**
  * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
+ * @param information about the detector that is at the location of the users mouse pointer
  */
-void InstrumentWindow::detectorHighlighted(int detectorId, int workspaceIndex, int spectrumNumber, int count)
+void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos)
 {
-  std::ostringstream out;
-  out << "Detector ID: " << detectorId;
-  if (workspaceIndex != spectrumNumber)
-    out << "  SpectrumID: " << spectrumNumber << "  WSIndex: " << workspaceIndex;
-  else
-    out << "  SpectrumID: " << spectrumNumber;
-  out << "  Count: " << count;
-  std::string out_str = out.str();
-  mInteractionInfo->setText(out_str.c_str());
+  mInteractionInfo->setText(cursorPos.display());
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
