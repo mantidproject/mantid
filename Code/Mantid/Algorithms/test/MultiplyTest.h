@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "WorkspaceCreationHelper.hh"
+#include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
