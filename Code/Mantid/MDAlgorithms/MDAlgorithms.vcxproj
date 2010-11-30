@@ -143,7 +143,6 @@
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterIntegration.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterNoIntegration.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterSet.h" />
-    <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h" />
@@ -169,7 +168,6 @@
     <ClCompile Include="src\DimensionParameterIntegration.cpp" />
     <ClCompile Include="src\DimensionParameterNoIntegration.cpp" />
     <ClCompile Include="src\DimensionParameterSet.cpp" />
-    <ClCompile Include="src\ImplicitTopology.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />
     <ClCompile Include="src\InvalidParameterParser.cpp" />
     <ClCompile Include="src\NormalParameter.cpp" />

@@ -173,7 +173,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Hexahedron.cpp" />
     <ClCompile Include="src\IMD_FileFormat.cpp" />
     <ClCompile Include="src\MDDataPoint.cpp" />
     <ClCompile Include="src\MDDataPoints.cpp" />
@@ -185,7 +184,6 @@
     <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MDDataObjects\Hexahedron.h" />
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoint.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h" />
