@@ -565,8 +565,8 @@ public:
     mem1=mem2;
 
     //Yes, our eventworkspace MRU is full
-    TS_ASSERT_EQUALS( ew->MRUSize(), 100);
-    TS_ASSERT_EQUALS( ew2->MRUSize(), 100);
+    TS_ASSERT_EQUALS( ew->MRUSize(), 50);
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
     xRef.resize(10);
@@ -665,11 +665,38 @@ public:
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
-    for (size_t i=0; i<ve.size()-1; i++)
+     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
   }
 
 
+  /** Nov 29 2010, ticket #1974
+   * SegFault on data access through MRU list.
+   * Test that parallelization is thread-safe
+   */
+  void xtestSegFault()
+  {
+    //std::cout << omp_get_num_threads() << " threads available\n";
+    //std::cout << " Starting testSegFault 1 \n\n";    std::cout.flush();
+
+    int numpix = 100000;
+    EventWorkspace_const_sptr ew1 = CreateRandomEventWorkspace(50, numpix);
+
+    //std::cout << " Starting testSegFault 2 \n\n";    std::cout.flush();
+    //#pragma omp parallel for
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i < numpix; i++)
+    {
+      //std::cout << "Thread " << PARALLEL_THREAD_NUMBER << " is starting with " << i << "\n";
+      for (int j=0; j < 10; j++)
+      {
+        MantidVec Y = ew1->dataY(i);
+        const MantidVec & E = ew1->dataE(i);
+        MantidVec E2 = E;
+      }
+      //std::cout << "Thread " << PARALLEL_THREAD_NUMBER << " should be done with " << i << "\n";
+    }
+  }
 
 
 

@@ -33,6 +33,8 @@ namespace DataObjects
 /**
  * This little class holds a MantidVec of data and an index marker that
  * is used for uniqueness.
+ * This is used in the MRUList.
+ *
  */
 class MantidVecWithMarker {
 public:
@@ -41,8 +43,8 @@ public:
    * @param the_index unique index into the workspace of this data
    */
   MantidVecWithMarker(const int the_index)
+  : m_index(the_index)
   {
-    m_index = the_index;
   }
 
   /// Destructor
@@ -50,7 +52,7 @@ public:
   {
     m_data.clear();
     //Trick to release the allocated memory
-    MantidVec().swap(m_data);
+    // MantidVec().swap(m_data);
   }
 
 
@@ -112,6 +114,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
  public:
   /// Typedef for a Most-Recently-Used list of Data objects.
   typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
+  typedef std::vector< mru_list * > mru_lists;
 
   /// The name of the workspace type.
   virtual const std::string id() const {return "EventWorkspace";}
@@ -143,6 +146,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void copyDataFrom(const EventWorkspace& source);
 
   //------------------------------------------------------------
+  void ensureEnoughBuffersY(int thread_num) const;
+  void ensureEnoughBuffersE(int thread_num) const;
 
   /// Return the data X vector at a given workspace index
   MantidVec& dataX(const int);
@@ -253,10 +258,10 @@ private:
   int m_noVectors;
 
   /// The most-recently-used list of dataY histograms
-  mutable mru_list m_bufferedDataY;
+  mutable mru_lists m_bufferedDataY;
 
   /// The most-recently-used list of dataE histograms
-  mutable mru_list m_bufferedDataE;
+  mutable mru_lists m_bufferedDataE;
 
   /// Cached copy of the # of events in the list, cached at the end of doneLoadingData()
   mutable std::size_t m_cachedNumberOfEvents;

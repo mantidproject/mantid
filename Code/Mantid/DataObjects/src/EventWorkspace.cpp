@@ -28,16 +28,30 @@ namespace DataObjects
                  = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace() : m_bufferedDataY(100), m_bufferedDataE(100),
+  EventWorkspace::EventWorkspace() : m_bufferedDataY(), m_bufferedDataE(),
       m_cachedNumberOfEvents(0)
   {
   }
 
   EventWorkspace::~EventWorkspace()
   {
-    //Make sure you free up the memory in the MRU
+    //Make sure you free up the memory in the MRUs
+    for (size_t i=0; i < m_bufferedDataY.size(); i++)
+      if (m_bufferedDataY[i])
+      {
+        m_bufferedDataY[i]->clear();
+        delete m_bufferedDataY[i];
+      };
     m_bufferedDataY.clear();
+
+    for (size_t i=0; i < m_bufferedDataE.size(); i++)
+      if (m_bufferedDataE[i])
+      {
+        m_bufferedDataE[i]->clear();
+        delete m_bufferedDataE[i];
+      };
     m_bufferedDataE.clear();
+
     //Go through the event list and clear them?
     EventListVector::iterator i = this->data.begin();
     for( ; i != this->data.end(); ++i )
@@ -194,17 +208,30 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
-  /// Return how many entries in the Y MRU list are used.
+  /** Return how many entries in the Y MRU list are used.
+   * Only used in tests. It only returns the 0-th MRU list size.
+   */
   int EventWorkspace::MRUSize() const
   {
-    return this->m_bufferedDataY.size();
+    return this->m_bufferedDataY[0]->size();
   }
 
-  /** Clear the MRU list */
+  //-----------------------------------------------------------------------------
+  /** Clears the MRU lists */
   void EventWorkspace::clearMRU() const
   {
-    this->m_bufferedDataY.clear();
-    this->m_bufferedDataE.clear();
+    //Make sure you free up the memory in the MRUs
+    for (size_t i=0; i < m_bufferedDataY.size(); i++)
+      if (m_bufferedDataY[i])
+      {
+        m_bufferedDataY[i]->clear();
+      };
+
+    for (size_t i=0; i < m_bufferedDataE.size(); i++)
+      if (m_bufferedDataE[i])
+      {
+        m_bufferedDataE[i]->clear();
+      };
   }
 
   //-----------------------------------------------------------------------------
@@ -227,14 +254,6 @@ namespace DataObjects
   /// Returns the amount of memory used in KB
   long int EventWorkspace::getMemorySize() const
   {
-//    std::stringstream out;
-//    out << "Get memory size. m_cachedNumberOfEvents = " << m_cachedNumberOfEvents <<
-//        ". sizeof(TofEvent) = " << sizeof(TofEvent) <<
-//        ". sizeof(std::size_t) = " << sizeof(std::size_t) <<
-//        ". sizeof(EventList) = " << sizeof(EventList);
-//    g_log.information(out.str());
-//    std::cout << out.str() << "\n";
-
     long int  total = 0;
 
     //Add up the two buffers
@@ -643,6 +662,56 @@ namespace DataObjects
   // --- Const Data Access ----
   //-----------------------------------------------------------------------------
 
+  //---------------------------------------------------------------------------
+  /** This function makes sure that there are enough data
+   * buffers (MRU's) for E for the number of threads requested.
+   */
+  void EventWorkspace::ensureEnoughBuffersE(int thread_num) const
+  {
+    if (thread_num < 0)
+      throw std::runtime_error("EventWorkspace::ensureEnoughBuffersE() called with a negative thread number.");
+
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+    {
+      if (static_cast<int>(m_bufferedDataE.size()) <= thread_num)
+      {
+        m_bufferedDataE.resize(thread_num+1);
+        for (size_t i=0; i < m_bufferedDataE.size(); i++)
+        {
+          if (!m_bufferedDataE[i])
+            m_bufferedDataE[i] = new mru_list(50); //Create a MRU list with this many entries.
+
+        }
+      }
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  /** This function makes sure that there are enough data
+   * buffers (MRU's) for Y for the number of threads requested.
+   */
+  void EventWorkspace::ensureEnoughBuffersY(int thread_num) const
+  {
+    if (thread_num < 0)
+      throw std::runtime_error("EventWorkspace::ensureEnoughBuffersY() called with a negative thread number.");
+
+    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    {
+      if (static_cast<int>(m_bufferedDataY.size()) <= thread_num)
+      {
+        m_bufferedDataY.resize(thread_num+1);
+        for (size_t i=0; i < m_bufferedDataY.size(); i++)
+        {
+          if (!m_bufferedDataY[i])
+            m_bufferedDataY[i] = new mru_list(50); //Create a MRU list with this many entries.
+
+        }
+      }
+    }
+  }
+
+
+  //---------------------------------------------------------------------------
   /// Return the const data X vector at a given workspace index
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
@@ -652,6 +721,7 @@ namespace DataObjects
   }
 
 
+
   //---------------------------------------------------------------------------
   /// Return the const data Y vector at a given workspace index
   const MantidVec& EventWorkspace::dataY(const int index) const
@@ -659,11 +729,17 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
 
-    //std::stringstream out;  out << "I'm retrieving DataY for index " << index << ".";
-    //g_log.information(out.str());
+    // This is the thread number from which this function was called.
+    int thread = PARALLEL_THREAD_NUMBER;
+    this->ensureEnoughBuffersY(thread);
 
     //Is the data in the mrulist?
-    MantidVecWithMarker * data = m_bufferedDataY.find(index);
+    MantidVecWithMarker * data;
+    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    {
+      data = m_bufferedDataY[thread]->find(index);
+    }
+
     if (data == NULL)
     {
       //Create the MRU object
@@ -672,7 +748,11 @@ namespace DataObjects
       this->data[index]->generateCountsHistogram( *this->data[index]->getRefX(), data->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * oldData = m_bufferedDataY.insert(data);
+      MantidVecWithMarker * oldData;
+      PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+      {
+        oldData = m_bufferedDataY[thread]->insert(data);
+      }
 
       //And clear up the memory of the old one, if it is dropping out.
       if (oldData)
@@ -681,6 +761,7 @@ namespace DataObjects
     return data->m_data;
   }
 
+
   //---------------------------------------------------------------------------
   /// Return the const data E vector at a given workspace index
   const MantidVec& EventWorkspace::dataE(const int index) const
@@ -688,8 +769,17 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
 
+    // This is the thread number from which this function was called.
+    int thread = PARALLEL_THREAD_NUMBER;
+    this->ensureEnoughBuffersE(thread);
+
     //Is the data in the mrulist?
-    MantidVecWithMarker * data = m_bufferedDataE.find(index);
+    MantidVecWithMarker * data;
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+    {
+      data = m_bufferedDataE[thread]->find(index);
+    }
+
     if (data == NULL)
     {
       //Get a handle on the event list.
@@ -703,11 +793,17 @@ namespace DataObjects
       el->generateHistogram(*(el->getRefX()), Y, data->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);
-
+      MantidVecWithMarker * oldData;
+      PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+      {
+        oldData = m_bufferedDataE[thread]->insert(data);
+      }
       //And clear up the memory of the old one, if it is dropping out.
       if (oldData)
+      {
+        //std::cout << "Dropping " << oldData->m_index << " from thread " << omp_get_thread_num() << "\n";
         delete oldData;
+      }
     }
     return data->m_data;
   }
