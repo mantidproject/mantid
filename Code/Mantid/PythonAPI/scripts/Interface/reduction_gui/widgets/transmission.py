@@ -4,6 +4,9 @@ import os
 from reduction_gui.reduction.hfir_reduction_steps import Transmission
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
+import ui.ui_trans_direct_beam
+import ui.ui_trans_spreader
+import ui.ui_hfir_transmission
 
 class DirectBeam(BaseWidget):
     """
@@ -24,9 +27,12 @@ class DirectBeam(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings  
               
-        f = QtCore.QFile(":/trans_direct_beam.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
+        class DirectBeamFrame(QtGui.QGroupBox, ui.ui_trans_direct_beam.Ui_GroupBox): 
+            def __init__(self, parent=None):
+                QtGui.QGroupBox.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = DirectBeamFrame(self)
         self.initialize_content()
         
         if state is not None:
@@ -94,9 +100,12 @@ class BeamSpreader(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings  
               
-        f = QtCore.QFile(":/trans_spreader.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
+        class SpreaderFrame(QtGui.QGroupBox, ui.ui_trans_spreader.Ui_GroupBox): 
+            def __init__(self, parent=None):
+                QtGui.QGroupBox.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = SpreaderFrame(self)
         self.initialize_content()
         
         if state is not None:
@@ -176,9 +185,12 @@ class TransmissionWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
 
-        f = QtCore.QFile(":/hfir_transmission.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
+        class TransFrame(QtGui.QFrame, ui.ui_hfir_transmission.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = TransFrame(self)
         self.initialize_content()
         
         if state is not None:

@@ -4,6 +4,8 @@ from PyQt4 import QtGui, QtCore, uic
 from reduction_gui.instruments.instrument_factory import instrument_factory
 from reduction_gui.settings.application_settings import GeneralSettings
 import reduction_gui.settings.qrc_resources
+import ui.ui_reduction_main
+import ui.ui_instrument_dialog
 
 # Check whether Mantid is available
 try:
@@ -13,7 +15,7 @@ try:
 except:
     HAS_MANTID = False    
 
-class ReductionGUI(QtGui.QMainWindow):
+class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None):
         QtGui.QMainWindow.__init__(self)
         
@@ -44,6 +46,8 @@ class ReductionGUI(QtGui.QMainWindow):
         
         # General settings shared by all widgets
         self.general_settings = GeneralSettings(settings)
+        
+        self.setupUi(self)
         
     def _set_window_title(self):
         """
@@ -180,9 +184,12 @@ class ReductionGUI(QtGui.QMainWindow):
         """
             Invoke an instrument selection dialog
         """ 
-        f = QtCore.QFile(":/instrument_dialog.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        dialog = uic.loadUi(f)
+        class InstrDialog(QtGui.QDialog, ui.ui_instrument_dialog.Ui_Dialog): 
+            def __init__(self):
+                QtGui.QDialog.__init__(self)
+                self.setupUi(self)
+                
+        dialog = InstrDialog()
         dialog.exec_()
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()
@@ -372,11 +379,7 @@ def start(argv=[]):
     app.setOrganizationDomain("mantidproject.org")
     app.setApplicationName("Mantid Reduction")
     
-    reducer = ReductionGUI()
-    
-    f = QtCore.QFile(":/reduction_main.ui")
-    f.open(QtCore.QIODevice.ReadOnly)    
-    uic.loadUi(f, reducer)
+    reducer = ReductionGUI()    
     reducer.setup_layout()
     reducer.show()
     app.exec_() 

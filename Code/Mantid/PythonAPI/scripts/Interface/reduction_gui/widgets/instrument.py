@@ -7,6 +7,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.mantid_util import DataFileProxy
 from base_widget import BaseWidget
 from mask import MaskWidget
+import ui.ui_hfir_data_summary
 
 class SANSInstrumentWidget(BaseWidget):    
     """
@@ -24,9 +25,13 @@ class SANSInstrumentWidget(BaseWidget):
         self._layout = QtGui.QHBoxLayout()
 
         self._summary = QtGui.QFrame(self)
-        f = QtCore.QFile(":/hfir_data_summary.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._summary)
+
+        class SummaryFrame(QtGui.QFrame, ui.ui_hfir_data_summary.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
 

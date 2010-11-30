@@ -5,6 +5,7 @@ from reduction_gui.reduction.hfir_reduction_steps import Background
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
 from transmission import BeamSpreader, DirectBeam
+import ui.ui_hfir_background
 
 class BckDirectBeam(DirectBeam):
     
@@ -53,9 +54,12 @@ class BackgroundWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
 
-        f = QtCore.QFile(":/hfir_background.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
+        class BckFrame(QtGui.QFrame, ui.ui_hfir_background.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = BckFrame(self)
         self.initialize_content()
         
         if state is not None:

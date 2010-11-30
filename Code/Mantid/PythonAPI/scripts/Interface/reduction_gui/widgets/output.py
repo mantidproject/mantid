@@ -2,6 +2,7 @@ from PyQt4 import QtGui, uic, QtCore
 from reduction_gui.reduction.hfir_reduction_steps import Output
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
+import ui.ui_hfir_output
 
 try:
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -22,9 +23,12 @@ class OutputWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
 
-        f = QtCore.QFile(":hfir_output.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
+        class OutputFrame(QtGui.QFrame, ui.ui_hfir_output.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = OutputFrame(self)
         self.initialize_content()
         
     def initialize_content(self):

@@ -7,9 +7,10 @@ from PyQt4 import QtGui, uic, QtCore
 from reduction_gui.reduction.hfir_reduction_steps import BeamFinder
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
+import ui.ui_hfir_beam_finder
 
 # Beam finder frame
-class BeamFinderFrame(QtGui.QFrame):
+class BeamFinderFrame(QtGui.QFrame, ui.ui_hfir_beam_finder.Ui_Frame):
     """
         Beam center interface
         TODO: move most of this class in BeamFinderWidget, along the
@@ -18,6 +19,7 @@ class BeamFinderFrame(QtGui.QFrame):
         
     def __init__(self, parent=None, flags=0):
         super(BeamFinderFrame, self).__init__(parent)        
+        self.setupUi(self)
     
     def get_state(self):
         """
@@ -84,10 +86,8 @@ class BeamFinderWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()
+        
         self._content = BeamFinderFrame(self)
-        f = QtCore.QFile(":/hfir_beam_finder.ui")
-        f.open(QtCore.QIODevice.ReadOnly)
-        uic.loadUi(f, self._content)
         self.initialize_content()
         self._layout.addWidget(self._content)
         self.setLayout(self._layout)
