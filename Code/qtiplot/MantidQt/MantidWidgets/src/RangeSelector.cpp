@@ -349,9 +349,13 @@ bool RangeSelector::changingMax(double x, double dx)
 void RangeSelector::verify()
 {
   if ( m_min < m_lower || m_min > m_higher )
+  {
     setMin(m_lower);
+  }
   if ( m_max < m_lower || m_max > m_higher )
+  {
     setMax(m_higher);
+  }
 
   if ( m_min > m_max )
   {
@@ -364,7 +368,11 @@ void RangeSelector::verify()
 bool RangeSelector::inRange(double x)
 {
   if ( x < m_lower || x > m_higher )
+  {
     return false;
+  }
   else
+  {
     return true;
+  }
 }

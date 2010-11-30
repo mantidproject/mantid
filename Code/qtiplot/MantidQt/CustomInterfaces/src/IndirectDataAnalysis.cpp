@@ -13,6 +13,10 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
+
 #include <QLineEdit>
 #include <QValidator>
 #include <QFileInfo>
@@ -287,20 +291,15 @@ void IndirectDataAnalysis::setupFuryFit()
   m_ffTree->setFactoryForManager(m_ffRangeManager, m_dblEdFac);
 
   m_ffProp["StartX"] = m_ffRangeManager->addProperty("StartX");
-  m_ffRangeManager->setDecimals(m_ffProp["StartX"], 10);
+  m_ffRangeManager->setDecimals(m_ffProp["StartX"], m_nDec);
   m_ffProp["EndX"] = m_ffRangeManager->addProperty("EndX");
-  m_ffRangeManager->setDecimals(m_ffProp["EndX"], 10);
+  m_ffRangeManager->setDecimals(m_ffProp["EndX"], m_nDec);
 
   connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyfitRangePropChanged(QtProperty*, double)));
 
   m_ffProp["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
   QtProperty* bgA0 = m_ffRangeManager->addProperty("A0");
-  QtProperty* bgA1 = m_doubleManager->addProperty("A1");
-  m_ffRangeManager->setDecimals(bgA0, 10);
-  m_doubleManager->setDecimals(bgA1, 1);
-  m_doubleManager->setRange(bgA1, 0.0, 0.0);
   m_ffProp["LinearBackground"]->addSubProperty(bgA0);
-  m_ffProp["LinearBackground"]->addSubProperty(bgA1);
   m_ffProp["BackgroundA0"] = bgA0;
 
   m_ffProp["Exponential1"] = createExponential();
@@ -314,6 +313,7 @@ void IndirectDataAnalysis::setupFuryFit()
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(furyfitPlotGuess(QtProperty*)));
 
   // Signal/slot ui connections
+  connect(m_uiForm.furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(furyfitPlotInput()));
   connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
   connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
   connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
@@ -401,6 +401,7 @@ void IndirectDataAnalysis::setupConFit()
 
   // Have HWHM Range linked to Fit Start/End Range
   connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
+  m_cfHwhmRange->setRange(-1.0,1.0);
 
   confitTypeSelection(m_uiForm.confit_cbFitType->currentIndex());
 
@@ -636,7 +637,6 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
   Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
 
   QList<QtBrowserItem*> items = propertyBrowser->topLevelItems();
-  m_furyfitConstraints = "";
   int funcIndex = 0;
 
   for ( int i = 0; i < items.size(); i++ )
@@ -656,9 +656,12 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         std::string formula = "Intensity*exp(-(x/Tau)^Beta)";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
-        if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
-        m_furyfitConstraints += "0 <= f%1.Beta <= 1";
-        m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
+        // Constrain Beta value to be between 0 and 1
+        std::string funcConstraint = "0 <= Beta <= 1";
+        Mantid::API::IConstraint* constraint = 
+          Mantid::API::ConstraintFactory::Instance().createInitialized(func, funcConstraint);
+        func->addConstraint(constraint);
+        
       }
       else if ( name == "Exponential" )
       {
@@ -668,7 +671,6 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         std::string formula = "Intensity*exp(-(x/Tau))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
-        m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else
       {
@@ -1079,7 +1081,7 @@ void IndirectDataAnalysis::furyfitRun()
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
-  alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
+  // alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
   alg->setPropertyValue("Function", *function);
   alg->setPropertyValue("Output",output);
   alg->execute();
@@ -1226,6 +1228,12 @@ void IndirectDataAnalysis::furyfitPlotInput()
   {
   case 0: // "File"
     {
+      if ( ! m_uiForm.furyfit_inputFile->isValid() )
+      {
+        return;
+      }
+      else
+      {
       QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
       wsname = fi.baseName().toStdString();
       if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
@@ -1239,6 +1247,7 @@ void IndirectDataAnalysis::furyfitPlotInput()
         alg->execute();
         // get the output workspace
         m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      }
       }
     }
     break;
@@ -1410,11 +1419,11 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
       std::string formula;
       if ( funcName == "Exponential" )
       {
-        formula = "Intensity*exp(-(x*Tau))";
+        formula = "Intensity*exp(-(x/Tau))";
       }
       else if ( funcName == "Stretched Exponential" )
       {
-        formula = "Intensity*exp(-Tau*(x^Beta))";
+        formula = "Intensity*exp(-(x/Tau)^Beta)";
       }
       // Create subfunction object with specified formula
       Mantid::API::IFunction::Attribute att(formula);

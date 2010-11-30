@@ -186,7 +186,6 @@ namespace MantidQt
       Mantid::API::MatrixWorkspace_const_sptr m_ffOutputWS;
       std::string m_ffInputWSName;
       QString m_furyfitTies;
-      QString m_furyfitConstraints;
 
       // Confit (prefix: 'm_cf')
       QtTreePropertyBrowser* m_cfTree;

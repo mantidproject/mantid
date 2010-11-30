@@ -212,21 +212,23 @@ def confitParsToWS(Table, Data):
     xAxisVals = []
     dataY = []
     dataE = []
-    names = []
+    names = ''
     ws = mtd[Table]
-    cCount = ws.getColumnCount()
-    rCount = ws.getRowCount()
     cName =  ws.getColumnNames()
-    nSpec = ( cCount - 1 ) / 2
-    xAxis = cName[0]
+    nSpec = ( ws.getColumnCount() - 1 ) / 2
     for spec in range(0,nSpec):
-        xAxisVals += dataX
         yAxis = cName[(spec*2)+1]
-        names.append(yAxis)
-        eAxis = cName[(spec*2)+2]
-        for row in range(0, rCount):
-            dataY.append(ws.getDouble(yAxis,row))
-            dataE.append(ws.getDouble(eAxis,row))
+        if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
+            xAxisVals += dataX        
+            if (len(names) > 0):
+                names += ","
+            names += yAxis
+            eAxis = cName[(spec*2)+2]
+            for row in range(0, ws.getRowCount()):
+                dataY.append(ws.getDouble(yAxis,row))
+                dataE.append(ws.getDouble(eAxis,row))
+        else:
+            nSpec -= 1
     CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
 
@@ -250,7 +252,7 @@ def furyfitParsToWS(Table, Data):
     dataX = createFuryFitXAxis(Data)
     dataY = []
     dataE = []
-    names = []
+    names = ""
     xAxisVals = []
     ws = mtd[Table]
     cCount = ws.getColumnCount()
@@ -259,13 +261,18 @@ def furyfitParsToWS(Table, Data):
     nSpec = ( cCount - 1 ) / 2
     xAxis = cName[0]
     for spec in range(0,nSpec):
-        xAxisVals += dataX
         yAxis = cName[(spec*2)+1]
-        names.append(yAxis)
-        eAxis = cName[(spec*2)+2]
-        for row in range(0, rCount):
-            dataY.append(ws.getDouble(yAxis,row))
-            dataE.append(ws.getDouble(eAxis,row))
+        if re.search('Tau$', yAxis) or re.search('Beta$', yAxis):
+            xAxisVals += dataX
+            if (len(names) > 0):
+                names += ","
+            names += yAxis
+            eAxis = cName[(spec*2)+2]
+            for row in range(0, rCount):
+                dataY.append(ws.getDouble(yAxis,row))
+                dataE.append(ws.getDouble(eAxis,row))
+        else:
+            nSpec -= 1
     CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
 

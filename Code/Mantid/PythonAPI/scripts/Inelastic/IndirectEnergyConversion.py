@@ -288,7 +288,6 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax,
     savepath = mantid.getConfigProperty('defaultsave.directory')
     (direct, filename) = os.path.split(rawfile)
     (root, ext) = os.path.splitext(filename)
-
     try:
         LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
     except:
