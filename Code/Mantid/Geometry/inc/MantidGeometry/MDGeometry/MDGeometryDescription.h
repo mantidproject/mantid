@@ -55,6 +55,14 @@ class DLLExport MDGeometryDescription
 {
 public:
   //  MDGeometryDescription(std::vector<MDDataObjects::DimensionsID> &IDs);
+
+    MDGeometryDescription(
+      std::vector<MDDimension> dimensions, 
+      const MDDimension& dimensionX, 
+      const MDDimension& dimensionY, 
+      const MDDimension& dimensionZ,
+      const MDDimension& dimensiont);
+
     MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);
     MDGeometryDescription(const MDGeometry &origin);
     virtual ~MDGeometryDescription(void);
@@ -140,6 +148,9 @@ private:
     static Kernel::Logger& g_log;
 
     std::deque<SlicingData> data;  //< data describes one dimension;
+
+    //Helper method to generate slicing data.
+    void createSlicingData(const MDDimension& dimension, const int i);
 
 typedef std::deque<SlicingData>::iterator       it_data;
 typedef std::deque<SlicingData>::const_iterator it_const_data;

@@ -41,11 +41,10 @@ namespace Mantid
   {
 
     //Seam method
-    boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry, boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile);
+    boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImageData> imageData);
 
-    //Seam method
-    boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry, boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile);
-
+    //Seam method.
+    boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(const Mantid::Geometry::MDGeometry* geometry);
 
     class DLLExport MDWorkspace :  public IMDWorkspace
     {
@@ -72,16 +71,16 @@ namespace Mantid
       /// return ID specifying the workspace kind
       virtual const std::string id() const { return "MD-Workspace"; }
       ///
-      virtual unsigned int getNumDims(void) const{return m_spGeometry->getNumDims();}
+      virtual unsigned int getNumDims(void) const{return m_spImageData->getGeometry()->getNumDims();}
 
-      void init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry);
+      void init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
 
       virtual ~MDWorkspace(void){};
 
       /// read the the pixels corresponding to cells in the vector cell_num
       size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
 
-      boost::shared_ptr<Mantid::Geometry::MDGeometry> getGeometry() const;
+      Mantid::Geometry::MDGeometry const * const getGeometry() const;
 
       void alloc_mdd_arrays(const MDGeometryDescription &transf){m_spImageData->alloc_mdd_arrays(transf);}
       /// identify proper file reader which corresponds to the file name and read memory resident part of the workspace into memory
@@ -92,17 +91,17 @@ namespace Mantid
       void write_mdd();
       /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
       //    bool write_mdd(void);
-      boost::shared_ptr<Mantid::Geometry::MDGeometry const>        get_const_spMDGeometry() const {return m_spGeometry;}
+      Mantid::Geometry::MDGeometry const * const       get_const_spMDGeometry() const {return m_spImageData->getGeometry();}
       boost::shared_ptr<Mantid::MDDataObjects::MDImageData const>  get_const_spMDImage()  const {return m_spImageData;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints const> get_const_spMDDPoints() const {return m_spDataPoints;}
 
-      boost::shared_ptr<Mantid::Geometry::MDGeometry>       get_spMDGeometry(){return m_spGeometry;}
+      //Mantid::Geometry::MDGeometry const * const       get_spMDGeometry(){return m_spImageData->getGeometry();}
       boost::shared_ptr<Mantid::MDDataObjects::MDImageData> get_spMDImage()  {return m_spImageData;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
     private:
       static Kernel::Logger& g_log;
 
-      boost::shared_ptr<Mantid::Geometry::MDGeometry> m_spGeometry;
+     
       boost::shared_ptr<Mantid::MDDataObjects::MDImageData> m_spImageData;
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> m_spDataPoints;
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;

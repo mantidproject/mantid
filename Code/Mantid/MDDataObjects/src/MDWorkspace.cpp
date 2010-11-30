@@ -6,23 +6,23 @@ namespace Mantid{
   namespace MDDataObjects{
 
      //Seam method.
-     boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry, boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile)
+     boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImageData> imageData)
      {
-       return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(spGeometry)); //TODO replace with some other factory call.
+       return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(imageData)); //TODO replace with some other factory call.
      }
 
      //Seam method.
-     boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry, boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile)
+     boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(Mantid::Geometry::MDGeometry* geometry)
      {
-       return boost::shared_ptr<Mantid::MDDataObjects::MDImageData>(new MDImageData(spGeometry));
+       return boost::shared_ptr<Mantid::MDDataObjects::MDImageData>(new MDImageData(geometry));
      }
 
-     void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, boost::shared_ptr<Mantid::Geometry::MDGeometry> spGeometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
+     void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
      {
        this->m_spFile = spFile;
-       this->m_spGeometry = spGeometry;
-       this->m_spDataPoints = getDataPoints(m_spGeometry, m_spFile);
-       this->m_spImageData = getImageData(m_spGeometry, m_spFile);
+       this->m_spImageData = getImageData(geometry);
+       this->m_spDataPoints = getDataPoints(m_spImageData); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
+       
      }
 
     // Register the workspace into the WorkspaceFactory
@@ -64,10 +64,10 @@ namespace Mantid{
       return this->m_spFile->read_pix_subset(*m_spImageData,cells_nums,start_cell,pix_buf,n_pix_in_buffer);
     } 
 
-    boost::shared_ptr<Mantid::Geometry::MDGeometry> 
+    Mantid::Geometry::MDGeometry const * const
       MDWorkspace::getGeometry() const
     {
-      return this->m_spGeometry; 
+      return this->m_spImageData->getGeometry();
     }
 
     long MDWorkspace::getMemorySize(void) const
@@ -92,7 +92,7 @@ namespace Mantid{
 
     Mantid::Geometry::IMDDimension* MDWorkspace::getDimension(std::string id) const
     {
-      return this->m_spGeometry->getDimension(id,true);
+      return m_spImageData->getGeometry()->getDimension(id,true);
     }
 
     Mantid::Geometry::MDPoint * MDWorkspace::getPoint(int index) const
@@ -127,22 +127,22 @@ namespace Mantid{
 
     Mantid::Geometry::IMDDimension* MDWorkspace::getXDimension() const
     {
-      return & this->m_spGeometry->getXDimension();
+      return &m_spImageData->getGeometry()->getXDimension(); 
     }
 
     Mantid::Geometry::IMDDimension* MDWorkspace::getYDimension() const
     {
-     return & this->m_spGeometry->getYDimension();
+     return &m_spImageData->getGeometry()->getYDimension(); 
     }
 
     Mantid::Geometry::IMDDimension* MDWorkspace::getZDimension() const
     {
-      return & this->m_spGeometry->getZDimension();
+      return &m_spImageData->getGeometry()->getZDimension(); 
     }
 
      Mantid::Geometry::IMDDimension* MDWorkspace::gettDimension() const
     {
-     return & this->m_spGeometry->getTDimension();
+     return &m_spImageData->getGeometry()->getTDimension(); 
     }
 
 } // namespace

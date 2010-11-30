@@ -47,7 +47,7 @@ namespace Mantid{
     }
     //
     void 
-      MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
+      MDGeometry::reinit_Geometry(const MDGeometryDescription &trf, unsigned int nReciprocalDims)
     {
       this->reinit_Geometry(trf.getDimensionsTags());
       this->setRanges(trf);
@@ -72,7 +72,7 @@ namespace Mantid{
 
     //
     void 
-      MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags)
+      MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags, unsigned int nReciprocalDims)
     {
 
  
@@ -314,7 +314,6 @@ MDGeometry::init_empty_dimensions()
     this->n_expanded_dim=0;
 
  }
-
 
     MDGeometry::~MDGeometry(void)
     {

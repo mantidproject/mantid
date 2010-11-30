@@ -77,8 +77,6 @@ namespace Mantid
 
       /// function checks if the ids supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
-      ///
-     
 
 
     private:
@@ -89,16 +87,16 @@ namespace Mantid
       /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
       unsigned int n_reciprocal_dimensions;
 
-      const std::set<MDBasisDimension> m_mdBasisDimensions;
+      std::set<MDBasisDimension> m_mdBasisDimensions;
       UnitCell m_cell;
-
-      /// it is unclear what is the meaning of =
-      MDGeometryBasis& operator=(const MDGeometryBasis&){return *this;}
 
       /// checks if nDimensions consistent with n_reciprocal_dimensions; throws if not
       void check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
 
       void checkInputBasisDimensions(const MDBasisDimension& dimension);
+
+      /// it is unclear what is the meaning of =
+      MDGeometryBasis& operator=(const MDGeometryBasis&);
     };
   } // namespace Geometry
 }  // namespace MANTID

@@ -32,6 +32,52 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
 {
     this->build_from_geometry(origin);
 }
+
+
+MDGeometryDescription::MDGeometryDescription(
+      std::vector<MDDimension> dimensions, 
+      const MDDimension& dimensionX, 
+      const MDDimension& dimensionY, 
+      const MDDimension& dimensionZ,
+      const MDDimension& dimensiont)
+{
+  this->nDimensions = dimensions.size();
+  this->data.resize(dimensions.size());
+  //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
+  std::vector<MDDimension>::iterator dimX = find(dimensions.begin(), dimensions.end(), dimensionX);
+  std::vector<MDDimension>::iterator dimY = find(dimensions.begin(), dimensions.end(), dimensionY);
+  std::vector<MDDimension>::iterator dimZ = find(dimensions.begin(), dimensions.end(), dimensionZ);
+  std::vector<MDDimension>::iterator dimT = find(dimensions.begin(), dimensions.end(), dimensiont);
+
+  createSlicingData(*dimX, 0);
+  createSlicingData(*dimY, 1);
+  createSlicingData(*dimZ, 2);
+  createSlicingData(*dimT, 3);
+
+ 
+  for(int i=3;i<dimensions.size();i++) 
+  {
+    createSlicingData(dimensions[i], i);
+  }
+}
+
+void MDGeometryDescription::createSlicingData(const MDDimension& dimension, const int i)
+{
+  this->data[i].Tag            = dimension.getDimensionId();
+  this->data[i].trans_bott_left= 0;
+  this->data[i].cut_min        = dimension.getMinimum();
+  this->data[i].cut_max        = dimension.getMaximum()*(1+FLT_EPSILON);
+  this->data[i].nBins          = dimension.getNBins();
+  this->data[i].AxisName       = dimension.getName();
+
+  //Handle reciprocal dimensions.
+  if(dimension.isReciprocal())
+  {
+    this->coordinates[i].assign(3,0);
+    this->coordinates[i].at(i)= 1;
+  }
+}
+
 //
 void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)

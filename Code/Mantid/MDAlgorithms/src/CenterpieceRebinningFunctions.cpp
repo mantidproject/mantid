@@ -50,12 +50,11 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
 
    // get pointer to the image data;
    const MD_image_point  *const data   = Source.get_const_spMDImage()->get_const_pData();
-   boost::shared_ptr<MDGeometry const> pGeom = Source.get_const_spMDGeometry();
-   boost::shared_ptr<MDGeometry> pGeom = Source.getGeometry();
+   const MDGeometry * const pGeom = Source.getGeometry();
 
    // evaluate the capacity of the orthogonal dimensions;
    unsigned int  nReciprocal    = pGeom->getNumReciprocalDims();
-   unsigned int  nOrthogonal    = pGeom->getNumDims()-nReciprocal;
+   unsigned int  nOrthogonal    = pGeom->getNumDims() - nReciprocal;
 
    std::vector<MDDimension *> pAllDim  = pGeom->getDimensions();
    std::vector<MDDimension *> pOrthogonal(nOrthogonal,NULL);

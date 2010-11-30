@@ -20,8 +20,8 @@ namespace Mantid{
 void
 MDImageData::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;
-    if(this->m_pMDGeometry->getNumExpandedDims()>3){
-        selection.assign(this->m_pMDGeometry->getNumExpandedDims()-3,0);
+    if(this->m_pgeometry->getNumExpandedDims()>3){
+        selection.assign(this->m_pgeometry->getNumExpandedDims()-3,0);
     }else{
         selection.resize(0);
     }
@@ -33,7 +33,7 @@ void
 MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> &image_points)const
 {
     unsigned int selection_size  =  (unsigned int )selection.size();
-    if(selection_size >this->m_pMDGeometry->getNumExpandedDims()){
+    if(selection_size >this->m_pgeometry->getNumExpandedDims()){
         throw(std::invalid_argument("MDImaegData::getPointData: selection-> attempting to select more dimensions then there are expanded dimensions"));
     }
     unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
@@ -41,9 +41,9 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
     MDDimension *pDim;
 
     // calculate shift for all selected dimensions;
-    int the_expanded_dim= this->m_pMDGeometry->getNumExpandedDims()-1;
+    int the_expanded_dim= this->m_pgeometry->getNumExpandedDims()-1;
     for(int iii=selection_size-1;iii>=0;iii--){
-        pDim = this->m_pMDGeometry->getDimension(the_expanded_dim);
+        pDim = this->m_pgeometry->getDimension(the_expanded_dim);
         if(selection[iii]>=pDim->getNBins()){
             isel=pDim->getNBins()-1;
         }else{
@@ -60,7 +60,7 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
     size_t   rez_size(0);
     if(the_expanded_dim>=0){
         iMin=0;
-        iMax=this->m_pMDGeometry->getDimension(0)->getNBins();
+        iMax=this->m_pgeometry->getDimension(0)->getNBins();
         rez_size = iMax;
     }else{
         iMin=selection[current_selected_dimension];
@@ -69,12 +69,12 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
         current_selected_dimension++;
     }
     std::vector<double> xx;
-    this->m_pMDGeometry->getDimension(0)->getAxisPoints(xx);
+    this->m_pgeometry->getDimension(0)->getAxisPoints(xx);
 
 
     if(the_expanded_dim>0){
         jMin=0;
-        jMax=this->m_pMDGeometry->getDimension(1)->getNBins();
+        jMax=this->m_pgeometry->getDimension(1)->getNBins();
         rez_size *= jMax;
     }else{
         jMin=selection[current_selected_dimension];
@@ -82,11 +82,11 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
         current_selected_dimension++;
     }
     std::vector<double> yy;
-    this->m_pMDGeometry->getDimension(1)->getAxisPoints(yy);
+    this->m_pgeometry->getDimension(1)->getAxisPoints(yy);
 
     if(the_expanded_dim>1){
         kMin=0;
-        kMax=this->m_pMDGeometry->getDimension(2)->getNBins();
+        kMax=this->m_pgeometry->getDimension(2)->getNBins();
         rez_size *= kMax;
     }else{
         kMin=selection[current_selected_dimension];
@@ -94,7 +94,7 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
         current_selected_dimension++;
     }
     std::vector<double> zz;
-    this->m_pMDGeometry->getDimension(2)->getAxisPoints(zz);
+    this->m_pgeometry->getDimension(2)->getAxisPoints(zz);
 
 // build full array of 3D points
 
@@ -170,18 +170,18 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
 
    // all paxis in the transformation matrix have to be defined properly and in accordance with the transformation data.
    // also sets the the dimension limits and object limits as the limits from transf class
-   this->m_pMDGeometry->reinit_Geometry(transf);
+   this->m_pgeometry->reinit_Geometry(transf);
 
    
-   this->MDStruct.dimSize.assign(this->m_pMDGeometry->getNumDims(),0);
+   this->MDStruct.dimSize.assign(this->m_pgeometry->getNumDims(),0);
    this->MDStruct.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
     MDDimension *pDim;
     this->MDStruct.dimStride[0] = 0;
     this->MDStruct.data_size    = 1;
     size_t  stride(1);
-    for(i=0;i<this->m_pMDGeometry->getNumDims();i++){
-      pDim                 = this->m_pMDGeometry->getDimension(i);
+    for(i=0;i<this->m_pgeometry->getNumDims();i++){
+      pDim                 = this->m_pgeometry->getDimension(i);
         stride               = pDim->getStride();
         this->MDStruct.dimSize[i]    =  pDim->getNBins();
         this->MDStruct.data_size     *= this->MDStruct.dimSize[i];
@@ -227,19 +227,19 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
         this->pData[j].err =0;
         this->pData[j].npix=0;
     }
-    this->MDStruct.min_value.assign(this->m_pMDGeometry->getNumDims(), FLT_MAX);
-    this->MDStruct.max_value.assign(this->m_pMDGeometry->getNumDims(),-FLT_MAX);
+    this->MDStruct.min_value.assign(this->m_pgeometry->getNumDims(), FLT_MAX);
+    this->MDStruct.max_value.assign(this->m_pgeometry->getNumDims(),-FLT_MAX);
     
 
 }
 
 //
-MDImageData::MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry):
-m_pMDGeometry(spMDGeometry),
+MDImageData::MDImageData(Mantid::Geometry::MDGeometry* pGeometry): 
+m_pgeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry)),
 pData(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
 {
-  int nDims = m_pMDGeometry->getNumDims();
+  int nDims = m_pgeometry->getNumDims();
   if( nDims >MAX_MD_DIMS_POSSIBLE){
     throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
   }
@@ -259,10 +259,10 @@ MDImageData::~MDImageData()
 std::vector<size_t>
 MDImageData::getStrides(void)const
 {
-  unsigned int nDims = this->m_pMDGeometry->getNumDims();
+  unsigned int nDims = this->m_pgeometry->getNumDims();
   std::vector<size_t> strides(nDims,0);
   for(unsigned int i=0;i<nDims;i++){
-    strides[i] = m_pMDGeometry->getDimension(i)->getStride();
+    strides[i] = m_pgeometry->getDimension(i)->getStride();
   }
   return strides;
 
@@ -291,10 +291,10 @@ MDImageData::clear_class(void)
         pData = NULL;
         //MDStruct.data = NULL;
     }
-    this->MDStruct.dimSize.assign(this->m_pMDGeometry->getNumDims(),0);
-    this->MDStruct.dimStride.assign(this->m_pMDGeometry->getNumDims()+1,0);
-    this->MDStruct.min_value.assign(this->m_pMDGeometry->getNumDims(), FLT_MAX);
-    this->MDStruct.max_value.assign(this->m_pMDGeometry->getNumDims(),-FLT_MAX);
+    this->MDStruct.dimSize.assign(this->m_pgeometry->getNumDims(),0);
+    this->MDStruct.dimStride.assign(this->m_pgeometry->getNumDims()+1,0);
+    this->MDStruct.min_value.assign(this->m_pgeometry->getNumDims(), FLT_MAX);
+    this->MDStruct.max_value.assign(this->m_pgeometry->getNumDims(),-FLT_MAX);
 
 
 }

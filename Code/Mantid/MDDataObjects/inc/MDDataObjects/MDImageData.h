@@ -70,7 +70,7 @@ class DLLExport MDImageData
 public:
 
     // default constructor
-  MDImageData(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry);
+  MDImageData(Mantid::Geometry::MDGeometry* p_geometry);
     // destructor
     ~MDImageData();
     /** function returns vector of points left after the selection has been applied to the multidimensinal dataset
@@ -86,6 +86,8 @@ public:
     size_t getDataSize(void)const{return MDStruct.data_size;}
     /// returns dimension strides e.g. the changes of a position in 1D array when an M-th dimension index changes by 1;
     std::vector<size_t> getStrides(void)const;
+
+    const MDGeometry * const getGeometry() const { return m_pgeometry.get(); }
  //******************************************************************************************************
 //******************************************************************************************************
    virtual void initialize(const Geometry::MDGeometryDescription &Description){
@@ -145,7 +147,7 @@ public:
 private:
   //*************************************************
 
-  boost::shared_ptr<MDGeometry> m_pMDGeometry;
+  std::auto_ptr<MDGeometry> m_pgeometry;
   // probably temporary
   MDImageData & operator = (const MDImageData & other);
   // copy constructor;

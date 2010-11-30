@@ -1,6 +1,6 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDDataPoints.h"
-
+#include "MDDataObjects/MDImageData.h"
                
 namespace Mantid{
     namespace MDDataObjects{
@@ -11,8 +11,8 @@ namespace Mantid{
  // default names for signal and error fields
  const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
 
-MDDataPoints::MDDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry):
-m_spMDGeometry(spMDGeometry),
+MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImageData> spImage):
+m_spImageData(spImage),
 memBased(false),
 n_data_points(0),
 n_fields(9),
@@ -20,13 +20,13 @@ data_buffer_size(0),
 data_buffer(NULL)
 {
   
-  std::vector<std::string> dim_tags= m_spMDGeometry->getBasisTags();
+  std::vector<std::string> dim_tags= m_spImageData->getGeometry()->getBasisTags();
   std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);
   this->field_tag.reserve(n_fields);
   this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
   this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
 
-  int nDims = m_spMDGeometry->getNumDims();
+  int nDims = m_spImageData->getGeometry()->getNumDims();
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);
 }
@@ -77,7 +77,7 @@ MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
       return;
     }
   }
-  unsigned int nDims = this->m_spMDGeometry->getNumDims();
+  unsigned int nDims = this->m_spImageData->getGeometry()->getNumDims();
 
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);

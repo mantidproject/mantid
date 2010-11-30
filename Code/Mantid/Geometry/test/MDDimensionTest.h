@@ -163,6 +163,21 @@ public:
           TS_ASSERT_DELTA(e0[2],0,FLT_EPSILON);
 
     }
+
+    void testEquivalent()
+    {
+      MDDimension a("a");
+      MDDimension b("a");
+      TSM_ASSERT("Equivelant comparison failed", a == b);
+    }
+
+    void testNotEquivalent()
+    {
+      MDDimension a("a");
+      MDDimension b("b");
+      TSM_ASSERT("Not Equivelant comparison failed", a != b);
+    }
+
     testMDDimension():pResDim(NULL),pOrtDim(NULL){}
     ~testMDDimension(){
         if(pResDim)delete pResDim;

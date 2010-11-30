@@ -141,6 +141,16 @@ MDDimension::setIntegrated(double rxMin, double rxMax)
     this->setIntegrated();
 }
 
+bool MDDimension::operator==(const MDDimension& other) const
+{
+  return this->dimTag == other.dimTag;
+}
+
+bool MDDimension::operator!=(const MDDimension& other) const
+{
+  return this->dimTag != other.dimTag;
+}
+
 MDDimension::~MDDimension()
 {
 }

@@ -89,6 +89,9 @@ public:
     virtual bool isReciprocal(void)const{return false;}
    
     MDDimension(const std::string &ID);
+
+    bool operator==(const MDDimension& other) const;
+    bool operator!=(const MDDimension& other) const;
 protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
@@ -142,7 +145,8 @@ private:
     double latticeParam;
 
    // *************  should be prohibited?:
-    MDDimension(const MDDimension &);
+    //MDDimension(const MDDimension &);
+
     MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);

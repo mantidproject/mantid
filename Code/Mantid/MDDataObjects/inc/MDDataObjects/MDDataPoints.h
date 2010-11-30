@@ -37,11 +37,11 @@ namespace Mantid{
   
 //**********************************************************************************************************************
 
-
+      class MDImageData;
       class DLLExport MDDataPoints
       {
       public:
-        MDDataPoints(boost::shared_ptr<Mantid::Geometry::MDGeometry> spMDGeometry);
+        MDDataPoints(boost::shared_ptr<const MDImageData> pImageData);
         ~MDDataPoints();
        
         /// check if the pixels are all in memory;
@@ -91,7 +91,7 @@ namespace Mantid{
         MDDataPoints(const MDDataPoints& p);
         MDDataPoints & operator = (const MDDataPoints & other);
 
-        boost::shared_ptr<Mantid::Geometry::MDGeometry> m_spMDGeometry;
+        boost::shared_ptr<const MDImageData> m_spImageData; //Allows access to current geometry owned by MDImageData.
 
           static Kernel::Logger& g_log;
       };
