@@ -8,6 +8,7 @@ class PDInfo:
         self.can = data[1]
         self.tmin = data[2] * 1000. # convert to microseconds
         self.tmax = data[3] * 1000.
+        self.bank = 1
 
 class PDConfigFile(object):
     def __init__(self, filename):
@@ -158,9 +159,9 @@ class SNSPowderReduction(PythonAlgorithm):
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.tmin, self._delta, info.tmax])
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace="temp") # TODO should be in place
+        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=[info.tmin, self._delta, info.tmax]) # TODO should be done in place
+        NormaliseByCurrent(InputWorkspace="temp", OutputWorkspace="temp") # TODO should be in place
         RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(wksp))
         return wksp
 
@@ -180,10 +181,10 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)        
 
-    def _save(self, wksp):
+    def _save(self, wksp, info, normalized):
         filename = os.path.join(self._outDir, str(wksp))
         if "gsas" in self._outTypes:
-            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False)
+            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByBinWidth=normalized, Bank=info.bank)
         if "fullprof" in self._outTypes:
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
 
@@ -236,8 +237,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     vanRun = self._loadData(info.van, SUFFIX)
                     vanRun = self._focus(vanRun, calib, info)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
-                    #RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(vanRun))
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace="temp", PeakWidthPercent=self._vanPeakWidthPercent)
+                    RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(vanRun))
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     SmoothData(InputWorkspace=vanRun, OutputWorkspace=vanRun, NPoints=self._vanSmoothPoints)
             else:
@@ -248,8 +249,11 @@ class SNSPowderReduction(PythonAlgorithm):
                 samRun -= canRun
             if vanRun is not None:
                 samRun /= vanRun
+                normalized = True
+            else:
+                normalized = False
 
             # write out the files
-            self._save(samRun)
+            self._save(samRun, info, normalized)
 
 mtd.registerPyAlgorithm(SNSPowderReduction())
