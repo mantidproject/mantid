@@ -200,7 +200,7 @@ public:
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
   void testExec_Event_2DSingleSpectrum()
@@ -211,7 +211,7 @@ public:
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
   void testExec_Event_2DSingleSpectrumBiggerSize()
@@ -223,7 +223,7 @@ public:
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
   void testExec_Event_SingleValue()
@@ -234,7 +234,7 @@ public:
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
   void testExec_Event_SingleValueNoError()
@@ -253,7 +253,7 @@ public:
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
   void testExec_SingleValue_Event_fails()
