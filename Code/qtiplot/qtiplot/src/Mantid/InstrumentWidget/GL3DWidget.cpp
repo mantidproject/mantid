@@ -364,6 +364,8 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
   if( iInteractionMode == GL3DWidget::PickMode && (event->buttons() & Qt::LeftButton) )
   { 
     setCursor(Qt::CrossCursor);
+    QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
+    emit actorHighlighted(tmpColor);
     mPickBox->mousePressed(event->buttons(), event->pos());
     return;
   } //end of pick mode and start of normal mode

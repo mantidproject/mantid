@@ -63,25 +63,28 @@ public:
     int operator()(const int someDetID) const{return getIndexOf(someDetID);}
     /// Get pointers to the workspace that contain informtion about detectors
     DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace=Mantid::API::MatrixWorkspace_const_sptr(), const std::vector<double> * const counts=NULL);
-    /// set the object to contain data for only one detector
-    void setDet(const int detID);
-    /** specify a range of detectors by giving the id of a detector at the end of the range
-    *  @param detID id number of detector to add
-    */
-    void setEndRange(const int detID) {m_lastDet = detID;}
+
+    void setDet(const int detID);                                 ///< set up the object to contain data for only one detector
+    void setEndRange(const int detID);                            ///< for a detector with at least one detector set the detector for the end of the range
     QString display() const;                                      ///< Creates a string with the object's data in a human readable form
   private:
-    static const int NO_INDEX = -1;                               ///< Value used to indicaate missing ddata, detectors, spectra, etc...
-    Mantid::API::MatrixWorkspace_const_sptr m_workspace;
-    const std::vector<double> * m_integrals;
-    boost::shared_ptr<const Mantid::API::IndexToIndexMap> m_detID_to_wi_map;
+    static const int NO_INDEX = -1;                               ///< Value used to indicate missing data, detectors, spectra, etc...
+    static const int ERROR_FLAG = -2;                             ///< flags missing values but indicates an inconsistency in the data state
+    Mantid::API::MatrixWorkspace_const_sptr m_workspace;          ///< All data refer to this workspace
+    const std::vector<double> * m_integrals;                      ///< the integral of each spectra
+    boost::shared_ptr<const Mantid::API::IndexToIndexMap> m_detID_to_wi_map;///< used to get workspace indices from detector IDs
     int m_firstDet;                                               ///< id number of the detector that was selected first
     int m_lastDet;                                                ///< if more than one detector is selected this is the id number of the one selected last otherwise the NO_DATA value
 
     int getIndexOf(const int someDetID) const;                    ///< Gets the index number of the spectrum for the given detector
-    void printDetData(std::ostringstream & output) const;         ///< Retrieves information about the deteector's location and associated spectra
+    void printSpectrum(const int index, std::ostringstream & output) const;///< Retrieves information about the spectrum whose index was passed
+    void Instrument3DWidget::DetInfo::printLocation(std::ostringstream & output) const;///< Writes the location of the detectors
     void printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const;///< Writes a position vector in a nice way
-
+    /** Returns true only if the value passed can't be missing data
+    *  @param testVal the data value to check
+    *  @return if there are no error flags returns true
+    */
+    bool is_good(const int testVal) const { return testVal > NO_INDEX; }
   };
 
   Instrument3DWidget(QWidget* parent=0); ///< Constructor
