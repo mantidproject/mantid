@@ -132,7 +132,7 @@ MDImageData::get_pData(void)
     if(pData){
         return pData;
     }else{
-        throw(std::bad_alloc("Data memory for Multidimensional dataset has not been allocated"));
+		throw(std::runtime_error("Data memory for Multidimensional dataset has not been allocated"));
     }
 }
 MD_image_point const*
@@ -141,7 +141,7 @@ MDImageData::get_const_pData(void)const
     if(pData){
         return pData;
     }else{
-        throw(std::bad_alloc("Data memory for Multidimensional dataset has not been allocated"));
+		throw(std::runtime_error("Data memory for Multidimensional dataset has not been allocated"));
     }
 }
 /*
@@ -218,7 +218,7 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 // allocate main data array;
     pData = new MD_image_point[MDStruct.data_size];
     if (!pData){
-        throw(std::bad_alloc("Can not allocate memory to keep Multidimensional dataset"));
+		throw(std::runtime_error("Can not allocate memory to keep Multidimensional dataset"));
     }
     MDStruct.data  = pData;
 

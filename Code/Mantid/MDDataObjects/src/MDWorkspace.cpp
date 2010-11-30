@@ -49,7 +49,7 @@ namespace Mantid{
       if(this->m_spFile.get()){
         m_spFile->read_pix(*m_spDataPoints);
       }else{
-        throw(std::bad_alloc("read_pix: file reader has not been defined"));
+		  throw(std::runtime_error("read_pix: file reader has not been defined"));
       }
 
 
@@ -59,7 +59,7 @@ namespace Mantid{
       MDWorkspace::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
     {
       if(!this->m_spFile.get()){
-        throw(std::bad_alloc("MDPixels::read_selected_pix: file reader has not been defined"));
+		  throw(std::runtime_error("MDPixels::read_selected_pix: file reader has not been defined"));
       }
       return this->m_spFile->read_pix_subset(*m_spImageData,cells_nums,start_cell,pix_buf,n_pix_in_buffer);
     } 
@@ -80,7 +80,7 @@ namespace Mantid{
       if(this->m_spFile.get()){
          this->m_spFile->write_mdd(*m_spImageData);
       }else{
-          throw(std::bad_alloc("MDPixels::read_selected_pix: file reader has not been defined"));
+		  throw(std::runtime_error("MDPixels::read_selected_pix: file reader has not been defined"));
       }
     }
 

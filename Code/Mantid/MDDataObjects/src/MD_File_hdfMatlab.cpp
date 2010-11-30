@@ -179,7 +179,7 @@ MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
 
     hsize_t arr_dims_buf_[MAX_MD_DIMS_POSSIBLE];
     arr_dims_buf_[0] = 3;
-    hid_t   memtype = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, arr_dims_buf_);
+    hid_t   memtype = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, arr_dims_buf_);
 
 /* TO DO: write this check!!!
     // check if the datasize has been calculated properly
@@ -280,7 +280,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     char *pix_array = (char *)sqw.get_pBuffer();
     if(!pix_array){
       f_log.fatal()<<" pixel array has not been properly allocated\n";
-      throw(std::bad_alloc("pixels array has not been allocated properly"));
+	  throw(std::runtime_error("pixels array has not been allocated properly"));
     }
     size_t n_pix_inDataset  = this->getNPix();
   

@@ -116,7 +116,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;$(SolutionName)API.lib;boost_python-vc100-mt-gyd-1_43.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName)_d.pyd</OutputFile>
-      <AdditionalLibraryDirectories>../debug;c:\Python25\libs;c:\Mantid\Code\Third_Party\lib\win64\Python25;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;c:\Python25\libs;..\..\Third_Party\lib\win64\Python25;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
