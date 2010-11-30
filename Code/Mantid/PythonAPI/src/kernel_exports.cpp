@@ -12,6 +12,7 @@
 #include<MantidKernel/MandatoryValidator.h>
 #include<MantidKernel/ListValidator.h>
 #include<MantidKernel/Logger.h>
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -194,6 +195,18 @@ namespace PythonAPI
       ;
   }
 
+  void export_units()
+  {
+    //
+    register_ptr_to_python<Mantid::Kernel::Unit_sptr>();
+    // Class Object & Methods
+    class_<Mantid::Kernel::Unit, boost::noncopyable >("MantidUnit", no_init)
+      .def("name", &Mantid::Kernel::Unit::unitID)
+      .def("label", &Mantid::Kernel::Unit::label)
+      .def("caption", &Mantid::Kernel::Unit::caption)
+      ;
+  }
+
   void export_kernel_namespace()
   {
     export_property();
@@ -202,6 +215,7 @@ namespace PythonAPI
     export_instrumentinfo();
     export_facilityinfo();
     export_configservice();
+    export_units();
   }
   
   //@endcond

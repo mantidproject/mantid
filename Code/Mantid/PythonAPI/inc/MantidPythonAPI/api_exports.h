@@ -14,6 +14,10 @@
 #include <boost/python.hpp>
 #include <iostream>
 
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/TextAxis.h"
+
 namespace Mantid
 {
   
@@ -133,8 +137,38 @@ namespace PythonAPI
 
   };
 
+  /**
+  * Creates a NumericAxis
+  * @param number of elements in the axis
+  * @return pointer to the axis object
+  */
+  Mantid::API::Axis* createNumericAxis(int length)
+  {
+    return new Mantid::API::NumericAxis(length);
+  }
+  /**
+  * Creates a SpectraAxis
+  * @param number of elements in the axis
+  * @return pointer to the axis object
+  */
+  Mantid::API::Axis* createSpectraAxis(int length)
+  {
+    return new Mantid::API::SpectraAxis(length);
+  }
+  /**
+  * Creates a TextAxis
+  * @param number of elements in the axis
+  * @return pointer to the axis object
+  */
+  Mantid::API::Axis* createTextAxis(int length)
+  {
+    return new Mantid::API::TextAxis(length);
+  }
+
   //@endcond
-}
-}
+
+
+} // namespace PythonAPI
+} // namespace Mantid
 
 #endif //MANTIDPYTHONAPI_API_EXPORTS_H_

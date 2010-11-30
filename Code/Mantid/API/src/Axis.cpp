@@ -55,6 +55,14 @@ Kernel::Unit_sptr& Axis::unit()
 {
   return m_unit;
 }
+/**
+* Sets the Unit that is in use on this axis.
+* @param unit name of the unit as known to the UnitFactory
+*/
+void Axis::setUnit(const std::string & unit)
+{
+  m_unit = Mantid::Kernel::UnitFactory::Instance().create(unit);
+}
 
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required

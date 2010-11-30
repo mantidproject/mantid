@@ -194,6 +194,9 @@ namespace PythonAPI
       .def("getDetector", &API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::run, return_internal_reference<>() )
       .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
+      .def("getNumberAxes", &API::MatrixWorkspace::axes)
+      .def("getAxis", &API::MatrixWorkspace::getAxis, return_internal_reference<>())
+      .def("replaceAxis", &API::MatrixWorkspace::replaceAxis)
       //Special methods
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
@@ -257,6 +260,43 @@ namespace PythonAPI
       .def("add", &API::WorkspaceGroup::add)
       .def("remove", &API::WorkspaceGroup::remove)
       ;
+  }
+
+  void export_axis()
+  {
+    // Pointer
+    register_ptr_to_python<API::Axis*>();
+
+    // Class
+    class_< API::Axis, boost::noncopyable >("MantidAxis", no_init)
+      .def("title", (std::string & (Mantid::API::Axis::*)() ) &API::Axis::title, return_internal_reference<>())
+      .def("isSpectra", & API::Axis::isSpectra)
+      .def("isNumeric", & API::Axis::isNumeric)
+      .def("isText", & API::Axis::isText)
+      .def("label", & API::Axis::label)
+      .def("getUnit", (const Mantid::Kernel::Unit_sptr & (Mantid::API::Axis::*)() const) &API::Axis::unit, return_value_policy<copy_const_reference>() )
+      .def("setUnit", & API::Axis::setUnit)
+      ;
+
+    // Numeric Axis subclass
+    class_< API::NumericAxis, bases<API::Axis>, boost::noncopyable >("NumericAxis", no_init)
+      .def("setValue", & API::NumericAxis::setValue)
+      ;
+    // Spectra Axis subclass
+    class_< API::SpectraAxis, bases<API::Axis>, boost::noncopyable >("SpectraAxis", no_init)
+      .def("spectraNumber", (const int & (Mantid::API::SpectraAxis::*)(const int &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() ) // (const int & (Mantid::API::SpectraAxis::*)() const) 
+      .def("setValue", & API::SpectraAxis::setValue)
+      .def("populateSimple", & API::SpectraAxis::populateSimple)
+      ;
+    // Text Axis subclass
+    class_< API::TextAxis, bases<API::Axis>, boost::noncopyable >("TextAxis", no_init)
+      .def("setValue", & API::TextAxis::setLabel)
+      .def("getValue", & API::TextAxis::label)
+      ;
+    // Axis creation helpers
+    def("createNumericAxis", & Mantid::PythonAPI::createNumericAxis, return_internal_reference<>());
+    def("createSpectraAxis", & Mantid::PythonAPI::createSpectraAxis, return_internal_reference<>());
+    def("createTextAxis", & Mantid::PythonAPI::createTextAxis, return_internal_reference<>());
   }
   
   void export_sample()
@@ -374,6 +414,7 @@ namespace PythonAPI
     export_matrixworkspace();
     export_tableworkspace();
     export_workspacegroup();
+    export_axis();
     export_sample();
     export_run();
     export_workspace_property();
@@ -383,5 +424,6 @@ namespace PythonAPI
     export_file_finder();
   }
   //@endcond
-}
-}
+
+} // namespace PythonAPI
+} // namespace Mantid
