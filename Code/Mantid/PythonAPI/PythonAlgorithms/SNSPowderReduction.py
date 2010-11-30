@@ -4,11 +4,11 @@ import os
 
 class PDInfo:
     def __init__(self, data):
-        self.van = data[0]
-        self.can = data[1]
-        self.tmin = data[2] * 1000. # convert to microseconds
-        self.tmax = data[3] * 1000.
-        self.bank = 1
+        self.bank = int(data[0])
+        self.van = int(data[1])
+        self.can = int(data[2])
+        self.tmin = data[3] * 1000. # convert to microseconds
+        self.tmax = data[4] * 1000.
 
 class PDConfigFile(object):
     def __init__(self, filename):
@@ -21,12 +21,7 @@ class PDConfigFile(object):
         if line.startswith('#') or len(line.strip()) <= 0:
             return
         data = line.strip().split()
-        float_items = (1,4,5)
-        int_items = (0,2,3)
-        for i in float_items:
-            data[i] = float(data[i])
-        for i in int_items:
-            data[i] = int(data[i])
+        data = [float(i) for i in data]
         if data[0] not in self._data.keys():
             self._data[data[0]]={}
         self._data[data[0]][data[1]]=PDInfo(data[2:])
