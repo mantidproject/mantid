@@ -53,6 +53,7 @@ class Instrument3DWidget : public GL3DWidget
   enum Handedness { LEFT, RIGHT };
 
 public:
+
   /// Contains summary information about detectors for display to users
   class DetInfo : public std::unary_function<int, int>
   {
@@ -78,7 +79,7 @@ public:
 
     int getIndexOf(const int someDetID) const;                    ///< Gets the index number of the spectrum for the given detector
     void printSpectrum(const int index, std::ostringstream & output) const;///< Retrieves information about the spectrum whose index was passed
-    void Instrument3DWidget::DetInfo::printLocation(std::ostringstream & output) const;///< Writes the location of the detectors
+    void printLocation(std::ostringstream & output) const;///< Writes the location of the detectors
     void printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const;///< Writes a position vector in a nice way
     /** Returns true only if the value passed can't be missing data
     *  @param testVal the data value to check
