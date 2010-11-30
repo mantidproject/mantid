@@ -301,7 +301,7 @@ public:
   void multiply(const double value, const double error);
   EventList& operator*=(const double value);
 
-  void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E, bool divide = false);
+  void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
 
   void divide(const double value);
   void divide(const double value, const double error);

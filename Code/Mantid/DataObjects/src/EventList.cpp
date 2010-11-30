@@ -1517,9 +1517,6 @@ using Kernel::DateAndTime;
     std::vector<WeightedEvent>::iterator itev;
     for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
     {
-//      itev->m_errorSquared = (value * itev->m_errorSquared / itev->m_weight);
-//      itev->m_weight *= value;
-
       itev->m_errorSquared = (itev->m_errorSquared * valSquared);
       itev->m_weight *= value;
     }
@@ -1561,7 +1558,7 @@ using Kernel::DateAndTime;
    *
    * \f$ \rho_{AB} \f$ is the covariance between A and B, which we take to be 0 (uncorrelated variables).
    * Therefore, this reduces to:
-   * \f[ \sigma_{AB}^2 = B \sigma_A^2 / A + A \sigma_B ^ 2 / B \f]
+   * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
    *
    * @param value: multiply all weights by this amount.
    * @param error: error on 'value'. Can be 0.
@@ -1578,18 +1575,13 @@ using Kernel::DateAndTime;
     this->switchToWeightedEvents();
 
     //Square of the value's error
-    double valErrorSquared = error * error;
-    double valErrorSquared_over_value;
-    if (value == 0)
-      valErrorSquared_over_value = 0;
-    else
-      valErrorSquared_over_value = valErrorSquared / value;
-
+    double errorSquared = error * error;
+    double valueSquared = value * value;
 
     std::vector<WeightedEvent>::iterator itev;
     for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
     {
-      itev->m_errorSquared = (value * itev->m_errorSquared / itev->m_weight) + (itev->m_weight * valErrorSquared_over_value);
+      itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
       itev->m_weight *= value;
     }
   }
@@ -1601,19 +1593,16 @@ using Kernel::DateAndTime;
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
    *
    * The formula used for calculating the error on the neutron weight is:
-   * \f[ \sigma_{AB}^2 = B \sigma_A^2 / A + A \sigma_B ^ 2 / B \f]
+   * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
    * ... where A is the weight, and B is the scalar multiplier for the histogram bin that A is in,
    *  \f$\sigma_X \f$ is the variance of the given variable:
    *
    * @param X: bins of the multiplying histogram.
    * @param Y: value to multiply the weights.
    * @param E: error on the value to multiply.
-   * @param divide: set to true to actually divide by the value in the histogram. Default false.
-   *        Each value B in the bin B is converted to \f$ C = 1/B \f$,
-   *        with \f$ \sigma_C = \frac{\sigma_B}{B^2} \f$
    * @throw invalid_argument if the sizes of X, Y, E are not consistent.
    */
-  void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E, bool divide)
+  void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
     //Validate inputs
     if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
@@ -1637,7 +1626,8 @@ using Kernel::DateAndTime;
     //Multiplier values
     double value;
     double error;
-    double valErrorSquared_over_value;
+    double valueSquared;
+    double errorSquared;
 
     //If the tof is greater the first bin boundary, so we need to find the first bin
     double tof = itev->tof();
@@ -1652,33 +1642,8 @@ using Kernel::DateAndTime;
     //New bin! Find what you are multiplying!
     value = Y[bin];
     error = E[bin];
-
-    if (divide)
-    {
-      // --- Division case ---
-      if (value == 0)
-      {
-        value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
-        error = 0;
-        valErrorSquared_over_value = 0;
-      }
-      else
-      {
-        error = error / (value * value); //(over original value!)
-        value = 1.0 / value; //Invert it
-        valErrorSquared_over_value = error * error / value;
-      }
-    }
-    else
-    {
-      // --- Multiplication case ---
-      if (value == 0)
-        valErrorSquared_over_value = 0;
-      else
-        valErrorSquared_over_value = error * error / value;
-    }
-
-
+    valueSquared = value*value;
+    errorSquared = error*error;
 
     //Keep going through all the events
     while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
@@ -1690,11 +1655,8 @@ using Kernel::DateAndTime;
         if ((tof >= X[bin]) && (tof < X[bin+1]))
         {
           //Process this event. Multilpy and calculate error.
-          itev->m_errorSquared = (value * itev->m_errorSquared / itev->m_weight) + (itev->m_weight * valErrorSquared_over_value);
+          itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
           itev->m_weight *= value;
-
-//          itev->m_errorSquared = (itev->m_errorSquared * valSquared) + (itev->m_weight*itev->m_weight * valErrorSquared);
-//          itev->m_weight *= value;
           break; //out of the bin-searching-while-loop
         }
         ++bin;
@@ -1703,31 +1665,8 @@ using Kernel::DateAndTime;
         //New bin! Find what you are multiplying!
         value = Y[bin];
         error = E[bin];
-
-        if (divide)
-        {
-          // --- Division case ---
-          if (value == 0)
-          {
-            value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
-            error = 0;
-            valErrorSquared_over_value = 0;
-          }
-          else
-          {
-            error = error / (value * value); //(over original value!)
-            value = 1.0 / value; //Invert it
-            valErrorSquared_over_value = error * error / value;
-          }
-        }
-        else
-        {
-          // --- Multiplication case ---
-          if (value == 0)
-            valErrorSquared_over_value = 0;
-          else
-            valErrorSquared_over_value = error * error / value;
-        }
+        valueSquared = value*value;
+        errorSquared = error*error;
       }
       ++itev;
     }
@@ -1747,81 +1686,93 @@ using Kernel::DateAndTime;
    */
   void EventList::divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
-    this->multiply(X, Y, E, true);
+    //Validate inputs
+    if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
+      throw std::invalid_argument("EventList::divide() was given invalid size or inconsistent histogram arrays.");
+
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Sorting by tof is necessary for the algorithm
+    this->sortTof();
+    size_t x_size = X.size();
+
+    //Iterate through all events (sorted by tof)
+    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+    // The above can still take you to end() if no events above X[0], so check again.
+    if (itev == this->weightedEvents.end()) return;
+
+    //Find the first bin
+    size_t bin=0;
+
+    //Multiplier values
+    double value;
+    double error;
+    double valError_over_value_squared;
+
+    //If the tof is greater the first bin boundary, so we need to find the first bin
+    double tof = itev->tof();
+    while (bin < x_size-1)
+    {
+      //Within range?
+      if ((tof >= X[bin]) && (tof < X[bin+1]))
+        break; //Stop increasing bin
+      ++bin;
+    }
+
+    //New bin! Find what you are multiplying!
+    value = Y[bin];
+    error = E[bin];
+
+    // --- Division case ---
+    if (value == 0)
+    {
+      value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
+      error = 0;
+      valError_over_value_squared = 0;
+    }
+    else
+      valError_over_value_squared = error * error / (value * value);
+
+
+
+    //Keep going through all the events
+    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+    {
+      tof = itev->tof();
+      while (bin < x_size-1)
+      {
+        //Event is Within range?
+        if ((tof >= X[bin]) && (tof < X[bin+1]))
+        {
+          //Process this event. Divide and calculate error.
+          double newWeight = itev->m_weight / value;
+          itev->m_errorSquared = newWeight * newWeight *
+                                ((itev->m_errorSquared / (itev->m_weight*itev->m_weight)) + valError_over_value_squared);
+          itev->m_weight = newWeight;
+          break; //out of the bin-searching-while-loop
+        }
+        ++bin;
+        if( bin >= x_size - 1 ) break;
+
+        //New bin! Find what you are multiplying!
+        value = Y[bin];
+        error = E[bin];
+
+        // --- Division case ---
+        if (value == 0)
+        {
+          value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
+          error = 0;
+          valError_over_value_squared = 0;
+        }
+        else
+          valError_over_value_squared = error * error / (value * value);
+
+      }
+      ++itev;
+    }
   }
-//    //Validate inputs
-//    if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
-//      throw std::invalid_argument("EventList::multiply() was given invalid size or inconsistent histogram arrays.");
-//
-//    //Switch to weights if needed.
-//    this->switchToWeightedEvents();
-//
-//    //Sorting by tof is necessary for the algorithm
-//    this->sortTof();
-//    size_t x_size = X.size();
-//
-//    //Iterate through all events (sorted by tof)
-//    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
-//    // The above can still take you to end() if no events above X[0], so check again.
-//    if (itev == this->weightedEvents.end()) return;
-//
-//    //Find the first bin
-//    size_t bin=0;
-//
-//    //Multiplier values
-//    double value;
-//    double error;
-//    double valSquared;
-//    double valFourth;
-//    double valErrorSquared;
-//
-//    //If the tof is greater the first bin boundary, so we need to find the first bin
-//    double tof = itev->tof();
-//    while (bin < x_size-1)
-//    {
-//      //Within range?
-//      if ((tof >= X[bin]) && (tof < X[bin+1]))
-//        break; //Stop increasing bin
-//      ++bin;
-//    }
-//    //New bin! Find what you are multiplying!
-//    value = Y[bin];
-//    if (value == 0) value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
-//    error = E[bin];
-//    valSquared = value * value;
-//    valFourth = valSquared * valSquared;
-//    valErrorSquared = error * error;
-//
-//    //Keep going through all the events
-//    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
-//    {
-//      tof = itev->tof();
-//      while (bin < x_size-1)
-//      {
-//        //Event is Within range?
-//        if ((tof >= X[bin]) && (tof < X[bin+1]))
-//        {
-//          //Process this event. Multilpy and calculate error.
-//          itev->m_errorSquared = (itev->m_errorSquared / valSquared) + (itev->m_weight*itev->m_weight * valErrorSquared / valFourth);
-//          itev->m_weight /= value;
-//          break; //out of the bin-searching-while-loop
-//        }
-//        //New bin! Find what you are multiplying!
-//        ++bin;
-//        if( bin >= x_size - 1 ) break;
-//        value = Y[bin];
-//        if (value == 0) value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
-//        error = E[bin];
-//        valSquared = value * value;
-//        valFourth = valSquared * valSquared;
-//        valErrorSquared = error * error;
-//      }
-//      ++itev;
-//    }
-//  }
-
-
-
 
 
   //------------------------------------------------------------------------------------------------
@@ -1834,9 +1785,7 @@ using Kernel::DateAndTime;
    */
   void EventList::divide(const double value)
   {
-    if (value == 0.0)
-      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
-    this->multiply(1.0/value);
+    this->divide(value, 0.0);
   }
 
   //------------------------------------------------------------------------------------------------
@@ -1850,9 +1799,7 @@ using Kernel::DateAndTime;
    */
   EventList& EventList::operator/=(const double value)
   {
-    if (value == 0.0)
-      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
-    this->multiply(1.0/value);
+    this->divide(value, 0.0);
     return *this;
   }
 
@@ -1869,7 +1816,23 @@ using Kernel::DateAndTime;
   {
     if (value == 0.0)
       throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
-    this->multiply(1.0/value, error/(value*value));
+    //Do nothing if dividing by exactly 1.0, no error
+    else if (value == 1.0 && error == 0.0)
+      return;
+
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Square of the value's error
+    double valError_over_value_Squared = error * error / (value * value);
+
+    std::vector<WeightedEvent>::iterator itev;
+    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
+    {
+      double newValue = itev->m_weight / value;
+      itev->m_errorSquared = newValue * newValue * ((itev->m_errorSquared / (itev->m_weight * itev->m_weight)) + valError_over_value_Squared);
+      itev->m_weight = newValue;
+    }
   }
 
 

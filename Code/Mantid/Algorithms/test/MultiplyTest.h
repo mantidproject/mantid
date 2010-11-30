@@ -18,13 +18,23 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
+
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS TEST IS SHARED (copy/pasted) WITH DivideTest.h *************/
+/*****************************************************************************************/
 class MultiplyTest : public CxxTest::TestSuite
 {
 public:
+  bool DO_DIVIDE;
+
+  MultiplyTest()
+  {
+    DO_DIVIDE = false;
+  }
 
   void testInit()
   {
-    Multiply alg;
+    Divide alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     //Setting properties to input workspaces that don't exist throws
@@ -33,255 +43,15 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") );
   }
 
-  void testExec1D1D()
+
+  void testDivideWithMaskedSpectraProducesZeroes()
   {
-    int sizex = 5;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    AnalysisDataService::Instance().add("test_in11", work_in1);
-    AnalysisDataService::Instance().add("test_in12", work_in2);
-
-    Multiply alg;
-
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("LHSWorkspace","test_in11");
-      alg.setPropertyValue("RHSWorkspace","test_in12");    
-      alg.setPropertyValue("OutputWorkspace","test_out1");
-    )
-    alg.execute();
-
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out1")));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove("test_out1");
-    AnalysisDataService::Instance().remove("test_in11");
-    AnalysisDataService::Instance().remove("test_in12");
-
+    doDivideWithMaskedTest(false);
   }
 
-  void testExec2D2D()
+  void testDivideWithMaskedSpectraProducesZeroesWhenReplacingInputWorkspace()
   {
-    int sizex = 2,sizey=4;
-    // Register the workspace in the data service
-    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    Multiply alg;
-
-    AnalysisDataService::Instance().add("test_in21", work_in1);
-    AnalysisDataService::Instance().add("test_in22", work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","test_in21");
-    alg.setPropertyValue("RHSWorkspace","test_in22");    
-    alg.setPropertyValue("OutputWorkspace","test_out2");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out2")));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove("test_in21");
-    AnalysisDataService::Instance().remove("test_in22");
-    AnalysisDataService::Instance().remove("test_out2");
-
-  }
-
-  void testExec1D2D()
-  {
-    int sizex = 10,sizey=20;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    Multiply alg;
-
-    std::string wsName1 = "test_in1D2D21";
-    std::string wsName2 = "test_in1D2D22";
-    std::string wsNameOut = "test_out1D2D";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);
-   
-  }
-
-  void testExec2D1D()
-  {
-    int sizex = 5,sizey=300;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    Multiply alg;
-
-    std::string wsName1 = "test_in2D1D21";
-    std::string wsName2 = "test_in2D1D22";
-    std::string wsNameOut = "test_out2D1D";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
-    checkData(work_in2, work_in1, work_out1);
-
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);
-   
-  }  
-
-  void testExec1DRand2D()
-  {
-    int sizex = 10,sizey=20;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    Multiply alg;
-
-    std::string wsName1 = "test_in1D2Dv1";
-    std::string wsName2 = "test_in1D2Dv2";
-    std::string wsNameOut = "test_out1D2Dv";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);
-  }
-
-  void testExec2D1DVertical()
-  {
-    int sizex = 10,sizey=20;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    Multiply alg;
-
-    std::string wsName1 = "test_in2D1Dv1";
-    std::string wsName2 = "test_in2D1Dv2";
-    std::string wsNameOut = "test_out2D1Dv";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
-    checkData(work_in2, work_in1, work_out1);
-
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);    
-  }
-  
-  void testExec2D2DbyOperatorOverload()
-  {
-    int sizex = 10,sizey=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    MatrixWorkspace_sptr work_out1 = work_in2 * work_in1;
-
-    checkData(work_in1, work_in2, work_out1);
-  }
-
-    void testExec1DSingleValue()
-  {
-    int sizex = 10;
-    // Register the workspace in the data service
-
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
-    AnalysisDataService::Instance().add("test_in11", work_in1);
-    AnalysisDataService::Instance().add("test_in12", work_in2);
-
-    Multiply alg;
-
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","test_in11");
-    alg.setPropertyValue("RHSWorkspace","test_in12");    
-    alg.setPropertyValue("OutputWorkspace","test_out1");
-    alg.execute();
-
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out1")));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove("test_out1");
-    AnalysisDataService::Instance().remove("test_in11");
-    AnalysisDataService::Instance().remove("test_in12");
-
-  } 
-  
-  void testExec2DSingleValue()
-  {
-    int sizex = 5,sizey=300;
-    // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
-
-    Multiply alg;
-
-    std::string wsName1 = "test_in2D1D21";
-    std::string wsName2 = "test_in2D1D22";
-    std::string wsNameOut = "test_out2D1D";
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
-    checkData(work_in1, work_in2, work_out1);
-
-    AnalysisDataService::Instance().remove(wsName1);
-    AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);
-   
+    doDivideWithMaskedTest(true);
   }
 
   void testCompoundAssignment()
@@ -289,217 +59,294 @@ public:
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
     const Workspace_const_sptr b = a;
     MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-    a *= 5;
-    TS_ASSERT_EQUALS(a->readY(0)[0],15);
+    a /= 5;
+    TS_ASSERT_EQUALS(a->readY(0)[0],0.6);
     TS_ASSERT_EQUALS(a,b);
-    a *= c;
-    TS_ASSERT_EQUALS(a->readY(0)[0],30);
+    a /= c;
+    TS_ASSERT_EQUALS(a->readY(0)[0],0.3);
     TS_ASSERT_EQUALS(a,b);
   }
-  
 
 
+  //========================================= 2D and 1D Workspaces ==================================
 
-
-
-
-
-
-
-
-  // ==================================================================================================================
-
-  void EventSetup()
+  void testExec_1D_1D()
   {
-    // 3 pixels, 100 events, starting at 0.5 in steps of +1.0.
-    AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 3)));
-
-    // 3 pixels, 200 events, (two each) starting at 0.5 in steps of +1.0.
-    AnalysisDataService::Instance().addOrReplace("ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 2)));
-
-    //200 events per spectrum, but the spectra are at different pixel ids
-    AnalysisDataService::Instance().addOrReplace("ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3, 10,100, 0.0, 1.0, 2, 100)));
-    //Make one with weird units
-    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
-    ev4->setYUnit("Microfurlongs per Megafortnights");
-    AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
-    //Different # of spectra
-    AnalysisDataService::Instance().addOrReplace("ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(5,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
-    //a 2d workspace with the value 2 in each bin
-    AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
-
-    //A single value workspace with the value 3 +- 0.0
-    MatrixWorkspace_sptr single_value = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(3, 0.0);
-    AnalysisDataService::Instance().add("three", single_value);
-
-
+    int sizex = 10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    performTest(work_in1,work_in2);
   }
 
-  void EventTeardown()
+  void testExec_2D_2D()
   {
-    AnalysisDataService::Instance().remove("ev1");
-    AnalysisDataService::Instance().remove("ev2");
-    AnalysisDataService::Instance().remove("ev3");
-    AnalysisDataService::Instance().remove("ev4_weird_units");
-    AnalysisDataService::Instance().remove("ev5");
-    AnalysisDataService::Instance().remove("in2D");
-    AnalysisDataService::Instance().remove("evOUT");
-    AnalysisDataService::Instance().remove("out2D");
-    AnalysisDataService::Instance().remove("three");
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    performTest(work_in1,work_in2);
   }
 
-  //-----------------------------------------------------------------------------------------------
-  void testExecOneEvent_times_single_value()
+  void testExec_2D_1D()
   {
-    EventWorkspace_sptr in1, in2, out;
-
-    EventSetup();
-    Multiply alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","three");
-    alg.setPropertyValue("OutputWorkspace", "evOUT");
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
-    TS_ASSERT(out); // still Eventworkspace
-    // Still has events, 300 total
-    TS_ASSERT_EQUALS( out->getNumberEvents(), 300);
-    for (int wi=0; wi < 3; wi++)
-    {
-      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
-      TS_ASSERT_DELTA( rwel[0].weight(), 3.0, 1e-5); // weight is 3
-      TS_ASSERT_DELTA( rwel[0].error(), 3.0, 1e-5); // error is 3
-
-      for (int i=0; i<out->blocksize(); i++)
-      {
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 3.0); // weight is 3
-        TS_ASSERT_EQUALS( out->readE(wi)[i], 3.0); // error is also 3
-      }
-    }
-
-    EventTeardown();
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    performTest(work_in1,work_in2);
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  void testExecTwoEvents_times_single_value()
+  void testExec_1D_Rand2D()
   {
-    EventWorkspace_sptr in1, in2, out;
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
+    performTest(work_in1,work_in2);
+  }
 
-    EventSetup();
-    Multiply alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev2");
-    alg.setPropertyValue("RHSWorkspace","three");
-    alg.setPropertyValue("OutputWorkspace", "evOUT");
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
+  void testExec_2D_1DVertical()
+  {
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
+    performTest(work_in1,work_in2);
+  }
 
-    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
-    TS_ASSERT(out); // still Eventworkspace
-    for (int wi=0; wi < 3; wi++)
-    {
-      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
-      TS_ASSERT_DELTA( rwel[0].weight(), 3.0, 1e-5); // weight is 3
-      TS_ASSERT_DELTA( rwel[0].error(), 3.0, 1e-5); // error is 3
+  void testExec_2D_2DSingleSpectrumBiggerSize_fails()
+  {
+    //In 2D workspaces, the X bins have to match
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(1,sizey*2);
+    performTest_fails(work_in1, work_in2);
+  }
 
-      for (int i=0; i<out->blocksize(); i++)
-      {
-        TS_ASSERT_DELTA( out->readY(wi)[i], 6.0, 1e-6); // two events, so 6
-        TS_ASSERT_DELTA( out->readE(wi)[i], sqrt(2.0) * 3.0, 1e-6); // relative error is 2 / sqrt(2), since there are two events
-      }
-    }
+  void testExec_2D_2DbyOperatorOverload()
+  {
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_out1;
+    if (DO_DIVIDE)
+      work_out1 = work_in1/work_in2;
+    else
+      work_out1 = work_in1*work_in2;
 
-    EventTeardown();
+    checkData(work_in1, work_in2, work_out1);
+  }
+
+  void testExec_1D_SingleValue()
+  {
+    int sizex = 10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+    performTest(work_in1,work_in2);
+  }
+
+  void testExec_SingleValue_1D_fails()
+  {
+    int sizex = 10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    performTest_fails(work_in1,work_in2);
+  }
+
+  void testExec_2D_SingleValue()
+  {
+    int sizex = 5,sizey=300;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    performTest(work_in1,work_in2);
+  }
+
+  void testExec_SingleValue_2D_fails()
+  {
+    int sizex = 5,sizey=300;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(sizex,sizey);
+    performTest_fails(work_in1,work_in2);
+  }
+
+  void testExec_2D_SingleValueNoError()
+  {
+    int sizex = 5,sizey=300;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(5.0, 0.0);
+    performTest(work_in1,work_in2);
   }
 
 
 
 
-  //-----------------------------------------------------------------------------------------------
-  void testExecOneEvent_times_histogram()
+  //========================================= EventWorkspaces ==================================
+
+  // Equivalent of 2D over 2D, really
+  void testExec_2D_Event()
   {
-    EventWorkspace_sptr in1, in2, out;
-    EventSetup();
-
-    Multiply alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","in2D");
-    alg.setPropertyValue("OutputWorkspace", "evOUT");
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
-    TS_ASSERT(out); // still Eventworkspace
-    TS_ASSERT_EQUALS( out->getNumberEvents(), 300); // Still has events, 300 total
-    for (int wi=0; wi < 3; wi++)
-    {
-      // The histogram was 2 +- sqrt(2) at all bins...
-
-      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
-      TS_ASSERT_DELTA( rwel[0].weight(), 2.0, 1e-5); // weight is twice
-      TS_ASSERT_DELTA( rwel[0].errorSquared(), 2.0+1, 1e-5); //error is sqrt(3)
-
-      for (int i=0; i<out->blocksize(); i++)
-      {
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 2.0);
-        TS_ASSERT_EQUALS( out->readE(wi)[i], sqrt(3.0));
-      }
-    }
-
-    EventTeardown();
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    performTest(work_in1,work_in2, false);
   }
 
-
-
-  //-----------------------------------------------------------------------------------------------
-  void testExecOneEvent_times_TwoEvents()
+  void testExec_Event_2D()
   {
-    EventWorkspace_sptr in1, in2, out;
-    EventSetup();
-
-    Multiply alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","ev2");
-    alg.setPropertyValue("OutputWorkspace", "evOUT");
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("evOUT"));
-    TS_ASSERT(out); // still Eventworkspace
-    TS_ASSERT_EQUALS( out->getNumberEvents(), 300); // Still has events, 300 total
-    for (int wi=0; wi < 3; wi++)
-    {
-      // The histogram was 2 +- sqrt(2) at all bins...
-
-      std::vector<WeightedEvent> & rwel = out->getEventListPtr(wi)->getWeightedEvents();
-      TS_ASSERT_DELTA( rwel[0].weight(), 2.0, 1e-5); // weight is twice
-      TS_ASSERT_DELTA( rwel[0].errorSquared(), 2.0+1, 1e-5); //error is sqrt(3)
-
-      for (int i=0; i<out->blocksize(); i++)
-      {
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 2.0);
-        TS_ASSERT_EQUALS( out->readE(wi)[i], sqrt(3.0));
-      }
-    }
-
-    EventTeardown();
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
   }
 
+  void testExec_Event_2DSingleSpectrum()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1,sizey);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+  }
 
+  void testExec_Event_2DSingleSpectrumBiggerSize()
+  {
+    //Unlike 2D workspaces, you can divide by a single spectrum with different X bins!
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1,sizey*2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+  }
 
+  void testExec_Event_SingleValue()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+  }
 
+  void testExec_Event_SingleValueNoError()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(2.0, 0.0);
+    performTest(work_in1,work_in2, true);
+  }
 
+  void testExec_Event_Event()
+  {
+    int sizex = 20,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12));
+  }
+
+  void testExec_SingleValue_Event_fails()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    performTest_fails(work_in1,work_in2);
+  }
+
+//  void testExec_Event_1D()
+//  {
+//    int sizex = 20,sizey=10;
+//    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+//    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceConstant(sizex, 2.0, sqrt(2.0));
+//    performTest(work_in1, work_in2, true,  1.0, sqrt(0.75));
+//  }
 
 
 
 private:
+
+  /** Divide work_in1 by work_in2.
+   * If outputIsEvent is true, check that the ouput is a EventWorkspace.
+   * If expectedValue and expectedError are specified, look for all data items to be those values.
+   */
+  MatrixWorkspace_sptr performTest(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2
+      , bool outputIsEvent = false, double expectedValue=-1.0, double expectedError=-1.0)
+  {
+
+    IAlgorithm * alg;
+    if (DO_DIVIDE)
+      alg = new Divide();
+    else
+      alg = new Multiply();
+
+    std::string wsName1 = "DivideTest_test_in1";
+    std::string wsName2 = "DivideTest_test_in2";
+    std::string wsNameOut = "DivideTest_test_out";
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
+    alg->initialize();
+    alg->setPropertyValue("LHSWorkspace",wsName1);
+    alg->setPropertyValue("RHSWorkspace",wsName2);
+    alg->setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT( alg->isExecuted() );
+    MatrixWorkspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+
+    if (work_out1)
+    {
+      //Check that the output is an event workspace?
+      if (outputIsEvent)
+      {
+        TS_ASSERT( boost::dynamic_pointer_cast<EventWorkspace>(work_out1) );
+      }
+
+      checkData(work_in1, work_in2, work_out1, 0, expectedValue, expectedError);
+
+      AnalysisDataService::Instance().remove(wsNameOut);
+    }
+
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    delete alg;
+    return work_out1;
+  }
+
+
+  /** Perform the algorithm, check that if fails! */
+  void performTest_fails(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2)
+  {
+    IAlgorithm * alg;
+    if (DO_DIVIDE)
+      alg = new Divide();
+    else
+      alg = new Multiply();
+
+    std::string wsName1 = "DivideTest_test_in1";
+    std::string wsName2 = "DivideTest_test_in2";
+    std::string wsNameOut = "DivideTest_test_out";
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
+    alg->initialize();
+    alg->setPropertyValue("LHSWorkspace",wsName1);
+    alg->setPropertyValue("RHSWorkspace",wsName2);
+    alg->setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT( !alg->isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);
+    delete alg;
+  }
+
+
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1)
   {
     //default to a horizontal loop orientation
@@ -507,7 +354,8 @@ private:
   }
 
   // loopOrientation 0=Horizontal, 1=Vertical
-  void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, int loopOrientation)
+  void checkData( const MatrixWorkspace_sptr work_in1,  const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1,
+      int loopOrientation, double expectedValue=-1.0, double expectedError=-1.0)
   {
     int ws2LoopCount;
     if (work_in2->size() > 0)
@@ -519,7 +367,7 @@ private:
     for (int i = 0; i < work_out1->size(); i++)
     {
       int ws2Index = i;
-    
+
       if (ws2LoopCount > 1)
       {
         if (loopOrientation == 0)
@@ -531,26 +379,123 @@ private:
           ws2Index = i/ws2LoopCount;
         }
       }
-      checkDataItem(work_in1,work_in2,work_out1,i,ws2Index);
+      if (!checkDataItem(work_in1,work_in2,work_out1,i,ws2Index, expectedValue, expectedError))
+        break;
     }
   }
 
-  void checkDataItem (MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, int i, int ws2Index)
+  bool checkDataItem (const MatrixWorkspace_sptr work_in1,  const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1,
+      int i, int ws2Index,
+      double expectedValue=-1.0, double expectedError=-1.0
+      )
   {
-      double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      double sig2 = work_in2->dataY(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-      double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      TS_ASSERT_DELTA(work_in1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()],
-        work_out1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
-      TS_ASSERT_DELTA(sig1 * sig2, sig3, 0.0001);
-      double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      double err2 = work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()]; 
-      // (Sa/a)2 + (Sb/b)2 = (Sc/c)2 
-      //  So after taking proportions, squaring, summing, 
-      //  and taking the square root, you get a proportional error to the product c. Multiply that proportional error by c to get the actual standard deviation Sc. 
-      double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));     
-      TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+      double sig1 = work_in1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+      double sig2 = work_in2->readY(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+      double sig3 = work_out1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+      TS_ASSERT_DELTA(work_in1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()],
+        work_out1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+
+      double err1 = work_in1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+      double err2 = work_in2->readE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+      double err3 = work_out1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+
+      double value, error;
+      if (expectedValue==-1.0 && expectedError==-1.0)
+      {
+        //Compute the expectation
+        if (DO_DIVIDE)
+          value = sig1 / sig2;
+        else
+          value = sig1 * sig2;
+
+        error = sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2)));;
+      }
+      else
+      {
+        //Use the parameters
+        error = expectedError;
+        value = expectedValue;
+      }
+
+      double diff = err3 - error;
+      if (diff < 0) diff = -diff;
+
+      TS_ASSERT_DELTA(value, sig3, 0.0001);
+      TS_ASSERT_DELTA(error, err3, 0.0001);
+
+      // Return false if the error is wrong
+      return (diff < 0.0001);
   }
+
+  void doDivideWithMaskedTest(bool replaceInput)
+  {
+    const int sizex = 10,sizey=20;
+    std::set<int> masking;
+    masking.insert(0);
+    masking.insert(2);
+    masking.insert(7);
+
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey, 0, masking);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey, 0, masking);
+    const std::string lhs("work_in1"), rhs("work_in2");
+    AnalysisDataService::Instance().add(lhs, work_in1);
+    AnalysisDataService::Instance().add(rhs, work_in2);
+
+    //Zero some data to test mask propagation
+    for( int j = 0; j < sizex; ++j )
+    {
+      work_in1->dataY(0)[j] = 0.0;
+      work_in1->dataY(2)[j] = 0.0;
+      work_in1->dataY(7)[j] = 0.0;
+
+      work_in2->dataY(0)[j] = 0.0;
+      work_in2->dataY(2)[j] = 0.0;
+      work_in2->dataY(7)[j] = 0.0;
+    }
+
+    Divide helper;
+    helper.initialize();
+    helper.setPropertyValue("LHSWorkspace", lhs);
+    helper.setPropertyValue("RHSWorkspace", rhs);
+    std::string outputSpace;
+    if( replaceInput )
+    {
+      outputSpace = lhs;
+    }
+    else
+    {
+      outputSpace = "lhsOverRhs";
+    }
+    helper.setPropertyValue("OutputWorkspace", lhs);
+    helper.execute();
+
+    TS_ASSERT(helper.isExecuted());
+
+    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("work_in1"));
+    TS_ASSERT(output);
+
+    for( int i = 0; i < sizey; ++i )
+    {
+      IDetector_sptr det = output->getDetector(i);
+      TS_ASSERT(det);
+      if( !det ) TS_FAIL("No detector found");
+      if( masking.count(i) == 0 )
+      {
+        TS_ASSERT_EQUALS(det->isMasked(), false);
+      }
+      else
+      {
+        TS_ASSERT_EQUALS(det->isMasked(), true);
+        double yValue = output->readY(i)[0];
+        TS_ASSERT_EQUALS(yValue, yValue );
+        TS_ASSERT_DIFFERS(yValue, std::numeric_limits<double>::infinity() );
+      }
+    }
+    AnalysisDataService::Instance().remove(lhs);
+    AnalysisDataService::Instance().remove(rhs);
+    if( !replaceInput ) AnalysisDataService::Instance().remove(outputSpace);
+  }
+
 
 };
 

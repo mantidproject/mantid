@@ -2,9 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Multiply.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -61,7 +63,6 @@ namespace Mantid
     // ===================================== EVENT LIST BINARY OPERATIONS ==========================================
     /** Carries out the binary operation IN-PLACE on a single EventList,
      * with another EventList as the right-hand operand.
-     * The event lists simply get appended.
      *
      *  @param lhs Reference to the EventList that will be modified in place.
      *  @param rhs Const reference to the EventList on the right hand side.
@@ -134,6 +135,54 @@ namespace Mantid
         BinaryOperation::checkRequirements();
       }
     }
+
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
+     *  In order to be size compatible then the larger workspace
+     *  must divide be the size of the smaller workspace leaving no remainder
+     *
+     *  @param lhs the first workspace to compare
+     *  @param rhs the second workspace to compare
+     *  @retval true The two workspaces are size compatible
+     *  @retval false The two workspaces are NOT size compatible
+     */
+    bool Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if (!m_keepEventWorkspace)
+      {
+        // Fallback on the default checks
+        return BinaryOperation::checkSizeCompatibility(lhs, rhs);
+      }
+      else
+      {
+        // --- Check for event workspaces - different than workspaces 2D! ---
+
+        // A SingleValueWorkspace on the right matches anything
+        WorkspaceSingleValue_const_sptr rhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(rhs);
+        if (rhs_single) return true;
+
+        // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
+        WorkspaceSingleValue_const_sptr lhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(lhs);
+        if (lhs_single) return false;
+
+        // RHS only has one value (1D vertical), so the number of histograms needs to match.
+        // Each lhs spectrum will be divided by that scalar
+        if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+
+        // We don't need to check for matching bins. Yay events!
+
+        const int rhsSpec = rhs->getNumberHistograms();
+
+        // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
+        if (rhsSpec == 1) return true;
+
+        // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
+        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+      }
+    }
+
 
   } // namespace Algorithms
 } // namespace Mantid

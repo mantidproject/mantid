@@ -73,6 +73,7 @@ namespace Mantid
           const double& rhsY, const double& rhsE);
 
       void checkRequirements();
+      virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       
 
 

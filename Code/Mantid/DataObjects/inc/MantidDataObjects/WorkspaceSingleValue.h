@@ -126,7 +126,8 @@ private:
 };
 
   ///shared pointer to the WorkspaceSingleValue class
-  typedef boost::shared_ptr<WorkspaceSingleValue> WorkspaceSingleValue_sptr;
+typedef boost::shared_ptr<WorkspaceSingleValue> WorkspaceSingleValue_sptr;
+typedef boost::shared_ptr<const WorkspaceSingleValue> WorkspaceSingleValue_const_sptr;
 
 } // namespace DataObjects
 } // namespace Mantid

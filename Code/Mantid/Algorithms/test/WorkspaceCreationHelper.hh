@@ -54,6 +54,21 @@ public:
     return retVal;
   }
 
+  static Workspace1D_sptr Create1DWorkspaceConstant(int size, double value, double error)
+  {
+    MantidVecPtr x1,y1,e1;
+    x1.access().resize(size,1);
+    y1.access().resize(size);
+    std::fill(y1.access().begin(), y1.access().end(), value);
+    e1.access().resize(size);
+    std::fill(y1.access().begin(), y1.access().end(), error);
+    Workspace1D_sptr retVal(new Workspace1D);
+    retVal->initialize(1,size,size);
+    retVal->setX(x1);
+    retVal->setData(y1,e1);
+    return retVal;
+  }
+
   static Workspace1D_sptr Create1DWorkspaceFib(int size)
   {
     MantidVecPtr x1,y1,e1;

@@ -358,8 +358,8 @@ public:
     //Multiply by zero with error
     el.multiply(0.0, 1.0);
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 0.0, 1e-5);
-    // Gives zero error. Relative error no longer has a meaning.
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 0.0, 1e-5);
+    // Error is preserved!
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].error(), 1.0, 1e-5);
   }
 
   void test_multiply_by_one_doesnt_give_weights()
@@ -368,6 +368,15 @@ public:
     this->fake_uniform_data();
     //Perform the multiply by one without error.
     el.multiply(1.0, 0.0);
+    TS_ASSERT( !el.hasWeights() );
+  }
+
+  void test_divide_by_one_doesnt_give_weights()
+  {
+    //No weights
+    this->fake_uniform_data();
+    //Perform the multiply by one without error.
+    el.divide(1.0, 0.0);
     TS_ASSERT( !el.hasWeights() );
   }
 
@@ -380,8 +389,8 @@ public:
     el.multiply(2.0, 0.5);
 
     TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
-    //Error^2 = 2*2.5^2/2 + 2*(0.5^2) / 2  = 6.5
-    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 6.5, 1e-5);
+    //Error^2 = 2.5*2.5 * 2.0*2.0 + 2.0*2.0*0.5*0.5
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), (2.5*2.5 * 2.0*2.0 + 2.0*2.0*0.5*0.5), 1e-5);
 
     //Try it with no scalar error
     this->fake_uniform_data_weights();
@@ -406,18 +415,14 @@ public:
     MantidVec X, Y, E;
     // one tenth of the # of bins
     double step = BIN_DELTA*10;
-    for (double tof=step; tof<BIN_DELTA*(NUMBINS+1); tof += step)
-    {
-      X.push_back(tof);
-      //std::cout << tof << "\n";
-    }
+    X = this->makeX(step, NUMBINS/10+1);
     for (int i=0; i < X.size()-1; i++)
     {
       Y.push_back( 1.0 * (i+1));
       E.push_back( sqrt(double(1.0 * (i+1))) );
     }
 
-    //Make the data and multiply
+    //Make the data and multiply: 2.0+-2.5
     this->fake_uniform_data_weights();
     el.multiply(X, Y, E);
 
@@ -432,7 +437,7 @@ public:
         double errorsquared = value;
         //Check the formulae for value and error
         TS_ASSERT_DELTA( rwel[i].weight(), 2.0*value, 1e-6);
-        TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5*2.5*value/2.0 + 2.0 * errorsquared / value, 1e-6);
+        TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5*2.5 * value*value + 2.0*2.0 * errorsquared, 1e-6);
       }
     }
   }
@@ -527,11 +532,83 @@ public:
         }
         else
         {
-          //Same weight error as dividing by a scalar before, since we divided by 2+-0.5 again
+          //Same weight error as dividing by a scalar with error before, since we divided by 2+-0.5 again
           TS_ASSERT_DELTA( rwel[i].weight(), 1.0, 1e-5);
           TS_ASSERT_DELTA( rwel[i].error(), sqrt(1.625), 1e-5);
         }
       }
+    }
+  }
+
+  void test_divide_by_a_scalar_without_error___then_histogram()
+  {
+    //Make the data and multiply
+    this->fake_uniform_data();
+    //Divide by 2, no error = result should be 1 +- 0.707
+    el.divide(2.0, 0);
+
+    //Make the histogram we are multiplying.
+    MantidVec Y, E;
+    MantidVec X = this->makeX(BIN_DELTA, 10);
+    el.generateHistogram(X, Y, E);
+
+    for (int i=0; i < Y.size(); i++)
+    {
+      TS_ASSERT_DELTA( Y[i], 1.0, 1e-5);
+      TS_ASSERT_DELTA( E[i], sqrt(2.0)/2.0, 1e-5);
+    }
+  }
+
+  void test_divide_by_a_scalar_with_error___then_histogram()
+  {
+    //Make the data and multiply
+    this->fake_uniform_data();
+    //Divide by two with error sqrt(2) = result has less error than if you had started from a histogram.
+    el.divide(2.0, sqrt(2.0));
+
+    //Make the histogram we are multiplying.
+    MantidVec Y, E;
+    MantidVec X = this->makeX(BIN_DELTA, 10);
+    el.generateHistogram(X, Y, E);
+
+    for (int i=0; i < Y.size(); i++)
+    {
+      TS_ASSERT_DELTA( Y[i], 1.0, 1e-5);
+      TS_ASSERT_DELTA( E[i], sqrt(0.75), 1e-5);
+    }
+  }
+
+  void test_multiply_by_a_scalar_without_error___then_histogram()
+  {
+    //Make the data and multiply
+    this->fake_uniform_data();
+    el.multiply(2.0, 0.0);
+
+    //Make the histogram we are multiplying.
+    MantidVec Y, E;
+    MantidVec X = this->makeX(BIN_DELTA);
+    el.generateHistogram(X, Y, E);
+
+    for (int i=0; i < Y.size(); i++)
+    {
+      TS_ASSERT_DELTA( Y[i], 4.0, 1e-5);
+      TS_ASSERT_DELTA( E[i], 4.0/sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_multiply_by_a_scalar_with_error___then_histogram()
+  {
+    //Make the data and multiply
+    this->fake_uniform_data();
+    el.multiply(2.0, sqrt(2.0));
+    MantidVec Y, E;
+    MantidVec X = this->makeX(BIN_DELTA);
+    el.generateHistogram(X, Y, E);
+
+    for (int i=0; i < Y.size(); i++)
+    {
+      TS_ASSERT_DELTA( Y[i], 4.0, 1e-5);
+      TS_ASSERT_DELTA( E[i], sqrt(12.0), 1e-5);
     }
   }
 
@@ -1277,6 +1354,17 @@ public:
     el = EventList();
     el += TofEvent(  rand()%1000, time1);
     el += TofEvent(  rand()%1000, time2);
+  }
+
+  /** Make a X-vector for histogramming, starting at step and going up in step */
+  MantidVec makeX(double step, int numbins=10)
+  {
+    MantidVec X;
+    for (double tof=step; tof<step*numbins; tof += step)
+    {
+      X.push_back(tof);
+    }
+    return X;
   }
 
 
