@@ -321,8 +321,8 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     double signalFields[2];
     int    ind_fields[3];
 
-    MDPointDescriptor defaults;
-    MDPixelSignature  pix(defaults);
+    MDPointSignature defaults;
+    MDPointDescription  pix(defaults);
     MDDataPoint<>  packer(pix_array,pix);
    
     for(i=0;i<n_pix_inDataset;i++){

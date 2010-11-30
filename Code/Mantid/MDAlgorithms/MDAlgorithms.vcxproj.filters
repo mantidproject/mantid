@@ -79,15 +79,6 @@
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning4D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinningFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\SimulateMDD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -142,15 +133,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PlaneImplicitFunctionParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CenterpieceRebinning.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CenterpieceRebinning4D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CenterpieceRebinningFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SimulateMDD.cpp">

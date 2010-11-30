@@ -12,9 +12,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
-
-        Invalid parameter type. Modelled from Null object pattern.
+        /**  Invalid parameter type. Modelled from Null object pattern.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010

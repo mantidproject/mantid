@@ -76,12 +76,12 @@ MDDimension::check_ranges(double rxMin,double rxMax)
 
         throw(std::invalid_argument("checkRanges: rMin>rMax"));
     }
-    if(rxMin>this->rMax||rxMax<this->rMin){
-        g_log.error()<< "Attempting to set integration limits outside the data range in Dimension ID N: "<<this->dimTag<<std::endl;
-        g_log.error()<< "existing MinVal: "<<this->rMin<<" MaxVal: "<<this->rMax<<" Setting: minVal: "<<rxMin<<" maxVal: "<<rxMax<<std::endl;
-        throw(std::invalid_argument("checkRanges: wrong rMin or rMax"));
+    //if(rxMin>this->rMax||rxMax<this->rMin){
+    //    g_log.error()<< "Attempting to set integration limits outside the data range in Dimension ID N: "<<this->dimTag<<std::endl;
+    //    g_log.error()<< "existing MinVal: "<<this->rMin<<" MaxVal: "<<this->rMax<<" Setting: minVal: "<<rxMin<<" maxVal: "<<rxMax<<std::endl;
+    //    throw(std::invalid_argument("checkRanges: wrong rMin or rMax"));
 
-    }
+    //}
 
 }
 void

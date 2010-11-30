@@ -47,9 +47,9 @@ namespace Mantid{
     }
     //
     void 
-      MDGeometry::reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims)
+      MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
     {
-      this->reinit_Geometry(trf.getDimensionsTags(),nReciprocalDims);
+      this->reinit_Geometry(trf.getDimensionsTags());
       this->setRanges(trf);
 
       /*
@@ -72,7 +72,7 @@ namespace Mantid{
 
     //
     void 
-      MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims)
+      MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags)
     {
 
  
@@ -81,7 +81,7 @@ namespace Mantid{
 
 
       // are the old geometry congruent to the new geometry? e.g the same nuber of dimensions and the same dimension tags;
-      if(DimensionTags.size()!=m_basis.getNumDims()||nReciprocalDims!=m_basis.getNumReciprocalDims()){
+      if(DimensionTags.size()!=m_basis.getNumDims()){
         congruent_geometries=false;
       }else{
         congruent_geometries=m_basis.checkIdCompartibility(DimensionTags);
@@ -105,105 +105,104 @@ namespace Mantid{
       }
 
     }
+//
+void 
+  MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
+{
+  unsigned int n_new_dims=tags.size();
+  unsigned int i;
 
-    void 
-      MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
-    {
-      unsigned int n_new_dims=tags.size();
-      unsigned int i;
-
-      if(n_new_dims>m_basis.getNumDims()){
-        g_log.error()<<"Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined \n";
-        throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
-      }
-
-
-      // array to keep final expanded dimensions
-      std::vector<MDDimension *> pExpandedDims(m_basis.getNumDims(),NULL);    
-      // array to keep final collapsed dimensions which sould be placed after expanded
-      std::vector<MDDimension *> pCollapsedDims(m_basis.getNumDims(),NULL);  
-      // array to keep thd initial dimensions which were not mentioned in transformation
-      std::vector<MDDimension *> pCurrentDims(this->theDimension);  
+  if(n_new_dims>m_basis.getNumDims()){
+    g_log.error()<<"Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined \n";
+    throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
+  }
 
 
+  // array to keep final expanded dimensions
+  std::vector<MDDimension *> pExpandedDims(m_basis.getNumDims(),NULL);    
+  // array to keep final collapsed dimensions which sould be placed after expanded
+  std::vector<MDDimension *> pCollapsedDims(m_basis.getNumDims(),NULL);  
+  // array to keep thd initial dimensions which were not mentioned in transformation
+  std::vector<MDDimension *> pCurrentDims(this->theDimension);  
 
-      unsigned int n_expanded_dimensions(0),n_collapsed_dimensions(0);
 
-      MDDimension *pDim;
-      std::map<std::string,MDDimension *>::iterator it;
+  unsigned int n_expanded_dimensions(0),n_collapsed_dimensions(0);
 
-      // let's sort dimensions as requested by the list of tags
-      for(i=0;i<n_new_dims;i++){
+  MDDimension *pDim;
+  std::map<std::string,MDDimension *>::iterator it;
 
-        // when dimension num we want to use next
-        it = dimensions_map.find(tags[i]);
-        if(it==dimensions_map.end()){
-          g_log.error()<<" The dimension with tag "<<tags[i]<<" does not belong to current geometry\n";
-          throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: new dimension requested but this function can not add new dimensions"));
-        }
-        // get the dimension itself
-        pDim     = it->second;
-        // clear map for future usage;
-        dimensions_map.erase(it);
+  // let's sort dimensions as requested by the list of tags
+  for(i=0;i<n_new_dims;i++){
 
-        // set range according to request;
-        if(pDim->getIntegrated()){ // this is collapsed dimension;
-          pCollapsedDims[n_collapsed_dimensions]=pDim;
-          n_collapsed_dimensions++;
-        }else{
-          pExpandedDims[n_expanded_dimensions]  =pDim;
-          n_expanded_dimensions++;
-        }
-
-      }
-      // deal with the dimensions, which were not menshioned in the transformation request
-      for(it=dimensions_map.begin();it!=dimensions_map.end();it++){
-        pDim = it->second;
-
-        if(pDim->getIntegrated()){ // this is collapsed dimension;
-          pCollapsedDims[n_collapsed_dimensions]=pDim;
-          n_collapsed_dimensions++;
-        }else{
-          pExpandedDims[n_expanded_dimensions]  =pDim;
-          n_expanded_dimensions++;
-        }
-      }
-      // invalidate map which is not nedded any more;
-      dimensions_map.clear();
-
-      this->n_expanded_dim=n_expanded_dimensions;
-      // total number of dimensions should not change;
-      if(n_expanded_dimensions+n_collapsed_dimensions!=m_basis.getNumDims()){
-        g_log.error()<<"Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error";
-        throw(Exception::NotImplementedError("Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error"));
-      }
-
-      size_t dimension_stride=1;
-      // deal with expanded dimensions
-      for(i=0;i<this->n_expanded_dim;i++){
-        pDim  = pExpandedDims[i];
-
-        // store the dimension in the vector and the map
-        this->theDimension[i]=pDim;
-        dimensions_map[pDim->getDimensionTag()]=pDim;
-
-        // set integral dimensions characteristics;
-        this->theDimension[i]->setStride(dimension_stride); 
-        dimension_stride     *= this->theDimension[i]->getNBins();
-
-      }
-      // now with collapsed dimensions;
-      unsigned int ind(n_expanded_dim);
-      for(i=0;i<n_collapsed_dimensions;i++){
-        pDim  = pCollapsedDims[i];
-
-        this->theDimension[ind+i]=pDim;
-        dimensions_map[pDim->getDimensionTag()]=pDim;
-
-        this->theDimension[ind+i]->setStride(0);
-      }
-
+    // when dimension num we want to use next
+    it = dimensions_map.find(tags[i]);
+    if(it==dimensions_map.end()){
+      g_log.error()<<" The dimension with tag "<<tags[i]<<" does not belong to current geometry\n";
+      throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: new dimension requested but this function can not add new dimensions"));
     }
+    // get the dimension itself
+    pDim     = it->second;
+    // clear map for future usage;
+    dimensions_map.erase(it);
+
+    // set range according to request;
+    if(pDim->getIntegrated()){ // this is collapsed dimension;
+      pCollapsedDims[n_collapsed_dimensions]=pDim;
+      n_collapsed_dimensions++;
+    }else{
+      pExpandedDims[n_expanded_dimensions]  =pDim;
+      n_expanded_dimensions++;
+    }
+
+  }
+  // deal with the dimensions, which were not menshioned in the transformation request
+  for(it=dimensions_map.begin();it!=dimensions_map.end();it++){
+    pDim = it->second;
+
+    if(pDim->getIntegrated()){ // this is collapsed dimension;
+      pCollapsedDims[n_collapsed_dimensions]=pDim;
+      n_collapsed_dimensions++;
+    }else{
+      pExpandedDims[n_expanded_dimensions]  =pDim;
+      n_expanded_dimensions++;
+    }
+  }
+  // invalidate map which is not nedded any more;
+  dimensions_map.clear();
+
+  this->n_expanded_dim=n_expanded_dimensions;
+  // total number of dimensions should not change;
+  if(n_expanded_dimensions+n_collapsed_dimensions!=m_basis.getNumDims()){
+    g_log.error()<<"Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error";
+    throw(Exception::NotImplementedError("Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error"));
+  }
+
+  size_t dimension_stride=1;
+  // deal with expanded dimensions
+  for(i=0;i<this->n_expanded_dim;i++){
+    pDim  = pExpandedDims[i];
+
+    // store the dimension in the vector and the map
+    this->theDimension[i]=pDim;
+    dimensions_map[pDim->getDimensionTag()]=pDim;
+
+    // set integral dimensions characteristics;
+    this->theDimension[i]->setStride(dimension_stride); 
+    dimension_stride     *= this->theDimension[i]->getNBins();
+
+  }
+  // now with collapsed dimensions;
+  unsigned int ind(n_expanded_dim);
+  for(i=0;i<n_collapsed_dimensions;i++){
+    pDim  = pCollapsedDims[i];
+
+    this->theDimension[ind+i]=pDim;
+    dimensions_map[pDim->getDimensionTag()]=pDim;
+
+    this->theDimension[ind+i]->setStride(0);
+  }
+
+}
     //
     MDDimension & 
       MDGeometry::getYDimension(void)const

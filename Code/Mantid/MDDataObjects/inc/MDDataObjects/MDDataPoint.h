@@ -42,8 +42,8 @@
 */
 namespace Mantid{
     namespace MDDataObjects{
-      /** the names of the fields, present in the MDPixelSignature class and describe the format of the MDDataPoint class */
-      struct MDPointDescriptor{
+      /** the names of the fields, present in the MDPixelDescription class and describe the format of the MDPixelDescriptions class */
+      struct MDPointSignature{
         unsigned int NumDimensions;    //< number of dimensions in the dataset
         unsigned int NumRecDimensions; //< number of reciprocal dimensions among these dimensions
         unsigned int NumDataFields;    //< datafields -> signal and error for histohram data or 0 for event data
@@ -55,40 +55,41 @@ namespace Mantid{
         unsigned int NumPixCompressionBits; //< Run number and detector number corresponding to the reciprocal dimensions of TOF experiments can be placed in single 32 bit word;
                                             // 10 in NumPixCompression means that it is pissible to have 2^10-1 (1023) different experiments and 2^22 detectors (4M) coded by this field 
                                             // 0 here should mean a class with even DimID fields -> not implemented;
-                                            //TO DO: does this specialisation practically usefull?  necessary?
-        MDPointDescriptor():NumDimensions(4),NumRecDimensions(3),NumDataFields(2),NumDimIDs(3),DimIDlength(2),DimLength(4),
-                            DimFieldsPresent(true),DataFieldsPresent(true),NumPixCompressionBits(10){}
+                                            //TO DO: does this specialisation is practically usefull?  necessary?
+        MDPointSignature():NumDimensions(4),NumRecDimensions(3),NumDataFields(2),NumDimIDs(3),DimIDlength(2),DimLength(4),
+                           DimFieldsPresent(true),DataFieldsPresent(true),NumPixCompressionBits(10){}
       };
 
       /** Small helper class describing format of the MDDataPoint in a form, which can be conveniently stored on HDD or transferred between classes
        *  allowing to instanciatei proper version of MDDataPoint which does the job transforming data from and to the HDD format
        */
-      class DLLExport MDPixelSignature{
+      class DLLExport MDPointDescription{
       public:
-        MDPixelSignature(const MDPointDescriptor &pixInfo,const std::vector<std::string> &dataTags);
+        MDPointDescription(const MDPointSignature &pixInfo,const std::vector<std::string> &dataTags);
         // use default tags;
-        MDPixelSignature(const MDPointDescriptor &pixInfo);
+        MDPointDescription(const MDPointSignature &pixInfo);
         // use defauld pixInfo and defailt tags
-        MDPixelSignature();
+        MDPointDescription();
 
-        MDPointDescriptor & PixInfo(){return PixDescriptor;}
+        MDPointSignature & PixInfo(){return PixDescriptor;}
         /// returns the column name, first come the names of dimensios (if any), data (if any) after that and indexes of dimensions to follow (these are always present)
-        /// no way to idenfify what are dimensios, what are signals or what are the indexes except counting them and comparing with the numbers of dimensions, signals and indexes from the MDPoindDescriptor
+        /// no way to idenfify what are dimensios, what are signals or what are the indexes except counting them and comparing with the numbers of dimensions, 
+        /// signals and indexes from the MDPoindDescriptor
         std::string getColumnName(unsigned int nColumn)const{return dataTags.at(nColumn);}
         /// gets all column names together; see the getColumnName description
         std::vector<std::string> const getColumnNames(void) const{return dataTags;}
       protected:
-        MDPointDescriptor PixDescriptor;
+        MDPointSignature PixDescriptor;
         /// the names (tags) of every dimension column and every data column; The former has to coinside (and would be obtained from) MDgeometryBasis, and first columns (if present) have to represent 
         /// reciprocal dimensions;
         std::vector<std::string> dataTags;
-        void buildDefaultTags(const MDPointDescriptor &pixInfo);
+        void buildDefaultTags(const MDPointSignature &pixInfo);
       };
 
 //********************************************************************************************************************************************************************
 /** the class to work with the pixels buffer itself*/
  template<class T=float, class I=uint16_t>
- class MDDataPoint: public MDPixelSignature
+ class MDDataPoint: public MDPointDescription
  {
   
  public:
@@ -97,7 +98,7 @@ namespace Mantid{
    */
    MDDataPoint(char * buf, unsigned int nDims=4,unsigned int nData=2,unsigned int nIDfields=3):
    pDataBuffer(buf),
-   MDPixelSignature()
+   MDPointDescription()
    {
      bool old_column_names(true);
      if(this->PixDescriptor.NumDimensions != nDims||this->PixDescriptor.NumDataFields!=nData||this->PixDescriptor.NumDimIDs!=nIDfields){
@@ -111,12 +112,12 @@ namespace Mantid{
      }
      this->buildPixel();
    }
- /**   main constructor which defines the size of the dataset, number of fields in this dataset and data location in memory
+ /**   main constructor which defines the size of the dataset, number of fields in this dataset and data location in memory and on hdd
    *   
    */
-   MDDataPoint(char * buf, const MDPixelSignature &pixSignature):
+   MDDataPoint(char * buf, const MDPointDescription &pixSignature):
    pDataBuffer(buf),
-   MDPixelSignature(pixSignature)    
+   MDPointDescription(pixSignature)    
    {
      buildPixel();
    }
@@ -136,7 +137,7 @@ namespace Mantid{
    uint32_t getRunID(size_t n_point)                 const{return   RunIDMask&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));}
    uint32_t getPixID(size_t n_point)                 const{return ((PixIDMask)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>pix_id_shift);}
    /// get size (in bytes) for the MDdataPoint;
-   unsigned int sizeofMDDataPoint(void)                const{return MDPointStride;}
+   unsigned int sizeofMDDataPoint(void)              const{return MDPointStride;}
    /// returns the total number of data point fields as sum of all contributing fields, e.g. dimensions, datas and signals
    unsigned int getNumPointFields(void)              const{return n_dimensions+n_indFields+n_signals;}
    /// get the numbers of all contributing fields separately
@@ -256,10 +257,8 @@ namespace Mantid{
      RunIDMask=0;
      for(i=0;i<pix_id_shift;i++){        RunIDMask=(RunIDMask<<1)|0x1;
      }
-     PixIDMask=0;
-     for(i=0;i<32-pix_id_shift;i++){     PixIDMask=(PixIDMask<<1)|0x1;
-     }
-     // calculate the size of buffer for data indexes;
+     PixIDMask=(~RunIDMask)>>pix_id_shift;
+    // calculate the size of buffer for data indexes;
      indexBufSize = sizeof(uint32_t);
      if(n_indFields>2){
        indexBufSize+=sizeof(I)*(n_indFields-2);

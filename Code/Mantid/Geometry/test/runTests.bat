@@ -1,6 +1,6 @@
 @echo off
 
-IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
+IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
 IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;%PATH%
 IF "%MANTIDTESTSETUP%"=="" SET MANTIDTESTSETUP=1
 REM Simple script to build and run the tests.

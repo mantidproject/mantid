@@ -26,39 +26,53 @@ class testMDDataPoints :    public CxxTest::TestSuite
 {
   std::vector<std::string> fieldNames4D;
   std::vector<std::string> fieldNames5D;
-  MDPointDescriptor descriptor4D;
-  MDPointDescriptor descriptor5D;
-  MDPixelSignature *pix4D,*pix5D;
+  MDPointSignature descriptor4D;
+  MDPointSignature descriptor5D;
+  MDPointDescription *pix4D,*pix5D;
 public:
-  void testMDPointDescriptionConstructors(){
+  void testMDPointDescriptionConstructorsDefault(){
     // default constructor builing 4x3 pixel description for histohram data and default tags
-    TS_ASSERT_THROWS_NOTHING(MDPixelSignature defSig());
+    TS_ASSERT_THROWS_NOTHING(MDPointDescription defSig);
+  }
+  void testMDPointDescrFromFields(){
 
     // and here we have default 4x3 histohram data itself 
-    MDPointDescriptor defaultPoint;
+    MDPointSignature defaultPoint;
     // and build pixel description from the default point using default tags; 
-    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint));
+    TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint));
+  }
+  void testMDPointDescriptionFromFieldsAndTags(){
+    MDPointSignature defaultPoint;
     // now let's have "non-default" tags
     std::vector<std::string> tags = fieldNames4D;
     // define the pixel from these tags and 
-    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint,tags));
-
+    TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint,tags));
+  }
+  void testEventDataDescription(){
+    MDPointSignature defaultPoint;
     // let's set default point for describing expanded event data
     defaultPoint.NumDataFields = 0;
     // should be ok
-    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint));
-    // names and fields are not-consistent
-    TS_ASSERT_THROWS_ANYTHING(MDPixelSignature def(defaultPoint,tags));
+    TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint));
+  }
+  void testTagsFieldConsistency(){
+       // let's set default point for describing expanded event data
+    MDPointSignature defaultPoint;
+    defaultPoint.NumDataFields = 0;
+    // and have "non-default" tags for TOF data
+    std::vector<std::string> tags = fieldNames4D;
+     // names and fields are not-consistent
+    TS_ASSERT_THROWS_ANYTHING(MDPointDescription def(defaultPoint,tags));
     tags.erase(tags.begin()+4,tags.begin()+6);
     // now it should work;
-    TS_ASSERT_THROWS_NOTHING(MDPixelSignature def(defaultPoint,tags));
+    TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint,tags));
 
   }
-  void testMDPointConstructors(){
-    MDDataPoint<float,uint16_t> *pPoint;
+  void testMDPoint4fx1dx2u8Constructors(){
+
     MDDataPoint<float,uint8_t>  *pPoints;
     char *dataBuf(NULL);
-   
+   // this constructor acutally owerwirtes default value for 8-bit fields as a TOF-kind of pixel is constructed which redefines 2 first fields as 32-bit field; MESS!
     TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,4,1,2)));
     
     TS_ASSERT_EQUALS(pPoints->getColumnNames().size(),pPoints->getNumPointFields());
@@ -69,17 +83,21 @@ public:
 
     delete pPoints;
     pPoints=NULL;
+  }
+  void testMDPointDefaultConstructor(){
 
-    MDPointDescriptor defaultPoint;
-    MDPixelSignature sig(defaultPoint,fieldNames4D);
+    MDDataPoint<float,uint16_t> *pPoint;
+    char *dataBuf(NULL);
+    MDPointSignature defaultPoint;
+    MDPointDescription sig(defaultPoint,fieldNames4D);
 
     TS_ASSERT_THROWS_NOTHING(pPoint = (new MDDataPoint<float,uint16_t>(dataBuf,sig)));
-    TS_ASSERT_EQUALS(pPoint->sizeofMDDataPoint(),4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t));
+ 
     TS_ASSERT_EQUALS(pPoint->getColumnNames().size(),pPoint->getNumPointFields());
     TS_ASSERT_EQUALS(pPoint->getNumDimensions(),4);
     TS_ASSERT_EQUALS(pPoint->getNumSignals(),2);
     TS_ASSERT_EQUALS(pPoint->getNumDimIndex(),3);
-
+    TS_ASSERT_EQUALS(pPoint->sizeofMDDataPoint(),4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t));
 
     delete pPoint;
   }
@@ -100,7 +118,7 @@ public:
       testData[i].iEn =(i+1)*9; 
     }
 
-    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPixelSignature(descriptor4D,fieldNames4D));
+    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPointDescription(descriptor4D,fieldNames4D));
 
     MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix4D);
 
@@ -214,7 +232,7 @@ public:
       testData[i].iT  =(i)*11; 
     }
 
-    TS_ASSERT_THROWS_NOTHING(pix5D = new MDPixelSignature(descriptor5D,fieldNames5D));
+    TS_ASSERT_THROWS_NOTHING(pix5D = new MDPointDescription(descriptor5D,fieldNames5D));
 
     MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix5D);
 
@@ -275,7 +293,7 @@ public:
     pix4D  = NULL;
     fieldNames4D.erase(fieldNames4D.begin()+4,fieldNames4D.begin()+6);
 
-    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPixelSignature(descriptor4D,fieldNames4D));
+    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPointDescription(descriptor4D,fieldNames4D));
     if(!pix4D)return;
 
     MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix4D);

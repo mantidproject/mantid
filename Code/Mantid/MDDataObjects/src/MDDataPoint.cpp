@@ -7,13 +7,13 @@ namespace Mantid
 namespace MDDataObjects
 {
 
-MDPixelSignature::MDPixelSignature():
+MDPointDescription::MDPointDescription():
 PixDescriptor()
 {
   buildDefaultTags(this->PixDescriptor);
 }
 
-MDPixelSignature::MDPixelSignature(const MDPointDescriptor &pixInfo,const std::vector<std::string> &IndataTags):
+MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo,const std::vector<std::string> &IndataTags):
 dataTags(IndataTags),PixDescriptor(pixInfo)
 {
   unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
@@ -23,7 +23,7 @@ dataTags(IndataTags),PixDescriptor(pixInfo)
 }
 //
 void 
-MDPixelSignature::buildDefaultTags(const MDPointDescriptor &pixInfo)
+MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
 {
 
   unsigned int nFields = pixInfo.NumDimensions+pixInfo.NumDataFields+pixInfo.NumDimIDs;
@@ -59,11 +59,11 @@ MDPixelSignature::buildDefaultTags(const MDPointDescriptor &pixInfo)
   this->dataTags = tags;
 }
 
-MDPixelSignature::MDPixelSignature(const MDPointDescriptor &pixInfo):
+MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo):
 PixDescriptor(pixInfo)
 {
  
-
+  this->buildDefaultTags(pixInfo);
 
 }
 //

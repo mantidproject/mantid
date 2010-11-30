@@ -86,9 +86,8 @@ namespace Mantid{
       *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
       *   when the structure is indeed 
       */
-      void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
-      void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
-    protected: 
+      void reinit_Geometry(const MDGeometryDescription &trf);
+     protected: 
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
       unsigned int n_expanded_dim;
       /// the array of Dimensions. Some are collapsed (integrated over)
@@ -96,10 +95,7 @@ namespace Mantid{
 
 
 
-      /** function used to arrange dimensions properly, e.g. according to the order of the dimension tags supplied as input argument
-      and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
-      void arrangeDimensionsProperly(const std::vector<std::string> &tags);
-      /* function returns tne location of the dimension specified by the tag, in the array theDimension (in the MDGeomerty)
+        /* function returns tne location of the dimension specified by the tag, in the array theDimension (in the MDGeomerty)
       negative value specifies that the requested dimension is not present in the array. */
       //  int getDimNum(const std::string &tag,bool do_trow=false)const;
 
@@ -108,14 +104,19 @@ namespace Mantid{
       void setRanges(const MDGeometryDescription &trf);
 
       MDGeometryBasis m_basis;
-      //void init_empty_dimensions();
-      /// the map used for fast search of a dumension from its tag. 
+      
+     /// the map used for fast search of a dumension from its tag. 
       std::map<std::string,MDDimension *> dimensions_map;
       //Defaults should do: ->NO?
       MDGeometry& operator=(const MDGeometry&);   
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
-
+      /// currently does the same as the arrangeDimensionsProperly, but verifies the the tags before rearranging
+      void reinit_Geometry(const std::vector<std::string> &DimensionTags);
+   /** function used to arrange dimensions properly, e.g. according to the order of the dimension tags supplied as input argument
+      and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
+      void arrangeDimensionsProperly(const std::vector<std::string> &tags);
+ 
       void init_empty_dimensions();
     };
   }  // Geometry
