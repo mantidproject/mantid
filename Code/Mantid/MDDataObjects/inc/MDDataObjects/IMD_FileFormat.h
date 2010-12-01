@@ -33,12 +33,15 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace Mantid{
-    namespace MDDataObjects{
+namespace Mantid
+{
+
+namespace MDDataObjects
+{
+
 //
 class MDImage;
 class MDDataPoints;
-class Mantid::Kernel::Logger;
 
 /** class describes the interface to file operations, which are supported by generic MD dataset
 */

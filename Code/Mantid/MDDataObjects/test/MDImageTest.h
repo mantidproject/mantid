@@ -18,7 +18,7 @@
 using namespace Mantid::MDDataObjects;
 using namespace Mantid::Geometry;
 
-class tesMDImage :    public CxxTest::TestSuite
+class testMDImage :    public CxxTest::TestSuite
 {
 
 private:

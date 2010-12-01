@@ -5,10 +5,11 @@
 
 
 #include <cxxtest/TestSuite.h>
-class tmain: public CxxTest::TestSuite
+class testSQW: public CxxTest::TestSuite
 {
 public:
-      void testTMain(void){
+      void testTMain(void)
+      {
            TS_WARN( "Main suite for sqw tests invoked" );
       }
 };

@@ -12,7 +12,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-class tesMDWorkspace :    public CxxTest::TestSuite
+class testMDWorkspace :    public CxxTest::TestSuite
 {
 private:
 
