@@ -56,7 +56,7 @@ namespace Mantid{
     }
 
     size_t 
-      MDWorkspace::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
+      MDWorkspace::read_pix_selection(const std::vector<size_t> &cells_nums, size_t &start_cell, std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
       if(!this->m_spFile.get()){
 		  throw(std::runtime_error("MDPixels::read_selected_pix: file reader has not been defined"));

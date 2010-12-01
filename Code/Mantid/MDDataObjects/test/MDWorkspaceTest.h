@@ -216,7 +216,9 @@ public:
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
     size_t size_param = 1;
-    workspace->read_pix_selection(std::vector<size_t>(), size_param, std::vector<char>(), size_param);
+    std::vector<size_t> empty1;
+    std::vector<char> empty2;
+    workspace->read_pix_selection(empty1, size_param, empty2, size_param);
     TSM_ASSERT("MDWorkspace::read_pix_selection failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
   }
 
@@ -227,7 +229,10 @@ public:
     MockFileFormat* mockFile = NULL;
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
     size_t size_param = 1;
-    TSM_ASSERT_THROWS("The file has not been provided, so should throw bad allocation", workspace->read_pix_selection(std::vector<size_t>(), size_param, std::vector<char>(), size_param), std::runtime_error);
+    std::vector<size_t> empty1;
+    std::vector<char> empty2;
+    TSM_ASSERT_THROWS("The file has not been provided, so should throw bad allocation",
+        workspace->read_pix_selection(empty1, size_param, empty2, size_param), std::runtime_error);
   }
 
 
