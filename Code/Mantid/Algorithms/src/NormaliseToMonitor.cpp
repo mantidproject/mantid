@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
 #include <iomanip>
@@ -17,6 +19,7 @@ namespace Algorithms
 DECLARE_ALGORITHM(NormaliseToMonitor)
 
 using namespace Kernel;
+using namespace DataObjects;
 using namespace API;
 
 /// Default constructor
@@ -321,12 +324,27 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
  *  @param inputWorkspace The input workspace
  *  @param outputWorkspace The output workspace
  */
-void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_const_sptr inputWorkspace,
+void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                                            API::MatrixWorkspace_sptr& outputWorkspace)
 { 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace ) 
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+
+  // ---- For event workspaces, the Divide operator will do the work. -----
+  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace))
+  {
+    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+    {
+      outputWorkspace /= m_monitor;
+    }
+    else
+    {
+      //outputWorkspace = inputWorkspace / boost::dynamic_pointer_cast<const MatrixWorkspace>(m_monitor);
+      outputWorkspace = inputWorkspace / m_monitor;
+    }
+    return;
+  }
 
   // Get hold of the monitor spectrum
   const MantidVec& monX = m_monitor->readX(0);

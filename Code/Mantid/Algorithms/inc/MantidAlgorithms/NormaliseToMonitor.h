@@ -87,7 +87,7 @@ private:
   void normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace, 
                                   API::MatrixWorkspace_sptr& outputWorkspace);
 
-  void normaliseBinByBin(API::MatrixWorkspace_const_sptr inputWorkspace,
+  void normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                          API::MatrixWorkspace_sptr& outputWorkspace);
   void normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E);
 
