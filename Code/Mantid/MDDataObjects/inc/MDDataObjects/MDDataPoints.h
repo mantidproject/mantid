@@ -5,8 +5,11 @@
 #include "MDDataObjects/MDDataPoint.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include <boost/shared_ptr.hpp>
-/** Class to support operations on single data pixels, as obtained from the instrument. Currently it contains information on the location of the pixel in 
-    the reciprocal space but this can chane as this information can be computed in the run time
+
+/** Class to support operations on single data pixels, as obtained from the instrument.
+ *  Currently it contains information on the location of the pixel in
+    the reciprocal space but this can change as this information
+    can be computed at the run time.
     
     @author Alex Buts, RAL ISIS
     @date 01/10/2010

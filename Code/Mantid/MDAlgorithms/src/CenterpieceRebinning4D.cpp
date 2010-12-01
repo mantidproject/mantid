@@ -178,11 +178,11 @@ CenterpieceRebinning4D::exec()
 }
 //
 
-void 
-CenterpieceRebinning4D::set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition)
+void CenterpieceRebinning4D::set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition)
 {  
 
-  double originX, originY, originZ, normalX, normalY, normalZ;
+  //double originX, originY, originZ, normalX, normalY, normalZ;
+
   /*
 Mantid::API::ImplicitFunction* ifunc = Mantid::API::Instance().ImplicitFunctionFactory(xmlDefinitions, xmlInstructions);
   PlaneImplicitFunction* plane = dynamic_cast<PlaneImplicitFunction*>(ifunc);
@@ -243,8 +243,7 @@ CenterpieceRebinning4D::rebin_dataset4D(const transf_matrix &rescaled_transf,con
   for(int ii=0;ii<9;ii++){
     rotations_ustep[ii]=rescaled_transf.rotations[ii];
   }
-  int num_OMP_Threads(1);
-  bool keep_pixels(false);
+  //bool keep_pixels(false);
 
   //int nRealThreads;
 
@@ -260,6 +259,7 @@ CenterpieceRebinning4D::rebin_dataset4D(const transf_matrix &rescaled_transf,con
   //
   // work at least for MSV 2008
 #ifdef _OPENMP  
+  int num_OMP_Threads(1);
   omp_set_num_threads(num_OMP_Threads);
 
 

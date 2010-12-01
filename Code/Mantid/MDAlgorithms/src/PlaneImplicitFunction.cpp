@@ -11,7 +11,8 @@ namespace MDAlgorithms
 {
 
 PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin) :
-  m_normal(normal), m_origin(origin)
+  m_origin(origin),
+  m_normal(normal)
 {
 }
 
