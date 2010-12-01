@@ -80,10 +80,10 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
     return was_opened;
 }
 void 
-MD_File_hdfMatlab::read_mdd(MDImageData & dnd)
+MD_File_hdfMatlab::read_mdd(MDImage & dnd)
 {
   // get pointer to MD structure which should be read from memory
-   MD_DATA *pMD_struct  = dnd.get_pMDData();
+   MD_img_data *pMD_struct  = dnd.get_pMDImgData();
 // The function accepts full 4D dataset only!!!
     hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
     if (h_signal_DSID<0){
@@ -351,7 +351,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 }
 
 size_t 
-MD_File_hdfMatlab::read_pix_subset(const MDImageData &DND,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
+MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer)
 {
 // open pixel dataset and dataspace if it has not been opened before;
     n_pix_in_buffer=0;

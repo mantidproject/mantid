@@ -176,7 +176,7 @@
     <ClCompile Include="src\IMD_FileFormat.cpp" />
     <ClCompile Include="src\MDDataPoint.cpp" />
     <ClCompile Include="src\MDDataPoints.cpp" />
-    <ClCompile Include="src\MDImageData.cpp" />
+    <ClCompile Include="src\MDImage.cpp" />
     <ClCompile Include="src\MDWorkspace.cpp" />
     <ClCompile Include="src\MDWorkspaceMockData10.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
@@ -187,7 +187,7 @@
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoint.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h" />
-    <ClInclude Include="inc\MDDataObjects\MDImageData.h" />
+    <ClInclude Include="inc\MDDataObjects\MDImage.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspaceHelper.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />

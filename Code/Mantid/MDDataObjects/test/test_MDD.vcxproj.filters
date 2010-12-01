@@ -18,21 +18,21 @@
     <ClCompile Include="test_sqw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MDDataTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MDPixelsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MDDataPointTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MDImageTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MDWorkspaceTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="test_sqw.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MDDataTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="MDPixelsTest.h">
@@ -41,5 +41,16 @@
     <CustomBuild Include="MDDataPointTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="MDImageTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MDWorkspaceTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="testPoint3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

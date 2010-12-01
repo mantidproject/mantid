@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "MantidAPI/FileFinder.h"
 #include "MDDataObjects/MDDataPoints.h"
 #include "Poco/Path.h"
@@ -18,7 +18,7 @@
 using namespace Mantid::MDDataObjects;
 using namespace Mantid::Geometry;
 
-class tesMDImageData :    public CxxTest::TestSuite
+class tesMDImage :    public CxxTest::TestSuite
 {
 
 private:
@@ -28,7 +28,7 @@ private:
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    virtual void read_mdd(Mantid::MDDataObjects::MDImageData& dnd)
+    virtual void read_mdd(Mantid::MDDataObjects::MDImage& dnd)
     {
        Mantid::Geometry::MDGeometryDescription dnd_shape(4);
        for(int i=0;i<4;i++){
@@ -37,12 +37,12 @@ private:
        dnd.alloc_mdd_arrays(dnd_shape);
     }
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
-    size_t read_pix_subset(const MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
+    size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
       return 0;
     }
     MOCK_METHOD0(getNPix, hsize_t());
-    void write_mdd(const MDImageData &)
+    void write_mdd(const MDImage &)
     {
     }
     virtual ~MockFileFormat(void){};
@@ -65,12 +65,12 @@ private:
 
 public:
 
-  void testMDImageDataGet2DData(void){
+  void testMDImageGet2DData(void){
 
     this->selection.assign(2,1);
 
-    MDImageData* pImageData = new MDImageData(getMDGeometry().release());
-    std::auto_ptr<MDImageData>pDND=std::auto_ptr<MDImageData>(pImageData);
+    MDImage* pImageData = new MDImage(getMDGeometry().release());
+    std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
     MockFileFormat file;
     file.read_mdd(*pDND);
 
@@ -89,8 +89,8 @@ public:
     selection.assign(1,20);
 
     MockFileFormat file;
-    MDImageData* pImageData = new MDImageData(getMDGeometry().release());
-    std::auto_ptr<MDImageData>pDND=std::auto_ptr<MDImageData>(pImageData);
+    MDImage* pImageData = new MDImage(getMDGeometry().release());
+    std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
 
     file.read_mdd(*pDND);
 
@@ -101,7 +101,7 @@ public:
   void testGet1Ddata(void){
     // this should return single point at (20,20,20,20)
     selection.assign(4,20);
-    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry().release()));
+    std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
     MockFileFormat file;
     file.read_mdd(*pDND);
     pDND->getPointData(selection,img);
@@ -111,7 +111,7 @@ public:
   void testGet2Ddata(void){
     // this should return line of size 50 
     selection.assign(3,10);
-    std::auto_ptr<MDImageData> pDND=std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry().release()));
+    std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
     MockFileFormat file;
     file.read_mdd(*pDND);
     pDND->getPointData(selection,img);
@@ -120,12 +120,12 @@ public:
 
   void test_alloc_mdd_arrays()
   {
-    std::auto_ptr<MDImageData>pMDImageData = std::auto_ptr<MDImageData>(new MDImageData(getMDGeometry().release()));
+    std::auto_ptr<MDImage>pMDImage = std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
     MDGeometryDescription tt;
 
-    pMDImageData->alloc_mdd_arrays(tt);
-    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImageData->get_pMDData() != NULL);
-    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImageData->get_pData() != NULL);
+    pMDImage->alloc_mdd_arrays(tt);
+    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImage->get_pMDImgData() != NULL);
+    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImage->get_pData() != NULL);
   }
 
 private:

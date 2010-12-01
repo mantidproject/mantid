@@ -1,5 +1,5 @@
 #include "MDDataObjects/stdafx.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfV1.h"
@@ -12,13 +12,13 @@ namespace Mantid{
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 // logger for MD workspaces  
-    Kernel::Logger& MDImageData::g_log =Kernel::Logger::get("MDWorkspaces");
+    Kernel::Logger& MDImage::g_log =Kernel::Logger::get("MDWorkspaces");
 
 
 
 
 void
-MDImageData::getPointData(std::vector<point3D> &image_points)const{
+MDImage::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;
     if(this->m_pgeometry->getNumExpandedDims()>3){
         selection.assign(this->m_pgeometry->getNumExpandedDims()-3,0);
@@ -30,7 +30,7 @@ MDImageData::getPointData(std::vector<point3D> &image_points)const{
 }
 //
 void
-MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> &image_points)const
+MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> &image_points)const
 {
     unsigned int selection_size  =  (unsigned int )selection.size();
     if(selection_size >this->m_pgeometry->getNumExpandedDims()){
@@ -127,7 +127,7 @@ MDImageData::getPointData(const std::vector<unsigned int> &selection,std::vector
 
 //
 MD_image_point *
-MDImageData::get_pData(void)
+MDImage::get_pData(void)
 {
     if(pData){
         return pData;
@@ -136,7 +136,7 @@ MDImageData::get_pData(void)
     }
 }
 MD_image_point const*
-MDImageData::get_const_pData(void)const
+MDImage::get_const_pData(void)const
 {
     if(pData){
         return pData;
@@ -164,7 +164,7 @@ DND::write_mdd(const char *file_name){
 */
 //*******************************************************************************************************
 size_t
-MDImageData::reshape_geometry(const MDGeometryDescription &transf)
+MDImage::reshape_geometry(const MDGeometryDescription &transf)
 {
    unsigned int i;
 
@@ -204,7 +204,7 @@ MDImageData::reshape_geometry(const MDGeometryDescription &transf)
     return MDStruct.data_size;
 }
 void
-MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
+MDImage::alloc_mdd_arrays(const MDGeometryDescription &transf)
 {
 
 // initiate initial dimensions
@@ -234,7 +234,7 @@ MDImageData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 }
 
 //
-MDImageData::MDImageData(Mantid::Geometry::MDGeometry* pGeometry): 
+MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry): 
 m_pgeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry)),
 pData(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
@@ -251,13 +251,13 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
   this->MDStruct.max_value.assign(nDims,-FLT_MAX);
 }
 //
-MDImageData::~MDImageData()
+MDImage::~MDImage()
 {
     this->clear_class();
 }
 
 std::vector<size_t>
-MDImageData::getStrides(void)const
+MDImage::getStrides(void)const
 {
   unsigned int nDims = this->m_pgeometry->getNumDims();
   std::vector<size_t> strides(nDims,0);
@@ -269,7 +269,7 @@ MDImageData::getStrides(void)const
 }
 //
 void
-MDImageData::identify_SP_points_locations()
+MDImage::identify_SP_points_locations()
 {
     // and calculate cells location for pixels;
     this->pData[0].chunk_location=0;
@@ -284,7 +284,7 @@ MDImageData::identify_SP_points_locations()
 
 //***************************************************************************************
 void
-MDImageData::clear_class(void)
+MDImage::clear_class(void)
 {
     if(pData){
         delete [] pData;

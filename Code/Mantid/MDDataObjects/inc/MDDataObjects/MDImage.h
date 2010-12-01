@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MantidAPI/IMDWorkspace.h"
+//#include "MantidAPI/IMDWorkspace.h"
 
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
@@ -52,7 +52,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 /// structure of the multidimension data array, which is the basis of MDData class and should be exposed to modyfying algorighms
-struct MD_DATA{
+struct MD_img_data{
     size_t data_size;               ///< size of the data points array expressed as 1D array;
     MD_image_point *data;           ///< multidimensional array of data points, represented as a single dimensional array;
     // integer descriptor for dimensions;
@@ -60,19 +60,19 @@ struct MD_DATA{
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
     std::vector<double> min_value;  ///< min value in the selected dimension
     std::vector<double> max_value;  ///< max value in the selected dimension
-    MD_DATA():data(NULL){}
+    MD_img_data():data(NULL){}
 
 };
 
 //
-class DLLExport MDImageData
+class DLLExport MDImage
 {
 public:
 
     // default constructor
-  MDImageData(Mantid::Geometry::MDGeometry* p_geometry);
+  MDImage(Mantid::Geometry::MDGeometry* p_geometry);
     // destructor
-    ~MDImageData();
+    ~MDImage();
     /** function returns vector of points left after the selection has been applied to the multidimensinal dataset
     * @param selection -- vector of indexes, which specify which dimensions are selected and the location of the selected point
     *                     e.g. selection[0]=10 -- selects the index 10 in the last expanded dimension or
@@ -97,7 +97,7 @@ public:
     MD_image_point      * get_pData(void);
     MD_image_point const* get_const_pData(void)const;
     /// get acces to the whole MD structure;
-    MD_DATA            * get_pMDData(void){return (&MDStruct);}
+    MD_img_data            * get_pMDImgData(void){return (&MDStruct);}
 
     // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
     void alloc_mdd_arrays(const MDGeometryDescription &transf);
@@ -109,9 +109,7 @@ public:
   /// build allocation table of sparce data points (pixels)
     void identify_SP_points_locations();
  protected:
-    MD_DATA  MDStruct;
-    MD_image_point *pData; // the additional pointer to data structure in MDStruct;
-
+ 
 
     // dimensions strides in linear order; formulated in this way for faster access<- looks like obsolete;
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;
@@ -148,10 +146,14 @@ private:
   //*************************************************
 
   std::auto_ptr<MDGeometry> m_pgeometry;
+//
+   MD_img_data  MDStruct;
+   MD_image_point *pData; // the additional pointer to data structure in MDStruct;
+
   // probably temporary
-  MDImageData & operator = (const MDImageData & other);
+  MDImage & operator = (const MDImage & other);
   // copy constructor;
-  MDImageData(const MDImageData & other);
+  MDImage(const MDImage & other);
 
 };
 //

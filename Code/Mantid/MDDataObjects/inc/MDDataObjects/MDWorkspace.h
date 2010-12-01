@@ -1,7 +1,7 @@
 #ifndef H_MD_WORKSPACE
 #define H_MD_WORKSPACE
 #include "MDDataObjects/MDDataPoints.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -41,10 +41,10 @@ namespace Mantid
   {
 
     //Seam method
-    boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImageData> imageData);
+    boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData);
 
     //Seam method.
-    boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(const Mantid::Geometry::MDGeometry* geometry);
+    boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometry* geometry);
 
     class DLLExport MDWorkspace :  public IMDWorkspace
     {
@@ -92,17 +92,17 @@ namespace Mantid
       /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
       //    bool write_mdd(void);
       Mantid::Geometry::MDGeometry const * const       get_const_spMDGeometry() const {return m_spImageData->getGeometry();}
-      boost::shared_ptr<Mantid::MDDataObjects::MDImageData const>  get_const_spMDImage()  const {return m_spImageData;}
+      boost::shared_ptr<Mantid::MDDataObjects::MDImage const>  get_const_spMDImage()  const {return m_spImageData;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints const> get_const_spMDDPoints() const {return m_spDataPoints;}
 
       //Mantid::Geometry::MDGeometry const * const       get_spMDGeometry(){return m_spImageData->getGeometry();}
-      boost::shared_ptr<Mantid::MDDataObjects::MDImageData> get_spMDImage()  {return m_spImageData;}
+      boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()  {return m_spImageData;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
     private:
       static Kernel::Logger& g_log;
 
      
-      boost::shared_ptr<Mantid::MDDataObjects::MDImageData> m_spImageData;
+      boost::shared_ptr<Mantid::MDDataObjects::MDImage> m_spImageData;
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> m_spDataPoints;
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
     };

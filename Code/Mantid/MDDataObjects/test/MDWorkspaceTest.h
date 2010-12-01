@@ -5,7 +5,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDWorkspace.h"
 
@@ -22,14 +22,14 @@ private:
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImageData&)); 
+    MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
-    MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
+    MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
     hsize_t getNPix()
     {
       return 0;
     }
-    MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImageData&));
+    MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImage&));
   };
 
   //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.

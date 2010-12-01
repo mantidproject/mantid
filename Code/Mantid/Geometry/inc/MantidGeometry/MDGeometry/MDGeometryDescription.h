@@ -5,9 +5,12 @@
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 
 
-/** class describes slicing and rebinning matrix and the geometry of the MD workspace
+/** class describes slicing and rebinning matrix and the geometry of the MD workspace. 
+
+*  Unlike the geometry itself, it allows to describe  various changes to the geometry. 
+*  Afer applying these changes to the MD image and MD geometry, an algorithm calculates various mutually 
+*  dependent changes to MDImage e.g. new coherent MD image data and MD geometry 
 * 
-* it is possible that such class should be just the MD-geometry as it actually describes it, thoug each class has set of its unique features
 
     @author Alex Buts (ISIS, RAL)
     @date 05/10/2010

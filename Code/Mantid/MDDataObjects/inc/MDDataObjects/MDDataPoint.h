@@ -151,11 +151,12 @@ namespace Mantid{
      memcpy(base+MDPointStride*iOrigin,targetBuff+MDPointStride*iTarget,MDPointStride);
    }
      
-   ///function sets data from external source into MDDataPoint format and is specialized for Horace data e.g. expetcs no more than 2^pix_id_shift-1 runs and no more than 2^(32-pix_id_shift) pixels (unique detectors)
+   /** function sets data from external source into MDDataPoint format and is specialized for Horace data e.g. expetcs no more than 2^pix_id_shift-1 runs and no more than 2^(32-pix_id_shift) pixels (unique detectors)
    // @param ind           - the location of the pixel in the MDDataPoints dataset
    // @param dim_fields    - the values of the dimension coordinates (may be absent)
    // @param Signal_fields - Signal and error for histogram data, absent for event data
    // @param iFields       - array of dimension ID in some look-up table; this function assumes that 2 first fields represent the detector location (detectorId and runID)
+   */
    void setData(unsigned int ind,T dim_fields[],double SignalFields[],int iFiels[]){
      unsigned int i,i0;
 

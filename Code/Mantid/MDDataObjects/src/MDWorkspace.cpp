@@ -6,15 +6,15 @@ namespace Mantid{
   namespace MDDataObjects{
 
      //Seam method.
-     boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImageData> imageData)
+     boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData)
      {
        return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(imageData)); //TODO replace with some other factory call.
      }
 
      //Seam method.
-     boost::shared_ptr<Mantid::MDDataObjects::MDImageData> getImageData(Mantid::Geometry::MDGeometry* geometry)
+     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(Mantid::Geometry::MDGeometry* geometry)
      {
-       return boost::shared_ptr<Mantid::MDDataObjects::MDImageData>(new MDImageData(geometry));
+       return boost::shared_ptr<Mantid::MDDataObjects::MDImage>(new MDImage(geometry));
      }
 
      void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.

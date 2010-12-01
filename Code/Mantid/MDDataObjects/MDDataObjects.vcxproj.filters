@@ -27,9 +27,6 @@
     <ClCompile Include="src\MDDataPoints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MDImageData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\IMD_FileFormat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MDDataPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,9 +65,6 @@
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MDImageData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDWorkspaceHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -96,7 +96,7 @@ protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
  
-//********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImageData;
+//********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
     virtual void setCoord(const std::vector<double> &){};
     // function sets the dimension as a linear dimension with specific ranges and number of bins

@@ -5,7 +5,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/IMD_FileFormat.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/FileFinder.h"
 #include "MDDataObjects/point3D.h"
@@ -26,21 +26,21 @@ private:
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImageData&)); 
+    MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
-    size_t read_pix_subset(const MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
+    size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
       return 0;
     }
     MOCK_METHOD0(getNPix, hsize_t());
-    void write_mdd(const MDImageData &)
+    void write_mdd(const MDImage &)
     {
     }
     virtual ~MockFileFormat(void){};
   };
 
   //Helper constructional method.
-  static std::auto_ptr<Mantid::MDDataObjects::MDImageData> constructMDGeometry()
+  static std::auto_ptr<Mantid::MDDataObjects::MDImage> constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -51,7 +51,7 @@ private:
 
     UnitCell cell;
     MDGeometry* pGeometry = new MDGeometry(MDGeometryBasis(basisDimensions, cell));
-    return std::auto_ptr<MDImageData>(new MDImageData(pGeometry));
+    return std::auto_ptr<MDImage>(new MDImage(pGeometry));
   }
 
 public:
@@ -64,7 +64,7 @@ public:
     MockFileFormat* mockFileFormat = new MockFileFormat;
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(100));
 
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImageData>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
     TSM_ASSERT_EQUALS("The number of pixels returned is not correct.", 100, points->getNumPixels(boost::shared_ptr<IMD_FileFormat>(mockFileFormat)));
     delete points;
   }
@@ -75,7 +75,7 @@ public:
     using namespace Mantid::MDDataObjects;
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImageData>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
 
     TSM_ASSERT_EQUALS("The memory buffer size following construction is not correct.", 0, points->getMemorySize());
     delete points;
@@ -87,7 +87,7 @@ public:
     using namespace Mantid::MDDataObjects;
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImageData>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
 
     TSM_ASSERT_EQUALS("The MDDataPoints should not be in memory.", false, points->isMemoryBased());
     delete points;
@@ -100,7 +100,7 @@ public:
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(2));
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImageData>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
     points->alloc_pix_array(boost::shared_ptr<IMD_FileFormat>(mockFileFormat));
     TSM_ASSERT_EQUALS("The memory size is not the expected value after allocation.", 2, points->getMemorySize());
     delete points;

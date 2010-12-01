@@ -45,17 +45,17 @@ public:
 
     virtual bool is_open(void)const{return (this->file_handler>0)?true:false;}
 
-    virtual void read_mdd(MDImageData & mdd);
+    virtual void read_mdd(MDImage & mdd);
    
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDDataPoints & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
-    virtual size_t read_pix_subset(const MDImageData &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
+    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDImageData &dnd){
+    virtual void write_mdd(const MDImage &dnd){
       f_log.error()<<" write_mdd function is not implemented for MD_File_hdfMatlab4D files\n";
       throw(Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));
     }

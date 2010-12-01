@@ -1,6 +1,6 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDDataPoints.h"
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
                
 namespace Mantid{
     namespace MDDataObjects{
@@ -11,7 +11,7 @@ namespace Mantid{
  // default names for signal and error fields
  const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
 
-MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImageData> spImage):
+MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage):
 m_spImageData(spImage),
 memBased(false),
 n_data_points(0),

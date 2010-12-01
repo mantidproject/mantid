@@ -55,7 +55,7 @@ MDGeometryDescription::MDGeometryDescription(
   createSlicingData(*dimT, 3);
 
  
-  for(int i=3;i<dimensions.size();i++) 
+  for(unsigned int i=3;i<dimensions.size();i++) 
   {
     createSlicingData(dimensions[i], i);
   }

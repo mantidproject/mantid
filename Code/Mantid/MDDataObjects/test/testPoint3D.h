@@ -3,7 +3,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-#include "MDDataObjects/MDImageData.h"
+#include "MDDataObjects/MDImage.h"
 #include "find_mantid.h"
 
 

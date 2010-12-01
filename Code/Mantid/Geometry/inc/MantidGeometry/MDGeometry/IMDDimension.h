@@ -39,17 +39,19 @@ namespace Mantid
     class DLLExport IMDDimension
     {
     public:
-
+    /// the name of the dimennlsion as can be displayed along the axis
       virtual std::string getName() const = 0;
-      
+    /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
+    /// various method exist to manipulate set of dimensions by their names. 
       virtual std::string getDimensionId() const = 0;
 
+    /// if the dimension is integrated (e.g. have single bin)
       virtual bool getIsIntegrated() const = 0;
 
       virtual double getMaximum() const = 0;
 
       virtual double getMinimum() const = 0;
-
+   /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual unsigned int getNBins() const = 0;
       
       virtual ~IMDDimension();

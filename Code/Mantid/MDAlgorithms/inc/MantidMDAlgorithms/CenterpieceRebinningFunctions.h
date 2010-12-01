@@ -4,7 +4,7 @@ namespace Mantid
     namespace MDAlgorithms
     {
 /** 
-* Rebinning matrix Internal class which describes rebinning transformation in the terms of current MDImageData
+* Rebinning matrix Internal class which describes rebinning transformation in the terms of current MDImage
 */
 class transf_matrix
 {
