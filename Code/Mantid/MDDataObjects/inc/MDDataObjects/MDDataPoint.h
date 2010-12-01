@@ -50,6 +50,7 @@ namespace MDDataObjects
 
 //********************************************************************************************************************************************************************
 //********************************************************************************************************************************************************************
+
 /** the names of the fields, present in the MDPixelDescription class
  *  and describe the format of the MDPixelDescriptions class */
 struct MDPointSignature
@@ -110,9 +111,14 @@ public:
 
 protected:
   MDPointSignature PixDescriptor;
-  /// the names (tags) of every dimension column and every data column; The former has to coinside (and would be obtained from) MDgeometryBasis, and first columns (if present) have to represent
-  /// reciprocal dimensions;
+
+  /** The names (tags) of every dimension column and every data column;
+   * The former has to coincide (and would be obtained from) MDgeometryBasis,
+   * and first columns (if present) have to represent
+   * reciprocal dimensions;
+   */
   std::vector<std::string> dataTags;
+
   void buildDefaultTags(const MDPointSignature &pixInfo);
 };
 

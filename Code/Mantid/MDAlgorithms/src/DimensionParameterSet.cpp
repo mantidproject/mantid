@@ -21,7 +21,7 @@ namespace MDAlgorithms
   {
     boost::shared_ptr<DimensionParameter> item;
     std::vector<boost::shared_ptr<DimensionParameter> >::iterator it = m_dimensionParameters.begin();
-    for(it; it != m_dimensionParameters.end(); ++it)
+    for( ; it != m_dimensionParameters.end(); ++it)
     {
       boost::shared_ptr<DimensionParameter> dimParam = (*it);
       if(dimParam->getId() == id)

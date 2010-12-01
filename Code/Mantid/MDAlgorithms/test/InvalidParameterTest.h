@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
-#include "InvalidParameter.h"
+#include "MantidMDAlgorithms/InvalidParameter.h"
 
 class InvalidParameterTest : public CxxTest::TestSuite
 {

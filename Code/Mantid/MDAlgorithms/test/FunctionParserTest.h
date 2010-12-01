@@ -4,10 +4,10 @@
 //Abstract testing base class for function parsers.
 
 #include <boost/scoped_ptr.hpp>
-#include "NormalParameterParser.h"
-#include "OriginParameterParser.h"
-#include "InvalidParameterParser.h"
-#include "PlaneFunctionBuilder.h"
+#include "MantidMDAlgorithms/NormalParameterParser.h"
+#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include <cxxtest/TestSuite.h>

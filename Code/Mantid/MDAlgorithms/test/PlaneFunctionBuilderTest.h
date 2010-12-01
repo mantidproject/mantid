@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
-#include "PlaneFunctionBuilder.h"
-#include "NormalParameter.h"
-#include "OriginParameter.h"
-#include "InvalidParameter.h"
+#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
+#include "MantidMDAlgorithms/InvalidParameter.h"
 
 class PlaneFunctionBuilderTest: public CxxTest::TestSuite
 {

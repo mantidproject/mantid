@@ -5,11 +5,12 @@
 #include <vector>
 #include <memory>
 #include "FunctionParserTest.h"
-#include "PlaneImplicitFunctionParser.h"
-#include "NormalParameterParser.h"
-#include "OriginParameterParser.h"
-#include "InvalidParameterParser.h"
-#include "PlaneFunctionBuilder.h"
+
+#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
+#include "MantidMDAlgorithms/NormalParameterParser.h"
+#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include <cxxtest/TestSuite.h>
 
 #include "Poco/DOM/DOMParser.h"

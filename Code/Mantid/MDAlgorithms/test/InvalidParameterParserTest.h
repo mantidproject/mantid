@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
-#include "InvalidParameterParser.h"
-#include "InvalidParameter.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/InvalidParameter.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

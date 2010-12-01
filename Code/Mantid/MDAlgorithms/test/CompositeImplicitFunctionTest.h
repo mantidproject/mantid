@@ -7,7 +7,7 @@
 #include <cmath>
 #include <typeinfo>
 
-#include "CompositeImplicitFunction.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
 
 class CompositeImplicitFunctionTest : public CxxTest::TestSuite

@@ -279,7 +279,8 @@ CenterpieceRebinning4D::rebin_dataset4D(const transf_matrix &rescaled_transf,con
     //	 mexPrintf(" n real threads %d :\n",nRealThread);}
 
 #pragma omp for schedule(static,1)
-    for(i=0;i<nPix;i++){
+    for(i=0;i<nPix;i++)
+    {
       sqw_pixel pix=source_pix[i];
 
       // Check for the case when either data.s or data.e contain NaNs or Infs, but data.npix is not zero.

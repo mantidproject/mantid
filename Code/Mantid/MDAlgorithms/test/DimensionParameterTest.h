@@ -2,9 +2,9 @@
 #define TEST_DIMENSION_PARAMETER_H
 
 #include <memory>
-#include "DimensionParameter.h"
-#include "DimensionParameterIntegration.h"
-#include "DimensionParameterNoIntegration.h"
+#include "MantidMDAlgorithms/DimensionParameter.h"
+#include "MantidMDAlgorithms/DimensionParameterIntegration.h"
+#include "MantidMDAlgorithms/DimensionParameterNoIntegration.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

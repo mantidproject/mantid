@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
-#include "OriginParameter.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
 
 class OriginParameterTest : public CxxTest::TestSuite
 {

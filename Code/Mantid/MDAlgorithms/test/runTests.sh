@@ -6,7 +6,7 @@
 # You will need to have the directories containing the Mantid
 #      .so libraries in your LD_LIBRARY_PATH environment variable
 #
-# Author: Owen Arnold 31/10/2010
+# Author: Russell Taylor, 07/11/07
 #
 
 # Clean up any old executable
@@ -28,9 +28,14 @@ echo
 
 echo "Compiling the test executable..."
 mantid_libpath=../../debug
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../inc/MantidMDAlgorithms -I../../API/inc -I../../Geometry/inc -I ../inc \
-    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include \
-    -L$mantid_libpath  -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time -lgmock -lMDAlgorithms
+gmock_libpath=../../../TestingTools/lib/ubuntu-10.10/lib
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp \
+ -I../../Kernel/inc -I../../Geometry/inc -I ../inc -I../../MDDataObjects/inc \
+ -I../../MDAlgorithms/inc -I../../API/inc -I/usr/local/include/gmock -I/usr/local/include/gtest  \
+ -I ../../../Third_Party/src/cxxtest \
+ -L$mantid_libpath -L$gmock_libpath -L/usr/local/lib \
+ -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time -lgmock -lgtest -lMDDataObjects -lhdf5 -lMDAlgorithms
+
 echo
 
 echo "Running the tests..."

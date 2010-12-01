@@ -7,8 +7,8 @@
 
 #include <vector>
 #include <memory>
-#include "NormalParameterParser.h"
-#include "NormalParameter.h"
+#include "MantidMDAlgorithms/NormalParameterParser.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

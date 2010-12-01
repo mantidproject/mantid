@@ -88,7 +88,7 @@ namespace Mantid
             }
             else
             {
-                for(int i = 0; i < this->m_Functions.size(); i++)
+                for(size_t i = 0; i < this->m_Functions.size(); i++)
                 {
                     evalResult = false; //TODO call equals operations on nested implicit functions.
                     if(!evalResult)

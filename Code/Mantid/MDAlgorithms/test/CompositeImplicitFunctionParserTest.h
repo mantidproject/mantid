@@ -6,10 +6,10 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 
-#include "InvalidParameterParser.h"
-#include "CompositeImplicitFunctionParser.h"
-#include "PlaneImplicitFunctionParser.h"
-#include "CompositeImplicitFunction.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"

@@ -2,8 +2,8 @@
 #define TEST_DIMENSION_PARAMETER_INTEGRATION_H
 
 #include <memory>
-#include "DimensionParameterIntegration.h"
-#include "DimensionParameterNoIntegration.h"
+#include "MantidMDAlgorithms/DimensionParameterIntegration.h"
+#include "MantidMDAlgorithms/DimensionParameterNoIntegration.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
-#include "NormalParameter.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
 
 class NormalParameterTest: public CxxTest::TestSuite
 {

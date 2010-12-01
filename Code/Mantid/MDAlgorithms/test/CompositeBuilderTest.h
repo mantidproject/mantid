@@ -6,8 +6,8 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
-#include "CompositeFunctionBuilder.h"
-#include "CompositeImplicitFunction.h"
+#include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"

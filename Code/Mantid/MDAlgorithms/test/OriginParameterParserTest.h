@@ -6,8 +6,8 @@
 #include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "OriginParameterParser.h"
-#include "OriginParameter.h"
+#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

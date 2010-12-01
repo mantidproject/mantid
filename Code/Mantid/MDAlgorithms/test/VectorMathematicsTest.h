@@ -2,7 +2,7 @@
 #define VECTOR_MATHEMATICS_TEST_H_
 
 
-#include "VectorMathematics.h"
+#include "MantidMDAlgorithms/VectorMathematics.h"
 
 using namespace Mantid::MDAlgorithms;
 

@@ -49,7 +49,7 @@ namespace Mantid
             std::auto_ptr<CompositeFunctionBuilder> functionBuilder = std::auto_ptr<CompositeFunctionBuilder>(new CompositeFunctionBuilder);
             NodeList* childFunctionElementList = functionElement->childNodes();
            
-            for(int i = 0; i < childFunctionElementList->length(); i++)
+            for(size_t i = 0; i < childFunctionElementList->length(); i++)
             {
                 Element* childFunctionElement = dynamic_cast<Element*>(childFunctionElementList->item(i));
                 std::string typeName = childFunctionElement->localName();
