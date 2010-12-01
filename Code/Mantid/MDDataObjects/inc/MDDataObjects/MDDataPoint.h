@@ -147,8 +147,9 @@ namespace Mantid{
    //************************************************************************************************************************
    //Mutators
    /// copy pixel from the specified location among origin pixels to the specified location among target pixels
-   void copyPixel(size_t iOrigin, char *targetBuff, size_t iTarget)const{
-     memcpy(base+MDPointStride*iOrigin,targetBuff+MDPointStride*iTarget,MDPointStride);
+   void copyPixel(size_t iOrigin, char *targetBuff, size_t iTarget) const
+   {
+     //memcpy(base+MDPointStride*iOrigin,targetBuff+MDPointStride*iTarget,MDPointStride);
    }
      
    /** function sets data from external source into MDDataPoint format and is specialized for Horace data e.g. expetcs no more than 2^pix_id_shift-1 runs and no more than 2^(32-pix_id_shift) pixels (unique detectors)
@@ -162,10 +163,10 @@ namespace Mantid{
 
      char *const base = pDataBuffer+ind*MDPointStride;
      // copy dimension values (axis values)
-     memcpy(base,dim_fields,sizeof(T)*n_dimensions);
+     //memcpy(base,dim_fields,sizeof(T)*n_dimensions);
      // copy signals
      i0 = n_dimensions;
-     memcpy(base+field_loc[i0],SignalFields,sizeof(double)*n_signals);
+     //memcpy(base+field_loc[i0],SignalFields,sizeof(double)*n_signals);
 
      // this part is specialized for coding detectors from runID and dimID
      i0=PixIndex;

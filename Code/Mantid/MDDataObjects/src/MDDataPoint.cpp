@@ -1,5 +1,6 @@
 #include "MDDataObjects/MDDataPoint.h"
 #include <sstream>
+#include <stdexcept>
 
 
 namespace Mantid

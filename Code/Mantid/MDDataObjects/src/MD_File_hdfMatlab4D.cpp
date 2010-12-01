@@ -71,8 +71,10 @@ bool
 MD_File_hdfMatlab4D::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
-    if(this->pixel_dataset_h<0){
-        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
+    if(this->pixel_dataset_h<0)
+    {
+        //this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
+      this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str());
         if(this->pixel_dataset_h<0){
             f_log.error()<<" MD_File_hdfMatlab::check_or_open_pix_dataset  Can not open pixels dataset "<< this->mdd_field_names[Pixels]<<" in file: "<<File_name<<" \n";
             throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open pixels dataset",this->File_name));
@@ -89,7 +91,7 @@ MD_File_hdfMatlab4D::read_mdd(MDImage & dnd)
   // get pointer to MD structure which should be read from memory
    MD_img_data *pMD_struct  = dnd.get_pMDImgData();
 // The function accepts full 4D dataset only!!!
-    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str()); //,H5P_DEFAULT);
     if (h_signal_DSID<0){
         f_log.error()<<" MD_File_hdfMatlab::check_or_open_pix_dataset  Can not open mdd dataset "<< this->mdd_field_names[DatasetName]<<" in file: "<<File_name<<" \n";
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
@@ -123,7 +125,7 @@ MD_File_hdfMatlab4D::read_mdd(MDImage & dnd)
 
 
     // read other dataset descriptors
-    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str(),H5P_DEFAULT);
+    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str()); //,H5P_DEFAULT);
     if (descriptors_DSID<0){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the the data descriptors field in the dataset: "<<mdd_attrib_names[DataDescriptor]<<std::endl;
