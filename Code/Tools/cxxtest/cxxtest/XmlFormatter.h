@@ -30,9 +30,12 @@
 #include <cxxtest/ValueTraits.h>
 #include <cxxtest/ErrorFormatter.h>
 #include <cxxtest/StdHeaders.h>
+#include <ctime>
+#include <sys/time.h>
 #include <iostream>
 #include <sstream>
 #include <cstring>
+
 
 namespace CxxTest
 {
@@ -204,9 +207,12 @@ namespace CxxTest
 
         void write( OutputStream &o )
             {
+        	std::ostringstream timeStream;
+        	timeStream << runtime;
             o << "    <testcase classname=\"" << className.c_str() 
               << "\" name=\"" << testName.c_str() 
-              << "\" line=\"" << line.c_str() << "\"";
+              << "\" line=\"" << line.c_str()
+              << "\" time=\"" << timeStream.str().c_str() << "\"";
             bool elts=false;
             element_t curr = elements.begin();
             element_t end  = elements.end();
@@ -243,6 +249,8 @@ namespace CxxTest
         int nfail;
         int nerror;
         double totaltime;
+        timeval testStartTime;
+        timeval testStopTime;
 
         int run()
         {
@@ -255,7 +263,7 @@ namespace CxxTest
             ntests=0;
             nfail=0;
             nerror=0;
-            totaltime=0;
+            totaltime=1.0;
         }
 
         static void totalTests( OutputStream &o )
@@ -308,6 +316,7 @@ namespace CxxTest
 
         void enterTest( const TestDescription & desc )
         {
+        	    gettimeofday(&testStartTime, 0);
                 testcase = info.insert(info.end(),TestCaseInfo());
                 testcase->testName = desc.testName();
                 testcase->className = classname;
@@ -340,6 +349,17 @@ namespace CxxTest
                 delete stream_redirect;
                 stream_redirect = NULL;
            }
+
+           gettimeofday(&testStopTime, 0);
+           double sec = testStopTime.tv_sec - testStartTime.tv_sec;
+           double usec = testStopTime.tv_usec - testStartTime.tv_usec;
+
+    //       std::cout << testcase->testName << " took " << sec << "secs and " << usec << ""
+
+           double testTime = sec + (usec / 1000000.0);
+
+            // Set the run time for this test
+            testcase->runtime = testTime;
         }
 
         void leaveWorld( const WorldDescription& desc )
@@ -357,6 +377,7 @@ namespace CxxTest
                 _os->clear();
                 (*_o) << "</testsuite>" << endl;
                 _o->flush();
+
         }
 
         void trace( const char* /*file*/, unsigned line, const char *expression )
