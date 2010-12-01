@@ -19,6 +19,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -122,10 +123,30 @@ namespace Mantid
         throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
       }
 
+      // check if IDF has valid-from and valid-to tags defined
+      if ( !pRootElem->hasAttribute("valid-from") )
+      {
+        g_log.error("XML file: " + m_filename + "<instrument> element must contain a valid-from tag.");
+        throw Kernel::Exception::InstrumentDefinitionError("Root element must contain a valid-from tag", m_filename);
+      }
+      else
+      {
+        //try (
+      }
+      if ( !pRootElem->hasAttribute("valid-to") )
+      {
+        g_log.error("XML file: " + m_filename + "<instrument> element must contain a valid-to tag.");
+        throw Kernel::Exception::InstrumentDefinitionError("Root element must contain a valid-to tag", m_filename);
+      }
+      else
+      {
+        //try (
+      }
+
       // Handle used in the singleton constructor for instrument file should append the value
-      // of the date-time tag inside the file to determine if it is already in memory so that
+      // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instrumentFile = instrumentFile + pRootElem->getAttribute("date");
+      instrumentFile = instrumentFile + pRootElem->getAttribute("last-modified");
 
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
@@ -1376,7 +1397,7 @@ namespace Mantid
             g_log.error() << "XML element with name or type = " << comp->getName() <<
               " contains <parameter> element with name=\"" << paramName << "\"." <<
               " This is a reserved Mantid keyword. Please use other name, " <<
-              "and see www.mantidproject.org/InstrumentDefinitionFile for list of reserved keywords." <<
+              "and see www.mantidproject.org/IDF for list of reserved keywords." <<
               " This parameter is ignored";
             continue;
           }
@@ -1406,7 +1427,7 @@ namespace Mantid
           {
             g_log.warning() << "XML element with name or type = " << comp->getName() <<
               " contains <parameter> element where the value of the parameter has been specified" <<
-              " more than once. See www.mantidproject.org/InstrumentDefinitionFile for how the value" <<
+              " more than once. See www.mantidproject.org/IDF for how the value" <<
               " of the parameter is set in this case.";
           }
 
@@ -1414,7 +1435,7 @@ namespace Mantid
           {
             g_log.error() << "XML element with name or type = " << comp->getName() <<
               " contains <parameter> for which no value is specified." <<
-              " See www.mantidproject.org/InstrumentDefinitionFile for how to set the value" <<
+              " See www.mantidproject.org/IDF for how to set the value" <<
               " of a parameter. This parameter is ignored.";
             continue;
           }

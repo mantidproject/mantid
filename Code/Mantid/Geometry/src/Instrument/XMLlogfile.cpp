@@ -120,7 +120,7 @@ namespace Mantid
         {
           throw Kernel::Exception::InstrumentDefinitionError(std::string("<parameter> with name ")
             + m_paramName + " much be set to a number,\n" + 
-            "unless it is meant to be a 'string' parameter, see http://www.mantidproject.org/InstrumentDefinitionFile .\n");
+            "unless it is meant to be a 'string' parameter.");
         }
       }
 

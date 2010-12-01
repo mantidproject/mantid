@@ -21,7 +21,6 @@
 #include "Poco/DOM/NodeFilter.h"
 
 using Poco::XML::DOMParser;
-using Poco::XML::XMLReader;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;

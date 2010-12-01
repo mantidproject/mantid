@@ -157,7 +157,7 @@ namespace Mantid
 
       /// Store units used by users to specify angles in IDFs and associated parameter files.
       /// By default this one is empty meaning that the default of angle=degree etc are used
-      /// see <http://www.mantidproject.org/InstrumentDefinitionFile>
+      /// see <http://www.mantidproject.org/IDF>
       /// However if map below contains e.g. <"angle", "radian"> it means
       /// that all "angle"-parameters in the _logfileCache are assumed to have been specified
       /// by the user in radian (not degrees)    

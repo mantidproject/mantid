@@ -160,7 +160,8 @@ const char* AbsObjMethod::what() const throw()
 InstrumentDefinitionError::InstrumentDefinitionError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)
 {
-	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+	outMessage = std::string(std::runtime_error::what()) + " search object " 
+    + objectName + ". See http://www.mantidproject.org/IDF for IDF syntax.";
 }
 
 /** Constructor
