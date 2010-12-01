@@ -155,9 +155,9 @@ class SNSPowderReduction(PythonAlgorithm):
                              GroupingFileName=calib)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=[info.tmin, self._delta, info.tmax]) # TODO should be done in place
-        NormaliseByCurrent(InputWorkspace="temp", OutputWorkspace="temp") # TODO should be in place
-        RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(wksp))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.tmin, self._delta, info.tmax])
+        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+
         return wksp
 
     def _getinfo(self, wksp):
