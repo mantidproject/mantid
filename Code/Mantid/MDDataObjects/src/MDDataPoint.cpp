@@ -8,23 +8,35 @@ namespace Mantid
 namespace MDDataObjects
 {
 
+//----------------------------------------------------------------------------------------------
 MDPointDescription::MDPointDescription():
-PixDescriptor()
+    PixDescriptor()
 {
   buildDefaultTags(this->PixDescriptor);
 }
 
+//----------------------------------------------------------------------------------------------
 MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo,const std::vector<std::string> &IndataTags):
-dataTags(IndataTags),PixDescriptor(pixInfo)
+  PixDescriptor(pixInfo),
+  dataTags(IndataTags)
 {
   unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
   if(dataTags.size()!=nFields){
     throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
   }
 }
-//
-void 
-MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
+
+//----------------------------------------------------------------------------------------------
+MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo):
+    PixDescriptor(pixInfo)
+{
+
+  this->buildDefaultTags(pixInfo);
+
+}
+
+//----------------------------------------------------------------------------------------------
+void MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
 {
 
   unsigned int nFields = pixInfo.NumDimensions+pixInfo.NumDataFields+pixInfo.NumDimIDs;
@@ -60,13 +72,6 @@ MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
   this->dataTags = tags;
 }
 
-MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo):
-PixDescriptor(pixInfo)
-{
- 
-  this->buildDefaultTags(pixInfo);
-
-}
 //
 } // namespaces
 }
