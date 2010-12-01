@@ -59,8 +59,8 @@ namespace Mantid
       virtual const std::string name() const { return "SimulateMDD";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
-      // Method to actually evaluate the bg model withe the given parameters
-      void SimulateMDD::SimBackground(std::string bgmodel,const double bgpara_p1,
+      // Method to actually evaluate the bg model with the given parameters
+      void SimBackground(std::string bgmodel,const double bgpara_p1,
              const double bgpara_p2, const double bgpara_p3);
 
     private:

@@ -78,8 +78,9 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
    size_t stride;
    int  nContributed(0);
    // this is the array of vectors to keep orthogonal indexes;
-   std::vector<std::vector<size_t>> enInd(nOrthogonal,std::vector<size_t>(0,0));
-// estimate cut limits in orthogonal dimensions
+   std::vector< std::vector<size_t> > enInd(nOrthogonal,std::vector<size_t>(0,0));
+
+   // estimate cut limits in orthogonal dimensions
    std::vector<double> ort_cut_min(nOrthogonal,0),ort_cut_max(nOrthogonal,0);
    int dim_num;
    for(i=0;i<nOrthogonal;i++){
