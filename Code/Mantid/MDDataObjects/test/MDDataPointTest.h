@@ -2,26 +2,34 @@
 #define MDDATA_POINT_TEST_H
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDDataPoints.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace MDDataObjects;
-struct data4D{
+
+struct data4D
+{
   float q1,q2,q3,En;
   double S,Err;
   int   iRun,iPix,iEn;
 };
-struct data5D{
+struct data5D
+{
   float q1,q2,q3,En,T;
   double S,Err;
   int   iRun,iPix,iEn,iT;
 };
-struct eventData4D{
+struct eventData4D
+{
   float q1,q2,q3,En;
   int   iRun,iPix,iEn;
 };
 
- 
- 
+
+
+
 class testMDDataPoints :    public CxxTest::TestSuite
 {
   std::vector<std::string> fieldNames4D;
@@ -29,52 +37,61 @@ class testMDDataPoints :    public CxxTest::TestSuite
   MDPointSignature descriptor4D;
   MDPointSignature descriptor5D;
   MDPointDescription *pix4D,*pix5D;
+
 public:
-  void testMDPointDescriptionConstructorsDefault(){
+  void testMDPointDescriptionConstructorsDefault()
+  {
     // default constructor builing 4x3 pixel description for histohram data and default tags
     TS_ASSERT_THROWS_NOTHING(MDPointDescription defSig);
   }
-  void testMDPointDescrFromFields(){
 
+  void testMDPointDescrFromFields()
+  {
     // and here we have default 4x3 histohram data itself 
     MDPointSignature defaultPoint;
     // and build pixel description from the default point using default tags; 
     TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint));
   }
-  void testMDPointDescriptionFromFieldsAndTags(){
+
+  void testMDPointDescriptionFromFieldsAndTags()
+  {
     MDPointSignature defaultPoint;
     // now let's have "non-default" tags
     std::vector<std::string> tags = fieldNames4D;
     // define the pixel from these tags and 
     TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint,tags));
   }
-  void testEventDataDescription(){
+
+  void testEventDataDescription()
+  {
     MDPointSignature defaultPoint;
     // let's set default point for describing expanded event data
     defaultPoint.NumDataFields = 0;
     // should be ok
     TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint));
   }
-  void testTagsFieldConsistency(){
-       // let's set default point for describing expanded event data
+
+  void testTagsFieldConsistency()
+  {
+    // let's set default point for describing expanded event data
     MDPointSignature defaultPoint;
     defaultPoint.NumDataFields = 0;
     // and have "non-default" tags for TOF data
     std::vector<std::string> tags = fieldNames4D;
-     // names and fields are not-consistent
+    // names and fields are not-consistent
     TS_ASSERT_THROWS_ANYTHING(MDPointDescription def(defaultPoint,tags));
     tags.erase(tags.begin()+4,tags.begin()+6);
     // now it should work;
     TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint,tags));
-
   }
-  void testMDPoint4fx1dx2u8Constructors(){
 
+  void testMDPoint4fx1dx2u8Constructors()
+  {
     MDDataPoint<float,uint8_t>  *pPoints;
     char *dataBuf(NULL);
-   // this constructor acutally owerwirtes default value for 8-bit fields as a TOF-kind of pixel is constructed which redefines 2 first fields as 32-bit field; MESS!
+    // this constructor acutally owerwirtes default value for 8-bit fields as a TOF-kind of pixel is constructed which redefines 2 first fields as 32-bit field; MESS!
     TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,4,1,2)));
-    
+
     TS_ASSERT_EQUALS(pPoints->getColumnNames().size(),pPoints->getNumPointFields());
     TS_ASSERT_EQUALS(pPoints->getNumDimensions(),4);
     TS_ASSERT_EQUALS(pPoints->getNumSignals(),1);
@@ -84,15 +101,17 @@ public:
     delete pPoints;
     pPoints=NULL;
   }
-  void testMDPointDefaultConstructor(){
 
+
+  void testMDPointDefaultConstructor()
+  {
     MDDataPoint<float,uint16_t> *pPoint;
     char *dataBuf(NULL);
     MDPointSignature defaultPoint;
     MDPointDescription sig(defaultPoint,fieldNames4D);
 
     TS_ASSERT_THROWS_NOTHING(pPoint = (new MDDataPoint<float,uint16_t>(dataBuf,sig)));
- 
+
     TS_ASSERT_EQUALS(pPoint->getColumnNames().size(),pPoint->getNumPointFields());
     TS_ASSERT_EQUALS(pPoint->getNumDimensions(),4);
     TS_ASSERT_EQUALS(pPoint->getNumSignals(),2);
@@ -101,7 +120,9 @@ public:
 
     delete pPoint;
   }
-  void test4DAccess(void){
+
+  void test4DAccess()
+  {
     const int nPix = 10;
     int i;
     data4D testData[nPix];
@@ -125,7 +146,8 @@ public:
     float  Dim[4];
     double SE[2];
     int    Ind[3];
-    for(i=0;i<nPix;i++){
+    for(i=0;i<nPix;i++)
+    {
       Dim[0]=testData[i].q1;
       Dim[1]=testData[i].q2;
       Dim[2]=testData[i].q3;
@@ -144,23 +166,25 @@ public:
     TS_ASSERT_EQUALS(PackUnpacker.getRunID(nPix), Ind[0]);
     TS_ASSERT_EQUALS(PackUnpacker.getPixID(nPix), Ind[1]);
 
-    for(i=0;i<nPix;i++){
-         TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
-         TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
-         TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
-         TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
-         TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
-         TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
-         TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
-         TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+    for(i=0;i<nPix;i++)
+    {
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+      TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
+      TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
+      TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+      TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
 
-         TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
+      TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
 
-     }
-
-
+    }
   }
-  void test4DAccess32bitIndex(void){
+
+
+  void test4DAccess32bitIndex()
+  {
     const int nPix = 10;
     int i;
     data4D testData[nPix];
@@ -178,7 +202,7 @@ public:
     }
 
 
-   
+
     MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,*pix4D);
 
     float  Dim[4];
@@ -199,26 +223,28 @@ public:
     }
 
     for(i=0;i<nPix;i++){
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
-        TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
-        TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
-        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
-        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+      TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
+      TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
+      TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+      TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
 
-        TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
+      TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
 
     }
   }
-         
-  void test5DAccess(void){
+
+  void test5DAccess(void)
+  {
     const int nPix = 10;
     int i;
     data5D testData[nPix];
     char   testBuffer[nPix*(5*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+2*sizeof(uint16_t))];
-    for(i=0;i<10;i++){
+    for(i=0;i<10;i++)
+    {
       testData[i].q1  =(float)(i);
       testData[i].q2  =(float)(i)*2;
       testData[i].q3  =(float)(i)*3;
@@ -239,7 +265,8 @@ public:
     float  Dim[5];
     double SE[2];
     int    Ind[4];
-    for(i=0;i<nPix;i++){
+    for(i=0;i<nPix;i++)
+    {
       Dim[0]=testData[i].q1;
       Dim[1]=testData[i].q2;
       Dim[2]=testData[i].q3;
@@ -252,34 +279,35 @@ public:
       Ind[2] =testData[i].iEn ;
       Ind[3] =testData[i].iT ;
       PackUnpacker.setData(i,Dim,SE,Ind);
-
     }
 
-    for(i=0;i<nPix;i++){
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(4,i),testData[i].T);
-        TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
-        TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
-        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
-        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+    for(i=0;i<nPix;i++)
+    {
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(4,i),testData[i].T);
+      TS_ASSERT_EQUALS(PackUnpacker.getSignal(i),testData[i].S);
+      TS_ASSERT_EQUALS(PackUnpacker.getError(i), testData[i].Err);
+      TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+      TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
 
-        TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
-        TS_ASSERT_EQUALS(PackUnpacker.getIndex(3,i), testData[i].iT);
+      TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
+      TS_ASSERT_EQUALS(PackUnpacker.getIndex(3,i), testData[i].iT);
     }
-         
-
 
   }
 
- void testEventData4D(void){
+
+  void testEventData4D(void)
+  {
     const int nPix = 10;
     int i;
     eventData4D testData[nPix];
     char   testBuffer[nPix*(4*sizeof(float)+sizeof(uint32_t)+sizeof(uint16_t))];
-    for(i=0;i<10;i++){
+    for(i=0;i<10;i++)
+    {
       testData[i].q1  =(float)(i+1);
       testData[i].q2  =(float)(i+1)*2;
       testData[i].q3  =(float)(i+1)*3;
@@ -301,7 +329,8 @@ public:
     float  Dim[4];
     double SE[2];
     int    Ind[3];
-    for(i=0;i<nPix;i++){
+    for(i=0;i<nPix;i++)
+    {
       Dim[0]=testData[i].q1;
       Dim[1]=testData[i].q2;
       Dim[2]=testData[i].q3;
@@ -310,37 +339,38 @@ public:
       Ind[1] =testData[i].iPix ;
       Ind[2] =testData[i].iEn ;
       PackUnpacker.setData(i,Dim,SE,Ind);
-
     }
 
-    for(i=0;i<nPix;i++){
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
-        TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
-        TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
-        TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
-
-        TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
-
+    for(i=0;i<nPix;i++)
+    {
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(0,i),testData[i].q1);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(1,i),testData[i].q2);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(2,i),testData[i].q3);
+      TS_ASSERT_EQUALS(PackUnpacker.getDataField(3,i),testData[i].En);
+      TS_ASSERT_EQUALS(PackUnpacker.getRunID(i), testData[i].iRun);
+      TS_ASSERT_EQUALS(PackUnpacker.getPixID(i), testData[i].iPix);
+      TS_ASSERT_EQUALS(PackUnpacker.getIndex(2,i), testData[i].iEn);
     }
   }
- 
 
- testMDDataPoints()
- {
-   const char *cfieldNames4D[]={"q1","q2","q3","En","S","Err","iRun","iPix","iEn"};
-   const char *cfieldNames5D[]={"q1","q2","q3","En","T","S","Err","iRun","iPix","iEn","iT"};
-   fieldNames4D.assign(cfieldNames4D,(cfieldNames4D+9));
-   fieldNames5D.assign(cfieldNames5D,(cfieldNames5D+11));
 
-   descriptor5D.NumDimensions=5;
-   descriptor5D.NumDimIDs= 4;
- }
- ~testMDDataPoints(){
-   delete pix4D;
-   delete pix5D;
- }
+  testMDDataPoints()
+  {
+    const char *cfieldNames4D[]={"q1","q2","q3","En","S","Err","iRun","iPix","iEn"};
+    const char *cfieldNames5D[]={"q1","q2","q3","En","T","S","Err","iRun","iPix","iEn","iT"};
+    fieldNames4D.assign(cfieldNames4D,(cfieldNames4D+9));
+    fieldNames5D.assign(cfieldNames5D,(cfieldNames5D+11));
+
+    descriptor5D.NumDimensions=5;
+    descriptor5D.NumDimIDs= 4;
+  }
+
+
+  ~testMDDataPoints()
+  {
+    delete pix4D;
+    delete pix5D;
+  }
 };
 
 #endif

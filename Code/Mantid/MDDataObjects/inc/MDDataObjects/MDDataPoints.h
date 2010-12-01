@@ -32,69 +32,82 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-namespace Mantid{
-    namespace MDDataObjects{
+namespace Mantid
+{
+
+namespace MDDataObjects
+{
+
+  class MDImage;
   
-//**********************************************************************************************************************
+  //**********************************************************************************************************************
+  class DLLExport MDDataPoints
+  {
+  public:
+    MDDataPoints(boost::shared_ptr<const MDImage> pImageData);
+    ~MDDataPoints();
 
-      class MDImage;
-      class DLLExport MDDataPoints
-      {
-      public:
-        MDDataPoints(boost::shared_ptr<const MDImage> pImageData);
-        ~MDDataPoints();
-       
-        /// check if the pixels are all in memory;
-        bool isMemoryBased(void)const{return memBased;}
-        /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
-        size_t getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile);
+    /// check if the pixels are all in memory;
+    bool isMemoryBased(void)const{return memBased;}
+    /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
+    size_t getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile);
 
-        size_t getMemorySize()const{return data_buffer_size*1;}
+    size_t getMemorySize()const{return data_buffer_size*1;}
 
-        // Accessors & Mutators used mainly for IO Operations on the dataset
-        /// function returns minimal value for dimension i
-        double &rPixMin(unsigned int i){return *(&box_min[0]+i);}
-        /// function returns maximal value for dimension i
-        double &rPixMax(unsigned int i){return *(&box_max[0]+i);}
-        /// in-out -- returns or allow to set-up the number of data fields in the dataPoint
-        unsigned int &numFields(void){return n_fields;}
-        /// returns the pointer to the location of the data buffer; the data has to be processed through MDDataPoint then
-        void * get_pBuffer(void){return data_buffer;}
-        /// return the size of the buffer allocated for pixels
-        size_t get_pix_bufSize(void)const{return data_buffer_size;} //TODO: refactor out.
-        void set_field_length(const std::vector<unsigned int> &in_fields); //TODO: refactor out.
-        std::vector<unsigned int> get_field_length(void)const{return field_length;} //TODO: refactor out.
-        std::vector<unsigned int> get_field_start(void)const {return field_start;} //TODO: refactor out.
-        // initiates memory for part of the pixels, which should be located in memory;  
-        void alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile);
-      protected:
-        // the parameter identify if the class data are file or memory based
-        // usually it is le based and memory used for small datasets, debugging or in a future when PC are big
-        bool      memBased;
-      private:
+    // Accessors & Mutators used mainly for IO Operations on the dataset
+    /// function returns minimal value for dimension i
+    double &rPixMin(unsigned int i){return *(&box_min[0]+i);}
+    /// function returns maximal value for dimension i
+    double &rPixMax(unsigned int i){return *(&box_max[0]+i);}
+    /// in-out -- returns or allow to set-up the number of data fields in the dataPoint
+    unsigned int &numFields(void){return n_fields;}
+    /// returns the pointer to the location of the data buffer; the data has to be processed through MDDataPoint then
+    void * get_pBuffer(void){return data_buffer;}
+    /// return the size of the buffer allocated for pixels
+    size_t get_pix_bufSize(void)const{return data_buffer_size;} //TODO: refactor out.
+    void set_field_length(const std::vector<unsigned int> &in_fields); //TODO: refactor out.
+    std::vector<unsigned int> get_field_length(void)const{return field_length;} //TODO: refactor out.
+    std::vector<unsigned int> get_field_start(void)const {return field_start;} //TODO: refactor out.
+    // initiates memory for part of the pixels, which should be located in memory;
+    void alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile);
 
-        /// the data, describing the detector pixels
-        size_t  n_data_points;  //< number of data points contributing in dataset
-        //
-        unsigned int n_fields;  //< number of fields contributed into each data point;
-        std::vector<double> box_min, //< minimal and 
-          box_max; //< maximal values of ranges the data pixels are in; size is nDimensions
-        std::vector<unsigned int> field_length;  //< length each data point in bytes
-        std::vector<unsigned int> field_start;   //< location of data points field from the start of the field (roughly sum of field_length-es, but padding has to be considered for efficiency)
-        std::vector<std::string>  field_tag;     //< name of each data field in the pixels array;
-        //
-        unsigned int pixel_size;              //<the size of the pixel (DataPoint)(single point of data in reciprocal space) in bytes
-        size_t  data_buffer_size;             //< size the data buffer in pixels (data_points) rather then in char;
-        void *data_buffer;
+  protected:
 
-        // private for the time being but may be needed in a future
-        MDDataPoints(const MDDataPoints& p);
-        MDDataPoints & operator = (const MDDataPoints & other);
+    /** the parameter identify if the class data are file or memory based
+     * usually it is le based and memory used for small datasets, debugging
+     * or in a future when PC are big
+     */
+    bool memBased;
 
-        boost::shared_ptr<const MDImage> m_spImageData; //Allows access to current geometry owned by MDImage.
+  private:
 
-          static Kernel::Logger& g_log;
-      };
-    }
+    /// the data, describing the detector pixels
+    size_t  n_data_points;  //< number of data points contributing in dataset
+
+    /// number of fields contributed into each data point;
+    unsigned int n_fields;
+
+    /// minimal values of ranges the data pixels are in; size is nDimensions
+    std::vector<double> box_min;
+    /// maximal values of ranges the data pixels are in; size is nDimensions
+    std::vector<double> box_max;
+
+    std::vector<unsigned int> field_length;  //< length each data point in bytes
+    std::vector<unsigned int> field_start;   //< location of data points field from the start of the field (roughly sum of field_length-es, but padding has to be considered for efficiency)
+    std::vector<std::string>  field_tag;     //< name of each data field in the pixels array;
+    //
+    unsigned int pixel_size;              //<the size of the pixel (DataPoint)(single point of data in reciprocal space) in bytes
+    size_t  data_buffer_size;             //< size the data buffer in pixels (data_points) rather then in char;
+    void *data_buffer;
+
+    // private for the time being but may be needed in a future
+    MDDataPoints(const MDDataPoints& p);
+    MDDataPoints & operator = (const MDDataPoints & other);
+
+    boost::shared_ptr<const MDImage> m_spImageData; //Allows access to current geometry owned by MDImage.
+
+      static Kernel::Logger& g_log;
+  };
+}
 }
 #endif

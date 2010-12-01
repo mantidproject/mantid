@@ -236,8 +236,8 @@ MDImage::alloc_mdd_arrays(const MDGeometryDescription &transf)
 //
 MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry): 
 m_pgeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry)),
-pData(NULL),
-nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
+nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0),
+pData(NULL)
 {
   int nDims = m_pgeometry->getNumDims();
   if( nDims >MAX_MD_DIMS_POSSIBLE){
