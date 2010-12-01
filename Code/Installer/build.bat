@@ -11,8 +11,8 @@ if /i not %1 == x86 (
     )
 )
 
-REM Delete Old MSI
-del %MSI_NAME%
+REM Delete Old MSI and wxs file
+del %MSI_NAME%  tmp.wxs tmp.wixobj
 svn update > build_number.txt
 python generateWxs.py
 if errorlevel 1 goto wxs_error
@@ -40,8 +40,8 @@ goto failed
 :end
 ENDLOCAL
 echo "MSI build succeeded"
-EXIT /b 0
+EXIT 0
 
 :failed
 ENDLOCAL
-EXIT /b 1
+EXIT 1

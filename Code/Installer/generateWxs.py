@@ -593,7 +593,7 @@ addAllFiles('../Mantid/includes/MantidAPI','api',IncludeMantidAPI)
 
 includeMantidCurveFittingDir = addDirectory('IncludeMantidCurveFittingDir','MAlgs','MantidCurveFitting',includeDir)
 IncludeMantidCurveFitting = addComponent('IncludeMantidCurveFitting',comp_guid['IncludeMantidCurveFitting'],includeMantidCurveFittingDir)
-addAllFiles('../Mantid/includes/MantidCurveFitting','alg',IncludeMantidCurveFitting)
+addAllFiles('../Mantid/includes/MantidCurveFitting','cur',IncludeMantidCurveFitting)
 
 includeMantidDataHandlingDir = addDirectory('IncludeMantidDataHandlingDir','MDH','MantidDataHandling',includeDir)
 IncludeMantidDataHandling = addComponent('IncludeMantidDataHandling',comp_guid['IncludeMantidDataHandling'],includeMantidDataHandlingDir)
