@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseByCurrent.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -13,6 +14,7 @@ DECLARE_ALGORITHM(NormaliseByCurrent)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Default constructor
 NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
@@ -57,27 +59,17 @@ void NormaliseByCurrent::exec()
 
   charge=1.0/charge; // Inverse of the charge to be multiplied by
 
-  if (inputWS==outputWS) //
+  // The operator overloads properly take into account of both EventWorkspaces and doing it in place or not.
+
+  if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
   {
-    const int nspec=inputWS->getNumberHistograms()-1;
-    const int nbin=inputWS->blocksize()-1;
-    m_progress =new Progress(this,0.0,1.0,nspec);
-    for (int i=nspec;i>=0;--i)
-    {
-      MantidVec& refY=inputWS->dataY(i);
-      MantidVec& refE=inputWS->dataE(i);
-      for (int j=nbin;j>=0;--j)
-      {
-        refY[j]*=charge;
-        refE[j]*=charge;
-      }
-      m_progress->report();
-    }
+    outputWS = inputWS*charge;
+    setProperty("OutputWorkspace", outputWS);
   }
   else
   {
-    outputWS = inputWS*charge;
-    setProperty("OutputWorkspace",outputWS);
+    inputWS *= charge;
+    setProperty("OutputWorkspace", inputWS);
   }
 
   outputWS->setYUnitLabel("Counts per microAmp.hour");

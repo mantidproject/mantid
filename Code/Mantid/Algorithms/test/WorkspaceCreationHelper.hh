@@ -164,6 +164,9 @@ public:
     return workspace;
   }
 
+  /** Create a 2D workspace with this many histograms and bins.
+   * Filled with Y = 2.0 and E = sqrt(2.0)
+   */
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0)
   {
     MantidVecPtr x,y,e;
