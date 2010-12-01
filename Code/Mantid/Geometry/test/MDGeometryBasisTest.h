@@ -6,6 +6,7 @@
 #include <set>
 #include <cfloat>
 #include <sstream>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -16,7 +17,7 @@ class testWorkspaceGm :   public CxxTest::TestSuite
 private:
 
   //Helper method to construct a MDGeometryBasis schenario.
-  static std::auto_ptr<MDGeometryBasis> constructMDGeometryBasis()
+  static MDGeometryBasis* constructMDGeometryBasis()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -26,8 +27,7 @@ private:
     basisDimensions.insert(MDBasisDimension("p", false, 5));
 
     UnitCell cell;
-    MDGeometryBasis* basisDimension = new MDGeometryBasis(basisDimensions, cell);
-    return std::auto_ptr<MDGeometryBasis>(basisDimension);
+    return new MDGeometryBasis(basisDimensions, cell);
   }
 
 public:
@@ -46,7 +46,7 @@ public:
   void testGetReciprocalDimensions()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    boost::scoped_ptr<MDGeometryBasis> basisDimension(constructMDGeometryBasis());
     std::set<MDBasisDimension> reciprocalDimensions = basisDimension->getReciprocalDimensions();
     TSM_ASSERT_LESS_THAN_EQUALS("Too many reciprocal dimensions.", 3, reciprocalDimensions.size());
     TSM_ASSERT("Expect to have at least 1 reciprocal dimension.", reciprocalDimensions.size() > 0);  
@@ -55,7 +55,7 @@ public:
   void testGetNonReciprocalDimensions()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    boost::scoped_ptr<MDGeometryBasis> basisDimension(constructMDGeometryBasis());
     std::set<MDBasisDimension> nonReciprocalDimensions = basisDimension->getNonReciprocalDimensions();
     TSM_ASSERT_EQUALS("Wrong number of non-reciprocal dimensions returned.", 1, nonReciprocalDimensions.size());
   }
@@ -63,7 +63,7 @@ public:
     void testGetAllBasisDimensions()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    boost::scoped_ptr<MDGeometryBasis> basisDimension(constructMDGeometryBasis());
     std::set<MDBasisDimension> allBasisDimensions = basisDimension->getBasisDimensions();
     TSM_ASSERT_EQUALS("Wrong number of basis dimensions returned.", 4, allBasisDimensions.size());
   }
@@ -72,7 +72,7 @@ public:
   void testConsistentNDimensions()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDGeometryBasis> basisDimension = constructMDGeometryBasis();
+    boost::scoped_ptr<MDGeometryBasis> basisDimension(constructMDGeometryBasis());
     std::set<MDBasisDimension> allBasisDimensions = basisDimension->getBasisDimensions(); 
     TSM_ASSERT_EQUALS("The number of dimensions returned via the getter should be the same as the actual number of dimensions present.", basisDimension->getNumDims(), allBasisDimensions.size());
   }
@@ -115,7 +115,7 @@ public:
     new_ids[2]="qz";
     new_ids[3]="p";
 
-    std::auto_ptr<MDGeometryBasis> basis = constructMDGeometryBasis();
+    boost::scoped_ptr<MDGeometryBasis> basis(constructMDGeometryBasis());
     TS_ASSERT_EQUALS(basis->checkIdCompartibility(new_ids),true);
 
     new_ids[0]="k"; //some unknown id value

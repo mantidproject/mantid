@@ -69,12 +69,12 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        MockFunctionParser* mockFuncParser = new MockFunctionParser(constructRootParameterParser().release());
+        MockFunctionParser* mockFuncParser = new MockFunctionParser(constructRootParameterParser());
         EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
             .Times(1);
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser().release());
+		functionParser.setParameterParser(constructRootParameterParser());
         functionParser.setSuccessorParser(mockFuncParser);
         ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
@@ -92,7 +92,7 @@ public:
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         ExposedPlaneFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser().release());
+		functionParser.setParameterParser(constructRootParameterParser());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
         std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = planeBuilder->create();
 
@@ -119,7 +119,7 @@ public:
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser().release());
+		functionParser.setParameterParser(constructRootParameterParser());
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 
@@ -133,7 +133,7 @@ public:
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser().release());
+		functionParser.setParameterParser(constructRootParameterParser());
         TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneImplicitFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
 	

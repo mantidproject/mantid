@@ -4,6 +4,7 @@
 #include "FunctionParserTest.h"
 #include <vector>
 #include <memory>
+#include <boost/scoped_ptr.hpp>
 
 #include "InvalidParameterParser.h"
 #include "CompositeImplicitFunctionParser.h"
@@ -61,7 +62,7 @@ public:
     Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
     Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-    MockFunctionParser* mockFuncParser = new MockFunctionParser(constructRootParameterParser().release());
+    MockFunctionParser* mockFuncParser = new MockFunctionParser(constructRootParameterParser());
     EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
       .Times(1);
 
@@ -84,10 +85,10 @@ public:
 
     CompositeImplicitFunctionParser functionParser;
     ImplicitFunctionParser* planeParser = new PlaneImplicitFunctionParser;
-    planeParser->setParameterParser(constructRootParameterParser().release());
+    planeParser->setParameterParser(constructRootParameterParser());
     functionParser.setSuccessorParser(planeParser);
     ImplicitFunctionBuilder* implicitFunctionBuilder = functionParser.createFunctionBuilder(pRootElem);
-    std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = implicitFunctionBuilder->create();
+    boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(implicitFunctionBuilder->create());
 
     CompositeImplicitFunction* compositeFunction = dynamic_cast<CompositeImplicitFunction*>(impFunction.get());
 

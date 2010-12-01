@@ -84,7 +84,7 @@ public:
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
 
     std::string id = "q1";
-    Mantid::Geometry::IMDDimension* dimension = workspace->getDimension(id);
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getDimension(id);
     TSM_ASSERT_EQUALS("The dimension id does not match", id, dimension->getDimensionId());
   }
 
@@ -152,7 +152,7 @@ public:
   {
     using namespace Mantid::API;
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
-    Mantid::Geometry::IMDDimension* dimension = workspace->getXDimension();
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getXDimension();
     TSM_ASSERT_EQUALS("The x-dimension returned was not the expected alignment.", "q1", dimension->getDimensionId());
 
   }
@@ -162,7 +162,7 @@ public:
   {
     using namespace Mantid::API;
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
-    Mantid::Geometry::IMDDimension* dimension = workspace->getYDimension();
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getYDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q2", dimension->getDimensionId());
   }
 
@@ -171,7 +171,7 @@ public:
   {
     using namespace Mantid::API;
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
-    Mantid::Geometry::IMDDimension* dimension = workspace->getZDimension();
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getZDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q3", dimension->getDimensionId());
   }
 
@@ -180,7 +180,7 @@ public:
   {
     using namespace Mantid::API;
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
-    Mantid::Geometry::IMDDimension* dimension = workspace->gettDimension();
+    boost::shared_ptr<const IMDDimension> dimension = workspace->gettDimension();
     TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u1", dimension->getDimensionId());
   }
 

@@ -183,6 +183,7 @@
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
     <ClCompile Include="src\IFunction.cpp" />
+    <ClCompile Include="src\IMDWorkspace.cpp" />
     <ClCompile Include="src\ImplicitFunctionParserFactory.cpp" />
     <ClCompile Include="src\ImplicitFunctionParameterParserFactory.cpp" />
     <ClCompile Include="src\ImplictFunctionFactory.cpp" />

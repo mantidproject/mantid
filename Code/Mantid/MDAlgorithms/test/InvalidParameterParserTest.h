@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "InvalidParameterParser.h"
 #include "InvalidParameter.h"
 
@@ -33,7 +33,7 @@ public:
         InvalidParameterParser parser;
         Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         InvalidParameter* pInvalidParam = dynamic_cast<InvalidParameter*>(iparam);
-        std::auto_ptr<InvalidParameter> invalparam = std::auto_ptr<InvalidParameter>(pInvalidParam);
+        boost::scoped_ptr<InvalidParameter> invalparam(pInvalidParam);
 
         TSM_ASSERT("The paramter generated should be an InvalidParamter", NULL != pInvalidParam);
         TSM_ASSERT_EQUALS("The invalid parameter has not been parsed correctly.", "x", invalparam->getValue());

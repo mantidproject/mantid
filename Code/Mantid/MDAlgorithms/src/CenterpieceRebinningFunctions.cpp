@@ -341,8 +341,8 @@ MD_image_point *data = TargetWorkspace.get_spMDImage()->get_pData();
 
 for(unsigned int ii=0;ii<nDims;ii++){
   
-    boxMin[ii]       = TargetWorkspace.get_spMDImage()->get_pMDData()->min_value[ii];
-    boxMax[ii]       = TargetWorkspace.get_spMDImage()->get_pMDData()->max_value[ii];
+    boxMin[ii]       = TargetWorkspace.get_spMDImage()->get_pMDImgData()->min_value[ii];
+    boxMax[ii]       = TargetWorkspace.get_spMDImage()->get_pMDImgData()->max_value[ii];
 
     axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
     shifts[ii]   =rescaled_transf.trans_bott_left[ii];

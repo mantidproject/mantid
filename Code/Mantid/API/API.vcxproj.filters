@@ -171,6 +171,9 @@
     <ClCompile Include="src\MatrixWSIndexCalculator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\IMDWorkspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAPI\Algorithm.h">

@@ -6,17 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDCell.h"
+#include "MantidGeometry/MDGeometry/MDPoint.h"
+#include <boost/shared_ptr.hpp>
+#include <stdarg.h>
 
 namespace Mantid
 {
-  //--------------------------------------------------------------------
-  // Forward declarations
-  //--------------------------------------------------------------------
-  namespace Geometry
-  {
-    class MDCell;
-    class MDPoint;
-  }
+
 
   namespace API
   {
@@ -54,20 +51,57 @@ namespace Mantid
     class DLLExport IMDWorkspace : public Workspace
     {
     public:
-      //virtual std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension*>> getDimensions() const = 0;
-      virtual Mantid::Geometry::IMDDimension * getXDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension * getYDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension * getZDimension() const = 0;
-      virtual Mantid::Geometry::IMDDimension * gettDimension() const = 0;
+      
       virtual int getNPoints() const = 0;
-      virtual Mantid::Geometry::MDPoint* getPoint(int index) const = 0;
-      virtual Mantid::Geometry::MDCell* getCell(int dim1Increment) const = 0;
-      virtual Mantid::Geometry::MDCell* getCell(int dim1Increment, int dim2Increment) const = 0;
-      virtual Mantid::Geometry::MDCell* getCell(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
-      virtual Mantid::Geometry::MDCell* getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
-      virtual Mantid::Geometry::MDCell* getCell(...) const = 0;
-      virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const = 0;
-      virtual ~IMDWorkspace(){}
+
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
+
+      boost::shared_ptr< const Mantid::Geometry::IMDDimension> getYDimension() const;
+
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
+
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
+
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDPoint> getPoint(int index) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+
+      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(...) const;
+
+      virtual ~IMDWorkspace();
+
+    protected:
+
+      virtual Mantid::Geometry::IMDDimension * getXDimensionImp() const = 0;
+
+      virtual Mantid::Geometry::IMDDimension * getYDimensionImp() const = 0;
+
+      virtual Mantid::Geometry::IMDDimension * getZDimensionImp() const = 0;
+
+      virtual Mantid::Geometry::IMDDimension * gettDimensionImp() const = 0;
+      
+      virtual Mantid::Geometry::MDPoint* getPointImp(int index) const = 0;
+
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment) const = 0;
+
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment) const = 0;
+
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
+
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
+
+      virtual Mantid::Geometry::MDCell* getCellImp(...) const = 0;
+
+      virtual Mantid::Geometry::IMDDimension* getDimensionImp(std::string id) const = 0;
+      
     };
     
     /// Shared pointer to the matrix workspace base class

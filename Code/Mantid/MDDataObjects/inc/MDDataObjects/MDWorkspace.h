@@ -51,18 +51,6 @@ namespace Mantid
     public:
 
       virtual int getNPoints() const;
-      virtual Mantid::Geometry::IMDDimension* getDimension(std::string id) const;
-      virtual Mantid::Geometry::MDPoint * getPoint(int index) const;
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
-      virtual Mantid::Geometry::MDCell * getCell(...) const;
-      virtual Mantid::Geometry::IMDDimension* getXDimension() const;
-      virtual Mantid::Geometry::IMDDimension* getYDimension() const;
-      virtual Mantid::Geometry::IMDDimension* getZDimension() const;
-      virtual Mantid::Geometry::IMDDimension* gettDimension() const;
-
 
       virtual long getMemorySize(void)const;
       MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3)
@@ -100,6 +88,39 @@ namespace Mantid
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
     private:
       static Kernel::Logger& g_log;
+
+      ///Implementation of getXDimension providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::IMDDimension* getXDimensionImp() const;
+      
+      ///Implementation of getYDimension providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::IMDDimension* getYDimensionImp() const;
+      
+      ///Implementation of getZDimension providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::IMDDimension* getZDimensionImp() const;
+      
+      ///Implementation of gettDimension providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::IMDDimension* gettDimensionImp() const;
+      
+      ///Implementation of getDimension providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::IMDDimension* getDimensionImp(std::string id) const;
+      
+      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDPoint* getPointImp(int index) const ;
+      
+      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment) const;
+      
+      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment) const;
+      
+      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      
+      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      
+      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
+      virtual Mantid::Geometry::MDCell* getCellImp(...) const;
 
      
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> m_spImageData;

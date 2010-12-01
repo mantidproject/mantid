@@ -64,6 +64,8 @@ namespace Mantid { namespace DataObjects {
   };
 }}// namespace
 
+using Mantid::DataObjects::MatrixWorkspaceTester;
+
 //Test the MatrixWorkspace as an IMDWorkspace.
 class IMDWorkspaceTest : public CxxTest::TestSuite
 {
@@ -94,12 +96,11 @@ public:
   }
 
   void testGetXDimension() 
-  {
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::API;
+  { 
+    
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(1, 1, 1);
-    Mantid::Geometry::IMDDimension const * const dimension = matrixWS.getXDimension();
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
     TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.", "1", id);
   }
@@ -107,32 +108,27 @@ public:
 
   void testGetYDimension()
   {
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::API;
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(1, 1, 1);
-    Mantid::Geometry::IMDDimension const * const dimension = matrixWS.getYDimension();
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
     TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.", "2", id);
   }
 
   void testGetZDimension()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getZDimension(), std::logic_error);
   }
 
   void testGettDimension()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.gettDimension(), std::logic_error);
   }
 
   void testGetDimensionThrows()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
     TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.", matrixWS.getDimension("3"), std::overflow_error);
@@ -140,17 +136,14 @@ public:
 
   void testGetDimension()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
-    IMDDimension* dim = matrixWS.getDimension("1");
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = matrixWS.getDimension("1");
     TSM_ASSERT_EQUALS("The dimension id found is not the same as that searched for.", "1", dim->getDimensionId());
-    delete dim;
   }
 
   void testGetNPoints()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(5, 5, 5);
     TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 5, matrixWS.getNPoints());
@@ -158,17 +151,14 @@ public:
 
   void testGetCellElipsisParameterVersion()
   {
-    using namespace Mantid::DataObjects;
     MatrixWorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1), std::logic_error);
     TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1), std::logic_error);
-    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::logic_error);
+    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::runtime_error);
   }
 
   void testGetHistogramIndex()
   {
-    using namespace Mantid::DataObjects;
-
     MatrixWSIndexCalculator indexCalculator(5);
     int histogramIndexA = indexCalculator.getHistogramIndex(4);
     int histogramIndexB = indexCalculator.getHistogramIndex(5);
@@ -180,7 +170,6 @@ public:
 
   void testGetBinIndex()
   {
-    using namespace Mantid::DataObjects;
     MatrixWSIndexCalculator indexCalculator(5);
     int binIndexA = indexCalculator.getBinIndex(4, 0);
     int binIndexB = indexCalculator.getBinIndex(12, 2);
@@ -190,8 +179,8 @@ public:
 
   void testGetCellSingleParameterVersion()
   {
-    MDCell* cell = workspace.getCell(1);
-    MDPoint* point = workspace.getPoint(1);
+    boost::shared_ptr<const Mantid::Geometry::MDCell> cell = workspace.getCell(1);
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> point = workspace.getPoint(1);
 
     TSM_ASSERT_EQUALS("There should be a single contributing point to this cell.", 1, cell->getContributingPoints().size());
     TSM_ASSERT_EQUALS("Signal values not correct. The cell should be the same as a point for the matrix ws.", point->getSignal(), cell->getSignal());
@@ -200,8 +189,8 @@ public:
 
   void testGetCellDoubleParameterVersion()
   {
-    MDCell* cell = workspace.getCell(1, 1);
-    MDPoint* point = workspace.getPoint(5);
+    boost::shared_ptr<const Mantid::Geometry::MDCell> cell = workspace.getCell(1, 1);
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> point = workspace.getPoint(5);
 
     TSM_ASSERT_EQUALS("There should be a single contributing point to this cell.", 1, cell->getContributingPoints().size());
     TSM_ASSERT_EQUALS("Signal values not correct. The cell should be the same as a point for the matrix ws.", point->getSignal(), cell->getSignal());
@@ -210,14 +199,14 @@ public:
 
   void testGetPoint()
   {
-    MDPoint* pointA = workspace.getPoint(5); 
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> pointA = workspace.getPoint(5); 
     TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of signal.", 100, pointA->getSignal());
     TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of error.", 10, pointA->getError());
   }
 
   void testGetPointVertexes()
   {
-    MDPoint* pointA = workspace.getPoint(4); 
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> pointA = workspace.getPoint(4); 
     std::vector<coordinate> vertexes = pointA->getVertexes();
     TSM_ASSERT_EQUALS("Wrong number of vertexes returned", 4, vertexes.size());
     

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
+#include <boost/scoped_ptr.hpp>
 
 class MDCellTest :    public CxxTest::TestSuite
 {
@@ -26,7 +27,7 @@ private:
   };
 
     //Helper constructional method.
-  static std::auto_ptr<Mantid::Geometry::MDCell> constructMDCell()
+  static Mantid::Geometry::MDCell* constructMDCell()
   {
     using namespace Mantid::Geometry;
     std::vector<coordinate> vertexes;
@@ -41,7 +42,7 @@ private:
     points.push_back(boost::shared_ptr<MDPoint>(new FakeMDPoint));
     points.push_back(boost::shared_ptr<MDPoint>(new FakeMDPoint));
 
-    return std::auto_ptr<MDCell>(new MDCell(points, vertexes));
+    return new MDCell(points, vertexes);
   }
 
 public:
@@ -49,22 +50,22 @@ public:
   void testGetSignal()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDCell> cell = constructMDCell();
+    boost::scoped_ptr<MDCell> cell(constructMDCell());
     TSM_ASSERT_EQUALS("The signal value is not wired-up correctly", 2, cell->getSignal()); 
   }
 
   void testGetError()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDCell> cell = constructMDCell();
+    boost::scoped_ptr<MDCell> cell(constructMDCell());
     TSM_ASSERT_EQUALS("The error value is not wired-up correctly", 0.2, cell->getError()); 
   }
 
   void testGetContributingPoints()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDCell> point = constructMDCell();
-    std::vector<boost::shared_ptr<MDPoint> > contributingPoints = point->getContributingPoints();
+    boost::scoped_ptr<MDCell> cell(constructMDCell());
+    std::vector<boost::shared_ptr<MDPoint> > contributingPoints = cell->getContributingPoints();
     TSM_ASSERT_EQUALS("Wrong number of contributing points returned", 2, contributingPoints.size());
     TSM_ASSERT("First contributing point is null", NULL != contributingPoints.at(0).get());
     TSM_ASSERT("Second contributing point is null", NULL != contributingPoints.at(1).get());
@@ -74,7 +75,7 @@ public:
   void testGetVertexes()
   {
     using namespace Mantid::Geometry;
-    std::auto_ptr<MDCell> cell = constructMDCell();
+    boost::scoped_ptr<MDCell> cell(constructMDCell());
     std::vector<coordinate> vertexes = cell->getVertexes();
     TSM_ASSERT_EQUALS("A single vertex should be present.", 1, vertexes.size());
     coordinate v1 = vertexes.at(0);

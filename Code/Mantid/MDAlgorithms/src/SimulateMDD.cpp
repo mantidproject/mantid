@@ -58,7 +58,7 @@ namespace Mantid
                 int ncell= myCut->getXDimension()->getNBins();
                 for(int i=0; i<ncell ; i++ ){
                     double bgsum=0.;
-                    Mantid::Geometry::MDCell *newCell = myCut->getCell(i);
+                    boost::shared_ptr<const Mantid::Geometry::MDCell> newCell = myCut->getCell(i);
                     std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > myPoints = newCell->getContributingPoints();
                     for(int j=0; j<myPoints.size(); j++){
                         std::vector<Mantid::Geometry::coordinate> vertexes = myPoints[j]->getVertexes();

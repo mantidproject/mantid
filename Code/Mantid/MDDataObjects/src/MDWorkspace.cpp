@@ -90,59 +90,64 @@ namespace Mantid{
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getDimension(std::string id) const
+    Mantid::Geometry::IMDDimension* MDWorkspace::getDimensionImp(std::string id) const
     {
-      return m_spImageData->getGeometry()->getDimension(id,true);
+      MDDimension* dimension =m_spImageData->getGeometry()->getDimension(id,true); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
+      return new MDDimension(dimension->getDimensionId());
     }
 
-    Mantid::Geometry::MDPoint * MDWorkspace::getPoint(int index) const
+    Mantid::Geometry::MDPoint * MDWorkspace::getPointImp(int index) const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCell(int dim1Increment) const 
+    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment) const 
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCell(int dim1Increment, int dim2Increment) const 
+    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment) const 
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment)  const
+    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment)  const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
+    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCell(...)  const
+    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(...)  const
     {
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getXDimension() const
+    Mantid::Geometry::IMDDimension* MDWorkspace::getXDimensionImp() const
     {
-      return &m_spImageData->getGeometry()->getXDimension(); 
+      MDDimension& xDimension = m_spImageData->getGeometry()->getXDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
+      return new MDDimension(xDimension.getDimensionId());
     }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getYDimension() const
+    Mantid::Geometry::IMDDimension* MDWorkspace::getYDimensionImp() const
     {
-     return &m_spImageData->getGeometry()->getYDimension(); 
+     MDDimension& yDimension = m_spImageData->getGeometry()->getYDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
+      return new MDDimension(yDimension.getDimensionId());
     }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getZDimension() const
+    Mantid::Geometry::IMDDimension* MDWorkspace::getZDimensionImp() const
     {
-      return &m_spImageData->getGeometry()->getZDimension(); 
+      MDDimension& zDimension = m_spImageData->getGeometry()->getZDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
+      return new MDDimension(zDimension.getDimensionId());
     }
 
-     Mantid::Geometry::IMDDimension* MDWorkspace::gettDimension() const
+     Mantid::Geometry::IMDDimension* MDWorkspace::gettDimensionImp() const
     {
-     return &m_spImageData->getGeometry()->getTDimension(); 
+     MDDimension& tDimension = m_spImageData->getGeometry()->getTDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
+      return new MDDimension(tDimension.getDimensionId());
     }
 
 } // namespace

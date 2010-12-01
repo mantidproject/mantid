@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <iostream>
-
+#include <boost/scoped_ptr.hpp> 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
@@ -48,17 +48,17 @@ private:
 
 public:
 
-      virtual Mantid::Geometry::IMDDimension * getXDimension() const {return new Mantid::Geometry::TestIMDDimension() ;};
-      virtual Mantid::Geometry::IMDDimension * getYDimension() const
+      virtual Mantid::Geometry::IMDDimension * getXDimensionImp() const {return new Mantid::Geometry::TestIMDDimension() ;};
+      virtual Mantid::Geometry::IMDDimension * getYDimensionImp() const
               {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::IMDDimension * getZDimension() const
+      virtual Mantid::Geometry::IMDDimension * getZDimensionImp() const
               {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::IMDDimension * gettDimension() const
+      virtual Mantid::Geometry::IMDDimension * gettDimensionImp() const
               {throw std::runtime_error("Not implemented");};
       virtual int getNPoints() const {return m_points;};
-      virtual Mantid::Geometry::MDPoint * getPoint(int index) const
+      virtual Mantid::Geometry::MDPoint * getPointImp(int index) const
               {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment) const
+      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment) const
       {
           if (dim1Increment<0 || dim1Increment >= m_mdcells.size())
           {
@@ -67,12 +67,12 @@ public:
           return(m_mdcells.at(dim1Increment));
           
       };
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCell(...) const {return 0;};
+      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment) const {return 0;};
+      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const {return 0;};
+      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const {return 0;};
+      virtual Mantid::Geometry::MDCell * getCellImp(...) const {return 0;};
 
-      virtual Mantid::Geometry::IMDDimension * getDimension(std::string id) const
+      virtual Mantid::Geometry::IMDDimension * getDimensionImp(std::string id) const
       {
          throw std::runtime_error("Not implemented");
       }
@@ -150,7 +150,7 @@ private:
   };
 
   //Helper constructional method.
-  static std::auto_ptr<Mantid::Geometry::MDPoint> constructMDPoint(double s, double e, double x, double y, double z, double t)
+  static Mantid::Geometry::MDPoint* constructMDPoint(double s, double e, double x, double y, double z, double t)
   {
     using namespace Mantid::Geometry;
     std::vector<coordinate> vertices;
@@ -162,7 +162,7 @@ private:
     vertices.push_back(c);
     IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
     IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
-    return std::auto_ptr<MDPoint>(new MDPoint(s, e, vertices, detector, instrument));
+    return new MDPoint(s, e, vertices, detector, instrument);
   }
 
 
@@ -187,15 +187,17 @@ public:
     TS_ASSERT_EQUALS(outCut->getNPoints(),0);
     TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
 
-    Mantid::Geometry::MDCell *myCell;
+    Mantid::Geometry::MDCell* myCell;
     std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
     std::vector<Mantid::Geometry::coordinate> vertices;
 
     // test that cells and points are as expected
-    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCell(0) );
+    int firstCell = 0;
+    int secondCell = 1;
+    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCellImp(firstCell) );
     TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),1);
-    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCell(1) );
+    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCellImp(secondCell) );
     TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),2);
     TS_ASSERT_THROWS_NOTHING(vertices=contributingPoints.at(0)->getVertexes());
@@ -207,7 +209,6 @@ public:
 
   void testExecSimulate()
   {
-
     using namespace Mantid::MDAlgorithms;
 
     SimulateMDD alg;

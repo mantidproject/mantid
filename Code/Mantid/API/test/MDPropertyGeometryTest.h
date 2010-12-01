@@ -6,9 +6,9 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 #include "MantidAPI/MDPropertyGeometry.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
 
 using Mantid::MantidVec;
 using namespace Mantid;
@@ -32,7 +32,7 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
   };
   
   //Helper constructional method.
-  static std::auto_ptr<Mantid::Geometry::MDGeometry> constructMDGeometry()
+  static Mantid::Geometry::MDGeometry* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -42,7 +42,7 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
     basisDimensions.insert(MDBasisDimension("u1", false, 4));
 
     UnitCell cell;
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
   }
 
 public:
@@ -66,7 +66,7 @@ public:
 //    TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
   }
   void testServices(){
-      std::auto_ptr<MDGeometry> pGeom= constructMDGeometry();
+      boost::scoped_ptr<MDGeometry> pGeom(constructMDGeometry());
       
       TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geometryDescription","ws1",Direction::Input),"this property describes the geometry obtained from string"));
       manager.declareProperty( new MDPropertyGeometry("geom2Description",*pGeom,Direction::Input),"this property describes the geometry obtained from object");

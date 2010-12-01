@@ -3,7 +3,7 @@
 
 //Abstract testing base class for function parsers.
 
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "NormalParameterParser.h"
 #include "OriginParameterParser.h"
 #include "InvalidParameterParser.h"
@@ -37,16 +37,16 @@ protected:
     };
 	
     //helper method to construct real parameter parser chain.
-    std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser> constructRootParameterParser()
+    Mantid::API::ImplicitFunctionParameterParser* constructRootParameterParser()
     {
         using namespace Mantid::MDAlgorithms;
 		using namespace Mantid::API;
-        std::auto_ptr<ImplicitFunctionParameterParser> originParser = std::auto_ptr<ImplicitFunctionParameterParser>(new OriginParameterParser);
-        std::auto_ptr<ImplicitFunctionParameterParser> normalParser = std::auto_ptr<ImplicitFunctionParameterParser>(new NormalParameterParser);
-        std::auto_ptr<ImplicitFunctionParameterParser> invalidParser = std::auto_ptr<ImplicitFunctionParameterParser>(new InvalidParameterParser);
+        ImplicitFunctionParameterParser* originParser = new OriginParameterParser;
+        ImplicitFunctionParameterParser*  normalParser = new NormalParameterParser;
+        ImplicitFunctionParameterParser*  invalidParser = new InvalidParameterParser;
 
-        originParser->setSuccessorParser(invalidParser.release());
-        normalParser->setSuccessorParser(originParser.release());
+        originParser->setSuccessorParser(invalidParser);
+        normalParser->setSuccessorParser(originParser);
 
         return normalParser;
     }
