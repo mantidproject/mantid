@@ -110,13 +110,13 @@ namespace Mantid
 
       virtual boost::shared_ptr<const Mantid::Geometry::MDPoint>  getPoint(int index) const;
 
-      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment) const;
 
       virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const;
 
       virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
 
-      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
 
       virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const;
 
@@ -129,6 +129,7 @@ namespace Mantid
       /// Internal data storage, sparse array of data points.
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> m_spDataPoints;
 
+      /// Pointer to a file reader/writer
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
     };
 
