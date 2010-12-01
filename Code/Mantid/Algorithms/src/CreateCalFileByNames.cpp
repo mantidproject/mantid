@@ -107,9 +107,9 @@ namespace Mantid
       }
 
       // Handle used in the singleton constructor for instrument file should append the value
-      // of the date-time tag inside the file to determine if it is already in memory so that
+      // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instshort = instshort + pRootElem->getAttribute("date");
+      instshort = instshort + pRootElem->getAttribute("last-modified");
 
       // If instrument not in store, insult the user
       if (!API::InstrumentDataService::Instance().doesExist(instshort))
