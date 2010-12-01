@@ -42,11 +42,9 @@ namespace Algorithms
 
 
 /**
- * Run the MoveInstrumentComponent algorithm as a child algorithm
- * @param detname_name The detnameonent name
- * @param x The shift along the X-axis
- * @param y The shift along the Y-axis
- * @param z The shift along the Z-axis
+ * The gsl_costFunction is optimized by GSL simplex2
+ * @param v vector containing center position and rotations
+ * @param params names of detector, workspace, and instrument
  */
 
   static double gsl_costFunction(const gsl_vector *v, void *params)
@@ -65,15 +63,22 @@ namespace Algorithms
     roty = gsl_vector_get(v, 4);
     rotz = gsl_vector_get(v, 5);
     Mantid::Algorithms::DiffractionEventCalibrateDetectors u;
-    return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, instname);
+    // To maximize intensity, minimize -intensity
+    return -u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, instname);
   }
 
 /**
- * Run the MoveInstrumentComponent algorithm as a child algorithm
- * @param detname_name The detnameonent name
+ * The intensity function calculates the intensity as a function of detector position and angles
  * @param x The shift along the X-axis
  * @param y The shift along the Y-axis
  * @param z The shift along the Z-axis
+ * @param rotx The rotation around the X-axis
+ * @param roty The rotation around the Y-axis
+ * @param rotz The rotation around the Z-axis
+ * @param detname The detector name
+ * @param inname The workspace name
+ * @param outname The workspace name
+ * @param instname The instrument name
  */
 
   double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname)
@@ -166,10 +171,11 @@ namespace Algorithms
       throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
     }
 
-    IAlgorithm_sptr alg3 = createSubAlgorithm("ConvertUnits");
+    IAlgorithm_sptr alg3 = createSubAlgorithm("AlignDetectors");
     alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-    alg3->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-    alg3->setPropertyValue("Target","dSpacing");
+    alg3->setPropertyValue("OutputWorkspace", outname);
+    alg3->setPropertyValue("CalibrationFile", outputFile);
+    //alg3->setPropertyValue("Target","dSpacing");
     try
     {
       alg3->execute();
@@ -179,10 +185,11 @@ namespace Algorithms
       g_log.information("Unable to successfully run ConvertUnits sub-algorithm");
       throw std::runtime_error("Error while executing ConvertUnits as a sub algorithm.");
     }
+    MatrixWorkspace_sptr outputW=alg3->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr alg4 = createSubAlgorithm("DiffractionFocussing");
-    alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-    alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+    alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
+    alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
     alg4->setPropertyValue("GroupingFileName", outputFile);
     try
     {
@@ -193,13 +200,13 @@ namespace Algorithms
       g_log.information("Unable to successfully run DiffractionFocussing sub-algorithm");
       throw std::runtime_error("Error while executing DiffractionFocussing as a sub algorithm.");
     }
-    inputW=alg4->getProperty("OutputWorkspace");
+    outputW=alg4->getProperty("OutputWorkspace");
     //Remove file
     Poco::File(outputFile).remove();
 
     IAlgorithm_sptr alg5 = createSubAlgorithm("Rebin");
-    alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-    alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+    alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
+    alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
     alg5->setPropertyValue("Params", ".2,0.0002,10.");
     try
     {
@@ -210,13 +217,13 @@ namespace Algorithms
       g_log.information("Unable to successfully run Rebin sub-algorithm");
       throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
     }
-    inputW=alg5->getProperty("OutputWorkspace");
+    outputW=alg5->getProperty("OutputWorkspace");
 
   // Find point of peak centre
-    const MantidVec & yValues = inputW->readY(0);
+    const MantidVec & yValues = outputW->readY(0);
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
     const double peakHeight = *it;
-    const double peakLoc = inputW->readX(0)[it - yValues.begin()];
+    const double peakLoc = outputW->readX(0)[it - yValues.begin()];
     std::cout << x <<" "<< y <<" "<< z <<" "<< rotx <<" "<< roty <<" "<< rotz <<" "<<peakHeight <<" "<<peakLoc<<"\n";
 
     IAlgorithm_sptr alg6 = createSubAlgorithm("MoveInstrumentComponent");
@@ -287,23 +294,7 @@ namespace Algorithms
       throw std::runtime_error("Error while executing RotateInstrumentComponent as a sub algorithm.");
     }
 
-    IAlgorithm_sptr alg7 = createSubAlgorithm("ConvertUnits");
-    alg7->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-    alg7->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-    alg7->setPropertyValue("Target","TOF");
-    try
-    {
-      alg7->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run ConvertUnits sub-algorithm");
-      throw std::runtime_error("Error while executing ConvertUnits as a sub algorithm.");
-    }
-
-
-    // To maximize peakHeight, minimize -peakHeight
-    return -peakHeight;
+    return peakHeight;
 }
   /** Initialisation method
   */
@@ -345,7 +336,6 @@ namespace Algorithms
       throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
 
     //Get some stuff from the input workspace
-    const int YLength = inputW->blocksize();
     IInstrument_sptr inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
