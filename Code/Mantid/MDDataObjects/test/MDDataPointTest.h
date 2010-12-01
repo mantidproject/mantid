@@ -127,7 +127,8 @@ public:
     int i;
     data4D testData[nPix];
     char   testBuffer[(nPix+1)*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t))];
-    for(i=0;i<10;i++){
+    for(i=0;i<10;i++)
+    {
       testData[i].q1  =(float)(i+1);
       testData[i].q2  =(float)(i+1)*2;
       testData[i].q3  =(float)(i+1)*3;

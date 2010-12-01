@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <vector> 
 #include <string>
+#include <cstring>
+#include <stdexcept>
 #include "MantidKernel/DllExport.h"
 
 /**  path-through class which provide transformation of the data from pixel buffer format to the data fields format; 
@@ -125,7 +127,7 @@ class MDDataPoint: public MDPointDescription
 public:
 
   //------------------------------------------------------------------------------------------------
-  /**   the constructor which defines the size of the dataset, number of fields in
+  /** The constructor which defines the size of the dataset, number of fields in
    *  this dataset and data location in memory.
    *
    *  This constructor should be used mainly for debugging and unit tests as relies on default column names only,
@@ -149,44 +151,65 @@ public:
 
   
   //------------------------------------------------------------------------------------------------
-  /**   main constructor which defines the size of the dataset, number of fields in this dataset and data location in memory and on hdd
+  /** Main constructor which defines the size of the dataset,
+   * number of fields in this dataset and data location in memory and on hdd.
    *   
    */
   MDDataPoint(char * buf, const MDPointDescription &pixSignature):
     MDPointDescription(pixSignature),
     pDataBuffer(buf)
-
   {
     buildPixel();
   }
 
+
 public:
   // Accessors:;
   /// obtain the value of correspondent data field;
-  T getDataField(unsigned int nField,size_t n_point)const{return *(reinterpret_cast<T *>     (pDataBuffer + n_point*MDPointStride+field_loc[nField]));}
+  T getDataField(unsigned int nField,size_t n_point)const
+  {return *(reinterpret_cast<T *>     (pDataBuffer + n_point*MDPointStride+field_loc[nField]));}
+
   /// function returns signal
-  double getSignal(size_t n_point)                  const{return *(reinterpret_cast<double *>(pDataBuffer + n_point*MDPointStride+pSignal));}
+  double getSignal(size_t n_point)                  const
+  {return *(reinterpret_cast<double *>(pDataBuffer + n_point*MDPointStride+pSignal));}
+
   /// function returns error
-  double getError  (size_t n_point)                 const{return *(reinterpret_cast<double *>(pDataBuffer + n_point*MDPointStride +pError));}
+  double getError  (size_t n_point)                 const
+  {return *(reinterpret_cast<double *>(pDataBuffer + n_point*MDPointStride +pError));}
+
   /// function returns and dimension index e.g. position of this dimension in some kind of look-up table
-  I getIndex(unsigned int nf,size_t n_point)        const{return *(reinterpret_cast<I *>     (pDataBuffer + n_point*MDPointStride+field_loc[PixIndex+nf]));}
+  I getIndex(unsigned int nf,size_t n_point)        const
+  {return *(reinterpret_cast<I *>     (pDataBuffer + n_point*MDPointStride+field_loc[PixIndex+nf]));}
 
   // these two are coded for particular type of experiments -> number of runs (2^pix_id_shift-1) <~2^9, number of pixels <~ 2^(23)
-  uint32_t getRunID(size_t n_point)                 const{return   RunIDMask&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));}
-  uint32_t getPixID(size_t n_point)                 const{return ((PixIDMask)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>pix_id_shift);}
+  uint32_t getRunID(size_t n_point)                 const
+  {
+    return   RunIDMask&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));
+  }
+
+  uint32_t getPixID(size_t n_point)                 const
+  {
+    return ((PixIDMask)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>pix_id_shift);
+  }
+
   /// get size (in bytes) for the MDdataPoint;
   unsigned int sizeofMDDataPoint(void)              const{return MDPointStride;}
+
   /// returns the total number of data point fields as sum of all contributing fields, e.g. dimensions, datas and signals
   unsigned int getNumPointFields(void)              const{return n_dimensions+n_indFields+n_signals;}
+
   /// get the numbers of all contributing fields separately
   unsigned int getNumDimensions(void)              const{return n_dimensions;}
   unsigned int getNumSignals(void)                 const{return n_signals;}
   unsigned int getNumDimIndex(void)                const{return n_indFields;}
+
   //************************************************************************************************************************
+
   //Mutators
   /// copy pixel from the specified location among origin pixels to the specified location among target pixels
   void copyPixel(size_t iOrigin, char *targetBuff, size_t iTarget) const
   {
+    throw std::runtime_error("Not implemented");
     //memcpy(base+MDPointStride*iOrigin,targetBuff+MDPointStride*iTarget,MDPointStride);
   }
 
@@ -200,16 +223,16 @@ public:
    *  @param Signal_fields - Signal and error for histogram data, absent for event data
    *  @param iFields       - array of dimension ID in some look-up table; this function assumes that 2 first fields represent the detector location (detectorId and runID)
    */
-  void setData(unsigned int ind,T dim_fields[],double SignalFields[],int iFiels[])
+  void setData(unsigned int ind,T dim_fields[], double SignalFields[], int iFiels[])
   {
     unsigned int i,i0;
 
     char *const base = pDataBuffer+ind*MDPointStride;
     // copy dimension values (axis values)
-    //memcpy(base,dim_fields,sizeof(T)*n_dimensions);
+    memcpy(base, dim_fields, sizeof(T)*n_dimensions);
     // copy signals
     i0 = n_dimensions;
-    //memcpy(base+field_loc[i0],SignalFields,sizeof(double)*n_signals);
+    memcpy(base+field_loc[i0], SignalFields, sizeof(double)*n_signals);
 
     // this part is specialized for coding detectors from runID and dimID
     i0=PixIndex;

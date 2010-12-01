@@ -12,13 +12,18 @@ Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
 const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
 
 
+//------------------------------------------------------------------------------------------------
+/** Constructor
+ *
+ * @param spImage: ???
+ * */
 MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage):
   memBased(false),
   n_data_points(0),
   n_fields(9),
   data_buffer_size(0),
   data_buffer(NULL),
-m_spImageData(spImage)
+  m_spImageData(spImage)
 {
 
   std::vector<std::string> dim_tags= m_spImageData->getGeometry()->getBasisTags();
@@ -33,8 +38,9 @@ m_spImageData(spImage)
 }
 
 
-size_t
-MDDataPoints::getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile)
+//------------------------------------------------------------------------------------------------
+/** */
+size_t MDDataPoints::getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile)
 {
   if(this->n_data_points>0){   return n_data_points;
   }
@@ -48,9 +54,10 @@ MDDataPoints::getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile)
   }
   return n_data_points;
 }
-//
-void 
-MDDataPoints::set_field_length(const std::vector<unsigned int> &in_fields)
+
+//------------------------------------------------------------------------------------------------
+/** */
+void MDDataPoints::set_field_length(const std::vector<unsigned int> &in_fields)
 {
   this->n_fields=(unsigned int)in_fields.size();
   this->field_length  = in_fields;
@@ -63,8 +70,7 @@ MDDataPoints::set_field_length(const std::vector<unsigned int> &in_fields)
 
 }
 //***************************************************************************************
-void
-MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
+void MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
 {
   if(this->data_buffer){
     // if it is already allocated and bif enough, do nothing
