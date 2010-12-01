@@ -34,18 +34,16 @@ public:
 
   }
   void testMDGeomIntegrated(void){
-    std::vector<MDDimension *> Dims;
-    TS_ASSERT_THROWS_NOTHING(Dims=tDND_geometry->getIntegratedDimensions());
+    std::vector<boost::shared_ptr<MDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
     // default size of the dimensions is equal 4
     TS_ASSERT_EQUALS(Dims.size(),4);
   }
   void testMDGeomDimAcessors(void){
-    /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. 
-    MDDimension *pDim;
     // get pointer to the dimension 0
-    TS_ASSERT_THROWS_NOTHING(pDim=tDND_geometry->getDimension(0));
+    boost::shared_ptr<MDDimension> pDim=tDND_geometry->getDimension(0);
     TS_ASSERT_EQUALS(pDim->getDimensionTag(),"qx");
-    MDDimension *pDim0;
+    
+    boost::shared_ptr<MDDimension> pDim0;
     // no such dimension
     TS_ASSERT_THROWS_ANYTHING(pDim0=tDND_geometry->getDimension(8));
     // no such dimension
@@ -54,7 +52,7 @@ public:
 
     // the same dimension as above
     TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("qx"));
-    TS_ASSERT_EQUALS(pDim0,pDim);
+    TS_ASSERT_EQUALS(pDim0.get(),pDim.get());
   }
   void testSlicingProperty(void){
     pSlice = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*tDND_geometry));
@@ -87,7 +85,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->reinit_Geometry(*pSlice));
     unsigned int i,ic;
 
-    MDDimension *pDim;
+    boost::shared_ptr<MDDimension> pDim;
 
     std::vector<std::string> expanded_tags(tDND_geometry->getNumDims());
 
@@ -130,7 +128,7 @@ public:
     // arrange final dimensions according to pAxis, this will run through one branch of reinit_Geometry only
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->reinit_Geometry(*pSlice));
 
-    MDDimension *pDim;
+    boost::shared_ptr<MDDimension> pDim;
 
 
     TS_ASSERT_THROWS_NOTHING(pDim = tDND_geometry->getDimension(0));

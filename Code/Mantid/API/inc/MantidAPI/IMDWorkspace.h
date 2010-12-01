@@ -54,53 +54,64 @@ namespace Mantid
       
       virtual int getNPoints() const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;
 
-      boost::shared_ptr< const Mantid::Geometry::IMDDimension> getYDimension() const;
+      virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension> getYDimension() const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDPoint> getPoint(int index) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint> getPoint(int index) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(...) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(...) const = 0;
 
       virtual ~IMDWorkspace();
 
-    protected:
+    //protected:
 
-      virtual Mantid::Geometry::IMDDimension * getXDimensionImp() const = 0;
+    //  /// template method style customisable x dimension for concrete instances to override.
+    //  virtual Mantid::Geometry::IMDDimension * getXDimensionImp() const = 0;
 
-      virtual Mantid::Geometry::IMDDimension * getYDimensionImp() const = 0;
+    //  /// template method style customisable y dimension for concrete instances to override.
+    //  virtual Mantid::Geometry::IMDDimension * getYDimensionImp() const = 0;
 
-      virtual Mantid::Geometry::IMDDimension * getZDimensionImp() const = 0;
+    //  /// template method style customisable z dimension for concrete instances to override.
+    //  virtual Mantid::Geometry::IMDDimension * getZDimensionImp() const = 0;
 
-      virtual Mantid::Geometry::IMDDimension * gettDimensionImp() const = 0;
-      
-      virtual Mantid::Geometry::MDPoint* getPointImp(int index) const = 0;
+    //  /// template method style customisable t dimension for concrete instances to override.
+    //  virtual Mantid::Geometry::IMDDimension * gettDimensionImp() const = 0;
+    //  
+    //  /// template method style customisable mdpoint implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDPoint* getPointImp(int index) const = 0;
 
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment) const = 0;
+    //  /// template method style customisable mdcell implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment) const = 0;
 
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment) const = 0;
+    //  /// template method style customisable mdcell dimension implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment) const = 0;
 
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
+    //  /// template method style customisable mdcell dimension implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
 
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
+    //  /// template method style customisable mdcell dimension implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
 
-      virtual Mantid::Geometry::MDCell* getCellImp(...) const = 0;
+    //  /// template method style customisable mdcell dimension implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::MDCell* getCellImp(...) const = 0;
 
-      virtual Mantid::Geometry::IMDDimension* getDimensionImp(std::string id) const = 0;
+    //  /// template method style customisable dimension implementation for concrete instances to override.
+    //  virtual Mantid::Geometry::IMDDimension* getDimensionImp(std::string id) const = 0;
       
     };
     

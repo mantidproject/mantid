@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
+#include <boost/shared_ptr.hpp>
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 //#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
@@ -49,22 +49,22 @@ namespace Mantid{
     {
     public:
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
-      MDDimension & getXDimension(void)const{return (*theDimension[0]);}
-      MDDimension & getYDimension(void)const;
-      MDDimension & getZDimension(void)const;
-      MDDimension & getTDimension(void)const;
-      std::vector<MDDimension *> getIntegratedDimensions(void);
+      boost::shared_ptr<MDDimension> getXDimension(void)const{return (theDimension[0]);}
+      boost::shared_ptr<MDDimension> getYDimension(void)const;
+      boost::shared_ptr<MDDimension> getZDimension(void)const;
+      boost::shared_ptr<MDDimension> getTDimension(void)const;
+      std::vector<boost::shared_ptr<MDDimension> > getIntegratedDimensions(void);
       /// obtains pointers to all dimensions defined in the geometry
-      std::vector<MDDimension* > getDimensions(void)const{return theDimension;}
+      std::vector<boost::shared_ptr<MDDimension> > getDimensions(void)const{return theDimension;}
 
       /// returns the number of expanded (non-integrated) dimensions
       unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
 
       /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
-      MDDimension *  getDimension(unsigned int i)const;
+      boost::shared_ptr<MDDimension>  getDimension(unsigned int i)const;
       /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
-      MDDimension *  getDimension(const std::string &tag,bool do_throw=true)const;
+      boost::shared_ptr<MDDimension>  getDimension(const std::string &tag,bool do_throw=true)const;
 
       /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 
       /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;
@@ -94,7 +94,7 @@ namespace Mantid{
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
       unsigned int n_expanded_dim;
       /// the array of Dimensions. Some are collapsed (integrated over)
-      std::vector<MDDimension*>  theDimension;
+      std::vector<boost::shared_ptr<MDDimension> >  theDimension;
 
 
 
@@ -112,7 +112,7 @@ namespace Mantid{
       MDGeometryBasis m_basis;
       //void init_empty_dimensions();
       /// the map used for fast search of a dumension from its tag. 
-      std::map<std::string,MDDimension *> dimensions_map;
+      std::map<std::string,boost::shared_ptr<MDDimension> > dimensions_map;
       //Defaults should do: ->NO?
       MDGeometry& operator=(const MDGeometry&);   
       /// logger -> to provide logging, for MD workspaces

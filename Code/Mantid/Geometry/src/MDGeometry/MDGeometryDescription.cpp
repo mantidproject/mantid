@@ -89,7 +89,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 
     for(unsigned int i=0;i<nReciprocalDimensions;i++){
       this->coordinates[i].assign(3,0);
-      MDDimension * pDim = origin.getDimension(i);
+      boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
       if(pDim){
            this->coordinates[i] = pDim->getCoord();
       }
@@ -101,7 +101,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
     unsigned int i;
     for(i=0;i<nDimensions;i++){
 
-        MDDimension *pDim = origin.getDimension(i);
+        boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
         this->data[i].Tag            = pDim->getDimensionTag();
         this->data[i].trans_bott_left= 0;
         this->data[i].cut_min        = pDim->getMinimum();

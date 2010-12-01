@@ -147,7 +147,7 @@ private:
    // *************  should be prohibited?:
     //MDDimension(const MDDimension &);
 
-    MDDimension & operator=(const MDDimension &rhs);
+    //MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);
 

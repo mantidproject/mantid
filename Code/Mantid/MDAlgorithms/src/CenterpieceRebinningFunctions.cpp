@@ -42,7 +42,7 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
    // dataset;
    unsigned int j,k,l,mp,mm,sizem;
    double xt1,yt1,zt1,Etm,Etp;
-   MDDimension *pDim(NULL);
+   boost::shared_ptr<MDDimension> pDim;
    //TO DO: this will be obtained from the taget
    double rotations[9];
    rotations[0]=rotations[1]=rotations[2]=rotations[3]=rotations[4]=rotations[5]=rotations[6]=rotations[7]=rotations[8]=0;
@@ -56,9 +56,9 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
    unsigned int  nReciprocal    = pGeom->getNumReciprocalDims();
    unsigned int  nOrthogonal    = pGeom->getNumDims() - nReciprocal;
 
-   std::vector<MDDimension *> pAllDim  = pGeom->getDimensions();
-   std::vector<MDDimension *> pOrthogonal(nOrthogonal,NULL);
-   std::vector<MDDimension *> pReciprocal(nReciprocal,NULL);
+   std::vector<boost::shared_ptr<MDDimension> > pAllDim  = pGeom->getDimensions();
+   std::vector<boost::shared_ptr<MDDimension> > pOrthogonal(nOrthogonal);
+   std::vector<boost::shared_ptr<MDDimension> > pReciprocal(nReciprocal);
    unsigned int nr(0),no(0);
 
    // get the orthogonal and reciprocal dimensions separately
@@ -130,7 +130,7 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
        }
    }
   enInd.clear();
-  boost::ptr_vector<MDDimension *> rec_dim;
+  std::vector<boost::shared_ptr<MDDimension> > rec_dim;
   rec_dim.resize(3);
 // evaluate the capacity of the real space (3D or less);
 // Define (1<=N<=3)D subspace and transform it into the coordinate system of the new cut;
@@ -147,7 +147,7 @@ preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeom
    }
    // if there are less then 3 reciprocal dimensions, lets make 3 now to make the algorithm generic
    for(i=nReciprocal;i<3;i++){
-      rec_dim[i] =  new MDDimDummy(i);
+      rec_dim[i] =  boost::shared_ptr<MDDimension>(new MDDimDummy(i));
       // we should know the limits the dummy dimensions have
       cut_min[i] = rec_dim[i]->getMinimum();
       cut_max[i] = rec_dim[i]->getMaximum()*(1+FLT_EPSILON);

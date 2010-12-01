@@ -15,7 +15,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-
+using namespace Mantid::Geometry;
 
 // Add a concrete IMDDimension class
 namespace Mantid
@@ -43,36 +43,67 @@ class DLLExport TestCut : public IMDWorkspace
 private:
    int m_points;
    int m_cells;
-   //std::vector<boost::shared_ptr<Mantid::Geometry::MDCell>> m_mdcells;
-   std::vector< Mantid::Geometry::MDCell * > m_mdcells;
+
+   std::vector<boost::shared_ptr<Mantid::Geometry::MDCell> > m_mdcells;
 
 public:
 
-      virtual Mantid::Geometry::IMDDimension * getXDimensionImp() const {return new Mantid::Geometry::TestIMDDimension() ;};
-      virtual Mantid::Geometry::IMDDimension * getYDimensionImp() const
-              {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::IMDDimension * getZDimensionImp() const
-              {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::IMDDimension * gettDimensionImp() const
-              {throw std::runtime_error("Not implemented");};
-      virtual int getNPoints() const {return m_points;};
-      virtual Mantid::Geometry::MDPoint * getPointImp(int index) const
-              {throw std::runtime_error("Not implemented");};
-      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment) const
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const 
       {
-          if (dim1Increment<0 || dim1Increment >= m_mdcells.size())
-          {
-              throw std::range_error("TestCut::getCell, increment out of range");
-          }
-          return(m_mdcells.at(dim1Increment));
-          
-      };
-      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const {return 0;};
-      virtual Mantid::Geometry::MDCell * getCellImp(...) const {return 0;};
+        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestIMDDimension());
+      }
 
-      virtual Mantid::Geometry::IMDDimension * getDimensionImp(std::string id) const
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual int getNPoints() const 
+      {
+        return m_points;
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint> getPoint(int index) const       
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment) const
+      {
+          return(m_mdcells.at(dim1Increment));
+      };
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
       {
          throw std::runtime_error("Not implemented");
       }
@@ -89,7 +120,8 @@ public:
       m_points=0;
       m_cells=0;
    }
-   TestCut(std::vector<Mantid::Geometry::MDCell * > pContribCells ) :
+
+   TestCut(std::vector<boost::shared_ptr<Mantid::Geometry::MDCell> > pContribCells ) :
            m_mdcells(pContribCells)
    {
       m_cells=pContribCells.size();
@@ -103,7 +135,7 @@ class testSimulateMDD : public CxxTest::TestSuite
 private:
   boost::shared_ptr<TestCut> myCut;
   boost::shared_ptr<TestCut> outCut;
-  std::vector<Mantid::Geometry::MDCell *> pContribCells;
+  std::vector<boost::shared_ptr<MDCell> > pContribCells;
   std::string FakeWSname;
 
   std::vector<Mantid::Geometry::MDPoint> pnts1,pnts2;
@@ -130,7 +162,7 @@ private:
        points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(36,6,1,2,3,2)) );
     }
 
-    return (MDCell *) (new MDCell(points, vertices));
+    return new MDCell(points, vertices);
   }
 
 
@@ -165,7 +197,6 @@ private:
     return new MDPoint(s, e, vertices, detector, instrument);
   }
 
-
 public:
 
   testSimulateMDD() {};
@@ -175,10 +206,10 @@ public:
   {
     FakeWSname = "test_FakeMDWS";
 
-    pContribCells.push_back(constructMDCell(1));
-    pContribCells.push_back(constructMDCell(2));
+    pContribCells.push_back(boost::shared_ptr<MDCell>(constructMDCell(1)));
+    pContribCells.push_back(boost::shared_ptr<MDCell>(constructMDCell(2)));
 
-    TS_ASSERT_THROWS_NOTHING( myCut = boost::shared_ptr<TestCut> (new TestCut(pContribCells) ) );
+    myCut = boost::shared_ptr<TestCut> (new TestCut(pContribCells) ) ;
     TS_ASSERT_EQUALS(myCut->getNPoints(),0);
     TS_ASSERT_THROWS_ANYTHING(myCut->getPoint(0));
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
@@ -187,17 +218,17 @@ public:
     TS_ASSERT_EQUALS(outCut->getNPoints(),0);
     TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
 
-    Mantid::Geometry::MDCell* myCell;
+    boost::shared_ptr<const MDCell> myCell;
     std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
     std::vector<Mantid::Geometry::coordinate> vertices;
 
     // test that cells and points are as expected
     int firstCell = 0;
     int secondCell = 1;
-    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCellImp(firstCell) );
+    myCell=myCut->getCell(firstCell);
     TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),1);
-    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCellImp(secondCell) );
+    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCell(secondCell) );
     TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),2);
     TS_ASSERT_THROWS_NOTHING(vertices=contributingPoints.at(0)->getVertexes());

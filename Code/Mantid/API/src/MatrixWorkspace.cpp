@@ -893,53 +893,9 @@ namespace Mantid
       return hops - 1;
     }
 
-    Mantid::Geometry::IMDDimension* MatrixWorkspace::getXDimensionImp() const
-    {
-      Axis* xAxis = this->getAxis(0);
-      return new Mantid::Geometry::MDDimension(xAxis->title());
-    }
-
-    Mantid::Geometry::IMDDimension* MatrixWorkspace::getYDimensionImp() const
-    {
-      Axis* yAxis = this->getAxis(1); //Will throw if 1D Workspace.
-      return new Mantid::Geometry::MDDimension(getDimensionIdFromAxis(yAxis));
-    }
-
-    Mantid::Geometry::IMDDimension* MatrixWorkspace::getZDimensionImp() const
-    {
-      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
-    }
-
-     Mantid::Geometry::IMDDimension* MatrixWorkspace::gettDimensionImp() const
-    {
-      throw std::logic_error("MatrixWorkspaces do not have a time dimension mapping.");
-    }
-
     int MatrixWorkspace::getNPoints() const
     {
       return this->size();
-    }
-
-    Mantid::Geometry::IMDDimension* MatrixWorkspace::getDimensionImp(std::string id) const
-    {
-      int nAxes = this->axes();
-      IMDDimension* dim = NULL;
-      for(int i = 0; i < nAxes; i++)
-      {
-        Axis* xAxis = this->getAxis(i);
-        const std::string& title = getDimensionIdFromAxis(xAxis);
-        if(title == id)
-        {
-          dim = new Mantid::Geometry::MDDimension(id);
-          break;
-        }
-      }
-      if(NULL == dim)
-      {
-        std::string message = "Cannot find id : " + id;
-        throw std::overflow_error(message);
-      }
-      return dim;
     }
 
     Mantid::Geometry::MDPoint * MatrixWorkspace::getPointImp(int index) const
@@ -991,8 +947,64 @@ namespace Mantid
       return new Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCellImp(int  dim1Increment)  const
+    std::string MatrixWorkspace::getDimensionIdFromAxis(Axis const * const axis) const
     {
+      return axis->title(); //Seam. single point where we configure how an axis maps to a dimension id.
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getXDimension() const
+    { 
+      Axis* xAxis = this->getAxis(0);
+      MDDimension* dimension = new Mantid::Geometry::MDDimension(xAxis->title());
+      return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    }
+
+    boost::shared_ptr< const Mantid::Geometry::IMDDimension> MatrixWorkspace::getYDimension() const
+    { 
+      Axis* yAxis = this->getAxis(1);
+      MDDimension* dimension = new Mantid::Geometry::MDDimension(yAxis->title());
+      return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getZDimension() const
+    { 
+      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::gettDimension() const
+    { 
+      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(std::string id) const
+    { 
+      int nAxes = this->axes();
+      IMDDimension* dim = NULL;
+      for(int i = 0; i < nAxes; i++)
+      {
+        Axis* xAxis = this->getAxis(i);
+        const std::string& title = getDimensionIdFromAxis(xAxis);
+        if(title == id)
+        {
+          dim = new Mantid::Geometry::MDDimension(id);
+          break;
+        }
+      }
+      if(NULL == dim)
+      {
+        std::string message = "Cannot find id : " + id;
+        throw std::overflow_error(message);
+      }
+      return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> MatrixWorkspace::getPoint(int index) const
+    { 
+      return boost::shared_ptr<const Mantid::Geometry::MDPoint>(getPointImp(index));
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment) const
+    { 
       if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
@@ -1004,11 +1016,12 @@ namespace Mantid
       contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
 
       //wrap a cell around the returned point.
-      return new MDCell(contributingPoints, point->getVertexes());
+      MDCell* pCell = new MDCell(contributingPoints, point->getVertexes());
+      return boost::shared_ptr<const Mantid::Geometry::MDCell>(pCell);
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCellImp(int dim1Increment, int dim2Increment)  const
-    {
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    { 
       if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
@@ -1024,28 +1037,25 @@ namespace Mantid
       contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
 
       //wrap a cell around the returned point.
-      return new MDCell(contributingPoints, point->getVertexes());
+      MDCell* cell = new MDCell(contributingPoints, point->getVertexes());
+      return boost::shared_ptr<const Mantid::Geometry::MDCell>(cell);
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment)  const
-    {
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+    { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
-    {
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+    { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    Mantid::Geometry::MDCell * MatrixWorkspace::getCellImp(...)  const
-    {
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(...) const
+    { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    std::string MatrixWorkspace::getDimensionIdFromAxis(Axis const * const axis) const
-    {
-      return axis->title(); //Seam. single point where we configure how an axis maps to a dimension id.
-    }
 
   } // namespace API
 } // Namespace Mantid

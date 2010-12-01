@@ -192,6 +192,28 @@ namespace Mantid
       /// Gets the number of points available on the workspace.
       virtual int getNPoints() const;
 
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getXDimension() const;
+
+      virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension>  getYDimension() const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getZDimension() const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  gettDimension() const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getDimension(std::string id) const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint>  getPoint(int index) const;
+
+      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment) const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+
+      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+
+      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const;
+
     protected:
       MatrixWorkspace();
 
@@ -201,44 +223,14 @@ namespace Mantid
       /// A vector of pointers to the axes for this workspace
       std::vector<Axis*> m_axes;
 
-      ///Implementation of getXDimension providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::IMDDimension* getXDimensionImp() const;
-      
-      ///Implementation of getYDimension providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::IMDDimension* getYDimensionImp() const;
-      
-      ///Implementation of getZDimension providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::IMDDimension* getZDimensionImp() const;
-      
-      ///Implementation of gettDimension providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::IMDDimension* gettDimensionImp() const;
-      
-      ///Implementation of getDimension providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::IMDDimension* getDimensionImp(std::string id) const;
-      
-      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDPoint* getPointImp(int index) const ;
-      
-      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDPoint* getPointImp(int histogram, int bin) const;
-      
-      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment) const;
-      
-      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment) const;
-      
-      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment) const;
-      
-      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDCell* getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
-      
-      ///Implementation of getMDCell providing coverience for public shared ptr on interface.
-      virtual Mantid::Geometry::MDCell* getCellImp(...) const;
-
-
     private:
+
+      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
+      Mantid::Geometry::MDPoint* getPointImp(int index) const ;
+      
+      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
+      Mantid::Geometry::MDPoint* getPointImp(int histogram, int bin) const;
+     
       /// Private copy constructor. NO COPY ALLOWED
       MatrixWorkspace(const MatrixWorkspace&);
       /// Private copy assignment operator. NO ASSIGNMENT ALLOWED

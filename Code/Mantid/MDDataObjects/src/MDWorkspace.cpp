@@ -90,65 +90,60 @@ namespace Mantid{
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getDimensionImp(std::string id) const
-    {
-      MDDimension* dimension =m_spImageData->getGeometry()->getDimension(id,true); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
-      return new MDDimension(dimension->getDimensionId());
-    }
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
+      { 
+        return m_spImageData->getGeometry()->getXDimension(); 
+      }
 
-    Mantid::Geometry::MDPoint * MDWorkspace::getPointImp(int index) const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr< const Mantid::Geometry::IMDDimension> MDWorkspace::getYDimension() const
+      { 
+        return m_spImageData->getGeometry()->getYDimension();
+      }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment) const 
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getZDimension() const
+      { 
+        return m_spImageData->getGeometry()->getZDimension();
+      }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment) const 
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::gettDimension() const
+      { 
+        return m_spImageData->getGeometry()->getTDimension();
+      }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
+      { 
+        return m_spImageData->getGeometry()->getDimension(id, true); 
+      }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDPoint> MDWorkspace::getPoint(int index) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement;
+      }
 
-    Mantid::Geometry::MDCell * MDWorkspace::getCellImp(...)  const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement
+      }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getXDimensionImp() const
-    {
-      MDDimension& xDimension = m_spImageData->getGeometry()->getXDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
-      return new MDDimension(xDimension.getDimensionId());
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement
+      }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getYDimensionImp() const
-    {
-     MDDimension& yDimension = m_spImageData->getGeometry()->getYDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
-      return new MDDimension(yDimension.getDimensionId());
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement
+      }
 
-    Mantid::Geometry::IMDDimension* MDWorkspace::getZDimensionImp() const
-    {
-      MDDimension& zDimension = m_spImageData->getGeometry()->getZDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
-      return new MDDimension(zDimension.getDimensionId());
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement
+      }
 
-     Mantid::Geometry::IMDDimension* MDWorkspace::gettDimensionImp() const
-    {
-     MDDimension& tDimension = m_spImageData->getGeometry()->getTDimension(); //TODO: fix MDGeometry to work with vector of shared_ptr rather than vector of raw pointers.
-      return new MDDimension(tDimension.getDimensionId());
-    }
+      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(...) const
+      { 
+        throw std::runtime_error("Not implemented"); //TODO: implement
+      }
 
 } // namespace
 }

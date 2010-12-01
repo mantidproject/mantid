@@ -38,7 +38,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
     }
     unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
     size_t   base(0);
-    MDDimension *pDim;
+    boost::shared_ptr<MDDimension> pDim;
 
     // calculate shift for all selected dimensions;
     int the_expanded_dim= this->m_pgeometry->getNumExpandedDims()-1;
@@ -176,7 +176,7 @@ MDImage::reshape_geometry(const MDGeometryDescription &transf)
    this->MDStruct.dimSize.assign(this->m_pgeometry->getNumDims(),0);
    this->MDStruct.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
-    MDDimension *pDim;
+    boost::shared_ptr<MDDimension> pDim;
     this->MDStruct.dimStride[0] = 0;
     this->MDStruct.data_size    = 1;
     size_t  stride(1);

@@ -16,7 +16,7 @@ namespace Mantid{
     {
       unsigned int i;
       unsigned int n_new_dims=trf.getNumDims();
-      MDDimension *pDim;
+      boost::shared_ptr<MDDimension> pDim;
       if(n_new_dims>m_basis.getNumDims()){
         g_log.error()<<" MDGeometry::setRanges transformation sets more ranges then already defined\n";
         throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
@@ -119,17 +119,17 @@ void
 
 
   // array to keep final expanded dimensions
-  std::vector<MDDimension *> pExpandedDims(m_basis.getNumDims(),NULL);    
+  std::vector<boost::shared_ptr<MDDimension> > pExpandedDims(m_basis.getNumDims());    
   // array to keep final collapsed dimensions which sould be placed after expanded
-  std::vector<MDDimension *> pCollapsedDims(m_basis.getNumDims(),NULL);  
+  std::vector<boost::shared_ptr<MDDimension> > pCollapsedDims(m_basis.getNumDims());  
   // array to keep thd initial dimensions which were not mentioned in transformation
-  std::vector<MDDimension *> pCurrentDims(this->theDimension);  
+  std::vector<boost::shared_ptr<MDDimension> > pCurrentDims(this->theDimension);  
 
 
   unsigned int n_expanded_dimensions(0),n_collapsed_dimensions(0);
 
-  MDDimension *pDim;
-  std::map<std::string,MDDimension *>::iterator it;
+  boost::shared_ptr<MDDimension> pDim;
+  std::map<std::string,boost::shared_ptr<MDDimension> >::iterator it;
 
   // let's sort dimensions as requested by the list of tags
   for(i=0;i<n_new_dims;i++){
@@ -204,40 +204,40 @@ void
 
 }
     //
-    MDDimension & 
+    boost::shared_ptr<MDDimension>
       MDGeometry::getYDimension(void)const
     {
       if(m_basis.getNumDims()<2){
         throw(std::invalid_argument("No Y dimension is defined in this workspace"));
       }
-      return *(theDimension[1]);
+      return theDimension[1];
     }
     //
-    MDDimension & 
+    boost::shared_ptr<MDDimension> 
       MDGeometry::getZDimension(void)const
     {
       if(m_basis.getNumDims()<3){
         throw(std::invalid_argument("No Z dimension is defined in this workspace"));
       }
-      return *(theDimension[2]);
+      return theDimension[2];
     }
     //
-    MDDimension & 
+    boost::shared_ptr<MDDimension>
       MDGeometry::getTDimension(void)const
     {
       if(m_basis.getNumDims()<4){
         throw(std::invalid_argument("No T dimension is defined in this workspace"));
       }
-      return *(theDimension[3]);
+      return theDimension[3];
     }
     //
-    std::vector<MDDimension *> 
+    std::vector<boost::shared_ptr<MDDimension> >
       MDGeometry::getIntegratedDimensions(void)
     {
-      std::vector<MDDimension *> tmp;
+      std::vector<boost::shared_ptr<MDDimension> > tmp;
 
       if(this->n_expanded_dim!=m_basis.getNumDims()){
-        std::vector<MDDimension *>::iterator it;
+        std::vector<boost::shared_ptr<MDDimension> >::iterator it;
         it=theDimension.begin()+this->n_expanded_dim;
 
         tmp.assign(it,theDimension.end());
@@ -245,7 +245,7 @@ void
       return tmp;
     }
 
-    MDDimension *  
+    boost::shared_ptr<MDDimension>
       MDGeometry::getDimension(unsigned int i)const
     {
       if(i>=m_basis.getNumDims()){
@@ -254,11 +254,12 @@ void
       }
       return theDimension[i];
     }
-    MDDimension *  
+
+    boost::shared_ptr<MDDimension>
       MDGeometry::getDimension(const std::string &tag,bool do_throw)const
     {
-      MDDimension *pDim(NULL);
-      std::map<std::string,MDDimension *>::const_iterator it;
+      boost::shared_ptr<MDDimension> pDim;
+      std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
       it = dimensions_map.find(tag);
       if(it == dimensions_map.end()){
         if(do_throw){
@@ -276,7 +277,7 @@ void
     m_basis(basis),
       n_expanded_dim(0)
     {
-      this->theDimension.assign(basis.getNumDims(), NULL);
+      this->theDimension.resize(basis.getNumDims());
       this->init_empty_dimensions();
     }
 
@@ -296,7 +297,7 @@ MDGeometry::init_empty_dimensions()
   
    for(it=recID.begin();it!=recID.end();++it){
       tag = it->getId();
-      this->theDimension[i] = new MDDimensionRes(tag,(rec_dim)nRec_count);
+      this->theDimension[i] = boost::shared_ptr<MDDimension>(new MDDimensionRes(tag,(rec_dim)nRec_count));
        nRec_count++;
       // initiate map to search dimensions by names
       dimensions_map[tag]=this->theDimension[i];
@@ -304,7 +305,7 @@ MDGeometry::init_empty_dimensions()
    }
     for(it=nonRecID.begin();it!=nonRecID.end();++it){
       tag = it->getId();
-      this->theDimension[i] = new MDDimension(tag);
+      this->theDimension[i] = boost::shared_ptr<MDDimension>(new MDDimension(tag));
 
       // initiate map to search dimensions by names
       dimensions_map[tag]=this->theDimension[i];
@@ -317,15 +318,8 @@ MDGeometry::init_empty_dimensions()
 
     MDGeometry::~MDGeometry(void)
     {
-      unsigned int i;
-      for(i=0; i<m_basis.getNumDims(); i++){
-        delete this->theDimension[i];
-
-      }
       this->theDimension.clear();
       this->dimensions_map.clear();
-
-
     }
 
     std::vector<std::string> MDGeometry::getBasisTags(void)const //TODO: consider removing this function.
