@@ -32,10 +32,18 @@ Quat::Quat(const V3D& src,const V3D& des)
   V3D v = (src+des);
   v.normalize();
   V3D cross=v.cross_prod(des);
-  w = v.scalar_prod(des);
-  a = cross[0];
-  b = cross[1];
-  c = cross[2];
+  if (cross.nullVector())
+  {
+    w = 1.;
+    a = b = c = 0.;
+  }
+  else
+  {
+    w = v.scalar_prod(des);
+    a = cross[0];
+    b = cross[1];
+    c = cross[2];
+  }
 }
 
 //! Constructor with values
@@ -385,7 +393,7 @@ void Quat::normalize()
 	if(len2()==0)
 		overnorm=1.0;
 	else
-		overnorm=1.0/len2();
+		overnorm=1.0/len();
 	w*=overnorm;
 	a*=overnorm;
 	b*=overnorm;
@@ -428,8 +436,15 @@ double Quat::len2() const
 void Quat::inverse()
 {
 	conjugate();
-	normalize();
-	return;
+	double overnorm = len2();
+	if(overnorm==0)
+		overnorm=1.0;
+	else
+		overnorm=1.0/overnorm;
+	w*=overnorm;
+	a*=overnorm;
+	b*=overnorm;
+	c*=overnorm;
 }
 
 /*! 	Rotate a vector.

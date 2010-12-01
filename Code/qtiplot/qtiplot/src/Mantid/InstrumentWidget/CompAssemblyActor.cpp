@@ -382,3 +382,28 @@ void CompAssemblyActor::AppendBoundingBox(const Mantid::Geometry::V3D& minBound,
   if(maxBoundBox[2]<maxBound[2]) maxBoundBox[2]=maxBound[2];
 }
 
+void CompAssemblyActor::addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list)
+{
+  for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
+  {
+    (**iObjComp).addToUnwrappedList(cylinder,list);
+  }
+
+  for(std::vector<ICompAssemblyActor*>::iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  {
+    (**iAssem).addToUnwrappedList(cylinder,list);
+  }
+}
+
+void CompAssemblyActor::detectorCallback(DetectorCallback* callback)const
+{
+  for(std::vector<ObjComponentActor*>::const_iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
+  {
+    (**iObjComp).detectorCallback(callback);
+  }
+
+  for(std::vector<ICompAssemblyActor*>::const_iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  {
+    (**iAssem).detectorCallback(callback);
+  }
+}

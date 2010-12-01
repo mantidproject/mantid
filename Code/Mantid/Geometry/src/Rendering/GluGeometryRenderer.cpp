@@ -120,6 +120,24 @@ namespace Mantid
 			}
 		}
 
+    void GluGeometryRenderer::RenderSegmentedCylinder(const V3D& center,const V3D& axis,double radius,double height)
+    {
+			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
+			{
+				while(glGetError() != GL_NO_ERROR);
+				iDisplaylistId=glGenLists(1);
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+				CreateSegmentedCylinder(center,axis,radius,height);
+				glEndList();
+				mErrorCode=glGetError();
+				boolDisplaylistCreated=true;
+			}else if(mErrorCode == GL_NO_ERROR){
+				glCallList(iDisplaylistId);
+			}else {
+				CreateSegmentedCylinder(center,axis,radius,height);
+			}
+    }
+
 		/**
 		* Render ObjComponent
 		* @param ObjComp input to render
@@ -263,5 +281,26 @@ namespace Mantid
 			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
 			glPopMatrix();
 		}
+
+    void GluGeometryRenderer::CreateSegmentedCylinder(const V3D& center,const V3D& axis,double radius,double height)
+    {
+			GLUquadricObj *qobj=gluNewQuadric();
+			gluQuadricDrawStyle(qobj,GLU_FILL);
+			gluQuadricNormals(qobj,GL_SMOOTH);
+      gluQuadricTexture(qobj,true); 
+			glPushMatrix();
+			glTranslated(center[0],center[1],center[2]);
+			GLdouble mat[16];
+			V3D unit(0,0,1);
+			Quat rot(unit,axis);
+			rot.GLMatrix(&mat[0]);
+			glMultMatrixd(mat);
+			gluCylinder(qobj,radius,radius,height, Cylinder::g_nslices, 1);
+      gluQuadricTexture(qobj,false); 
+			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
+			glTranslated(0.0,0.0,height);
+			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
+			glPopMatrix();
+    }
 	}
 }

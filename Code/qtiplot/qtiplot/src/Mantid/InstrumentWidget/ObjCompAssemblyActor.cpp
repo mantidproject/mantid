@@ -242,3 +242,16 @@ int ObjCompAssemblyActor::findDetectorIDUsingColor(int rgb)
   return -1;
 }
 
+void ObjCompAssemblyActor::detectorCallback(DetectorCallback* callback)const
+{
+  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
+  for(int i=0;i<getNumberOfDetectors();++i)
+  {
+    const unsigned char* clr(m_tex->getColor(i));
+    float red = float(*clr) / 255;
+    float green = float(*(clr+1)) / 255;
+    float blue = float(*(clr+2)) / 255;
+    callback->callback(boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objAss->getChild(i)),
+                       DetectorCallbackData(GLColor(red,green,blue)));
+  }
+}

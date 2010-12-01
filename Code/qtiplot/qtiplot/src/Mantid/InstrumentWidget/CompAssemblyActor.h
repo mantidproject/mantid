@@ -71,6 +71,8 @@ public:
   virtual std::string type()const {return "CompAssemblyActor";} ///< Type of the GL object
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   void drawUsingColorID();
+  void addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list);
+  void detectorCallback(DetectorCallback* callback)const;
 };
 
 #endif /*GLTRIANGLE_H_*/

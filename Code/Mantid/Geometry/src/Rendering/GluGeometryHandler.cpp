@@ -62,6 +62,9 @@ namespace Mantid
 					case CONE:
 						(dynamic_cast<GluGeometryRenderer*>(Renderer))->RenderCone(center,axis,radius,height);
 						break;
+					case SEGMENTED_CYLINDER:
+						(dynamic_cast<GluGeometryRenderer*>(Renderer))->RenderSegmentedCylinder(center,axis,radius,height);
+						break;
 				}
 			}else if(ObjComp!=NULL){
 				Renderer->Render(ObjComp);
@@ -95,6 +98,13 @@ namespace Mantid
 		      break;
 		    case CONE:
 		      mytype = 4;
+		      vectors.push_back(center);
+		      vectors.push_back(axis);
+		      myradius = radius;
+		      myheight = height;
+		      break;
+        case SEGMENTED_CYLINDER:
+          mytype = 5;
 		      vectors.push_back(center);
 		      vectors.push_back(axis);
 		      myradius = radius;
@@ -144,5 +154,13 @@ namespace Mantid
 			radius=r;
 			height=h;
 		}
+    void GluGeometryHandler::setSegmentedCylinder(V3D c,V3D a,double r,double h)
+    {
+			type=SEGMENTED_CYLINDER;
+			center=c;
+			axis=a;
+			radius=r;
+			height=h;
+    }
 	}
 }

@@ -105,3 +105,8 @@ void TexObject::swap()
   m_data = m_pick_data;
   m_pick_data = tmp;
 }
+
+const unsigned char* TexObject::getColor(int i)const
+{
+  return &m_data[3*i];
+}

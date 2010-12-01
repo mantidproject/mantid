@@ -53,6 +53,7 @@ public:
   virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
 
   const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
+  void detectorCallback(DetectorCallback* callback)const;
 };
 
 #endif /*OBJCOMPONENT_ACTOR_H_*/

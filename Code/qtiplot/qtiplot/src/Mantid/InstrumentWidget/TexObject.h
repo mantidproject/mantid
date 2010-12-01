@@ -61,6 +61,7 @@ public:
   void generateTexture();
   /// Swap between drawing counts and drawing detector code colours
   void swap();
+  const unsigned char* getColor(int i)const;
 protected:
   unsigned int m_id;     ///< OpenGL texture id
   int m_n;               ///< texture size in one dimension, the other dimension is 1

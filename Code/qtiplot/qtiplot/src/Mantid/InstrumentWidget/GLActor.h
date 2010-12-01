@@ -18,6 +18,25 @@
 #include "boost/shared_ptr.hpp"
 #include <ostream>
 
+#include <QList>
+
+class UnwrappedCylinder;
+class UnwrappedDetectorCyl;
+
+namespace Mantid
+{
+  namespace Geometry
+  {
+    class IDetector;
+  }
+}
+
+struct DetectorCallbackData
+{
+  DetectorCallbackData(const GLColor& c):color(c){}
+  GLColor color;
+};
+
 /*!
   \class  GLActor
   \brief  An actor class that holds geometry objects with its position.
@@ -50,21 +69,30 @@
 class GLActor : public GLObject
 {
 public:
+
+  class DetectorCallback
+  {
+  public:
+    virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
+  };
+
   GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
   GLActor(const GLActor&);        ///< Constructor with another actor as input
   virtual ~GLActor();             ///< Virtual destructor
   void setColor(boost::shared_ptr<GLColor>);
-  const boost::shared_ptr<GLColor> getColor(){return mColor;}
+  const boost::shared_ptr<GLColor> getColor()const{return mColor;}
   void markPicked();
   void markUnPicked();
   void setVisibility(bool);
   bool getVisibility();
   virtual int  setStartingReferenceColor(int){return 1;}
-  friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
-  {
-    os << "Actor Name:" << a.type() << std::endl;
-    return os;
-  } ///< Printing Actor object
+//  friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
+//  {
+//    os << "Actor Name:" << a.type() << std::endl;
+//    return os;
+//  } ///< Printing Actor object
+  virtual void addToUnwrappedList(UnwrappedCylinder& /*cylinder*/, QList<UnwrappedDetectorCyl>& /*list*/){}
+  virtual void detectorCallback(DetectorCallback* /*callback*/)const{}
 protected:
   boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object
   bool  mPicked;                   ///< Flag Whether the actor is picked by mouse click or not

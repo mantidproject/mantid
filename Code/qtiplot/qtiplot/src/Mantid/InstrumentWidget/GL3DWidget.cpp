@@ -2,14 +2,23 @@
 #include <windows.h>
 #endif
 #include "GL3DWidget.h"
-#include <QtOpenGL>
 #include "GLActor.h"
-#include <QSpinBox>
 #include "GLColor.h"
+#include "InstrumentActor.h"
+#include "UnwrappedCylinder.h"
+#include "UnwrappedSphere.h"
+#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Objects/Object.h"
+
+#include "boost/shared_ptr.hpp"
+
+#include <QtOpenGL>
+#include <QSpinBox>
+#include <QApplication>
+#include <QTime>
+
 #include <map>
 #include <string>
-#include "boost/shared_ptr.hpp"
-#include <QApplication>
 #include <iostream>
 #include <cfloat>
 #ifndef GL_MULTISAMPLE
@@ -44,15 +53,24 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   m_polygonMode = SOLID;
   m_lightingState = 0;
   m_firstFrame = true;
+  m_renderMode = FULL3D;
+  m_unwrappedSurface = NULL;
+  m_unwrappedSurfaceChanged = true;
+  m_unwrappedViewChanged = true;
 
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
+
 }
 
 GL3DWidget::~GL3DWidget()
 {
   delete _viewport;
   delete _trackball;
+  if (m_unwrappedSurface)
+  {
+    delete m_unwrappedSurface;
+  }
 }
 
 void GL3DWidget::setInteractionModePick()
@@ -155,7 +173,7 @@ void GL3DWidget::setLightingModel(int state)
 /** Draw 3D axes centered at the origin (if the option is selected)
  *
  */
-void GL3DWidget::drawAxes()
+void GL3DWidget::drawAxes(double axis_length)
 {
   //Don't do anything if the checkbox is unchecked.
   if (!m3DAxesShown)
@@ -164,7 +182,6 @@ void GL3DWidget::drawAxes()
   glPointSize(3.0);
   glLineWidth(3.0);
 
-  double axis_length = 100.0;
   //To make sure the lines are colored
   glEnable(GL_COLOR_MATERIAL);
   glDisable(GL_TEXTURE_2D);
@@ -193,6 +210,20 @@ void GL3DWidget::drawAxes()
  * This method draws the scene onto the graphics context
  */
 void GL3DWidget::drawDisplayScene()
+{
+  if (m_renderMode == FULL3D)
+  {
+    draw3D();
+  }
+  else
+  {
+    drawUnwrapped();
+  }
+}
+/**
+  * This method draws the scene onto the graphics context
+  */
+void GL3DWidget::draw3D()
 {
   static int i = 0;
   glMatrixMode(GL_MODELVIEW);
@@ -250,6 +281,8 @@ void GL3DWidget::drawDisplayScene()
 
   }
   glPopMatrix();
+  QPainter painter(this);
+  painter.end();
 }
 
 /**
@@ -322,8 +355,6 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
   else
   {
     drawDisplayScene();
-    QPainter painter(this);
-    painter.end();
   }
 
   //
@@ -348,6 +379,8 @@ void GL3DWidget::resizeGL(int width, int height)
   {
     mPickingDraw=true;
   }
+
+  m_unwrappedViewChanged = true;
 }
 
 /**
@@ -360,6 +393,20 @@ void GL3DWidget::resizeGL(int width, int height)
  */
 void GL3DWidget::mousePressEvent(QMouseEvent* event)
 {
+  if (m_renderMode != FULL3D && m_unwrappedSurface)
+  {
+    if(event->buttons() & Qt::RightButton)
+    {
+      m_unwrappedSurface->unzoomUnwrapped();
+    }
+    else
+    {
+      m_unwrappedSurface->startUnwrappedSelection(event->x(),event->y());
+    }
+    update();
+    return;
+  }
+
   // Pick Mode
   if( iInteractionMode == GL3DWidget::PickMode && (event->buttons() & Qt::LeftButton) )
   { 
@@ -422,6 +469,16 @@ void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
  */
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
+  if (m_renderMode != FULL3D && m_unwrappedSurface)
+  {
+    if (event->buttons() & Qt::LeftButton)
+    {
+      m_unwrappedSurface->moveUnwrappedSelection(event->x(),event->y());
+    }
+    update();
+    return;
+  }
+
   if(iInteractionMode == GL3DWidget::PickMode)
   {
     setCursor(Qt::CrossCursor);
@@ -469,6 +526,16 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
  */
 void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+  if (m_renderMode != FULL3D && m_unwrappedSurface)
+  {
+//    if(event->buttons() & Qt::LeftButton)
+//    {
+      m_unwrappedSurface->endUnwrappedSelection(event->x(),event->y());
+//    }
+      update();
+    return;
+  }
+
   setCursor(Qt::PointingHandCursor);
   isKeyPressed=false;
   setSceneHighResolution();
@@ -802,6 +869,10 @@ void GL3DWidget::enableLighting(bool on)
 {
   m_lightingState = on? 2 : 0;
   setLightingModel(m_lightingState);
+  if (m_unwrappedSurface)
+  {
+    m_unwrappedSurface->updateView();
+  }
   update();
 }
 
@@ -813,4 +884,83 @@ void GL3DWidget::setWireframe(bool on)
 {
   m_polygonMode = on ? WIREFRAME : SOLID;
   update();
+}
+
+void GL3DWidget::setRenderMode(int mode)
+{
+  if (mode < RENDERMODE_SIZE)
+  {
+    m_renderMode = RenderMode(mode);
+    resetUnwrappedViews();
+  }
+  if (mode == FULL3D)
+  {
+    _viewport->issueGL();
+  }
+  update();
+}
+
+void GL3DWidget::resetUnwrappedViews()
+{
+  if (m_unwrappedSurface)
+  {
+    delete m_unwrappedSurface;
+    m_unwrappedSurface = NULL;
+  }
+  m_unwrappedSurfaceChanged = true;
+}
+
+void GL3DWidget::drawUnwrapped()
+{
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  if (m_unwrappedSurfaceChanged)
+  {
+    GLActor* actor = scene->getActor(0);
+    if (!actor) return;
+    InstrumentActor* instrActor = dynamic_cast<InstrumentActor*>(actor);
+    if (!instrActor) return;
+    boost::shared_ptr<Mantid::Geometry::IInstrument> instr = instrActor->getInstrument();
+    Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
+    Mantid::Geometry::V3D sample_pos = sample->getPos();
+
+    QTime time;
+    time.start();
+    if (m_unwrappedSurface) delete m_unwrappedSurface;
+    Mantid::Geometry::V3D axis;
+    if (m_renderMode == SPHERICAL_Y || m_renderMode == CYLINDRICAL_Y)
+    {
+      axis = Mantid::Geometry::V3D(0,1,0);
+    }
+    else if (m_renderMode == SPHERICAL_Z || m_renderMode == CYLINDRICAL_Z)
+    {
+      axis = Mantid::Geometry::V3D(0,0,1);
+    }
+    else // SPHERICAL_X || CYLINDRICAL_X
+    {
+      axis = Mantid::Geometry::V3D(1,0,0);
+    }
+
+    if (m_renderMode <= CYLINDRICAL_X)
+    {
+      m_unwrappedSurface = new UnwrappedCylinder(instrActor,sample_pos,axis);
+    }
+    else // SPHERICAL
+    {
+      m_unwrappedSurface = new UnwrappedSphere(instrActor,sample_pos,axis);
+    }
+
+    m_unwrappedSurfaceChanged = false;
+  }
+
+  m_unwrappedSurface->draw(this);
+
+  QApplication::restoreOverrideCursor();
+}
+
+void GL3DWidget::redrawUnwrapped()
+{
+  if (m_unwrappedSurface)
+  {
+    m_unwrappedSurface->updateDetectors();
+  }
 }

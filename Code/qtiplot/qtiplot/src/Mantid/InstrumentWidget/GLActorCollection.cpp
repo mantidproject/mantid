@@ -58,7 +58,7 @@ void GLActorCollection::addActor(GLActor* a)
  * Remove the input actor from the collection
  * @param a input actor to be removed from the list
  */
-void GLActorCollection::removeActor(GLActor* a)
+void GLActorCollection::removeActor(GLActor*)
 {
 	throw std::runtime_error("Removing actor not implemented");
 }
@@ -115,4 +115,13 @@ void GLActorCollection::refresh()
 void GLActorCollection::init()
 {
     for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::init));
+}
+
+void GLActorCollection::addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list)
+{
+  std::vector<GLActor*>::iterator it = mActorsList.begin();
+  for(;it != mActorsList.end();++it)
+  {
+    (**it).addToUnwrappedList(cylinder,list);
+  }
 }

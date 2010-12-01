@@ -60,6 +60,8 @@ namespace Mantid
 			void RenderCone(const V3D& center,const V3D &axis,double radius,double height);
 			///Renders a Cylinder from the input values
 			void RenderCylinder(const V3D& center,const V3D& axis,double radius,double height);
+			///Renders a Segmented Cylinder from the input values
+			void RenderSegmentedCylinder(const V3D& center,const V3D& axis,double radius,double height);
 			///Creates a sphere from the input values
 			void CreateSphere(const V3D& center,double radius);
 			///Creates a cuboid from the input values
@@ -68,6 +70,8 @@ namespace Mantid
 			void CreateCone(const V3D& center,const V3D& axis,double radius,double height);
 			///Creates a cylinder from the input values
 			void CreateCylinder(const V3D& center,const V3D& axis,double radius,double height);
+			///Creates a segmented cylinder from the input values
+			void CreateSegmentedCylinder(const V3D& center,const V3D& axis,double radius,double height);
 		};
 
 	}   // NAMESPACE Geometry

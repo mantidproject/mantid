@@ -135,3 +135,13 @@ void ObjComponentActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::G
 	minBound[0]=xmin;minBound[1]=ymin;minBound[2]=zmin;
 	maxBound[0]=xmax;maxBound[1]=ymax;maxBound[2]=zmax;
 }
+
+void ObjComponentActor::detectorCallback(DetectorCallback* callback)const
+{
+  boost::shared_ptr<const Mantid::Geometry::IDetector> det =
+      boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector> (mObjComp);
+  if (det)
+  {
+    callback->callback(det,DetectorCallbackData(*getColor()));
+  }
+}

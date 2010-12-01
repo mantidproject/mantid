@@ -65,6 +65,7 @@ public:
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   void drawUsingColorID();
   int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list);
+  void detectorCallback(DetectorCallback* callback)const;
 };
 
 #endif /*OBJCOMPASSEMBLY_ACTOR__H_*/

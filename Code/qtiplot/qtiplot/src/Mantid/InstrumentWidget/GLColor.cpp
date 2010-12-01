@@ -55,12 +55,23 @@ void GLColor::set(float red, float green, float blue, float alpha)
  * @param blue Blue Componenent of color value between [0 - 1]
  * @param alpha Alpha componenet of color value between [0 - 1]
  */
-void GLColor::get(float& red, float& green, float& blue, float& alpha)
+void GLColor::get(float& red, float& green, float& blue, float& alpha)const
 {
   red = m_rgba[0];
   green = m_rgba[1];
   blue = m_rgba[2];
   alpha = m_rgba[3];
+}
+
+/**
+  * This method sets copies red,green, and blue color components into a provided buffer
+  * @param c Pointer to an array of unsigned chars big enough to accept 3 bytes
+  */
+void GLColor::getUB3(unsigned char* c)const
+{
+  *c = (unsigned char)(m_rgba[0]*255);
+  *(c+1) = (unsigned char)(m_rgba[1]*255);
+  *(c+2) = (unsigned char)(m_rgba[2]*255);
 }
 
 /**

@@ -52,7 +52,8 @@ namespace Mantid
 				CUBOID,   ///< CUBOID
 				CYLINDER, ///< CYLINDER
 				CONE,     ///< CONE
-				SPHERE    ///< SPHERE
+				SPHERE,    ///< SPHERE
+        SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis). Sizes of segments are important.
 			}; 
 		private:
 			static Kernel::Logger& PLog;           ///< The official logger
@@ -82,6 +83,8 @@ namespace Mantid
 			void setCylinder(V3D,V3D,double,double);
 			///sets the geometry handler for a cone
 			void setCone(V3D,V3D,double,double);
+			///sets the geometry handler for a segmented cylinder
+			void setSegmentedCylinder(V3D,V3D,double,double);
 			void Triangulate();
 			void Render();
 			void Initialize();

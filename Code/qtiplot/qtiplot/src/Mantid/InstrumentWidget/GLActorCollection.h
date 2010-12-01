@@ -56,6 +56,7 @@ public:
   void define();
   GLActor* findColorID(unsigned char[3]);
   void refresh();
+  void addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list);
 private:
   void init();
   std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.

@@ -5,8 +5,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "boost/weak_ptr.hpp"
-#include "MantidGeometry/Objects/Object.h"
+//#include "boost/weak_ptr.hpp"
+
 namespace Mantid
 {
 

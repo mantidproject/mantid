@@ -522,7 +522,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
       // inverse the vz axis
       vz = vz * (-1);
     }
-    obj_str << "<cylinder id=\"stick\">";
+    obj_str << "<segmented-cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
     obj_str << "x=\""<<Cmass.X();
     obj_str << "\" y=\""<<Cmass.Y();
@@ -531,7 +531,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
     obj_str << "<axis x=\""<<vz.X()<<"\" y=\""<<vz.Y()<<"\" z=\""<<vz.Z()<<"\" /> ";
     obj_str << "<radius val=\""<<radius<<"\" />";
     obj_str << "<height val=\""<<hz<<"\" />";
-    obj_str << "</cylinder>";
+    obj_str << "</segmented-cylinder>";
   }
 
   if (!obj_str.str().empty())

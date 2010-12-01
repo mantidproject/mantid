@@ -78,6 +78,7 @@ namespace Mantid
       std::string parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
+      std::string parseSegmentedCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);

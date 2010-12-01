@@ -508,7 +508,10 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/InstrumentActor.h \
 		src/Mantid/InstrumentWidget/RectangularDetectorActor.h \
 		src/Mantid/InstrumentWidget/MantidColorMap.h \
-		src/Mantid/ManageCustomMenus.h
+                src/Mantid/InstrumentWidget/UnwrappedSurface.h \
+                src/Mantid/InstrumentWidget/UnwrappedCylinder.h \
+                src/Mantid/InstrumentWidget/UnwrappedSphere.h \
+                src/Mantid/ManageCustomMenus.h
 
 ###################### FORMS ##############################################
 
@@ -692,7 +695,10 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
 		src/Mantid/InstrumentWidget/RectangularDetectorActor.cpp \
 		src/Mantid/InstrumentWidget/MantidColorMap.cpp \
-		src/Mantid/ManageCustomMenus.cpp \
+                src/Mantid/InstrumentWidget/UnwrappedSurface.cpp \
+                src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp \
+                src/Mantid/InstrumentWidget/UnwrappedSphere.cpp \
+                src/Mantid/ManageCustomMenus.cpp \
 		src/pixmaps.cpp
 
 

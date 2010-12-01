@@ -143,7 +143,7 @@ public:
     double radius, height;
     shape->GetObjectGeom(otype, vectors, radius, height);
 
-    TS_ASSERT_EQUALS(otype,3);
+    TS_ASSERT_EQUALS(otype,5);
     TS_ASSERT_EQUALS(radius,0.1);
     TS_ASSERT_EQUALS(height,0.6);
 

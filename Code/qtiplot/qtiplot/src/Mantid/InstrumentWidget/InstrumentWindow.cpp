@@ -69,8 +69,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   // Lighting is needed for testing
-  //QPushButton* setLight = new QPushButton(tr("Set lighting"));
-  //setLight->setCheckable(true);
+//  QPushButton* setLight = new QPushButton(tr("Set lighting"));
+//  setLight->setCheckable(true);
 
   mMinValueBox = new QLineEdit();
   mMaxValueBox = new QLineEdit();
@@ -128,17 +128,25 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
   poligonMOdeToggle->setCheckState(Qt::Unchecked);
   connect(poligonMOdeToggle, SIGNAL(clicked(bool)), mInstrumentDisplay, SLOT(setWireframe(bool)));
+  
+  QComboBox* renderMode = new QComboBox(this);
+  renderMode->setToolTip("Set render mode");
+  QStringList modeList;
+  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
+  renderMode->insertItems(0,modeList);
+  connect(renderMode,SIGNAL(currentIndexChanged(int)),mInstrumentDisplay,SLOT(setRenderMode(int)));
 
   renderControlsLayout->addWidget(mSelectButton);
   renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSelectColormap);
   renderControlsLayout->addWidget(mSaveImage);
-  //renderControlsLayout->addWidget(setLight);
+//  renderControlsLayout->addWidget(setLight);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(btnBackgroundColor);
   renderControlsLayout->addWidget(lColormapFrame);
   renderControlsLayout->addWidget(m3DAxesToggle);
   renderControlsLayout->addWidget(poligonMOdeToggle);
+  renderControlsLayout->addWidget(renderMode);
 
   //Set the main frame to the window
   frame->setLayout(mainLayout);
@@ -151,7 +159,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
   connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
   connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
-  //connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+//  connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
   connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
   connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 
@@ -477,6 +485,7 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
   setupColorBarScaling();
   
+  mInstrumentDisplay->resetUnwrappedViews();
   // Ensure the 3D display is up-to-date
   mInstrumentDisplay->update();
   // Populate the instrument tree
@@ -493,6 +502,7 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
     // this was an automatic view change, only flag that the view changed if the user initiated the change
     mViewChanged = false;
   }
+
 }
 
 /// Set a maximum and minimum for the colour map range

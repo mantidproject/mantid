@@ -141,6 +141,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
         std::string primitiveName = pE->tagName();  // get name of primitive
 
+
         // if there are any error thrown while parsing the XML string for a given shape
         // write out a warning to the user that this shape is ignored. If all shapes are ignored
         // this way an empty object is returned to the user.
@@ -166,6 +167,12 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           {
             lastElement=pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("segmented-cylinder"))
+          {
+            lastElement=pE;
+            idMatching[idFromUser] = parseSegmentedCylinder(pE, primitives, l_id);  
             numPrimitives++;
           }
           else if ( !primitiveName.compare("cuboid"))
@@ -440,6 +447,59 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   return retAlgebraMatch.str();
 }
 
+/** Parse XML 'cylinder' element
+ *
+ *  @param pElem XML 'cylinder' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+{
+  Element* pElemBase = getShapeElement(pElem, "centre-of-bottom-base"); 
+  Element* pElemAxis = getShapeElement(pElem, "axis"); 
+  Element* pElemRadius = getShapeElement(pElem, "radius"); 
+  Element* pElemHeight = getShapeElement(pElem, "height"); 
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+
+  // getDoubleAttribute can throw - put the calls above any new
+  const double radius = getDoubleAttribute(pElemRadius,"val");
+  const double height = getDoubleAttribute(pElemHeight,"val");
+  
+  // add infinite cylinder
+  Cylinder* pCylinder = new Cylinder();
+  V3D centreOfBottomBase = parsePosition(pElemBase);
+  pCylinder->setCentre(centreOfBottomBase+normVec*(0.5*height));              
+  pCylinder->setNorm(normVec);  
+  pCylinder->setRadius(radius);
+  prim[l_id] = pCylinder;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add top plane
+  Plane* pPlaneTop = new Plane();
+  // to get point in top plane
+  V3D pointInPlane = centreOfBottomBase + (normVec * height);
+  pPlaneTop->setPlane(pointInPlane, normVec); 
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom plane
+  Plane* pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(centreOfBottomBase, normVec); 
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
 
 /** Parse XML 'cuboid' element
  *
@@ -957,6 +1017,18 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
     ((GluGeometryHandler*)(handler.get()))->setCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
+  }
+  else if(pElem->tagName()=="segmented-cylinder")
+  {
+    boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+    Obj->setGeometryHandler(handler);
+    Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
+    Element* pElemAxis = getShapeElement(pElem, "axis");
+    Element* pElemRadius = getShapeElement(pElem, "radius");
+    Element* pElemHeight = getShapeElement(pElem, "height");
+    V3D normVec = parsePosition(pElemAxis);
+    normVec.normalize();
+    ((GluGeometryHandler*)(handler.get()))->setSegmentedCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
   }
   else if(pElem->tagName()=="cone")
   {

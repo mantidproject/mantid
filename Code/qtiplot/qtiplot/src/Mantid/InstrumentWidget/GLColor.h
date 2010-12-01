@@ -45,7 +45,9 @@ public:
   /// Set all four values atomically
   void set(float red, float green ,float blue, float alpha);
   /// Retrieve the component colours
-  void get(float&,float&,float&,float&);
+  void get(float&,float&,float&,float&)const;
+  /// Retrieve the component colours
+  void getUB3(unsigned char* c)const;
   /// Set the painting method
   void paint(GLColor::PaintMethod pm);
 private:

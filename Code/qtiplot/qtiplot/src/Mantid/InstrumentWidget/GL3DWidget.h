@@ -4,11 +4,16 @@
 #include <QGLWidget>
 #include <QString>
 #include <QImage>
+#include <QList>
+#include <QStack>
 #include "GLViewport.h"
 #include "GLTrackball.h"
 #include "GLActorCollection.h"
 #include "GLGroupPickBox.h"
 #include "boost/shared_ptr.hpp"
+
+class UnwrappedCylinder;
+class UnwrappedSurface;
 
 /*!
   \class  GL3DWidget
@@ -47,6 +52,7 @@ public:
   enum InteractionMode {MoveMode = 0, PickMode = 1};
   enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
   enum PolygonMode{ SOLID, WIREFRAME };
+  enum RenderMode{ FULL3D = 0, CYLINDRICAL_Y, CYLINDRICAL_Z, CYLINDRICAL_X, SPHERICAL_Y, SPHERICAL_Z, SPHERICAL_X, RENDERMODE_SIZE };
   GL3DWidget(QWidget* parent=0); ///< Constructor
   virtual ~GL3DWidget();         ///< Destructor
   void setActorCollection(boost::shared_ptr<GLActorCollection>);
@@ -57,6 +63,7 @@ public:
   void setBackgroundColor(QColor);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
+  void getViewport(int& w,int& h){_viewport->getViewport(&w,&h);}
 
 signals:
   void actorsPicked(const std::set<QRgb>& );
@@ -66,6 +73,7 @@ signals:
 public slots:
   void enableLighting(bool);
   void setWireframe(bool);
+  void resetUnwrappedViews();
 
 protected:
   void initializeGL();
@@ -81,6 +89,7 @@ protected:
   void keyPressEvent(QKeyEvent *);
   void keyReleaseEvent(QKeyEvent *);
   void defaultProjection();
+  void redrawUnwrapped();
   
   virtual void drawSceneUsingColorID()=0;
   virtual void setSceneLowResolution()=0;
@@ -93,14 +102,17 @@ protected:
 
 protected slots:
   void set3DAxesState(int state);
+  void setRenderMode(int);
 
 private:
   void setRenderingOptions();
   void setLightingModel(int);
-  void drawAxes();
+  void drawAxes(double axis_length = 100.0);
   void drawDisplayScene();
   void drawPickingScene();
   void switchToPickingMode();
+  void draw3D();
+  void drawUnwrapped();
 
   QColor bgColor; ///< Background color
   InteractionMode iInteractionMode;
@@ -113,6 +125,11 @@ private:
   PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
   bool m_firstFrame;
 
+  // Unwrapping stuff
+  RenderMode m_renderMode;       ///< 3D view or unwrapped
+  UnwrappedSurface* m_unwrappedSurface;
+  bool m_unwrappedSurfaceChanged;
+  bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn, but the surface is the same
 };
 
 #endif /*GL3DWIDGET_H_*/

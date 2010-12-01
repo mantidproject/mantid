@@ -365,6 +365,7 @@ void Instrument3DWidget::recount()
 {
   calculateColorCounts(mWorkspace, false);
   mInstrumentActor->refresh();
+  redrawUnwrapped();
   update();
 }
 

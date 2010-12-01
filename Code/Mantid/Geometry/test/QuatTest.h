@@ -126,10 +126,10 @@ public:
   {
     q(2,2,2,2);
     q.normalize();
-    TS_ASSERT_DELTA(q[0],0.125,0.000001);
-    TS_ASSERT_DELTA(q[1],0.125,0.000001);
-    TS_ASSERT_DELTA(q[2],0.125,0.000001);
-    TS_ASSERT_DELTA(q[3],0.125,0.000001);
+    TS_ASSERT_DELTA(q[0],0.5,0.000001);
+    TS_ASSERT_DELTA(q[1],0.5,0.000001);
+    TS_ASSERT_DELTA(q[2],0.5,0.000001);
+    TS_ASSERT_DELTA(q[3],0.5,0.000001);
   }
 
   void testconjugatemethod()

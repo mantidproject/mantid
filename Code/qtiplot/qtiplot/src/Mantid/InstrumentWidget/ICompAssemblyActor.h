@@ -78,6 +78,7 @@ public:
   int getNumberOfDetectors() const { return mNumberOfDetectors;}
   virtual void drawUsingColorID() = 0;
   void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+  boost::shared_ptr<Mantid::Geometry::IInstrument> getInstrument(){return mInstrument;}
 
   //virtual void init() = 0;
   virtual void redraw() = 0;
