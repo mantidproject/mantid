@@ -36,7 +36,7 @@ if __name__ == '__main__':
     p = Pool(6)
     #Best to put the slowest tests at the front...
     simple_folders = ['Nexus',  'CurveFitting', 'DataHandling', 
-                 'DataObjects', 'API', 'Kernel', 'PythonAPI']
+                 'DataObjects', 'API', 'Kernel', 'PythonAPI', 'MDDataObjects', 'MDAlgorithms']
     # Algorithms will get split in half
     arguments = ['Algorithms1', 'Algorithms2' ] + simple_folders
     p.map(runtest, arguments)

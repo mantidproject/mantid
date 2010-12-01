@@ -15,9 +15,20 @@
 //#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
 
 
-/** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions (its organisation in the 1D array)
+/**
+ * The kernel of the main class for visualisation and analysis operations,
+ * which keeps the data itself and brief information about the data dimensions
+ * (its organisation in the 1D array)
  *
- *   This is equivalent of multidimensional Horace dataset without detailed pixel information (the largest part of dnd dataset)
+ * This is equivalent of multidimensional Horace dataset without detailed pixel
+ * information (the largest part of dnd dataset).
+ *
+ *
+ * Note, Janik Zikovsky: It is my understanding that:
+ *
+ * MDImage is a dense representation of a specific slice of a larger data set,
+ * generated from a MDWorkspace by (some kind of) rebinning algorithm.
+ *
 
     @author Alex Buts, RAL ISIS
     @date 28/09/2010
@@ -42,6 +53,8 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
+
 namespace Mantid{
 namespace MDDataObjects{
 
@@ -51,16 +64,30 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-/// structure of the multidimension data array, which is the basis of MDData class and should be exposed to modyfying algorighms
-struct MD_img_data{
-  size_t data_size;               ///< size of the data points array expressed as 1D array;
-  MD_image_point *data;           ///< multidimensional array of data points, represented as a single dimensional array;
-  // integer descriptor for dimensions;
+/** Structure of the multidimension data array, which is the basis of
+ * MDData class and should be exposed to modyfying algorithms.
+ */
+struct MD_img_data
+{
+  /// size of the data points array expressed as 1D array;
+  size_t data_size;
+
+  /// multidimensional array of data points, represented as a single dimensional array;
+  MD_image_point *data;
+
+  /// integer descriptor for dimensions;
   std::vector<size_t>dimStride;
-  std::vector<size_t>dimSize;     ///< number of bin in this dimension
+
+  /// number of bin in this dimension
+  std::vector<size_t>dimSize;
   std::vector<double> min_value;  ///< min value in the selected dimension
   std::vector<double> max_value;  ///< max value in the selected dimension
-  MD_img_data():data(NULL){}
+
+  /* Default constructor */
+  MD_img_data():
+    data(NULL)
+  {
+  }
 
 };
 
@@ -82,10 +109,13 @@ public:
    *                     attempt to make selection outside of the range of the dimension range lead to the selection of last point in the dimension.
    */
   void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
+
   /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3
   void getPointData(std::vector<point3D> & image_data)const;
+
   /// returns the size of the Image array as 1D array;
   size_t getDataSize(void)const{return MDStruct.data_size;}
+
   /// returns dimension strides e.g. the changes of a position in 1D array when an M-th dimension index changes by 1;
   std::vector<size_t> getStrides(void)const;
 

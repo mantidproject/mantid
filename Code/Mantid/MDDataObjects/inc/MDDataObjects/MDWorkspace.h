@@ -7,8 +7,18 @@
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 
 
-/** Class is empty to provide calling name for all MD-workspace components and provide interfaces to all workspace  public set functions 
-*   and to the one not included in separate components (like get_detectors)    (in a future) 
+/** Class is empty to provide calling name for all MD-workspace
+ * components and provide interfaces to all workspace  public set functions
+*  and to the one not included in separate components (like get_detectors)    (in a future)
+*
+*
+*  MDWorkspace: a workspace containing multidimensional scattering data.
+*  For instance, this may represent the data from a single run, mapped
+*  to reciprocal space = 3 dimensions.
+*  Add an energy loss for inelastic instruments = 4 dimensions.
+*  Add another dimension, for example, Temperature = 5 dimensions.
+*
+*  A single MD workspace may combine the data from several runs.
 
 
 @author Alex Buts, RAL ISIS
@@ -50,13 +60,14 @@ namespace Mantid
     {
     public:
 
+      MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3);
+
       virtual int getNPoints() const;
 
       virtual long getMemorySize(void)const;
-      MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3)
-      {};
+
       //  IMD workspace interface functions
-      /// return ID specifying the workspace kind
+     /// return ID specifying the workspace kind
       virtual const std::string id() const { return "MD-Workspace"; }
       ///
       virtual unsigned int getNumDims(void) const{return m_spImageData->getGeometry()->getNumDims();}
@@ -112,9 +123,12 @@ namespace Mantid
     private:
       static Kernel::Logger& g_log;
 
-     
+      /// Not sure
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> m_spImageData;
+
+      /// Internal data storage, sparse array of data points.
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> m_spDataPoints;
+
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
     };
 

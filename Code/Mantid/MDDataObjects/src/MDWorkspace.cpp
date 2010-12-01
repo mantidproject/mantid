@@ -22,7 +22,6 @@ namespace Mantid{
        this->m_spFile = spFile;
        this->m_spImageData = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spImageData); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
-       
      }
 
     // Register the workspace into the WorkspaceFactory
@@ -32,9 +31,15 @@ namespace Mantid{
     // logger for MD workspaces  
     Kernel::Logger& MDWorkspace::g_log =Kernel::Logger::get("MDWorkspaces");
 
-    // 
-    void 
-    MDWorkspace::read_mdd()
+
+    //----------------------------------------------------------------------------------------------
+    /** Default constructor - does nothing */
+    MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
+    {
+    }
+
+    //----------------------------------------------------------------------------------------------
+    void MDWorkspace::read_mdd()
     {
       //  read image part of the data
       this->m_spFile->read_mdd(*this->m_spImageData);

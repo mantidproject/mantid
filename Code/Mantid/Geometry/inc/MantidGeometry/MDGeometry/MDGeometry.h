@@ -9,7 +9,9 @@
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 //#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
-/** The class describes the geometry of the N-D visualisation workspace and provides interface and convenient container to sizes and shapes of DND object
+
+/** The class describes the geometry of the N-D visualisation workspace
+ * and provides interface and convenient container to sizes and shapes of DND object
 *
 *   It is specific workspace geometry, which is used for visualisation and analysis. 
 *   It describes current size and shape of the data and its dimensions, including the dimensions which are integrated. 
@@ -48,6 +50,10 @@ namespace Mantid{
     class DLLExport MDGeometry
     {
     public:
+      MDGeometry(MDGeometryBasis basis);
+
+      ~MDGeometry(void);
+
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
       boost::shared_ptr<MDDimension> getXDimension(void)const{return (theDimension[0]);}
       boost::shared_ptr<MDDimension> getYDimension(void)const;
@@ -70,9 +76,6 @@ namespace Mantid{
       /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;
       std::vector<double> getOrt(const std::string &tag)const;
 
-      ~MDGeometry(void);
-
-      MDGeometry(MDGeometryBasis basis);
       /// return the numbers of dimensions in current geometry; 
       unsigned int getNumDims(void)const{return m_basis.getNumDims();}
       /// returns the number of reciprocal dimensions

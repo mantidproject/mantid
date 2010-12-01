@@ -274,8 +274,8 @@ void
 
 
     MDGeometry::MDGeometry(MDGeometryBasis basis):
-    m_basis(basis),
-      n_expanded_dim(0)
+        n_expanded_dim(0),
+        m_basis(basis)
     {
       this->theDimension.resize(basis.getNumDims());
       this->init_empty_dimensions();
@@ -327,7 +327,7 @@ MDGeometry::init_empty_dimensions()
       std::vector<std::string> tags; 
       std::set<MDBasisDimension> basisDimensions = this->m_basis.getBasisDimensions(); 
       std::set<MDBasisDimension>::const_iterator it = basisDimensions.begin();
-      for(it;it != basisDimensions.end(); ++it)
+      for(;it != basisDimensions.end(); ++it)
       {  
         tags.push_back(it->getId());
       }

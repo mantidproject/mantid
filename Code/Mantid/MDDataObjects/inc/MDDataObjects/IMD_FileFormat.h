@@ -50,16 +50,23 @@ class IMD_FileFormat
 public:
     IMD_FileFormat(void){};
     virtual bool is_open(void)const{return false;}
+
     /// reads the MD-image part of the dataset
-    virtual void read_mdd(MDImage &)=0; 
+    virtual void read_mdd(MDImage &)=0;
+
     /// tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
-    virtual bool read_pix(MDDataPoints &)=0; 
+    virtual bool read_pix(MDDataPoints &)=0;
+
     /// read part of the dataset, specified by the vector of MDImage cell numbers. 
-    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0; 
+    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0;
+
     /// obtain the number of data points (pixels) stored in the dataset;
     virtual hsize_t getNPix(void)=0;
+
     virtual void write_mdd(const MDImage &)=0;
+
     virtual ~IMD_FileFormat(void){};
+
 protected: 
 
      /// logger -> to provide logging, for MD dataset file operations
