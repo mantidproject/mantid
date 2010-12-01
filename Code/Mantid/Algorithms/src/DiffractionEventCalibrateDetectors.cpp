@@ -42,7 +42,7 @@ namespace Algorithms
 
 
 /**
- * The gsl_costFunction is optimized by GSL simplex2
+ * The gsl_costFunction is optimized by GSL simplex
  * @param v vector containing center position and rotations
  * @param params names of detector, workspace, and instrument
  */
@@ -352,7 +352,7 @@ namespace Algorithms
     par[2]=outname;
     par[3]=instname;
     const gsl_multimin_fminimizer_type *T =
-      gsl_multimin_fminimizer_nmsimplex2;
+      gsl_multimin_fminimizer_nmsimplex;
     gsl_multimin_fminimizer *s = NULL;
     gsl_vector *ss, *x;
     gsl_multimin_function minex_func;

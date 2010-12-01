@@ -4,8 +4,6 @@
 #include "MantidAlgorithms/CreateDummyCalFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/IInstrument.h"
@@ -71,10 +69,9 @@ namespace Mantid
     {
       std::ostringstream mess;
       // Get the input workspace
-      MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");
-      EventWorkspace_const_sptr inputW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInWS );
+      MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
       if (!inputW)
-        throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
+        throw std::invalid_argument("No InputWorkspace");
 
       //Get some stuff from the input workspace
       IInstrument_sptr inst = inputW->getInstrument();
