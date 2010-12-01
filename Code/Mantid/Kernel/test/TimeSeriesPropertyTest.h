@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <ctime>
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
@@ -303,6 +304,23 @@ public:
     TS_ASSERT_DELTA( stats.standard_deviation, 3.1622, 1e-3);
 
   }
+
+  void testPlusEqualsOperator_Incompatible_Types()
+  {
+    // Adding incompatible types together should not throw, but issue a warning in the log
+
+    TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
+    TimeSeriesProperty<int> * logi  = new TimeSeriesProperty<int>("MyIntLog");
+    PropertyWithValue<double> * val  = new PropertyWithValue<double>("MySimpleDouble", 1.23);
+
+    Property * prop;
+    log->operator+=(val);
+    log->operator+=(logi);
+    logi->operator+=(log);
+    val->operator+=(log);
+    val->operator+=(logi);
+  }
+
 
 private:
   TimeSeriesProperty<int> *iProp;

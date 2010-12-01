@@ -7,6 +7,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include <boost/lexical_cast.hpp>
@@ -315,10 +316,15 @@ public:
   {
     PropertyWithValue * rhs = dynamic_cast< PropertyWithValue * >(right);
 
-    //This function basically does:
-    //  m_value += rhs->m_value; for values
-    //  or concatenates vectors for vectors
-    addingOperator(m_value, rhs->m_value);
+    if (rhs)
+    {
+      //This function basically does:
+      //  m_value += rhs->m_value; for values
+      //  or concatenates vectors for vectors
+      addingOperator(m_value, rhs->m_value);
+    }
+    else
+      g_log.warning() << "PropertyWithValue " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
 
     return *this;
   }

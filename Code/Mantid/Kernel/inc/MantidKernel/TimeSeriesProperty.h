@@ -7,6 +7,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <iostream>
@@ -163,11 +164,15 @@ public:
   {
     TimeSeriesProperty * rhs = dynamic_cast< TimeSeriesProperty * >(right);
 
-    //Concatenate the maps!
-    m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
-
-    //Count the REAL size.
-    m_size = m_propertySeries.size();
+    if (rhs)
+    {
+      //Concatenate the maps!
+      m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
+      //Count the REAL size.
+      m_size = m_propertySeries.size();
+    }
+    else
+      g_log.warning() << "TimeSeriesProperty " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
 
     return *this;
   }
@@ -948,7 +953,15 @@ public:
     return out;
   }
 
+
+  /// Static reference to the logger class
+  static Logger& g_log;
+
 };
+
+
+template <typename TYPE>
+Logger& TimeSeriesProperty<TYPE>::g_log = Logger::get("TimeSeriesProperty");
 
 } // namespace Kernel
 } // namespace Mantid
