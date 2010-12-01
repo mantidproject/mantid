@@ -29,7 +29,7 @@ echo
 echo "Compiling the test executable..."
 mantid_libpath=../../debug
 gmock_libpath=../../../TestingTools/lib/ubuntu-10.10/lib
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I ../inc -I../../MDDataObjects/inc \
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I ../inc \
     -I ../../../Third_Party/src/cxxtest \
     -L$mantid_libpath -L$gmock_libpath -L/usr/local/lib \
     -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time -lgmock -lgtest
