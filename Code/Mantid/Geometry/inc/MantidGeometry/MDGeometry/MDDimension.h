@@ -14,10 +14,12 @@
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+
+
 /*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
-*
-*   A multidimensional dataset has N such dimensions and usual problem would have maximal number of 
-*   dimensions N_max with N<=N_max
+ *
+ *   A multidimensional dataset has N such dimensions and usual problem would have maximal number of
+ *   dimensions N_max with N<=N_max
 
     @author Alex Buts, RAL ISIS
     @date 28/09/2010
@@ -41,37 +43,39 @@
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 
-namespace Mantid{
-    namespace Geometry{
-
-class DLLExport MDDimension : public IMDDimension
+namespace Mantid
 {
-public:
+namespace Geometry
+{
+
+  class DLLExport MDDimension : public IMDDimension
+  {
+  public:
 
     virtual std::string getDimensionId() const;
 
     virtual bool getIsIntegrated() const;
 
     virtual ~MDDimension();
-/// function returns the name of the axis in this direction
-   virtual std::string getName()const{return AxisName;}
-/// function return the unique dimension ID, identifying the current dimension among others 
+    /// function returns the name of the axis in this direction
+    virtual std::string getName()const{return AxisName;}
+    /// function return the unique dimension ID, identifying the current dimension among others
     virtual std::string getDimensionTag(void)const{return dimTag;}
-/// get maximal value along the dimension
+    /// get maximal value along the dimension
     virtual double       getMaximum(void)const{return rMax;}
-/// get minimal value along the dimension
+    /// get minimal value along the dimension
     virtual double       getMinimum(void)const{return rMin;}
-/// range of data along this axis
+    /// range of data along this axis
     virtual double       getRange(void)const{return (rMax-rMin);}
-/// scale of the data along this axis 
+    /// scale of the data along this axis
     /// TO DO: what is this scale and what constraint we want to apply on it? 
     virtual double getScale(void)const{return latticeParam;}
-/*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
- *   coinsiding with min and max values rMin and rMax; */
+    /*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
+     *   coinsiding with min and max values rMin and rMax; */
     virtual bool        getIntegrated(void)const{return isIntegrated;}
-/// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
+    /// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
     virtual std::vector<double>const & getCoord(void)const{return coord;}
     /// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
@@ -87,23 +91,23 @@ public:
     virtual double getX(unsigned int ind){return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
-   
+
     MDDimension(const std::string &ID);
 
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
-protected:
+  protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
- 
-//********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
+
+    //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
     virtual void setCoord(const std::vector<double> &){};
     // function sets the dimension as a linear dimension with specific ranges and number of bins
     virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
     void  setName(const char *name) {this->AxisName.assign(name);}
     void  setName(const std::string & name){this->AxisName.assign(name); }
-      /*! Set the scale of a particular dimension
+    /*! Set the scale of a particular dimension
      * @param Value -- the value to set;    */
     void   setScale(double Value){latticeParam=Value;}
     /// functions clears axis, makes nBins=1 and sets "integrated" sign to the dimension. Meaningless and dangerous without real integration procedure
@@ -118,14 +122,16 @@ protected:
     /// differs from setRange by the fact that the limits has to be within the existing ranges
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
 
-  /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
+    /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
-/// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is. 
+    /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is.
     std::vector<double> coord;
- /// logger -> to provide logging, for MD workspaces in this dimension
+
+    /// logger -> to provide logging, for MD workspaces in this dimension
     static Kernel::Logger& g_log;
-private:
-     /// name of the axis;
+
+  private:
+    /// name of the axis;
     std::string AxisName;
     /// the name of the dimension in the dimensions basis;
     std::string dimTag;
@@ -139,21 +145,21 @@ private:
     size_t   nStride;
     /// vector of leftmost bin ranges plus rightmost value;  
     std::vector<double> Axis;
-     /// min and maximum values along this dimension;
+    /// min and maximum values along this dimension;
     double rMin,rMax;
     /// lattice sacale in this direction
     double latticeParam;
 
-   // *************  should be prohibited?:
+    // *************  should be prohibited?:
     //MDDimension(const MDDimension &);
-
+  public:
     //MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);
 
- 
-};
-} // MDDataObjects
+  };
+
+} // Geometry
 } // Mantid
 
 #endif
