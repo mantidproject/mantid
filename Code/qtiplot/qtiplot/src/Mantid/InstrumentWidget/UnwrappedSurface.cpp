@@ -5,6 +5,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#include <cfloat>
+
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
                      boost::shared_ptr<const Mantid::Geometry::IDetector> det
                      ):
