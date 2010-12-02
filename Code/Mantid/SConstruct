@@ -113,7 +113,7 @@ if os.name == 'nt':
 	libList.append('muparser') # Muparser used in DataHandling
 	libList.append('zlib1')    # used in DataObjects
 
-	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123']
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123', third_party+'/include/hdf5']
 	
 	#set up scons to embed manifest files on compilers prior to VS2010
 	if vsversion != '10.0':
@@ -188,7 +188,9 @@ elif platform.system() == 'Linux':
 	cppPaths.append(USRINCLUDE+'/muParser')
 	
 	libDirList.append(USRLIB)
+
 elif platform.system() == 'Darwin':
+
 	cppPaths.append(third_party+'/include')
 	cppPaths.append(third_party+'/include/muParser')
 	env.Append(SHLINKFLAGS='-install_name @executable_path/./${TARGET.file}')
