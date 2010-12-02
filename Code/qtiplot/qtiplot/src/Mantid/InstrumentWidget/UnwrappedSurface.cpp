@@ -5,6 +5,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#include <QRgb>
+#include <QSet>
+
 #include <cfloat>
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
@@ -29,6 +32,7 @@ UnwrappedSurface::UnwrappedSurface(const GLActor* rootActor,const Mantid::Geomet
     m_v_min(DBL_MAX),
     m_v_max(-DBL_MAX),
     m_unwrappedImage(NULL),
+    m_pickImage(NULL),
     m_unwrappedViewChanged(true),
     m_unwrappedView(),
     m_selectRect()
@@ -41,6 +45,10 @@ UnwrappedSurface::~UnwrappedSurface()
   if (m_unwrappedImage)
   {
     delete m_unwrappedImage;
+  }
+  if (m_pickImage)
+  {
+    delete m_pickImage;
   }
 }
 
@@ -64,6 +72,11 @@ void UnwrappedSurface::clear()
   {
     delete m_unwrappedImage;
     m_unwrappedImage = NULL;
+  }
+  if (m_pickImage)
+  {
+    delete m_pickImage;
+    m_pickImage = NULL;
   }
   m_unwrappedViewChanged = true;
   m_unwrappedDetectors.clear();
@@ -99,18 +112,40 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
   m_unwrappedDetectors.append(udet);
 }
 
+void UnwrappedSurface::draw(GL3DWidget *widget)
+{
+  if (widget->getInteractionMode() == GL3DWidget::MoveMode)
+  {
+    drawSurface(widget,false);
+    if (m_pickImage)
+    {
+      delete m_pickImage;
+      m_pickImage = NULL;
+    }
+  }
+  else
+  {
+    bool changed = m_unwrappedViewChanged;
+    drawSurface(widget,true);
+    m_unwrappedViewChanged = changed;
+    drawSurface(widget,false);
+  }
+}
+
 /**
   * Draw the unwrapped instrument onto the screen
   * @param widget The widget to draw it on.
   */
-void UnwrappedSurface::draw(GL3DWidget *widget)
+void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 {
   int vwidth,vheight;
   widget->getViewport(vwidth,vheight);
   const double dw = fabs(m_unwrappedView.width() / vwidth);
   const double dh = fabs(m_unwrappedView.height()/ vheight);
 
-  if (!m_unwrappedImage || m_unwrappedImage->width() != vwidth || m_unwrappedImage->height() != vheight)
+  QImage **image = picking ? &m_pickImage : &m_unwrappedImage;
+
+  if (!*image || (*image)->width() != vwidth || (*image)->height() != vheight)
   {
     m_unwrappedViewChanged = true;
   }
@@ -140,7 +175,7 @@ void UnwrappedSurface::draw(GL3DWidget *widget)
 
       if (!m_unwrappedView.contains(udet.u,udet.v)) continue;
 
-      glColor3ubv(&udet.color[0]);
+      setColor(i,picking);
 
       int iw = udet.width / dw;
       int ih = udet.height / dh;
@@ -183,19 +218,25 @@ void UnwrappedSurface::draw(GL3DWidget *widget)
 
     glLineWidth(oldLineWidth);
 
-    if (m_unwrappedImage)
+    if (*image)
     {
-      delete m_unwrappedImage;
+      delete (*image);
     }
-    m_unwrappedImage = new QImage(widget->grabFrameBuffer());
-    //m_unwrappedImage->save("C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\test\\Unwrapped.png");
+    (*image) = new QImage(widget->grabFrameBuffer());
+//    if (picking)
+//    {
+//      (*image)->save("C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\test\\Unwrapped.png");
+//    }
+    if (!picking)
+    {
+      widget->swapBuffers();
+    }
     m_unwrappedViewChanged = false;
-    widget->swapBuffers();
   }
-  else
+  else if (!picking)
   {
     QPainter painter(widget);
-    painter.drawImage(0,0,*m_unwrappedImage);
+    painter.drawImage(0,0,**image);
     // draw the selection rectangle
     if (!m_selectRect.isNull())
     {
@@ -374,44 +415,41 @@ void UnwrappedSurface::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
 }
 
 
-void UnwrappedSurface::startUnwrappedSelection(int x,int y)
+void UnwrappedSurface::startSelection(int x,int y)
 {
   m_selectRect.setRect(x,y,1,1);
 }
 
-void UnwrappedSurface::moveUnwrappedSelection(int x,int y)
+void UnwrappedSurface::moveSelection(int x,int y)
 {
   m_selectRect.setBottomRight(QPoint(x,y));
 }
 
-void UnwrappedSurface::endUnwrappedSelection(int x,int y)
+void UnwrappedSurface::endSelection(int x,int y)
 {
-  if (!m_selectRect.isNull())
+  if (m_pickImage) // we are in picking mode
   {
-    zoomUnwrapped();
-    m_selectRect = QRect();
+    showPickedDetector();
   }
+  else
+  {
+    if (!m_selectRect.isNull())
+    {
+      zoom();
+    }
+  }
+  m_selectRect = QRect();
 }
 
-void UnwrappedSurface::zoomUnwrapped()
+void UnwrappedSurface::zoom()
 {
   if (!m_unwrappedImage) return;
-  double x_min = double(m_selectRect.left())/m_unwrappedImage->width();
-  double x_size = double(m_selectRect.width())/m_unwrappedImage->width();
-  double y_min = double(/*m_selectRect.height() - */m_selectRect.top())/m_unwrappedImage->height();
-  double y_size = double(m_selectRect.height())/m_unwrappedImage->height();
-
-  x_min = m_unwrappedView.left() + x_min * m_unwrappedView.width();
-  x_size = x_size * m_unwrappedView.width();
-  y_min = m_unwrappedView.top() + y_min * m_unwrappedView.height();
-  y_size = y_size * m_unwrappedView.height();
-
   m_zoomStack.push(m_unwrappedView);
-  m_unwrappedView.setRect(x_min,y_min,x_size,y_size);
+  m_unwrappedView = selectionRectUV();
   m_unwrappedViewChanged = true;
 }
 
-void UnwrappedSurface::unzoomUnwrapped()
+void UnwrappedSurface::unzoom()
 {
   if (!m_zoomStack.isEmpty())
   {
@@ -429,4 +467,124 @@ void UnwrappedSurface::updateDetectors()
 {
   clear();
   init();
+}
+
+QRect UnwrappedSurface::selectionRect()const
+{
+  if (m_selectRect.width() == 0 || m_selectRect.height() == 0) return QRect();
+
+  int x_min  = m_selectRect.left();
+  int x_size = m_selectRect.width();
+  int y_min  = m_selectRect.top();
+  int y_size = m_selectRect.height();
+
+  if (x_size < 0)
+  {
+    x_min += x_size;
+    x_size = abs(x_size);
+  }
+
+  if (y_size < 0)
+  {
+    y_min += y_size;
+    y_size = abs(y_size);
+  }
+
+  return QRect(x_min,y_min,x_size,y_size);
+}
+
+QRectF UnwrappedSurface::selectionRectUV()const
+{
+  if (m_selectRect.width() == 0 || m_selectRect.height() == 0) return QRectF();
+
+  double x_min  = double(m_selectRect.left())/m_unwrappedImage->width();
+  double x_size = double(m_selectRect.width())/m_unwrappedImage->width();
+  double y_min  = double(m_selectRect.top())/m_unwrappedImage->height();
+  double y_size = double(m_selectRect.height())/m_unwrappedImage->height();
+
+  if (x_size < 0)
+  {
+    x_min += x_size;
+    x_size = fabs(x_size);
+  }
+
+  if (y_size < 0)
+  {
+    y_min += y_size;
+    y_size = fabs(y_size);
+  }
+
+  x_min = m_unwrappedView.left() + x_min * m_unwrappedView.width();
+  x_size = x_size * m_unwrappedView.width();
+  y_min = m_unwrappedView.top() + y_min * m_unwrappedView.height();
+  y_size = y_size * m_unwrappedView.height();
+
+  return QRectF(x_min,y_min,x_size,y_size);
+}
+
+void UnwrappedSurface::setColor(int index,bool picking)
+{
+  if (picking)
+  {
+    unsigned int id = (unsigned int)(index+1);
+    unsigned char r = (unsigned char)(id % 256); id /= 256;
+    unsigned char g = (unsigned char)(id % 256); id /= 256;
+    unsigned char b = (unsigned char)(id % 256); id /= 256;
+    if (id != 0)
+    {
+      throw std::overflow_error("Picking color overflow with detector id "+
+                                QString::number(m_unwrappedDetectors[index].detector->getID()).toStdString());
+    }
+    glColor3ub(r,g,b);
+  }
+  else
+  {
+    glColor3ubv(&m_unwrappedDetectors[index].color[0]);
+  }
+}
+
+int UnwrappedSurface::getDetectorID(unsigned char r,unsigned char g,unsigned char b)const
+{
+  unsigned int id = b;
+  id *= 256;
+  id += g;
+  id *= 256;
+  id += r;
+  if (id == 0)
+  {
+    return -1;
+  }
+  else
+  {
+    return m_unwrappedDetectors[id-1].detector->getID();
+  }
+}
+
+void UnwrappedSurface::showPickedDetector()
+{
+  if (m_selectRect.isNull())
+  {
+    std::cerr<<"nothing selected\n";
+    return;
+  }
+  QRect rect = selectionRect();
+  QSet<int> detIDs;
+  for(int i=0;i<rect.width();++i)
+  {
+    for(int j=0;j<rect.height();++j)
+    {
+      int x = rect.x() + i;
+      int y = rect.y() + j;
+      QRgb pixel = m_pickImage->pixel(x,y);
+      int detID = getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+      if (detID >= 0)
+      {
+        detIDs.insert(detID);
+      }
+    }
+  }
+  foreach(int id,detIDs)
+  {
+    std::cerr<<"det ID = "<<id<<'\n';
+  }
 }

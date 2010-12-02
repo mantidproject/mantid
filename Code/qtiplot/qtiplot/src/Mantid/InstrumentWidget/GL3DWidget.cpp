@@ -307,19 +307,26 @@ void GL3DWidget::drawPickingScene()
  */
 void GL3DWidget::switchToPickingMode()
 {
-  //First we draw the regular scene and save it to display
-  drawDisplayScene();
-  glReadBuffer(GL_BACK);
-  mPickBox->setDisplayImage(grabFrameBuffer(false));
+  if (m_renderMode == FULL3D)
+  {
+    //First we draw the regular scene and save it to display
+    drawDisplayScene();
+    glReadBuffer(GL_BACK);
+    mPickBox->setDisplayImage(grabFrameBuffer(false));
 
-  // Now we draw the picking scene with the special colors
+    // Now we draw the picking scene with the special colors
 
-  glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
-  glDisable(GL_NORMALIZE);
-  drawPickingScene();
-  mPickBox->setPickImage(grabFrameBuffer(false));
-  glEnable(GL_MULTISAMPLE);   //enable antialiasing
-  mPickingDraw=false;
+    glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
+    glDisable(GL_NORMALIZE);
+    drawPickingScene();
+    mPickBox->setPickImage(grabFrameBuffer(false));
+    glEnable(GL_MULTISAMPLE);   //enable antialiasing
+    mPickingDraw=false;
+  }
+  else
+  {
+    drawUnwrapped();
+  }
 }
 
 
@@ -397,11 +404,11 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
   {
     if(event->buttons() & Qt::RightButton)
     {
-      m_unwrappedSurface->unzoomUnwrapped();
+      m_unwrappedSurface->unzoom();
     }
     else
     {
-      m_unwrappedSurface->startUnwrappedSelection(event->x(),event->y());
+      m_unwrappedSurface->startSelection(event->x(),event->y());
     }
     update();
     return;
@@ -473,9 +480,9 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
   {
     if (event->buttons() & Qt::LeftButton)
     {
-      m_unwrappedSurface->moveUnwrappedSelection(event->x(),event->y());
+      m_unwrappedSurface->moveSelection(event->x(),event->y());
+      update();
     }
-    update();
     return;
   }
 
@@ -530,7 +537,7 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
   {
 //    if(event->buttons() & Qt::LeftButton)
 //    {
-      m_unwrappedSurface->endUnwrappedSelection(event->x(),event->y());
+      m_unwrappedSurface->endSelection(event->x(),event->y());
 //    }
       update();
     return;

@@ -60,25 +60,31 @@ class UnwrappedSurface: public GLActor::DetectorCallback
 public:
   UnwrappedSurface(const GLActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
   ~UnwrappedSurface();
-  void startUnwrappedSelection(int x,int y);
-  void moveUnwrappedSelection(int x,int y);
-  void endUnwrappedSelection(int x,int y);
-  void zoomUnwrapped();
-  void unzoomUnwrapped();
+  void startSelection(int x,int y);
+  void moveSelection(int x,int y);
+  void endSelection(int x,int y);
+  void zoom();
+  void unzoom();
   void updateView();
   void updateDetectors();
 
-  virtual void draw(GL3DWidget* widget);
+  void draw(GL3DWidget* widget);
 
 protected:
   virtual void calcUV(UnwrappedDetector& udet) = 0;
   virtual void calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R) = 0;
+  virtual void drawSurface(GL3DWidget* widget,bool picking = false);
 
   void init();
   void calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
                 const Mantid::Geometry::V3D& Y);
   void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
   void clear();
+  void setColor(int index,bool picking);
+  void showPickedDetector();
+  int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
+  QRect selectionRect()const;
+  QRectF selectionRectUV()const;
 
   const GLActor* m_rootActor;
   const Mantid::Geometry::V3D m_pos;   ///< Origin (sample position)
@@ -90,6 +96,7 @@ protected:
   double m_v_min;                      ///< Minimum z
   double m_v_max;                      ///< Maximum z
   QImage* m_unwrappedImage;      ///< storage for unwrapped image
+  QImage* m_pickImage;      ///< storage for picking image
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
   QRectF m_unwrappedView;

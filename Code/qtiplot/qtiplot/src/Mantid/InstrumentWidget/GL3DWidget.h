@@ -58,6 +58,7 @@ public:
   void setActorCollection(boost::shared_ptr<GLActorCollection>);
   void setInteractionModePick();
   void setInteractionModeNormal();
+  InteractionMode getInteractionMode()const{return iInteractionMode;}
   GLActor* getPickedActor();
   void setViewDirection(AxisDirection);
   void setBackgroundColor(QColor);
