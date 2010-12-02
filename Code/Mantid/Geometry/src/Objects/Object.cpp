@@ -31,7 +31,7 @@ namespace Mantid
     *  Default constuctor
     */
     Object::Object() :
-    ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+      ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
       vtkGeometryCacheWriter>())
@@ -102,6 +102,17 @@ namespace Mantid
      Object::~Object()
     {
       delete TopRule;
+    }
+
+    /**
+     * Returns whether this object has a valid shape
+     * @returns True if the surface list is populated and there is a 
+     * defined TopRule, false otherwise.
+     */
+    bool Object::hasValidShape() const
+    {
+      // Assume invalid shape if object has no 'TopRule' or surfaces
+      return (TopRule != NULL && !SurList.empty());
     }
 
      /**

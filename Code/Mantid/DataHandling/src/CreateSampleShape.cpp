@@ -37,14 +37,24 @@ void CreateSampleShape::init()
 void CreateSampleShape::exec()
 {  
   // Get the input workspace
-  const MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
   // Get the XML definition
   std::string shapeXML = getProperty("ShapeXML");
   Geometry::ShapeFactory sFactory;
+  // Create the object
   boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
-
-  workspace->mutableSample().setShapeObject(*shape_sptr);
-
+  // Check it's valid and attach it to the workspace sample
+  if( shape_sptr->hasValidShape() )
+  {
+    workspace->mutableSample().setShape(*shape_sptr);
+  }
+  else
+  {
+    g_log.warning() << "Object has invalid shape. TopRule = " << shape_sptr->topRule() 
+		    << ", number of surfaces = " << shape_sptr->getSurfacePtr().size() << "\n";
+    throw std::runtime_error("Shape object is invalid, cannot attach it to workspace."); 
+  }
+  // Done!
   progress(1);
 }
 

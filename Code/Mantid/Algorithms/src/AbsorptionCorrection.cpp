@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -189,7 +190,7 @@ void AbsorptionCorrection::exec()
 
     if (x_step > 1) // Interpolate linearly between points separated by x_step, last point required
     {
-      interpolate(X, Y, isHist);
+      VectorHelper::linearlyInterpolateY(X, Y, x_step);
     }
 
     prog.report();
@@ -252,7 +253,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
   if (xmlstring.empty())
   {
     // This means that we should use the shape already defined on the sample.
-    m_sampleObject = &sample.getShapeObject();
+    m_sampleObject = &sample.getShape();
     // Check there is one, and fail if not
     if ( ! m_sampleObject->topRule() )
     {
@@ -264,8 +265,8 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
   else
   {
     boost::shared_ptr<Object> shape = ShapeFactory().createShape(xmlstring);
-    sample.setShapeObject( *shape );
-    m_sampleObject = &sample.getShapeObject();
+    sample.setShape( *shape );
+    m_sampleObject = &sample.getShape();
 
     g_log.information("Successfully constructed the sample object");
   }

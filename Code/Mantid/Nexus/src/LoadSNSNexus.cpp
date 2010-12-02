@@ -109,6 +109,7 @@ void LoadSNSNexus::exec()
  */
 API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double progress_start, double progress_end)
 {
+    (void)period;
     std::cerr << "loadEntry00:" << std::endl;// REMOVE
     // To keep sorted bank names
     std::set<std::string,CompareBanks> banks;

@@ -35,8 +35,7 @@ void DefineGaugeVolume::exec()
   const std::string shapeXML = getProperty("ShapeXML");
   // Try creating the shape to make sure the input's valid
   boost::shared_ptr<Geometry::Object> shape_sptr = Geometry::ShapeFactory().createShape(shapeXML);
-  // Assume invalid shape if object has no 'TopRule' or surfaces
-  if ( !(shape_sptr->topRule()) && shape_sptr->getSurfacePtr().empty() )
+  if ( !shape_sptr->hasValidShape() )
   {
     g_log.error("Invalid shape definition provided. Gauge Volume NOT added to workspace.");
     throw std::invalid_argument("Invalid shape definition provided.");

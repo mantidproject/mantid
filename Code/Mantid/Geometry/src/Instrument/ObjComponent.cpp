@@ -18,7 +18,7 @@ namespace Mantid
      * @param map: pointer to the ParameterMap
      * */
     ObjComponent::ObjComponent(const IComponent* base, const ParameterMap * map)
-    : Component(base,map), m_shape()
+      : Component(base,map), m_shape(), m_material()
     {
 
     }
@@ -29,7 +29,7 @@ namespace Mantid
     *  @param parent The Parent geometry object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, IComponent* parent)
-    : IObjComponent(), Component(name,parent), m_shape()
+      : IObjComponent(), Component(name,parent), m_shape(), m_material()
     {
     }
 
@@ -37,15 +37,17 @@ namespace Mantid
     *  @param name   The name of the component
     *  @param shape  A pointer to the object describing the shape of this component
     *  @param parent The Parent geometry object of this component
+    *  @param material An optional pointer to the material object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent)
-    : IObjComponent(), Component(name,parent), m_shape(shape)
+    ObjComponent::ObjComponent(const std::string& name, Object_sptr shape, 
+			       IComponent* parent, Material_sptr material)
+      : IObjComponent(), Component(name,parent), m_shape(shape), m_material(material)
     {
     }
 
     /// Copy constructor
     ObjComponent::ObjComponent(const ObjComponent& rhs) :
-    IObjComponent(),Component(rhs), m_shape(rhs.m_shape)
+      IObjComponent(rhs),Component(rhs), m_shape(rhs.m_shape), m_material(rhs.m_material)
     {
     }
 
@@ -57,7 +59,7 @@ namespace Mantid
 
     /** Return the shape of the component
      */
-    const boost::shared_ptr<const Object> ObjComponent::shape()const
+    const Object_const_sptr ObjComponent::shape()const
     {
       if (m_isParametrized)
         return dynamic_cast<const ObjComponent*>(m_base)->m_shape;
@@ -65,6 +67,14 @@ namespace Mantid
         return m_shape;
     }
 
+    /** 
+     * Return the material of the component. Currently 
+     * unaffacted by parametrization
+     */
+    const Material_const_sptr ObjComponent::material() const
+    {
+      return m_material;
+    }
 
     /// Does the point given lie within this object component?
     bool ObjComponent::isValid(const V3D& point) const

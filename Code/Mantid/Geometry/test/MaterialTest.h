@@ -5,28 +5,43 @@
 #include <cmath>
 
 #include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 
-
-using namespace Mantid;
-using namespace Geometry;
+using Mantid::Geometry::Material;
 
 class testMaterial: public CxxTest::TestSuite
 {
 public:
-	void testConstructor()
+
+  void test_Empty_Constructor()
   {
-    const double testDensity(1e-03), testTemp(300.), testPressure(1e+5), 
-      testCohXsec(20.), testIncohXsec(2.0), testAbsXsec(1.5); 
-		Material fake("fake", testDensity, testTemp, testPressure, testCohXsec, testIncohXsec, testAbsXsec); 
-		TS_ASSERT_EQUALS(fake.name(), "fake");
-    TS_ASSERT_EQUALS(fake.density(), testDensity);
-    TS_ASSERT_EQUALS(fake.temperature(), testTemp);
-    TS_ASSERT_EQUALS(fake.pressure(), testPressure);
-    TS_ASSERT_EQUALS(fake.coherentCrossSection(), testCohXsec);
-    TS_ASSERT_EQUALS(fake.incoherentCrossSection(), testIncohXsec);
-    TS_ASSERT_EQUALS(fake.absorptionCrossSection(), testAbsXsec);
-    TS_ASSERT_DELTA(fake.totalCrossSection(), testCohXsec + testIncohXsec, 1e-08);
-	}
+    Material empty;
+    TS_ASSERT_EQUALS(empty.name(), "");
+    TS_ASSERT_EQUALS(empty.numberDensity(), 0.0);
+    TS_ASSERT_EQUALS(empty.temperature(), 0.0);
+    TS_ASSERT_EQUALS(empty.pressure(), 0.0);
+
+    const double lambda(2.1);
+    TS_ASSERT_EQUALS(empty.coherentCrossSection(lambda), 0.0);
+    TS_ASSERT_EQUALS(empty.incoherentCrossSection(lambda), 0.0);
+    TS_ASSERT_EQUALS(empty.absorptionCrossSection(lambda), 0.0);
+    
+  }
+
+  void test_That_Construction_By_Known_Element_Gives_Expected_Values()
+  {
+    Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+
+    TS_ASSERT_EQUALS(vanBlock.name(), "vanBlock");
+    TS_ASSERT_EQUALS(vanBlock.numberDensity(), 0.072);
+    TS_ASSERT_EQUALS(vanBlock.temperature(), 300);
+    TS_ASSERT_EQUALS(vanBlock.pressure(), Mantid::PhysicalConstants::StandardAtmosphere);
+
+    const double lambda(2.1);
+    TS_ASSERT_DELTA(vanBlock.coherentCrossSection(lambda), 0.0184,  1e-02);
+    TS_ASSERT_DELTA(vanBlock.incoherentCrossSection(lambda), 5.08,  1e-02);
+    TS_ASSERT_DELTA(vanBlock.absorptionCrossSection(lambda), 5.93, 1e-02);
+  }
 
 };
 #endif

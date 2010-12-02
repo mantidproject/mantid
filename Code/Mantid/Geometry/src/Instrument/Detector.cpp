@@ -40,7 +40,8 @@ Detector::Detector(const std::string& name, boost::shared_ptr<Object> shape, ICo
 
 /// Copy constructor
 Detector::Detector(const Detector& rhs) :
-  ObjComponent(rhs), m_id(rhs.m_id), m_isMonitor(rhs.m_isMonitor)
+  IObjComponent(rhs), IDetector(rhs), ObjComponent(rhs), m_id(rhs.m_id), 
+  m_isMonitor(rhs.m_isMonitor)
 {
 }
 
@@ -100,14 +101,6 @@ double Detector::getPhi() const
   double phi = 0.0, dummy;
   this->getPos().getSpherical(dummy,dummy,phi);
   return phi*M_PI/180.0;
-}
-
-///Get the solid angle between the detector and an observer
-///@param observer The observer position
-///@return The solid angle
-double Detector::solidAngle(const V3D& observer) const
-{
-	return ObjComponent::solidAngle(observer);
 }
 
 /** Returns true if the detector is masked. Only Parametrized instruments

@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"

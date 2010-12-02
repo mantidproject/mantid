@@ -24,12 +24,8 @@
 using namespace Mantid;
 using namespace Geometry;
 
-typedef boost::shared_ptr<Object> Object_sptr;
-
-class testObject: public CxxTest::TestSuite
+class TestObject: public CxxTest::TestSuite
 {
-private:
-
 
 public:
 

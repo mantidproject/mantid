@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Objects/Material.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "boost/shared_ptr.hpp"
 
 #ifdef _WIN32
@@ -60,7 +62,8 @@ public:
   ObjComponent(const IComponent* base, const ParameterMap * map);
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, IComponent* parent=0);
-  explicit ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent=0);
+  explicit ObjComponent(const std::string& name, Object_sptr shape, IComponent* parent=0,
+			Material_sptr material = Material_sptr());
   virtual ~ObjComponent();
 
   /** Virtual Copy Constructor
@@ -81,10 +84,10 @@ public:
   void initDraw() const;
   V3D getScaleFactorP() const;
 
-
   ///Return the shape of the component
   const boost::shared_ptr<const Object> shape()const;
-
+  /// Return the material this component is made from
+  const Material_const_sptr material() const;
 
 protected:
   ObjComponent(const ObjComponent&);
@@ -92,7 +95,9 @@ protected:
   /// The phyical geometry representation
   // Made a const pointer to a const object. Since this is a shared object we shouldn't be
   // exposing non-const methods of Object through this class.
-  /*const*/ boost::shared_ptr<const Object> m_shape;
+  Object_const_sptr m_shape;
+  /// The material this object is made of
+  Material_const_sptr m_material;
 
 private:
   /// Private, unimplemented copy assignment operator

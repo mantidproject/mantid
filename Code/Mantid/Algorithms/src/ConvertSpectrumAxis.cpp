@@ -64,7 +64,6 @@ namespace Algorithms
     // Get the input workspace
     MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     std::string unitTarget = getProperty("Target");
-    const Axis* const specAxis = inputWS->getAxis(1);
     // Loop over the original spectrum axis, finding the theta (n.b. not 2theta!) for each spectrum
     // and storing it's corresponding workspace index
     // Map will be sorted on theta, so resulting axis will be ordered as well

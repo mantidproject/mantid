@@ -37,13 +37,15 @@ namespace Geometry
   ///< Create an instance of concrete geometry handler for ObjComponent
   BitmapGeometryHandler* BitmapGeometryHandler::createInstance(IObjComponent *comp)
   {
-    return new BitmapGeometryHandler(); //comp);
+    (void)comp;
+    return new BitmapGeometryHandler();
   }
 
   ///< Create an instance of concrete geometry handler for Object
   BitmapGeometryHandler* BitmapGeometryHandler::createInstance(boost::shared_ptr<Object> obj )
   {
-    return new BitmapGeometryHandler(); //obj);
+    (void)obj;
+    return new BitmapGeometryHandler();
   }
 
   //----------------------------------------------------------------------------------------------

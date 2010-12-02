@@ -417,6 +417,7 @@ NXRoot::NXRoot(const std::string& fname)
 NXRoot::NXRoot(const std::string& fname,const std::string& entry)
     :m_filename(fname)
 {
+    (void)entry;
     // Open NeXus file
     NXstatus stat=NXopen(m_filename.c_str(), NXACC_CREATE5, &m_fileID);
     if(stat==NX_ERROR)

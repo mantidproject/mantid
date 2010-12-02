@@ -18,6 +18,10 @@ namespace XML {
 
 namespace Mantid
 {
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
 
   namespace Geometry
   {
@@ -217,6 +221,9 @@ namespace Mantid
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 
       double m_angleConvertConst; 
+      
+      /// Everything can reference the workspace if it needs to
+      boost::shared_ptr<API::MatrixWorkspace> m_workspace;
     };
 
   } // namespace DataHandling

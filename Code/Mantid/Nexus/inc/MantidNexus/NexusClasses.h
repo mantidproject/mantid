@@ -180,7 +180,11 @@ namespace Mantid
       *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indices. 
       *            The rank of the data must be 4
       */
-      virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,int l = -1) {};
+      virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,int l = -1) 
+      {
+	// Avoid compiler warnings
+	(void)blocksize; (void)i; (void)j; (void)k; (void)l;
+      };
     protected:
       void getData(void* data);
       void getSlab(void* data, int start[], int size[]);

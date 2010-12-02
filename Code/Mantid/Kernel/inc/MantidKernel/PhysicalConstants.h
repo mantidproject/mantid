@@ -52,6 +52,10 @@ namespace PhysicalConstants
 	
   /**  Muon lifetime. Taken from MuLan experiment on 08/12/2008. */
   static const double MuonLifetime = 2.197019e-6;
+
+  /** Standard atmospheric pressure in kPa. 
+   * Taken from <http://physics.nist.gov/cgi-bin/cuu/Value?stdatm|search_for=adopted_in!> on 01/12/2010 **/
+  static const double StandardAtmosphere = 101.325;
   
 } // namespace PhysicalConstants
 } // namespace Mantid

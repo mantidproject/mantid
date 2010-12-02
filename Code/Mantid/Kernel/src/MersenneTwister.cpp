@@ -24,10 +24,10 @@ namespace Mantid
      * (Re-)seed the generator
      * @param seedValue A seed for the generator
      */
-    void MersenneTwister::setSeed(long seedValue)
+    void MersenneTwister::setSeed(unsigned int seedValue)
     {
       // Bug in earlier versions of this implementation meant
-      // that a long could not be past to the seed function
+      // that a unsigned int could not be past to the seed function
       m_generator.seed((boost::mt19937::result_type)seedValue);
     }
 

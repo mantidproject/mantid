@@ -49,9 +49,9 @@ public:
 	virtual std::string type() const {return "DetectorComponent";}
 
 	/// Constructor for parametrized version
-  Detector(const IComponent* base, const ParameterMap * map);
+	Detector(const IComponent* base, const ParameterMap * map);
 	Detector(const std::string& name, IComponent* parent);
-  Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent);
+	Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent);
 	virtual ~Detector();
 	// functions inherited from IObjectComponent
 	virtual Component* clone() const {return new Detector(*this);}
@@ -60,10 +60,9 @@ public:
 
 	// IDetector methods
 	int getID() const;
-  double getDistance(const IComponent& comp) const;
+	double getDistance(const IComponent& comp) const;
 	double getTwoTheta(const V3D& observer, const V3D& axis) const;
 	double getPhi() const;
-	double solidAngle(const V3D& observer) const;
 	bool isMasked() const;
 	bool isMonitor() const;
 	/// Returns a reference to itself

@@ -273,6 +273,8 @@ namespace Mantid
     */
     void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry & entry,int period)
     {
+      //Avoid compiler warning 
+      (void)period;
 
       std::string start_time = entry.getString("start_time");
 

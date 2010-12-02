@@ -19,10 +19,10 @@ namespace
     const std::string unitID() const { return ""; }
     const std::string caption() const { return "Phi"; }
     const std::string label() const { return "degrees"; }
-    void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
-    void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
+    void toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
+      const double&, const int&, const double&, const double&) const {}
+    void fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
+      const double&, const int&, const double&, const double&) const {}
   };
 } // end anonynmous namespace
 /// @endcond

@@ -61,8 +61,11 @@ namespace Mantid
      * @param origin The object to initialize this with
      */
     IObjComponent::IObjComponent(const IObjComponent& origin) : 
-      m_ScaleFactor(origin.m_ScaleFactor), handle(origin.handle)
+      m_ScaleFactor(origin.m_ScaleFactor)
     {
+      // Handler contains a pointer to 'this' therefore needs regenerating
+      // with new object
+      handle = origin.handle->createInstance(this);
     }
 
     

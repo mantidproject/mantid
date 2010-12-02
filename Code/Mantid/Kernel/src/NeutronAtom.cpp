@@ -1,9 +1,6 @@
-/*
- * NeutronAtom.cpp
- *
- *, Created on: Oct 21, 2010
- *, , Author: pf9
- */
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
 #include "MantidKernel/NeutronAtom.h"
 #include <algorithm>
 #include <limits>
@@ -12,10 +9,12 @@
 
 namespace Mantid
 {
-namespace Kernel
-{
+
 namespace PhysicalConstants
 {
+
+/// Reference wavelength for absorption cross section values.
+const double NeutronAtom::ReferenceLambda = 1.7982;
 
 /**
  * Atom constructor
@@ -527,5 +526,4 @@ NeutronAtom getNeutronAtom(const int z_number, const int a_number)
 }
 
 } // namespace PhysicalConstants
-} // namespace Kernel
 } // namespace Mantid

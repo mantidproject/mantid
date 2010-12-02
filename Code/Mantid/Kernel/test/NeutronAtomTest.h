@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include "MantidKernel/NeutronAtom.h"
 
-using namespace Mantid::Kernel::PhysicalConstants;
+using namespace Mantid::PhysicalConstants;
 
 class NeutronAtomTest : public CxxTest::TestSuite
 {

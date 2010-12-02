@@ -81,6 +81,8 @@ namespace Mantid
       void setName(const int nx) { ObjName=nx; }           ///< Set Name
       int getName() const  { return ObjName; }             ///< Get Name
 
+      /// Return whether this object has a valid shape
+      bool hasValidShape() const;
       int setObject(const int ON,const std::string& Ln);
       int procString(const std::string& Line);
       int complementaryObject(const int Cnum,std::string& Ln); ///< Process a complementary object
@@ -156,9 +158,7 @@ namespace Mantid
       void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
     private:
       static Kernel::Logger& PLog;           ///< The official logger
-
       int ObjName;       ///< Creation number
-
       Rule* TopRule;     ///< Top rule [ Geometric scope of object]
 
       int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
@@ -206,6 +206,11 @@ namespace Mantid
     protected:
       std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)
     };
+
+    /// Typdef for a shared pointer
+    typedef boost::shared_ptr<Object> Object_sptr;
+    /// Typdef for a shared pointer to a const object
+    typedef boost::shared_ptr<const Object> Object_const_sptr;
 
   }  // NAMESPACE Geometry
 }  // NAMESPACE Mantid

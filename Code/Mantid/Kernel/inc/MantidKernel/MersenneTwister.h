@@ -58,7 +58,7 @@ namespace Mantid
       /// Default constructor
       MersenneTwister();
       /// Set the random number seed
-      virtual void setSeed(long seed);
+      virtual void setSeed(unsigned int seed);
       /// Sets the range of the subsequent calls to next 
       virtual void setRange(double start, double end);
       /// Generate the next random number in the sequence within the given range, (default=[0.0,1.0]).

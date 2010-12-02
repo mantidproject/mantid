@@ -5,7 +5,6 @@ import platform
 import sys
 import types
 import copy
-import sets
 import warnings
 import __builtin__
 import __main__

@@ -43,7 +43,7 @@ namespace Mantid
     void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                                const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
-      (void) lhsE; //Avoid compiler warning
+      (void) lhsE; (void) lhsX; //Avoid compiler warning
 
       assert( lhsX.size() == 1 );
       // If we get here we've got two single column workspaces so it's easy.

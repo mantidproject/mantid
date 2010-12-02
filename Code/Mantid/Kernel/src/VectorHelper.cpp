@@ -409,6 +409,43 @@ int getBinIndex(std::vector<double>& bins, const double X )
   return index;
 }
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Linearly interpolates between Y points separated by the given step size.
+ * @param x The X array
+ * @param y The Y array with end points and values at stepSize intervals calculated
+ * @param stepSize The distance between each pre-calculated point
+ */
+void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize)
+{
+  int specSize = static_cast<int>(y.size());
+  int xSize = static_cast<int>(x.size());
+  bool isHistogram(xSize == specSize + 1);
+  int step(stepSize), index2(0);
+  double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
+
+  for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
+  {
+    if(step == stepSize) //Point numerically integrated, does not need interpolation
+    {
+      x1 = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
+      index2 = ((i + stepSize) >= specSize ? specSize - 1 : (i + stepSize));
+      x2 = (isHistogram ? (0.5 * (x[index2] + x[index2 + 1])) : x[index2]);
+      overgap = 1.0 / (x2 - x1);
+      y1 = y[i];
+      y2 = y[index2];
+      step = 1;
+      continue;
+    }
+    xp = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
+    // Linear interpolation
+    y[i] = (xp - x1) * y2 + (x2 - xp) * y1;
+    y[i] *= overgap;
+    step++;
+  }
+
+}
+
 
 } // End namespace VectorHelper
 } // End namespace Kernel

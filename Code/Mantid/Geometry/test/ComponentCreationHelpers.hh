@@ -13,7 +13,6 @@ namespace ComponentCreationHelper
 {
 
   using namespace Mantid::Geometry;
-  typedef boost::shared_ptr<Object> Object_sptr;
 
   /** 
   A set of helper functions for creating various component structures for the unit tests.
@@ -117,6 +116,15 @@ namespace ComponentCreationHelper
     }
     
     return bank;
+  }
+
+  /**
+   * Create an object component that has a defined shape
+   */
+  static ObjComponent * createSingleObjectComponent()
+  {
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube");
+    return new ObjComponent("pixel", pixelShape);
   }
 
   //----------------------------------------------------------------------------------------------

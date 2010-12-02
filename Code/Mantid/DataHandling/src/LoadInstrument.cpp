@@ -91,17 +91,17 @@ namespace Mantid
       m_filename = getPropertyValue("Filename");
 
       // Get the input workspace
-      const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+      m_workspace = getProperty("Workspace");
 
       // Clear off any existing instrument for this workspace
-      localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+      m_workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
       // Remove the path from the filename for use with the InstrumentDataService
       const int stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
 
       // Get reference to Instrument and set its name
-      m_instrument = localWorkspace->getBaseInstrument();
+      m_instrument = m_workspace->getBaseInstrument();
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
@@ -164,9 +164,9 @@ namespace Mantid
       if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
       {
         // If it does, just use the one from the one stored there
-        localWorkspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
+        m_workspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
         // Get reference to Instrument 
-        m_instrument = localWorkspace->getBaseInstrument();
+        m_instrument = m_workspace->getBaseInstrument();
         //get list of monitors and set the property
         std::vector<int>monitordetIdList=m_instrument->getMonitors();
         setProperty("MonitorList",monitordetIdList);
@@ -414,7 +414,7 @@ namespace Mantid
       }
 
       // populate parameter map of workspace 
-      localWorkspace->populateInstrumentParameters();
+      m_workspace->populateInstrumentParameters();
 
       // check if default parameter file is also present
       runLoadParameterFile();
@@ -823,6 +823,8 @@ namespace Mantid
         if ( category.compare("SamplePos") == 0 )
         {
           m_instrument->markAsSamplePos(comp);
+	  API::Sample & sample = m_workspace->mutableSample();
+	  sample.attachToPosition(comp);
         }
 
         // set location for this newly added comp and set facing if specified in instrument def. file. Also
@@ -1738,8 +1740,7 @@ namespace Mantid
       try
       {
         loadInstParam->setPropertyValue("Filename", fullPathIDF);
-        const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-        loadInstParam->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInstParam->setProperty<MatrixWorkspace_sptr> ("Workspace", m_workspace);
         loadInstParam->execute();
       } catch (std::invalid_argument& e)
       {

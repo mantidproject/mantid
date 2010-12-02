@@ -13,7 +13,7 @@ private:
   class FakeRandomNumberGenerator : public Mantid::Kernel::RandomNumberGenerator
   {
   public:
-    void setSeed(long seedValue)
+    void setSeed(unsigned int seedValue)
     {
     }
     void setRange(double start, double end)

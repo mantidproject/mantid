@@ -49,7 +49,7 @@ namespace VectorHelper
 
   // New method to rebin Histogram data, should be faster than previous one
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-          const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
+				const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
 
   /// Convert an array of bin boundaries to bin centre values.
   void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
@@ -59,7 +59,8 @@ namespace VectorHelper
   DLLExport std::vector<double> splitStringIntoVector(std::string listString);
 
   DLLExport int getBinIndex(std::vector<double>& bins, const double X );
-
+  // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
+  DLLExport void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
 
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
