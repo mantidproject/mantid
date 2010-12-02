@@ -102,6 +102,7 @@ if os.name == 'nt':
 	
 	if not int(win64):
 		libDirList.append(third_party + '/lib/win32/')
+		cppPaths
 	else:
 		print "* Building for 64bit Windows *"
 		libDirList.append(third_party + '/lib/win64/')
@@ -114,6 +115,12 @@ if os.name == 'nt':
 	libList.append('zlib1')    # used in DataObjects
 
 	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123', third_party+'/include/hdf5']
+
+	if not int(win64):
+		cppPaths.append(third_party+'/include/hdf5/win32/');
+	else:
+		cppPaths.append(third_party+'/include/hdf5/win64/');
+
 	
 	#set up scons to embed manifest files on compilers prior to VS2010
 	if vsversion != '10.0':
