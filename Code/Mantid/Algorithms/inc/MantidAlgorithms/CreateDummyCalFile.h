@@ -30,10 +30,10 @@ namespace Algorithms
     <LI> GroupNames       - Name of assemblies to consider (names separated by "/" or "," or "*"</LI>
     </UL>
 
-    @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
-    @date 01/03/2009
+    @author Vickie Lynch, SNS, ORNL
+    @date 12/01/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
