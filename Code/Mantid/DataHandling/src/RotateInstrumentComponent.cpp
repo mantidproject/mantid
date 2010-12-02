@@ -32,6 +32,7 @@ void RotateInstrumentComponent::init()
   declareProperty("Y",0.0);
   declareProperty("Z",0.0);
   declareProperty("Angle",0.0);
+  declareProperty("RelativeRotation",true);
 }
 
 /** Executes the algorithm. 
@@ -48,6 +49,7 @@ void RotateInstrumentComponent::exec()
   const double Y = getProperty("Y");
   const double Z = getProperty("Z");
   const double angle = getProperty("Angle");
+  const bool RelativeRotation = getProperty("RelativeRotation");
 
   if (X + Y + Z == 0.0) throw std::invalid_argument("The rotation axis must not be a zero vector");
 
@@ -83,8 +85,25 @@ void RotateInstrumentComponent::exec()
       throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  Quat Rot0 = comp->getRelativeRot();
-  Quat Rot = Rot0 * Quat(angle,V3D(X,Y,Z));
+  // First set new relative or absolute rotation
+  Quat Rot;
+  if (RelativeRotation)
+  {
+      Quat Rot0 = comp->getRelativeRot();
+      Rot = Rot0 * Quat(angle,V3D(X,Y,Z));
+  }
+  else
+  {
+      Rot = Quat(angle,V3D(X,Y,Z));
+      // Then find the corresponding relative position
+      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      if (parent)
+      {
+          Quat rot0 = parent->getRelativeRot();
+          rot0.inverse();
+          Rot = Rot * rot0;
+      }
+  }
 
   //Need to get the address to the base instrument component
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
