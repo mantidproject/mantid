@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "hdf5.h"
 #include <climits>
 
 namespace Mantid
