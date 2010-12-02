@@ -36,6 +36,12 @@ private:
     void write_mdd(const MDImage &)
     {
     }
+   
+   MOCK_METHOD1(read_MDGeomDescription,void(Mantid::Geometry::MDGeometryDescription &));
+   MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
+   MOCK_CONST_METHOD0(read_pointDescriptions,Mantid::MDDataObjects::MDPointDescription(void));
+
+
     virtual ~MockFileFormat(void){};
   };
 

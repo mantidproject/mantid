@@ -34,8 +34,8 @@ class testMDDataPoints :    public CxxTest::TestSuite
 {
   std::vector<std::string> fieldNames4D;
   std::vector<std::string> fieldNames5D;
-  MDPointSignature descriptor4D;
-  MDPointSignature descriptor5D;
+  MDPointStructure descriptor4D;
+  MDPointStructure descriptor5D;
   MDPointDescription *pix4D,*pix5D;
 
 public:
@@ -48,14 +48,14 @@ public:
   void testMDPointDescrFromFields()
   {
     // and here we have default 4x3 histohram data itself 
-    MDPointSignature defaultPoint;
+    MDPointStructure defaultPoint;
     // and build pixel description from the default point using default tags; 
     TS_ASSERT_THROWS_NOTHING(MDPointDescription def(defaultPoint));
   }
 
   void testMDPointDescriptionFromFieldsAndTags()
   {
-    MDPointSignature defaultPoint;
+    MDPointStructure defaultPoint;
     // now let's have "non-default" tags
     std::vector<std::string> tags = fieldNames4D;
     // define the pixel from these tags and 
@@ -64,7 +64,7 @@ public:
 
   void testEventDataDescription()
   {
-    MDPointSignature defaultPoint;
+    MDPointStructure defaultPoint;
     // let's set default point for describing expanded event data
     defaultPoint.NumDataFields = 0;
     // should be ok
@@ -74,7 +74,7 @@ public:
   void testTagsFieldConsistency()
   {
     // let's set default point for describing expanded event data
-    MDPointSignature defaultPoint;
+    MDPointStructure defaultPoint;
     defaultPoint.NumDataFields = 0;
     // and have "non-default" tags for TOF data
     std::vector<std::string> tags = fieldNames4D;
@@ -107,7 +107,7 @@ public:
   {
     MDDataPoint<float,uint16_t> *pPoint;
     char *dataBuf(NULL);
-    MDPointSignature defaultPoint;
+    MDPointStructure defaultPoint;
     MDPointDescription sig(defaultPoint,fieldNames4D);
 
     TS_ASSERT_THROWS_NOTHING(pPoint = (new MDDataPoint<float,uint16_t>(dataBuf,sig)));

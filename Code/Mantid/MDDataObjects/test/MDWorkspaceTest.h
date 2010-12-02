@@ -1,4 +1,3 @@
-
 #ifndef H_TEST_MDWORKSPACE
 #define H_TEST_MDWORKSPACE
 
@@ -12,7 +11,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-class testMDWorkspace :    public CxxTest::TestSuite
+
+using namespace Mantid;
+
+
+class tesMDWorkspace :    public CxxTest::TestSuite
 {
 private:
 
@@ -30,8 +33,13 @@ private:
       return 0;
     }
     MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImage&));
-  };
+    MOCK_METHOD1(read_MDGeomDescription,void(Mantid::Geometry::MDGeometryDescription &));
+    MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
+    MOCK_CONST_METHOD0(read_pointDescriptions,Mantid::MDDataObjects::MDPointDescription(void));
 
+    virtual ~MockFileFormat(void){};
+  };
+     ///
   //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.
   static std::auto_ptr<Mantid::Geometry::MDGeometry> constructMDGeometry()
   {
@@ -84,7 +92,7 @@ public:
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
 
     std::string id = "q1";
-    boost::shared_ptr<const IMDDimension> dimension = workspace->getDimension(id);
+    boost::shared_ptr<const Geometry::IMDDimension> dimension = workspace->getDimension(id);
     TSM_ASSERT_EQUALS("The dimension id does not match", id, dimension->getDimensionId());
   }
 
@@ -151,6 +159,8 @@ public:
   void testGetXDimension()
   {
     using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
     boost::shared_ptr<const IMDDimension> dimension = workspace->getXDimension();
     TSM_ASSERT_EQUALS("The x-dimension returned was not the expected alignment.", "q1", dimension->getDimensionId());
@@ -161,6 +171,8 @@ public:
   void testGetYDimension()
   {
     using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
     boost::shared_ptr<const IMDDimension> dimension = workspace->getYDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q2", dimension->getDimensionId());
@@ -170,6 +182,8 @@ public:
   void testGetZDimension()
   {
     using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
     boost::shared_ptr<const IMDDimension> dimension = workspace->getZDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q3", dimension->getDimensionId());
@@ -179,6 +193,8 @@ public:
   void testGettDimension()
   {
     using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
     std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
     boost::shared_ptr<const IMDDimension> dimension = workspace->gettDimension();
     TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u1", dimension->getDimensionId());
@@ -287,6 +303,7 @@ public:
   void testProperInitalisation()
   {
     using namespace Mantid::MDDataObjects;
+    using namespace Mantid::Geometry;
 
     std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
 

@@ -4,6 +4,7 @@
 //#include <../../../Third_Party/include/hdf5/hdf5.h>
 #include <hdf5.h>
 #include "MDDataObjects/IMD_FileFormat.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MDDataObjects/MDDataPoints.h"
 
 
@@ -37,7 +38,38 @@
 
 namespace Mantid{
     namespace MDDataObjects{
-        using namespace Mantid::Kernel;
+//
+//******************************************************************************************************************
+// couple of structures and MATPAB compartibility functions defined here
+// MATLAB datatypes which may be written into hdf HORACE file
+enum matlab_attrib_kind
+{
+    double_scalar,
+    double_array,
+    char_array, // usually string e.g. 1D array of characters
+    empty,
+    char_cellarray,
+    double_cellarray
+};
+
+// functions used to understand Horace-written HDF5 file format;
+/// structure describing the Horace pixels. It is here for tests and compartibility stuff;
+struct sqw_pixel{
+    double qx;  //| 
+    double qy;  //| 3 Coordinates of each pixel in Q space
+    double qz;  //|
+    double En;  //| and the pixel enerty 
+    double s;   // pixels signal;
+    double err; // pixels error (variance i.e. error bar squared)
+
+
+// this the info about compressed direct picture, which describes the pixel in direct space; It is not used at the moment by Horace
+    int    irun; //    Run index in the header block from which pixel came          | these two parameters (or the last one) 
+    int    idet; //    Detector group number in the detector listing for the pixel  | convoluted with detectors.par and cristal orientation
+                 //    describe 3D picture in Q space and can be the source of additional dimensions if a parameter (e.g. T or pressure)
+                 //    changes from run to run
+    int    ien ; //    Energy bin number for the pixel in the array in the (irun)th header |-> 4th coordinate dimension
+};      
 //
 class MD_File_hdfMatlab :    public IMD_FileFormat
 {
@@ -46,20 +78,34 @@ public:
 
     virtual bool is_open(void)const{return (this->file_handler>0)?true:false;}
 
+	//****> MD baisis object (will be expanded?)
+	/// read the part of MD dataset containing the basis; Current implementations allocate basis from what they are reading
+	// no basis exists in Horace dataset so this funtion will return defaults
+	virtual void read_basis(Mantid::Geometry::MDGeometryBasis &);
+
+	//****> MD image object
+	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
+	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &);
+ 
     virtual void read_mdd(MDImage & mdd);
    
+
+	//****> datapoints object
+	/// read the description of the data points format and (possibly) service information to calculate the pixel location;
+	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
+	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDDataPoints & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
-    /// get number of data pixels contributing into the dataset;
+    /// get number of data pixels(points) contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDImage & dnd){throw(Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
+    virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
     
     virtual ~MD_File_hdfMatlab(void);
-private:
+protected:
     /// name of a file which keeps mdd dataset;
     std::string File_name;
     /// the variable which provides access to the open hdf file
@@ -89,7 +135,13 @@ private:
    bool check_or_open_pix_dataset(void);
  
 };
-//
+
+// function used to understand Horace written Matlab dataset.
+bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
+void ** transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
+//********************************************************************************************************************************************************************
+
+
 }
 }
 #endif

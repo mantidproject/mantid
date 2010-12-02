@@ -3,6 +3,7 @@
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDImage.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 
@@ -56,7 +57,7 @@ namespace Mantid
     //Seam method.
     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometry* geometry);
 
-    class DLLExport MDWorkspace :  public IMDWorkspace
+    class DLLExport MDWorkspace :  public API::IMDWorkspace
     {
     public:
 
@@ -81,7 +82,7 @@ namespace Mantid
 
       Mantid::Geometry::MDGeometry const * const getGeometry() const;
 
-      void alloc_mdd_arrays(const MDGeometryDescription &transf){m_spImageData->alloc_mdd_arrays(transf);}
+	  void initialize_MDImage(const Mantid::Geometry::MDGeometryDescription &transf){m_spImageData->initialize(transf);}
       /// identify proper file reader which corresponds to the file name and read memory resident part of the workspace into memory
       void read_mdd();
       /// read the whole pixels dataset in the memory
@@ -140,9 +141,7 @@ namespace Mantid
     typedef boost::shared_ptr<const MDWorkspace> MDWorkspace_const_sptr;
 
 
-
-  }}
-
-
+}
+}
 
 #endif

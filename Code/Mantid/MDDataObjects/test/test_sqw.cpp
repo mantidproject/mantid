@@ -15,15 +15,15 @@ int main() {
 }
 #include "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDDataObjects/test/test_sqw.h"
 
-static tmain suite_tmain;
+static testSQW suite_testSQW;
 
-static CxxTest::List Tests_tmain = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_tmain( "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDDataObjects/test/test_sqw.h", 8, "tmain", suite_tmain, Tests_tmain );
+static CxxTest::List Tests_testSQW = { 0, 0 };
+CxxTest::StaticSuiteDescription suiteDescription_testSQW( "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDDataObjects/test/test_sqw.h", 8, "testSQW", suite_testSQW, Tests_testSQW );
 
-static class TestDescription_tmain_testTMain : public CxxTest::RealTestDescription {
+static class TestDescription_testSQW_testTMain : public CxxTest::RealTestDescription {
 public:
- TestDescription_tmain_testTMain() : CxxTest::RealTestDescription( Tests_tmain, suiteDescription_tmain, 11, "testTMain" ) {}
- void runTest() { suite_tmain.testTMain(); }
-} testDescription_tmain_testTMain;
+ TestDescription_testSQW_testTMain() : CxxTest::RealTestDescription( Tests_testSQW, suiteDescription_testSQW, 11, "testTMain" ) {}
+ void runTest() { suite_testSQW.testTMain(); }
+} testDescription_testSQW_testTMain;
 
 #include <cxxtest/Root.cpp>

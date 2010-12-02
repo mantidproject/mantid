@@ -4,7 +4,9 @@
 
 namespace Mantid{
   namespace MDDataObjects{
-
+	  using namespace Kernel;
+	  using namespace Geometry;
+	  using namespace API;
      //Seam method.
      boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData)
      {

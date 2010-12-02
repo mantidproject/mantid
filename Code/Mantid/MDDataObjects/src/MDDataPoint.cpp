@@ -1,6 +1,5 @@
 #include "MDDataObjects/MDDataPoint.h"
 #include <sstream>
-#include <stdexcept>
 
 
 namespace Mantid
@@ -8,35 +7,23 @@ namespace Mantid
 namespace MDDataObjects
 {
 
-//----------------------------------------------------------------------------------------------
 MDPointDescription::MDPointDescription():
-    PixDescriptor()
+PixDescriptor()
 {
   buildDefaultTags(this->PixDescriptor);
 }
 
-//----------------------------------------------------------------------------------------------
-MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo,const std::vector<std::string> &IndataTags):
-  PixDescriptor(pixInfo),
-  dataTags(IndataTags)
+MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo,const std::vector<std::string> &IndataTags):
+dataTags(IndataTags),PixDescriptor(pixInfo)
 {
   unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
   if(dataTags.size()!=nFields){
     throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
   }
 }
-
-//----------------------------------------------------------------------------------------------
-MDPointDescription::MDPointDescription(const MDPointSignature &pixInfo):
-    PixDescriptor(pixInfo)
-{
-
-  this->buildDefaultTags(pixInfo);
-
-}
-
-//----------------------------------------------------------------------------------------------
-void MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
+//
+void 
+MDPointDescription::buildDefaultTags(const MDPointStructure &pixInfo)
 {
 
   unsigned int nFields = pixInfo.NumDimensions+pixInfo.NumDataFields+pixInfo.NumDimIDs;
@@ -72,6 +59,13 @@ void MDPointDescription::buildDefaultTags(const MDPointSignature &pixInfo)
   this->dataTags = tags;
 }
 
+MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo):
+PixDescriptor(pixInfo)
+{
+ 
+  this->buildDefaultTags(pixInfo);
+
+}
 //
 } // namespaces
 }

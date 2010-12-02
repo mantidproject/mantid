@@ -30,11 +30,7 @@ private:
     MOCK_CONST_METHOD0(is_open, bool());
     virtual void read_mdd(Mantid::MDDataObjects::MDImage& dnd)
     {
-       Mantid::Geometry::MDGeometryDescription dnd_shape(4);
-       for(int i=0;i<4;i++){
-         dnd_shape.setNumBins(i,50);
-       }
-       dnd.alloc_mdd_arrays(dnd_shape);
+		// this function fills data arrays with values obtained from Hdd
     }
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
     size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
@@ -45,6 +41,17 @@ private:
     void write_mdd(const MDImage &)
     {
     }
+   MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
+   void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &description){
+	  using namespace Mantid::Geometry;
+	  for(int i=0;i<description.getNumDims();i++){
+		description.setNumBins(i,50);
+	  }
+
+   }
+  
+   MOCK_CONST_METHOD0(read_pointDescriptions,Mantid::MDDataObjects::MDPointDescription(void));
+
     virtual ~MockFileFormat(void){};
   };
 
@@ -69,12 +76,19 @@ public:
 
     this->selection.assign(2,1);
 
+ 
+    MockFileFormat file;
+  
     MDImage* pImageData = new MDImage(getMDGeometry().release());
     std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
-    MockFileFormat file;
-    file.read_mdd(*pDND);
-
     // returns 2D image
+ 
+	Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+	file.read_MDGeomDescription(geom_description);
+	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
+
+	// this should read real data 
+   //file.read_mdd(*pDND);
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),2500);
 
@@ -92,7 +106,13 @@ public:
     MDImage* pImageData = new MDImage(getMDGeometry().release());
     std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
 
-    file.read_mdd(*pDND);
+
+	Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+	file.read_MDGeomDescription(geom_description);
+
+	//
+	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
+    //file.read_mdd(*pDND);
 
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50*50*50); 
@@ -102,8 +122,14 @@ public:
     // this should return single point at (20,20,20,20)
     selection.assign(4,20);
     std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
+
+    Mantid::Geometry::MDGeometryDescription geom_description(4,3);
     MockFileFormat file;
-    file.read_mdd(*pDND);
+	file.read_MDGeomDescription(geom_description);
+
+	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
+//    file.read_mdd(*pDND);
+
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),1);
   }
@@ -112,21 +138,27 @@ public:
     // this should return line of size 50 
     selection.assign(3,10);
     std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
-    MockFileFormat file;
-    file.read_mdd(*pDND);
+ 
+	MockFileFormat file;
+    Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+ 	file.read_MDGeomDescription(geom_description);
+
+	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
+//    file.read_mdd(*pDND);
+
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
 
-  void test_alloc_mdd_arrays()
-  {
-    std::auto_ptr<MDImage>pMDImage = std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
-    MDGeometryDescription tt;
+  //void test_alloc_mdd_arrays()
+  //{
+  //  std::auto_ptr<MDImage>pMDImage = std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
+  //  MDGeometryDescription tt;
 
-    pMDImage->alloc_mdd_arrays(tt);
-    TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImage->get_pMDImgData() != NULL);
-    TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImage->get_pData() != NULL);
-  }
+  //  pMDImage->alloc_mdd_arrays(tt);
+  //  TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImage->get_pMDImgData() != NULL);
+  //  TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImage->get_pData() != NULL);
+  //}
 
 private:
   std::string findTestFileLocation(void){

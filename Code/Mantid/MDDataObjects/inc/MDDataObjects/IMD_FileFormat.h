@@ -7,6 +7,7 @@
 #include <hdf5.h>
 #include <vector>
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
 /** interface to various MDData file formats (and may be other parts of MD-workspace file in a future);
 
@@ -33,15 +34,14 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace Mantid
-{
-
-namespace MDDataObjects
-{
-
-//
+namespace Mantid{
+    namespace MDDataObjects{
+// forward declaration of classes, contributing into MD workspace which should be read from file;
 class MDImage;
+class MDPointDescription;
 class MDDataPoints;
+//
+class Mantid::Kernel::Logger;
 
 /** class describes the interface to file operations, which are supported by generic MD dataset
 */
@@ -49,67 +49,42 @@ class IMD_FileFormat
 {
 public:
     IMD_FileFormat(void){};
+	/// is the file with underlying MDWorkspace is open;
     virtual bool is_open(void)const{return false;}
 
-    /// reads the MD-image part of the dataset
-    virtual void read_mdd(MDImage &)=0;
+	//****> MD baisis object (will be expanded?)
+	/// read the part of MD dataset containing the basis; Current implementations allocate basis from what they are reading
+	///TODO: should be probably MDGeometryBasisDescription, which later used to build the geometry basis from the description;
+	virtual void read_basis(Mantid::Geometry::MDGeometryBasis &)=0;
 
-    /// tries to read MDDataPoints (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
-    virtual bool read_pix(MDDataPoints &)=0;
+	//****> MD image object
+	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
+	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &)=0;
+    /// reads the data part of the MD Image 
+    virtual void read_mdd(MDImage &)=0; 
 
+	//****> datapoints object
+	/// read the description of the data points format and (possibly) service information to calculate the pixel location;
+	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
+	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const=0;
+    /// tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
+    virtual bool read_pix(MDDataPoints &)=0; 
     /// read part of the dataset, specified by the vector of MDImage cell numbers. 
-    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0;
-
+    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0; 
     /// obtain the number of data points (pixels) stored in the dataset;
     virtual hsize_t getNPix(void)=0;
 
+//
     virtual void write_mdd(const MDImage &)=0;
-
+//  virtual void write_pix(const MDDataPoints &)=0;
+//  virtual void write_pix_subset(const std::vector<size_t> &cell_indexes, const str::vector<char> &pix_buf)=0;
     virtual ~IMD_FileFormat(void){};
-
 protected: 
 
      /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& f_log;
 
 };
-//******************************************************************************************************************
-// couple of structures and MATPAB compartibility functions defined here
-// MATLAB datatypes which may be written into hdf HORACE file
-enum matlab_attrib_kind
-{
-    double_scalar,
-    double_array,
-    char_array, // usually string e.g. 1D array of characters
-    empty,
-    char_cellarray,
-    double_cellarray
-};
-
-// functions used to understand Horace-written HDF5 file format;
-/// structure describing the Horace pixels. It is here for tests and compartibility stuff;
-struct sqw_pixel{
-    double qx;  //| 
-    double qy;  //| 3 Coordinates of each pixel in Q space
-    double qz;  //|
-    double En;  //| and the pixel enerty 
-    double s;   // pixels signal;
-    double err; // pixels error (variance i.e. error bar squared)
-
-
-// this the info about compressed direct picture, which describes the pixel in direct space; It is not used at the moment by Horace
-    int    irun; //    Run index in the header block from which pixel came          | these two parameters (or the last one) 
-    int    idet; //    Detector group number in the detector listing for the pixel  | convoluted with detectors.par and cristal orientation
-                 //    describe 3D picture in Q space and can be the source of additional dimensions if a parameter (e.g. T or pressure)
-                 //    changes from run to run
-    int    ien ; //    Energy bin number for the pixel in the array in the (irun)th header |-> 4th coordinate dimension
-};
-// function used to understand Horace written Matlab dataset.
-bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
-void ** transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
-//********************************************************************************************************************************************************************
-
-
 
 } // MDDataObjects
 } // Mantid;
