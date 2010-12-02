@@ -5,7 +5,7 @@
 // Include
 //------------------------------------------------------------------------------
 #include <string>
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllExport.h"
 
 namespace Mantid
 {
@@ -36,7 +36,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.   
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    struct NeutronAtom {
+    struct EXPORT_OPT_MANTID_KERNEL NeutronAtom {
 
       /// The reference wavelength value for absorption cross sections
       static const double ReferenceLambda;
