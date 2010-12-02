@@ -17,6 +17,23 @@ myenv.Append(LIBS=libList)
 myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
 myenv.Append(CPPPATH=cppPath + ['../../../Tools/cxxtest'])
 
+# Add the location of the gmock library
+myenv.Append(CPPPATH=['../../../TestingTools/include'])
+third_party_path = '../../../TestingTools/lib/'
+
+# For Windows and Mac, the gmock library is in Third_Party
+# which is already in the path. Just add the path for linux.
+
+dist = platform.dist()[2]
+if dist == 'Tikanga':\
+    myenv.Append(LIBPATH=[third_party_path+'rhel5'])
+elif dist == 'maverick':
+    myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.10'])
+elif dist == 'lucid':
+    myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.04'])
+
+myenv.Append(LIBS=libList+['gmock'])
+
 #GET LIST OF TESTS
 path = '../../'
 testfolder = '/test'
