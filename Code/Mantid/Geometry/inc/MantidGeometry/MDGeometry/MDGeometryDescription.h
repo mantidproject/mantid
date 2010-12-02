@@ -36,23 +36,27 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-namespace Mantid{
-    namespace Geometry {
-    //
-    /// class descries data in one dimension;
-    // 
-    class DimensionDescription{
-    public:
-        std::string Tag;           //< unuque dimension identifier (tag)
-        double trans_bott_left;    //< shift in all directions (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
-        double cut_min;            //< min limits to extract data;
-        double cut_max;            //< max limits to extract data;
-        unsigned int nBins;        //< number of bins in each direction, bins of size 1 are integrated (collased);
-		bool   isReciprocal;       //< specifies if this dimension is reciprocal or not. 
-        std::string AxisName;      //< new names for axis; 
-        DimensionDescription():Tag(""),isReciprocal(false),trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
-   
-    };
+namespace Mantid
+{
+namespace Geometry
+{
+//
+/// class describes data in one dimension;
+//
+class DimensionDescription
+{
+public:
+  std::string Tag; //< unuque dimension identifier (tag)
+  double trans_bott_left; //< shift in all directions (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
+  double cut_min; //< min limits to extract data;
+  double cut_max; //< max limits to extract data;
+  unsigned int nBins; //< number of bins in each direction, bins of size 1 are integrated (collased);
+  bool isReciprocal; //< specifies if this dimension is reciprocal or not.
+  std::string AxisName; //< new names for axis;
+  DimensionDescription() :
+    Tag(""), trans_bott_left(0), cut_min(-1), cut_max(1), nBins(1), isReciprocal(false), AxisName("")
+  {}
+};
 
 
 class DLLExport MDGeometryDescription

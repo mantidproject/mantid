@@ -13,12 +13,11 @@ namespace Mantid
 
     Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
 //
-MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions):
-n_total_dim(nDimensions),n_reciprocal_dimensions(nReciprocalDimensions)
+MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions, unsigned int nReciprocalDimensions) :
+  n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions(), m_cell()
 {
-	
-    this->check_nDims(n_total_dim , n_reciprocal_dimensions);
-	m_mdBasisDimensions.insert(MDBasisDimension("q0",true,0));
+  this->check_nDims(n_total_dim, n_reciprocal_dimensions);
+  m_mdBasisDimensions.insert(MDBasisDimension("q0", true, 0));
 }
 //
 void
@@ -30,7 +29,7 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const
 
    this->n_total_dim = mdBasisDimensions.size();
       std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
-      for(it;it != mdBasisDimensions.end(); ++it)
+      for( ;it != mdBasisDimensions.end(); ++it)
       {  
         checkInputBasisDimensions(*(it)); // Check that duplicate column numbers have not been used.
 
@@ -50,7 +49,7 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
     void MDGeometryBasis::checkInputBasisDimensions(const MDBasisDimension&  dimension)
     {
       std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
-      for(it;it != m_mdBasisDimensions.end(); ++it){
+      for( ;it != m_mdBasisDimensions.end(); ++it){
         if(dimension != *it && it->getColumnNumber()==dimension.getColumnNumber())
         {
           //Record the error and throw.
@@ -95,7 +94,7 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
     {
       std::set<MDBasisDimension> reciprocalDims;
       std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
-      for(it;it != m_mdBasisDimensions.end(); ++it)
+      for( ;it != m_mdBasisDimensions.end(); ++it)
       {  
         if((*it).getIsReciprocal())
         {
@@ -109,7 +108,7 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
     {
       std::set<MDBasisDimension> nonReciprocalDims;
       std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
-      for(it;it != m_mdBasisDimensions.end(); ++it)
+      for( ;it != m_mdBasisDimensions.end(); ++it)
       {  
         if(!(*it).getIsReciprocal())
         {

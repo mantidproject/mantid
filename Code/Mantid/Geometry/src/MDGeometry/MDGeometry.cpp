@@ -275,13 +275,11 @@ void
     }
 
 
-MDGeometry::MDGeometry(MDGeometryBasis basis):
-m_basis(basis),
-n_expanded_dim(0),
-nGeometrySize(0)
+MDGeometry::MDGeometry(MDGeometryBasis basis) :
+  n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 {
-      this->theDimension.resize(basis.getNumDims());
-      this->init_empty_dimensions();
+  this->theDimension.resize(basis.getNumDims());
+  this->init_empty_dimensions();
 }
 
     
