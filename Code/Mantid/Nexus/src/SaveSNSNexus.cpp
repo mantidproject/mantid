@@ -686,6 +686,7 @@ namespace NeXus
     H5Gclose(subgrp_out_id);
     H5Gclose(grp_out_id);
     H5Fclose(file_out_id);
+    H5close();
 
     // Free map memory
     delete map;
