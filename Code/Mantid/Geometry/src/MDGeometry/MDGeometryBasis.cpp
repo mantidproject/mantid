@@ -16,7 +16,7 @@ namespace Mantid
 MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions):
 n_total_dim(nDimensions),n_reciprocal_dimensions(nReciprocalDimensions)
 {
-	m_cell = UnitCell();
+	
     this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 	m_mdBasisDimensions.insert(MDBasisDimension("q0",true,0));
 }

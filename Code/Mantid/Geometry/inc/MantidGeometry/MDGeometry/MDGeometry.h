@@ -66,7 +66,7 @@ namespace Mantid{
       /// returns the number of expanded (non-integrated) dimensions
       unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
 
-	  /// function returns the number of cells, which an Image with this geometry would take;
+	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}
 
       /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
