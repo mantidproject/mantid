@@ -126,21 +126,33 @@ namespace Mantid
       // check if IDF has valid-from and valid-to tags defined
       if ( !pRootElem->hasAttribute("valid-from") )
       {
-        g_log.error("XML file: " + m_filename + "<instrument> element must contain a valid-from tag.");
-        throw Kernel::Exception::InstrumentDefinitionError("Root element must contain a valid-from tag", m_filename);
+        throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-from tag", m_filename);
       }
       else
       {
-        //try (
+        try
+        {
+          DateAndTime d(pRootElem->getAttribute("valid-from"));
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", m_filename);
+        }
       }
       if ( !pRootElem->hasAttribute("valid-to") )
       {
-        g_log.error("XML file: " + m_filename + "<instrument> element must contain a valid-to tag.");
-        throw Kernel::Exception::InstrumentDefinitionError("Root element must contain a valid-to tag", m_filename);
+        throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
       }
       else
       {
-        //try (
+        try
+        {
+          DateAndTime d(pRootElem->getAttribute("valid-to"));
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::InstrumentDefinitionError("The valid-to <instrument> tag must be a ISO8601 string", m_filename);
+        }
       }
 
       // Handle used in the singleton constructor for instrument file should append the value
