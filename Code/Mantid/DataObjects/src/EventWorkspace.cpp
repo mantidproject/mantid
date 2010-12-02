@@ -894,7 +894,7 @@ namespace DataObjects
    * @param sortType How to sort the event lists.
    * @param prog a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
    */
-  void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog)
+  void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
 
     //Go through all the histograms and set the data

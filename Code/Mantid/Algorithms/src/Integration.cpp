@@ -54,7 +54,7 @@ void Integration::exec()
   const bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
 
@@ -78,7 +78,7 @@ void Integration::exec()
 
 
   // Can we keep events?
-  inputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+  inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (inputEventWS)
   {
     execEvent();
@@ -209,8 +209,10 @@ void Integration::execEvent()
   if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace") &&
       (m_MaxSpec == inputEventWS->getNumberHistograms()-1) && (m_MinSpec == 0))
   {
-    //Then we don't need to copy the data
-    outputWS = inputEventWS;
+    // Then we don't need to copy the data.
+    // OutputWorkspace property will point to input workspace, just need to cast.
+    MatrixWorkspace_sptr outputWS_matrix = getProperty("OutputWorkspace");
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS_matrix);
   }
   else
   {

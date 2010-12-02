@@ -226,7 +226,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void clearData();
 
   /// Sort all event lists. Uses a parallelized algorithm
-  void sortAll(EventSortType sortType, Mantid::API::Progress * prog);
+  void sortAll(EventSortType sortType, Mantid::API::Progress * prog) const;
 
   Kernel::DateAndTime getFirstPulseTime() const;
 

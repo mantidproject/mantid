@@ -70,7 +70,7 @@ private:
   void exec();
   void execEvent();
 
-  DataObjects::EventWorkspace_sptr inputEventWS;
+  DataObjects::EventWorkspace_const_sptr inputEventWS;
 
   /// The value in X to start the integration from
   double m_MinRange;
