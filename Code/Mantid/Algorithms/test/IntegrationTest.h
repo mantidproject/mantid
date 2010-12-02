@@ -7,6 +7,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "WorkspaceCreationHelper.hh"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -193,6 +195,69 @@ public:
       TS_ASSERT_EQUALS( y[0], yy[i] );
       TS_ASSERT_DELTA( e[0], ee[i], 0.001 );
     }
+  }
+
+
+  void doTestEvent(std::string inName, std::string outName, int StartWorkspaceIndex, int EndWorkspaceIndex)
+  {
+    int numPixels = 100;
+    int numBins = 50;
+    EventWorkspace_sptr inWS = WorkspaceCreationHelper::CreateEventWorkspace(numPixels,numBins,numBins,0.0, 1.0, 2);
+    AnalysisDataService::Instance().addOrReplace(inName, inWS);
+
+    Integration integ;
+    integ.initialize();
+    integ.setPropertyValue("InputWorkspace",inName);
+    integ.setPropertyValue("OutputWorkspace",outName);
+    integ.setPropertyValue("RangeLower","9.9");
+    integ.setPropertyValue("RangeUpper","20.1");
+    integ.setProperty("StartWorkspaceIndex",StartWorkspaceIndex);
+    integ.setProperty("EndWorkspaceIndex",EndWorkspaceIndex);
+
+    integ.execute();
+    TS_ASSERT( integ.isExecuted() );
+
+    EventWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<EventWorkspace>( AnalysisDataService::Instance().retrieve(outName) ) );
+    //Yep, it is an event
+    TS_ASSERT( output );
+    if (!output) return;
+
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), EndWorkspaceIndex -StartWorkspaceIndex+1 );
+
+    for (int i=0; i< output->getNumberHistograms(); i++)
+    {
+      MantidVec X = output->readX(i);
+      MantidVec Y = output->readY(i);
+      MantidVec E = output->readE(i);
+      TS_ASSERT_EQUALS( X.size(), 2);
+      TS_ASSERT_EQUALS( Y.size(), 1);
+      TS_ASSERT_DELTA( Y[0], 20.0, 1e-6);
+      TS_ASSERT_DELTA( E[0], sqrt(20.0), 1e-6);
+    }
+
+    AnalysisDataService::Instance().remove(inName);
+    AnalysisDataService::Instance().remove(outName);
+  }
+
+  void testEvent_AllHistograms()
+  {
+    doTestEvent("inWS", "outWS", 0, 99);
+  }
+
+  void testEvent_SomeHistograms()
+  {
+    doTestEvent("inWS", "outWS", 10, 39);
+  }
+
+  void testEvent_InPlace_AllHistograms()
+  {
+    doTestEvent("inWS", "inWS", 0, 99);
+  }
+
+  void testEvent_InPlace_SomeHistograms()
+  {
+    doTestEvent("inWS", "inWS", 10, 29);
   }
 
 

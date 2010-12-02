@@ -100,7 +100,7 @@ namespace Mantid
 
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getXDimension() const;
 
-      virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension>  getYDimension() const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getYDimension() const;
 
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getZDimension() const;
 

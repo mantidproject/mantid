@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include <cmath>
 
@@ -17,6 +18,7 @@ DECLARE_ALGORITHM(Integration)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 
 /** Initialisation method.
@@ -52,7 +54,7 @@ void Integration::exec()
   const bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
 
@@ -72,6 +74,15 @@ void Integration::exec()
   {
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to frame maximum.");
     m_MaxRange = 0.0;
+  }
+
+
+  // Can we keep events?
+  inputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+  if (inputEventWS)
+  {
+    execEvent();
+    return;
   }
 
   // Create the 1D workspace for the output
@@ -183,6 +194,70 @@ void Integration::exec()
 
   return;
 }
+
+
+
+/** Executes the algorithm on EventWorkspaces
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
+void Integration::execEvent()
+{
+  EventWorkspace_sptr outputWS;
+
+  // Changing in place, and not changing the number of histograms?
+  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace") &&
+      (m_MaxSpec == inputEventWS->getNumberHistograms()-1) && (m_MinSpec == 0))
+  {
+    //Then we don't need to copy the data
+    outputWS = inputEventWS;
+  }
+  else
+  {
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_MaxSpec-m_MinSpec+1, 2, 1));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputEventWS, outputWS, false);
+    //You need to copy over the data as well.
+    // -- we copy only a range, if specified.
+    outputWS->copyDataFrom( (*inputEventWS), m_MinSpec, m_MaxSpec );
+  }
+
+  Progress * progress = new Progress(this,0,1,m_MaxSpec-m_MinSpec +1 + inputEventWS->getNumberHistograms() ,1);
+
+  //Sort the input WS - this will allow parallel processing after
+  inputEventWS->sortAll(TOF_SORT, progress);
+
+  for (int i = 0; i < m_MaxSpec-m_MinSpec; ++i)
+  {
+    // Remove events before minRange
+    outputWS->getEventListPtr(i)->maskTof( -std::numeric_limits<double>::max(), m_MinRange);
+    // Remove events after maxRange
+    outputWS->getEventListPtr(i)->maskTof(  m_MaxRange, std::numeric_limits<double>::max());
+    // Progress report
+    progress->report("Filtering");
+  }
+
+  // Make the X bin vector
+  MantidVecPtr X;
+  X.access().push_back(m_MinRange);
+  X.access().push_back(m_MaxRange);
+
+  // And set it for all workspaces
+  outputWS->setAllX(X);
+
+  // Assign it to the output workspace property
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
+
+
+//  // Loop over spectra
+//  PARALLEL_FOR2(localworkspace,outputWorkspace)
+  //  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+//  {
+//    PARALLEL_START_INTERUPT_REGION
+}
+
 
 } // namespace Algorithms
 } // namespace Mantid

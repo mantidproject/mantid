@@ -113,15 +113,37 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /**
    * Copy all of the data (event lists) from the source workspace to this workspace.
+   *
+   * @param source: EventWorkspace from which we are taking data.
+   * @param sourceStartWorkspaceIndex: index in the workspace of source where we start
+   *          copying the data. This index will be 0 in the "this" workspace.
+   *          Default: -1, meaning copy all.
+   * @param sourceEndWorkspaceIndex: index in the workspace of source where we stop.
+   *          It is inclusive = source[sourceEndWorkspaceIndex[ WILL be copied.
+   *          Default: -1, meaning copy all.
+   *
    */
-  void EventWorkspace::copyDataFrom(const EventWorkspace& source)
+  void EventWorkspace::copyDataFrom(const EventWorkspace& source, int sourceStartWorkspaceIndex, int sourceEndWorkspaceIndex)
   {
     //Start with nothing.
     this->data.clear();
     //Copy the vector of EventLists
     EventListVector source_data = source.data;
     EventListVector::iterator it;
-    for (it = source_data.begin(); it != source_data.end(); it++ )
+    EventListVector::iterator it_start = source_data.begin();
+    EventListVector::iterator it_end = source_data.end();
+    int source_data_size = static_cast<int>(source_data.size());
+
+    //Do we copy only a range?
+    if ((sourceStartWorkspaceIndex >=0) && (sourceStartWorkspaceIndex < source_data_size)
+        && (sourceEndWorkspaceIndex >= 0) && (sourceEndWorkspaceIndex < source_data_size)
+        && (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex))
+    {
+      it_start = source_data.begin() + sourceStartWorkspaceIndex;
+      it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
+    }
+
+    for (it = it_start; it != it_end; it++ )
     {
       //Create a new event list, copying over the events
       EventList * newel = new EventList( **it );
@@ -879,6 +901,8 @@ namespace DataObjects
     PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
     for (int i=0; i < m_noVectors; ++i)
     {
+      //TODO: Make sure no thread throws an exception in parallel?
+
       //Perform the sort
       this->data[i]->sort(sortType);
 

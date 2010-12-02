@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -67,6 +68,9 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void execEvent();
+
+  DataObjects::EventWorkspace_sptr inputEventWS;
 
   /// The value in X to start the integration from
   double m_MinRange;

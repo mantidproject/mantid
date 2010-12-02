@@ -143,7 +143,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   long int getMemorySize() const;
 
-  void copyDataFrom(const EventWorkspace& source);
+  void copyDataFrom(const EventWorkspace& source,
+      int sourceStartWorkspaceIndex=-1, int sourceEndWorkspaceIndex=-1);
 
   //------------------------------------------------------------
   void ensureEnoughBuffersY(int thread_num) const;
