@@ -45,7 +45,6 @@ ${COMMON_SOURCES}
 SET(LIBE_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterEnginePluginInfo.C
 ${CMAKE_CURRENT_SOURCE_DIR}/src/avtRebinningCutterFilter.C
-${CMAKE_CURRENT_SOURCE_DIR}/src/InterfaceVatesMantid.C
 ${COMMON_SOURCES}
 )
 
@@ -101,6 +100,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Geometry/inc/
 ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/API/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDAlgorithms/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
+${CMAKE_CURRENT_SOURCE_DIR}/../VisitPresenters/inc/
 )
 
 
@@ -155,8 +155,13 @@ find_library(MDAlgorithms_LIBRARY
   PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
 )
 
+find_library(VisitPresenters_LIBRARY
+  NAMES VisitPresenters
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../VisitPresenters/Debug/
+)
+
 ADD_LIBRARY(ERebinningCutterOperator_ser ${LIBE_SOURCES})
-TARGET_LINK_LIBRARIES(ERebinningCutterOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MantidKernel_LIBRARY} ${MantidGeometry_LIBRARY} ${MantidAPI_LIBRARY} ${MDAlgorithms_LIBRARY})
+TARGET_LINK_LIBRARIES(ERebinningCutterOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MantidKernel_LIBRARY} ${MantidGeometry_LIBRARY} ${MantidAPI_LIBRARY} ${VisitPresenters_LIBRARY} ${MDAlgorithms_LIBRARY})
 SET(INSTALLTARGETS ${INSTALLTARGETS} ERebinningCutterOperator_ser)
 
 IF(VISIT_PARALLEL)
