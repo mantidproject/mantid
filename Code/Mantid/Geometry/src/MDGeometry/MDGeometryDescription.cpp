@@ -49,19 +49,19 @@ MDGeometryDescription::MDGeometryDescription(
   std::vector<MDDimension>::iterator dimZ = find(dimensions.begin(), dimensions.end(), dimensionZ);
   std::vector<MDDimension>::iterator dimT = find(dimensions.begin(), dimensions.end(), dimensiont);
 
-  createSlicingData(*dimX, 0);
-  createSlicingData(*dimY, 1);
-  createSlicingData(*dimZ, 2);
-  createSlicingData(*dimT, 3);
+  createDimensionDescription(*dimX, 0);
+  createDimensionDescription(*dimY, 1);
+  createDimensionDescription(*dimZ, 2);
+  createDimensionDescription(*dimT, 3);
 
  
   for(unsigned int i=3;i<dimensions.size();i++) 
   {
-    createSlicingData(dimensions[i], i);
+    createDimensionDescription(dimensions[i], i);
   }
 }
 
-void MDGeometryDescription::createSlicingData(const MDDimension& dimension, const int i)
+void MDGeometryDescription::createDimensionDescription(const MDDimension& dimension, const int i)
 {
   this->data[i].Tag            = dimension.getDimensionId();
   this->data[i].trans_bott_left= 0;
@@ -69,6 +69,7 @@ void MDGeometryDescription::createSlicingData(const MDDimension& dimension, cons
   this->data[i].cut_max        = dimension.getMaximum()*(1+FLT_EPSILON);
   this->data[i].nBins          = dimension.getNBins();
   this->data[i].AxisName       = dimension.getName();
+  this->data[i].isReciprocal   = dimension.isReciprocal();
 
   //Handle reciprocal dimensions.
   if(dimension.isReciprocal())
@@ -95,19 +96,14 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
       }
     }
     
-    SlicingData any;
+    DimensionDescription any;
     this->data.assign(nDimensions,any);    
   
     unsigned int i;
     for(i=0;i<nDimensions;i++){
 
         boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
-        this->data[i].Tag            = pDim->getDimensionTag();
-        this->data[i].trans_bott_left= 0;
-        this->data[i].cut_min        = pDim->getMinimum();
-        this->data[i].cut_max        = pDim->getMaximum()*(1+FLT_EPSILON);
-        this->data[i].nBins          = pDim->getNBins();
-        this->data[i].AxisName       = pDim->getName();
+		this->createDimensionDescription(*pDim,i);
 
     }
 
@@ -131,7 +127,19 @@ MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
     }
     return iTagNum;
 }
+size_t
+MDGeometryDescription::getImageSize()const
+{
+   size_t data_size = 1;
+   for(unsigned int i=0;i<nDimensions;i++){
 
+	   if( this->data[i].nBins>1 ){
+		   data_size*=this->data[i].nBins;
+	   }
+          
+   }
+	return data_size;
+}
 //****** SET *******************************************************************************
 
 void 
@@ -335,7 +343,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     }
 
     unsigned int i;
-    SlicingData defaults;
+    DimensionDescription defaults;
     defaults.trans_bott_left=0;
     defaults.cut_min =-1;
     defaults.cut_max = 1;

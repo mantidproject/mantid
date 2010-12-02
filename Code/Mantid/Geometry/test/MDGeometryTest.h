@@ -81,7 +81,7 @@ public:
 
   }
   void testMDGeomSetFromSlice1(void){
-   
+   // pSlice describes 4x3 geometry with 200x100 dimensions expanded and others integrated;
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->reinit_Geometry(*pSlice));
     unsigned int i,ic;
 
@@ -121,6 +121,9 @@ public:
         TS_ASSERT_THROWS_NOTHING(pDim = tDND_geometry->getDimension(2));
         TS_ASSERT_EQUALS(pDim->getStride(),0);
         TS_ASSERT_EQUALS(pDim->getIntegrated(),true);
+  }
+  void testGeometryFromSlice1Size(){
+	  TSM_ASSERT_EQUALS("The size of the image, described by this geometry after resizing, differs from expected",tDND_geometry->getGeometryExtend(),100*200);
   }
   void testMDGeomSetFromSlice2(void){
     // this should be fully equivalent to 1

@@ -36,10 +36,10 @@ namespace Mantid
 {
   namespace Geometry
   {
-    IMDDimension::~IMDDimension()
+  /*  IMDDimension::~IMDDimension()
     {
       
-    }
+    }*/
   }
 }
 

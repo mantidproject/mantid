@@ -54,6 +54,8 @@ namespace Mantid
 
     class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
     {
+	public: 
+		UnitCell(void){};
     };
 
     //****************************************************************************************************************************************
@@ -61,9 +63,9 @@ namespace Mantid
     {
     public:
 
-      //MDGeometryBasis(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);  
+      MDGeometryBasis(unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
 
-      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, UnitCell cell);
+      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell);
 
       std::set<MDBasisDimension> getNonReciprocalDimensions() const;
       std::set<MDBasisDimension> getReciprocalDimensions() const;
@@ -78,7 +80,7 @@ namespace Mantid
       /// function checks if the ids supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-
+	  void init(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell);
     private:
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;

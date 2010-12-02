@@ -171,15 +171,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\MDGeometry\IMDDimension.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDBasisDimension.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDCell.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimension.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimensionRes.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometry.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryBasis.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryDescription.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDPoint.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDWorkspaceConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\MDGeometry\IMDDimension.cpp" />
+    <ClCompile Include="src\MDGeometry\MDBasisDimension.cpp" />
     <ClCompile Include="src\MDGeometry\MDDimension.cpp" />
     <ClCompile Include="src\MDGeometry\MDDimensionRes.cpp" />
     <ClCompile Include="src\MDGeometry\MDGeometry.cpp" />

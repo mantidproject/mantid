@@ -46,65 +46,65 @@ namespace Mantid{
 
     }
     //
-    void 
-      MDGeometry::reinit_Geometry(const MDGeometryDescription &trf, unsigned int nReciprocalDims)
-    {
-      this->reinit_Geometry(trf.getDimensionsTags());
-      this->setRanges(trf);
+void 
+MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
+{
+  this->reinit_Geometry(trf.getDimensionsTags());
+  this->setRanges(trf);
 
-      /*
-      // all reciprocal dimensions may have new coordinates in the WorkspaceGeometry coordinate system, so these coordinates have to 
-      // be set properly;
-      Dimension *pDim;
-      DimensionsID id;
-      for(i=0;i<3;i++){
-      id=DimensionsID(i);
-      // get nDim and cycle if this dim does not exist
-      if(getDimRefNum(id,true)<0)continue;
+  /*
+  // all reciprocal dimensions may have new coordinates in the WorkspaceGeometry coordinate system, so these coordinates have to 
+  // be set properly;
+  Dimension *pDim;
+  DimensionsID id;
+  for(i=0;i<3;i++){
+  id=DimensionsID(i);
+  // get nDim and cycle if this dim does not exist
+  if(getDimRefNum(id,true)<0)continue;
 
-      // get a reciprocal dimension with proper ID
-      pDim = this->getDimension(id);
-      // and set its coordinate from the transformation matrix;
-      pDim->setCoord(trf.getCoord(id));
-      }
-      */
-    }
+  // get a reciprocal dimension with proper ID
+  pDim = this->getDimension(id);
+  // and set its coordinate from the transformation matrix;
+  pDim->setCoord(trf.getCoord(id));
+  }
+  */
+}
 
     //
-    void 
-      MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags, unsigned int nReciprocalDims)
-    {
-
- 
-      bool congruent_geometries(true);
+void 
+MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags)
+{
 
 
+  bool congruent_geometries(true);
 
-      // are the old geometry congruent to the new geometry? e.g the same nuber of dimensions and the same dimension tags;
-      if(DimensionTags.size()!=m_basis.getNumDims()){
-        congruent_geometries=false;
-      }else{
-        congruent_geometries=m_basis.checkIdCompartibility(DimensionTags);
-      }
 
-      if(!congruent_geometries){
-        g_log.error()<<"builing geometry with the basis different from the current geometry is prohibited\n";
-        throw(std::invalid_argument("builing geometry with the basis different from the current geometry is prohibited"));
-        // m_basis( = .reinit_GeometryBasis(DimensionTags,nReciprocalDims);
 
-        //// clear old dimensions if any
-        //for(i=0;i<this->theDimension.size();i++){
-        //  if(this->theDimension[i]){
-        //    delete this->theDimension[i];
-        //    theDimension[i]=NULL;
-        //  }
-        //}
-        //this->init_empty_dimensions();
-      }else{
-        this->arrangeDimensionsProperly(DimensionTags);
-      }
+  // are the old geometry congruent to the new geometry? e.g the same nuber of dimensions and the same dimension tags;
+  if(DimensionTags.size()!=m_basis.getNumDims()){
+    congruent_geometries=false;
+  }else{
+    congruent_geometries=m_basis.checkIdCompartibility(DimensionTags);
+  }
 
-    }
+  if(!congruent_geometries){
+    g_log.error()<<"builing geometry with the basis different from the current geometry is prohibited\n";
+    throw(std::invalid_argument("builing geometry with the basis different from the current geometry is prohibited"));
+    // m_basis( = .reinit_GeometryBasis(DimensionTags,nReciprocalDims);
+
+    //// clear old dimensions if any
+    //for(i=0;i<this->theDimension.size();i++){
+    //  if(this->theDimension[i]){
+    //    delete this->theDimension[i];
+    //    theDimension[i]=NULL;
+    //  }
+    //}
+    //this->init_empty_dimensions();
+  }else{
+    this->arrangeDimensionsProperly(DimensionTags);
+  }
+
+}
 //
 void 
   MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
@@ -191,6 +191,8 @@ void
     dimension_stride     *= this->theDimension[i]->getNBins();
 
   }
+  nGeometrySize = dimension_stride;
+
   // now with collapsed dimensions;
   unsigned int ind(n_expanded_dim);
   for(i=0;i<n_collapsed_dimensions;i++){
@@ -232,7 +234,7 @@ void
     }
     //
     std::vector<boost::shared_ptr<MDDimension> >
-      MDGeometry::getIntegratedDimensions(void)
+    MDGeometry::getIntegratedDimensions(void)
     {
       std::vector<boost::shared_ptr<MDDimension> > tmp;
 
@@ -246,7 +248,7 @@ void
     }
 
     boost::shared_ptr<MDDimension>
-      MDGeometry::getDimension(unsigned int i)const
+    MDGeometry::getDimension(unsigned int i)const
     {
       if(i>=m_basis.getNumDims()){
         g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
@@ -273,13 +275,14 @@ void
     }
 
 
-    MDGeometry::MDGeometry(MDGeometryBasis basis):
-        n_expanded_dim(0),
-        m_basis(basis)
-    {
+MDGeometry::MDGeometry(MDGeometryBasis basis):
+m_basis(basis),
+n_expanded_dim(0),
+nGeometrySize(0)
+{
       this->theDimension.resize(basis.getNumDims());
       this->init_empty_dimensions();
-    }
+}
 
     
 void 
@@ -313,14 +316,15 @@ MDGeometry::init_empty_dimensions()
    }
      // all dimensions initiated by default constructor are integrated;
     this->n_expanded_dim=0;
+	this->nGeometrySize =0;
 
- }
+}
 
-    MDGeometry::~MDGeometry(void)
-    {
-      this->theDimension.clear();
-      this->dimensions_map.clear();
-    }
+MDGeometry::~MDGeometry(void)
+{
+    this->theDimension.clear();
+    this->dimensions_map.clear();
+}
 
     std::vector<std::string> MDGeometry::getBasisTags(void)const //TODO: consider removing this function.
     {

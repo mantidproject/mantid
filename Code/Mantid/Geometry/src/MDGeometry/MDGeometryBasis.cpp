@@ -12,11 +12,23 @@ namespace Mantid
     using namespace Kernel;
 
     Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
+//
+MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions):
+n_total_dim(nDimensions),n_reciprocal_dimensions(nReciprocalDimensions)
+{
+	m_cell = UnitCell();
+    this->check_nDims(n_total_dim , n_reciprocal_dimensions);
+	m_mdBasisDimensions.insert(MDBasisDimension("q0",true,0));
+}
+//
+void
+MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell)
+{
+	m_cell = cell;
+	m_mdBasisDimensions.clear();
+	m_mdBasisDimensions = mdBasisDimensions;
 
-
-    MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell cell) : m_cell(cell), m_mdBasisDimensions(mdBasisDimensions), n_reciprocal_dimensions(0)
-    {
-      this->n_total_dim = mdBasisDimensions.size();
+   this->n_total_dim = mdBasisDimensions.size();
       std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
       for(it;it != mdBasisDimensions.end(); ++it)
       {  
@@ -28,7 +40,12 @@ namespace Mantid
         }
       }
       this->check_nDims(n_total_dim , n_reciprocal_dimensions);
-    }
+}
+
+MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell) : m_cell(cell), m_mdBasisDimensions(mdBasisDimensions), n_reciprocal_dimensions(0)
+{
+   this->init(mdBasisDimensions,cell);
+}
 
     void MDGeometryBasis::checkInputBasisDimensions(const MDBasisDimension&  dimension)
     {
@@ -44,7 +61,7 @@ namespace Mantid
     }
 
     void 
-      MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions)
+    MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions)
     {
       if(nReciprocalDimensions<1||nReciprocalDimensions>3){
         g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted"<<nReciprocalDimensions<<std::endl;

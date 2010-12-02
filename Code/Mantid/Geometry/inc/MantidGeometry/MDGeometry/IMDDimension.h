@@ -54,7 +54,7 @@ namespace Mantid
    /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual unsigned int getNBins() const = 0;
       
-      virtual ~IMDDimension();
+	  virtual ~IMDDimension(){};
     };
 
   }

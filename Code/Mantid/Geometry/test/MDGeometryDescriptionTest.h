@@ -73,6 +73,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(output=pSlice->toXMLstring());
     TS_ASSERT_EQUALS(output,"TEST PROPERTY");
   }
+  void testDataSize(){
+	  std::shared_ptr<MDGeometryDescription> pDescr = std::shared_ptr<MDGeometryDescription>(constructDescription());
+	  TS_ASSERT_THROWS_NOTHING(pDescr->setNumBins("q1",100));
+	  TS_ASSERT_THROWS_NOTHING(pDescr->setNumBins("q2",100));
+	  TS_ASSERT_THROWS_NOTHING(pDescr->setNumBins("T",100));
+
+	  TSM_ASSERT_EQUALS("The image size described by this description differs from expected",100*100*100,pDescr->getImageSize());
+  }
 
 
   testMDGeometryDescription():pSlice(NULL){}

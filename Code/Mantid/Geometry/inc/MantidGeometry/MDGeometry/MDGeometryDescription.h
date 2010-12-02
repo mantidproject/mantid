@@ -41,15 +41,16 @@ namespace Mantid{
     //
     /// class descries data in one dimension;
     // 
-    class SlicingData{
+    class DimensionDescription{
     public:
         std::string Tag;           //< unuque dimension identifier (tag)
         double trans_bott_left;    //< shift in all directions (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
         double cut_min;            //< min limits to extract data;
         double cut_max;            //< max limits to extract data;
         unsigned int nBins;        //< number of bins in each direction, bins of size 1 are integrated (collased);
+		bool   isReciprocal;       //< specifies if this dimension is reciprocal or not. 
         std::string AxisName;      //< new names for axis; 
-        SlicingData():Tag(""),trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
+        DimensionDescription():Tag(""),isReciprocal(false),trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
    
     };
 
@@ -71,8 +72,11 @@ public:
     virtual ~MDGeometryDescription(void);
     unsigned int getNumDims(void)const{return nDimensions;}
 
+	// returns the size of the image, described by this class
+	size_t getImageSize()const;
+
    /// the function sets the rotation matrix which allows to transform vector inumber i into the basis;
-   // TO DO : it is currently a stub returning argument independant unit matrix; has to be written propely
+   // TODO : it is currently a stub returning argument independant unit matrix; has to be written propely
    std::vector<double> setRotations(unsigned int i,const std::vector<double> basis[3]);
 
    void build_from_geometry(const MDGeometry &origin);
@@ -150,13 +154,13 @@ private:
  /// logger -> to provide logging, for MD workspaces
     static Kernel::Logger& g_log;
 
-    std::deque<SlicingData> data;  //< data describes one dimension;
+    std::deque<DimensionDescription> data;  //< data describes one dimension;
 
     //Helper method to generate slicing data.
-    void createSlicingData(const MDDimension& dimension, const int i);
+    void createDimensionDescription(const MDDimension& dimension, const int i);
 
-typedef std::deque<SlicingData>::iterator       it_data;
-typedef std::deque<SlicingData>::const_iterator it_const_data;
+typedef std::deque<DimensionDescription>::iterator       it_data;
+typedef std::deque<DimensionDescription>::const_iterator it_const_data;
 
 };
 

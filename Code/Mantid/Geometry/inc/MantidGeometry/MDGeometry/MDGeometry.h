@@ -66,6 +66,9 @@ namespace Mantid{
       /// returns the number of expanded (non-integrated) dimensions
       unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
 
+	  /// function returns the number of cells, which an Image with this geometry would take;
+	  size_t getGeometryExtend()const{return nGeometrySize;}
+
       /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
       boost::shared_ptr<MDDimension>  getDimension(unsigned int i)const;
@@ -86,13 +89,11 @@ namespace Mantid{
       unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
 
       /** function resets MDGeometryBasis and MDGeometry to new state;
-      *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
-      *   when the structure is indeed 
+      *   
+	  *  modified substantially from initial idea
+	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
       */
-      void reinit_Geometry(const MDGeometryDescription &trf,unsigned int nReciprocalDims=3);
-      void reinit_Geometry(const std::vector<std::string> &DimensionTags,unsigned int nReciprocalDims=3);
-      //void reinit_Geometry(const std::vector<std::string> &DimensionTags);
-
+      void reinit_Geometry(const MDGeometryDescription &trf);
     protected: 
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
       unsigned int n_expanded_dim;
@@ -100,10 +101,6 @@ namespace Mantid{
       std::vector<boost::shared_ptr<MDDimension> >  theDimension;
 
 
-
-      /** function used to arrange dimensions properly, e.g. according to the order of the dimension tags supplied as input argument
-      and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
-      void arrangeDimensionsProperly(const std::vector<std::string> &tags);
       /* function returns tne location of the dimension specified by the tag, in the array theDimension (in the MDGeomerty)
       negative value specifies that the requested dimension is not present in the array. */
       //  int getDimNum(const std::string &tag,bool do_trow=false)const;
@@ -111,6 +108,8 @@ namespace Mantid{
     private:
       /** function sets ranges of the data as in transformation request; Useless without real change of the ranges */
       void setRanges(const MDGeometryDescription &trf);
+	  /// the number of data cells, which such geometry would occupy
+	  size_t nGeometrySize;
 
       MDGeometryBasis m_basis;
       //void init_empty_dimensions();
@@ -121,7 +120,13 @@ namespace Mantid{
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
 
-      void init_empty_dimensions();
+      /// currently similar to arrangeDimensionsProperly as reinit is currently disabled but checks if tags are valid;
+      void reinit_Geometry(const std::vector<std::string> &DimensionTags);
+      /** function used to arrange dimensions properly, e.g. according to the order of the dimension tags supplied as input argument
+      and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
+      void arrangeDimensionsProperly(const std::vector<std::string> &tags);
+
+	  void init_empty_dimensions();
     };
   }  // Geometry
 }  // Mantid
