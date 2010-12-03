@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include <boost/ptr_container/ptr_vector.hpp>
+// temporary -- to provide size of sqw pixel
+#include "MDDataObjects/MD_File_hdfMatlab.h"
 
 namespace Mantid{
     namespace MDAlgorithms{
@@ -127,8 +129,9 @@ CenterpieceRebinning::exec()
   }
  
  
-  // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->alloc_mdd_arrays(*pSlicing);
+
+ // transform output workspace to the target shape and allocate memory for resulting matrix
+  outputWS->initialize_MDImage(*pSlicing);
 
  
 
@@ -145,7 +148,7 @@ CenterpieceRebinning::exec()
             n_pix_in_buffer(0),pix_buffer_size(PIX_BUFFER_SIZE);
   
   std::vector<char  > pix_buf;
-  //TO DO: Give correct pixel size from the workspace method
+  //TODO: Give correct pixel size from the workspace method
   pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
  
 

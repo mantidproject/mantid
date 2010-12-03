@@ -56,11 +56,12 @@
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\..\$(Configuration)\MantidKernel.lib" "$(OutDir)MantidKernel.lib" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidKernel.dll" "$(OutDir)MantidKernel.dll" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidGeometry.lib" "$(OutDir)MantidGeometry.lib" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidGeometry.dll" "$(OutDir)MantidGeometry.dll" /Y </Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy /Y $(TargetDir)*.exe $(TargetDir)..\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

@@ -11,7 +11,8 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 
-#include "CenterpieceRebinningFunctions.h"
+#include "MantidMDAlgorithms/CenterpieceRebinningFunctions.h"
+#include "MDDataObjects/MD_File_hdfMatlab4D.h"
 
 namespace Mantid
 {

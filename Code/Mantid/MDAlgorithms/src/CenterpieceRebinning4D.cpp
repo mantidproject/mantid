@@ -131,7 +131,7 @@ CenterpieceRebinning4D::exec()
 
 
   // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->alloc_mdd_arrays(*pSlicing);
+  outputWS->initialize_MDImage(*pSlicing);
 
 
 
@@ -159,7 +159,15 @@ CenterpieceRebinning4D::exec()
   double boxMin[4],boxMax[4];
   boxMin[0]=boxMin[1]=boxMin[2]=boxMin[3]=FLT_MAX;
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
-  std::vector<size_t> strides = outputWS->get_const_spMDImage()->getStrides();
+
+   // reduction dimensions; if stride = 0, the dimension is reduced;
+  const std::vector<boost::shared_ptr<MDDimension> >  dims = outputWS->get_const_spMDImage()->getGeometry()->getDimensions();
+
+  std::vector<size_t> strides(dims.size());
+  for(unsigned int i=0;i<dims.size();i++){
+	  strides[i]= dims[i]->getStride();
+  }
+
 
   transf_matrix trf = build_scaled_transformation_matrix(*(inputWS->getGeometry()),*pSlicing,this->ignore_inf,this->ignore_nan);
   // start reading and rebinning;

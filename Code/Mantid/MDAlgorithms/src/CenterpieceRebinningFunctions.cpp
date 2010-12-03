@@ -323,7 +323,12 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
   std::vector<double> rN(nDims,0);
 
   // reduction dimensions; if stride = 0, the dimension is reduced;
-  std::vector<size_t> strides = TargetWorkspace.get_const_spMDImage()->getStrides();
+  const std::vector<boost::shared_ptr<MDDimension> >  dims = TargetWorkspace.get_const_spMDImage()->getGeometry()->getDimensions();
+
+  std::vector<size_t> strides(dims.size());
+  for(unsigned int i=0;i<dims.size();i++){
+	  strides[i]= dims[i]->getStride();
+  }
 
   double rotations_ustep[9];
   std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
