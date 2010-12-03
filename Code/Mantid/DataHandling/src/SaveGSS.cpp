@@ -9,8 +9,12 @@
 #include <fstream>
 #include <iomanip>
 
-using namespace Mantid::DataHandling;
-using namespace Mantid::API;
+namespace Mantid
+{
+namespace DataHandling
+{
+
+using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
@@ -186,7 +190,7 @@ void SaveGSS::writeHeaders(std::ostream& os, Mantid::API::MatrixWorkspace_const_
 }
 
 inline void writeBankLine(std::ostream& out, const std::string& bintype,
-                          const int banknum, const int datasize)
+                          const int banknum, const size_t datasize)
 {
   out << "BANK "
     << std::fixed << std::setprecision(0) << banknum // First bank should be 1 for GSAS; this can be changed
@@ -195,7 +199,8 @@ inline void writeBankLine(std::ostream& out, const std::string& bintype,
     << std::fixed << " " << bintype;
 }
 
-inline double fixErrorValue(const double value) {
+inline double fixErrorValue(const double value) 
+{
   if(value<0 || boost::math::isnan(value) || boost::math::isinf(value)) //Negative errors cannot be read by GSAS
     return 0.;
   else
@@ -203,8 +208,9 @@ inline double fixErrorValue(const double value) {
 }
 
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
-                            const MantidVec& X, const MantidVec& Y, const MantidVec& E) const {
-  const int datasize = Y.size();
+                            const MantidVec& X, const MantidVec& Y, const MantidVec& E) const 
+{
+  const size_t datasize = Y.size();
   double bc1=X[0]*32;
   double bc2=(X[1]-X[0])*32;
   // Logarithmic step
@@ -245,8 +251,9 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::
 }
 
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
-                            const MantidVec& X, const MantidVec& Y, const MantidVec& E) const {
-  const int datasize = Y.size();
+                            const MantidVec& X, const MantidVec& Y, const MantidVec& E) const 
+{
+  const size_t datasize = Y.size();
   double bc1 = *(X.begin()); // minimum TOF in microseconds
   if (bc1 <= 0.) {
     throw std::runtime_error("Cannot write out logorithmic data starting at zero");
@@ -279,3 +286,6 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::
   }
   out << std::flush;
 }
+
+} // namespace DataHandling
+} // namespace Mantid
