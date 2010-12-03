@@ -84,7 +84,7 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
     if(this->pixel_dataset_h<0){
-        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
+        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str()); //,this->file_access_mode);
         if(this->pixel_dataset_h<0){
             throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open pixels dataset",this->File_name));
         }
@@ -99,7 +99,7 @@ void
 MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription & DND_shape)
 {
   	// The function accepts full 4D dataset only!!!
-    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str());// ,H5P_DEFAULT);
     if (h_signal_DSID<0){
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
     }
@@ -130,7 +130,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 
 
     // read other dataset descriptors
-    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str(),H5P_DEFAULT);
+    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str()); //,H5P_DEFAULT);
     if (descriptors_DSID<0){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the the data descriptors field in the dataset: "<<mdd_attrib_names[DataDescriptor]<<std::endl;
@@ -189,7 +189,7 @@ void
 MD_File_hdfMatlab::read_mdd(MDImage & dnd)
 {
 // The function accepts full 4D dataset only!!!
-    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str()); // ,H5P_DEFAULT);
     if (h_signal_DSID<0){
         f_log.error()<<"MD_File_hdfMatlab::read_mdd: can not open multidimensional dataset "<<this->mdd_field_names[DatasetName]<<std::endl;
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));

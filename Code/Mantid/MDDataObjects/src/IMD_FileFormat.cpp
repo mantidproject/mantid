@@ -2,8 +2,11 @@
 #include "MDDataObjects/MDWorkspace.h"
 
 #include <vector>
-namespace Mantid{
-namespace MDDataObjects{
+
+namespace Mantid
+{
+namespace MDDataObjects
+{
 
  Kernel::Logger& IMD_FileFormat::f_log=Kernel::Logger::get("IMD_fileOperations");
 //***************************************************************************************
