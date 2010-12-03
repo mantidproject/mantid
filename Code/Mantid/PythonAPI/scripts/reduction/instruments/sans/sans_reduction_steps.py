@@ -15,7 +15,6 @@ class BaseBeamFinder(ReductionStep):
         Base beam finder. Holds the position of the beam center
         and the algorithm for calculates it using the beam's
         displacement under gravity
-        TODO: Maintain HFIR-ISIS compatibility
     """
     def __init__(self, beam_center_x=0.0, beam_center_y=0.0):
         super(BaseBeamFinder, self).__init__()
@@ -36,9 +35,17 @@ class BaseBeamFinder(ReductionStep):
         """
         # Load the file to extract the beam center from, and process it.
         filepath = reducer._full_file_path(self._datafile)
-        Load(filepath, "beam_center")
         
-        beam_center = FindCenterOfMassPosition("beam_center",
+        # Check whether that file was already meant to be processed
+        workspace = "beam_center"
+        if filepath in reducer._data_files.values():
+            for k in reducer._data_files.iterkeys():
+                if reducer._data_files[k]==filepath:
+                    workspace = k
+                    
+        reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
+        
+        beam_center = FindCenterOfMassPosition(workspace,
                                                Output = None,
                                                NPixelX=reducer.instrument.nx_pixels,
                                                NPixelY=reducer.instrument.ny_pixels,

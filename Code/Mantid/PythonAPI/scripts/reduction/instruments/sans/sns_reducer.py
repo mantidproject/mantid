@@ -22,11 +22,9 @@ class EqSansReducer(SANSReducer):
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)
-        self._beam_finder = sans_reduction_steps.BaseBeamFinder(self.instrument.nx_pixels/2, self.instrument.ny_pixels/2)
+        #self._beam_finder = sans_reduction_steps.BaseBeamFinder(self.instrument.nx_pixels/2, self.instrument.ny_pixels/2)
+        self._beam_finder = sans_reduction_steps.BaseBeamFinder(96.3, 125.95)
 
-    def pre_process(self): 
-        # Create the list of reduction steps
-        self._to_steps()  
     
 
         

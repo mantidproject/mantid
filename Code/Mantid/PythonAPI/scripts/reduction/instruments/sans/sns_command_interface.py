@@ -11,7 +11,7 @@ def EQSANS():
     NoSolidAngle()
     AzimuthalAverage()
     
-def AzimuthalAverage(binning="0.001,0.001,2.0", suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
+def AzimuthalAverage(binning="0.001,0.001,0.05", suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
     ReductionSingleton().set_azimuthal_averager(sans_reduction_steps.WeightedAzimuthalAverage(binning=binning,
                                                                                             suffix=suffix,
                                                                                             n_bins=n_bins,

@@ -7,8 +7,10 @@ class EQSANS(Instrument):
     """
         HFIR SANS instrument description
     """
-    def __init__(self, instrument_id="EQSANS") :
-        self._NAME = instrument_id
+    _NAME = "EQSANS"
+    
+    def __init__(self) :
+        super(EQSANS, self).__init__()
         ## Number of detector pixels in X
         self.nx_pixels = 192
         ## Number of detector pixels in Y
