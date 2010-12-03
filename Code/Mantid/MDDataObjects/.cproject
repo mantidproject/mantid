@@ -5,13 +5,7 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.1807695009">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.1807695009" moduleId="org.eclipse.cdt.core.settings" name="Debug">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/MDAlgorithms"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/MDAlgorithms/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="MDAlgorithms"/>
-					</externalSetting>
-				</externalSettings>
+				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -26,13 +20,19 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.1807695009." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.837997740" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1096950108" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
-							<builder buildPath="${workspace_loc:/MDAlgorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1086945440" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="7" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<builder buildPath="${workspace_loc:/MDAlgorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1086945440" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="7" superClass="cdt.managedbuild.target.gnu.builder.so.debug">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
+								</outputEntries>
+							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1371053142" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.1935889305" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.168870473" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1362899000" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataObjects/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/API/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
@@ -44,6 +44,13 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.286095014" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.376647000" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.so.debug.option.debugging.level.964356446" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.887835236" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/MDDataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/DataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/API/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/Geometry/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/Kernel/inc}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1404096460" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.959630604" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
@@ -51,27 +58,27 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1755683730" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.949263728" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
-								<option id="gnu.cpp.link.option.libs.856707283" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="MantidKernel"/>
-									<listOptionValue builtIn="false" value="MantidGeometry"/>
-									<listOptionValue builtIn="false" value="MantidAPI"/>
-									<listOptionValue builtIn="false" value="MantidDataObjects"/>
-								</option>
-								<option id="gnu.cpp.link.option.paths.1381325122" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../debug"/>
-								</option>
+								<option id="gnu.cpp.link.option.libs.856707283" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs"/>
+								<option id="gnu.cpp.link.option.paths.1381325122" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.626401808" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.1837871081" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
+								<option id="gnu.both.asm.option.include.paths.329581089" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/MDDataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/DataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/API/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/Geometry/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/Kernel/inc}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1850986697" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/ParameterParser.cpp|src/CenterpieceRebinning.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/CenterpieceRebinning.cpp|Event|src/ParameterParser.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -831,8 +838,11 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/MDAlgorithms"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/MDDataObjects"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/MDAlgorithms/Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/MDDataObjects/Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="MDAlgorithms"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="MDDataObjects"/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -876,6 +886,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="Event" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
