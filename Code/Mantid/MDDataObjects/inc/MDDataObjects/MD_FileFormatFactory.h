@@ -8,6 +8,8 @@
 #include "MDDataObjects/MD_File_hdfV1.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfMatlab4D.h"
+#include "MantidKernel/System.h"
+
 /** The class takes the file name and returns file the reader/writer which would understand and interpret the file format 
  *  of the file, provided. If the file is not found, the factory returns the default reader or the one, modified 
  *

@@ -9,7 +9,7 @@
 
 using namespace Mantid;
 using namespace MDDataObjects;
-class testMDFileFactory :    public CxxTest::TestSuite
+class MD_FileFactoryTest :    public CxxTest::TestSuite
 {
 
 public:
@@ -20,7 +20,16 @@ public:
 	void testReturnsNewHDFV1format(){
 		std::auto_ptr<IMD_FileFormat> newFormat;
 		// new file format has not been implemented so throws rubbish
-		TS_ASSERT_THROWS(MD_FileFormatFactory::getFileReader("testFile"),char *);
+		try
+		{
+		  MD_FileFormatFactory::getFileReader("testFile");
+		  TSM_ASSERT("MD_FileFormatFactory::getFileReader() should have thrown.", false);
+		}
+		catch (...)
+		{
+		  //Some kind of exception thrown. good.
+		}
+
 		//TS_ASSERT_THROWS_NOTHING(newFormat=MD_FileFormatFactory::getFileReader("testFile"));
 		//TSM_ASSERT("FileFormat factory returned a pointer to a wrong file format ",dynamic_cast<MD_File_hdfV1*>(newFormat.get())!=0);
 	}
