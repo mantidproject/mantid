@@ -1,6 +1,13 @@
 #ifndef MANTID_NEXUS_SAVESNSNEXUS_H_
 #define MANTID_NEXUS_SAVESNSNEXUS_H_
 
+//Copy of the NexusCpp API was placed in MantidNexus
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+
+using namespace ::NeXus;
+
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -15,7 +22,7 @@ namespace Mantid
     Save a Workspace2D into a Nexus file whose format corresponds to that expected at the SNS.
     Uses an initial file to copy most of the contents, only with modified data.
 
-    @author Janik Zikovsky, with HDF-copying code from Vickie Lynch.
+    @author Janik Zikovsky, with code from NXConvert, part of the NeXus library.
     @date Dec 2, 2010
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -67,7 +74,34 @@ namespace Mantid
       /// The name and path of the input file
       std::string m_inputFilename;
       /// Pointer to the local workspace
-      std::string m_inputWorkspace;
+      API::MatrixWorkspace_const_sptr inputWorkspace;
+      // Input workspace name.
+      std::string m_inputWorkspaceName;
+
+      // Map from detector ID to WS index
+      API::IndexToIndexMap * map;
+
+
+      struct link_to_make
+      {
+          char from[1024];   /* path of directory with link */
+          char name[256];    /* name of link */
+          char to[1024];     /* path of real item */
+      };
+
+      struct link_to_make links_to_make[1024];
+      int links_count;
+      char current_path[1024];
+
+      NXhandle inId, outId;
+
+      int add_path(const char* path);
+      int remove_path(const char* path);
+
+      int WriteGroup (int is_definition);
+      int WriteAttributes (int is_definition);
+      int convert_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
+
 //
 //      // For iterating through the HDF file...
 //      void data(char *bank);
