@@ -72,7 +72,8 @@ class myContentHandler : public Poco::XML::ContentHandler
 
     if ( localName == "instrument" )
     {
-      throw DummyException(attrList.getValue("","valid-from"), attrList.getValue("","valid-to"));
+      throw DummyException(static_cast<std::string>(attrList.getValue("","valid-from")), 
+        static_cast<std::string>(attrList.getValue("","valid-to")));
     }
   }
   virtual void endElement(
