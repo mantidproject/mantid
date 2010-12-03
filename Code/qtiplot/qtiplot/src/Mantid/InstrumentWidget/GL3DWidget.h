@@ -1,6 +1,8 @@
 #ifndef GL3DWIDGET_H_
 #define GL3DWIDGET_H_
 
+#include "MantidGeometry/IComponent.h"
+
 #include <QGLWidget>
 #include <QString>
 #include <QImage>
@@ -65,6 +67,7 @@ public:
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
   void getViewport(int& w,int& h){_viewport->getViewport(&w,&h);}
+  RenderMode getRenderMode()const{return m_renderMode;}
 
 signals:
   void actorsPicked(const std::set<QRgb>& );
@@ -75,6 +78,7 @@ public slots:
   void enableLighting(bool);
   void setWireframe(bool);
   void resetUnwrappedViews();
+  void componentSelected(Mantid::Geometry::ComponentID);
 
 protected:
   void initializeGL();

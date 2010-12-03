@@ -4,6 +4,7 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/IInstrument.h"
 
 #include <QRgb>
 #include <QSet>
@@ -23,8 +24,8 @@ detector(det)
 
 double UnwrappedSurface::m_tolerance = 0.00001;
 
-UnwrappedSurface::UnwrappedSurface(const GLActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis):
-    m_rootActor(rootActor),
+UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis):
+    m_instrActor(rootActor),
     m_pos(origin),
     m_zaxis(axis),
     m_u_min(DBL_MAX),
@@ -55,7 +56,7 @@ UnwrappedSurface::~UnwrappedSurface()
 void UnwrappedSurface::init()
 {
   // the actor calls this->callback for each detector
-  m_rootActor->detectorCallback(this);
+  m_instrActor->detectorCallback(this);
   double du = fabs(m_u_max - m_u_min) * 0.05;
   double dv = fabs(m_v_max - m_v_min) * 0.05;
   m_u_min -= du;
@@ -110,6 +111,30 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
   if (udet.v < m_v_min) m_v_min = udet.v;
   if (udet.v > m_v_max) m_v_max = udet.v;
   m_unwrappedDetectors.append(udet);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  if (parent)
+  {
+    QRectF detRect;
+    detRect.setLeft(udet.u - udet.width);
+    detRect.setRight(udet.u + udet.width);
+    detRect.setBottom(udet.v - udet.height);
+    detRect.setTop(udet.v + udet.height);
+    Mantid::Geometry::ComponentID id = parent->getComponentID();
+    QRectF& r = m_assemblies[id];
+    r |= detRect;
+    calcAssemblies(parent,r);
+  }
+}
+
+void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
+{
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
+  if (parent)
+  {
+    QRectF& r = m_assemblies[parent->getComponentID()];
+    r |= compRect;
+    calcAssemblies(parent,r);
+  }
 }
 
 void UnwrappedSurface::draw(GL3DWidget *widget)
@@ -138,6 +163,9 @@ void UnwrappedSurface::draw(GL3DWidget *widget)
   */
 void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 {
+//  std::cerr<<"drawing to:\n";
+//  std::cerr<<m_unwrappedView.left()<<','<<m_unwrappedView.top()<<' '
+//      <<m_unwrappedView.width()<<','<<m_unwrappedView.height()<<'\n'<<'\n';
   int vwidth,vheight;
   widget->getViewport(vwidth,vheight);
   const double dw = fabs(m_unwrappedView.width() / vwidth);
@@ -257,8 +285,8 @@ void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::
   Mantid::Geometry::BoundingBox bbox = udet.detector->shape()->getBoundingBox();
   Mantid::Geometry::V3D scale = udet.detector->getScaleFactor();
 
-  udet.minPoint = bbox.minPoint();
-  udet.maxPoint = bbox.maxPoint();
+//  udet.minPoint = bbox.minPoint();
+//  udet.maxPoint = bbox.maxPoint();
 
   Mantid::Geometry::V3D size = bbox.maxPoint() - bbox.minPoint();
   size *= scale;
@@ -449,6 +477,39 @@ void UnwrappedSurface::zoom()
   m_unwrappedViewChanged = true;
 }
 
+/**
+  * Zooms to the specified area. The previous zoom stack is cleared.
+  */
+void UnwrappedSurface::zoom(const QRectF& area)
+{
+  if (!m_zoomStack.isEmpty())
+  {
+    m_unwrappedView = m_zoomStack.first();
+    m_zoomStack.clear();
+  }
+  m_zoomStack.push(m_unwrappedView);
+
+  double left = area.left();
+  double top  = area.top();
+  double width = area.width();
+  double height = area.height();
+
+  if (width * m_unwrappedView.width() < 0)
+  {
+    left += width;
+    width = -width;
+  }
+  if (height * m_unwrappedView.height() < 0)
+  {
+    top += height;
+    height = -height;
+  }
+//  std::cerr<<"New area:\n";
+//  std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
+  m_unwrappedView = QRectF(left,top,width,height);
+  m_unwrappedViewChanged = true;
+}
+
 void UnwrappedSurface::unzoom()
 {
   if (!m_zoomStack.isEmpty())
@@ -588,3 +649,43 @@ void UnwrappedSurface::showPickedDetector()
     std::cerr<<"det ID = "<<id<<'\n';
   }
 }
+
+bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,Mantid::Geometry::ComponentID id)
+{
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
+  if (!parent) return false;
+  if (parent->getComponentID() == id) return true;
+  return hasParent(parent,id);
+}
+
+void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
+{
+  boost::shared_ptr<const Mantid::Geometry::IInstrument> instr = m_instrActor->getInstrument();
+  boost::shared_ptr<const Mantid::Geometry::IComponent> comp = instr->getComponentByID(id);
+  boost::shared_ptr<const Mantid::Geometry::ICompAssembly> ass =
+      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(comp);
+  boost::shared_ptr<const Mantid::Geometry::IDetector> det =
+      boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(comp);
+  if (det)
+  {
+    int detID = det->getID();
+    foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
+    {
+      if (udet.detector->getID() == detID)
+      {
+        QRectF area(udet.u - udet.width,udet.v - udet.height,udet.width*2,udet.height*2);
+        zoom(area);
+        break;
+      }
+    }
+  }
+  if (ass)
+  {
+    QMap<Mantid::Geometry::ComponentID,QRectF>::iterator assRect = m_assemblies.find(ass->getComponentID());
+    if (assRect != m_assemblies.end())
+    {
+      zoom(*assRect);
+    }
+  }
+}
+

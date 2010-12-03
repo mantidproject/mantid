@@ -5,7 +5,7 @@
 #include "MantidGeometry/IDetector.h"
 //#include "MantidGeometry/Objects/Object.h"
 
-UnwrappedCylinder::UnwrappedCylinder(const GLActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
+UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
 {
   init();

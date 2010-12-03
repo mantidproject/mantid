@@ -21,6 +21,9 @@ public:
   void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
   Mantid::Geometry::V3D getSamplePos()const;
   QModelIndex findComponentByName(const QString & name) const;
+  void sendComponentSelectedSignal(QModelIndex index);
+signals:
+  void componentSelected(const Mantid::Geometry::ComponentID);
 private:
   boost::shared_ptr<Mantid::Geometry::IInstrument> mInstrument;
   InstrumentTreeModel *mTreeModel;

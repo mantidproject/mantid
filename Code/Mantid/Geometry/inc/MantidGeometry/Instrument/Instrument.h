@@ -107,6 +107,9 @@ namespace Mantid
       /// Returns a shared pointer to a component
       boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
 
+      /// Returns a shared pointer to a component
+      boost::shared_ptr<const Geometry::IComponent> getComponentByID(Geometry::ComponentID id)const;
+
       /// Get information about the parameters described in the instrument definition file and associated parameter files
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
 

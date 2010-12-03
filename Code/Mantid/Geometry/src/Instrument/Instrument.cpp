@@ -136,6 +136,19 @@ namespace Mantid
         return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
     }
 
+    /**  Get a shared pointer to a component by its ID, const version
+    *   @param id ID
+    *   @return A pointer to the component.
+    */
+    boost::shared_ptr<const Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)const
+    {
+      IComponent* base = (IComponent*)(id);
+      if (m_isParametrized)
+        return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
+      else
+        return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
+    }
+
     /**	Gets a pointer to the detector from its ID
     *  Note that for getting the detector associated with a spectrum, the SpectraDetectorMap::getDetector
     *  method should be used rather than this one because it takes account of the possibility of more

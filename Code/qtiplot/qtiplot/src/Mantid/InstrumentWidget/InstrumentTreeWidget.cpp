@@ -65,11 +65,11 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,doubl
 Mantid::Geometry::V3D InstrumentTreeWidget::getSamplePos()const
 {
     boost::shared_ptr<Mantid::Geometry::IComponent> sample = mInstrument->getSample();
-		if(sample!=NULL)
-			return sample->getPos();
-		else
-			return Mantid::Geometry::V3D(0.0,0.0,0.0);
-}
+    if(sample!=NULL)
+      return sample->getPos();
+    else
+      return Mantid::Geometry::V3D(0.0,0.0,0.0);
+  }
 
 QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) const
 {
@@ -80,4 +80,10 @@ QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) cons
 					      Qt::MatchFixedString | Qt::MatchRecursive);
   if( matches.isEmpty() ) return QModelIndex();
   return matches.first();
+}
+
+void InstrumentTreeWidget::sendComponentSelectedSignal(QModelIndex index)
+{
+  Mantid::Geometry::ComponentID id = static_cast<Mantid::Geometry::ComponentID>(index.internalPointer());
+  emit componentSelected(id);
 }

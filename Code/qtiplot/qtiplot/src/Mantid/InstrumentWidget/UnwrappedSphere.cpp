@@ -1,7 +1,7 @@
 #include "UnwrappedSphere.h"
 #include "MantidGeometry/IDetector.h"
 
-UnwrappedSphere::UnwrappedSphere(const GLActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
+UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
 {
   init();

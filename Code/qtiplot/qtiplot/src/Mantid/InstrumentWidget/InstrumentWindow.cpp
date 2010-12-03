@@ -58,6 +58,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   //Tree Controls
   mInstrumentTree = new InstrumentTreeWidget(0);
   instrumentTreeLayout->addWidget(mInstrumentTree);
+  connect(mInstrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
+          mInstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
   //Render Controls
   mSelectButton = new QPushButton(tr("Pick"));
   mSelectColormap = new QPushButton(tr("Select ColorMap"));
@@ -676,10 +678,18 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
   QModelIndexList items = selected.indexes();
   if( items.isEmpty() ) return;
 
-  double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
-  mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
-  V3D pos = mInstrumentTree->getSamplePos();
-  mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
+  if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
+  {
+    double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
+    mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
+    V3D pos = mInstrumentTree->getSamplePos();
+    mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
+  }
+  else
+  {
+    mInstrumentTree->sendComponentSelectedSignal(items.first());
+  }
+
 }
 
 /**

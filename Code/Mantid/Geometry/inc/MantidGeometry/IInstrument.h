@@ -71,6 +71,9 @@ public:
   /// Returns a shared pointer to a component
   virtual boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id) = 0;
 
+  /// Returns a shared pointer to a component
+  virtual boost::shared_ptr<const Geometry::IComponent> getComponentByID(Geometry::ComponentID id)const = 0;
+
   /// Returns a pointer to the first component encountered with the given name
   boost::shared_ptr<Geometry::IComponent> getComponentByName(const std::string & cname);
 

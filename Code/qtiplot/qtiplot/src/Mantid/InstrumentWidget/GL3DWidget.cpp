@@ -971,3 +971,12 @@ void GL3DWidget::redrawUnwrapped()
     m_unwrappedSurface->updateDetectors();
   }
 }
+
+void GL3DWidget::componentSelected(Mantid::Geometry::ComponentID id)
+{
+  if (m_unwrappedSurface)
+  {
+    m_unwrappedSurface->componentSelected(id);
+    update();
+  }
+}

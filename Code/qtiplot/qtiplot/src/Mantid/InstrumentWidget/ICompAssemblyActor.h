@@ -79,6 +79,7 @@ public:
   virtual void drawUsingColorID() = 0;
   void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
   boost::shared_ptr<Mantid::Geometry::IInstrument> getInstrument(){return mInstrument;}
+  boost::shared_ptr<const Mantid::Geometry::IInstrument> getInstrument()const{return mInstrument;}
 
   //virtual void init() = 0;
   virtual void redraw() = 0;

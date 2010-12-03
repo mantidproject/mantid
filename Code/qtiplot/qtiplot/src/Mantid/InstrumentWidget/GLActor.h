@@ -19,6 +19,7 @@
 #include <ostream>
 
 #include <QList>
+//#include <QObject>
 
 class UnwrappedCylinder;
 class UnwrappedDetectorCyl;
@@ -35,6 +36,13 @@ struct DetectorCallbackData
 {
   DetectorCallbackData(const GLColor& c):color(c){}
   GLColor color;
+};
+
+class DetectorCallback
+{
+  //Q_OBJECT
+public:
+  virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
 };
 
 /*!
@@ -69,12 +77,6 @@ struct DetectorCallbackData
 class GLActor : public GLObject
 {
 public:
-
-  class DetectorCallback
-  {
-  public:
-    virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
-  };
 
   GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
   GLActor(const GLActor&);        ///< Constructor with another actor as input

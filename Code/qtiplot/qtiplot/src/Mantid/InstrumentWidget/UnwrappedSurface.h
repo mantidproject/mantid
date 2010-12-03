@@ -3,13 +3,14 @@
 
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
-#include "GLActor.h"
+#include "MantidGeometry/IComponent.h"
+#include "InstrumentActor.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
 #include <QList>
 #include <QStack>
-#include <map>
+#include <QMap>
 
 namespace Mantid{
   namespace Geometry{
@@ -43,9 +44,8 @@ public:
   double uscale; ///< scaling factor in u direction
   double vscale; ///< scaling factor in v direction
   boost::shared_ptr<const Mantid::Geometry::IDetector> detector;
-  Mantid::Geometry::V3D minPoint,maxPoint;
+//  Mantid::Geometry::V3D minPoint,maxPoint;
 };
-
 
 /**
   * @class UnwrappedSurface
@@ -55,20 +55,24 @@ public:
   * @date 18 Nov 2010
   */
 
-class UnwrappedSurface: public GLActor::DetectorCallback
+class UnwrappedSurface: public DetectorCallback
 {
+  //Q_OBJECT
 public:
-  UnwrappedSurface(const GLActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
+  UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
   ~UnwrappedSurface();
   void startSelection(int x,int y);
   void moveSelection(int x,int y);
   void endSelection(int x,int y);
   void zoom();
+  void zoom(const QRectF& area);
   void unzoom();
   void updateView();
   void updateDetectors();
 
   void draw(GL3DWidget* widget);
+
+  void componentSelected(Mantid::Geometry::ComponentID);
 
 protected:
   virtual void calcUV(UnwrappedDetector& udet) = 0;
@@ -85,20 +89,22 @@ protected:
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   QRect selectionRect()const;
   QRectF selectionRectUV()const;
+  void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
 
-  const GLActor* m_rootActor;
+  const InstrumentActor* m_instrActor;
   const Mantid::Geometry::V3D m_pos;   ///< Origin (sample position)
   const Mantid::Geometry::V3D m_zaxis; ///< The z axis, symmetry axis of the cylinder
   Mantid::Geometry::V3D m_xaxis;       ///< The x axis, defines the zero of the polar phi angle
   Mantid::Geometry::V3D m_yaxis;       ///< The y axis, rotation from x to y defines positive phi
-  double m_u_min;                    ///< Minimum phi
-  double m_u_max;                    ///< Maximum phi
-  double m_v_min;                      ///< Minimum z
-  double m_v_max;                      ///< Maximum z
+  double m_u_min;                      ///< Minimum u
+  double m_u_max;                      ///< Maximum u
+  double m_v_min;                      ///< Minimum v
+  double m_v_max;                      ///< Maximum v
   QImage* m_unwrappedImage;      ///< storage for unwrapped image
   QImage* m_pickImage;      ///< storage for picking image
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
+  QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies;
   QRectF m_unwrappedView;
   QRect m_selectRect;
   QStack<QRectF> m_zoomStack;
