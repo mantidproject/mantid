@@ -57,19 +57,13 @@ namespace Mantid
 
             virtual std::string toXMLString() const = 0;
 
-
-            std::auto_ptr<ImplicitFunctionParameter> clone() const
-            { 
-                return std::auto_ptr<ImplicitFunctionParameter>( this->cloneImp() ); 
-            }
+            virtual ImplicitFunctionParameter* clone() const =0;
 
             virtual ~ImplicitFunctionParameter()
             {
             }
 
         protected:
-
-            virtual ImplicitFunctionParameter* cloneImp() const = 0;
 
             bool m_isValid;
 

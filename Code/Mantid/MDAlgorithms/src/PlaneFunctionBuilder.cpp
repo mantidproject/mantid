@@ -26,7 +26,7 @@ namespace Mantid
             this->m_origin = OriginParameter(parameter);
         }
 
-        std::auto_ptr<ImplicitFunction> PlaneFunctionBuilder::create() const
+        ImplicitFunction* PlaneFunctionBuilder::create() const
         {
             //check that builder parameters are valid.
             if(!m_origin.isValid())
@@ -43,7 +43,7 @@ namespace Mantid
             NormalParameter& refNormal = m_normal;
             OriginParameter& refOrigin = m_origin;
             PlaneImplicitFunction* func = new Mantid::MDAlgorithms::PlaneImplicitFunction(refNormal, refOrigin);
-            return std::auto_ptr<ImplicitFunction>(func);
+            return func;
         }
 
         PlaneFunctionBuilder::~PlaneFunctionBuilder()

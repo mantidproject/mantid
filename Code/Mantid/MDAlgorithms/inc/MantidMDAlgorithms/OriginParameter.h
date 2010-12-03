@@ -46,10 +46,6 @@ namespace Mantid
 
            std::vector<double> m_origin;
 
-        protected:
-
-            OriginParameter* cloneImp() const;
-
         public:
 
             OriginParameter(double o1, double o2, double o3);
@@ -70,7 +66,7 @@ namespace Mantid
 
             void asVector(std::vector<double>& origin) const;
 
-            std::auto_ptr<OriginParameter> clone() const;
+            OriginParameter* clone() const;
 
             double getX() const;
 

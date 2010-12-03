@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/OriginParameter.h"
 
 class OriginParameterTest : public CxxTest::TestSuite
@@ -53,7 +53,7 @@ public:
     void testClone()
     {
         Mantid::MDAlgorithms::OriginParameter original(0, 1, 2);
-        std::auto_ptr<Mantid::MDAlgorithms::OriginParameter> cloned = original.clone();
+        boost::scoped_ptr<Mantid::MDAlgorithms::OriginParameter> cloned(original.clone());
 
         TSM_ASSERT_EQUALS("Cloned OriginParameter getX() is not same as original.", 0, cloned->getX() );
         TSM_ASSERT_EQUALS("Cloned OriginParameter getY() is not same as original.", 1, cloned->getY() );

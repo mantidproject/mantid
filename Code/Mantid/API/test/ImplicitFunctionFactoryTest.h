@@ -126,9 +126,9 @@ private:
     Mantid::API::ImplicitFunction* m_return;
   public:
     MockImplicitFunctionBuilder(Mantid::API::ImplicitFunction* preturn): m_return(preturn){}
-    std::auto_ptr<Mantid::API::ImplicitFunction> create() const
+    Mantid::API::ImplicitFunction* create() const
     {
-      return std::auto_ptr<Mantid::API::ImplicitFunction>(m_return);
+      return m_return;
     }
   };
 

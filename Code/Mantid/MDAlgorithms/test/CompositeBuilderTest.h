@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidAPI/ImplicitFunction.h"
@@ -29,7 +29,7 @@ private:
         ~FakeParameter(){;} 
 
     protected:
-        virtual Mantid::API::ImplicitFunctionParameter* cloneImp() const
+        virtual Mantid::API::ImplicitFunctionParameter* clone() const
         {
             return new FakeParameter;
         }
@@ -55,10 +55,10 @@ private:
         void addParameter(std::auto_ptr<Mantid::API::ImplicitFunctionParameter> parameter)
         {
         }
-        std::auto_ptr<Mantid::API::ImplicitFunction> create() const
+        Mantid::API::ImplicitFunction* create() const
         {
             isInvoked = true;
-            return std::auto_ptr<Mantid::API::ImplicitFunction>(new FakeImplicitFunction);
+            return new FakeImplicitFunction;
         }
     };
 
@@ -74,9 +74,9 @@ public:
         CompositeFunctionBuilder* innerCompBuilder = new CompositeFunctionBuilder;
         innerCompBuilder->addFunctionBuilder(builderA);
         innerCompBuilder->addFunctionBuilder(builderB);
-        std::auto_ptr<CompositeFunctionBuilder> outterCompBuilder = std::auto_ptr<CompositeFunctionBuilder>(new CompositeFunctionBuilder);
+        boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
         outterCompBuilder->addFunctionBuilder(innerCompBuilder);
-        std::auto_ptr<Mantid::API::ImplicitFunction> topFunc = outterCompBuilder->create();
+        boost::scoped_ptr<Mantid::API::ImplicitFunction> topFunc(outterCompBuilder->create());
         //CompositeImplicitFunction* topCompFunc = dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
 
         TSM_ASSERT("Nested builder not called by composite", builderA->isInvoked);

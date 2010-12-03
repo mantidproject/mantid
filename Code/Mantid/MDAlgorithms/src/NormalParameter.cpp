@@ -54,14 +54,9 @@ bool NormalParameter::isValid() const
   return this->m_isValid;
 }
 
-NormalParameter* NormalParameter::cloneImp() const
+NormalParameter* NormalParameter::clone() const
 {
   return new NormalParameter(m_normal.at(0), m_normal.at(1), m_normal.at(2));
-}
-
-std::auto_ptr<NormalParameter> NormalParameter::clone() const
-{
-  return std::auto_ptr<NormalParameter>(cloneImp());
 }
 
 NormalParameter::~NormalParameter()

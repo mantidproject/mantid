@@ -47,10 +47,6 @@ private:
 
   std::vector<double> m_normal;
 
-protected:
-
-  NormalParameter* cloneImp() const;
-
 public:
 
   NormalParameter(double n1, double n2, double n3);
@@ -71,7 +67,7 @@ public:
 
   NormalParameter* reflect();
 
-  std::auto_ptr<NormalParameter> clone() const;
+  NormalParameter* clone() const;
 
   ~NormalParameter();
 

@@ -12,6 +12,7 @@
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include <cxxtest/TestSuite.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -21,6 +22,7 @@
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
+
 
 class  PlaneImplicitFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
 {
@@ -95,7 +97,7 @@ public:
         ExposedPlaneFunctionParser functionParser;
 		functionParser.setParameterParser(constructRootParameterParser());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
-        std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = planeBuilder->create();
+        boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(planeBuilder->create());
 
         PlaneImplicitFunction* planeFunction = dynamic_cast<PlaneImplicitFunction*>(impFunction.get());
 

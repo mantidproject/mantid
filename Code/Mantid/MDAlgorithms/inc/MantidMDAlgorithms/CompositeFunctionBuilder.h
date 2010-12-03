@@ -52,7 +52,7 @@ namespace Mantid
         public:
             CompositeFunctionBuilder();
             void addFunctionBuilder(ImplicitFunctionBuilder* funcBuilder);
-            std::auto_ptr<Mantid::API::ImplicitFunction> create() const;
+            Mantid::API::ImplicitFunction* create() const;
             ~CompositeFunctionBuilder();
         };
 

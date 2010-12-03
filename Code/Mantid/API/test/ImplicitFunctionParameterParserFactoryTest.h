@@ -24,7 +24,7 @@ class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunctionParameter(){}
     protected:
-    virtual ImplicitFunctionParameter* cloneImp() const 
+    virtual ImplicitFunctionParameter* clone() const 
     { 
       return new MockImplicitFunctionParameter;
     }

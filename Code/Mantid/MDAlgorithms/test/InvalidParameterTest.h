@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 class InvalidParameterTest : public CxxTest::TestSuite
@@ -21,7 +21,7 @@ public:
     {
         using namespace Mantid::MDAlgorithms;
         InvalidParameter original("1");
-        std::auto_ptr<InvalidParameter> cloned = original.clone();
+        boost::scoped_ptr<InvalidParameter> cloned(original.clone());
         TSM_ASSERT_EQUALS("The parameter value has not been cloned.", "1", cloned->getValue());
     }
 

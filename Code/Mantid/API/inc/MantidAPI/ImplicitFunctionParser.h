@@ -18,7 +18,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <memory>
+#include <memory.h>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

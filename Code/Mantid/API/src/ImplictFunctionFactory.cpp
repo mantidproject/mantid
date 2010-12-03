@@ -36,7 +36,7 @@ namespace Mantid
       std::auto_ptr<ImplicitFunctionParser> funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(configXML);
 
       ImplicitFunctionBuilder* functionBuilder = funcParser->createFunctionBuilder(pInstructionsXML);
-      return functionBuilder->create().release();
+      return functionBuilder->create();
     }
   }
 }

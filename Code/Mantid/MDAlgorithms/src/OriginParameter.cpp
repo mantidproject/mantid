@@ -49,14 +49,9 @@ namespace Mantid
             return m_isValid;
         }
 
-        OriginParameter* OriginParameter::cloneImp() const
+        OriginParameter* OriginParameter::clone() const
         {
             return new OriginParameter(m_origin.at(0), m_origin.at(1), m_origin.at(2));
-        }
-
-        std::auto_ptr<OriginParameter> OriginParameter::clone() const
-        {
-            return std::auto_ptr<OriginParameter>(cloneImp());
         }
 
         OriginParameter::~OriginParameter()

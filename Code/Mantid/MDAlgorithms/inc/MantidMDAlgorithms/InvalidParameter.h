@@ -42,9 +42,9 @@ namespace Mantid
         {
         private:
             std::string m_value;
-        protected:
-            InvalidParameter* cloneImp() const;
+
         public:
+
             InvalidParameter();
 
             InvalidParameter(std::string value);
@@ -55,7 +55,7 @@ namespace Mantid
 
             bool isValid() const;
 
-            std::auto_ptr<Mantid::MDAlgorithms::InvalidParameter> clone() const;
+            Mantid::MDAlgorithms::InvalidParameter* clone() const;
 
             std::string toXMLString() const;
 
