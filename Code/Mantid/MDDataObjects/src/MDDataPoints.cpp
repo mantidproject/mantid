@@ -5,6 +5,7 @@
 namespace Mantid{
 namespace MDDataObjects{
 using namespace Mantid::Kernel;
+/// this class is idle at the moment as all renbinning functionality is wired up through the file reader;
 
 // logger for MD workspaces  
 Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
@@ -17,22 +18,23 @@ const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
  *
  * @param spImage: ???
  * */
-MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage):
+MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage,const MDDataPointsDescription &descr):
+  description(descr),
   memBased(false),
   n_data_points(0),
   n_fields(9),
   data_buffer_size(0),
   data_buffer(NULL),
-  m_spImageData(spImage)
+  m_spMDImage(spImage)
 {
 
-  std::vector<std::string> dim_tags= m_spImageData->getGeometry()->getBasisTags();
+  std::vector<std::string> dim_tags= m_spMDImage->getGeometry()->getBasisTags();
   std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);
   this->field_tag.reserve(n_fields);
   this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
   this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
 
-  int nDims = m_spImageData->getGeometry()->getNumDims();
+  int nDims = m_spMDImage->getGeometry()->getNumDims();
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);
 }
@@ -73,7 +75,7 @@ void MDDataPoints::set_field_length(const std::vector<unsigned int> &in_fields)
 void MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
 {
   if(this->data_buffer){
-    // if it is already allocated and bif enough, do nothing
+    // if it is already allocated and big enough, do nothing
     size_t nPix= this->getNumPixels(spFile);
 
     size_t buf_size = (nPix<PIX_BUFFER_SIZE)?nPix:PIX_BUFFER_SIZE;
@@ -84,7 +86,7 @@ void MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
       return;
     }
   }
-  unsigned int nDims = this->m_spImageData->getGeometry()->getNumDims();
+  unsigned int nDims = this->m_spMDImage->getGeometry()->getNumDims();
 
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);

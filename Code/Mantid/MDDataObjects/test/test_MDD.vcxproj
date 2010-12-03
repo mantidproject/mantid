@@ -166,6 +166,7 @@
     <ClCompile Include="MDImageTest.cpp" />
     <ClCompile Include="MDPixelsTest.cpp" />
     <ClCompile Include="MDWorkspaceTest.cpp" />
+    <ClCompile Include="MD_FileFactoryTest.cpp" />
     <ClCompile Include="test_sqw.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +230,20 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="MD_FileFactoryTest.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FileName).cpp</Outputs>
+    </CustomBuild>
     <ClInclude Include="testPoint3D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

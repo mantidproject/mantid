@@ -42,12 +42,23 @@ namespace MDDataObjects
 {
 
   class MDImage;
+  class MDDataPointsDescription{
+  public:
+	  MDDataPointsDescription(const MDPointDescription &descr):
+      point_description(descr)
+	  { }
+  private:
+	  /// this one describes structure of single pixel as it is defined and written on HDD
+	  MDPointDescription point_description;
+	  // this has not been defined at the moment, but will provide the description for possible lookup tables
+	  std::vector<double> lookup_tables;
+  };
   
   //**********************************************************************************************************************
   class DLLExport MDDataPoints
   {
   public:
-    MDDataPoints(boost::shared_ptr<const MDImage> pImageData);
+    MDDataPoints(boost::shared_ptr<const MDImage> pImageData,const MDDataPointsDescription &description);
     ~MDDataPoints();
 
     /// check if the pixels are all in memory;
@@ -83,6 +94,8 @@ namespace MDDataObjects
     bool memBased;
 
   private:
+	  // does nothing at the moment --> define underlying logic;
+	 MDDataPointsDescription description;
 
     /// the data, describing the detector pixels
     size_t  n_data_points;  //< number of data points contributing in dataset
@@ -107,7 +120,7 @@ namespace MDDataObjects
     MDDataPoints(const MDDataPoints& p);
     MDDataPoints & operator = (const MDDataPoints & other);
 
-    boost::shared_ptr<const MDImage> m_spImageData; //Allows access to current geometry owned by MDImage.
+    boost::shared_ptr<const MDImage> m_spMDImage; //Allows access to current geometry owned by MDImage.
 
       static Kernel::Logger& g_log;
   };

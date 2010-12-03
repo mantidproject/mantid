@@ -191,6 +191,7 @@ MD_File_hdfMatlab::read_mdd(MDImage & dnd)
 // The function accepts full 4D dataset only!!!
     hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
     if (h_signal_DSID<0){
+        f_log.error()<<"MD_File_hdfMatlab::read_mdd: can not open multidimensional dataset "<<this->mdd_field_names[DatasetName]<<std::endl;
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
     }
     std::vector<int> arr_dims_vector;
@@ -199,6 +200,10 @@ MD_File_hdfMatlab::read_mdd(MDImage & dnd)
  
   // get pointer to MD structure which should be read from memory
    MD_img_data *pMD_struct  = dnd.get_pMDImgData();
+   if(!pMD_struct->data){
+	   f_log.error()<<"MD_File_hdfMatlab::read_mdd: Image data structures have not been allocated properly\n";
+	   throw(std::runtime_error("Image data structures have not been allocated properly"));
+   }
 //-------------------------------------------------------------------------
 // read the dataset itself
 // 1) create mem datatype to read data into. 

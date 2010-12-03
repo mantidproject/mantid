@@ -59,7 +59,9 @@ private:
     MDGeometry* pGeometry = new MDGeometry(MDGeometryBasis(basisDimensions, cell));
     return std::auto_ptr<MDImage>(new MDImage(pGeometry));
   }
-
+  // helper variable providing default pixels description
+  MDPointDescription pixDescription;
+  
 public:
 
   void testGetPixels(void)
@@ -70,7 +72,7 @@ public:
     MockFileFormat* mockFileFormat = new MockFileFormat;
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(100));
 
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
     TSM_ASSERT_EQUALS("The number of pixels returned is not correct.", 100, points->getNumPixels(boost::shared_ptr<IMD_FileFormat>(mockFileFormat)));
     delete points;
   }
@@ -81,7 +83,7 @@ public:
     using namespace Mantid::MDDataObjects;
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
 
     TSM_ASSERT_EQUALS("The memory buffer size following construction is not correct.", 0, points->getMemorySize());
     delete points;
@@ -93,7 +95,7 @@ public:
     using namespace Mantid::MDDataObjects;
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
 
     TSM_ASSERT_EQUALS("The MDDataPoints should not be in memory.", false, points->isMemoryBased());
     delete points;
@@ -106,7 +108,7 @@ public:
 
     MockFileFormat* mockFileFormat = new MockFileFormat;
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(2));
-    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()));
+    MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
     points->alloc_pix_array(boost::shared_ptr<IMD_FileFormat>(mockFileFormat));
     TSM_ASSERT_EQUALS("The memory size is not the expected value after allocation.", 2, points->getMemorySize());
     delete points;
