@@ -1,5 +1,5 @@
-#ifndef MD_IMAGE_DATA_H
-#define MD_IMAGE_DATA_H
+#ifndef MD_IMAGE_H
+#define MD_IMAGE_H
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -58,11 +58,12 @@ namespace Mantid{
 struct MD_img_data{
     size_t data_size;              ///< size of the data points array expressed as 1D array;
 	size_t data_array_size;        ///< size of allocated part of MD_Image_point *data block (may be bigger then data_size)
-    MD_image_point *data;           ///< multidimensional array of data points, represented as a single dimensional array;
-    // integer descriptor for dimensions;
+    MD_image_point *data;           ///< multidimensional array of image cells, represented as a single dimensional array;
+    // descriptors for dimensions;
     std::vector<size_t>dimStride;
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
-    std::vector<double> min_value;  ///< min value of data extend in the selected dimension -- differs from geometry ranges
+    std::vector<double> min_value;  /**< min value of real data in the selected dimension -- differs from the MDGeometry ranges, as geometry 
+	                                 specifies  ranges for rebinning */
     std::vector<double> max_value;  ///< max value of data extend in the selected dimension -- differs from ranges, set in geometry
     MD_img_data():data_size(0),data_array_size(0),data(NULL){}
 
@@ -76,12 +77,13 @@ public:
     MDImage(Mantid::Geometry::MDGeometry* p_geometry);
     // destructor
     ~MDImage();
-    /** function returns vector of points left after the selection has been applied to the multidimensinal dataset
+    /** function returns vector of points left after the selection has been applied to the multidimensinal image
+	*
     * @param selection -- vector of indexes, which specify which dimensions are selected and the location of the selected point
     *                     e.g. selection[0]=10 -- selects the index 10 in the last expanded dimension or
     *                     selection.assign(2,10) for 4-D dataset lead to 2D image extracted from 4D image at range of points (:,:,10,10);
     *                     throws if attempeted to select more dimensions then the number of expanded dimensions
-	*                     if selection index gous out of range for an dimension function returns last point in this dimension.
+	*                     if the selection index extends beyond of range for an dimension, function returns last point in this dimension.
     */
     void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3

@@ -37,6 +37,22 @@ class testMDDataPoints :    public CxxTest::TestSuite
   MDPointStructure descriptor4D;
   MDPointStructure descriptor5D;
   MDPointDescription *pix4D,*pix5D;
+  // helper function generating the data for the tests;
+  void build4DTestdata(data4D testData[],unsigned int nPixels)
+  {
+   for(unsigned int i=0;i<nPixels;i++)
+    {
+      testData[i].q1  =(float)(i+1);
+      testData[i].q2  =(float)(i+1)*2;
+      testData[i].q3  =(float)(i+1)*3;
+      testData[i].En  =(float)(i+1)*4;
+      testData[i].S   =(double)(i+1)*5;
+      testData[i].Err =(double)(i+1)*6;
+      testData[i].iRun=(i+1)*7;
+      testData[i].iPix=(i+1)*8;
+      testData[i].iEn =(i+1)*9; 
+    }
+  }
 
 public:
   void testMDPointDescriptionConstructorsDefault()
@@ -127,19 +143,9 @@ public:
     int i;
     data4D testData[nPix];
     char   testBuffer[(nPix+1)*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t))];
-    for(i=0;i<10;i++)
-    {
-      testData[i].q1  =(float)(i+1);
-      testData[i].q2  =(float)(i+1)*2;
-      testData[i].q3  =(float)(i+1)*3;
-      testData[i].En  =(float)(i+1)*4;
-      testData[i].S   =(double)(i+1)*5;
-      testData[i].Err =(double)(i+1)*6;
-      testData[i].iRun=(i+1)*7;
-      testData[i].iPix=(i+1)*8;
-      testData[i].iEn =(i+1)*9; 
-    }
 
+	build4DTestdata(testData,nPix);
+   
     TS_ASSERT_THROWS_NOTHING(pix4D = new MDPointDescription(descriptor4D,fieldNames4D));
 
     MDDataPoint<float,uint16_t>  PackUnpacker(testBuffer,*pix4D);
@@ -190,19 +196,8 @@ public:
     int i;
     data4D testData[nPix];
     char   testBuffer[nPix*(4*sizeof(float)+2*sizeof(double)+2*sizeof(uint32_t))];
-    for(i=0;i<10;i++){
-      testData[i].q1  =(float)(i+1);
-      testData[i].q2  =(float)(i+1)*2;
-      testData[i].q3  =(float)(i+1)*3;
-      testData[i].En  =(float)(i+1)*4;
-      testData[i].S   =(double)(i+1)*5;
-      testData[i].Err =(double)(i+1)*6;
-      testData[i].iRun=(i+1)*7;
-      testData[i].iPix=(i+1)*8;
-      testData[i].iEn =(i+1)*9; 
-    }
 
-
+    build4DTestdata(testData,nPix);
 
     MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,*pix4D);
 
@@ -300,7 +295,58 @@ public:
 
   }
 
+  void testPixelCopying(){
+  const int nPix = 10;
+    int i;
+    data4D testData[nPix];
+    char   sourceBuffer[(nPix)*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t))];
 
+    build4DTestdata(testData,nPix);
+
+    TS_ASSERT_THROWS_NOTHING(pix4D = new MDPointDescription(descriptor4D,fieldNames4D));
+
+    MDDataPoint<float,uint16_t>  PackUnpacker(sourceBuffer,*pix4D);
+
+    float  Dim[4];
+    double SE[2];
+    int    Ind[3];
+    for(i=0;i<nPix;i++)
+    {
+      Dim[0]=testData[i].q1;
+      Dim[1]=testData[i].q2;
+      Dim[2]=testData[i].q3;
+      Dim[3]=testData[i].En;
+      SE[0] =testData[i].S ;
+      SE[1] =testData[i].Err ;
+      Ind[0] =testData[i].iRun ;
+      Ind[1] =testData[i].iPix ;
+      Ind[2] =testData[i].iEn ;
+      PackUnpacker.setData(i,Dim,SE,Ind);
+    }
+    char   targetBuffer[(2*nPix)*(4*sizeof(float)+2*sizeof(double)+sizeof(uint32_t)+sizeof(uint16_t))];
+
+	for(i=0;i<nPix;i++){
+		PackUnpacker.copyPixel(i,targetBuffer,2*i);
+	}
+	// initate path-through class to interpret the transformed data
+    MDDataPoint<float,uint16_t>  newUnpacker(targetBuffer,*pix4D);
+ // 
+    for(i=0;i<nPix;i++)
+    {
+      TS_ASSERT_EQUALS(newUnpacker.getDataField(0,2*i),testData[i].q1);
+      TS_ASSERT_EQUALS(newUnpacker.getDataField(1,2*i),testData[i].q2);
+      TS_ASSERT_EQUALS(newUnpacker.getDataField(2,2*i),testData[i].q3);
+      TS_ASSERT_EQUALS(newUnpacker.getDataField(3,2*i),testData[i].En);
+      TS_ASSERT_EQUALS(newUnpacker.getSignal(2*i),testData[i].S);
+      TS_ASSERT_EQUALS(newUnpacker.getError(2*i), testData[i].Err);
+      TS_ASSERT_EQUALS(newUnpacker.getRunID(2*i), testData[i].iRun);
+      TS_ASSERT_EQUALS(newUnpacker.getPixID(2*i), testData[i].iPix);
+
+      TS_ASSERT_EQUALS(newUnpacker.getIndex(2,2*i), testData[i].iEn);
+
+    }
+
+  }
   void testEventData4D(void)
   {
     const int nPix = 10;

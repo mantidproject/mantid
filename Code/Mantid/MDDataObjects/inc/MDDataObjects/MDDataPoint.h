@@ -172,12 +172,12 @@ protected:
    unsigned int getNumDimensions(void)              const{return n_dimensions;}
    unsigned int getNumSignals(void)                 const{return n_signals;}
    unsigned int getNumDimIndex(void)                const{return n_indFields;}
-   //************************************************************************************************************************
-   //Mutators
    /// copy pixel from the specified location among origin pixels to the specified location among target pixels
    void copyPixel(size_t iOrigin, char *targetBuff, size_t iTarget)const{
-     memcpy(base+MDPointStride*iOrigin,targetBuff+MDPointStride*iTarget,MDPointStride);
+     memcpy(targetBuff+MDPointStride*iTarget,pDataBuffer+MDPointStride*iOrigin,MDPointStride);
    }
+   //************************************************************************************************************************
+   //Mutators
      
   //------------------------------------------------------------------------------------------------
   /** function sets data from external source into MDDataPoint format and is specialized
@@ -187,7 +187,8 @@ protected:
    *  @param ind           - the location of the pixel in the MDDataPoints dataset
    *  @param dim_fields    - the values of the dimension coordinates (may be absent)
    *  @param Signal_fields - Signal and error for histogram data, absent for event data
-   *  @param iFields       - array of dimension ID in some look-up table; this function assumes that 2 first fields represent the detector location (detectorId and runID)
+   *  @param iFields       - array of dimension ID in some look-up table; this function assumes that 2 first 
+   *                         fields represent the detector location (detectorId and runID)
    */
    void setData(unsigned int ind,T dim_fields[],double SignalFields[],int iFiels[]){
      unsigned int i,i0;
@@ -241,8 +242,8 @@ protected:
    // auxiliary 
    I*           pWorkingBuf;
    std::vector<unsigned int> field_lengths;
-
- // the main constructor function;
+ //*************************************************************************************************************
+ /// the main constructor function;
    void buildPixel(void)
    {
      unsigned int i;
