@@ -1,18 +1,22 @@
 #ifndef MANTID_NEXUS_SAVESNSNEXUS_H_
 #define MANTID_NEXUS_SAVESNSNEXUS_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
+#include <climits>
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
+
 //Copy of the NexusCpp API was placed in MantidNexus
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 
 using namespace ::NeXus;
 
-
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include <climits>
 
 namespace Mantid
 {
