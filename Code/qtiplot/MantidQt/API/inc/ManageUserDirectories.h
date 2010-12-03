@@ -27,7 +27,8 @@ private slots:
   void cancelClicked();
   void confirmClicked();
 
-  void addDataDir();
+  void addDataDirPath();
+  void addDataDirBrowse();
   void remDataDir();
   void moveUp();
   void moveDown();

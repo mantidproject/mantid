@@ -21,7 +21,8 @@ void ManageUserDirectories::initLayout()
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(confirmClicked()));
 
-  connect(m_uiForm.pbAddDir, SIGNAL(clicked()), this, SLOT(addDataDir()));
+  connect(m_uiForm.pbAddDirectory, SIGNAL(clicked()), this, SLOT(addDataDirPath()));
+  connect(m_uiForm.pbBrowseToDir, SIGNAL(clicked()), this, SLOT(addDataDirBrowse()));
   connect(m_uiForm.pbRemDir, SIGNAL(clicked()), this, SLOT(remDataDir()));
   connect(m_uiForm.pbMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
   connect(m_uiForm.pbMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
@@ -93,7 +94,19 @@ void ManageUserDirectories::confirmClicked()
   saveProperties();
   this->close();
 }
-void ManageUserDirectories::addDataDir()
+
+void ManageUserDirectories::addDataDirPath()
+{
+  QString path = m_uiForm.leDirectoryPath->text();
+
+  if ( path != "" )
+  {
+    m_uiForm.lwDataSearchDirs->addItem(path);
+  }
+
+}
+
+void ManageUserDirectories::addDataDirBrowse()
 {
   QSettings settings;
   QString lastDirectory = settings.value("ManageUserSettings/last_directory", "").toString();
