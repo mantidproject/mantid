@@ -5,6 +5,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
