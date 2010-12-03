@@ -177,6 +177,7 @@
     <ClCompile Include="src\LoadGSS.cpp" />
     <ClCompile Include="src\LoadInstrument.cpp" />
     <ClCompile Include="src\LoadInstrumentFromRaw.cpp" />
+    <ClCompile Include="src\LoadInstrumentHelper.cpp" />
     <ClCompile Include="src\LoadLog.cpp" />
     <ClCompile Include="src\LoadLOQDistancesFromRaw.cpp" />
     <ClCompile Include="src\LoadMappingTable.cpp" />
@@ -223,6 +224,7 @@
     <ClInclude Include="inc\mantiddatahandling\isisdataarchive.h" />
     <ClInclude Include="inc\mantiddatahandling\load.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadGSS.h" />
+    <ClInclude Include="inc\MantidDataHandling\LoadInstrumentHelper.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadPreNeXusMonitors.h" />
     <ClInclude Include="inc\mantiddatahandling\loadrawspectrum0.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadSNSspec.h" />
@@ -254,6 +256,7 @@
     <ClInclude Include="inc\MantidDataHandling\LoadInstrument.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadInstrumentFromRaw.h" />
     <ClInclude Include="test\LoadInstrumentFromRawTest.h" />
+    <ClInclude Include="test\LoadInstrumentHelperTest.h" />
     <ClInclude Include="test\LoadInstrumentTest.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadLog.h" />
     <ClInclude Include="test\LoadLogTest.h" />

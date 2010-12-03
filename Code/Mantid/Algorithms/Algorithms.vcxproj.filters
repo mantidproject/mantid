@@ -884,6 +884,9 @@
     <ClInclude Include="inc\MantidAlgorithms\Integration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\CreateCalFileByNamesTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\WorkspaceCreationHelper.hh" />

@@ -332,6 +332,7 @@
     <ClInclude Include="test\CorrectToFileTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateCalFileByNames.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateSingleValuedWorkspace.h" />
+    <ClInclude Include="test\CreateCalFileByNamesTest.h" />
     <ClInclude Include="test\CreateSingleValuedWorkspaceTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\CropWorkspace.h" />
     <ClInclude Include="test\CreateWorkspaceTest.h" />
