@@ -19,8 +19,9 @@ namespace Mantid
   namespace NeXus
   {
     /**
-    Save a Workspace2D into a Nexus file whose format corresponds to that expected at the SNS.
-    Uses an initial file to copy most of the contents, only with modified data.
+    Save a Workspace2D or an EventWorkspace into a Nexus file whose format
+    corresponds to that expected at the SNS.
+    Uses an initial file to copy most of the contents, only with modified data and time_of_flight fields.
 
     @author Janik Zikovsky, with code from NXConvert, part of the NeXus library.
     @date Dec 2, 2010
@@ -82,6 +83,7 @@ namespace Mantid
       API::IndexToIndexMap * map;
 
 
+      // Stuff needed by the copy_file() functions
       struct link_to_make
       {
           char from[1024];   /* path of directory with link */
@@ -100,7 +102,7 @@ namespace Mantid
 
       int WriteGroup (int is_definition);
       int WriteAttributes (int is_definition);
-      int convert_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
+      int copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
 
 //
 //      // For iterating through the HDF file...
