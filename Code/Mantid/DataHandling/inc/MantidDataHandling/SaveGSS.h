@@ -76,7 +76,7 @@ private:
   ///Execution code
   void exec();
   ///Write the header information
-  void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
+  void writeHeaders(const std::string &format, std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
   ///Write out the data in RALF format
   void writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
                      const MantidVec& X, const MantidVec& Y, const MantidVec& E) const;
