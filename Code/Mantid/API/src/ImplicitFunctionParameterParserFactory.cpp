@@ -25,22 +25,18 @@ namespace Mantid
       throw std::runtime_error("Use of create in this context is forbidden. Use createUnwrappedInstead.");
     }
 
-    std::auto_ptr<ImplicitFunctionParameterParser> ImplicitFunctionParameterParserFactoryImpl::createImplicitFunctionParameterParserFromXML(const std::string& configXML) const
+    ImplicitFunctionParameterParser* ImplicitFunctionParameterParserFactoryImpl::createImplicitFunctionParameterParserFromXML(Poco::XML::Element* parametersElement) const
     {
-      using namespace Poco::XML;
-      DOMParser pParser;
-      Document* pDoc = pParser.parseString(configXML);
-      Element* pRootElem = pDoc->documentElement();
-      if(pRootElem->localName() != "Factories")
+      if(parametersElement->localName() != "ParameterList")
       {
-        throw std::runtime_error("Root node must be a Fatories element");
+        throw std::runtime_error("Expected passed element to be ParameterList.");
       }
-      NodeList* paramParserNodes = pRootElem->getChildElement("ParameterParserFactoryList")->childNodes();
-
+      Poco::XML::NodeList* parameters = parametersElement->getElementsByTagName("Parameter");
       ImplicitFunctionParameterParser* paramParser = NULL;
-      for(int i = 0; i < paramParserNodes->length(); i++)
+      for(int i = 0 ; i < parameters->length(); i++)
       {
-        std::string paramParserName = paramParserNodes->item(i)->innerText();
+        Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(i));
+        std::string paramParserName = parameter->getChildElement("Type")->innerText() + "Parser"; //Append parser to the name. Fixed convention
         ImplicitFunctionParameterParser* childParamParser = this->createUnwrapped(paramParserName);
         if(paramParser != NULL)
         {
@@ -51,7 +47,7 @@ namespace Mantid
           paramParser = childParamParser;
         }
       }
-      return std::auto_ptr<ImplicitFunctionParameterParser>(paramParser);
+      return paramParser;
     }
 
   }

@@ -46,9 +46,11 @@ namespace Mantid
 
       virtual boost::shared_ptr<ImplicitFunctionParser> create(const std::string& xmlString) const;
 
-      std::auto_ptr<ImplicitFunctionParser> createImplicitFunctionParserFromXML(const std::string& configXML) const;
+      ImplicitFunctionParser* createImplicitFunctionParserFromXML(const std::string& configXML) const;
 
     private:
+
+      ImplicitFunctionParser* createImplicitFunctionParserFromXML(Poco::XML::Element* functionElement) const;
 
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParserFactoryImpl>;
 

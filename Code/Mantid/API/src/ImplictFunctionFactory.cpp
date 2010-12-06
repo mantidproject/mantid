@@ -8,6 +8,7 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
+#include "boost/scoped_ptr.hpp"
 
 namespace Mantid
 {
@@ -26,16 +27,16 @@ namespace Mantid
       throw std::runtime_error("Use of create in this context is forbidden. Use createUnwrappedInstead.");
     }
 
-    ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(const std::string& configXML, const std::string& processXML) const
+    ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(const std::string& processXML) const
     {
       using namespace Poco::XML;
       DOMParser pParser;
       Document* pDoc = pParser.parseString(processXML);
       Element* pInstructionsXML = pDoc->documentElement();
 
-      std::auto_ptr<ImplicitFunctionParser> funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(configXML);
+      ImplicitFunctionParser* funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
 
-      ImplicitFunctionBuilder* functionBuilder = funcParser->createFunctionBuilder(pInstructionsXML);
+      boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
       return functionBuilder->create();
     }
   }
