@@ -27,6 +27,7 @@ MDGeometryDescription::setRotations(unsigned int i,const std::vector<double> bas
     rotations.assign(i*3+i,1);
     return tmp;
 }
+
 /// this extracts the size and shape of the current DND object
 MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
 {
@@ -141,7 +142,12 @@ MDGeometryDescription::getImageSize()const
 	return data_size;
 }
 //****** SET *******************************************************************************
-
+void 
+MDGeometryDescription::renameTag(unsigned int num,const std::string &newID)
+{
+   this->check_index(num,"renameTag");
+   this->data[num].Tag = newID;
+}
 void 
 MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag) 
 {

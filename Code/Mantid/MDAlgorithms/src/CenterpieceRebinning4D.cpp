@@ -154,14 +154,14 @@ CenterpieceRebinning4D::exec()
   // get pointer for data to rebin to; 
   MD_image_point *pImage    = outputWS->get_spMDImage()->get_pData();
   // and the number of elements the image has;
-  size_t         image_size=  outputWS->get_const_spMDImage()->getDataSize();
+  size_t         image_size=  outputWS->get_const_MDImage().getDataSize();
   //
   double boxMin[4],boxMax[4];
   boxMin[0]=boxMin[1]=boxMin[2]=boxMin[3]=FLT_MAX;
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
 
    // reduction dimensions; if stride = 0, the dimension is reduced;
-  const std::vector<boost::shared_ptr<MDDimension> >  dims = outputWS->get_const_spMDImage()->getGeometry()->getDimensions();
+  const std::vector<boost::shared_ptr<MDDimension> >  dims = outputWS->get_const_MDImage().getGeometry()->getDimensions();
 
   std::vector<size_t> strides(dims.size());
   for(unsigned int i=0;i<dims.size();i++){

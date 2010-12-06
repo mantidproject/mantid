@@ -7,6 +7,8 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MDDataObjects/MDDataPoints.h"
 
+// TEMPORARY COMPARTIBILITY FUNCIONS with HDF1.6 -- should be enabled if HDF1.6 is used
+// #define HDF_1_6
 
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
 *      to read the data initially provided by MATLAB, Horace

@@ -47,7 +47,7 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
   rotations[0]=rotations[4]=rotations[8]=1;
 
   // get pointer to the image data;
-  const MD_image_point  *const data   = Source.get_const_spMDImage()->get_const_pData();
+  const MD_image_point  *const data   = Source.get_const_MDImage().get_const_pData();
   const MDGeometry * const pGeom = Source.getGeometry();
 
   // evaluate the capacity of the orthogonal dimensions;
@@ -323,7 +323,7 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
   std::vector<double> rN(nDims,0);
 
   // reduction dimensions; if stride = 0, the dimension is reduced;
-  const std::vector<boost::shared_ptr<MDDimension> >  dims = TargetWorkspace.get_const_spMDImage()->getGeometry()->getDimensions();
+  const std::vector<boost::shared_ptr<MDDimension> >  dims = TargetWorkspace.get_const_MDImage().getGeometry()->getDimensions();
 
   std::vector<size_t> strides(dims.size());
   for(unsigned int i=0;i<dims.size();i++){
@@ -511,11 +511,11 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
       }
     }
   } // end parallel region
-
-  for(unsigned int ii=0;ii<nDims;ii++){
-    TargetWorkspace.get_spMDDPoints()->rPixMin(ii) = boxMin[ii];
-    TargetWorkspace.get_spMDDPoints()->rPixMax(ii) = boxMax[ii];
-  }
+  //TODO: enable this when w
+  //for(unsigned int ii=0;ii<nDims;ii++){
+  //  TargetWorkspace.get_spMDDPoints()->rPixMin(ii) = boxMin[ii];
+  //  TargetWorkspace.get_spMDDPoints()->rPixMax(ii) = boxMax[ii];
+  //}
 
   return nPixel_retained;
 }

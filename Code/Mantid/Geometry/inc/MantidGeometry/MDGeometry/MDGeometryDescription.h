@@ -105,7 +105,7 @@ public:
    ///returns the list of the axis tags sorted in the order requested for view 
    std::vector<std::string> getDimensionsTags(void)const;
 
-
+   void renameTag(unsigned int num,const std::string &newID);
 
 //*** SET -> t
    void setCoord(const std::string &Tag,const std::vector<double> &coord){

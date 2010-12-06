@@ -50,7 +50,8 @@ namespace Mantid{
     class DLLExport MDGeometry
     {
     public:
-      MDGeometry(MDGeometryBasis basis);
+      MDGeometry(const MDGeometryBasis &basis);
+      MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
 
       ~MDGeometry(void);
 

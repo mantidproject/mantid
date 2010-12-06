@@ -3,6 +3,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 
+
 namespace Mantid{
     namespace MDDataObjects{
       using namespace Mantid::Kernel;
@@ -84,7 +85,11 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
     if(this->pixel_dataset_h<0){
+#ifdef  HDF_1_6
         this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str()); //,this->file_access_mode);
+#else
+        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
+#endif
         if(this->pixel_dataset_h<0){
             throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open pixels dataset",this->File_name));
         }
@@ -99,7 +104,12 @@ void
 MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription & DND_shape)
 {
   	// The function accepts full 4D dataset only!!!
-    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str());// ,H5P_DEFAULT);
+#ifdef HDF_1_6
+      hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str());// ,H5P_DEFAULT);
+#else
+	  hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+#endif
+ 
     if (h_signal_DSID<0){
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
     }
@@ -123,14 +133,19 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 
     for(i=0;i<nDims;i++){
         unsigned int dim_size=(unsigned int)*((double*)(data)+i);
-        DND_shape.setNumBins(i,dim_size);
+	      DND_shape.setNumBins(i,dim_size);
     }
     delete [] data;
     arr_dims_vector.clear();
 
 
     // read other dataset descriptors
+#ifdef  HDF_1_6
     hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str()); //,H5P_DEFAULT);
+#else
+    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str(),H5P_DEFAULT);
+#endif
+
     if (descriptors_DSID<0){
         std::stringstream err;
         err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the the data descriptors field in the dataset: "<<mdd_attrib_names[DataDescriptor]<<std::endl;
@@ -170,6 +185,8 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
     // This is nesessary for linear axis as n-bins has been already defined, but this operation defines axis within proper limits;
         for(i=0;i<nDims;i++){
           unsigned int dim_lentgh=(unsigned int)rez[i]->size();
+		  // this provides number of points along an axis and axis has nBins+1 points
+		  if(dim_lentgh > 1) dim_lentgh--;
           delete rez[i];
           DND_shape.setNumBins(i,dim_lentgh);
     }  
@@ -182,14 +199,33 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 
 
 	H5Gclose(descriptors_DSID);
+	// tags are not currently written into HDF matlab format, so we have to hard code it here;
+     std::vector<std::string> tags(4,"");
+	 unsigned int indMax = (nDims<4)?nDims:4;
+	 tags[0]="qx";
+	 tags[1]="qy";
+	 tags[2]="qz";
+	 tags[3]="en";
+	 for(i=0;i<indMax;i++){
+		 DND_shape.renameTag(i,tags[i]);
 
+	 }
+
+
+
+	
 }
 
 void 
 MD_File_hdfMatlab::read_mdd(MDImage & dnd)
 {
 // The function accepts full 4D dataset only!!!
+#ifdef  HDF_1_6
     hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str()); // ,H5P_DEFAULT);
+#else
+    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+#endif
+
     if (h_signal_DSID<0){
         f_log.error()<<"MD_File_hdfMatlab::read_mdd: can not open multidimensional dataset "<<this->mdd_field_names[DatasetName]<<std::endl;
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));

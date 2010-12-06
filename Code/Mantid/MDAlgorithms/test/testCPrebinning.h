@@ -4,6 +4,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include "MDDataObjects/MD_FileFormatFactory.h"
 #include "Poco/Path.h"
 
 using namespace Mantid;
@@ -24,16 +25,23 @@ class testCPRebinning :    public CxxTest::TestSuite
         if(!pOrigin)return;
 
      
-    //    TS_ASSERT_THROWS_NOTHING(pOrigin->read_mdd(location.c_str()));
+   
          AnalysisDataService::Instance().add("InWorkspace", pOrigin);
 
+		 // should go to Load workspace algorithm ----->
+		 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
+		 boost::shared_ptr<IMD_FileFormat> spFile = boost::shared_ptr<IMD_FileFormat>(pFile.get());
+		 pFile.release();
+
+		 pOrigin->load_workspace(spFile);
+		 //<----- should go to Load workspace algorithm 
 
         CenterpieceRebinning cpr;
 
          TS_ASSERT_THROWS_NOTHING(cpr.initialize());
          TS_ASSERT( cpr.isInitialized() );
 
-         cpr.setPropertyValue("Filename", "../../../../Test/VATES/fe_demo.sqw");
+         cpr.setPropertyValue("Filename", "new_datafile.sqw");
          cpr.setPropertyValue("Input", "InWorkspace");      
          cpr.setPropertyValue("Result","OutWorkspace");
 
@@ -42,8 +50,9 @@ class testCPRebinning :    public CxxTest::TestSuite
 
          //Geometry::MDGeometryDescription *const pSlicing=cpr.pSlicingProperty();
 
-        TS_ASSERT_THROWS_NOTHING(cpr.init_source(pOrigin));
+        TS_ASSERT_THROWS_NOTHING(cpr.init_property(pOrigin));
 
+		// get property from property service;
       //  std::string i1,i2;
       //  cpr.set_from_VISIT(i1,i2);
         Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
@@ -52,12 +61,12 @@ class testCPRebinning :    public CxxTest::TestSuite
         }
 
         double r0=0;
-        pSlicing->setCutMin("q1",r0);
-        pSlicing->setCutMax("q1",r0+2);
-        pSlicing->setCutMin("q2",r0);
-        pSlicing->setCutMax("q2",r0+2);
-        pSlicing->setCutMin("q3",r0);
-        pSlicing->setCutMax("q3",r0+2);
+        pSlicing->setCutMin("qx",r0);
+        pSlicing->setCutMax("qx",r0+2);
+        pSlicing->setCutMin("qy",r0);
+        pSlicing->setCutMax("qy",r0+2);
+        pSlicing->setCutMin("qz",r0);
+        pSlicing->setCutMax("qz",r0+2);
         pSlicing->setCutMax("en",50);
 
    

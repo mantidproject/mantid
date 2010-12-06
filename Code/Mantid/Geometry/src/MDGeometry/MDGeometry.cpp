@@ -273,10 +273,17 @@ void
 
       return pDim;
     }
+MDGeometry::MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description):
+n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
+{
+  this->theDimension.resize(basis.getNumDims());
+  this->init_empty_dimensions();
+  // arrange dimensions in accordence with the descriptions and sets dimension ranges
+  this->reinit_Geometry(description);
+}
 
-
-MDGeometry::MDGeometry(MDGeometryBasis basis) :
-  n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
+MDGeometry::MDGeometry(const MDGeometryBasis &basis) :
+n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 {
   this->theDimension.resize(basis.getNumDims());
   this->init_empty_dimensions();

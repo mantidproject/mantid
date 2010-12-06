@@ -226,9 +226,11 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
   if( nDims >MAX_MD_DIMS_POSSIBLE){
     throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
   }
+  MDGeometryDescription descr(*pGeometry);
+  this->initialize(descr);
 
-  this->alloc_image_data(pMDGeometry->getGeometryExtend(),nDims);
 }
+
 //
 void
 MDImage::alloc_image_data(size_t ImgSize,unsigned int nDims)

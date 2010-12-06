@@ -93,7 +93,7 @@ public:
 	/// returns the size occupied by the data part of the MD_IMG_array;
     virtual long getMemorySize()const{return MD_IMG_array.data_array_size*sizeof(MD_image_point);}
    ///
-    const Geometry::MDGeometry * const getGeometry() const { return pMDGeometry.get(); }
+    Geometry::MDGeometry * const getGeometry() const { return pMDGeometry.get(); }
  //******************************************************************************************************
 //******************************************************************************************************
     // interface to allocates_mdd_arrays below in case of full not collapsed mdd dataset

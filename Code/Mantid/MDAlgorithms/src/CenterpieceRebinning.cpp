@@ -27,9 +27,10 @@ CenterpieceRebinning::~CenterpieceRebinning()
     }
 }
 void 
-CenterpieceRebinning::init_source(MDWorkspace_sptr inputWSX)
+CenterpieceRebinning::init_property(MDWorkspace_sptr inputWSX)
 {
-MDWorkspace_sptr inputWS;
+    // input workspace has to exist and be loaded;
+	MDWorkspace_sptr inputWS;
   // Get the input workspace
     if(existsProperty("Input")){
          inputWS = getProperty("Input");
@@ -41,16 +42,6 @@ MDWorkspace_sptr inputWS;
        throw(std::runtime_error("input workspace has to be availible through properties"));
     }
 
-   std::string filename;
-  // filename = "../../../../Test/VATES/fe_demo.sqw";
-
-   if(existsProperty("Filename")){
-      filename= getProperty("Filename");
-   }else{
-      throw(std::runtime_error("filename property can not be found"));
-   }
-
-    inputWS->read_mdd();
 
     // set up slicing property to the shape of current workspace;
     MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
@@ -59,7 +50,8 @@ MDWorkspace_sptr inputWS;
      }
 
     pSlicing->build_from_geometry(*(inputWS->getGeometry()));
-     pSlicing=NULL; // should remain in Property
+    //pSlicing=NULL; // should remain in Property
+ 
 }
 /*
 void
@@ -75,11 +67,12 @@ CenterpieceRebinning::init()
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
 
       declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
-      declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load), "The file containing input MD dataset");
+	  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save), "The file containing output MD dataset");
 
 
       m_progress = new Progress(this,0,1,10);
 
+ 
    
 }
 //
@@ -89,16 +82,14 @@ CenterpieceRebinning::exec()
  MDWorkspace_sptr inputWS;
  MDWorkspace_sptr outputWS;
 
-  
-  // Get the input workspace
-  if(existsProperty("Input")){
+   if(existsProperty("Input")){
         inputWS = getProperty("Input");
         if(!inputWS){
-            throw(std::runtime_error("input workspace has to exist"));
+              throw(std::runtime_error("input workspace has to exist"));
         }
-  }else{
-      throw(std::runtime_error("input workspace has to be accessible through properties"));
-  }
+   }else{
+       throw(std::runtime_error("input workspace has to be availible through properties"));
+   }
 
 
   // Now create the output workspace
@@ -127,13 +118,10 @@ CenterpieceRebinning::exec()
   }else{
         throw(std::runtime_error("slising property has to exist and has to be defined "));
   }
- 
- 
 
  // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->initialize_MDImage(*pSlicing);
+  outputWS->init(inputWS,pSlicing);
 
- 
 
   std::vector<size_t> preselected_cells_indexes;
   size_t  n_precelected_pixels(0);
@@ -156,7 +144,7 @@ CenterpieceRebinning::exec()
   MD_image_point*pImage     = outputWS->get_spMDImage()->get_pData();
 
   // and the number of elements the image has;
-  size_t         image_size=  outputWS->get_const_spMDImage()->getDataSize();
+  size_t         image_size=  outputWS->get_const_MDImage().getDataSize();
  //
   transf_matrix trf = build_scaled_transformation_matrix(*(inputWS->getGeometry()),*pSlicing,this->ignore_inf,this->ignore_nan);
 // start reading and rebinning;

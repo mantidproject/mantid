@@ -20,11 +20,11 @@ int main() {
 static testCPRebinning suite_testCPRebinning;
 
 static CxxTest::List Tests_testCPRebinning = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testCPRebinning( "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDAlgorithms/test/testCPrebinning.h", 17, "testCPRebinning", suite_testCPRebinning, Tests_testCPRebinning );
+CxxTest::StaticSuiteDescription suiteDescription_testCPRebinning( "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDAlgorithms/test/testCPrebinning.h", 18, "testCPRebinning", suite_testCPRebinning, Tests_testCPRebinning );
 
 static class TestDescription_testCPRebinning_testRebinInit : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPRebinning_testRebinInit() : CxxTest::RealTestDescription( Tests_testCPRebinning, suiteDescription_testCPRebinning, 21, "testRebinInit" ) {}
+ TestDescription_testCPRebinning_testRebinInit() : CxxTest::RealTestDescription( Tests_testCPRebinning, suiteDescription_testCPRebinning, 22, "testRebinInit" ) {}
  void runTest() { suite_testCPRebinning.testRebinInit(); }
 } testDescription_testCPRebinning_testRebinInit;
 

@@ -205,8 +205,8 @@ public:
     using namespace Mantid::MDDataObjects;
 
     std::auto_ptr<MDWorkspace> workspace = constructMDWorkspace();
-    size_t img_data_size = workspace->get_const_spMDImage()->getMemorySize();
-    size_t pix_data_size = workspace->get_const_spMDDPoints()->getMemorySize();
+    size_t img_data_size = workspace->get_const_MDImage().getMemorySize();
+    size_t pix_data_size = workspace->get_const_MDDPoints().getMemorySize();
     TSM_ASSERT_EQUALS("Workspace memory size differs from its parts ",pix_data_size+img_data_size , workspace->getMemorySize());
   }
   void testId(){
@@ -313,8 +313,8 @@ public:
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
 
     //check that constructed components are now accessible.
-    TSM_ASSERT("The const ImageData getter is not wired-up correctly", workspace->get_const_spMDImage().get() != NULL);
-    TSM_ASSERT("The const MDDataPoints getter is not wired-up correctly", workspace->get_const_spMDDPoints().get() != NULL);
+    TSM_ASSERT_THROWS_NOTHING("The const ImageData getter is not wired-up correctly",  workspace->get_const_MDImage());
+    TSM_ASSERT_THROWS_NOTHING("The const MDDataPoints getter is not wired-up correctly", workspace->get_const_MDDPoints());
 
     TSM_ASSERT_EQUALS("The const geometry getter is not wired-up correctly", workspace->getGeometry(), geometry);
     TSM_ASSERT("The ImageData getter is not wired-up correctly", workspace->get_spMDImage().get() != NULL);

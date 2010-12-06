@@ -82,8 +82,20 @@ namespace Mantid
       virtual const std::string id() const { return "MD-Workspace"; }
       /// provides number of dimensions the workspace contains
       virtual unsigned int getNumDims(void) const{return m_spMDImage->getGeometry()->getNumDims();}
-	  ///OBSOLETE?
+
+	  ///OBSOLETE? or should be modified as does not work properly at the moment  Total share pointers mess;
       void init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
+	  /** initialize from another workspace but with different MD image and (sub) set of data points; 
+	   the basis and the instrument description(s) are the same. 
+
+	   TODO: All set methods have to be ready to make copy-construction of the corresponding object and analyse reference counter! 
+
+	   file manager will be different so should come from somewhere. Probably from factory when requested
+	   save algorithm will have this file property and should create proper file manager.
+	   the workspace itself will allocate temporary file for its internal usage -- this file will be basis for final workspace file when saved;
+	   MESS, DANGER!!!! 
+	   */
+	  void init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Mantid::Geometry::MDGeometryDescription *const transf=NULL);
 	  /// this should be moved in data loading routines soon
 	  void load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile);
 
@@ -104,12 +116,15 @@ namespace Mantid
       void write_mdd();
       /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
       //    bool write_mdd(void);
-      Mantid::Geometry::MDGeometry const * const       get_const_spMDGeometry() const {return m_spMDImage->getGeometry();}
-      boost::shared_ptr<Mantid::MDDataObjects::MDImage const>  get_const_spMDImage()  const {return m_spMDImage;}
-      boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints const> get_const_spMDDPoints() const {return m_spDataPoints;}
+	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis.get());}
+      Mantid::Geometry::MDGeometry      &   get_const_MDGeometry()const{return *(m_spMDImage->getGeometry());}
+      Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage.get());}
+      Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints.get());}
 
-      //Mantid::Geometry::MDGeometry const * const       get_spMDGeometry(){return m_spMDImage->getGeometry();}
-      boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()  {return m_spMDImage;}
+	  // it seems we can not alow this for safety reasons; From other size, how algorithms  would modify this?
+	  // geometry should be unmutable from outside of workspace and withoug MDImageData;
+      //Mantid::Geometry::MDGeometry const *        get_spMDGeometry(){return m_spMDImage->getGeometry();}
+      boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
 
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getXDimension() const;

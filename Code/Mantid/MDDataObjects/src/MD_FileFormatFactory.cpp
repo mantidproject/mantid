@@ -38,7 +38,7 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
 {
 	if(rec == test_data){
 		f_log.error()<<"MD_FileFactory: test file format has not been implemented yet for file: "<<file_name<<std::endl;
-		throw(Exception::NotImplementedError("test file format has not been implemented "));
+		throw(Exception::NotImplementedError("test file format has not been implemented yet"));
 	}
 
 // check if the file exist;

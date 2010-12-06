@@ -35,7 +35,7 @@ public:
       virtual const std::string category() const { return "MD-Algorithms";}
 
       void set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition);
-      void init_source(MDDataObjects::MDWorkspace_sptr inputWSX);
+      void init_property(MDDataObjects::MDWorkspace_sptr inputWSX);
      
 private:
     // Overridden Algorithm methods

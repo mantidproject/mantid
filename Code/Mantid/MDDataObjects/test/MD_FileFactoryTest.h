@@ -2,7 +2,7 @@
 #define MD_FILE_FACTORY_TEST_H
 
 #include <cxxtest/TestSuite.h>
-#include <MDDataObjects/MD_FileFormatFactory.h>
+#include "MDDataObjects/MD_FileFormatFactory.h"
 #include "Poco/Path.h"
 
 #include "MantidKernel/System.h"

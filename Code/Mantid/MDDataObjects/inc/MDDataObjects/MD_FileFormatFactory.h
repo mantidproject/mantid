@@ -71,6 +71,7 @@ private:
 	// default constructor and others;
 	MD_FileFormatFactory();
 	~MD_FileFormatFactory();
+	// no copying
 	MD_FileFormatFactory(const MD_FileFormatFactory &);
 	MD_FileFormatFactory & operator= (const MD_FileFormatFactory &);
 

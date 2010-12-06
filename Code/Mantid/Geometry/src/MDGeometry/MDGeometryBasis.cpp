@@ -26,19 +26,18 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const
 	m_cell = cell;
 	m_mdBasisDimensions.clear();
 	m_mdBasisDimensions = mdBasisDimensions;
+    this->n_total_dim   = mdBasisDimensions.size();
 
-   this->n_total_dim = mdBasisDimensions.size();
-      std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
-      for( ;it != mdBasisDimensions.end(); ++it)
-      {  
+	this->n_reciprocal_dimensions = 0;
+    std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
+    for( ;it != mdBasisDimensions.end(); ++it){  
         checkInputBasisDimensions(*(it)); // Check that duplicate column numbers have not been used.
 
-        if((*it).getIsReciprocal())
-        {
+      if((*it).getIsReciprocal()){
           n_reciprocal_dimensions++;
         }
-      }
-      this->check_nDims(n_total_dim , n_reciprocal_dimensions);
+	}
+    this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 }
 
 MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell) : m_cell(cell), m_mdBasisDimensions(mdBasisDimensions), n_reciprocal_dimensions(0)

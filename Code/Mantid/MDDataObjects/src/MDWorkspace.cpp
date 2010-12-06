@@ -42,26 +42,59 @@ MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFor
 	MDGeometryDescription description;
 	this->m_spFile->read_MDGeomDescription(description);
 	// we have basis and description, now can build geometry
-	std::auto_ptr<MDGeometry> pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis));
-	//  initiate it with description -> ugly, should be one;
-	pGeometry->reinit_Geometry(description);
+	std::auto_ptr<MDGeometry> pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,description));
+
 
 	this->m_spMDImage = boost::shared_ptr<MDImage>(new MDImage(pGeometry.get()));
-	// free the pGeometry as it is now resides with MDImage --> ugly should be one
+	// free the pGeometry as it is now resides with MDImage and should not be deleted by auto_ptr
 	pGeometry.release();
 	// obtain the MDPoint description now (and MDPointsDescription in a future)
 	MDPointDescription pd = this->m_spFile->read_pointDescriptions();
 
 	// temporary constructor --> have not been finished and ugly
 	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(m_spMDImage,pd));
-}
 
+    //  read image part of the data
+     this->m_spFile->read_mdd(*this->m_spMDImage);
+	 // need to be moved to to dataPoints;
+	 this->m_spMDImage->identify_SP_points_locations();
+   
+}
+//
      void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
      {
        this->m_spFile = spFile;
        this->m_spMDImage = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spMDImage); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
      }
+
+//
+void
+MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Mantid::Geometry::MDGeometryDescription *const transf)
+{
+	this->m_spMDBasis = boost::shared_ptr<MDGeometryBasis>(new MDGeometryBasis(SourceWorkspace->get_const_MDBaisis()));
+
+	// build old or new geometry
+	std::auto_ptr<MDGeometry> pGeometry;
+	// no changes to new workspace is defined and we are initiating the new workspace as a copy of an old workspace;
+	if(!transf){
+		std::auto_ptr<MDGeometryDescription> oldShape = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*SourceWorkspace->getGeometry()));
+		// we have basis and description, now can build geometry
+		pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,*oldShape));
+	}else{
+		pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,*transf));
+	}
+	//
+   this->m_spMDImage = boost::shared_ptr<MDImage>(new MDImage(pGeometry.get()));
+   // free the pGeometry as it is now resides with MDImage and should not be deleted by auto_ptr;
+   pGeometry.release();
+
+   //TODO: 
+   // MDDataPoints have to be constructed here and intiated later after the image is build and points need to be saved
+   // fileManager has to be initated for writing workspace but this will happens only when saveWorkspace algorithm is 
+   // called and new file name is known. Temporary file manager has to be created if and when datapoint writing is necessary;
+
+}
 
     /** Default constructor - does nothing */
     MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)

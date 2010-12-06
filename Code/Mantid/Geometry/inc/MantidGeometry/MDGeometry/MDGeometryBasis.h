@@ -76,11 +76,13 @@ namespace Mantid
       unsigned int getNumDims(void)const{return this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
       unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
+	  
 
       /// function checks if the ids supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
 	  void init(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell);
+	  // copy constructor is used and can be default
     private:
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
