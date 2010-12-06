@@ -285,6 +285,9 @@ void LoadSNSEventNexus::exec()
   //Set the binning axis using this.
   WS->setAllX(axis);
 
+  // set more properties on the workspace
+  this->loadEntryMetadata("entry");
+
   //Save output
   this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
 
@@ -292,6 +295,35 @@ void LoadSNSEventNexus::exec()
   this->pulseTimes.clear();
 
   return;
+}
+
+void LoadSNSEventNexus::loadEntryMetadata(const std::string &entry_name) {
+  // Open the file
+  ::NeXus::File file(m_filename);
+  file.openGroup(entry_name, "NXentry");
+
+  // get the title
+  file.openData("title");
+  if (file.getInfo().type == ::NeXus::CHAR) {
+    string title = file.getStrData();
+    if (!title.empty())
+      WS->setTitle(title);
+  }
+  file.closeData();
+
+  // TODO get the run number
+//  file.openData("run_number");
+//  string run("");
+//  if (file.getInfo().type == ::NeXus::CHAR) {
+//    run = file.getStrData();
+//  }
+//  if (!run.empty()) {
+//    WS->mutableRun().addProperty("run_number", run);
+//  }
+//  file.closeData();
+
+  // close the file
+  file.close();
 }
 
 
