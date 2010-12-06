@@ -208,16 +208,33 @@ void MantidSampleLogDialog::init()
 
     //this specifies the format of the data it should be overridden below or there is a problem
     treeItem->setData(1, Qt::UserRole, -1);
+
+    Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
+    Mantid::Kernel::TimeSeriesProperty<int>    *tspi = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr);
+    Mantid::Kernel::TimeSeriesProperty<bool>   *tspb = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr);
+
     //See what type of data we have    
-    if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr) ||
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr) ||
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr) )
+    if( tspd || tspi || tspb )
     {
       treeItem->setText(1, "num. series");
       //state that the string we passed into data[0] is a time series -multiple lines with a time and then a number
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numTSeries));
       std::ostringstream msg;
-      msg << "(" << (*pItr)->size() << " entries)";
+      if ((*pItr)->size() == 1)
+      {
+        //Print out the only entry
+        if (tspd)
+          msg << tspd->nthValue(0);
+        else if (tspi)
+          msg << tspi->nthValue(0);
+        else if (tspb)
+          msg << tspb->nthValue(0);
+      }
+      else
+      {
+        //Show the # of entries
+        msg << "(" << (*pItr)->size() << " entries)";
+      }
       treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
     else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
@@ -226,7 +243,16 @@ void MantidSampleLogDialog::init()
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       std::ostringstream msg;
-      msg << "(" << (*pItr)->size() << " entries)";
+      if ((*pItr)->size() == 1)
+      {
+        //Print out the only entry
+        (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr))->nthValue(1);
+      }
+      else
+      {
+        //Show the # of entries
+        msg << "(" << (*pItr)->size() << " entries)";
+      }
       treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr) )
