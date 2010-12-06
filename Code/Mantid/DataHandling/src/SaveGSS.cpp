@@ -199,9 +199,12 @@ void writeValue(std::ostream &os, const Run& runinfo, const std::string& name) {
  */
 void SaveGSS::writeHeaders(const std::string &format, std::ostream& os, Mantid::API::MatrixWorkspace_const_sptr& workspace) const
 {
-  if (format.compare(SLOG) == 0) { // TODO fill this in
+  if (format.compare(SLOG) == 0) {
     const Run& runinfo = workspace->run();
-    os << "# Sample Run: " << " Vanadium Run: " << " Wavelength: ";
+    os << "# Sample Run: " << "UNKNOWN"; // TODO fill this in
+    //writeValue(os, runinfo, "run_number");
+    os << " Vanadium Run: " << "UNKNOWN"; // TODO fill this in
+    os << " Wavelength: ";
     writeValue(os, runinfo, "LambdaRequest");
     os << "\n";
     os << "# Sample Temperature: ";

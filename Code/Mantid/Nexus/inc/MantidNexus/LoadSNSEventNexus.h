@@ -105,6 +105,7 @@ namespace Mantid
       std::vector<Kernel::DateAndTime> pulseTimes;
 
       void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map);
+      void loadEntryMetadata(const std::string &entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void runLoadMonitors();
 
