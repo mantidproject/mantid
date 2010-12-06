@@ -105,7 +105,9 @@ void CropWorkspace::exec()
     outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+(m_maxX-m_histogram));
     const MantidVec& oldE = m_inputWorkspace->readE(i);
     outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+(m_maxX-m_histogram));
-    if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(i);
+    
+    //copy over the axis entry for each spectrum, regardless of the type of axes present
+    if (specAxis) outAxis->setValue(j, specAxis->operator()(i));
 
     if ( !m_commonBoundaries ) this->cropRagged(outputWorkspace,i,j);
     
