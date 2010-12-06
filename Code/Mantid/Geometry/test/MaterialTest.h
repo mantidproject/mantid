@@ -22,9 +22,9 @@ public:
     TS_ASSERT_EQUALS(empty.pressure(), 0.0);
 
     const double lambda(2.1);
-    TS_ASSERT_EQUALS(empty.coherentCrossSection(lambda), 0.0);
-    TS_ASSERT_EQUALS(empty.incoherentCrossSection(lambda), 0.0);
-    TS_ASSERT_EQUALS(empty.absorptionCrossSection(lambda), 0.0);
+    TS_ASSERT_EQUALS(empty.cohScatterXSection(lambda), 0.0);
+    TS_ASSERT_EQUALS(empty.incohScatterXSection(lambda), 0.0);
+    TS_ASSERT_EQUALS(empty.absorbXSection(lambda), 0.0);
     
   }
 
@@ -38,9 +38,9 @@ public:
     TS_ASSERT_EQUALS(vanBlock.pressure(), Mantid::PhysicalConstants::StandardAtmosphere);
 
     const double lambda(2.1);
-    TS_ASSERT_DELTA(vanBlock.coherentCrossSection(lambda), 0.0184,  1e-02);
-    TS_ASSERT_DELTA(vanBlock.incoherentCrossSection(lambda), 5.08,  1e-02);
-    TS_ASSERT_DELTA(vanBlock.absorptionCrossSection(lambda), 5.93, 1e-02);
+    TS_ASSERT_DELTA(vanBlock.cohScatterXSection(lambda), 0.0184,  1e-02);
+    TS_ASSERT_DELTA(vanBlock.incohScatterXSection(lambda), 5.08,  1e-02);
+    TS_ASSERT_DELTA(vanBlock.absorbXSection(lambda), 5.93, 1e-02);
   }
 
 };
