@@ -74,7 +74,7 @@ private:
   long long computePhi(const int& w) const;
 
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const double FWHM_guess);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
   void findPeaksUsingMariscotti();
   void findPeaksGivenStartingPoints(std::vector<double> peakCenters);
 

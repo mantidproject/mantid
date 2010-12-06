@@ -46,9 +46,6 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 
-/// For debugging...
-static bool VERBOSE = false;
-
 namespace Mantid
 {
 namespace DataHandling

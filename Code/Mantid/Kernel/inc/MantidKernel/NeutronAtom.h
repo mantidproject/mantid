@@ -42,20 +42,20 @@ namespace Mantid
       static const double ReferenceLambda;
 
       NeutronAtom(const uint8_t z,
-		  const double coh_b_real, const double inc_b_real,
-		  const double coh_xs, const double inc_xs,
-		  const double tot_xs, const double abs_xs);
+          const double coh_b_real, const double inc_b_real,
+          const double coh_xs, const double inc_xs,
+          const double tot_xs, const double abs_xs);
 
       NeutronAtom(const uint8_t z, const uint8_t a,
-		  const double coh_b_real, const double inc_b_real,
-		  const double coh_xs, const double inc_xs,
-		  const double tot_xs, const double abs_xs);
+          const double coh_b_real, const double inc_b_real,
+          const double coh_xs, const double inc_xs,
+          const double tot_xs, const double abs_xs);
 
       NeutronAtom(const uint8_t z, const uint8_t a,
-		  const double coh_b_real, const double coh_b_img,
-		  const double inc_b_real, const double inc_b_img,
-		  const double coh_xs, const double inc_xs,
-		  const double tot_xs, const double abs_xs);
+          const double coh_b_real, const double coh_b_img,
+          const double inc_b_real, const double inc_b_img,
+          const double coh_xs, const double inc_xs,
+          const double tot_xs, const double abs_xs);
 
       /// The atomic number, or number of protons, for the atom.
       uint8_t z_number;

@@ -7,10 +7,10 @@ namespace Mantid
   {
 
     MDCell::MDCell(std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > pContributingPoints, std::vector<coordinate> vertexes) 
-      : m_contributingPoints(pContributingPoints),
-      m_vertexes(vertexes),
-      m_cachedError(0),
-      m_cachedSignal(0)
+      : m_cachedSignal(0),
+        m_cachedError(0),
+        m_vertexes(vertexes),
+        m_contributingPoints(pContributingPoints)
     {
       //TODO, Accelerate. if no contributing points then can immediately exit and.
       //TODO, depending on client-code usage, may be more optimal to place method call on the getters.

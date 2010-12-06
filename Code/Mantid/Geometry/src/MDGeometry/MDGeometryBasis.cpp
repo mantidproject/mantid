@@ -40,7 +40,8 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const
     this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 }
 
-MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell) : m_cell(cell), m_mdBasisDimensions(mdBasisDimensions), n_reciprocal_dimensions(0)
+MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell)
+  : n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions), m_cell(cell)
 {
    this->init(mdBasisDimensions,cell);
 }

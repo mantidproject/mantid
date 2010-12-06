@@ -55,7 +55,7 @@ namespace Mantid
 		{
 			CICatHelper helper;
 			//search datasets for a given investigation id using ICat api.
-			int ret_advsearch = helper.doDataSetsSearch(investigationId,
+			helper.doDataSetsSearch(investigationId,
 				ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
 		}
 
@@ -65,7 +65,6 @@ namespace Mantid
 	     */
 		void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
 		{
-			bool bDataFiles=false;
 			CICatHelper helperobj;	
 			helperobj.getDataFiles(investigationId,ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
 		}

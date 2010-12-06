@@ -1225,8 +1225,6 @@ namespace Mantid
 			std::string sessionId=Session::Instance().getSessionId();
 			request.sessionId = &sessionId;
 			
-			int ret=icat.isSessionValid(&request,&response);
-			
 			return (response.return_? true: false);
 			
 

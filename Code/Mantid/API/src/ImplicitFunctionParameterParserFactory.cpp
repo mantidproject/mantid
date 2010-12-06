@@ -33,7 +33,7 @@ namespace Mantid
       }
       Poco::XML::NodeList* parameters = parametersElement->getElementsByTagName("Parameter");
       ImplicitFunctionParameterParser* paramParser = NULL;
-      for(int i = 0 ; i < parameters->length(); i++)
+      for(unsigned long i = 0 ; i < parameters->length(); i++)
       {
         Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(i));
         std::string paramParserName = parameter->getChildElement("Type")->innerText() + "Parser"; //Append parser to the name. Fixed convention

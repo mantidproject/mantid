@@ -573,7 +573,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  *  @param center_guess: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
  *  @param FWHM_guess: A guess of the full-width-half-max of the peak, in # of bins.
 */
-void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const double FWHM_guess)
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess)
 {
   //The indices
   int i_left, i_right, i_center;

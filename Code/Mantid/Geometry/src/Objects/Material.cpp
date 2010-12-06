@@ -15,7 +15,7 @@ namespace Mantid
      * Construct an "empty" material. Everything returns zero
      */
     Material::Material() : 
-      m_name(), m_element(0,0.0,0.0,0.0,0.0,0.0,0.0,0.0), 
+      m_name(), m_element(0,0,0.0,0.0,0.0,0.0,0.0,0.0),
       m_numberDensity(0.0), m_temperature(0.0), m_pressure(0.0)
     {
     }

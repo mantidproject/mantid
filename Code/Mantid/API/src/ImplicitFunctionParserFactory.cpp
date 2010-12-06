@@ -43,7 +43,7 @@ namespace Mantid
       functionParser->setParameterParser(paramParser);
 
       Poco::XML::NodeList* childFunctions = functionElement->getElementsByTagName("Function");
-      for(int i = 0; i < childFunctions->length(); i++)
+      for(unsigned long i = 0; i < childFunctions->length(); i++)
       {
         Poco::XML::Node* childFunctionNode = childFunctions->item(i);
 
