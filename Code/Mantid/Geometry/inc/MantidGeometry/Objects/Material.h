@@ -55,7 +55,7 @@ namespace Mantid
       /// temperature and pressure
       explicit Material(
 	const std::string & name, 
-	const PhysicalConstants::NeutronAtom & element,
+	const PhysicalConstants::NeutronAtom element,
 	const double numberDensity, 
 	const double temperature = 300, 
 	const double pressure = PhysicalConstants::StandardAtmosphere
@@ -74,19 +74,21 @@ namespace Mantid
       double temperature() const;
       /// Get the pressure
       double pressure() const;
-      /// Get the coherent cross section for a given wavelength
-      double coherentCrossSection(const double lambda) const;
+      /// Get the coherent scattering cross section for a given wavelength
+      double cohScatterXSection(const double lambda) const;
       /// Get the incoherent cross section for a given wavelength
-      double incoherentCrossSection(const double lambda) const;
+      double incohScatterXSection(const double lambda) const;
+      /// Return the total scattering cross section for a given wavelength
+      double totalScatterXSection(const double lambda) const;
       /// Get the absorption cross section at a given wavelength
-      double absorptionCrossSection(const double lambda) const;
+      double absorbXSection(const double lambda) const;
       //@}
 
     private:
       /// Material name
       std::string m_name;
       /// Reference to an element
-      const PhysicalConstants::NeutronAtom * m_element;
+      PhysicalConstants::NeutronAtom m_element;
       /// Number density in A^-3
       double m_numberDensity;
       /// Temperature
