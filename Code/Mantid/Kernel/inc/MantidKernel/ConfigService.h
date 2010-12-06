@@ -149,7 +149,12 @@ namespace Mantid
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
       /// Gets the instrument geometry filename
-      const std::string getInstrumentFilename(const std::string& instrument) const;
+      const std::string getInstrumentFilename(const std::string& instrument, const std::string& identifier) const;
+      /// Get instrument search directory
+      const std::string getInstrumentDirectory() const;
+      /// Adjust instrument name to be consistent with names used for instruments in 
+      /// instrument search directory
+      const std::string adjustIDFname(const std::string& instrumentName) const;
 
       /// Load facility information from instrumentDir/Facilities.xml file 
       void updateFacilities(const std::string& fName = "");

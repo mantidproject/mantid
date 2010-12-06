@@ -174,7 +174,7 @@ void LoadNexusMonitors::exec()
 void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
     API::MatrixWorkspace_sptr localWorkspace)
 {
-  std::string filename = Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+  std::string filename = Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
   if (filename.empty())
   {
     return;

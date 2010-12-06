@@ -242,7 +242,7 @@ void LoadPreNeXusMonitors::exec()
 void LoadPreNeXusMonitors::runLoadInstrument(const std::string &instrument,
     MatrixWorkspace_sptr localWorkspace)
 {
-  std::string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+  std::string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
   if (filename.empty())
     return;
   if (!Poco::File(filename).exists())

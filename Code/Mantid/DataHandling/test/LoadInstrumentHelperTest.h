@@ -45,98 +45,7 @@ using namespace Mantid::DataObjects;
 
 using namespace Poco::XML;
 
-class DummyException {
-public:
-  std::string m_validFrom;
-  std::string m_validTo;
-  DummyException(std::string validFrom, std::string validTo) 
-    : m_validFrom(validFrom), m_validTo(validTo) {}
 
-
-};
-
-
-class myContentHandler : public Poco::XML::ContentHandler
-{
-  virtual void startElement(
-    const XMLString & uri,
-    const XMLString & localName,
-    const XMLString & qname,
-    const Attributes & attrList
-    ) 
-  { 
-    //int a = 2;
-    //std::cout << localName << "\n";
-    //for (int i = 0; i < attrList.getLength(); i++)
-    //  std::cout << attrList.getValue(i) << "\n";
-
-    if ( localName == "instrument" )
-    {
-      throw DummyException(static_cast<std::string>(attrList.getValue("","valid-from")), 
-        static_cast<std::string>(attrList.getValue("","valid-to")));
-    }
-  }
-  virtual void endElement(
-    const XMLString & uri,
-    const XMLString & localName,
-    const XMLString & qname
-    ) {}
-  virtual void startDocument() {}
-  virtual void endDocument() {}
-  virtual void characters(
-    const XMLChar ch[],
-    int start,
-    int length
-    ) {}
-  virtual void endPrefixMapping(
-    const XMLString & prefix
-    ) {}
-  virtual void ignorableWhitespace(
-    const XMLChar ch[],
-    int start,
-    int length
-    ) {}
-  virtual void processingInstruction(
-    const XMLString & target,
-    const XMLString & data
-    ) {}
-  virtual void setDocumentLocator(
-    const Locator * loc
-    ) {}
-  virtual void skippedEntity(
-    const XMLString & name
-    ) {}
-  virtual void startPrefixMapping(
-    const XMLString & prefix,
-    const XMLString & uri
-    ) {}
-};
-
-void getValidFromTo(const std::string& filename, std::string& outValidFrom,
-  std::string& outValidTo)
-{
-      SAXParser pParser;
-      myContentHandler*  conHand = new myContentHandler();
-      pParser.setContentHandler(conHand);
-
-      try
-      {
-        pParser.parse(filename);
-      }
-      catch(DummyException e)
-      {
-        outValidFrom = e.m_validFrom;
-        outValidTo = e.m_validTo;
-        //std::cout << "In getValidFromTo " << outValidFrom << " " << outValidTo << std::endl;
-      }
-      catch(...)
-      {
-        //g_log.error("Unable to parse file " + m_filename);
-        //throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
-
-        //std::cout << "\ndfgdsfgdsfgsdfgfdgdfgdfg\n";
-      }
-}
 
 struct fromToEntry
 {
@@ -174,15 +83,12 @@ public:
           if ( regex.match(l_filenamePart) )
           {
             std::string validFrom, validTo;
-            getValidFromTo(dir_itr->path(), validFrom, validTo);
+            helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
 
             size_t found;
             found = l_filenamePart.find("_Definition");
-            //std::cout << l_filenamePart.substr(0,found) << std::endl;
-            //std::cout << dir_itr->path() << std::endl;
             fromToEntry ft;
             ft.path = dir_itr->path();
-            //std::cout << validFrom << " " << validTo << std::endl;
             ft.from.set_from_ISO8601_string(validFrom);
             ft.to.set_from_ISO8601_string(validTo);
             idfFiles.insert( std::pair<std::string,fromToEntry>(l_filenamePart.substr(0,found), 
@@ -216,18 +122,21 @@ public:
             {
               // some more intelligent stuff here later
               TS_ASSERT("dates in IDF overlap"=="0");
-              //std::cout << "\nNot OK\n";
             }
           }
         }
 
       }
     }
-  
+  }
 
-    //TS_ASSERT( !loader.isInitialized() );
-    //loader.initialize();
-    //TS_ASSERT( loader.isInitialized() );
+  // 
+  void testInstrumentHelperFunctions()
+  {
+    LoadInstrumentHelper helper;
+
+    std::string boevs = helper.getIDF_identifier("BIOSANS", "2100-01-31 22:59:59");
+    TS_ASSERT(boevs.empty());
   }
 
 };

@@ -55,8 +55,12 @@ namespace Mantid
       /// Destructor
       virtual ~LoadInstrumentHelper() {}
 
-      /// Given an instrument name and a date return filename of appropriate IDF
-      std::string getIDF_Filename(std::string& IDFname, std::string date) {return std::string();}
+      /// For a given instrument name return IDF (identifier) that is valid for date
+      std::string getIDF_identifier(const std::string& idfName, const std::string& date);
+
+      /// Return from an IDF the values of the valid-from and valid-to attributes
+      void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
+                          std::string& outValidTo);
       
 
     private:

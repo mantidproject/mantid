@@ -554,7 +554,7 @@ namespace Mantid
       if (i != std::string::npos)
         instrumentID.erase(i);
 
-      std::string fullPathIDF = Kernel::ConfigService::Instance().getInstrumentFilename(instrumentID);
+      std::string fullPathIDF = Kernel::ConfigService::Instance().getInstrumentFilename(instrumentID,"");
 
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 

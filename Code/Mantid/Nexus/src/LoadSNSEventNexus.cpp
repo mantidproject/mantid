@@ -515,7 +515,7 @@ void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, Matr
   nxfile.close();
 
   // determine the instrument parameter file
-  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
   if (filename.empty())
   {
 	g_log.warning() << "Unable to determine geometry file for " << instrument << std::endl;

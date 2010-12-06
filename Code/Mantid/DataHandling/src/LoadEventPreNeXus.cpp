@@ -273,7 +273,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   pos = instrument.rfind("_", pos-1); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
-  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
   if (filename.empty())
     return;
   if (!Poco::File(filename).exists())
