@@ -6,6 +6,10 @@
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
 
+// Required for using the numpy arrayobject across multiple files
+#define PY_ARRAY_UNIQUE_SYMBOL MantidPythonAPI_ARRAY_API
+#include <numpy/arrayobject.h>
+
 namespace Mantid 
 {
 namespace PythonAPI
@@ -30,6 +34,11 @@ BOOST_PYTHON_MODULE(MantidPythonAPI)
 BOOST_PYTHON_MODULE(libMantidPythonAPI)
 #endif
 {
+  //-------------- Module initialization ---------------------
+  // Import numpy array object. Must be done in initialization
+  import_array();
+  //-------------- End of module initialization --------------
+
   using namespace Mantid::PythonAPI;
 
   MantidVecHelper::initializeDependencies();

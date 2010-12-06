@@ -170,8 +170,8 @@ namespace PythonAPI
     vector_proxy<MatrixWorkspace*>::wrap("stl_vector_matrixworkspace");
  
     //Operator overloads dispatch through the above structure. The typedefs save some typing
-    typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn1)(const WorkspaceAlgebraProxy::wraptype_ptr, const WorkspaceAlgebraProxy::wraptype_ptr);
-    typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraProxy::wraptype_ptr, double);
+    typedef WorkspaceAlgebraHelper::wraptype_ptr(*binary_fn1)(const WorkspaceAlgebraHelper::wraptype_ptr, const WorkspaceAlgebraHelper::wraptype_ptr,const std::string &,const std::string &,bool);
+    typedef WorkspaceAlgebraHelper::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraHelper::wraptype_ptr, double,const std::string&,const std::string &,bool);
 
     /// Typedef for data access
     typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(int const);
@@ -197,27 +197,9 @@ namespace PythonAPI
       .def("getNumberAxes", &API::MatrixWorkspace::axes)
       .def("getAxis", &API::MatrixWorkspace::getAxis, return_internal_reference<>())
       .def("replaceAxis", &API::MatrixWorkspace::replaceAxis)
-      //Special methods
-      .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
-      .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
-      .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
-      .def("__iadd__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_plus)
-      .def("__iadd__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_plus)
-      .def("__sub__", (binary_fn1)&WorkspaceAlgebraProxy::minus)
-      .def("__sub__", (binary_fn2)&WorkspaceAlgebraProxy::minus)
-      .def("__rsub__",(binary_fn2)&WorkspaceAlgebraProxy::rminus)
-      .def("__isub__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_minus)
-      .def("__isub__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_minus)
-      .def("__mul__", (binary_fn1)&WorkspaceAlgebraProxy::times)
-      .def("__mul__", (binary_fn2)&WorkspaceAlgebraProxy::times)
-      .def("__rmul__",(binary_fn2)&WorkspaceAlgebraProxy::rtimes)
-      .def("__imul__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_times)
-      .def("__imul__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_times)
-      .def("__div__", (binary_fn1)&WorkspaceAlgebraProxy::divide)
-      .def("__div__", (binary_fn2)&WorkspaceAlgebraProxy::divide)
-      .def("__rdiv__", (binary_fn2)&WorkspaceAlgebraProxy::rdivide)
-      .def("__idiv__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_divide)
-      .def("__idiv__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_divide)
+      // Binary operations
+      .def("do_binary_op", (binary_fn1)&WorkspaceAlgebraHelper::performBinaryOp)
+      .def("do_binary_op", (binary_fn2)&WorkspaceAlgebraHelper::performBinaryOp)
       // Deprecated, here for backwards compatability
       .def("blocksize", &API::MatrixWorkspace::blocksize)
       .def("getSampleDetails", &API::MatrixWorkspace::run, return_internal_reference<>() )

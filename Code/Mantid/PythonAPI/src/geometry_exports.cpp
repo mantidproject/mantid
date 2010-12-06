@@ -2,6 +2,17 @@
 // Wrappers for classes in the Mantid::Geometry namespace
 //
 
+/** M. Gigg 2010-12-02: gcc 4.4 warns about an aliasing pointer problem when 
+  trying to compile the line
+ .def("getDistance", &Geometry::IComponent::getDistance)
+ It is something to do with the function taking a reference to an IComponent but
+ there doesn't seem to be a problem when it is used so disable the warning but
+ just for this translation unit
+ */ 
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 #include <boost/python.hpp>
 //Geometry
 #include <MantidGeometry/V3D.h>

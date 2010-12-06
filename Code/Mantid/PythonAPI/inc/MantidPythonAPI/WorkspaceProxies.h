@@ -75,151 +75,18 @@ namespace Mantid
      *  A proxy for implementing workspace algebra operator overloads.
      *
      */
-    struct WorkspaceAlgebraProxy
+    struct WorkspaceAlgebraHelper
     {
       typedef API::MatrixWorkspace wraptype; ///< Wrapper type def
       typedef boost::shared_ptr<wraptype> wraptype_ptr; ///< Shared pointer type def
 
-      /** 
-      * Perform the given binary operation on two workspaces
-      * @param lhs The left-hand side of the operation
-      * @param rhs The right-hand side of the operation
-      * @param op One of 'p', 'm', 't', 'd' to denote the required operation
-      * @param inplace If true, then the lhs argument is replaced by the result of the operation.
-      */
-      static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace);
+      /// Binary op for two workspaces
+      static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, 
+					  const std::string & op, const std::string & name, bool inplace);
 
-      ///Plus workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'p', false);
-      }
-      /// Inplace Plus workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr inplace_plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'p', true);
-      }
-      /// Minus workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'm', false);
-      }
-      /// Inplace Minus workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr inplace_minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'm', true);
-      }
-      /// Multiply workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr times(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 't', false);
-      }
-      /// Inplace Multiply workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr inplace_times(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 't', true);
-      }
-      /// Divide workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'd', false);
-      }
-      /// Divide workspace
-      /// @param lhs Left hand side
-      /// @param rhs Right hand side
-      /// @return A shared pointer to the result workspace
-      static wraptype_ptr inplace_divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'd', true);
-      }
-
-      /// Perform the given binary operation on a workspace and a double
-      static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace);
-
-      /// Perform the given binary operation on a double and a workspace
-      static wraptype_ptr performBinaryOp(double lhs, const wraptype_ptr rhs, char op);
-      /// Plus
-      static wraptype_ptr plus(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'p', false);
-      }
-      /// Inplace Plus
-      static wraptype_ptr inplace_plus(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'p', true);
-      }
-      /// Reverse Plus
-      static wraptype_ptr rplus(const wraptype_ptr rhs, double lhs)
-      {
-        return performBinaryOp(lhs, rhs, 'p');
-      }
-      /// Minus
-      static wraptype_ptr minus(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'm', false);
-      }
-      /// Inplace Minus
-      static wraptype_ptr inplace_minus(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'm', true);
-      }
-      /// Reverse Minus
-      static wraptype_ptr rminus(const wraptype_ptr rhs, double lhs)
-      {
-        return performBinaryOp(lhs, rhs, 'm');
-      }
-      /// Multiply
-      static wraptype_ptr times(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 't', false);
-      }
-      /// Inplace Multiply
-      static wraptype_ptr inplace_times(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 't', true);
-      }
-      /// Multiply
-      static wraptype_ptr rtimes(const wraptype_ptr rhs, double lhs)
-      {
-        return performBinaryOp(lhs, rhs, 't');
-      }
-      /// Divide
-      static wraptype_ptr divide(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'd', false);
-      }
-      /// Reverse Divide
-      static wraptype_ptr rdivide(const wraptype_ptr rhs, double lhs)
-      {
-        return performBinaryOp(lhs, rhs, 'd');
-      }
-      /// Inplace Divide
-      static wraptype_ptr inplace_divide(const wraptype_ptr lhs, double rhs)
-      {
-        return performBinaryOp(lhs, rhs, 'd', true);
-      }
-
+      /// Binary op for a workspace and a double
+      static wraptype_ptr performBinaryOp(const wraptype_ptr inputWS, const double value, 
+					  const std::string & op, const std::string & name, bool inplace);
     };
 
     /**

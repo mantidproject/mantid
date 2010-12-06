@@ -51,146 +51,90 @@ namespace Mantid
 
     //*********************************************************************************
     //
-    // WorkspaceAlgebraProxy
+    // WorkspaceAlgebraHelper
     //
     //**********************************************************************************
 
-    /// Binary operation for two workspaces
-    /// @param lhs the left hand side workspace of the operation
-    /// @param rhs the right hand side workspace of the operation
-    /// @param op The operation
-    /// @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
-    /// @returns The resulting workspace
-    WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace)
+    /** Binary operation for two workspaces
+     * @param lhs the left hand side workspace of the operation
+     * @param rhs the right hand side workspace of the operation
+     * @param op The operation
+     * @param name The output name
+     * @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
+     * @returns The resulting workspace
+     */
+    WorkspaceAlgebraHelper::wraptype_ptr 
+    WorkspaceAlgebraHelper::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, 
+					    const std::string& op, const std::string & name, bool inplace)
     {
       wraptype_ptr result;
-      std::string name(lhs->getName());
+      std::string error("");
+      std::string wsName("");
       if( inplace )
       {
-        switch( op )
-        {
-        case 'p':
-          lhs += rhs;
-          break;
-        case 'm':
-          lhs -= rhs;
-          break;
-        case 't':
-          lhs *= rhs;
-          break;
-        case 'd':
-          lhs /= rhs;
-        }
+	if( op == "Plus" ) lhs += rhs;
+	else if( op == "Minus" ) lhs -= rhs;
+	else if( op == "Multiply" ) lhs *= rhs;
+	else if( op == "Divide" ) lhs /= rhs;
+	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown inplace binary operation requested: " + op;
         result = lhs;
+	wsName = lhs->getName();
       }
       else
       {
-        switch( op )
-        {
-        case 'p':
-          result = lhs + rhs;
-          break;
-        case 'm':
-          result = lhs - rhs;
-          break;
-        case 't':
-          result = lhs * rhs;
-          break;
-        case 'd':
-          result = lhs / rhs;
-        }
-        name += std::string("_") + op + std::string("_") + rhs->getName();
+	if( op == "Plus" ) result = lhs + rhs;
+	else if( op == "Minus" ) result = lhs - rhs; 
+	else if( op == "Multiply" ) result = lhs * rhs; 
+	else if( op == "Divide" ) result = lhs / rhs; 
+	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown binary operation requested: " + op;
+      }
+      if( !error.empty() )
+      {
+	throw std::runtime_error(error);
       }
       Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
       return result;
     }
-
 
     /** 
     * Perform the given binary operation on a workspace and a double
-    * @param lhs The left-hand side of the operation
-    * @param rhs The right-hand side of the operation
-    * @param op One of 'p', 'm', 't', 'd' to denote the required operation
+    * @param lhs The input workspace
+    * @param rhs The input value
+    * @param op The operation
     * @param inplace If true, then the lhs argument is replaced by the result of the operation.
     * @return A shared pointer to the result workspace
     */
-    WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
+    WorkspaceAlgebraHelper::wraptype_ptr 
+    WorkspaceAlgebraHelper::performBinaryOp(const wraptype_ptr inputWS, const double value, 
+					    const std::string& op, const std::string & name, bool inplace)
     {
       wraptype_ptr result;
-      std::string name(lhs->getName());
+      std::string error("");
       if( inplace )
       {
-        switch( op )
-        {
-        case 'p':
-          lhs += rhs;
-          break;
-        case 'm':
-          lhs -= rhs;
-          break;
-        case 't':
-          lhs *= rhs;
-          break;
-        case 'd':
-          lhs /= rhs;
-          break;
-        }
-        result = lhs;
+	if( op == "Plus" ) inputWS += value;
+	else if( op == "Minus" ) inputWS -= value;
+	else if( op == "Multiply" ) inputWS *= value;
+	else if( op == "Divide" ) inputWS /= value;
+	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown inplace binary operation requested: " + op;
+        result = inputWS;
       }
       else
       {
-        switch( op )
-        {
-        case 'p':
-          result = lhs + rhs;
-          break;
-        case 'm':
-          result = lhs - rhs;
-          break;
-        case 't':
-          result = lhs * rhs;
-          break;
-        case 'd':
-          result = lhs / rhs;
-        }
-        std::ostringstream os;
-        os << rhs;
-        name += std::string("_") + op + std::string("_") + os.str();
+	if( op == "Plus" ) result = inputWS + value;
+	else if( op == "Minus" ) result = inputWS - value; 
+	else if( op == "Multiply" ) result = inputWS * value; 
+	else if( op == "Divide" ) result = inputWS / value; 
+	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown binary operation requested: " + op;
       }
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
-      return result;
-    }
-
-    /** Binary operation on double and workspace
-    @param lhs The left-hand side of the operation
-    @param rhs The right-hand side of the operation
-    @param op One of 'p', 'm', 't', 'd' to denote the required operation
-    @returns The resulting workspace
-    */
-    WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
-    {
-      wraptype_ptr result;
-      std::ostringstream os;
-      os << lhs;
-      std::string name(os.str());
-      switch( op )
+      if( !error.empty() )
       {
-      case 'p':
-        result = rhs + lhs;
-        break;
-      case 'm':
-        result = lhs - rhs;
-        break;
-      case 't':
-        result = lhs * rhs;
-        break;
-      case 'd':
-        result = lhs / rhs;
+	throw std::runtime_error(error);
       }
-      name += std::string("_") + op + std::string("_") + rhs->getName();
       Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
       return result;
     }
 
   }
+
 }

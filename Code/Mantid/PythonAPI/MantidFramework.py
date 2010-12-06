@@ -5,7 +5,8 @@ import platform
 import sys
 import types
 import copy
-import warnings
+import inspect
+import opcode
 import __builtin__
 import __main__
 
@@ -57,6 +58,222 @@ def makeString(value):
         return str(value)
 
 #-------------------------------------------------------------------------------
+def _decompile(code_object):
+    """
+    Taken from http://thermalnoise.wordpress.com/2007/12/30/exploring-python-bytecode/
+
+    Extracts dissasembly information from the byte code and stores it in 
+    a list for further use.
+    
+    Call signature(s):
+        instructions=decompile(f.f_code)
+
+    Required      arguments:
+    =========     =====================================================================
+    code_object   A bytecode object extracted with inspect.currentframe()
+                  or any other mechanism that returns byte code.   
+    
+    Optional keyword arguments: NONE    
+
+    Outputs:
+    =========     =====================================================================
+    instructions  a list of offsets, op_codes, names, arguments, argument_type, 
+                  argument_value which can be deconstructed to find out various things
+                  about a function call.
+
+    Example:
+    # Two frames back so that we get the callers' caller
+    f = inspect.currentframe().f_back.f_back  
+    i = f.f_lasti  # index of the last attempted instruction in byte code
+    ins = decompile(f.f_code)
+    """
+    code = code_object.co_code
+    variables = code_object.co_cellvars + code_object.co_freevars
+    instructions = []
+    n = len(code)
+    i = 0
+    e = 0
+    while i < n:
+        i_offset = i
+        i_opcode = ord(code[i])
+        i = i + 1
+        if i_opcode >= opcode.HAVE_ARGUMENT:
+            i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
+            i = i + 2
+            if i_opcode == opcode.EXTENDED_ARG:
+                e = iarg << 16
+            else:
+                e = 0
+            if i_opcode in opcode.hasconst:
+                i_arg_value = repr(code_object.co_consts[i_argument])
+                i_arg_type = 'CONSTANT'
+            elif i_opcode in opcode.hasname:
+                i_arg_value = code_object.co_names[i_argument]
+                i_arg_type = 'GLOBAL VARIABLE'
+            elif i_opcode in opcode.hasjrel:
+                i_arg_value = repr(i + i_argument)
+                i_arg_type = 'RELATIVE JUMP'
+            elif i_opcode in opcode.haslocal:
+                i_arg_value = code_object.co_varnames[i_argument]
+                i_arg_type = 'LOCAL VARIABLE'
+            elif i_opcode in opcode.hascompare:
+                i_arg_value = opcode.cmp_op[i_argument]
+                i_arg_type = 'COMPARE OPERATOR'
+            elif i_opcode in opcode.hasfree:
+                i_arg_value = variables[i_argument]
+                i_arg_type = 'FREE VARIABLE'
+            else:
+                i_arg_value = i_argument
+                i_arg_type = 'OTHER'
+        else:
+            i_argument = None
+            i_arg_value = None
+            i_arg_type = None
+        instructions.append( (i_offset, i_opcode, opcode.opname[i_opcode], i_argument, i_arg_type, i_arg_value) )
+    return instructions
+
+#-------------------------------------------------------------------------------
+
+# A must list all of the operators that behave like a function calls in byte-code
+# This is for the lhs functionality
+__operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_NOT',
+                      'UNARY_CONVERT','UNARY_INVERT','GET_ITER', 'BINARY_POWER',
+                      'BINARY_MULTIPLY','BINARY_DIVIDE', 'BINARY_FLOOR_DIVIDE', 
+                      'BINARY_TRUE_DIVIDE', 'BINARY_MODULO','BINARY_ADD','BINARY_SUBTRACT',
+                      'BINARY_SUBSCR','BINARY_LSHIFT','BINARY_RSHIFT','BINARY_AND',
+                      'BINARY_XOR','BINARY_OR', 'INPLACE_POWER', 'INPLACE_MULTIPLY', 
+                      'INPLACE_DIVIDE', 'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
+                      'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT', 
+                      'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
+                      'INPLACE_OR'])
+
+
+def lhs_info(output_type='both'):
+    """Returns the number of arguments on the left of assignment along 
+    with the names of the variables.
+     
+    Call signature(s)::
+
+    Required arguments: NONE
+    
+    Optional keyword arguments    Meaning:
+    ===========================   ==========
+    output_type                   A string enumerating the type of output, one of
+                                    output_type = 'nreturns' : The number of return values
+                                                      expected from the call
+                                    output_type = 'names' : Just return a list of 
+                                                      variable names 
+                                    output_type = 'both' : A tuple containing both of
+                                                      the above
+
+    Outputs:
+    =========     
+    Depends on the value of the argument. See above.
+
+    """
+    # Two frames back so that we get the callers' caller, i.e. this should only
+    # be called from within a function
+    try:
+        frame = inspect.currentframe().f_back.f_back
+    except AttributeError:
+        raise RuntimeError("lhs_info cannot be used on the command line, only within a function")
+
+    # Process the frame noting the advice here:
+    # http://docs.python.org/library/inspect.html#the-interpreter-stack
+    try:
+        ret_vals = _process_frame(frame)
+    finally:
+        del frame
+        
+    if output_type == 'nreturns':
+        ret_vals = ret_vals[0]
+    elif output_type == 'names':
+        ret_vals = ret_vals[1]
+    else:
+        pass
+
+    return ret_vals
+
+def _process_frame(frame):
+    """Returns the number of arguments on the left of assignment along 
+    with the names of the variables for the given frame.
+     
+    Call signature(s)::
+
+    Required arguments:
+    ===========================   ==========
+    frame                         The code frame to analyse
+
+    Outputs:
+    =========     
+    Returns the a tuple with the number of arguments and their names
+    """
+    # Index of the last attempted instruction in byte code
+    last_i = frame.f_lasti  
+    ins_stack = _decompile(frame.f_code)
+
+    call_function_locs = {}
+    start_index = 0 
+    start_offset = 0
+    
+    for index, instruction in enumerate(ins_stack):
+        (offset, op, name, argument, argtype, argvalue) = instruction
+        if name in __operator_names:
+            call_function_locs[start_offset] = (start_index, index)
+            start_index = index
+            start_offset = offset
+
+    (offset, op, name, argument, argtype, argvalue) = ins_stack[-1]
+    # Append the index of the last entry to form the last boundary
+    call_function_locs[start_offset] = (start_index, len(ins_stack)-1) 
+
+    # In our case last_i should always be the offset of a call_function_locs instruction. 
+    # We use this to bracket the bit which we are interested in
+    output_var_names = []
+    max_returns = []
+    last_func_offset = call_function_locs[last_i][0]
+    (offset, op, name, argument, argtype, argvalue) = ins_stack[last_func_offset + 1] 
+    if name == 'POP_TOP':  # no return values
+        pass
+    if name == 'STORE_FAST' or name == 'STORE_NAME': # one return value 
+        output_var_names.append(argvalue)
+    if name == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign 
+        for index in range(argvalue):
+            (offset_, op_, name_, argument_, argtype_, argvalue_) = ins_stack[last_func_offset + 2 +index] 
+            output_var_names.append(argvalue_)
+    max_returns = len(output_var_names)
+    if name == 'DUP_TOP': # Many Return Values, Many equal signs
+        # The output here should be a multi-dim list which mimics the variable unpacking sequence.
+        # For instance a,b=c,d=f() => [ ['a','b'] , ['c','d'] ]
+        #              a,b=c=d=f() => [ ['a','b'] , 'c','d' ]  So on and so forth.
+
+        # put this in a loop and stack the results in an array.
+        count = 0
+        max_returns = 0 # Must count the max_returns ourselves in this case
+        while count < len(ins_stack[call_function_locs[i][0]:call_function_locs[i][1]]):
+            (offset_, op_, name_, argument_, argtype_, argvalue_) = ins[call_function_locs[i][0]+count] 
+            if name_ == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign 
+                hold = []
+                if argvalue_ > max_returns:
+                    max_returns = argvalue_
+                for index in range(argvalue_):
+                    (_offset_, _op_, _name_, _argument_, _argtype_, _argvalue_) = ins[call_function_locs[i][0] + count+1+index] 
+                    hold.append(_argvalue_)
+                count = count + argvalue_
+                output_var_names.append(hold)
+            # Need to now skip the entries we just appended with the for loop.
+            if name_ == 'STORE_FAST' or name_ == 'STORE_NAME': # One Return Value 
+                if 1 > max_returns:
+                    max_returns = 1
+                output_var_names.append(argvalue_)
+            count = count + 1
+
+    return (max_returns,output_var_names)
+
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
 class ProxyObject(object):
     """Base class for all objects acting as proxys
     """
@@ -99,6 +316,8 @@ class ProxyObject(object):
         """
         self.__obj = obj
 
+# Name for temporary objects within Binary operations
+_binary_tmp = '__binary_tmp'
 
 class WorkspaceProxy(ProxyObject):
     """
@@ -122,105 +341,138 @@ class WorkspaceProxy(ProxyObject):
         else:
             raise AttributeError('Index invalid, object is not a group.')
 
+    def __do_operation(self, op, rhs, output_name, inplace):
+        """Perform the given binary operation
+        """
+        if isinstance(rhs, WorkspaceProxy):
+            rhs = rhs._getHeldObject()
+        result = self.__factory.create(self.do_binary_op(rhs, op, output_name, inplace))
+        if inplace:
+            self._swap(result)
+        # 
+        if mtd.workspaceExists(_binary_tmp) and output_name != _binary_tmp:
+            mtd.deleteWorkspace(_binary_tmp)
+        return result
+
     def __add__(self, rhs):
         """
         Sum the proxied objects and return a new proxy managing that object
         """
-        if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self._getHeldObject() + rhs._getHeldObject())
+        # Figure out the name of the output. Only the final function call that is
+        # before the assignment will have the name of the variable
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
         else:
-            return self.__factory.create(self._getHeldObject() + rhs)
+            output_name = _binary_tmp
+        return self.__do_operation('Plus', rhs, output_name, False)
 
     def __radd__(self, rhs):
         """
         Sum the proxied objects and return a new proxy managing that object
         """
-        return self.__factory.create(rhs + self._getHeldObject())
-
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
+        else:
+            output_name = _binary_tmp
+        return self.__do_operation('Plus', rhs, output_name, False)
+    
     def __iadd__(self, rhs):
         """
-        In-place ssum the proxied objects and return a new proxy managing that object
+        In-place sum the proxied objects and return a new proxy managing that object
         """
-        result = self._getHeldObject()
-        if isinstance(rhs, WorkspaceProxy):
-            rhs = rhs._getHeldObject()
-        result += rhs
-        return self
+        output_name = self.getName()
+        return self.__do_operation('Plus', rhs, output_name, True)
 
     def __sub__(self, rhs):
         """
         Subtract the proxied objects and return a new proxy managing that object
         """
-        if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self._getHeldObject() - rhs._getHeldObject())
+        # Figure out the name of the output. Only the final function call that is
+        # before the assignment will have the name of the variable
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
         else:
-            return self.__factory.create(self._getHeldObject() - rhs)
+            output_name = __binary_tmp
+        return self.__do_operation('Minus', rhs, output_name, False)
 
     def __rsub__(self, rhs):
         """
         Subtract the proxied objects and return a new proxy managing that object
         """
-        return self.__factory.create(rhs - self._getHeldObject())
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
+        else:
+            output_name = _binary_tmp
+        return self.__do_operation('Minus', rhs, output_name, False)
 
     def __isub__(self, rhs):
         """
         In-place subtract the proxied objects and return a new proxy managing that object
         """
-        result = self._getHeldObject()
-        if isinstance(rhs, WorkspaceProxy):
-            rhs = rhs._getHeldObject()
-        result -= rhs
-        return self
+        output_name = self.getName()
+        return self.__do_operation('Plus', rhs, output_name, True)
 
     def __mul__(self, rhs):
         """
         Multiply the proxied objects and return a new proxy managing that object
         """
-        if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self._getHeldObject() * rhs._getHeldObject())
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
         else:
-            return self.__factory.create(self._getHeldObject() * rhs)
+            output_name = __binary_tmp
+        return self.__do_operation('Multiply', rhs, output_name, False)
 
     def __rmul__(self, rhs):
         """
         Multiply the proxied objects and return a new proxy managing that object
         """
-        return self.__factory.create(rhs * self._getHeldObject())
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
+        else:
+            output_name = _binary_tmp
+        return self.__do_operation('Multiply', rhs, output_name, False)
 
     def __imul__(self, rhs):
         """
         In-place multiply the proxied objects and return a new proxy managing that object
         """
-        result = self._getHeldObject()
-        if isinstance(rhs, WorkspaceProxy):
-            rhs = rhs._getHeldObject()
-        result *= rhs
-        return self
+        output_name = self.getName()
+        return self.__do_operation('Multiply', rhs, output_name, True)
 
     def __div__(self, rhs):
         """
         Divide the proxied objects and return a new proxy managing that object
         """
-        if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self._getHeldObject() / rhs._getHeldObject())
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
         else:
-            return self.__factory.create(self._getHeldObject() / rhs)
+            output_name = __binary_tmp
+        return self.__do_operation('Divide', rhs, output_name, False)
 
     def __rdiv__(self, rhs):
         """
         Divide the proxied objects and return a new proxy managing that object
         """
-        return self.__factory.create(rhs / self._getHeldObject())
+        nvars, names = lhs_info()
+        if nvars > 0:
+            output_name = names[0]
+        else:
+            output_name = _binary_tmp
+        return self.__do_operation('Multiply', rhs, output_name, False)
 
     def __idiv__(self, rhs):
         """
         In-place divide the proxied objects and return a new proxy managing that object
         """
-        result = self._getHeldObject()
-        if isinstance(rhs, WorkspaceProxy):
-            rhs = rhs._getHeldObject()
-        result /= rhs
-        return self
+        output_name = self.getName()
+        return self.__do_operation('Divide', rhs, output_name, True)
 
     def isGroup(self):
         """
@@ -476,7 +728,7 @@ class MantidPyFramework(FrameworkManager):
         max_width += 3
         output_table = '\nWorkspace list:\n'
         for row in output:
-            output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1]
+            output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1] + '\n'
 
         print output_table
 
