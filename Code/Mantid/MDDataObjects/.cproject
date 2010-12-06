@@ -5,7 +5,13 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.1807695009">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.1807695009" moduleId="org.eclipse.cdt.core.settings" name="Debug">
-				<externalSettings/>
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/MDDataObjects"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/MDDataObjects/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="MDDataObjects"/>
+					</externalSetting>
+				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -39,6 +45,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Kernel/inc}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1497283633" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1327317480" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="HDF_1_6"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1762184210" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.286095014" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -77,6 +86,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.so.debug.1807695009.1577629748" name="MD_File_hdfMatlab.cpp" rcbsApplicability="disable" resourcePath="src/MD_File_hdfMatlab.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1445591135">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1445591135" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544"/>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="src/CenterpieceRebinning.cpp|Event|src/ParameterParser.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -887,7 +899,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Event" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/MD_File_hdfMatlab.cpp|Event" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
