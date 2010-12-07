@@ -312,15 +312,15 @@ void LoadSNSEventNexus::loadEntryMetadata(const std::string &entry_name) {
   file.closeData();
 
   // TODO get the run number
-//  file.openData("run_number");
-//  string run("");
-//  if (file.getInfo().type == ::NeXus::CHAR) {
-//    run = file.getStrData();
-//  }
-//  if (!run.empty()) {
-//    WS->mutableRun().addProperty("run_number", run);
-//  }
-//  file.closeData();
+  file.openData("run_number");
+  string run("");
+  if (file.getInfo().type == ::NeXus::CHAR) {
+    run = file.getStrData();
+  }
+  if (!run.empty()) {
+    WS->mutableRun().addProperty("run_number", run);
+  }
+  file.closeData();
 
   // close the file
   file.close();
