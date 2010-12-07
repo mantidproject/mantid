@@ -69,6 +69,8 @@ public:
   const std::string shortName()const{return m_shortName;}
   /// Returns zero padding for this instrument
   int zeroPadding()const{return m_zeroPadding;}
+  /// Returns the default delimiter between instrument name and run number
+  const std::string delimiter() const{return m_delimiter;}
   /// Return list of techniques
   const std::set<std::string>& techniques()const{return m_technique;}
 private:
@@ -76,7 +78,8 @@ private:
   std::string m_name;                      ///< instrument name
   std::string m_shortName;                 ///< instrument short name
   int m_zeroPadding;                       ///< default zero padding for this facility
-  std::set<std::string> m_technique; ///< list of techniques the instrument can do
+  std::string m_delimiter;                 ///  default delimiter between instrument name and run number
+  std::set<std::string> m_technique;       ///< list of techniques the instrument can do
   static Logger& g_log;                    ///< logger
 };
 

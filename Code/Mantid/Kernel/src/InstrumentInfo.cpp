@@ -33,6 +33,9 @@ namespace Mantid
         m_zeroPadding = f->zeroPadding();
       }
 
+      // The string to separate the instrument name and the run number.
+        std::string m_delimiter = elem->getAttribute("delimiter");
+
       m_name = elem->getAttribute("name");
       if (m_name.empty())
       {

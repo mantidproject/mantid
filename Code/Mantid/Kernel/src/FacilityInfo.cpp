@@ -39,6 +39,9 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
     m_zeroPadding = 0;
   }
 
+  // The string to separate the instrument name and the run number.
+  std::string m_delimiter = elem->getAttribute("delimiter");
+
   std::string extsStr = elem->getAttribute("FileExtensions");
   if (extsStr.empty())
   {
@@ -115,7 +118,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
 
   if (m_instruments.empty())
   {
-    throw std::runtime_error("Facility "+m_name+" does not have any instrument;");
+    throw std::runtime_error("Facility "+m_name+" does not have any instruments;");
   }
 }
 
