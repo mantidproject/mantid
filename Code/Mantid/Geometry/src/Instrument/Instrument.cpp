@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -31,7 +32,7 @@ namespace Mantid
      * @param map parameter map to include
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
-    : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map.get() ),
+    : CompAssembly(instr.get(), map.get() ),
       m_instr(instr),
       m_map_nonconst(map)
     {
