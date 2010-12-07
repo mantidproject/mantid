@@ -172,24 +172,27 @@ void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName
 }
 
 void writeValue(std::ostream &os, const Run& runinfo, const std::string& name) {
-  if (runinfo.hasProperty(name)) {
-    Kernel::Property* prop = runinfo.getProperty(name);
-    Kernel::TimeSeriesProperty<double> *log = static_cast<Kernel::TimeSeriesProperty<double> *>(prop);
-    if (log != NULL)
-    {
-      os << log->getStatistics().mean;
-    }
-    else
-    {
-      os << prop->value();
-    }
-    std::string units = prop->units();
-    if (!units.empty())
-      os << " " << units;
-  }
-  else {
+  if (!runinfo.hasProperty(name)) {
     os << "UNKNOWN";
+    return;
   }
+  Kernel::Property* prop = runinfo.getProperty(name);
+  if (prop == NULL) {
+    os << "UNKNOWN";
+    return;
+  }
+  Kernel::TimeSeriesProperty<double> *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *> (prop);
+  if (log != NULL)
+  {
+    os << log->getStatistics().mean;
+  }
+  else
+  {
+    os << prop->value();
+  }
+  std::string units = prop->units();
+  if (!units.empty())
+    os << " " << units;
 }
 
 /**
@@ -201,8 +204,8 @@ void SaveGSS::writeHeaders(const std::string &format, std::ostream& os, Mantid::
 {
   if (format.compare(SLOG) == 0) {
     const Run& runinfo = workspace->run();
-    os << "# Sample Run: " << "UNKNOWN"; // TODO fill this in
-    //writeValue(os, runinfo, "run_number");
+    os << "# Sample Run: ";
+    writeValue(os, runinfo, "run_number");
     os << " Vanadium Run: " << "UNKNOWN"; // TODO fill this in
     os << " Wavelength: ";
     writeValue(os, runinfo, "LambdaRequest");
