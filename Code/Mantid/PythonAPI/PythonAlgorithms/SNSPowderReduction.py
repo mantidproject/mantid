@@ -245,6 +245,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if vanRun is not None:
                 samRun /= vanRun
                 normalized = True
+                samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
             else:
                 normalized = False
 

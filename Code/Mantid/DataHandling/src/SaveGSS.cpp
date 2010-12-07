@@ -206,7 +206,8 @@ void SaveGSS::writeHeaders(const std::string &format, std::ostream& os, Mantid::
     const Run& runinfo = workspace->run();
     os << "# Sample Run: ";
     writeValue(os, runinfo, "run_number");
-    os << " Vanadium Run: " << "UNKNOWN"; // TODO fill this in
+    os << " Vanadium Run: ";
+    writeValue(os, runinfo, "van_number");
     os << " Wavelength: ";
     writeValue(os, runinfo, "LambdaRequest");
     os << "\n";
