@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -32,7 +31,7 @@ namespace Mantid
      * @param map parameter map to include
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
-    : CompAssembly(instr.get(), map.get() ),
+    : CompAssembly( dynamic_cast<IComponent *>(instr.get()), map.get() ),
       m_instr(instr),
       m_map_nonconst(map)
     {
@@ -284,7 +283,10 @@ namespace Mantid
     void Instrument::markAsDetector(Geometry::IDetector* det)
     {
       if (m_isParametrized)
-        throw std::runtime_error("Instrument::markAsDetector() called on a parametrized Instrument object.");
+      {
+        m_instr->markAsDetector(det);
+        // throw std::runtime_error("Instrument::markAsDetector() called on a parametrized Instrument object.");
+      }
 
       //Create a (non-deleting) shared pointer to it
       Geometry::IDetector_sptr det_sptr = Geometry::IDetector_sptr(det, NoDeleting() );

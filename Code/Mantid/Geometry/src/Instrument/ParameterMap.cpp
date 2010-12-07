@@ -1,9 +1,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidGeometry/Instrument/Instrument.h"
 
 namespace Mantid
 {
@@ -31,18 +29,11 @@ namespace Mantid
     //@endcond
 
     /**
-    * Constructor
-    */
-    ParameterMap::ParameterMap() : m_nearestNeighbours()
-    {}
-
-
-    /**
      * Copy constructor
      * @param copy A reference to the object whose contents should be copied.
      */
     ParameterMap::ParameterMap(ParameterMap& copy)
-      :m_map(copy.m_map), m_nearestNeighbours(copy.m_nearestNeighbours)
+      :m_map(copy.m_map)
     {
     }
 
@@ -194,21 +185,6 @@ namespace Mantid
       }
       return out.str();
     }
-
-    /**
-    * Clears the cache and nearest neighbour information managed by the parameter map.
-    */
-    void ParameterMap::clearCache()
-    {
-      m_cacheLocMap.clear();
-      m_cacheRotMap.clear();
-      m_boundingBoxMap.clear();
-      if ( m_nearestNeighbours )
-      {
-        m_nearestNeighbours->clear();
-      }
-    }
- 
 
     /** Create or adjust "pos" parameter for a component
     * Assumed that name either equals "x", "y" or "z" otherwise this method will not add or modify "pos" parameter
@@ -404,48 +380,6 @@ namespace Mantid
       return m_boundingBoxMap.getCache(comp->getComponentID(),box);
     }
 
-
-    /**
-    * Handles the building of the NearestNeighbours object, if it has not already been populated for this parameter map.
-    * @param comp Object used for determining the Instrument
-    */
-    void ParameterMap::buildNearestNeighbours(const IComponent *comp) const
-    {
-      if ( ! m_nearestNeighbours )
-      {
-        // Get pointer to Instrument
-        boost::shared_ptr<const IComponent> parent(comp, NoDeleting());
-        while ( parent->getParent() )
-        {
-          parent = parent->getParent();
-        }
-        boost::shared_ptr<const Instrument> inst = boost::dynamic_pointer_cast<const Instrument>(parent);
-        if ( inst )
-        {
-          m_nearestNeighbours = NearestNeighbours_sptr(new NearestNeighbours(inst));
-        }
-        else
-        {
-          throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours", parent->getName());
-        }
-      }
-      m_nearestNeighbours->build();
-    }
-    
-    /**
-    * Queries the NearestNeighbours object for the selected detector.
-    * @param comp pointer to the querying detector
-    * @param radius distance from detector on which to filter results
-    * @return map of DetectorID to distance for the nearest neighbours
-    */
-    std::map<int, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
-    {
-      if ( ! m_nearestNeighbours || ! m_nearestNeighbours->isPopulated() )
-      {
-        buildNearestNeighbours(comp);
-      }
-      return m_nearestNeighbours->neighbours(comp, radius);
-    }
 
   } // Namespace Geometry
 

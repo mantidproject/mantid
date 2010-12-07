@@ -10,7 +10,6 @@
 #include "MantidGeometry/IObjComponent.h"
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
-#include <map>
 
 namespace Mantid
 {
@@ -75,9 +74,6 @@ public:
 
   /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
-
-  /// Get Nearest Neighbours
-  virtual std::map<int, double> getNeighbours(double radius = 0.0) = 0;
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();

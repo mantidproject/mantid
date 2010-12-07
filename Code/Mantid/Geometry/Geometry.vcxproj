@@ -169,7 +169,6 @@
   <ItemGroup>
     <ClCompile Include="src\IInstrument.cpp" />
     <ClCompile Include="src\Instrument\Instrument.cpp" />
-    <ClCompile Include="src\Instrument\NearestNeighbours.cpp" />
     <ClCompile Include="src\Instrument\ObjCompAssembly.cpp" />
     <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\XMLlogfile.cpp" />
@@ -262,8 +261,9 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\IInstrument.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\Instrument.h" />
-    <ClInclude Include="inc\MantidGeometry\Instrument\NearestNeighbours.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ObjCompAssembly.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParObjCompAssembly.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParRectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\XMLlogfile.h" />
@@ -333,7 +333,6 @@
     <ClInclude Include="inc\MantidGeometry\Math\MatrixBase.h" />
     <ClInclude Include="test\MatrixTest.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ObjComponent.h" />
-    <ClInclude Include="test\NearestNeighboursTest.h" />
     <ClInclude Include="test\ObjComponentTest.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\Object.h" />
     <ClInclude Include="test\ObjectTest.h" />
@@ -343,10 +342,14 @@
     <ClInclude Include="inc\MantidGeometry\Instrument\Parameter.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParameterFactory.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParameterMap.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParametrizedComponent.h" />
     <ClInclude Include="test\ParametrizedComponentTest.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParCompAssembly.h" />
     <ClInclude Include="test\ParCompAssemblyTest.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParComponentFactory.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParDetector.h" />
     <ClInclude Include="test\ParDetectorTest.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParObjComponent.h" />
     <ClInclude Include="test\ParObjComponentTest.h" />
     <ClInclude Include="inc\MantidGeometry\Surfaces\Plane.h" />
     <ClInclude Include="test\PlaneTest.h" />

@@ -27,7 +27,6 @@ namespace Geometry
   // Forward declarations
   //---------------------------------------------------------------------------
   class BoundingBox;
-  class NearestNeighbours;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -78,7 +77,7 @@ public:
   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
 #endif
     ///Constructor
-    ParameterMap();
+    ParameterMap(){}
     ///virtual destructor
     virtual ~ParameterMap(){}
     /// Returns true if the map is empty, false otherwise
@@ -285,8 +284,13 @@ public:
     std::string asString()const;
 
     ///Clears the location and roatation caches
-    void clearCache();
-    
+    void clearCache()
+    {
+      m_cacheLocMap.clear();
+      m_cacheRotMap.clear();
+      m_boundingBoxMap.clear();
+    }
+ 
     ///Sets a cached location on the location cache
     void setCachedLocation(const IComponent* comp, const V3D& location) const;
     ///Attempts to retreive a location from the location cache
@@ -299,10 +303,6 @@ public:
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
-    /// Build and populate the NearestNeighbours object
-    void buildNearestNeighbours(const IComponent *comp) const;
-    /// Query the NearestNeighbours object for a detector
-    std::map<int, double> getNeighbours(const IComponent *comp, const double radius = 0.0) const;
 
 private:
   ///Assignment operator
@@ -312,8 +312,6 @@ private:
   /// internal parameter map instance
   pmap m_map;
 
-  /// shared pointer to NearestNeighbours object
-  mutable boost::shared_ptr<NearestNeighbours> m_nearestNeighbours;
   /// internal cache map instance for cached postition values
   mutable Kernel::Cache<const ComponentID,V3D > m_cacheLocMap;
   /// internal cache map instance for cached rotation values

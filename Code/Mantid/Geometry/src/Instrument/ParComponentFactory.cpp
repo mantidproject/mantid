@@ -7,8 +7,7 @@
 #include "MantidGeometry/Instrument/Detector.h" 
 #include "MantidGeometry/Instrument/Detector.h" 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/ObjComponent.h" 
 
 namespace Mantid
 {
@@ -27,10 +26,6 @@ boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<cons
       const RectangularDetector* rd = dynamic_cast<const RectangularDetector*>(base.get());
       if (rd)
         return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
-
-      boost::shared_ptr<const Instrument> iinst = boost::dynamic_pointer_cast<const Instrument>(base);
-      if (iinst)
-        return boost::shared_ptr<Instrument>(new Instrument(boost::const_pointer_cast<Instrument>(iinst), boost::shared_ptr<ParameterMap>(const_cast<ParameterMap*>(map), NoDeleting())));
 
       const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
       if (ac)

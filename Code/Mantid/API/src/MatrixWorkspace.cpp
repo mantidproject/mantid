@@ -8,7 +8,6 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -31,7 +30,7 @@ namespace Mantid
     MatrixWorkspace::MatrixWorkspace() : 
     IMDWorkspace(), m_axes(), m_isInitialized(false),
       sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap), m_masks()
+      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(), m_masks()
     {}
 
     /// Destructor
@@ -453,7 +452,15 @@ namespace Mantid
     */
     IInstrument_sptr MatrixWorkspace::getInstrument()const
     {
-      return boost::shared_ptr<Instrument>(new Instrument(sptr_instrument,m_parmap));
+      //Return a Parametrized Instrument if there is a parameter map and it isn't empty
+      if (m_parmap)
+      {
+        if( !m_parmap->empty() )
+        {
+          return boost::shared_ptr<Instrument>(new Instrument(sptr_instrument,m_parmap));
+        }
+      }
+      return sptr_instrument;
     }
 
     /** Get a shared pointer to the instrument associated with this workspace
@@ -470,6 +477,11 @@ namespace Mantid
     */
     Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
     {
+      //If you requrest instrument parameters but the pointer is empty,
+      //  create them for the first time.
+      if (!m_parmap)
+        m_parmap = ParameterMap_sptr(new ParameterMap());
+
       //TODO: Here duplicates cow_ptr. Figure out if there's a better way
 
       // Use a double-check for sharing so that we only
@@ -498,6 +510,11 @@ namespace Mantid
 
     const Geometry::ParameterMap& MatrixWorkspace::constInstrumentParameters() const
     {
+      //If you requrest instrument parameters but the pointer is empty,
+      //  create them for the first time.
+      if (!m_parmap)
+        m_parmap = ParameterMap_sptr(new ParameterMap());
+
       return *m_parmap;
     }
 
@@ -689,8 +706,7 @@ namespace Mantid
     {
       // Get instrument and sample
 
-      boost::shared_ptr<const Instrument> instrument = getBaseInstrument();
-      Instrument* inst = const_cast<Instrument*>(instrument.get());
+      boost::shared_ptr<Instrument> instrument = getBaseInstrument();
 
       // Get the data in the logfiles associated with the raw data
 
@@ -701,7 +717,7 @@ namespace Mantid
       // the parameters that my be specified in the instrument definition file (IDF)
 
       Geometry::ParameterMap& paramMap = instrumentParameters();
-      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
+      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
 
 
       // iterator to browse through the multimap: paramInfoFromIDF

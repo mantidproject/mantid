@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -26,7 +27,6 @@ namespace Mantid
   {
     class MDCell;
     class MDPoint;
-    class ParameterMap;
   }
 
   namespace API
@@ -257,7 +257,7 @@ namespace Mantid
 
       /// Parameters modifying the base instrument
       //mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
-      mutable boost::shared_ptr<Geometry::ParameterMap> m_parmap;
+      mutable Geometry::ParameterMap_sptr m_parmap;
 
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int, MaskList > m_masks;

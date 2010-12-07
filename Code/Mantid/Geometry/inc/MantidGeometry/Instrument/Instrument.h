@@ -7,6 +7,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -24,7 +25,6 @@ namespace Mantid
     // Forward declarations
     //------------------------------------------------------------------
     class XMLlogfile;
-    class ParameterMap;
 
     /**
     Base Instrument Class.
@@ -60,12 +60,12 @@ namespace Mantid
       ///String description of the type of component
       virtual std::string type() const { return "Instrument"; }
 
-      Instrument(const boost::shared_ptr<Instrument> instr, boost::shared_ptr<ParameterMap> map);
+      Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map);
       Instrument();
       Instrument(const std::string& name);
       ///Virtual destructor
       virtual ~Instrument() {}
-
+      
       Geometry::IObjComponent_sptr getSource() const;
       Geometry::IObjComponent_sptr getSample() const;
       Geometry::IDetector_sptr getDetector(const int &detector_id) const;
@@ -128,7 +128,7 @@ namespace Mantid
       boost::shared_ptr<Instrument> baseInstrument() const;
 
       /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
-      boost::shared_ptr<ParameterMap> getParameterMap() const;
+      Geometry::ParameterMap_sptr getParameterMap() const;
 
 
     private:
@@ -176,7 +176,7 @@ namespace Mantid
       boost::shared_ptr<Instrument> m_instr;
 
       /// Non-const pointer to the parameter map
-      boost::shared_ptr<ParameterMap> m_map_nonconst;
+      ParameterMap_sptr m_map_nonconst;
 
     };
 
