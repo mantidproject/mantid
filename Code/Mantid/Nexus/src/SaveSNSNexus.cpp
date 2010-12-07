@@ -199,6 +199,7 @@ namespace NeXus
           if (NXgetgroupID(inId, &link) != NX_OK) return NX_ERROR;
           if (!strcmp(current_path, link.targetPath))
           {
+            // Create a copy of the group
             if (NXmakegroup (outId, name, theClass) != NX_OK) return NX_ERROR;
             if (NXopengroup (outId, name, theClass) != NX_OK) return NX_ERROR;
             if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
@@ -240,8 +241,6 @@ namespace NeXus
               }
             }
 
-
-
             //---------------------------------------------------------------------------------------
             if (data_label=="data" && (bank != ""))
             {
@@ -279,6 +278,9 @@ namespace NeXus
                 // Make a buffer of floats will all the counts in that bank.
                 float * data;
                 data = new float[dataDimensions[0]*dataDimensions[1]*dataDimensions[2]];
+                // Here's one with the errors
+                float * errors;
+                errors = new float[dataDimensions[0]*dataDimensions[1]*dataDimensions[2]];
 
                 for (int x = 0; x < det->xpixels(); x++)
                 {
@@ -290,11 +292,15 @@ namespace NeXus
                     {
                       wi = (*map)[ det->getAtXY(x,y)->getID() ];
                       const MantidVec & Y = inputWorkspace->readY(wi);
+                      const MantidVec & E = inputWorkspace->readE(wi);
                       // Offset into array.
                       int index = x*dataDimensions[1]*dataDimensions[2] + y*dataDimensions[2];
                       // Save in the float array
                       for (int i=0; i < static_cast<int>(Y.size()); i++)
+                      {
                         data[index+i] = Y[i];
+                        errors[index+i] = E[i];
+                      }
                     }
                     catch (...)
                     {
@@ -303,10 +309,22 @@ namespace NeXus
                   }
                 }
 
-                if (NXmakedata (outId, name, dataType, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+                if (NXmakedata (outId, name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
                 if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
                 if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+
+                // Add an attribute called "errors" with value = the name of the data_errors field.
+                NXname attrName = "errors";
+                std::string attrBuffer = "data_errors";
+                if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), attrBuffer.size(), NX_CHAR) != NX_OK) return NX_ERROR;
                 if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
+
+                // ----- Save the data_errors field -------
+                NXname errors_name = "data_errors";
+                if (NXmakedata (outId, errors_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+                if (NXopendata (outId, errors_name) != NX_OK) return NX_ERROR;
+                if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
+
                 if (NXclosedata (outId) != NX_OK) return NX_ERROR;
 
                 delete [] data;
