@@ -511,7 +511,7 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
       }
     }
   } // end parallel region
-  //TODO: enable this when w
+  //TODO: enable this when MDDataPoints are in working order;
   //for(unsigned int ii=0;ii<nDims;ii++){
   //  TargetWorkspace.get_spMDDPoints()->rPixMin(ii) = boxMin[ii];
   //  TargetWorkspace.get_spMDDPoints()->rPixMax(ii) = boxMax[ii];

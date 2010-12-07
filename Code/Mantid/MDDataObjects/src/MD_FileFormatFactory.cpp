@@ -1,5 +1,9 @@
 #include "MDDataObjects/MD_FileFormatFactory.h"
-
+// existing file formats
+#include "MDDataObjects/MD_File_hdfV1.h"
+#include "MDDataObjects/MD_File_hdfMatlab.h"
+#include "MDDataObjects/MD_File_hdfMatlab4D.h"
+#include "MDDataObjects/MD_FileHoraceReader.h"
 
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -61,6 +65,9 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
     htri_t rez=H5Fis_hdf5(file_name);
     if (rez<=0){
         if (rez==0){
+			if(isHoraceFile(file_name)){
+				return (new MD_FileHoraceReader(file_name));
+			}
 			f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
             throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));
         }else{
@@ -75,8 +82,46 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
          return (new MD_File_hdfMatlab(file_name));
       }
     }
-
 }
+// 
+bool 
+MD_FileFormatFactory::isHoraceFile(const char *fileName)
+{
+	std::ifstream aFile(fileName);
+	if(aFile.bad()){
+		f_log.error()<< "attempt to open existing file"<<fileName<<" for reading have failed\n";
+		std::string errorName(fileName);
+		throw(Kernel::Exception::FileError(" can not open existing file to check if it Horace written",errorName));
+	}
+	char DataBuffer[4+6+8];
+	aFile.read(DataBuffer,4+6+8);
+	if(aFile.bad()){
+		f_log.debug()<< "Can not read first 18 bytes of data from existing binary file: "<<fileName<<" It is probably not a Horace file\n";
+		return false; // probably not Horace file
+	}
 
+
+	int n_symbols= *(reinterpret_cast<uint32_t*>(DataBuffer));
+	if(n_symbols!=6){
+		f_log.debug()<<" first number of the file header is not 6, It is probably not a Horace file\n";
+		return false;
+	}
+	// 6 symbols starting from 4-th 
+	std::string buf(DataBuffer+4,6);
+	if(buf != "horace"){
+		f_log.debug()<<" the program name is not a Horace, definitely not a Horace file\n";
+		return false;
+	}
+
+	double version = *(reinterpret_cast<double *>(DataBuffer+10));
+
+	if(abs(version-2)>FLT_EPSILON){
+		f_log.debug()<<" Only version 2 of Horace format file is currently supported and we got the version :"<<version<<std::endl;
+		return false;
+	}
+	// should be happening automatically anyway;
+	aFile.close();
+	return true;
+}
 } // end namespaces
 } 

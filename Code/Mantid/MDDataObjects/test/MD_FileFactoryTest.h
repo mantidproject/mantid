@@ -4,8 +4,13 @@
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MD_FileFormatFactory.h"
 #include "Poco/Path.h"
-
 #include "MantidKernel/System.h"
+
+// existing file formats
+#include "MDDataObjects/MD_File_hdfV1.h"
+#include "MDDataObjects/MD_File_hdfMatlab.h"
+#include "MDDataObjects/MD_File_hdfMatlab4D.h"
+#include "MDDataObjects/MD_FileHoraceReader.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
@@ -35,20 +40,28 @@ public:
 	}
 	void testReturnsMatlabReader(){
 		std::auto_ptr<IMD_FileFormat> oldFormat;
-		std::string testFile = findTestFileLocation();
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw");
 		TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str()));
 
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab*>(oldFormat.get())!=0);
 	}
 	void testReturnsOldMatlabReader(){
 		std::auto_ptr<IMD_FileFormat> oldFormat;
-		std::string testFile = findTestFileLocation();
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw");
 		TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str(),old_4DMatlabReader));
 
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab4D*>(oldFormat.get())!=0);
 	}
+	void testHoraceFileFound(){
+		std::auto_ptr<IMD_FileFormat> horaceFormat;
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo_bin.sqw");
+
+		TS_ASSERT_THROWS_NOTHING(horaceFormat= MD_FileFormatFactory::getFileReader(testFile.c_str()));
+
+		TSM_ASSERT("FileFormat factory have not returned a pointer to a Horace file reader ",dynamic_cast<MD_FileHoraceReader*>(horaceFormat.get())!=0);
+	}
 private:
-  std::string findTestFileLocation(void){
+  std::string findTestFileLocation(const char *filePath){
 
     std::string path = Mantid::Kernel::getDirectoryOfExecutable();
 
@@ -61,7 +74,7 @@ private:
     size_t   nPos = path.find("Mantid"+sps+"Code");
     if(nPos==std::string::npos){
       std::cout <<" can not identify application location\n";
-      root_path="../../../../Test/VATES/fe_demo.sqw";
+	  root_path.assign(filePath);
     }else{
       root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
     }

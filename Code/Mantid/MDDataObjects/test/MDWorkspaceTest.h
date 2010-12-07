@@ -28,7 +28,7 @@ private:
     MOCK_METHOD1(read_mdd, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
     MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
-    hsize_t getNPix()
+    size_t getNPix()
     {
       return 0;
     }

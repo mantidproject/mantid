@@ -298,7 +298,7 @@ MD_File_hdfMatlab::read_pointDescriptions(void)const
 	return MDPointDescription(defaultPixel,dataTags);
 }
  
-hsize_t
+size_t
 MD_File_hdfMatlab::getNPix(void)
 {
     if(this->file_handler<0)return -1;
@@ -515,7 +515,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     std::vector<hsize_t> cells_preselection_buf;
     cells_preselection_buf.resize(max_npix_selected);
     size_t ic(0);
-    hsize_t max_npix_indataset = this->getNPix();
+    size_t max_npix_indataset = this->getNPix();
     size_t pixel_num,block_location;
     for(i=starting_cell;i<=n_selected_cells;i++){
         npix_tt          =pData[selected_cells[i]].npix; 

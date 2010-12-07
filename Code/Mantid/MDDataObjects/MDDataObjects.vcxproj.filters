@@ -48,6 +48,9 @@
     <ClCompile Include="src\MD_File_hdfV1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MD_FileHoraceReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MD_FileFormatFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MD_FileHoraceReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,10 +4,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MDDataObjects/IMD_FileFormat.h"
-// existing file formats
-#include "MDDataObjects/MD_File_hdfV1.h"
-#include "MDDataObjects/MD_File_hdfMatlab.h"
-#include "MDDataObjects/MD_File_hdfMatlab4D.h"
+
 #include "MantidKernel/System.h"
 
 /** The class takes the file name and returns file the reader/writer which would understand and interpret the file format 
@@ -17,6 +14,8 @@
  *
  * not a factory in Mantid sence, as the rules to select file format are defined within the class, so user who creates new format
  * has to add these rules to the class manualy 
+ *
+ * Proper Mantid factory will be build if this class widely used in a future;
 
     @author Alex Buts, RAL ISIS
     @date 03/12/2010
@@ -79,6 +78,8 @@ private:
     static Mantid::Kernel::Logger& f_log;
 
 	IMD_FileFormat* select_file_reader(const char *file_name,user_request rec=best_fit);
+	/// function checks if the file provided is binary Horace format file;
+	bool isHoraceFile(const char *fileName);
 };
 } // end namespaces
 }

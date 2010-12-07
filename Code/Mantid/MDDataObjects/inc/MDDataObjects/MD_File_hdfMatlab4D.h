@@ -38,7 +38,7 @@ namespace Mantid{
 
    using namespace Mantid::Kernel;
 //
-class MD_File_hdfMatlab4D :    public MD_File_hdfMatlab
+class DLLExport MD_File_hdfMatlab4D :    public MD_File_hdfMatlab
 {
 public:
 	MD_File_hdfMatlab4D(const char *file_name):MD_File_hdfMatlab(file_name){};

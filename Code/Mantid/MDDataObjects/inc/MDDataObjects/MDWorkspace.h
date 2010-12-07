@@ -86,14 +86,14 @@ namespace Mantid
 	  ///OBSOLETE? or should be modified as does not work properly at the moment  Total share pointers mess;
       void init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
 	  /** initialize from another workspace but with different MD image and (sub) set of data points; 
-	   the basis and the instrument description(s) are the same. 
+	   the basis and the instrument description(s) are the same and copied from the source
 
-	   TODO: All set methods have to be ready to make copy-construction of the corresponding object and analyse reference counter! 
+	   TODO: All set methods have to be ready to make copy-construction of the corresponding object and analyse reference counter if 
+	   shared pointers to be implemented. 
 
 	   file manager will be different so should come from somewhere. Probably from factory when requested
 	   save algorithm will have this file property and should create proper file manager.
 	   the workspace itself will allocate temporary file for its internal usage -- this file will be basis for final workspace file when saved;
-	   MESS, DANGER!!!! 
 	   */
 	  void init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Mantid::Geometry::MDGeometryDescription *const transf=NULL);
 	  /// this should be moved in data loading routines soon

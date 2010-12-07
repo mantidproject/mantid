@@ -73,7 +73,7 @@ struct sqw_pixel{
     int    ien ; //    Energy bin number for the pixel in the array in the (irun)th header |-> 4th coordinate dimension
 };      
 //
-class MD_File_hdfMatlab :    public IMD_FileFormat
+class DLLExport MD_File_hdfMatlab :    public IMD_FileFormat
 {
 public:
     MD_File_hdfMatlab(const char *file_name);
@@ -102,7 +102,7 @@ public:
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels(points) contributing into the dataset;
-    virtual hsize_t getNPix(void);
+    virtual size_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
     virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
     
