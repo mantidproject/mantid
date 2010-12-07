@@ -904,14 +904,13 @@ namespace DataObjects
         num_threads = PARALLEL_NUMBER_OF_THREADS;
       }
     }
-    num_threads = 1;
-    g_log.information() << num_threads << " threads found.\n";
 
-    if ((num_threads > m_noVectors) && sortType==TOF_SORT)
+    if ((num_threads > m_noVectors) && sortType==TOF_SORT && (m_noVectors <= 4))
     {
 
       if (m_noVectors == 1)
       {
+        g_log.information() << num_threads << " cores found. ";
         g_log.information() << "Performing sort with as many cores as possible on single event list.\n";
         // Only one event list - throw all the cores you got!
         if (num_threads >= 4)
@@ -921,34 +920,49 @@ namespace DataObjects
       }
       else
       {
+        g_log.information() << num_threads << " cores found. ";
         g_log.information() << "Performing sort with 2 cores per event list.\n";
-        // We will split the threads into blocks of 2
-        // How many vectors will each (2) thread group need to do?
-        int vectors_per_thread = m_noVectors / (num_threads/2);
-        if (vectors_per_thread <= 0) vectors_per_thread = 1;
-
-        // More threads than vectors - parallelize each vector sort with a 2-thread sort
-        //PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
-        //PRAGMA_OMP(parallel for )
-        for (int j=0; j < num_threads/2; j++)
+        if (num_threads >= 4)
         {
-          int start = j*vectors_per_thread;
-          int end = start + vectors_per_thread;
-          if (end > m_noVectors) end = m_noVectors;
-          for (int i=start; i < end; i++)
+          // Do two event lists at once, 2 cores each
+          for (int i=0; i < m_noVectors; )
+          {
+            PARALLEL_SECTIONS
+            {
+              PARALLEL_SECTION
+              {
+                this->data[i]->sortTof2();
+                if (prog) prog->report(1);
+              }
+              PARALLEL_SECTION
+              {
+                if (i+1 < m_noVectors)
+                {
+                  this->data[i+1]->sortTof2();
+                  if (prog) prog->report(1);
+                }
+              }
+            }
+            i += 2;
+          } // each group of 2 event lists
+        }
+        else
+        {
+          // Fewer than 4 cores - do each event list sequentially, using 2 cores.
+          for (int i=0; i < m_noVectors; i++)
           {
             // Sort this event list using 2 cores
             this->data[i]->sortTof2();
+            //Report progress
+            if (prog) prog->report(1);
           }
-
-          //Report progress
-          if (prog) prog->report(vectors_per_thread);
         }
+
       }
     }
-
     else
     {
+      g_log.information() << num_threads << " cores found. ";
       g_log.information() << "Performing sort with 1 core per event list.\n";
 
       // More vectors than threads - sort them in parallel

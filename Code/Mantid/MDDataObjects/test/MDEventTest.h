@@ -26,6 +26,9 @@ public:
     TS_ASSERT_EQUALS( b.getNumDims(), 4);
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
+
+    TS_ASSERT_EQUALS( sizeof(a), sizeof(CoordType)*3+8);
+    TS_ASSERT_EQUALS( sizeof(b), sizeof(CoordType)*4+8);
   }
 
   void testConstructorsWithCoords()

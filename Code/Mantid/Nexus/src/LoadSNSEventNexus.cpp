@@ -498,9 +498,10 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
         //The event TOF passes the filter.
         TofEvent event(tof, pulsetime);
 
-        //Add it to the list at the workspace index corresponding to that pixel ID
-        WS->getEventList((*pixelID_to_wi_map)[event_id[i]]).addEventQuickly( event );
-        //WS->getEventListAtPixelID( event_id[i] ).addEventQuickly( event );
+        //Find the the workspace index corresponding to that pixel ID
+        int wi((*pixelID_to_wi_map)[event_id[i]]);
+        // Add it to the list at that workspace index
+        WS->getEventList(wi).addEventQuickly( event );
 
         //Local tof limits
         if (tof < my_shortest_tof) { my_shortest_tof = tof;}
