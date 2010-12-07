@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Timer.h"
 #include <cmath>
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -124,9 +125,9 @@ class EventListTest : public CxxTest::TestSuite
 {
 private:
   EventList el;
-  static const int NUMEVENTS = 100;
-  static const int MAX_TOF = 10e6;
-  static const int NUMBINS = 160;
+  int NUMEVENTS;
+  int MAX_TOF;
+  int NUMBINS;
   int BIN_DELTA;
 
 
@@ -134,6 +135,9 @@ public:
   EventListTest()
   {
     BIN_DELTA = 10000;
+    NUMBINS = 160;
+    MAX_TOF = 10e6;
+    NUMEVENTS = 100;
   }
 
   void setUp()
@@ -1285,9 +1289,6 @@ public:
 
 
 
-
-
-
   //==================================================================================
   // Mocking functions
   //==================================================================================
@@ -1365,6 +1366,93 @@ public:
       X.push_back(tof);
     }
     return X;
+  }
+
+
+
+
+
+
+
+  bool checkSort(std::string context)
+  {
+    vector<TofEvent> rel = el.getEvents();
+    TSM_ASSERT_EQUALS(context, rel.size(), NUMEVENTS);
+    bool ret = true;
+    for (int i=1; i<rel.size(); i++)
+    {
+      //std::cout << i << ":" << rel[i].tof() << "\n";
+      if (rel[i-1].tof() > rel[i].tof()) ret = false;
+      if (!ret) return ret;
+    }
+    return ret;
+  }
+
+  bool checkSortWeighted(std::string context)
+  {
+    vector<WeightedEvent> rel = el.getWeightedEvents();
+    TSM_ASSERT_EQUALS(context, rel.size(), NUMEVENTS);
+    bool ret = true;
+    for (int i=1; i<rel.size(); i++)
+    {
+      //std::cout << i << ":" << rel[i].tof() << "\n";
+      if (rel[i-1].tof() > rel[i].tof()) ret = false;
+      if (!ret) return ret;
+    }
+    return ret;
+  }
+
+
+
+  void test_ParallelizedSorting()
+  {
+    bool verbose = false;
+    if (verbose)
+    {
+      std::cout << "\n";
+      NUMEVENTS = 1e8;
+    }
+    else
+    {
+      NUMEVENTS = 100;
+    }
+
+    if (verbose) std::cout << NUMEVENTS << " events:\n";
+    Timer timer1;
+    fake_data();
+    if (verbose) std::cout << "   - " << timer1.elapsed() << " seconds to create.\n";
+
+    Timer timer2;
+    el.sortTof();
+    if (verbose) std::cout << "   - " << timer2.elapsed() << " seconds to sortTof (original).\n";
+    TS_ASSERT( checkSort("sortTof") );
+
+    // Reset
+    fake_data();
+    Timer timer3;
+    el.sortTof2();
+    if (verbose) std::cout << "   - " << timer3.elapsed() << " seconds to sortTof2.\n";
+    TS_ASSERT( checkSort("sortTof2") );
+
+    // Reset
+    fake_data();
+    Timer timer4;
+    el.sortTof4();
+    if (verbose) std::cout << "   - " << timer4.elapsed() << " seconds to sortTof4.\n";
+    TS_ASSERT( checkSort("sortTof4") );
+
+    if (!verbose)
+    {
+      fake_data();
+      el.switchToWeightedEvents();
+      el.sortTof2();
+      TS_ASSERT( checkSortWeighted("sortTof2, weighted") );
+      fake_data();
+      el.switchToWeightedEvents();
+      el.sortTof4();
+      TS_ASSERT( checkSortWeighted("sortTof4, weighted") );
+    }
+
   }
 
 

@@ -896,18 +896,73 @@ namespace DataObjects
    */
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
-
-    //Go through all the histograms and set the data
-    PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
-    for (int i=0; i < m_noVectors; ++i)
+    int num_threads;
+    PARALLEL
     {
-      //TODO: Make sure no thread throws an exception in parallel?
+      PARALLEL_CRITICAL(how_many_threads)
+      {
+        num_threads = PARALLEL_NUMBER_OF_THREADS;
+      }
+    }
+    num_threads = 1;
+    g_log.information() << num_threads << " threads found.\n";
 
-      //Perform the sort
-      this->data[i]->sort(sortType);
+    if ((num_threads > m_noVectors) && sortType==TOF_SORT)
+    {
 
-      //Report progress
-      if (prog) prog->report();
+      if (m_noVectors == 1)
+      {
+        g_log.information() << "Performing sort with as many cores as possible on single event list.\n";
+        // Only one event list - throw all the cores you got!
+        if (num_threads >= 4)
+          this->data[0]->sortTof4();
+        else
+          this->data[0]->sortTof2();
+      }
+      else
+      {
+        g_log.information() << "Performing sort with 2 cores per event list.\n";
+        // We will split the threads into blocks of 2
+        // How many vectors will each (2) thread group need to do?
+        int vectors_per_thread = m_noVectors / (num_threads/2);
+        if (vectors_per_thread <= 0) vectors_per_thread = 1;
+
+        // More threads than vectors - parallelize each vector sort with a 2-thread sort
+        //PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
+        //PRAGMA_OMP(parallel for )
+        for (int j=0; j < num_threads/2; j++)
+        {
+          int start = j*vectors_per_thread;
+          int end = start + vectors_per_thread;
+          if (end > m_noVectors) end = m_noVectors;
+          for (int i=start; i < end; i++)
+          {
+            // Sort this event list using 2 cores
+            this->data[i]->sortTof2();
+          }
+
+          //Report progress
+          if (prog) prog->report(vectors_per_thread);
+        }
+      }
+    }
+
+    else
+    {
+      g_log.information() << "Performing sort with 1 core per event list.\n";
+
+      // More vectors than threads - sort them in parallel
+      PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
+      for (int i=0; i < m_noVectors; ++i)
+      {
+        //TODO: Make sure no thread throws an exception in parallel?
+
+        //Perform the sort
+        this->data[i]->sort(sortType);
+
+        //Report progress
+        if (prog) prog->report();
+      }
     }
   }
 

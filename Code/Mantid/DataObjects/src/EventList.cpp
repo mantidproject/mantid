@@ -87,6 +87,14 @@ using Kernel::DateAndTime;
   }
 
   /** < comparison operator, using the TOF to do the comparison.
+   * @param rhs: the other TofEvent to compare.
+   * @return true if this->m_tof < rhs.m_tof*/
+  bool TofEvent::operator>(const TofEvent & rhs) const
+  {
+    return (this->m_tof > rhs.m_tof);
+  }
+
+  /** < comparison operator, using the TOF to do the comparison.
    * @param rhs_tof: the other time of flight to compare.
    * @return true if this->m_tof < rhs.m_tof*/
   bool TofEvent::operator<(const double rhs_tof) const
@@ -246,15 +254,6 @@ using Kernel::DateAndTime;
     return (e1.tof() < e2.tof());
   }
 
-//  /** Compare two events' TOF, return true if e1 should be before e2.
-//   * @param e1 first event
-//   * @param e2_tof second event's time of flight
-//   *  */
-//  bool compareEventTof(const TofEvent & e1, const double e2_tof)
-//  {
-//    return (e1.tof() < e2.tof());
-//  }
-
   /** Compare two events' FRAME id, return true if e1 should be before e2.
   * @param e1 first event
   * @param e2 second event
@@ -263,6 +262,28 @@ using Kernel::DateAndTime;
   {
     return (e1.pulseTime() < e2.pulseTime());
   }
+
+//  /** Comparison operator by TOF for TofEvents) */
+//  bool operator<(const TofEvent & e1, const TofEvent& e2)
+//  {
+//    return (e1.tof() < e2.tof());
+//  }
+//
+//  /** Comparison operator by TOF for TofEvents) */
+//  bool operator>(const TofEvent & e1, const TofEvent& e2)
+//  {
+//    return (e1.tof() > e2.tof());
+//  }
+//
+//  /** Comparison operator by TOF for TofEvents) */
+//  bool operator<(const WeightedEvent & e1, const WeightedEvent& e2)
+//  {
+//    return (e1.tof() < e2.tof());
+//  }
+
+
+
+
 
   //==========================================================================
   /** Unary function for searching the event list.
@@ -729,6 +750,252 @@ using Kernel::DateAndTime;
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
   }
+
+
+
+//  // MergeSort from: http://en.literateprograms.org/Merge_sort_%28C_Plus_Plus%29#chunk%20def:merge
+//  template<typename IT, typename VT> void insert(IT begin, IT end, const VT &v)
+//  {
+//    while(begin+1!=end && *(begin+1)<v) {
+//      std::swap(*begin, *(begin+1));
+//      ++begin;
+//    }
+//    *begin=v;
+//  }
+//
+//  template<typename IT> void merge(IT begin, IT begin_right, IT end)
+//  {
+//    for(;begin<begin_right; ++begin) {
+//      if(*begin>*begin_right) {
+//        typename std::iterator_traits<IT>::value_type v(*begin);
+//        *begin=*begin_right;
+//        insert(begin_right, end, v);
+//      }
+//    }
+//  }
+//
+//  template<typename IT> void mergesort(IT begin, IT end)
+//  {
+//    size_t size(end-begin);
+//    //std::cout << "mergesort called on " << size << "\n";
+//    if(size<2) return;
+//
+//    IT begin_right=begin+size/2;
+//
+//    mergesort(begin, begin_right);
+//    mergesort(begin_right, end);
+//    merge(begin, begin_right, end);
+//  }
+
+
+  //----------------------------------------------------------------------------------------------------
+  /** Merge two sorted lists into one sorted vector.
+   *
+   * @tparam T :: the type in the vector.
+   * @param begin1 :: iterator at the start of the first list.
+   * @param end1 :: iterator at the end of the first list.
+   * @param begin2 :: iterator at the start of the second list.
+   * @param end2 :: iterator at the end of the second list.
+   * @param result_vector :: a vector (by reference) that will be filled with the result.
+   * */
+  template<typename T>
+  void merge(typename std::vector<T>::iterator begin1, typename std::vector<T>::iterator end1,
+             typename std::vector<T>::iterator begin2, typename std::vector<T>::iterator end2,
+             typename std::vector<T> & result_vector)
+  {
+    typename std::vector<T>::iterator it1=begin1;
+    typename std::vector<T>::iterator it2=begin2;
+    while (!((it1 == end1) && (it2 == end2)))
+    {
+      if (it1 == end1)
+      {
+        // Only it2 makes sense
+        result_vector.push_back(*it2);
+        it2++;
+      }
+      else if (it2 == end2)
+      {
+        // Only it1 makes sense
+        result_vector.push_back(*it1);
+        it1++;
+      }
+      else
+      {
+        // Both iterators are valid. Which is smaller?
+        if (*it1 < *it2)
+        {
+          result_vector.push_back(*it1);
+          it1++;
+        }
+        else
+        {
+          result_vector.push_back(*it2);
+          it2++;
+        }
+      }
+    }
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------------
+  /** Perform a parallelized sort on a provided vector, using 2 threads.
+   * NOTE: Will temporarily use twice the memory used by the incoming vector.
+   *
+   * @param vec :: a vector, by refe/rence, that will be sorted-in place.
+   */
+  template<typename T>
+  void parallel_sort2(typename std::vector<T> & vec)
+  {
+    size_t size = vec.size();
+
+    typename std::vector<T>::iterator begin = vec.begin();
+    typename std::vector<T>::iterator middle = begin + size/2;
+    typename std::vector<T>::iterator end = vec.end();
+
+    PRAGMA_OMP(parallel sections)
+    {
+      PRAGMA_OMP(section)
+      {
+        std::sort(begin, middle);
+        //std::cout << " ----------- Part 1 --------------\n"; for (typename std::vector<T>::iterator it = begin; it != middle; it++) std::cout << *it << "\n";
+      }
+      PRAGMA_OMP(section)
+      {
+        std::sort(middle, end);
+        // std::cout << " ----------- Part 2 --------------\n";for (typename std::vector<T>::iterator it = middle; it != end; it++) std::cout << *it << "\n";
+      }
+    }
+
+    // Now merge back
+    typename std::vector<T> temp;
+    merge(begin, middle, middle, end, temp);
+
+    //std::cout << " ----------- Part 1+2 --------------\n"; for (typename std::vector<T>::iterator it = temp.begin(); it != temp.end(); it++) std::cout << *it << "\n";
+    // Swap storage with the temp vector
+    vec.swap(temp);
+    // Which we can now clear
+    temp.clear();
+  }
+
+
+  //----------------------------------------------------------------------------------------------------
+  /** Perform a parallelized sort on a provided vector, using 4 threads.
+   * NOTE: Will temporarily use twice the memory used by the incoming vector.
+   *
+   * @param vec :: a vector, by refe/rence, that will be sorted-in place.
+   */
+  template<typename T>
+  void parallel_sort4(std::vector<T> & vec)
+  {
+    //int num_cores = PARALLEL_NUMBER_OF_THREADS;
+    size_t size = vec.size();
+
+    typename std::vector<T>::iterator begin = vec.begin();
+    typename std::vector<T>::iterator middle1 = begin + size/4;
+    typename std::vector<T>::iterator middle2 = begin + size/2;
+    typename std::vector<T>::iterator middle3 = begin + 3*size/4;
+    typename std::vector<T>::iterator end = vec.end();
+
+    PRAGMA_OMP(parallel sections)
+    {
+      PRAGMA_OMP(section)
+      {
+        std::sort(begin, middle1);
+      }
+      PRAGMA_OMP(section)
+      {
+        std::sort(middle1, middle2);
+      }
+      PRAGMA_OMP(section)
+      {
+        std::sort(middle2, middle3);
+      }
+      PRAGMA_OMP(section)
+      {
+        std::sort(middle3, end);
+      }
+    }
+
+    // Now merge back
+    typename std::vector<T> temp1, temp2;
+    //PRAGMA_OMP(parallel sections)
+    {
+      //PRAGMA_OMP(section)
+      {
+        merge(begin, middle1, middle1, middle2, temp1);
+      }
+      //PRAGMA_OMP(section)
+      {
+        merge(middle2, middle3, middle3, end, temp2);
+      }
+    }
+
+    // We can clear the incoming vector to free up memory now,
+    //  because it is copied already in temp1, temp2
+    vec.clear();
+
+    // Final merge
+    typename std::vector<T> temp;
+    merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), temp);
+
+    // Swap storage with the temp vector
+    vec.swap(temp);
+    // Which we can now clear
+    temp.clear();
+  }
+
+
+  // --------------------------------------------------------------------------
+  /** Sort events by TOF, using two threads.
+   *
+   * Performance for 5e7 events:
+   *  - 40.5 secs with sortTof() (one thread)
+   *  - 21.1 secs with sortTof2() (two threads)
+   *  - 18.2 secs with sortTof4() (four threads)
+   * Performance gain tends to go up with longer event lists.
+   * */
+  void EventList::sortTof2() const
+  {
+    if (this->order == TOF_SORT)
+    {
+      return; // nothing to do
+    }
+    if (has_weights)
+      parallel_sort2(weightedEvents);
+    else
+      parallel_sort2(events);
+
+    //Save the order to avoid unnecessary re-sorting.
+    this->order = TOF_SORT;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Sort events by TOF, using four threads.
+   *
+   * Performance for 5e7 events:
+   *  - 40.5 secs with sortTof() (one thread)
+   *  - 21.1 secs with sortTof2() (two threads)
+   *  - 18.2 secs with sortTof4() (four threads)
+   * Performance gain tends to go up with longer event lists.
+   * */
+  void EventList::sortTof4() const
+  {
+    if (this->order == TOF_SORT)
+    {
+      return; // nothing to do
+    }
+
+    if (has_weights)
+      parallel_sort4(weightedEvents);
+    else
+      parallel_sort4(events);
+
+    //Save the order to avoid unnecessary re-sorting.
+    this->order = TOF_SORT;
+  }
+
+
 
   // --------------------------------------------------------------------------
   /** Sort events by Frame */

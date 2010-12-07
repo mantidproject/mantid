@@ -74,6 +74,7 @@ public:
   bool operator==(const TofEvent & rhs) const;
   bool operator<(const TofEvent & rhs) const;
   bool operator<(const double rhs_tof) const;
+  bool operator>(const TofEvent & rhs) const;
 
 
   /// Return the time of flight, as a double, in nanoseconds.
@@ -243,6 +244,8 @@ public:
   void sort(const EventSortType order) const;
 
   void sortTof() const;
+  void sortTof2() const;
+  void sortTof4() const;
 
   void sortPulseTime() const;
 

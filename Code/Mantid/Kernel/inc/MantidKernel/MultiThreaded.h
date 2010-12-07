@@ -102,6 +102,8 @@
 #define PARALLEL_ATOMIC \
                 PRAGMA(omp atomic)
 
+#define PARALLEL_NUMBER_OF_THREADS omp_get_num_threads()
+
 #define PARALLEL_THREAD_NUMBER omp_get_thread_num()
 
 #define PARALLEL \
@@ -113,7 +115,15 @@
 #define PARALLEL_SECTION \
                 PRAGMA(omp section)
 
+/** General purpose define for OpenMP, becomes the equivalent of
+ * #pragma omp EXPRESSION
+ * (if your compiler supports OpenMP)
+ */
+#define PRAGMA_OMP(expression) \
+                PRAGMA(omp expression )
+
 #else //_OPENMP
+
 ///Empty definitions - to enable set your complier to enable openMP
 #define PARALLEL_FOR_IF(condition)
 #define PARALLEL_FOR_NO_WSP_CHECK()
@@ -128,9 +138,11 @@
 #define PARALLEL_CRITICAL(name)
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
+#define PARALLEL_NUMBER_OF_THREADS 1
 #define PARALLEL
 #define PARALLEL_SECTIONS
 #define PARALLEL_SECTION
+#define PRAGMA_OMP(expression)
 #endif //_OPENMP
 
 #endif //MANTID_KERNEL_MULTITHREADED_H_
