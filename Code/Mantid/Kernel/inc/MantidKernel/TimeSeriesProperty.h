@@ -192,9 +192,9 @@ public:
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); /*increment within loop*/)
     {
       DateAndTime t = it->first;
-	  // Avoid iterator invalidation by caching current value and incrementing ahead of erase.
+      // Avoid iterator invalidation by caching current value and incrementing ahead of erase.
       typename timeMap::iterator it_current = it;
-	  ++it;
+      ++it;
       if ((t < start) || (t >= stop))
       {
         //Is outside the range we are keeping, so erase that.
@@ -228,6 +228,7 @@ public:
       {
         outputs_tsp.push_back(myOutput);
         myOutput->m_propertySeries.clear();
+        myOutput->m_size=0;
       }
       else
       {
@@ -282,6 +283,14 @@ public:
         break;
 
     } //Looping through entries in the splitter vector
+
+    //Make sure all entries have the correct size recorded in m_size.
+    for (int i=0; i < numOutputs; i++)
+    {
+      TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
+      if (myOutput)
+        myOutput->m_size = myOutput->realSize();
+    }
 
   }
 
