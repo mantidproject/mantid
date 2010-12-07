@@ -284,7 +284,8 @@ class CanSubtraction(LoadRun):
 
         # Put the components in the correct positions
         currentDet = reducer.instrument.cur_detector().name() 
-        maskpt_rmin, maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_CAN.getName(), beamcoords[0], beamcoords[1])
+        reducer.instrument.set_component_positions(
+                self.SCATTER_CAN.getName(), beamcoords[0], beamcoords[1])
         mantid.sendLogMessage('::SANS:: Initialized can workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
 
         # Create a run details object
@@ -315,7 +316,7 @@ class CanSubtraction(LoadRun):
         if not reducer.transmission_calculator is None:
             reduce_can.transmission_calculator.set_loader(reduce_can.can_trans_load)
 
-        norm_step_ind = reduce_can._reduction_steps.index(reduce_can.norm_mon)
+        norm_step_ind = reduce_can.step_num(reduce_can.norm_mon)
         reduce_can.norm_mon = NormalizeToMonitor(
                                         raw_ws = self.SCATTER_CAN.getName())
         reduce_can._reduction_steps[norm_step_ind] = reduce_can.norm_mon
@@ -324,9 +325,9 @@ class CanSubtraction(LoadRun):
         reduce_can.set_process_single_workspace(self.SCATTER_CAN.getName())
 
         #this will be the first command that is run in the new chain
-        start = reduce_can._reduction_steps.index(reduce_can.flood_file)
+        start = reduce_can.step_num(reduce_can.flood_file)
         #stop before this current step
-        end = reducer._reduction_steps.index(self)-1
+        end = reducer.step_num(self)-1
         #the reducer is completely setup, run it
         reduce_can.run_steps(start_ind=start, stop_ind=end)
         
@@ -670,13 +671,13 @@ class LoadSample(LoadRun):
     #TODO: we don't need a dictionary here
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
 
-    def __init__(self, sample_run=None, reload=True, period=-1):
+    def __init__(self, sample=None, reload=True, period=-1):
         super(LoadRun, self).__init__()
         self.SCATTER_SAMPLE = None
         self._SAMPLE_SETUP = None
         self._SAMPLE_RUN = None
         self._SAMPLE_N_PERIODS = -1
-        self._sample_run = sample_run
+        self.sample_run = sample
         self._reload = reload
         self._period = period
         
@@ -691,19 +692,19 @@ class LoadSample(LoadRun):
         
     def execute(self, reducer, workspace):
         # If we don't have a data file, look up the workspace handle
-        if self._sample_run is None:
-            self._sample_run = reducer._data_files.values()[0]
+        if self.sample_run is None:
+            self.sample_run = reducer.get_sample()
         # Code from AssignSample
         self._clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
         
-        if( self._sample_run.startswith('.') or self._sample_run == '' or self._sample_run == None):
+        if( self.sample_run.startswith('.') or self.sample_run == '' or self.sample_run == None):
             self._SAMPLE_SETUP = None
             self._SAMPLE_RUN = ''
             self.SCATTER_SAMPLE = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
-        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer, self._sample_run, False, self._reload, self._period)
+        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer, self.sample_run, False, self._reload, self._period)
         if self.SCATTER_SAMPLE.getName() == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
         if reset == True:
@@ -730,15 +731,27 @@ class LoadSample(LoadRun):
         return reducer.wksp_name, logvalues
 
 class MoveComponents(ReductionStep):
+    """
+        Moves the components so that the centre of the detector bank is at the location
+        that was passed to the BeamFinder
+    """
     def __init__(self):
-        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(MoveComponents, self).__init__()
+        #save where we have moved the workspace to so that we don't move it again
+        self.moved_to = None
 
-    def execute(self, reducer, workspace, rebin_alg = 'use default'):
+    def execute(self, reducer, workspace):
 
         # Put the components in the correct positions
         beamcoords = reducer._beam_finder.get_beam_center()
-        self.maskpt_rmin, self.maskpt_rmax = reducer.instrument.set_component_positions(workspace, beamcoords[0], beamcoords[1])
+        if self.moved_to and self.moved_to != beamcoords:
+            #the components had already been moved, return them to their original location first
+            reducer.instrument.set_component_positions(workspace, -self.moved_to[0], -self.moved_to[1])
+        
+        if self.moved_to != beamcoords:
+            self.maskpt_rmin, self.maskpt_rmax = reducer.instrument.set_component_positions(workspace, beamcoords[0], beamcoords[1])
+            self.moved_to = beamcoords
+
         mantid.sendLogMessage('::SANS:: Moved sample workspace to [' + str(self.maskpt_rmin)+','+str(self.maskpt_rmax) + ']' )
 
 class CropDetBank(ReductionStep):
@@ -1356,8 +1369,11 @@ class UserFile(ReductionStep):
                         reducer.instrument.other_detector().correction_file \
                            = filepath
                     elif parts[0].upper() == 'HAB':
-                        reducer.instrument.getDetector('HAB').correction_file \
-                            = filepath
+                        try:
+                            reducer.instrument.getDetector('HAB').correction_file \
+                                = filepath
+                        except AttributeError:
+                            raise AttributeError('Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
                     elif parts[0].upper() == 'FLAT':
                         reducer.flood_file.set_filename(filepath)
                     else:

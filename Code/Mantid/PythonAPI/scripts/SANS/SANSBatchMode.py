@@ -79,7 +79,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
     file_handle.close()
 
     #first copy the user settings incase running the reductionsteps can change it 
-    settings = copy.deepcopy(ReductionSingleton().reference())
+    settings = copy.deepcopy(ISIS_global().reference())
 
     # Now loop over run information and process
     for run in runinfo:
@@ -145,4 +145,4 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
             PlotResult(final_name)
 
         #the call to WaveRang... killed the reducer so copy back over the settings
-        ReductionSingleton.replace(copy.deepcopy(settings))
+        reset_singleton(copy.deepcopy(settings))

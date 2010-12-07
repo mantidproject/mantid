@@ -701,11 +701,11 @@ bool SANSRunWindow::loadUserFile()
 
   // Use python function to read the file and then extract the fields
   runReduceScriptFunction(
-//    "i.ReductionSingleton().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')\n");
-      "i.ReductionSingleton().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");
+//    "i.ISIS_global().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')\n");
+      "i.ISIS_global().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");
 
   QString status = runReduceScriptFunction(
-      "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
+      "print i.ISIS_global().user_settings.execute(i.ISIS_global())").trimmed();
   if ( status != "True" )
   {
     return false;
@@ -714,23 +714,23 @@ bool SANSRunWindow::loadUserFile()
   double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.min_radius").toDouble();
+      "print i.ISIS_global().mask.min_radius").toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param*unit_conv));
   dbl_param = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.max_radius").toDouble();
+      "print i.ISIS_global().mask.max_radius").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
   //Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_low"));
+      "print i.ISIS_global().to_wavelen.wav_low"));
   m_uiForm.wav_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_high").trimmed());
+      "print i.ISIS_global().to_wavelen.wav_high").trimmed());
   const QString wav_step = runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_step").trimmed();
+      "print i.ISIS_global().to_wavelen.wav_step").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
   //Q
   QString text = runReduceScriptFunction(
-      "print i.ReductionSingleton().Q_REBIN");
+      "print i.ISIS_global().Q_REBIN");
   QStringList values = text.split(",");
   if( values.count() == 3 )
   {
@@ -746,18 +746,18 @@ bool SANSRunWindow::loadUserFile()
   }
   //Qxy
   m_uiForm.qy_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().QXY2"));
+      "print i.ISIS_global().QXY2"));
   setLimitStepParameter("Qxy", runReduceScriptFunction(
-      "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
+      "print i.ISIS_global().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
   // Tranmission options
   m_uiForm.trans_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamin()"));
+      "print i.ISIS_global().get_trans_lambdamin()"));
   m_uiForm.trans_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamax()"));
+      "print i.ISIS_global().get_trans_lambdamax()"));
   text = runReduceScriptFunction(
-      "print i.ReductionSingleton().transmission_calculator.fit_method").trimmed();
+      "print i.ISIS_global().transmission_calculator.fit_method").trimmed();
   int index = m_uiForm.trans_opt->findData(text, Qt::UserRole, Qt::MatchFixedString);
   if( index >= 0 )
   {
@@ -766,23 +766,23 @@ bool SANSRunWindow::loadUserFile()
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.get_incident_mon()"));
+    "print i.ISIS_global().instrument.get_incident_mon()"));
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc"));
+    "print i.ISIS_global().instrument.incid_mon_4_trans_calc"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.is_interpolating_norm").trimmed() == "True");
+    "print i.ISIS_global().instrument.is_interpolating_norm").trimmed() == "True");
   m_uiForm.trans_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.use_interpol_trans_calc"
+    "print i.ISIS_global().instrument.use_interpol_trans_calc"
     ).trimmed() == "True");
 
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.detector_file('rear')"));
+    "print i.ISIS_global().instrument.detector_file('rear')"));
   m_uiForm.front_direct_file->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.detector_file('front')"));
+    "print i.ISIS_global().instrument.detector_file('front')"));
 
   QString file = runReduceScriptFunction(
-      "print i.ReductionSingleton().flood_file.get_filename()");
+      "print i.ISIS_global().flood_file.get_filename()");
   file = file.trimmed();
   //Check if the file name is set to Python's None object
   file = file == "None" ? "" : file;
@@ -790,25 +790,25 @@ bool SANSRunWindow::loadUserFile()
 
   //Scale factor
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._corr_and_scale.rescale").toDouble();
+    "print i.ISIS_global()._corr_and_scale.rescale").toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
 
   //Sample offset if one has been specified
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.SAMPLE_Z_CORR").toDouble();
+    "print i.ISIS_global().instrument.SAMPLE_Z_CORR").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
   //Centre coordinates
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._beam_finder.get_beam_center()[0]").toDouble();
+    "print i.ISIS_global()._beam_finder.get_beam_center()[0]").toDouble();
   m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._beam_finder.get_beam_center()[1]").toDouble();
+    "print i.ISIS_global()._beam_finder.get_beam_center()[1]").toDouble();
   m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
 
   //Gravity switch
   QString param = runReduceScriptFunction(
-    "print i.ReductionSingleton().to_Q.gravity").trimmed();
+    "print i.ISIS_global().to_Q.gravity").trimmed();
   if( param == "True" )
   {
     m_uiForm.gravity_check->setChecked(true);
@@ -820,7 +820,7 @@ bool SANSRunWindow::loadUserFile()
   
   ////Detector bank
   QString detName = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.cur_detector().name()").trimmed();
+    "print i.ISIS_global().instrument.cur_detector().name()").trimmed();
   index = m_uiForm.detbank_sel->findText(detName);  
   if( index >= 0 && index < 2 )
   {
@@ -832,12 +832,12 @@ bool SANSRunWindow::loadUserFile()
  
   // Phi values 
   m_uiForm.phi_min->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_min"));
+    "print i.ISIS_global().mask.phi_min"));
   m_uiForm.phi_max->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_max"));
+    "print i.ISIS_global().mask.phi_max"));
 
   if ( runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_mirror").trimmed() == "True" )
+    "print i.ISIS_global().mask.phi_mirror").trimmed() == "True" )
   {
     m_uiForm.mirror_phi->setChecked(true);
   }
@@ -946,24 +946,24 @@ void SANSRunWindow::updateMaskTable()
   //Now add information from the mask file
   //Spectrum mask, "Rear" det
   QString mask_string = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.spec_mask_r");
+      "print i.ISIS_global().mask.spec_mask_r");
   addSpectrumMasksToTable(mask_string, reardet_name);
   //"Front" det
   mask_string = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.spec_mask_f");
+      "print i.ISIS_global().mask.spec_mask_f");
   addSpectrumMasksToTable(mask_string, frontdet_name);
 
   //Time masks
   mask_string = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.time_mask");
+      "print i.ISIS_global().mask.time_mask");
   addTimeMasksToTable(mask_string, "-");
   //Rear detector
   mask_string = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.time_mask_r");
+      "print i.ISIS_global().mask.time_mask_r");
   addTimeMasksToTable(mask_string, reardet_name);
   //Front detectors
   mask_string = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.time_mask_f");
+      "print i.ISIS_global().mask.time_mask_f");
   addTimeMasksToTable(mask_string, frontdet_name);
 }
 
@@ -1591,7 +1591,7 @@ void SANSRunWindow::selectUserFile()
     return;
   }
   
-  runReduceScriptFunction("i.ReductionSingleton().user_file_path='"+
+  runReduceScriptFunction("i.ISIS_global().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'");
 
   if( !loadUserFile() )
@@ -1712,7 +1712,7 @@ bool SANSRunWindow::oldLoadButtonClick()
   }
   if( !work_dir.endsWith('/') ) work_dir += "/";
   m_data_dir = work_dir;
-  runReduceScriptFunction("import SANSReduction\nSANSReduction.INSTRUMENT = i.ReductionSingleton().instrument\nSANSReduction.DataPath('" + m_data_dir + "')");
+  runReduceScriptFunction("import SANSReduction\nSANSReduction.INSTRUMENT = i.ISIS_global().instrument\nSANSReduction.DataPath('" + m_data_dir + "')");
 
   runReduceScriptFunction("SANSReduction.UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
   oldLoadUserFile();
@@ -1851,7 +1851,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
   if( !work_dir.endsWith('/') ) work_dir += "/";
   m_data_dir = work_dir;
-  runReduceScriptFunction("i.ReductionSingleton().set_data_path('" + m_data_dir + "')");
+  runReduceScriptFunction("i.ISIS_global().set_data_path('" + m_data_dir + "')");
 
   // Check if we have loaded the data_file
   if( !isUserFileLoaded() )
@@ -2042,35 +2042,35 @@ bool SANSRunWindow::handleLoadButtonClick()
 QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
 {
   //Construct a run script based upon the current values within the various widgets
-  QString exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
+  QString exec_reduce = "i.ISIS_global().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
 
   //Add the path in the single mode data box if it is not empty
   QString data_path = m_uiForm.datadir_edit->text();
   if( !data_path.isEmpty() )
   {
-    exec_reduce += "i.ReductionSingleton().set_data_path('" + data_path + "')\n";
+    exec_reduce += "i.ISIS_global().set_data_path('" + data_path + "')\n";
   }
 
-  exec_reduce += "i.ReductionSingleton().to_Q.output_type='"+type+"'\n";
+  exec_reduce += "i.ISIS_global().to_Q.output_type='"+type+"'\n";
   //Analysis details
-  exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
+  exec_reduce +="i.ISIS_global().user_settings.readLimitValues('L/R '+'"+
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
-    m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
+    m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ISIS_global())\n";
 
   exec_reduce += "i.LimitsWav(" + m_uiForm.wav_min->text().trimmed() + "," + m_uiForm.wav_max->text() + "," +
     m_uiForm.wav_dw->text()+",'"+m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString()+"')\n";
   if( m_uiForm.q_dq_opt->currentIndex() == 2 )
   {
-    exec_reduce += "i.ReductionSingleton().user_settings.readLimitValues('L/Q '"+m_uiForm.q_rebin->text() +
-      "', i.ReductionSingleton())\n";
+    exec_reduce += "i.ISIS_global().user_settings.readLimitValues('L/Q '"+m_uiForm.q_rebin->text() +
+      "', i.ISIS_global())\n";
   }
   else
   {
-    exec_reduce += "i.ReductionSingleton().user_settings.readLimitValues('L/Q "+
+    exec_reduce += "i.ISIS_global().user_settings.readLimitValues('L/Q "+
       m_uiForm.q_min->text()+" "+m_uiForm.q_max->text()+" "+m_uiForm.q_dq->text()+"/"+
       m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() +
-      "', i.ReductionSingleton())\n";
+      "', i.ISIS_global())\n";
   }
   exec_reduce += "i.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
     m_uiForm.qy_dqy->text().trimmed() + ",'"
@@ -2124,10 +2124,10 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
 
   //Set geometry info
   exec_reduce += 
-    "i.ReductionSingleton().geometry.height = " + m_uiForm.sample_height->text()+"\n"+
-    "i.ReductionSingleton().geometry.width = " + m_uiForm.sample_width->text()+"\n" +
-    "i.ReductionSingleton().geometry.thickness = " + m_uiForm.sample_thick->text() +"\n"+
-    "i.ReductionSingleton().geometry.shape = " + m_uiForm.sample_geomid->currentText().at(0)+"\n";
+    "i.ISIS_global().geometry.height = " + m_uiForm.sample_height->text()+"\n"+
+    "i.ISIS_global().geometry.width = " + m_uiForm.sample_width->text()+"\n" +
+    "i.ISIS_global().geometry.thickness = " + m_uiForm.sample_thick->text() +"\n"+
+    "i.ISIS_global().geometry.shape = " + m_uiForm.sample_geomid->currentText().at(0)+"\n";
  
   return exec_reduce;
 }
@@ -2266,7 +2266,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   if ( runMode == SingleMode )
   {
     //copy the user setting to use as a base for future reductions after the one that is about to start
-    py_code += "\n_user_settings_copy = copy.deepcopy(i.ReductionSingleton().user_settings)";
+    py_code += "\n_user_settings_copy = copy.deepcopy(i.ISIS_global().user_settings)";
     //the following line runs the reduction and then resets it
     py_code += "\nreduced = i.WavRangeReduction(full_trans_wav=" + full_trans_range + ")\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
@@ -2315,10 +2315,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   //create a new reducer object for another run
   const int index = m_uiForm.inst_opt->currentIndex();
-  py_code = "i.ReductionSingleton().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
+  py_code = "i.ISIS_global().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
   //restore the settings from the user file
-  py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
-  py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
+  py_code += "\ni.ISIS_global().user_settings = _user_settings_copy";
+  py_code += "\ni.ISIS_global().user_settings.execute(i.ISIS_global())";
   runReduceScriptFunction(py_code);
 
   if ( runMode == SingleMode )
@@ -2540,7 +2540,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
   addUserMaskStrings(analysis_script);
-  analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
+  analysis_script += "\ni.ISIS_global().ViewCurrentMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);
   m_uiForm.showMaskBtn->setText("Working...");
@@ -2560,11 +2560,11 @@ void SANSRunWindow::handleInstrumentChange(const int index)
   //Inform the Python objects of the change
   QString instClass =
     m_uiForm.inst_opt->itemData(index).toString();
-  runReduceScriptFunction("i.ReductionSingleton().set_instrument(isis_instrument."+instClass+")");
+  runReduceScriptFunction("i.ISIS_global().set_instrument(isis_instrument."+instClass+")");
 
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.cur_detector().name()");
+    "print i.ISIS_global().instrument.cur_detector().name()");
   int ind = m_uiForm.detbank_sel->findText(detect);  
   if( ind >= 0 && ind < 2 )
   {
@@ -2776,9 +2776,9 @@ void SANSRunWindow::updateTransInfo(int state)
   if( state == Qt::Checked )
   {//"Use default transmission" means use the full range for the instrument
     m_uiForm.trans_min->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
+        "print i.ISIS_global().instrument.WAV_RANGE_MIN").trimmed());
     m_uiForm.trans_max->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
+        "print i.ISIS_global().instrument.WAV_RANGE_MAX").trimmed());
     m_uiForm.trans_min->setEnabled(false);
     m_uiForm.trans_max->setEnabled(false);
   }
@@ -2877,12 +2877,12 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
       m_workspace_names.insert(key + 3, direct_ws);
 
       //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "i.ReductionSingleton().can_trans_load.TRANS_SAMPLE_N_PERIODS" : "i.ReductionSingleton().samp_trans_load.TRANS_SAMPLE_N_PERIODS";
+      QString pythonVar = is_can ? "i.ISIS_global().can_trans_load.TRANS_SAMPLE_N_PERIODS" : "i.ISIS_global().samp_trans_load.TRANS_SAMPLE_N_PERIODS";
       int nPeriods =
         runReduceScriptFunction("print " + pythonVar).toInt();
       setNumberPeriods(key, nPeriods);
       
-      pythonVar = is_can ? "i.ReductionSingleton().can_trans_load.DIRECT_SAMPLE_N_PERIODS" : "i.ReductionSingleton().samp_trans_load.DIRECT_SAMPLE_N_PERIODS";
+      pythonVar = is_can ? "i.ISIS_global().can_trans_load.DIRECT_SAMPLE_N_PERIODS" : "i.ISIS_global().samp_trans_load.DIRECT_SAMPLE_N_PERIODS";
       nPeriods =
         runReduceScriptFunction("print " + pythonVar).toInt();
       setNumberPeriods(key + 3, nPeriods);
@@ -2928,7 +2928,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {//save the workspace name
       m_workspace_names.insert(key, base_workspace);
       //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "i.ReductionSingleton().background_subtracter._CAN_N_PERIODS" : "i.ReductionSingleton().data_loader._SAMPLE_N_PERIODS";
+      QString pythonVar = is_can ? "i.ISIS_global().background_subtracter._CAN_N_PERIODS" : "i.ISIS_global().data_loader._SAMPLE_N_PERIODS";
       int nPeriods =
         runReduceScriptFunction("print "+pythonVar).toInt();
       setNumberPeriods(key, nPeriods);
@@ -3086,7 +3086,7 @@ bool SANSRunWindow::oldAssign(int key, QString & logs)
 void SANSRunWindow::fillDetectNames(QComboBox *output)
 {
   QString detsTuple = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.listDetectors()");
+    "print i.ISIS_global().instrument.listDetectors()");
 
   if (detsTuple.isEmpty())
   {//this happens if the run Python signal hasn't yet been connected

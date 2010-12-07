@@ -50,6 +50,8 @@ class ISISReducer(SANSReducer):
         self.wksp_name = None
         self.full_trans_wav = True
         self._monitor_set = False
+        #executing the reduction chain unsets this
+        self.clean = True
 
 
     def _to_steps(self):
@@ -60,7 +62,7 @@ class ISISReducer(SANSReducer):
 #        self._reduction_steps.append(self.user_settings)
         self._reduction_steps.append(self.place_det_sam)
         self._reduction_steps.append(self.geometry)
-        self._reduction_steps.append(self._out_name)
+        self._reduction_steps.append(self.out_name)
         #---- the can special reducer uses the steps starting with the next one
         self._reduction_steps.append(self.flood_file)
         self._reduction_steps.append(self.crop_detector)
@@ -89,12 +91,12 @@ class ISISReducer(SANSReducer):
         self.data_loader =     None
         self.user_settings =   None
         self.place_det_sam =   isis_reduction_steps.MoveComponents()
-        self.geometry =       sans_reduction_steps.GetSampleGeom()
-        self._out_name =       isis_reduction_steps.GetOutputName()
+        self.geometry =        sans_reduction_steps.GetSampleGeom()
+        self.out_name =       isis_reduction_steps.GetOutputName()
         self.flood_file =      isis_reduction_steps.CorrectToFileISIS(
-            '', 'SpectrumNumber','Divide', self._out_name.name_holder)
+            '', 'SpectrumNumber','Divide', self.out_name.name_holder)
         self.crop_detector =   isis_reduction_steps.CropDetBank(
-            self._out_name.name_holder)
+            self.out_name.name_holder)
         self.samp_trans_load = None
         self.can_trans_load =  None
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
@@ -142,9 +144,10 @@ class ISISReducer(SANSReducer):
         if period > 0:
             self._period_num = period
 
-    def append_data_file(self, data_file, workspace=None):
+    def set_run_number(self, data_file, workspace=None):
         """
-            Append a file to be processed.
+            The run number is a number followed by a . and then
+            the extension of the run file to load
             @param data_file: name of the file to be processed
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
@@ -159,6 +162,13 @@ class ISISReducer(SANSReducer):
         self._data_files.clear()
         self._data_files[workspace] = workspace
 
+    def get_sample(self):
+        """
+            Returns the name of the raw workspace that was
+            loaded to run
+        """ 
+        return self._data_files.values()[0]
+    
     def set_background(self, can_run=None, reload = True, period = -1):
         """
             Sets the can data to be subtracted from sample data files
@@ -230,6 +240,14 @@ class ISISReducer(SANSReducer):
         """
         self._data_files = {'dummy' : wk_name}
 
+    def step_num(self, step):
+        """
+            Returns the index number of a step in the
+            list of steps that have _so_ _far_ been
+            added to the chain
+        """
+        return self._reduction_steps.index(step)
+
     def _reduce(self):
         """
             Execute the list of all reduction steps
@@ -250,6 +268,8 @@ class ISISReducer(SANSReducer):
 
         #any clean up, possibly removing workspaces 
         self.post_process()
+        self.clean = False
+        
         return self.wksp_name
 
     def run_steps(self, start_ind = None, stop_ind = None):
@@ -289,6 +309,8 @@ class ISISReducer(SANSReducer):
                     for key, value in quadrants.iteritems():
                         old_name = self.final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
+
+        self.clean = False
 
 
     def post_process(self):
