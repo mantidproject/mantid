@@ -544,6 +544,24 @@ class RunProxy(ProxyObject):
         else:
             return default
 
+    def __setitem__(self, key, value, overwrite=False):
+        """
+        Sets the value of the item with the given key. This has limited 
+        support for types.
+        """
+        value_type = type(value)
+        runobj = self._getHeldObject()
+        if value_type == type(1.):
+            runobj.addProperty_dbl(key, value, overwrite)
+        elif value_type == type(1):
+            runobj.addProperty_int(key, value, overwrite)
+        elif value_type == type(""):
+            runobj.addProperty_str(key, value, overwrite)
+        else:
+            raise TypeError("Not working for %s" % str(type(value)))
+        runobj = self._getHeldObject().getProperty(key)
+            
+
 #-------------------------------------------------------------------------------
 
 class WorkspaceProxyFactory(object):

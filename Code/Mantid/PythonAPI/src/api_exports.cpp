@@ -304,6 +304,9 @@ namespace PythonAPI
     //Pointer
     register_ptr_to_python<API::Run*>();
 
+#define EXPORT_ADDPROPERTY(type, suffix)\
+    .def("addProperty_"#suffix,(void (API::Run::*)(const std::string &, const type&, bool))&Run::addProperty)
+
     //Run class
     class_< API::Run,  boost::noncopyable >("Run", no_init)
       .def("getLogData", (Kernel::Property* (API::Run::*)(const std::string&) const)&Run::getLogData, 
@@ -314,7 +317,13 @@ namespace PythonAPI
       .def("hasProperty", &API::Run::hasProperty)
       .def("getProperty", &API::Run::getProperty, return_value_policy<return_by_value>())
       .def("getProperties", &API::Run::getProperties, return_internal_reference<>())
+//      .def("addProperty", (void (API::Run::*) (const std::string&, const std::string&, bool))&Run::addProperty)
+      EXPORT_ADDPROPERTY(int, int)
+      EXPORT_ADDPROPERTY(double, dbl)
+      EXPORT_ADDPROPERTY(std::string, str)
      ;
+
+#undef EXPORT_ADDPROPERTY
   }
 
   void export_workspace_property()
