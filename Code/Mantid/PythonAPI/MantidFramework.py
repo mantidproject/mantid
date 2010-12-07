@@ -17,6 +17,7 @@ if os.getenv("MANTIDPATH") is not None:
 # --- Import the Mantid API ---
 if os.name == 'nt':
     from MantidPythonAPI import *
+    from MantidPythonAPI import _binary_op
 else:
     # 
     # To enable symbol sharing across extension modules (i.e. loaded dynamic libraries)
@@ -41,6 +42,7 @@ else:
         sys.setdlopenflags(dynload.RTLD_NOW | dynload.RTLD_GLOBAL)
 
     from libMantidPythonAPI import *
+    from libMantidPythonAPI import _binary_op
     sys.setdlopenflags(saved_dlopenflags)
 # --- End of library load ---
 
@@ -60,7 +62,8 @@ def makeString(value):
 #-------------------------------------------------------------------------------
 def _decompile(code_object):
     """
-    Taken from http://thermalnoise.wordpress.com/2007/12/30/exploring-python-bytecode/
+    Taken from 
+    http://thermalnoise.wordpress.com/2007/12/30/exploring-python-bytecode/
 
     Extracts dissasembly information from the byte code and stores it in 
     a list for further use.
@@ -151,6 +154,10 @@ __operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_N
 def lhs_info(output_type='both'):
     """Returns the number of arguments on the left of assignment along 
     with the names of the variables.
+
+    Acknowledgements: 
+       Thanks to Tim Charlton and Jon Taylor of the ISIS facility for 
+       figuring this out.
      
     Call signature(s)::
 
@@ -341,18 +348,19 @@ class WorkspaceProxy(ProxyObject):
         else:
             raise AttributeError('Index invalid, object is not a group.')
 
-    def __do_operation(self, op, rhs, output_name, inplace):
+    def __do_operation(self, op, rhs, output_name, inplace, reverse = False):
         """Perform the given binary operation
         """
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
-        result = self.__factory.create(self.do_binary_op(rhs, op, output_name, inplace))
-        if inplace:
-            self._swap(result)
-        # 
+        resultws = _binary_op(self._getHeldObject(),rhs, op, output_name, inplace, reverse)
+        
         if mtd.workspaceExists(_binary_tmp) and output_name != _binary_tmp:
             mtd.deleteWorkspace(_binary_tmp)
-        return result
+        if inplace:
+            return self
+        else:
+            return self.__factory.create(resultws)
 
     def __add__(self, rhs):
         """
@@ -365,7 +373,7 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = _binary_tmp
-        return self.__do_operation('Plus', rhs, output_name, False)
+        return self.__do_operation('Plus', rhs, output_name, inplace=False)
 
     def __radd__(self, rhs):
         """
@@ -376,14 +384,14 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = _binary_tmp
-        return self.__do_operation('Plus', rhs, output_name, False)
+        return self.__do_operation('Plus', rhs, output_name, inplace=False,reverse=True)
     
     def __iadd__(self, rhs):
         """
         In-place sum the proxied objects and return a new proxy managing that object
         """
         output_name = self.getName()
-        return self.__do_operation('Plus', rhs, output_name, True)
+        return self.__do_operation('Plus', rhs, output_name, inplace=True)
 
     def __sub__(self, rhs):
         """
@@ -396,25 +404,25 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = __binary_tmp
-        return self.__do_operation('Minus', rhs, output_name, False)
+        return self.__do_operation('Minus', rhs, output_name, inplace=False)
 
     def __rsub__(self, rhs):
         """
-        Subtract the proxied objects and return a new proxy managing that object
+        Handle a (double - workspace)
         """
         nvars, names = lhs_info()
         if nvars > 0:
             output_name = names[0]
         else:
             output_name = _binary_tmp
-        return self.__do_operation('Minus', rhs, output_name, False)
+        return self.__do_operation('Minus', rhs, output_name, inplace=False, reverse=True)
 
     def __isub__(self, rhs):
         """
         In-place subtract the proxied objects and return a new proxy managing that object
         """
         output_name = self.getName()
-        return self.__do_operation('Plus', rhs, output_name, True)
+        return self.__do_operation('Minus', rhs, output_name, inplace=True)
 
     def __mul__(self, rhs):
         """
@@ -425,7 +433,7 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = __binary_tmp
-        return self.__do_operation('Multiply', rhs, output_name, False)
+        return self.__do_operation('Multiply', rhs, output_name, inplace=False)
 
     def __rmul__(self, rhs):
         """
@@ -436,14 +444,14 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = _binary_tmp
-        return self.__do_operation('Multiply', rhs, output_name, False)
+        return self.__do_operation('Multiply', rhs, output_name, inplace=False, reverse=True)
 
     def __imul__(self, rhs):
         """
         In-place multiply the proxied objects and return a new proxy managing that object
         """
         output_name = self.getName()
-        return self.__do_operation('Multiply', rhs, output_name, True)
+        return self.__do_operation('Multiply', rhs, output_name, inplace=True)
 
     def __div__(self, rhs):
         """
@@ -454,25 +462,25 @@ class WorkspaceProxy(ProxyObject):
             output_name = names[0]
         else:
             output_name = __binary_tmp
-        return self.__do_operation('Divide', rhs, output_name, False)
+        return self.__do_operation('Divide', rhs, output_name, inplace=False)
 
     def __rdiv__(self, rhs):
         """
-        Divide the proxied objects and return a new proxy managing that object
+        Handle a double/workspace
         """
         nvars, names = lhs_info()
         if nvars > 0:
             output_name = names[0]
         else:
             output_name = _binary_tmp
-        return self.__do_operation('Multiply', rhs, output_name, False)
+        return self.__do_operation('Divide', rhs, output_name, inplace=False, reverse=True)
 
     def __idiv__(self, rhs):
         """
         In-place divide the proxied objects and return a new proxy managing that object
         """
         output_name = self.getName()
-        return self.__do_operation('Divide', rhs, output_name, True)
+        return self.__do_operation('Divide', rhs, output_name, inplace=True)
 
     def isGroup(self):
         """

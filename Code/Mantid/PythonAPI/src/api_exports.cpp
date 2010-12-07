@@ -169,9 +169,6 @@ namespace PythonAPI
     // A vector of MatrixWorkspace pointers
     vector_proxy<MatrixWorkspace*>::wrap("stl_vector_matrixworkspace");
  
-    //Operator overloads dispatch through the above structure. The typedefs save some typing
-    typedef WorkspaceAlgebraHelper::wraptype_ptr(*binary_fn1)(const WorkspaceAlgebraHelper::wraptype_ptr, const WorkspaceAlgebraHelper::wraptype_ptr,const std::string &,const std::string &,bool);
-    typedef WorkspaceAlgebraHelper::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraHelper::wraptype_ptr, double,const std::string&,const std::string &,bool);
 
     /// Typedef for data access
     typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(int const);
@@ -197,13 +194,19 @@ namespace PythonAPI
       .def("getNumberAxes", &API::MatrixWorkspace::axes)
       .def("getAxis", &API::MatrixWorkspace::getAxis, return_internal_reference<>())
       .def("replaceAxis", &API::MatrixWorkspace::replaceAxis)
-      // Binary operations
-      .def("do_binary_op", (binary_fn1)&WorkspaceAlgebraHelper::performBinaryOp)
-      .def("do_binary_op", (binary_fn2)&WorkspaceAlgebraHelper::performBinaryOp)
       // Deprecated, here for backwards compatability
       .def("blocksize", &API::MatrixWorkspace::blocksize)
       .def("getSampleDetails", &API::MatrixWorkspace::run, return_internal_reference<>() )
       ;
+
+    //Operator overloads dispatch through the above structure. The typedefs save some typing
+    typedef MatrixWorkspace_sptr(*binary_fn1)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,const std::string &,const std::string &,bool, bool);
+    typedef MatrixWorkspace_sptr(*binary_fn2)(const API::MatrixWorkspace_sptr, double,const std::string&,const std::string &,bool,bool);
+
+      // Binary operations helpers
+    def("_binary_op", (binary_fn1)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn2)&PythonAPI::performBinaryOp);
+
   }
 
   void export_tableworkspace()

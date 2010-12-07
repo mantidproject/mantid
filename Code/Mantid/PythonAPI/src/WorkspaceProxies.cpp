@@ -5,11 +5,14 @@
 #include <MantidPythonAPI/MantidVecHelper.h>
 
 #include <MantidAPI/WorkspaceOpOverloads.h>
+#include <MantidAPI/AlgorithmManager.h>
+#include <MantidAPI/AnalysisDataService.h>
 
 namespace Mantid
 {
   namespace PythonAPI
   {
+    using API::MatrixWorkspace_sptr;
 
     //****************************************
     //
@@ -51,7 +54,7 @@ namespace Mantid
 
     //*********************************************************************************
     //
-    // WorkspaceAlgebraHelper
+    // Binary Operation helpers
     //
     //**********************************************************************************
 
@@ -61,38 +64,40 @@ namespace Mantid
      * @param op The operation
      * @param name The output name
      * @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
+     * @param reverse Unused parameter. Here for consistent interface
      * @returns The resulting workspace
      */
-    WorkspaceAlgebraHelper::wraptype_ptr 
-    WorkspaceAlgebraHelper::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, 
-					    const std::string& op, const std::string & name, bool inplace)
+    MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr lhs, 
+					 const MatrixWorkspace_sptr rhs, 
+					 const std::string& op, const std::string & name, 
+					 bool inplace,bool reverse)
     {
-      wraptype_ptr result;
+      MatrixWorkspace_sptr result;
       std::string error("");
-      std::string wsName("");
-      if( inplace )
+      try
       {
-	if( op == "Plus" ) lhs += rhs;
-	else if( op == "Minus" ) lhs -= rhs;
-	else if( op == "Multiply" ) lhs *= rhs;
-	else if( op == "Divide" ) lhs /= rhs;
-	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown inplace binary operation requested: " + op;
-        result = lhs;
-	wsName = lhs->getName();
+	if( reverse ) 
+	{
+	  result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name);
+	}
+	else
+	{
+	  result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name);
+	}
       }
-      else
+      catch(std::runtime_error & exc)
       {
-	if( op == "Plus" ) result = lhs + rhs;
-	else if( op == "Minus" ) result = lhs - rhs; 
-	else if( op == "Multiply" ) result = lhs * rhs; 
-	else if( op == "Divide" ) result = lhs / rhs; 
-	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown binary operation requested: " + op;
+	error = exc.what();
+	if( error.find("algorithm") == 0 )
+	{
+	  error = "Unknown binary operation requested: " + op;
+	  throw std::runtime_error(error);
+	}
+	else
+	{
+	  throw;
+	}
       }
-      if( !error.empty() )
-      {
-	throw std::runtime_error(error);
-      }
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
       return result;
     }
 
@@ -102,36 +107,35 @@ namespace Mantid
     * @param rhs The input value
     * @param op The operation
     * @param inplace If true, then the lhs argument is replaced by the result of the operation.
+    * @param reverse If true then the double is the lhs argument
     * @return A shared pointer to the result workspace
     */
-    WorkspaceAlgebraHelper::wraptype_ptr 
-    WorkspaceAlgebraHelper::performBinaryOp(const wraptype_ptr inputWS, const double value, 
-					    const std::string& op, const std::string & name, bool inplace)
+    MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr inputWS, const double value, 
+					 const std::string& op, const std::string & name, 
+					 bool inplace, bool reverse)
     {
-      wraptype_ptr result;
-      std::string error("");
-      if( inplace )
+      // Create the single valued workspace first so that it is run as a top-level algorithm
+      // such that it's history can be recreated
+      API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
+      alg->setChild(false);
+      alg->initialize();
+      alg->setProperty<double>("DataValue",value);
+      const std::string & tmp_name("__tmp_double");
+      alg->setPropertyValue("OutputWorkspace", tmp_name);
+      alg->execute();
+      MatrixWorkspace_sptr singleValue;
+      API::AnalysisDataServiceImpl & data_store = API::AnalysisDataService::Instance();
+      if( alg->isExecuted() )
       {
-	if( op == "Plus" ) inputWS += value;
-	else if( op == "Minus" ) inputWS -= value;
-	else if( op == "Multiply" ) inputWS *= value;
-	else if( op == "Divide" ) inputWS /= value;
-	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown inplace binary operation requested: " + op;
-        result = inputWS;
+	singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(data_store.retrieve(tmp_name));
       }
       else
       {
-	if( op == "Plus" ) result = inputWS + value;
-	else if( op == "Minus" ) result = inputWS - value; 
-	else if( op == "Multiply" ) result = inputWS * value; 
-	else if( op == "Divide" ) result = inputWS / value; 
-	else error = "WorkspaceAlgebraHelper::performBinaryOp - Unknown binary operation requested: " + op;
-      }
-      if( !error.empty() )
-      {
-	throw std::runtime_error(error);
-      }
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
+	throw std::runtime_error("performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
+      }      
+      MatrixWorkspace_sptr result = performBinaryOp(inputWS, singleValue, op, name, inplace, reverse);
+      // Delete the temporary
+      data_store.remove(tmp_name);
       return result;
     }
 

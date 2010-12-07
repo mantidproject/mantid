@@ -71,23 +71,18 @@ namespace Mantid
       PyObject *m_self;
     };
 
-    /**
-     *  A proxy for implementing workspace algebra operator overloads.
-     *
-     */
-    struct WorkspaceAlgebraHelper
-    {
-      typedef API::MatrixWorkspace wraptype; ///< Wrapper type def
-      typedef boost::shared_ptr<wraptype> wraptype_ptr; ///< Shared pointer type def
-
-      /// Binary op for two workspaces
-      static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, 
-					  const std::string & op, const std::string & name, bool inplace);
-
-      /// Binary op for a workspace and a double
-      static wraptype_ptr performBinaryOp(const wraptype_ptr inputWS, const double value, 
-					  const std::string & op, const std::string & name, bool inplace);
-    };
+    /** @name Binary operation helpers */
+    //@{
+    /// Binary op for two workspaces
+    API::MatrixWorkspace_sptr performBinaryOp(const API::MatrixWorkspace_sptr lhs, 
+					      const API::MatrixWorkspace_sptr rhs, 
+					      const std::string & op, const std::string & name, 
+					      bool inplace, bool reverse);
+    /// Binary op for a workspace and a double
+    API::MatrixWorkspace_sptr performBinaryOp(const API::MatrixWorkspace_sptr inputWS, const double value, 
+					      const std::string & op, const std::string & name, 
+					      bool inplace, bool reverse);
+    //@}
 
     /**
     * A proxy struct for the WorkspaceFactory

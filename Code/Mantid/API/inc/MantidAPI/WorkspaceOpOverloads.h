@@ -9,6 +9,14 @@ namespace Mantid
 namespace API
 {
 
+namespace OperatorOverloads
+{
+  // Helper function for operator overloads
+  MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, 
+					      const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false, 
+					      bool child = true, const std::string & name = "");
+}
+
 // Workspace operator overloads
 MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);

@@ -15,35 +15,66 @@ namespace Mantid
 {
 namespace API
 {
+namespace OperatorOverloads
+{
 
 /** Performs a binary operation on two workspaces
  *  @param algorithmName The name of the binary operation to perform
  *  @param lhs left hand side workspace shared pointer
  *  @param rhs left hand side workspace shared pointer
  *  @param lhsAsOutput If true, indicates that the lhs input is the same workspace as the output one
+ *  @param child If true the algorithm is run as a child
+ *  @param name If child is true and this is not an inplace operation then this name is used as output
  *  @returns The result in a workspace shared pointer
  */
-static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false)
+  MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput, bool child, const std::string &name)
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
-  alg->setChild(true);
+  alg->setChild(child);
   alg->initialize();
 
-  alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
-  alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
-
-  // Have to set a text name for the output workspace even though it will not be used.
-  //   This satisfies the validation.
-  alg->setPropertyValue("OutputWorkspace","��NotApplicable");
-  // If calling from a compound assignment operator, set the left-hand operand to be the output workspace
-  if (lhsAsOutput) alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
+  if( child )
+  {
+    alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
+    alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
+    // Have to set a text name for the output workspace if the algorithm is a child even 
+    // though it will not be used.
+    alg->setPropertyValue("OutputWorkspace","��NotApplicable");
+    if( lhsAsOutput )
+    {
+      alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
+    }
+  }
+  // If this is not a child algorithm then we need names for the properties
+  else
+  {
+    alg->setPropertyValue("LHSWorkspace",lhs->getName());
+    alg->setPropertyValue("RHSWorkspace",rhs->getName());
+    if( lhsAsOutput )
+    {
+      alg->setPropertyValue("OutputWorkspace",lhs->getName());    
+    }
+    else
+    {
+      alg->setPropertyValue("OutputWorkspace",name);    
+    }
+  }
 
   alg->execute();
 
   if (alg->isExecuted())
   {
-    //Get the output workspace property
-    return alg->getProperty("OutputWorkspace");
+    // Get the output workspace property
+    if( child )
+    {
+      return alg->getProperty("OutputWorkspace");
+    }
+    else
+    {
+      API::Workspace_sptr result = 
+	API::AnalysisDataService::Instance().retrieve(alg->getPropertyValue("OutputWorkspace"));
+      return boost::dynamic_pointer_cast<API::MatrixWorkspace>(result);
+    }
   }
   else
   {
@@ -57,6 +88,8 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
   return MatrixWorkspace_sptr();
 }
 
+} // namespace OperatorOverloads
+
 /** Creates a temporary single value workspace the error is set to zero
  *  @param rhsValue the value to use
  *  @returns The value in a workspace shared pointer
@@ -68,6 +101,8 @@ static MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 
   return retVal;
 }
+
+using OperatorOverloads::executeBinaryOperation;
 
 /** Adds two workspaces
  *  @param lhs left hand side workspace shared pointer
