@@ -1479,7 +1479,7 @@ bool ApplicationWindow::getMenuSettingsFlag(const QString & menu_item)
   }
 
   // If we didn't find it, check whether is was manually removed
-  if( removed_interfaces.grep(menu_item).size() > 0 ) return false;
+  if( removed_interfaces.contains(menu_item) ) return false;
   return true;
 }
 
