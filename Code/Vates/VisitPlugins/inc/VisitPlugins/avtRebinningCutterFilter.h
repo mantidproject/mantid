@@ -50,11 +50,8 @@
 #include <RebinningCutterAttributes.h>
 #include <vtkVisItClipper.h>
 
-//#include <MantidAPI/ImplicitFunctionFactory.h>
 #include <MantidAPI/ImplicitFunction.h>
-//#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
-//#include <MantidMDAlgorithms/CompositeImplicitFunction.h>
-#include <InterfaceVatesMantid.h>
+#include <MantidVisitPresenters/RebinningCutterPresenter.h>
 class vtkDataSet;
 
 // ****************************************************************************

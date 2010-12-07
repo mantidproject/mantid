@@ -5,23 +5,13 @@
 #include <boost/shared_ptr.hpp>
 #include <vtkImplicitFunction.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
 #include <boost/algorithm/string.hpp>
 namespace Mantid
 {
 namespace VATES
 {
 
-//helper method
-std::string RebinningCutterPresenter::getXMLLanguageDef()
-{
-  return std::string("<Factories>") + "<FunctionParserFactoryList>"
-      + "<FunctionParserFactory>CompositeImplicitFunctionParser</FunctionParserFactory>"
-      + "<FunctionParserFactory>PlaneImplicitFunctionParser</FunctionParserFactory>"
-      + "</FunctionParserFactoryList>" + "<ParameterParserFactoryList>"
-      + "<ParameterParser>NormalParameterParser</ParameterParser>"
-      + "<ParameterParser>OriginParameterParser</ParameterParser>" + "</ParameterParserFactoryList>"
-      + "</Factories>";
-}
 
 void RebinningCutterPresenter::metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
     const char* id)
@@ -73,8 +63,7 @@ Mantid::API::ImplicitFunction* RebinningCutterPresenter::findExistingRebinningDe
   std::string xmlString = fieldDataToMetaData(in_ds->GetFieldData(), id);
   if (false == xmlString.empty())
   {
-    function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(getXMLLanguageDef(),
-        xmlString);
+    function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(xmlString);
   }
   return function;
 }
@@ -178,4 +167,11 @@ const char*  RebinningCutterPresenter::getMetadataID()
 }
 
 }
+
 }
+
+
+
+
+
+

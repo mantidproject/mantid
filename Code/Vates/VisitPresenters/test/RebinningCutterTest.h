@@ -17,6 +17,7 @@
 #include <vtkUnstructuredGrid.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 class RebinningCutterTest: public CxxTest::TestSuite
 {
@@ -34,6 +35,38 @@ private:
   MOCK_METHOD0(Delete,void());
 };
 
+class PsudoFilter
+{
+private:
+  std::vector<double> m_normal;
+  std::vector<double> m_origin;
+  Mantid::VATES::RebinningCutterPresenter* m_pPresenter;
+public:
+  PsudoFilter(Mantid::VATES::RebinningCutterPresenter* presenter, std::vector<double> normal, std::vector<double> origin)
+  : m_origin(origin),
+    m_normal(normal),
+    m_pPresenter(presenter)
+  {
+  }
+
+  vtkDataSet* Execute(Mantid::VATES::Clipper* clipper, vtkDataSet* in_ds)
+  {
+    Mantid::API::ImplicitFunction* function = m_pPresenter->constructReductionKnowledge(in_ds, m_normal, m_origin, m_pPresenter->getMetadataID());
+
+    vtkUnstructuredGrid *ug = m_pPresenter->applyReductionKnowledge(clipper, in_ds, function);
+
+    m_pPresenter->persistReductionKnowledge(ug, function, m_pPresenter->getMetadataID());
+
+    std::string outputxml = function->toXMLString();
+    std::cout << "----------this is the xml-----------" << std::endl;
+    std::cout << outputxml << std::endl;
+
+    delete function;
+    in_ds->Delete();
+    return ug;
+  }
+};
+
 //helper method;
 std::string getXMLInstructions()
 {
@@ -43,7 +76,40 @@ std::string getXMLInstructions()
 //helper method
 std::string getComplexXMLInstructions()
 {
-  return std::string("<Function><Type>CompositeImplicitFunction</Type><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>0.0000, 1.0000, 1.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>0.0000, 0.0000, 0.0000</Value></Parameter></ParameterList></Function><Function><Type>CompositeImplicitFunction</Type><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>0.0000, 0.0000, -1.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>0.0000, 0.0000, 0.0000</Value></Parameter></ParameterList></Function></Function></Function>");
+  return std::string("<Function>"
+		  "<Type>CompositeImplicitFunction</Type>"
+		  "<ParameterList></ParameterList>"
+		  "<Function>"
+		  "<Type>PlaneImplicitFunction</Type>"
+		  "<ParameterList>"
+		  "<Parameter>"
+		  "<Type>NormalParameter</Type>"
+		  "<Value>0.0000, 1.0000, 1.0000</Value>"
+		  "</Parameter>"
+		  "<Parameter>"
+		  "<Type>OriginParameter</Type>"
+		  "<Value>0.0000, 0.0000, 0.0000</Value>"
+		  "</Parameter>"
+		  "</ParameterList>"
+		  "</Function>"
+		  "<Function>"
+		  "<Type>CompositeImplicitFunction</Type>"
+		  "<ParameterList></ParameterList>"
+		  "<Function>"
+		  "<Type>PlaneImplicitFunction</Type>"
+		  "<ParameterList>"
+		  "<Parameter>"
+		  "<Type>NormalParameter</Type>"
+		  "<Value>0.0000, 0.0000, -1.0000</Value>"
+		  "</Parameter>"
+		  "<Parameter>"
+		  "<Type>OriginParameter</Type>"
+		  "<Value>0.0000, 0.0000, 0.0000</Value>"
+		  "</Parameter>"
+		  "</ParameterList>"
+		  "</Function>"
+		  "</Function>"
+		  "</Function>");
 }
 
 //helper method
@@ -82,6 +148,33 @@ vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
   return fieldData;
 }
 public:
+
+void testInChainedFilterSchenario()
+{
+  std::string input;
+  std::cin >> input;
+
+
+  using namespace Mantid::VATES;
+  boost::scoped_ptr<RebinningCutterPresenter> presenter(new RebinningCutterPresenter);
+  vtkDataSet* in_ds = vtkUnstructuredGrid::New();
+
+  MockClipper* clipper = new MockClipper;
+      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(3);
+      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(3);
+      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(3);
+      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(3);
+      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(3);
+      EXPECT_CALL(*clipper, Update()).Times(3);
+
+
+  PsudoFilter a(presenter.get(),std::vector<double>(3,1),std::vector<double>(3,1));
+  PsudoFilter b(presenter.get(),std::vector<double>(3,2),std::vector<double>(3,2));
+  PsudoFilter c(presenter.get(),std::vector<double>(3,3),std::vector<double>(3,3));
+
+  vtkDataSet* out_ds =  c.Execute(clipper, b.Execute(clipper, a.Execute(clipper, in_ds)));
+  delete clipper;
+}
 
 void testgetMetaDataID()
 {
@@ -183,6 +276,7 @@ void testFieldDataToMetaData()
 
 void testFindExistingRebinningDefinitions()
 {
+
   using namespace Mantid::VATES;
   using namespace Mantid::API;
   using namespace Mantid::MDAlgorithms;
@@ -192,9 +286,10 @@ void testFindExistingRebinningDefinitions()
   RebinningCutterPresenter presenter;
   ImplicitFunction* func = presenter.findExistingRebinningDefinitions(dataset, id.c_str());
 
-
   TSM_ASSERT("There was a previous definition of a plane that should have been recognised and generated."
       , CompositeImplicitFunction::functionName() == func->getName());
+
+  delete func;
 }
 
 
@@ -210,6 +305,7 @@ void testNoExistingRebinningDefinitions()
   TSM_ASSERT("There were no previous definitions carried through.", NULL == func);
 }
 
+
 void testConstructWithoutValidNormalThrows()
 {
   using namespace Mantid::VATES;
@@ -223,6 +319,7 @@ void testConstructWithoutValidNormalThrows()
     TSM_ASSERT_THROWS("The normal vector is the wrong size. Should have thrown.",
         presenter.constructReductionKnowledge(vtkUnstructuredGrid::New(), badNormal, goodOrigin,  "1"), std::invalid_argument);
 }
+
 
 void testPersistance()
 {
@@ -267,7 +364,7 @@ void testConstructionWithoutValidOriginThrows()
       goodNormal.push_back(1);
       TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
           presenter.constructReductionKnowledge(vtkUnstructuredGrid::New(), goodNormal, badOrigin,  "1"), std::invalid_argument);
-  }
+}
 
 void testApplyReduction()
 {

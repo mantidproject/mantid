@@ -32,7 +32,7 @@ mantid_libpath=../../../Mantid/debug
 visit_libpresenterpath=../Debug 
 
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Mantid/Kernel/inc -I../../../Mantid/MDAlgorithms/inc -I../../../Mantid/API/inc -I../inc/VisitPlugins -I/usr/include/vtk-5.2 -I/usr/local/2.1.0/linux-intel/include -I../../../Mantid/Geometry/inc -I ../inc \
-    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include -I ../../../TestingTools/include -I /usr/local/2.1.0/linux-intel/include/vtk/include/vtk-5.0 -L$mantid_libpath -L$visit_libpresenterpath  -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMDAlgorithms -lVisitPresenters
+    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include -I ../../../TestingTools/include -I /usr/include/vtk-5.2 -L$mantid_libpath -L$visit_libpresenterpath  -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMDAlgorithms -lVisitPresenters -Wno-deprecated 
 
 echo
 
