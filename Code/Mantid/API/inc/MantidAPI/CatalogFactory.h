@@ -28,7 +28,7 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-namespace kernel
+namespace Kernel
 {
   class Logger;
 }
