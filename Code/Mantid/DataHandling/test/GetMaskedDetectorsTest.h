@@ -7,6 +7,7 @@
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <vector>

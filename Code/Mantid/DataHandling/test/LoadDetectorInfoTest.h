@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"

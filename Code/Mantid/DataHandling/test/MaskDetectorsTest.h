@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
