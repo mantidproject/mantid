@@ -1696,30 +1696,28 @@ using Kernel::DateAndTime;
 
   }
 
-
-  // --------------------------------------------------------------------------
-  /**
-   * Get a list of the TOFs
-   *
-   * @return A list of the current TOFs
+  /** Fill a vector with the list of TOFs
+   *  @param A reference to the vector to be filled
    */
-  MantidVec * EventList::getTofs() const
+  void EventList::getTofs(std::vector<double>& tofs) const
   {
-    MantidVec * tofs = new MantidVec();
+    // Set the capacity of the vector to avoid multiple resizes
+    tofs.reserve(this->getNumberEvents());
+
     // iterate through all events
     if (has_weights)
     {
       std::vector<WeightedEvent>::iterator iter;
       for (iter = this->weightedEvents.begin(); iter != this->weightedEvents.end(); iter++)
-        tofs->push_back(iter->m_tof);
+        tofs.push_back(iter->m_tof);
     }
     else
     {
       std::vector<TofEvent>::iterator iter;
       for (iter = this->events.begin(); iter != this->events.end(); iter++)
-        tofs->push_back(iter->m_tof);
+        tofs.push_back(iter->m_tof);
     }
-    return tofs;
+
   }
 
 

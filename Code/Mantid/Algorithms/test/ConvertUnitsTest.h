@@ -191,16 +191,16 @@ public:
 
   void testDeltaE()
   {
-	 IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
-    loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/MAR11060.raw");
-    loader->setPropertyValue("SpectrumList", "900");
+    Mantid::DataHandling::LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/MAR11060.raw");
+    loader.setPropertyValue("SpectrumList", "900");
     std::string ws = "mar";
-    loader->setPropertyValue("OutputWorkspace", ws);
-    TS_ASSERT_THROWS_NOTHING( loader->execute() );
-    TS_ASSERT( loader->isExecuted() );
+    loader.setPropertyValue("OutputWorkspace", ws);
+    TS_ASSERT_THROWS_NOTHING( loader.execute() );
+    TS_ASSERT( loader.isExecuted() );
 
- ConvertUnits conv;
+    ConvertUnits conv;
     conv.initialize();
     conv.setPropertyValue("InputWorkspace",ws);
     std::string outputSpace = "outWorkspace";
@@ -210,14 +210,14 @@ public:
     conv.setPropertyValue("Efixed","12");
     conv.execute();
 
- MatrixWorkspace_const_sptr output;
+    MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS( output->blocksize(), 472 );
 
     AnalysisDataService::Instance().remove(outputSpace);
 
-      ConvertUnits conv2;
+    ConvertUnits conv2;
     conv2.initialize();
     conv2.setPropertyValue("InputWorkspace",ws);
     conv.setPropertyValue("OutputWorkspace",outputSpace);

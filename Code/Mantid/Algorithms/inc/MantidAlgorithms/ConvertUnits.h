@@ -27,6 +27,10 @@ namespace Algorithms
     <UL>
     <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry) </LI>
     <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
+    </UL>
+
+    Optional, deprecated property (see http://www.mantidproject.org/ConvertUnits for details):
+    <UL>
     <LI> AlignBins - If true (default is false), rebins if necessary to ensure that all spectra in
                      the output workspace have identical bins (with linear binning) </LI>
     </UL>
@@ -34,7 +38,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -79,7 +83,7 @@ private:
   /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
 
-  /// Convert the workspace units using TOF as an intermediate step in the conversion
+  /// Convert the EventWorkspace units using TOF as an intermediate step in the conversion
   void convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS);
 
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace

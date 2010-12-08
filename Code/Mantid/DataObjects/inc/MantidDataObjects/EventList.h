@@ -290,7 +290,8 @@ public:
 
   void maskTof(const double tofMin, const double tofMax);
 
-  virtual MantidVec * getTofs() const;
+//  virtual MantidVec * getTofs() const;
+  void getTofs(std::vector<double>& tofs) const;
 
   void setTofs(const MantidVec& T);
 

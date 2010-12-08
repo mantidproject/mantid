@@ -62,9 +62,8 @@ void ConvertUnits::init()
     "set if the target unit requires it (e.g. DeltaE)");
 
   declareProperty("AlignBins",false,
-    "Set AlignBins to true to ensure that all spectra in the output workspace\n"
-    "have identical bin boundaries.  Rebin with (with linear binning) is run,\n"
-    "where necessary, to ensure this (default false)");
+    "If true (default is false), rebins after conversion to ensure that all spectra in the output workspace\n"
+    "have identical bin boundaries. This option is not recommended (see http://www.mantidproject.org/ConvertUnits).");
 }
 
 /** Executes the algorithm
@@ -75,7 +74,7 @@ void ConvertUnits::init()
 void ConvertUnits::exec()
 {
   // Get the workspaces
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   //Check if its an event workspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -86,7 +85,7 @@ void ConvertUnits::exec()
     return;
   }
 
-  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Check that the input workspace doesn't already have the desired unit.
   // If it does, just set the output workspace to point to the input one.
@@ -251,6 +250,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
   using namespace Geometry;
   
   Progress prog(this,0.0,1.0,numberOfSpectra);
+
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
   // Get the parameter map
@@ -262,6 +262,10 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
+  if ( source == NULL || sample == NULL )
+  {
+    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+  }
   double l1;
   try
   {
@@ -346,6 +350,8 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2)
         {
+          if ( efixed == EMPTY_DBL() )
+          {
           try
           {
             Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
@@ -356,6 +362,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
             }
           } 
           catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
+          }
         }
       }
       else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
@@ -372,20 +379,23 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       }
 
       // Convert from time-of-flight to the desired unit
-      MantidVec tofs = *outputWS->getEventList(i).getTofs();
+      std::vector<double> tofs;
+      outputWS->getEventList(i).getTofs(tofs);
       fromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputWS->getEventList(i).setTofs(tofs);
 
       // convert the cached x-values to the desired unit
-      MantidVec x = (outputWS->getEventList(i).getRefX()).access();
-      fromUnit->toTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-      outputUnit->fromTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-      outputWS->getEventList(i).setX(x);
+      MantidVecPtr x = outputWS->refX(i);
+      fromUnit->toTOF(x.access(),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      outputUnit->fromTOF(x.access(),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      outputWS->setX(i,x);
 
       // reverse the data if appropriate
-      if ((!x.empty()) && (*(x.begin()) > *(x.end()-1)))
-          outputWS->getEventList(i).reverse();
+      if ( !x->empty() && x->front() > x->back() )
+      {
+        outputWS->getEventList(i).reverse();
+      }
 
     }
     catch (Exception::NotFoundError&)
@@ -491,6 +501,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
+  if ( source == NULL || sample == NULL )
+  {
+    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+  }
   double l1;
   try
   {
@@ -577,14 +591,16 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         {
           if ( efixed == EMPTY_DBL() )
           {
-          try {
+          try
+          {
             Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
             if (par) 
             {
               efixed = par->value<double>();
               g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
             }
-          } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
+          }
+          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
           }
         }
       }
