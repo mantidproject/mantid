@@ -70,14 +70,32 @@ namespace Mantid
       WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
         Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
       Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName )
+      m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(false)
       {
       }
+
+      /** Constructor.
+      *  Sets the property and workspace names but initialises the workspace pointer to null.
+      *  @param name The name to assign to the property
+      *  @param wsName The name of the workspace
+      *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+      *  @param optional A boolean indicating whether the property is mandatory or not. Only matters 
+      * for input properties
+      *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
+      */
+      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
+				 bool optional) :
+	Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), 
+							     new Kernel::NullValidator<boost::shared_ptr<TYPE> >, direction),
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional)
+      {
+      }
+
 
       /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
       WorkspaceProperty( const WorkspaceProperty& right ) :
       Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
-        m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName )
+      m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName ), m_optional(right.m_optional)
       {    
       }
 
@@ -175,7 +193,7 @@ namespace Mantid
           else
           {
             //Return a user level error
-            error = "Enter a name for the workspace";
+            error = "Enter a name for the Output workspace";
             //the debug message has more detail to put it in context
             g_log.debug() << "Problem validating workspace: " << error << std::endl;
             return error;
@@ -183,6 +201,7 @@ namespace Mantid
         }
 
         // If an input (or inout) workspace, must point to something, although it doesn't have to have a name
+	// unless it's optional
         if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
         {
           // Workspace groups will not have a value since they are not of type TYPE
@@ -197,13 +216,21 @@ namespace Mantid
             {
               if( m_workspaceName.empty() ) 
               {
-                error = "Enter a name for the workspace";
+		if( m_optional )
+		{
+		  error = "";
+		}
+		else
+		{
+		  error = "Enter a name for the Input/InOut workspace";
+		}
               }
               else
               {
                 error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
               }
-              g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+	      if( !error.empty() )
+		g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
               return error;
             }
 
@@ -313,6 +340,8 @@ namespace Mantid
       std::string m_workspaceName;
       /// The name of the workspace that the this this object was created for
       std::string m_initialWSName;
+      /// A flag indicating whether the property should be considered optional. Only matters for input workspaces
+      bool m_optional;
 
       /// for access to logging streams
       static Kernel::Logger& g_log;

@@ -80,6 +80,9 @@ public:
     wsp1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input);
     wsp2 = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
     wsp3 = new WorkspaceProperty<WorkspaceTest2>("workspace3","ws3",Direction::InOut);
+    // Two optional properties of different types
+    wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, true);
+    wsp5 = new WorkspaceProperty<WorkspaceTest2>("workspace5","",Direction::Input, true);
   }
 
   ~WorkspacePropertyTest()
@@ -87,6 +90,8 @@ public:
     delete wsp1;
     delete wsp2;
     delete wsp3;
+    delete wsp4;
+    delete wsp5;
   }
 
   void testConstructor()
@@ -104,7 +109,7 @@ public:
   void testSetValue()
   {
     TS_ASSERT_EQUALS( wsp1->setValue(""),
-      "Enter a name for the workspace" )
+      "Enter a name for the Input/InOut workspace" )
     TS_ASSERT_EQUALS( wsp1->value(), "" )
     TS_ASSERT_EQUALS( wsp1->setValue("newValue"),
       "Workspace \"newValue\" was not found in the Analysis Data Service" )
@@ -113,25 +118,36 @@ public:
     wsp1->setValue("ws1");
   }
 
+  void testSetValue_On_Optional()
+  {
+    TS_ASSERT_EQUALS(wsp4->setValue(""), "");
+    TS_ASSERT_EQUALS(wsp4->value(), "");
+    TS_ASSERT_EQUALS(wsp4->setValue("newValue"), 
+		     "Workspace \"newValue\" was not found in the Analysis Data Service");
+    TS_ASSERT_EQUALS( wsp4->value(), "newValue" );
+    wsp4->setValue("");
+  }
+
   void testIsValid()
   {  
-    TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" )
-    TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the workspace" )
-    TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" was not found in the Analysis Data Service" )
+    TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" );
+    TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the Output workspace" );
+    TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" was not found in the Analysis Data Service" );
+    TS_ASSERT_EQUALS( wsp4->isValid(), "");
 
     // Setting the workspace name should make wsp2 (an output workspace) valid
-    TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" )
-    TS_ASSERT_EQUALS( wsp2->isValid(), "" )
+    TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" );
+    TS_ASSERT_EQUALS( wsp2->isValid(), "" );
 
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
     WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
 
-    // The other two need the input workspace to exist in the ADS
+    // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
     wsp1->setValue("ws1");
-    TS_ASSERT_EQUALS( wsp1->isValid(), "" )
+    TS_ASSERT_EQUALS( wsp1->isValid(), "" );
 
     // Put workspace of wrong type and check validation fails
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
@@ -142,7 +158,18 @@ public:
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2",1,1,1) )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
     wsp3->setValue("ws3");
-    TS_ASSERT_EQUALS( wsp3->isValid(), "")
+    TS_ASSERT_EQUALS( wsp3->isValid(), "");
+
+    // The optional one
+    wsp4->setValue("ws1");
+    TS_ASSERT_EQUALS( wsp4->isValid(), "" );
+    // Check incorrect type
+    wsp5->setValue("ws1");
+    TS_ASSERT_EQUALS(wsp5->isValid(),
+		     "Workspace ws1 is not of the correct type" );
+    // Now the correct type
+    wsp5->setValue("ws3");
+    TS_ASSERT_EQUALS(wsp5->isValid(), "");
   }
 
   void testIsDefaultAndGetDefault()
@@ -229,15 +256,19 @@ public:
 
   void testDirection()
   {
-    TS_ASSERT_EQUALS( wsp1->direction(), 0 )
-    TS_ASSERT_EQUALS( wsp2->direction(), 1 )
-    TS_ASSERT_EQUALS( wsp3->direction(), 2 )
+    TS_ASSERT_EQUALS( wsp1->direction(), 0 );
+    TS_ASSERT_EQUALS( wsp2->direction(), 1 );
+    TS_ASSERT_EQUALS( wsp3->direction(), 2 );
+    TS_ASSERT_EQUALS( wsp4->direction(), 0 );
+    TS_ASSERT_EQUALS( wsp5->direction(), 0 );      
   }
 
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;
   WorkspaceProperty<WorkspaceTest2> *wsp3;
+  WorkspaceProperty<Workspace> *wsp4;
+  WorkspaceProperty<WorkspaceTest2> *wsp5;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/

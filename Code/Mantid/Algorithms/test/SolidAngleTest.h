@@ -68,10 +68,11 @@ public:
 
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     
-    // Mark one detector dead to test that it leads to zero solid angle
-    Detector* det143 = dynamic_cast<Detector*>(space2D->getDetector(143).get());
+
+   // Mark one detector dead to test that it leads to zero solid angle
+    IDetector_sptr det143 = space2D->getDetector(143);
     ParameterMap& pmap = space2D->instrumentParameters();
-    pmap.addBool(det143,"masked",true);
+    pmap.addBool(det143.get(),"masked",true);
   }
 
   void testInit()

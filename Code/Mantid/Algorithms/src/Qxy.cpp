@@ -40,7 +40,7 @@ void Qxy::exec()
   // Create the output Qx-Qy grid
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
   // Copy over the instrument name and the workspace title
-  outputWorkspace->getInstrument()->setName(inputWorkspace->getInstrument()->getName());
+  outputWorkspace->getBaseInstrument()->setName(inputWorkspace->getInstrument()->getName());
   outputWorkspace->setTitle(inputWorkspace->getTitle());
   // Will also need an identically-sized workspace to hold the solid angles
   MatrixWorkspace_sptr solidAngles = WorkspaceFactory::Instance().create(outputWorkspace);

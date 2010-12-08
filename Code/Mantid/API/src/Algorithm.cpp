@@ -142,7 +142,7 @@ namespace Mantid
 	    try
 	    {	  //check if the pointer is valid, it won't be if it is a group
 	      Workspace_sptr wsSptr=wsProp->getWorkspace();
-	      if(!wsSptr)
+	      if(!wsName.empty() && !wsSptr)
 	      {
 		boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
 		  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
@@ -523,14 +523,17 @@ namespace Mantid
 	if (wsProp)
 	{
 	  const Property *wsPropProp = dynamic_cast<Property*>(*it);
+	  // Check we actually have a workspace, it may have been optional
+	  Workspace_sptr workspace = wsProp->getWorkspace();
+	  if( !workspace ) continue;
 	  unsigned int direction = wsPropProp->direction();
 	  if (direction == Direction::Input || direction == Direction::InOut)
 	  {
-	    inputWorkspaces.push_back(wsProp->getWorkspace());
+	    inputWorkspaces.push_back(workspace);
 	  }
 	  if (direction == Direction::Output || direction == Direction::InOut)
 	  {
-	    outputWorkspaces.push_back(wsProp->getWorkspace());
+	    outputWorkspaces.push_back(workspace);
 	  }
 	}
       }
