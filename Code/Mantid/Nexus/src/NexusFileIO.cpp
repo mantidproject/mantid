@@ -606,13 +606,32 @@ namespace Mantid
       status=NXputattr(fileID, "distribution", (void*)dist.c_str(), 2, NX_CHAR);
       NXputattr (fileID, "units", (void*)xLabel.c_str(), xLabel.size(), NX_CHAR);
       status=NXclosedata(fileID);
-      // write axis2, maybe just spectra number
-      dims_array[0]=axis2.size();
-      status=NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
-      status=NXopendata(fileID, "axis2");
-      status=NXputdata(fileID, (void*)&(axis2[0]));
-      NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
-      status=NXclosedata(fileID);
+
+      if ( ! sAxis->isText() )
+      {
+        // write axis2, maybe just spectra number
+        dims_array[0]=axis2.size();
+        status=NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
+        status=NXopendata(fileID, "axis2");
+        status=NXputdata(fileID, (void*)&(axis2[0]));
+        NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
+        status=NXclosedata(fileID);
+      }
+      else
+      {
+        std::string textAxis;
+        for ( int i = 0; i < sAxis->length(); i ++ )
+        {
+          std::string label = sAxis->label(i);
+          textAxis += label + "\n";
+        }      
+        dims_array[0] = textAxis.size();
+        status = NXmakedata(fileID, "axis2", NX_CHAR, 2, dims_array);
+        status = NXopendata(fileID, "axis2");
+        status = NXputdata(fileID, (void*)textAxis.c_str());
+        NXputattr (fileID, "units", (void*)"TextAxis", 8, NX_CHAR);
+        status = NXclosedata(fileID);
+      }
 
       writeNexusBinMasking(localworkspace);
 

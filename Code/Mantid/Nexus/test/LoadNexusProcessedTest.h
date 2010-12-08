@@ -66,9 +66,9 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
    }
 
@@ -82,7 +82,7 @@ public:
     testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
-	alg.setPropertyValue("SpectrumMin","2");
+	  alg.setPropertyValue("SpectrumMin","2");
     alg.setPropertyValue("SpectrumMax","4");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -96,202 +96,7 @@ public:
     MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     TS_ASSERT( matrix_ws.get() );
 
-	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
-
-    // Test proton charge from the sample block
-    //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
-   
-
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
-
-   }
-
-  void testNexusProcessed_List()
-  {
-
-    LoadNexusProcessed alg;
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/AutoTestData/focussed.nxs";
-    alg.setProperty("Filename", testFile);
-    alg.setPropertyValue("OutputWorkspace", output_ws);
-	alg.setPropertyValue("SpectrumList","1,2,3,4");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-    
-    //Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-    TS_ASSERT( workspace.get() );
-
-    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT( matrix_ws.get() );
-
-	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),4);
-
-    // Test proton charge from the sample block
-    //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
-   
-
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
-
-   }
-
-  void testNexusProcessed_Min_Max_List()
-  {
-
-    LoadNexusProcessed alg;
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/AutoTestData/focussed.nxs";
-    alg.setProperty("Filename", testFile);
-    alg.setPropertyValue("OutputWorkspace", output_ws);
-	alg.setPropertyValue("SpectrumMin","1");
-    alg.setPropertyValue("SpectrumMax","3");
-	alg.setPropertyValue("SpectrumList","4,5");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    
-    //Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-    TS_ASSERT( workspace.get() );
-
-    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT( matrix_ws.get() );
-
-	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),5);
-
-    // Test proton charge from the sample block
-    //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
-   
-
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM")
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17)
-
-   }
-
-  void testNexusProcessed_Min()
-  {
-
-    LoadNexusProcessed alg;
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/AutoTestData/focussed.nxs";
-    alg.setProperty("Filename", testFile);
-    alg.setPropertyValue("OutputWorkspace", output_ws);
-	alg.setPropertyValue("SpectrumMin","4");
-    
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    
-    //Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-    TS_ASSERT( workspace.get() );
-
-    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT( matrix_ws.get() );
-
-	//Testing the number of histograms
-   TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
-
-    // Test proton charge from the sample block
-    //TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(),500.1182, 1e-5)
-   
-
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4)
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
-
-   }
-
-   void testNexusProcessed_Max()
-  {
-
-    LoadNexusProcessed alg;
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/AutoTestData/focussed.nxs";
-    alg.setProperty("Filename", testFile);
-    alg.setPropertyValue("OutputWorkspace", output_ws);
-	alg.setPropertyValue("SpectrumMax","3");
-    
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    
-    //Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-    TS_ASSERT( workspace.get() );
-
-    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT( matrix_ws.get() );
-
-	//Testing the number of histograms
+	  //Testing the number of histograms
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     //Test history
@@ -307,7 +112,182 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+
+   }
+
+  void testNexusProcessed_List()
+  {
+    LoadNexusProcessed alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
+    alg.setProperty("Filename", testFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+	  alg.setPropertyValue("SpectrumList","1,2,3,4");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    
+    //Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+    TS_ASSERT( workspace.get() );
+
+    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT( matrix_ws.get() );
+
+	  //Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),4);
+
+    //Test history
+    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
+    int nalgs = static_cast<int>(alghist.size());
+    TS_ASSERT_EQUALS(nalgs, 4);
+      
+    if( nalgs == 4 )
+    {
+      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
+      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
+    }
+    
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+
+   }
+
+  void testNexusProcessed_Min_Max_List()
+  {
+    LoadNexusProcessed alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
+    alg.setProperty("Filename", testFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+	  alg.setPropertyValue("SpectrumMin","1");
+    alg.setPropertyValue("SpectrumMax","3");
+	  alg.setPropertyValue("SpectrumList","4,5");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    
+    //Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+    TS_ASSERT( workspace.get() );
+
+    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT( matrix_ws.get() );
+
+	  //Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),5);
+
+    //Test history
+    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
+    int nalgs = static_cast<int>(alghist.size());
+    TS_ASSERT_EQUALS(nalgs, 4);
+      
+    if( nalgs == 4 )
+    {
+      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
+      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
+    }
+    
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+
+   }
+
+  void testNexusProcessed_Min()
+  {
+    LoadNexusProcessed alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
+    alg.setProperty("Filename", testFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+	  alg.setPropertyValue("SpectrumMin","4");
+    
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    
+    //Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+    TS_ASSERT( workspace.get() );
+
+    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT( matrix_ws.get() );
+
+	  //Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
+
+    //Test history
+    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
+    int nalgs = static_cast<int>(alghist.size());
+    TS_ASSERT_EQUALS(nalgs, 4);
+      
+    if( nalgs == 4 )
+    {
+      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
+      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
+    }
+    
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+
+   }
+
+   void testNexusProcessed_Max()
+  {
+    LoadNexusProcessed alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
+    alg.setProperty("Filename", testFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+	  alg.setPropertyValue("SpectrumMax","3");
+    
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    
+    //Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+    TS_ASSERT( workspace.get() );
+
+    MatrixWorkspace_sptr matrix_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT( matrix_ws.get() );
+
+	  //Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
+
+    //Test history
+    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
+    int nalgs = static_cast<int>(alghist.size());
+    TS_ASSERT_EQUALS(nalgs, 4);
+      
+    if( nalgs == 4 )
+    {
+      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
+      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
+    }
+    
+    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 

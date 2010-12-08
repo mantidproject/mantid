@@ -4,6 +4,8 @@
 #include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
@@ -220,19 +222,26 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
   {
     g_log.information() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
   }
-
-  try
+    
+  // Setting a unit onto a SpectraAxis makes no sense.
+  if ( unit2 == "TextAxis" )
   {
-    local_workspace->getAxis(1)->unit() = UnitFactory::Instance().create(unit2);
+    Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(nspectra);
+    local_workspace->replaceAxis(1, newAxis);
   }
-  catch( std::runtime_error & )
+  else if ( unit2 != "spectraNumber" )
   {
-    g_log.information() << "Axis 1 set to unitless quantity \"" << unit2 << "\"\n";
+    try
+    {
+      Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
+      local_workspace->replaceAxis(1, newAxis);
+      newAxis->unit() = UnitFactory::Instance().create(unit2);      
+    }
+    catch( std::runtime_error & )
+    {
+      g_log.information() << "Axis 1 set to unitless quantity \"" << unit2 << "\"\n";
+    }
   }
-  local_workspace->setYUnit(data.attributes("units"));
-  std::string unitLabel = data.attributes("unit_label");
-  if (unitLabel.empty()) unitLabel = data.attributes("units");
-  local_workspace->setYUnitLabel(unitLabel);
 
   //Are we a distribution
   std::string dist = xbins.attributes("distribution");
@@ -248,6 +257,10 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
   //Get information from all but data group
   progress(progressStart+0.05*progressRange,"Reading the instrument details...");
   readInstrumentGroup(mtd_entry, local_workspace);
+  if ( ! local_workspace->getAxis(1)->isSpectra() )
+  { // If not a spectra axis, load the axis data into the workspace. (MW 25/11/10)
+    loadNonSpectraAxis(local_workspace, wksp_cls);
+  }
 
   progress(progressStart+0.1*progressRange,"Reading the sample details...");
   readSampleGroup(mtd_entry, local_workspace);
@@ -505,6 +518,45 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, DataObjects::W
 
   local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
   delete[] spectra_list;
+}
+
+/**
+* Loads the information contained in non-Spectra (ie, Text or Numeric) axis in the Nexus
+* file into the workspace.
+* @param local_workspace pointer to workspace object
+* @param data reference to the NeXuS data for the axis
+*/
+void LoadNexusProcessed::loadNonSpectraAxis(DataObjects::Workspace2D_sptr local_workspace, NXData & data)
+{
+  Mantid::API::Axis* axis = local_workspace->getAxis(1);
+
+  if ( axis->isNumeric() )
+  {
+    NXDouble axisData = data.openNXDouble("axis2");
+    axisData.load();
+    for ( int i = 0; i < axis->length(); i++ )
+    {
+      axis->setValue(i, axisData[i]);
+    }
+  }
+  else if ( axis->isText() )
+  {
+    // We must cast the axis object to TextAxis so we may use ->setLabel
+    Mantid::API::TextAxis* textAxis = dynamic_cast<Mantid::API::TextAxis*>(axis);
+    NXChar axisData = data.openNXChar("axis2");
+    axisData.load();
+    std::string axisLabels = axisData();    
+    // Use boost::tokenizer to split up the input
+    boost::char_separator<char> sep("\n");
+    boost::tokenizer<boost::char_separator<char> > tokenizer(axisLabels, sep);
+    boost::tokenizer<boost::char_separator<char> >::iterator tokIter;
+    int i = 0;
+    for ( tokIter = tokenizer.begin(); tokIter != tokenizer.end(); ++tokIter )
+    {
+      textAxis->setLabel(i, *tokIter);
+      ++i;
+    }
+  }
 }
 
 /**
@@ -844,7 +896,8 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  IInstrument_sptr instr = local_workspace->getBaseInstrument();
+  
+  boost::shared_ptr<Geometry::Instrument> instr = boost::shared_ptr<Geometry::Instrument>(const_cast<Geometry::Instrument*>(local_workspace->getBaseInstrument().get()));
 
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;

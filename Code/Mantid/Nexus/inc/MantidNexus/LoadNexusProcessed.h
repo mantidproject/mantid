@@ -108,6 +108,9 @@ namespace Mantid
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins, 
 		     int blocksize, int nchannels, int &hist,int& wsIndex, DataObjects::Workspace2D_sptr local_workspace);
 
+      /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
+      void loadNonSpectraAxis(DataObjects::Workspace2D_sptr local_workspace, NXData & data);
+
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties(const int numberofspectra);
 

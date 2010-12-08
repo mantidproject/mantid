@@ -81,7 +81,7 @@ namespace Mantid
       bool writeNexusInstrument(const Geometry::IInstrument_const_sptr& instrument) const;
       /// write any spectra map information to Nexus file
       bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec) const;
-      /// write instrument parameters
+     /// write instrument parameters
       bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws) const;
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
