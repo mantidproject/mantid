@@ -197,7 +197,7 @@ namespace Mantid
       // Attenuation factor is simply the average value
       attenFactor /= numDetected;
       // Error is 1/sqrt(nevents)
-      error = 1./sqrt(numDetected);
+      error = 1./sqrt((double)numDetected);
     }
 
     /**
