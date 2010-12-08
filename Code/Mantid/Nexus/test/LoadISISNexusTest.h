@@ -27,6 +27,10 @@ public:
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
+        std::cout << "\nBefore \n";
+        int iii;
+        std::cin >> iii;
+        std::cout << "\n has now typed \n";
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
