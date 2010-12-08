@@ -135,8 +135,8 @@ public:
   {
     LoadInstrumentHelper helper;
 
-    std::string boevs = helper.getIDF_identifier("BIOSANS", "2100-01-31 22:59:59");
-    TS_ASSERT(boevs.empty());
+    std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
+    TS_ASSERT(!boevs.empty());
   }
 
 };
