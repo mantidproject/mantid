@@ -37,7 +37,7 @@ public:
       forSpecDetMap[j] = j;
     }
 
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument);
+    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
 
     Detector *d = new Detector("det",0);
     d->setID(0);
