@@ -38,7 +38,7 @@ public:
     input->getAxis(1)->spectraNo(2) = 2;
     Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",NULL);
     mon->setID(0);
-    boost::shared_ptr<Instrument> instr = boost::dynamic_pointer_cast<Instrument>(input->getInstrument());
+    boost::shared_ptr<Instrument> instr = boost::dynamic_pointer_cast<Instrument>(input->getBaseInstrument());
     instr->add(mon);
     instr->markAsMonitor(mon);
     Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",NULL);

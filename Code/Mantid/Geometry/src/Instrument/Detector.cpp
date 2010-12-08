@@ -1,5 +1,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 
+#include "MantidGeometry/Instrument/ParameterMap.h"
+
 namespace Mantid
 {
 namespace Geometry
@@ -129,6 +131,14 @@ bool Detector::isMonitor() const
     return dynamic_cast<const Detector*>(m_base)->isMonitor();
   else
     return m_isMonitor;
+}
+
+/**
+*
+*/
+std::map<int, double> Detector::getNeighbours(double radius)
+{
+  return m_map->getNeighbours(getComponent(), radius);
 }
 
 /** Sets the flag for whether this detector object is a monitor

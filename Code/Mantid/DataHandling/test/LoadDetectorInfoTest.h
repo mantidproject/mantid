@@ -293,24 +293,27 @@ public:
       detIDs[j] = j;
       specNums[j] = j+1;
     }
+
+    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
+
     Detector *d = new Detector("det",0);
     d->setID(0);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d);
+    instr->markAsDetector(d);
     Detector *d1 = new Detector("det",0);
     d1->setID(1);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d1);
+    instr->markAsDetector(d1);
     Detector *d2 = new Detector("det",0);
     d2->setID(2);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d2);
+    instr->markAsDetector(d2);
     Detector *d3 = new Detector("det",0);
     d3->setID(3);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d3);
+    instr->markAsDetector(d3);
     Detector *d4 = new Detector("det",0);
     d4->setID(4);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d4);
+    instr->markAsDetector(d4);
     Detector *d5 = new Detector("det",0);
     d5->setID(5);
-    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d5);
+    instr->markAsDetector(d5);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
     space->mutableSpectraMap().populate(specNums, detIDs, NDETECTS );
