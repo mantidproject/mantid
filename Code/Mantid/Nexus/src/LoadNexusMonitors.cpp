@@ -174,15 +174,6 @@ void LoadNexusMonitors::exec()
 void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
     API::MatrixWorkspace_sptr localWorkspace)
 {
-  std::string filename = Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
-  if (filename.empty())
-  {
-    return;
-  }
-  if (!Poco::File(filename).exists())
-  {
-    return;
-  }
 
   // do the actual work
   API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
@@ -191,7 +182,7 @@ void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
   bool executionSuccessful(true);
   try
   {
-    loadInst->setPropertyValue("Filename", filename);
+    loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace",
         localWorkspace);
     loadInst->execute();

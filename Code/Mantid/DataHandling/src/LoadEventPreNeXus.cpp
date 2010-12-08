@@ -22,6 +22,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/LoadInstrumentHelper.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -273,12 +275,6 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   pos = instrument.rfind("_", pos-1); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
-  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
-  if (filename.empty())
-    return;
-  if (!Poco::File(filename).exists())
-    return;
-
   // do the actual work
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
@@ -286,7 +282,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   bool executionSuccessful(true);
   try
   {
-    loadInst->setPropertyValue("Filename", filename);
+    loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadInst->execute();
 

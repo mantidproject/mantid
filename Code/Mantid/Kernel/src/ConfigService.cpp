@@ -846,55 +846,6 @@ const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
 
 
 /**
- * Adjust instrument name to be consistent with names used for instruments in 
- * instrument search directory, including adjusting instrument names to be upper case
- */
-const std::string ConfigServiceImpl::adjustIDFname(const std::string& instrumentName) const
-{
-  // force instrument ID to upper case
-  std::string instrument;
-  instrument = instrumentName;
-  std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
-
-  // hack to look for long name versions
-  if (instrument == "SEQ")
-    return "SEQUOIA";
-  if (instrument == "PG3")
-    return "POWGEN";
-
-  return instrument;
-}
-
-
-/**
- * Return the filename of the instrument geometry definition file.
- * @param instrumentName A string giving the instrument name
- * @param identifier A given instrument may have multiple IDFs, this identifier identify which one
- * @returns A string containing the full qualified filename of the instrument file.
- */
-const std::string ConfigServiceImpl::getInstrumentFilename(const std::string& instrumentName, const std::string& identifier) const
-{
-  // force instrument ID to upper case
-  std::string instrument;
-  instrument = instrumentName;
-  std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
-
-  // hack to look for long name versions
-  if (instrument == "SEQ")
-    return this->getInstrumentFilename("SEQUOIA", identifier);
-  if (instrument == "PG3")
-    return this->getInstrumentFilename("POWGEN", identifier);
-
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getInstrumentDirectory();
-
-  // force ID to upper case
-  return directoryName + "/" + instrument + "_Definition"
-    + identifier + ".xml";
-}
-
-
-/**
  * Return the search directory for XML instrument definition files (IDFs)
  * @returns Full path of instrument search directory
  */
@@ -916,7 +867,6 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
 
   return directoryName;
 }
-
 
 
 /**

@@ -20,6 +20,7 @@
 #include "Poco/Path.h"
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include "MantidDataHandling/LoadInstrumentHelper.h"
 
 namespace Mantid
 {
@@ -152,15 +153,16 @@ namespace Mantid
         DataObjects::Workspace2D_sptr localWorkspace = 
           DataObjects::Workspace2D_sptr(new ManagedRawFileWorkspace2D(m_filename, option));
         progress(0.,"Reading raw file...");
+        helper->loadRunParameters(localWorkspace, isisRaw.get());
         runLoadInstrument(localWorkspace );
         runLoadMappingTable(localWorkspace );
         runLoadLog(localWorkspace );
-	Property* log=createPeriodLog(1);
-	if(log)
-	{
-	  localWorkspace->mutableRun().addLogData(log);
-	}
-	localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+        Property* log=createPeriodLog(1);
+        if(log)
+        {
+          localWorkspace->mutableRun().addLogData(log);
+        }
+	      localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         for (int i = 0; i < m_numberOfSpectra; ++i)
           localWorkspace->getAxis(1)->spectraNo(i)= i+1;
         localWorkspace->populateInstrumentParameters();
@@ -239,11 +241,11 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-	  Property* log=createPeriodLog(period+1);
-	  if(log)
-	  {
-	    localWorkspace->mutableRun().addLogData(log);
-	  }
+          Property* log=createPeriodLog(period+1);
+          if(log)
+          {
+            localWorkspace->mutableRun().addLogData(log);
+          }
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
           localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
@@ -355,31 +357,16 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadRaw2::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-      if ( directoryName.empty() )
-      {
-	// This is the assumed deployment directory for IDFs, where we need to be relative to the
-	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
-      }
-
-      //const int stripPath = m_filename.find_last_of("\\/");
-      //std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
-      
+      // get instrument ID      
       std::string instrumentID = isisRaw->i_inst; // get the instrument name
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
       if (i != std::string::npos) instrumentID.erase(i);
-
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       bool executionSuccessful(true);
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         loadInst->execute();
       }
@@ -398,7 +385,7 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       if( !executionSuccessful )
       {
         g_log.information() << "Instrument definition file " 
-          << fullPathIDF << " not found. Attempt to load information about \n"
+          << " not found. Attempt to load information about \n"
           << "the instrument from raw data file.\n";
         runLoadInstrumentFromRaw(localWorkspace);
       }

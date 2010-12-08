@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/LoadInstrumentHelper.h"
 
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
@@ -554,15 +555,13 @@ namespace Mantid
       if (i != std::string::npos)
         instrumentID.erase(i);
 
-      std::string fullPathIDF = Kernel::ConfigService::Instance().getInstrumentFilename(instrumentID,"");
-
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         loadInst->execute();
       } catch (std::invalid_argument&)
@@ -579,7 +578,7 @@ namespace Mantid
       if (!executionSuccessful)
       {
         g_log.information() << "Instrument definition file " 
-          << fullPathIDF << " not found. Attempt to load information about \n"
+          << " not found. Attempt to load information about \n"
           << "the instrument from raw data file.\n";
         runLoadInstrumentFromRaw(fileName,localWorkspace);
       }

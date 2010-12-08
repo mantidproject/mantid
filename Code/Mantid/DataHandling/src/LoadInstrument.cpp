@@ -20,6 +20,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidDataHandling/LoadInstrumentHelper.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -68,11 +69,13 @@ namespace Mantid
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
         "The name of the workspace to load the instrument definition into" );
-      declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
+      declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
         "The filename (including its full or relative path) of an instrument\n"
         "definition file");
       declareProperty("MonitorList", std::vector<int>(), new NullValidator< std::vector<int> >,
         "List of detector ids of monitors loaded in to the workspace", Direction::Output);
+      declareProperty( "InstrumentName", "",
+        "Can be used instead of Filename to specify and IDF" );
 
       m_angleConvertConst = 1.0;
     }
@@ -87,11 +90,29 @@ namespace Mantid
     */
     void LoadInstrument::exec()
     {
-      // Retrieve the filename from the properties
-      m_filename = getPropertyValue("Filename");
-
       // Get the input workspace
       m_workspace = getProperty("Workspace");
+
+      // Retrieve the filename from the properties
+      m_filename = getPropertyValue("Filename");
+      if ( m_filename.empty() )
+      {
+        // look to see if an Instrument name provided in which case create
+        // IDF filename on the fly
+        std::string instName = getPropertyValue("InstrumentName");
+        if ( instName.empty() )
+        {
+          g_log.error("Either the InstrumentName or Filename property of LoadInstrument most be specified"); 
+          throw Kernel::Exception::FileError("Either the InstrumentName or Filename property of LoadInstrument most be specified to load an IDF" , m_filename);
+        }
+        else
+        {
+          LoadInstrumentHelper helper;
+          m_filename = helper.getInstrumentFilename(instName, 
+            helper.getWorkspaceStartDate(m_workspace));
+        }
+      }
+
 
       // Clear off any existing instrument for this workspace
       m_workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));

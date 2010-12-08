@@ -8,11 +8,14 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataHandling/LoadInstrumentHelper.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <cmath>
 #include <boost/shared_array.hpp>
 #include "Poco/Path.h"
 #include <Poco/Thread.h>
+
 
 #include "LoadDAE/idc.h"
 
@@ -456,28 +459,17 @@ namespace Mantid
      */
     void LoadDAE::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace, const char* iName)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-      if ( directoryName.empty() )
-      {
-          // This is the assumed deployment directory for IDFs, where we need to be relative to the
-          // directory of the executable, not the current working directory.
-          directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
-      }
-
+      // instrument name
       std::string instrumentID = iName; // get the instrument name
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
       if (i != std::string::npos) instrumentID.erase(i);
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       bool successfulExecution(true);
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
         loadInst->execute();
       }

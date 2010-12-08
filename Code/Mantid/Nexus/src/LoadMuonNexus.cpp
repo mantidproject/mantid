@@ -453,19 +453,6 @@ namespace Mantid
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
     void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
-      if ( directoryName.empty() )
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
-      }
-      // For Nexus, Instrument name given by MuonNexusReader from Nexus file
-      std::string instrumentID = m_instrument_name; //m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
@@ -473,7 +460,7 @@ namespace Mantid
       bool executionSuccessful(true);
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", m_instrument_name);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         loadInst->execute();
       }

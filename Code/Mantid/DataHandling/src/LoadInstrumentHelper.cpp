@@ -55,6 +55,8 @@ using namespace API;
 using namespace Geometry;
 using namespace Poco::XML;
 
+Logger& LoadInstrumentHelper::g_log = Logger::get("LoadInstrumentHelper");
+
 // used to terminate SAX process
 class DummyException {
 public:
@@ -62,8 +64,6 @@ public:
   std::string m_validTo;
   DummyException(std::string validFrom, std::string validTo) 
     : m_validFrom(validFrom), m_validTo(validTo) {}
-
-
 };
 
 // SAX content handler for grapping stuff quickly from IDF
@@ -76,11 +76,6 @@ class myContentHandler : public Poco::XML::ContentHandler
     const Attributes & attrList
     ) 
   { 
-    //int a = 2;
-    //std::cout << localName << "\n";
-    //for (int i = 0; i < attrList.getLength(); i++)
-    //  std::cout << attrList.getValue(i) << "\n";
-
     if ( localName == "instrument" )
     {
       throw DummyException(static_cast<std::string>(attrList.getValue("","valid-from")), 
@@ -148,39 +143,68 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
       }
       catch(...)
       {
-        // should return some sensible here
+        // should throw some sensible here
       }
 }
 
 
-struct fromToEntry
+/** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the 
+*   method returns current date.
+*
+*  @parad instrumentName Instrument name e.g. GEM, TOPAS or BIOSANS
+*  @return workspace start date
+*/
+std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace)
 {
-  std::string identifier; 
-  DateAndTime from;
-  DateAndTime to;
-};
+    const API::Run& runDetails = workspace->run();
+    std::string date;
+    if ( runDetails.hasProperty("startdate") && runDetails.hasProperty("starttime") )
+    {
+      std::string startdate = runDetails.getProperty("startdate")->value();
+      std::string starttime = runDetails.getProperty("starttime")->value();
+      date = startdate.substr(7,4) + "-" + startdate.substr(3,3) + "-" + startdate.substr(0,2) + " " + starttime;
+    }
+    else
+    {
+      g_log.information("startdate/starttime not stored in workspace. Default to current date.");
 
-/// Given an instrument name and a date return filename of appropriate IDF
+      date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+    }
+
+    return date;
+}
+
 /** A given instrument may have multiple IDFs associated with it. This method return an 
 *  identifier which identify a given IDF for a given instrument. An IDF filename is 
 *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
 *  then is the part of a filename that identifies the IDF valid at a given date.
 *
-*  @param IDFname Instrument name ID e.g. GEM, TOPAS or BIOSANS
-*  @param date Date. E.g. date when raw files where collected
+*  @param instrumentName Instrument name e.g. GEM, TOPAS or BIOSANS
+*  @param date ISO 8601 date
+*  @return full path of IDF
 */
-std::string LoadInstrumentHelper::getIDF_identifier(const std::string& idfName, const std::string& date)
+std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instrumentName, const std::string& date)
 {
+  // force instrument ID to upper case
+  std::string instrument;
+  instrument = instrumentName;
+  std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
+
+  // hack to look for long name versions
+  if (instrument == "SEQ")
+    instrument = "SEQUOIA";
+  if (instrument == "PG3")
+    instrument = "POWGEN";
+
   // Get the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
-  // adjust IDFname to be consistent with names used in instrument search directory
-  std::string IDFname = Kernel::ConfigService::Instance().adjustIDFname(idfName);
 
 
-  Poco::RegularExpression regex(IDFname+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
+  Poco::RegularExpression regex(instrument+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
   Poco::DirectoryIterator end_iter;
-  std::vector<fromToEntry> idfInstances;
   DateAndTime d(date);
+  std::string mostRecentIDF; // store most recent IDF which is returned if no match for the date found
+  DateAndTime refDate("1900-01-31 23:59:59"); // used to help determine the most recent IDF
   for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
   {
     if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
@@ -194,19 +218,20 @@ std::string LoadInstrumentHelper::getIDF_identifier(const std::string& idfName, 
 
       DateAndTime from(validFrom);
       DateAndTime to(validTo);
-      if ( DateAndTime(validFrom) <= d && d <= DateAndTime(validTo) )
+      if ( from <= d && d <= to )
       {
-        size_t foundDefinition;
-        foundDefinition = l_filenamePart.find("_Definition");
-        size_t foundXML;
-        foundXML = l_filenamePart.find(".xml");
-        return l_filenamePart.substr(foundDefinition+11,foundXML-foundDefinition-11);
+        return dir_itr->path();
+      }
+      if ( to > refDate )
+      {
+        refDate = to;
+        mostRecentIDF = dir_itr->path();
       }
     }
   }
 
-  // should throw warning here: no IDF found with date:  
-  return "";
+  // No date match found return most recent   
+  return mostRecentIDF;
 }
 
 } // namespace DataHandling

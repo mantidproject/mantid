@@ -125,6 +125,7 @@ void LoadRaw3::exec()
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn,m_lengthIn-1,title);
 
   // Only run the sub-algorithms once
+  loadRunParameters(localWorkspace);
   runLoadInstrument(m_filename,localWorkspace);
   runLoadMappingTable(m_filename,localWorkspace);
   Run& run = localWorkspace->mutableRun();
@@ -137,7 +138,6 @@ void LoadRaw3::exec()
   // Set the total proton charge for this run
   setProtonCharge(run);
   setRunNumber(run);
-  loadRunParameters(localWorkspace);
 
   // populate instrument parameters
   g_log.debug("Populating the instrument parameters...");
@@ -544,6 +544,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
     new ManagedRawFileWorkspace2D(fileName, option));
   m_prog = 0.2;
+  loadRunParameters(localWorkspace);
   runLoadInstrument(fileName,localWorkspace);
   m_prog = 0.4;
   runLoadMappingTable(fileName,localWorkspace);

@@ -547,18 +547,6 @@ void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, Matr
   // Now let's close the file as we don't need it anymore to load the instrument.
   nxfile.close();
 
-  // determine the instrument parameter file
-  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
-  if (filename.empty())
-  {
-	g_log.warning() << "Unable to determine geometry file for " << instrument << std::endl;
-    return;
-  }
-  if (!Poco::File(filename).exists())
-  {
-	g_log.warning() << "Instrument file does not exist: " << filename << std::endl;
-    return;
-  }
 
   // do the actual work
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
@@ -567,7 +555,7 @@ void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, Matr
   bool executionSuccessful(true);
   try
   {
-    loadInst->setPropertyValue("Filename", filename);
+    loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadInst->execute();
 

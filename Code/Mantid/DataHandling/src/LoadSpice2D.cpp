@@ -309,29 +309,13 @@ namespace Mantid
     void LoadSpice2D::runLoadInstrument(const std::string & inst_name,
         DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString(
-          "instrumentDefinition.directory");
-      if (directoryName.empty())
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
-            "../Instrument").toString();
-      }
-
-      // For Nexus Mantid processed, Instrument XML file name is read from nexus
-      std::string instrumentID = inst_name;
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", inst_name);
         loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         loadInst->execute();
       } catch (std::invalid_argument&)

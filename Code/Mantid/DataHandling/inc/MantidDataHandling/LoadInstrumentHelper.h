@@ -55,16 +55,17 @@ namespace Mantid
       /// Destructor
       virtual ~LoadInstrumentHelper() {}
 
-      /// For a given instrument name return IDF (identifier) that is valid for date
-      std::string getIDF_identifier(const std::string& idfName, const std::string& date);
-
       /// Return from an IDF the values of the valid-from and valid-to attributes
       void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
                           std::string& outValidTo);
       
+      std::string getInstrumentFilename(const std::string& instName, const std::string& date);
+      std::string getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace);
 
     private:
 
+      /// static reference to the logger class
+      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

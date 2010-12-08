@@ -242,20 +242,14 @@ void LoadPreNeXusMonitors::exec()
 void LoadPreNeXusMonitors::runLoadInstrument(const std::string &instrument,
     MatrixWorkspace_sptr localWorkspace)
 {
-  std::string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument,"");
-  if (filename.empty())
-    return;
-  if (!Poco::File(filename).exists())
-    return;
 
-  // do the actual work
   IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try
   {
-    loadInst->setPropertyValue("Filename", filename);
+    loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadInst->execute();
 

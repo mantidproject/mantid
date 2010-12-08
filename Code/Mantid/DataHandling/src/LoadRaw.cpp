@@ -16,6 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include "LoadRaw/isisraw.h"
 #include <cstdio> // Required for gcc 4.4
+#include "MantidDataHandling/LoadInstrumentHelper.h"
 
 namespace Mantid
 {
@@ -179,11 +180,11 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-	  Property* log=createPeriodLog(1);
-	  if(log)localWorkspace->mutableRun().addLogData(log);
+	        Property* log=createPeriodLog(1);
+	        if(log)localWorkspace->mutableRun().addLogData(log);
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-	  localWorkspace->mutableRun().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
+	        localWorkspace->mutableRun().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -325,19 +326,9 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadRaw::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-      if ( directoryName.empty() )
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
-      }
+      // instrument ID
       const int stripPath = m_filename.find_last_of("\\/");
       std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
@@ -345,7 +336,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
       bool executionSuccessful(true);
       try
       {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         loadInst->execute();
       }
@@ -364,7 +355,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
       if( !executionSuccessful )
       {
         g_log.information() << "Instrument definition file " 
-          << fullPathIDF << " not found. Attempt to load information about \n"
+          << " not found. Attempt to load information about \n"
           << "the instrument from raw data file.\n";
         runLoadInstrumentFromRaw(localWorkspace);
       }
