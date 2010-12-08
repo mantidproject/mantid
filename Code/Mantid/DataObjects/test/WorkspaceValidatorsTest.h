@@ -204,7 +204,7 @@ public:
     delete compVal3;
   }
 
-  void testWSPropertyandValidator()
+  void xtestWSPropertyandValidator()
   {
       
     WorkspaceProperty<MatrixWorkspace> wsp1("workspace1","ws1",Direction::Input,wavUnitVal->clone());

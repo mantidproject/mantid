@@ -31,7 +31,7 @@ public:
     TS_ASSERT( atten.isInitialized() )
   }
 
-  void testExec()
+  void xtestExec()
   {
     if ( !atten.isInitialized() ) atten.initialize();
 
