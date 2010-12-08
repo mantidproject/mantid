@@ -136,7 +136,7 @@ public:
   {
     BIN_DELTA = 10000;
     NUMBINS = 160;
-    MAX_TOF = 10e6;
+    MAX_TOF = 10000000;
     NUMEVENTS = 100;
   }
 
@@ -436,8 +436,7 @@ public:
       double tof = rwel[i].tof();
       if (tof>=step && tof<BIN_DELTA*NUMBINS)
       {
-        int bini = tof / step;
-        double value = bini;
+        double value = std::floor(tof/step);
         double errorsquared = value;
         //Check the formulae for value and error
         TS_ASSERT_DELTA( rwel[i].weight(), 2.0*value, 1e-6);
@@ -525,9 +524,7 @@ public:
       double tof = rwel[i].tof();
       if (tof>=step && tof<BIN_DELTA*NUMBINS)
       {
-        int bini = tof / step;
-        double value = bini;
-        double errorsquared = value;
+        int bini = static_cast<int>(tof / step);
         if (bini == 7)
         {
           //That was zeros
@@ -1066,7 +1063,7 @@ public:
 
     // Grab original data as it will become "new" data
     MantidVec T;
-    T = *el.getTofs();
+    el.getTofs(T);
 
     // Convert to make values something different
     this->el.convertTof(4.0, 2.0);
@@ -1089,7 +1086,7 @@ public:
 
     // Grab original data as it will become "new" data
     MantidVec T;
-    T = *el.getTofs();
+    el.getTofs(T);
 
     // Convert to make values something different
     this->el.convertTof(4.0, 2.0);
@@ -1342,7 +1339,7 @@ public:
     el = EventList();
     //Create some mostly-reasonable fake data.
     srand(1234); //Fixed random seed
-    for (double time=0; time < 1000; time++)
+    for (int time=0; time < 1000; time++)
     {
       //All pulse times from 0 to 999
       el += TofEvent( rand()%1000, time);
@@ -1410,7 +1407,7 @@ public:
     if (verbose)
     {
       std::cout << "\n";
-      NUMEVENTS = 1e8;
+      NUMEVENTS = 100000000;
     }
     else
     {
