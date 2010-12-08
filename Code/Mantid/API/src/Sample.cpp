@@ -13,15 +13,13 @@ namespace Mantid
 
     using Geometry::Object;
     using Geometry::Material;
-    using Geometry::IComponent;
     using Geometry::V3D;
-    using Geometry::Quat;
     
     /**
      * Default constructor
      */
     Sample::Sample() : 
-      m_name(), m_shape(), m_material(), m_environment(), m_positionComp(NULL), 
+      m_name(), m_shape(), m_material(), m_environment(),
       m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0)
     {
     }
@@ -32,9 +30,8 @@ namespace Mantid
      */
     Sample::Sample(const Sample& copy) :
       m_name(copy.m_name), m_shape(copy.m_shape), m_material(copy.m_material), 
-      m_environment(copy.m_environment), m_positionComp(copy.m_positionComp), 
-      m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height), 
-      m_width(copy.m_width)
+      m_environment(copy.m_environment), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), 
+      m_height(copy.m_height), m_width(copy.m_width)
     {
     }
 
@@ -50,7 +47,6 @@ namespace Mantid
       m_shape = rhs.m_shape;
       m_material = rhs.m_material;
       m_environment = rhs.m_environment;
-      m_positionComp = rhs.m_positionComp;
       m_geom_id = rhs.m_geom_id;
       m_thick = rhs.m_thick;
       m_height = rhs.m_height;
@@ -77,7 +73,8 @@ namespace Mantid
     }
 
     /**
-     * Get a pointer to the sample shape object
+     * Get a pointer to the sample shape object. It is assumed that this is defined within
+     * its own coordinate system with its centre at [0,0,0]
      * @returns A reference to the object describing the shape
      */
     const Object& Sample::getShape() const
@@ -86,7 +83,8 @@ namespace Mantid
     }
 
     /**
-     * Set the object that describes the sample shape
+     * Set the object that describes the sample shape. It is assumed that this is defined such
+     * that its centre is at [0,0,0]
      * @param object The object describing the shape
      * @throws An std::invalid_argument error if the object does 
      * not have a valid shape
@@ -101,6 +99,24 @@ namespace Mantid
       {
 	throw std::invalid_argument("Sample::setShape - Object has an invalid shape.");
       }
+    }
+
+    /**
+     * Return the material.
+     * @returns A reference to the material the sample is composed of
+     */
+    const Material & Sample::getMaterial() const
+    {
+      return m_material;
+    }
+    
+    /**
+     * Set the type of material that this sample is composed from
+     * @param material A reference to the material object. It is copied into the sample.
+     */
+    void Sample::setMaterial(const Geometry::Material& material)
+    {
+      m_material = material;
     }
 
     /**
@@ -127,41 +143,6 @@ namespace Mantid
       m_environment = boost::shared_ptr<SampleEnvironment>(env);
     }
 
-    /**
-     * Returns the absolute position of the sample
-     * @returns A V3D object containing the absolute position of the sample
-     */
-    V3D Sample::getPos() const
-    {
-      if( !m_positionComp ) 
-      {
-	throw std::runtime_error("Sample::getPos - Position component not defined.");
-      }
-      return m_positionComp->getPos();
-    }
-    
-    /** 
-     * Returns the absolute rotation of the sample
-     * @returns A Quaternion containin the absolute rotation of the sample
-     */
-    Quat Sample::getRotation() const
-    {
-      if( !m_positionComp ) 
-      {
-	throw std::runtime_error("Sample::getRoations - Position component not defined.");
-      }
-      return m_positionComp->getRotation();
-    }
-
-    /**
-     * Attach the sample to a position defined by the given component.
-     * @param positionComp The component defining the sample position
-     */
-    void Sample::attachToPosition(const Geometry::IComponent * const positionComp)
-    {
-      m_positionComp = positionComp;
-    }
-        
     /**
      * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT
      * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal

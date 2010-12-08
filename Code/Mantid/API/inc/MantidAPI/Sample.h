@@ -6,19 +6,11 @@
 //------------------------------------------------------------------------------
 #include "DllExport.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
 
 namespace Mantid
 {
-  //-----------------------------------------------------------------------------
-  // Geometry forward declarations
-  //------------------------------------------------------------------------------
-  namespace Geometry
-  {
-    class IComponent;
-  }
 
   namespace API
   {
@@ -76,23 +68,20 @@ namespace Mantid
       /// Update the shape of the object
       void setShape(const Geometry::Object& shape);
 
+      /** @name Material properties.*/
+      //@{
+      /// Return the material
+      const Geometry::Material & getMaterial() const;
+      /// Set the type of material that this sample is composed from
+      void setMaterial(const Geometry::Material& material);
+      //@}
+
       /** @name Access the environment information */
       //@{
       /// Get a reference to the sample's environment
       const SampleEnvironment & getEnvironment() const;
       /// Set the environment used to contain the sample
       void setEnvironment(SampleEnvironment * env);
-      //@}
-
-      /** @name Position and rotation information. */
-      //@
-      /// Returns the absolute position of the sample
-      Geometry::V3D getPos() const;
-      /// Returns the absolute rotation of the sample
-      Geometry::Quat getRotation() const;
-      /// Attach the sample to a position defined by the given component.
-      /// There is no transfer of ownership.
-      void attachToPosition(const Geometry::IComponent *const positionComp);
       //@}
 
       // Required for SANS work until we define a proper
@@ -127,10 +116,6 @@ namespace Mantid
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
 
-      /// A pointer to the component that is identified as the sample 
-      /// position, not owned.
-      Geometry::IComponent const * m_positionComp;
-      
       /// The sample geometry flag
       int m_geom_id;
       /// The sample thickness from the SPB_STRUCT in the raw file

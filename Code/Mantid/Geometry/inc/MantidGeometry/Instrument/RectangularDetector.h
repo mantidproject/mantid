@@ -130,6 +130,11 @@ public:
 
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const;
+  /// Returns the material of the detector
+  const boost::shared_ptr<const Material> material() const
+  {
+    return boost::shared_ptr<const Material>();
+  }
 
   // ------------ End of IObjComponent methods ----------------
 

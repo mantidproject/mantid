@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "../../Geometry/test/ComponentCreationHelpers.hh"
 
 using Mantid::API::SampleEnvironment;
+using namespace Mantid::PhysicalConstants;
 using namespace Mantid::Geometry;
 
 class SampleEnvironmentTest : public CxxTest::TestSuite

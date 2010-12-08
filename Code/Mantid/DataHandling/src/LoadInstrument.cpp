@@ -823,8 +823,6 @@ namespace Mantid
         if ( category.compare("SamplePos") == 0 )
         {
           m_instrument->markAsSamplePos(comp);
-	  API::Sample & sample = m_workspace->mutableSample();
-	  sample.attachToPosition(comp);
         }
 
         // set location for this newly added comp and set facing if specified in instrument def. file. Also

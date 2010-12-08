@@ -51,15 +51,21 @@ namespace Mantid
       /// Type of object
       virtual std::string type() const {return "SampleEnvironment"; }
 
-      /// Override add a component to the assembly so that we can only add components that
-      /// have a physical shape
+      /// Override the default add member to only add components with a defined
+      /// shape
       int add(IComponent* comp);
+      /// Is the point given a valid point within the environment
+      bool isValid(const Geometry::V3D & point) const;
+      /// Update the given track with intersections within the environment
+      void interceptSurfaces(Geometry::Track & track) const;
 
     private:
       /// Default constructor
       SampleEnvironment();
       /// Assignment operator
       SampleEnvironment& operator=(const SampleEnvironment&);
+
+
     };
   }
 }

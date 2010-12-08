@@ -17,6 +17,7 @@ namespace Geometry
 // Forward Declaration
 //----------------------------------------------------------------------
 class Object;
+class Material;
 class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes of the component
@@ -110,6 +111,8 @@ public:
 
   /// Returns the shape of the Object
   virtual const boost::shared_ptr<const Object> shape()const = 0;
+  /// Returns the material of the Object
+  virtual const boost::shared_ptr<const Material> material()const = 0;
 
   void setScaleFactor(double xFactor,double yFactor, double zFactor);
 

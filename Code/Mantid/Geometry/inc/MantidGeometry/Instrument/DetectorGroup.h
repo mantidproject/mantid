@@ -175,6 +175,11 @@ private:
   {
     return boost::shared_ptr<const Object>();
   }
+  /// Returns the material of the Object
+  const boost::shared_ptr<const Material> material() const
+  {
+    return boost::shared_ptr<const Material>();
+  }
 
   void setScaleFactor(double,double, double);
 };

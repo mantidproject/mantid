@@ -4,6 +4,7 @@
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid
 {
@@ -12,6 +13,8 @@ namespace Mantid
     
     using Geometry::IComponent;
     using Geometry::IObjComponent;
+    using Geometry::V3D;
+    using Geometry::Track;
 
     //------------------------------------------------------------------------------
     // Public methods
@@ -71,6 +74,43 @@ namespace Mantid
 	throw std::invalid_argument("CompAssembly::add - Component does not have a defined shape.");
       }
     }
+    
+    /**
+     * Is the point given a valid point within the environment
+     * @param point Is the point valid within the environment
+     * @returns True if the point is within the environment
+     */
+    bool SampleEnvironment::isValid(const V3D & point) const
+    {
+      const int numElements(nelements());
+      for(int i = 0; i < numElements; ++i )
+      {
+	boost::shared_ptr<IObjComponent> part = boost::dynamic_pointer_cast<IObjComponent>(getChild(i));
+	if( part && part->isValid(point) )
+	{
+	  return true;
+	}
+      }
+      return false;
+    }
+    
+    /**
+     * Update the given track with intersections within the environment 
+     * @param [Input/Output] The track is update with an intersections with the
+     * environment
+     */
+    void SampleEnvironment::interceptSurfaces(Track & track) const
+    {
+      const int numElements(nelements());
+      for(int i = 0; i < numElements; ++i )
+      {
+	boost::shared_ptr<IObjComponent> part = boost::dynamic_pointer_cast<IObjComponent>(getChild(i));
+	if( part )
+	{
+	  part->interceptSurface(track);
+	}
+      }      
+    } 
     
   }
 

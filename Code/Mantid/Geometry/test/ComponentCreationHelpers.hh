@@ -59,19 +59,27 @@ namespace ComponentCreationHelper
   
 
   //----------------------------------------------------------------------------------------------
+
   /**
-   * Create a sphere object
+   * Return the XML for a sphere.
    */
-  static Object_sptr createSphere(double radius, const V3D & centre, const std::string & id)
+  std::string sphereXML(double radius, const V3D & centre, const std::string & id)
   {
     std::ostringstream xml;
     xml << "<sphere id=\"" << id <<  "\">"
     << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\"" << centre.Z() << "\" />"
     << "<radius val=\"" << radius << "\" />"
     << "</sphere>";
+    return xml.str();
+  }
 
+  /**
+   * Create a sphere object
+   */
+  static Object_sptr createSphere(double radius, const V3D & centre, const std::string & id)
+  {
     ShapeFactory shapeMaker;
-    return shapeMaker.createShape(xml.str());
+    return shapeMaker.createShape(sphereXML(radius, centre, id));
   }
 
 
@@ -125,6 +133,20 @@ namespace ComponentCreationHelper
   {
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube");
     return new ObjComponent("pixel", pixelShape);
+  }
+
+  /**
+   * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and r2
+   */
+  static Object_sptr createHollowShell(double innerRadius, double outerRadius, const V3D & centre = V3D())
+  {
+    std::string wholeXML = 
+      sphereXML(innerRadius, centre, "inner") + "\n" + 
+      sphereXML(outerRadius, centre, "outer") + "\n" + 
+      "<algebra val=\"(outer (# inner))\" />";
+    
+    ShapeFactory shapeMaker;
+    return shapeMaker.createShape(wholeXML);
   }
 
   //----------------------------------------------------------------------------------------------

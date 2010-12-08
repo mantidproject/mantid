@@ -43,25 +43,6 @@ public:
     TS_ASSERT_THROWS(sample.setShape(object), std::invalid_argument);
   }
 
-  void test_Requests_For_Pos_Information_With_Valid_Component_Link_Do_Not_Throw()
-  {
-    const V3D pos(0.0,0.0,1.0);
-    const Quat rot(10., V3D(0.,1.0,0.0));
-    Component *sampleHolder = new Component("SamplePos", pos, rot);
-    Sample sample;
-    sample.attachToPosition(sampleHolder);
-
-    TS_ASSERT_EQUALS(sample.getPos(), pos);
-    TS_ASSERT_EQUALS(sample.getRotation(), rot);
-  }
-
-  void test_Requests_For_Pos_Information_Without_Attaching_A_Component_Throw()
-  {
-    Sample sample;
-    TS_ASSERT_THROWS(sample.getPos(), std::runtime_error);
-    TS_ASSERT_THROWS(sample.getRotation(), std::runtime_error);
-  }
-  
   void test_That_Requests_For_An_Undefined_Environment_Throw()
   {
     Sample sample;
@@ -83,6 +64,24 @@ public:
     TS_ASSERT_EQUALS(sampleKit.getName(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
   }
+
+  void test_Material_Returns_The_Correct_Value()
+  {
+    Material *vanBlock = new Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+    Sample sample;
+    sample.setMaterial(*vanBlock);
+
+    const Material * mat = &sample.getMaterial();
+    const double lambda(2.1);
+    TS_ASSERT_DELTA(mat->cohScatterXSection(lambda), 0.0184,  1e-02);
+    TS_ASSERT_DELTA(mat->incohScatterXSection(lambda), 5.08,  1e-02);
+    TS_ASSERT_DELTA(mat->absorbXSection(lambda), 5.93, 1e-02);
+
+    delete vanBlock;
+  }
+
+  
+
   
 };
 

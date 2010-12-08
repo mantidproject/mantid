@@ -1100,7 +1100,7 @@ CompObj::isValid(const Geometry::V3D& Pt) const
   */
 {
   if (key)
-    return (key->isValid(Pt)) ? false : true;
+    return !(key->isValid(Pt));
   return true;
 }
 
@@ -1530,7 +1530,7 @@ CompGrp::isValid(const Geometry::V3D& Pt) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(Pt)) ? false : true;
+    return !(A->isValid(Pt));
   return true;
 }
 
