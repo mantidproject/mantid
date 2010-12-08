@@ -191,7 +191,7 @@ public:
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("", NULL);
       det->setID(i);
       boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::dynamic_pointer_cast<
-          Mantid::Geometry::Instrument>(work_in2->getInstrument());
+          Mantid::Geometry::Instrument>(work_in2->getBaseInstrument());
       instr->add(det);
       instr->markAsDetector(det);
     }
