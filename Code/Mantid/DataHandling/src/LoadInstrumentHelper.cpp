@@ -162,7 +162,10 @@ std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<
     {
       std::string startdate = runDetails.getProperty("startdate")->value();
       std::string starttime = runDetails.getProperty("starttime")->value();
-      date = startdate.substr(7,4) + "-" + startdate.substr(3,3) + "-" + startdate.substr(0,2) + " " + starttime;
+      if ( startdate.size() == 11 ) 
+        date = startdate.substr(7,4) + "-" + startdate.substr(3,3) + "-" + startdate.substr(0,2) + " " + starttime;
+      else 
+        date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
     }
     else
     {
