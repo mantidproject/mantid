@@ -180,7 +180,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
     double filler = *((double *)(data)+nData);
     std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
     if(MAX_MD_DIMS_POSSIBLE<=arr_dims_vector[0]){
-        throw(Exception::FileError("file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
+        throw(Exception::FileError("file_hdf_Matlab::read_MDImg_data=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
     }
     // This is nesessary for linear axis as n-bins has been already defined, but this operation defines axis within proper limits;
         for(i=0;i<nDims;i++){
@@ -217,7 +217,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 }
 
 void 
-MD_File_hdfMatlab::read_mdd(MDImage & dnd)
+MD_File_hdfMatlab::read_MDImg_data(MDImage & dnd)
 {
 // The function accepts full 4D dataset only!!!
 #ifdef  HDF_1_6
@@ -227,7 +227,7 @@ MD_File_hdfMatlab::read_mdd(MDImage & dnd)
 #endif
 
     if (h_signal_DSID<0){
-        f_log.error()<<"MD_File_hdfMatlab::read_mdd: can not open multidimensional dataset "<<this->mdd_field_names[DatasetName]<<std::endl;
+        f_log.error()<<"MD_File_hdfMatlab::read_MDImg_data: can not open multidimensional dataset "<<this->mdd_field_names[DatasetName]<<std::endl;
         throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
     }
     std::vector<int> arr_dims_vector;
@@ -237,7 +237,7 @@ MD_File_hdfMatlab::read_mdd(MDImage & dnd)
   // get pointer to MD structure which should be read from memory
    MD_img_data *pMD_struct  = dnd.get_pMDImgData();
    if(!pMD_struct->data){
-	   f_log.error()<<"MD_File_hdfMatlab::read_mdd: Image data structures have not been allocated properly\n";
+	   f_log.error()<<"MD_File_hdfMatlab::read_MDImg_data: Image data structures have not been allocated properly\n";
 	   throw(std::runtime_error("Image data structures have not been allocated properly"));
    }
 //-------------------------------------------------------------------------

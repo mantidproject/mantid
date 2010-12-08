@@ -66,7 +66,7 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
     if (rez<=0){
         if (rez==0){
 			if(isHoraceFile(file_name)){
-				return (new MD_FileHoraceReader(file_name));
+				return (new HoraceReader::MD_FileHoraceReader(file_name));
 			}
 			f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
             throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));

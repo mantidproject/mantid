@@ -61,7 +61,7 @@ public:
 	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
 	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &)=0;
     /// reads the data part of the MD Image 
-    virtual void read_mdd(MDImage &)=0; 
+    virtual void read_MDImg_data(MDImage &)=0; 
 
 	//****> datapoints object
 	/// read the description of the data points format and (possibly) service information to calculate the pixel location;

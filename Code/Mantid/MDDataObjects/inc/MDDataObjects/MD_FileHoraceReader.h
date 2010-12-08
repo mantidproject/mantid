@@ -2,6 +2,8 @@
 #define FILE_HDF_HORACE_READER_H
 //
 
+#include <iostream>
+#include <fstream>
 #include "MDDataObjects/IMD_FileFormat.h"
 
 
@@ -35,14 +37,36 @@
 
 namespace Mantid{
 namespace MDDataObjects{
+	namespace HoraceReader{
 
+/// horace data locations in bytes from the beginning of the horace binary file
+/// some have fixed positions but most not.
+struct data_positions{
+	std::streamoff  if_sqw_start,
+	                n_dims_start,
+	                sqw_header_start;
+	std::vector<std::streamoff> component_headers_starts;
+	std::streamoff detectors_start,
+		data_start,
+		crystal_start,
+		npax_start,
+		s_start,
+		err_start,
+		n_cell_pix_start,
+		min_max_start,
+		pix_start;
+	data_positions():if_sqw_start(18),n_dims_start(22),sqw_header_start(26),
+		detectors_start(0),data_start(0),crystal_start(0),s_start(0), // the following values have to be identified from the file itself
+		min_max_start(0),
+		err_start(0),n_cell_pix_start(0),pix_start(0){}; // the following values have to be identified from the file itself
+};
 //
 class DLLExport MD_FileHoraceReader :    public IMD_FileFormat
 {  
 public:
 	MD_FileHoraceReader(const char *file_name);
 
-    virtual bool is_open(void)const;
+	virtual bool is_open(void)const{return fileStreamHolder.is_open();}
 
 	//****> MD baisis object (will be expanded?)
 	/// read the part of MD dataset containing the basis; Current implementations allocate basis from what they are reading
@@ -53,7 +77,7 @@ public:
 	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
 	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &);
    // read DND object data;
-    virtual void read_mdd(MDImage & mdd);
+    virtual void read_MDImg_data(MDImage & mdd);
    
 
 	//****> datapoints object
@@ -68,16 +92,39 @@ public:
     /// get number of data pixels(points) contributing into the dataset;
     virtual size_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-H?orace format function is not supported and should not be used"));}
+    virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Horace format function is not supported and should not be used"));}
     
-	virtual ~MD_FileHoraceReader(void){};
+	virtual ~MD_FileHoraceReader(void);
+
+	// private, but protected for test purposes;
 protected:
     /// name of a file which keeps mdd dataset;
     std::string File_name;
+	/// the variable which keeps the opened Horace data stream
+	std::ifstream fileStreamHolder;
+	/// the structure holding positions for all important parts of the file
+	data_positions positions;
+	/// Various Horace data field which are initiated by constructor but requested by our IO operations
+	unsigned int nDims; //< number of dimensions; Horace understands 4 and 3 reciprocal so should be 4
+	/// number of bins in every non-integrated dimension
+	std::vector<size_t> nBins;
+	// size of the multidimensional image in the HDD file (in cells)
+	size_t     mdImageSize;
+	/// number of data points (pixels) contributing into the MD image and present in the file;
+	size_t     nDataPoints;
 
-
+///**** auxilary functions dealing with different parts of Horace file;
+	/// skips main sqw header, calculates its size and reads the number of contributing files and sets the location of first contributed
+	/// file header
+	void parse_sqw_main_header();
+	/// reads one component header and returns the locations for the next header or part of the file
+	std::streamoff parse_component_header(std::streamoff start_location);
+	/// analyse  detectors data (or their length)
+	std::streamoff parse_sqw_detpar(std::streamoff detectors_start);
+	/// 
+	void  parse_data_locations(std::streamoff data_start);
 };
-
 } // end namespaces
+} 
 }
 #endif

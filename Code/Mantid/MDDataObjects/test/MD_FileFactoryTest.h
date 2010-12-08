@@ -5,6 +5,7 @@
 #include "MDDataObjects/MD_FileFormatFactory.h"
 #include "Poco/Path.h"
 #include "MantidKernel/System.h"
+#include <boost/algorithm/string/case_conv.hpp>
 
 // existing file formats
 #include "MDDataObjects/MD_File_hdfV1.h"
@@ -40,45 +41,48 @@ public:
 	}
 	void testReturnsMatlabReader(){
 		std::auto_ptr<IMD_FileFormat> oldFormat;
-		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw");
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw","fe_demo.sqw");
 		TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str()));
 
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab*>(oldFormat.get())!=0);
 	}
 	void testReturnsOldMatlabReader(){
 		std::auto_ptr<IMD_FileFormat> oldFormat;
-		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw");
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw","fe_demo.sqw");
 		TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str(),old_4DMatlabReader));
 
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab4D*>(oldFormat.get())!=0);
 	}
 	void testHoraceFileFound(){
 		std::auto_ptr<IMD_FileFormat> horaceFormat;
-		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo_bin.sqw");
+		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo_bin.sqw","fe_demo_bin.sqw");
 
 		TS_ASSERT_THROWS_NOTHING(horaceFormat= MD_FileFormatFactory::getFileReader(testFile.c_str()));
 
-		TSM_ASSERT("FileFormat factory have not returned a pointer to a Horace file reader ",dynamic_cast<MD_FileHoraceReader*>(horaceFormat.get())!=0);
+		TSM_ASSERT("FileFormat factory have not returned a pointer to a Horace file reader ",dynamic_cast<HoraceReader::MD_FileHoraceReader*>(horaceFormat.get())!=0);
 	}
 private:
-  std::string findTestFileLocation(const char *filePath){
+  std::string findTestFileLocation(const char *filePath,const std::string &fileName){
 
-    std::string path = Mantid::Kernel::getDirectoryOfExecutable();
+    std::string search_path = Mantid::Kernel::getDirectoryOfExecutable();
+	std::string real_path   = search_path;
+	boost::to_upper(search_path);
 
-    char pps[2];
+	char pps[2];
     pps[0]=Poco::Path::separator();
     pps[1]=0; 
     std::string sps(pps);
 
     std::string root_path;
-    size_t   nPos = path.find("Mantid"+sps+"Code");
-    if(nPos==std::string::npos){
+    size_t   nPos = search_path.find("MANTID"+sps+"CODE");
+
+	if(nPos==std::string::npos){
       std::cout <<" can not identify application location\n";
 	  root_path.assign(filePath);
     }else{
-      root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
+      root_path=real_path.substr(0,nPos)+"Mantid/Test/VATES/"+fileName;
     }
-    std::cout << " test file location: "<< root_path<< std::endl;
+    std::cout << "\n\n test file location: "<< root_path<< std::endl;
     return root_path;
   }
 };

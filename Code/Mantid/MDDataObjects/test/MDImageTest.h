@@ -28,7 +28,7 @@ private:
   public:
 
     MOCK_CONST_METHOD0(is_open, bool());
-    virtual void read_mdd(Mantid::MDDataObjects::MDImage& dnd)
+    virtual void read_MDImg_data(Mantid::MDDataObjects::MDImage& dnd)
     {
 		// this function fills data arrays with values obtained from Hdd
     }
@@ -88,7 +88,7 @@ public:
 	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
 
 	// this should read real data 
-   //file.read_mdd(*pDND);
+   //file.read_MDImg_data(*pDND);
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),2500);
 
@@ -112,7 +112,7 @@ public:
 
 	//
 	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-    //file.read_mdd(*pDND);
+    //file.read_MDImg_data(*pDND);
 
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50*50*50); 
@@ -128,7 +128,7 @@ public:
 	file.read_MDGeomDescription(geom_description);
 
 	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-//    file.read_mdd(*pDND);
+//    file.read_MDImg_data(*pDND);
 
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),1);
@@ -144,7 +144,7 @@ public:
  	file.read_MDGeomDescription(geom_description);
 
 	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-//    file.read_mdd(*pDND);
+//    file.read_MDImg_data(*pDND);
 
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
@@ -178,7 +178,7 @@ private:
     }else{
       root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
     }
-    std::cout << " test file location: "<< root_path<< std::endl;
+    std::cout << "\n\n test file location: "<< root_path<< std::endl;
     return root_path;
   }
 };

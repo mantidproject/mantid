@@ -55,7 +55,7 @@ MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFor
 	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(m_spMDImage,pd));
 
     //  read image part of the data
-     this->m_spFile->read_mdd(*this->m_spMDImage);
+     this->m_spFile->read_MDImg_data(*this->m_spMDImage);
 	 // need to be moved to to dataPoints;
 	 this->m_spMDImage->identify_SP_points_locations();
    
@@ -102,14 +102,14 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     }
 
     //----------------------------------------------------------------------------------------------
-    void MDWorkspace::read_mdd()
+    void MDWorkspace::read_MDImg()
     {
       Geometry::MDGeometryDescription Description;
 	  this->m_spFile->read_MDGeomDescription(Description);
 	  //
 	  this->m_spMDImage->initialize(Description);
       //  read image part of the data
-      this->m_spFile->read_mdd(*this->m_spMDImage);
+      this->m_spFile->read_MDImg_data(*this->m_spMDImage);
       // alocate memory for pixels;
       m_spDataPoints->alloc_pix_array(m_spFile);
       m_spMDImage->identify_SP_points_locations();

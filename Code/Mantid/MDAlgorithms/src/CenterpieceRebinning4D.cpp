@@ -51,7 +51,7 @@ void CenterpieceRebinning4D::init_source(MDWorkspace_sptr inputWSX)
     throw(std::runtime_error("filename property can not be found"));
   }
 
-  inputWS->read_mdd();
+  inputWS->read_MDImg();
 
   // set up slicing property to the shape of current workspace;
   MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));

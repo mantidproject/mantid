@@ -108,8 +108,8 @@ namespace Mantid
 	  /** the function resets MD image to a new state,e.g defines the arrengement and number of active and integrated dimensions
 	      It also allocates or reuses the memory neded to place MD image data into memory, preparing workspace for rebinning operations */
 	  void initialize_MDImage(const Mantid::Geometry::MDGeometryDescription &transf){m_spMDImage->initialize(transf);}
-      ///OBSOLETE:: identify proper file reader which corresponds to the file name and read memory resident part of the workspace into memory
-      void read_mdd();
+      /// read MD image into memory TODO: do we still need this function?
+      void read_MDImg();
       /// read the whole pixels dataset in the memory
       void read_pix(void);
       /// function writes the MDD data using current file reader; if the file is not opened, a default file reader is used. 

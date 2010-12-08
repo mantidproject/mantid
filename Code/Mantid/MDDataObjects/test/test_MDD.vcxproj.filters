@@ -33,6 +33,9 @@
     <ClCompile Include="MD_FileFactoryTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HoraceReaderTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="test_sqw.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="MD_FileFactoryTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="HoraceReaderTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

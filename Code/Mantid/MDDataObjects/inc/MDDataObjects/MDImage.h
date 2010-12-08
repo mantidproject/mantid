@@ -106,7 +106,7 @@ public:
 
 
 /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-  //  void read_mdd(boost::shared_ptr<IMD_FileFormat> spFile,bool old4DMatlabReader=false);
+  //  void read_MDImg_data(boost::shared_ptr<IMD_FileFormat> spFile,bool old4DMatlabReader=false);
     
 
   /// build allocation table of sparce data points (pixels)

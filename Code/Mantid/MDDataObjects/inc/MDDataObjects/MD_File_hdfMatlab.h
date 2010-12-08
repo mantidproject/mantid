@@ -89,7 +89,7 @@ public:
 	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
 	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &);
  
-    virtual void read_mdd(MDImage & mdd);
+    virtual void read_MDImg_data(MDImage & mdd);
    
 
 	//****> datapoints object
