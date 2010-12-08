@@ -243,6 +243,12 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
     }
   }
 
+  // Set the YUnit label
+  local_workspace->setYUnit(data.attributes("units")); 
+  std::string unitLabel = data.attributes("unit_label"); 
+  if (unitLabel.empty()) unitLabel = data.attributes("units"); 
+  local_workspace->setYUnitLabel(unitLabel);
+
   //Are we a distribution
   std::string dist = xbins.attributes("distribution");
   if( dist == "1" )
@@ -896,9 +902,8 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
+  IInstrument_sptr instr = local_workspace->getBaseInstrument();
   
-  boost::shared_ptr<Geometry::Instrument> instr = boost::shared_ptr<Geometry::Instrument>(const_cast<Geometry::Instrument*>(local_workspace->getBaseInstrument().get()));
-
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;
   Poco::StringTokenizer splitter(details, "|", options);
