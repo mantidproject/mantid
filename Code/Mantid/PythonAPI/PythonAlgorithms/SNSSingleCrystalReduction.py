@@ -20,11 +20,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("EmptyInstrumentNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0))
-        self.declareProperty("TOFMin", 0.,
+        self.declareProperty("TOFMin", 400.0,
                              Description="Relative time to start filtering by")
-        self.declareProperty("TOFMax", 2.e7,
+        self.declareProperty("TOFMax", 45000.0,
                              Description="Relative time to stop filtering by")
-        self.declareProperty("TOFBinWidth", 0.,
+        self.declareProperty("TOFBinWidth", -0.004,
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothNumPoints", 11)
