@@ -146,14 +146,14 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr5->dataY(0)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr6->dataY(0)[555] )
 
-    TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
+    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr2->getBaseInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
-    TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
+    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr6->getBaseInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 	

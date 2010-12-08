@@ -91,7 +91,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IInstrument> i = output->getBaseInstrument();
     boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
@@ -130,13 +130,13 @@ public:
     // Check running algorithm for same XML file leads to same instrument object being attached
     boost::shared_ptr<Instrument> instr(new Instrument());
     output->setInstrument(instr);
-    TS_ASSERT_EQUALS( output->getInstrument(), instr );
+    TS_ASSERT_EQUALS( output->getBaseInstrument(), instr );
     LoadInstrument loadAgain;
     TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() );
     loadAgain.setPropertyValue("Filename", inputFile);
     loadAgain.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING( loadAgain.execute() );
-    TS_ASSERT_EQUALS( output->getInstrument(), i );
+    TS_ASSERT_EQUALS( output->getBaseInstrument(), i );
 
     AnalysisDataService::Instance().remove(wsName);
   }

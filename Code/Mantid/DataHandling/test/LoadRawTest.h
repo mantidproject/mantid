@@ -300,7 +300,7 @@ public:
     TS_ASSERT_DIFFERS( output1->dataY(1)[555], output12->dataY(1)[555] )
 
     // Check these are the same
-    TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getBaseInstrument(), output2->getBaseInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
     TS_ASSERT_EQUALS( output1->run().getProtonCharge(), output2->run().getProtonCharge() )
     TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output2->sample().getGeometryFlag() )
@@ -308,7 +308,7 @@ public:
     TS_ASSERT_EQUALS( output1->sample().getHeight(), output2->sample().getHeight() )
     TS_ASSERT_EQUALS( output1->sample().getWidth(), output2->sample().getWidth() )
 
-    TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getBaseInstrument(), output6->getBaseInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
     TS_ASSERT_EQUALS( output1->run().getProtonCharge(), output6->run().getProtonCharge() )
     TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output6->sample().getGeometryFlag() )
@@ -316,7 +316,7 @@ public:
     TS_ASSERT_EQUALS( output1->sample().getHeight(), output6->sample().getHeight() )
     TS_ASSERT_EQUALS( output1->sample().getWidth(), output6->sample().getWidth() )
 
-    TS_ASSERT_EQUALS( output1->getInstrument(), output12->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getBaseInstrument(), output12->getBaseInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output12->spectraMap()) )
     TS_ASSERT_EQUALS( output1->run().getProtonCharge(), output12->run().getProtonCharge() )
     TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output12->sample().getGeometryFlag() )
