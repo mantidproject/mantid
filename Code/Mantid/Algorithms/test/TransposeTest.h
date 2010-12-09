@@ -38,7 +38,7 @@ public:
     delete transpose;
   }
 
-  void xtestExec()
+  void testExec()
   {
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;

@@ -18,7 +18,7 @@ using namespace Mantid::Algorithms;
 class GetEiTest : public CxxTest::TestSuite
 {
 public:
-  void xtestOnMARI()
+  void testOnMARI()
   {
     GetEi grouper;
 
@@ -65,7 +65,7 @@ public:
   }
 
   // this test takes 10 seconds to run on Steve's computer
-  void xtestOnMERLIN()
+  void testOnMERLIN()
   {
     loadRawFile(m_MERLIN, "69634, 69638");
 
@@ -92,7 +92,7 @@ public:
     AnalysisDataService::Instance().remove(m_WS);
   }
 
-  void xloadRawFile(std::string filename, std::string list)
+  void loadRawFile(std::string filename, std::string list)
   {
     LoadRaw3 loader;
     loader.initialize();
