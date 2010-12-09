@@ -61,6 +61,11 @@ public:
     vec[1] = -1.0;
     vec[2] = 200.0;
     TS_ASSERT( ! v.isValid(vec).empty() );
+    //Logarithmic bin starts at -ve number
+    vec[0] = -5.0;
+    vec[1] = -1.0;
+    vec[2] = 10.0;
+    TS_ASSERT( ! v.isValid(vec).empty() );
   }
 
   void testCorrect()
