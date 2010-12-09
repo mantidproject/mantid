@@ -180,30 +180,30 @@ class EQSANSTofOffset(PythonAlgorithm):
                         if frame_wl_2>c_wl_2[i]: 
                              frame_wl_2=c_wl_2[i]
 
-        if frame_wl_2 > frame_wl_1:
-            if c_wl_1[2] > c_wl_1[3]:
-                n = 2
+            if frame_wl_2 > frame_wl_1:
+                if c_wl_1[2] > c_wl_1[3]:
+                    n = 2
+                else: 
+                    n = 3
+                frame_srcpulse_wl_1=c_wl_1[n] - 3.9560346 * c_wl_1[n] * self.PULSEWIDTH /self.CHOPPER_LOCATION[n];
+    
+                for i in range(4):
+                    chopper_wl_1[i] = c_wl_1[i]
+                    chopper_wl_2[i] = c_wl_2[i]
+                    if frame_skipping==True:
+                        
+                        chopper_frameskip_wl_1[i] = c_wl_1[i] +  3.9560346 * 2.* tof_frame_width /self.CHOPPER_LOCATION[i];
+                        chopper_frameskip_wl_2[i] = c_wl_2[i] +  3.9560346 * 2.* tof_frame_width /self.CHOPPER_LOCATION[i];
+                        if i==0:
+                            frameskip_wl_1 = chopper_frameskip_wl_1[i]
+                            frameskip_wl_2 = chopper_frameskip_wl_2[i]
+                        else:
+                            if frameskip_wl_1<chopper_frameskip_wl_1[i]:
+                                frameskip_wl_1=chopper_frameskip_wl_1[i]
+                            if frameskip_wl_2>chopper_frameskip_wl_2[i]:
+                                frameskip_wl_2=chopper_frameskip_wl_2[i]
             else: 
-                n = 3
-            frame_srcpulse_wl_1=c_wl_1[n] - 3.9560346 * c_wl_1[n] * self.PULSEWIDTH /self.CHOPPER_LOCATION[n];
-
-            for i in range(4):
-                chopper_wl_1[i] = c_wl_1[i]
-                chopper_wl_2[i] = c_wl_2[i]
-                if frame_skipping==True:
-                    
-                    chopper_frameskip_wl_1[i] = c_wl_1[i] +  3.9560346 * 2.* tof_frame_width /self.CHOPPER_LOCATION[i];
-                    chopper_frameskip_wl_2[i] = c_wl_2[i] +  3.9560346 * 2.* tof_frame_width /self.CHOPPER_LOCATION[i];
-                    if i==0:
-                        frameskip_wl_1 = chopper_frameskip_wl_1[i]
-                        frameskip_wl_2 = chopper_frameskip_wl_2[i]
-                    else:
-                        if frameskip_wl_1<chopper_frameskip_wl_1[i]:
-                            frameskip_wl_1=chopper_frameskip_wl_1[i]
-                        if frameskip_wl_2>chopper_frameskip_wl_2[i]:
-                            frameskip_wl_2=chopper_frameskip_wl_2[i]
-        else: 
-            frame_srcpulse_wl_1=0.0
+                frame_srcpulse_wl_1=0.0
 
         # Get source and detector locations
         source_z = mtd[input_ws].getInstrument().getSource().getPos().getZ()
