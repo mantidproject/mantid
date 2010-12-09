@@ -48,6 +48,7 @@ public:
     Instrument i;
     TS_ASSERT( ! i.getSource() );
     TS_ASSERT( ! i.getSample() );
+    TS_ASSERT( ! i.isParametrized() );
 
     Instrument ii("anInstrument");
     TS_ASSERT( ! ii.getSource() );

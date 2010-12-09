@@ -18,6 +18,7 @@ public:
     TS_ASSERT_EQUALS(det.getID(),0);
     TS_ASSERT(!det.isMasked());
     TS_ASSERT(!det.isMonitor());
+    TS_ASSERT(!det.isParametrized());
   }
 
   void testNameParentConstructor()
