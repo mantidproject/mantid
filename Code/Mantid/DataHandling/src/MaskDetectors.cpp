@@ -42,6 +42,9 @@ void MaskDetectors::init()
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
     "A comma separated list or array containing the workspace indices\n"
     "to mask" );
+  declareProperty(
+    new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, true),
+    "If given, the masking from this workspace will be copied.");
 }
 
 void MaskDetectors::exec()
@@ -57,12 +60,20 @@ void MaskDetectors::exec()
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
   std::vector<int> spectraList = getProperty("SpectraList");
   const std::vector<int> detectorList = getProperty("DetectorList");
+  const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
-  //each one of these values is optional but the user can't leave all three blank
-  if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
+  //each one of these values is optional but the user can't leave all four blank
+  if ( indexList.empty() && spectraList.empty() && detectorList.empty() && !prevMasking )
   {
-    g_log.information(name() + ": There is nothing to mask, the index, spectra and detector lists are all empty");
+    g_log.information(name() + ": There is nothing to mask, the index, spectra, "
+		      "detector lists and masked workspace properties are all empty");
     return;
+  }
+
+  // Check the provided workspace has the same number of spectra as the input
+  if( prevMasking && prevMasking->getNumberHistograms() != WS->getNumberHistograms() )
+  {
+    throw std::runtime_error("Size mismatch between two input workspaces.");
   }
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
@@ -72,12 +83,18 @@ void MaskDetectors::exec()
     fillIndexListFromSpectra(indexList,spectraList,WS);
   }// End dealing with spectraList
   else if ( ! detectorList.empty() )
-  {// Dealing with DetectorList
-    //convert from detectors to spectra numbers
+  {
+    // Convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
+  // If we have a workspace that could contain masking,copy that in too
+  if( prevMasking )
+  {
+    appendToIndexListFromWS(indexList,prevMasking);
+  }
+  
 
   // Need to get hold of the parameter map
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
@@ -163,9 +180,14 @@ void MaskDetectors::exec()
 
 }
 
-/// Convert a list of spectra numbers into the corresponding workspace indices
-void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
-                                              const API::MatrixWorkspace_sptr WS)
+/**
+ * Convert a list of spectra numbers into the corresponding workspace indices
+ * @param indexList An output index list from the given spectra list
+ * @param spectraList A list of spectra numbers
+ * @param WS The input workspace to be masked
+ */
+void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, const std::vector<int>& spectraList,
+					     const API::MatrixWorkspace_sptr WS)
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int> spectraSet(spectraList.begin(),spectraList.end());
@@ -183,6 +205,27 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::v
       indexList.push_back(i);
     }
   }
+}
+
+/**
+ * Append the indices of the masked spectra from the given workspace list to the given list
+ * @param indexList An existing list of indices
+ * @param maskedWorkspace An workspace with masked spectra
+ */
+void MaskDetectors::appendToIndexListFromWS(std::vector<int>& indexList, const MatrixWorkspace_sptr maskedWorkspace)
+{
+  // Convert the vector of properties into a set for easy searching
+  std::set<int> existingIndices(indexList.begin(), indexList.end());
+  const int numHistograms(maskedWorkspace->getNumberHistograms());
+  
+  for (int i = 0; i < numHistograms; ++i)
+  {
+    if( existingIndices.count(i) == 0 )
+    {
+      indexList.push_back(i);
+    }
+  }
+
 }
 
 } // namespace DataHandling

@@ -19,6 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::MantidVecPtr;
 
 class MaskDetectorsTest : public CxxTest::TestSuite
 {
@@ -38,7 +39,7 @@ public:
   }
 
 
-  void setUpWS(bool event)
+  void setUpWS(bool event, const std::string & name = "testSpace")
   {
     MatrixWorkspace_sptr space;
     int forSpecDetMap[5];
@@ -104,7 +105,7 @@ public:
     space->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 5 );
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add("testSpace", space);
+    AnalysisDataService::Instance().add(name, space);
 
   }
 
@@ -119,7 +120,7 @@ public:
     TS_ASSERT( mdd.isInitialized() );
 
     std::vector<Property*> props = mdd.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 5 );
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" );
     TS_ASSERT( props[0]->isDefault() );
@@ -136,6 +137,24 @@ public:
     TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" );
     TS_ASSERT( props[3]->isDefault() );
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) );
+
+    TS_ASSERT_EQUALS( props[4]->name(), "MaskedWorkspace" );
+    TS_ASSERT( props[4]->isDefault() );
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<>* >(props[4]) );
+  }
+
+  void testExecWithNoInput()
+  {
+    setUpWS(false);
+
+    MaskDetectors masker;
+    
+    TS_ASSERT_THROWS_NOTHING(masker.initialize());
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("Workspace","testSpace"));
+
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
   //---------------------------------------------------------------------------------------------
@@ -147,7 +166,7 @@ public:
 
     marker.setPropertyValue("Workspace","testSpace");
 
-    TS_ASSERT_THROWS_NOTHING( marker.execute());
+    TS_ASSERT_THROWS_NOTHING(marker.execute());
     TS_ASSERT( marker.isExecuted() );
 
     marker.setPropertyValue("WorkspaceIndexList","0,3");
@@ -186,7 +205,7 @@ public:
     TS_ASSERT( i->getDetector(3)->isMasked() );
     TS_ASSERT( ! i->getDetector(4)->isMasked() );
 
-  AnalysisDataService::Instance().remove("testSpace");
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
 
@@ -241,9 +260,70 @@ public:
     TS_ASSERT( ! i->getDetector(4)->isMasked() );
 
   AnalysisDataService::Instance().remove("testSpace");
-
-
   }
+
+  void test_That_Giving_A_Workspace_Containing_Masks_Copies_These_Masks_Over()
+  {
+    // Create 2 workspaces
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    setUpWS(false, inputWSName);
+    setUpWS(false, existingMaskName);
+    MatrixWorkspace_sptr existingMask = 
+      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(existingMaskName));
+
+    // Mask some detectors on the existing mask workspace
+    std::set<int> masked_indices;
+    masked_indices.insert(0);
+    masked_indices.insert(3);
+    masked_indices.insert(4);
+    
+    ParameterMap & pmap = existingMask->instrumentParameters();
+    for( int i = 0; i < existingMask->getNumberHistograms(); ++i )
+    {
+      if( masked_indices.count(i) == 1 )
+      {
+	IDetector_sptr det;
+	TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
+	pmap.addBool(det.get(), "masked", true);	
+      }
+    }
+
+    MaskDetectors masker;
+    TS_ASSERT_THROWS_NOTHING(masker.initialize());
+    
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("Workspace", inputWSName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("MaskedWorkspace", existingMaskName));
+    
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+
+    //Test the original has the correct spectra masked
+    MatrixWorkspace_sptr originalWS = 
+      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWSName));
+
+    TS_ASSERT(originalWS);
+    if( !originalWS ) return;
+    for( int i = 0; i < originalWS->getNumberHistograms(); ++i )
+    {
+      IDetector_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
+      if( masked_indices.count(i) == 1 )
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), true);
+      }
+      else
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), false);
+      }
+    }
+    
+    
+
+    //Cleanup
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove(existingMaskName);
+  }
+
 
 private:
   MaskDetectors marker;
