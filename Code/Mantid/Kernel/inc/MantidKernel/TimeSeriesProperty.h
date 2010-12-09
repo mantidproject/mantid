@@ -134,6 +134,7 @@ class DLLExport TimeSeriesProperty: public Property
 private:
   /// typedef for the storage of a TimeSeries
   typedef std::multimap<DateAndTime, TYPE> timeMap;
+
   /// Holds the time series data 
   timeMap m_propertySeries;
 
@@ -635,12 +636,16 @@ public:
       throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
     m_size = 0;
     m_propertySeries.clear();
+    // Give a guess as to where it goes?
+    typename std::multimap<Kernel::DateAndTime, TYPE>::iterator iter = m_propertySeries.begin();
     size_t num = new_values.size();
     for (size_t i=0; i < num; i++)
     {
       Kernel::DateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( time_sec[i] );
-      this->addValue(time, new_values[i]);
+      // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
+      iter = m_propertySeries.insert(iter, typename timeMap::value_type(time, new_values[i]));
     }
+    m_size = m_propertySeries.size();
   }
 
   //-----------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Timer.h"
 #include "MantidAPI/FileProperty.h"
 
 #include <fstream>
@@ -17,6 +18,7 @@ using std::map;
 using std::string;
 using std::vector;
 
+static bool VERBOSE = false;
 
 namespace Mantid
 {
@@ -158,6 +160,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   //isTimeSeries = (info.dims[0] > 1);
   isTimeSeries = true;
 
+  Timer timer1;
   try
   {
     //Get the data (convert types if necessary)
@@ -188,6 +191,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     file.closeGroup();
     return;
   }
+  if (VERBOSE) std::cout << "getDataCoerce took " << timer1.elapsed() << " sec.\n";
 
 
   file.closeData();
@@ -243,6 +247,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       return;
     }
 
+    Timer timer2;
     //--- Load the seconds into a double array ---
     try {
       file.getDataCoerce(time_double);
@@ -256,6 +261,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     }
     file.closeData();
 
+    if (VERBOSE) std::cout << "getDataCoerce for the seconds field took " << timer2.elapsed() << " sec.\n";
 
     if (isInt)
     {
@@ -264,17 +270,24 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       tsp->create(start_time, time_double, values_int);
       tsp->setUnits( units );
       WS->mutableRun().addProperty( tsp, overwritelogs );
+
     }
     else
     {
+
       //Make a double TSP
       TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(entry_name);
+
+      Timer timer3;
       tsp->create(start_time, time_double, values);
+      if (VERBOSE) std::cout << "creating a TSP took  " << timer3.elapsed() << " sec.\n";
+
       tsp->setUnits( units );
       WS->mutableRun().addProperty( tsp, overwritelogs );
       // Trick to free memory?
       std::vector<double>().swap(time_double);
       std::vector<double>().swap(values);
+
     }
 
   }
