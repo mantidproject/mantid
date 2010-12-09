@@ -2,6 +2,8 @@
 #define MDEVENT_H_
 
 #include "MantidKernel/System.h"
+#include <numeric>
+#include <math.h>
 
 namespace Mantid
 {
@@ -27,14 +29,17 @@ namespace MDDataObjects
    * will be (many) billions of it.
    * No virtual methods! This adds a vtable which uses lots of memory.
    *
-   * @tparam ndims :: the number of dimensions that each MDEvent will be tracking.
-   *                  an int > 0.
+   * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
+   *               an int > 0.
+   * @tparam ne :: the number of extra (non-float) ints of information to store.
+   *               These could be detector ids, run numbers, etc. and will consist
+   *               of signed 32-bit ints
    *
    * @author Janik Zikovsky, SNS
    * @date Dec 3, 2010
    *
    * */
-  template <size_t ndims>
+  template <size_t nd>
   DLLExport class MDEvent
   {
   private:
@@ -52,7 +57,7 @@ namespace MDDataObjects
     /** The N-dimensional coordinates. A simple
      * fixed-sized array of (floats or doubles).
      */
-    CoordType coord[ndims];
+    CoordType coord[nd];
 
   public:
     /* Will be keeping functions inline for (possible?) performance improvements */
@@ -81,12 +86,12 @@ namespace MDDataObjects
      *
      * @param signal :: signal
      * @param errorSquared :: errorSquared
-     * @param coords :: pointer to a ndims-sized array of values to set for all coordinates.
+     * @param coords :: pointer to a nd-sized array of values to set for all coordinates.
      * */
     MDEvent(const float signal, const float errorSquared, const CoordType * coords) :
       signal(signal), errorSquared(errorSquared)
     {
-      for (size_t i=0; i<ndims; i++)
+      for (size_t i=0; i<nd; i++)
         coord[i] = coords[i];
     }
 
@@ -99,7 +104,7 @@ namespace MDDataObjects
     MDEvent(const MDEvent &rhs) :
       signal(rhs.signal), errorSquared(rhs.errorSquared)
     {
-      for (size_t i=0; i<ndims; i++)
+      for (size_t i=0; i<nd; i++)
         coord[i] = rhs.coord[i];
     }
 
@@ -126,11 +131,11 @@ namespace MDDataObjects
     //---------------------------------------------------------------------------------------------
     /** Sets all the coordinates.
      *
-     * @param coords :: pointer to a ndims-sized array of the values to set.
+     * @param coords :: pointer to a nd-sized array of the values to set.
      * */
     void setCoords(const CoordType * coords)
     {
-      for (size_t i=0; i<ndims; i++)
+      for (size_t i=0; i<nd; i++)
         coord[i] = coords[i];
     }
 
@@ -139,7 +144,7 @@ namespace MDDataObjects
      * */
     size_t getNumDims() const
     {
-      return ndims;
+      return nd;
     }
 
     //---------------------------------------------------------------------------------------------

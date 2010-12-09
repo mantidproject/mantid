@@ -14,6 +14,7 @@ using namespace Mantid::MDDataObjects;
 
 class MDEventTest :    public CxxTest::TestSuite
 {
+
 public:
   void testConstructors()
   {
