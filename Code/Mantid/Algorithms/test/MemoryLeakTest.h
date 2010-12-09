@@ -21,8 +21,8 @@
 //#ifndef _WIN32
 //  #include <sys/resource.h>
 //#endif
-//#include "boost/date_time/gregorian/gregorian.hpp"
-//#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -59,8 +59,8 @@ public:
 //    //Overwrite
 //    AnalysisDataService::Instance().addOrReplace("ew1", ew2);
 //  }
-
-
+//
+//
 //
 //  //------------------------------------------------------------------------------
 //  /// Linux-only method for getting memory usage
@@ -106,7 +106,7 @@ public:
 //
 //
 //  // THIS DOES NOT LEAK after i=2
-//  void testLeak3()
+//  void xtestLeak3()
 //  {
 //    for (int i=0; i<4; i++)
 //    {
@@ -202,9 +202,9 @@ public:
 //  }
 //
 //  // ! THIS LEAKS MORE THAN THE PREVIOUS ONE !
-//  void xtest_MemoryLeak_inLoadSNSEventNexus2()
+//  void test_MemoryLeak_inLoadSNSEventNexus2()
 //  {
-//    for (int i=0; i<50; i++)
+//    for (int i=0; i<5; i++)
 //    {
 //      std::cout << "LoadSNSEventNexus call # " << i << ". Memory used " << memory_usage() << " kb\n";
 //      IAlgorithm_sptr ld = AlgorithmFactory::Instance().create("LoadSNSEventNexus",1);
