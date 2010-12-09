@@ -195,7 +195,7 @@ namespace Mantid
       int m_total_specs;
       
       /// convert month label to int string
-      std::string convertMonthLabelToIntStr(std::string& month) const;
+      std::string convertMonthLabelToIntStr(std::string month) const;
     };
 
   } // namespace DataHandling

@@ -747,7 +747,7 @@ namespace Mantid
     /// To help transforming date stored in ISIS raw file into iso 8601
     /// @param month
     /// @return month as string integer e.g. 01
-    std::string LoadRawHelper::convertMonthLabelToIntStr(std::string& month) const
+    std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) const
     {
       std::transform(month.begin(), month.end(), month.begin(), toupper);
 
