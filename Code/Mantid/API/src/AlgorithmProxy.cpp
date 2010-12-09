@@ -197,6 +197,15 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void & dummy)
 
   return m_isExecuted;
 }
-
+ ///setting the child start progress
+ void AlgorithmProxy::setChildStartProgress(const double startProgress)
+ {
+   m_alg->setChildStartProgress(startProgress);
+ }
+ /// setting the child end progress
+ void AlgorithmProxy::setChildEndProgress(const double endProgress)
+ {
+   m_alg->setChildEndProgress(endProgress);
+ }
 } // namespace API
 } // namespace Mantid

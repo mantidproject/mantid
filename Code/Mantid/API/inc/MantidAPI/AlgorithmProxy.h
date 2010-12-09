@@ -100,6 +100,12 @@ namespace Mantid
       /// Is the algorithm have logging enabled
       bool isLogging() const { return m_isLoggingEnabled; }
 
+      ///setting the child start progress
+      void setChildStartProgress(const double startProgress);
+        /// setting the child end progress
+      void setChildEndProgress(const double endProgress);
+      
+
     private:
       /// Private Copy constructor: NO COPY ALLOWED
       AlgorithmProxy(const AlgorithmProxy&);

@@ -182,6 +182,7 @@
     <ClCompile Include="src\FrameworkManager.cpp" />
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
+    <ClCompile Include="src\IDataFileChecker.cpp" />
     <ClCompile Include="src\IFunction.cpp" />
     <ClCompile Include="src\IMDWorkspace.cpp" />
     <ClCompile Include="src\ImplicitFunctionParserFactory.cpp" />
@@ -190,6 +191,7 @@
     <ClCompile Include="src\InstrumentDataService.cpp" />
     <ClCompile Include="src\IPeakFunction.cpp" />
     <ClCompile Include="src\ITableWorkspace.cpp" />
+    <ClCompile Include="src\LoadAlgorithmFactory.cpp" />
     <ClCompile Include="src\LocatedDataRef.cpp" />
     <ClCompile Include="src\LocatedDataValue.cpp" />
     <ClCompile Include="src\MatrixWorkspace.cpp" />
@@ -225,6 +227,8 @@
     <ClInclude Include="inc\mantidapi\filefinder.h" />
     <ClInclude Include="inc\MantidAPI\FileProperty.h" />
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
+    <ClInclude Include="inc\MantidAPI\ICatalog.h" />
+    <ClInclude Include="inc\MantidAPI\IDataFileChecker.h" />
     <ClInclude Include="inc\MantidAPI\IMDWorkspace.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunction.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionBuilder.h" />
@@ -234,6 +238,7 @@
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParserFactory.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParserFactory.h" />
+    <ClInclude Include="inc\MantidAPI\LoadAlgorithmFactory.h" />
     <ClInclude Include="inc\MantidAPI\MatrixWSIndexCalculator.h" />
     <ClInclude Include="inc\MantidAPI\MDPropertyGeometry.h" />
     <ClInclude Include="inc\MantidAPI\Point3D.h" />
@@ -310,11 +315,6 @@
     <ClInclude Include="test\WorkspacePropertyTest.h" />
     <ClInclude Include="inc\MantidAPI\WorkspaceTracer.h" />
     <ClInclude Include="inc\MantidAPI\WorkspaceValidators.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\MemoryManager.cpp_WIN32">
-      <FileType>CppCode</FileType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Geometry\Geometry.vcxproj">

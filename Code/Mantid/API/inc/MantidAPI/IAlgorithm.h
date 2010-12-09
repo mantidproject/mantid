@@ -124,6 +124,10 @@ public:
   virtual void setLogging(const bool value) = 0;
   ///returns the status of logging, True = enabled
   virtual bool isLogging() const = 0;
+  ///setting the child start progress
+  virtual void setChildStartProgress(const double startProgress)=0;
+  /// setting the child end progress
+  virtual void setChildEndProgress(const double endProgress)=0;
 };
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;

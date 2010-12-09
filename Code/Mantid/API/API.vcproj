@@ -547,6 +547,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\ICatalog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IConstraint.h"
 				>
 			</File>
@@ -676,6 +680,14 @@
 			</File>
 			<File
 				RelativePath=".\test\SampleTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\SearchParam.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\SearchParam.h"
 				>
 			</File>
 			<File

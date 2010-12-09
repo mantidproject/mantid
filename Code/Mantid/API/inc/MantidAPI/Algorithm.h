@@ -231,6 +231,10 @@ public:
   /// Set  an optional message that will be displayed in the default GUI, at the top.
   void setOptionalMessage(const std::string optionalMessage) { m_OptionalMessage = optionalMessage;}
 
+  ///setting the child start progress
+  void setChildStartProgress(const double startProgress){m_startChildProgress=startProgress;}
+  /// setting the child end progress
+  void setChildEndProgress(const double endProgress){m_endChildProgress=endProgress;}
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
