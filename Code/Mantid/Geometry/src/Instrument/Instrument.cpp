@@ -90,37 +90,43 @@ namespace Mantid
       }
     }
 
-    /**	Gets a pointer to the source
-    * @returns a pointer to the source
-    */
-    Geometry::IObjComponent_sptr Instrument::getSource() const
+    /** Gets a pointer to the source
+     *   @returns a pointer to the source
+     */
+    IObjComponent_sptr Instrument::getSource() const
     {
-      if (m_isParametrized)
+      if ( !_sourceCache )
+      {
+        g_log.warning("In Instrument::getSource(). No source has been set.");
+        return boost::shared_ptr<IObjComponent>(_sourceCache,NoDeleting());
+      }
+      else if (m_isParametrized)
       {
         return IObjComponent_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->_sourceCache,m_map));
       }
       else
       {
-        if ( !_sourceCache )
-          g_log.warning("In Instrument::getSource(). No source has been set.");
-        return boost::shared_ptr<Geometry::IObjComponent>(_sourceCache,NoDeleting());
+        return boost::shared_ptr<IObjComponent>(_sourceCache,NoDeleting());
       }
     }
 
-    /**	Gets a pointer to the Sample Position
-    * @returns a pointer to the Sample Position
-    */
-    Geometry::IObjComponent_sptr Instrument::getSample() const
+    /** Gets a pointer to the Sample Position
+     *  @returns a pointer to the Sample Position
+     */
+    IObjComponent_sptr Instrument::getSample() const
     {
-      if (m_isParametrized)
+      if ( !_sampleCache )
+      {
+        g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
+        return boost::shared_ptr<IObjComponent>(_sampleCache,NoDeleting());
+      }
+      else if (m_isParametrized)
       {
         return IObjComponent_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->_sampleCache,m_map));
       }
       else
       {
-        if ( !_sampleCache )
-          g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-        return boost::shared_ptr<Geometry::IObjComponent>(_sampleCache,NoDeleting());
+        return boost::shared_ptr<IObjComponent>(_sampleCache,NoDeleting());
       }
     }
 

@@ -34,7 +34,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -66,12 +66,12 @@ namespace Mantid
       ///Virtual destructor
       virtual ~Instrument() {}
 
-      Geometry::IObjComponent_sptr getSource() const;
-      Geometry::IObjComponent_sptr getSample() const;
-      Geometry::IDetector_sptr getDetector(const int &detector_id) const;
+      IObjComponent_sptr getSource() const;
+      IObjComponent_sptr getSample() const;
+      IDetector_sptr getDetector(const int &detector_id) const;
 
       /// Returns a pointer to the geometrical object representing the monitor with the given ID
-      Geometry::IDetector_sptr getMonitor(const int &detector_id) const;
+      IDetector_sptr getMonitor(const int &detector_id) const;
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -187,4 +187,4 @@ namespace Mantid
 
   } // namespace Geometry
 } //Namespace Mantid
-#endif /*MANTID_APIINSTRUMENT_H_*/
+#endif /*MANTID_GEOMETRY_INSTRUMENT_H_*/
