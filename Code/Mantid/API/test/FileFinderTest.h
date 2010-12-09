@@ -13,14 +13,16 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-class FileFinderTest : public CxxTest::TestSuite
+class FileFinderTest: public CxxTest::TestSuite
 {
- 
+
 public:
-  
-  FileFinderTest():m_facFile("./FileFinderTest_Facilities.xml")
+
+  FileFinderTest() :
+    m_facFile("./FileFinderTest_Facilities.xml")
   {
-    if( m_facFile.exists() ) m_facFile.remove();
+    if (m_facFile.exists())
+      m_facFile.remove();
 
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
@@ -44,19 +46,31 @@ public:
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
       "  </facility>"
+      "  <facility name=\"SNS\" delimiter=\"_\" FileExtensions=\"_event.nxs,.nxs,.dat\">"
+      "    <archive>"
+      "      <archiveSearch plugin=\"ISISDataSearch\" />"
+      "    </archive>"
+      "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
+      "      <technique>Inelastic Spectroscopy</technique>"
+      "    </instrument>"
+      "    <instrument name=\"ARCS\" shortname=\"ARCS\">"
+      "      <technique>Inelastic Spectroscopy</technique>"
+      "    </instrument>"
+      "    <instrument name=\"REF_L\" shortname=\"REF_L\">"
+      "      <technique>Reflectometer</technique>"
+      "    </instrument>"
+      "  </facility>"
       "</facilities>";
 
     std::ofstream fil(m_facFile.path().c_str());
     fil << xmlStr;
     fil.close();
 
- }
+  }
 
   void setUp()
   {
     ConfigService::Instance().updateFacilities(m_facFile.path());
-    ConfigService::Instance().setString("default.instrument","HRPD");
-    ConfigService::Instance().setString("default.facility","ISIS");
   }
 
   ~FileFinderTest()
@@ -66,42 +80,74 @@ public:
 
   void testGetFullPath()
   {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     ConfigService::Instance().setString("datasearch.directories",
-      "../../../../Test/AutoTestData;../../../../Test/");
+        "../../../../Test/AutoTestData;../../../../Test/");
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
-    TS_ASSERT( !path.empty() );
+    TS_ASSERT(!path.empty());
   }
 
-  void testMakeFileName()
+  void testMakeFileNameForISIS()
   {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+    // Set the default instrument
+    ConfigService::Instance().setString("default.instrument", "HRPD");
+
     std::string fName = FileFinder::Instance().makeFileName("123");
-    TS_ASSERT_EQUALS(fName,"HRP00123");
+    TS_ASSERT_EQUALS(fName, "HRP00123");
 
     fName = FileFinder::Instance().makeFileName("ABC0123");
-    TS_ASSERT_EQUALS(fName,"ABC00000123");
+    TS_ASSERT_EQUALS(fName, "ABC00000123");
 
     fName = FileFinder::Instance().makeFileName("ABCD123");
-    TS_ASSERT_EQUALS(fName,"ABC00000123");
+    TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD"),std::invalid_argument);
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456"),std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD"), std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456"), std::invalid_argument);
 
     fName = FileFinder::Instance().makeFileName("0");
-    TS_ASSERT_EQUALS(fName,"HRP00000");
+    TS_ASSERT_EQUALS(fName, "HRP00000");
 
     TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123"));
+
   }
 
-  void testFindRun()
+  void testMakeFileNameForSNS()
   {
-    ConfigService::Instance().setString("datasearch.searcharchive","Off");
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "SNS");
+
+    // Set the default instrument
+    ConfigService::Instance().setString("default.instrument", "ARCS");
+
+    // Check that we remove any leading zeros
+    TS_ASSERT_EQUALS("ARCS_123", FileFinder::Instance().makeFileName("0123"));
+
+    // Test using long and short name
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21"));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21"));
+
+    // Test for REF_L (to check that the extra _ doesn't upset anything)
+    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666"));
+
+  }
+
+  void testFindRunForISIS()
+  {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
+    ConfigService::Instance().setString("datasearch.searcharchive", "Off");
     std::string path = FileFinder::Instance().findRun("CSP78173");
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
     path = FileFinder::Instance().findRun("HRP37129");
     TS_ASSERT(path.size() > 3);
-    TS_ASSERT_EQUALS(path.substr(path.size()-3),"s02");
+    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
 
     //ConfigService::Instance().setString("datasearch.searcharchive","On");
     //path = FileFinder::Instance().findRun("CSP77374");
@@ -112,15 +158,22 @@ public:
 
   void testFindFiles()
   {
-    std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-99");
-    TS_ASSERT_EQUALS(files.size(),11);
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
+    std::cout << "Starting Test..." << std::endl;
+
+    std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-15199");
+    TS_ASSERT_EQUALS(files.size(), 11);
     std::vector<std::string>::iterator it = files.begin();
-    for(; it != files.end(); ++it)
+    for (; it != files.end(); ++it)
     {
       if (it != files.begin())
       {
-        TS_ASSERT_DIFFERS(*it,*(it-1));
+        std::cout << *it << " ";
+        TS_ASSERT_DIFFERS(*it, *(it - 1));
       }
+
     }
   }
 
@@ -128,7 +181,5 @@ private:
 
   Poco::File m_facFile;
 };
-
-
 
 #endif /*FILEFINDERTEST_H_*/
