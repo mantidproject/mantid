@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+//#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "Poco/File.h"
@@ -52,6 +53,34 @@ void SaveGSS::init()
 }
 
 /**
+ * Determine the focused position for the supplied spectrum. The position
+ * (l1, l2, tth) is returned via the references passed in.
+ */
+void getFocusedPos(MatrixWorkspace_const_sptr wksp, const size_t spectrum, double &l1, double &l2, double &tth) {
+  Geometry::IInstrument_const_sptr instrument = wksp->getInstrument();
+  if (instrument == NULL)
+  {
+    l1 = 0.;
+    l2 = 0.;
+    tth = 0.;
+    return;
+  }
+  Geometry::IObjComponent_const_sptr source = instrument->getSource();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  if ( source == NULL || sample == NULL )
+  {
+    l1 = 0.;
+    l2 = 0.;
+    tth = 0.;
+    return;
+  }
+  l1 = source->getDistance(*sample);
+  Geometry::IDetector_sptr det = wksp->getDetector(spectrum);
+  l2 = det->getDistance(*sample);
+  tth = wksp->detectorTwoTheta(det);
+}
+
+/**
  * Execute the algorithm
  */
 void SaveGSS::exec()
@@ -85,8 +114,10 @@ void SaveGSS::exec()
   using std::ios_base;
   ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
   Progress p(this,0.0,1.0,nHist);
+  double l1, l2, tth;
   for (int i=0;i<nHist;i++)
   {
+    getFocusedPos(inputWS, i, l1, l2, tth);
     if (!split && i==0) // Assign only one file
     {
       const std::string file(filename+'.'+ext);
@@ -114,6 +145,11 @@ void SaveGSS::exec()
         throw std::runtime_error("Could not open filename: "+filename);
       }
 
+      if (l1 != 0. || l2 != 0. || tth != 0.)
+        out << "# Total flight path " << (l1+l2) << "m, tth " << (tth*180./M_PI)
+            << "deg, DIFC "
+            << (( 2.0 * PhysicalConstants::NeutronMass * sin(tth/2.0) * ( l1 + l2 ) )
+            / (PhysicalConstants::h * 1e3)) << "\n";
       out << "# Data for spectrum :"<< i << std::endl;
       if (RALF.compare(outputFormat) == 0) {
         this->writeRALFdata(bank+i, MultiplyByBinWidth, out,
@@ -313,8 +349,6 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
                             const MantidVec& X, const MantidVec& Y, const MantidVec& E) const 
 {
-  out << "# Focus Flight path and 2Theta\n"; // TODO fill this in
-
   const size_t datasize = Y.size();
   double bc1 = *(X.begin()); // minimum TOF in microseconds
   if (bc1 <= 0.) {
