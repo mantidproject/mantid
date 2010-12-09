@@ -35,7 +35,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 	/** 
-    Implements the SANS, small angle nuetron scattering, dialog box
+    Implements the SANS, small angle neutron scattering, dialog box
 
     @author Martyn Gigg
 

@@ -2262,11 +2262,12 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   }
 
   const static QString PYTHON_SEP("C++handleReduceButtonClickC++");
+
+  //copy the user setting to use as a base for future reductions after the one that is about to start
+  py_code += "\n_user_settings_copy = copy.deepcopy(i.ISIS_global().user_settings)";
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
-    //copy the user setting to use as a base for future reductions after the one that is about to start
-    py_code += "\n_user_settings_copy = copy.deepcopy(i.ISIS_global().user_settings)";
     //the following line runs the reduction and then resets it
     py_code += "\nreduced = i.WavRangeReduction(full_trans_wav=" + full_trans_range + ")\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below

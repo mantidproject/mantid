@@ -32,9 +32,17 @@ _VERBOSE_ = False
 __ISIS_reducer_instance_ = isis_reducer.ISISReducer()
 
 def ISIS_global():
+    """
+        Returns an isis_reducer object that is shared by all
+        dictionaries, e.g. GUI and scripting
+    """
     return __ISIS_reducer_instance_
 
 def reset_singleton(new=None):
+    """
+        Creates a new isis_reducer which is shared by all
+        dictionaries (GUI and scripting)
+    """
     global __ISIS_reducer_instance_
     if new is None:
         __ISIS_reducer_instance_ = isis_reducer.ISISReducer()

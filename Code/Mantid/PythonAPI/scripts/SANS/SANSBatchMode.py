@@ -83,54 +83,58 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
 
     # Now loop over run information and process
     for run in runinfo:
-        # Sample run
-        run_file = run['sample_sans']
-        if len(run_file) == 0:
-            issueWarning('No sample run given, skipping entry.')
-            continue
-        run_file += format
-        sample_ws = AssignSample(run_file)[0]
-        if len(sample_ws) == 0:
-            issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
-            continue
-        
-        #Sample trans
-        run_file = run['sample_trans']
-        run_file2 = run['sample_direct_beam']
-        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
-        if len(run_file) > 0 and len(ws1) == 0:
-            issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
-            continue
-        if len(run_file2) > 0 and len(ws2) == 0: 
-            issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
-            continue
-        
-        # Sans Can 
-        run_file = run['can_sans']
-        can_ws = AssignCan(run_file + format)[0]
-        if run_file != '' and len(can_ws) == 0:
-            issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
-            continue
+        try:
+            # Sample run
+            run_file = run['sample_sans']
+            if len(run_file) == 0:
+                issueWarning('No sample run given, skipping entry.')
+                continue
+            run_file += format
+            sample_ws = AssignSample(run_file)[0]
+            if len(sample_ws) == 0:
+                issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
+                continue
+            
+            #Sample trans
+            run_file = run['sample_trans']
+            run_file2 = run['sample_direct_beam']
+            ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
+            if len(run_file) > 0 and len(ws1) == 0:
+                issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
+                continue
+            if len(run_file2) > 0 and len(ws2) == 0: 
+                issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
+                continue
+            
+            # Sans Can 
+            run_file = run['can_sans']
+            can_ws = AssignCan(run_file + format)[0]
+            if run_file != '' and len(can_ws) == 0:
+                issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
+                continue
+    
+            #Can trans
+            run_file = run['can_trans']
+            run_file2 = run['can_direct_beam']
+            ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
+            if len(run_file) > 0 and len(ws1) == 0:
+                issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
+                continue
+            if len(run_file2) > 0 and len(ws2) == 0: 
+                issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
+                continue
+    
+    
+            if centreit == 1:
+                if verbose == 1:
+                    FindBeamCentre(50.,170.,12)
 
-        #Can trans
-        run_file = run['can_trans']
-        run_file2 = run['can_direct_beam']
-        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
-        if len(run_file) > 0 and len(ws1) == 0:
-            issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
-            continue
-        if len(run_file2) > 0 and len(ws2) == 0: 
-            issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
-            continue
+        finally:
+            # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
+            # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
+            # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
+            reduced = WavRangeReduction(full_trans_wav=deftrans)
 
-
-        if centreit == 1:
-            if verbose == 1:
-                FindBeamCentre(50.,170.,12)
-        # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
-        # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
-        # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
-        reduced = WavRangeReduction(full_trans_wav=deftrans)
         file_1 = run['output_as'] + '.txt'
         if file_1 != '.txt':
             SaveRKH(reduced,file_1,'0')

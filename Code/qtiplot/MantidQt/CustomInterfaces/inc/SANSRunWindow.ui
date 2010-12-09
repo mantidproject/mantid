@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>713</width>
-    <height>415</height>
+    <width>724</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -343,7 +343,7 @@
        <item row="3" column="0" colspan="2" >
         <widget class="QStackedWidget" name="mode_stack" >
          <property name="currentIndex" >
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_5" >
           <layout class="QVBoxLayout" name="verticalLayout_9" >
@@ -1419,7 +1419,7 @@ p, li { white-space: pre-wrap; }
             <item row="7" column="0" >
              <widget class="QLabel" name="label_36" >
               <property name="text" >
-               <string>Use default transmission</string>
+               <string>Full wavelength range</string>
               </property>
              </widget>
             </item>

@@ -677,6 +677,7 @@ class LoadSample(LoadRun):
         self._SAMPLE_SETUP = None
         self._SAMPLE_RUN = None
         self._SAMPLE_N_PERIODS = -1
+        # the run number followed by dot and the extension
         self.sample_run = sample
         self._reload = reload
         self._period = period
@@ -712,7 +713,12 @@ class LoadSample(LoadRun):
 
         self.uncropped  = self.SCATTER_SAMPLE.getName()
         p_run_ws = mantid[self.uncropped]
-        run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
+        try:
+            run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
+        except RuntimeError:
+            # if the run number is not stored in the workspace, take it from the filename
+            run_num = self.sample_run.split('.')[0]
+        
         reducer.instrument.set_up_for_run(run_num)
 
         logvalues = None
@@ -1459,6 +1465,11 @@ class ReplaceErrors(ReductionStep):
 
 
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
+    """
+        Takes a run number and file type and generates the filename, workspace name and log name
+        @param run_string a run number followed by a dot and then the file type, i.e. file extension
+        @param is_trans true for transmission files, false for sample files (default is false)
+    """
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
