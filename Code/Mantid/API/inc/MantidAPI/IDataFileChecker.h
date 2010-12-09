@@ -1,11 +1,6 @@
 #ifndef MANTID_API_IDATAFILECHECKER_H
 #define MANTID_API_IDATAFILECHECKER_H
 
-#ifdef _WIN32
-#	include <winsock.h>
-#else
-#	include <netinet/in.h>
-#endif
 #include<string>
 #include "MantidAPI/Algorithm.h"
 
