@@ -906,7 +906,7 @@ void DateAndTime::createVector(const DateAndTime start, const std::vector<double
   size_t i = 0;
   for(it = seconds.begin(); it != seconds.end(); it++)
   {
-    out[i]._nanoseconds = startnano + static_cast<long>(  (*it) * 1000000000 );
+    out[i]._nanoseconds = startnano + static_cast<int64_t>(  (*it) * 1000000000.0 );
     i++;
   }
 }
