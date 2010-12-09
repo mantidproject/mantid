@@ -1,16 +1,7 @@
-
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/Dom/Element.h"
-
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 
 namespace Mantid
 {
