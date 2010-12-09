@@ -70,7 +70,7 @@ public:
   /// Returns zero padding for this instrument
   int zeroPadding()const{return m_zeroPadding;}
   /// Returns the default delimiter between instrument name and run number
-  const std::string delimiter() const{return m_delimiter;}
+  std::string delimiter() const{return m_delimiter;}
   /// Return list of techniques
   const std::set<std::string>& techniques()const{return m_technique;}
 private:

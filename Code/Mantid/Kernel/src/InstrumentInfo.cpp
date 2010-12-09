@@ -33,14 +33,18 @@ namespace Mantid
         m_zeroPadding = f->zeroPadding();
       }
 
-      // The string to separate the instrument name and the run number.
-        std::string m_delimiter = elem->getAttribute("delimiter");
-
       m_name = elem->getAttribute("name");
       if (m_name.empty())
       {
         g_log.error("Instrument name is not defined");
         throw std::runtime_error("Instrument name is not defined");
+      }
+
+      // The string to separate the instrument name and the run number.
+      m_delimiter = elem->getAttribute("delimiter");
+      if (m_delimiter.empty())
+      {
+        m_delimiter = f->delimiter();
       }
 
       m_shortName = elem->getAttribute("shortname");
@@ -85,8 +89,7 @@ namespace Mantid
     */
     bool InstrumentInfo::operator==(const InstrumentInfo & rhs) const
     {
-      return (this->name() == rhs.name() && this->shortName() == rhs.shortName() &&
-        this->zeroPadding() == rhs.zeroPadding());
+      return (this->name() == rhs.name() && this->shortName() == rhs.shortName());
     }
 
   } // namespace Kernel

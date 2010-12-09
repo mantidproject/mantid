@@ -40,7 +40,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   }
 
   // The string to separate the instrument name and the run number.
-  std::string m_delimiter = elem->getAttribute("delimiter");
+  m_delimiter = elem->getAttribute("delimiter");
 
   std::string extsStr = elem->getAttribute("FileExtensions");
   if (extsStr.empty())
@@ -200,6 +200,14 @@ std::vector<InstrumentInfo> FacilityInfo::Instruments(const std::string& tech)co
   return out;
 }
 
+/**
+ * Returns the delimiter between the instrument name and the run number.
+ * @return the delimiter as a string
+ */
+const std::string FacilityInfo::getDelimiter() const
+{
+  return m_delimiter;
+}
 
 } // namespace Kernel
 } // namespace Mantid
