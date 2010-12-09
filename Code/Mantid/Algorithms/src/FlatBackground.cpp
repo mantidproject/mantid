@@ -41,6 +41,13 @@ void FlatBackground::init()
   declareProperty("Mode","Linear Fit",new ListValidator(modeOptions),
     "The background count rate is estimated either by taking a mean or doing a\n"
     "linear fit (default: Linear Fit)");
+  // Property to determine whether we subtract the background or just return the background.
+  std::vector<std::string> outputOptions;
+  outputOptions.push_back("Subtract Background");
+  outputOptions.push_back("Return Background");
+  declareProperty("OutputMode", "Subtract Background", new ListValidator(outputOptions),
+      "Once the background has been determined it can either be subtracted from \n"
+      "the InputWorkspace and returned or just returned (default: Subtract Background)");
 }
 
 void FlatBackground::exec()
@@ -61,6 +68,9 @@ void FlatBackground::exec()
 
   const bool useMean = isModeMean(getProperty("mode"));
  
+  // Are we removing the background?
+  const bool removeBackground = subtractBackground(getProperty("outputMode"));
+
   // Initialise the progress reporting object
   m_progress = new Progress(this,0.0,0.3,numHists); 
 
@@ -128,7 +138,14 @@ void FlatBackground::exec()
       // Now subtract the background from the data
       for (int j=0; j < blocksize; ++j)
       {
-        Y[j] -= background;
+        if (removeBackground)
+        {
+          Y[j] -= background;
+        }
+        else
+        {
+          Y[j] = background;
+        }
         //remove negative values
         if (Y[j] < 0.0)
         {
@@ -199,7 +216,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
 }
 /** Checks the user selected mode value
 *  @param mode must be one of LinearFit or Mean
-*  @return true if the user slected Mean background analysis and false if Linear Fit was selected
+*  @return true if the user selected Mean background analysis and false if Linear Fit was selected
 *  @throw invalid_argument if the mode is not recognised
 */
 bool FlatBackground::isModeMean(const std::string &mode)
@@ -214,6 +231,28 @@ bool FlatBackground::isModeMean(const std::string &mode)
   }
   throw std::invalid_argument("Selected mode: \"" + mode + "\" is not recognised");
 }
+
+/**
+ * Checks the user selected output mode value.
+ * @param outputMode
+ * @return true if we are subtracting the background, false if not.  If neither then return true.
+ */
+bool FlatBackground::subtractBackground(const std::string &outputMode)
+{
+  if ( outputMode == "Subtract Background")
+    {
+      return true;
+    }
+
+  if ( outputMode == "Return Background" )
+  {
+    return false;
+  }
+
+  // If in doubt, just return the default behaviour.
+  return true;
+}
+
 /** Gets the mean number of counts in each bin the background region and the variance (error^2) of that
 *  number
 *  @param WS points to the input workspace

@@ -21,6 +21,7 @@ namespace Algorithms
     <LI> StartX             - The start of the flat region to fit to. </LI>
     <LI> EndX               - The end of the flat region to fit to. </LI>
     <LI> Mode               - How to estimate the background number of counts: a linear fit or the mean. </LI>
+    <LI> OutputMode         - What to return in the Outputworkspace: the corrected signal or just the background. </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
@@ -68,6 +69,7 @@ private:
 
   void checkRange(double& startX, double& endX);
   bool isModeMean(const std::string &mode);
+  bool subtractBackground(const std::string &outputMode);
   void getSpecInds(std::vector<int> &output, const int workspaceTotal);
   double Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
