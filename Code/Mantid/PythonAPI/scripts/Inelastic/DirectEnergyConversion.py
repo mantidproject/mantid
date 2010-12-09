@@ -111,7 +111,6 @@ class DirectEnergyConversion(object):
         """
         # Special load monitor stuff.    
         if (self.instr_name == "CNCS"):
-            #self.log("--- CNCS ---")
             self.fix_ei = True
             ei_value = ei_guess
             if (Tzero is None):
@@ -123,14 +122,6 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             self.apply_detector_eff = True
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            #self.log("***** ARCS/SEQUOIA *****")
-            #self.log(mono_run)
-            
-            # Quick fix to check for a list.
-            # if type(mono_run) == list:
-            #     datafile = str(mono_run[0])
-            # else:
-            #     datafile = str(mono_run)
             mono_run = common.loaded_file('mono-sample')
             if (self.fix_ei):
                 if mono_run.endswith("_event.nxs"):
@@ -159,11 +150,18 @@ class DirectEnergyConversion(object):
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
 
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
+        bin_offset = -mon1_peak
+
         # Get the workspace the converted data will end up in
         result_ws = mtd[result_name]
-            
+        
         # For event mode, we are going to histogram in energy first, then go back to TOF
         if (self.facility == "SNS"):
+            if self.background == True:
+                # Extract the time range for the background determination before we throw it away
+                background_bins = "%s,%s,%s" % (self.background_range[0] + bin_offset, 10.0, self.background_range[1] + bin_offset)
+                Rebin(result_ws, "background_origin_ws", background_bins)
             # Convert to Et
             ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
             RenameWorkspace("_tmp_energy_ws", result_ws)
@@ -180,14 +178,22 @@ class DirectEnergyConversion(object):
             # it belongs
             LoadDetectorInfo(result_ws, common.loaded_file('mono'))
 
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
-        bin_offset = -mon1_peak
+
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
-            ConvertToDistribution(result_ws)                                             
-            FlatBackground(result_ws, result_ws, self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean')
+            ConvertToDistribution(result_ws)    
+            if (self.facility == "SNS"):
+                FlatBackground("background_origin_ws", "background_ws", self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Linear Fit', 'Return Background')
+                mtd.deleteWorkspace("background_origin_ws")
+                # Not sure if this is correct ?
+                ConvertToDistribution("background_ws") 
+                RebinToWorkspace("background_ws", result_ws, "background_ws")
+                Minus(result_ws, "background_ws", result_ws)
+                mtd.deleteWorkspace("background_ws")
+            else:
+                FlatBackground(result_ws, result_ws, self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean')
             ConvertFromDistribution(result_ws)  
-    
+
         # Normalise using the chosen method
         # TODO: This really should be done as soon as possible after loading
         self.normalise(result_ws, result_ws, self.normalise_method, range_offset=bin_offset)
