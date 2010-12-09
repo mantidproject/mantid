@@ -270,11 +270,9 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       tsp->create(start_time, time_double, values_int);
       tsp->setUnits( units );
       WS->mutableRun().addProperty( tsp, overwritelogs );
-
     }
     else
     {
-
       //Make a double TSP
       TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(entry_name);
 
