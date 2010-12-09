@@ -212,6 +212,7 @@
     <ClCompile Include="src\SaveDASC.cpp" />
     <ClCompile Include="src\SaveFocusedXYE.cpp" />
     <ClCompile Include="src\SaveGSS.cpp" />
+    <ClCompile Include="src\SavePHX.cpp" />
     <ClCompile Include="src\SaveRKH.cpp" />
     <ClCompile Include="src\SaveSPE.cpp" />
     <ClCompile Include="src\SaveVTK.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="inc\mantiddatahandling\loadrawspectrum0.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadSNSspec.h" />
     <ClInclude Include="inc\MantidDataHandling\LoadSpec.h" />
+    <ClInclude Include="inc\MantidDataHandling\SavePHX.h" />
     <ClInclude Include="test\AlignDetectorsTest.h" />
     <ClInclude Include="src\LoadRaw\byte_rel_comp.h" />
     <ClInclude Include="inc\MantidDataHandling\CreateSampleShape.h" />

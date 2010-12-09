@@ -192,6 +192,9 @@
     <ClCompile Include="src\LoadInstrumentHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SavePHX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test\AlignDetectorsTest.h">
@@ -465,6 +468,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\LoadInstrumentHelperTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\SavePHX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

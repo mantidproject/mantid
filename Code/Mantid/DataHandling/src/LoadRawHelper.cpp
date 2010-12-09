@@ -16,9 +16,11 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadInstrumentHelper.h"
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
+#include "Poco/DateTimeParser.h"
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 
@@ -729,13 +731,50 @@ namespace Mantid
       runDetails.addProperty("mon_sum1", localISISRaw->rpb.r_mon_sum1);	// monitor sum 1
       runDetails.addProperty("mon_sum2",localISISRaw->rpb.r_mon_sum2);	// monitor sum 2
       runDetails.addProperty("mon_sum3",localISISRaw->rpb.r_mon_sum3);	// monitor sum 3
-      runDetails.addProperty("enddate",std::string(localISISRaw->rpb.r_enddate, 11)); // format DD-MM-YYYY
-      runDetails.addProperty("endtime", std::string(localISISRaw->rpb.r_endtime, 8)); // format HH-MM-SS
       runDetails.addProperty("rb_proposal",localISISRaw->rpb.r_prop); // RB (proposal) number
 
-      // Add the start time from the header
-      runDetails.addProperty("startdate",std::string(localISISRaw->hdr.hd_date, 11)); // format DD-MM-YYYY
-      runDetails.addProperty("starttime", std::string(localISISRaw->hdr.hd_time, 8)); // format HH-MM-SS
+      // Note isis raw date format which is stored in DD-MMM-YYYY. Store dates in ISO 8601
+      std::string isisDate = std::string(localISISRaw->rpb.r_enddate, 11);
+      if ( isisDate[0] == ' ' ) isisDate[0] = '0';
+      runDetails.addProperty("run_end", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
+        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->rpb.r_endtime, 8)).to_ISO8601_string());
+      isisDate = std::string(localISISRaw->hdr.hd_date, 11);
+      if ( isisDate[0] == ' ' ) isisDate[0] = '0';
+      runDetails.addProperty("run_start", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
+        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->hdr.hd_time, 8)).to_ISO8601_string());
+    }
+
+    /// To help transforming date stored in ISIS raw file into iso 8601
+    /// @param month
+    /// @return month as string integer e.g. 01
+    std::string LoadRawHelper::convertMonthLabelToIntStr(std::string& month) const
+    {
+      std::transform(month.begin(), month.end(), month.begin(), toupper);
+
+      if ( month == "JAN" )
+        return "01";
+      if ( month == "FEB" )
+        return "02";
+      if ( month == "MAR" )
+        return "03";
+      if ( month == "APR" )
+        return "04";
+      if ( month == "MAY" )
+        return "05";
+      if ( month == "JUN" )
+        return "06";
+      if ( month == "JUL" )
+        return "07";
+      if ( month == "AUG" )
+        return "08";
+      if ( month == "SEP" )
+        return "09";
+      if ( month == "OCT" )
+        return "10";
+      if ( month == "NOV" )
+        return "11";
+      if ( month == "DEC" )
+        return "12";
     }
 
     ///sets optional properties for the loadraw algorithm

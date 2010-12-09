@@ -158,18 +158,13 @@ std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<
 {
     const API::Run& runDetails = workspace->run();
     std::string date;
-    if ( runDetails.hasProperty("startdate") && runDetails.hasProperty("starttime") )
+    if ( runDetails.hasProperty("run_start") )
     {
-      std::string startdate = runDetails.getProperty("startdate")->value();
-      std::string starttime = runDetails.getProperty("starttime")->value();
-      //if ( startdate.size() == 11 ) 
-      //  date = startdate.substr(7,4) + "-" + startdate.substr(3,3) + "-" + startdate.substr(0,2) + " " + starttime;
-      //else 
-        date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+      date = runDetails.getProperty("run_start")->value();
     }
     else
     {
-      g_log.information("startdate/starttime not stored in workspace. Default to current date.");
+      g_log.information("run_start not stored in workspace. Default to current date.");
 
       date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
     }
