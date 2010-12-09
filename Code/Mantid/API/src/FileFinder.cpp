@@ -47,7 +47,8 @@ FileFinderImpl::FileFinderImpl()
 std::string FileFinderImpl::getFullPath(const std::string& fName) const
 {
   // If this is already a full path, nothing to do
-  if (Poco::Path(fName).isAbsolute()) return fName;
+  if (Poco::Path(fName).isAbsolute())
+    return fName;
 
   const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
   std::vector<std::string>::const_iterator it = searchPaths.begin();
@@ -95,7 +96,8 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
   else
   {
     /// Find the last non-digit as the instrument name can contain numbers
-    std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(), std::not1( std::ptr_fun(isdigit)));
+    std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(), std::not1(
+        std::ptr_fun(isdigit)));
     // No non-digit or all non-digits
     if (it == hint.rend() || it == hint.rbegin())
     {
@@ -111,11 +113,13 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
   // remove any leading zeros in case there are too many of them
   std::string::size_type i = runPart.find_first_not_of('0');
   runPart.erase(0, i);
-  while (runPart.size() < nZero) runPart.insert(0, "0");
-  if (runPart.size() > nZero)
+  while (runPart.size() < nZero)
+    runPart.insert(0, "0");
+  if (runPart.size() > nZero && nZero != 0)
   {
     throw std::invalid_argument("Run number does not match instrument's zero padding");
   }
+
   instrPart = instr.shortName();
 
   return std::make_pair(instrPart, runPart);
@@ -133,10 +137,23 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  */
 std::string FileFinderImpl::makeFileName(const std::string& hint) const
 {
-  if (hint.empty()) return "";
+  if (hint.empty())
+    return "";
 
   std::pair<std::string, std::string> p = toInstrumentAndNumber(hint);
-  return p.first + p.second;
+
+  Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(p.first);
+  std::string delimiter = instr.delimiter();
+
+  if (delimiter.empty())
+  {
+    return p.first + p.second;
+  }
+  else
+  {
+    return p.first + delimiter + p.second;
+  }
+
 }
 
 /**
@@ -154,7 +171,8 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
     return getFullPath(hint);
   }
   std::string fName = makeFileName(hint);
-  const std::vector<std::string> facility_extensions = Kernel::ConfigService::Instance().Facility().extensions();
+  const std::vector<std::string> facility_extensions =
+      Kernel::ConfigService::Instance().Facility().extensions();
   // select allowed extensions
   std::vector<std::string> extensions;
   if (exts != NULL)
@@ -177,17 +195,18 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
   for (; ext != extensions.end(); ++ext)
   {
     std::string path = getFullPath(fName + *ext);
-    if (!path.empty()) return path;
+    if (!path.empty())
+      return path;
   }
 
   // Search the archive of the default facility
   std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
   std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
-  if (!archiveOpt.empty() && archiveOpt != "off" && !Kernel::ConfigService::Instance().Facility().archiveSearch().empty())
+  if (!archiveOpt.empty() && archiveOpt != "off"
+      && !Kernel::ConfigService::Instance().Facility().archiveSearch().empty())
   {
-    IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(	
-     *Kernel::ConfigService::Instance().Facility().archiveSearch().begin()
-     );
+    IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
+        *Kernel::ConfigService::Instance().Facility().archiveSearch().begin());
     if (arch)
     {
       std::string path = arch->getPath(fName);
@@ -231,7 +250,8 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
 std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
 {
   std::vector<std::string> res;
-  Poco::StringTokenizer hints(hint, ",", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Poco::StringTokenizer hints(hint, ",", Poco::StringTokenizer::TOK_TRIM
+      | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
   Poco::StringTokenizer::Iterator h = hints.begin();
 
   for (; h != hints.end(); ++h)
@@ -248,7 +268,8 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
       fileSuspected = true;
     }
 
-    Poco::StringTokenizer range(*h, "-", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+    Poco::StringTokenizer range(*h, "-", Poco::StringTokenizer::TOK_TRIM
+        | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected))
     {
       throw std::invalid_argument("Malformed range of runs: " + *h);
@@ -260,8 +281,8 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
       size_t nZero = run.size(); // zero padding
       if (range[1].size() > nZero)
       {
-        ("Malformed range of runs: " + *h + 
-            ". The end of string value is longer than the instrument's zero padding");
+        ("Malformed range of runs: " + *h
+            + ". The end of string value is longer than the instrument's zero padding");
       }
       int runNumber = boost::lexical_cast<int>(run);
       std::string runEnd = run;
@@ -274,7 +295,8 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
       for (int irun = runNumber; irun <= runEndNumber; ++irun)
       {
         run = boost::lexical_cast<std::string>(irun);
-        while (run.size() < nZero) run.insert(0, "0");
+        while (run.size() < nZero)
+          run.insert(0, "0");
         std::string path = findRun(p1.first + run);
         if (!path.empty())
         {
@@ -282,18 +304,18 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
         }
       }
 
-  }
-  else
-  {
-    std::string path = findRun(*h);
-    if ( !path.empty() )
+    }
+    else
     {
-      res.push_back(path);
+      std::string path = findRun(*h);
+      if (!path.empty())
+      {
+        res.push_back(path);
+      }
     }
   }
-}
 
-return res;
+  return res;
 }
 
 }// API
