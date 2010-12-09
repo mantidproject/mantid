@@ -182,6 +182,9 @@ namespace Mantid
       const bool& isDistribution() const;
       bool& isDistribution(bool newValue);
 
+      /// Mask a given workspace index, setting the data and error values to the given value
+      void maskWorkspaceIndex(const int index, const double maskValue = 0.0);
+
       // Methods to set and access masked bins
       void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
       bool hasMaskedBins(const int& spectrumIndex) const;

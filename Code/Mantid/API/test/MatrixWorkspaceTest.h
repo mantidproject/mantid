@@ -8,14 +8,19 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid { namespace DataObjects {
+namespace Mantid 
+{
+
+namespace DataObjects 
+{
+
 class WorkspaceTester : public MatrixWorkspace
 {
 public:
@@ -47,11 +52,7 @@ private:
   MantidVec vec;
   int spec;
 };
-}}// namespace
 
-
-
-namespace Mantid { namespace DataObjects {
 class WorkspaceTesterWithMaps : public MatrixWorkspace
 {
 public:
@@ -103,7 +104,62 @@ private:
 
 DECLARE_WORKSPACE(WorkspaceTester)
 
-}}// namespace
+class WorkspaceTesterWithDetectors : public MatrixWorkspace
+{
+public:
+  WorkspaceTesterWithDetectors() : MatrixWorkspace() {}
+  virtual ~WorkspaceTesterWithDetectors() {}
+
+  // Empty overrides of virtual methods
+  virtual int getNumberHistograms() const { return m_NVectors;}
+  const std::string id() const {return "WorkspaceTester";}
+  void init(const int& NVectors, const int& j, const int& k)
+  {
+    m_NVectors = NVectors;
+    vec.resize(NVectors, MantidVec(1, 1.0));
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new NumericAxis(1);
+
+    m_axes[1] =  new SpectraAxis(m_NVectors);
+    for (int i=0; i<m_NVectors; i++)
+    {
+      this->getAxis(1)->spectraNo(i) = i;
+    }
+    this->mutableSpectraMap().populateSimple(0, NVectors);
+
+    setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
+    Instrument_sptr inst = getBaseInstrument();
+    
+    for( int i = 0; i < NVectors; ++i )
+    {
+      // Create a detector for each spectra
+      Detector * det = new Detector("pixel", inst.get());
+      det->setID(i);
+      inst->add(det);
+      inst->markAsDetector(det);
+    }
+
+  }
+  int size() const {return vec.size();}
+  int blocksize() const {return vec[0].size();}
+  MantidVec& dataX(int const i) {return vec[i];}
+  MantidVec& dataY(int const i) {return vec[i];}
+  MantidVec& dataE(int const i) {return vec[i];}
+  const MantidVec& dataX(int const i) const {return vec[i];}
+  const MantidVec& dataY(int const i) const {return vec[i];}
+  const MantidVec& dataE(int const i) const {return vec[i];}
+  Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
+  void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
+
+private:
+  std::vector<MantidVec> vec;
+  int spec;
+  int m_NVectors;
+};
+
+}
+}// namespace
 
 
 
@@ -203,6 +259,67 @@ public:
     TS_ASSERT_EQUALS( ws->YUnit(), "" );
     TS_ASSERT_THROWS_NOTHING( ws->setYUnit("something") );
     TS_ASSERT_EQUALS( ws->YUnit(), "something" );
+  }
+
+  void testWholeSpectraMasking()
+  {
+    boost::shared_ptr<MatrixWorkspace> workspace(new Mantid::DataObjects::WorkspaceTesterWithDetectors);
+    // Workspace has 3 spectra, each 1 in length
+    const int numHist(3);
+    workspace->initialize(numHist,1,1);
+
+    // Initially un masked
+    for( int i = 0; i < numHist; ++i )
+    {
+      TS_ASSERT_EQUALS(workspace->readY(i)[0], 1.0);
+      TS_ASSERT_EQUALS(workspace->readE(i)[0], 1.0);
+
+      IDetector_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
+      if( det )
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), false);
+      }
+      else
+      {
+	TS_FAIL("No detector defined");
+      }
+    }
+
+    // Mask a spectra
+    const double maskValue(-10.0);
+    workspace->maskWorkspaceIndex(1,maskValue);
+    workspace->maskWorkspaceIndex(2,maskValue);
+
+    for( int i = 0; i < numHist; ++i )
+    {
+      double expectedValue(0.0);
+      bool expectedMasked(false);
+      if( i == 0 )
+      {
+	expectedValue = 1.0;
+	expectedMasked = false;
+      }
+      else
+      {
+	expectedValue = maskValue;
+	expectedMasked = true;
+      }
+      TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
+      TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
+
+      IDetector_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
+      if( det )
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), expectedMasked);
+      }
+      else
+      {
+	TS_FAIL("No detector defined");
+      }
+    }
+        
   }
 
   void testMasking()

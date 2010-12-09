@@ -617,6 +617,39 @@ namespace Mantid
       return m_isDistribution;
     }
 
+    /**
+     * Mask a given workspace index, setting the data and error values to the given value
+     * @param index The index within the workspace to mask
+     * @param maskValue A value to assign to the data and error values of the spectra
+     */
+    void MatrixWorkspace::maskWorkspaceIndex(const int index, const double maskValue)
+    {
+      if(index < 0 || index >= this->getNumberHistograms() )
+        throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
+					    "MatrixWorkspace::maskWorkspaceIndex,index");
+
+      // Assign the value to the data and error arrays
+      MantidVec & yValues = this->dataY(index);
+      std::fill(yValues.begin(), yValues.end(), maskValue);
+      MantidVec & eValues = this->dataE(index);
+      std::fill(eValues.begin(), eValues.end(), maskValue);
+
+      IDetector_sptr det;
+      try
+      {
+	det = this->getDetector(index);
+      }
+      catch(Kernel::Exception::NotFoundError &)
+      {
+	return;
+      }
+      
+      PARALLEL_CRITICAL(MatrixWorkspace_maskWorkspaceIndex)
+      {
+	m_parmap->addBool(det.get(),"masked",true);
+      }
+    }
+
     /** Masks a single bin. It's value (and error) will be scaled by (1-weight).
     *  @param spectrumIndex The workspace spectrum index of the bin
     *  @param binIndex      The index of the bin in the spectrum
@@ -1025,12 +1058,12 @@ namespace Mantid
       return boost::shared_ptr<const Mantid::Geometry::MDCell>(cell);
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int, int, int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int, int, int, int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
