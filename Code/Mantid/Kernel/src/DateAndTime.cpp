@@ -888,6 +888,28 @@ int64_t DateAndTime::nanoseconds_from_seconds(double sec)
 }
 
 
+//-----------------------------------------------------------------------------------------------
+/** Static method to create a vector of DateAndTime objects
+ * using a start time and seconds offset. To speed things up,
+ * no limit checking is performed!
+ *
+ * @param start :: DateAndTime at 0.
+ * @param seconds :: a vector of doubles of the number of seconds.
+ * @param out :: reference to a vector that will be filled with DateAndTime's
+ */
+void DateAndTime::createVector(const DateAndTime start, const std::vector<double> & seconds, std::vector<DateAndTime> & out)
+{
+  int64_t startnano = start._nanoseconds;
+  size_t num = seconds.size();
+  out.resize(num);
+  std::vector<double>::const_iterator it;
+  size_t i = 0;
+  for(it = seconds.begin(); it != seconds.end(); it++)
+  {
+    out[i]._nanoseconds = startnano + static_cast<long>(  (*it) * 1000000000 );
+    i++;
+  }
+}
 
 
 

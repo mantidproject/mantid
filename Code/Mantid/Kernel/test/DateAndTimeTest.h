@@ -435,6 +435,23 @@ public:
     TS_ASSERT_LESS_THAN(extreme, onesec);
   }
 
+  void test_Vector()
+  {
+    DateAndTime a = DateAndTime("1990-01-02 03:04:05.000");
+    std::vector<double> secs;
+    secs.push_back(1.0);
+    secs.push_back(2.0);
+    secs.push_back(0.5);
+    secs.push_back(-3.0);
+
+    std::vector<DateAndTime> times;
+    DateAndTime::createVector(a, secs, times);
+    TS_ASSERT_EQUALS( times.size(), secs.size());
+    TS_ASSERT_EQUALS( times[0], DateAndTime("1990-01-02 03:04:06.000"));
+    TS_ASSERT_EQUALS( times[1], DateAndTime("1990-01-02 03:04:07.000"));
+    TS_ASSERT_EQUALS( times[2], DateAndTime("1990-01-02 03:04:05.500"));
+    TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
+  }
 };
 
 

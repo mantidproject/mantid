@@ -91,7 +91,7 @@ public:
 
   time_duration operator-(const DateAndTime& rhs) const;
 
-  //-------------- STATIC FUNCTION -----------------------
+  //-------------- STATIC FUNCTIONS -----------------------
   static DateAndTime get_current_time();
   static DateAndTime maximum();
   static DateAndTime minimum();
@@ -101,6 +101,7 @@ public:
   static int64_t nanoseconds_from_seconds(double sec);
   static time_duration duration_from_nanoseconds(int64_t dur);
   static const DateAndTime defaultTime();
+  static void createVector(const DateAndTime start, const std::vector<double> & seconds, std::vector<DateAndTime> & out);
 
 private:
   ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
