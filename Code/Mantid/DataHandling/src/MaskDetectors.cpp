@@ -18,6 +18,7 @@ DECLARE_ALGORITHM(MaskDetectors)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+using Geometry::IDetector_sptr;
 using namespace DataObjects;
 
 /// (Empty) Constructor
@@ -220,7 +221,17 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<int>& indexList, const M
   
   for (int i = 0; i < numHistograms; ++i)
   {
-    if( existingIndices.count(i) == 0 )
+    IDetector_sptr det;
+    try
+    {
+      det = maskedWorkspace->getDetector(i);
+    }
+    catch(Exception::NotFoundError &)
+    {
+      continue;
+    }
+
+    if( det->isMasked() && existingIndices.count(i) == 0 )
     {
       indexList.push_back(i);
     }

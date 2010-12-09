@@ -161,8 +161,6 @@ public:
     // Set the facility
     ConfigService::Instance().setString("default.facility", "ISIS");
 
-    std::cout << "Starting Test..." << std::endl;
-
     std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-15199");
     TS_ASSERT_EQUALS(files.size(), 11);
     std::vector<std::string>::iterator it = files.begin();
@@ -170,7 +168,6 @@ public:
     {
       if (it != files.begin())
       {
-        std::cout << *it << " ";
         TS_ASSERT_DIFFERS(*it, *(it - 1));
       }
 

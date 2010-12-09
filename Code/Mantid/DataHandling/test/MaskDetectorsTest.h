@@ -310,15 +310,15 @@ public:
       if( masked_indices.count(i) == 1 )
       {
 	TS_ASSERT_EQUALS(det->isMasked(), true);
+	TS_ASSERT_EQUALS(originalWS->readY(i)[0], 0.0);
       }
       else
       {
 	TS_ASSERT_EQUALS(det->isMasked(), false);
+	TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
       }
     }
     
-    
-
     //Cleanup
     AnalysisDataService::Instance().remove(inputWSName);
     AnalysisDataService::Instance().remove(existingMaskName);

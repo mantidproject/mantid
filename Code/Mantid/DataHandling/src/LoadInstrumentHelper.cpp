@@ -70,9 +70,9 @@ public:
 class myContentHandler : public Poco::XML::ContentHandler
 {
   virtual void startElement(
-    const XMLString & uri,
+    const XMLString &,
     const XMLString & localName,
-    const XMLString & qname,
+    const XMLString &,
     const Attributes & attrList
     ) 
   { 
@@ -83,38 +83,38 @@ class myContentHandler : public Poco::XML::ContentHandler
     }
   }
   virtual void endElement(
-    const XMLString & uri,
-    const XMLString & localName,
-    const XMLString & qname
+    const XMLString &,
+    const XMLString &,
+    const XMLString & 
     ) {}
   virtual void startDocument() {}
   virtual void endDocument() {}
   virtual void characters(
-    const XMLChar ch[],
-    int start,
-    int length
+    const XMLChar [],
+    int ,
+    int 
     ) {}
   virtual void endPrefixMapping(
-    const XMLString & prefix
+    const XMLString &
     ) {}
   virtual void ignorableWhitespace(
-    const XMLChar ch[],
-    int start,
-    int length
+    const XMLChar [],
+    int ,
+    int 
     ) {}
   virtual void processingInstruction(
-    const XMLString & target,
-    const XMLString & data
+    const XMLString & ,
+    const XMLString & 
     ) {}
   virtual void setDocumentLocator(
-    const Locator * loc
+    const Locator *
     ) {}
   virtual void skippedEntity(
-    const XMLString & name
+    const XMLString &
     ) {}
   virtual void startPrefixMapping(
-    const XMLString & prefix,
-    const XMLString & uri
+    const XMLString & ,
+    const XMLString & 
     ) {}
 };
 
