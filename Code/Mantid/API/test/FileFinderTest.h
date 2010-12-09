@@ -53,7 +53,7 @@ public:
       "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
       "      <technique>Inelastic Spectroscopy</technique>"
       "    </instrument>"
-      "    <instrument name=\"ARCS\" shortname=\"ARCS\">"
+      "    <instrument name=\"CNCS\" shortname=\"CNCS\">"
       "      <technique>Inelastic Spectroscopy</technique>"
       "    </instrument>"
       "    <instrument name=\"REF_L\" shortname=\"REF_L\">"
@@ -121,10 +121,10 @@ public:
     ConfigService::Instance().setString("default.facility", "SNS");
 
     // Set the default instrument
-    ConfigService::Instance().setString("default.instrument", "ARCS");
+    ConfigService::Instance().setString("default.instrument", "CNCS");
 
     // Check that we remove any leading zeros
-    TS_ASSERT_EQUALS("ARCS_123", FileFinder::Instance().makeFileName("0123"));
+    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123"));
 
     // Test using long and short name
     TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21"));
@@ -132,6 +132,20 @@ public:
 
     // Test for REF_L (to check that the extra _ doesn't upset anything)
     TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666"));
+
+  }
+
+  void testFindRunForSNS()
+  {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "SNS");
+    // Turn off the archive searching
+    ConfigService::Instance().setString("datasearch.searcharchive", "Off");
+
+    std::string path = FileFinder::Instance().findRun("CNCS7850");
+    TS_ASSERT(path.find("CNCS_7850_event.nxs") != std::string::npos);
+    Poco::File file(path);
+    TS_ASSERT(file.exists());
 
   }
 
