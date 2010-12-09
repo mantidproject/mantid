@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ConfigService.h"
 #include <stdexcept>
 #include <vector>
 
@@ -76,6 +77,8 @@ public:
 
   AlgorithmManagerTest() 
   {
+    // A test fails unless algorithms.retained is big enough
+    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","100");
   }
 
   void testVersionFail()
@@ -83,7 +86,7 @@ public:
     const int nalgs = AlgorithmFactory::Instance().getKeys().size();
     TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestFail>());
     // Size should be the same
-    TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs)
+    TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
     
   }
 
@@ -98,11 +101,11 @@ public:
     //AlgorithmManager *tester = AlgorithmManager::Instance();
     //TS_ASSERT_EQUALS( manager, tester);
 
-    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
     TS_ASSERT_THROWS(
     AlgorithmManager::Instance().create("AlgTest",3)
-    , std::runtime_error )
-    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
+    , std::runtime_error );
+    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error );
   }
 
   void testGetNamesAndCategories()
@@ -112,10 +115,16 @@ public:
 	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
     std::vector<std::pair<std::string,std::string> > names = AlgorithmManager::Instance().getNamesAndCategories();
 	  TS_ASSERT_EQUALS(names.size(), 2);
-	  TS_ASSERT_EQUALS(names[0].first, "AlgTest");
-	  TS_ASSERT_EQUALS(names[0].second, "Cat4");
-	  TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
-	  TS_ASSERT_EQUALS(names[1].second, "Cat3");
+    if (names.size() > 0)
+	  {
+      TS_ASSERT_EQUALS(names[0].first, "AlgTest");
+      TS_ASSERT_EQUALS(names[0].second, "Cat4");
+	  }
+    if (names.size() > 1)
+    {
+      TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
+      TS_ASSERT_EQUALS(names[1].second, "Cat3");
+    }
 
   }
 
