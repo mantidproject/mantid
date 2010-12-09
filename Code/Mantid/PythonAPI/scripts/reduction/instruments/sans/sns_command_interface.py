@@ -18,3 +18,5 @@ def AzimuthalAverage(binning="0.001,0.001,0.05", suffix="_Iq", error_weighting=F
                                                                                             n_subpix=n_subpix,
                                                                                             error_weighting=error_weighting))
     
+def FrameSkipping(value):
+    ReductionSingleton().set_frame_skipping(value)

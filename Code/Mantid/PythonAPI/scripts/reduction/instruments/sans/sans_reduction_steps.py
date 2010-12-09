@@ -45,7 +45,9 @@ class BaseBeamFinder(ReductionStep):
                     
         reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
         
-        beam_center = FindCenterOfMassPosition(workspace,
+        # Integrate over all wavelength bins so that we process a single detector image
+        Integration(workspace, workspace+'_int')
+        beam_center = FindCenterOfMassPosition(workspace+'_int',
                                                Output = None,
                                                NPixelX=reducer.instrument.nx_pixels,
                                                NPixelY=reducer.instrument.ny_pixels,
@@ -56,6 +58,14 @@ class BaseBeamFinder(ReductionStep):
         
         self._beam_center_x = float(ctr[0])
         self._beam_center_y = float(ctr[1])
+        
+        # Move detector array to correct position. Do it here so that we don't need to
+        # move it if we need to load that data set for analysis later.
+        # Note: the position of the detector in Z is now part of the load
+        MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
+                                X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
+                                Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                RelativePosition="1")        
         
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 

@@ -4,8 +4,8 @@
     TODO:   - Allow use of FindNexus when we are on an analysis computer  
 """
 import os
-import math
 from reduction import ReductionStep
+from sans_reduction_steps import BaseTransmission
 
 # Mantid imports
 from mantidsimple import *
@@ -35,7 +35,8 @@ class LoadRun(ReductionStep):
         filepath = reducer._full_file_path(data_file)
 
         # Check whether that file was already loaded
-        if mtd[workspace] is not None and not force:
+        # The file also has to be pristine
+        if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
             return "Data %s is already loaded: delete it first if reloading is intended" % (workspace)
 
         # Find all the necessary files
@@ -44,6 +45,8 @@ class LoadRun(ReductionStep):
         nxs_file = ""
         
         # Check if we have an event file or a pulseid file.
+        is_event_nxs = False
+        
         if filepath.find("_neutron_event")>0:
             event_file = filepath
             pulseid_file = filepath.replace("_neutron_event", "_pulseid")
@@ -51,16 +54,23 @@ class LoadRun(ReductionStep):
             pulseid_file = filepath
             event_file = filepath.replace("_pulseid", "_neutron_event")
         else:
-            raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
-        nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
+            #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
+            # Doesn't look like event pre-nexus, try event nexus
+            is_event_nxs = True
         
         # Mapping file
         mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
         directory,_ = os.path.split(event_file)
         mapping_file = os.path.join(directory, mapping_file)
         
-        LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
-        LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
+        if is_event_nxs:
+            mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
+            LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
+        else:
+            mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
+            nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
+            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+            LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
         
         # Store the sample-detector distance
         reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
@@ -70,7 +80,8 @@ class LoadRun(ReductionStep):
         Rebin(workspace+'_evt', workspace, "0,10,20000")
         
         # Apply the TOF offset for this run
-        offset = EQSANSTofOffset(InputWorkspace=workspace)
+        mantid.sendLogMessage("Frame-skipping option: %s" % str(reducer.frame_skipping))
+        offset = EQSANSTofOffset(InputWorkspace=workspace, FrameSkipping=reducer.frame_skipping)
         offset_calc = offset["Offset"].value
         ChangeBinOffset(workspace, workspace, offset_calc) 
 
@@ -78,5 +89,58 @@ class LoadRun(ReductionStep):
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
+        # Remove the dirty flag if it existed
+        reducer.clean(workspace)
         return "Data file loaded: %s" % (workspace)
 
+
+
+class Normalize(ReductionStep):
+    """
+        Normalize the data to the accelerator current
+    """
+    def execute(self, reducer, workspace):
+        # Flag the workspace as dirty
+        reducer.dirty(workspace)
+        
+        #NormaliseByCurrent(workspace, workspace)
+        proton_charge = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().mean
+        duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
+        frequency = mantid.getMatrixWorkspace(workspace).getRun()["frequency"].getStatistics().mean
+        acc_current = 1.0e-12 * proton_charge * duration * frequency
+        Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
+        
+        return "Data normalized to accelerator current" 
+    
+    
+class Transmission(BaseTransmission):
+    """
+        Perform the transmission correction for EQ-SANS
+    """
+    def __init__(self, normalize_to_unity=True):
+        super(Transmission, self).__init__()
+        self._normalize = normalize_to_unity
+    
+    def execute(self, reducer, workspace):
+        # The transmission calculation only works on the original un-normalized counts
+        if not reducer.is_clean(workspace):
+            raise RuntimeError, "The Transmission can only be calculated using un-modified data"
+        
+        beam_center = reducer.get_beam_center()
+
+        # Calculate the transmission as a function of wavelength
+        EQSANSTransmission(InputWorkspace=workspace,
+                           OutputWorkspace="transmission",
+                           XCenter=beam_center[0],
+                           YCenter=beam_center[1],
+                           NormalizeToUnity = self._normalize)
+        
+        # Apply the transmission. For EQSANS, we just divide by the 
+        # transmission instead of using the angular dependence of the
+        # correction.
+        reducer.dirty(workspace)
+        Divide(workspace, "transmission", workspace)
+        
+        return "Transmission correction applied"
+    
+    
