@@ -35,6 +35,7 @@ namespace DataObjects
 
   EventWorkspace::~EventWorkspace()
   {
+    //std::cout << "EventWorkspace " << this->getName() << " is being deleted.\n";
     //Make sure you free up the memory in the MRUs
     for (size_t i=0; i < m_bufferedDataY.size(); i++)
       if (m_bufferedDataY[i])
@@ -126,7 +127,8 @@ namespace DataObjects
   void EventWorkspace::copyDataFrom(const EventWorkspace& source, int sourceStartWorkspaceIndex, int sourceEndWorkspaceIndex)
   {
     //Start with nothing.
-    this->data.clear();
+    this->clearData(); //properly de-allocates memory!
+
     //Copy the vector of EventLists
     EventListVector source_data = source.data;
     EventListVector::iterator it;
@@ -149,6 +151,9 @@ namespace DataObjects
       EventList * newel = new EventList( **it );
       this->data.push_back(newel);
     }
+    //Save the number of vectors
+    m_noVectors = this->data.size();
+
     this->clearMRU();
     //The data map is useless now
     this->data_map.clear();
