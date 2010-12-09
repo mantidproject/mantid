@@ -49,35 +49,35 @@ namespace Mantid
       int local_version=version;
       if( version < 0)
       {
-	if(version == -1)//get latest version since not supplied
-	{
-	  versionMap::const_iterator it = m_vmap.find(name);
-	  if (!name.empty())
-	  {
-	    if(it == m_vmap.end() )			  
-	      throw std::runtime_error("algorithm not registered "+ name );
-	    else
-	      local_version = it->second;						  
-	  }
-	  else			  
-	    throw;					
-	}		
+        if(version == -1)//get latest version since not supplied
+        {
+          versionMap::const_iterator it = m_vmap.find(name);
+          if (!name.empty())
+          {
+            if(it == m_vmap.end() )
+              throw std::runtime_error("algorithm not registered "+ name );
+            else
+              local_version = it->second;
+          }
+          else
+            throw;
+        }
       }
       try
       {
-	return this->createAlgorithm(name, local_version);
+        return this->createAlgorithm(name, local_version);
       }
       catch(Kernel::Exception::NotFoundError&)
       {
-	versionMap::const_iterator it = m_vmap.find(name);
-	if(it == m_vmap.end() )			  
-	  throw std::runtime_error("algorithm not registered "+ name );
-	else
-	{
-	  g_log.error()<< "algorithm "<< name<< " version " << version << " is not registered "<<std::endl;
-	  g_log.error()<< "the latest registered version is " << it->second<<std::endl;
-	  throw std::runtime_error("algorithm not registered "+ createName(name,local_version) );			
-	}
+        versionMap::const_iterator it = m_vmap.find(name);
+        if(it == m_vmap.end() )
+          throw std::runtime_error("algorithm not registered "+ name );
+        else
+        {
+          g_log.error()<< "algorithm "<< name<< " version " << version << " is not registered "<<std::endl;
+          g_log.error()<< "the latest registered version is " << it->second<<std::endl;
+          throw std::runtime_error("algorithm not registered "+ createName(name,local_version) );
+        }
       }
     }
 
@@ -217,7 +217,7 @@ namespace Mantid
     {
       try
       {
-	return Kernel::DynamicFactory<Algorithm>::create(createName(name,version));
+        return Kernel::DynamicFactory<Algorithm>::create(createName(name,version));
       }
       catch(Mantid::Kernel::Exception::NotFoundError &)
       {
@@ -227,16 +227,16 @@ namespace Mantid
       std::map<std::string, CloneableAlgorithm*>::const_iterator itr = m_cloneable_algs.find(fqlname);
       if( itr != m_cloneable_algs.end() )
       {
-	API::CloneableAlgorithm *cloned = itr->second->clone();
-	if( !cloned )
-	{
-	  throw std::runtime_error("Cloning algorithm failed, cannot create algorithm \"" + name + "\"");
-	}
-	return boost::shared_ptr<API::CloneableAlgorithm>(cloned, std::mem_fun(&CloneableAlgorithm::kill));
+        API::CloneableAlgorithm *cloned = itr->second->clone();
+        if( !cloned )
+        {
+          throw std::runtime_error("Cloning algorithm failed, cannot create algorithm \"" + name + "\"");
+        }
+        return boost::shared_ptr<API::CloneableAlgorithm>(cloned, std::mem_fun(&CloneableAlgorithm::kill));
       }
       else
       {
-	throw Mantid::Kernel::Exception::NotFoundError("Unknown algorithm requested.", name);
+        throw Mantid::Kernel::Exception::NotFoundError("Unknown algorithm requested.", name);
       }
     }
 

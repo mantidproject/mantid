@@ -272,6 +272,9 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       tsp->create(start_time, time_double, values);
       tsp->setUnits( units );
       WS->mutableRun().addProperty( tsp, overwritelogs );
+      // Trick to free memory?
+      std::vector<double>().swap(time_double);
+      std::vector<double>().swap(values);
     }
 
   }

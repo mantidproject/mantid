@@ -804,7 +804,16 @@ string File::getStrData() {
     throw Exception(msg.str());
   }
   char* value = new char[info.dims[0]+1]; // probably do not need +1, but being safe
-  this->getData(value);
+  try
+  {
+    this->getData(value);
+  }
+  catch (Exception e)
+  {
+    delete[] value;
+    throw e;
+  }
+
   res = string(value, info.dims[0]);
   delete[] value;
   return res;
@@ -935,7 +944,9 @@ void File::getAttr(const AttrInfo& info, void* data, int length) {
   }
   NXstatus status = NXgetattr(this->m_file_id, name, data, &length,
                               &type);
-  if (status != NX_OK) {
+  if (status != NX_OK)
+  {
+
     throw Exception("NXgetattr(" + info.name + ") failed", status);
   }
   if (type != info.type) {
@@ -991,14 +1002,22 @@ string File::getStrAttr(const AttrInfo & info) {
     throw Exception(msg.str());
   }
   char* value = new char[info.length + 1];
-  this->getAttr(info, value, info.length+1);
+  try
+  {
+    this->getAttr(info, value, info.length+1);
+  }
+  catch (Exception e)
+  {
+    //Avoid memory leak
+    delete [] value;
+    throw e; //re-throw
+  }
 
   //res = string(value, info.length);
-
   //allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
   res = string(value);
+  delete [] value;
 
-  delete[] value;
   return res;
 }
 
@@ -1069,7 +1088,8 @@ string File::inquireFile(const int buff_length) {
   string filename;
   char* c_filename = new char[buff_length];
   NXstatus status = NXinquirefile(this->m_file_id, c_filename, buff_length);
-  if (status != NX_OK) {
+  if (status != NX_OK)
+  {
     delete[] c_filename;
     stringstream msg;
     msg << "NXinquirefile(" << buff_length << ") failed";

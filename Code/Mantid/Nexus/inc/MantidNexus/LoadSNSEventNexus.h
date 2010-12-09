@@ -60,7 +60,9 @@ namespace Mantid
       LoadSNSEventNexus();
 
       /// Destructor
-      virtual ~LoadSNSEventNexus() {}
+      virtual ~LoadSNSEventNexus()
+      {
+      }
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadSNSEventNexus";};

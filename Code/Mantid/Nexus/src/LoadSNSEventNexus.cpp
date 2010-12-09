@@ -171,6 +171,11 @@ void LoadSNSEventNexus::exec()
     this->runLoadMonitors();
   }
 
+  // Delete the output workspace name if it existed
+  std::string outName = getPropertyValue("OutputWorkspace");
+  if (AnalysisDataService::Instance().doesExist(outName))
+    AnalysisDataService::Instance().remove( outName );
+
   // top level file information
   ::NeXus::File file(m_filename);
 
@@ -296,6 +301,8 @@ void LoadSNSEventNexus::exec()
 
   return;
 }
+
+
 
 void LoadSNSEventNexus::loadEntryMetadata(const std::string &entry_name) {
   // Open the file
