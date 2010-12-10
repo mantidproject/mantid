@@ -12,7 +12,8 @@ class OpenGLError: public std::exception
   std::string m_msg;
 public:
   explicit OpenGLError(const std::string& msg):m_msg(msg){}
-  const char * what() const{return m_msg.c_str();}
+  ~OpenGLError() throw(){}
+  const char * what() const throw() {return m_msg.c_str();}
   static void check(const std::string& funName);
 };
 
