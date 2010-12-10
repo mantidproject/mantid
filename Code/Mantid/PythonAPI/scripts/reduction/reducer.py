@@ -20,6 +20,8 @@
 import os
 import time
 from instrument import Instrument
+import MantidFramework
+
 
 ## Version number
 __version__ = '0.0'
@@ -68,13 +70,18 @@ class Reducer(object):
             @param filename: name of the file to create the full path for
         """
         filepath = os.path.join(self._data_path, filename)
-        
+
         # Check that the file exists
         if os.path.isfile(filepath):
             return filepath
         elif os.path.isfile(filename):
             # If not, check in the working directory
             return filename
+
+        system_path = MantidFramework.FileFinder.getFullPath(filename).strip()
+        
+        if system_path :
+            return system_path
         else:
             # If not, raise an exception
             raise RuntimeError, 'Could not load file "%s"' % filename

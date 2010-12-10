@@ -156,9 +156,7 @@ class ISISReducer(SANSReducer):
                             data_file, False, self.instrument.name(), self.instrument.run_number_width)
         if workspace is None:
             workspace = wrkspc
-            
-        self._full_file_path(filename)
-        
+
         self._data_files.clear()
         self._data_files[workspace] = workspace
 

@@ -505,7 +505,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
   g_log.debug() << "Executing Python: " << pycode.toStdString() << std::endl;
 
   const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
-  QString code_torun =  pycode + ";print '"+PYTHON_SEP+"'";
+  QString code_torun =  pycode + ";print '"+PYTHON_SEP+"p'";
   QString pythonOut = runPythonCode(code_torun).trimmed();
   
   QStringList allOutput = pythonOut.split(PYTHON_SEP);
@@ -2318,7 +2318,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   const int index = m_uiForm.inst_opt->currentIndex();
   py_code = "i.ISIS_global().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
   //restore the settings from the user file
-  py_code += "i.ISIS_global().user_file_path='"+
+  py_code += "\ni.ISIS_global().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
   py_code += "\ni.ISIS_global().user_settings = _user_settings_copy";
   py_code += "\ni.ISIS_global().user_settings.execute(i.ISIS_global())";
