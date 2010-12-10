@@ -4897,7 +4897,7 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/ScriptWindow");
   d_script_win_on_top = settings.value("/AlwaysOnTop", false).toBool();  //M. Gigg, Mantid
-  d_script_win_rect = QRect(settings.value("/x", 0).toInt(), settings.value("/y", 0).toInt(),
+  d_script_win_rect = QRect(settings.value("/x", 100).toInt(), settings.value("/y", 50).toInt(),
       settings.value("/width", 600).toInt(), settings.value("/height", 660).toInt());
   d_script_win_arrow = settings.value("/ProgressArrow", true).toBool();  // Mantid - restore progress arrow state
   settings.endGroup();
