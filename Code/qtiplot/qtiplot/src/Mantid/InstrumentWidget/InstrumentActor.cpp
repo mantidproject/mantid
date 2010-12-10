@@ -50,8 +50,8 @@ void InstrumentActor::getDetectorIDList(std::vector<int>& idList)
  */
 void InstrumentActor::setDetectorColors(std::vector<boost::shared_ptr<GLColor> >& list)
 {
-	std::vector<boost::shared_ptr<GLColor> >::iterator listItr=list.begin();
-	setInternalDetectorColors(listItr);
+  std::vector<boost::shared_ptr<GLColor> >::iterator listItr=list.begin();
+  setInternalDetectorColors(listItr);
 }
 
 /**

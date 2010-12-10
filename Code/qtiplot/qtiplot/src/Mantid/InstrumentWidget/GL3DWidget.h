@@ -14,7 +14,6 @@
 #include "GLGroupPickBox.h"
 #include "boost/shared_ptr.hpp"
 
-class UnwrappedCylinder;
 class UnwrappedSurface;
 
 /*!
@@ -95,6 +94,7 @@ protected:
   void keyReleaseEvent(QKeyEvent *);
   void defaultProjection();
   void redrawUnwrapped();
+  void checkGLError(const QString& funName);
   
   virtual void drawSceneUsingColorID()=0;
   virtual void setSceneLowResolution()=0;

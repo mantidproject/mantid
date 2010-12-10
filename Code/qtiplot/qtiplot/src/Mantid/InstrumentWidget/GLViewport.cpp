@@ -6,14 +6,21 @@
 #include "GL/glu.h"
 #include "math.h"
 #include "MantidGeometry/V3D.h"
+#include "OpenGLError.h"
 #include <iostream>
 
 GLViewport::GLViewport(int w, int h):mWidth(w),mHeight(h)
 {
-	mProjection=GLViewport::ORTHO;
-	mZoomFactor=1.0;
-	mXTrans=0.0;
-	mYTrans=0.0;
+  mProjection=GLViewport::ORTHO;
+  mZoomFactor=1.0;
+  mXTrans=0.0;
+  mYTrans=0.0;
+  mLeft = -1;
+  mRight = 1;
+  mBottom = -1;
+  mTop = 1;
+  mNear = -1;
+  mFar = 1;
 }
 
 GLViewport::~GLViewport()
@@ -167,6 +174,7 @@ void GLViewport::issueGL() const
   glLoadIdentity();
   glViewport(0, 0, mWidth, mHeight);
 
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   if(mProjection==GLViewport::PERSPECTIVE)
@@ -191,4 +199,5 @@ void GLViewport::issueGL() const
     //		std::cout << "glOrtho called with nearVal = " << nearVal  << " and farVal = " << farVal << "\n";
   }
   glMatrixMode(GL_MODELVIEW);
+  OpenGLError::check("GLViewport::issueGL()");
 }

@@ -1,6 +1,7 @@
 #include "Instrument3DWidget.h"
 #include "InstrumentActor.h"
 #include "MantidObject.h"
+#include "OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -124,6 +125,7 @@ void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
 void Instrument3DWidget::setWorkspace(const QString& wsName)
 {
   Timer timer;
+  makeCurrent();
 
   MatrixWorkspace_sptr output = 
     boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));

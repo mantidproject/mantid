@@ -491,8 +491,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
 	    src/Mantid/InstrumentWidget/GLViewport.h \
 	    src/Mantid/InstrumentWidget/Instrument3DWidget.h \
-	    src/Mantid/InstrumentWidget/GL3DWidget.h \
-	    src/Mantid/InstrumentWidget/GLActor.h \
+            src/Mantid/InstrumentWidget/GL3DWidget.h \
+            src/Mantid/InstrumentWidget/OpenGLError.h \
+            src/Mantid/InstrumentWidget/GLActor.h \
 	    src/Mantid/InstrumentWidget/GLActorCollection.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
             src/Mantid/InstrumentWidget/TexObject.h \
@@ -679,7 +680,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/GLViewport.cpp \
 	    src/Mantid/InstrumentWidget/Instrument3DWidget.cpp \
 	    src/Mantid/InstrumentWidget/GL3DWidget.cpp \
-	    src/Mantid/InstrumentWidget/GLActor.cpp \
+            src/Mantid/InstrumentWidget/OpenGLError.cpp \
+            src/Mantid/InstrumentWidget/GLActor.cpp \
 	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
             src/Mantid/InstrumentWidget/TexObject.cpp \
@@ -889,4 +891,3 @@ contains(SCRIPTING_LANGS, Python) {
 
 }
 ###############################################################
-

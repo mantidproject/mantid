@@ -7,6 +7,7 @@
 #include "InstrumentActor.h"
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
+#include "OpenGLError.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Objects/Object.h"
 
@@ -38,12 +39,13 @@ GL3DWidget::GL3DWidget(QWidget* parent):
     std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
   //std::cout << "Depth buffer size is " << this->format().depthBufferSize() << "\n";
 
+  makeCurrent();
   _viewport=new GLViewport;
   _trackball=new GLTrackball(_viewport);
   isKeyPressed=false;
   scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection());
   mPickedActor=NULL;
-  mPickingDraw=false;
+  mPickingDraw=true;
   iInteractionMode=GL3DWidget::MoveMode;
   mPickBox=new GLGroupPickBox();
   setFocusPolicy(Qt::StrongFocus);
@@ -225,10 +227,11 @@ void GL3DWidget::drawDisplayScene()
   */
 void GL3DWidget::draw3D()
 {
-  static int i = 0;
+  glGetError();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  OpenGLError::check("GL3DWidget::draw3D()[clear] ");
 
   // Issue the rotation, translation and zooming of the trackball to the object
   _trackball->IssueRotation();
@@ -252,6 +255,7 @@ void GL3DWidget::draw3D()
     scene->draw();
     setLightingModel(0);
     this->drawAxes();
+    OpenGLError::check("GL3DWidget::draw3D()[scene draw 1] ");
   }
   else
   {
@@ -264,6 +268,7 @@ void GL3DWidget::draw3D()
       setLightingModel(0);
 
     scene->draw();
+    OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
 
     //This draws a point at the origin, I guess
     glPointSize(3.0);
@@ -281,6 +286,7 @@ void GL3DWidget::draw3D()
 
   }
   glPopMatrix();
+  OpenGLError::check("GL3DWidget::draw3D()");
   QPainter painter(this);
   painter.end();
 }
@@ -290,6 +296,8 @@ void GL3DWidget::draw3D()
  */
 void GL3DWidget::drawPickingScene()
 {
+  makeCurrent();
+  glGetError();
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glClearColor(0.0,0.0,0.0,1.0);
   glMatrixMode(GL_MODELVIEW);
@@ -321,7 +329,8 @@ void GL3DWidget::switchToPickingMode()
     drawPickingScene();
     mPickBox->setPickImage(grabFrameBuffer(false));
     glEnable(GL_MULTISAMPLE);   //enable antialiasing
-    mPickingDraw=false;
+    //mPickingDraw=false;
+    OpenGLError::check("GL3DWidget::switchToPickingMode() ");
   }
   else
   {
@@ -342,21 +351,25 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
     {
       switchToPickingMode();
     }
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(format().sampleBuffers())
+    if (m_renderMode == FULL3D)
     {
-      QPainter painter(this);
-      painter.setRenderHint(QPainter::Antialiasing);
-      mPickBox->draw(&painter);
-      painter.end();
-    }
-    else
-    {
-      drawDisplayScene();
-      QPainter painter(this);
-      painter.setRenderHint(QPainter::Antialiasing);
-      mPickBox->drawPickBox(&painter);
-      painter.end();
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      //OpenGLError::check("GL3DWidget::paintEvent");
+      if(format().sampleBuffers())
+      {
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        mPickBox->draw(&painter);
+        painter.end();
+      }
+      else
+      {
+        drawDisplayScene();
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        mPickBox->drawPickBox(&painter);
+        painter.end();
+      }
     }
   }
   else
@@ -364,7 +377,7 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
     drawDisplayScene();
   }
 
-  //
+
   if (m_firstFrame)
   {
     update();
@@ -378,7 +391,7 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
  */
 void GL3DWidget::resizeGL(int width, int height)
 {
-
+  makeCurrent();
   _viewport->resize(width,height);
   _viewport->issueGL();
   
@@ -386,8 +399,9 @@ void GL3DWidget::resizeGL(int width, int height)
   {
     mPickingDraw=true;
   }
-
   m_unwrappedViewChanged = true;
+
+  OpenGLError::check("GL3DWidget::resizeGL");
 }
 
 /**
@@ -411,6 +425,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
       m_unwrappedSurface->startSelection(event->x(),event->y());
     }
     update();
+    OpenGLError::check("GL3DWidget::mousePressEvent");
     return;
   }
 
@@ -445,6 +460,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
     isKeyPressed=true;
     setSceneLowResolution();
   }
+  OpenGLError::check("GL3DWidget::mousePressEvent");
 }
 
 /**
@@ -476,6 +492,7 @@ void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
  */
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
+  makeCurrent();
   if (m_renderMode != FULL3D && m_unwrappedSurface)
   {
     if (event->buttons() & Qt::LeftButton)
@@ -483,6 +500,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
       m_unwrappedSurface->moveSelection(event->x(),event->y());
       update();
     }
+    OpenGLError::check("GL3DWidget::mouseMoveEvent");
     return;
   }
 
@@ -525,6 +543,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
       _trackball->initZoomFrom(event->x(),event->y());
     }
   }
+  OpenGLError::check("GL3DWidget::mouseMoveEvent");
 }
 
 /**
@@ -540,6 +559,7 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
       m_unwrappedSurface->endSelection(event->x(),event->y());
 //    }
       update();
+      OpenGLError::check("GL3DWidget::mouseReleaseEvent");
     return;
   }
 
@@ -555,6 +575,7 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
       emit actorsPicked(result);
     }
   }
+  OpenGLError::check("GL3DWidget::mouseReleaseEvent");
   update();
 }
 
@@ -564,11 +585,13 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
  */
 void GL3DWidget::wheelEvent(QWheelEvent* event)
 {
+  makeCurrent();
   setCursor(Qt::SizeVerCursor);
   _trackball->initZoomFrom(event->x(),event->y());
   _trackball->generateZoomTo(event->x(),event->y()+event->delta());
   update();
   setCursor(Qt::PointingHandCursor);
+  OpenGLError::check("GL3DWidget::wheelEvent");
 }
 
 /**
@@ -577,6 +600,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
  */
 void GL3DWidget::keyPressEvent(QKeyEvent *event)
 {
+  makeCurrent();
   grabKeyboard();
   // Ignore keyboard event when in pick mode
   if( iInteractionMode== GL3DWidget::PickMode) return; 
@@ -690,6 +714,7 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
       update();
       break;
     }
+  OpenGLError::check("GL3DWidget::keyPressEvent");
 }
 
 /**
@@ -705,6 +730,7 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
   {
     update();
   }
+  OpenGLError::check("GL3DWidget::keyReleaseEvent");
 }
 /**
  * This method sets the collection of actors that widget needs to display
@@ -717,6 +743,7 @@ void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
   _viewport->getViewport(&width,&height);
   resizeGL(width,height);
   update();
+  OpenGLError::check("GL3DWidget::setActorCollection");
 }
 
 /**
@@ -732,6 +759,7 @@ void GL3DWidget::MakeObject()
  */
 void GL3DWidget::setViewDirection(AxisDirection dir)
 {
+  makeCurrent();
   Mantid::Geometry::V3D minPoint,maxPoint;
   double _bbmin[3],_bbmax[3];
   getBoundingBox(minPoint,maxPoint);
@@ -770,7 +798,7 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
     _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
     break;
   }
-  
+  OpenGLError::check("GL3DWidget::setViewDirection");
   _viewport->issueGL();
   update();
 }
@@ -780,6 +808,7 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
  */
 void GL3DWidget::defaultProjection()
 {
+  makeCurrent();
   // Getting the bounding box of the scene and setting the orthagonal projection
   // such that the orthogonal projection places the object completly in the screen
   // Its a simplified version of placing the object completly in screen with same
@@ -810,6 +839,7 @@ void GL3DWidget::defaultProjection()
   minValue=temp;
   
   _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);
+  OpenGLError::check("GL3DWidget::defaultProjection()");
   Mantid::Geometry::V3D center;
   center=(minPoint+maxPoint)/2.0;
   _viewport->issueGL();
@@ -833,9 +863,11 @@ void GL3DWidget::set3DAxesState(int state)
  */
 void GL3DWidget::setBackgroundColor(QColor input)
 {
+  makeCurrent();
   bgColor = input;
   glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  OpenGLError::check("GL3DWidget::setBackgroundColor");
   update();
 }
 
@@ -857,6 +889,7 @@ void GL3DWidget::saveToFile(const QString & filename)
   this->swapBuffers(); // temporarily swap the buffers
   QImage image = this->grabFrameBuffer();
   this->swapBuffers(); // swap them back
+  OpenGLError::check("GL3DWidget::saveToFile");
   image.save(filename);
 }
 
@@ -895,6 +928,7 @@ void GL3DWidget::setWireframe(bool on)
 
 void GL3DWidget::setRenderMode(int mode)
 {
+  makeCurrent();
   if (mode < RENDERMODE_SIZE)
   {
     m_renderMode = RenderMode(mode);
@@ -962,6 +996,7 @@ void GL3DWidget::drawUnwrapped()
   m_unwrappedSurface->draw(this);
 
   QApplication::restoreOverrideCursor();
+  OpenGLError::check("GL3DWidget::drawUnwrapped()");
 }
 
 void GL3DWidget::redrawUnwrapped()
@@ -980,3 +1015,4 @@ void GL3DWidget::componentSelected(Mantid::Geometry::ComponentID id)
     update();
   }
 }
+

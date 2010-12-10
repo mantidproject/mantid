@@ -1,6 +1,7 @@
 #include "UnwrappedSurface.h"
 #include "GLColor.h"
 #include "GL3DWidget.h"
+#include "OpenGLError.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -274,6 +275,7 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
     }
     painter.end();
   }
+  OpenGLError::check("UnwrappedSurface::drawSurface");
 }
 
 void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
@@ -647,6 +649,7 @@ void UnwrappedSurface::showPickedDetector()
   foreach(int id,detIDs)
   {
     std::cerr<<"det ID = "<<id<<'\n';
+
   }
 }
 

@@ -1,4 +1,5 @@
 #include "TexObject.h"
+#include "OpenGLError.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
@@ -42,8 +43,8 @@ void TexObject::generateTexture()
   if (m_id > 0)
   {
     glDeleteTextures(1,&m_id);
+    OpenGLError::check("TexObject::generateTexture()[delete texture] ");
   }
-
   bool vertical = true; // depends on the tex coordinates of the shape object
 
   int width = m_n;
@@ -56,14 +57,13 @@ void TexObject::generateTexture()
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glGenTextures(1, &m_id);					// Create The Texture
-  //std::cerr<<"m_id="<<m_id<<' '<<m_n<<'\n';
-  GLuint err=glGetError(); if (err) std::cerr<<err<<" GL 1d error1\n";
+  OpenGLError::check("TexObject::generateTexture()[generate] ");
   glBindTexture(GL_TEXTURE_2D, m_id);
-  err=glGetError(); if (err) std::cerr<<err<<" GL 1d error2\n";
+  OpenGLError::check("TexObject::generateTexture()[bind] ");
 
   GLint texParam = GL_NEAREST;
   glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
-  err=glGetError(); if (err) std::cerr<<err<<" GL 1d error3\n";
+  OpenGLError::check("TexObject::generateTexture()[set data] ");
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,texParam);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,texParam);
 }
@@ -78,6 +78,7 @@ void TexObject::define()
   glBindTexture(GL_TEXTURE_2D, m_id);
   Obj->draw();
   glBindTexture(GL_TEXTURE_2D, 0);
+  OpenGLError::check("TexObject::define()");
 }
 
 /**

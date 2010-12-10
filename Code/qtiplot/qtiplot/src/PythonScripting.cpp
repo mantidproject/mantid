@@ -106,81 +106,88 @@ QsciLexer * PythonScripting::createCodeLexer() const
  */
 bool PythonScripting::start()
 {
-  if( Py_IsInitialized() ) return true;
-  // Initialize interpreter, disabling signal registration as we don't need it
-  Py_InitializeEx(0);
-
-  // Add in Mantid paths.
-  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
-  QString pycode = 
-    "import sys\n"
-    "mantidbin = '" +  mantidbin.absolutePath() + "'\n" + 
-    "if not mantidbin in sys.path:\n"
-    "\tsys.path.insert(0,mantidbin)\n";
-
-  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
-  if( mantidoutput != mantidbin )
+  try
   {
+    if( Py_IsInitialized() ) return true;
+    // Initialize interpreter, disabling signal registration as we don't need it
+    Py_InitializeEx(0);
+
+    // Add in Mantid paths.
+    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+    QString pycode =
+        "import sys\n"
+        "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
+        "if not mantidbin in sys.path:\n"
+        "\tsys.path.insert(0,mantidbin)\n";
+
+    QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+    if( mantidoutput != mantidbin )
+    {
       pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("')\n");
-  }
-  PyRun_SimpleString(pycode.toStdString().c_str());
+    }
+    PyRun_SimpleString(pycode.toStdString().c_str());
 
-  //Keep a hold of the globals, math and sys dictionary objects
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  if( !pymodule )
+    //Keep a hold of the globals, math and sys dictionary objects
+    PyObject *pymodule = PyImport_AddModule("__main__");
+    if( !pymodule )
+    {
+      shutdown();
+      return false;
+    }
+    m_globals = PyModule_GetDict(pymodule);
+    if( !m_globals )
+    {
+      shutdown();
+      return false;
+    }
+
+    //Create a new dictionary for the math functions
+    m_math = PyDict_New();
+
+    pymodule = PyImport_ImportModule("sys");
+    m_sys = PyModule_GetDict(pymodule);
+    if( !m_sys )
+    {
+      shutdown();
+      return false;
+    }
+
+    //Embedded qti module needs sip definitions initializing before it can be used
+    initqti();
+
+    pymodule = PyImport_ImportModule("qti");
+    if( pymodule )
+    {
+      PyDict_SetItemString(m_globals, "qti", pymodule);
+      PyObject *qti_dict = PyModule_GetDict(pymodule);
+      setQObject(d_parent, "app", qti_dict);
+      PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
+      Py_DECREF(pymodule);
+    }
+    else
+    {
+      shutdown();
+      return false;
+    }
+
+    setQObject(this, "stdout", m_sys);
+    setQObject(this, "stderr", m_sys);
+
+    if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) &&
+        loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
+    {
+      d_initialized = true;
+    }
+    else
+    {
+      d_initialized = false;
+    }
+    return d_initialized;
+  }
+  catch(...)
   {
-    shutdown();
     return false;
   }
-  m_globals = PyModule_GetDict(pymodule);
-  if( !m_globals )
-  {
-    shutdown();
-    return false;
-  }
-
-  //Create a new dictionary for the math functions
-  m_math = PyDict_New();
-
-  pymodule = PyImport_ImportModule("sys"); 
-  m_sys = PyModule_GetDict(pymodule);
-  if( !m_sys )
-  {
-    shutdown();
-    return false;
-  }
-
-  //Embedded qti module needs sip definitions initializing before it can be used
-  initqti();
-
-  pymodule = PyImport_ImportModule("qti");
-  if( pymodule )
-  {
-    PyDict_SetItemString(m_globals, "qti", pymodule);
-    PyObject *qti_dict = PyModule_GetDict(pymodule);
-    setQObject(d_parent, "app", qti_dict);
-    PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
-    Py_DECREF(pymodule);
-  } 
-  else
-  {
-    shutdown();
-    return false;
-  }
-
-  setQObject(this, "stdout", m_sys);
-  setQObject(this, "stderr", m_sys);
-
-  if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) && 
-      loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
-  {
-    d_initialized = true;
-  }
-  else
-  {
-    d_initialized = false;
-  }
-  return d_initialized;
 }
 
 /**
@@ -234,6 +241,14 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   if(!val) return false;
   PyObject *pyobj=NULL;
   
+  if (!sipAPI_qti)
+  {
+    throw std::runtime_error("sipAPI_qti is undefined");
+  }
+  if (!sipAPI_qti->api_find_class)
+  {
+    throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
+  }
   sipWrapperType *klass = sipFindClass(val->className());
   if ( !klass ) return false;
   pyobj = sipConvertFromInstance(val, klass, NULL);
