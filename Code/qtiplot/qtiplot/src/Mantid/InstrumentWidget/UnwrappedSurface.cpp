@@ -9,6 +9,7 @@
 
 #include <QRgb>
 #include <QSet>
+#include <QMenu>
 
 #include <cfloat>
 
@@ -457,11 +458,7 @@ void UnwrappedSurface::moveSelection(int x,int y)
 
 void UnwrappedSurface::endSelection(int x,int y)
 {
-  if (m_pickImage) // we are in picking mode
-  {
-    showPickedDetector();
-  }
-  else
+  if (!m_pickImage) // we are in normal mode
   {
     if (!m_selectRect.isNull())
     {
@@ -692,3 +689,31 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
   }
 }
 
+void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
+{
+  if (m_selectRect.isNull())
+  {
+    return;
+  }
+  QRect rect = selectionRect();
+
+  for(int i=0;i<rect.width();++i)
+  {
+    for(int j=0;j<rect.height();++j)
+    {
+      int x = rect.x() + i;
+      int y = rect.y() + j;
+      QRgb pixel = m_pickImage->pixel(x,y);
+      int detID = getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+      if (detID >= 0)
+      {
+        dets.insert(detID);
+      }
+    }
+  }
+}
+
+bool UnwrappedSurface::hasSelection()const
+{
+  return ! m_selectRect.isNull();
+}

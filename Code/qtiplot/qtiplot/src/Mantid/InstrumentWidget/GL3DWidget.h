@@ -5,9 +5,6 @@
 
 #include <QGLWidget>
 #include <QString>
-#include <QImage>
-#include <QList>
-#include <QStack>
 #include "GLViewport.h"
 #include "GLTrackball.h"
 #include "GLActorCollection.h"
@@ -15,6 +12,7 @@
 #include "boost/shared_ptr.hpp"
 
 class UnwrappedSurface;
+class QAction;
 
 /*!
   \class  GL3DWidget
@@ -95,6 +93,7 @@ protected:
   void defaultProjection();
   void redrawUnwrapped();
   void checkGLError(const QString& funName);
+  void showUnwrappedContextMenu();
   
   virtual void drawSceneUsingColorID()=0;
   virtual void setSceneLowResolution()=0;
@@ -108,6 +107,7 @@ protected:
 protected slots:
   void set3DAxesState(int state);
   void setRenderMode(int);
+  void showInfo();
 
 private:
   void setRenderingOptions();
@@ -135,6 +135,8 @@ private:
   UnwrappedSurface* m_unwrappedSurface;
   bool m_unwrappedSurfaceChanged;
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn, but the surface is the same
+
+  QAction *m_InfoAction;
 };
 
 #endif /*GL3DWIDGET_H_*/

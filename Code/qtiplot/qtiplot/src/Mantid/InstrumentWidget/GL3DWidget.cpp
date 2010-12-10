@@ -17,6 +17,8 @@
 #include <QSpinBox>
 #include <QApplication>
 #include <QTime>
+#include <QAction>
+#include <QSet>
 
 #include <map>
 #include <string>
@@ -62,6 +64,9 @@ GL3DWidget::GL3DWidget(QWidget* parent):
 
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
+
+  m_InfoAction = new QAction("Show info",this);
+  connect(m_InfoAction,SIGNAL(activated()),this,SLOT(showInfo()));
 
 }
 
@@ -418,7 +423,10 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
   {
     if(event->buttons() & Qt::RightButton)
     {
-      m_unwrappedSurface->unzoom();
+      if (getInteractionMode() == MoveMode)
+      {
+        m_unwrappedSurface->unzoom();
+      }
     }
     else
     {
@@ -554,12 +562,12 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
   if (m_renderMode != FULL3D && m_unwrappedSurface)
   {
-//    if(event->buttons() & Qt::LeftButton)
-//    {
-      m_unwrappedSurface->endSelection(event->x(),event->y());
-//    }
-      update();
-      OpenGLError::check("GL3DWidget::mouseReleaseEvent");
+    if (getInteractionMode() == PickMode && m_unwrappedSurface->hasSelection())
+    {
+      showUnwrappedContextMenu();
+    }
+    m_unwrappedSurface->endSelection(event->x(),event->y());
+    update();
     return;
   }
 
@@ -575,7 +583,6 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
       emit actorsPicked(result);
     }
   }
-  OpenGLError::check("GL3DWidget::mouseReleaseEvent");
   update();
 }
 
@@ -1016,3 +1023,33 @@ void GL3DWidget::componentSelected(Mantid::Geometry::ComponentID id)
   }
 }
 
+void GL3DWidget::showUnwrappedContextMenu()
+{
+  QMenu context(this);
+
+  context.addAction(m_InfoAction);
+//  context.addAction(mPlotAction);
+//  context.addAction(mDetTableAction);
+
+  context.exec(QCursor::pos());
+}
+
+void GL3DWidget::showInfo()
+{
+  if (!m_unwrappedSurface) return;
+
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QString msg;
+  if (dets.size() == 0) return;
+  else if (dets.size() == 1)
+  {
+    msg = "Detector ID " + QString::number(*dets.begin());
+  }
+  else
+  {
+    msg = "Selected " + QString::number(dets.size()) + " detectors";
+  }
+  QMessageBox::information(this,"MantidPlot",msg);
+}

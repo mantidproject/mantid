@@ -138,6 +138,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   renderMode->insertItems(0,modeList);
   connect(renderMode,SIGNAL(currentIndexChanged(int)),mInstrumentDisplay,SLOT(setRenderMode(int)));
 
+  renderControlsLayout->addWidget(renderMode);
   renderControlsLayout->addWidget(mSelectButton);
   renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSelectColormap);
@@ -148,7 +149,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   renderControlsLayout->addWidget(lColormapFrame);
   renderControlsLayout->addWidget(m3DAxesToggle);
   renderControlsLayout->addWidget(poligonMOdeToggle);
-  renderControlsLayout->addWidget(renderMode);
 
   //Set the main frame to the window
   frame->setLayout(mainLayout);

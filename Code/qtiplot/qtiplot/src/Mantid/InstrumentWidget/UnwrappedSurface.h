@@ -10,6 +10,7 @@
 #include <QImage>
 #include <QList>
 #include <QStack>
+#include <QSet>
 #include <QMap>
 
 namespace Mantid{
@@ -73,6 +74,8 @@ public:
   void draw(GL3DWidget* widget);
 
   void componentSelected(Mantid::Geometry::ComponentID);
+  void getPickedDetector(QSet<int>& dets);
+  bool hasSelection()const;
 
 protected:
   virtual void calcUV(UnwrappedDetector& udet) = 0;
