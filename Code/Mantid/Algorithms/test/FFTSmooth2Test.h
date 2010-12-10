@@ -34,33 +34,33 @@ public:
   void testInit()
   {
     Mantid::Algorithms::FFTSmooth2   fftsmooth2_b;
-    TS_ASSERT_THROWS_NOTHING( fftsmooth2_b.initialize() )
-    TS_ASSERT( fftsmooth2_b.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( fftsmooth2_b.initialize() );
+    TS_ASSERT( fftsmooth2_b.isInitialized() );
 
     const std::vector<Property*> props = fftsmooth2_b.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 5 )
+    TS_ASSERT_EQUALS( props.size(), 6 );
 
-    TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" )
-    TS_ASSERT( props[0]->isDefault() )
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[0]) )
+    TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" );
+    TS_ASSERT( props[0]->isDefault() );
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[0]) );
 
-    TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" )
-    TS_ASSERT( props[1]->isDefault() )
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) )
+    TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" );
+    TS_ASSERT( props[1]->isDefault() );
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) );
 
-    TS_ASSERT_EQUALS( props[2]->name(), "WorkspaceIndex")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<int>* >(props[2]) )
+    TS_ASSERT_EQUALS( props[2]->name(), "WorkspaceIndex");
+    TS_ASSERT( props[2]->isDefault() );
+    TS_ASSERT( dynamic_cast<PropertyWithValue<int>* >(props[2]) );
 
-    TS_ASSERT_EQUALS( props[3]->name(), "Filter")
-    TS_ASSERT( props[3]->isDefault() )
-    TS_ASSERT_EQUALS( props[3]->value(), "Zeroing" )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<std::string>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[3]->name(), "Filter");
+    TS_ASSERT( props[3]->isDefault() );
+    TS_ASSERT_EQUALS( props[3]->value(), "Zeroing" );
+    TS_ASSERT( dynamic_cast<PropertyWithValue<std::string>* >(props[3]) );
 
-    TS_ASSERT_EQUALS( props[4]->name(), "Params" )
-    TS_ASSERT( props[4]->isDefault() )
-    TS_ASSERT_EQUALS( props[4]->value(), "" )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<std::string>* >(props[4]) )
+    TS_ASSERT_EQUALS( props[4]->name(), "Params" );
+    TS_ASSERT( props[4]->isDefault() );
+    TS_ASSERT_EQUALS( props[4]->value(), "" );
+    TS_ASSERT( dynamic_cast<PropertyWithValue<std::string>* >(props[4]) );
   }
 
   void testZeroing()
@@ -91,16 +91,18 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) )
-    TS_ASSERT( test_output_WS )
+    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) );
+    TS_ASSERT( test_output_WS );
 
-    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ZeroingGoldWS")) )
-    TS_ASSERT( gold_output_WS )
+    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ZeroingGoldWS")) );
+    TS_ASSERT( gold_output_WS );
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
 
     for ( int i = 0; i < test_output_WS->size(); i++ )
-      TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 )
+    {
+      TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 );
+    }
 
     AnalysisDataService::Instance().remove("TestInputWS");
     AnalysisDataService::Instance().remove("SmoothedWS");
@@ -137,16 +139,18 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) )
-    TS_ASSERT( test_output_WS )
+    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) );
+    TS_ASSERT( test_output_WS );
 
-    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ButterworthGoldWS")) )
-    TS_ASSERT( gold_output_WS )
+    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ButterworthGoldWS")) );
+    TS_ASSERT( gold_output_WS );
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
 
     for ( int i = 0; i < test_output_WS->size(); i++ )
-      TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 )
+    {
+      TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 );
+    }
 
     AnalysisDataService::Instance().remove("TestInputWS");
     AnalysisDataService::Instance().remove("SmoothedWS");

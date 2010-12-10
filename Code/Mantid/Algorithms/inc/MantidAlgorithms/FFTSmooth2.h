@@ -71,6 +71,9 @@ private:
   /// Variable for storing the lowest x value
   double m_x0;
 
+  // Will we Allow Any X Bins
+  bool IgnoreXBins;
+
 };
 
 } // namespace Algorithm

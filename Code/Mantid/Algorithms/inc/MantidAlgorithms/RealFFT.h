@@ -56,6 +56,8 @@ private:
   void init();
   void exec();
 
+  bool IgnoreXBins;
+
 };
 
 } // namespace Algorithm

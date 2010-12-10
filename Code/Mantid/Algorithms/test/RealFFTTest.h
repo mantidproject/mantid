@@ -67,37 +67,49 @@ public:
         FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_backward");
     }
 
+    void dotestForward(std::string IgnoreXBins)
+    {
+      IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+      fft->initialize();
+      fft->setPropertyValue("InputWorkspace","RealFFT_WS");
+      fft->setPropertyValue("OutputWorkspace","RealFFT_WS_forward");
+      fft->setPropertyValue("WorkspaceIndex","0");
+      fft->execute();
+
+      MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+          (AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
+
+      const MantidVec& X = fWS->readX(0);
+      const MantidVec& Yr = fWS->readY(0);
+      const MantidVec& Yi = fWS->readY(1);
+
+      const double PI = 3.1415926535897932384626433832795;
+      double h = sqrt(PI/3);
+      double a = PI*PI/3;
+      double dx = 1/(XX);
+
+      for(int i=0;i<N/4;i++)
+      {
+        double x = X[i];
+        double tmp = sqrt(Yr[i]*Yr[i]+Yi[i]*Yi[i]);
+        //std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
+        TS_ASSERT_DELTA(x,dx*i,0.00001);
+        TS_ASSERT_DELTA(tmp / (h*exp(-a*x*x)),1.,0.001);
+        TS_ASSERT_DELTA(Yi[i],0.0,0.00001);
+      }
+    }
+
+
     void testForward()
     {
-        IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
-        fft->initialize();
-        fft->setPropertyValue("InputWorkspace","RealFFT_WS");
-        fft->setPropertyValue("OutputWorkspace","RealFFT_WS_forward");
-        fft->setPropertyValue("WorkspaceIndex","0");
-        fft->execute();
-
-        MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-            (AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
-
-        const MantidVec& X = fWS->readX(0);
-        const MantidVec& Yr = fWS->readY(0);
-        const MantidVec& Yi = fWS->readY(1);
-
-        const double PI = 3.1415926535897932384626433832795;
-        double h = sqrt(PI/3);
-        double a = PI*PI/3;
-        double dx = 1/(XX);
-
-        for(int i=0;i<N/4;i++)
-        {
-          double x = X[i];
-          double tmp = sqrt(Yr[i]*Yr[i]+Yi[i]*Yi[i]);
-          //std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
-          TS_ASSERT_DELTA(x,dx*i,0.00001);
-          TS_ASSERT_DELTA(tmp / (h*exp(-a*x*x)),1.,0.001);
-          TS_ASSERT_DELTA(Yi[i],0.0,0.00001);
-        }
+      dotestForward("0");
     }
+
+    void testForward_IgnoringX()
+    {
+      dotestForward("1");
+    }
+
 
     void testBackward()
     {

@@ -50,6 +50,10 @@ void RealFFT::init()
       fft_dir.push_back("Backward");
       declareProperty("Transform","Forward",new ListValidator(fft_dir),"Direction of the transform: forward or backward");
 
+      declareProperty("IgnoreXBins",false,
+          "Ignores the requirement that X bins be linear and of the same size.\n"
+          "Set this to true if you are using log binning.\n"
+          "FFT will be performed on the Y values only.");
 }
 
 /** Executes the algorithm
@@ -60,6 +64,7 @@ void RealFFT::exec()
 {
     API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     std::string transform = getProperty("Transform");
+    IgnoreXBins = getProperty("IgnoreXBins");
 
     int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 
@@ -70,8 +75,11 @@ void RealFFT::exec()
 
     //Check that the x values are evenly spaced
     double dx = (X.back() - X.front()) / (X.size() - 1);
-    for(size_t i=0;i<X.size()-2;i++)
-        if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
+    if (!IgnoreXBins)
+    {
+      for(size_t i=0;i<X.size()-2;i++)
+          if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
+    }
 
     API::MatrixWorkspace_sptr outWS;
 
@@ -126,7 +134,7 @@ void RealFFT::exec()
     {
 
       if (inWS->getNumberHistograms() < 2)
-        throw std::runtime_error("The imput workspace must have at least 2 spectra.");
+        throw std::runtime_error("The input workspace must have at least 2 spectra.");
 
       int yOutSize = (ySize - 1)* 2;
       if (inWS->readY(1).back() != 0.0) yOutSize++;

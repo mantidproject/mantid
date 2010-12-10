@@ -37,7 +37,16 @@ void FFTSmooth2::init()
       type.push_back("Zeroing");
       type.push_back("Butterworth");
       declareProperty("Filter","Zeroing",new ListValidator(type),"The type of the applied filter");
-      declareProperty("Params","","The filter parameters");
+      declareProperty("Params","",
+          "The filter parameters:\n"
+          "For Zeroing, 1 parameter: 'n' - an integer greater than 1 meaning that the Fourier coefficients with frequencies outside the 1/n of the original range will be set to zero.\n"
+          "For Butterworth, 2 parameters: 'n' and 'order', giving the 1/n truncation and the smoothing order.\n" );
+
+      declareProperty("IgnoreXBins",false,
+          "Ignores the requirement that X bins be linear and of the same size.\n"
+          "Set this to true if you are using log binning.\n"
+          "FFT will be performed on the Y values only.");
+
 }
 
 /// @cond 
@@ -58,6 +67,7 @@ void FFTSmooth2::exec()
 {
   m_inWS = getProperty("InputWorkspace");
   int spec = getProperty("WorkspaceIndex");
+  IgnoreXBins = getProperty("IgnoreXBins");
 
   // Save the starting x value so it can be restored after all transforms.
   m_x0 = m_inWS->readX(spec)[0];
@@ -88,6 +98,7 @@ void FFTSmooth2::exec()
   IAlgorithm_sptr fft = createSubAlgorithm("RealFFT", 0, 0.5 );
   fft->setProperty("InputWorkspace",symmWS);
   fft->setProperty("WorkspaceIndex",0);
+  fft->setProperty("IgnoreXBins", IgnoreXBins);
   try
   {
     fft->execute();
@@ -154,6 +165,7 @@ void FFTSmooth2::exec()
   //fft->setProperty("Real",0);
   //fft->setProperty("Imaginary",1);
   fft->setProperty("Transform","Backward");
+  fft->setProperty("IgnoreXBins", IgnoreXBins);
   try
   {
     fft->execute();
