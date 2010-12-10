@@ -450,7 +450,7 @@ public:
     TS_ASSERT_EQUALS( times[0], DateAndTime("1990-01-02 03:04:06.000"));
     TS_ASSERT_EQUALS( times[1], DateAndTime("1990-01-02 03:04:07.000"));
     TS_ASSERT_EQUALS( times[2], DateAndTime("1990-01-02 03:04:05.500"));
-    //TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
+    TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
   }
 };
 
