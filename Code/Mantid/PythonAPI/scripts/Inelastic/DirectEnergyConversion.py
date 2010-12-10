@@ -160,16 +160,14 @@ class DirectEnergyConversion(object):
         if (self.facility == "SNS"):
             if self.background == True:
                 # Extract the time range for the background determination before we throw it away
-                background_bins = "%s,%s,%s" % (self.background_range[0] + bin_offset, 10.0, self.background_range[1] + bin_offset)
+                background_bins = "%s,%s,%s" % (self.background_range[0] + bin_offset, (self.background_range[1]-self.background_range[0]), self.background_range[1] + bin_offset)
                 Rebin(result_ws, "background_origin_ws", background_bins)
             # Convert to Et
             ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
             RenameWorkspace("_tmp_energy_ws", result_ws)
-            mtd.deleteWorkspace("_tmp_energy_ws")
             # Histogram
             Rebin(result_ws, "_tmp_rebin_ws", self.energy_bins)
             RenameWorkspace("_tmp_rebin_ws", result_ws)
-            mtd.deleteWorkspace("_tmp_rebin_ws")
             # Convert back to TOF
             ConvertUnits(result_ws, result_ws, Target="TOF",EMode="Direct", EFixed=ei_value)
         else:
@@ -183,12 +181,14 @@ class DirectEnergyConversion(object):
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
             ConvertToDistribution(result_ws)    
             if (self.facility == "SNS"):
-                FlatBackground("background_origin_ws", "background_ws", self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Linear Fit', 'Return Background')
+                FlatBackground("background_origin_ws", "background_ws", self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean', 'Return Background')
+                # Delete the raw data background region workspace
                 mtd.deleteWorkspace("background_origin_ws")
-                # Not sure if this is correct ?
+                # Convert to distribution to make it compatible with the data workspace (result_ws).
                 ConvertToDistribution("background_ws") 
-                RebinToWorkspace("background_ws", result_ws, "background_ws")
+                # Subtract the background
                 Minus(result_ws, "background_ws", result_ws)
+                # Delete the determined background 
                 mtd.deleteWorkspace("background_ws")
             else:
                 FlatBackground(result_ws, result_ws, self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean')
