@@ -96,6 +96,9 @@ namespace Geometry
 
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
+
+virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
+void  setName(const std::string & name){this->AxisName.assign(name); }
   protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
@@ -104,9 +107,9 @@ namespace Geometry
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
     virtual void setCoord(const std::vector<double> &){};
     // function sets the dimension as a linear dimension with specific ranges and number of bins
-    virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
+    
     void  setName(const char *name) {this->AxisName.assign(name);}
-    void  setName(const std::string & name){this->AxisName.assign(name); }
+    
     /*! Set the scale of a particular dimension
      * @param Value -- the value to set;    */
     void   setScale(double Value){latticeParam=Value;}

@@ -99,7 +99,9 @@ namespace Mantid
 	  /// this should be moved in data loading routines soon
 	  void load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile);
 
-      virtual ~MDWorkspace(void){};
+      virtual ~MDWorkspace(void)
+      {
+      };
 
       /// read the the pixels corresponding to cells in the vector cell_num
       size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);

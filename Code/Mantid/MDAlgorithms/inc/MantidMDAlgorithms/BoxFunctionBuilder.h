@@ -1,29 +1,26 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
+#ifndef BOX_FUNCTONBUILDER_H_
+#define BOX_FUNCTONBUILDER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
+#include <memory>
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
-#include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
+
     namespace MDAlgorithms
     {
         /**
-        This class to parse plane type functions and generate the associated builders.
+
+        This class is the abstract type for building BoxImplicitFunctions
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 09/12/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -46,24 +43,25 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport PlaneImplicitFunctionParser : public Mantid::API::ImplicitFunctionParser
+        class DLLExport BoxFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
         {
-
+        private:
+            mutable OriginParameter m_origin;
+            mutable WidthParameter m_width;
+            mutable HeightParameter m_height;
+            mutable DepthParameter m_depth;
         public:
-            PlaneImplicitFunctionParser();
+            BoxFunctionBuilder();
 
-            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
-
-            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
-
-            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
-
-            PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
-
-            ~PlaneImplicitFunctionParser();
+            void addOriginParameter(const OriginParameter& parameter);
+            void addDepthParameter(const DepthParameter& depthParam);
+            void addWidthParameter(const WidthParameter& widthParam);
+            void addHeightParameter(const HeightParameter& heightParam);
+            Mantid::API::ImplicitFunction* create() const;
+            ~BoxFunctionBuilder();
         };
+
     }
 }
-
 
 #endif

@@ -133,16 +133,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning4D.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinningFunctions.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DepthParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterIntegration.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterNoIntegration.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterSet.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DynamicRebinFromXML.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\HeightParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h" />
@@ -153,21 +159,28 @@
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\SimulateMDD.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\SingleValueParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\Topology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\WidthParameter.h" />
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BoxFunctionBuilder.cpp" />
+    <ClCompile Include="src\BoxImplicitFunction.cpp" />
+    <ClCompile Include="src\BoxImplicitFunctionParser.cpp" />
     <ClCompile Include="src\CenterpieceRebinning.cpp" />
-    <ClCompile Include="src\CenterpieceRebinning4D.cpp" />
     <ClCompile Include="src\CenterpieceRebinningFunctions.cpp" />
     <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
     <ClCompile Include="src\CompositeImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\DepthParameter.cpp" />
     <ClCompile Include="src\DimensionParameter.cpp" />
     <ClCompile Include="src\DimensionParameterIntegration.cpp" />
     <ClCompile Include="src\DimensionParameterNoIntegration.cpp" />
     <ClCompile Include="src\DimensionParameterSet.cpp" />
+    <ClCompile Include="src\DynamicRebinFromXML.cpp" />
+    <ClCompile Include="src\HeightParameter.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />
     <ClCompile Include="src\InvalidParameterParser.cpp" />
     <ClCompile Include="src\NormalParameter.cpp" />
@@ -178,6 +191,8 @@
     <ClCompile Include="src\PlaneImplicitFunction.cpp" />
     <ClCompile Include="src\PlaneImplicitFunctionParser.cpp" />
     <ClCompile Include="src\SimulateMDD.cpp" />
+    <ClCompile Include="src\SingleValueParameterParser.cpp" />
+    <ClCompile Include="src\WidthParameter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

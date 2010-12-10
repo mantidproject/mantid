@@ -7,9 +7,6 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
-#include "MantidMDAlgorithms/OriginParameter.h"
-#include "MantidAPI/Point3D.h"
 
 class PlaneImplicitFunctionTest: public CxxTest::TestSuite
 {

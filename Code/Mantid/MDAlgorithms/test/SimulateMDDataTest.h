@@ -25,12 +25,13 @@ namespace Mantid
     class DLLExport TestIMDDimension : public IMDDimension
     {
     public:
-      virtual std::string getName() const { return("TestX"); };
-      virtual std::string getDimensionId() const { return("TestX"); };
-      virtual bool getIsIntegrated() const {return(0);};
-      virtual double getMaximum() const {return(1.0);};
-      virtual double getMinimum() const {return(0.0);};
-      virtual unsigned int getNBins() const {return(2);};
+      virtual std::string getName() const { return("TestX"); }
+      virtual std::string getDimensionId() const { return("TestX"); }
+      virtual bool getIsIntegrated() const {return(0);}
+      virtual double getMaximum() const {return(1.0);}
+      virtual double getMinimum() const {return(0.0);}
+      virtual unsigned int getNBins() const {return(2);}
+      virtual bool isReciprocal() const {return false;}
       TestIMDDimension() {};
       ~TestIMDDimension() {};
     };

@@ -33,6 +33,7 @@ namespace Mantid
       }
       Poco::XML::NodeList* parameters = parametersElement->getElementsByTagName("Parameter");
       ImplicitFunctionParameterParser* paramParser = NULL;
+      ImplicitFunctionParameterParser* nextParser = NULL;
       for(unsigned long i = 0 ; i < parameters->length(); i++)
       {
         Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(i));
@@ -40,12 +41,13 @@ namespace Mantid
         ImplicitFunctionParameterParser* childParamParser = this->createUnwrapped(paramParserName);
         if(paramParser != NULL)
         {
-          paramParser->setSuccessorParser(childParamParser);
+          nextParser->setSuccessorParser(childParamParser);
         }
         else
         {
           paramParser = childParamParser;
         }
+        nextParser = childParamParser;
       }
       return paramParser;
     }

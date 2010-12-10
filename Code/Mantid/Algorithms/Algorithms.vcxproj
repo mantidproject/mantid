@@ -215,6 +215,7 @@
     <ClCompile Include="src\GetEi.cpp" />
     <ClCompile Include="src\GetEi2.cpp" />
     <ClCompile Include="src\GhostCorrection.cpp" />
+    <ClCompile Include="src\GravitySANSHelper.cpp" />
     <ClCompile Include="src\He3TubeEfficiency.cpp" />
     <ClCompile Include="src\HRPDSlabCanAbsorption.cpp" />
     <ClCompile Include="src\InputWSDetectorInfo.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h" />
     <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
+    <ClInclude Include="inc\MantidAlgorithms\GravitySANSHelper.h" />
     <ClInclude Include="inc\MantidAlgorithms\He3TubeEfficiency.h" />
     <ClInclude Include="inc\MantidAlgorithms\Integration.h" />
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />

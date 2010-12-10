@@ -162,60 +162,60 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       throw std::runtime_error("Not implemented"); //TODO: implement
     }
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
-      { 
-        return m_spMDImage->getGeometry()->getXDimension(); 
-      }
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
+    { 
+      return m_spMDImage->getGeometry()->getXDimension(); 
+    }
 
-      boost::shared_ptr< const Mantid::Geometry::IMDDimension> MDWorkspace::getYDimension() const
-      { 
-        return m_spMDImage->getGeometry()->getYDimension();
-      }
+    boost::shared_ptr< const Mantid::Geometry::IMDDimension> MDWorkspace::getYDimension() const
+    { 
+      return m_spMDImage->getGeometry()->getYDimension();
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getZDimension() const
-      { 
-        return m_spMDImage->getGeometry()->getZDimension();
-      }
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getZDimension() const
+    { 
+      return m_spMDImage->getGeometry()->getZDimension();
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::gettDimension() const
-      { 
-        return m_spMDImage->getGeometry()->getTDimension();
-      }
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::gettDimension() const
+    { 
+      return m_spMDImage->getGeometry()->getTDimension();
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
-      { 
-        return m_spMDImage->getGeometry()->getDimension(id, true); 
-      }
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
+    { 
+      return m_spMDImage->getGeometry()->getDimension(id, true); 
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDPoint> MDWorkspace::getPoint(int index) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement;
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDPoint> MDWorkspace::getPoint(int index) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement;
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
-      boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(...) const
-      { 
-        throw std::runtime_error("Not implemented"); //TODO: implement
-      }
+    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(...) const
+    { 
+      throw std::runtime_error("Not implemented"); //TODO: implement
+    }
 
 } // namespace
 }

@@ -1,29 +1,22 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
+#ifndef HeightParameter_H_
+#define HeightParameter_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
-#include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
     namespace MDAlgorithms
     {
         /**
-        This class to parse plane type functions and generate the associated builders.
+
+        HeightParameter. Wraps a vector expressing origin location.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 09/12/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -46,24 +39,45 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport PlaneImplicitFunctionParser : public Mantid::API::ImplicitFunctionParser
+        
+        class DLLExport HeightParameter :public Mantid::API::ImplicitFunctionParameter
         {
+        private:
+
+           double m_height;
 
         public:
-            PlaneImplicitFunctionParser();
 
-            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+            HeightParameter(double width);
+            
+            HeightParameter();
+            
+            HeightParameter(const HeightParameter & other);
+            
+            HeightParameter& operator=(const HeightParameter& other);
 
-            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
+            bool operator==(const HeightParameter &other) const;
 
-            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
+            bool operator!=(const HeightParameter &other) const;
 
-            PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
+            bool isValid() const;
 
-            ~PlaneImplicitFunctionParser();
+            std::string getName() const;
+
+            HeightParameter* clone() const;
+
+            double getValue() const;
+
+            std::string toXMLString() const;
+
+            ~HeightParameter();
+
+            static std::string parameterName()
+            {
+                return "HeightParameter";
+            }
         };
     }
 }
-
 
 #endif

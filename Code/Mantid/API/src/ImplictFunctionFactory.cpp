@@ -27,6 +27,16 @@ namespace Mantid
       throw std::runtime_error("Use of create in this context is forbidden. Use createUnwrappedInstead.");
     }
 
+    ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element* processXML) const
+    {
+
+      ImplicitFunctionParser* funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
+
+      boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(processXML));
+      return functionBuilder->create();
+    }
+
+
     ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(const std::string& processXML) const
     {
       using namespace Poco::XML;

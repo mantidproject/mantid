@@ -7,12 +7,13 @@
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDWorkspace.h"
-
+#include "boost/scoped_ptr.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 
-using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 
 class tesMDWorkspace :    public CxxTest::TestSuite
@@ -41,7 +42,7 @@ private:
   };
      ///
   //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.
-  static std::auto_ptr<Mantid::Geometry::MDGeometry> constructMDGeometry()
+  static Mantid::Geometry::MDGeometry* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -51,25 +52,25 @@ private:
     basisDimensions.insert(MDBasisDimension("u1", false, 4));
 
     UnitCell cell;
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
   }
 
   //Helper stock constructional method.
-  static std::auto_ptr<Mantid::MDDataObjects::MDWorkspace> constructMDWorkspace()
+  static Mantid::MDDataObjects::MDWorkspace* constructMDWorkspace()
   {
     using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
     MDWorkspace* workspace = new MDWorkspace;
     MockFileFormat* mockFile = new MockFileFormat;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
-    return std::auto_ptr<MDWorkspace>(workspace);
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
+    return workspace;
   }
 
   //Helper constructional method provides mdworkspace as IMDWorkspace in order to test this axis of the implementation.
-  static std::auto_ptr<Mantid::API::IMDWorkspace> constructMDWorkspaceAsIMDWorkspace()
+  static Mantid::API::IMDWorkspace* constructMDWorkspaceAsIMDWorkspace()
   {
-    return std::auto_ptr<Mantid::API::IMDWorkspace>(constructMDWorkspace().release());
+    return  constructMDWorkspace();
   }
 
 
@@ -80,7 +81,7 @@ public:
   void testGetNPoints()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getNPoints() is not yet implemented. Should have thrown runtime exception", workspace->getNPoints(), std::runtime_error);
   }
 
@@ -89,10 +90,10 @@ public:
   {
     using namespace Mantid::API;
 
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
 
     std::string id = "q1";
-    boost::shared_ptr<const Geometry::IMDDimension> dimension = workspace->getDimension(id);
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getDimension(id);
     TSM_ASSERT_EQUALS("The dimension id does not match", id, dimension->getDimensionId());
   }
 
@@ -100,7 +101,7 @@ public:
   void testGetDimensionThrows()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
 
     std::string id = "::::::";
     TSM_ASSERT_THROWS("The unknown dimension id should have cause and exception to be thrown.", workspace->getDimension(id), std::invalid_argument);
@@ -110,7 +111,7 @@ public:
   void testGetPoint()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getPoint() is not yet implemented. Should have thrown runtime exception", workspace->getPoint(1), std::runtime_error);
   }
 
@@ -118,7 +119,7 @@ public:
   void testGetCellOneArgument()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1), std::runtime_error);
   }
 
@@ -126,7 +127,7 @@ public:
   void testGetCellTwoArgument()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1), std::runtime_error);
 
   }
@@ -135,7 +136,7 @@ public:
   void testGetCellThreeArgument()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1), std::runtime_error);
   }
 
@@ -143,7 +144,7 @@ public:
   void testGetCellFourArgument()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1, 1), std::runtime_error);
   }
 
@@ -151,7 +152,7 @@ public:
   void testGetCellNArgument()
   {
     using namespace Mantid::API;
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1, 1, 1), std::runtime_error);
   }
 
@@ -161,7 +162,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getXDimension();
     TSM_ASSERT_EQUALS("The x-dimension returned was not the expected alignment.", "q1", dimension->getDimensionId());
 
@@ -173,7 +174,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getYDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q2", dimension->getDimensionId());
   }
@@ -184,7 +185,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getZDimension();
     TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q3", dimension->getDimensionId());
   }
@@ -195,7 +196,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
-    std::auto_ptr<IMDWorkspace> workspace = constructMDWorkspaceAsIMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->gettDimension();
     TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u1", dimension->getDimensionId());
   }
@@ -204,33 +205,33 @@ public:
   {
     using namespace Mantid::MDDataObjects;
 
-    std::auto_ptr<MDWorkspace> workspace = constructMDWorkspace();
+    boost::scoped_ptr<MDWorkspace> workspace(constructMDWorkspace());
     size_t img_data_size = workspace->get_const_MDImage().getMemorySize();
     size_t pix_data_size = workspace->get_const_MDDPoints().getMemorySize();
     TSM_ASSERT_EQUALS("Workspace memory size differs from its parts ",pix_data_size+img_data_size , workspace->getMemorySize());
   }
   void testId(){
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = constructMDWorkspace();
+    boost::scoped_ptr<MDWorkspace> workspace(constructMDWorkspace());
 
     TSM_ASSERT_EQUALS("MD Workspace ID differs from expected ","MD-Workspace", workspace->id());
   }
   ///
   void testGetNumDims(void){
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = constructMDWorkspace();
+    boost::scoped_ptr<MDWorkspace> workspace(constructMDWorkspace());
     TSM_ASSERT_EQUALS("Default number of dimensions in Workspac differs from expected ",4, workspace->getNumDims());
   }
 
   void testReadPixSubset()
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, read_pix_subset(testing::_, testing::_, testing::_, testing::_, testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
     size_t size_param = 1;
     std::vector<size_t> empty1;
     std::vector<char> empty2;
@@ -241,9 +242,9 @@ public:
   void testReadPixSubsetThrows()
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
     size_t size_param = 1;
     std::vector<size_t> empty1;
     std::vector<char> empty2;
@@ -255,12 +256,12 @@ public:
   void  testReadPix(void)
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, read_pix(testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
 
     workspace->read_pix();
     TSM_ASSERT("MDWorkspace::read_pix() failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
@@ -269,9 +270,9 @@ public:
   void  testReadThrows(void)
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
 
     TSM_ASSERT_THROWS("The file reader has not been provided, so should throw bad allocation", workspace->read_pix(), std::runtime_error);
   }
@@ -279,12 +280,12 @@ public:
   void testwriteMDDWriteFile(void)
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat();
     EXPECT_CALL(*mockFile, write_mdd(testing::_)).Times(1);
 
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
 
     workspace->write_mdd();
     TSM_ASSERT("MDWorkspace::read_pix() failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
@@ -293,9 +294,9 @@ public:
   void testwriteMDDthrows()
   {
     using namespace Mantid::MDDataObjects;
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
     MockFileFormat* mockFile = NULL;
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry().release());
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
 
     TSM_ASSERT_THROWS("The file reader has not been provided, so should throw bad allocation", workspace->write_mdd(), std::runtime_error);
   }
@@ -305,10 +306,10 @@ public:
     using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
-    std::auto_ptr<MDWorkspace> workspace = std::auto_ptr<MDWorkspace>(new MDWorkspace());
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat();
-    MDGeometry* geometry = constructMDGeometry().release();
+    MDGeometry* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
 

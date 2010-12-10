@@ -1,15 +1,15 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_BOX_IMPLICITFUNCTION_PARSER_H_
+#define MANTID_ALGORITHMS_BOX_IMPLICITFUNCTION_PARSER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunction.h"
-#include "MantidMDAlgorithms/OriginParameter.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
-#include "MantidMDAlgorithms/VectorMathematics.h"
+#include <boost/shared_ptr.hpp>
+#include "MantidMDAlgorithms/BoxFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
@@ -20,12 +20,10 @@ namespace Mantid
     namespace MDAlgorithms
     {
         /**
-
-        This class represents a plane implicit function used for communicating and implementing an operation against 
-        an MDWorkspace.
+        This class to parse plane type functions and generate the associated builders.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 09/12/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,33 +46,21 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport PlaneImplicitFunction : public Mantid::API::ImplicitFunction
+        class DLLExport BoxImplicitFunctionParser : public Mantid::API::ImplicitFunctionParser
         {
+
         public:
-            PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin);
-            ~PlaneImplicitFunction();
-            std::string getName() const;
-            std::string toXMLString() const;
-            bool evaluate(const API::Point3D* pPoint) const;
-            double getOriginX() const;
-            double getOriginY() const;
-            double getOriginZ() const;
-            double getNormalX() const;
-            double getNormalY() const;
-            double getNormalZ() const;
-            bool operator==(const PlaneImplicitFunction &other) const;
-            bool operator!=(const PlaneImplicitFunction &other) const;
+            BoxImplicitFunctionParser();
 
-            static std::string functionName()
-            {
-                return "PlaneImplicitFunction";
-            }
+            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
-        private:
+            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
 
-            OriginParameter m_origin;
-            NormalParameter m_normal;
+            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
 
+            BoxFunctionBuilder* parseBoxFunction(Poco::XML::Element* functionElement);
+
+            ~BoxImplicitFunctionParser();
         };
     }
 }

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_BOXIMPLICITFUNCTION_H_
+#define MANTID_ALGORITHMS_BOXIMPLICITFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,9 +7,10 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunction.h"
-#include "MantidMDAlgorithms/OriginParameter.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
-#include "MantidMDAlgorithms/VectorMathematics.h"
+#include "MantidMDAlgorithms/WidthParameter.h"
+#include "MantidMDAlgorithms/DepthParameter.h"
+#include "MantidMDAlgorithms/HeightParameter.h"
+#include "MantidMDAlgorithms/OriginParameter.h" 
 
 namespace Mantid
 {
@@ -21,11 +22,10 @@ namespace Mantid
     {
         /**
 
-        This class represents a plane implicit function used for communicating and implementing an operation against 
-        an MDWorkspace.
+        This class represents a box for making slices orthogonal to the cartesian axes set.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 09/12/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,32 +48,43 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport PlaneImplicitFunction : public Mantid::API::ImplicitFunction
+        class DLLExport BoxImplicitFunction : public Mantid::API::ImplicitFunction
         {
         public:
-            PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin);
-            ~PlaneImplicitFunction();
+            BoxImplicitFunction(WidthParameter& width, HeightParameter& height, DepthParameter& depth, OriginParameter& origin);
+            ~BoxImplicitFunction();
             std::string getName() const;
             std::string toXMLString() const;
             bool evaluate(const API::Point3D* pPoint) const;
-            double getOriginX() const;
-            double getOriginY() const;
-            double getOriginZ() const;
-            double getNormalX() const;
-            double getNormalY() const;
-            double getNormalZ() const;
-            bool operator==(const PlaneImplicitFunction &other) const;
-            bool operator!=(const PlaneImplicitFunction &other) const;
+            double getUpperX() const;
+            double getLowerX() const;
+            double getUpperY() const;
+            double getLowerY() const;
+            double getUpperZ() const;
+            double getLowerZ() const;
+            bool operator==(const BoxImplicitFunction &other) const;
+            bool operator!=(const BoxImplicitFunction &other) const;
 
             static std::string functionName()
             {
-                return "PlaneImplicitFunction";
+                return "BoxImplicitFunction";
             }
 
         private:
 
+            //from raw inputs.
             OriginParameter m_origin;
-            NormalParameter m_normal;
+            HeightParameter m_height;
+            WidthParameter m_width;
+            DepthParameter m_depth;
+
+            //calculated and cached.
+            double m_upperX;
+            double m_lowerX;
+            double m_upperY;
+            double m_lowerY;
+            double m_upperZ;
+            double m_lowerZ;
 
         };
     }

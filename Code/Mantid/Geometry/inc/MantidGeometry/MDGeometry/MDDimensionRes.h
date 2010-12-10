@@ -48,7 +48,13 @@ public:
     virtual bool isReciprocal(void)const{return true;}
  /// 
     virtual std::vector<double> const & getCoord(void)const{return this->coord;}
-protected:
+
+    /// indicates which reciprocal primitive vector this reciprocal dimension is associated with, either q1, q2 or q3
+    rec_dim getReciprocalVectorType() const 
+    {
+      return this->nRecDim;
+    }
+
     MDDimensionRes(const std::string &ID,const rec_dim nDim);
 private:
     // function sets the coordinates of the dimension;

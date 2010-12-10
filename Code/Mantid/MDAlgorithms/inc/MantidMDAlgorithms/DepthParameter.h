@@ -1,29 +1,22 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
+#ifndef DEPTH_PARAMETER_H_
+#define DEPTH_PARAMETER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
-#include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
     namespace MDAlgorithms
     {
         /**
-        This class to parse plane type functions and generate the associated builders.
+
+        DepthParameter. Wraps a vector expressing origin location.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 09/12/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -46,24 +39,45 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport PlaneImplicitFunctionParser : public Mantid::API::ImplicitFunctionParser
+        
+        class DLLExport DepthParameter :public Mantid::API::ImplicitFunctionParameter
         {
+        private:
+
+           double m_depth;
 
         public:
-            PlaneImplicitFunctionParser();
 
-            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+            DepthParameter(double depth);
+            
+            DepthParameter();
+            
+            DepthParameter(const DepthParameter & other);
+            
+            DepthParameter& operator=(const DepthParameter& other);
 
-            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
+            bool operator==(const DepthParameter &other) const;
 
-            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
+            bool operator!=(const DepthParameter &other) const;
 
-            PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
+            bool isValid() const;
 
-            ~PlaneImplicitFunctionParser();
+            std::string getName() const;
+
+            DepthParameter* clone() const;
+
+            double getValue() const;
+
+            std::string toXMLString() const;
+
+            ~DepthParameter();
+
+            static std::string parameterName()
+            {
+                return "DepthParameter";
+            }
         };
     }
 }
-
 
 #endif

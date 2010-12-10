@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+#include <algorithm>
 #include <float.h>
 #include <sstream>
 
@@ -8,6 +9,19 @@ namespace Mantid{
 
  // get reference to logger for MD workspaces
     Kernel::Logger& MDGeometryDescription::g_log=Kernel::Logger::get("MDWorkspaces");
+
+    	
+//Helper Function object to find dimensions.
+struct findDimension
+{
+   const Dimension_sptr m_dimension;
+   findDimension(const Dimension_sptr dimension ): m_dimension( dimension ) 
+   { 
+   }
+   bool operator () (const boost::shared_ptr<IMDDimension> obj ) const{ //overloaded operator to check the condition.
+     return m_dimension->getDimensionId() == obj->getDimensionId();
+   }
+};
 
         
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
@@ -34,49 +48,77 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
     this->build_from_geometry(origin);
 }
 
-
 MDGeometryDescription::MDGeometryDescription(
-      std::vector<MDDimension> dimensions, 
-      const MDDimension& dimensionX, 
-      const MDDimension& dimensionY, 
-      const MDDimension& dimensionZ,
-      const MDDimension& dimensiont)
+      DimensionVec dimensions, 
+      Dimension_sptr dimensionX, 
+      Dimension_sptr dimensionY,  
+      Dimension_sptr dimensionZ, 
+      Dimension_sptr dimensiont)
 {
   this->nDimensions = dimensions.size();
   this->data.resize(dimensions.size());
+
   //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
-  std::vector<MDDimension>::iterator dimX = find(dimensions.begin(), dimensions.end(), dimensionX);
-  std::vector<MDDimension>::iterator dimY = find(dimensions.begin(), dimensions.end(), dimensionY);
-  std::vector<MDDimension>::iterator dimZ = find(dimensions.begin(), dimensions.end(), dimensionZ);
-  std::vector<MDDimension>::iterator dimT = find(dimensions.begin(), dimensions.end(), dimensiont);
+  DimensionVecIterator dimX = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionX));
+  DimensionVecIterator dimY = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionY));
+  DimensionVecIterator dimZ = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionZ));
+  DimensionVecIterator dimT = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensiont));
 
   createDimensionDescription(*dimX, 0);
   createDimensionDescription(*dimY, 1);
   createDimensionDescription(*dimZ, 2);
   createDimensionDescription(*dimT, 3);
 
- 
-  for(unsigned int i=3;i<dimensions.size();i++) 
+  //Now process dimension that are not already mapped.
+  DimensionVecIterator it = dimensions.begin();
+  int count = 4; // mappings take priority see above.
+  while(it != dimensions.end())
   {
-    createDimensionDescription(dimensions[i], i);
+    if((it != dimX) && (it != dimY) && ( it != dimZ) && (it != dimT))
+    {
+      createDimensionDescription(*it, count);
+      count++;
+    }
+    it++;
+    
   }
 }
 
-void MDGeometryDescription::createDimensionDescription(const MDDimension& dimension, const int i)
+void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {
-  this->data[i].Tag            = dimension.getDimensionId();
+  this->data[i].Tag            = dimension->getDimensionId();
   this->data[i].trans_bott_left= 0;
-  this->data[i].cut_min        = dimension.getMinimum();
-  this->data[i].cut_max        = dimension.getMaximum()*(1+FLT_EPSILON);
-  this->data[i].nBins          = dimension.getNBins();
-  this->data[i].AxisName       = dimension.getName();
-  this->data[i].isReciprocal   = dimension.isReciprocal();
+  this->data[i].cut_min        = dimension->getMinimum();
+  this->data[i].cut_max        = dimension->getMaximum()*(1+FLT_EPSILON);
+  this->data[i].nBins          = dimension->getNBins();
+  this->data[i].AxisName       = dimension->getName();
+  this->data[i].isReciprocal   = dimension->isReciprocal();
 
   //Handle reciprocal dimensions.
-  if(dimension.isReciprocal())
+  if(dimension->isReciprocal())
   {
     this->coordinates[i].assign(3,0);
-    this->coordinates[i].at(i)= 1;
+    MDDimensionRes* reciprocalDimension = dynamic_cast<MDDimensionRes*>(dimension.get());
+    rec_dim qn = reciprocalDimension->getReciprocalVectorType();
+
+    //The following is only accurate for othogonal primitive reciprocal vectors. This has had to be done
+    //because of the way that geometry currently works.
+    int index;
+    if(qn == q1)
+    {
+      index = 0;
+    }
+    else if(qn == q2)
+    {
+      index = 1;
+    }
+    else if(qn == q3)
+    {
+      index = 2;
+    }
+    this->coordinates[index].assign(3,0);
+    this->coordinates[index].at(index)= 1;
+
   }
 }
 
@@ -104,7 +146,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
     for(i=0;i<nDimensions;i++){
 
         boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
-		this->createDimensionDescription(*pDim,i);
+		this->createDimensionDescription(pDim,i);
 
     }
 

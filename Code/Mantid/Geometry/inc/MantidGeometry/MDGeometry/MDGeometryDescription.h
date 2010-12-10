@@ -3,7 +3,7 @@
 
 #include <deque>
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-
+#include <boost/shared_ptr.hpp>
 
 /** class describes slicing and rebinning matrix and the geometry of the MD workspace. 
 
@@ -58,6 +58,9 @@ public:
   {}
 };
 
+typedef boost::shared_ptr<IMDDimension> Dimension_sptr;
+typedef std::vector<boost::shared_ptr<IMDDimension> > DimensionVec;
+typedef std::vector<boost::shared_ptr<IMDDimension> >::iterator DimensionVecIterator;
 
 class DLLExport MDGeometryDescription
 {
@@ -65,11 +68,11 @@ public:
   //  MDGeometryDescription(std::vector<MDDataObjects::DimensionsID> &IDs);
 
     MDGeometryDescription(
-      std::vector<MDDimension> dimensions, 
-      const MDDimension& dimensionX, 
-      const MDDimension& dimensionY, 
-      const MDDimension& dimensionZ,
-      const MDDimension& dimensiont);
+      DimensionVec dimensions, 
+      Dimension_sptr dimensionX, 
+      Dimension_sptr dimensionY,  
+      Dimension_sptr dimensionZ, 
+      Dimension_sptr dimensiont ); 
 
     MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);
     MDGeometryDescription(const MDGeometry &origin);
@@ -161,7 +164,7 @@ private:
     std::deque<DimensionDescription> data;  //< data describes one dimension;
 
     //Helper method to generate slicing data.
-    void createDimensionDescription(const MDDimension& dimension, const int i);
+    void createDimensionDescription(Dimension_sptr dimension, const int i);
 
 typedef std::deque<DimensionDescription>::iterator       it_data;
 typedef std::deque<DimensionDescription>::const_iterator it_const_data;

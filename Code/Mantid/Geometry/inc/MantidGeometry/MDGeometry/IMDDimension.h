@@ -53,6 +53,8 @@ namespace Mantid
       virtual double getMinimum() const = 0;
    /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual unsigned int getNBins() const = 0;
+
+      virtual bool isReciprocal() const = 0;
       
 	  virtual ~IMDDimension(){};
     };
