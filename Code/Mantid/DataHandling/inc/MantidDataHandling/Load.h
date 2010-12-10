@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidAPI/IDataFileChecker.h"
 namespace Mantid
 {
   namespace DataHandling
@@ -37,35 +37,43 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
+    static const int bufferSize=100;
     class DLLExport Load : public API::Algorithm
     {
     public:
+      /// Default constructor
       Load(){}
+       /// Destructor
       ~Load() {}
+      /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Load"; }
+      /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       virtual const std::string category() const { return "DataHandling"; }
-
+          
     private:
+      ///init
       void init();
+      /// execute
       void exec();
 
-      /// Run LoadRaw
-      void runLoadRaw(API::IAlgorithm_sptr&);
-      /// Run LoadNexus
-      void runLoadNexus(API::IAlgorithm_sptr&);
-      /// Run LoadAscii
-      void runLoadAscii(API::IAlgorithm_sptr&);
-      /// Run LoadSPE
-      void runLoadSPE(API::IAlgorithm_sptr&);
-      /// Run LoadSpice2D
-      void runLoadSpice2D(API::IAlgorithm_sptr&);
+      /// This method returns shared pointer to load algorithm which got  the highest preference after file check.
+      API::IAlgorithm_sptr getLoadAlgorithmfromFile(const std::string& filePath);
       /// Set the output workspace(s)
       void setOutputWorkspace(API::IAlgorithm_sptr&);
-      /// Set the output workspace
-      void setOutputMatrixWorkspace(API::IAlgorithm_sptr&);
-
-    };
+      /// intiliases the load algorithm with highest preference and sets this as a child algorithm
+      void initialiseLoadSubAlgorithm(API::IAlgorithm_sptr alg, const double startProgress, const double endProgress, 
+						  const bool enableLogging, const int& version);
+    private:
+      /// union used for identifying teh file type
+      unsigned char* m_header_buffer;
+       union { 
+        unsigned u; 
+        unsigned long ul; 
+        unsigned char c[bufferSize+1]; 
+      } header_buffer_union;
+     };
 
   } // namespace DataHandling
 } // namespace Mantid

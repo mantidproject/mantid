@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/Node.h"
 //----------------------------------------------------------------------
@@ -53,7 +54,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport LoadCanSAS1D : public API::Algorithm
+    class DLLExport LoadCanSAS1D : public API::IDataFileChecker
     {
     public:
       ///default constructor
@@ -66,6 +67,11 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
+
+       /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
 
     private:
       /// If a workspace group is created this is set from empty to the root name of the members, the name of the workspace group members up to and including the _

@@ -5,9 +5,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-
-#include <algorithm>
-#include <sstream>
+#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
+#include<algorithm>
 
 namespace Mantid
 {
@@ -22,6 +22,7 @@ namespace Mantid
     /// Initialisation method.
     void Load::init()
     {
+      
       std::vector<std::string> exts;
       exts.push_back(".raw");
       exts.push_back(".s*");
@@ -37,7 +38,7 @@ namespace Mantid
       exts.push_back(".csv");
 
       exts.push_back(".spe");
-
+   
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		      "The name of the file to read, including its full or relative\n"
 		      "path. (N.B. case sensitive if running on Linux).");
@@ -51,8 +52,20 @@ namespace Mantid
       declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
     }
+     
+    struct hasProperty
+    { 
+      hasProperty(const std::string name):m_name(name){}
+      bool operator()(Mantid::Kernel::Property* prop)
+      {
+        std::string name=prop->name();
+        return (!name.compare(m_name));
+      }
+      std::string m_name;
+      
+    };
 
-    /** 
+   /** 
      *   Executes the algorithm.
      */
     void Load::exec()
@@ -61,155 +74,178 @@ namespace Mantid
       std::string::size_type i = fileName.find_last_of('.');
       std::string ext = fileName.substr(i+1);
       std::transform(ext.begin(),ext.end(),ext.begin(),tolower);
-
-      API::IAlgorithm_sptr load;
-      if (ext == "raw" || ext == "add")
-      {
-        runLoadRaw(load);
-      }
-      else if (ext == "nxs" || ext == "nx5")
-      {
-        runLoadNexus(load);
-      }
-      else if (ext == "dat" || ext == "txt" || ext == "csv")
-      {
-        runLoadAscii(load);
-      }
-      else if (ext == "spe")
-      {
-        runLoadSPE(load);
-      }
-      else if (ext[0] == 's')
-      {
-        runLoadRaw(load);
-      }
-      else if (ext[0] == 'n')
-      {
-        runLoadNexus(load);
-      }
-      else if (ext == "xml")
-      {
-        try
-        {
-          runLoadNexus(load);
-        }
-        catch(...)
-        {
-          runLoadSpice2D(load);
-        }
-      }
-      else
+      //get the shared pointer to the specialised load algorithm to execute  
+      API::IAlgorithm_sptr alg= getLoadAlgorithmfromFile(fileName);
+      if(!alg)
       {
         throw std::runtime_error("Cannot load file " + fileName);
       }
-
+      g_log.debug()<<"The sub algorithm  name is "<<alg->name()<<std::endl;
+      double startProgress=0,endProgress=1;
+      // set the load algorithm as a child algorithm 
+      initialiseLoadSubAlgorithm(alg,startProgress,endProgress,true,-1);
+  
+      //get the list of properties for this algorithm
+      std::vector<Kernel::Property*> props=getProperties();
+      ///get the list properties for the sub load algorithm
+      std::vector<Kernel::Property*>loader_props=alg->getProperties();
+      
+      //loop through the properties of this algorithm 
+      std::vector<Kernel::Property*>::iterator itr;
+      for (itr=props.begin();itr!=props.end();++itr)
+      {        
+        std::vector<Mantid::Kernel::Property*>::iterator prop;
+        //if  the load sub algorithm has the same property then set it.
+        prop=std::find_if(loader_props.begin(),loader_props.end(),hasProperty((*itr)->name()));
+        if(prop!=loader_props.end())
+        {           
+          alg->setPropertyValue((*prop)->name(),getPropertyValue((*prop)->name()));
+        }
+        
+      }
+      //execute the load sub algorithm
+      alg->execute();
+      //se the workspace
+      setOutputWorkspace(alg);
+          
     }
 
-    /**
-      * Run LoadRaw
-      * @param load Shared pointer to the subalgorithm
-      */ 
-    void Load::runLoadRaw(API::IAlgorithm_sptr& load)
+
+   /** get a shared pointer to the load algorithm with highest preference for loading
+     *@param filePath path of the file
+     *@return filePath - path of the file
+     */
+     API::IAlgorithm_sptr Load::getLoadAlgorithmfromFile(const std::string& filePath)
+     {
+       unsigned char* header_buffer = header_buffer_union.c;
+       int nread;
+       /* Open the file and read in the first bufferSize bytes - these will
+       * be used to determine the type of the file
+       */
+       FILE* fp = fopen(filePath.c_str(), "rb");
+       if (fp == NULL)
+       {
+         throw Kernel::Exception::FileError("Unable to open the file:", filePath);
+       }
+       nread = fread((char*)header_buffer,sizeof(char), bufferSize,fp);
+       header_buffer[bufferSize] = '\0';
+       if (nread == -1)
+       {
+         fclose(fp);
+       }
+
+       if (fclose(fp) != 0)
+       {
+       } 
+
+       int val=0;
+       API::IAlgorithm_sptr load;
+       // now get the name of  algorithms registered in the loadAlgorithmfactory
+       std::vector<std::string> algnames=API::LoadAlgorithmFactory::Instance().getKeys();
+       std::map<std::string, boost::shared_ptr<DataHandling::IDataFileChecker> >loadalgs;
+       /// create  load algorithms and store it in a map 
+       std::vector<std::string>::const_iterator citr;
+       for (citr=algnames.begin();citr!=algnames.end();++citr)
+       {        
+        loadalgs[*citr]= API::LoadAlgorithmFactory::Instance().create(*citr);
+       }
+           
+       std::map<std::string, boost::shared_ptr<DataHandling::IDataFileChecker> >::const_iterator alg_itr;
+       //loop thorugh the map and do a quick check for each load algorithm by opening the file and look at it's first 100 bytes and extensions
+       //if quick check succeeds then do a filecheck again by opening the file and read the structure of the file
+       for (alg_itr=loadalgs.begin();alg_itr!=loadalgs.end();++alg_itr)
+       {         
+         bool bcheck=alg_itr->second->quickFileCheck(filePath,nread,header_buffer);
+         if(!bcheck)
+         {
+           continue;
+         }
+         int ret=alg_itr->second->fileCheck(filePath);
+         if(ret>val) 
+         {
+           // algorithm with highest preference will cached.
+           val=ret;
+           load=alg_itr->second;
+         }
+       }
+       return load;
+     }
+
+  /** This method set the algorithm as a child algorithm.
+    *  @param alg            The shared pointer to a  algorithm
+    *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
+    *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
+    *  @param enableLogging  Set to false to disable logging from the child algorithm
+    *  @param version        The version of the child algorithm to create. By default gives the latest version.
+    */
+    void Load::initialiseLoadSubAlgorithm(API::IAlgorithm_sptr alg, const double startProgress, const double endProgress, 
+						  const bool enableLogging, const int& version)
+    
     {
-      load = createSubAlgorithm("LoadRaw",0,1);
-      load->initialize();
-      load->setPropertyValue("Filename",getPropertyValue("Filename"));
-      load->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-      load->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
-      load->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
-      load->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
-      load->execute();
-      setOutputWorkspace(load);
-    }
+      //set as a child
+      alg->initialize();
+      alg->setChild(true);
+      alg->setLogging(enableLogging);
 
-    /**
-      * Run LoadNexus
-      * @param load Shared pointer to the subalgorithm
-      */ 
-    void Load::runLoadNexus(API::IAlgorithm_sptr& load)
-    {
-      load = createSubAlgorithm("LoadNexus",0,1);
-      load->initialize();
-      load->setPropertyValue("Filename",getPropertyValue("Filename"));
-      load->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-      load->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
-      load->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
-      load->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
-      load->execute();
-      setOutputWorkspace(load);
-    }
+      // If output workspaces are nameless, give them a temporary name to satisfy validator
+      const std::vector< Property*> &props = alg->getProperties();
+      for (unsigned int i = 0; i < props.size(); ++i)
+      {
+        if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        {
+          if ( props[i]->value().empty() ) props[i]->setValue("ChildAlgOutput");
+        }
+      }
 
-    /**
-      * Run LoadAscii
-      * @param load Shared pointer to the subalgorithm
-      */ 
-    void Load::runLoadAscii(API::IAlgorithm_sptr& load)
-    {
-      load = createSubAlgorithm("LoadAscii",0,1);
-      load->initialize();
-      load->setPropertyValue("Filename",getPropertyValue("Filename"));
-      load->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-      load->execute();
-      setOutputMatrixWorkspace(load);
-    }
+      if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
+      {
+        alg->addObserver(m_progressObserver);
+        alg->setChildStartProgress(startProgress);
+        alg->setChildEndProgress(endProgress);
+      }
 
-    /**
-      * Run LoadSPE
-      * @param load Shared pointer to the subalgorithm
-      */ 
-    void Load::runLoadSPE(API::IAlgorithm_sptr& load)
-    {
-      load = createSubAlgorithm("LoadSPE",0,1);
-      load->initialize();
-      load->setPropertyValue("Filename",getPropertyValue("Filename"));
-      load->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-      load->execute();
-      setOutputMatrixWorkspace(load);
     }
-
-    void Load::runLoadSpice2D(API::IAlgorithm_sptr& load)
-    {
-      load = createSubAlgorithm("LoadSpice2D",0,1);
-      load->initialize();
-      load->setPropertyValue("Filename",getPropertyValue("Filename"));
-      load->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-      load->execute();
-      setOutputWorkspace(load);
-    }
-
+        
     /**
       * Set the output workspace(s) if the load's return workspace
       *  has type API::Workspace
+      *@param shared pointer to load algorithm
       */
     void Load::setOutputWorkspace(API::IAlgorithm_sptr& load)
     {
-      Workspace_sptr ws = load->getProperty("OutputWorkspace");
-      setProperty("OutputWorkspace",ws);
-      WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-      if (wsg)
+      try
       {
-        std::vector<std::string> names = wsg->getNames();
-        for(size_t i = 0; i < names.size(); ++i)
+        Workspace_sptr ws = load->getProperty("OutputWorkspace"); 
+        WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+        if (wsg)
         {
-          std::ostringstream propName;
-          propName << "OutputWorkspace_" << (i+1);
-          DataObjects::Workspace2D_sptr ws1 = load->getProperty(propName.str());
-          std::string wsName = load->getPropertyValue(propName.str());
-          declareProperty(new WorkspaceProperty<>(propName.str(),wsName,Direction::Output));
-          setProperty(propName.str(),boost::dynamic_pointer_cast<MatrixWorkspace>(ws1));
+          setProperty("OutputWorkspace",ws);
+          std::vector<std::string> names = wsg->getNames();
+          for(size_t i = 0; i < names.size(); ++i)
+          {
+            std::ostringstream propName;
+            propName << "OutputWorkspace_" << (i+1);
+            DataObjects::Workspace2D_sptr memberwsws1 = load->getProperty(propName.str());
+
+            std::string memberwsName = load->getPropertyValue(propName.str());
+            declareProperty(new WorkspaceProperty<>(propName.str(),memberwsName,Direction::Output));
+            setProperty(propName.str(),boost::dynamic_pointer_cast<MatrixWorkspace>(memberwsws1));
+          }
+        }
+        else
+        { 
+          setProperty("OutputWorkspace",ws);
         }
       }
+      catch(std::runtime_error&)
+      {
+        MatrixWorkspace_sptr mws=load->getProperty("OutputWorkspace");
+        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(mws));
+      }
+         
+     
     }
 
-    /**
-      * Set the output workspace(s) if the load's return workspace
-      *  has type API::MatrixWorkspace
-      */
-    void Load::setOutputMatrixWorkspace(API::IAlgorithm_sptr& load)
-    {
-      MatrixWorkspace_sptr ws = load->getProperty("OutputWorkspace");
-      setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(ws));
-    }
-
+  
   } // namespace DataHandling
 } // namespace Mantid

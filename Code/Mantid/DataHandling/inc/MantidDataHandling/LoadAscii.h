@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
@@ -44,7 +45,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadAscii : public API::Algorithm
+    class DLLExport LoadAscii :public API::IDataFileChecker 
     {
     public:
       LoadAscii();
@@ -52,6 +53,12 @@ namespace Mantid
       virtual const std::string name() const { return "LoadAscii"; }
       virtual int version() const { return 1; }
       virtual const std::string category() const { return "DataHandling"; }
+
+      /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
+
 
     private:
       void init();

@@ -7,6 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "Poco/File.h"
 #include <iostream>
 #include <fstream>
@@ -19,6 +20,8 @@ using namespace Mantid::Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadGSS)
 
+//register the algorithm into loadalgorithm factory
+DECLARE_LOADALGORITHM(LoadGSS)
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -180,3 +183,57 @@ void LoadGSS::exec()
   setProperty("OutputWorkspace", outputWorkspace);
   return;
 }
+
+
+/**This method does a quick file type check by checking the first 100 bytes of the file 
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+    bool LoadGSS::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+      std::string extn=extension(filePath);
+      bool bascii(false);
+      (!extn.compare("text"))?bascii=true:bascii=false;
+
+      bool is_ascii (true);
+      for(int i=0; i<nread; i++)
+      {
+        if (!isascii(header_buffer[i]))
+          is_ascii =false;
+      }
+      return(is_ascii|| bascii?true:false);
+    }
+
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+    int LoadGSS::fileCheck(const std::string& filePath)
+    {      
+      std::ifstream file(filePath.c_str());
+      if (!file)
+      {
+        g_log.error("Unable to open file: " + filePath);
+        throw Exception::FileError("Unable to open file: " , filePath);
+      }
+      std::string str;
+      getline(file,str);//workspace ttile first line
+      while (!file.eof())
+      {
+        getline(file,str);
+        if(str.empty()||str[0]=='#')
+        {
+          continue;
+        }
+        if(!str.substr(0,4).compare("BANK")&& (str.find("RALF")!=std::string::npos)&& (str.find("FXYE")!=std::string::npos))
+        {
+          return 80;
+        }
+        return 0;
+      }
+      return  0;
+
+    }
+

@@ -7,11 +7,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
-
+#include "MantidAPI/IDataFileChecker.h"
 #include <napi.h>
 #include <climits>
 
 #include <boost/shared_array.hpp>
+
+
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -66,7 +68,7 @@ namespace NeXus
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadSNSNexus : public API::Algorithm
+    class DLLExport LoadSNSNexus : public API::IDataFileChecker
     {
     public:
         /// Default constructor
@@ -79,6 +81,10 @@ namespace NeXus
         virtual int version() const { return 1; }
         /// Algorithm's category for identification overriding a virtual method
         virtual const std::string category() const { return "DataHandling"; }
+       /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
 
     private:
         /// Overwrites Algorithm method.

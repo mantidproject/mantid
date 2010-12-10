@@ -5,7 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidAPI/IDataFileChecker.h"
 namespace Mantid
 {
 namespace DataHandling
@@ -36,11 +36,11 @@ namespace DataHandling
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadGSS : public Mantid::API::Algorithm
+class DLLExport LoadGSS : public  API::IDataFileChecker 
 {
 public:
   /// (Empty) Constructor
-  LoadGSS() : Mantid::API::Algorithm(){}
+  LoadGSS() {}
   /// Virtual destructor
   virtual ~LoadGSS() {}
   /// Algorithm's name
@@ -49,6 +49,11 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
+
+  /// do a quick check that this file can be loaded 
+  virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+  virtual int fileCheck(const std::string& filePath);
 
 private:
   /// Initialisation code

@@ -5,7 +5,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-
 #include <fstream>
 #include <cstring>
 #include <boost/tokenizer.hpp>
@@ -16,17 +15,18 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadSpec)
+  
 
     using namespace Kernel;
     using namespace API;
-
+    
     /// Empty constructor
-    LoadSpec::LoadSpec() : Algorithm() {}
+    LoadSpec::LoadSpec()  {}
 
     /// Initialisation method.
     void LoadSpec::init()
     {
-      std::vector<std::string> exts;
+     std::vector<std::string> exts;
 	  exts.push_back(".dat");
 	  exts.push_back(".txt");
 
@@ -171,6 +171,7 @@ namespace Mantid
 	  }
 
     }
+
 
   } // namespace DataHandling
 } // namespace Mantid

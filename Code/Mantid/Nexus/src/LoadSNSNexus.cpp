@@ -14,19 +14,25 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
-
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <cmath>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <limits>
 
+#ifdef _WIN32
+#	include <winsock.h>
+#else
+#	include <netinet/in.h>
+#endif
 namespace Mantid
 {
 namespace NeXus
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSNSNexus)
+DECLARE_LOADALGORITHM(LoadSNSNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -304,5 +310,56 @@ double LoadSNSNexus::dblSqrt(double in)
 {
     return sqrt(in);
 }
+
+
+/**This method does a quick file type check by looking at the first 100 bytes of the file 
+    *  @param filePath- path of the file including name.
+    *  @param nread - no.of bytes read
+    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @return true if the given file is of type which can be loaded by this algorithm
+    */
+    bool LoadSNSNexus::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+      std::string extn=extension(filePath);
+      bool bnexs(false);
+      (!extn.compare("nxs")||!extn.compare(".nx5"))?bnexs=true:bnexs=false;
+      /*
+      * HDF files have magic cookie 0x0e031301 in the first 4 bytes
+      */
+      if ( (nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)||bnexs )
+      {
+        //hdf
+        return true;
+      }
+      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature))) )
+      {   
+        //hdf5
+        return true;
+      }
+      return false;
+
+    }
+    /**checks the file by opening it and reading few lines 
+    *  @param filePath name of the file inluding its path
+    *  @return an integer value how much this algorithm can load the file 
+    */
+    int LoadSNSNexus::fileCheck(const std::string& filePath)
+    {
+      NXRoot root(filePath);
+      NXEntry entry = root.openEntry(root.groups().front().nxname);
+      int bret=0;
+      try
+      {
+        NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+        bret= 80;
+      }
+      catch(...)
+      {
+       bret=0;
+      }
+      return bret;
+    }
+
+
 } // namespace DataHandling
 } // namespace Mantid

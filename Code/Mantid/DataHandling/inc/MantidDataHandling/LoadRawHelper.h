@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -47,7 +48,7 @@ namespace Mantid
 	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadRawHelper: public API::Algorithm
+    class DLLExport LoadRawHelper: public API::IDataFileChecker 
     {
     public:
       /// Default constructor
@@ -62,6 +63,12 @@ namespace Mantid
       FILE* openRawFile(const std::string & fileName);
       /// Read in run parameters Public so that LoadRaw2 can use it
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
+
+      /// do a quick check that this file can be loaded 
+     virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and if this file can be loaded return a value between 1 and 100
+     virtual int fileCheck(const std::string& filePath);
+      
     protected:
       /// Overwrites Algorithm method.
       void init();
@@ -154,7 +161,9 @@ namespace Mantid
 				   int& normalwsSpecs, int& monitorwsSpecs);
       /// load the specra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
-		       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
+		       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >); 
+      
+      
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?

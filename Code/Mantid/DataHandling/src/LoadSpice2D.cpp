@@ -17,6 +17,7 @@
 #include "Poco/DOM/Node.h"
 #include "Poco/DOM/Text.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <boost/shared_array.hpp>
 #include <iostream>
 //-----------------------------------------------------------------------
@@ -86,6 +87,9 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(LoadSpice2D)
+
+    //register the algorithm into loadalgorithm factory
+     DECLARE_LOADALGORITHM(LoadSpice2D)
 
     /// Constructor
     LoadSpice2D::LoadSpice2D() {}
@@ -397,6 +401,56 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError(name + " element not found in Spice XML file", fileName);
       }
+    }
+
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+    bool LoadSpice2D::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+      std::string extn=extension(filePath);
+      bool bspice2d(false);
+      (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
+
+      const char* xml_header="<?xml version=";
+      if ( ((unsigned)nread >= strlen(xml_header)) && 
+        !strncmp((char*)header_buffer, xml_header, strlen(xml_header)) )
+      {
+      }
+      return(bspice2d?true:false);
+    }
+
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+    int LoadSpice2D::fileCheck(const std::string& filePath)
+    {      
+      // Set up the DOM parser and parse xml file
+      DOMParser pParser;
+      Document* pDoc;
+      try
+      {
+        pDoc = pParser.parse(filePath);
+      } catch (...)
+      {
+        throw Kernel::Exception::FileError("Unable to parse File:", filePath);
+      }
+      // Get pointer to root element
+      Element* pRootElem = pDoc->documentElement();
+      if(pRootElem)
+      {
+        if(!pRootElem->tagName().compare("SPICErack"))
+        {
+          return 80;
+        }
+      }
+      
+      return  0;
+
     }
 }
 }

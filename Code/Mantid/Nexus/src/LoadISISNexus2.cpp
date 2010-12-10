@@ -11,7 +11,8 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
-
+#include "MantidNexus/NexusFileIO.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
@@ -24,19 +25,25 @@
 #include <functional>
 #include <algorithm>
 
+#ifdef _WIN32
+#	include <winsock.h>
+#else
+#	include <netinet/in.h>
+#endif
 namespace Mantid
 {
   namespace NeXus
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadISISNexus2)
-
+    DECLARE_LOADALGORITHM(LoadISISNexus2)
+    
     using namespace Kernel;
     using namespace API;
 
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
-    Algorithm(), m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
+    m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
     m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
     m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
     m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
@@ -750,5 +757,56 @@ namespace Mantid
       return sqrt(in);
     }
 
+ /**This method does a quick file type check by looking at the first 100 bytes of the file 
+    *  @param filePath- path of the file including name.
+    *  @param nread - no.of bytes read
+    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @return true if the given file is of type which can be loaded by this algorithm
+    */
+    bool LoadISISNexus2::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+      std::string extn=extension(filePath);
+      bool bnexs(false);
+      (!extn.compare("nxs")||!extn.compare(".nx5"))?bnexs=true:bnexs=false;
+      /*
+      * HDF files have magic cookie 0x0e031301 in the first 4 bytes
+      */
+      if ( (nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)||bnexs )
+      {
+        //hdf
+        return true;
+      }
+      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature))) )
+      { 
+        //hdf5
+        return true;
+      }
+      return false;
+    }
+     /**checks the file by opening it and reading few lines 
+    *  @param filePath name of the file inluding its path
+    *  @return an integer value how much this algorithm can load the file 
+    */
+    int LoadISISNexus2::fileCheck(const std::string& filePath)
+    {
+      std::vector<std::string> entryName,definition;
+      int count= getNexusEntryTypes(filePath,entryName,definition);
+      if(count<=-1)
+      {
+        g_log.error("Error reading file " + filePath);
+        throw Exception::FileError("Unable to read data in File:" , filePath);
+      }
+      else if(count==0)
+      {
+        g_log.error("Error no entries found in " + filePath);
+        throw Exception::FileError("Error no entries found in " , filePath);
+      }
+      int ret=0;
+      if( entryName[0]=="raw_data_1" )
+      {
+        ret=80;
+      }
+      return ret;
+    }
   } // namespace DataHandling
 } // namespace Mantid

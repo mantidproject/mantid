@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/IDataFileChecker.h"
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -48,7 +49,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport LoadSpice2D : public API::Algorithm
+    class DLLExport LoadSpice2D : public API::IDataFileChecker
     {
     public:
       ///default constructor
@@ -63,6 +64,11 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
       /// Number of monitors
       static const int nMonitors = 2;
+
+     /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
 
     private:
       /// Overwrites Algorithm method.

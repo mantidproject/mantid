@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadMuonNexus.h"
+#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
@@ -72,6 +73,10 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
 
+      /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
     private:
       /// Overwrites Algorithm method
       void exec();

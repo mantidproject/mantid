@@ -7,9 +7,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <cstdio>
 #include <limits>
-
+#include <fstream>
 /// @cond
 // Don't document this very long winded way of getting "degrees" to print on the axis.
 namespace
@@ -37,6 +38,9 @@ using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSPE)
+
+//register the algorithm into loadalgorithm factory
+DECLARE_LOADALGORITHM(LoadSPE)
 
 //---------------------------------------------------
 // Private member functions
@@ -223,6 +227,66 @@ void LoadSPE::reportFormatError(const std::string& what)
   g_log.error("Unexpected formatting in file " + m_filename + " : " + what);
   throw Exception::FileError("Unexpected formatting in file: " , m_filename);
 }
+
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadSPE::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+{
+  std::string extn=extension(filePath);
+  bool bspe(false);
+  (!extn.compare("spe"))?bspe=true:bspe=false;
+  bool is_ascii (true);
+  for(int i=0; i<nread; i++)
+  {
+    if (!isascii(header_buffer[i]))
+      is_ascii =false;
+  }
+  return(is_ascii|| bspe?true:false);
+}
+
+/**checks the file by opening it and reading few lines 
+ * @param filePath name of the file inluding its path
+ * @return an integer value how much this algorithm can load the file 
+ */
+int LoadSPE::fileCheck(const std::string& filePath)
+{  
+  std::ifstream file(filePath.c_str());
+  if (!file)
+  {
+    g_log.error("Unable to open file: " + filePath);
+    throw Exception::FileError("Unable to open file: " , filePath);
+  }
+  int bret=0;
+  std::string fileline;
+  //read first line
+  getline(file,fileline);
+  boost::char_separator<char> sep(" ");
+  int ncols=0;
+  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+  tokenizer tok(fileline,sep);
+  for (tokenizer::iterator beg=tok.begin();beg!=tok.end();++beg)
+  {
+    ++ncols;
+  }
+  if(ncols==2)
+  {
+    bret+=40;
+  }
+  // Next line should be comment line: "### Phi Grid" or "### Q Grid"
+  std::string commentline;
+  getline(file,commentline);
+  if(commentline.find("Phi Grid")!=std::string::npos|| commentline.find("Q Grid")!=std::string::npos )
+  {
+   bret+=40;
+  }
+ 
+  return bret;
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
 #include "Poco/DateTimeParser.h"
@@ -32,12 +33,12 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    /// Constructor
+      /// Constructor
     LoadRawHelper::LoadRawHelper() :
-    Algorithm(),isisRaw(new ISISRAW2),
+    isisRaw(new ISISRAW2),
       m_list(false),m_spec_list(),m_spec_min(0),
       m_spec_max(EMPTY_INT()),m_specTimeRegimes(),m_bmspeclist(false)
-    {
+    {      
     }
 
     LoadRawHelper::~LoadRawHelper()
@@ -1014,6 +1015,36 @@ namespace Mantid
       }
 
     }
+    
+ ///
+bool LoadRawHelper::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+{
+  std::string extn=extension(filePath);
+  bool braw(false);
+  (!extn.compare("raw")||!extn.compare("add")||!extn.compare("s"))?braw=true:braw=false;
+  /*
+  * look at the "address of RUN and INST section" attribute - if there, must be an ISIS raw file
+  */
+  if ( ((nread > 88) && (header_buffer[84] == 32) && (header_buffer[88] == 126))|| braw )
+  {
+   return true;
+  }
+  else
+  {
+    return false;
+  }
+ 
+}
+///
+int LoadRawHelper::fileCheck(const std::string& filePath)
+{
+  //here the assumption is generic load algorithm will
+  //call filecheck if quickFileCheck passed.
+  // once quick checked passed return 80 for loadraw 
+  return 80;
+}
+
+
 
   } // namespace DataHandling
 } // namespace Mantid

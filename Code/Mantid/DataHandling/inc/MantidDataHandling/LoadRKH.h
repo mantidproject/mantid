@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include <istream>
 
 namespace Mantid
@@ -44,11 +45,11 @@ namespace DataHandling
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
-class DLLExport LoadRKH : public Mantid::API::Algorithm
+class DLLExport LoadRKH : public API::IDataFileChecker
 {
 public:
   /// Constructor
-  LoadRKH() : Mantid::API::Algorithm(), m_unitKeys(), m_RKHKeys() {}
+  LoadRKH() :m_unitKeys(), m_RKHKeys() {}
   /// Virtual destructor
   virtual ~LoadRKH() {}
   /// Algorithm's name
@@ -57,7 +58,10 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
-
+  /// do a quick check that this file can be loaded 
+      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      virtual int fileCheck(const std::string& filePath);
 private:
   // Initialisation code
   void init();

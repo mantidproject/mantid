@@ -15,6 +15,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
@@ -27,6 +28,7 @@ namespace DataHandling
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadRaw3)
+DECLARE_LOADALGORITHM(LoadRaw3)
 
 using namespace Kernel;
 using namespace API;
@@ -662,7 +664,25 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   }
 }
 
-
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadRaw3::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+{ 
+  return(LoadRawHelper::quickFileCheck(filePath,nread,header_buffer)?true:false);
+ 
+}
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+int LoadRaw3::fileCheck(const std::string& filePath)
+{
+  return LoadRawHelper::fileCheck(filePath);
+}
 
 
 } // namespace DataHandling

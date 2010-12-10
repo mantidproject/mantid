@@ -5,7 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <fstream>
 #include <boost/tokenizer.hpp>
 
@@ -15,12 +15,15 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadAscii)
+    
+    //register the algorithm into loadalgorithm factory
+    DECLARE_LOADALGORITHM(LoadAscii)
 
     using namespace Kernel;
     using namespace API;
 
     /// Empty constructor
-    LoadAscii::LoadAscii() : Algorithm() {}
+    LoadAscii::LoadAscii()  {}
 
     /// Initialisation method.
     void LoadAscii::init()
@@ -161,6 +164,115 @@ namespace Mantid
       }
 
       setProperty("OutputWorkspace",localWorkspace);
+    }
+
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+    bool LoadAscii::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+      std::string extn=extension(filePath);
+      bool bascii(false);
+      (!extn.compare("dat")||!extn.compare("csv")|| extn.compare("txt"))?bascii=true:bascii=false;
+
+      bool is_ascii (true);
+      for(int i=0; i<nread; i++)
+      {
+        if (!isascii(header_buffer[i]))
+          is_ascii =false;
+      }
+      return(is_ascii|| bascii?true:false);
+    }
+
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file including its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+    int LoadAscii::fileCheck(const std::string& filePath)
+    {      
+      std::ifstream file(filePath.c_str());
+      if (!file)
+      {
+        g_log.error("Unable to open file: " + filePath);
+        throw Exception::FileError("Unable to open file: " , filePath);
+      }
+      //set up the separators
+      /*std::map<std::string,const char*>::const_iterator it;
+      std::string separators;
+      for(it=m_separatormap.begin();it!=m_separatormap.end();++it)
+      {     
+        separators+=it->second;
+      }
+*/
+      std::string separators(",");
+      int ncols=0; 
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+      boost::char_separator<char> seps(separators.c_str());
+      std::string line;
+      int bret=0;
+      while(!file.eof())
+      { 
+        getline(file,line) ;      
+        if (line.empty()) 
+        {
+          continue;
+        }
+        
+        if(line.at(0) == '#')
+        {
+          try
+          {
+            if(line.at(1)=='L')
+            {
+              return 0;
+            }
+          }
+          catch(std::out_of_range&)
+          {
+            continue;
+          }
+        }
+        else
+        {
+          //break at a non empty line
+          break;
+        }
+      }
+
+      boost::tokenizer<boost::char_separator<char> > values(line, seps);
+      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
+      {         
+        ++ncols;
+      } 
+      
+      //if the line has odd number of coulmns with mantid supported separators
+      // this is considered as ascci file 
+      if (ncols % 2 == 1 && ncols>2) 
+      {
+        bret+=40;
+      }
+      bool bloadAscii(true);
+      //if the data is of double type this file can be loaded by loadascci
+      double data;
+      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
+      {       
+        std::istringstream is(*it);
+        is>>data;
+        if(is.fail())
+        {
+          bloadAscii=false;
+          break;
+        }
+       
+      }
+      if(bloadAscii)
+      {
+        bret+=40;
+      }
+      return  bret;
     }
 
   } // namespace DataHandling

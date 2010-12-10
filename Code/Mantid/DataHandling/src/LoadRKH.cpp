@@ -5,14 +5,19 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/date_parsing.hpp"
 
 #include <fstream>
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadRKH)
-
+//register the algorithm into loadalgorithm factory
+DECLARE_LOADALGORITHM(LoadRKH)
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -183,4 +188,154 @@ void LoadRKH::skipLines(std::istream & strm, int nlines)
   {
     getline(strm, buried);
   }
+}
+
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadRKH::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+{
+  std::string extn=extension(filePath);
+  bool bascii(false);
+  (!extn.compare("txt")|| extn.compare("Q"))?bascii=true:bascii=false;
+
+  bool is_ascii (true);
+  for(int i=0; i<nread; i++)
+  {
+    if (!isascii(header_buffer[i]))
+      is_ascii =false;
+  }
+  return(is_ascii|| bascii?true:false);
+}
+
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+int LoadRKH::fileCheck(const std::string& filePath)
+{ 
+  int bret=0;
+  std::ifstream file(filePath.c_str());
+  if (!file)
+  {
+    g_log.error("Unable to open file: " + filePath);
+    throw Exception::FileError("Unable to open file: " , filePath);
+  }
+
+  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+   boost::char_separator<char> sep(" ");
+
+  std::string fileline("");
+  std::string ws,da,dt,time;
+  int ncols=0;
+  //get first line
+  getline(file, fileline);
+  std::istringstream is(fileline);
+  //get diff words from first line
+  is>>ws>>da>>dt>>time;
+  //get the day,year and month part from first line
+  std::string::size_type pos=dt.find_last_of("-");
+  if(pos==std::string::npos)
+  {
+    return 0;
+  }
+  std::string year(dt.substr(pos+1,dt.length()-pos));
+  
+  std::string::size_type pos1=dt.find_last_of("-",pos-1);
+  if(pos1==std::string::npos)
+  {
+    return 0;
+  }
+  std::string month(dt.substr(pos1+1,pos-pos1));
+  
+  std::string day(dt.substr(0,pos1));
+  std::string rkhdate=year+"-";
+  rkhdate+=month;
+  rkhdate+="-";
+  rkhdate+=day;
+//if the first line contains date this could be rkh file
+  try
+  {
+    boost::gregorian::date d(boost::gregorian::from_string(rkhdate));
+    boost::gregorian::date::ymd_type ymd = d.year_month_day();
+    if(ymd.month>=1 && ymd.month<13)
+    {
+      bret+=10;
+    }
+    if(ymd.day>=1 && ymd.month<32)
+    {
+      bret+=10;
+    }
+  }
+  catch(std::exception&)
+  {
+    return 0;
+  }
+ 
+  
+  //read second line
+  getline(file, fileline);
+  if(fileline.find("(")!=std::string::npos && fileline.find(")")!=std::string::npos)
+  {
+    bret+=10;
+  }
+  //read 3rd line
+  getline(file, fileline);
+  if(fileline.find("(")!=std::string::npos && fileline.find(")")!=std::string::npos)
+  {
+    bret+=10;
+    if(fileline.find("    0    0    0    1")!=std::string::npos)
+    {
+      bret+=10;
+    }
+  }
+  else
+  { 
+    tokenizer tok(fileline,sep);
+    for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+    {		 
+      ++ncols;
+    }
+    if(ncols==7)
+    {
+      bret+=10;
+    }
+  }
+  //4th line
+  getline(file, fileline);
+  if(fileline.find("         0         0         0         0")!=std::string::npos)
+  {
+    bret+=10;
+  }
+  else if(fileline.find("  0 ")!=std::string::npos)
+  {
+      bret+=10;
+  }
+  //5th line
+  getline(file, fileline);
+  if(fileline.find("3 (F12.5,2E16.6)")!=std::string::npos)
+  {
+    bret+=10;
+  }
+  else if (fileline.find("  1\n")!=std::string::npos)
+  { 
+      bret+=10;
+  }
+  ncols=0;  
+  //6th line data line
+  getline(file, fileline);
+  tokenizer tok1(fileline, sep); 
+  for (tokenizer::iterator beg=tok1.begin(); beg!=tok1.end(); ++beg)
+  {		 
+    ++ncols;
+  }
+  if(ncols==3)
+  {
+    bret+=20;
+  }
+  
+  return bret;
 }

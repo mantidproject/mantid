@@ -5,7 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <fstream>
 #include <cstring>
 #include <boost/tokenizer.hpp>
@@ -16,12 +16,14 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadSNSspec)
+      //register the algorithm into loadalgorithm factory
+    DECLARE_LOADALGORITHM(LoadSNSspec)
 
     using namespace Kernel;
     using namespace API;
 
     /// Empty constructor
-    LoadSNSspec::LoadSNSspec() : Algorithm() {}
+    LoadSNSspec::LoadSNSspec()  {}
 
     /// Initialisation method.
     void LoadSNSspec::init()
@@ -171,6 +173,95 @@ namespace Mantid
 	  }
 
     }
+    /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+    bool LoadSNSspec::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    {
+       std::string extn=extension(filePath);
+      bool bascii(false);
+      (!extn.compare("txt"))?bascii=true:bascii=false;
 
+      bool is_ascii (true);
+      for(int i=0; i<nread; i++)
+      {
+        if (!isascii(header_buffer[i]))
+          is_ascii =false;
+      }
+      return(is_ascii|| bascii?true:false);
+    }
+
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+    int LoadSNSspec::fileCheck(const std::string& filePath)
+    {  
+      std::ifstream file(filePath.c_str());
+      if (!file)
+      {
+        g_log.error("Unable to open file: " + filePath);
+        throw Exception::FileError("Unable to open file: " , filePath);
+      }
+
+      int bret=0;
+      int ncols=0;
+      std::string str;
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer; 
+      boost::char_separator<char> sep(" ");   
+     
+      while(!file.eof())
+      {
+        //read line
+        std::getline(file,str);
+        if(str.empty())
+        {
+          continue;
+        }
+        try
+        {
+          //if it's comment line
+          if (str.at(0)=='#' ) 
+          {  
+            if(str.at(1) =='L')  
+            {
+              tokenizer tok(str, sep); 
+              for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+              {		 
+                ++ncols;
+              }
+              //if the file contains a comment line starting with "#L" followed
+              //by three columns this could be load spec file
+              if(ncols>3)
+              {
+                bret+=40;
+              }
+            }
+          }
+          else //first non comment line is data line
+          { 
+            ncols=0;
+            tokenizer tok(str, sep); 
+            for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+            {		 
+              ++ncols;
+            } 
+            if(ncols==3)
+            {
+              bret+=40;
+            }
+            break;
+          }
+        }
+        catch(std::out_of_range& )
+        {
+        } 
+      }
+     
+      return bret;
+    }
   } // namespace DataHandling
 } // namespace Mantid

@@ -86,6 +86,17 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
   }
+   void t1estISISNexus()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/LOQ49886.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
 
   void testUnknownExt()
   {
@@ -132,7 +143,41 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
+  void testSNSSpec()
+  {
+     Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/LoadSNSspec.txt");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
 
+  void testGSS()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/gss.txt");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
+
+   void testRKH()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/DIRECT.041");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
 private:
   std::string m_baseDir;
 };
