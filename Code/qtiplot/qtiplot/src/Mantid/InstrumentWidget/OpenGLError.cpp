@@ -21,6 +21,6 @@ void OpenGLError::check(const std::string& funName)
      std::ostringstream ostr;
      ostr<<"OpenGL error detected in " << funName <<": " << gluErrorString(err);
      std::cerr<<ostr.str()<<'\n';
-     throw OpenGLError(ostr.str());
+     //throw OpenGLError(ostr.str());
    }
 }
