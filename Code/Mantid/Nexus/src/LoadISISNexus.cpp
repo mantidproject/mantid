@@ -611,19 +611,13 @@ namespace Mantid
       getNexusData(&strvalue);
       closeNexusData();
       std::string end_time_iso(strvalue, 19);
-      std::string end_date(""), end_time("");
-      parseISODateTime(end_time_iso, end_date, end_time);
-      runDetails.addProperty("enddate", end_date);
-      runDetails.addProperty("endtime", end_time);
+      runDetails.addProperty("run_end", end_time_iso);
 
       openNexusData("start_time");
       getNexusData(&strvalue);
       closeNexusData();
       std::string start_time_iso = std::string(strvalue, 19);
-      std::string start_date(""), start_time("");
-      parseISODateTime(start_time_iso, start_date, start_time);
-      runDetails.addProperty("startdate", start_date);
-      runDetails.addProperty("starttime", start_time);
+      runDetails.addProperty("run_start", start_time_iso);
 
       runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
 
