@@ -717,7 +717,7 @@ class LoadSample(LoadRun):
             run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
         except RuntimeError:
             # if the run number is not stored in the workspace, take it from the filename
-            run_num = self.sample_run.split('.')[0]
+            run_num = self.sample_run.split('.')[0].split('-')[0]
         
         reducer.instrument.set_up_for_run(run_num)
 
@@ -877,7 +877,7 @@ class ConvertToQ(ReductionStep):
             self.error_est_1D = None
 
         elif self._Q_alg == 'Qxy':
-            Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY)
+            Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
             ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
         else:
             raise NotImplementedError('The type of Q reduction hasn\'t been set, e.g. 1D or 2D')
