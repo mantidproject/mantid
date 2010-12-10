@@ -40,5 +40,4 @@ namespace Mantid
 
   }
 }
-
 #endif /*#define MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_*/

@@ -2062,7 +2062,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     m_uiForm.wav_dw->text()+",'"+m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString()+"')\n";
   if( m_uiForm.q_dq_opt->currentIndex() == 2 )
   {
-    exec_reduce += "i.ISIS_global().user_settings.readLimitValues('L/Q '"+m_uiForm.q_rebin->text() +
+    exec_reduce += "i.ISIS_global().user_settings.readLimitValues('L/Q "+m_uiForm.q_rebin->text() +
       "', i.ISIS_global())\n";
   }
   else

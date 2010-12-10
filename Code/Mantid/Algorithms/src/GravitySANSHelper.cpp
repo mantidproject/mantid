@@ -23,7 +23,6 @@ namespace Mantid
        //this is the LineOfSight assuming no drop, the drop is added (and subtracted) later in the code when required
        m_cachedLineOfSight = m_det->getPos()-m_samplePos;
      }
-
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity
     *  @param wavAngstroms the neutrons' wave length in Angstoms
     *  @return the sin of theta
