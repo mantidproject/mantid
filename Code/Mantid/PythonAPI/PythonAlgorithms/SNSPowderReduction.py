@@ -3,28 +3,39 @@ from mantidsimple import *
 import os
 
 class PDInfo:
-    def __init__(self, data):
-        self.bank = int(data[0])
-        self.van = int(data[1])
-        self.can = int(data[2])
-        self.tmin = data[3] * 1000. # convert to microseconds
-        self.tmax = data[4] * 1000.
+    def __init__(self, data, has_dspace=False):
+        self.freq = data[0]
+        self.wl = data[1]
+        self.bank = int(data[2])
+        self.van = int(data[3])
+        self.can = int(data[4])
+        self.has_dspace = has_dspace
+        if has_dspace:
+            self.dmin = data[5]
+            self.dmax = data[6]
+        else:
+            self.tmin = data[5] * 1000. # convert to microseconds
+            self.tmax = data[6] * 1000.
 
 class PDConfigFile(object):
     def __init__(self, filename):
         self.filename = filename
         handle = file(filename, 'r')
         self._data = {}
+        self.use_dspace = False
         for line in handle.readlines():
             self._addData(line)
     def _addData(self, line):
         if line.startswith('#') or len(line.strip()) <= 0:
+            if "d_min" in line and "d_max" in line:
+                self.use_dspace = True
             return
         data = line.strip().split()
         data = [float(i) for i in data]
         if data[0] not in self._data.keys():
             self._data[data[0]]={}
-        self._data[data[0]][data[1]]=PDInfo(data[2:])
+        info = PDInfo(data, self.use_dspace)
+        self._data[info.freq][info.wl]=info
     def __getFrequency(self, request):
         for freq in self._data.keys():
             if 100. * abs(float(freq)-request)/request < 5.:
@@ -70,7 +81,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("BinWidth", 0.,
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
-        self.declareProperty("VanadiumSmoothNumPoints", 11)
+        self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
@@ -153,9 +164,12 @@ class SNSPowderReduction(PythonAlgorithm):
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.tmin, self._delta, info.tmax])
+        if info.has_dspace:
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.dmin, self._delta, info.dmax])
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        if not info.has_dspace:
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.tmin, self._delta, info.tmax])
         NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
@@ -204,7 +218,7 @@ class SNSPowderReduction(PythonAlgorithm):
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
         self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
-        self._vanSmoothPoints = self.getProperty("VanadiumSmoothNumPoints")
+        self._vanSmoothing = self.getProperty("VanadiumSmoothParams")
         calib = self.getProperty("CalibrationFile")
         self._outDir = self.getProperty("OutputDirectory")
         self._outTypes = self.getProperty("SaveAs")
@@ -231,11 +245,11 @@ class SNSPowderReduction(PythonAlgorithm):
                 if vanRun is None:
                     vanRun = self._loadData(info.van, SUFFIX)
                     vanRun = self._focus(vanRun, calib, info)
+                    ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace="temp", PeakWidthPercent=self._vanPeakWidthPercent)
-                    RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(vanRun))
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    SmoothData(InputWorkspace=vanRun, OutputWorkspace=vanRun, NPoints=self._vanSmoothPoints)
+                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth", Params=self._vanSmoothing,IgnoreXBins=True)
             else:
                 vanRun = None
 
@@ -250,6 +264,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 normalized = False
 
             # write out the files
+            ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
             self._save(samRun, info, normalized)
 
 mtd.registerPyAlgorithm(SNSPowderReduction())
