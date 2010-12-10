@@ -18,8 +18,6 @@ namespace Mantid
       double calcComponents(const double wavAngstroms, double & xFrac, double & yFrac) const;
 
     private:
-      /// the workspace that is being used
-      API::MatrixWorkspace_const_sptr m_works;
       /// coordinates of the sample
       Geometry::V3D m_samplePos;
       /// the displacement from the source to the sample
@@ -41,7 +39,7 @@ namespace Mantid
       *  @param wav the wave length in Angstrom
       *  @return the drop in meters
       */
-      const double gravitationalDrop(const double wav) const {return m_dropPerAngstrom2*wav*wav;}
+      double gravitationalDrop(const double wav) const {return m_dropPerAngstrom2*wav*wav;}
       double calcSinTheta() const;
     };
 

@@ -12,10 +12,10 @@ namespace Mantid
     *  @param det the detector for which the calculations will be for
     */
     GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws, Geometry::IDetector_const_sptr det) :
-          m_works(ws), m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0)
+          m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0)
      {
-       m_samplePos = m_works->getInstrument()->getSample()->getPos();
-       const V3D sourcePos = m_works->getInstrument()->getSource()->getPos();
+       m_samplePos = ws->getInstrument()->getSample()->getPos();
+       const V3D sourcePos = ws->getInstrument()->getSource()->getPos();
        m_beamLine = m_samplePos-sourcePos;
 
        m_beamLineNorm = 2.0*(m_samplePos-sourcePos).norm();
@@ -23,7 +23,7 @@ namespace Mantid
        //this is the LineOfSight assuming no drop, the drop is added (and subtracted) later in the code when required
        m_cachedLineOfSight = m_det->getPos()-m_samplePos;
        // the drop is proportional to the wave length squared and using this and doing the full calculation only once increases the speed a lot
-       m_dropPerAngstrom2 = m_works->gravitationalDrop(m_det, 10e-10);
+       m_dropPerAngstrom2 = ws->gravitationalDrop(m_det, 1e-10);
      }
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity
     *  @param wavAngstroms the neutrons' wave length in Angstoms
