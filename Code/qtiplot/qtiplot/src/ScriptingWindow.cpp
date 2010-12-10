@@ -420,7 +420,8 @@ void ScriptingWindow::fileAboutToShow()
   m_file_menu->insertSeparator();
   m_file_menu->addAction(m_manager->m_close_tab);
 
- 
+  // Close scripting window
+  m_file_menu->addAction(m_close_window);
 
 }
 
@@ -497,6 +498,10 @@ void ScriptingWindow::initMenus()
 
   m_print_output = new QAction(tr("Print &Output"), this);
   connect(m_print_output, SIGNAL(activated()), m_output_dock, SLOT(print()));
+
+  m_close_window = new QAction(tr("Close Script Window"), this);
+  m_close_window->setShortcut(tr("F3"));
+  connect(m_close_window, SIGNAL(activated()), this, SLOT(close()));
 
   //************* Edit menu *************
   m_edit_menu = menuBar()->addMenu(tr("&Edit"));

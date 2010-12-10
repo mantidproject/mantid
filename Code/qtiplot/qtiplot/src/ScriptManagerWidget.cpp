@@ -278,6 +278,30 @@ QAction* ScriptManagerWidget::printAction() const
   else return NULL;
 }
 
+/**
+ * Print action for the current editor
+ */
+QAction* ScriptManagerWidget::zoomInAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->zoomInAction();
+  }
+  else return NULL;
+}
+
+/**
+ * Print action for the current editor
+ */
+QAction* ScriptManagerWidget::zoomOutAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->zoomOutAction();
+  }
+  else return NULL;
+}
+
 //-------------------------------------------
 // Public slots
 //-------------------------------------------
@@ -659,6 +683,11 @@ void ScriptManagerWidget::editorContextMenu(const QPoint &)
    context.addAction(cutAction());
    context.addAction(pasteAction());
  
+   context.insertSeparator();
+
+   context.addAction(zoomInAction());
+   context.addAction(zoomOutAction());
+
    context.insertSeparator();
 
   context.addAction(m_toggle_completion);

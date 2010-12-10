@@ -162,6 +162,8 @@ private:
   QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
   /// Change scripting language
   QAction *m_scripting_lang;
+  /// Close the scripting window
+  QAction *m_close_window;
 };
 
 #endif //SCRIPTINGWINDOW_H_

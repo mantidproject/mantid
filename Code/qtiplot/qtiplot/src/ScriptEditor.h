@@ -138,6 +138,20 @@ public:
     return m_paste;
   }
 
+  /// Zoom in action for this editor
+  inline QAction* zoomInAction() const
+  {
+    return m_zoomIn;
+  }
+  /// Zoom out action for this editor
+  inline QAction* zoomOutAction() const
+  {
+    return m_zoomOut;
+  }
+
+  /// Override so that ctrl + mouse wheel will zoom in and out
+  void wheelEvent( QWheelEvent * e );
+
   /// Print action for this editor
   inline QAction* printAction() const
   {
@@ -236,6 +250,7 @@ private:
 
   //Each editor needs its own undo/redo etc
   QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
+  QAction *m_zoomIn,*m_zoomOut;
   /// The margin marker 
   int m_marker_handle;
   /// Flag that we are in interpreter mode

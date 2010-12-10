@@ -154,6 +154,14 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   m_print->setShortcut(tr("Ctrl+P"));
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
+  m_zoomIn = new QAction(("Zoom &In"), this);
+  m_zoomIn->setShortcut(tr("Ctrl++"));
+  connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
+
+  m_zoomOut = new QAction(("Zoom &Out"), this);
+  m_zoomOut->setShortcut(Qt::ControlModifier + Qt::Key_Minus);
+  connect(m_zoomOut, SIGNAL(activated()),this,SLOT(zoomOut()));
+
   //Syntax highlighting and code completion
   setLexer(codelexer);
 
@@ -501,6 +509,28 @@ void ScriptEditor::mousePressEvent(QMouseEvent *event)
     getCursorPosition(&line, &dummy);
     setEditingState(line);
     
+  }
+}
+
+/** Ctrl + Rotating the mouse wheel will increase/decrease the font size
+ *
+ */
+void ScriptEditor::wheelEvent( QWheelEvent * e )
+{
+  if ( e->state() == Qt::ControlButton )
+  {
+    if ( e->delta() > 0 )
+    {
+      zoomIn();
+    }
+    else
+    {
+      zoomOut();
+    }
+  }
+  else
+  {
+    QsciScintilla::wheelEvent(e);
   }
 }
 
