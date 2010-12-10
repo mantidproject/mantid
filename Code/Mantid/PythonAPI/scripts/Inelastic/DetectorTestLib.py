@@ -86,8 +86,10 @@ def single_white_van(wbrf, tiny, huge, median_hi, median_lo, error_bars, prevLis
   try:
     data_ws = common.load_run(wbrf, 'white-beam')
     #----------------Calculations Start------------
+    # Make sure we are a Matrix Workspace
+    ConvertToMatrixWorkspace(data_ws, data_ws)    
     #--the integrated workspace will be much smaller so do this as soon as possible
-    Integration(data_ws, SINGLE_WHITE_WS)                                                                 
+    Integration(data_ws, SINGLE_WHITE_WS)                                                               
     (fileOut, numFound) = SingleWBV( SINGLE_WHITE_WS, outWS, huge, tiny,
                                      median_hi, median_lo, error_bars, oFile )
 
@@ -139,6 +141,8 @@ def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,previous_wb_w
       data_ws = common.load_run(wbrf)
 
 #--------------------------Calculations Start---
+      # Make sure we are a Matrix Workspace
+      ConvertToMatrixWorkspace(data_ws, data_ws)  
       #--the integrated workspace will be much smaller so do this as soon as possible
       Integration(data_ws, COMP_WHITE_WS)
   
@@ -216,6 +220,9 @@ def bgTest(inst_prefix, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, er
 
       # integrate the counts as soon as possible to reduce the size of the workspace
       Integration(InputWorkspace=data_ws, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)
+      # Make sure we are a Matrix Workspace
+      ConvertToMatrixWorkspace(SUM, SUM)   
+      
       if len(run_nums) > 1 :
         for toAdd in run_nums[ 1 : ] :
             # save the memory by overwriting the old workspaces
