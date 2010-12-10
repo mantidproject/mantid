@@ -40,7 +40,7 @@ namespace MDDataObjects
    *
    * */
   template <size_t nd>
-  DLLExport class MDEvent
+  class DLLExport MDEvent
   {
   private:
     /** The signal (aka weight) from the neutron event.

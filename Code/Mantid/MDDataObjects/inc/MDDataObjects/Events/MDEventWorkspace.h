@@ -14,6 +14,9 @@ namespace MDDataObjects
 
   /** Templated class for the multi-dimensional event workspace.
    *
+   * Template parameters are the same as the MDPoint<> template params, and
+   * determine the basic MDPoint type used.
+   *
    * @tparam nd :: the number of dimensions that each MDPoint will be tracking.
    *               an usigned int > 0.
    *
@@ -33,9 +36,16 @@ namespace MDDataObjects
    *
    * */
   template <size_t nd, size_t nv=0, typename TE=char[0]>
-  DLLExport class MDEventWorkspace  : public IMDEventWorkspace
+  class DLLExport MDEventWorkspace  : public IMDEventWorkspace
   {
   public:
+    /** Typedef of the basic MDPoint data type used in this MDEventWorkspace.
+     * This is for convenience; an algorithm can declare
+     *  MyWorkspace::Point somePoint;
+     * without having to look up template parameters...
+     */
+    typedef MDPoint<nd,nv,TE> Point;
+
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const;
 
@@ -49,10 +59,9 @@ namespace MDDataObjects
     /** Sample function returning the n-th point in the workspace.
      * This may not be needed.
      *  */
-    MDPoint<nd,nv,TE> getPoint(int n);
+    Point getPoint(int n);
 
   protected:
-
 
   };
 

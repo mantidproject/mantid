@@ -18,10 +18,16 @@ namespace MDDataObjects
   typedef double CoordType;
 
 
-  /** Templated class holding data about a neutron detection point
+  /** Templated class holding data about a signal from neutron(s) at a given point
    * in N-dimensions (for example, Qx, Qy, Qz, E).
    *
-   *   Each neutron has a signal (a float, can be != 1.0) and an error. This
+   * To be more general, the MDPoint class can hold a number of vertices
+   * that define the corners of the volume occupied.
+   *
+   * If MDPoint represents a single neutron event, in which case the corner
+   * vertices are not needed.
+   *
+   * Each point has a signal (a float, can be != 1.0) and an error. This
    * is the same principle as the WeightedEvent in EventWorkspace's
    *
    * This class is meant to be as small in memory as possible, since there
@@ -47,7 +53,7 @@ namespace MDDataObjects
    *
    * */
   template <size_t nd, size_t nv = 0, typename TE = char[0]>
-  DLLExport class MDPoint
+  class DLLExport MDPoint
   {
   private:
     /** The signal (aka weight) from the point.
