@@ -53,7 +53,7 @@ void RealFFT::init()
       declareProperty("IgnoreXBins",false,
           "Ignores the requirement that X bins be linear and of the same size.\n"
           "Set this to true if you are using log binning.\n"
-          "FFT will be performed on the Y values only.");
+          "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
 /** Executes the algorithm
