@@ -16,6 +16,7 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <numeric>
 
@@ -445,6 +446,29 @@ namespace Mantid
       const Geometry::V3D beamLine = samplePos - getInstrument()->getSource()->getPos();
 
       return det->getTwoTheta(samplePos,beamLine);
+    }
+
+    /**Calculates the distance a neutron coming from the sample will have deviated from a
+    *  straight tragetory before hitting a detector. This function has no knowledge of
+    *  the direction of the drop
+    *  @param det the detector that the neutron entered
+    *  @param wavAngstroms the neutrons wave length in Angstroms
+    *  @return the deviation in meters
+    */
+    double MatrixWorkspace::gravitationalDrop(Geometry::IDetector_const_sptr det, const double wavAngstroms) const
+    {
+      using namespace PhysicalConstants;
+      /// Pre-factor in gravity calculation: gm^2/2h^2
+      static const double gm2_OVER_2h2 = g*NeutronMass*NeutronMass/( 2.0*h*h )
+      // Adjust for fact that wavelength is in angstroms
+        *1.0e-20;
+
+      const V3D samplePos = getInstrument()->getSample()->getPos();
+      const double pathLength = det->getPos().distance(samplePos);
+      // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
+      const double L2 = gm2_OVER_2h2*std::pow(pathLength,2);
+
+      return wavAngstroms*wavAngstroms*L2;
     }
 
     /** Get a shared pointer to the instrument associated with this workspace

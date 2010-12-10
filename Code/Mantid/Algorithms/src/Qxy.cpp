@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -17,6 +18,7 @@ DECLARE_ALGORITHM(Qxy)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+
 
 void Qxy::init()
 {
@@ -31,37 +33,44 @@ void Qxy::init()
   
   declareProperty("MaxQxy",-1.0,mustBePositive);
   declareProperty("DeltaQ",-1.0,mustBePositive->clone());
+  declareProperty("AccountForGravity",false,Direction::Input);
 }
 
 void Qxy::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
+  const bool doGravity = getProperty("AccountForGravity");
+
   // Create the output Qx-Qy grid
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
+
   // Copy over the instrument name and the workspace title
   outputWorkspace->getBaseInstrument()->setName(inputWorkspace->getInstrument()->getName());
   outputWorkspace->setTitle(inputWorkspace->getTitle());
-  // Will also need an identically-sized workspace to hold the solid angles
-  MatrixWorkspace_sptr solidAngles = WorkspaceFactory::Instance().create(outputWorkspace);
+  // Will also need an identically-sized workspace to hold the solid angle/time bin masked weight
+  MatrixWorkspace_sptr weights = WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
   cow_ptr<MantidVec> axis;
   axis.access() = outputWorkspace->readX(0);
-  for ( int i = 0; i < solidAngles->getNumberHistograms(); ++i ) solidAngles->setX(i,axis);
+  for ( int i = 0; i < weights->getNumberHistograms(); ++i ) weights->setX(i,axis);
   
   const int numSpec = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
   
+  // the samplePos is often not (0, 0, 0) because the instruments components are moved to account for the beam centre
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
+  
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
-  
+  const int prog_int = numSpec/100 > 0 ? numSpec/100 : 1;
+
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try {
       det = inputWorkspace->getDetector(i);
     } catch (Exception::NotFoundError) {
@@ -70,28 +79,49 @@ void Qxy::exec()
     }
     // If this is a monitor, then skip
     if ( det->isMonitor() ) continue;
+    if ( det->isMasked() ) continue;
     
-    const V3D detPos = det->getPos();
-    const double phi = atan2(detPos.Y(),detPos.X());
-    const double a = cos(phi);
-    const double b = sin(phi);
-    
-    const double sinTheta = sin( inputWorkspace->detectorTwoTheta(det)/2.0 );
-    
-    const double solidAngle = det->solidAngle(samplePos);
-    
+    V3D detPos = det->getPos()-samplePos;
+      
+    // these will be re-calculated if gravity is on but without gravity there is no need
+    double phi = atan2(detPos.Y(),detPos.X());
+    double a = cos(phi);
+    double b = sin(phi);
+    double sinTheta = sin( inputWorkspace->detectorTwoTheta(det)/2.0 );
+
     // Get references to the data for this spectrum
     const MantidVec& X = inputWorkspace->readX(i);
     const MantidVec& Y = inputWorkspace->readY(i);
+    const MantidVec& E = inputWorkspace->readE(i);
  
     const MantidVec& axis = outputWorkspace->readX(0);
+
+    // the solid angle of the detector as seen by the sample is used for normalisation later on
+    double angle = det->solidAngle(samplePos);
+    // the bin widths are multiplied back in later on, if they're not masked, so without masking the sum of exposures of all bins will be the spectrum's solid angle
     
+    
+    // this object is not used if gravity correction is off, but it is only constructed once per spectrum
+    GravitySANSHelper grav;
+    if (doGravity)
+    {
+      grav = GravitySANSHelper(inputWorkspace, det);
+    }
     for (int j = numBins-1; j >= 0; --j)
     {
-      // Calculate the wavelength at the mid-point of this bin (note this is 1/lambda)
-      const double oneOverLambda = 2.0/(X[j]+X[j+1]);
+      const double binWidth = X[j+1]-X[j];
+      // Calculate the wavelength at the mid-point of this bin
+      const double wavLength = X[j]+(binWidth)/2.0;
+      
+      if (doGravity)
+      {
+        // SANS instruments must have their y-axis pointing up, show the detector position as where the neutron would be without gravity
+        sinTheta = grav.calcComponents(wavLength, a, b);
+      }
+
       // Calculate |Q| for this bin
-      const double Q = 4.0*M_PI*sinTheta*oneOverLambda;
+      const double Q = 4.0*M_PI*sinTheta/wavLength;
+
       // Now get the x & y components of Q.
       const double Qx = a*Q;
       // Test whether they're in range, if not go to next spectrum.
@@ -100,24 +130,45 @@ void Qxy::exec()
       if ( Qy < axis.front() || Qy >= axis.back() ) break;
       // Find the indices pointing to the place in the 2D array where this bin's contents should go
       const MantidVec::difference_type xIndex = std::upper_bound(axis.begin(),axis.end(),Qx) - axis.begin() - 1;
-      const MantidVec::difference_type yIndex = std::upper_bound(axis.begin(),axis.end(),Qy) - axis.begin() - 1;
+      const int yIndex = static_cast<int>(
+        std::upper_bound(axis.begin(),axis.end(),Qy) - axis.begin() - 1);
       PARALLEL_CRITICAL(qxy)    /* Write to shared memory - must protect */
       {
+        // the data will be copied to this bin in the output array
+        double & outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
+        double & outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
+        // all bins start out at Nan and hence pass the odd conditional below
+        if ( outputBinY != outputBinY )
+        {
+          outputBinY = outputBinE = 0;
+        }
         // Add the contents of the current bin to the 2D array.
-        outputWorkspace->dataY(yIndex)[xIndex] += Y[j];
-        // And the current solid angle number to same location.
-        solidAngles->dataY(yIndex)[xIndex] += solidAngle;
+        outputBinY += Y[j];
+        // add the errors in quadranture
+        outputBinE = std::sqrt( (outputBinE*outputBinE) + (E[j]*E[j]) );
+        
+        // the no masked bin case
+        double fraction(1);
+        // add the total weight for this bin in the weights workspace, in an equivelant bin to where the data was stored
+        weights->dataY(yIndex)[xIndex] += fraction*angle;    
+      
+
       }
     } // loop over single spectrum
     
-    progress.report();
+    if ( i % prog_int == 0 )
+    {
+      progress.report("Calculating Q");
+    }
+
     PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Divide the output data by the solid angles
-  outputWorkspace /= solidAngles;
+  outputWorkspace /= weights;
   outputWorkspace->isDistribution(true);
+
   
   // Count of the number of empty cells
   MatrixWorkspace::const_iterator wsIt(*outputWorkspace);
@@ -169,6 +220,11 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   for (int i=0; i < bins-1; ++i)
   {
     outputWorkspace->setX(i,axis);
+    for (int j=0; j < bins-j; ++j)
+    {
+      outputWorkspace->dataY(i)[j] = std::numeric_limits<double>::quiet_NaN();
+      outputWorkspace->dataE(i)[j] = std::numeric_limits<double>::quiet_NaN();
+    }
   }
 
   // Set the axis units

@@ -109,6 +109,8 @@ namespace Mantid
       /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
       Geometry::IDetector_sptr getDetector(const int index) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+      /// Calculates the drop of a neutron coming from the sample the direction of drop is instrument dependent
+      double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
 
       /// Get the footprint in memory in KB.
       virtual long int getMemorySize() const;

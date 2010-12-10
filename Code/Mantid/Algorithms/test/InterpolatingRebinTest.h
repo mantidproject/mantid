@@ -31,7 +31,15 @@ public:
     // Check it fails if property not set
     TS_ASSERT_THROWS( rebin.execute(), std::runtime_error )
     TS_ASSERT( ! rebin.isExecuted() )
-    
+
+    // the last bin would are too high to calculate, check it aborts
+    rebin.setPropertyValue("Params", "1,1,50");
+    TS_ASSERT( ! rebin.isExecuted() )
+
+    // some of the new bins would are too low to calculate, check it aborts
+    rebin.setPropertyValue("Params", "0.85,0.001,15");
+    TS_ASSERT( ! rebin.isExecuted() )
+
     // set the new bins to be less than half the size of the old, one in every 2 old bins and one in every 5 old will coinside
     rebin.setPropertyValue("Params", "2.225,0.2,15");
     TS_ASSERT_THROWS_NOTHING(rebin.execute())
@@ -204,7 +212,7 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, nBins+1, nBins);
     
-    double j=-0.5;
+    double j=1.0;
     int i = 0;
     for (; i<nBins; i++, j+=1.5)
     {
