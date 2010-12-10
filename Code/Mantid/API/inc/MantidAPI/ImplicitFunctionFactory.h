@@ -46,7 +46,7 @@ namespace Mantid
 
       virtual boost::shared_ptr<ImplicitFunction> create(const std::string& className) const;
 
-      virtual ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element* processXML) const;
+      virtual ImplicitFunction* createUnwrapped(Poco::XML::Element* processXML) const;
 
       virtual ImplicitFunction* createUnwrapped(const std::string& processXML) const;
 
