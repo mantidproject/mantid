@@ -228,7 +228,10 @@ namespace Mantid
       std::vector<double> masked_data (nBins, MASK_FLAG);
       std::vector<double> masked_error (nBins, MASK_ERROR);
        
-
+      // Create a progress reporting object
+      Progress progress(this,0,1,100);
+      const int progStep = static_cast<int>(ceil(nHist/100.0));
+      
       // Loop over spectra
       for (size_t i = 0; i < static_cast<size_t> (nHist); i++)
         {
@@ -300,7 +303,11 @@ namespace Mantid
                   nxFile.closeData();
                 }
             }
-
+          // make regular progress reports and check for cancelling the algorithm
+          if ( i % progStep == 0 )
+          {
+            progress.report();
+          }
         }
 
       // Write the Polar (2Theta) angles
