@@ -24,7 +24,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              Description="Relative time to start filtering by")
         self.declareProperty("TOFMax", 45000.0,
                              Description="Relative time to stop filtering by")
-        self.declareProperty("TOFBinWidth", -0.004,
+        self.declareProperty("TOFBinWidth", -0.04,
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothNumPoints", 11)
@@ -115,7 +115,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         #ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
+        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=[self._TOFMin, self._delta, self._TOFMax])
+        RenameWorkspace(InputWorkspace="temp", OutputWorkspace=wksp)
         NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
@@ -171,6 +172,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 if bkgRun is None:
                     bkgRun = self._loadData(bkg, SUFFIX)
                     bkgRun = self._bin(bkgRun)
+                    samRun -= bkgRun
+                    mtd.deleteWorkspace("%s_%d" % (self._instrument, bkg))
             else:
                 bkgRun = None 
 
@@ -180,6 +183,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 if emptyRun is None:
                     emptyRun = self._loadData(empty, SUFFIX)
                     emptyRun = self._bin(emptyRun)
+                    samRun -= emptyRun
+                    mtd.deleteWorkspace("%s_%d" % (self._instrument, empty))
             else:
                 emptyRun = None 
 
@@ -198,17 +203,15 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 vanRun = None
 
             # the final bit of math
-            if bkgRun is not None:
-                samRun -= bkgRun
-            if emptyRun is not None:
-                samRun -= emptyRun
             if vanRun is not None:
                 samRun /= vanRun
+                mtd.deleteWorkspace("%s_%d" % (self._instrument, van))
                 normalized = True
             else:
                 normalized = False
 
             # write out the files
+            ReplaceSpecialValues(InputWorkspace=samRun, OutputWorkspace=samRun, NaNValue="0.0", InfinityValue="0.0")
             self._save(samRun, normalized)
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
