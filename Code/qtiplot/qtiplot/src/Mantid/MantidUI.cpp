@@ -1356,6 +1356,13 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
 {
 
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  if (!ws) return NULL;
+  Mantid::Geometry::IInstrument_const_sptr instr = ws->getInstrument();
+  if (!instr || instr->getName().empty())
+  {
+    return NULL;
+  }
 
   //Need a new window
   InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
@@ -1381,6 +1388,11 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
   InstrumentWindow *insWin = getInstrumentView(wsName);
+  if (!insWin)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Error","Instrument view cannot be opened");
+    return;
+  }
   insWin->showWindow();
 }
 
