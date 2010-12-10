@@ -75,7 +75,7 @@ namespace Mantid
       declareProperty("MonitorList", std::vector<int>(), new NullValidator< std::vector<int> >,
         "List of detector ids of monitors loaded in to the workspace", Direction::Output);
       declareProperty( "InstrumentName", "",
-        "Can be used instead of Filename to specify and IDF" );
+        "Name of instrument. Can be used instead of Filename to specify an IDF" );
 
       m_angleConvertConst = 1.0;
     }
