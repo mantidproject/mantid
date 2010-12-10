@@ -12,7 +12,7 @@ namespace Mantid
     *  @param det the detector for which the calculations will be for
     */
     GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws, Geometry::IDetector_const_sptr det) :
-          m_works(ws), m_beamLineNorm(-1), m_det(det), m_cachedDrop(0)
+          m_works(ws), m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0)
      {
        m_samplePos = m_works->getInstrument()->getSample()->getPos();
        const V3D sourcePos = m_works->getInstrument()->getSource()->getPos();
@@ -22,6 +22,8 @@ namespace Mantid
 
        //this is the LineOfSight assuming no drop, the drop is added (and subtracted) later in the code when required
        m_cachedLineOfSight = m_det->getPos()-m_samplePos;
+       // the drop is proportional to the wave length squared and using this and doing the full calculation only once increases the speed a lot
+       m_dropPerAngstrom2 = m_works->gravitationalDrop(m_det, 10e-10);
      }
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity
     *  @param wavAngstroms the neutrons' wave length in Angstoms
@@ -55,7 +57,7 @@ namespace Mantid
     const V3D & GravitySANSHelper::getDetLoc(const double wav) const
     {
       // Calculate the drop
-      const double drop = m_works->gravitationalDrop(m_det, wav);
+      const double drop = gravitationalDrop(wav);
       // I'm fairly confident that Y is up! Using the previous drop to allow the same V3D to be modified many times
       m_cachedLineOfSight[1] += drop   -     m_cachedDrop;
       m_cachedDrop = drop;
