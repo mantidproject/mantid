@@ -13,7 +13,7 @@ import CommonFunctions as common
 
 def diagnose(sample_run, white_run, other_white = None, remove_zero=False, 
              tiny=1e-10, large=1e10, median_lo=0.1, median_hi=3.0, signif=3.3, 
-             bkgd_threshold=5.0, bkgd_range=None, inst_name=None):
+             bkgd_threshold=5.0, bkgd_range=None, effic_var=1.1, inst_name=None):
     """
     Run diagnostics on the provided run and white beam files.
 
@@ -40,7 +40,9 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
       bkgd_threshold - High threshold for background removal in multiples of median (default = 5.0)
       bkgd_range - The background range as a list of 2 numbers: [min,max]. 
                    If not present then they are taken from the parameter file. (default = None)
-      inst_name  - The name of the instrument to perform the diagnosis. 
+      effic_var  - The number of medians the ratio of the first/second white beam can deviate from
+                   the average by (default=1.1)
+      inst_name  - The name of the instrument to perform the diagnosis.
                    If it is not provided then the default instrument is used (default = None)
     """
     # Set the default instrument so that Mantid can search for the runs correctly, 
@@ -73,7 +75,10 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
         data_ws = common.load_run(other_white, 'white-beam2')
         second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()        
         # Run tests
-        _second_white_masks = _do_second_white_test()
+        _second_white_masks, failures_per_test[1] = \
+                             _do_second_white_test(white_counts, second_white_counts,
+                                                   tiny, large, median_lo, median_hi,
+                                                   signif,effic_var, _diag_total_mask)
 
         # Accumulate masks
         _diag_total_mask += _second_white_masks
@@ -116,7 +121,7 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
       large         - Maximum threshold for acceptance
       median_lo     - Fraction of median to consider counting low
       median_hi     - Fraction of median to consider counting high
-      signif          - Counts within this number of multiples of the 
+      signif        - Counts within this number of multiples of the 
                       standard dev will be kept (default = 3.3)
     """
     print 'Running white beam test'
@@ -134,20 +139,56 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
                                      LowThreshold=median_lo, HighThreshold=median_hi)
 
     num_failed = range_check['NumberOfFailures'].value + median_test['NumberOfFailures'].value
-    print "--Output for GUI--"
-    print "Number of failures %d " % num_failed
     
     return median_test.workspace(), num_failed
 
 #-------------------------------------------------------------------------------
 
-def _do_second_white_test():
+def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_lo,
+                          median_hi, signif, variation, prev_masks=None):
+    """
+    Run additional tests comparing given another white beam count workspace, comparing
+    to the first
+
+    Required inputs:
+    
+      white_counts  - A workspace containing the integrated counts from a
+                      white beam vanadium run
+      comp_white_counts  - A workspace containing the integrated counts from a
+                      white beam vanadium run
+      tiny          - Minimum threshold for acceptance
+      large         - Maximum threshold for acceptance
+      median_lo     - Fraction of median to consider counting low
+      median_hi     - Fraction of median to consider counting high
+      signif          - Counts within this number of multiples of the 
+                      standard dev will be kept
+      variation     - Defines a range within which the ratio of the two counts is
+                      allowed to fall in terms of the number of medians
+    """
+    
     print 'Running second white beam test'
-    pass
+
+    # What shall we call the output
+    lhs_names = lhs_info('names')
+    if len(lhs_names) > 0:
+        ws_name = lhs_names[0]
+    else:
+        ws_name = '__do_second_white_test'
+    
+    if prev_masks is not None:
+        MaskDetectors(comp_white_counts, MaskedWorkspace=prev_masks)
+    # Do the white beam test
+    __white_tests = _do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, signif)[0]
+    # and now compare it with the first
+    effic_var = DetectorEfficiencyVariation(white_counts, __white_tests, ws_name, Variation=variation)
+    
+    mtd.deleteWorkspace(str(__white_tests))
+    num_failed = effic_var['NumberOfFailures'].value 
+    return effic_var.workspace(), num_failed
 
 #------------------------------------------------------------------------------
 
-def _do_background_test(sample_run, white_counts, second_white_counts, bkgd_range,
+def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
                         bkgd_threshold, remove_zero, signif, prev_masks = None):
     """
     Run the background tests on the integrated sample run normalised by an
@@ -158,7 +199,7 @@ def _do_background_test(sample_run, white_counts, second_white_counts, bkgd_rang
       sample_run          - The run number or filepath of the sample run
       white_counts        - A workspace containing the integrated counts from a
                             white beam vanadium run
-      second_white_counts - A second workspace containing the integrated counts from a
+      comp_white_counts - A second workspace containing the integrated counts from a
                             different white beam vanadium run
       bkgd_range          - The background range as a list of 2 numbers: [min,max]. 
                             If not present then they are taken from the parameter file.
@@ -190,12 +231,18 @@ def _do_background_test(sample_run, white_counts, second_white_counts, bkgd_rang
     # Get the total counts
     sample_counts = Integration(data_ws, '__counts_mono-sample', RangeLower=min_value, \
                                 RangeUpper=max_value).workspace()
-    #
-    # @todo: If we have another white beam then compute the harmonic mean of the counts
-    #
-
+    
+    # If we have another white beam then compute the harmonic mean of the counts
+    # The harmonic mean: 1/av = (1/Iwbv1 + 1/Iwbv2)/2
+    # We'll resuse the comp_white_counts workspace as we don't need it anymore
+    white_count_mean = white_counts
+    if comp_white_counts is not None:
+        white_count_mean = (comp_white_counts * white_counts)/(comp_white_counts + white_counts)
+        
     # Normalise the sample run
-    sample_counts = Divide(sample_counts, white_counts, sample_counts).workspace()
+    sample_counts = Divide(sample_counts, white_count_mean, sample_counts).workspace()
+    if comp_white_counts is not None:
+        mtd.deleteWorkspace(str(white_count_mean))
 
     # If we need to remove zeroes as well then set the the low threshold to a tiny positive number
     if remove_zero:
@@ -212,8 +259,7 @@ def _do_background_test(sample_run, white_counts, second_white_counts, bkgd_rang
 
     # Apply previous masking first
     if prev_masks is not None:
-        MaskDetectors(data_ws, WorkspaceIndexList=[0,1,2,3,4,5,6,7,8,9,10])
-        MaskDetectors(sample_counts, MaskedWorkspace=data_ws)
+        MaskDetectors(sample_counts, MaskedWorkspace=prev_masks)
     median_test = MedianDetectorTest(sample_counts, ws_name, SignificanceTest=signif,
                                      LowThreshold=low_threshold, HighThreshold=bkgd_threshold)
 
@@ -221,8 +267,6 @@ def _do_background_test(sample_run, white_counts, second_white_counts, bkgd_rang
     mtd.deleteWorkspace(str(sample_counts))
 
     num_failed = median_test['NumberOfFailures'].value
-    print "--Output for GUI--"
-    print "Number of failures %d " % num_failed
     
     return median_test.workspace(), num_failed
 

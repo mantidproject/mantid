@@ -323,13 +323,16 @@ class ProxyObject(object):
         """
         self.__obj = obj
 
-# Name for temporary objects within Binary operations
-_binary_tmp = '__binary_tmp'
+
+# Prefix for temporary objects within workspace binary operations
+_binary_op_prefix = '__binary_tmp'
+# A list of temporary workspaces created by algebraic operations
+_binary_op_tmps = []
 
 class WorkspaceProxy(ProxyObject):
     """
     A proxy object that stores a workspace instance. When the workspace is deleted
-    from the ADS in Mantid, the object reference held here is set to "None"
+    from the ADS in Mantid, the object reference held here is set to 'None'
     """
 
     def __init__(self, obj, factory):
@@ -348,15 +351,40 @@ class WorkspaceProxy(ProxyObject):
         else:
             raise AttributeError('Index invalid, object is not a group.')
 
-    def __do_operation(self, op, rhs, output_name, inplace, reverse = False):
-        """Perform the given binary operation
+    def __do_operation(self, op, rhs, inplace, reverse, lhs_info):
         """
+        Perform the given binary operation
+
+        lhs_info is expected to be a tuple containing the number of lhs variables and
+        their names as the first and second element respectively
+        """
+        global _binary_op_tmps
+
+        if lhs_info[0] > 0:
+            # Assume the first and clear the tempoaries as this
+            # must be the final assignment
+            if inplace:
+                output_name = self.getName()
+            else:
+                output_name = lhs_info[0][0]
+            clear_tmps = True
+        else:
+            # Give it a temporary name and keep track of it
+            clear_tmps = False
+            output_name = _binary_op_prefix + len(_binary_op_tmps)
+            _binary_op_tmps.append(output_name)
+
+        # Do the operation
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
         resultws = _binary_op(self._getHeldObject(),rhs, op, output_name, inplace, reverse)
-        
-        if mtd.workspaceExists(_binary_tmp) and output_name != _binary_tmp:
-            mtd.deleteWorkspace(_binary_tmp)
+
+        if clear_tmps:
+            for name in _binary_op_tmps:
+                if mtd.workspaceExists(name) and output_name != name:
+                    mtd.deleteWorkspace(name)
+            _binary_op_tmps = []
+            
         if inplace:
             return self
         else:
@@ -368,119 +396,97 @@ class WorkspaceProxy(ProxyObject):
         """
         # Figure out the name of the output. Only the final function call that is
         # before the assignment will have the name of the variable
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = _binary_tmp
-        return self.__do_operation('Plus', rhs, output_name, inplace=False)
+        lhs = lhs_info()
+        return self.__do_operation('Plus', rhs,inplace=False, reverse=False,
+                                   lhs_info=lhs)
 
     def __radd__(self, rhs):
         """
         Sum the proxied objects and return a new proxy managing that object
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = _binary_tmp
-        return self.__do_operation('Plus', rhs, output_name, inplace=False,reverse=True)
+        lhs = lhs_info()
+        return self.__do_operation('Plus', rhs,inplace=False, reverse=True,
+                                   lhs_info=lhs)
     
     def __iadd__(self, rhs):
         """
         In-place sum the proxied objects and return a new proxy managing that object
         """
-        output_name = self.getName()
-        return self.__do_operation('Plus', rhs, output_name, inplace=True)
+        lhs = lhs_info()
+        return self.__do_operation('Plus', rhs,inplace=True, reverse=False,
+                                   lhs_info=lhs)
 
     def __sub__(self, rhs):
         """
         Subtract the proxied objects and return a new proxy managing that object
         """
-        # Figure out the name of the output. Only the final function call that is
-        # before the assignment will have the name of the variable
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = __binary_tmp
-        return self.__do_operation('Minus', rhs, output_name, inplace=False)
+        lhs = lhs_info()
+        return self.__do_operation('Minus', rhs,inplace=False, reverse=False,
+                                   lhs_info=lhs)
 
     def __rsub__(self, rhs):
         """
         Handle a (double - workspace)
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = _binary_tmp
-        return self.__do_operation('Minus', rhs, output_name, inplace=False, reverse=True)
+        lhs = lhs_info()
+        return self.__do_operation('Minus', rhs,inplace=False, reverse=True,
+                                   lhs_info=lhs)
 
     def __isub__(self, rhs):
         """
         In-place subtract the proxied objects and return a new proxy managing that object
         """
-        output_name = self.getName()
-        return self.__do_operation('Minus', rhs, output_name, inplace=True)
+        lhs = lhs_info()
+        return self.__do_operation('Minus', rhs,inplace=True, reverse=False,
+                                   lhs_info=lhs)
 
     def __mul__(self, rhs):
         """
         Multiply the proxied objects and return a new proxy managing that object
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = __binary_tmp
-        return self.__do_operation('Multiply', rhs, output_name, inplace=False)
+        lhs = lhs_info()
+        return self.__do_operation('Multiply', rhs,inplace=False, reverse=False,
+                                   lhs_info=lhs)
 
     def __rmul__(self, rhs):
         """
         Multiply the proxied objects and return a new proxy managing that object
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = _binary_tmp
-        return self.__do_operation('Multiply', rhs, output_name, inplace=False, reverse=True)
+        lhs = lhs_info()
+        return self.__do_operation('Multiply', rhs,inplace=False, reverse=True,
+                                   lhs_info=lhs)
 
     def __imul__(self, rhs):
         """
         In-place multiply the proxied objects and return a new proxy managing that object
         """
-        output_name = self.getName()
-        return self.__do_operation('Multiply', rhs, output_name, inplace=True)
+        lhs = lhs_info()
+        return self.__do_operation('Multiply', rhs,inplace=True, reverse=False,
+                                   lhs_info=lhs)
 
     def __div__(self, rhs):
         """
         Divide the proxied objects and return a new proxy managing that object
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = __binary_tmp
-        return self.__do_operation('Divide', rhs, output_name, inplace=False)
+        lhs = lhs_info()
+        return self.__do_operation('Divide', rhs,inplace=False, reverse=False,
+                                   lhs_info=lhs)
 
     def __rdiv__(self, rhs):
         """
         Handle a double/workspace
         """
-        nvars, names = lhs_info()
-        if nvars > 0:
-            output_name = names[0]
-        else:
-            output_name = _binary_tmp
-        return self.__do_operation('Divide', rhs, output_name, inplace=False, reverse=True)
+        lhs = lhs_info()
+        return self.__do_operation('Divide', rhs,inplace=False, reverse=True,
+                                   lhs_info=lhs)
 
     def __idiv__(self, rhs):
         """
         In-place divide the proxied objects and return a new proxy managing that object
         """
-        output_name = self.getName()
-        return self.__do_operation('Divide', rhs, output_name, inplace=True)
+        lhs = lhs_info()
+        return self.__do_operation('Divide', rhs,inplace=True, reverse=False,
+                                   lhs_info=lhs)
 
     def isGroup(self):
         """
