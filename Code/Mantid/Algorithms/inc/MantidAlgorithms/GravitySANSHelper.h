@@ -12,7 +12,7 @@ namespace Mantid
     class GravitySANSHelper
     {
     public:
-      GravitySANSHelper() : m_beamLineNorm(-1), m_cachedDrop(0) {}
+      GravitySANSHelper() : m_beamLineNorm(-1), m_cachedDrop(-1) {}
       GravitySANSHelper(API::MatrixWorkspace_const_sptr ws, Geometry::IDetector_const_sptr det);
       double calcSinTheta(const double wavAngstroms) const;
       double calcComponents(const double wavAngstroms, double & xFrac, double & yFrac) const;

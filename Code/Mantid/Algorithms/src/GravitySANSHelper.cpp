@@ -25,7 +25,6 @@ namespace Mantid
      }
 
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity
-    *  @param det the detector that the neutrons entered
     *  @param wavAngstroms the neutrons' wave length in Angstoms
     *  @return the sin of theta
     */

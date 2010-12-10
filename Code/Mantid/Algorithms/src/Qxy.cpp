@@ -98,8 +98,22 @@ void Qxy::exec()
 
     // the solid angle of the detector as seen by the sample is used for normalisation later on
     double angle = det->solidAngle(samplePos);
-    // the bin widths are multiplied back in later on, if they're not masked, so without masking the sum of exposures of all bins will be the spectrum's solid angle
-    
+
+    // some bins are masked completely or partially, the following vector will contain the fractions
+    MantidVec fractions;
+    if ( inputWorkspace->hasMaskedBins(i) )
+    {
+      // go through the set and convert it to a vector
+      const MatrixWorkspace::MaskList& mask = inputWorkspace->maskedBins(i);
+      fractions.resize(numBins, 1.0);
+      MatrixWorkspace::MaskList::const_iterator it, itEnd(mask.end());
+      for (it = mask.begin(); it != itEnd; ++it)
+      {
+        // The weight for this masked bin is 1 minus the degree to which this bin is masked
+        fractions[it->first] -= it->second;
+      }
+    }
+    double fraction(1);
     
     // this object is not used if gravity correction is off, but it is only constructed once per spectrum
     GravitySANSHelper grav;
@@ -107,6 +121,7 @@ void Qxy::exec()
     {
       grav = GravitySANSHelper(inputWorkspace, det);
     }
+
     for (int j = numBins-1; j >= 0; --j)
     {
       const double binWidth = X[j+1]-X[j];
@@ -147,11 +162,13 @@ void Qxy::exec()
         // add the errors in quadranture
         outputBinE = std::sqrt( (outputBinE*outputBinE) + (E[j]*E[j]) );
         
-        // the no masked bin case
-        double fraction(1);
+        // account for masked bins
+        if ( ! fractions.empty() )
+        {
+          fraction = fractions[j];
+        }
         // add the total weight for this bin in the weights workspace, in an equivelant bin to where the data was stored
-        weights->dataY(yIndex)[xIndex] += fraction*angle;    
-      
+        weights->dataY(yIndex)[xIndex] += fraction*angle;      
 
       }
     } // loop over single spectrum
