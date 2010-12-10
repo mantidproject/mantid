@@ -195,7 +195,7 @@ namespace Mantid
     }
 
 /**checks the file by opening it and reading few lines 
- *  @param filePath name of the file inluding its path
+ *  @param filePath name of the file including its path
  *  @return an integer value how much this algorithm can load the file 
  */
     int LoadSNSspec::fileCheck(const std::string& filePath)
@@ -208,11 +208,12 @@ namespace Mantid
       }
 
       int bret=0;
-      int ncols=0;
+      int axiscols=0;
+      int datacols=0;
       std::string str;
       typedef boost::tokenizer<boost::char_separator<char> > tokenizer; 
       boost::char_separator<char> sep(" ");   
-     
+      bool bsnsspec(false);
       while(!file.eof())
       {
         //read line
@@ -231,28 +232,24 @@ namespace Mantid
               tokenizer tok(str, sep); 
               for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
               {		 
-                ++ncols;
+                ++axiscols;
               }
               //if the file contains a comment line starting with "#L" followed
-              //by three columns this could be load spec file
-              if(ncols>3)
-              {
-                bret+=40;
+              //by three columns this could be loadsnsspec file
+              if(axiscols>2)
+              {                
+                bsnsspec=true;
               }
             }
           }
-          else //first non comment line is data line
-          { 
-            ncols=0;
+          else 
+          {  
+            //check first data line is a 3 column line
             tokenizer tok(str, sep); 
             for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
             {		 
-              ++ncols;
+              ++datacols;
             } 
-            if(ncols==3)
-            {
-              bret+=40;
-            }
             break;
           }
         }
@@ -260,7 +257,10 @@ namespace Mantid
         {
         } 
       }
-     
+      if(bsnsspec && datacols==3 )//three column data
+      {
+        bret=80;
+      }
       return bret;
     }
   } // namespace DataHandling

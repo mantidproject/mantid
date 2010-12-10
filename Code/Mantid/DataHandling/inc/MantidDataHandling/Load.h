@@ -6,10 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"
+
+
 namespace Mantid
 {
   namespace DataHandling
-  {
+  { 
+   
     /**
     Loads a workspace from a data file. The algorithm tries to determine the actual type
     of the file (raw, nxs, ...) and use the specialized loading algorith to load it.
@@ -38,7 +41,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    static const int bufferSize=100;
+ 
     class DLLExport Load : public API::Algorithm
     {
     public:

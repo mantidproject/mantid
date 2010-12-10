@@ -260,31 +260,44 @@ int LoadSPE::fileCheck(const std::string& filePath)
     g_log.error("Unable to open file: " + filePath);
     throw Exception::FileError("Unable to open file: " , filePath);
   }
-  int bret=0;
   std::string fileline;
   //read first line
   getline(file,fileline);
   boost::char_separator<char> sep(" ");
   int ncols=0;
+  bool isnumeric(false);
+  bool b(true);
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
   tokenizer tok(fileline,sep);
+  //in the spe file first line is expecetd to be a line 2 colomns which is  histogram  & bin numbers
   for (tokenizer::iterator beg=tok.begin();beg!=tok.end();++beg)
   {
     ++ncols;
+    std::stringstream stream(*beg);
+    unsigned int hist_bin;
+    stream>>hist_bin;
+    b=b&&(!stream.fail());
+    
   }
-  if(ncols==2)
+  isnumeric =b;
+  bool bspe(false); 
+  //if the first line has two numeric data columns
+  if(ncols==2 && isnumeric)
   {
-    bret+=40;
+   bspe=true;
   }
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   std::string commentline;
   getline(file,commentline);
   if(commentline.find("Phi Grid")!=std::string::npos|| commentline.find("Q Grid")!=std::string::npos )
   {
-   bret+=40;
+   if(bspe)
+   {
+     return 80;
+   }
   }
  
-  return bret;
+  return 0;
 }
 
 

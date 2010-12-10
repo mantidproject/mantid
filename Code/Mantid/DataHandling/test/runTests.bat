@@ -13,12 +13,12 @@ echo "Generating the source from the test header files..."
 IF "%1" == "" GOTO BUILD_ALL ELSE GOTO BUILD_ONE
 :BUILD_ONE 
 ECHO Building only %1
-python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp %1
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --runner=MantidPrinter -o runner.cpp %1
 GOTO COMPILE
 
 :BUILD_ALL 
 ECHO Building all .h files
-python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp *.h
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --runner=MantidPrinter -o runner.cpp *.h
 GOTO COMPILE
 
 :COMPILE

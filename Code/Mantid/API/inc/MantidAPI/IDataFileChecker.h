@@ -3,7 +3,9 @@
 
 #include<string>
 #include "MantidAPI/Algorithm.h"
-
+static const unsigned char hdf5_signature[] = { '\211', 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
+static const int bufferSize=100;
+   
 namespace Mantid
 {
   namespace API
@@ -39,10 +41,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-static const unsigned char hdf5_signature[] = { '\211', 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
-static const int bufferSize=100;
 
-   
     class DLLExport IDataFileChecker: public API::Algorithm
     {
     public:

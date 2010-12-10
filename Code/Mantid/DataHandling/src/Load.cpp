@@ -9,6 +9,7 @@
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include<algorithm>
 
+
 namespace Mantid
 {
   namespace DataHandling
@@ -52,15 +53,25 @@ namespace Mantid
       declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
     }
-     
+    /** checks this property exists in the list of algorithm properties.
+    */
     struct hasProperty
     { 
+      /** constructor which takes 1 arguement.
+        *@param name - name of the property
+        */
       hasProperty(const std::string name):m_name(name){}
+
+      /**This method comapres teh property name
+        *@param prop - shared pointer to property
+        *@return true if the property exists in the list of properties.
+      */
       bool operator()(Mantid::Kernel::Property* prop)
       {
         std::string name=prop->name();
         return (!name.compare(m_name));
       }
+      /// name of teh property
       std::string m_name;
       
     };
@@ -80,7 +91,7 @@ namespace Mantid
       {
         throw std::runtime_error("Cannot load file " + fileName);
       }
-      g_log.debug()<<"The sub algorithm  name is "<<alg->name()<<std::endl;
+      g_log.information()<<"The sub load algorithm  created to execute is "<<alg->name()<<"  and it version is  "<<alg->version()<<std::endl;
       double startProgress=0,endProgress=1;
       // set the load algorithm as a child algorithm 
       initialiseLoadSubAlgorithm(alg,startProgress,endProgress,true,-1);
@@ -98,13 +109,14 @@ namespace Mantid
         //if  the load sub algorithm has the same property then set it.
         prop=std::find_if(loader_props.begin(),loader_props.end(),hasProperty((*itr)->name()));
         if(prop!=loader_props.end())
-        {           
+        { 
+          
           alg->setPropertyValue((*prop)->name(),getPropertyValue((*prop)->name()));
-        }
+         }
         
       }
       //execute the load sub algorithm
-      alg->execute();
+       alg->execute();
       //se the workspace
       setOutputWorkspace(alg);
           
@@ -209,7 +221,7 @@ namespace Mantid
     /**
       * Set the output workspace(s) if the load's return workspace
       *  has type API::Workspace
-      *@param shared pointer to load algorithm
+      *@param load shared pointer to load algorithm
       */
     void Load::setOutputWorkspace(API::IAlgorithm_sptr& load)
     {

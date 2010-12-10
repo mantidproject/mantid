@@ -199,14 +199,6 @@ namespace Mantid
         g_log.error("Unable to open file: " + filePath);
         throw Exception::FileError("Unable to open file: " , filePath);
       }
-      //set up the separators
-      /*std::map<std::string,const char*>::const_iterator it;
-      std::string separators;
-      for(it=m_separatormap.begin();it!=m_separatormap.end();++it)
-      {     
-        separators+=it->second;
-      }
-*/
       std::string separators(",");
       int ncols=0; 
       typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -216,44 +208,23 @@ namespace Mantid
       while(!file.eof())
       { 
         getline(file,line) ;      
-        if (line.empty()) 
+        if (line.empty()||line[0] == '#') 
         {
           continue;
         }
-        
-        if(line.at(0) == '#')
-        {
-          try
-          {
-            if(line.at(1)=='L')
-            {
-              return 0;
-            }
-          }
-          catch(std::out_of_range&)
-          {
-            continue;
-          }
-        }
         else
         {
-          //break at a non empty line
+          //break at a non empty/non comment line is teh 1st data line
           break;
         }
       }
 
+      //iterarte through the first line cloumns
       boost::tokenizer<boost::char_separator<char> > values(line, seps);
       for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
       {         
         ++ncols;
       } 
-      
-      //if the line has odd number of coulmns with mantid supported separators
-      // this is considered as ascci file 
-      if (ncols % 2 == 1 && ncols>2) 
-      {
-        bret+=40;
-      }
       bool bloadAscii(true);
       //if the data is of double type this file can be loaded by loadascci
       double data;
@@ -268,10 +239,16 @@ namespace Mantid
         }
        
       }
-      if(bloadAscii)
+      //if the line has odd number of coulmns with mantid supported separators
+      // this is considered as ascci file 
+      if (ncols % 2 == 1 && ncols>2 && bloadAscii) 
+      {
+        bret=80;
+      }
+      /*if(bloadAscii)
       {
         bret+=40;
-      }
+      }*/
       return  bret;
     }
 
