@@ -10,6 +10,7 @@
 #include <boost/unordered_set.hpp>
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/DllExport.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
 
@@ -52,14 +53,14 @@ namespace Mantid
   {
 
 
-    class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
+    class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
     {
 	public: 
 		UnitCell(void){};
     };
 
     //****************************************************************************************************************************************
-    class DLLExport MDGeometryBasis
+    class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {
     public:
 

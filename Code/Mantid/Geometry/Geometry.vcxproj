@@ -260,6 +260,7 @@
     <ClCompile Include="src\Rendering\vtkGeometryCacheWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidGeometry\DllExport.h" />
     <ClInclude Include="inc\MantidGeometry\IInstrument.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\Instrument.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\NearestNeighbours.h" />

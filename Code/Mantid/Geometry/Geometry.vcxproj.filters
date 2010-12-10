@@ -626,6 +626,9 @@
     <ClInclude Include="test\NearestNeighboursTest.h">
       <Filter>Header Files\Instrument</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\DllExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\ComponentCreationHelpers.hh">

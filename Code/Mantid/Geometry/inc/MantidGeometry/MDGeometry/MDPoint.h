@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllExport.h"
 #include <vector>
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
@@ -42,7 +42,7 @@ namespace Mantid
 
   namespace Geometry
   {
-    struct DLLExport coordinate
+    struct EXPORT_OPT_MANTID_GEOMETRY coordinate
     {
       double x;
       double y;
@@ -52,7 +52,7 @@ namespace Mantid
 
     //TODO: relocate once name is stable.
     class MDPoint;
-    class DLLExport SignalAggregate
+    class EXPORT_OPT_MANTID_GEOMETRY SignalAggregate
     {
     public:
       virtual std::vector<coordinate> getVertexes() const = 0;
@@ -62,7 +62,7 @@ namespace Mantid
       virtual ~SignalAggregate(){};
     };
 
-    class DLLExport MDPoint : public SignalAggregate
+    class EXPORT_OPT_MANTID_GEOMETRY MDPoint : public SignalAggregate
     {
     private:
       double m_signal;
