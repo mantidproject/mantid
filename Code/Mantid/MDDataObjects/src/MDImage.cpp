@@ -136,7 +136,13 @@ MDImage::get_const_pData(void)const
 		throw(std::runtime_error("Data memory for Multidimensional dataset has not been allocated"));
     }
 }
-
+//
+bool 
+MDImage::is_initialized(void)const
+{
+	if(!pMDGeometry.get()||!this->get_const_pData())return false;
+	return true;
+}
 
 //*******************************************************************************************************
 void
@@ -170,25 +176,29 @@ MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
 		throw(std::logic_error(" MD geometry and MD_image_Data are not synchroneous any more. BUGGG!!! "));
 	}
 
-    this->nd2 =MD_IMG_array.dimStride[0];
-    this->nd3 =MD_IMG_array.dimStride[1];
-    this->nd4 =MD_IMG_array.dimStride[2];
-    this->nd5 =MD_IMG_array.dimStride[3];
-    this->nd6 =MD_IMG_array.dimStride[4];
-    this->nd7 =MD_IMG_array.dimStride[5];
-    this->nd8 =MD_IMG_array.dimStride[6];
-    this->nd9 =MD_IMG_array.dimStride[7];
-    this->nd10=MD_IMG_array.dimStride[8];
-    this->nd11=MD_IMG_array.dimStride[9];
+    this->nd2 =MD_IMG_array.dimStride[1];
+    this->nd3 =MD_IMG_array.dimStride[2];
+    this->nd4 =MD_IMG_array.dimStride[3];
+    this->nd5 =MD_IMG_array.dimStride[4];
+    this->nd6 =MD_IMG_array.dimStride[5];
+    this->nd7 =MD_IMG_array.dimStride[6];
+    this->nd8 =MD_IMG_array.dimStride[7];
+    this->nd9 =MD_IMG_array.dimStride[8];
+    this->nd10=MD_IMG_array.dimStride[9];
+    this->nd11=MD_IMG_array.dimStride[10];
 
 }
 void
-MDImage::initialize(const Geometry::MDGeometryDescription &transf)
+MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *const pBasis)
 {
 
 	if(!this->pMDGeometry.get()){
-		g_log.error()<<" MDImage::initialize: construction geometry from its description is not implemented at the moment\n";
-		throw(Kernel::Exception::NotImplementedError("Constructing geometry from geometry description at initialisation is not implemented at the moment"));
+		if(!pBasis){
+			g_log.error()<<" MDImage::initialize: construction geometry from its description without the basis is imkpossible\n";
+			throw(std::invalid_argument("Constructing geometry from geometry description without the Geometry basis is impossible"));
+		}else{
+			this->pMDGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*pBasis,transf));
+		}
 	}
 // initiate initial dimensions
 	size_t ImgSize = transf.getImageSize();
@@ -230,7 +240,12 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
   this->initialize(descr);
 
 }
-
+MDImage::MDImage(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis & Basis):
+pMDGeometry(NULL),
+nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
+{
+	this->initialize(Description,&Basis);
+}
 //
 void
 MDImage::alloc_image_data(size_t ImgSize,unsigned int nDims)

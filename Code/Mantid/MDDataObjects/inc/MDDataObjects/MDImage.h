@@ -62,6 +62,7 @@ struct MD_img_data{
     // descriptors for dimensions;
     std::vector<size_t>dimStride;
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
+	// this should be calculated by algorithm and currently is not here. Do we need it here?
     std::vector<double> min_value;  /**< min value of real data in the selected dimension -- differs from the MDGeometry ranges, as geometry 
 	                                 specifies  ranges for rebinning */
     std::vector<double> max_value;  ///< max value of data extend in the selected dimension -- differs from ranges, set in geometry
@@ -74,7 +75,9 @@ class DLLExport MDImage
 {
 public:
     /// default constructor
-    MDImage(Mantid::Geometry::MDGeometry* p_geometry);
+    MDImage(Mantid::Geometry::MDGeometry* p_MDGeometry=NULL);
+	/// the constructor which builds empty image from geometry the description (calling proper geometry constructor inside)
+    MDImage(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis & pBasis);
     // destructor
     ~MDImage();
     /** function returns vector of points left after the selection has been applied to the multidimensinal image
@@ -96,20 +99,19 @@ public:
     Geometry::MDGeometry * const getGeometry() const { return pMDGeometry.get(); }
  //******************************************************************************************************
 //******************************************************************************************************
-    // interface to allocates_mdd_arrays below in case of full not collapsed mdd dataset
-	virtual void initialize(const Geometry::MDGeometryDescription &Description);
+    /** initialises image, build with empty constructor, to working state. 
+	 *  If called on existing image, ignores basis and tries to reshape image as stated in description	*/
+	virtual void initialize(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis *const pBasis=NULL);
+	bool is_initialized(void)const;
     /// get acces to the internal image dataset for further modifications; throws if dataset is undefinded;
     MD_image_point      * get_pData(void);
 	MD_image_point const* get_const_pData(void)const;
     /// get acces to the whole MDga structure;
     MD_img_data         * get_pMDImgData(void){return (&MD_IMG_array);}
 
+ 
 
-/// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
-  //  void read_MDImg_data(boost::shared_ptr<IMD_FileFormat> spFile,bool old4DMatlabReader=false);
-    
-
-  /// build allocation table of sparce data points (pixels)
+  /// build allocation table of sparce data points (pixels) -> will be moved into points;
     void identify_SP_points_locations();
 
  protected:

@@ -189,7 +189,57 @@ public:
     }
   }
 
+  void testHoracePointAccess(){
+   const int nPix = 10;
+    int i;
+    data4D testData[nPix];
+    char   testBuffer[nPix*(4*sizeof(double)+2*sizeof(double)+3*sizeof(uint64_t))];
 
+    build4DTestdata(testData,nPix);
+	MDPointStructure horStruct;
+
+	horStruct.DimIDlength=8;
+	horStruct.DimLength  =8;
+	horStruct.NumPixCompressionBits=0;
+
+	MDPointDescription HorDescription(horStruct,fieldNames4D);
+
+	MDDataPointEven<float,uint32_t,float> hp(testBuffer,HorDescription);
+
+    float     Dim[4];
+    float     SE[2];
+    uint32_t   Ind[3];
+    for(i=0;i<nPix;i++){
+      Dim[0]=testData[i].q1;
+      Dim[1]=testData[i].q2;
+      Dim[2]=testData[i].q3;
+      Dim[3]=testData[i].En;
+      SE[0] =testData[i].S ;
+      SE[1] =testData[i].Err ;
+      Ind[0] =testData[i].iRun ;
+      Ind[1] =testData[i].iPix ;
+      Ind[2] =testData[i].iEn ;
+      hp.setData(i,Dim,SE,Ind);
+
+    }
+
+   for(i=0;i<nPix;i++)
+    {
+      TS_ASSERT_EQUALS(hp.getDataField(0,i),testData[i].q1);
+      TS_ASSERT_EQUALS(hp.getDataField(1,i),testData[i].q2);
+      TS_ASSERT_EQUALS(hp.getDataField(2,i),testData[i].q3);
+      TS_ASSERT_EQUALS(hp.getDataField(3,i),testData[i].En);
+      TS_ASSERT_EQUALS(hp.getSignal(i),testData[i].S);
+      TS_ASSERT_EQUALS(hp.getError(i), testData[i].Err);
+
+      TS_ASSERT_EQUALS(hp.getIndex(0,i), testData[i].iRun);
+      TS_ASSERT_EQUALS(hp.getIndex(1,i), testData[i].iPix);
+      TS_ASSERT_EQUALS(hp.getIndex(2,i), testData[i].iEn);
+
+    }
+
+
+  }
   void test4DAccess32bitIndex()
   {
     const int nPix = 10;

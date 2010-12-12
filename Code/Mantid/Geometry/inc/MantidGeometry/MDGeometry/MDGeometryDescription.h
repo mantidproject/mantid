@@ -47,14 +47,18 @@ class DimensionDescription
 {
 public:
   std::string Tag; //< unuque dimension identifier (tag)
-  double trans_bott_left; //< shift in all directions (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
+  double data_shift; /**< shift in this direction (tans_elo is 4th element of transf_bott_left. Shift expressed in the physical units
+                         the data, which are binned into MD image and plotted along this dimension shifted by this value */
   double cut_min; //< min limits to extract data;
   double cut_max; //< max limits to extract data;
+  double data_scale; //< Length of projection axes vectors in Ang^-1 or meV 
   unsigned int nBins; //< number of bins in each direction, bins of size 1 are integrated (collased);
   bool isReciprocal; //< specifies if this dimension is reciprocal or not.
   std::string AxisName; //< new names for axis;
+   
+
   DimensionDescription() :
-    Tag(""), trans_bott_left(0), cut_min(-1), cut_max(1), nBins(1), isReciprocal(false), AxisName("")
+    Tag(""), data_shift(0), cut_min(-1), cut_max(1), nBins(1),data_scale(1),isReciprocal(false), AxisName("")
   {}
 };
 
@@ -74,12 +78,16 @@ public:
       Dimension_sptr dimensionZ, 
       Dimension_sptr dimensiont ); 
 
+	MDGeometryDescription(const MDGeometryBasis &basis);
     MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);
     MDGeometryDescription(const MDGeometry &origin);
     virtual ~MDGeometryDescription(void);
+	/// obtain number of dimensions in the geometry
     unsigned int getNumDims(void)const{return nDimensions;}
+	/// obtain number of reciprocal dimensions in the geometry
+	unsigned int getNumRecDims(void)const{return nReciprocalDimensions;}
 
-	// returns the size of the image, described by this class
+	/// returns the size of the image, described by this class
 	size_t getImageSize()const;
 
    /// the function sets the rotation matrix which allows to transform vector inumber i into the basis;
@@ -95,49 +103,36 @@ public:
    std::vector<double> getRotations(void)const{return rotations;}
 
    std::vector<double> getCoord(unsigned int i)const;
-   double shift(unsigned int i)const; 
-   double cutMin(unsigned int i)const;
-   double cutMax(unsigned int i)const;
-   unsigned int numBins(unsigned int i)const;
    bool isAxisNamePresent(unsigned int i)const;
-   std::string getAxisName(unsigned int i)const;
-   std::string getTag(unsigned int i)const;  
  
-   /// finds the location of the dimension, defined by the tag in the list of all dimensions;
+   /** finds the location of the dimension, defined by the tag in the list of all dimensions;
+    * informatiom about the axis to display is encoded by the tag numbers */
    int getTagNum(const std::string &Tag, bool do_throw=false)const;
    ///returns the list of the axis tags sorted in the order requested for view 
    std::vector<std::string> getDimensionsTags(void)const;
 
-   void renameTag(unsigned int num,const std::string &newID);
+//   void renameTag(unsigned int num,const std::string &newID);
+   // access to all 
+   DimensionDescription & dimDescription(unsigned int i){
+	   check_index(i,"dimDescription");
+	   return data[i];
+   }
+   DimensionDescription & dimDescription(unsigned int i)const{
+	   check_index(i,"dimDescription");
+	   return const_cast<DimensionDescription &>(data[i]);
+   }
 
-//*** SET -> t
+   // access to all 
+   DimensionDescription & dimDescription(const std::string &Tag){
+	int index = getTagNum(Tag,true);
+	   return data[index];
+   }
+
+////*** SET -> t
    void setCoord(const std::string &Tag,const std::vector<double> &coord){
        int index = getTagNum(Tag,true);       this->setCoord(index,coord);
    }
-   
-   void setShift(const std::string &Tag,double Val){
-       int index = getTagNum(Tag,true);       setShift(index,Val);
-   }
-   void setCutMin(const std::string &Tag,double Val){
-      int index = getTagNum(Tag,true);      setCutMin(index,Val);
-   }
-   void setCutMax(const std::string &Tag,double Val){
-     int index = getTagNum(Tag,true);     setCutMax(index,Val);
-   }
-   void setNumBins(const std::string &Tag,unsigned int Val){
-      int index = getTagNum(Tag,true);      setNumBins(index,Val);
-    }
-   void setAxisName(const std::string &Tag,const std::string &Name){
-      int index = getTagNum(Tag,true);      setAxisName(index,Name);
-   }
-
    void setCoord(unsigned int i,const std::vector<double> &coord);
-
-   void setShift(unsigned int i,double Val); 
-   void setCutMin(unsigned int i,double Val);
-   void setCutMax(unsigned int i,double Val);
-   void setNumBins(unsigned int i,unsigned int Val);
-   void setAxisName(unsigned int i,const std::string &Name);
 
 /**  function sets the Tag requested into the position, defined by the index i;
  *

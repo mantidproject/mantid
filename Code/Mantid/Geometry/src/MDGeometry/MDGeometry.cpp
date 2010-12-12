@@ -28,10 +28,11 @@ namespace Mantid{
       // as requested
       for(i=0;i<n_new_dims;i++){
         pDim=this->getDimension(tag[i]);
-        pDim->setRange(trf.cutMin(i),trf.cutMax(i),trf.numBins(i));
+		DimensionDescription descr = trf.dimDescription(i);
+		pDim->setRange(descr.cut_min,descr.cut_max,descr.nBins);
         // set new axis name ;
-        if(trf.isAxisNamePresent(i)){
-          pDim->setName(trf.getAxisName(i));
+		if(!descr.AxisName.empty()){
+			pDim->setName(descr.AxisName);
         }
 
       }

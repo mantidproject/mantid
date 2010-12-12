@@ -45,6 +45,9 @@
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\DllExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\MDGeometry\MDDimension.cpp">

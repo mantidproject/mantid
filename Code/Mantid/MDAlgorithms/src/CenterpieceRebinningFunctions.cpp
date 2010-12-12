@@ -83,8 +83,8 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
   int dim_num;
   for(i=0;i<nOrthogonal;i++){
     dim_num = target.getTagNum(pOrthogonal[i]->getDimensionTag(),true);
-    ort_cut_min[i]=target.cutMin(dim_num);
-    ort_cut_max[i]=target.cutMax(dim_num);
+	ort_cut_min[i]=target.dimDescription(dim_num).cut_min;
+    ort_cut_max[i]=target.dimDescription(dim_num).cut_max;
   }
 
   for(i=0;i<nOrthogonal;i++){
@@ -141,14 +141,15 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
     rec_dim[i] = pReciprocal[i];
 
     dim_num    = target.getTagNum(rec_dim[i]->getDimensionTag(),true);
-    cut_min[i] = target.cutMin(dim_num);
-    cut_max[i] = target.cutMax(dim_num);
+	cut_min[i] = target.dimDescription(dim_num).cut_min;
+    cut_max[i] = target.dimDescription(dim_num).cut_max;
   }
   // if there are less then 3 reciprocal dimensions, lets make 3 now to make the algorithm generic
   for(i=nReciprocal;i<3;i++){
     rec_dim[i] =  boost::shared_ptr<MDDimension>(new MDDimDummy(i));
     // we should know the limits the dummy dimensions have
     cut_min[i] = rec_dim[i]->getMinimum();
+	//TODO: Verify
     cut_max[i] = rec_dim[i]->getMaximum()*(1+FLT_EPSILON);
 
     //TO DO: deal with rotations in case they have not been dealt with before;
@@ -259,10 +260,11 @@ build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geom
   //MDGeometryDescription tSource(Source);
 
   for(i=0;i<nDims;i++){
-    trf.trans_bott_left[i]=target.shift(i);
-    trf.axis_step[i]=(target.cutMax(i)-target.cutMin(i))/target.numBins(i);
-    trf.cut_max[i]  = target.cutMax(i)/trf.axis_step[i];
-    trf.cut_min[i]  = target.cutMin(i)/trf.axis_step[i];
+	  DimensionDescription dimD = target.dimDescription(i);
+	  trf.trans_bott_left[i]=dimD.data_shift;
+	  trf.axis_step[i]=(dimD.cut_max-dimD.cut_min)/dimD.nBins;
+    trf.cut_max[i]  = dimD.cut_max/trf.axis_step[i];
+    trf.cut_min[i]  = dimD.cut_min/trf.axis_step[i];
     //   trf.stride[i]   = target.getStride(i);
   }
   std::vector<double> rot = target.getRotations();
@@ -366,8 +368,8 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
   int    indX,indY,indZ,indE;
   double s,err;
   size_t nDimX(strides[0]),nDimY(strides[1]),nDimZ(strides[2]);
-
-  MDDataObjects::MDDataPoint<> unPacker(const_cast<char *>(source_pix_buf),nDims,2,3);
+  // this one should coinside with the description, obtained from the MDDataPoints and readers;
+  MDDataObjects::MDDataPoint<float,uint16_t,float> unPacker(const_cast<char *>(source_pix_buf),nDims,2,3);
   // min-max value initialization
 
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();

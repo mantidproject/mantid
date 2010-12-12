@@ -48,6 +48,36 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
     this->build_from_geometry(origin);
 }
 
+
+MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis)
+{
+	std::set<MDBasisDimension> basisDims = basis.getBasisDimensions();
+	this->nDimensions           = 0 ;
+	this->nReciprocalDimensions = 0;
+	std::set<MDBasisDimension>::const_iterator it= basisDims.begin();
+	for(;it != basisDims.end();it++){
+		this->nDimensions++;
+		if(it->getIsReciprocal())this->nReciprocalDimensions++;
+	
+	}
+	// create default dimension descriptions;
+	this->data.resize(this->nDimensions);
+	unsigned int ic(0);
+	for(it= basisDims.begin();it != basisDims.end();it++){
+		this->data[ic].Tag = it->getId();
+		this->data[ic].isReciprocal = it->getIsReciprocal();
+
+		ic++;
+	}
+	// place dimension descriptions in the list of the descritions to the positions, specified by the basis;
+	int num;
+	for(it= basisDims.begin();it != basisDims.end();it++){
+		num = it->getColumnNumber();
+		this->setPAxis(num,it->getId());
+	}
+
+}
+
 MDGeometryDescription::MDGeometryDescription(
       DimensionVec dimensions, 
       Dimension_sptr dimensionX, 
@@ -87,12 +117,13 @@ MDGeometryDescription::MDGeometryDescription(
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {
   this->data[i].Tag            = dimension->getDimensionId();
-  this->data[i].trans_bott_left= 0;
+  this->data[i].data_shift     = 0;
   this->data[i].cut_min        = dimension->getMinimum();
   this->data[i].cut_max        = dimension->getMaximum()*(1+FLT_EPSILON);
   this->data[i].nBins          = dimension->getNBins();
   this->data[i].AxisName       = dimension->getName();
   this->data[i].isReciprocal   = dimension->isReciprocal();
+  //this->data[i].data_scale     = dimension.getScale();  /TODO: conflict
 
   //Handle reciprocal dimensions.
   if(dimension->isReciprocal())
@@ -184,12 +215,12 @@ MDGeometryDescription::getImageSize()const
 	return data_size;
 }
 //****** SET *******************************************************************************
-void 
-MDGeometryDescription::renameTag(unsigned int num,const std::string &newID)
-{
-   this->check_index(num,"renameTag");
-   this->data[num].Tag = newID;
-}
+//void 
+//MDGeometryDescription::renameTag(unsigned int num,const std::string &newID)
+//{
+//   this->check_index(num,"renameTag");
+//   this->data[num].Tag = newID;
+//}
 void 
 MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag) 
 {
@@ -227,69 +258,8 @@ MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag)
     }
  
 }
-//
-void
-MDGeometryDescription::setShift(unsigned int i,double Val)
-{
-   this->check_index(i,"setShift");
-   this->data[i].trans_bott_left=Val;
-}
-void
-MDGeometryDescription::setCutMin(unsigned int i,double Val)
-{
-    this->check_index(i,"setCutMin");
-    this->data[i].cut_min=Val;
-}
-void
-MDGeometryDescription::setCutMax(unsigned int i,double Val)
-{
-    this->check_index(i,"setCutMax");
-    this->data[i].cut_max=Val;
-}
-void
-MDGeometryDescription::setNumBins(unsigned int i,unsigned int Val)
-{
-    this->check_index(i,"setNumBins");
-    if(Val>MAX_REASONABLE_BIN_NUMBER){
-        throw(std::invalid_argument("SlicingProperty::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
-    }
-    if(Val==0)Val=1;
-    this->data[i].nBins=Val;
-}
-void
-MDGeometryDescription::setAxisName(unsigned int i,const std::string &Name)
-{
-    this->check_index(i,"setAxisName");
-    this->data[i].AxisName=Name;
-}
-//*************************************************************************************
 
-double 
-MDGeometryDescription::cutMin(unsigned int i)const
-{
-    this->check_index(i,"cutMin");
-    return this->data[i].cut_min;
-}
-double
-MDGeometryDescription::cutMax(unsigned int i)const
-{
-    this->check_index(i,"cutMax");
-    return this->data[i].cut_max;
 
-}
-unsigned int 
-MDGeometryDescription::numBins(unsigned int i)const
-{
-    this->check_index(i,"numBins");
-    return this->data[i].nBins;
-
-}
-double 
-MDGeometryDescription::shift(unsigned int i)const
-{
-    this->check_index(i,"Shift");
-    return this->data[i].trans_bott_left;
-}
 bool
 MDGeometryDescription::isAxisNamePresent(unsigned int i)const
 {
@@ -300,18 +270,6 @@ MDGeometryDescription::isAxisNamePresent(unsigned int i)const
     }else{
         return true;
     }
-}
-std::string 
-MDGeometryDescription::getAxisName(unsigned int i)const
-{
-    this->check_index(i,"getAxisName");
-    return (this->data[i].AxisName);
-}
-std::string 
-MDGeometryDescription::getTag(unsigned int i)const
-{
-    this->check_index(i,"getTag");
-    return (this->data[i].Tag);
 }
 
 std::vector<std::string> 
@@ -336,32 +294,7 @@ nReciprocalDimensions(numRecDims)
     this->intit_default_slicing(nDimensions,nReciprocalDimensions);
 
 }
-/*
-SlicingProperty::SlicingProperty(std::vector<DimensionsID> &IDs)
-{
-    unsigned int i;
-    unsigned int nDims=(unsigned int)IDs.size();
-    this->intit_default_slicing(nDims);
 
-    // calculate the reciprocal dimensions which are not present in the ID list and clear their coordinates;
-    unsigned int nReciprocalDims(0);
-    std::vector<unsigned int> rec_dim_to_clear(3,1);
-    for(i=0;i<nDims;i++){
-        if(IDs[i]<3){
-            nReciprocalDims++;
-            rec_dim_to_clear[i]=0;
-        }
-    }
-
-    if(nReciprocalDims<3){
-        for(i=0;i<nDims;i++){
-            if(rec_dim_to_clear[i]){
-                this->coordinates[i].assign(3,0);
-            }
-        }
-    }
-}
-*/
 void
 MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRecDims)
 {
@@ -392,7 +325,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
 
     unsigned int i;
     DimensionDescription defaults;
-    defaults.trans_bott_left=0;
+    defaults.data_shift=0;
     defaults.cut_min =-1;
     defaults.cut_max = 1;
     defaults.nBins   = 1;
@@ -448,7 +381,7 @@ MDGeometryDescription::check_index(unsigned int i,const char *fName)const
 {
     if(i>=this->nDimensions){
         g_log.error()<<" index out of range for function: "<<fName<<std::endl;
-        g_log.error()<<" Allowed nDims: "<<this->nDimensions<<" and requested is: "<<i<<std::endl;
+        g_log.error()<<" Allowed nDims: "<<this->nDimensions<<" and requested are: "<<i<<std::endl;
         throw(std::invalid_argument("MDGeometryDescription: index out of range"));
     }
 }

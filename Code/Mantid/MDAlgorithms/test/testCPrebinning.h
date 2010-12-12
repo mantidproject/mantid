@@ -29,7 +29,7 @@ class testCPRebinning :    public CxxTest::TestSuite
          AnalysisDataService::Instance().add("InWorkspace", pOrigin);
 
 		 // should go to Load workspace algorithm ----->
-		 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
+		 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo_bin.sqw");
 		 boost::shared_ptr<IMD_FileFormat> spFile = boost::shared_ptr<IMD_FileFormat>(pFile.get());
 		 pFile.release();
 
@@ -61,13 +61,14 @@ class testCPRebinning :    public CxxTest::TestSuite
         }
 
         double r0=0;
-        pSlicing->setCutMin("qx",r0);
-        pSlicing->setCutMax("qx",r0+2);
-        pSlicing->setCutMin("qy",r0);
-        pSlicing->setCutMax("qy",r0+2);
-        pSlicing->setCutMin("qz",r0);
-        pSlicing->setCutMax("qz",r0+2);
-        pSlicing->setCutMax("en",50);
+		pSlicing->dimDescription("qx").cut_min = r0;
+		pSlicing->dimDescription("qx").cut_min = r0+2;
+		pSlicing->dimDescription("qy").cut_min = r0;
+		pSlicing->dimDescription("qy").cut_max = r0+2;
+		pSlicing->dimDescription("qz").cut_min = r0;
+		pSlicing->dimDescription("qz").cut_max = r0+2;
+		pSlicing->dimDescription("en").cut_max = 50;
+
 
    
         TS_ASSERT_THROWS_NOTHING(cpr.execute());

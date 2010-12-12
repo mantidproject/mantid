@@ -7,6 +7,8 @@
 #include "MantidKernel/System.h"
 
 #include "MDDataObjects/MD_FileHoraceReader.h"
+#include "MDDataObjects/MDImage.h"
+#include "MDDataObjects/MDDataPoints.h"
 #include <boost/algorithm/string/case_conv.hpp>
 
 using namespace Mantid;
@@ -34,6 +36,7 @@ public:
 		nTestPixels=1523850;
 
 	 }
+	  size_t getNConributedPixels()const{return nTestPixels;}
 	int check_values_correct(){
 		int rez = 0;
 		if(cdp.if_sqw_start != positions.if_sqw_start)          {std::cerr<<" pixels location differs from expected"      <<positions.if_sqw_start
@@ -79,8 +82,68 @@ public:
 	void testValuesReadCorrectly(){
 		TSM_ASSERT_EQUALS("Number of values from the test file have not been read correctly",pReader->check_values_correct(),0);
 	}
+	void testGetNpixCorrect(){
+		TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",1523850,pReader->getNPix());
+	}
+
+	void testReadBasis(){
+		// this is currently hardcoded so no problem shouls be here but it will read crystall in a futute. 
+		TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",pReader->read_basis(basis));
+
+	}
+	void testReadGeometry(){
+		// this constructor should be tested elsewhere
+		TSM_ASSERT_THROWS_NOTHING("Geometry description should be able to build from basis ",pGeomDescription = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(basis)));
+		// and here is the test of reading
+		TS_ASSERT_THROWS_NOTHING(pReader->read_MDGeomDescription(*pGeomDescription));
+
+		// verify what has been read;
+	}
+	void testReadMDImgData(){
+		TSM_ASSERT_THROWS_NOTHING("MD Image has not been constructred by empty constructor",
+			pImg=std::auto_ptr<MDDataObjects::MDImage>(new MDDataObjects::MDImage(*pGeomDescription,basis)));
+
+
+		TSM_ASSERT_THROWS_NOTHING("MD image reader should not normaly throw",
+			this->pReader->read_MDImg_data(*pImg));
+		// temporary here and should move to constructor for MDDataPoints;
+		pImg->identify_SP_points_locations();
+		// check what has been read;
+	}
+	//void testReadAllPixels(){
+	//	MDPointDescription defaultDescr;
+	//	boost::shared_ptr<MDImage const> emptyImg = boost::shared_ptr<MDImage const>(new MDImage());
+	//	MDDataPointsDescription pd(defaultDescr);
+	//	MDDataPoints points(emptyImg,pd);
+	//	TSM_ASSERT_THROWS("You implemented the Horace reader, write test for it",pReader->read_pix(points),Kernel::Exception::NotImplementedError);
+	//}
+
+	void testReadPixelsSelection(){
+		// t
+		const int nCells = 2;
+		std::vector<size_t> selected_cells(nCells);
+		size_t starting_cell(0),final_cell;
+		std::vector<char> pix_buf(pReader->getNConributedPixels()*9*8);
+		size_t n_pix_in_buffer(0);
+		for(int i=0;i<nCells;i++){
+			selected_cells[i]=i;
+		}
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			final_cell=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+	}
+	void testWriteMDD(){
+		TSM_ASSERT_THROWS("Looks like Horace writer has been implemented, why? ",pReader->write_mdd(*pImg),Kernel::Exception::NotImplementedError);
+	}
+
 private:
 	std::auto_ptr<HoraceReaderTester> pReader;
+	// the components of the workspace which the reader supplies with data
+    Geometry::MDGeometryBasis basis;
+	std::auto_ptr<Geometry::MDGeometryDescription> pGeomDescription;
+	std::auto_ptr<MDDataObjects::MDImage> pImg;
 //******************************************************************
    std::string findTestFileLocation(const char *filePath=NULL){
 

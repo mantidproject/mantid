@@ -45,7 +45,7 @@ private:
    void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &description){
 	  using namespace Mantid::Geometry;
 	  for(int i=0;i<description.getNumDims();i++){
-		description.setNumBins(i,50);
+		  description.dimDescription(i).nBins=50;
 	  }
 
    }

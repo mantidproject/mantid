@@ -189,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoint.h" />
+    <ClInclude Include="inc\MDDataObjects\MDDataPointDescription.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h" />
     <ClInclude Include="inc\MDDataObjects\MDImage.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h" />

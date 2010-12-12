@@ -131,10 +131,10 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
     nDims= arr_dims_vector[0];
 	// create geometry description with nDims(=4) and 3 reciprocal dimensions (hardcoded in Horace)
 
-    for(i=0;i<nDims;i++){
-        unsigned int dim_size=(unsigned int)*((double*)(data)+i);
-	      DND_shape.setNumBins(i,dim_size);
-    }
+  //  for(i=0;i<nDims;i++){
+  //      unsigned int dim_size=(unsigned int)*((double*)(data)+i);
+		//DND_shape.dimDescription(i).nBins = dim_size;
+  //  }
     delete [] data;
     arr_dims_vector.clear();
 
@@ -159,8 +159,8 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
         throw(Exception::FileError(err.str(),this->File_name));
     }
     for(i=0;i<nDims;i++){
-        DND_shape.setCutMin(i,*((double*)(data)+2*i));
-        DND_shape.setCutMax(i,*((double*)(data)+2*i+1));
+		DND_shape.dimDescription(i).cut_min=*((double*)(data)+2*i);
+        DND_shape.dimDescription(i).cut_max=*((double*)(data)+2*i+1);
     }
     delete [] data;
     arr_dims_vector.clear();
@@ -188,7 +188,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 		  // this provides number of points along an axis and axis has nBins+1 points
 		  if(dim_lentgh > 1) dim_lentgh--;
           delete rez[i];
-          DND_shape.setNumBins(i,dim_lentgh);
+		  DND_shape.dimDescription(i).nBins = dim_lentgh;
     }  
 	// we need to set expanded instead
     delete [] data;
@@ -207,7 +207,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 	 tags[2]="qz";
 	 tags[3]="en";
 	 for(i=0;i<indMax;i++){
-		 DND_shape.renameTag(i,tags[i]);
+		 DND_shape.dimDescription(i).Tag = tags[i];
 
 	 }
 
@@ -403,11 +403,11 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     if(err){
         throw(Exception::FileError("Error reading the pixels dataset",this->File_name));
     }
-    size_t nCellPic(0);
-    size_t nPixel(0);
-    float  DimFields[4];
-    double signalFields[2];
-    int    ind_fields[3];
+    size_t  nCellPic(0);
+    size_t   nPixel(0);
+    float    DimFields[4];
+    double   signalFields[2];
+    int      ind_fields[3];
 
     MDPointStructure defaults;
     MDPointDescription  pix(defaults);
@@ -459,7 +459,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
         pixel_dataspece_opened=true;
     }
     // define the format of the data point (pixel)
-    MDDataPoint<>  packer(&pix_buf[0],4,2,3);
+    MDDataPoint<float,uint16_t,float>  packer(&pix_buf[0],4,2,3);
 // identify the cells to read and maximal buffer size necessary to do the preselection;
     size_t max_npix_in_buffer(0),max_npix_selected(0),npix_tt;
     size_t i,j,n_selected_cells,n_cells_processed(0);
@@ -560,7 +560,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     f_log.debug(message.str());
 
     float DimFields[4];
-    double signalFields[2];
+    float signalFields[2];
     int    ind_fields[3];
   
 
@@ -571,8 +571,8 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
           DimFields[1] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+1)); // sqw.pix_array[i].qy 
           DimFields[2] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+2)); // sqw.pix_array[i].qz
           DimFields[3] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+3)); // sqw.pix_array[i].En
-          signalFields[0] = (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4)); // sqw.pix_array[i].s 
-          signalFields[1] = (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));  // sqw.pix_array[i].err
+          signalFields[0] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4)); // sqw.pix_array[i].s 
+          signalFields[1] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));  // sqw.pix_array[i].err
           ind_fields[0]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+6));    // sqw.pix_array[i].irun 
           ind_fields[1]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+7));   // sqw.pix_array[i].idet
           ind_fields[2]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+8)); // sqw.pix_array[i].ien

@@ -27,6 +27,7 @@ MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage,const MDData
   data_buffer(NULL),
   m_spMDImage(spImage)
 {
+  if(!m_spMDImage||!m_spMDImage->is_initialized())return;
 
   std::vector<std::string> dim_tags= m_spMDImage->getGeometry()->getBasisTags();
   std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);

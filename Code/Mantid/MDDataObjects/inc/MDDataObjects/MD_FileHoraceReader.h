@@ -48,7 +48,7 @@ struct data_positions{
 	std::vector<std::streamoff> component_headers_starts;
 	std::streamoff detectors_start,
 		data_start,
-		crystal_start,
+		geom_start,
 		npax_start,
 		s_start,
 		err_start,
@@ -56,7 +56,7 @@ struct data_positions{
 		min_max_start,
 		pix_start;
 	data_positions():if_sqw_start(18),n_dims_start(22),sqw_header_start(26),
-		detectors_start(0),data_start(0),crystal_start(0),s_start(0), // the following values have to be identified from the file itself
+		detectors_start(0),data_start(0),geom_start(0),s_start(0), // the following values have to be identified from the file itself
 		min_max_start(0),
 		err_start(0),n_cell_pix_start(0),pix_start(0){}; // the following values have to be identified from the file itself
 };
@@ -68,15 +68,14 @@ public:
 
 	virtual bool is_open(void)const{return fileStreamHolder.is_open();}
 
-	//****> MD baisis object (will be expanded?)
 	/// read the part of MD dataset containing the basis; Current implementations allocate basis from what they are reading
-	// no basis exists in Horace dataset so this funtion will return defaults
+	// no basis exists in Horace dataset so this funtion initialises default basis qx qy qz
 	virtual void read_basis(Mantid::Geometry::MDGeometryBasis &);
 
 	//****> MD image object
 	/// reads the MD geometry description, which allows to build MD geometry from the description and the basis;
 	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &);
-   // read DND object data;
+   // read DND object data; Image has to exist and be initiated;
     virtual void read_MDImg_data(MDImage & mdd);
    
 
@@ -85,7 +84,8 @@ public:
 	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
-    virtual bool read_pix(MDDataPoints & sqw);
+	// TODO: Implement;
+	virtual bool read_pix(MDDataPoints & sqw){throw(Kernel::Exception::NotImplementedError("Read all pixels funtion is not implemented at the moment as target obect for it is in nucleus state"));}
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
@@ -123,6 +123,12 @@ protected:
 	std::streamoff parse_sqw_detpar(std::streamoff detectors_start);
 	/// 
 	void  parse_data_locations(std::streamoff data_start);
+private:
+	/// horace data are written on HDD as 9 double words; this function compress them into
+	/// four float, two double and 3 uint16_t;
+	void compact_hor_data(char *buffer,size_t &buf_size);
+	// the size of data block for Horace reader;
+	static const unsigned int hbs=9*4;
 };
 } // end namespaces
 } 

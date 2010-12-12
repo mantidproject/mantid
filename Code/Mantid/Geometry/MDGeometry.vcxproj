@@ -170,6 +170,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidGeometry\DllExport.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\IMDDimension.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDBasisDimension.h" />
     <ClInclude Include="inc\MantidGeometry\MDGeometry\MDCell.h" />

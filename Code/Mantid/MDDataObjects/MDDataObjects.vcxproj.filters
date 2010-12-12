@@ -92,6 +92,9 @@
     <ClInclude Include="inc\MDDataObjects\MD_FileHoraceReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDDataPointDescription.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />

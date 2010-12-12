@@ -260,14 +260,14 @@ namespace Mantid
       BoxImplicitFunction impBox(width, height, depth, origin);
       
       //current implmentation of geometry description uses ordering so that x, y, z, t mappings appear first in the arrangement of dimensions.
-      description->setCutMax(0, impBox.getUpperX());
-      description->setCutMin(0, impBox.getLowerX());
+	  description->dimDescription(0).cut_max=impBox.getUpperX();
+      description->dimDescription(0).cut_min=impBox.getLowerX();
 
-      description->setCutMax(1, impBox.getUpperY());
-      description->setCutMin(1, impBox.getLowerY());
+      description->dimDescription(1).cut_min=impBox.getUpperY();
+      description->dimDescription(1).cut_max=impBox.getLowerY();
 
-      description->setCutMax(2, impBox.getUpperZ());
-      description->setCutMin(2, impBox.getLowerZ());
+      description->dimDescription(2).cut_min=impBox.getUpperZ();
+      description->dimDescription(2).cut_max=impBox.getLowerZ();
 
     }
 
