@@ -25,7 +25,7 @@ public:
       "    <archive>"
       "      <archiveSearch plugin=\"ISISDataSearch\" />"
       "    </archive>"
-      "    <instrument name=\"GEM\" shortname=\"GEM\">"
+      "    <instrument name=\"LOQ\" shortname=\"LOQ\">"
       "      <technique>technique</technique>"
       "    </instrument>"
       "    <instrument name=\"ALF\" shortname=\"ALF\">"
@@ -41,7 +41,7 @@ public:
     facilityFile.close();
 
     ConfigService::Instance().updateFacilities(facilityFilePath);
-    ConfigService::Instance().setString("default.instrument","GEM");
+    ConfigService::Instance().setString("default.instrument","LOQ");
     ConfigService::Instance().setString("default.facility","ISIS");
     
     Poco::File(facilityFilePath).remove();
@@ -62,7 +62,7 @@ public:
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
 
     ///Test a GEM file in the test directory
-    const std::string test_file = "GEM38370.raw";
+    const std::string test_file = "LOQ48127.raw";
     std::string msg = fp->setValue(test_file);
     TS_ASSERT_EQUALS(msg, "");
 
@@ -85,7 +85,7 @@ public:
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw");
 
     ///Test a GEM file in the test directory
-    std::string msg = fp->setValue("GEM38370.raw");
+    std::string msg = fp->setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
     msg = fp->setValue("ALF15739.raw");
     TS_ASSERT_EQUALS(msg, "");
@@ -113,14 +113,14 @@ public:
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
     TS_ASSERT_EQUALS(fp->isOptional(), true);
 
-    std::string msg = fp->setValue("GEM38370.raw");
+    std::string msg = fp->setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
     // I'm using part of the file's path to check that the property really has found the file, with OptionalLoad the property returns valid whether it finds the file or not
     TS_ASSERT(fp->value().find("AutoTestData") != std::string::npos);
     // do this in parts making no assumptions about the identity of the slash that separates directories
     TS_ASSERT(fp->value().find("Test") != std::string::npos);
 
-    msg = fp->setValue("GEM38371.raw");
+    msg = fp->setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
 
     msg = fp->setValue("");
@@ -147,13 +147,13 @@ public:
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
     Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
-    Poco::Path test_file = test_dir.resolve("GEM38370.raw");
+    Poco::Path test_file = test_dir.resolve("LOQ48127.raw");
     
 
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
 				    std::vector<std::string>(1, ".raw"));
-    std::string error = fp->setValue("38370");
+    std::string error = fp->setValue("48127");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT_EQUALS(test_file.toString(), fp->value());
     

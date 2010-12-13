@@ -16,7 +16,7 @@ class RawFileInfoTest : public CxxTest::TestSuite
 public:
   
   // Perform test with a GEM file
-  RawFileInfoTest() : m_filetotest("../../../../Test/AutoTestData/GEM38370.raw") 
+  RawFileInfoTest() : m_filetotest("../../../../Test/AutoTestData/LOQ48127.raw") 
   {
   }
   
@@ -53,14 +53,14 @@ private:
 
     // Check the output parameters are what we expect
     std::string title = alg.getProperty("RunTitle");
-    TS_ASSERT_EQUALS(title, std::string("MnV2O4 28K _T in cryomagnet                                                     "));
+    TS_ASSERT_EQUALS(title, std::string("direct beam                                                                     "));
     std::string header = alg.getProperty("RunHeader");
-    TS_ASSERT_EQUALS(header, std::string("38370 Martin,Damay,Mannini MnV2O4 28K _T in cryomag 20-APR-2008 15:33:20"));
+    TS_ASSERT_EQUALS(header, std::string("48127 LOQ team & SANS Xpre direct beam              18-DEC-2008 17:58:38"));
     int spectra_count = alg.getProperty("SpectraCount"); //7290
-    TS_ASSERT_EQUALS(spectra_count, 7290);
+    TS_ASSERT_EQUALS(spectra_count, 8);
       
     int bin_count = alg.getProperty("TimeChannelCount"); //5050
-    TS_ASSERT_EQUALS(bin_count, 5050);
+    TS_ASSERT_EQUALS(bin_count, 102);
 
     int prd_count = alg.getProperty("PeriodCount");
     TS_ASSERT_EQUALS(prd_count, 1);
@@ -79,16 +79,16 @@ private:
 	
       //Check a couple of things
       int r_goodfrm = run_table->getRef<int>("r_goodfrm", 0);
-      TS_ASSERT_EQUALS(r_goodfrm, 33538);
+      TS_ASSERT_EQUALS(r_goodfrm, 9229);
 
       int r_dur = run_table->getRef<int>("r_dur", 0);
-      TS_ASSERT_EQUALS(r_dur, 670);
+      TS_ASSERT_EQUALS(r_dur, 462);
 
       double r_gd_prtn_chrg = run_table->getRef<double>("r_gd_prtn_chrg", 0);
-      TS_ASSERT_DELTA(r_gd_prtn_chrg, 30.1481, 1e-4);
+      TS_ASSERT_DELTA(r_gd_prtn_chrg, 10.0409, 1e-4);
 
       std::string r_enddate = run_table->getRef<std::string>("r_enddate", 0);
-      TS_ASSERT_EQUALS(r_enddate, "20-APR-2008");
+      TS_ASSERT_EQUALS(r_enddate, "18-DEC-2008");
 	
       //Tidy up
       Mantid::API::AnalysisDataService::Instance().remove("Raw_RPB");
