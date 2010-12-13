@@ -78,7 +78,7 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
         _second_white_masks, failures_per_test[1] = \
                              _do_second_white_test(white_counts, second_white_counts,
                                                    tiny, large, median_lo, median_hi,
-                                                   signif,effic_var, _diag_total_mask)
+                                                   signif,effic_var)
 
         # Accumulate masks
         _diag_total_mask += _second_white_masks
@@ -87,8 +87,7 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
         # Run the tests
         _bkgd_masks, failures_per_test[2] = \
                      _do_background_test(sample_run, white_counts, second_white_counts,
-                                         bkgd_range, bkgd_threshold, remove_zero, signif,
-                                         _diag_total_mask)
+                                         bkgd_range, bkgd_threshold, remove_zero, signif)
         # Accumulate the masks
         _diag_total_mask += _bkgd_masks
     else:
@@ -124,7 +123,7 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
       signif        - Counts within this number of multiples of the 
                       standard dev will be kept (default = 3.3)
     """
-    print 'Running white beam test'
+    mtd.sendLogMessage('Running first white beam test')
 
     # What shall we call the output
     lhs_names = lhs_info('names')
@@ -139,8 +138,10 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
                                      LowThreshold=median_lo, HighThreshold=median_hi)
 
     num_failed = range_check['NumberOfFailures'].value + median_test['NumberOfFailures'].value
-    
-    return median_test.workspace(), num_failed
+
+    maskWS = median_test.workspace()
+    MaskDetectors(white_counts, MaskedWorkspace=maskWS)
+    return maskWS, num_failed
 
 #-------------------------------------------------------------------------------
 
@@ -164,9 +165,8 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
                       standard dev will be kept
       variation     - Defines a range within which the ratio of the two counts is
                       allowed to fall in terms of the number of medians
-    """
-    
-    print 'Running second white beam test'
+    """ 
+    mtd.sendLogMessage('Running second white beam test')   
 
     # What shall we call the output
     lhs_names = lhs_info('names')
@@ -175,16 +175,20 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
     else:
         ws_name = '__do_second_white_test'
     
-    if prev_masks is not None:
-        MaskDetectors(comp_white_counts, MaskedWorkspace=prev_masks)
     # Do the white beam test
-    __white_tests = _do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, signif)[0]
+    __second_white_tests, failed = _do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, signif)
     # and now compare it with the first
-    effic_var = DetectorEfficiencyVariation(white_counts, __white_tests, ws_name, Variation=variation)
-    
-    mtd.deleteWorkspace(str(__white_tests))
-    num_failed = effic_var['NumberOfFailures'].value 
-    return effic_var.workspace(), num_failed
+    effic_var = DetectorEfficiencyVariation(white_counts, comp_white_counts, ws_name, Variation=variation)
+    # Total number of failures
+    num_failed = effic_var['NumberOfFailures'].value + failed
+
+    mtd.deleteWorkspace(str(__second_white_tests))
+    # Mask those that failed
+    maskWS = effic_var.workspace()
+    MaskDetectors(white_counts, MaskedWorkspace=maskWS)
+    MaskDetectors(comp_white_counts, MaskedWorkspace=maskWS)
+        
+    return maskWS, num_failed
 
 #------------------------------------------------------------------------------
 
@@ -210,7 +214,8 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
       prev_ma sks         - If present then this masking is applied to the sample run before the
                             test is applied. It is expected as a MaskWorkspace
     """
-    print 'Running background test'
+    mtd.sendLogMessage('Running background count test')
+
     # Load and integrate the sample using the defined background range. If none is given use the
     # instrument defaults
     data_ws = common.load_run(sample_run, 'mono-sample')
@@ -231,12 +236,16 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     # Get the total counts
     sample_counts = Integration(data_ws, '__counts_mono-sample', RangeLower=min_value, \
                                 RangeUpper=max_value).workspace()
+
+    # Apply previous masking first
+    MaskDetectors(sample_counts, MaskedWorkspace=white_counts)
     
     # If we have another white beam then compute the harmonic mean of the counts
     # The harmonic mean: 1/av = (1/Iwbv1 + 1/Iwbv2)/2
     # We'll resuse the comp_white_counts workspace as we don't need it anymore
     white_count_mean = white_counts
     if comp_white_counts is not None:
+        MaskDetectors(sample_counts, MaskedWorkspace=comp_white_counts)
         white_count_mean = (comp_white_counts * white_counts)/(comp_white_counts + white_counts)
         
     # Normalise the sample run
@@ -257,17 +266,12 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     else:
         ws_name = '__do_background_test'
 
-    # Apply previous masking first
-    if prev_masks is not None:
-        MaskDetectors(sample_counts, MaskedWorkspace=prev_masks)
-    median_test = MedianDetectorTest(sample_counts, ws_name, SignificanceTest=signif,
+    median_test = MedianDetectorTest(sample_counts, ws_name, SignificanceTest=signif,\
                                      LowThreshold=low_threshold, HighThreshold=bkgd_threshold)
-
     # Remove temporary
     mtd.deleteWorkspace(str(sample_counts))
 
     num_failed = median_test['NumberOfFailures'].value
-    
     return median_test.workspace(), num_failed
 
     

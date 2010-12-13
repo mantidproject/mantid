@@ -351,27 +351,27 @@ class WorkspaceProxy(ProxyObject):
         else:
             raise AttributeError('Index invalid, object is not a group.')
 
-    def __do_operation(self, op, rhs, inplace, reverse, lhs_info):
+    def __do_operation(self, op, rhs, inplace, reverse, lhs_vars):
         """
         Perform the given binary operation
 
-        lhs_info is expected to be a tuple containing the number of lhs variables and
+        lhs_vars is expected to be a tuple containing the number of lhs variables and
         their names as the first and second element respectively
         """
         global _binary_op_tmps
 
-        if lhs_info[0] > 0:
+        if lhs_vars[0] > 0:
             # Assume the first and clear the tempoaries as this
             # must be the final assignment
             if inplace:
                 output_name = self.getName()
             else:
-                output_name = lhs_info[0][0]
+                output_name = lhs_vars[1][0]
             clear_tmps = True
         else:
             # Give it a temporary name and keep track of it
             clear_tmps = False
-            output_name = _binary_op_prefix + len(_binary_op_tmps)
+            output_name = _binary_op_prefix + str(len(_binary_op_tmps))
             _binary_op_tmps.append(output_name)
 
         # Do the operation
@@ -398,7 +398,7 @@ class WorkspaceProxy(ProxyObject):
         # before the assignment will have the name of the variable
         lhs = lhs_info()
         return self.__do_operation('Plus', rhs,inplace=False, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __radd__(self, rhs):
         """
@@ -406,7 +406,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Plus', rhs,inplace=False, reverse=True,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
     
     def __iadd__(self, rhs):
         """
@@ -414,7 +414,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Plus', rhs,inplace=True, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __sub__(self, rhs):
         """
@@ -422,7 +422,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Minus', rhs,inplace=False, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __rsub__(self, rhs):
         """
@@ -430,7 +430,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Minus', rhs,inplace=False, reverse=True,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __isub__(self, rhs):
         """
@@ -438,7 +438,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Minus', rhs,inplace=True, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __mul__(self, rhs):
         """
@@ -446,7 +446,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Multiply', rhs,inplace=False, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __rmul__(self, rhs):
         """
@@ -454,7 +454,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Multiply', rhs,inplace=False, reverse=True,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __imul__(self, rhs):
         """
@@ -462,7 +462,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Multiply', rhs,inplace=True, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __div__(self, rhs):
         """
@@ -470,7 +470,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Divide', rhs,inplace=False, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __rdiv__(self, rhs):
         """
@@ -478,7 +478,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Divide', rhs,inplace=False, reverse=True,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def __idiv__(self, rhs):
         """
@@ -486,7 +486,7 @@ class WorkspaceProxy(ProxyObject):
         """
         lhs = lhs_info()
         return self.__do_operation('Divide', rhs,inplace=True, reverse=False,
-                                   lhs_info=lhs)
+                                   lhs_vars=lhs)
 
     def isGroup(self):
         """

@@ -35,6 +35,7 @@ _loaded_files = \
     {
     'mono-sample': '',
     'white-beam': '',
+    'white-beam2': '',
     'mono-van': '',
     }
 # This is temporary so that the correct file can be picked up for LoadDetectorInfo
