@@ -77,6 +77,13 @@ public:
   double solidAngle(const V3D& observer) const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   void getBoundingBox(BoundingBox& absoluteBB) const;
+  /// get Height (Y-dimension) value for component
+  virtual double getHeight() const;
+  /// get Width (X-dimension) value for component
+  virtual double getWidth() const;
+  /// get Depth (Z-dimension) value for component
+  virtual double getDepth() const;
+  
   int getPointInObject(V3D& point) const;
   //Rendering member functions
   void draw() const;

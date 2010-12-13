@@ -231,6 +231,36 @@ namespace Mantid
     }
 
     /**
+    * Gets the Height of the object by querying the underlying BoundingBox.
+    * @return height of object
+    */
+    double ObjComponent::getHeight() const
+    {
+      const BoundingBox & bbox = shape()->getBoundingBox();
+      return (bbox.yMax() - bbox.yMin()) / m_ScaleFactor.Y();
+    }
+
+    /**
+    * Gets the Width of the object by querying the underlying BoundingBox.
+    * @return width of object
+    */
+    double ObjComponent::getWidth() const
+    {
+      const BoundingBox & bbox = shape()->getBoundingBox();
+      return ( bbox.xMax() - bbox.xMin() ) / m_ScaleFactor.X();
+    }
+    
+    /**
+    * Gets the Depth of the object by querying the underlying BoundingBox.
+    * @return depth of object
+    */
+    double ObjComponent::getDepth() const
+    {
+      const BoundingBox & bbox = shape()->getBoundingBox();
+      return ( bbox.zMax() - bbox.zMin() ) / m_ScaleFactor.Z();
+    }
+
+    /**
     * Try to find a point that lies within (or on) the object
     * @param point On exit, set to the point value (if found)
     * @return 1 if point found, 0 otherwise
