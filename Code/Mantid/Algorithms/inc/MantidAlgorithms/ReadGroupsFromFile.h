@@ -24,7 +24,8 @@ namespace Algorithms
  * are grouped together. The output 2D workspace can be visualize using the show instrument method.
  * The format of the *.cal file is as follows:
  *
- *   # Format: number  UDET offset  select  group
+ *   # Format: 
+ *   number   UDET offset  select  group
  *   0        611  0.0000000  1    0
  *   1        612  0.0000000  1    0
  *   2        601  0.0000000  0    0
@@ -94,6 +95,8 @@ private:
   /// Read a grouping file and construct the calibration map
   /// @param groupingFileName (filename extension .cal, including path)
   void readGroupingFile(const std::string& groupingFileName);
+  /// Read an XML Grouping File
+  void readXMLGroupingFile(const std::string& filename);
   /// Sub-algorithm to Load the associated empty instrument
   /// @param instrument_xml_name The instrument xml name including extension(.xml or .XML) but no path
   /// this is determine by the mantid instrument.directory

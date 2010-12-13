@@ -10,6 +10,15 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 
+// Poco XML Headers for Grouping File
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+
 
 namespace Mantid
 {
@@ -40,7 +49,10 @@ void ReadGroupsFromFile::init()
     "this Mantid session either by loading a dataset from that instrument\n"
     "or calling LoadEmptyInstrument" );
   // The calibration file that contains the grouping information
-  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, ".cal"),
+  std::vector<std::string> exts;
+  exts.push_back(".cal");
+  exts.push_back(".xml");
+  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, exts),
 		  "The CalFile containing the grouping you want to visualize" );
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select;
@@ -72,10 +84,21 @@ void ReadGroupsFromFile::exec()
 
 	const std::string groupfile=getProperty("GroupingFilename");
 
-	readGroupingFile(groupfile);
+  if ( ! groupfile.empty() )
+  {
+    std::string filename(groupfile);
+    std::transform(filename.begin(), filename.end(), filename.begin(), tolower);
+    if ( filename.find(".xml") != std::string::npos )
+    {
+      readXMLGroupingFile(groupfile);
+    }
+    else
+    {
+      readGroupingFile(groupfile);
+    }
+  }
 
 	// Get the instrument.
-
 	const int nHist=localWorkspace->getNumberHistograms();
 	API::Axis* specAxis=localWorkspace->getAxis(1);
 	// Get the spectra to detector map
@@ -175,6 +198,80 @@ void ReadGroupsFromFile::readGroupingFile(const std::string& filename)
 	  grFile.close();
 	  progress(0.7);
 	  return;
+}
+
+/**
+* Reads detctor ids for groups from an XML grouping file, such as one created by the SpatialGrouping algorithm.
+* @param filename path and name of input file
+* @throws FileError is there is a problem with the XML file
+*/
+void ReadGroupsFromFile::readXMLGroupingFile(const std::string& filename)
+{
+  Poco::XML::DOMParser xmlParser;
+  Poco::XML::Document* file;
+  try
+  {
+    file = xmlParser.parse(filename);
+  }
+  catch ( ... )
+  {
+    throw Kernel::Exception::FileError("Unable to parse file: ", filename);
+  }
+
+  Poco::XML::Element* root = file->documentElement();
+
+  if ( ! root->hasChildNodes() )
+  {
+    throw Kernel::Exception::FileError("No root element in XML grouping file: ", filename);
+  }
+  
+  Poco::XML::NodeList* groups = root->getElementsByTagName("group");
+
+  if ( groups->length() == 0 )
+  {
+    throw Kernel::Exception::FileError("XML group file contains no group elements:", filename);
+  }
+  
+  unsigned int nGroups = groups->length();
+  for ( unsigned int i = 0; i < nGroups; i++ )
+  {
+    // Get the "detids" element from the grouping file
+    Poco::XML::Element* elem = static_cast<Poco::XML::Element*>(groups->item(i));
+    Poco::XML::Element* group = elem->getChildElement("detids");
+
+    if ( ! group )
+    {
+      throw Mantid::Kernel::Exception::FileError("XML Group File, group contains no <detids> element:", filename);
+    }
+
+    std::string ids = group->getAttribute("val");
+
+    Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
+
+    if ( data.begin() != data.end() )
+    {
+      for ( Poco::StringTokenizer::Iterator it = data.begin(); it != data.end(); ++it )
+      {
+        // cast the string to an int
+        int detID;
+        try
+        {
+          detID = boost::lexical_cast<int>(*it);
+        } catch ( boost::bad_lexical_cast & )
+        {
+          throw Mantid::Kernel::Exception::FileError("Could cast string to integer in input XML file", filename);
+        }
+
+        if ( calibration.find(detID) == calibration.end() )
+        {
+          // add detector to a group
+          calibration[detID] = std::pair<int,int>(i+1, 1);
+        }
+      }
+    }
+  }
+
+  progress(0.7);
 }
 
 
