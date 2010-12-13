@@ -212,6 +212,28 @@ public:
 
   }
 
+  void testNegativeBinBoundaries()
+  {
+    const std::string wsName("neg");
+    AnalysisDataService::Instance().add(wsName,WorkspaceCreationHelper::Create2DWorkspaceBinned(1,5,-6));
+    CropWorkspace crop4;
+    TS_ASSERT_THROWS_NOTHING( crop4.initialize() );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("InputWorkspace",wsName) );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("OutputWorkspace",wsName) );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMin","-5") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","-2") );
+    TS_ASSERT( crop4.execute() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)) );
+
+    TSM_ASSERT_EQUALS( "The number of bins", 3, output->blocksize() );
+    TSM_ASSERT_EQUALS( "First bin boundary", -5, output->readX(0).front() );
+    TSM_ASSERT_EQUALS( "Last bin boundary", -2, output->readX(0).back() );
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 private:
   CropWorkspace crop;
 };

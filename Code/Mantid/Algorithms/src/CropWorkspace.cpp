@@ -200,7 +200,7 @@ int CropWorkspace::getXMin(const int wsIndex)
     }
     // Reduce cut-off value slightly to allow for rounding errors
     // when trying to exactly hit a bin boundary.
-    minX_val -= minX_val*xBoundaryTolerance;
+    minX_val -= std::abs(minX_val*xBoundaryTolerance);
     xIndex = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
   }
   return xIndex;
@@ -226,7 +226,7 @@ int CropWorkspace::getXMax(const int wsIndex)
     }
     // Increase cut-off value slightly to allow for rounding errors
     // when trying to exactly hit a bin boundary.
-    maxX_val += maxX_val*xBoundaryTolerance;
+    maxX_val += std::abs(maxX_val*xBoundaryTolerance);
     xIndex = std::upper_bound(X.begin(),X.end(),maxX_val) - X.begin();
   }
   return xIndex;
