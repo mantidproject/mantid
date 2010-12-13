@@ -153,9 +153,13 @@ private:
   int readInt(std::string line);
   void readFile(std::map<int,int> &specs2index, std::ifstream &File,
     int &lineNum, std::vector<int> &unUsedSpec);
-  /// used while reading the file reads reads specftra numbers from the string and returns spectra indexes 
+  /// used while reading the file reads reads spectra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, std::map<int,int> &specs2index,
                    std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator="#");
+
+  /// used while reading the file reads reads detector ids from the string and returns spectra indexes 
+  void readDetectorIDs(std::string line, std::vector<int> &output, std::vector<int> &unUsedSpec,
+                   Mantid::API::IndexToIndexMap* detIdToWiMap);
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(int numGroupsRead, int numInHists);
