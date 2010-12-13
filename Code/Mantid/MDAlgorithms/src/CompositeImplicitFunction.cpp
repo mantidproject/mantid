@@ -28,7 +28,6 @@ namespace Mantid
         std::string CompositeImplicitFunction::toXMLString() const
         {
             using namespace Poco::XML;
-
             AutoPtr<Document> pDoc = new Document;
             AutoPtr<Element> functionElement = pDoc->createElement("Function");
             pDoc->appendChild(functionElement);
@@ -36,6 +35,8 @@ namespace Mantid
             AutoPtr<Text> typeText = pDoc->createTextNode(this->getName());
             typeElement->appendChild(typeText);
             functionElement->appendChild(typeElement);
+            AutoPtr<Element> parameterListElement = pDoc->createElement("ParameterList");
+            functionElement->appendChild(parameterListElement);
 
             std::string functionXML;
             for(FunctionIterator it = m_Functions.begin();it!=m_Functions.end(); ++it)
@@ -44,6 +45,7 @@ namespace Mantid
             }
             AutoPtr<Text> functionFormatText = pDoc->createTextNode("%s");
             functionElement->appendChild(functionFormatText);
+
 
             std::stringstream xmlstream;
             DOMWriter writer;
