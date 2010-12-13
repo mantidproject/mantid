@@ -250,6 +250,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth", Params=self._vanSmoothing,IgnoreXBins=True)
+                    SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
             else:
                 vanRun = None
 
