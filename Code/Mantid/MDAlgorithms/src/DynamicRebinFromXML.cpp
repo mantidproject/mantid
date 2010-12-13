@@ -263,11 +263,11 @@ namespace Mantid
 	  description->dimDescription(0).cut_max=impBox.getUpperX();
       description->dimDescription(0).cut_min=impBox.getLowerX();
 
-      description->dimDescription(1).cut_min=impBox.getUpperY();
-      description->dimDescription(1).cut_max=impBox.getLowerY();
+      description->dimDescription(1).cut_max=impBox.getUpperY();
+      description->dimDescription(1).cut_min=impBox.getLowerY();
 
-      description->dimDescription(2).cut_min=impBox.getUpperZ();
-      description->dimDescription(2).cut_max=impBox.getLowerZ();
+      description->dimDescription(2).cut_max=impBox.getUpperZ();
+      description->dimDescription(2).cut_min=impBox.getLowerZ();
 
     }
 

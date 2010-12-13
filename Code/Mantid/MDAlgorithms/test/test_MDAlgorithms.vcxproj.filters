@@ -18,9 +18,15 @@
     <CustomBuild Include="testCPrebinning.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="DynamicRebinFromXMLAlgorithmTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="testCPrebinning.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicRebinFromXMLAlgorithmTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
