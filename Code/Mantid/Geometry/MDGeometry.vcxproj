@@ -94,7 +94,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_GEOMETRY=1;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;..\..\Third_Party\include\OpenCascade;..\..\Third_Party\include;..\..\Third_Party\include\muParser</AdditionalIncludeDirectories>
     </ClCompile>

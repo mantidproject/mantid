@@ -99,18 +99,22 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(OutDir);..\..\Debug;..\..\..\Third_Party\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MantidAPI.lib;MantidGeometry.lib;MantidKernel.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\Debug;..\..\..\Third_party\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MantidAPI.lib;MantidGeometry.lib;MantidKernel.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\..\$(Configuration)\MantidKernel.lib" "$(OutDir)MantidKernel.lib" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidKernel.dll" "$(OutDir)MantidKernel.dll" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidGeometry.lib" "$(OutDir)MantidGeometry.lib" /Y
-copy "$(ProjectDir)..\..\$(Configuration)\MantidGeometry.dll" "$(OutDir)MantidGeometry.dll" /Y</Command>
+      <Command>copy /Y ..\..\Debug\MantidGeometry.lib $(Outdir)MantidGeometry.lib;
+copy /Y ..\..\Debug\MantidGeometry.dll $(Outdir)MantidGeometry.dll;
+copy /Y ..\..\Debug\MantidKernel.lib $(Outdir)MantidKernel.lib;
+copy /Y ..\..\Debug\MantidKernel.dll $(Outdir)MantidKernel.dll;</Command>
     </PreBuildEvent>
     <PreBuildEvent>
-      <Message>copying the libraries requested for the test</Message>
+      <Message>Copying dependencies into project directories (MVS oddity)</Message>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy /Y $(TargetDir)*.exe $(TargetDir)..\</Command>
+      <Message>copying the target file one level up for tests</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

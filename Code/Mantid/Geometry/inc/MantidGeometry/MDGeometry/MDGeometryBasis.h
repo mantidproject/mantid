@@ -52,16 +52,15 @@ namespace Mantid
   namespace Geometry
   {
 
-
-//    class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
-  class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure. 
+  class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
+ // class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure. 
   {
 	public: 
 		UnitCell(void){};
     };
 
     //****************************************************************************************************************************************
-    class DLLExport MDGeometryBasis
+    class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {
     public:
 
