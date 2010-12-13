@@ -135,8 +135,6 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.logger_clear, SIGNAL(clicked()), this, SLOT(clearLogger()));
   m_uiForm.logging_field->ensureCursorVisible();
 
-  connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
-
   //Create the widget hash maps
   initWidgetMaps();
 
@@ -2265,6 +2263,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   //copy the user setting to use as a base for future reductions after the one that is about to start
   py_code += "\n_user_settings_copy = copy.deepcopy(i.ISIS_global().user_settings)";
+  const QString verb = m_uiForm.verbose_check ? "True" : "False";
+  py_code += "\ni.SetVerboseMode(" + verb + ")";
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
@@ -2751,22 +2751,6 @@ void SANSRunWindow::clearLogger()
 {
   m_uiForm.logging_field->clear();
   m_uiForm.tabWidget->setTabText(4, "Logging");
-}
-/**
- * Handle a verbose mode check box state change
- * state The new state
- */
-void SANSRunWindow::verboseMode(int state)
-{
-  if( state == Qt::Checked )
-  {
-    runReduceScriptFunction("i.SetVerboseMode(True)");
-  }
-  else if( state == Qt::Unchecked )
-  {
-    runReduceScriptFunction("i.SetVerboseMode(False)");
-  }
-  else {}
 }
 /**Respond to the "Use default transmission" check box being clicked. If
  * the box is checked the transmission fit wavelength maximum and minimum

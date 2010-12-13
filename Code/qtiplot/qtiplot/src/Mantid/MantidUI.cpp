@@ -658,7 +658,17 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   for( int row = 0; row < nrows; ++row )
   {
     int ws_index = indices[row];
-    int currentSpec = spectraAxis->spectraNo(ws_index);
+
+    int currentSpec;
+    try
+    {
+      currentSpec = spectraAxis->spectraNo(ws_index);
+    }
+    catch(std::domain_error)
+    {//if there is no spectra number information in the workspace display the spectra numbers as -1
+      currentSpec = -1;
+    }
+
     int detID = 0;
     double R(0.0), Theta(0.0), Phi(0.0);
     try

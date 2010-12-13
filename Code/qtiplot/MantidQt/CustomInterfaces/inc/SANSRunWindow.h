@@ -227,8 +227,6 @@ private slots:
   void clearBatchTable();
   ///Clear logger
   void clearLogger();
-  ///Verbose mode checked/unchecked
-  void verboseMode(int state);
   ///Default trans changed state
   void updateTransInfo(int state);
 
