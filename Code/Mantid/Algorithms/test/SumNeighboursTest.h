@@ -27,7 +27,6 @@ public:
 //
 //    Mantid::NeXus::LoadSNSEventNexus loader;
 //    loader.initialize();
-//    //loader.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
 //    loader.setPropertyValue("Filename","/home/janik/data/SNAP_4105_event.nxs");
 //    loader.setPropertyValue("OutputWorkspace",inputSpace);
 //    loader.execute();

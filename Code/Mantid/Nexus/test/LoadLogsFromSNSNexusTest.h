@@ -23,26 +23,6 @@ class LoadLogsFromSNSNexusTest : public CxxTest::TestSuite
 {
 public:
 
-
-  void xtestSpeed()
-  {
-      Mantid::API::FrameworkManager::Instance();
-      LoadLogsFromSNSNexus ld;
-      std::string outws_name = "topaz_instrument";
-      ld.initialize();
-      ld.setPropertyValue("Filename","/home/8oz/data/PG3_1370_event.nxs");
-
-      //Create an empty workspace with some fake size, to start from.
-      DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-          (WorkspaceFactory::Instance().create("Workspace2D",1000,18+1,18));
-      //Put it in the object.
-      ld.setProperty("Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
-
-      ld.execute();
-      TS_ASSERT( ld.isExecuted() );
-  }
-
-
   void testExec()
   {
       Mantid::API::FrameworkManager::Instance();
@@ -50,8 +30,6 @@ public:
       std::string outws_name = "topaz_instrument";
       ld.initialize();
       ld.setPropertyValue("Filename","../../../../Test/AutoTestData/TOPAZ_900.nxs");
-      //ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
-
 
       //Create an empty workspace with some fake size, to start from.
       DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
