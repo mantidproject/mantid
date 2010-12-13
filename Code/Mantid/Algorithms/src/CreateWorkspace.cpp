@@ -4,6 +4,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 
@@ -137,7 +138,7 @@ void CreateWorkspace::exec()
   }
   else
   {
-    outputWS->mutableSpectraMap().populateSimple(0, nSpec);
+    dynamic_cast<Mantid::API::SpectraAxis*>(outputWS->getAxis(1))->populateSimple(nSpec);
   }
   setProperty("OutputWorkspace", outputWS);
 }
