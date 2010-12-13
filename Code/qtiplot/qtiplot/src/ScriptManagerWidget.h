@@ -137,7 +137,7 @@ public slots:
   bool runScriptCode(const QString & code, const int line_offset = 0);
 
   /// run mutli line code
-  bool runMultiLineCode();
+  bool runMultiLineCode(int line_offset);
 
   ///Format an output message with an optional timestamp
   void displayOutput(const QString & msg, bool timestamp = false);

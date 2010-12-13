@@ -28,7 +28,6 @@
 #include <QGroupBox>
 #include <QButtonGroup>
 #include <QTextCursor>
-
 //***************************************************************************
 //
 // ScriptManagerWidget class
@@ -53,20 +52,20 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
   
   // Start with a blank tab
   newTab();
-
   QString group;
   if( interpreter_mode )
   {
     tabBar()->hide();
     setContextMenuPolicy(Qt::NoContextMenu);
     ScriptEditor *editor = currentEditor();
+   
     connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
     connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor, 
 	    SLOT(displayOutput(const QString&,bool)));
      connect(editor, SIGNAL(compile(const QString&)), this, SLOT(compile(const QString &)));
       connect(editor, SIGNAL(executeMultiLine()), this, SLOT(executeMultiLine()));
     group = "ScriptInterpreter";
-
+ 
   }
   else
   {
@@ -494,8 +493,13 @@ void ScriptManagerWidget::evaluate()
 void ScriptManagerWidget::executeInterpreter(const QString & code)
 {
   if( isScriptRunning() ) return;
-  runScriptCode(code);
   ScriptEditor *editor = currentEditor();
+  if( !editor ) return;
+  
+  int lineno,index;
+  editor->getCursorPosition(&lineno, &index);
+  runScriptCode(code,lineno);
+  
   editor->newInputLine();
   setFocus();  
 }
@@ -510,12 +514,12 @@ void ScriptManagerWidget::executeMultiLine()
   {
     return;
   }
-  runMultiLineCode();
+  int lineno,index;
+  editor->getCursorPosition(&lineno, &index);
+  runMultiLineCode(lineno);
   editor->append("\n");
   int marker_handle= editor->markerDefine(QsciScintilla::ThreeRightArrows);
   editor->setMarkerHandle(marker_handle);
-  /*editor->markerAdd(editor->lines()-1,marker_handle);
-  editor->setCursorPosition(editor->lines()-1,0);*/
   editor->newInputLine();
   setFocus(); 
 }
@@ -569,19 +573,18 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
  */
 void ScriptManagerWidget::compile(const QString & code)
 {
-   // Get the correct script runner
-  Script * runner = m_script_runners.value(this->currentIndex());
-  runner->setCode(code);
- 
-  emit ScriptIsActive(true);
-   
-  bool success = runner->compile(true);
-  emit ScriptIsActive(false);
   ScriptEditor *editor = currentEditor();
   if(!editor)
   {
     return ;
-  }
+  }// Get the correct script runner
+  Script * runner = m_script_runners.value(this->currentIndex());
+  runner->setCode(code);
+  emit ScriptIsActive(true);
+   
+  bool success = runner->compile(true);
+  emit ScriptIsActive(false);
+ 
   if(success)
   {
     editor->setCompilationStatus(true);
@@ -592,16 +595,20 @@ void ScriptManagerWidget::compile(const QString & code)
   }
  
 }
-/**
- * Run the code
+/**Run the multi line code set to runner
+ * @param line_offset offset of the line
  * @returns true if executed successfully
  */
-bool ScriptManagerWidget::runMultiLineCode()
+bool ScriptManagerWidget::runMultiLineCode(int line_offset)
 {
   // Get the correct script runner
   Script * runner = m_script_runners.value(this->currentIndex());
+  if(!runner)
+  {
+    return 0;
+  }
   emit ScriptIsActive(true);
-  
+  runner->setLineOffset(line_offset);
   bool success = runner->exec();
   emit ScriptIsActive(false);
   return success;
