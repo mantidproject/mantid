@@ -315,7 +315,7 @@ namespace Mantid
     {
       std::string extn=extension(filePath);
       bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare(".nx5"))?bnexs=true:bnexs=false;
+      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
       /*
       * HDF files have magic cookie 0x0e031301 in the first 4 bytes
       */
@@ -324,7 +324,7 @@ namespace Mantid
         //hdf
         return true;
       }
-      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature))) )
+      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature)))  )
       { 
         //hdf5
         return true;

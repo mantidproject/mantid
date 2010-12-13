@@ -1230,7 +1230,7 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
     {
       std::string extn=extension(filePath);
        bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare(".nx5"))?bnexs=true:bnexs=false;
+      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
       /*
       * HDF files have magic cookie 0x0e031301 in the first 4 bytes
       */

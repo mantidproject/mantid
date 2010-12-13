@@ -200,7 +200,7 @@ bool LoadRKH::quickFileCheck(const std::string& filePath,int nread,unsigned char
 {
   std::string extn=extension(filePath);
   bool bascii(false);
-  (!extn.compare("txt")|| extn.compare("Q"))?bascii=true:bascii=false;
+  (!extn.compare("txt")|| extn.compare("q"))?bascii=true:bascii=false;
 
   bool is_ascii (true);
   for(int i=0; i<nread; i++)

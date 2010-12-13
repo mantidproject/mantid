@@ -1021,7 +1021,7 @@ bool LoadRawHelper::quickFileCheck(const std::string& filePath,int nread,unsigne
 {
   std::string extn=extension(filePath);
   bool braw(false);
-  (!extn.compare("raw")||!extn.compare("add")||!extn.compare("s"))?braw=true:braw=false;
+  (!extn.compare("raw")||!extn.compare("add")||extn[0]=='s')?braw=true:braw=false;
   /*
   * look at the "address of RUN and INST section" attribute - if there, must be an ISIS raw file
   */

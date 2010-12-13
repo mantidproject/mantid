@@ -195,7 +195,7 @@ void LoadGSS::exec()
     {
       std::string extn=extension(filePath);
       bool bascii(false);
-      (!extn.compare("text"))?bascii=true:bascii=false;
+      (!extn.compare("txt"))?bascii=true:bascii=false;
 
       bool is_ascii (true);
       for(int i=0; i<nread; i++)
