@@ -1,6 +1,6 @@
 """
-Conversion class defined for inelastic 'direct' geometry conversions 
-to DeltaE 
+Conversion class defined for conversion to deltaE for
+'direct' inelastic geometry instruments
    
 The class defines various methods to allow users to convert their 
 files to DeltaE.
@@ -35,6 +35,17 @@ import CommonFunctions as common
 from mantidsimple import *
 import glob
 import os.path
+
+def setup_reducer(inst_name):
+    """
+    Given an instrument name or prefix this sets up a converter
+    object for the reduction
+    """
+    try:
+        return DirectEnergyConversion(inst_name)
+    except RuntimeError:
+        raise RuntimeError('Unknown instrument "%s", cannot continue' % inst_name)
+    
 
 class DirectEnergyConversion(object):
     """
@@ -499,6 +510,7 @@ class DirectEnergyConversion(object):
         """
         self._to_stdout = True
         self._log_to_mantid = False
+        self._idf_values_read = False
         # Instrument and default parameter setup
         self.initialise(instr_name)
 
@@ -570,8 +582,11 @@ class DirectEnergyConversion(object):
      
     def init_idf_params(self):
         """
-        Initialise the parameters from the IDF file
+        Initialise the parameters from the IDF file if necessary
         """
+        if self._idf_values_read == True:
+            return
+
         self.ei_mon_spectra = [int(self.get_default_parameter("ei-mon1-spec")), int(self.get_default_parameter("ei-mon2-spec"))]
         self.scale_factor = self.get_default_parameter("scale-factor")
         self.wb_scale_factor = self.get_default_parameter("wb-scale-factor")
@@ -590,6 +605,9 @@ class DirectEnergyConversion(object):
         self.abs_median_frac_low = self.get_default_parameter('abs-median-lo-frac')
         self.abs_median_frac_hi = self.get_default_parameter('abs-median-hi-frac')
         self.abs_median_sig = self.get_default_parameter('abs-median-signif')
+
+        # Mark IDF files as read
+        self._idf_values_read = True
 
     def get_default_parameter(self, name):
         if self.instrument is None:
