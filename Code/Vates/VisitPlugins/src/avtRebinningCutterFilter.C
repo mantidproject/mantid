@@ -166,14 +166,16 @@ avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
   origin.push_back(atts.GetOriginZ());
 
   Mantid::API::ImplicitFunction* function = presenter.constructReductionKnowledge(in_ds, normal, origin, presenter.getMetadataID());
-  debug5 << "Input Reduction Knowledge --- " << function->toXMLString() << endl;
+  debug5 << "Input Reduction Knowledge --- " << endl;
+  debug5 << function->toXMLString() << endl;
+  debug5 << "Output -end Reduction Knowledge --- " << endl;
 
 
   vtkVisItClipper* adaptee = vtkVisItClipper::New();
   vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee), in_ds, function);
 
   presenter.persistReductionKnowledge(ug, function, presenter.getMetadataID());
-  debug5 << "Output Reduction Knowledge --- " << function->toXMLString() << endl;
+  debug5 << "Output Reduction Knowledge --- " << endl;
   debug5 << function->toXMLString() << endl;
   debug5 << "Output -end Reduction Knowledge --- " << function->toXMLString() << endl;
 
