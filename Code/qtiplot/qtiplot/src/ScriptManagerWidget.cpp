@@ -579,6 +579,9 @@ void ScriptManagerWidget::compile(const QString & code)
     return ;
   }// Get the correct script runner
   Script * runner = m_script_runners.value(this->currentIndex());
+  int lineno,index;
+  editor->getCursorPosition(&lineno, &index);
+  runner->setLineOffset(lineno);
   runner->setCode(code);
   emit ScriptIsActive(true);
    
