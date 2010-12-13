@@ -115,7 +115,8 @@ void SpatialGrouping::exec()
   std::vector<std::vector<int> >::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
-  xml.open(fname + ".xml");
+  fname = fname + ".xml";
+  xml.open(fname);
 
   xml << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
     << "<!-- XML Grouping File created by SpatialGrouping Algorithm -->\n"
