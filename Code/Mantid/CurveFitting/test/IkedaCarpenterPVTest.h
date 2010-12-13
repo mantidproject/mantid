@@ -188,9 +188,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
-    LoadRaw loader;
+    LoadNexus loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39182.raw");
+    loader.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39182_cutdown.nx5");
     loader.setPropertyValue("OutputWorkspace", "HRP39182");
     loader.execute();
 

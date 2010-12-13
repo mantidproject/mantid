@@ -13,6 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
+#include "MantidNexus/LoadNeXus.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -20,7 +21,7 @@ using Mantid::CurveFitting::LinearBackground;
 using Mantid::CurveFitting::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
-
+using namespace Mantid::NeXus;
 
 class LinearBackgroundTest : public CxxTest::TestSuite
 {
@@ -35,8 +36,8 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // load hrpd dataset to test against
-    std::string inputFile = "../../../../Test/AutoTestData/HRP39182.raw";
-    LoadRaw loader;
+    std::string inputFile = "../../../../Test/Nexus/HRP39182_cutdown.nx5";
+    LoadNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
     std::string wsName = "HRPD_Dataset";

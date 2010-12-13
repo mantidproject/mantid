@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/PointByPointVCorrection.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidNexus/LoadNeXus.h"
 
 class PointByPointVCorrectionTest : public CxxTest::TestSuite
 {
@@ -33,17 +34,17 @@ public:
   void testExec()
   {
     using namespace Mantid::API;
-    Mantid::DataHandling::LoadRaw3 loader1;
+    Mantid::NeXus::LoadNexus loader1;
     loader1.initialize();
-    loader1.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39182.raw");
+    loader1.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39182_cutdown.nx5");
     loader1.setPropertyValue("OutputWorkspace", "sample");
     loader1.setPropertyValue("SpectrumMin","1");
     loader1.setPropertyValue("SpectrumMax","10");
     loader1.execute();
     
-    Mantid::DataHandling::LoadRaw3 loader2;
+    Mantid::NeXus::LoadNexus loader2;
     loader2.initialize();
-    loader2.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39191.raw");
+    loader2.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39191_cutdown.nx5");
     loader2.setPropertyValue("OutputWorkspace", "vanadium");
     loader2.setPropertyValue("SpectrumMin","1");
     loader2.setPropertyValue("SpectrumMax","10");
