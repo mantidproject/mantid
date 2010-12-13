@@ -97,6 +97,7 @@ namespace Geometry
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
 
+//HACK -- these methods should be private
 virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
 void  setName(const std::string & name){this->AxisName.assign(name); }
   protected:

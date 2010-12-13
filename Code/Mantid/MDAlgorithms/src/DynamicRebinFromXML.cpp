@@ -136,7 +136,7 @@ namespace Mantid
         lowerBounds = lowerLimit;
       }
 
-      mdDimension->setRange(lowerBounds, upperBounds, nBins);
+      mdDimension->setRange(lowerBounds, upperBounds, nBins); //HACK- this method should be private 
       return mdDimension;
     }
 
