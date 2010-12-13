@@ -1,5 +1,6 @@
 #ifndef H_MD_WORKSPACE
 #define H_MD_WORKSPACE
+#include <map>
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDImage.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -67,13 +68,12 @@ namespace Mantid
     //Seam method.
     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometry* geometry);
 
+    typedef std::map<int, Mantid::Geometry::MDPoint> MDPointMap;
     class DLLExport MDWorkspace :  public API::IMDWorkspace
     {
     public:
 
       MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3);
-
-      virtual int getNPoints() const;
 
       virtual long getMemorySize(void)const;
 
@@ -129,29 +129,34 @@ namespace Mantid
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getXDimension() const;
+        int getNPoints() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getYDimension() const;
+        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getZDimension() const;
+        virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension> getYDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  gettDimension() const;
+        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getDimension(std::string id) const;
+        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint>  getPoint(int index) const;
+        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment) const;
+        virtual const Mantid::Geometry::SignalAggregate & getPoint(int index) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const;
+        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const;
+        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+
+        virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
 
     private:
+
+      MDPointMap m_mdPointMap;
+
       static Kernel::Logger& g_log;
 	  /// pointer to the geometry basis e.g. the unit cell of the bravis latice of the crystal and additional dimensions
 	  boost::shared_ptr<Mantid::Geometry::MDGeometryBasis> m_spMDBasis;
@@ -163,6 +168,8 @@ namespace Mantid
 
       /// Pointer to a file reader/writer
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
+
+
     };
 
 

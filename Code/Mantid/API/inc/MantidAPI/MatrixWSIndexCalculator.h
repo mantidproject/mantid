@@ -35,6 +35,13 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
    
+    /// Denotes index in 1D array.
+    typedef int Index;
+    /// Denotes index of a particular bin in a histogram.
+    typedef int BinIndex;
+    /// Denotes index of a particular histogram in the Matrix Workspace.
+    typedef int HistogramIndex;
+
     class DLLExport MatrixWSIndexCalculator
     {
     private:
@@ -43,11 +50,27 @@ namespace Mantid
 
     public:
 
+      //Default constructor gives blocksize as 1.
+      MatrixWSIndexCalculator();
+   
+      /// Constructor requires block size for calculation.
       MatrixWSIndexCalculator(int blockSize);
 
-      int getHistogramIndex(int index);
+      /// Determine which histogram an index in a 1D array relates to given the known blockSize
+      HistogramIndex getHistogramIndex(Index index) const;
 
-      int getBinIndex(int index, int histogram);
+      /// Get the bin index.
+      BinIndex getBinIndex(Index index, HistogramIndex histogram) const;
+
+      /// Get the one dimensional index given a histogram and bin index.
+      Index getOneDimIndex(HistogramIndex histogram, BinIndex binIndex) const;
+
+      ////Assignment operator
+      MatrixWSIndexCalculator& operator=(const MatrixWSIndexCalculator& other);
+
+      ////Copy constructor
+      MatrixWSIndexCalculator(const MatrixWSIndexCalculator& other);
+
     };
 
   }

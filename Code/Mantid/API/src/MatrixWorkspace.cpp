@@ -32,7 +32,7 @@ namespace Mantid
     MatrixWorkspace::MatrixWorkspace() : 
     IMDWorkspace(), m_axes(), m_isInitialized(false),
       sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap), m_masks()
+      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap), m_masks(), m_indexCalculator()
     {}
 
     /// Destructor
@@ -73,7 +73,7 @@ namespace Mantid
         g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
         throw;
       }
-
+      m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
     }
@@ -939,22 +939,38 @@ namespace Mantid
       return this->size();
     }
 
-    Mantid::Geometry::MDPoint * MatrixWorkspace::getPointImp(int index) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(int index) const
     {
-      MatrixWSIndexCalculator indexCalculator(this->blocksize());
-      int j = indexCalculator.getHistogramIndex(index);
-      int  i = indexCalculator.getBinIndex(index, j);
-      return getPointImp(j, i);
+      HistogramIndex histInd = m_indexCalculator.getHistogramIndex(index);
+      BinIndex binInd = m_indexCalculator.getBinIndex(index, histInd);
+      MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(index);
+      //Create the MDPoint if it is not already present.
+      if(m_mdPointMap.end() ==  iter)
+      {
+        m_mdPointMap[index] = createPoint(histInd, binInd);
+      }
+      return m_mdPointMap[index];
     }
 
-    Mantid::Geometry::MDPoint * MatrixWorkspace::getPointImp(int histogram, int bin) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(int histogram, int bin) const
+    {
+      Index oneDimIndex = m_indexCalculator.getOneDimIndex(histogram, bin);
+      MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(oneDimIndex);
+      if(m_mdPointMap.end() ==  iter)
+      {
+        m_mdPointMap[oneDimIndex] = createPoint(histogram, bin);
+      }
+      return m_mdPointMap[oneDimIndex];
+    }
+
+    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(int histogram, int bin) const
     {
       std::vector<Mantid::Geometry::coordinate> verts;
 
       double x = this->dataX(histogram)[bin];
       double signal = this->dataY(histogram)[bin];
       double error = this->dataE(histogram)[bin];
-      
+
       coordinate vert1, vert2, vert3, vert4;
 
       if(isHistogramData()) //TODO. complete vertex generating cases.
@@ -968,13 +984,12 @@ namespace Mantid
         vert3.x = x;
         vert4.x = this->dataX(histogram)[bin+1];
       }
+      verts.resize(4);
+      verts[0] = vert1;
+      verts[1] = vert2;
+      verts[2] = vert3;
+      verts[3] = vert4;
 
-      verts.push_back(vert1);
-      verts.push_back(vert2);
-      verts.push_back(vert3);
-      verts.push_back(vert4);
-
-      
       IDetector_sptr detector;
       try
       {
@@ -984,9 +999,9 @@ namespace Mantid
       {
         //Swallow exception and continue processing.
       }
-
-      return new Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
+      return Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
     }
+
 
     std::string MatrixWorkspace::getDimensionIdFromAxis(Axis const * const axis) const
     {
@@ -1039,29 +1054,17 @@ namespace Mantid
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDPoint> MatrixWorkspace::getPoint(int index) const
-    { 
-      return boost::shared_ptr<const Mantid::Geometry::MDPoint>(getPointImp(index));
-    }
-
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int dim1Increment) const
     { 
       if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
 
-      MDPoint* point = this->getPointImp(dim1Increment);
-
-      std::vector<boost::shared_ptr<MDPoint> > contributingPoints;
-      contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
-
-      //wrap a cell around the returned point.
-      MDCell* pCell = new MDCell(contributingPoints, point->getVertexes());
-      return boost::shared_ptr<const Mantid::Geometry::MDCell>(pCell);
+      return this->getPoint(dim1Increment);
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int dim1Increment, int dim2Increment) const
     { 
       if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
       {
@@ -1072,27 +1075,20 @@ namespace Mantid
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
 
-      MDPoint* point = this->getPointImp(dim1Increment, dim2Increment);
-
-      std::vector<boost::shared_ptr<MDPoint> > contributingPoints;
-      contributingPoints.push_back(boost::shared_ptr<MDPoint>(point));
-
-      //wrap a cell around the returned point.
-      MDCell* cell = new MDCell(contributingPoints, point->getVertexes());
-      return boost::shared_ptr<const Mantid::Geometry::MDCell>(cell);
+      return getPointImp(dim1Increment, dim2Increment);
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int, int, int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int, int, int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(int, int, int, int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int, int, int, int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MatrixWorkspace::getCell(...) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(...) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }

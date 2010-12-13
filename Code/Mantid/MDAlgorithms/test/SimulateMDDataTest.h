@@ -45,7 +45,7 @@ private:
    int m_points;
    int m_cells;
 
-   std::vector<boost::shared_ptr<Mantid::Geometry::MDCell> > m_mdcells;
+   std::vector<Mantid::Geometry::MDCell> m_mdcells;
 
 public:
 
@@ -74,32 +74,32 @@ public:
         return m_points;
       }
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint> getPoint(int index) const       
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const       
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell> getCell(int dim1Increment) const
+     virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const
       {
           return(m_mdcells.at(dim1Increment));
       };
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+      virtual const Mantid::Geometry::SignalAggregate&  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+      virtual const Mantid::Geometry::SignalAggregate&  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const
+      virtual const Mantid::Geometry::SignalAggregate&  getCell(...) const
       {
         throw std::runtime_error("Not implemented");
       }
@@ -122,7 +122,7 @@ public:
       m_cells=0;
    }
 
-   TestCut(std::vector<boost::shared_ptr<Mantid::Geometry::MDCell> > pContribCells ) :
+   TestCut(std::vector<Mantid::Geometry::MDCell> pContribCells ) :
            m_mdcells(pContribCells)
    {
       m_cells=pContribCells.size();
@@ -136,14 +136,14 @@ class testSimulateMDD : public CxxTest::TestSuite
 private:
   boost::shared_ptr<TestCut> myCut;
   boost::shared_ptr<TestCut> outCut;
-  std::vector<boost::shared_ptr<MDCell> > pContribCells;
+  std::vector<MDCell> pContribCells;
   std::string FakeWSname;
 
   std::vector<Mantid::Geometry::MDPoint> pnts1,pnts2;
 
   //Helper constructional method - based on code from MD_CELL_TEST
   // Returns a cell with one or 2 points depending on npnts
-  static Mantid::Geometry::MDCell * constructMDCell(int npnts)
+  static Mantid::Geometry::MDCell constructMDCell(int npnts)
   {
     using namespace Mantid::Geometry;
     std::vector<coordinate> vertices;
@@ -163,7 +163,7 @@ private:
        points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(36,6,1,2,3,2)) );
     }
 
-    return new MDCell(points, vertices);
+    return  MDCell(points, vertices);
   }
 
 
@@ -207,8 +207,8 @@ public:
   {
     FakeWSname = "test_FakeMDWS";
 
-    pContribCells.push_back(boost::shared_ptr<MDCell>(constructMDCell(1)));
-    pContribCells.push_back(boost::shared_ptr<MDCell>(constructMDCell(2)));
+    pContribCells.push_back(constructMDCell(1));
+    pContribCells.push_back(constructMDCell(2));
 
     myCut = boost::shared_ptr<TestCut> (new TestCut(pContribCells) ) ;
     TS_ASSERT_EQUALS(myCut->getNPoints(),0);
@@ -219,18 +219,17 @@ public:
     TS_ASSERT_EQUALS(outCut->getNPoints(),0);
     TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
 
-    boost::shared_ptr<const MDCell> myCell;
     std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
     std::vector<Mantid::Geometry::coordinate> vertices;
 
     // test that cells and points are as expected
     int firstCell = 0;
     int secondCell = 1;
-    myCell=myCut->getCell(firstCell);
-    TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
+    const SignalAggregate& firstMDCell=myCut->getCell(firstCell);
+    TS_ASSERT_THROWS_NOTHING( contributingPoints=firstMDCell.getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),1);
-    TS_ASSERT_THROWS_NOTHING( myCell=myCut->getCell(secondCell) );
-    TS_ASSERT_THROWS_NOTHING( contributingPoints=myCell->getContributingPoints() );
+    const SignalAggregate& secondMDCell=myCut->getCell(secondCell);
+    TS_ASSERT_THROWS_NOTHING( contributingPoints=secondMDCell.getContributingPoints() );
     TS_ASSERT_EQUALS(contributingPoints.size(),2);
     TS_ASSERT_THROWS_NOTHING(vertices=contributingPoints.at(0)->getVertexes());
     TS_ASSERT_EQUALS(vertices.size(),1);

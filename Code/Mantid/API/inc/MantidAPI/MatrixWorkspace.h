@@ -5,8 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
-//#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceIterator.h"
@@ -36,6 +37,9 @@ namespace Mantid
     * Used by MatrixWorkspace to return maps.
     */
     typedef std::map<int, int> IndexToIndexMap;
+
+    // Map for associating indexes to generated MDPoints.
+    typedef std::map<int, Mantid::Geometry::MDPoint> MatrixMDPointMap;
 
     //----------------------------------------------------------------------
     // Forward Declaration
@@ -197,27 +201,38 @@ namespace Mantid
       /// Gets the number of points available on the workspace.
       virtual int getNPoints() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getXDimension() const;
+      /// Get the x-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
 
-      virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension>  getYDimension() const;
+      /// Get the y-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getZDimension() const;
+      /// Get the z-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  gettDimension() const;
+      /// Get the t-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>  getDimension(std::string id) const;
+      /// Get the dimension with the specified id.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDPoint>  getPoint(int index) const;
+      /// Get the point at the specified index.
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const;
 
-      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
 
-      virtual  boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
 
-      virtual boost::shared_ptr<const Mantid::Geometry::MDCell>  getCell(...) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
 
     protected:
       MatrixWorkspace();
@@ -230,11 +245,11 @@ namespace Mantid
 
     private:
 
-      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
-      Mantid::Geometry::MDPoint* getPointImp(int index) const ;
-      
-      ///Implementation of getMDPoint providing coverience for public shared ptr on interface.
-      Mantid::Geometry::MDPoint* getPointImp(int histogram, int bin) const;
+      /// Implementation of getMDPointImp taking two arguments for histogram and bin.
+      const Mantid::Geometry::SignalAggregate& getPointImp(int histogram, int bin) const;
+
+      /// Creates a point for a given histogram/bin.
+      Mantid::Geometry::MDPoint createPoint(int histogram, int bin) const;
      
       /// Private copy constructor. NO COPY ALLOWED
       MatrixWorkspace(const MatrixWorkspace&);
@@ -266,6 +281,12 @@ namespace Mantid
 
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int, MaskList > m_masks;
+
+      /// Associates indexes to MDPoints. Dynamic cache.
+      mutable MatrixMDPointMap m_mdPointMap;
+
+      /// Assists conversions to and from 2D histogram indexing to 1D indexing.
+      MatrixWSIndexCalculator m_indexCalculator;
 
       /// Used for storing info about "r-position", "t-position" and "p-position" parameters
       /// as all parameters are processed  

@@ -61,7 +61,15 @@ private:
     using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
-    MDWorkspace* workspace = new MDWorkspace;
+    MDWorkspace* workspace;
+    try
+    {
+    workspace = new MDWorkspace;
+    }
+    catch(std::exception& ex)
+    {
+      std::string what = ex.what();
+    }
     MockFileFormat* mockFile = new MockFileFormat;
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
     return workspace;

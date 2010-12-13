@@ -38,9 +38,8 @@ MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFor
 	this->m_spMDBasis = boost::shared_ptr<Geometry::MDGeometryBasis>(new Geometry::MDGeometryBasis());
 	this->m_spFile->read_basis(*m_spMDBasis);
 
-	// build default description on from the basis;
-	MDGeometryDescription description(*m_spMDBasis);
 	// read the geometry description
+	MDGeometryDescription description;
 	this->m_spFile->read_MDGeomDescription(description);
 	// we have basis and description, now can build geometry
 	std::auto_ptr<MDGeometry> pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,description));
@@ -188,35 +187,36 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return m_spMDImage->getGeometry()->getDimension(id, true); 
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDPoint> MDWorkspace::getPoint(int index) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement;
+    const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(int index) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
-    boost::shared_ptr<const Mantid::Geometry::MDCell> MDWorkspace::getCell(...) const
-    { 
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(...) const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
+
 
 } // namespace
 }
