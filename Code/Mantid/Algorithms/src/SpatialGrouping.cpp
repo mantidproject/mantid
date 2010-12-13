@@ -116,7 +116,7 @@ void SpatialGrouping::exec()
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
   fname = fname + ".xml";
-  xml.open(fname);
+  xml.open(fname.c_str());
 
   xml << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
     << "<!-- XML Grouping File created by SpatialGrouping Algorithm -->\n"
