@@ -1016,7 +1016,13 @@ namespace Mantid
 
     }
     
- ///
+
+/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
+ *  @param filePath- path of the file including name.
+ *  @param nread - no.of bytes read
+ *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
 bool LoadRawHelper::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
 {
   std::string extn=extension(filePath);
@@ -1026,7 +1032,7 @@ bool LoadRawHelper::quickFileCheck(const std::string& filePath,int nread,unsigne
   * look at the "address of RUN and INST section" attribute - if there, must be an ISIS raw file
   */
   if ( ((nread > 88) && (header_buffer[84] == 32) && (header_buffer[88] == 126))|| braw )
-  {
+  {   
    return true;
   }
   else
@@ -1035,13 +1041,41 @@ bool LoadRawHelper::quickFileCheck(const std::string& filePath,int nread,unsigne
   }
  
 }
-///
+/**checks the file by opening it and reading few lines 
+ *  @param filePath name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
 int LoadRawHelper::fileCheck(const std::string& filePath)
 {
-  //here the assumption is generic load algorithm will
-  //call filecheck if quickFileCheck passed.
-  // once quick checked passed return 80 for loadraw 
-  return 80;
+  
+  unsigned char* hdr_buffer = buffer_union.c;
+  int nread;
+  /* Open the file and read in the first bufferSize bytes - these will
+  * be used to determine the type of the file
+  */
+  int bret=0;
+  FILE* fp = fopen(filePath.c_str(), "rb");
+  if (fp == NULL)
+  {
+    return bret;
+  }
+  nread = fread((char*)hdr_buffer,sizeof(char), bufferSize,fp);
+  hdr_buffer[bufferSize] = '\0';
+  if (nread == -1)
+  {
+    fclose(fp);
+    return bret;
+  }
+
+  if (fclose(fp) != 0)
+  {
+  } 
+
+  if ((nread > 88) && (hdr_buffer[84] == 32) && (hdr_buffer[88] == 126))
+  {
+    bret=80;
+  }
+  return bret;
 }
 
 

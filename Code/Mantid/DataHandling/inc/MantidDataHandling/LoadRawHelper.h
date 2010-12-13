@@ -205,6 +205,14 @@ namespace Mantid
       
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;
+
+      /// union used for identifying the raw file type
+      unsigned char* m_buffer;
+      union { 
+        unsigned u; 
+        unsigned long ul; 
+        unsigned char c[bufferSize+1]; 
+      }buffer_union;
     };
 
   } // namespace DataHandling
