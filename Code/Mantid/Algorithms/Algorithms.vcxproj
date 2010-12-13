@@ -182,6 +182,7 @@
     <ClCompile Include="src\CorrectKiKf.cpp" />
     <ClCompile Include="src\CorrectToFile.cpp" />
     <ClCompile Include="src\CreateCalFileByNames.cpp" />
+    <ClCompile Include="src\CreateDummyCalFile.cpp" />
     <ClCompile Include="src\CreateSingleValuedWorkspace.cpp" />
     <ClCompile Include="src\CreateWorkspace.cpp" />
     <ClCompile Include="src\CropWorkspace.cpp" />
@@ -262,6 +263,7 @@
     <ClCompile Include="src\SolidAngle.cpp" />
     <ClCompile Include="src\SolidAngleCorrection.cpp" />
     <ClCompile Include="src\Sort.cpp" />
+    <ClCompile Include="src\SpatialGrouping.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
     <ClCompile Include="src\StripVanadiumPeaks.cpp" />
     <ClCompile Include="src\SumNeighbours.cpp" />
@@ -280,6 +282,7 @@
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
     <ClInclude Include="inc\MantidAlgorithms\CorrectKiKf.h" />
+    <ClInclude Include="inc\MantidAlgorithms\CreateDummyCalFile.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
     <ClInclude Include="inc\MantidAlgorithms\CuboidGaugeVolumeAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h" />
@@ -296,6 +299,7 @@
     <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
+    <ClInclude Include="inc\MantidAlgorithms\SpatialGrouping.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
     <ClInclude Include="inc\MantidAlgorithms\SumNeighbours.h" />
     <ClInclude Include="inc\MantidAlgorithms\TofCorrection.h" />

@@ -354,6 +354,15 @@
     <ClCompile Include="src\GravitySANSHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CreateDummyCalFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpatialGrouping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GravitySANSHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h">
@@ -878,6 +887,9 @@
     <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\CreateCalFileByNamesTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="inc\MantidAlgorithms\CuboidGaugeVolumeAbsorption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -888,6 +900,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\CreateCalFileByNamesTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\GravitySANSHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\CreateDummyCalFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\SpatialGrouping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAlgorithms\GravitySANSHelper.h">
