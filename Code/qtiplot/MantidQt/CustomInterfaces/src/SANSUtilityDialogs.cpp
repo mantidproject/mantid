@@ -20,6 +20,12 @@
 
 using namespace MantidQt::CustomInterfaces;
 
+namespace MantidQt
+{
+namespace CustomInterfaces
+{
+
+
 //-----------------------------
 // Public member functions
 //-----------------------------
@@ -315,3 +321,8 @@ void SANSPlotDialog::deleteKeyPressed()
     delete itr.next();
   }
 }
+
+
+} // namespace MantidQt
+
+} // namespace CustomInterfaces
