@@ -9,7 +9,7 @@ try:
     import numpy
     HAS_NUMPY = True
 except:
-    HAS_NUMPT = False    
+    HAS_NUMPY = False    
 
 class EQSANSTransmission(PythonAlgorithm):
     """
