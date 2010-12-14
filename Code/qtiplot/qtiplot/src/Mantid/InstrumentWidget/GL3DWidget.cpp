@@ -79,7 +79,6 @@ void GL3DWidget::setInteractionModePick()
 {
   iInteractionMode = GL3DWidget::PickMode;// Pick mode
   setMouseTracking(true);
-  switchToPickingMode();
 }
 
 void GL3DWidget::setInteractionModeNormal()
@@ -319,7 +318,7 @@ void GL3DWidget::switchToPickingMode()
   {
     //First we draw the regular scene and save it to display
     drawDisplayScene();
-    glReadBuffer(GL_BACK);
+    glReadBuffer(GL_FRONT);
     mPickBox->setDisplayImage(grabFrameBuffer(false));
 
     // Now we draw the picking scene with the special colors
@@ -327,9 +326,10 @@ void GL3DWidget::switchToPickingMode()
     glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
     glDisable(GL_NORMALIZE);
     drawPickingScene();
+    glReadBuffer(GL_BACK);
     mPickBox->setPickImage(grabFrameBuffer(false));
     glEnable(GL_MULTISAMPLE);   //enable antialiasing
-    //mPickingDraw=false;
+    mPickingDraw=false;
     OpenGLError::check("GL3DWidget::switchToPickingMode() ");
   }
   else
@@ -347,29 +347,20 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
   makeCurrent();
   if(iInteractionMode == GL3DWidget::PickMode)
   {
-    if(mPickingDraw==true)
-    {
-      switchToPickingMode();
-    }
     if (m_renderMode == FULL3D)
     {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      //OpenGLError::check("GL3DWidget::paintEvent");
-      if(format().sampleBuffers())
+      if(mPickingDraw==true)
       {
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        mPickBox->draw(&painter);
-        painter.end();
+        switchToPickingMode();
       }
-      else
-      {
-        drawDisplayScene();
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        mPickBox->drawPickBox(&painter);
-        painter.end();
-      }
+      QPainter painter(this);
+      painter.setRenderHint(QPainter::Antialiasing);
+      mPickBox->draw(&painter);
+      painter.end();
+    }
+    else
+    {
+      drawUnwrapped();
     }
   }
   else
@@ -514,13 +505,13 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
     if (event->buttons() & Qt::LeftButton)
     {
       emit increaseSelection(tmpColor);
+      mPickBox->mouseMoveEvent(event);
+      update();
     }
     else
     {
       emit actorHighlighted(tmpColor);
     }
-    mPickBox->mouseMoveEvent(event);
-    update();
   }
   else
   {
