@@ -150,6 +150,9 @@ private:
   mutable QwtDoubleRect m_boundingRect;
 };
 
+
+//=================================================================================================
+//=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
 class MantidQwtData: public QObject, public QwtData
@@ -209,12 +212,15 @@ private:
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// Spectrum index in the workspace
   int m_spec;
-  /// Reference to the X vector
-  const Mantid::MantidVec& m_X;
-  /// Reference to the Y vector
-  const Mantid::MantidVec& m_Y;
-  /// Reference to the E vector
-  const Mantid::MantidVec& m_E;
+  /// Copy of the X vector
+  const Mantid::MantidVec m_X;
+
+  /// Copy of the Y vector
+  const Mantid::MantidVec m_Y;
+
+  /// Copy of the E vector
+  const Mantid::MantidVec m_E;
+
   /// Is the spectrum a histogram?
   bool m_isHistogram;
   /// This field can be set true for a histogram worspace. If it's true x(i) returns (X[i]+X[i+1])/2

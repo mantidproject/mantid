@@ -6,6 +6,7 @@
 
 #include <QMessageBox>
 #include <QPushButton>
+#include <iostream>
 
 /// The logger
 Mantid::Kernel::Logger& MantidApplication::g_log = Mantid::Kernel::Logger::get("MantidPlot");
@@ -20,6 +21,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   bool res = false;
   try
   {
+    //std::cout << "MantidApplication::notify( event.type() == " << event->type() << ")\n";
     res = QApplication::notify(receiver,event);
   }
   catch(std::exception& e) 
