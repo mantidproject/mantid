@@ -189,6 +189,7 @@
     <ClCompile Include="src\CrossCorrelate.cpp" />
     <ClCompile Include="src\CuboidGaugeVolumeAbsorption.cpp" />
     <ClCompile Include="src\CylinderAbsorption.cpp" />
+    <ClCompile Include="src\DetectorDiagnostic.cpp" />
     <ClCompile Include="src\DetectorEfficiencyCor.cpp" />
     <ClCompile Include="src\DetectorEfficiencyVariation.cpp" />
     <ClCompile Include="src\DiffractionFocussing.cpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="inc\MantidAlgorithms\CreateDummyCalFile.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
     <ClInclude Include="inc\MantidAlgorithms\CuboidGaugeVolumeAbsorption.h" />
+    <ClInclude Include="inc\MantidAlgorithms\DetectorDiagnostic.h" />
     <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractMasking.h" />
