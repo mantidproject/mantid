@@ -182,57 +182,6 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void testAgainstHRPD_data()
-  {
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    LoadNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39182_cutdown.nx5");
-    loader.setPropertyValue("OutputWorkspace", "HRP39182");
-    loader.execute();
-
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve("HRP39182"));
-
-    // Set general Fit parameters
-    alg2.setPropertyValue("InputWorkspace", "HRP39182");
-    alg2.setPropertyValue("WorkspaceIndex","3");
-    alg2.setPropertyValue("StartX","79300");
-    alg2.setPropertyValue("EndX","79600");
-
-    // set up fitting function and pass to Fit
-    IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
-    icpv->initialize();
-    icpv->setWorkspace(wsToPass, 3,0,1);
-
-    icpv->setParameter("I",9500);
-    icpv->tie("Alpha0", "1.597107");
-    icpv->tie("Alpha1", "1.496805");
-    icpv->tie("Beta0", "31.891718");
-    icpv->tie("Kappa", "46.025921");
-    icpv->setParameter("SigmaSquared",100);
-    icpv->tie("SigmaSquared", "100.0");
-    icpv->tie("X0", "79400");
-    icpv->tie("Gamma", "1.0");
-
-    alg2.setFunction(icpv);
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    // test the output from fit is what you expect
-    // note this test will never produce good fit because it assumes no background
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 11.67,1);
-
-    AnalysisDataService::Instance().remove("HRP39182");
-  }
-
 
   // motivation for this test is to figure out way IC function goes absolutely
   // nuts when a large data range are selection
