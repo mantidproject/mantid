@@ -6,11 +6,20 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
 using namespace Mantid::Geometry;
+class testMDGeometry: public MDGeometry
+{
+public:
+	testMDGeometry(const MDGeometryBasis &basis):
+	  MDGeometry(basis){};
+
+	  boost::shared_ptr<MDDimension> getDimension(unsigned int num){ return MDGeometry::getDimension(num);  }
+	  boost::shared_ptr<MDDimension> getDimension(const std::string &ID, bool doThrow=true){ return MDGeometry::getDimension(ID,doThrow);  }
+};
 
 
 class testMulitDimensionalGeometry : public CxxTest::TestSuite
 {
-  std::auto_ptr<MDGeometry> tDND_geometry;
+  std::auto_ptr<testMDGeometry> tDND_geometry;
   std::auto_ptr<MDGeometryDescription> pSlice;
 public:
 
@@ -23,7 +32,7 @@ public:
     basisDimensions.insert(MDBasisDimension("p", false, 0));
 
     UnitCell cell;
-    tDND_geometry= std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    tDND_geometry= std::auto_ptr<testMDGeometry>(new testMDGeometry(MDGeometryBasis(basisDimensions, cell)));
   }
 
   void testMDGeometryDimAccessors(void){
@@ -34,7 +43,7 @@ public:
 
   }
   void testMDGeomIntegrated(void){
-    std::vector<boost::shared_ptr<MDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
+    std::vector<boost::shared_ptr<IMDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
     // default size of the dimensions is equal 4
     TS_ASSERT_EQUALS(Dims.size(),4);
   }

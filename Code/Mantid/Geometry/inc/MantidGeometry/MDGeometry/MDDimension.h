@@ -53,7 +53,7 @@ namespace Geometry
   class DLLExport MDDimension : public IMDDimension
   {
   public:
-
+   /// function return the unique dimension ID, identifying the current dimension among others
     virtual std::string getDimensionId() const;
 
     virtual bool getIsIntegrated() const;
@@ -88,7 +88,7 @@ namespace Geometry
     virtual size_t       getStride(void)const{return nStride;}
   
     //Get coordinate for index; Throws through vector if ind out of range 
-    virtual double getX(unsigned int ind){return Axis.at(ind);}
+    virtual double getX(unsigned int ind)const{return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
 
@@ -97,7 +97,7 @@ namespace Geometry
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
 
-//HACK -- these methods should be private
+//HACK -- these methods should be protected or everything goes through IMD 
 virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
 void  setName(const std::string & name){this->AxisName.assign(name); }
   protected:

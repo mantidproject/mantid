@@ -163,6 +163,7 @@
     <ClInclude Include="inc\MantidMDAlgorithms\Topology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\WidthParameter.h" />
+    <ClInclude Include="test\DynamicRebinFromXMLAlgorithmTest.h" />
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>

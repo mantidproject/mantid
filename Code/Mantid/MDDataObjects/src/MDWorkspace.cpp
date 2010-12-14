@@ -184,7 +184,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
     { 
-      return m_spMDImage->getGeometry()->getDimension(id, true); 
+		return m_spMDImage->getGeometry()->get_constDimension(id,true); 
     }
 
     const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(int index) const

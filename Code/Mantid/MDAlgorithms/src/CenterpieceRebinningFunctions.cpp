@@ -40,7 +40,7 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
   // dataset;
   unsigned int j,k,l,mp,mm,sizem;
   double xt1,yt1,zt1,Etm,Etp;
-  boost::shared_ptr<MDDimension> pDim;
+  boost::shared_ptr<IMDDimension> pDim;
   //TO DO: this will be obtained from the taget
   double rotations[9];
   rotations[0]=rotations[1]=rotations[2]=rotations[3]=rotations[4]=rotations[5]=rotations[6]=rotations[7]=rotations[8]=0;
@@ -54,9 +54,9 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
   unsigned int  nReciprocal    = pGeom->getNumReciprocalDims();
   unsigned int  nOrthogonal    = pGeom->getNumDims() - nReciprocal;
 
-  std::vector<boost::shared_ptr<MDDimension> > pAllDim  = pGeom->getDimensions();
-  std::vector<boost::shared_ptr<MDDimension> > pOrthogonal(nOrthogonal);
-  std::vector<boost::shared_ptr<MDDimension> > pReciprocal(nReciprocal);
+  std::vector<boost::shared_ptr<IMDDimension> > pAllDim  = pGeom->getDimensions();
+  std::vector<boost::shared_ptr<IMDDimension> > pOrthogonal(nOrthogonal);
+  std::vector<boost::shared_ptr<IMDDimension> > pReciprocal(nReciprocal);
   unsigned int nr(0),no(0);
 
   // get the orthogonal and reciprocal dimensions separately
@@ -82,7 +82,7 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
   std::vector<double> ort_cut_min(nOrthogonal,0),ort_cut_max(nOrthogonal,0);
   int dim_num;
   for(i=0;i<nOrthogonal;i++){
-    dim_num = target.getTagNum(pOrthogonal[i]->getDimensionTag(),true);
+    dim_num = target.getTagNum(pOrthogonal[i]->getDimensionId(),true);
 	ort_cut_min[i]=target.dimDescription(dim_num).cut_min;
     ort_cut_max[i]=target.dimDescription(dim_num).cut_max;
   }
@@ -129,7 +129,7 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
     }
   }
   enInd.clear();
-  std::vector<boost::shared_ptr<MDDimension> > rec_dim;
+  std::vector<boost::shared_ptr<IMDDimension> > rec_dim;
   rec_dim.resize(3);
   // evaluate the capacity of the real space (3D or less);
   // Define (1<=N<=3)D subspace and transform it into the coordinate system of the new cut;
@@ -140,7 +140,7 @@ void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::M
     size3D    *= (pReciprocal[i]->getNBins()+1);
     rec_dim[i] = pReciprocal[i];
 
-    dim_num    = target.getTagNum(rec_dim[i]->getDimensionTag(),true);
+    dim_num    = target.getTagNum(rec_dim[i]->getDimensionId(),true);
 	cut_min[i] = target.dimDescription(dim_num).cut_min;
     cut_max[i] = target.dimDescription(dim_num).cut_max;
   }
@@ -325,7 +325,7 @@ size_t rebin_Nx3dataset(const transf_matrix &rescaled_transf, const char *source
   std::vector<double> rN(nDims,0);
 
   // reduction dimensions; if stride = 0, the dimension is reduced;
-  const std::vector<boost::shared_ptr<MDDimension> >  dims = TargetWorkspace.get_const_MDImage().getGeometry()->getDimensions();
+  std::vector<boost::shared_ptr<IMDDimension> >  dims = TargetWorkspace.get_const_MDImage().getGeometry()->getDimensions();
 
   std::vector<size_t> strides(dims.size());
   for(unsigned int i=0;i<dims.size();i++){

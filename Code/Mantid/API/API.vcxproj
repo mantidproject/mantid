@@ -81,7 +81,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MantidAPI</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MantidAPI</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MantidAPI</TargetName>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,8 +97,10 @@
     <Link>
       <AdditionalDependencies>MantidGeometry.lib;MantidKernel.lib;ws2_32.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).dll</OutputFile>
-      <AdditionalLibraryDirectories>..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

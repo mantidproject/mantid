@@ -101,7 +101,7 @@ public:
     virtual size_t       getStride(void)const{return 0;}
   
     //Get coordinate for index; Throws  if ind is out of range 
-    virtual double getX(unsigned int ind);
+    virtual double getX(unsigned int ind)const;
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return true;}
     // no mutator allowed

@@ -56,13 +56,13 @@ namespace Mantid{
       ~MDGeometry(void);
 
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
-      boost::shared_ptr<MDDimension> getXDimension(void)const{return (theDimension[0]);}
-      boost::shared_ptr<MDDimension> getYDimension(void)const;
-      boost::shared_ptr<MDDimension> getZDimension(void)const;
-      boost::shared_ptr<MDDimension> getTDimension(void)const;
-      std::vector<boost::shared_ptr<MDDimension> > getIntegratedDimensions(void);
+      boost::shared_ptr<IMDDimension> getXDimension(void)const{return (theDimension[0]);}
+      boost::shared_ptr<IMDDimension> getYDimension(void)const;
+      boost::shared_ptr<IMDDimension> getZDimension(void)const;
+      boost::shared_ptr<IMDDimension> getTDimension(void)const;
+      std::vector<boost::shared_ptr<IMDDimension> > getIntegratedDimensions(void)const;
       /// obtains pointers to all dimensions defined in the geometry
-      std::vector<boost::shared_ptr<MDDimension> > getDimensions(void)const{return theDimension;}
+      std::vector<boost::shared_ptr<IMDDimension> > getDimensions(void)const;
 
       /// returns the number of expanded (non-integrated) dimensions
       unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
@@ -70,12 +70,7 @@ namespace Mantid{
 	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}
 
-      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
-      /// asking for DimX, Y and Z;
-      boost::shared_ptr<MDDimension>  getDimension(unsigned int i)const;
-      /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
-      boost::shared_ptr<MDDimension>  getDimension(const std::string &tag,bool do_throw=true)const;
-
+ 
       /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 
       /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;
       std::vector<double> getOrt(const std::string &tag)const;
@@ -89,6 +84,13 @@ namespace Mantid{
       ///
       unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
 
+     /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
+      /// asking for DimX, Y and Z;
+      boost::shared_ptr<const IMDDimension>  get_constDimension(unsigned int i)const;
+      /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
+      boost::shared_ptr<const IMDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
+
+
       /** function resets MDGeometryBasis and MDGeometry to new state;
       *   
 	  *  modified substantially from initial idea
@@ -96,6 +98,12 @@ namespace Mantid{
       */
       void reinit_Geometry(const MDGeometryDescription &trf);
     protected: 
+     /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
+      /// asking for DimX, Y and Z;
+      boost::shared_ptr<MDDimension>  getDimension(unsigned int i);
+      /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
+      boost::shared_ptr<MDDimension>  getDimension(const std::string &tag,bool do_throw=true);
+
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
       unsigned int n_expanded_dim;
       /// the array of Dimensions. Some are collapsed (integrated over)

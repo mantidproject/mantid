@@ -1,6 +1,6 @@
 #ifndef H_TEST_MAIN_SQW
 #define H_TEST_MAIN_SQW
-#include "find_mantid.h"
+
 #include "MantidKernel/System.h"
 
 

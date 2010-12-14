@@ -30,6 +30,7 @@ class testCPRebinning :    public CxxTest::TestSuite
 
 		 // should go to Load workspace algorithm ----->
 		 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo_bin.sqw");
+	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
 		 boost::shared_ptr<IMD_FileFormat> spFile = boost::shared_ptr<IMD_FileFormat>(pFile.get());
 		 pFile.release();
 
@@ -50,19 +51,33 @@ class testCPRebinning :    public CxxTest::TestSuite
 
          //Geometry::MDGeometryDescription *const pSlicing=cpr.pSlicingProperty();
 
-        TS_ASSERT_THROWS_NOTHING(cpr.init_property(pOrigin));
+ //       TS_ASSERT_THROWS_NOTHING(cpr.init_property(pOrigin));
+   // input workspace has to exist and be loaded;
+    	MDWorkspace_sptr inputWS;
+    // Get the input workspace
+      if(cpr.existsProperty("Input")){
+            inputWS = cpr.getProperty("Input");
+            if(!inputWS){
+                throw(std::runtime_error("input workspace has to exist"));
+            }
 
-		// get property from property service;
-      //  std::string i1,i2;
-      //  cpr.set_from_VISIT(i1,i2);
-        Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-        if(!pSlicing){
-            throw(std::runtime_error("can not cast managed property to a slicing data"));
+       }else{
+           throw(std::runtime_error("input workspace has to be availible through properties"));
         }
+
+
+    // set up slicing property to the shape of current workspace;
+         Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+        if(!pSlicing){
+            throw(std::runtime_error("can not obtain slicing property from the property manager"));
+        }
+
+        pSlicing->build_from_geometry(*(inputWS->getGeometry()));
+ 
 
         double r0=0;
 		pSlicing->dimDescription("qx").cut_min = r0;
-		pSlicing->dimDescription("qx").cut_min = r0+2;
+		pSlicing->dimDescription("qx").cut_max = r0+2;
 		pSlicing->dimDescription("qy").cut_min = r0;
 		pSlicing->dimDescription("qy").cut_max = r0+2;
 		pSlicing->dimDescription("qz").cut_min = r0;

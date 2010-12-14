@@ -1,6 +1,6 @@
 #ifndef I_MD_DIMENSION_H
 #define I_MD_DIMENSION_H
-
+#include <vector>
 
 /*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
 *
@@ -53,8 +53,21 @@ namespace Mantid
       virtual double getMinimum() const = 0;
    /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual unsigned int getNBins() const = 0;
-
+   /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one. 
+	  virtual size_t      getStride()const = 0;
+	  /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
       virtual bool isReciprocal() const = 0;
+	  /// defines the dimension scale in physical units. 
+	  virtual double getScale()const = 0; 
+	  ///  Get coordinate for index;
+	  virtual double getX(unsigned int ind)const = 0;
+	  // Mess; TODO: clear
+      virtual std::vector<double>const & getCoord(void)const = 0;
+
+    /// the function returns the center points of the axis bins; There are nBins of such points 
+    /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
+    virtual void getAxisPoints(std::vector<double>  &)const=0;
+
       
 	  virtual ~IMDDimension(){};
     };

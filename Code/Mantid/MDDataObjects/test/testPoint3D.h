@@ -4,7 +4,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDImage.h"
-#include "find_mantid.h"
 
 
 using namespace Mantid;

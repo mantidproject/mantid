@@ -98,7 +98,14 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
 
 	std::vector<char> buf(4*(3+3+4+16+4+2));
 	unsigned int i,j,ic,i0;
-	
+	// horace tags come from basis, but as they have not been transferred between classes, 
+	// they should be written with image too. 
+	std::vector<std::string> Horace_tags(4);
+	Horace_tags[0]="qx";
+	Horace_tags[1]="qy";
+	Horace_tags[2]="qz";
+	Horace_tags[3]="en";
+
 	this->fileStreamHolder.seekg(this->positions.geom_start,std::ios::beg);
 
 /*
@@ -136,7 +143,7 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
 	unsigned int nCols = *((uint32_t*)(&buf[i0+4]));
 
 
-	// read axis labels
+	// read axis labelsg
 	buf.resize(nRows*nCols);
    // [ulabel, count, ok, mess] = fread_catch(fid,[n(1),n(2)],'*char'); if ~all(ok); return; end;
 
@@ -152,6 +159,8 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
 			name[j] =symb;  // should be trim here;
 		}
 		dscrptn.dimDescription(i).AxisName = name;
+		// hardcoded here as we read the dimensions ID (tags and Horace does not do it)
+		dscrptn.dimDescription(i).Tag    = Horace_tags[i];
 	}
 
 // pax dax fax...

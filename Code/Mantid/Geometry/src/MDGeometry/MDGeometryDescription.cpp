@@ -123,7 +123,7 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
   this->data[i].nBins          = dimension->getNBins();
   this->data[i].AxisName       = dimension->getName();
   this->data[i].isReciprocal   = dimension->isReciprocal();
-  //this->data[i].data_scale     = dimension.getScale();  /TODO: conflict
+  this->data[i].data_scale     = dimension->getScale(); 
 
   //Handle reciprocal dimensions.
   if(dimension->isReciprocal())
@@ -161,27 +161,23 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
+    std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions();
+	
+	unsigned int i,nr(0),no(0);
 
-    for(unsigned int i=0;i<nReciprocalDimensions;i++){
-      this->coordinates[i].assign(3,0);
-      boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
-      if(pDim){
-           this->coordinates[i] = pDim->getCoord();
-      }
-    }
-    
     DimensionDescription any;
     this->data.assign(nDimensions,any);    
-  
-    unsigned int i;
-    for(i=0;i<nDimensions;i++){
 
-        boost::shared_ptr<MDDimension> pDim = origin.getDimension(i);
-		this->createDimensionDescription(pDim,i);
-
+    for(i=0;i<this->nDimensions;i++){
+		if(Dims[i]->isReciprocal()){
+			//TODO: THIS IS WRONG; redesighn
+				this->coordinates[nr].assign(3,0);
+				this->coordinates[nr] = Dims[i]->getCoord();
+		}
+		this->createDimensionDescription(Dims[i],i);
     }
-
-}
+    
+ }
 //
 int 
 MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{

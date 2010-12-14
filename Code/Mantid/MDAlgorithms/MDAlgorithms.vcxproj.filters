@@ -112,6 +112,9 @@
     <ClInclude Include="inc\MantidMDAlgorithms\SingleValueParameterParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\DynamicRebinFromXMLAlgorithmTest.h">
+      <Filter>tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DimensionParameter.cpp">

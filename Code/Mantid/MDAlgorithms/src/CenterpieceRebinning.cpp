@@ -163,33 +163,7 @@ CenterpieceRebinning::exec()
 }
 //
 
-void 
-CenterpieceRebinning::set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition)
-{  
 
-//double originX, originY, originZ, normalX, normalY, normalZ;
-/*
-Mantid::API::ImplicitFunction* ifunc = Mantid::API::Instance().ImplicitFunctionFactory(xmlDefinitions, xmlInstructions);
-  PlaneImplicitFunction* plane = dynamic_cast<PlaneImplicitFunction*>(ifunc);
-
-for(int i = 0; i < compFunction->getNFunctions() ; i++)
-{
-
-  ImplicitFunction* nestedFunction =   compFunction->getFunction().at(i).get();
-  PlaneImplicitFunction* plane = dynamic_cast<PlaneImplicitFunction*>(nestedFunction);
-  if(NULL != plane)
-  {
-    originX = plane->getOriginX();
-    originY = plane->getOriginY();
-    originZ = plane->getOriginZ();
-    normalX = plane->getNOrmalX();
-    normalY = plane->getNormalY();
-    normalZ = plane->getNOrmalX();
-    break;
-  }
-}
-*/
-}
 
 } //namespace MDAlgorithms
 } //namespace Mantid

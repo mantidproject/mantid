@@ -33,8 +33,7 @@ public:
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "MD-Algorithms";}
-
-      void set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition);
+      ///
       void init_property(MDDataObjects::MDWorkspace_sptr inputWSX);
      
 private:

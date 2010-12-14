@@ -36,12 +36,12 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
     }
     unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
     size_t   base(0);
-    boost::shared_ptr<MDDimension> pDim;
+    const IMDDimension *pDim;
 
     // calculate shift for all selected dimensions;
     int the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
     for(int iii=selection_size-1;iii>=0;iii--){
-        pDim = this->pMDGeometry->getDimension(the_expanded_dim);
+		pDim = this->pMDGeometry->get_constDimension(the_expanded_dim).get();
         if(selection[iii]>=pDim->getNBins()){
             isel=pDim->getNBins()-1;
         }else{
@@ -58,7 +58,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
     size_t   rez_size(0);
     if(the_expanded_dim>=0){
         iMin=0;
-        iMax=this->pMDGeometry->getDimension(0)->getNBins();
+        iMax=this->pMDGeometry->get_constDimension(0)->getNBins();
         rez_size = iMax;
     }else{
         iMin=selection[current_selected_dimension];
@@ -67,12 +67,13 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
         current_selected_dimension++;
     }
     std::vector<double> xx;
-    this->pMDGeometry->getDimension(0)->getAxisPoints(xx);
+	pDim = this->pMDGeometry->get_constDimension(0).get();
+    pDim->getAxisPoints(xx);
 
 
     if(the_expanded_dim>0){
         jMin=0;
-        jMax=this->pMDGeometry->getDimension(1)->getNBins();
+        jMax=this->pMDGeometry->get_constDimension(1)->getNBins();
         rez_size *= jMax;
     }else{
         jMin=selection[current_selected_dimension];
@@ -80,11 +81,11 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
         current_selected_dimension++;
     }
     std::vector<double> yy;
-    this->pMDGeometry->getDimension(1)->getAxisPoints(yy);
+    (this->pMDGeometry->get_constDimension(1))->getAxisPoints(yy);
 
     if(the_expanded_dim>1){
         kMin=0;
-        kMax=this->pMDGeometry->getDimension(2)->getNBins();
+        kMax=this->pMDGeometry->get_constDimension(2)->getNBins();
         rez_size *= kMax;
     }else{
         kMin=selection[current_selected_dimension];
@@ -92,7 +93,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
         current_selected_dimension++;
     }
     std::vector<double> zz;
-    this->pMDGeometry->getDimension(2)->getAxisPoints(zz);
+    (this->pMDGeometry->get_constDimension(2))->getAxisPoints(zz);
 
 // build full array of 3D points
 	const MD_image_point  *const pData = this->get_const_pData();
@@ -158,12 +159,12 @@ MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
    this->MD_IMG_array.dimSize.assign(this->pMDGeometry->getNumDims(),0);
    this->MD_IMG_array.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
-    MDDimension *pDim;
+    const IMDDimension *pDim;
     this->MD_IMG_array.dimStride[0] = 0;
     this->MD_IMG_array.data_size    = 1;
     size_t  stride(1);
     for(i=0;i<this->pMDGeometry->getNumDims();i++){
-        pDim                 = (this->pMDGeometry->getDimension(i)).get();
+        pDim                 = (this->pMDGeometry->get_constDimension(i)).get();
         stride               = pDim->getStride();
         this->MD_IMG_array.dimSize[i]    =  pDim->getNBins();
         this->MD_IMG_array.data_size     *= this->MD_IMG_array.dimSize[i];

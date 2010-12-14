@@ -10,10 +10,11 @@ namespace Mantid{
   namespace Geometry{
 
     //----------------------------------------------------------------
-    Logger& MDGeometry::g_log=Kernel::Logger::get("MDWorkspaces");
-    void
-      MDGeometry::setRanges(MDGeometryDescription const &trf)
-    {
+Logger& MDGeometry::g_log=Kernel::Logger::get("MDWorkspaces");
+
+void
+MDGeometry::setRanges(MDGeometryDescription const &trf)
+{
       unsigned int i;
       unsigned int n_new_dims=trf.getNumDims();
       boost::shared_ptr<MDDimension> pDim;
@@ -45,7 +46,18 @@ namespace Mantid{
       }
       this->arrangeDimensionsProperly(trf.getDimensionsTags());
 
-    }
+}
+std::vector<boost::shared_ptr<IMDDimension> > 
+MDGeometry::getDimensions(void)const
+{
+
+	std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
+	for(unsigned int i=0;i<this->getNumDims();i++){
+		dims[i] = theDimension[i];
+	}
+	return dims;
+
+}
     //
 void 
 MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
@@ -207,7 +219,7 @@ void
 
 }
     //
-    boost::shared_ptr<MDDimension>
+    boost::shared_ptr<IMDDimension>
       MDGeometry::getYDimension(void)const
     {
       if(m_basis.getNumDims()<2){
@@ -216,7 +228,7 @@ void
       return theDimension[1];
     }
     //
-    boost::shared_ptr<MDDimension> 
+    boost::shared_ptr<IMDDimension> 
       MDGeometry::getZDimension(void)const
     {
       if(m_basis.getNumDims()<3){
@@ -225,7 +237,7 @@ void
       return theDimension[2];
     }
     //
-    boost::shared_ptr<MDDimension>
+    boost::shared_ptr<IMDDimension>
       MDGeometry::getTDimension(void)const
     {
       if(m_basis.getNumDims()<4){
@@ -234,32 +246,47 @@ void
       return theDimension[3];
     }
     //
-    std::vector<boost::shared_ptr<MDDimension> >
-    MDGeometry::getIntegratedDimensions(void)
+    std::vector<boost::shared_ptr<IMDDimension> >
+    MDGeometry::getIntegratedDimensions(void)const
     {
-      std::vector<boost::shared_ptr<MDDimension> > tmp;
+      std::vector<boost::shared_ptr<IMDDimension> > tmp;
 
-      if(this->n_expanded_dim!=m_basis.getNumDims()){
-        std::vector<boost::shared_ptr<MDDimension> >::iterator it;
-        it=theDimension.begin()+this->n_expanded_dim;
-
-        tmp.assign(it,theDimension.end());
+      if(this->n_expanded_dim<m_basis.getNumDims()){
+        unsigned int size = m_basis.getNumDims()-this->n_expanded_dim;
+		tmp.resize(size);
+		unsigned int ic(0);
+		for(unsigned int i = this->n_expanded_dim;i<theDimension.size();i++){
+			tmp[ic] = theDimension[i];
+			ic++;
+		}
       }
       return tmp;
     }
 
     boost::shared_ptr<MDDimension>
-    MDGeometry::getDimension(unsigned int i)const
+    MDGeometry::getDimension(unsigned int i)
     {
+	  
       if(i>=m_basis.getNumDims()){
         g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
         throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
       }
       return theDimension[i];
     }
+//
+boost::shared_ptr<const IMDDimension>
+MDGeometry::get_constDimension(unsigned int i)const
+    {
+	  
+      if(i>=m_basis.getNumDims()){
+        g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
+        throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
+      }
+      return theDimension[i];
+}
 
     boost::shared_ptr<MDDimension>
-      MDGeometry::getDimension(const std::string &tag,bool do_throw)const
+      MDGeometry::getDimension(const std::string &tag,bool do_throw)
     {
       boost::shared_ptr<MDDimension> pDim;
       std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
@@ -268,12 +295,33 @@ void
         if(do_throw){
           g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
           throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
-        }
+        }else{
+			return pDim;
+		}
       }
       pDim = it->second;
 
       return pDim;
     }
+boost::shared_ptr<const IMDDimension>
+MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
+{
+      boost::shared_ptr<IMDDimension> pDim;
+      std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
+      it = dimensions_map.find(tag);
+      if(it == dimensions_map.end()){
+        if(do_throw){
+          g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
+          throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
+        }else{
+			return pDim;
+		}
+      }
+      pDim = it->second;
+
+      return pDim;
+}
+
 MDGeometry::MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description):
 n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 {
