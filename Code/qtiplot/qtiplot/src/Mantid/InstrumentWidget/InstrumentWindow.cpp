@@ -693,7 +693,8 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
 }
 
 /**
- * This method picks the background color
+ * This method opens a color dialog to pick the background color,
+ * and then sets it.
  */
 void InstrumentWindow::pickBackgroundColor()
 {

@@ -229,6 +229,8 @@ void GL3DWidget::draw3D()
   glGetError();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  // Clear the background to the bg color set previously.
+  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("GL3DWidget::draw3D()[clear] ");
 
