@@ -1834,22 +1834,15 @@ bool SANSRunWindow::oldLoadButtonClick()
   m_uiForm.load_dataBtn->setText("Load Data");
   return true;
 }
-
 /**
  * Receive a load button click signal
  */
 bool SANSRunWindow::handleLoadButtonClick()
 {
-  QString origin_dir = QDir::currentPath();
-  QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
-  if( work_dir.isEmpty() || !QDir(work_dir).exists() )
+  if ( ! setDataDir() )
   {
-    showInformationBox("The specified data directory " + m_uiForm.datadir_edit->text() + " does not exist.");
     return false;
   }
-  if( !work_dir.endsWith('/') ) work_dir += "/";
-  m_data_dir = work_dir;
-  runReduceScriptFunction("i.ISIS_global().set_data_path('" + m_data_dir + "')");
 
   // Check if we have loaded the data_file
   if( !isUserFileLoaded() )
@@ -2043,12 +2036,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   QString exec_reduce = "i.ISIS_global().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
 
-  //Add the path in the single mode data box if it is not empty
-  QString data_path = m_uiForm.datadir_edit->text();
-  if( !data_path.isEmpty() )
-  {
-    exec_reduce += "i.ISIS_global().set_data_path('" + data_path + "')\n";
-  }
+  setDataDir();
 
   exec_reduce += "i.ISIS_global().to_Q.output_type='"+type+"'\n";
   //Analysis details
@@ -3399,7 +3387,23 @@ void SANSRunWindow::checkLogFlags()
   }
   m_log_warnings = false;
 }
+/** Update Python variables with the user selected directory in datadir_edit
+  */
+bool SANSRunWindow::setDataDir()
+{
+  QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
+  if( work_dir.isEmpty() || !QDir(work_dir).exists() )
+  {
+    showInformationBox("The specified data directory " + m_uiForm.datadir_edit->text() + " does not exist.");
+    return false;
+  }
+  if( !work_dir.endsWith('/') ) work_dir += "/";
+  m_data_dir = work_dir;
+  const QString worked =
+    runReduceScriptFunction("i.ISIS_global().set_data_path('" + m_data_dir + "')");
 
+  return worked != "Error";
+}
 
 } //namespace CustomInterfaces
 

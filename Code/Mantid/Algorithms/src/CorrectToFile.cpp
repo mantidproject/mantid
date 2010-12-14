@@ -41,7 +41,7 @@ void CorrectToFile::exec()
   //The input workspace is the uncorrected data
   MatrixWorkspace_sptr toCorrect = getProperty("WorkspaceToCorrect");
   //This workspace is loaded from the RKH compatible file
-  MatrixWorkspace_sptr rkhInput = fileToWksp(getProperty("Filename"));
+  MatrixWorkspace_sptr rkhInput = loadInFile(getProperty("Filename"));
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != toCorrect)
@@ -52,10 +52,10 @@ void CorrectToFile::exec()
 
   if ( getPropertyValue("FirstColumnValue") == "SpectrumNumber")
   {
-    //the workspace probably contains many spectra but each with only 1 bin
+    //the workspace (probably) contains many spectra but each with only 1 bin
     doWkspAlgebra(toCorrect, rkhInput, operation, outputWS);
   }
-  else
+  else// interpolation the correction values and divide or multiply the input by these values
   {//the correction values should be all contained in 1 spectrum
     // Check that the workspace to rebin has the same units as the one that we are matching to
     // However, just print a warning if it isn't, don't abort (since user provides the file's unit)
@@ -71,9 +71,13 @@ void CorrectToFile::exec()
 
     const bool histogramData = outputWS->isHistogramData();
     const bool divide = (operation == "Divide") ? true : false;
-    double Yfactor,Efactor;
+    double Yfactor,correctError;
 
-    Progress prg(this,LOAD_TIME,1.0,outputWS->size());
+    const int nOutSpec = outputWS->size();
+    Progress prg(this,LOAD_TIME,1.0, nOutSpec);
+    const int prog_int = nOutSpec/100 > 0 ? nOutSpec/100 : 1;
+    int counter(0);
+
     MatrixWorkspace::iterator outIt(*outputWS);
     for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
     {
@@ -85,7 +89,7 @@ void CorrectToFile::exec()
       {
         // If we're past the end of the correction factors vector, use the last point
         Yfactor = Ycor[index-1];
-        Efactor = Ycor[index-1];
+        correctError = Ecor[index-1];
       }
       else if (index)
       {
@@ -93,30 +97,51 @@ void CorrectToFile::exec()
         const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
         // Now linearly interpolate to find the correction factors to use
         Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
-        Efactor = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
+        correctError = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
       }
       else
       {
         // If we're before the start of the correction factors vector, use the first point
         Yfactor = Ycor[0];
-        Efactor = Ycor[0];
+        correctError = Ecor[0];
       }
 
       // Now do the correction on the current point
       if (divide)
       {
         outIt->Y() = inIt->Y()/Yfactor;
-        outIt->E() = inIt->E()/Efactor;
+        // the proportional error is equal to the sum of the proportional errors
+        //  re-arrange so that you don't get infinity if leftY==0. Sa = error on a, etc.
+        // c = a/b
+        // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
+        // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
+        // = (Sa 1/b)2 + (Sb (a/b2))2
+        // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
+        outIt->E() = sqrt(    pow(inIt->E(), 2) +
+          pow( inIt->Y()*correctError/Yfactor, 2)    )/Yfactor;
       }
       else
       {
         outIt->Y() = inIt->Y()*Yfactor;
-        outIt->E() = inIt->E()*Efactor;
+        // error multiplying two uncorrelated numbers, re-arrange so that you don't get infinity if leftY or rightY == 0
+        //  Sa = error on a, etc.
+        // c = a*b
+        // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
+        // (Sc)2 = (Sa c/a)2 + (Sb c/b)2 = (Sa b)2 + (Sb a)2 
+        outIt->E() = sqrt(   pow(inIt->E()*Yfactor, 2)
+                           + pow(correctError*inIt->Y(), 2)  );
       }
+
+
       // Copy X value over
       outIt->X() = inIt->X();
       if (histogramData) outIt->X2() = inIt->X2();
-      prg.report();
+      
+      if ( counter % prog_int == 0 )
+      {
+        prg.report("CorrectToFile: applying " + operation);
+      }
+      counter ++;
 
     }
   }
@@ -129,7 +154,7 @@ void CorrectToFile::exec()
 *  @return workspace containing the loaded data
 *  @throw runtime_error if load algorithm fails
 */
-MatrixWorkspace_sptr CorrectToFile::fileToWksp(const std::string & corrFile)
+MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string & corrFile)
 {  
   g_log.information() << "Loading file " << corrFile << std::endl;
   progress(0, "Loading file");
