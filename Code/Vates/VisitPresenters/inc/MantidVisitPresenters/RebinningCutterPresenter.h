@@ -2,12 +2,12 @@
 #define VATES_REBINNING_PRESENTER_H_
 
 #include <vtkUnstructuredGrid.h>
-#include <vtkPlane.h>
+#include <vtkBox.h>
 
 #include <MantidAPI/ImplicitFunctionFactory.h>
 #include <MantidAPI/ImplicitFunction.h>
-#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
+#include <MantidGeometry/MDGeometry/IMDDimension.h>
 
 
 namespace Mantid
@@ -58,6 +58,9 @@ public:
   virtual void Delete() = 0;
 };
 
+typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > DimensionVec;
+typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
+
 /// RebinningCutterPresenter does the work of implemening requests/information provided by pipeline filters. Generates new datasets from
 /// current and historical rebinning knowledge accumulated in the pipeline.
 class RebinningCutterPresenter
@@ -84,7 +87,16 @@ public:
 	Mantid::API::ImplicitFunction const * const getFunction() const;
 
   /// Construct reduction knowledge objects
-  void constructReductionKnowledge(std::vector<double>& normal, std::vector<double>& origin);
+  void constructReductionKnowledge(
+      DimensionVec dimensions,
+      Dimension_sptr dimensionX,
+      Dimension_sptr dimensionY,
+      Dimension_sptr dimensionZ,
+      Dimension_sptr dimensiont,
+      double height,
+      double width,
+      double depth,
+      std::vector<double>& origin);
 
   /// Apply reduction knowledge to create a vtk dataset.
   vtkUnstructuredGrid* applyReductionKnowledge(Clipper* clipper);

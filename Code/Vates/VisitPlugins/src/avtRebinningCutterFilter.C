@@ -45,7 +45,7 @@
 #include <vtkVisItClipper.h>
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
-
+#include <MantidGeometry/MDGeometry/MDDimension.h>
 
 
 using namespace Mantid::VATES;
@@ -137,6 +137,9 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 vtkDataSet *
 avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
 {
+  using namespace Mantid::Geometry;
+  using namespace Mantid::VATES;
+
   RebinningCutterPresenter presenter(in_ds);
 
   doubleVector normal;
@@ -148,12 +151,26 @@ avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
   origin.push_back(atts.GetOriginY());
   origin.push_back(atts.GetOriginZ());
 
-  presenter.constructReductionKnowledge(normal, origin);
+  DimensionVec vec;
+  Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
+  Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
+  Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
+  Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
+
+  vec.push_back(dimX);
+  vec.push_back(dimY);
+  vec.push_back(dimZ);
+  vec.push_back(dimT);
+
+  std::vector<double> badOrigin;
+
+  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 1, 1, origin);
 
   vtkVisItClipper* adaptee = vtkVisItClipper::New();
   vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee));
 
-  debug5 << "-------------------------- Output ------------------------" << endl;
+  debug5
+    << "-------------------------- Output ------------------------" << endl;
   debug5 << presenter.getFunction()->toXMLString() << endl;
   debug5 << "-------------------------- End Output ------------------------" << endl;
 

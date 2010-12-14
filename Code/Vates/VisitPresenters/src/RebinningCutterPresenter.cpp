@@ -5,7 +5,8 @@
 #include <boost/shared_ptr.hpp>
 #include <vtkImplicitFunction.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+
 #include <boost/algorithm/string.hpp>
 namespace Mantid
 {
@@ -26,30 +27,38 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 }
 
 void RebinningCutterPresenter::constructReductionKnowledge(
-    std::vector<double>& normal, std::vector<double>& origin)
+    DimensionVec dimensions,
+    Dimension_sptr dimensionX,
+    Dimension_sptr dimensionY,
+    Dimension_sptr dimensionZ,
+    Dimension_sptr dimensiont,
+    double height,
+    double width,
+    double depth,
+    std::vector<double>& origin)
 {
-  if (normal.size() != 3)
-  {
-    throw std::invalid_argument("Three normal components expected.");
-  }
+  using namespace Mantid::MDAlgorithms;
+
   if (origin.size() != 3)
   {
     throw std::invalid_argument("Three origin components expected.");
   }
-  Mantid::MDAlgorithms::NormalParameter normalParam = Mantid::MDAlgorithms::NormalParameter(
-      normal.at(0), normal.at(1), normal.at(2));
-  Mantid::MDAlgorithms::OriginParameter originParam = Mantid::MDAlgorithms::OriginParameter(
-      origin.at(0), origin.at(1), origin.at(2));
+
+  OriginParameter originParam = OriginParameter(origin.at(0), origin.at(1), origin.at(2));
+
+  WidthParameter widthParam = WidthParameter(width);
+  HeightParameter heightParam = HeightParameter(height);
+  DepthParameter depthParam = DepthParameter(depth);
 
   //create the composite holder.
   Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
   //create the box.
-  Mantid::MDAlgorithms::PlaneImplicitFunction* planeFunc =
-      new Mantid::MDAlgorithms::PlaneImplicitFunction(normalParam, originParam);
+  BoxImplicitFunction* boxFunc =
+      new BoxImplicitFunction(widthParam, heightParam, depthParam, originParam);
 
-  //Add the new plane function.
-  compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(planeFunc));
+  //Add the new function.
+  compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunc));
 
   //Add existing functions.
   Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, getMetadataID());
@@ -172,22 +181,21 @@ void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
         returnedFuncs.begin();
     for (it; it != returnedFuncs.end(); ++it)
     {
-      PlaneImplicitFunction* planeFunction = dynamic_cast<PlaneImplicitFunction*> ((*it).get());
-      if (NULL != planeFunction)
+      BoxImplicitFunction* boxFunction = dynamic_cast<BoxImplicitFunction*> ((*it).get());
+      if (NULL != boxFunction)
       {
-        vtkPlane* plane = vtkPlane::New();
-        plane->SetOrigin(planeFunction->getOriginX(), planeFunction->getOriginY(),
-            planeFunction->getOriginZ());
-        plane->SetNormal(planeFunction->getNormalX(), planeFunction->getNormalY(),
-            planeFunction->getNormalZ());
+        vtkBox* box = vtkBox::New();
+
+        //Map implicit function to box function.
+        box->SetBounds(boxFunction->getLowerX(), boxFunction->getUpperX(), boxFunction->getLowerY(), boxFunction->getUpperY(), boxFunction->getLowerZ(), boxFunction->getUpperZ());
 
         clipper->SetInput(in_ds);
-        clipper->SetClipFunction(plane);
+        clipper->SetClipFunction(box);
         clipper->SetInsideOut(true);
         clipper->SetRemoveWholeCells(true);
         clipper->SetOutput(out_ds);
         clipper->Update();
-        plane->Delete();
+        box->Delete();
       }
       else
       {

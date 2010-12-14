@@ -8,8 +8,9 @@
 #include <cmath>
 #include <typeinfo>
 
+#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
@@ -50,11 +51,33 @@ public:
 
   vtkDataSet* Execute(Mantid::VATES::Clipper* clipper, vtkDataSet* in_ds)
   {
-    Mantid::VATES::RebinningCutterPresenter presenter(in_ds);
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    RebinningCutterPresenter presenter(in_ds);
 
-    presenter.constructReductionKnowledge(m_normal, m_origin);
+    DimensionVec vec;
+    Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
+    Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
+    Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
+    Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
+
+    vec.push_back(dimX);
+    vec.push_back(dimY);
+    vec.push_back(dimZ);
+    vec.push_back(dimT);
+
+    std::vector<double> origin;
+    origin.push_back(1);
+    origin.push_back(1);
+    origin.push_back(1);
+
+    presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, origin);
 
     vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(clipper);
+
+    std::cout << "---- Ouput --- " << std::endl;
+    std::cout << presenter.getFunction()->toXMLString() << std::endl;
+    std::cout << "---- Ouput End --- " << std::endl;
 
     in_ds->Delete();
     return ug;
@@ -64,7 +87,7 @@ public:
 //helper method;
 std::string getXMLInstructions()
 {
-  return std::string("<Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 1.0000, 1.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>2.0000, 3.0000, 4.0000</Value></Parameter></ParameterList></Function>");
+  return std::string("<Function><Type>BoxImplicitFunction</Type><ParameterList><Parameter><Type>WidthParameter</Type><Value>1.0000</Value></Parameter><Parameter><Type>DepthParameter</Type><Value>3.0000</Value></Parameter><Parameter><Type>HeightParameter</Type><Value>2.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>2.0000, 3.0000, 4.0000</Value></Parameter></ParameterList></Function>");
 }
 
 //helper method
@@ -74,15 +97,23 @@ std::string getComplexXMLInstructions()
 		  "<Type>CompositeImplicitFunction</Type>"
 		  "<ParameterList/>"
 		  "<Function>"
-		  "<Type>PlaneImplicitFunction</Type>"
+		  "<Type>BoxImplicitFunction</Type>"
 		  "<ParameterList>"
-		  "<Parameter>"
-		  "<Type>NormalParameter</Type>"
-		  "<Value>0.0000, 1.0000, 1.0000</Value>"
-		  "</Parameter>"
-		  "<Parameter>"
+      "<Parameter>"
+      "<Type>WidthParameter</Type>"
+      "<Value>1.0000</Value>"
+      "</Parameter>"
+      "<Parameter>"
+      "<Type>HeightParameter</Type>"
+      "<Value>2.0000</Value>"
+      "</Parameter>"
+      "<Parameter>"
+      "<Type>DepthParameter</Type>"
+      "<Value>3.0000</Value>"
+      "</Parameter>"
+      "<Parameter>"
 		  "<Type>OriginParameter</Type>"
-		  "<Value>0.0000, 0.0000, 0.0000</Value>"
+		  "<Value>1.0000, 0.0000, 1.0000</Value>"
 		  "</Parameter>"
 		  "</ParameterList>"
 		  "</Function>"
@@ -90,16 +121,24 @@ std::string getComplexXMLInstructions()
 		  "<Type>CompositeImplicitFunction</Type>"
 		  "<ParameterList></ParameterList>"
 		  "<Function>"
-		  "<Type>PlaneImplicitFunction</Type>"
+		  "<Type>BoxImplicitFunction</Type>"
 		  "<ParameterList>"
 		  "<Parameter>"
-		  "<Type>NormalParameter</Type>"
-		  "<Value>0.0000, 0.0000, -1.0000</Value>"
+		  "<Type>WidthParameter</Type>"
+		  "<Value>1.0000</Value>"
 		  "</Parameter>"
 		  "<Parameter>"
-		  "<Type>OriginParameter</Type>"
-		  "<Value>0.0000, 0.0000, 0.0000</Value>"
+		  "<Type>HeightParameter</Type>"
+		  "<Value>2.0000</Value>"
 		  "</Parameter>"
+      "<Parameter>"
+      "<Type>DepthParameter</Type>"
+      "<Value>3.0000</Value>"
+      "</Parameter>"
+      "<Parameter>"
+      "<Type>OriginParameter</Type>"
+      "<Value>0.0000, 0.0000, 0.0000</Value>"
+      "</Parameter>"
 		  "</ParameterList>"
 		  "</Function>"
 		  "</Function>"
@@ -150,12 +189,12 @@ void testInChainedFilterSchenario()
   vtkDataSet* in_ds = vtkUnstructuredGrid::New();
 
   MockClipper* clipper = new MockClipper;
-      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(3);
-      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(3);
-      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, Update()).Times(3);
+      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(testing::Between(3,6));
+      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(testing::Between(3,6));
+      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(testing::Between(3,6));
+      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(testing::Between(3,6));
+      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(testing::Between(3,6));
+      EXPECT_CALL(*clipper, Update()).Times(testing::Between(3,6));
 
 
   PsudoFilter a(std::vector<double>(3,1),std::vector<double>(3,1));
@@ -239,7 +278,7 @@ void testFindExistingRebinningDefinitions()
 
   ImplicitFunction* func = findExistingRebinningDefinitions(dataset, id.c_str());
 
-  TSM_ASSERT("There was a previous definition of a plane that should have been recognised and generated."
+  TSM_ASSERT("There was a previous definition of a function that should have been recognised and generated."
       , CompositeImplicitFunction::functionName() == func->getName());
 
   delete func;
@@ -259,31 +298,27 @@ void testNoExistingRebinningDefinitions()
 }
 
 
-void testConstructWithoutValidNormalThrows()
-{
-  using namespace Mantid::VATES;
-
-    RebinningCutterPresenter presenter(vtkUnstructuredGrid::New());
-    std::vector<double> badNormal;
-    std::vector<double> goodOrigin;
-    goodOrigin.push_back(1);
-    goodOrigin.push_back(1);
-    goodOrigin.push_back(1);
-    TSM_ASSERT_THROWS("The normal vector is the wrong size. Should have thrown.",
-        presenter.constructReductionKnowledge(badNormal, goodOrigin), std::invalid_argument);
-}
-
 void testConstructionWithoutValidOriginThrows()
 {
   using namespace Mantid::VATES;
+  using namespace Mantid::Geometry;
   RebinningCutterPresenter presenter(vtkUnstructuredGrid::New());
-      std::vector<double> badOrigin;
-      std::vector<double> goodNormal;
-      goodNormal.push_back(1);
-      goodNormal.push_back(1);
-      goodNormal.push_back(1);
-      TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
-          presenter.constructReductionKnowledge(goodNormal, badOrigin), std::invalid_argument);
+
+  DimensionVec vec;
+  Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
+  Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
+  Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
+  Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
+
+  vec.push_back(dimX);
+  vec.push_back(dimY);
+  vec.push_back(dimZ);
+  vec.push_back(dimT);
+
+  std::vector<double> badOrigin;
+
+  TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
+      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, badOrigin), std::invalid_argument);
 }
 
 void testApplyReductionThrows()
