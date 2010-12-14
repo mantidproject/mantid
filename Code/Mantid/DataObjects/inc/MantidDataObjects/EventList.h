@@ -302,9 +302,13 @@ public:
 
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
-  void filterInPlace(Kernel::TimeSplitterType splitter);
+  template< class T >
+  void filterInPlaceHelper(Kernel::TimeSplitterType & splitter, typename std::vector<T> & events);
+  void filterInPlace(Kernel::TimeSplitterType & splitter);
 
-  void splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const;
+  template< class T >
+  void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
+  void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
   void multiply(const double value);
   void multiply(const double value, const double error);

@@ -1251,6 +1251,8 @@ public:
   {
     this->fake_data_only_two_times(150, 850);
     el.switchToWeightedEvents();
+    // Set the weights to 2.0
+    el *= 2.0;
 
     std::vector< EventList * > outputs;
     for (int i=0; i<10; i++)
@@ -1266,6 +1268,7 @@ public:
 
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[1]->getNumberEvents(), 1);
+    TS_ASSERT_EQUALS( outputs[1]->getWeightedEvents()[0].weight(), 2.0);
     TS_ASSERT_EQUALS( outputs[2]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[3]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[4]->getNumberEvents(), 0);
@@ -1273,6 +1276,7 @@ public:
     TS_ASSERT_EQUALS( outputs[6]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[7]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[8]->getNumberEvents(), 1);
+    TS_ASSERT_EQUALS( outputs[8]->getWeightedEvents()[0].weight(), 2.0);
     TS_ASSERT_EQUALS( outputs[9]->getNumberEvents(), 0);
   }
 

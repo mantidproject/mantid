@@ -37,7 +37,7 @@ if __name__ == '__main__':
     #Best to put the slowest tests at the front...
     simple_folders = ['Nexus',  'CurveFitting', 'DataHandling', 
                  'DataObjects', 'API', 'Kernel', 'PythonAPI'] 
-    simple_folders += ['MDDataObjects', 'MDAlgorithms']
+    #simple_folders += ['MDDataObjects', 'MDAlgorithms']
 
     # Algorithms will get split in half
     arguments = ['Algorithms1', 'Algorithms2' ] + simple_folders
