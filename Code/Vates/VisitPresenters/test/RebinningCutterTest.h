@@ -78,7 +78,7 @@ std::string getComplexXMLInstructions()
 {
   return std::string("<Function>"
 		  "<Type>CompositeImplicitFunction</Type>"
-		  "<ParameterList></ParameterList>"
+		  "<ParameterList/>"
 		  "<Function>"
 		  "<Type>PlaneImplicitFunction</Type>"
 		  "<ParameterList>"
@@ -160,12 +160,12 @@ void testInChainedFilterSchenario()
   vtkDataSet* in_ds = vtkUnstructuredGrid::New();
 
   MockClipper* clipper = new MockClipper;
-      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(3);
-      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(3);
-      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(3);
-      EXPECT_CALL(*clipper, Update()).Times(3);
+      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(6);
+      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(6);
+      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(6);
+      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(6);
+      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(6);
+      EXPECT_CALL(*clipper, Update()).Times(6);
 
 
   PsudoFilter a(presenter.get(),std::vector<double>(3,1),std::vector<double>(3,1));
@@ -347,7 +347,7 @@ void testPersistance()
   vtkCharArray* charArry = dynamic_cast<vtkCharArray*>(dataArry);
   std::string xmlString = convertCharArrayToString(charArry);
   TSM_ASSERT_EQUALS("The persistence of the reduction knowledge into the output dataset has not worked correctly.",
-      "<Function><Type>CompositeImplicitFunction</Type><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>7.0000, 8.0000, 9.0000</Value></Parameter></ParameterList></Function><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>4.0000, 5.0000, 6.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>10.0000, 11.0000, 12.0000</Value></Parameter></ParameterList></Function></Function>"
+      "<Function><Type>CompositeImplicitFunction</Type><ParameterList/><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>7.0000, 8.0000, 9.0000</Value></Parameter></ParameterList></Function><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>4.0000, 5.0000, 6.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>10.0000, 11.0000, 12.0000</Value></Parameter></ParameterList></Function></Function>"
       ,xmlString);
   delete compFunc;
   outdataset->Delete();

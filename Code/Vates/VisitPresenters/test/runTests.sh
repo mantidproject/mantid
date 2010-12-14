@@ -30,15 +30,16 @@ echo "Compiling the test executable..."
 
 mantid_libpath=../../../Mantid/debug
 visit_libpresenterpath=../Debug 
+vtk_libpath=/usr/local/2.1.1/linux-x86_64/lib
 
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Mantid/Kernel/inc -I../../../Mantid/MDAlgorithms/inc -I../../../Mantid/API/inc -I../inc/VisitPlugins -I/usr/include/vtk-5.2 -I/usr/local/2.1.0/linux-intel/include -I../../../Mantid/Geometry/inc -I ../inc \
-    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include -I ../../../TestingTools/include -I /usr/include/vtk-5.2 -L$mantid_libpath -L$visit_libpresenterpath  -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMDAlgorithms -lVisitPresenters -Wno-deprecated 
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Mantid/Kernel/inc -I../../../Mantid/MDAlgorithms/inc -I../../../Mantid/API/inc -I../inc/VisitPlugins -I/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 -I../../../Mantid/Geometry/inc -I ../inc \
+    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include -I ../../../TestingTools/include -L$vtk_libpath -L$mantid_libpath -L$visit_libpresenterpath  -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMDAlgorithms -lMantidDataObjects -lMDDataObjects -lVisitPresenters -lhdf5 -Wno-deprecated 
 
 echo
 
 echo "Running the tests..."
 ln ../../../Mantid/Build/Tests/*.properties .
-LD_LIBRARY_PATH=$mantid_libpath:$visit_libpresenterpath:$LD_LIBRARY_PATH ./runner.exe
+LD_LIBRARY_PATH=$vtk_libpath:$mantid_libpath:$visit_libpresenterpath:$LD_LIBRARY_PATH ./runner.exe
 echo
 
 # Remove the generated files to ensure that they're not inadvertently run
