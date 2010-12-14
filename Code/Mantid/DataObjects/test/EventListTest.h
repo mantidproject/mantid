@@ -1310,7 +1310,7 @@ public:
   void do_testSplit_FilterInPlace(bool weighted)
   {
     this->fake_uniform_time_data();
-    if (weighted) el.switchToWeightedEvents();
+    if (weighted) el *= 3.0;
 
     TimeSplitterType split;
     split.push_back( SplittingInterval(100, 200, 0) );
@@ -1329,6 +1329,7 @@ public:
       TS_ASSERT_EQUALS( el.getWeightedEvents()[149].pulseTime(), 249);
       TS_ASSERT_EQUALS( el.getWeightedEvents()[150].pulseTime(), 300);
       TS_ASSERT_EQUALS( el.getWeightedEvents()[199].pulseTime(), 349);
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[0].weight(), 3.0);
     }
     else
     {
@@ -1361,7 +1362,7 @@ public:
   void do_testSplit_FilterInPlace_Everything(bool weighted)
   {
     this->fake_uniform_time_data();
-    if (weighted) el.switchToWeightedEvents();
+    if (weighted) el *= 3.0;
 
     TimeSplitterType split;
     split.push_back( SplittingInterval(-10, 1700, 0) );
@@ -1371,6 +1372,10 @@ public:
 
     // Nothing left
     TS_ASSERT_EQUALS( el.getNumberEvents(), 1000);
+    if (weighted)
+    {
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[0].weight(), 3.0);
+    }
   }
 
 
