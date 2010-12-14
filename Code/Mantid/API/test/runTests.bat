@@ -24,9 +24,9 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl /O2 runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\..\..\TestingTools\include" /I "..\inc" /I "..\..\MDDataObjects\inc" /I "..\..\kernel\inc" /I "..\..\Geometry\inc" /I "..\.." /D"_USE_MATH_DEFINES" /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /EHsc /MDd /W3 -wd4275 -wd4996 /nologo /c /TP
+cl /O2 runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\..\..\TestingTools\include" /I "..\inc" /I "..\..\MDDataObjects\inc" /I "..\..\kernel\inc" /I "..\..\Geometry\inc" /I "..\.." /D"_USE_MATH_DEFINES" /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /DIN_MANTID_GEOMETRY=1 /EHsc /MDd /W3 -wd4275 -wd4996 /nologo /c /TP
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" gmock_d.lib Mantidkernel.lib runner.obj Mantidapi.lib Mantidgeometry.lib MDAlgorithms.lib
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" gmock_d.lib Mantidkernel.lib runner.obj Mantidapi.lib Mantidgeometry.lib
 
 echo "Copying in properties files..."
 copy /Y ..\..\Build\Tests\*properties

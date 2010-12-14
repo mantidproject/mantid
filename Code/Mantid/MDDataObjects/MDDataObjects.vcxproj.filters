@@ -59,9 +59,6 @@
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\point3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDDataPointDescription.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDImageDatatypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

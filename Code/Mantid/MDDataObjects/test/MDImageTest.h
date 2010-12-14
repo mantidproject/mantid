@@ -71,6 +71,12 @@ private:
   std::vector<unsigned int> selection;
 
 public:
+	void testMDImageConstructor1(){
+		std::auto_ptr<MDImage> pImg;
+		TSM_ASSERT_THROWS_NOTHING("MDImage constructor builds empty object and should not throw",pImg = std::auto_ptr<MDImage>(new MDImage()));
+
+		TSM_ASSERT_EQUALS("emtpy image should not be initialized",false,pImg->is_initialized());
+	}
 
   void testMDImageGet2DData(void){
 
@@ -149,16 +155,6 @@ public:
     pDND->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
-
-  //void test_alloc_mdd_arrays()
-  //{
-  //  std::auto_ptr<MDImage>pMDImage = std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
-  //  MDGeometryDescription tt;
-
-  //  pMDImage->alloc_mdd_arrays(tt);
-  //  TSM_ASSERT("The Multi-dimensional image data structure should not be returned as null.", pMDImage->get_pMDImgData() != NULL);
-  //  TSM_ASSERT("The Multi-dimensional point data should not be returned as null.", pMDImage->get_pData() != NULL);
-  //}
 
 private:
   std::string findTestFileLocation(void){

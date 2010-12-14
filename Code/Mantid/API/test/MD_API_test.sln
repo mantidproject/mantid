@@ -7,6 +7,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MD_API_test", "MD_API_test.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "API", "..\API.vcxproj", "{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F1EB475D-8936-49E5-AC28-3B3830483487} = {F1EB475D-8936-49E5-AC28-3B3830483487}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Geometry", "..\..\Geometry\Geometry.vcxproj", "{F1EB475D-8936-49E5-AC28-3B3830483487}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +37,14 @@ Global
 		{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}.Release|Win32.Build.0 = Release|Win32
 		{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}.Release|x64.ActiveCfg = Release|x64
 		{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}.Release|x64.Build.0 = Release|x64
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Debug|Win32.Build.0 = Debug|Win32
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Debug|x64.ActiveCfg = Debug|x64
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Debug|x64.Build.0 = Debug|x64
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Release|Win32.ActiveCfg = Release|Win32
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Release|Win32.Build.0 = Release|Win32
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Release|x64.ActiveCfg = Release|x64
+		{F1EB475D-8936-49E5-AC28-3B3830483487}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

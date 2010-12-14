@@ -85,8 +85,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildStep>
       <Message>Performing Custom Build Step - copying properties file to debug; </Message>
-      <Command>copy "$(SolutionDir)\Properties\*properties" "$(SolutionDir)\debug" /Y</Command>
-      <Outputs>$(SolutionDir)\debug\Mantid.properties;%(Outputs)</Outputs>
+      <Command>copy /Y "$(SolutionDir)Properties\*properties" "$(SolutionDir)debug"</Command>
+      <Outputs>$(SolutionDir)debug\Mantid.properties;%(Outputs)</Outputs>
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>

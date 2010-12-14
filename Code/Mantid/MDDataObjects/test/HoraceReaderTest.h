@@ -120,7 +120,7 @@ public:
 
 	void testReadPixelsSelection(){
 		// t
-		const int nCells = 2;
+		const int nCells = this->pImg->getGeometry()->getGeometryExtend();
 		std::vector<size_t> selected_cells(nCells);
 		size_t starting_cell(0),final_cell;
 		std::vector<char> pix_buf(pReader->getNConributedPixels()*9*8);

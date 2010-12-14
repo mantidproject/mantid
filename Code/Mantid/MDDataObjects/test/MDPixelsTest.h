@@ -8,7 +8,7 @@
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/FileFinder.h"
-#include "MDDataObjects/point3D.h"
+#include "MDDataObjects/MDImageDatatypes.h"
 #include "Poco/Path.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

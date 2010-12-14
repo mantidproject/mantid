@@ -192,6 +192,7 @@
     <ClInclude Include="inc\MDDataObjects\MDDataPointDescription.h" />
     <ClInclude Include="inc\MDDataObjects\MDDataPoints.h" />
     <ClInclude Include="inc\MDDataObjects\MDImage.h" />
+    <ClInclude Include="inc\MDDataObjects\MDImageDatatypes.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspaceHelper.h" />
     <ClInclude Include="inc\MDDataObjects\MD_FileFormatFactory.h" />
@@ -199,7 +200,6 @@
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab4D.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
-    <ClInclude Include="inc\MDDataObjects\point3D.h" />
     <ClInclude Include="inc\MDDataObjects\stdafx.h" />
   </ItemGroup>
   <ItemGroup>

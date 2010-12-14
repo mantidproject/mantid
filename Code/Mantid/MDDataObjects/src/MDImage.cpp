@@ -301,10 +301,12 @@ MDImage::clear_class(void)
         delete [] MD_IMG_array.data;
         MD_IMG_array.data = NULL;
     }
-    this->MD_IMG_array.dimSize.assign(this->pMDGeometry->getNumDims(),0);
-    this->MD_IMG_array.dimStride.assign(this->pMDGeometry->getNumDims()+1,0);
-    this->MD_IMG_array.min_value.assign(this->pMDGeometry->getNumDims(), FLT_MAX);
-    this->MD_IMG_array.max_value.assign(this->pMDGeometry->getNumDims(),-FLT_MAX);
+	if(this->pMDGeometry.get()){
+		this->MD_IMG_array.dimSize.assign(this->pMDGeometry->getNumDims(),0);
+		this->MD_IMG_array.dimStride.assign(this->pMDGeometry->getNumDims()+1,0);
+		this->MD_IMG_array.min_value.assign(this->pMDGeometry->getNumDims(), FLT_MAX);
+		this->MD_IMG_array.max_value.assign(this->pMDGeometry->getNumDims(),-FLT_MAX);
+	}
 	MD_IMG_array.data_array_size=0;
 	MD_IMG_array.data_size     = 0;
 

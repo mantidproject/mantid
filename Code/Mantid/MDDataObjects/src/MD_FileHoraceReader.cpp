@@ -309,13 +309,32 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 	size_t         block_size(0);
 	size_t         block_start(0);
 //	
-	for(i=starting_cell;i<=iCellRead;i++){
+	size_t ic      = starting_cell;
+	size_t ic_next = ic+1;
 
-		cell_index      = selected_cells[i];
-		pixels_start  = this->positions.pix_start+hbs*pImgData[cell_index].chunk_location; 
+	while(ic<iCellRead){
+
+		cell_index      = selected_cells[ic];
+		pixels_start  =   this->positions.pix_start+hbs*pImgData[cell_index].chunk_location; 
 
 		// optimisaion possible when cells are adjacent
 		block_size    = hbs*pImgData[cell_index].npix;
+
+		// if the next cell follows the current on HDD, we should read them together aggregating adjacent cells;
+		size_t next_block = pImgData[cell_index].chunk_location+pImgData[cell_index].npix;
+		size_t next_index = selected_cells[ic_next];
+		while(pImgData[next_index].chunk_location==next_block){
+			// block size grows and all other is auxiliary
+				block_size    += hbs*pImgData[next_index].npix;
+				ic = ic_next;
+				ic_next++;
+				if(ic_next == iCellRead)break;
+
+				cell_index = selected_cells[ic];
+				next_block = pImgData[cell_index].chunk_location+pImgData[cell_index].npix;
+				next_index = selected_cells[ic_next];
+			
+		}
 
 
 		this->fileStreamHolder.seekg(pixels_start,std::ios::beg);
@@ -323,7 +342,9 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 		// compacting horace data in memory
 		this->compact_hor_data(&pix_buf[block_start],block_size);
 		block_start+=block_size;
-			
+
+		ic = ic_next;
+	    ic_next++;
 	}
 
 	return iCellRead;
