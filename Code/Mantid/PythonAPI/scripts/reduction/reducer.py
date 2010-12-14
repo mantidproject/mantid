@@ -38,6 +38,8 @@ class Reducer(object):
     _data_path = '.'
     ## List of data files to process
     _data_files = {}
+    ## List of workspaces that were modified
+    _dirty = []
     ## List of reduction steps
     _reduction_steps = []
     ## Log
@@ -53,6 +55,28 @@ class Reducer(object):
         else:
             raise RuntimeError, "Reducer.set_instrument expects an %s object, found %s" % (Instrument, configuration.__class__)
         
+    def dirty(self, workspace):
+        """
+            Flag a workspace as dirty when the data has been modified
+        """
+        if workspace not in self._dirty:
+            self._dirty.append(workspace)
+        
+    def clean(self, workspace):
+        """
+            Remove the dirty flag on a workspace
+        """
+        if workspace in self._dirty:
+            self._dirty.remove(workspace)
+            
+    def is_clean(self, workspace):
+        """
+            Returns True if the workspace is clean
+        """
+        if workspace in self._dirty:
+            return False
+        return True
+    
     def set_data_path(self, path):
         """
             Set the path for data files
