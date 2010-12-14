@@ -1,5 +1,5 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
-#include "MantidQtMantidWidgets/MWDiagCalcs.h"
+#include "MantidQtMantidWidgets/DiagResults.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
@@ -107,7 +107,8 @@ void MWDiag::loadDefaults()
   m_designWidg.leEndTime->setText(
     m_prevSets.value("TOF end", END_WINDOW_TOF).toString());
 }
-/// loads default values into each control using either the previous value used when the form was run or the default value for that control
+/// loads default values into each control using either the previous value used when 
+/// the form was run or the default value for that control
 void MWDiag::saveDefaults()
 {
   m_prevSets.setValue("input mask", m_designWidg.leIFile->text());
@@ -265,6 +266,11 @@ bool MWDiag::isInputValid() const
   valid &= m_WBV1->isValid();
   valid &= m_WBV2->isValid();
 
+  if(m_designWidg.ckDoBack->isChecked() && m_monoFiles.isEmpty() )
+  {
+    valid = false;
+  }
+
   return valid;
 }
 
@@ -299,30 +305,91 @@ void MWDiag::browseClicked(const QString &buttonDis)
     this->setFocus();
   }
 }
-/** create, setup and show a dialog box that reports the number of bad
-* detectors.
-*/
-void MWDiag::raiseDialog()
-{// uses new to create the form and the form needs to execute setAttribute(Qt::WA_DeleteOnClose) so that its memory will be freed
-  m_dispDialog = new DiagResults(this->parentWidget());
-  m_dispDialog->show();
-  connect(m_dispDialog, SIGNAL(died()), this, SLOT(noDispDialog()));
-  connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)),
-            this, SIGNAL(runAsPythonScript(const QString&)));
-}
-/** checks that the results dialog box hasn't been closed before asking it to display
-*  data
-*  @param display the results from running an individual test
-*  @throw NullPointer if the dialog box had already been closed
-*/
-void MWDiag::notifyDialog(const DiagResults::TestSummary &display)
+
+/**
+ * Create a diagnostic script from the given
+ */
+QString MWDiag::createDiagnosticScript() const
 {
-  if ( ! m_dispDialog )
+  // Be nice and explicit so that this is as easy as possible to read later
+  // Pull out the for data first
+  QString sampleRun = m_designWidg.ckDoBack->isChecked() ? ("r'" + m_monoFiles[0] + "'") : "";
+  QString whiteBeam = "r'" + m_WBV1->getFirstFilename() + "'";
+  QString whiteBeam2 = "r'" + m_WBV2->getFirstFilename() + "'";
+  if( whiteBeam2 == "r''" ) whiteBeam2 = "None";
+  QString removeZeroes = m_designWidg.ckZeroCounts->isChecked() ? "True" : "False";
+  QString lowCounts = m_designWidg.leLowAbs->text();
+  QString highCounts = m_designWidg.leHighAbs->text();
+  QString lowMedian = m_designWidg.leLowMed->text();
+  QString highMedian = m_designWidg.leHighMed->text();
+  QString significance = m_designWidg.leSignificance->text();
+  QString acceptance = m_designWidg.leAcceptance->text();
+  QString bkgdRange = QString("[%1,%2]").arg(m_designWidg.leStartTime->text(),m_designWidg.leEndTime->text());
+  QString variation = m_designWidg.leVariation->text();
+
+  QString diagCall = 
+    "diag_total_mask = diagnostics.diagnose(";
+  
+  if( m_designWidg.ckDoBack->isChecked() )
   {
-    throw Exception::NullPointerException("MWDiag::notifyDialog", "m_dispDialog");
+    // Do the background check so we need all fields
+    diagCall += 
+      "white_run=" + whiteBeam + ","
+      "sample_run=" + sampleRun + ","
+      "other_white=" + whiteBeam2 + ","
+      "remove_zero=" + removeZeroes + ","
+      "tiny=" + lowCounts + ","
+      "large=" + highCounts + ","
+      "median_lo=" + lowMedian + ","
+      "median_hi=" + highMedian + ","
+      "signif=" + significance + ","
+      "bkgd_threshold=" + acceptance + ","
+      "bkgd_range=" + bkgdRange + ","
+      "variation=" + variation;    
   }
-  m_dispDialog->addResults(display);
+  else
+  {
+    // No background check so don't need all of the fields
+    diagCall += 
+      "white_run=" + whiteBeam + ","
+      "other_white=" + whiteBeam2 + ","
+      "tiny=" + lowCounts + ","
+      "large=" + highCounts + ","
+      "median_lo=" + lowMedian + ","
+      "median_hi=" + highMedian + ","
+      "signif=" + significance;
+  }
+
+  // Print results argument and Closing  argument bracket
+  diagCall += ", print_results=True)\n";
+
+  QString pyCode = 
+    "import diagnostics\n"
+    "try:\n"
+    "    " + diagCall + "\n"
+    "except RuntimeError, exc:\n"
+    "    print 'Exception:'\n"
+    "    print str(exc)\n";
+  
+  return pyCode;
 }
+
+/**
+ * Show the test result dialog
+ */
+void MWDiag::showTestResults(const QString & testSummary) const
+{
+  if( !m_dispDialog )
+  {
+    m_dispDialog = new DiagResults(this->parentWidget());
+    connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)), this, 
+	    SIGNAL(runAsPythonScript(const QString&)));
+  }
+  
+  m_dispDialog->updateResults(testSummary);
+  m_dispDialog->show();
+}
+
 /** close the results window, if there is one open
 */
 void MWDiag::closeDialog()
@@ -332,7 +399,10 @@ void MWDiag::closeDialog()
     m_dispDialog->close();
   }
 }
-// ??STEVES?? move this function to the file widget?
+
+/**
+ *
+ */
 QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
 {
   QString filter;
@@ -352,23 +422,24 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
   if( save )
   {
     filename = FileDialogHandler::getSaveFileName(this, "Save file",
-	  m_prevSets.value("save file dir", "").toString(), filter);
-	if( ! filename.isEmpty() )
-	{
-	  m_prevSets.setValue("save file dir", QFileInfo(filename).absoluteDir().path());
-	}
+          m_prevSets.value("save file dir", "").toString(), filter);
+        if( ! filename.isEmpty() )
+        {
+          m_prevSets.setValue("save file dir", QFileInfo(filename).absoluteDir().path());
+        }
   }
   else
   {
     filename = QFileDialog::getOpenFileName(this, "Open file",
-	  m_prevSets.value("load file dir", "").toString(), filter);
-	if( ! filename.isEmpty() )
-	{
-	  m_prevSets.setValue("load file dir", QFileInfo(filename).absoluteDir().path());
-	}
+          m_prevSets.value("load file dir", "").toString(), filter);
+        if( ! filename.isEmpty() )
+        {
+          m_prevSets.setValue("load file dir", QFileInfo(filename).absoluteDir().path());
+        }
   }
   return filename;
 } 
+
 /**raises the window containing the results summary, run the Python scripts that
 *  have been created and, optionally on success, save the values on the form 
 *  @param saveSettings if the Python executes successfully and this parameter is true the settings are saved
@@ -386,228 +457,249 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   {
     throw std::invalid_argument("Invalid input detected. Errors are marked with a red star.");
   }
-  try
+  QString diagCode = createDiagnosticScript();
+  // The results of the diag code execution are captured in the string return of runPythonCode
+  QString scriptResults = runPythonCode(diagCode);
+
+  // Now display them to the user if all went well
+  // but bail out if not
+  if( scriptResults.startsWith("Exception:") )
   {
-    // these objects read the user settings in the GUI on construction
-    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFirstFilename(), m_instru->currentText(), outWS);
-    connect(&firstTest, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
+    return scriptResults;
+  }
+  // Send the results to the the non-modal dialog
+  showTestResults(scriptResults);
+  return "";
+
+
+
+//   try
+//   {
+//     // these objects read the user settings in the GUI on construction
+//     whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFirstFilename(), m_instru->currentText(), outWS);
+//     connect(&firstTest, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
   
-    // the two tests below are optional, dependent on the information supplied by the user
-    boost::shared_ptr<whiteBeam2> optional1;
-    QString prob2 = possibleSecondTest(optional1, outWS);
-    boost::shared_ptr<backTest> optional2;
-    QString prob3 = possibleThirdTest(optional2, outWS);
+//     // the two tests below are optional, dependent on the information supplied by the user
+//     boost::shared_ptr<whiteBeam2> optional1;
+//     QString prob2 = possibleSecondTest(optional1, outWS);
+//     boost::shared_ptr<backTest> optional2;
+//     QString prob3 = possibleThirdTest(optional2, outWS);
     
   
-    //if were errors return a description of the first error
-    //stars have already been placed next to any problem input
-    if ( ! prob1.isEmpty() )
-    {
-      throw std::invalid_argument(prob1.toStdString());
-    }
-    if ( ! prob2.isEmpty() )
-    {
-      throw std::invalid_argument(prob2.toStdString());
-    }
-    if ( ! prob3.isEmpty() )
-    {
-      throw std::invalid_argument(prob3.toStdString());
-    }
+//     //if were errors return a description of the first error
+//     //stars have already been placed next to any problem input
+//     if ( ! prob1.isEmpty() )
+//     {
+//       throw std::invalid_argument(prob1.toStdString());
+//     }
+//     if ( ! prob2.isEmpty() )
+//     {
+//       throw std::invalid_argument(prob2.toStdString());
+//     }
+//     if ( ! prob3.isEmpty() )
+//     {
+//       throw std::invalid_argument(prob3.toStdString());
+//     }
 
-    // the input is good bring up the status window
-    raiseDialog();
-    try // run things that are dependent on the dialog box being present, it is deleted whenever the user closes it!
-    {
-      DiagResults::TestSummary sumFirst = singleWhiteBeamTest(firstTest);
+//     // the input is good bring up the status window
+//     raiseDialog();
+//     try // run things that are dependent on the dialog box being present, it is deleted whenever the user closes it!
+//     {
+//       DiagResults::TestSummary sumFirst = singleWhiteBeamTest(firstTest);
 
-      // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
-      DiagResults::TestSummary sumOption1("");
-      DiagResults::TestSummary sumOption2("");
-      tempOutputWS.push_back(sumFirst.inputWS.toStdString());
+//       // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
+//       DiagResults::TestSummary sumOption1("");
+//       DiagResults::TestSummary sumOption2("");
+//       tempOutputWS.push_back(sumFirst.inputWS.toStdString());
 
-      if ( optional1 )
-      {
-        connect(optional1.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
-        sumOption1 = whiteBeamCompTest(sumFirst, optional1);
-        tempOutputWS.push_back(sumOption1.inputWS.toStdString());
-      }
+//       if ( optional1 )
+//       {
+//         connect(optional1.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
+//         sumOption1 = whiteBeamCompTest(sumFirst, optional1);
+//         tempOutputWS.push_back(sumOption1.inputWS.toStdString());
+//       }
 
-      if ( optional2 )
-      {
-        connect(optional2.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
-        sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
-      }	
-    }
-    catch ( Exception::NullPointerException & )
-    {// the diag has died, probably the user closed it
-      prob1 = "The results window was closed, calculation aborted";
-    }
-    catch (std::exception &e)
-    {
-      return QString(e.what())+"  Exception encountered running detector diagnostic tests";
-    }
-  }
-  catch (std::invalid_argument &e)
-  {
-    return "In detector test:\n" + QString(e.what());
-  }
-  // clean up tempory workspaces that were used in the calculations
-  std::vector<std::string>::const_iterator it = tempOutputWS.begin();
-  for ( ; it !=  tempOutputWS.end(); ++it )
-  {
-    Mantid::API::FrameworkManager::Instance().deleteWorkspace(*it);
-  }
-  //tell the results window it may re-enable its buttons
-  blockPython(false);
+//       if ( optional2 )
+//       {
+//         connect(optional2.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
+//         sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
+//       }	
+//     }
+//     catch ( Exception::NullPointerException & )
+//     {// the diag has died, probably the user closed it
+//       prob1 = "The results window was closed, calculation aborted";
+//     }
+//     catch (std::exception &e)
+//     {
+//       return QString(e.what())+"  Exception encountered running detector diagnostic tests";
+//     }
+//   }
+//   catch (std::invalid_argument &e)
+//   {
+//     return "In detector test:\n" + QString(e.what());
+//   }
+//   // clean up tempory workspaces that were used in the calculations
+//   std::vector<std::string>::const_iterator it = tempOutputWS.begin();
+//   for ( ; it !=  tempOutputWS.end(); ++it )
+//   {
+//     Mantid::API::FrameworkManager::Instance().deleteWorkspace(*it);
+//   }
+//   //tell the results window it may re-enable its buttons
+//   blockPython(false);
 
-  if (prob1.isEmpty() && saveSettings)
-  {//avoid saving user settings that caused errors but assume there are no errors by this point
-    saveDefaults();
-  }
-  // prob1 should be empty so the next line is equivalent to return ""
-  return prob1;
+//   if (prob1.isEmpty() && saveSettings)
+//   {//avoid saving user settings that caused errors but assume there are no errors by this point
+//     saveDefaults();
+//   }
+//   // prob1 should be empty so the next line is equivalent to return ""
+//   return prob1;
 }
+
 void MWDiag::blockPython(const bool block)
 {//don't need to do anything if the dialog box was closed
-  if(m_dispDialog)
-  {
-    m_dispDialog->showButtons( ! block );
-  }
+//   if(m_dispDialog)
+//   {
+//     m_dispDialog->showButtons( ! block );
+//   }
 }
-/** Pointers the passed pointer to an object will contain all the Python script for
-*  the two white beam vanadium detector test
-*  @param whiteBeamComp will be pointed at a valid whiteBeam2 object
-*  @param outWS the name of the workspace that will remain after execution
-*  @return any errors or an empty string for no error
-*/
-QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName)
-{  
-  QString whiteBeamFile2 = m_WBV2->getFirstFilename();
-  if ( ! whiteBeamFile2.isEmpty() )
-  {// the user has supplied an input file for the second test so fill the shared_ptr with the script
-    whiteBeamComp.reset(
-	    new whiteBeam2(this, m_designWidg, whiteBeamFile2, m_instru->currentText(), WSName));
-	  return "";
-  }
-  else
-  {
-    whiteBeamComp = boost::shared_ptr<whiteBeam2>();
-  }
-  return "";
-}
-/** Pointers the passed pointer to an object will contain all the Python script for
-*  the detector test based on background values
-*  @param backCheck will be pointered to a valid backTest object
-*  @return any errors or an empty string for no error
-*/
-QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const QString &WSName)
-{
-  if (m_designWidg.ckDoBack->isChecked())
-  { //generate a Python script
-    backCheck.reset(new backTest(this, m_designWidg, m_monoFiles, m_instru->currentText(), WSName));
-	//report any problems trying to construct it, likely to be problems with the values suggested by the user
-	return "";
-  }
-  else
-  {
-    backCheck = boost::shared_ptr<backTest>();
-  }
-  return "";
-}
-/** Executes the Python script constructed for the first white beam vanadium test
-*  @param python this object contains a script constructed for this test
-*  @return summary data of the test results
-*  @throw invalid_argument if an exception was thrown during execution of the Python
-*/
-DiagResults::TestSummary MWDiag::singleWhiteBeamTest(whiteBeam1 &python)
-{
-  DiagResults::TestSummary results("First white beam test");
-  // report to the dialog what's happening
-  results.status = "Analysing white beam vanadium 1";
-  notifyDialog(results);
-  
-  // use the following code to see the script QStringList list1 = python.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
-  QString error = results.pythonResults(python.run());
-  
-  if ( results.status == "success" )
-  {
-    results.status = "White beam vanadium 1 complete";
-  }
-  notifyDialog(results);
-  
-  if ( ! error.isEmpty() )
-  {
-    throw std::invalid_argument(error.toStdString());
-  }
-  return results;
-}
-/** Adds data from the first test to the script that was built up for the white beam comparison test
-*  and executes the comparison test
-*  @param firstTest the results from a single white beam vanadium test
-*  @param python this object contains a script constructed for this test
-*  @return summary data of the test results
-*  @throw invalid_argument if an exception was thrown during execution of the Python
-*/
-DiagResults::TestSummary MWDiag::whiteBeamCompTest(const DiagResults::TestSummary firstTest, boost::shared_ptr<whiteBeam2> &python)
-{
-  DiagResults::TestSummary results("Second white beam test");
-  results.status = "Analysing white beam vanadium 2 and comparing";
-  notifyDialog(results);
 
-  // adds the output workspace from the first test to the current script
-  python->incPrevious(firstTest);
-  // use the following code to see the script QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
-  QString error = results.pythonResults(python->run());
+// /** Pointers the passed pointer to an object will contain all the Python script for
+// *  the two white beam vanadium detector test
+// *  @param whiteBeamComp will be pointed at a valid whiteBeam2 object
+// *  @param outWS the name of the workspace that will remain after execution
+// *  @return any errors or an empty string for no error
+// */
+// QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName)
+// {  
+//   QString whiteBeamFile2 = m_WBV2->getFirstFilename();
+//   if ( ! whiteBeamFile2.isEmpty() )
+//   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
+//     whiteBeamComp.reset(
+// 	    new whiteBeam2(this, m_designWidg, whiteBeamFile2, m_instru->currentText(), WSName));
+// 	  return "";
+//   }
+//   else
+//   {
+//     whiteBeamComp = boost::shared_ptr<whiteBeam2>();
+//   }
+//   return "";
+// }
+// /** Pointers the passed pointer to an object will contain all the Python script for
+// *  the detector test based on background values
+// *  @param backCheck will be pointered to a valid backTest object
+// *  @return any errors or an empty string for no error
+// */
+// QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const QString &WSName)
+// {
+//   if (m_designWidg.ckDoBack->isChecked())
+//   { //generate a Python script
+//     backCheck.reset(new backTest(this, m_designWidg, m_monoFiles, m_instru->currentText(), WSName));
+// 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
+// 	return "";
+//   }
+//   else
+//   {
+//     backCheck = boost::shared_ptr<backTest>();
+//   }
+//   return "";
+// }
+// /** Executes the Python script constructed for the first white beam vanadium test
+// *  @param python this object contains a script constructed for this test
+// *  @return summary data of the test results
+// *  @throw invalid_argument if an exception was thrown during execution of the Python
+// */
+// DiagResults::TestSummary MWDiag::singleWhiteBeamTest(whiteBeam1 &python)
+// {
+//   DiagResults::TestSummary results("First white beam test");
+//   // report to the dialog what's happening
+//   results.status = "Analysing white beam vanadium 1";
+//   notifyDialog(results);
   
-  if ( results.status == "success" )
-  {
-    results.status = "White beam vanadium comparison complete";
-  }
-  notifyDialog(results);
+//   // use the following code to see the script QStringList list1 = python.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
+//   QString error = results.pythonResults(python.run());
+  
+//   if ( results.status == "success" )
+//   {
+//     results.status = "White beam vanadium 1 complete";
+//   }
+//   notifyDialog(results);
+  
+//   if ( ! error.isEmpty() )
+//   {
+//     throw std::invalid_argument(error.toStdString());
+//   }
+//   return results;
+// }
 
-  if ( ! error.isEmpty() )
-  {
-    throw std::invalid_argument(error.toStdString());
-  }
-  return results;
-}
-/** Adds data from the first test and second tests (the second test results can be default if there was no test to the
-*  script built for the background test and execute the script
-*  @param firstTest the results from a single white beam vanadium test
-*  @param secondTest the results from a white beam comparison test, if this is a default results summary then no second test data is used
-*  @param python this object contains a script constructed for this test
-*  @return summary data of the test results
-*  @throw invalid_argument if an exception was thrown during execution of the Python
-*/
-DiagResults::TestSummary MWDiag::backGroundTest(const DiagResults::TestSummary &firstTest, const DiagResults::TestSummary &secondTest, boost::shared_ptr<backTest>& python)
-{
-  DiagResults::TestSummary results("Background test");
-  results.status = "Analysing the background regions of experimental runs";
-  notifyDialog(results);
-  
-  if ( secondTest.status != "Error" )
-  {
-    python->incSecondTest(secondTest, secondTest.inputWS);
-  }
-  else
-  {
-    python->incFirstTest(firstTest);
-  }
-  // use the following code to see the script  QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
-  QString error = results.pythonResults(python->run());
-  
-  if ( results.status == "success" )
-  {
-    results.status = "Tests on low flux background complete";
-  }
-  notifyDialog(results);
+// /** Adds data from the first test to the script that was built up for the white beam comparison test
+// *  and executes the comparison test
+// *  @param firstTest the results from a single white beam vanadium test
+// *  @param python this object contains a script constructed for this test
+// *  @return summary data of the test results
+// *  @throw invalid_argument if an exception was thrown during execution of the Python
+// */
+// DiagResults::TestSummary MWDiag::whiteBeamCompTest(const DiagResults::TestSummary firstTest, boost::shared_ptr<whiteBeam2> &python)
+// {
+//   DiagResults::TestSummary results("Second white beam test");
+//   results.status = "Analysing white beam vanadium 2 and comparing";
+//   notifyDialog(results);
 
-  if ( ! error.isEmpty() )
-  {
-    throw std::invalid_argument(error.toStdString());
-  }
-  return results;
-}
+//   // adds the output workspace from the first test to the current script
+//   python->incPrevious(firstTest);
+//   // use the following code to see the script QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
+//   QString error = results.pythonResults(python->run());
+  
+//   if ( results.status == "success" )
+//   {
+//     results.status = "White beam vanadium comparison complete";
+//   }
+//   notifyDialog(results);
+
+//   if ( ! error.isEmpty() )
+//   {
+//     throw std::invalid_argument(error.toStdString());
+//   }
+//   return results;
+// }
+// /** Adds data from the first test and second tests (the second test results can be default if there was no test to the
+// *  script built for the background test and execute the script
+// *  @param firstTest the results from a single white beam vanadium test
+// *  @param secondTest the results from a white beam comparison test, if this is a default results summary then no second test data is used
+// *  @param python this object contains a script constructed for this test
+// *  @return summary data of the test results
+// *  @throw invalid_argument if an exception was thrown during execution of the Python
+// */
+// DiagResults::TestSummary MWDiag::backGroundTest(const DiagResults::TestSummary &firstTest, const DiagResults::TestSummary &secondTest, boost::shared_ptr<backTest>& python)
+// {
+//   DiagResults::TestSummary results("Background test");
+//   results.status = "Analysing the background regions of experimental runs";
+//   notifyDialog(results);
+  
+//   if ( secondTest.status != "Error" )
+//   {
+//     python->incSecondTest(secondTest, secondTest.inputWS);
+//   }
+//   else
+//   {
+//     python->incFirstTest(firstTest);
+//   }
+//   // use the following code to see the script  QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
+//   QString error = results.pythonResults(python->run());
+  
+//   if ( results.status == "success" )
+//   {
+//     results.status = "Tests on low flux background complete";
+//   }
+//   notifyDialog(results);
+
+//   if ( ! error.isEmpty() )
+//   {
+//     throw std::invalid_argument(error.toStdString());
+//   }
+//   return results;
+// }
+
+
 /** Called when the user identifies the background region in a different form, it copies the values over
 *  @param start the TOF value of the start of the background region
 *  @param end the TOF value of the end of the background region

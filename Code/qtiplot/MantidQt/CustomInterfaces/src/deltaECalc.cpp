@@ -170,14 +170,16 @@ void deltaECalc::addMaskingCommands(QString & analysisScript)
   {
     return;
   }
+  
+  analysisScript += "mono_sample.spectra_masks = '" + m_diagnosedWS + "'\n";
 
-  QString tmpWS = QString("tmp_") + m_diagnosedWS;
+//   QString tmpWS = QString("tmp_") + m_diagnosedWS;
 
-  analysisScript += "fdol_alg = FindDetectorsOutsideLimits(InputWorkspace='%1',OutputWorkspace='%2',HighThreshold=10,LowThreshold=-1,OutputFile='')\n";
-  analysisScript += "mono_sample.spectra_masks = fdol_alg.getPropertyValue('BadSpectraNums')\n";
-  analysisScript += "mtd.deleteWorkspace('%2')\n";
+//   analysisScript += "fdol_alg = FindDetectorsOutsideLimits(InputWorkspace='%1',OutputWorkspace='%2',HighThreshold=10,LowThreshold=-1,OutputFile='')\n";
+//   analysisScript += "mono_sample.spectra_masks = fdol_alg.getPropertyValue('BadSpectraNums')\n";
+//   analysisScript += "mtd.deleteWorkspace('%2')\n";
 
-  analysisScript = analysisScript.arg(m_diagnosedWS).arg(tmpWS);
+//   analysisScript = analysisScript.arg(m_diagnosedWS).arg(tmpWS);
 }
 
 QString deltaECalc::createPyListAsString(const QStringList & names) const

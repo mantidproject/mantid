@@ -11,56 +11,22 @@
 #include <QPushButton>
 #include <QCloseEvent>
 #include <QHashIterator>
+#include <QRegExp>
 
 #include <boost/lexical_cast.hpp>
 
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
-DiagResults::TestSummary::TestSummary(QString name) :
-  test(name), status("Error"), numBad(NORESULTS) {}
-/** Reads the multi-line string created by the print statments in python scripts
-*  @param pythonOut string as returned by runPythonCode()
-*  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
-*  @throw invalid_argument if output from the wrong test is passed to this function
-*/
-QString DiagResults::TestSummary::pythonResults(const QString &pythonOut)
-{// set the number found bad to the not ready state incase there is an error below
-  numBad = NORESULTS;
 
-  QStringList results = pythonOut.split("\n");
-
-  if ( results.count() < 2 )
-  {// there was an error in the python, disregard these results
-    status = "Error", outputWS = "", inputWS = "", listBad = "";
-    return "Error \"" + pythonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
-  }
-  if ( results[0] != "Created the workspaces:" )
-  {// there was an error in the python, disregard these results
-    status = "Error", outputWS = "", inputWS = "", listBad = "";
-    return results[0] + " '"+results[1]+"' " + results[2] + ". Diagnostic information may be found in the Mantid and python logs.";
-  }
-  if ( ! results[3].contains(test) )
-  {
-    throw std::invalid_argument("Logic error: test '"+test.toStdString()+"' was excuted out of order");
-  }
-  
-  //no errors, return the results
-  std::string theBad = results[4].toStdString();
-  
-  status = "success";
-  outputWS = results[1];
-  numBad = boost::lexical_cast<int>(theBad);
-  inputWS = results[2];
-  listBad = results[5];
-  return "";
-}
-
-/// the total number of tests that results are reported for here
-const int DiagResults::NUMTESTS = 3;
-/// the list of tests that we display results for
-const QString DiagResults::TESTS[DiagResults::NUMTESTS] =
+namespace
+{
+  /// the total number of tests that results are reported for here
+  const int NUMTESTS = 3;
+  /// the list of tests that we display results for
+  const QString TESTS[NUMTESTS] =
   { "First white beam test", "Second white beam test", "Background test" };
+}
 
 //----------------------
 // Public member functions
@@ -72,47 +38,53 @@ DiagResults::DiagResults(QWidget *parent): MantidDialog(parent),
 {
   setWindowTitle("Failed detectors list");
 
-  connect(m_ListMapper, SIGNAL(mapped(const QString &)), this, SLOT(tableList(const QString &)));
-  connect(m_ViewMapper, SIGNAL(mapped(const QString &)), this, SLOT(instruView(const QString &)));
+  connect(m_ListMapper, SIGNAL(mapped(int)), this, SLOT(tableList(int)));
+  connect(m_ViewMapper, SIGNAL(mapped(int)), SLOT(instruView(int)));
   
-  // fill in the first row of controls and displays
-  addRow("Step", "Bad detectors found");
-    // make one row of buttons for each set of results
+  addRow("Test", "Number of failed spectra");
+  // make one row of buttons for each set of results
   int row = 0;
   for ( int i = 0; i < NUMTESTS; i ++ )
   {
-    row = addRow(QString(TESTS[i]) + QString(" not done"), QString("     "));
-    addButtonsDisab(row);
+    QString col1 = TESTS[i];
+    QString col2 = "N/A";
+    row = addRow(col1, col2);
+    addButtons(row);
   }
-
-  row ++;
+  row++;
   QPushButton *close = new QPushButton("Close");
   m_Grid->addWidget(close, row, 1);
   connect(close, SIGNAL(clicked()), this, SLOT(close()));
 
   setLayout(m_Grid);
 
-  setAttribute(Qt::WA_DeleteOnClose);
+  setAttribute(Qt::WA_DeleteOnClose, false);
 }
 
-void DiagResults::addResults(const TestSummary &display)
+/**
+ * Update the results on the dialog
+ * @param testSummary A string containing the test results
+ */
+void DiagResults::updateResults(const QString & testSummary)
 {
-  // store with the test the location of the data, outputWS could be an empty string
-  m_outputWorkS.insert(display.test,display.outputWS);
-
-  for ( int i = 0; i < NUMTESTS; i ++ )
+  QStringList results = testSummary.split("\n");
+  // First result line is the header
+  for(int i = 1; i <= NUMTESTS; ++i)
   {
-    if ( QString(TESTS[i]) == display.test )
-    {
-      int row = i + 1 + 1;
-      updateRow(row, display.status, display.numBad);
-      if ( display.numBad != TestSummary::NORESULTS )
-      {
-        setupButtons(row, display.test);
-      }
-    }
+    QString testName = results[i].section(":", 0, 1);
+    QString fieldValues = results[i].section(":", 1);
+    QStringList columns = fieldValues.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    Q_ASSERT(columns.size() == 2);
+    QString status;
+    if( columns[0] == "None" ) status = "N/A";
+    else status = columns[1];
+    // Store the name of the test workspace
+    m_diagWS[i+1] = columns[0];
+    updateRow(i+1, status);
   }
+  
 }
+
 /** Enable or disable the buttons used to run Python scripts
 *  @param show the buttons are enabled if this is set to true and disabled otherwise
 */
@@ -148,46 +120,51 @@ int DiagResults::addRow(QString firstColumn, QString secondColumn)
   m_Grid->addWidget(new QLabel(secondColumn), row, 1);
   return row;
 }
+
 /** Displays a summary of the results of tests in to text labels
 *  @param row the row where the data will be displayed
-*  @param firstColumn the text that should be displayed in the first column
-*  @param secondColumn the text that should be displayed in the second column
+*  @param text the text that should be displayed in the first column
 */
-void DiagResults::updateRow(int row, QString firstColumn, int secondColumn)
+void DiagResults::updateRow(int row, QString text)
 {
-  QWidget *oldLabel = m_Grid->itemAtPosition(row, 0)->widget();
-  if ( !oldLabel ) return;
-  oldLabel->hide();
-  m_Grid->removeWidget( oldLabel );
-  delete oldLabel;
-  m_Grid->addWidget(new QLabel(firstColumn), row, 0);
-
-  oldLabel = m_Grid->itemAtPosition(row, 1)->widget();
-  if ( !oldLabel ) return;
-  oldLabel->hide();
-  m_Grid->removeWidget( oldLabel );
-  delete oldLabel;
-  QString secondLabel;
-  if ( secondColumn != TestSummary::NORESULTS )
+  // Get the text label from the grid
+  QWidget *widget = m_Grid->itemAtPosition(row, 1)->widget();
+  QLabel *label = qobject_cast<QLabel*>(widget);
+  label->setText(text);
+  // Update the buttons depending on the status of text
+  QPushButton *listButton = qobject_cast<QPushButton*>(m_Grid->itemAtPosition(row, 2)->widget());
+  QPushButton *viewButton = qobject_cast<QPushButton*>(m_Grid->itemAtPosition(row, 3)->widget());
+  if(text == "N/A")
   {
-    secondLabel = QString("   ") + QString::number(secondColumn);
+    listButton->setEnabled(false);
+    viewButton->setEnabled(false);
   }
-  else secondLabel = "";
-  m_Grid->addWidget(new QLabel(secondLabel), row, 1);
+  else
+  {
+    listButton->setEnabled(true);
+    viewButton->setEnabled(true);
+  }
+
 }
+
 /// insert a row at the bottom of the grid
-void DiagResults::addButtonsDisab(int row)
+void DiagResults::addButtons(int row)
 {
-  QPushButton *list = new QPushButton("");
+  QPushButton *list = new QPushButton("List");
+  connect(list, SIGNAL(clicked()), m_ListMapper, SLOT(map()));
+  m_ListMapper->setMapping(list, row);
   list->setToolTip("List the detector IDs of the detectors found bad");
   m_Grid->addWidget(list, row, 2);
   list->setEnabled(false);
 
-  QPushButton *view = new QPushButton("");
+  QPushButton *view = new QPushButton("View");
+  connect(view, SIGNAL(clicked()), m_ViewMapper, SLOT(map()));
+  m_ViewMapper->setMapping(view, row);
   view->setToolTip("Show the locations of the bad detectors");
   m_Grid->addWidget(view, row, 3);
   view->setEnabled(false);
 }
+
 /** Enable the controls on the row and conect the buttons to the slots
 *  from which their Python script is executed
 *  @param row the index number of the row to enable
@@ -217,48 +194,46 @@ void DiagResults::setupButtons(int row, QString test)
 /// enables the run button on the parent window so the user can do more analysis
 void DiagResults::closeEvent(QCloseEvent *event)
 {
-  //// remove all tempary workspaces
-  QHashIterator<QString,QString> itr(m_outputWorkS);
+  // Remove all tempary workspaces
+  QHashIterator<int,QString> itr(m_diagWS);
   while(itr.hasNext() )
   {
     QString remove = itr.next().value();
-    Mantid::API::FrameworkManager::Instance().deleteWorkspace(remove.toStdString());
+    if( remove != "None" ) 
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(remove.toStdString());
+    }
   }
   emit died();
   event->accept();
 }
 
-void DiagResults::tableList(const QString &name)
+void DiagResults::tableList(int row)
 {
-  QString workspace = m_outputWorkS[name];
-  QString tempOutp = QString("_FindBadDe") + workspace + QString("_temp");
-  QString temp_key = name + "_temp";
-  m_outputWorkS.insert(temp_key,tempOutp);
+  QString wsName = m_diagWS[row];
+  QString testName = TESTS[row - 2];
+  QString pyCode = 
+    "import diagnostics\n"
+    "failed_spectra = diagnostics.get_failed_spectra_list('%1')\n"
+    "num_failed = len(failed_spectra)\n"
+    "failed_table = newTable('Failed Spectra - %2 ', num_failed, 1)\n"
+    "for i in range(num_failed):\n"
+    "    failed_table.setText(1, i+1, str(failed_spectra[i]))\n"
+    "failed_table.show()";
 
-  QString viewTablePy = "import DetectorTestLib as functions\n";
-  viewTablePy.append("if mtd.workspaceExists('" + workspace + "'):\n");
-  viewTablePy.append(
-    "  bad = FindDetectorsOutsideLimits(InputWorkspace='"+workspace+"', OutputWorkspace='"+tempOutp+"', HighThreshold=10, LowThreshold=-1 )\n");
-  viewTablePy.append("  stBad = bad.getPropertyValue('BadSpectraNums')\n");
-  viewTablePy.append("  liBad = stBad.split(',')\n");
-  viewTablePy.append("else : liBad = ['The analysis data has been removed, run the detector efficiency tests again']\n");
-  viewTablePy.append("tbBad = newTable('Failed Detector IDs -" + name + "', len(liBad), 1)\n");
-  viewTablePy.append("for i in range(0, len(liBad) ) :\n");
-  viewTablePy.append("  tbBad.setText( 1, i+1, liBad[i] )\n");
-  viewTablePy.append("tbBad.show()");
-
-  emit runAsPythonScript(viewTablePy);
+  //Set the workspace name and testName
+  pyCode = pyCode.arg(wsName,testName);
+  runPythonCode(pyCode, true);
 }
 
-void DiagResults::instruView(const QString &name)
+void DiagResults::instruView(int row)
 {
-  QString workspace = m_outputWorkS[name];
-  QString startInstruViewPy =
-    "instrument_view = getInstrumentView(\"" +workspace+ "\")\n";
-  // the colour map range should match the values set in the output workspace by the algorithms like FindDetectorsOutsideLimits
-  startInstruViewPy.append("instrument_view.setWindowTitle('Failed detectors are marked 100 -" + name + "')\n");
-  startInstruViewPy.append("instrument_view.setColorMapRange(0.,100.)\n");
-  startInstruViewPy.append("instrument_view.showWindow()\n");
-  
-  emit runAsPythonScript(startInstruViewPy);
+  QString wsName = m_diagWS[row];
+  QString pyCode = 
+    "inst_view = getInstrumentView('%1')\n"
+    "inst_view.setWindowTitle('Failed detectors')\n"
+    "inst_view.setColorMapRange(0.0, 1.0)\n"
+    "inst_view.show()";
+  pyCode = pyCode.arg(wsName);
+  runPythonCode(pyCode, true);
 }

@@ -591,7 +591,8 @@ bool Homer::runScripts()
   // display the first page because it's likely any problems occur now relate to problems with settings here
   m_uiForm.tabWidget->setCurrentIndex(0);
   // constructing this builds the Python script, it is executed below
-  deltaECalc unitsConv( this, m_uiForm, m_backgroundDialog->removeBackground(),m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
+  deltaECalc unitsConv( this, m_uiForm, m_backgroundDialog->removeBackground(),
+			m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
   connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
   
   // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
@@ -601,15 +602,15 @@ bool Homer::runScripts()
     pythonIsRunning(true);
     // display the second page in case errors occur in processing the user settings here
     m_uiForm.tabWidget->setCurrentIndex(1);
-    QString maskOutWS = "mask_"+QString::fromStdString(Poco::Path(m_uiForm.runFiles->getFirstFilename().toStdString()).getBaseName());
-    QString errors = m_diagPage->run(maskOutWS, true);
+    QString errors = m_diagPage->run("diag_total_mask", true);
+
     if ( ! errors.isEmpty() )
     {
       pythonIsRunning(false); 
       throw std::invalid_argument(errors.toStdString());
     }
-	// pass the bad detector list to the conversion script to enable masking
-	unitsConv.setDiagnosedWorkspaceName(maskOutWS);
+    // pass the bad detector list to the conversion script to enable masking
+    unitsConv.setDiagnosedWorkspaceName("diag_total_mask");
   }
   else
   {

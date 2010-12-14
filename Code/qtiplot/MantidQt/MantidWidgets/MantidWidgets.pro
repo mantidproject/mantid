@@ -28,7 +28,6 @@ SOURCES = \
   $$SRCDIR/pythonCalc.cpp \
   $$SRCDIR/DiagResults.cpp \
   $$SRCDIR/MWDiag.cpp \
-  $$SRCDIR/MWDiagCalcs.cpp \
   $$SRCDIR/SaveWorkspaces.cpp \
   $$SRCDIR/UserFunctionDialog.cpp \
   $$SRCDIR/RenameParDialog.cpp \
@@ -47,7 +46,6 @@ HEADERS = \
   $$HEADERDIR/WidgetDllOption.h \
   $$HEADERDIR/DiagResults.h \
   $$HEADERDIR/MWDiag.h \
-  $$HEADERDIR/MWDiagCalcs.h \
   $$HEADERDIR/SaveWorkspaces.h \
   $$HEADERDIR/UserFunctionDialog.h \
   $$HEADERDIR/RenameParDialog.h \
