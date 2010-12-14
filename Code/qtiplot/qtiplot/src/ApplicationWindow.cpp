@@ -279,7 +279,8 @@ void ApplicationWindow::init(bool factorySettings)
   results=new QTextEdit(logWindow);
   results->setReadOnly (true);
   results->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showresultsContextMenu(const QPoint &)));
+  connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this, 
+	  SLOT(showLogWindowContextMenu(const QPoint &)));
   logWindow->setWidget(results);
   logWindow->hide();
 
@@ -290,6 +291,9 @@ void ApplicationWindow::init(bool factorySettings)
   addDockWidget( Qt::TopDockWidgetArea, consoleWindow );
   console = new QTextEdit(consoleWindow);
   console->setReadOnly(true);
+  console->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(console, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+	  SLOT(showScriptConsoleContextMenu(const QPoint &)));
   consoleWindow->setWidget(console);
   consoleWindow->hide();
 #endif
@@ -378,8 +382,6 @@ void ApplicationWindow::init(bool factorySettings)
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
   connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
       this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
-  //connect(this,SIGNAL(resultsContextMenu()),this,SLOT(showresultsContextMenu()));
-
 
   connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
   //connect(&http, SIGNAL(done(bool)), this, SLOT(receivedVersionFile(bool)));
@@ -407,7 +409,7 @@ void ApplicationWindow::init(bool factorySettings)
   }
 }
 
-void ApplicationWindow::showresultsContextMenu(const QPoint & p)
+void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
 {
   (void)p; //Avoid compiler warning
   QMenu *menu = results->createStandardContextMenu();
@@ -423,7 +425,14 @@ void ApplicationWindow::showresultsContextMenu(const QPoint & p)
 
   menu->addAction(actionClearLogInfo);
   menu->popup(QCursor::pos());
+}
 
+void ApplicationWindow::showScriptConsoleContextMenu(const QPoint &p)
+{
+  (void)p;
+  QMenu *menu = results->createStandardContextMenu();
+  menu->addAction(actionClearConsole);
+  menu->popup(QCursor::pos());
 }
 
 void ApplicationWindow::initWindow()
@@ -1050,7 +1059,6 @@ void ApplicationWindow::initMainMenu()
   edit->addAction(actionClearSelection);
   edit->insertSeparator();
   edit->addAction(actionDeleteFitTables);
-  //edit->addAction(actionClearLogInfo);
 
   connect(edit, SIGNAL(aboutToShow()), this, SLOT(editMenuAboutToShow()));
 
@@ -4396,7 +4404,7 @@ void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timesta
   {
     if( timestamp )
     {
-      QString separator(75, '-'); 
+      QString separator(100, '-'); 
       msg_to_print  = separator + "\n" + QDateTime::currentDateTime().toString() 
 	    + ": " + msg.trimmed() + "\n" + separator + '\n';
     }
@@ -12026,6 +12034,9 @@ void ApplicationWindow::createActions()
   actionClearLogInfo = new QAction(tr("Clear &Log Information"), this);
   connect(actionClearLogInfo, SIGNAL(activated()), this, SLOT(clearLogInfo()));
 
+  actionClearConsole = new QAction(tr("Clear &Console"), this);
+  connect(actionClearConsole, SIGNAL(activated()), console, SLOT(clear()));
+
   actionDeleteFitTables = new QAction(QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);
   connect(actionDeleteFitTables, SIGNAL(activated()), this, SLOT(deleteFitTables()));
 
@@ -12871,6 +12882,7 @@ void ApplicationWindow::translateActionsStrings()
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
   actionClearLogInfo->setMenuText(tr("Clear &Log Information"));
+  actionClearConsole->setMenuText(tr("Clear &Console"));
   actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
 
   actionToolBars->setMenuText(tr("&Toolbars..."));
@@ -16215,12 +16227,16 @@ if( QFileInfo(action_data).exists() )
   QTextStream stream(&script_file);
   QString scriptPath = QString("r'%1'").arg(QFileInfo(action_data).absolutePath());
   QString code = QString("sys.path.append(%1)\n").arg(scriptPath);
+    runPythonScript(code, true);
+  code = "";
   while( !stream.atEnd() )
   {
     code.append(stream.readLine() + "\n");
   }
-  code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
   runPythonScript(code);
+  code = "";
+  code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
+    runPythonScript(code, true);
 }
 else
 {
@@ -16256,7 +16272,7 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
 #endif
 }
 
-void ApplicationWindow::runPythonScript(const QString & code)
+void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 {
   if( code.isEmpty() || scriptingEnv()->isRunning() ) return;
 
@@ -16264,6 +16280,7 @@ void ApplicationWindow::runPythonScript(const QString & code)
   {
     setScriptingLanguage("Python");
     m_iface_script = scriptingEnv()->newScript("",this,false, "");
+    m_iface_script->setLineOffset(0);
     connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 
         SLOT(scriptPrint(const QString &)));
@@ -16271,7 +16288,17 @@ void ApplicationWindow::runPythonScript(const QString & code)
   }
 
   m_iface_script->setCode(code);
-  m_iface_script->exec();
+  if( !quiet )
+  {
+    // Output a message to say we've started
+    scriptPrint("Script execution started.", false, true);
+  }
+  bool success = m_iface_script->exec();
+  if(success && !quiet)
+  {
+    scriptPrint("Script execution completed successfully.", false, true);
+  }
+    
 }
 
 void ApplicationWindow::loadCustomActions()

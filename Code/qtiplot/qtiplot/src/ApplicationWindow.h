@@ -1069,14 +1069,16 @@ private slots:
 	void showCustomActionDialog();
   void showUserDirectoryDialog();
 	void performCustomAction(QAction *);
-  void runPythonScript(const QString & code);
+  void runPythonScript(const QString & code, bool quiet=false);
 
 	void hideSelectedColumns();
 	void showAllColumns();
 	void closedLastCopiedLayer(){lastCopiedLayer = NULL;};
 
   /// context menu for log window
-  void showresultsContextMenu(const QPoint &p);
+  void showLogWindowContextMenu(const QPoint &p);
+  /// context menu for scripting console
+  void showScriptConsoleContextMenu(const QPoint &p);
   ///
   void showMantidConcepts();
 
@@ -1297,7 +1299,7 @@ private:
     QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
     QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
     QAction *actionExportPDF, *actionReadOnlyCol;
-    QAction *actionCloseAllWindows, *actionClearLogInfo, *actionShowPlotWizard, *actionShowConfigureDialog;
+  QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
     QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
     QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
     QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
