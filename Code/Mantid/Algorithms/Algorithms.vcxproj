@@ -259,6 +259,7 @@
     <ClCompile Include="src\RenameWorkspace.cpp" />
     <ClCompile Include="src\ReplaceSpecialValues.cpp" />
     <ClCompile Include="src\Scale.cpp" />
+    <ClCompile Include="src\SetUncertaintiesToZero.cpp" />
     <ClCompile Include="src\SmoothData.cpp" />
     <ClCompile Include="src\SofQW.cpp" />
     <ClCompile Include="src\SolidAngle.cpp" />
@@ -300,6 +301,7 @@
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
+    <ClInclude Include="inc\MantidAlgorithms\SetUncertaintiesToZero.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\SpatialGrouping.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
