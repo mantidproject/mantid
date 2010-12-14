@@ -130,7 +130,7 @@ public:
   /// Copy from another WeightedEvent object
   WeightedEvent& operator=(const WeightedEvent & rhs);
 
-  bool operator==(const WeightedEvent & other);
+  bool operator==(const WeightedEvent & other) const;
 
   /// Return the weight of the neutron, as a double (it is saved as a float).
   double weight() const;
@@ -216,6 +216,9 @@ public:
   EventList& operator+=(const EventList& more_events);
 
   EventList& operator-=(const EventList& more_events);
+
+  bool operator==(const EventList& rhs) const;
+  bool operator!=(const EventList& rhs) const;
 
   void addEventQuickly(const TofEvent &event);
 

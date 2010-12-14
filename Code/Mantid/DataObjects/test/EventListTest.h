@@ -718,6 +718,21 @@ public:
     }
   }
 
+  //==================================================================================
+  //--- Comparison Operators
+  //==================================================================================
+
+  void testEqualityOperator()
+  {
+    EventList el1, el2;
+    el1.addEventQuickly( TofEvent(1.5, 2.3) );
+    TS_ASSERT( !(el1 == el2) );
+    TS_ASSERT( (el1 != el2) );
+    el2.addEventQuickly( TofEvent(1.5, 2.3) );
+    TS_ASSERT( (el1 == el2) );
+    TS_ASSERT( !(el1 != el2) );
+  }
+
 
   //==================================================================================
   //--- Histogramming Tests ---

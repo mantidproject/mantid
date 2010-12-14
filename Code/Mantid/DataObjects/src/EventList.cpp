@@ -195,7 +195,7 @@ using Kernel::DateAndTime;
    * @param rhs event to which we are comparing.
    * @return true if all elements of this event are identical
    *  */
-  bool WeightedEvent::operator==(const WeightedEvent & rhs)
+  bool WeightedEvent::operator==(const WeightedEvent & rhs) const
   {
     return  (this->m_tof == rhs.m_tof) &&
             (this->m_pulsetime == rhs.m_pulsetime) &&
@@ -559,7 +559,30 @@ using Kernel::DateAndTime;
   }
 
 
+  // --------------------------------------------------------------------------
+  /** Equality operator between EventList's
+   * @param rhs :: other EventList to compare
+   */
+  bool EventList::operator==(const EventList& rhs) const
+  {
+    if (this->getNumberEvents() != rhs.getNumberEvents())
+      return false;
+    if (this->has_weights != rhs.has_weights)
+      return false;
+    if (events != rhs.events)
+      return false;
+    if (weightedEvents != rhs.weightedEvents)
+      return false;
+    return true;
+  }
 
+  /** Inequality comparator
+  * @param rhs :: other EventList to compare
+  */
+  bool EventList::operator!=(const EventList& rhs) const
+  {
+    return (!this->operator==(rhs));
+  }
 
 
   // --------------------------------------------------------------------------

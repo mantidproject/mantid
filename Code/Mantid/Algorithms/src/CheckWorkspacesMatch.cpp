@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "sstream"
 
 namespace Mantid
 {
@@ -14,6 +16,7 @@ DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 void CheckWorkspacesMatch::init()
 {
@@ -54,6 +57,38 @@ void CheckWorkspacesMatch::doComparison()
 {
   MatrixWorkspace_const_sptr ws1 = getProperty("Workspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("Workspace2");
+
+  // Check that both workspaces are the same type
+  EventWorkspace_const_sptr ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  EventWorkspace_const_sptr ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  if ((ews1 && !ews2) ||(!ews1 && ews2))
+  {
+    result = "One workspace is an EventWorkspace and the other is not.";
+    return;
+  }
+
+  // Check some event-based stuff
+  if (ews1 && ews2)
+  {
+    if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
+    {
+      result = "Mismatched number of histograms.";
+      return;
+    }
+    for (int i=0; i<ews1->getNumberHistograms(); i++)
+    {
+      const EventList &el1 = ews1->getEventList(i);
+      const EventList &el2 = ews2->getEventList(i);
+      if (el1 != el2)
+      {
+        std::ostringstream mess;
+        mess << "Mismatched event list at workspace index " << i;
+        result = mess.str();
+        return;
+      }
+    }
+  }
+
 
   // First check the data - always do this
   if ( ! checkData(ws1,ws2) ) return;
