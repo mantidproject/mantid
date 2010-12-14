@@ -5,46 +5,41 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/Expression.h"
 
-#include <QLineEdit>
 #include <QValidator>
-#include <QFileInfo>
-#include <QUrl>
-#include <QDesktopServices>
+#include <QIntValidator>
+#include <QDoubleValidator>
 
+#include <QLineEdit>
+#include <QFileInfo>
+
+#include <QDesktopServices>
+#include <QUrl>
+
+#include "DoubleEditorFactory.h"
+#include <QtCheckBoxFactory>
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 
-#include <Poco/NObserver.h>
-
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-//Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
+//Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(IndirectDataAnalysis);
-
-using namespace MantidQt::CustomInterfaces;
-
-//----------------------
-// Public member functions
-//----------------------
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
 UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), m_furyResFileType(true), m_ffDataCurve(NULL), m_ffFitCurve(NULL),
@@ -84,24 +79,17 @@ void IndirectDataAnalysis::initLayout()
   m_valDbl = new QDoubleValidator(this);
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory();
-  m_strEdFac = new StringDialogEditorFactory();
   m_blnEdFac = new QtCheckBoxFactory();
 
   setupElwin();
   setupMsd();
-  // setupFury();
   setupFuryFit();
   setupConFit();
-  // setupAbsorption();
-
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
+    
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-
-  // Main "Run" event
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
-  // msd
-  connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
   // fury
   connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyInputType(int)));
   connect(m_uiForm.fury_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
@@ -258,6 +246,8 @@ void IndirectDataAnalysis::setupMsd()
   connect(m_msdRange, SIGNAL(minValueChanged(double)), this, SLOT(msdMinChanged(double)));
   connect(m_msdRange, SIGNAL(maxValueChanged(double)), this, SLOT(msdMaxChanged(double)));
   connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(msdUpdateRS(QtProperty*, double)));
+
+  connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
 }
 
 void IndirectDataAnalysis::setupFuryFit()
@@ -329,7 +319,6 @@ void IndirectDataAnalysis::setupConFit()
   // Create Property Managers
   m_cfGrpMng = new QtGroupPropertyManager();
   m_cfBlnMng = new QtBoolPropertyManager();
-  m_cfStrMng = new QtStringPropertyManager();
   m_cfDblMng = new QtDoublePropertyManager();
 
   // Create TreeProperty Widget
@@ -339,7 +328,6 @@ void IndirectDataAnalysis::setupConFit()
   // add factories to managers
   m_cfTree->setFactoryForManager(m_cfBlnMng, m_blnEdFac);
   m_cfTree->setFactoryForManager(m_cfDblMng, m_dblEdFac);
-  m_cfTree->setFactoryForManager(m_cfStrMng, m_strEdFac);
 
   // Create Plot Widget
   m_cfPlot = new QwtPlot(this);
@@ -369,10 +357,8 @@ void IndirectDataAnalysis::setupConFit()
 
   m_cfProp["LinearBackground"] = m_cfGrpMng->addProperty("Background");
   m_cfProp["BGA0"] = m_cfDblMng->addProperty("A0");
-  m_cfProp["BGConstant"] = m_cfBlnMng->addProperty("Constant");
   m_cfProp["BGA1"] = m_cfDblMng->addProperty("A1");
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA0"]);
-  m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGConstant"]);
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
   m_cfTree->addProperty(m_cfProp["LinearBackground"]);
 
@@ -382,7 +368,6 @@ void IndirectDataAnalysis::setupConFit()
   m_cfProp["DeltaHeight"] = m_cfDblMng->addProperty("Height");
   m_cfDblMng->setDecimals(m_cfProp["DeltaHeight"], m_nDec);
   m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["UseDeltaFunc"]);
-  // m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); // < Not by default
   m_cfTree->addProperty(m_cfProp["DeltaFunction"]);
 
   m_cfProp["Lorentzian1"] = createLorentzian("Lorentzian 1");
@@ -402,21 +387,23 @@ void IndirectDataAnalysis::setupConFit()
   // Have HWHM Range linked to Fit Start/End Range
   connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
   m_cfHwhmRange->setRange(-1.0,1.0);
+  confitHwhmUpdateRS(0.02);
 
   confitTypeSelection(m_uiForm.confit_cbFitType->currentIndex());
+  confitBgTypeSelection(m_uiForm.confit_cbBackground->currentIndex());
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(confitPlotInput()));
   connect(m_uiForm.confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(confitPlotInput()));
-  // other signal/slot connections
+  
   connect(m_uiForm.confit_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
   connect(m_uiForm.confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitInputType(int)));
   connect(m_uiForm.confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
+  connect(m_uiForm.confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(confitBgTypeSelection(int)));
   connect(m_uiForm.confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(confitPlotInput()));
   connect(m_uiForm.confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
 
-  // Set default values
-  m_cfDblMng->setValue(m_cfProp["Lorentzian1.HWHM"], 0.02);
+  m_uiForm.confit_leSpecNo->setValidator(m_valInt);
 }
 
 bool IndirectDataAnalysis::validateElwin()
@@ -688,6 +675,99 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
   return result;
 }
 
+Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool tie)
+{
+  Mantid::API::CompositeFunction* conv = dynamic_cast<Mantid::API::CompositeFunction*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
+  Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
+  Mantid::API::CompositeFunction* comp = new Mantid::API::CompositeFunction();
+  int index = 0;
+
+  // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
+  const int bgType = m_uiForm.confit_cbBackground->currentIndex();
+
+  // 1 - CompositeFunction A
+  // - - 1 LinearBackground
+  // - - 2 Convolution Function
+  // - - - - 1 Resolution
+  // - - - - 2 CompositeFunction B
+  // - - - - - - DeltaFunction (yes/no)
+  // - - - - - - Lorentzian 1 (yes/no)
+  // - - - - - - Lorentzian 2 (yes/no)
+
+  Mantid::API::IFunction* func;
+
+  // Background
+  func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+  index = result->addFunction(func);
+  if ( tie  || bgType == 0 )
+  {
+    result->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() );
+  }
+  else
+  {
+    func->setParameter("A0", m_cfProp["BGA0"]->valueText().toDouble());
+  }
+
+  if ( bgType != 2 )
+  {
+    result->tie("f0.A1", "0.0");
+  }
+  else
+  {
+    if ( tie ) { result->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() ); }
+    else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
+  }
+
+  // Resolution
+  func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
+  index = conv->addFunction(func);
+  Mantid::API::IFunction::Attribute attr(m_uiForm.confit_resInput->getFirstFilename().toStdString()); //m_cfProp["ResFuncFile"]->valueText().toStdString()
+  func->setAttribute("FileName", attr);
+
+  // Delta Function
+  if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+  {
+    func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
+    index = comp->addFunction(func);
+    if ( tie ) { comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() ); }
+    else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
+  }
+
+  // Lorentzians
+  switch ( m_uiForm.confit_cbFitType->currentIndex() )
+  {
+  case 0: // No Lorentzians
+    break;
+  case 1: // 1 Lorentzian
+    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
+    break;
+  case 2: // 2 Lorentzian
+    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
+    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+    index = comp->addFunction(func);
+    populateFunction(func, comp, m_cfProp["Lorentzian2"], index, tie);
+    // Tie PeakCentres together
+    if ( ! tie )
+    {
+      QString tieL = "f" + QString::number(index-1) + ".PeakCentre";
+      QString tieR = "f" + QString::number(index) + ".PeakCentre";
+      comp->tie(tieL.toStdString(), tieR.toStdString());
+    }
+    break;
+  }
+
+  conv->addFunction(comp);
+  result->addFunction(conv);
+
+  if ( tie ) { result->applyTies(); }
+
+  return result;
+}
+
 QtProperty* IndirectDataAnalysis::createLorentzian(QString name)
 {
   QtProperty* lorentzGroup = m_cfGrpMng->addProperty(name);
@@ -698,6 +778,7 @@ QtProperty* IndirectDataAnalysis::createLorentzian(QString name)
   m_cfDblMng->setDecimals(m_cfProp[name+".Height"], m_nDec);
   m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], m_nDec);
   m_cfDblMng->setDecimals(m_cfProp[name+".HWHM"], m_nDec);
+  m_cfDblMng->setValue(m_cfProp[name+".HWHM"], 0.02);
   lorentzGroup->addSubProperty(m_cfProp[name+".Height"]);
   lorentzGroup->addSubProperty(m_cfProp[name+".PeakCentre"]);
   lorentzGroup->addSubProperty(m_cfProp[name+".HWHM"]);
@@ -732,6 +813,54 @@ QtProperty* IndirectDataAnalysis::createStretchedExp()
   prop->addSubProperty(stA1);
   prop->addSubProperty(stA2);
   return prop;
+}
+
+void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction* func, Mantid::API::IFunction* comp, QtProperty* group, int index, bool tie)
+{
+  // Get subproperties of group and apply them as parameters on the function object
+  QList<QtProperty*> props = group->subProperties();
+  QString pref = "f" + QString::number(index) + ".";
+
+  for ( int i = 0; i < props.size(); i++ )
+  {
+    if ( tie )
+    {
+      QString propName = pref + props[i]->propertyName();
+      comp->tie(propName.toStdString(), props[i]->valueText().toStdString() );
+    }
+    else { func->setParameter(props[i]->propertyName().toStdString(), props[i]->valueText().toDouble()); }
+  }
+
+}
+
+QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index)
+{
+  if ( curve != NULL )
+  {
+    curve->attach(0);
+    delete curve;
+    curve = 0;
+  }
+
+  Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspace));
+
+  int nhist = ws->getNumberHistograms();
+  if ( index >= nhist )
+  {
+    showInformationBox("Error: Workspace index out of range.");
+    return 0;
+  }
+
+  const QVector<double> dataX = QVector<double>::fromStdVector(ws->readX(index));
+  const QVector<double> dataY = QVector<double>::fromStdVector(ws->readY(index));
+
+  curve = new QwtPlotCurve();
+  curve->setData(dataX, dataY);
+  curve->attach(plot);
+
+  plot->replot();
+
+  return curve;
 }
 
 void IndirectDataAnalysis::refreshWSlist()
@@ -1035,7 +1164,6 @@ void IndirectDataAnalysis::furyPlotInput()
   }
 }
 
-/* FURY FIT TAB */
 void IndirectDataAnalysis::furyfitRun()
 {
   // First create the function
@@ -1191,7 +1319,7 @@ void IndirectDataAnalysis::furyfitRun()
     QString pyOutput = runPythonCode(pyInput);
   }
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitTypeSelection(int index)
 {
   m_ffTree->clear();
@@ -1219,7 +1347,7 @@ void IndirectDataAnalysis::furyfitTypeSelection(int index)
     break;
   }
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitPlotInput()
 {
   std::string wsname;
@@ -1286,22 +1414,22 @@ void IndirectDataAnalysis::furyfitPlotInput()
   m_ffPlot->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
   m_ffPlot->replot();
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitXMinSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["StartX"], val);
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitXMaxSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["EndX"], val);
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitBackgroundSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
 {
   if ( prop == m_ffProp["StartX"] )
@@ -1317,12 +1445,12 @@ void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
     m_ffBackRangeS->setMinimum(val);
   }
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitInputType(int index)
 {
   m_uiForm.furyfit_swInput->setCurrentIndex(index);
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitSequential()
 {
   furyfitPlotInput();
@@ -1352,20 +1480,23 @@ void IndirectDataAnalysis::furyfitSequential()
 
   std::string function = std::string(*func);
   
-  QString stX = QString::number(m_ffRangeManager->value(m_ffProp["StartX"]), 'g', 10);
-  QString enX = QString::number(m_ffRangeManager->value(m_ffProp["EndX"]), 'g', 10);
+  QString stX = QString::number(m_ffRangeManager->value(m_ffProp["StartX"]), 'g', m_nDec);
+  QString enX = QString::number(m_ffRangeManager->value(m_ffProp["EndX"]), 'g', m_nDec);
 
   QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
     "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
     "func = r'" + QString::fromStdString(function) + "'\n"
     "startx = " + stX + "\n"
     "endx = " + enX + "\n"
-    "furyfitSeq(input, func, startx, endx)\n";
+    "plot = '" + m_uiForm.furyfit_cbPlotOutput->currentText() + "'\n"
+    "save = ";
+  pyInput += m_uiForm.furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+  pyInput += "furyfitSeq(input, func, startx, endx, save, plot)\n";
   
   QString pyOutput = runPythonCode(pyInput);
 
 }
-/** ...  */
+
 void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 {
   if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() )
@@ -1496,7 +1627,6 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   m_ffPlot->replot();
 }
 
-// CONVOLUTION FIT
 void IndirectDataAnalysis::confitRun()
 {
   confitPlotInput();
@@ -1617,135 +1747,16 @@ void IndirectDataAnalysis::confitTypeSelection(int index)
   }    
 }
 
-Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool tie)
+void IndirectDataAnalysis::confitBgTypeSelection(int index)
 {
-  Mantid::API::CompositeFunction* conv = dynamic_cast<Mantid::API::CompositeFunction*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
-  Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
-  Mantid::API::CompositeFunction* comp = new Mantid::API::CompositeFunction();
-  int index = 0;
-
-  // 1 - CompositeFunction A
-  // - - 1 LinearBackground
-  // - - 2 Convolution Function
-  // - - - - 1 Resolution
-  // - - - - 2 CompositeFunction B
-  // - - - - - - DeltaFunction (yes/no)
-  // - - - - - - Lorentzian 1 (yes/no)
-  // - - - - - - Lorentzian 2 (yes/no)
-
-  Mantid::API::IFunction* func;
-
-  // Background
-  func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-  index = result->addFunction(func);
-  if ( tie ) { result->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() ); }
-  else { func->setParameter("A0", m_cfProp["BGA0"]->valueText().toDouble()); }
-  if ( m_cfBlnMng->value(m_cfProp["BGConstant"]) )
+  if ( index == 2 )
   {
-    result->tie("f0.A1", "0.0");
+    m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
   }
   else
   {
-    if ( tie ) { result->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() ); }
-    else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
+    m_cfProp["LinearBackground"]->removeSubProperty(m_cfProp["BGA1"]);
   }
-
-  // Resolution
-  func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
-  index = conv->addFunction(func);
-  Mantid::API::IFunction::Attribute attr(m_uiForm.confit_resInput->getFirstFilename().toStdString()); //m_cfProp["ResFuncFile"]->valueText().toStdString()
-  func->setAttribute("FileName", attr);
-
-  // Delta Function
-  if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
-  {
-    func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-    index = comp->addFunction(func);
-    if ( tie ) { comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() ); }
-    else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
-  }
-
-  // Lorentzians
-  switch ( m_uiForm.confit_cbFitType->currentIndex() )
-  {
-  case 0: // No Lorentzians
-    break;
-  case 1: // 1 Lorentzian
-    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
-    break;
-  case 2: // 2 Lorentzian
-    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
-    func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian2"], index, tie);
-    // Tie PeakCentres together
-    if ( ! tie )
-    {
-      QString tieL = "f" + QString::number(index-1) + ".PeakCentre";
-      QString tieR = "f" + QString::number(index) + ".PeakCentre";
-      comp->tie(tieL.toStdString(), tieR.toStdString());
-    }
-    break;
-  }
-
-  conv->addFunction(comp);
-  result->addFunction(conv);
-
-  if ( tie ) { result->applyTies(); }
-
-  return result;
-}
-
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction* func, Mantid::API::IFunction* comp, QtProperty* group, int index, bool tie)
-{
-  // Get subproperties of group and apply them as parameters on the function object
-  QList<QtProperty*> props = group->subProperties();
-  QString pref = "f" + QString::number(index) + ".";
-
-  for ( int i = 0; i < props.size(); i++ )
-  {
-    if ( tie )
-    {
-      QString propName = pref + props[i]->propertyName();
-      comp->tie(propName.toStdString(), props[i]->valueText().toStdString() );
-    }
-    else { func->setParameter(props[i]->propertyName().toStdString(), props[i]->valueText().toDouble()); }
-  }
-
-}
-
-QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index)
-{
-  if ( curve != NULL )
-  {
-    curve->attach(0);
-    delete curve;
-    curve = 0;
-  }
-
-  Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspace));
-
-  int nhist = ws->getNumberHistograms();
-  if ( index >= nhist )
-  {
-    showInformationBox("Error: Workspace index out of range.");
-    return 0;
-  }
-
-  const QVector<double> dataX = QVector<double>::fromStdVector(ws->readX(index));
-  const QVector<double> dataY = QVector<double>::fromStdVector(ws->readY(index));
-
-  curve = new QwtPlotCurve();
-  curve->setData(dataX, dataY);
-  curve->attach(plot);
-
-  plot->replot();
-
-  return curve;
 }
 
 void IndirectDataAnalysis::confitInputType(int index)
@@ -1892,7 +1903,14 @@ void IndirectDataAnalysis::confitSequential()
     "func = r'" + QString::fromStdString(function) + "'\n"
     "startx = " + stX + "\n"
     "endx = " + enX + "\n"
-    "confitSeq(input, func, startx, endx)\n";
+    "plot = '" + m_uiForm.confit_cbPlotOutput->currentText() + "'\n"
+    "save = ";
+  
+  pyInput += m_uiForm.confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+  
+  pyInput +=
+    "confitSeq(input, func, startx, endx, save, plot)\n";
+
   QString pyOutput = runPythonCode(pyInput);
 }
 
@@ -1943,19 +1961,13 @@ void IndirectDataAnalysis::confitHwhmUpdateRS(double val)
 void IndirectDataAnalysis::confitCheckBoxUpdate(QtProperty* prop, bool checked)
 {
   // Add/remove some properties to display only relevant options
-  if ( prop == m_cfProp["BGConstant"] )
-  {
-    if ( ! checked ) { m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]); }
-    else { m_cfProp["LinearBackground"]->removeSubProperty(m_cfProp["BGA1"]); }
-  }
-  else if ( prop == m_cfProp["UseDeltaFunc"] )
+  if ( prop == m_cfProp["UseDeltaFunc"] )
   {
     if ( checked ) { m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); }
     else { m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]); }
   }
 }
 
-/* ABSORPTION TAB */
 void IndirectDataAnalysis::absorptionRun()
 {
   if ( ! validateAbsorption() )
@@ -2038,5 +2050,5 @@ void IndirectDataAnalysis::help()
   QDesktopServices::openUrl(QUrl(url));
 }
 
-} //namespace
-} //namespace
+} //namespace CustomInterfaces
+} //namespace MantidQt

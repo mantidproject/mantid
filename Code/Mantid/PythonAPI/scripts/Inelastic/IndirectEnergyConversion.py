@@ -119,8 +119,8 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
     return outWS_n
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
-    if adjustTOF(inWS_n):
-        ConvertUnits(inWS_n, outWS_n, 'Energy', 'Indirect') # TRC interested in Energy rather than DeltaE
+    if adjustTOF(inWS_n): # TRC interested in Energy rather than DeltaE
+        ConvertUnits(inWS_n, outWS_n, 'Energy', 'Indirect')
     else:
         ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
         CorrectKiKf(outWS_n, outWS_n, 'Indirect', efixed)

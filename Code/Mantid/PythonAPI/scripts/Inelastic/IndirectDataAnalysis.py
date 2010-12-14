@@ -1,7 +1,9 @@
 from mantidsimple import *
 from mantidplot import *
 from IndirectEnergyConversion import *
+
 import math
+import re
 
 def abscyl(inWS_n, outWS_n, efixed, sample, can):
     ConvertUnits(inWS_n, 'wavelength', 'Wavelength', 'Indirect', efixed)
@@ -58,6 +60,69 @@ def concatWSs(workspaces, unit, name):
             dataE.append(readE[i])
     CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
         UnitX=unit)
+
+def confitParsToWS(Table, Data):
+    dataX = []
+    outNm = Table + '_matrix'
+    ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
+    Transpose('inq', 'inq')
+    readX = mtd['inq'].readX(0)
+    nBins = len(readX)
+    for i in range(0,nBins):
+        dataX.append(readX[i])
+    mtd.deleteWorkspace('inq')
+    xAxisVals = []
+    dataY = []
+    dataE = []
+    names = ''
+    ws = mtd[Table]
+    cName =  ws.getColumnNames()
+    nSpec = ( ws.getColumnCount() - 1 ) / 2
+    for spec in range(0,nSpec):
+        yAxis = cName[(spec*2)+1]
+        if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
+            xAxisVals += dataX        
+            if (len(names) > 0):
+                names += ","
+            names += yAxis
+            eAxis = cName[(spec*2)+2]
+            for row in range(0, ws.getRowCount()):
+                dataY.append(ws.getDouble(yAxis,row))
+                dataE.append(ws.getDouble(eAxis,row))
+        else:
+            nSpec -= 1
+    CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
+        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
+    return outNm
+
+def confitPlotSeq(inputWS, plot):
+    nhist = mtd[inputWS].getNumberHistograms()
+    if ( plot == 'All' ):
+        plotSpectrum(inputWS, range(0, nhist))
+        return    
+    plotSpecs = []
+    if ( plot == 'Intensity' ):
+        res = 'Height$'
+    elif ( plot == 'HWHM' ):
+        res = 'HWHM$'
+    for i in range(0,nhist):
+        title = mtd[inputWS].getAxis(1).label(i)
+        if re.search(res, title):
+            plotSpecs.append(i)
+    plotSpectrum(inputWS, plotSpecs)
+
+def confitSeq(inputWS, func, startX, endX, save, plot):
+    input = inputWS+',i0'
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(1, nHist):
+        input += ';'+inputWS+',i'+str(i)
+    outNm = inputWS + '_convfit_seq_Parameters'
+    PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
+    wsname = confitParsToWS(outNm, inputWS)
+    if save:
+        SaveNexusProcessed(wsname, wsname+'.nxs')
+    if plot != 'None':
+        confitPlotSeq(wsname, plot)
 
 def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
         Verbose=False, Plot='None', Save=True):
@@ -182,57 +247,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         plotFury(outWSlist, specrange)
     return outWSlist
 
-def furyfitSeq(inputWS,func,startx,endx):
-    input = inputWS+',i0'
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1,nHist):
-        input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_furyfit_seq_Parameters'
-    PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
-    furyfitParsToWS(outNm, inputWS)
-
-def confitSeq(inputWS, func, startX, endX):
-    input = inputWS+',i0'
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1, nHist):
-        input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_convfit_seq_Parameters'
-    PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
-    confitParsToWS(outNm, inputWS)
-
-def confitParsToWS(Table, Data):
-    dataX = []
-    ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
-    Transpose('inq', 'inq')
-    readX = mtd['inq'].readX(0)
-    nBins = len(readX)
-    for i in range(0,nBins):
-        dataX.append(readX[i])
-    mtd.deleteWorkspace('inq')
-    xAxisVals = []
-    dataY = []
-    dataE = []
-    names = ''
-    ws = mtd[Table]
-    cName =  ws.getColumnNames()
-    nSpec = ( ws.getColumnCount() - 1 ) / 2
-    for spec in range(0,nSpec):
-        yAxis = cName[(spec*2)+1]
-        if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
-            xAxisVals += dataX        
-            if (len(names) > 0):
-                names += ","
-            names += yAxis
-            eAxis = cName[(spec*2)+2]
-            for row in range(0, ws.getRowCount()):
-                dataY.append(ws.getDouble(yAxis,row))
-                dataE.append(ws.getDouble(eAxis,row))
-        else:
-            nSpec -= 1
-    CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
-        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
-
-def createFuryFitXAxis(inputWS):
+def furyfitCreateXAxis(inputWS):
     result = []
     ws = mtd[inputWS]
     nHist = ws.getNumberHistograms()
@@ -241,7 +256,12 @@ def createFuryFitXAxis(inputWS):
     beamPos = samplePos - inst.getSource().getPos()
     for i in range(0,nHist):
         detector = ws.getDetector(i)
-        efixed = detector.getNumberParameter("Efixed")[0]
+        try:
+            efixed = detector.getNumberParameter("Efixed")[0]
+        except AttributeError: # Detector Group
+            ids = det.getDetectorIDs()
+            det = inst.getDetector(ids[0])
+            efixed = det.getNumberParameter("Efixed")[0]
         theta = detector.getTwoTheta(samplePos, beamPos) / 2
         lamda = math.sqrt(81.787/efixed)
         q = 4 * math.pi * math.sin(theta) / lamda
@@ -249,7 +269,8 @@ def createFuryFitXAxis(inputWS):
     return result
 
 def furyfitParsToWS(Table, Data):
-    dataX = createFuryFitXAxis(Data)
+    wsname = Table + '_matrix'
+    dataX = furyfitCreateXAxis(Data)
     dataY = []
     dataE = []
     names = ""
@@ -273,8 +294,38 @@ def furyfitParsToWS(Table, Data):
                 dataE.append(ws.getDouble(eAxis,row))
         else:
             nSpec -= 1
-    CreateWorkspace(Table+'_matrix', xAxisVals, dataY, dataE, nSpec,
+    CreateWorkspace(wsname, xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
+    return wsname
+
+def furyfitPlotSeq(inputWS, plot):
+    nHist = mtd[inputWS].getNumberHistograms()
+    if ( plot == 'All' ):
+        plotSpectrum(inputWS, range(0, nHist))
+        return
+    plotSpecs = []
+    if ( plot == 'Tau' ):
+        res = 'Tau$'
+    elif ( plot == 'Beta' ):
+        res = 'Beta$'    
+    for i in range(0, nHist):
+        title = mtd[inputWS].getAxis(1).label(i)
+        if ( re.search(res, title) ):
+            plotSpecs.append(i)
+    plotSpectrum(inputWS, plotSpecs)
+
+def furyfitSeq(inputWS, func, startx, endx, save, plot):
+    input = inputWS+',i0'
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(1,nHist):
+        input += ';'+inputWS+',i'+str(i)
+    outNm = inputWS + '_furyfit_seq_Parameters'
+    PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
+    wsname = furyfitParsToWS(outNm, inputWS)
+    if save:
+        SaveNexusProcessed(wsname, wsname+'.nxs')
+    if ( plot != 'None' ):
+        furyfitPlotSeq(wsname, plot)
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     output = []
@@ -323,6 +374,24 @@ def plotFury(inWS_n, spec):
     layer = graph.activeLayer()
     layer.setScale(Layer.Left, 0, 1.0)
 
+def plotInput(inputfiles,spectra=[]):
+    OneSpectra = False
+    if len(spectra) != 2:
+        spectra = [spectra[0], spectra[0]]
+        OneSpectra = True
+    workspaces = []
+    for file in inputfiles:
+        (direct, filename) = os.path.split(file)
+        (root, ext) = os.path.splitext(filename)
+        LoadNexusProcessed(file, root)
+        if not OneSpectra:
+            GroupDetectors(root, root,
+                DetectorList=range(spectra[0],spectra[1]+1) )
+        workspaces.append(root)
+    if len(workspaces) > 0:
+        graph = plotSpectrum(workspaces,0)
+        layer = graph.activeLayer().setTitle(", ".join(workspaces))
+
 def plotRaw(inputfiles,spectra=[]):
     if len(spectra) != 2:
         sys.exit(1)
@@ -331,20 +400,6 @@ def plotRaw(inputfiles,spectra=[]):
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         LoadRaw(file, root, SpectrumMin=spectra[0], SpectrumMax = spectra[1])
-        GroupDetectors(root,root,DetectorList=range(spectra[0],spectra[1]+1))
-        workspaces.append(root)
-    if len(workspaces) > 0:
-        graph = plotSpectrum(workspaces,0)
-        layer = graph.activeLayer().setTitle(", ".join(workspaces))
-
-def plotInput(inputfiles,spectra=[]):
-    if len(spectra) != 2:
-        sys.exit(1)
-    workspaces = []
-    for file in inputfiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        LoadNexusProcessed(file, root)
         GroupDetectors(root,root,DetectorList=range(spectra[0],spectra[1]+1))
         workspaces.append(root)
     if len(workspaces) > 0:

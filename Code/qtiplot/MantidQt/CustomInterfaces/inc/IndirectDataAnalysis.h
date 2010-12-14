@@ -7,28 +7,43 @@
 #include "MantidQtCustomInterfaces/ui_IndirectDataAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
-#include "MantidQtMantidWidgets/RangeSelector.h"
-
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
 
-#include <QIntValidator>
-#include <QDoubleValidator>
-
-// Editor Factories
-#include "DoubleEditorFactory.h"
-#include "StringDialogEditorFactory.h"
-#include <QtCheckBoxFactory>
-
-#include <Poco/NObserver.h>
-
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
-#include "qteditorfactory.h"
-
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
+//----------------------
+// Forward Declarations
+//----------------------
+namespace Mantid
+{
+  namespace API
+  {
+    class MatrixWorkspace;
+    class IFunction;
+    class CompositeFunction;
+  }
+}
+namespace MantidQt
+{
+  namespace MantidWidgets
+  {
+    class RangeSelector;
+  }
+}
+class QwtPlot;
+class QwtPlotCurve;
+class QIntValidator;
+class QDoubleValidator;
+class DoubleEditorFactory;
+class QtCheckBoxFactory;
+class QtProperty;
+class QtBoolPropertyManager;
+class QtDoublePropertyManager;
+class QtGroupPropertyManager;
+class QtTreePropertyBrowser;
+//----------------------
+//       End Of
+// Forward Declarations
+//----------------------
 
 namespace MantidQt
 {
@@ -85,7 +100,6 @@ namespace MantidQt
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
     private slots:
-      // Generic
       void refreshWSlist();
       void run();
 
@@ -120,6 +134,7 @@ namespace MantidQt
 
       // Convolution Fit
       void confitTypeSelection(int index);
+      void confitBgTypeSelection(int index);
       void confitInputType(int index);
       void confitPlotInput();
       void confitPlotGuess(QtProperty*);
@@ -136,21 +151,20 @@ namespace MantidQt
       void absorptionShape(int index);
       
       // Common Elements
-      void help();
       void openDirectoryDialog();
+      void help();
       
     private:
       Ui::IndirectDataAnalysis m_uiForm;
       int m_nDec;
-      QIntValidator *m_valInt;
-      QDoubleValidator *m_valDbl;
+      QIntValidator* m_valInt;
+      QDoubleValidator* m_valDbl;
 
       bool m_furyResFileType;
 
       // Editor Factories
-      DoubleEditorFactory *m_dblEdFac;
-      StringDialogEditorFactory *m_strEdFac;
-      QtCheckBoxFactory *m_blnEdFac;
+      DoubleEditorFactory* m_dblEdFac;
+      QtCheckBoxFactory* m_blnEdFac;
       
       // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
       QwtPlot* m_elwPlot;
@@ -182,8 +196,8 @@ namespace MantidQt
       QwtPlotCurve* m_ffFitCurve;
       MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
       MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
-      Mantid::API::MatrixWorkspace_const_sptr m_ffInputWS;
-      Mantid::API::MatrixWorkspace_const_sptr m_ffOutputWS;
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
       std::string m_ffInputWSName;
       QString m_furyfitTies;
 
@@ -197,10 +211,9 @@ namespace MantidQt
       QtGroupPropertyManager* m_cfGrpMng;
       QtDoublePropertyManager* m_cfDblMng;
       QtBoolPropertyManager* m_cfBlnMng;
-      QtStringPropertyManager* m_cfStrMng;
       QwtPlotCurve* m_cfDataCurve;
       QwtPlotCurve* m_cfCalcCurve;
-      Mantid::API::MatrixWorkspace_const_sptr m_cfInputWS;
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
       std::string m_cfInputWSName;
 
       /// Change Observer for ConfigService (monitors user directories)
@@ -209,4 +222,4 @@ namespace MantidQt
     };
   }
 }
-#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
+#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_ */
