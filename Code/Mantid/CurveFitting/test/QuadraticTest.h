@@ -32,7 +32,7 @@ public:
   void testAgainstHRPDData()
   {
     // create mock data to test against
-    std::string wsName = "GaussMockDataSimplex";
+    std::string wsName = "quadraticTest";
     int histogramNumber = 1;
     int timechannels = 5;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
