@@ -8731,7 +8731,7 @@ void ApplicationWindow::windowsMenuAboutToShow()
   windowsMenu->insertItem(tr("&Hide Window"),
       this, SLOT(hideActiveWindow()));
   windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"),
-      this, SLOT(closeActiveWindow()), Qt::CTRL+Qt::Key_W );
+			  this, SLOT(closeActiveWindow()) );
 
   if (n>0 && n<10){
     windowsMenu->insertSeparator();
