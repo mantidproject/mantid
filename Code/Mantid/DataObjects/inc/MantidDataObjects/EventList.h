@@ -302,6 +302,8 @@ public:
 
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
+  void filterInPlace(Kernel::TimeSplitterType splitter);
+
   void splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const;
 
   void multiply(const double value);

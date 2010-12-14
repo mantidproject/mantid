@@ -54,7 +54,7 @@ void FilterByLogValue::init()
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);
 
   declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::InOut,wsValidator),
     "An input event workspace" );
 
   declareProperty(
@@ -86,21 +86,13 @@ void FilterByLogValue::exec()
 {
 
   // convert the input workspace into the event workspace we already know it is
-  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS
-                 = boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+  const MatrixWorkspace_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_sptr inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixInputWS);
   if (!inputWS)
   {
     throw std::invalid_argument("Input workspace is not an EventWorkspace. Aborting.");
   }
 
-  //Make a brand new EventWorkspace for the output; it will overwrite the original if filtering in-place
-  EventWorkspace_sptr outputWS;
-  outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-  //Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-  //But we don't copy the data.
 
   // Get the properties.
   double min = getProperty("MinimumValue");
@@ -123,43 +115,88 @@ void FilterByLogValue::exec()
   }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
-
   int numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this,0.0,1.0,numberOfSpectra);
 
-  // Loop over the histograms (detector spectra)
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < numberOfSpectra; ++i)
+
+
+  EventWorkspace_sptr outputWS;
+  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
   {
-    PARALLEL_START_INTERUPT_REGION
+    // Filtering in place! -------------------------------------------------------------
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < numberOfSpectra; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
 
-    //Get the output event list (should be empty)
-    EventList * output_el = outputWS->getEventListPtr(i);
-    std::vector< EventList * > outputs;
-    outputs.push_back(output_el);
+      // this is the input event list
+      EventList& input_el = inputWS->getEventList(i);
 
-    //and this is the input event list
-    const EventList& input_el = inputWS->getEventList(i);
+      // Perform the filtering in place.
+      input_el.filterInPlace(splitter);
 
-    //Perform the filtering (using the splitting function and just one output)
-    input_el.splitByTime(splitter, outputs);
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
 
-    prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    //To split/filter the runs, first you make a vector with just the one output run
+    std::vector< Run *> output_runs;
+    Run * output_run = new Run(inputWS->mutableRun());
+    output_runs.push_back( output_run );
+    inputWS->run().splitByTime(splitter, output_runs);
+    // Set the output back in the input
+    inputWS->mutableRun() = *output_runs[0];
+    inputWS->mutableRun().integrateProtonCharge();
+
+    //Cast the outputWS to the matrixOutputWS and save it
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS));
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  else
+  {
+    //Make a brand new EventWorkspace for the output ------------------------------------------------------
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //But we don't copy the data.
 
-  outputWS->doneAddingEventLists();
+    // Loop over the histograms (detector spectra)
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < numberOfSpectra; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
 
-  //To split/filter the runs, first you make a vector with just the one output run
-  std::vector< Run *> output_runs;
-  output_runs.push_back( &outputWS->mutableRun() );
-  inputWS->run().splitByTime(splitter, output_runs);
+      //Get the output event list (should be empty)
+      EventList * output_el = outputWS->getEventListPtr(i);
+      std::vector< EventList * > outputs;
+      outputs.push_back(output_el);
 
-  //Cast the outputWS to the matrixOutputWS and save it
-  this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
+      //and this is the input event list
+      const EventList& input_el = inputWS->getEventList(i);
+
+      //Perform the filtering (using the splitting function and just one output)
+      input_el.splitByTime(splitter, outputs);
+
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    outputWS->doneAddingEventLists();
+
+    //To split/filter the runs, first you make a vector with just the one output run
+    std::vector< Run *> output_runs;
+    output_runs.push_back( &outputWS->mutableRun() );
+    inputWS->run().splitByTime(splitter, output_runs);
+
+    //Cast the outputWS to the matrixOutputWS and save it
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
+  }
+
+
 
 }
 

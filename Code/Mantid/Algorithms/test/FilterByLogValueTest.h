@@ -15,6 +15,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -34,17 +35,26 @@ public:
   /** Setup for loading raw data */
   void setUp_Event()
   {
-    LoadEventPreNeXus loader;
-    loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_12772_pulseid.dat" );
-    loader.setPropertyValue("EventFilename", eventfile);
-    loader.setProperty("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("PadEmptyPixels", "0");
-    loader.setPropertyValue("OutputWorkspace", inputWS);
-    loader.execute();
-    TS_ASSERT (loader.isExecuted() );
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadSNSEventNexus");
+    loader->initialize();
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+    loader->setPropertyValue("OutputWorkspace", inputWS);
+    loader->setPropertyValue("filterByTof_Min", "45000");
+    loader->setPropertyValue("filterByTof_Min", "50000");
+    loader->execute();
+    TS_ASSERT (loader->isExecuted() );
+
+//    LoadEventPreNeXus * loader;
+//    loader.initialize();
+//    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
+//    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_12772_pulseid.dat" );
+//    loader.setPropertyValue("EventFilename", eventfile);
+//    loader.setProperty("PulseidFilename", pulsefile);
+//    loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+//    loader.setPropertyValue("PadEmptyPixels", "0");
+    //    loader.setPropertyValue("OutputWorkspace", inputWS);
+//    loader.execute();
+//    TS_ASSERT (loader.isExecuted() );
   }
 
 
@@ -58,7 +68,9 @@ public:
 
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    TS_ASSERT( num_events > 0 );
+    double start_proton_charge = WS->run().getProtonCharge();
+    size_t num_sample_logs = WS->run().getProperties().size();
+    TS_ASSERT_EQUALS( num_events, 1208875 );
 
     //Do the filtering now.
     FilterByLogValue * alg = new FilterByLogValue();
@@ -67,7 +79,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputWS);
     alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg->setPropertyValue("MinimumValue", "1.33e7");
+    alg->setPropertyValue("MinimumValue", "1.85e7");
     alg->setPropertyValue("MaximumValue", "1e20");
     alg->setPropertyValue("TimeTolerance", "4e-2");
 
@@ -86,11 +98,14 @@ public:
     //There should be some events
     TS_ASSERT_LESS_THAN( 0, outWS->getNumberEvents());
 
-    TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), WS->getNumberEvents());
-    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 547346, 100);
+    TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), num_events);
+    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 6536, 100);
 
     //Proton charge is lower
-    TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
+    TS_ASSERT_EQUALS( outWS->run().getProperties().size(), num_sample_logs);
+    TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), start_proton_charge );
+    // But not 0
+    TS_ASSERT_LESS_THAN( 0, outWS->run().getProtonCharge());
 
     //Still has a spectraDetectorMap;
     outWS->spectraMap();

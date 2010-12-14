@@ -1301,6 +1301,87 @@ public:
 
 
 
+
+  //-----------------------------------------------------------------------------------------------
+  void do_testSplit_FilterInPlace(bool weighted)
+  {
+    this->fake_uniform_time_data();
+    if (weighted) el.switchToWeightedEvents();
+
+    TimeSplitterType split;
+    split.push_back( SplittingInterval(100, 200, 0) );
+    split.push_back( SplittingInterval(150, 250, 0) );
+    split.push_back( SplittingInterval(300, 350, 0) );
+
+    //Do the splitting
+    el.filterInPlace(split);
+
+    // 100-249; 300-349 are in the output, everything else is gone.
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 200);
+    if (weighted)
+    {
+      // First event is at 100.
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[0].pulseTime(), 100);
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[149].pulseTime(), 249);
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[150].pulseTime(), 300);
+      TS_ASSERT_EQUALS( el.getWeightedEvents()[199].pulseTime(), 349);
+    }
+    else
+    {
+      // First event is at 100.
+      TS_ASSERT_EQUALS( el.getEvents()[0].pulseTime(), 100);
+      TS_ASSERT_EQUALS( el.getEvents()[149].pulseTime(), 249);
+      TS_ASSERT_EQUALS( el.getEvents()[150].pulseTime(), 300);
+      TS_ASSERT_EQUALS( el.getEvents()[199].pulseTime(), 349);
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  void do_testSplit_FilterInPlace_Nothing(bool weighted)
+  {
+    this->fake_uniform_time_data();
+    if (weighted) el.switchToWeightedEvents();
+
+    TimeSplitterType split;
+    split.push_back( SplittingInterval(1500, 1700, 0) );
+
+    //Do the splitting
+    el.filterInPlace(split);
+
+    // Nothing left
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 0);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void do_testSplit_FilterInPlace_Everything(bool weighted)
+  {
+    this->fake_uniform_time_data();
+    if (weighted) el.switchToWeightedEvents();
+
+    TimeSplitterType split;
+    split.push_back( SplittingInterval(-10, 1700, 0) );
+
+    //Do the splitting
+    el.filterInPlace(split);
+
+    // Nothing left
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 1000);
+  }
+
+
+  void test_FilterInPlace_all_permutations()
+  {
+    do_testSplit_FilterInPlace(false);
+    do_testSplit_FilterInPlace_Nothing(false);
+    do_testSplit_FilterInPlace_Everything(false);
+    do_testSplit_FilterInPlace(true);
+    do_testSplit_FilterInPlace_Nothing(true);
+    do_testSplit_FilterInPlace_Everything(true);
+  }
+
+
+
   //==================================================================================
   // Mocking functions
   //==================================================================================

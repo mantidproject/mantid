@@ -211,6 +211,9 @@ public:
   /**
    * Split out a time series property by time intervals.
    *
+   * NOTE: If the input TSP has a single value, it is assumed to be a constant
+   *  and so is not split, but simply copied to all outputs.
+   *
    * @param splitter a TimeSplitterType object containing the list of intervals and destinations.
    * @param outputs A vector of output TimeSeriesProperty pointers of the same type.
    */
@@ -228,8 +231,17 @@ public:
       if (myOutput)
       {
         outputs_tsp.push_back(myOutput);
-        myOutput->m_propertySeries.clear();
-        myOutput->m_size=0;
+        if (this->m_propertySeries.size() == 1)
+        {
+          // Special case for TSP with a single entry = just copy.
+          myOutput->m_propertySeries = this->m_propertySeries;
+          myOutput->m_size = 1;
+        }
+        else
+        {
+          myOutput->m_propertySeries.clear();
+          myOutput->m_size=0;
+        }
       }
       else
       {
@@ -237,6 +249,9 @@ public:
       }
     }
 
+    // Special case for TSP with a single entry = just copy.
+    if (this->m_propertySeries.size() == 1)
+      return;
 
     //We will be iterating through all the entries in the the map
     typename timeMap::const_iterator it;

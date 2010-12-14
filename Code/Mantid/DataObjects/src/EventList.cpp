@@ -2186,6 +2186,131 @@ using Kernel::DateAndTime;
 
   }
 
+  //------------------------------------------------------------------------------------------------
+  /** Use a TimeSplitterType to filter the event list in place.
+   *
+   * @param splitter :: a TimeSplitterType where all the entries (start/end time) indicate events
+   *     that will be kept. Any other events will be deleted.
+   */
+  void EventList::filterInPlace(Kernel::TimeSplitterType splitter)
+  {
+    //Start by sorting the event list by pulse time.
+    this->sortPulseTime();
+
+    //Iterate through the splitter at the same time
+    Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+    DateAndTime start, stop;
+    int index;
+
+    if (has_weights)
+    {
+      //--------------- WEIGHTS ---------------------------------------
+
+      // Iterate for the input
+      std::vector<WeightedEvent>::iterator itev = this->weightedEvents.begin();
+
+      // Iterator for the outputted list; will follow the input except when events are dropped.
+      std::vector<WeightedEvent>::iterator itOut = this->weightedEvents.begin();
+
+      //This is the time of the first section. Anything before is thrown out.
+      while (itspl != splitter.end())
+      {
+        //Get the splitting interval times and destination
+        start = itspl->start();
+        stop = itspl->stop();
+        index = itspl->index();
+
+        //Skip the events before the start of the time
+        while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < start))
+          itev++;
+
+        //Go through all the events that are in the interval (if any)
+        while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < stop))
+        {
+          if (index >= 0)
+          {
+            // Copy the input Event to the output iterator position.
+            // Strictly speaking, this is not necessary if itOut == itev; but the extra check would likely
+            //  slow down the filtering in the 99% of cases where itOut != itev.
+            *itOut = *itev;
+            // And go up a spot in the output iterator.
+            ++itOut;
+          }
+          ++itev;
+        }
+
+        //Go to the next interval
+        itspl++;
+        //But if we reached the end, then we are done.
+        if (itspl==splitter.end())
+          break;
+
+        //No need to keep looping through the filter if we are out of events
+        if (itev == this->weightedEvents.end())
+          break;
+
+      } //Looping through entries in the splitter vector
+
+      // Ok, now resize the event list to reflect the fact that it (probably) shrank
+      weightedEvents.resize( (itOut-weightedEvents.begin()) );
+
+    }
+    else
+    {
+      //--------------- NO WEIGHTS ---------------------------------------
+
+      // Iterate for the input
+      std::vector<TofEvent>::iterator itev = this->events.begin();
+
+      // Iterator for the outputted list; will follow the input except when events are dropped.
+      std::vector<TofEvent>::iterator itOut = this->events.begin();
+
+      //This is the time of the first section. Anything before is thrown out.
+      while (itspl != splitter.end())
+      {
+        //Get the splitting interval times and destination
+        start = itspl->start();
+        stop = itspl->stop();
+        index = itspl->index();
+
+        //Skip the events before the start of the time
+        while ((itev != this->events.end()) && (itev->m_pulsetime < start))
+          itev++;
+
+        //Go through all the events that are in the interval (if any)
+        while ((itev != this->events.end()) && (itev->m_pulsetime < stop))
+        {
+          if (index >= 0)
+          {
+            // Copy the input Event to the output iterator position.
+            // Strictly speaking, this is not necessary if itOut == itev; but the extra check would likely
+            //  slow down the filtering in the 99% of cases where itOut != itev.
+            *itOut = *itev;
+            // And go up a spot in the output iterator.
+            ++itOut;
+          }
+          ++itev;
+        }
+
+        //Go to the next interval
+        itspl++;
+        //But if we reached the end, then we are done.
+        if (itspl==splitter.end())
+          break;
+
+        //No need to keep looping through the filter if we are out of events
+        if (itev == this->events.end())
+          break;
+
+      } //Looping through entries in the splitter vector
+
+      // Ok, now resize the event list to reflect the fact that it (probably) shrank
+      events.resize( (itOut-events.begin()) );
+
+    }
+
+  }
+
 
   //------------------------------------------------------------------------------------------------
   /** Split the event list into n outputs

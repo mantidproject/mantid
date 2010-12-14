@@ -129,7 +129,7 @@ namespace Mantid
       /// A pointer to a property manager
       Kernel::PropertyManager m_manager;
       /// The name of the proton charge property
-      const std::string m_protonChargeName;
+      std::string m_protonChargeName;
     };
 
     /**

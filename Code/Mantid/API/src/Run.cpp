@@ -50,6 +50,7 @@ using namespace Kernel;
   {
     if( this == &rhs ) return *this;
     m_manager = rhs.m_manager;
+    m_protonChargeName = rhs.m_protonChargeName;
     return *this;
   }
 
@@ -178,15 +179,27 @@ using namespace Kernel;
    * Calculate the total proton charge by summing up all the entries in the
    * "proton_charge" time series log. This is then saved in the log entry
    * using setProtonCharge().
+   * If "proton_charge" is not found, the value is set to 0.0.
    *
-   * @return the total charge in microAmp*hours
+   * @return :: the total charge in microAmp*hours.
    */
   double Run::integrateProtonCharge()
   {
     /// Conversion factor between picoColumbs and microAmp*hours
     const double CURRENT_CONVERSION = 1.e-6 / 3600.;
+    Kernel::TimeSeriesProperty<double> * log;
 
-    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("proton_charge") );
+    try
+    {
+      log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("proton_charge") );
+    }
+    catch (Exception::NotFoundError e)
+    {
+      //g_log.information() << "proton_charge log value not found. Total proton charge set to 0.0\n";
+      this->setProtonCharge(0);
+      return 0;
+    }
+
     if (log)
     {
       double total = log->getTotalValue() * CURRENT_CONVERSION;
