@@ -44,6 +44,16 @@ namespace Mantid
       BoundedValidator<double> *isDouble = new BoundedValidator<double>();
       declareProperty("Offset", 0.0, isDouble,
         "The amount to change each time bin by");
+
+      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      mustBePositive->setLower(0);
+      declareProperty("IndexMin", 0, mustBePositive,
+        "The workspace index of the first spectrum to shift. Only used if\n"
+        "IndexMax is set.");
+      declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+        "The workspace index of the last spectrum to shift. Only used if\n"
+        "explicitly set.");
+
     }
 
     /** Executes the algorithm
@@ -70,6 +80,29 @@ namespace Mantid
 	    
 	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 	    
+      int wi_min = 0;
+      int wi_max=histnumber-1;
+
+      //check if workspace indexes have been set
+      int tempwi_min = getProperty("IndexMin");
+      int tempwi_max = getProperty("IndexMax");
+      if ( tempwi_max != Mantid::EMPTY_INT() ) 
+      {
+        //check wimin<=tempwi_min<=tempwi_max<=wi_max
+        if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
+        {
+          wi_min = tempwi_min;
+          wi_max = tempwi_max;
+        }
+        else
+        {
+          g_log.error("Invalid Workspace Index min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
+      }
+
+
+      // do the shift in X
 	    PARALLEL_FOR2(inputW, outputW)
 	    for (int i=0; i < histnumber; ++i)
 	    {		    
@@ -78,7 +111,8 @@ namespace Mantid
 		    for (size_t j=0; j <  inputW->readX(i).size(); ++j)
 		    {
 			    //Change bin value by offset
-			    outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;
+			    if ((i >= wi_min) && (i <= wi_max)) outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;
+          else outputW->dataX(i)[j] = inputW->readX(i)[j];
 		    }
 		    //Copy y and e data
 		    outputW->dataY(i) = inputW->dataY(i);

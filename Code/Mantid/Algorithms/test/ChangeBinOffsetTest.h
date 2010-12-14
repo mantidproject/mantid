@@ -79,6 +79,7 @@ public:
 		alg2D.setPropertyValue("OutputWorkspace", "output2D");
 		alg2D.setPropertyValue("Offset", offsetStr.str());
 
+
 		TS_ASSERT_THROWS_NOTHING(alg2D.execute());
 		TS_ASSERT( alg2D.isExecuted() );
 
@@ -95,6 +96,27 @@ public:
 
 		TS_ASSERT(Xold[0] + offset == Xnew[0]);
 		TS_ASSERT(Xold[1] + offset == Xnew[1]);
+
+    // check limits
+    alg2D.setPropertyValue("IndexMin", "2");
+    alg2D.setPropertyValue("IndexMax", "3");
+    alg2D.setPropertyValue("OutputWorkspace", "output2D_lims");
+    TS_ASSERT_THROWS_NOTHING(alg2D.execute());
+		TS_ASSERT( alg2D.isExecuted() );
+
+		output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output2D_lims"));
+
+    //check hist 0 is unchanged
+		Mantid::MantidVec& Xold0 = input->dataX(0);
+		Mantid::MantidVec& Xnew0 = output->dataX(0);
+		TS_ASSERT(Xold0[0]  == Xnew0[0]);
+		TS_ASSERT(Xold0[1]  == Xnew0[1]);
+    //check hist 2 is changed
+		Mantid::MantidVec& Xold2 = input->dataX(2);
+		Mantid::MantidVec& Xnew2 = output->dataX(2);
+		TS_ASSERT(Xold2[0] + offset == Xnew2[0]);
+		TS_ASSERT(Xold2[1] + offset == Xnew2[1]);
+   
 
 		AnalysisDataService::Instance().remove("input2D");
 	}
@@ -120,12 +142,13 @@ public:
 		Workspace2D_sptr testWorkspace(new Workspace2D);
 
 		testWorkspace->setTitle("input2D");
-		testWorkspace->initialize(2,2,2);
-
+		testWorkspace->initialize(5,2,2);
+    int jj=0;
 		for (int i =0; i < 2; ++i)
 		{
-		  testWorkspace->dataX(1)[i] = testWorkspace->dataX(0)[i] = 1.0*i;
-		  testWorkspace->dataY(1)[i] = testWorkspace->dataY(0)[i] = 2.0*i;
+      for (jj=0; jj<4; ++jj)
+		  testWorkspace->dataX(jj)[i] = 1.0*i;
+		  testWorkspace->dataY(jj)[i] = 2.0*i;
 		}
 
 		return testWorkspace;
@@ -136,8 +159,8 @@ public:
     this->inputSpace = "eventWS";
     Mantid::DataHandling::LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_11514_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_11514_pulseid.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_23800_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_23800_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
