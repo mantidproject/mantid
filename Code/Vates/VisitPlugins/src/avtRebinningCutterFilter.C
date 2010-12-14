@@ -94,22 +94,6 @@ avtRebinningCutterFilter::Create()
 
 void avtRebinningCutterFilter::SetUp()
 {
-  int nLeaves = 0;
-  RebinningCutterPresenter presenter;
-  Mantid::API::ImplicitFunction* func = NULL;
-  vtkDataSet** allDataSets = this->GetInputDataTree()->GetAllLeaves(nLeaves);
-  for(int i = 0; i < nLeaves; i++)
-  {
-    debug5 << "Previous instruction " << i << func->getName() << endl;
-    vtkDataSet* currentDataSet = allDataSets[i];
-    func = presenter.findExistingRebinningDefinitions(currentDataSet, presenter.getMetadataID());
-    if(func != NULL)
-    {
-      debug5 << "Last MD Instruction: " << func->getName() << endl;
-        //Can use this to pre-populate options!
-      break;
-    }
-  }
 
 }
 
@@ -153,8 +137,7 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 vtkDataSet *
 avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
 {
-
-  RebinningCutterPresenter presenter;
+  RebinningCutterPresenter presenter(in_ds);
 
   doubleVector normal;
   normal.push_back(atts.GetNormalX());
@@ -165,20 +148,14 @@ avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
   origin.push_back(atts.GetOriginY());
   origin.push_back(atts.GetOriginZ());
 
-  Mantid::API::ImplicitFunction* function = presenter.constructReductionKnowledge(in_ds, normal, origin, presenter.getMetadataID());
-  debug5 << "Input Reduction Knowledge --- " << endl;
-  debug5 << function->toXMLString() << endl;
-  debug5 << "Output -end Reduction Knowledge --- " << endl;
-
+  presenter.constructReductionKnowledge(normal, origin);
 
   vtkVisItClipper* adaptee = vtkVisItClipper::New();
-  vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee), in_ds, function);
+  vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee));
 
-  presenter.persistReductionKnowledge(ug, function, presenter.getMetadataID());
-  debug5 << "Output Reduction Knowledge --- " << endl;
-  debug5 << function->toXMLString() << endl;
-  debug5 << "Output -end Reduction Knowledge --- " << function->toXMLString() << endl;
+  debug5 << "-------------------------- Output ------------------------" << endl;
+  debug5 << presenter.getFunction()->toXMLString() << endl;
+  debug5 << "-------------------------- End Output ------------------------" << endl;
 
-  delete function;
   return ug;
 }

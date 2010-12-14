@@ -41,6 +41,8 @@ namespace VATES
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
+/// Clipper, forms base of Adapter pattern.
 class Clipper
 {
 public:
@@ -56,40 +58,63 @@ public:
   virtual void Delete() = 0;
 };
 
+/// RebinningCutterPresenter does the work of implemening requests/information provided by pipeline filters. Generates new datasets from
+/// current and historical rebinning knowledge accumulated in the pipeline.
 class RebinningCutterPresenter
 {
+private:
+
+  /// Implicit function representing current and historical operations
+  Mantid::API::ImplicitFunction* m_function;
+
+  vtkDataSet* m_inputDataSet;
+
+  /// initalised flag
+  bool m_initalized;
 
 public:
 
-  //Construct reduction knowledge objects
-  Mantid::API::ImplicitFunction* constructReductionKnowledge(vtkDataSet *in_ds,
-      std::vector<double>& normal, std::vector<double>& origin, const char* id);
+	/// Constructor
+	RebinningCutterPresenter(vtkDataSet* inputDataSet);
 
-  //Apply reduction knowledge to create a vtk dataset.
-  vtkUnstructuredGrid* applyReductionKnowledge(Clipper* clipper, vtkDataSet *in_ds,
-      Mantid::API::ImplicitFunction * const function);
+	/// Destructor
+	~RebinningCutterPresenter();
 
-  //Save reduction knowledge object. Serialise to xml and pass to dependent filters.
+	/// Get the generated function.
+	Mantid::API::ImplicitFunction const * const getFunction() const;
+
+  /// Construct reduction knowledge objects
+  void constructReductionKnowledge(std::vector<double>& normal, std::vector<double>& origin);
+
+  /// Apply reduction knowledge to create a vtk dataset.
+  vtkUnstructuredGrid* applyReductionKnowledge(Clipper* clipper);
+
+};
+
+//Non-member helper functions.
+
+  /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkUnstructuredGrid * out_ds,
       Mantid::API::ImplicitFunction const * const function , const char* id);
 
-  //Walk composite functions and apply their operations to the visualisation dataset.
+  /// Walk composite functions and apply their operations to the visualisation dataset.
   void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
       vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction * const function);
 
-  //Convert field data to xml string meta data.
+  /// Convert field data to xml string meta data.
   std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id);
 
-  //Look for and extract exisiting reduction knowledge in input visualisation dataset.
+  /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
   Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
+  /// Gets the effective constant meta data id for keying cutting information.
   const char*  getMetadataID();
 
-  std::string getXMLLanguageDef();
-
+  /// Converts field data into metadata xml/string.
   void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
 
-};
+
+
 }
 }
 #endif

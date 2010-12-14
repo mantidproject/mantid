@@ -34,7 +34,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.353328192" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDAlgorithms/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VisitPresenters/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 "/>
+									<listOptionValue builtIn="false" value="/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/API/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MDDataObjects/inc}&quot;"/>

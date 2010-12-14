@@ -12,8 +12,80 @@ namespace Mantid
 namespace VATES
 {
 
+RebinningCutterPresenter::RebinningCutterPresenter(vtkDataSet* inputDataSet) : m_initalized(false), m_inputDataSet(inputDataSet), m_function(NULL)
+{
+}
 
-void RebinningCutterPresenter::metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
+RebinningCutterPresenter::~RebinningCutterPresenter()
+{
+  if (m_function != NULL)
+  {
+    delete m_function;
+    m_function = NULL;
+  }
+}
+
+void RebinningCutterPresenter::constructReductionKnowledge(
+    std::vector<double>& normal, std::vector<double>& origin)
+{
+  if (normal.size() != 3)
+  {
+    throw std::invalid_argument("Three normal components expected.");
+  }
+  if (origin.size() != 3)
+  {
+    throw std::invalid_argument("Three origin components expected.");
+  }
+  Mantid::MDAlgorithms::NormalParameter normalParam = Mantid::MDAlgorithms::NormalParameter(
+      normal.at(0), normal.at(1), normal.at(2));
+  Mantid::MDAlgorithms::OriginParameter originParam = Mantid::MDAlgorithms::OriginParameter(
+      origin.at(0), origin.at(1), origin.at(2));
+
+  //create the composite holder.
+  Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
+
+  //create the box.
+  Mantid::MDAlgorithms::PlaneImplicitFunction* planeFunc =
+      new Mantid::MDAlgorithms::PlaneImplicitFunction(normalParam, originParam);
+
+  //Add the new plane function.
+  compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(planeFunc));
+
+  //Add existing functions.
+  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, getMetadataID());
+  if (existingFunctions != NULL)
+  {
+    compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
+  }
+
+  m_function = compFunction;
+  this->m_initalized = true;
+}
+
+vtkUnstructuredGrid* RebinningCutterPresenter::applyReductionKnowledge(Clipper* clipper)
+{
+
+  if(true == m_initalized)
+  {
+  vtkUnstructuredGrid *ug = vtkUnstructuredGrid::New();
+  applyReductionKnowledgeToComposite(clipper, m_inputDataSet, ug, this->m_function);
+  persistReductionKnowledge(ug, this->m_function, getMetadataID());
+  return ug;
+  }
+  else
+  {
+    //To ensure that constructReductionKnowledge is always called first.
+    throw std::runtime_error("This instance has not been properly initalized via the contruct method.");
+  }
+
+}
+
+Mantid::API::ImplicitFunction const * const RebinningCutterPresenter::getFunction() const
+{
+  return m_function;
+}
+
+void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
     const char* id)
 {
   //clean out existing.
@@ -28,13 +100,13 @@ void RebinningCutterPresenter::metaDataToFieldData(vtkFieldData* fieldData, std:
   newArry->SetName(id);
   fieldData->AddArray(newArry);
 
-  for(int i = 0 ; i < metaData.size(); i++)
+  for(unsigned int i = 0 ; i < metaData.size(); i++)
   {
     newArry->InsertNextValue(metaData.at(i));
   }
 }
 
-std::string RebinningCutterPresenter::fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
+std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
 {
   std::string sXml;
   vtkDataArray* arry = fieldData->GetArray(id);
@@ -56,11 +128,26 @@ std::string RebinningCutterPresenter::fieldDataToMetaData(vtkFieldData* fieldDat
   return sXml;
 }
 
-Mantid::API::ImplicitFunction* RebinningCutterPresenter::findExistingRebinningDefinitions(
-    vtkDataSet *in_ds, const char* id)
+
+void persistReductionKnowledge(vtkUnstructuredGrid * out_ds,
+    Mantid::API::ImplicitFunction const * const function, const char* id)
+{
+  vtkFieldData* fd = vtkFieldData::New();
+
+  metaDataToFieldData(fd, function->toXMLString().c_str(), id);
+  out_ds->SetFieldData(fd);
+}
+
+const char* getMetadataID()
+{
+  return "1"; //value unimportant. Identifier to recognise a particular vktArray in the vtkFieldData.
+}
+
+Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
+    vtkDataSet* inputDataSet, const char* id)
 {
   Mantid::API::ImplicitFunction* function = NULL;
-  std::string xmlString = fieldDataToMetaData(in_ds->GetFieldData(), id);
+  std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
   if (false == xmlString.empty())
   {
     function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(xmlString);
@@ -68,51 +155,9 @@ Mantid::API::ImplicitFunction* RebinningCutterPresenter::findExistingRebinningDe
   return function;
 }
 
-Mantid::API::ImplicitFunction* RebinningCutterPresenter::constructReductionKnowledge(vtkDataSet *in_ds,
-    std::vector<double>& normal, std::vector<double>& origin, const char* id)
-{
-  if (normal.size() != 3)
-  {
-    throw std::invalid_argument("Three normal components expected.");
-  }
-  if (origin.size() != 3)
-  {
-    throw std::invalid_argument("Three origin components expected.");
-  }
-  Mantid::MDAlgorithms::NormalParameter normalParam = Mantid::MDAlgorithms::NormalParameter(
-      normal.at(0), normal.at(1), normal.at(2));
-  Mantid::MDAlgorithms::OriginParameter originParam = Mantid::MDAlgorithms::OriginParameter(
-      origin.at(0), origin.at(1), origin.at(2));
 
-  Mantid::MDAlgorithms::CompositeImplicitFunction* compFunc =
-      new Mantid::MDAlgorithms::CompositeImplicitFunction;
-  Mantid::MDAlgorithms::PlaneImplicitFunction* planeFunc =
-      new Mantid::MDAlgorithms::PlaneImplicitFunction(normalParam, originParam);
 
-  //Add the new plane function.
-  compFunc->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(planeFunc));
-
-  //Add existing functions.
-  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(in_ds, id);
-  if (existingFunctions != NULL)
-  {
-    compFunc->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
-  }
-
-  return compFunc;
-}
-
-vtkUnstructuredGrid* RebinningCutterPresenter::applyReductionKnowledge(Clipper* clipper,
-    vtkDataSet *in_ds, Mantid::API::ImplicitFunction * const function)
-{
-
-  vtkUnstructuredGrid *ug = vtkUnstructuredGrid::New();
-
-  this->applyReductionKnowledgeToComposite(clipper, in_ds, ug, function);
-  return ug;
-}
-
-void RebinningCutterPresenter::applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
+void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
     vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction * const function)
 {
   using namespace Mantid::MDAlgorithms;
@@ -150,20 +195,6 @@ void RebinningCutterPresenter::applyReductionKnowledgeToComposite(Clipper* clipp
       }
     }
   }
-}
-
-void RebinningCutterPresenter::persistReductionKnowledge(vtkUnstructuredGrid * out_ds,
-    Mantid::API::ImplicitFunction const * const function, const char* id)
-{
-  vtkFieldData* fd = vtkFieldData::New();
-
-  metaDataToFieldData(fd, function->toXMLString().c_str(), id);
-  out_ds->SetFieldData(fd);
-}
-
-const char*  RebinningCutterPresenter::getMetadataID()
-{
-  return "1";
 }
 
 }
