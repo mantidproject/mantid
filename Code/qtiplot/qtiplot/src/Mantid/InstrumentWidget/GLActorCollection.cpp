@@ -117,11 +117,11 @@ void GLActorCollection::init()
     for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::init));
 }
 
-void GLActorCollection::addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list)
-{
-  std::vector<GLActor*>::iterator it = mActorsList.begin();
-  for(;it != mActorsList.end();++it)
-  {
-    (**it).addToUnwrappedList(cylinder,list);
-  }
-}
+//void GLActorCollection::addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list)
+//{
+//  std::vector<GLActor*>::iterator it = mActorsList.begin();
+//  for(;it != mActorsList.end();++it)
+//  {
+//    (**it).addToUnwrappedList(cylinder,list);
+//  }
+//}

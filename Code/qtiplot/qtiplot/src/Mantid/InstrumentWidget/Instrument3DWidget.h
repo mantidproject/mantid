@@ -8,6 +8,8 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+class QAction;
+
 /*!
   \class  GL3DWidget
   \brief  OpenGL Qt Widget which renders Instrument
@@ -133,6 +135,12 @@ public slots:
   void setViewDirectionXNegative();
   void setViewDirectionYNegative();
   void setViewDirectionZNegative();
+  void showInfo();
+  void extractDetsToWorkspace();
+  void sumDetsToWorkspace();
+  void createIncludeGroupingFile();
+  void createExcludeGroupingFile();
+
 
 signals:
   void detectorsSelected();
@@ -149,6 +157,7 @@ private:
   void setSceneLowResolution();
   void setSceneHighResolution();
   void getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound);
+  void showUnwrappedContextMenu();
 
   /// Convert the list of detector ids to a list of workspace indices and store them
   void createWorkspaceIndexList(const std::vector<int> & idlist, bool forceNew);
@@ -194,6 +203,10 @@ private:
   /// Contains information about selected detectors, when there is a selection
   DetInfo m_detInfo;
 
+  QAction *m_ExtractDetsToWorkspaceAction;  ///< Extract selected detector ids to a new workspace
+  QAction *m_SumDetsToWorkspaceAction;      ///< Sum selected detectors to a new workspace
+  QAction *m_createIncludeGroupingFileAction; ///< Create grouping xml file which includes selected detectors
+  QAction *m_createExcludeGroupingFileAction; ///< Create grouping xml file which excludes selected detectors
 };
 
 #endif /*GL3DWIDGET_H_*/

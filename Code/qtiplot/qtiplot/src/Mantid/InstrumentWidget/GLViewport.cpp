@@ -177,6 +177,7 @@ void GLViewport::issueGL() const
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  OpenGLError::check("GLViewport::issueGL()");
   if(mProjection==GLViewport::PERSPECTIVE)
   {
     glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
@@ -194,10 +195,14 @@ void GLViewport::issueGL() const
     glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
             center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
             nearVal, farVal);
-    //    std::cout << "center is" << center << "\n";
-    //    std::cout << "distance is" << distance << "\n";
-    //		std::cout << "glOrtho called with nearVal = " << nearVal  << " and farVal = " << farVal << "\n";
+
+    if (OpenGLError::hasError("GLViewport::issueGL()"))
+    {
+      OpenGLError::log() << "Arguments to glOrtho:\n";
+      OpenGLError::log() << center[0]-distance[0]-mXTrans <<','<< center[0]+distance[0]-mXTrans <<','<<
+                            center[1]-distance[1]-mYTrans <<','<< center[1]+distance[1]-mYTrans <<','<<
+                            nearVal <<','<< farVal << "\n\n";
+    }
   }
   glMatrixMode(GL_MODELVIEW);
-  OpenGLError::check("GLViewport::issueGL()");
 }

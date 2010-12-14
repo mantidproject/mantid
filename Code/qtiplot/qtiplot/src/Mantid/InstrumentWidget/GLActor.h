@@ -38,10 +38,15 @@ struct DetectorCallbackData
   GLColor color;
 };
 
+/**
+  * Class for collecting information about detectors form actors.
+  * The information includes the detector id and the fields of the DetectorCallbackData struct
+  */
 class DetectorCallback
 {
-  //Q_OBJECT
 public:
+  /// An actor calls this method for each of its detectors and passes the detetctor id and
+  /// a reference to a DetectorCallbackData struct filled with the information about that detector
   virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
 };
 
@@ -88,12 +93,7 @@ public:
   void setVisibility(bool);
   bool getVisibility();
   virtual int  setStartingReferenceColor(int){return 1;}
-//  friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
-//  {
-//    os << "Actor Name:" << a.type() << std::endl;
-//    return os;
-//  } ///< Printing Actor object
-  virtual void addToUnwrappedList(UnwrappedCylinder& /*cylinder*/, QList<UnwrappedDetectorCyl>& /*list*/){}
+  /// Calls the DetectorCallback::callback method for each detector
   virtual void detectorCallback(DetectorCallback* /*callback*/)const{}
 protected:
   boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object

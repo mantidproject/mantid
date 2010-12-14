@@ -2,11 +2,14 @@
 #include "InstrumentActor.h"
 #include "MantidObject.h"
 #include "OpenGLError.h"
+#include "UnwrappedSurface.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Algorithm.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
@@ -23,17 +26,118 @@
 #include <QTimer>
 #include <QMessageBox>
 #include <QString>
+#include <QMenu>
+#include <QAction>
+#include <QSet>
+#include <QTemporaryFile>
+#include <QDir>
+#include <QApplication>
+#include <QFileDialog>
 
 #include <map>
 #include <cmath>
 #include <cfloat>
 #include <numeric>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 static const bool SHOWTIMING = false;
+
+/** A class for creating grouping xml files
+  */
+class DetXMLFile//: public DetectorCallback
+{
+public:
+  enum Option {List,Sum};
+  /// Create a grouping file to extract all detectors in detector_list excluding those in dets
+  DetXMLFile(const std::vector<int> detector_list, const QSet<int>& dets, const QString& fname)
+  {
+    m_fileName = fname;
+    m_delete = false;
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    std::vector<int>::const_iterator idet = detector_list.begin();
+    for(; idet != detector_list.end(); ++idet)
+    {
+      if (!dets.contains(*idet))
+      {
+        out << "<group name=\"" << *idet << "\"> <detids val=\"" << *idet << "\"/> </group> \n";
+      }
+    }
+    out << "</detector-grouping>\n";
+  }
+
+  /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
+  /// Option Sum - one group which is a sum of the detectors
+  /// If fname is empty create a temporary file
+  DetXMLFile(const QSet<int>& dets, Option opt = List, const QString& fname = "")
+  {
+    if (dets.empty())
+    {
+      m_fileName = "";
+      return;
+    }
+
+    if (fname.isEmpty())
+    {
+      QTemporaryFile mapFile;
+      mapFile.open();
+      m_fileName = mapFile.fileName() + ".xml";
+      mapFile.close();
+      m_delete = true;
+    }
+    else
+    {
+      m_fileName = fname;
+      m_delete = false;
+    }
+
+    switch(opt)
+    {
+    case Sum: makeSumFile(dets); break;
+    case List: makeListFile(dets); break;
+    }
+
+  }
+  void makeListFile(const QSet<int>& dets)
+  {
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    foreach(int det,dets)
+    {
+      out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
+    }
+    out << "</detector-grouping>\n";
+  }
+  void makeSumFile(const QSet<int>& dets)
+  {
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    out << "<group name=\"sum\"> <detids val=\"";
+    foreach(int det,dets)
+    {
+      out << det << ',';
+    }
+    out << "\"/> </group> \n</detector-grouping>\n";
+  }
+
+  ~DetXMLFile()
+  {
+    if (m_delete)
+    {
+      QDir dir;
+      dir.remove(m_fileName);
+    }
+  }
+  const std::string operator()()const{return m_fileName.toStdString();}
+
+private:
+  QString m_fileName;
+  bool m_delete;
+};
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
@@ -48,6 +152,18 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
   connect(this, SIGNAL(increaseSelection(QRgb)),this,SLOT(detectorsHighligted(QRgb)));
+
+  m_ExtractDetsToWorkspaceAction = new QAction("Extract to new workspace",this);
+  connect(m_ExtractDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(extractDetsToWorkspace()));
+
+  m_SumDetsToWorkspaceAction = new QAction("Sum to new workspace",this);
+  connect(m_SumDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(sumDetsToWorkspace()));
+
+  m_createIncludeGroupingFileAction = new QAction("Include",this);
+  connect(m_createIncludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createIncludeGroupingFile()));
+
+  m_createExcludeGroupingFileAction = new QAction("Exclude",this);
+  connect(m_createExcludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createExcludeGroupingFile()));
 }
 
 Instrument3DWidget::~Instrument3DWidget()
@@ -930,4 +1046,114 @@ int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const
     return it->second;
   }
   else return NO_INDEX;
+}
+
+void Instrument3DWidget::showUnwrappedContextMenu()
+{
+  QMenu context(this);
+
+  context.addAction(m_ExtractDetsToWorkspaceAction);
+  context.addAction(m_SumDetsToWorkspaceAction);
+  QMenu *gfileMenu = context.addMenu("Create grouping file");
+  gfileMenu->addAction(m_createIncludeGroupingFileAction);
+  gfileMenu->addAction(m_createExcludeGroupingFileAction);
+
+  context.exec(QCursor::pos());
+}
+
+void Instrument3DWidget::showInfo()
+{
+  if (!m_unwrappedSurface) return;
+
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QString msg;
+  if (dets.size() == 0) return;
+  else if (dets.size() == 1)
+  {
+    msg = "Detector ID " + QString::number(*dets.begin());
+  }
+  else
+  {
+    msg = "Selected " + QString::number(dets.size()) + " detectors";
+  }
+  QMessageBox::information(this,"MantidPlot",msg);
+}
+
+/**
+  * Extract selected detectors to a new workspace
+  */
+void Instrument3DWidget::extractDetsToWorkspace()
+{
+  if (!m_unwrappedSurface) return;
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  DetXMLFile mapFile(dets);
+  std::string fname = mapFile();
+
+  if (!fname.empty())
+  {
+    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
+    alg->setPropertyValue("InputWorkspace",getWorkspaceName().toStdString());
+    alg->setPropertyValue("MapFile",fname);
+    alg->setPropertyValue("OutputWorkspace",getWorkspaceName().toStdString()+"_selection");
+    alg->execute();
+  }
+
+  QApplication::restoreOverrideCursor();
+}
+
+/**
+  * Sum selected detectors to a new workspace
+  */
+void Instrument3DWidget::sumDetsToWorkspace()
+{
+  if (!m_unwrappedSurface) return;
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  DetXMLFile mapFile(dets,DetXMLFile::Sum);
+  std::string fname = mapFile();
+
+  if (!fname.empty())
+  {
+    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
+    alg->setPropertyValue("InputWorkspace",getWorkspaceName().toStdString());
+    alg->setPropertyValue("MapFile",fname);
+    alg->setPropertyValue("OutputWorkspace",getWorkspaceName().toStdString()+"_sum");
+    alg->execute();
+  }
+
+  QApplication::restoreOverrideCursor();
+}
+
+void Instrument3DWidget::createIncludeGroupingFile()
+{
+  if (!m_unwrappedSurface) return;
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  if (!fname.isEmpty())
+  {
+    DetXMLFile mapFile(dets,DetXMLFile::List,fname);
+  }
+
+}
+
+void Instrument3DWidget::createExcludeGroupingFile()
+{
+  if (!m_unwrappedSurface) return;
+  QSet<int> dets;
+  m_unwrappedSurface->getPickedDetector(dets);
+
+  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  if (!fname.isEmpty())
+  {
+    DetXMLFile mapFile(detector_list,dets,fname);
+  }
 }

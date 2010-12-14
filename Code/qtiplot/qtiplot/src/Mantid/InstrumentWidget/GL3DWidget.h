@@ -12,7 +12,6 @@
 #include "boost/shared_ptr.hpp"
 
 class UnwrappedSurface;
-class QAction;
 
 /*!
   \class  GL3DWidget
@@ -93,12 +92,12 @@ protected:
   void defaultProjection();
   void redrawUnwrapped();
   void checkGLError(const QString& funName);
-  void showUnwrappedContextMenu();
   
   virtual void drawSceneUsingColorID()=0;
   virtual void setSceneLowResolution()=0;
   virtual void setSceneHighResolution()=0;
   virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
+  virtual void showUnwrappedContextMenu() = 0;
 
   boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
   GLTrackball* _trackball;       ///< Trackball for user interaction
@@ -107,7 +106,6 @@ protected:
 protected slots:
   void set3DAxesState(int state);
   void setRenderMode(int);
-  void showInfo();
 
 private:
   void setRenderingOptions();
@@ -130,13 +128,13 @@ private:
   PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
   bool m_firstFrame;
 
+protected:
   // Unwrapping stuff
   RenderMode m_renderMode;       ///< 3D view or unwrapped
   UnwrappedSurface* m_unwrappedSurface;
   bool m_unwrappedSurfaceChanged;
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn, but the surface is the same
 
-  QAction *m_InfoAction;
 };
 
 #endif /*GL3DWIDGET_H_*/
