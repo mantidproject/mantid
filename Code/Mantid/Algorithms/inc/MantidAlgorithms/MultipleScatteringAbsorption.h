@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -68,10 +69,10 @@ private:
   void exec();
 
   // Attenuation Factor
-  double AttFac( float sigir, float sigsr, double Z[] );
+  double AttFac(const double sigir, const double sigsr, const std::vector<double>& Z);
 
   // Set up "Z" array for specified angle
-  void ZSet( double angle_deg, double Z[] );
+  void ZSet(const double angle_deg, std::vector<double>& Z);
 
   // Wavelength function
   double wavelength( double path_length_m, double tof_us );
@@ -96,8 +97,8 @@ private:
                              double angle_deg,
                              double radius,
                              double coeff1, double coeff2, double coeff3,
-                             double tof[],   int    n_tofs,
-                             double y_val[], int    n_ys );
+                             std::vector<double>& tof,
+                             std::vector<double>& y_val);
 };
 
 } // namespace Algorithm

@@ -3,9 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringAbsorption.h"
 #include "MantidKernel/Exception.h"
-
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <iostream>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -15,6 +16,7 @@ DECLARE_ALGORITHM(MultipleScatteringAbsorption)   // Register the class into the
 
 using namespace Kernel;
 using namespace API;
+using std::vector;
 
   // Constants required internally only, so make them static 
 
@@ -47,6 +49,9 @@ using namespace API;
                  2.0,0.0,0.0,0.0,0.0,0.0,
                  3.104279270,0.0,0.0,0.0,0.0,0.0 };
 
+  static const double  H_ES  = 6.62606876e-27;               // h in erg seconds
+  static const double  MN_KG = Mantid::PhysicalConstants::NeutronMass;  // mass of neutron(kg)
+  static const double  ANGST_PER_US_PER_M = H_ES/MN_KG/1000.;
 
 /**
  * Initialize the properties to default values
@@ -58,16 +63,9 @@ void MultipleScatteringAbsorption::init()
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-  mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", 0, mustBePositive,
-                  "Spectrum index for Multiple Scattering Absorption Corrections");
-
   declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross section / 1.81" );
   declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering cross section" );
   declareProperty("SampleNumberDensity", 0.0721, "Coefficient 2, density" );
-  declareProperty("TotalFlightPath", 62.602, "Total Flight Path Length in meters" );
-  declareProperty("ScatteringAngle", 129.824, "Scattering angle, two theta, in degrees" );
   declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm" );
 }
 
@@ -77,58 +75,59 @@ void MultipleScatteringAbsorption::init()
  */
 void MultipleScatteringAbsorption::exec()
 {
+  // common information
   API::MatrixWorkspace_sptr in_WS = getProperty("InputWorkspace");
-
-  int index         = getProperty("WorkspaceIndex");
-  int num_tofs      = in_WS->readX(index).size();
-  int num_ys        = in_WS->readY(index).size();
-  double total_path = getProperty("TotalFlightPath");
-  double angle_deg  = getProperty("ScatteringAngle");
   double radius     = getProperty("CylinderSampleRadius");
   double coeff1     = getProperty("AttenuationXSection");
   double coeff2     = getProperty("SampleNumberDensity");
   double coeff3     = getProperty("ScatteringXSection");
 
-  MantidVec tof_vec = in_WS->readX(index);
-  MantidVec y_vec   = in_WS->readY(index);
+  // geometry stuff
+  size_t nHist = in_WS->getNumberHistograms();
+  Geometry::IInstrument_const_sptr instrument = in_WS->getInstrument();
+  if (instrument == NULL)
+    throw std::runtime_error("Failed to find instrument attached to InputWorkspace");
+  Geometry::IObjComponent_const_sptr source = instrument->getSource();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  if (source == NULL)
+    throw std::runtime_error("Failed to find source in the instrument for InputWorkspace");
+  if (sample == NULL)
+    throw std::runtime_error("Failed to find sample in the instrument for InputWorkspace");
+  double l1 = source->getDistance(*sample);
 
-  double* tof   = new double[ num_tofs ];
-  double* y_val = new double[ num_ys ];
+  // Create the new workspace
+  MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(in_WS, nHist,
+      in_WS->readX(0).size(), in_WS->readY(0).size());
 
-  for ( int i = 0; i < num_tofs; i++ )
-    tof[i] = tof_vec[i];
+  for (size_t index = 0; index < nHist; ++index) {
+    Geometry::IDetector_sptr det = in_WS->getDetector(index);
+    if (det == NULL)
+      throw std::runtime_error("Failed to find detector");
+    double l2 = det->getDistance(*sample);
+    double tth_rad = in_WS->detectorTwoTheta(det);
+    double total_path = l1 + l2;
 
-  for ( int i = 0; i < num_ys; i++ )
-    y_val[i] = y_vec[i];
+    MantidVec tof_vec = in_WS->readX(index);
+    MantidVec y_vec   = in_WS->readY(index);
 
-  apply_msa_correction( total_path, angle_deg, radius,
-                        coeff1, coeff2, coeff3,
-                        tof,   num_tofs,
-                        y_val, num_ys );
+    apply_msa_correction( total_path, tth_rad, radius,
+                          coeff1, coeff2, coeff3,
+                          tof_vec, y_vec);
 
-  for ( int i = 0; i < num_ys; i++ )
-    y_vec[i] = y_val[i];
-
-  API::MatrixWorkspace_sptr out_WS = 
-    API::WorkspaceFactory::Instance().create( in_WS, 1, in_WS->readX(index).size(),
-                                                        in_WS->readY(index).size() );
-
-  out_WS->dataX(0).assign( tof_vec.begin(), tof_vec.end() );
-  out_WS->dataY(0).assign(   y_vec.begin(),   y_vec.end() );   
+    out_WS->dataX(index).assign( tof_vec.begin(), tof_vec.end() );
+    out_WS->dataY(index).assign(   y_vec.begin(),   y_vec.end() );
+  }
   
   setProperty("OutputWorkspace",out_WS);
-
-  delete [] tof;
-  delete [] y_val;
 }
 
 
 /**
  * Set up the Z table for the specified two theta angle (in degrees).
  */
-void MultipleScatteringAbsorption::ZSet( double angle_deg, double Z[] )
+void MultipleScatteringAbsorption::ZSet(const double angle_rad, vector<double>& Z)
 {
-  double theta_rad = angle_deg * M_PI / 360;
+  double theta_rad = angle_rad * .5;
   int l, J;
   double sum;
 
@@ -159,18 +158,18 @@ void MultipleScatteringAbsorption::ZSet( double angle_deg, double Z[] )
 /**
  * Evaluate the AttFac function for a given sigir and sigsr.
  */
-double MultipleScatteringAbsorption::AttFac( float sigir, float sigsr, double Z[] )
+double MultipleScatteringAbsorption::AttFac(const double sigir, const double sigsr,
+                                            const vector<double>& Z)
 {
   double facti = 1.0;
   double att   = 0.0;
 
-  for( int i = 0; i <= 5; i++ )
+  for( size_t i = 0; i <= 5; i++ )
   {
     double facts = 1.0;
-    for( int j = 0; j <= 5; j++ )
+    for( size_t j = 0; j <= 5; j++ )
     {
-      int iplusj = i+j;
-      if( iplusj <= 5 )
+      if( i+j <= 5 )
       {
         int J = 1 + i + 6 * j;
         att   = att + Z[J-1] * facts * facti;
@@ -187,12 +186,8 @@ double MultipleScatteringAbsorption::AttFac( float sigir, float sigsr, double Z[
  *  Calculate the wavelength at a specified total path in meters and
  *  time-of-flight in microseconds.
  */
-double MultipleScatteringAbsorption::wavelength( double path_length_m, double tof_us )
+inline double MultipleScatteringAbsorption::wavelength( double path_length_m, double tof_us )
 {
-  const double  H_ES  = 6.62606876e-27;               // h in erg seconds
-  const double  MN_KG = 1.67492716e-27;               // mass of neutron(kg)
-  const double  ANGST_PER_US_PER_M = H_ES/MN_KG/1000;
-
   return ANGST_PER_US_PER_M * tof_us / path_length_m;
 }
 
@@ -204,33 +199,30 @@ double MultipleScatteringAbsorption::wavelength( double path_length_m, double to
 void MultipleScatteringAbsorption::apply_msa_correction( 
                 double total_path, double angle_deg, double radius,
                 double coeff1,  double coeff2, double coeff3,
-                double tof[],   int    n_tofs,
-                double y_val[], int    n_ys )
+                vector<double>& tof, vector<double>& y_val)
 {
   const double  coeff4 =  1.1967;
   const double  coeff5 = -0.8667;
 
-  bool is_histogram = 0;
-  if ( n_tofs == n_ys + 1 )
-    is_histogram = 1;
-  else if ( n_tofs == n_ys )
-    is_histogram = 0;
+  bool is_histogram = false;
+  if ( tof.size() == y_val.size() + 1 )
+    is_histogram = true;
+  else if (tof.size() == y_val.size())
+    is_histogram = false;
 
   double wl_val, Q2,
          sigabs, sigir, sigsr, sigsct,
          delta, deltp,
          temp;
 
-  double* Z = new double[Z_size];            // initialize Z array for this angle
-    for ( int i = 0; i < Z_size; i++ )
-      Z[i] = Z_initial[i];
-
-  ZSet( angle_deg, Z );
+  vector<double> Z(Z_initial, Z_initial+Z_size);   // initialize Z array for this angle
+  ZSet(angle_deg, Z);
 
   Q2     = coeff1 * coeff2;
   sigsct = coeff2 * coeff3;
 
-  for ( int j = 0; j < n_ys; j++ )
+  size_t n_ys = y_val.size();
+  for ( size_t j = 0; j < n_ys; j++ )
   {
     if ( is_histogram )
       wl_val = (wavelength(total_path,tof[j]) + wavelength(total_path,tof[j+1]))/2;
@@ -247,7 +239,6 @@ void MultipleScatteringAbsorption::apply_msa_correction(
 
     y_val[j] *= ( 1.0 - deltp ) / temp;
   }
-  delete [] Z;
 }
 
 
