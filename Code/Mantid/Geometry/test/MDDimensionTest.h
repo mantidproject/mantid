@@ -186,6 +186,123 @@ public:
         pOrtDim=NULL;
     }
 
+    /// Tests for orthogonal dimensions
+    void testToXMLStringIntegrated()
+    {
+      tDimension dimension("1");
+      dimension.setRange(1, 3, 1); // last argument gives 1 bin, so not integrated.
+      dimension.setName("Qx");
+      dimension.setIntegrated();
+
+      //Expected output of the xml serialization code.
+      std::string expectedXML =std::string( 
+      "<Dimension ID=\"1\">") +
+      "<Name>Qx</Name>" +
+      "<UpperBounds>3</UpperBounds>" +
+      "<LowerBounds>1</LowerBounds>" +
+      "<NumberOfBins>1</NumberOfBins>" +
+      "<Integrated>" +
+        "<UpperLimit>3</UpperLimit>" +
+        "<LowerLimit>1</LowerLimit>" +
+      "</Integrated>" +
+      "</Dimension>";
+
+      TSM_ASSERT_EQUALS("The xml generated does not meet the schema.", expectedXML, dimension.toXMLString());
+    }
+
+    /// Test for orthogonal dimensions
+    void testToXMLStringNotIntegrated()
+    {
+      tDimension dimension("1");
+      dimension.setRange(1, 3, 10); // last argument gives 1 bin.
+      dimension.setName("Qx");
+
+      //Expected output of the xml serialization code.
+      std::string expectedXML =std::string( 
+      "<Dimension ID=\"1\">") +
+      "<Name>Qx</Name>" +
+      "<UpperBounds>3</UpperBounds>" +
+      "<LowerBounds>1</LowerBounds>" +
+      "<NumberOfBins>10</NumberOfBins>" +
+      "</Dimension>";
+
+      TSM_ASSERT_EQUALS("The xml generated does not meet the schema.", expectedXML, dimension.toXMLString());
+    }
+
+    /// Test for reciprocal dimensions Q1
+    void testToXMLStringReciprocalQ1()
+    {
+      tDimensionRes dimension("1", q1);
+      dimension.setRange(1, 3, 1); // last argument gives 1 bin, so not integrated.
+      dimension.setName("Qx");
+      dimension.setIntegrated();
+
+      //Expected output of the xml serialization code.
+      std::string expectedXML =std::string( 
+      "<Dimension ID=\"1\">") +
+      "<Name>Qx</Name>" +
+      "<UpperBounds>3</UpperBounds>" +
+      "<LowerBounds>1</LowerBounds>" +
+      "<NumberOfBins>1</NumberOfBins>" +
+      "<Integrated>" +
+        "<UpperLimit>3</UpperLimit>" +
+        "<LowerLimit>1</LowerLimit>" +
+      "</Integrated>" +
+      "<ReciprocalDimensionMapping>q1</ReciprocalDimensionMapping>" + // NB: q1 in expectation
+      "</Dimension>";
+
+      TSM_ASSERT_EQUALS("The xml generated does not meet the schema.", expectedXML, dimension.toXMLString());
+    }
+
+    /// Test for reciprocal dimensions Q2
+    void testToXMLStringReciprocalQ2()
+    {
+      tDimensionRes dimension("1", q2);
+      dimension.setRange(1, 3, 1); // last argument gives 1 bin, so not integrated.
+      dimension.setName("Qy");
+      dimension.setIntegrated();
+
+      //Expected output of the xml serialization code.
+      std::string expectedXML =std::string( 
+      "<Dimension ID=\"1\">") +
+      "<Name>Qy</Name>" +
+      "<UpperBounds>3</UpperBounds>" +
+      "<LowerBounds>1</LowerBounds>" +
+      "<NumberOfBins>1</NumberOfBins>" +
+      "<Integrated>" +
+        "<UpperLimit>3</UpperLimit>" +
+        "<LowerLimit>1</LowerLimit>" +
+      "</Integrated>" +
+      "<ReciprocalDimensionMapping>q2</ReciprocalDimensionMapping>" + // NB: q2 in expectation
+      "</Dimension>";
+
+      TSM_ASSERT_EQUALS("The xml generated does not meet the schema.", expectedXML, dimension.toXMLString());
+    }
+
+    /// Test for reciprocal dimensions Q3
+    void testToXMLStringReciprocalQ3()
+    {
+      tDimensionRes dimension("1", q3);
+      dimension.setRange(1, 3, 1); // last argument gives 1 bin, so not integrated.
+      dimension.setName("Qz");
+      dimension.setIntegrated();
+
+      //Expected output of the xml serialization code.
+      std::string expectedXML =std::string( 
+      "<Dimension ID=\"1\">") +
+      "<Name>Qz</Name>" +
+      "<UpperBounds>3</UpperBounds>" +
+      "<LowerBounds>1</LowerBounds>" +
+      "<NumberOfBins>1</NumberOfBins>" +
+      "<Integrated>" +
+        "<UpperLimit>3</UpperLimit>" +
+        "<LowerLimit>1</LowerLimit>" +
+      "</Integrated>" +
+      "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + // NB: q3 in expectation
+      "</Dimension>";
+
+      TSM_ASSERT_EQUALS("The xml generated does not meet the schema.", expectedXML, dimension.toXMLString());
+    }
 
 };
 #endif

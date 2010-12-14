@@ -97,6 +97,10 @@ namespace Mantid{
 	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
       */
       void reinit_Geometry(const MDGeometryDescription &trf);
+
+      /// Get the geometry in an xml/serialised form.
+      std::string toXMLString() const;
+
     protected: 
      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;

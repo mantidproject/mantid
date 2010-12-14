@@ -55,10 +55,17 @@ public:
       return this->nRecDim;
     }
 
+    /// Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
+    virtual std::string toXMLString() const;
+
     MDDimensionRes(const std::string &ID,const rec_dim nDim);
 private:
     // function sets the coordinates of the dimension;
     virtual void setCoord(const std::vector<double> &theCoord);
+
+    /// helper method for converting between qtypes as enums to strings.
+    std::string getQTypeAsString() const;
+
     /// number of this reciprocal dimension (one of 3)
     rec_dim nRecDim; 
 };

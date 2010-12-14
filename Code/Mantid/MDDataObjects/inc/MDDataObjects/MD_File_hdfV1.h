@@ -51,6 +51,8 @@ public:
     virtual void write_mdd(const MDImage &){};
 //  virtual void write_pix(const MDDataPoints &)=0;
 //  virtual void write_pix_subset(const std::vector<size_t> &cell_indexes, const str::vector<char> &pix_buf)=0;
+
+    virtual std::string getFileName() const;
 };
     }
 }

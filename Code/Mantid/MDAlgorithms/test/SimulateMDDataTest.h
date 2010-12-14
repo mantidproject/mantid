@@ -32,6 +32,13 @@ namespace Mantid
       virtual double getMinimum() const {return(0.0);}
       virtual unsigned int getNBins() const {return(2);}
       virtual bool isReciprocal() const {return false;}
+      virtual std::string toXMLString() const { return "";}
+      virtual size_t getStride()const {throw std::runtime_error("Not Implemented");}
+      virtual double getScale()const {throw std::runtime_error("Not Implemented");} 
+      virtual double getX(unsigned int ind)const {throw std::runtime_error("Not Implemented");}
+      virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not Implemented");}
+      virtual void getAxisPoints(std::vector<double>  &)const {throw std::runtime_error("Not Implemented");}
+
       TestIMDDimension() {};
       ~TestIMDDimension() {};
     };

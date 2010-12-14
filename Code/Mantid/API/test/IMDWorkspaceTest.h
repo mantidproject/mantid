@@ -221,6 +221,11 @@ public:
     TSM_ASSERT_EQUALS("The v3 y-value is incorrect.", 2, vertexes.at(3).y);
   }
 
+  void testGetWSLocationThrows()
+  {
+    TSM_ASSERT_THROWS("Getting the workspace location should not be possible.", workspace.getWSLocation(), std::logic_error);
+  }
+
 };
 
 #endif /*IMD_MATRIX_WORKSPACETEST_H_*/

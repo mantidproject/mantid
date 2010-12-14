@@ -79,6 +79,9 @@ public:
 //  virtual void write_pix(const MDDataPoints &)=0;
 //  virtual void write_pix_subset(const std::vector<size_t> &cell_indexes, const str::vector<char> &pix_buf)=0;
     virtual ~IMD_FileFormat(void){};
+
+    /// Get the file name associated this this instance of the reader.
+    virtual std::string getFileName() const = 0;
 protected: 
 
      /// logger -> to provide logging, for MD dataset file operations

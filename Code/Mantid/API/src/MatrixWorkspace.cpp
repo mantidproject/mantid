@@ -1107,6 +1107,11 @@ namespace Mantid
       throw std::logic_error("Cannot access higher dimensions");
     }
 
+    std::string MatrixWorkspace::getWSLocation() const
+    {
+      throw std::logic_error("Cannot access the workspace location on a MatrixWS");
+    }
+
 
   } // namespace API
 } // Namespace Mantid

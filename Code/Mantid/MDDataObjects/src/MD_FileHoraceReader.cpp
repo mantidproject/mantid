@@ -50,7 +50,6 @@ nDataPoints(0)
 		f_log.error()<<"MD_FileHoraceReader:: does not support"<<nDims<<" Dimensions, should be 4\n";
 		throw(Kernel::Exception::FileError("Wrong data in the Horace file",File_name));
 	}
-	
 
 	parse_sqw_main_header();
 
@@ -68,6 +67,11 @@ nDataPoints(0)
 	parse_data_locations(positions.data_start);
 }
 
+
+std::string MD_FileHoraceReader::getFileName() const
+{
+  return this->File_name;
+}
 
 //
 void 

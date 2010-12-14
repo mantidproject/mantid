@@ -2,6 +2,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 
+
 namespace Mantid{
   namespace MDDataObjects{
 	  using namespace Kernel;
@@ -215,6 +216,12 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(...) const
     {
       throw std::runtime_error("Not implemented"); //TODO
+    }
+
+    std::string MDWorkspace::getWSLocation() const 
+    {
+      //Forward request to file format.
+      return this->m_spFile->getFileName();
     }
 
 

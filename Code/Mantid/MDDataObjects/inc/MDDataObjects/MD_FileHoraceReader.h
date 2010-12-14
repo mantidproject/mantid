@@ -96,6 +96,9 @@ public:
     
 	virtual ~MD_FileHoraceReader(void);
 
+  /// Get the file name associated with this reader
+  virtual std::string getFileName() const;
+
 	// private, but protected for test purposes;
 protected:
     /// name of a file which keeps mdd dataset;

@@ -68,6 +68,9 @@ namespace Mantid
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
     virtual void getAxisPoints(std::vector<double>  &)const=0;
 
+
+      //Dimensions must be xml serializable.
+      virtual std::string toXMLString() const = 0;
       
 	  virtual ~IMDDimension(){};
     };

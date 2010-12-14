@@ -88,6 +88,9 @@ namespace Mantid
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const = 0;
 
+      /// Horace sytle implementations need to have access to the underlying file. 
+      virtual std::string getWSLocation() const = 0;
+
       virtual ~IMDWorkspace();
 
     };

@@ -45,6 +45,16 @@
       Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+/// Forward Declare XML DOM Library components
+namespace Poco
+{
+  namespace XML
+  {
+    class Document;
+    class Element;
+  }
+}
+
 namespace Mantid
 {
 namespace Geometry
@@ -134,6 +144,9 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// logger -> to provide logging, for MD workspaces in this dimension
     static Kernel::Logger& g_log;
 
+    /// Helper method actually implementing the bulk of toXMLString. Allows subtypes to use the same serialisation code, with the ability to append to the same root element.
+    void ApplySerialization(Poco::XML::Document* pDoc, Poco::XML::Element* pDimensionElement) const;
+
   private:
     /// name of the axis;
     std::string AxisName;
@@ -160,6 +173,9 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     //MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);
+
+    //Serialization as an xml string.
+    virtual std::string toXMLString() const;
 
   };
 

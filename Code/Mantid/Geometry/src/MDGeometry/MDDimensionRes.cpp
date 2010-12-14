@@ -1,4 +1,18 @@
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
+
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/Attr.h"
+#include "Poco/DOM/Text.h"
+#include "Poco/DOM/AutoPtr.h" 
+#include "Poco/DOM/DOMWriter.h"
+#include "Poco/XML/XMLWriter.h"
+#include <sstream>
+
+#include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
+
 namespace Mantid{
     namespace Geometry{
 
@@ -19,6 +33,56 @@ MDDimensionRes::setCoord(const std::vector<double> &theCoord)
     }
     coord=theCoord;
 }
+
+std::string MDDimensionRes::getQTypeAsString() const
+{
+  std::string qType;
+  if(this->nRecDim == q1)
+  {
+    qType = "q1";
+  }
+  else if(this->nRecDim == q2)
+  {
+    qType = "q2";
+  }
+  else
+  {
+    qType = "q3";
+  }
+  return qType;
+}
+
+
+std::string MDDimensionRes::toXMLString() const
+{
+   using namespace Poco::XML;
+
+  //Create the root element for this fragment.
+  AutoPtr<Document> pDoc = new Document;
+  AutoPtr<Element> pDimensionElement= pDoc->createElement("Dimension");
+  //Create the body
+  pDoc->appendChild(pDimensionElement);
+  
+  //Apply reciprocal dimension xml.
+  ApplySerialization(pDoc.get(), pDimensionElement.get());
+
+  //This is a reciprocal dimension
+  AutoPtr<Element> reciprocalDimensionMappingElement = pDoc->createElement("ReciprocalDimensionMapping");
+  //The type of reciprocal dimension
+  std::string qTypeString = getQTypeAsString();
+  AutoPtr<Text> reciprocalDimensionMappingText = pDoc->createTextNode(qTypeString);
+  reciprocalDimensionMappingElement->appendChild(reciprocalDimensionMappingText);
+  pDimensionElement->appendChild(reciprocalDimensionMappingElement);
+
+  //Convert to string format.
+  std::stringstream xmlstream;
+  DOMWriter writer;
+  writer.writeNode(xmlstream, pDoc);
+
+  return xmlstream.str().c_str();
+}
+
+
 MDDimensionRes::~MDDimensionRes(void)
 {
 }
@@ -40,8 +104,6 @@ MDDimDummy::getX(unsigned int ind)const
       default: throw(std::out_of_range("Dummy dimension index is out of range (0,1) "));
       }
 }
-
-
 
 }
 }

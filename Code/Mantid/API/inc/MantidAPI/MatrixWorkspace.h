@@ -234,6 +234,9 @@ namespace Mantid
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
 
+      /// Provide the location of the underlying file. 
+      virtual std::string getWSLocation() const;
+
     protected:
       MatrixWorkspace();
 

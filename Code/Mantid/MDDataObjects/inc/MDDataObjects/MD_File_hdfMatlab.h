@@ -106,6 +106,9 @@ public:
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
     virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
     
+    /// Get the file name associated with this reader.
+    virtual std::string getFileName() const;
+
     virtual ~MD_File_hdfMatlab(void);
 protected:
     /// name of a file which keeps mdd dataset;

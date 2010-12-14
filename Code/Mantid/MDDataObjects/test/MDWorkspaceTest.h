@@ -24,7 +24,7 @@ private:
   class MockFileFormat : public Mantid::MDDataObjects::IMD_FileFormat
   {
   public:
-
+    MOCK_CONST_METHOD0(getFileName, std::string());
     MOCK_CONST_METHOD0(is_open, bool());
     MOCK_METHOD1(read_MDImg_data, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 

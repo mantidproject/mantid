@@ -129,29 +129,44 @@ namespace Mantid
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
 
-        int getNPoints() const;
+        /// Gets the number of points available on the workspace.
+      virtual int getNPoints() const;
 
-        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
+      /// Get the x-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
 
-        virtual boost::shared_ptr< const Mantid::Geometry::IMDDimension> getYDimension() const;
+      /// Get the y-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
 
-        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
+      /// Get the z-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
 
-        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
+      /// Get the t-dimension mapping.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const;
 
-        virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+      /// Get the dimension with the specified id.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-        virtual const Mantid::Geometry::SignalAggregate & getPoint(int index) const;
+      /// Get the point at the specified index.
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const;
 
-        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
 
-        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
 
-        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
 
-        virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
 
-        virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
+      /// Get the cell at the specified index/increment.
+      virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
+
+      /// Get the location of the workspace on disk, supports Horace implementation of rebinning.
+      virtual std::string getWSLocation() const;
 
     private:
 

@@ -845,6 +845,10 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
     return NULL;
 }
 
+std::string MD_File_hdfMatlab::getFileName() const
+{
+  return this->File_name; 
+}
 
 }
 }
