@@ -11,9 +11,11 @@ masking and also passed to MaskDetectors to match masking there.
 from mantidsimple import *
 import CommonFunctions as common
 
-def diagnose(sample_run, white_run, other_white = None, remove_zero=False, 
-             tiny=1e-10, large=1e10, median_lo=0.1, median_hi=3.0, signif=3.3, 
-             bkgd_threshold=5.0, bkgd_range=None, effic_var=1.1, inst_name=None):
+def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None, 
+             tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
+             bkgd_threshold=None, bkgd_range=None, variation=None, print_results=False,
+             inst_name=None,
+             ):
     """
     Run diagnostics on the provided run and white beam files.
 
@@ -25,10 +27,10 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
     
     Required inputs:
     
-      sample_run - The run number or filepath of the sample run
       white_run  - The run number or filepath of the white beam run
     
     Optional inputs:
+      sample_run - The run number or filepath of the sample run for the background test (default = None)
       other_white   - If provided an addional set of tests is performed on this file. (default = None)
       remove_zero - If true then zeroes in the data will count as failed (default = False)
       tiny          - Minimum threshold for acceptance (default = 1e-10)
@@ -40,8 +42,9 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
       bkgd_threshold - High threshold for background removal in multiples of median (default = 5.0)
       bkgd_range - The background range as a list of 2 numbers: [min,max]. 
                    If not present then they are taken from the parameter file. (default = None)
-      effic_var  - The number of medians the ratio of the first/second white beam can deviate from
+      variation  - The number of medians the ratio of the first/second white beam can deviate from
                    the average by (default=1.1)
+      print_results - If True then the results are printed to std out
       inst_name  - The name of the instrument to perform the diagnosis.
                    If it is not provided then the default instrument is used (default = None)
     """
@@ -54,57 +57,73 @@ def diagnose(sample_run, white_run, other_white = None, remove_zero=False,
         mtd.settings["default.instrument"] = inst_name
     else: pass
 
-    # Which tests are we runnning?
-    _diag_total_mask = None
-    failures_per_test = [0, 0, 0]
+    # Map the test number to the results
+    # Each element is the mask workspace name then the number of failures
+    test_results = [ [None, None], [None, None], [None, None] ]
 
+    ##
+    ## White beam Test
+    ##
     white_counts = None
     if white_run is not None and str(white_run) != '':
         # Load and integrate
         data_ws = common.load_run(white_run, 'white-beam')
         white_counts = Integration(data_ws, "__counts_white-beam").workspace()        
         # Run first white beam tests
-        _diag_total_mask, failures_per_test[0] = \
-                          _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
+        _white_masks, num_failed = \
+                      _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
+        test_results[0] = [str(_white_masks), num_failed]
     else:
         raise RuntimeError('Invalid input for white run "%s"' % str(white_run))
 
+    ##
+    ## Second white beam Test
+    ##
     second_white_counts = None
     if other_white is not None and str(other_white) != '':
         # Load and integrate
         data_ws = common.load_run(other_white, 'white-beam2')
         second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()        
         # Run tests
-        _second_white_masks, failures_per_test[1] = \
+        _second_white_masks, num_failed = \
                              _do_second_white_test(white_counts, second_white_counts,
                                                    tiny, large, median_lo, median_hi,
-                                                   signif,effic_var)
+                                                   signif,variation)
+        test_results[1] = [str(_second_white_masks), num_failed]
 
-        # Accumulate masks
-        _diag_total_mask += _second_white_masks
-
+    ##
+    ## Background Test
+    ##
     if sample_run is not None and sample_run != '':
         # Run the tests
-        _bkgd_masks, failures_per_test[2] = \
+        _bkgd_masks, num_failed = \
                      _do_background_test(sample_run, white_counts, second_white_counts,
                                          bkgd_range, bkgd_threshold, remove_zero, signif)
-        # Accumulate the masks
-        _diag_total_mask += _bkgd_masks
+        test_results[2] = [str(_bkgd_masks), num_failed]
     else:
         raise RuntimeError('Invalid input for sample run "%s"' % str(sample_run))
 
-    # Remove temporary workspaces
-    mtd.deleteWorkspace(str(white_counts))    
+    ##
+    ## Accumulate the masking
+    ##
+    diag_total_mask = _white_masks + _bkgd_masks
+    # If we did the second white beam, add that too
+    if test_results[1][0] is not None:
+        diag_total_mask += _second_white_masks
 
+    # Remove temporary workspaces
+    mtd.deleteWorkspace(str(white_counts))
+    mtd.deleteWorkspace(str(second_white_counts))
+    
     # Revert our default instrument changes if necessary
     if inst_name != def_inst:
         mtd.settings["default.instrument"] = def_inst
+
+    if print_results:
+        print_test_summary(test_results)
     
     # This will be a MaskWorkspace which contains the accumulation of all of the masks
-    if lhs_info('nreturns') == 1:
-        return _diag_total_mask
-    else:
-        return _diag_total_mask, failures_per_test
+    return diag_total_mask
 
 #-------------------------------------------------------------------------------
 
@@ -187,7 +206,7 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
     maskWS = effic_var.workspace()
     MaskDetectors(white_counts, MaskedWorkspace=maskWS)
     MaskDetectors(comp_white_counts, MaskedWorkspace=maskWS)
-        
+  
     return maskWS, num_failed
 
 #------------------------------------------------------------------------------
@@ -274,7 +293,75 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     num_failed = median_test['NumberOfFailures'].value
     return median_test.workspace(), num_failed
 
-    
-    
+def print_test_summary(test_results):
+    """Print a summary of the failures per test run.
+
+    Input:
+    test_results - A list or tuple containing either the number of failed spectra or None
+                   indicating that the test was not run
+    """
+    if len(test_results) != 3:
+        raise ValueError("Invalid input for print_test_summary. A list of 3 numbers is expected.")
+
+    if test_results[0] is None and test_results[1] and test_results[2]:
+        print "No tests have been run!"
+        return
+
+    summary = (
+        ['First white beam test:',test_results[0]], \
+        ['Second white beam test:',test_results[1]], \
+        ['Background test:',test_results[2]] \
+        )
+
+    print '==== Diagnostic Test Summary ===='
+
+    max_name_length = -1
+    max_ws_length = -1
+    for key in range(3):
+        result = summary[key]
+        name_length = len(str(result[0]))
+        ws_length = len(str(result[1][0]))
+        if name_length > max_name_length:
+            max_name_length = name_length
+        if ws_length > max_ws_length:
+            max_ws_length = ws_length
+
+    max_name_length += 2
+    max_ws_length += 2
+    for result in summary:
+        test_name = str(result[0])
+        workspace = str(result[1][0])
+        nfailed = str(result[1][1])
+        line = test_name + ' '*(max_name_length-len(test_name)) + \
+               workspace + ' '*(max_ws_length-len(workspace)) + str(nfailed)
+        print line
+    # Append a new line
+    print ''
 
 
+def get_failed_spectra_list(diag_workspace):
+    """Compile a list of spectra numbers that are marked as
+    masked in the given workspace
+
+    Input:
+
+     diag_workspace  -  A workspace containing masking
+    """
+    if type(diag_workspace) == str:
+        diag_workspace = mtd[diag_workspace]
+
+    if hasattr(diag_workspace, "getAxis") == False:
+        raise ValueError("Invalid input to get_failed_spectra_list. "
+                         "A workspace handle or name is expected")
+        
+    spectra_axis = diag_workspace.getAxis(1)
+    failed_spectra = []
+    for i in range(diag_workspace.getNumberHistograms()):
+	try:
+            det = diag_workspace.getDetector(i)
+	except RuntimeError:
+            continue
+	if det.isMasked():
+            failed_spectra.append(spectra_axis.spectraNumber(i))
+
+    return failed_spectra

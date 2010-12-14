@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "WorkspaceCreationHelper.hh"
 #include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -186,6 +187,9 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(outwsName);
+    // Clear up files
+    Poco::File(ghostFilename).remove();
+    Poco::File(groupingFile).remove();
   }
 
 

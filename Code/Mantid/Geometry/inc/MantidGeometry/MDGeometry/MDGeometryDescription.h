@@ -58,7 +58,7 @@ public:
    
 
   DimensionDescription() :
-    Tag(""), data_shift(0), cut_min(-1), cut_max(1), nBins(1),data_scale(1),isReciprocal(false), AxisName("")
+    Tag(""), data_shift(0), cut_min(-1), cut_max(1), data_scale(1), nBins(1), isReciprocal(false), AxisName("")
   {}
 };
 

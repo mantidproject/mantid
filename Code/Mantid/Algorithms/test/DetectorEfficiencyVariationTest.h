@@ -42,7 +42,7 @@ public:
     return good;
   }
 
-  void testWorkspaceAndArray()
+  void testWorkspace()
   {
     DetectorEfficiencyVariation alg;
     //the spectra were setup in the constructor and passed to our algorithm through this function
@@ -53,9 +53,12 @@ public:
     double variation = 1.1;
     alg.setProperty( "Variation", variation );
 
-    //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
+    //we are using the defaults on StartSpectrum, EndSpectrum, 
+    //RangeLower and RangeUpper which is to use the whole spectrum
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    alg.setRethrows(true);
+
+    alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
     // Get back the saved workspace
@@ -63,7 +66,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("DetEfficVariTestWSO"));
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT ( outputMat ) ;
-    TS_ASSERT_EQUALS( outputMat->YUnit(), "" )
+    TS_ASSERT_EQUALS( outputMat->YUnit(), "" );
+    
+    const int numFailed = alg.getProperty("NumberOfFailures");
+    TS_ASSERT_EQUALS(numFailed, 65);
+
     int firstGoodSpec = (Nhist/2)-int((variation-1)/m_ramp)+1;
     int lastGoodSpec = (Nhist/2)+int((variation-1)/m_ramp)-1;
     for (int lHist = 0; lHist < firstGoodSpec; lHist++)
@@ -81,84 +88,8 @@ public:
       TS_ASSERT_EQUALS( static_cast<double>(outputMat->readY(lHist).front()),
         static_cast<double>(BadVal) )
     }
-    std::vector<int> OArray;
-    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty("BadSpectraNums") )
-    //now check the array
-    std::vector<int>::const_iterator it = OArray.begin();
-    for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )
-    {
-      TS_ASSERT_EQUALS( *it, lHist+1 )
-      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
-    }
-    for (int lHist = lastGoodSpec+1 ; lHist < Nhist ; lHist++ )
-    {
-      TS_ASSERT_EQUALS( *it, lHist+1 )
-      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
-    }
-    //check that extra entries haven't been written to the array
-    TS_ASSERT_EQUALS( it, OArray.end() )
   }
-
-  void testFile()
-  {
-    DetectorEfficiencyVariation alg;
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( runInit(alg) ) )
-
-    const int fSpec = Nhist/2;
-    alg.setProperty( "StartWorkspaceIndex", fSpec );
-    //a couple of random numbers in the range
-    const double lRange = 4000, uRange = 10000;
-    alg.setProperty( "RangeLower", lRange );
-    alg.setProperty( "RangeUpper", uRange );
-
-    //Since Mantid's defaultsave.directory converts relative paths, make sure we put this in the current directory
-    std::string OFileName = Poco::Path().absolute().resolve("DetEfficVariTestFile.txt").toString();
-    alg.setPropertyValue( "OutputFile", OFileName );
-
-    //this is an extreme value for the variation there is only one value that I inserted that will fail
-    alg.setProperty( "Variation", 2.5 );
-    int lastGoodSpec = Nhist-2;
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-
-    //test file output
-    std::fstream testFile(OFileName.c_str(), std::ios::in);
-
-    TS_ASSERT ( testFile )
-    
-    std::string fileLine = "";
-    std::getline( testFile, fileLine );
-    std::string correctLine = "---"+alg.name()+"---";
-    TS_ASSERT_EQUALS ( fileLine, correctLine )
-    correctLine.clear();
-    for (int iHist = lastGoodSpec+1, i = 0 ; iHist < Nhist; iHist++, i++ )
-    {
-      correctLine += boost::lexical_cast<std::string>(iHist+1);
-      if ( (i + 1) % 10 == 0 ) 
-      {
-        std::getline( testFile, fileLine );
-        TS_ASSERT_EQUALS ( fileLine, correctLine )
-        correctLine.clear();
-      }
-      else
-      {
-        correctLine += " ";
-      }
-    }
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS( fileLine, correctLine )
-    std::getline( testFile, fileLine );
-    correctLine = "----Spectra not linked to a valid detector in the instrument definition : 0----";
-    TS_ASSERT_EQUALS ( fileLine, correctLine )
-
-    std::getline( testFile, fileLine );
-    TS_ASSERT(fileLine.empty())
-    testFile.close();
-    remove(OFileName.c_str());
-  }
-        
+       
   DetectorEfficiencyVariationTest() :
     m_WB1Name("DetEfficVariTestWSI1"), m_WB2Name("DetEfficVariTestWSI2"), m_ramp(0.01)
   {
@@ -239,7 +170,7 @@ private:
   double m_ramp, m_LargeValue;
   enum { Nhist = 84, NXs = 34, 
     //these values must match the values in DetectorEfficiencyVariation.h
-    BadVal  = 100, GoodVal = 0 };
+    BadVal  = 0, GoodVal = 1 };
 };
 
 

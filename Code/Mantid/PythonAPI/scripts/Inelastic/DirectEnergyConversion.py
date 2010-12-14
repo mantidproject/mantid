@@ -32,6 +32,7 @@ Run the conversion
 deltaE_wkspace = reducer.convert_to_energy(11015, 85, 11060, 11001)
 """
 import CommonFunctions as common
+import diagnostics
 from mantidsimple import *
 import glob
 import os.path
@@ -51,6 +52,48 @@ class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is an elastic instrument
     """
+
+    def diagnose(self, white_run, sample_run=None, other_white=None, remove_zero=None, 
+                 tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
+                 bkgd_threshold=None, bkgd_range=None, variation=None, print_results=False):
+        """
+        A pass through method to the 'real' one in diagnostics.py
+
+        Run diagnostics on the provided run and white beam files.
+
+        There are 3 possible tests, depending on the input given:
+          White beam diagnosis
+          Background tests
+          Second white beam
+            
+        Required inputs:
+        
+          white_run  - The run number or filepath of the white beam run
+        
+        Optional inputs:
+          sample_run - The run number or filepath of the sample run for the background test (default = None)
+          other_white   - If provided an addional set of tests is performed on this file. (default = None)
+          remove_zero - If true then zeroes in the data will count as failed (default = False)
+          tiny          - Minimum threshold for acceptance (default = 1e-10)
+          large         - Maximum threshold for acceptance (default = 1e10)
+          median_lo     - Fraction of median to consider counting low (default = 0.1)
+          median_hi     - Fraction of median to consider counting high (default = 3.0)
+          signif        - Counts within this number of multiples of the 
+                          standard dev will be kept (default = 3.3)
+          bkgd_threshold - High threshold for background removal in multiples of median (default = 5.0)
+          bkgd_range - The background range as a list of 2 numbers: [min,max]. 
+                       If not present then they are taken from the parameter file. (default = None)
+          variation  - The number of medians the ratio of the first/second white beam can deviate from
+                       the average by (default=1.1)
+          print_results - If True then the results are printed to std out
+          inst_name  - The name of the instrument to perform the diagnosis.
+                       If it is not provided then the default instrument is used (default = None)
+          """
+        return diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
+                                    tiny, large, median_lo, median_hi, signif,
+                                    bkgd_threshold, bkgd_range, variation, print_results,
+                                    self.instr_name)
+    
     def do_white(self, white_run, spectra_masks, map_file): 
         """
         Normalise to a specified white-beam run
@@ -321,7 +364,7 @@ class DirectEnergyConversion(object):
         Mask and group detectors based on input parameters
         """
         if not spec_masks is None:
-            MaskDetectors(result_ws, SpectraList=spec_masks)
+            MaskDetectors(result_ws, MaskedWorkspace=spec_masks)
         if not map_file is None:
             GroupDetectors(result_ws, result_ws, map_file, KeepUngroupedSpectra=0)
 
@@ -439,13 +482,13 @@ class DirectEnergyConversion(object):
         # Limit test
         median_tests_ws = '_tmp_abs_median_tests'
         fdol_alg = FindDetectorsOutsideLimits(data_ws, median_tests_ws, HighThreshold=max_value, LowThreshold=min_value)
-        MaskDetectors(data_ws, SpectraList=fdol_alg.getPropertyValue('BadSpectraNums'))
+        MaskDetectors(data_ws, MaskedWorkspace=fdol_alg.workspace())
         # Median tests
         median_test_alg = MedianDetectorTest(data_ws, median_tests_ws, LowThreshold=median_lbound, HighThreshold=median_ubound)
-        MaskDetectors(data_ws, SpectraList=median_test_alg.getPropertyValue('BadSpectraNums'))
+        MaskDetectors(data_ws, MaskedWorkspace=median_test_alg.workspace())
         median_test_alg = MedianDetectorTest(data_ws, median_tests_ws, SignificanceTest=median_sig,
                                              LowThreshold=median_frac_lo, HighThreshold=median_frac_hi)
-        MaskDetectors(data_ws, SpectraList=median_test_alg.getPropertyValue('BadSpectraNums'))
+        MaskDetectors(data_ws, MaskedWorkspace=median_test_alg.workspace())
         mtd.deleteWorkspace(median_tests_ws)
 
     def save_results(self, workspace, save_path, formats = None):

@@ -38,7 +38,6 @@ public:
 
   void testExec()
   {
-    const std::string liveVal = "1", deadVal = "2";
     const int sizex = 10, sizey = 20;
     // Register the workspace in the data service and initialise it with abitary data
     Workspace2D_sptr work_in =
@@ -86,44 +85,42 @@ public:
     alg.setPropertyValue("LowThreshold","1");
     alg.setPropertyValue("HighThreshold","21.01");
     alg.setPropertyValue("RangeLower", "-1");
-    alg.setPropertyValue("GoodValue", liveVal);
-    alg.setPropertyValue("BadValue", deadVal);
-    alg.setPropertyValue("OutputFile", "FindDetectorsOutsideLimitsTestFile.txt");
-    std::string filename = alg.getProperty("OutputFile");
 
     // Testing behavour with Range_lower or Range_upper not set
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
-    std::vector<int> deadDets;
-    TS_ASSERT_THROWS_NOTHING( deadDets = alg.getProperty("BadSpectraNums") )
-    //it will scan the whole range and so only find the very dead detectors, there are 10 of them
-    TS_ASSERT_EQUALS( deadDets.size(), 11 )
 
     // Get back the output workspace
     MatrixWorkspace_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
 
+    const int numFailed = alg.getProperty("NumberOfFailures");
+    TS_ASSERT_EQUALS(numFailed, 11);
+
+    const double liveValue(1.0);
+    const double maskValue(0.0);
     for (int i=0; i< sizey; i++)
     {
       const double val = work_out->readY(i)[0];
-      double valExpected = 1;
-      // Spectra set up with yVeryDead fail low counts
-      if ( i%2 == 0 )
+      double valExpected = liveValue;
+      // Check masking
+      IDetector_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
+      bool maskExpected(false);
+      // Spectra set up with yVeryDead fail low counts or yStrange fail on high
+      if ( i%2 == 0 || i == 19 )
       {
-          valExpected = 2;
-          TS_ASSERT_EQUALS( deadDets[i/2], i )
+	valExpected = maskValue;
+	maskExpected = true;
       }
-      // AND yStrange fail on high
-      if ( i == 19 ) valExpected = 2;
+      if(det)
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
+      }
+      
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
     
-    TS_ASSERT( Poco::File(filename).exists() )
-
-    checkFile(filename);
-
-    Poco::File(filename).remove();
-
     // Set cut off much of the range and yTooDead will stop failing on high counts
     alg.setPropertyValue("RangeUpper", "4.9");
     alg.initialize();
@@ -131,40 +128,35 @@ public:
     TS_ASSERT( alg.isExecuted() );
     //retrieve the output workspace
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")))
+
+    const int numFailed2 = alg.getProperty("NumberOfFailures");
+    TS_ASSERT_EQUALS(numFailed2, 11); 
+    
     //Check the dead detectors found agrees with what was setup above
     for (int i=0; i< sizey; i++)
     {
       const double val = work_out->readY(i)[0];
-      double valExpected = boost::lexical_cast<double>(liveVal);
-      //i%2 == 0 is the veryDead i == 19 is the yStrange
-      if ( i%2==0 || i == 19) valExpected = boost::lexical_cast<double>(deadVal);
+      double valExpected = liveValue;
+      // Check masking
+      IDetector_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
+      bool maskExpected(false);
+      // Spectra set up with yVeryDead fail low counts or yStrange fail on high
+      if ( i%2 == 0 || i == 19 )
+      {
+	valExpected = maskValue;
+	maskExpected = true;
+      }
+      if(det)
+      {
+	TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
+      }
+      
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
     
-    checkFile(filename);
-    Poco::File(filename).remove();
-
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");
-  }
-
-private:
-
-  void checkFile(const std::string & filename)
-  {
-    // Quick test number of lines within file
-    std::ifstream file(filename.c_str(), std::ios_base::in );
-    TS_ASSERT(file.good());
-
-    std::string line;
-    size_t line_count(0);
-    while( std::getline(file, line))
-    {
-      line_count += 1;
-    }
-    file.close();
-    TS_ASSERT_EQUALS(line_count, 6)
-
   }
 
 };
