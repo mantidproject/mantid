@@ -78,7 +78,7 @@ public:
 
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
     TS_ASSERT_DELTA( linB->getParameter("A0"),0.0, 0.01);
-    TS_ASSERT_DELTA( linB->getParameter("A1"),1.0, 0.0001);
+    TS_ASSERT_DELTA( linB->getParameter("A1"),1.0, 0.0003);
 
 
   }
