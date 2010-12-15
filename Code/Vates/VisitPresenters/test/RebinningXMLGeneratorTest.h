@@ -97,7 +97,10 @@ void testNoWorkspaceThrows()
 void testNoImplicitFunctionThrows()
 {
   RebinningXMLGenerator generator;
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(new MockIMDWorkspace);
+  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
+  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1);
+  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1);
+  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   generator.setWorkspace(workspace);
   TSM_ASSERT_THROWS("Cannot generate the xml without the implicitFunction", generator.createXMLString(), std::runtime_error);
 }
@@ -107,6 +110,7 @@ void testNoGeometryXMLThrows()
   boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return(""));
+  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("../somelocation/somefile.sqw"));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   RebinningXMLGenerator generator;
   generator.setImplicitFunction(impFunction);
@@ -145,24 +149,47 @@ void testNoNameThrows()
       std::runtime_error);
 }
 
-void testCreateXML()
+void testCreateXMLWithWorkspace() //Uses the workspace settter.
 {
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
 
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("<WorkspaceName/>");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(2).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(2).WillRepeatedly(testing::Return("<WorkspaceLocation/>"));
+  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
+  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("<WorkspaceLocation/>"));
 
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
   RebinningXMLGenerator generator;
+
+  //Apply setters.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspace(workspace);
+
   std::string xml = generator.createXMLString();
 
   TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><WorkspaceName/><WorkspaceLocation/><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
+
+void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.
+{
+  MockImplicitFunction* pImpFunction = new MockImplicitFunction;
+  EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
+  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
+
+  RebinningXMLGenerator generator;
+  //Apply setters.
+  generator.setImplicitFunction(impFunction);
+  generator.setWorkspaceName("<WorkspaceName/>");
+  generator.setWorkspaceLocation("<WorkspaceLocation/>");
+  generator.setGeometryXML("<DimensionSet/>");
+
+  std::string xml = generator.createXMLString();
+
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><WorkspaceName/><WorkspaceLocation/><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+}
+
+
 
 };
 

@@ -51,7 +51,9 @@ class RebinningXMLGenerator
 private:
 
   boost::shared_ptr<const Mantid::API::ImplicitFunction>  m_spFunction;
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> m_spWorkspace;
+  std::string m_wsLocation;
+  std::string m_wsName;
+  std::string m_geomXML;
 
 public:
 
@@ -60,6 +62,15 @@ public:
 
   /// Set the workspace name to apply.
   void setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace);
+
+  /// Set the workspace name to apply.
+  void setWorkspaceName(std::string wsName);
+
+  /// Set the location to apply.
+  void setWorkspaceLocation(std::string wsLocation);
+
+  /// Set the geometry xml to apply.
+  void setGeometryXML(std::string geomXML);
 
   /// Creat ethe xml string correponding to the set values.
   std::string createXMLString() const;
