@@ -153,7 +153,7 @@ namespace Mantid
       {
         fit_alg->execute();
       }
-      catch (std::runtime_error)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
         throw;

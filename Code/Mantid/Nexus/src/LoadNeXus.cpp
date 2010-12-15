@@ -181,7 +181,7 @@ namespace Mantid
           setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
           period++;
         }
-        catch (Exception::NotFoundError)
+        catch (Exception::NotFoundError&)
         {
           noError=false;
         }
@@ -250,7 +250,7 @@ namespace Mantid
           setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
           period++;
         }
-        catch (Exception::NotFoundError)
+        catch (Exception::NotFoundError&)
         {
           noError=false;
         }
@@ -313,7 +313,7 @@ namespace Mantid
           setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
           period++;
         }
-        catch (Exception::NotFoundError)
+        catch (Exception::NotFoundError&)
         {
           noError=false;
         }

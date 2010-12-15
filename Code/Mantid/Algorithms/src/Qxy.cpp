@@ -73,7 +73,7 @@ void Qxy::exec()
     IDetector_const_sptr det;
     try {
       det = inputWorkspace->getDetector(i);
-    } catch (Exception::NotFoundError) {
+    } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
       continue;
     }

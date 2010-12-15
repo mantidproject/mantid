@@ -33,7 +33,7 @@ void Transpose::exec()
   {
     inputAxis = inputWorkspace->getAxis(1);
   }
-  catch ( Kernel::Exception::IndexError )
+  catch ( Kernel::Exception::IndexError&)
   {
     g_log.error() << "Axis(1) not found on input workspace." << std::endl;
     throw std::runtime_error("Axis(1) not found on input workspace.");

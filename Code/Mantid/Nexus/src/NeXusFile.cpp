@@ -808,7 +808,7 @@ string File::getStrData() {
   {
     this->getData(value);
   }
-  catch (Exception e)
+  catch (Exception& e)
   {
     delete[] value;
     throw e;
@@ -1006,7 +1006,7 @@ string File::getStrAttr(const AttrInfo & info) {
   {
     this->getAttr(info, value, info.length+1);
   }
-  catch (Exception e)
+  catch (Exception& e)
   {
     //Avoid memory leak
     delete [] value;

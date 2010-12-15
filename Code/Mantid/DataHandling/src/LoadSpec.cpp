@@ -165,7 +165,7 @@ namespace Mantid
 
 	    setProperty("OutputWorkspace",localWorkspace);
 	  }
-	  catch (Exception::NotFoundError)
+	  catch (Exception::NotFoundError&)
 	  {
 	    // Asked for dimensionless workspace (obviously not in unit factory)
 	  }

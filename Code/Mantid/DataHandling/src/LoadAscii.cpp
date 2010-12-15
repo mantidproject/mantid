@@ -150,7 +150,7 @@ namespace Mantid
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
       try {
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
-      } catch (Exception::NotFoundError) {
+      } catch (Exception::NotFoundError&) {
         // Asked for dimensionless workspace (obviously not in unit factory)
       }
 

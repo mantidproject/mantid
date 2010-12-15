@@ -123,7 +123,7 @@ void MergeRuns::buildAdditionTables()
   {
     lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
   }
-  catch (std::runtime_error err)
+  catch (std::runtime_error& err)
   {
     //If it fails, then there are some grouped detector IDs, and the map cannot exist
   }
@@ -398,7 +398,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
         }
       inWS.push_back(ws);
     }
-    catch (Exception::NotFoundError) {
+    catch (Exception::NotFoundError&) {
       g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found." << std::endl;
       throw;
     }
@@ -622,7 +622,7 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
 
   // Now execute the sub-algorithm. Catch and log any error
   try { rebin->execute(); }
-  catch (std::runtime_error)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run Rebin sub-algorithm");
     throw;

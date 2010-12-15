@@ -298,7 +298,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   integrate->setProperty("IncludePartialBins",incPartBins);
   try {
     integrate->execute();
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error&) {
     g_log.error("Unable to successfully run Integration sub-algorithm");
     throw;
   }
@@ -312,7 +312,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);
   try {
     divide->execute();
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error&) {
     g_log.error("Unable to successfully run Divide sub-algorithm");
     throw;
   }

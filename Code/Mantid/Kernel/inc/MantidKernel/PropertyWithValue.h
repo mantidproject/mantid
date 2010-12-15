@@ -282,7 +282,7 @@ public:
       *this = result;
       return "";
     }
-    catch ( boost::bad_lexical_cast )
+    catch ( boost::bad_lexical_cast&)
     {
       std::string error = "Could not set property " + name() +
         ". Can not convert \"" + value + "\" to " + type();

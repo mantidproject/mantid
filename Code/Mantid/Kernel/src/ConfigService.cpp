@@ -390,7 +390,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   try
   {
     is_relative = Poco::Path(dir).isRelative();
-  } catch (Poco::PathSyntaxException &)
+  } catch (Poco::PathSyntaxException&)
   {
     g_log.warning() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir
         << "\"\n";
@@ -470,7 +470,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const
     filestr << "#algorithms.retained = 90" << std::endl;
 
     filestr.close();
-  } catch (std::runtime_error ex)
+  } catch (std::runtime_error& ex)
   {
     g_log.warning() << "Unable to write out user.properties file to " << getOutputDir()
         << m_user_properties_file_name << " error: " << ex.what() << std::endl;

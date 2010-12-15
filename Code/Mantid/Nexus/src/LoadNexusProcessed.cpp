@@ -213,7 +213,7 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
   {
     local_workspace->setTitle(mtd_entry.getString("title"));
   }
-  catch (std::runtime_error)
+  catch (std::runtime_error&)
   {
     g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
   }
@@ -284,7 +284,7 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
   {
     readAlgorithmHistory(mtd_entry, local_workspace);
   }
-  catch (std::out_of_range)
+  catch (std::out_of_range&)
   {
     g_log.warning() << "Error in the workspaces algorithm list, its processing history is incomplete\n";
   }
