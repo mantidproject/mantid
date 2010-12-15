@@ -555,6 +555,7 @@ class RunProxy(ProxyObject):
         Sets the value of the item with the given key. This has limited 
         support for types.
         """
+        print "__setitem__(%s, %s, %s, %s)" % (self, key, value, overwrite)
         value_type = type(value)
         runobj = self._getHeldObject()
         if value_type == type(1.):
@@ -565,7 +566,8 @@ class RunProxy(ProxyObject):
             runobj.addProperty_str(key, value, overwrite)
         else:
             raise TypeError("Not working for %s" % str(type(value)))
-        runobj = self._getHeldObject().getProperty(key)
+        prop = self._getHeldObject().getProperty(key)
+        self.__properties[key] = prop
             
 
 #-------------------------------------------------------------------------------
