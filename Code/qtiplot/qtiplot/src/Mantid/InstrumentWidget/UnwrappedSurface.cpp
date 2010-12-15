@@ -12,6 +12,7 @@
 #include <QMenu>
 
 #include <cfloat>
+#include <limits>
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
                      boost::shared_ptr<const Mantid::Geometry::IDetector> det
@@ -61,10 +62,27 @@ void UnwrappedSurface::init()
 {
   // the actor calls this->callback for each detector
   m_instrActor->detectorCallback(this);
-  double du = fabs(m_u_max - m_u_min) * 0.05;
-  double dv = fabs(m_v_max - m_v_min) * 0.05;
-  if (m_width_max > du) du = m_width_max;
-  if (m_height_max > dv) dv = m_height_max;
+
+  double dU = fabs(m_u_max - m_u_min);
+  double dV = fabs(m_v_max - m_v_min);
+  double du = dU * 0.05;
+  double dv = dV * 0.05;
+  if (m_width_max > du && m_width_max != std::numeric_limits<double>::infinity())
+  {
+    if (du > 0 && !(dU >= m_width_max))
+    {
+      m_width_max = dU;
+    }
+    du = m_width_max;
+  }
+  if (m_height_max > dv && m_height_max != std::numeric_limits<double>::infinity())
+  {
+    if (dv > 0 && !(dV >= m_height_max))
+    {
+      m_height_max = dV;
+    }
+    dv = m_height_max;
+  }
   m_u_min -= du;
   m_u_max += du;
   m_v_min -= dv;
