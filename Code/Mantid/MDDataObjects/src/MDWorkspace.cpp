@@ -40,15 +40,12 @@ MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFor
 	this->m_spFile->read_basis(*m_spMDBasis);
 
 	// read the geometry description
-	MDGeometryDescription description;
+	MDGeometryDescription description(m_spMDBasis->getNumDims(),m_spMDBasis->getNumReciprocalDims());
 	this->m_spFile->read_MDGeomDescription(description);
-	// we have basis and description, now can build geometry
-	std::auto_ptr<MDGeometry> pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,description));
 
+	//build image from basis and description
+	this->m_spMDImage  = boost::shared_ptr<MDImage>(new MDImage(description,*m_spMDBasis));
 
-	this->m_spMDImage = boost::shared_ptr<MDImage>(new MDImage(pGeometry.get()));
-	// free the pGeometry as it is now resides with MDImage and should not be deleted by auto_ptr
-	pGeometry.release();
 	// obtain the MDPoint description now (and MDPointsDescription in a future)
 	MDPointDescription pd = this->m_spFile->read_pointDescriptions();
 

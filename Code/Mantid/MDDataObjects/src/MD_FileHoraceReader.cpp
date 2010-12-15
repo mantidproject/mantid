@@ -303,11 +303,13 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     std::streamoff pixels_start;
     size_t         block_size(0);
     size_t         block_start(0);
+    size_t         data_buffer_size(0);
 //	
     size_t ic      = starting_cell;
     size_t ic_next = ic+1;
     if(ic_next>iCellRead)ic_next = iCellRead;
 
+	// read untill data buffer is full
     while(true){
 
         cell_index      = selected_cells[ic];
@@ -335,8 +337,6 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 
         this->fileStreamHolder.seekg(pixels_start,std::ios::beg);
         this->fileStreamHolder.read(&pix_buf[block_start],block_size);
-        // compacting horace data in memory
-        this->compact_hor_data(&pix_buf[block_start],block_size);
         block_start+=block_size;
 
         // for single cell it is important to add but not to assign the next value, for more then one -- no difference
@@ -345,6 +345,10 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         if(ic>iCellRead)break;
         if(ic_next>iCellRead)ic_next=iCellRead;
     }
+
+	data_buffer_size = block_start+block_size;
+	compact_hor_data(&pix_buf[0],data_buffer_size);
+
     // returns next cell to read if any or size of the selection
     return ic;
 }
@@ -363,7 +367,7 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
     float Dim_sig[6];
     int   index[3];
 
-    MDDataPoint<float,uint16_t,float> defPoint(buffer);
+ 	MDDataPoint<float,uint16_t,float> defPoint(buffer);
     // output buffer size now decreases;
     buf_size = data_size*defPoint.sizeofMDDataPoint();
     for(i=0;i<data_size;i++){

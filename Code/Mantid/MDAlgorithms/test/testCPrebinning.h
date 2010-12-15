@@ -75,14 +75,14 @@ class testCPRebinning :    public CxxTest::TestSuite
         pSlicing->build_from_geometry(*(inputWS->getGeometry()));
  
 
-    /*    double r0=0;
+        double r0=0;
 		pSlicing->dimDescription("qx").cut_min = r0;
 		pSlicing->dimDescription("qx").cut_max = r0+2;
 		pSlicing->dimDescription("qy").cut_min = r0;
 		pSlicing->dimDescription("qy").cut_max = r0+2;
 		pSlicing->dimDescription("qz").cut_min = r0;
 		pSlicing->dimDescription("qz").cut_max = r0+2;
-		pSlicing->dimDescription("en").cut_max = 50;*/
+		pSlicing->dimDescription("en").cut_max = 50;
 
 
    
