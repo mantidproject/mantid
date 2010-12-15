@@ -24,6 +24,7 @@ public:
     TS_ASSERT(ta.unit());
     TS_ASSERT_EQUALS(ta(0),Mantid::EMPTY_DBL());
     TS_ASSERT_THROWS(ta.setValue(0,10.),std::domain_error);
+    TS_ASSERT(ta.isText());
   }
 
   void testLabels()
@@ -76,6 +77,7 @@ public:
       delete a2;
     }
   }
+
 
 };
 

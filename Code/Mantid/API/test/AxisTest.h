@@ -126,6 +126,12 @@ public:
     TS_ASSERT( numericAxis->isNumeric() );
   }
 
+  void testIsText()
+  {
+    TS_ASSERT( !spectraAxis->isText() );
+    TS_ASSERT( !numericAxis->isText() );
+  }
+
   void testOperatorBrackets()
   {
     TS_ASSERT_THROWS( (*spectraAxis)(-1), Exception::IndexError );
