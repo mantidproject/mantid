@@ -106,14 +106,10 @@ public:
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
     virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));}
     
-    /// Get the file name associated with this reader.
-    virtual std::string getFileName() const;
 
     virtual ~MD_File_hdfMatlab(void);
 protected:
-    /// name of a file which keeps mdd dataset;
-    std::string File_name;
-    /// the variable which provides access to the open hdf file
+     /// the variable which provides access to the open hdf file
     hid_t file_handler;
    /// the variable to access open pixels dataset (necessary for partial read operations)
     hid_t pixel_dataset_h;

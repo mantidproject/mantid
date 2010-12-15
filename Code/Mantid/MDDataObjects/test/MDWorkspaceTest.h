@@ -24,6 +24,7 @@ private:
   class MockFileFormat : public Mantid::MDDataObjects::IMD_FileFormat
   {
   public:
+	MockFileFormat(const char *file_name):IMD_FileFormat(file_name){}; 
     MOCK_CONST_METHOD0(getFileName, std::string());
     MOCK_CONST_METHOD0(is_open, bool());
     MOCK_METHOD1(read_MDImg_data, void(Mantid::MDDataObjects::MDImage&)); 
@@ -70,7 +71,7 @@ private:
     {
       std::string what = ex.what();
     }
-    MockFileFormat* mockFile = new MockFileFormat;
+    MockFileFormat* mockFile = new MockFileFormat("");
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
     return workspace;
   }
@@ -236,7 +237,7 @@ public:
     using namespace Mantid::MDDataObjects;
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat();
+    MockFileFormat* mockFile = new MockFileFormat("");
     EXPECT_CALL(*mockFile, read_pix_subset(testing::_, testing::_, testing::_, testing::_, testing::_)).Times(1);
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
@@ -266,7 +267,7 @@ public:
     using namespace Mantid::MDDataObjects;
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat();
+    MockFileFormat* mockFile = new MockFileFormat("");
     EXPECT_CALL(*mockFile, read_pix(testing::_)).Times(1);
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
@@ -290,7 +291,7 @@ public:
     using namespace Mantid::MDDataObjects;
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat();
+    MockFileFormat* mockFile = new MockFileFormat("");
     EXPECT_CALL(*mockFile, write_mdd(testing::_)).Times(1);
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
@@ -316,7 +317,7 @@ public:
 
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat();
+    MockFileFormat* mockFile = new MockFileFormat("");
     MDGeometry* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);

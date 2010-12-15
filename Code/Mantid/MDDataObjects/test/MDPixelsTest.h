@@ -21,10 +21,10 @@ class testMultiDimensionalDataPoints :    public CxxTest::TestSuite
 
 private:
 
-  class MockFileFormat : public IMD_FileFormat
+  class  MockFileFormat : public IMD_FileFormat
   {
   public:
-
+	MockFileFormat(const char *file_name):IMD_FileFormat(file_name){}; 
     MOCK_CONST_METHOD0(is_open, bool());
     MOCK_METHOD1(read_MDImg_data, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
@@ -69,7 +69,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace Mantid::MDDataObjects;
 
-    MockFileFormat* mockFileFormat = new MockFileFormat;
+    MockFileFormat* mockFileFormat = new MockFileFormat("");
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(100));
 
     MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
@@ -82,7 +82,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace Mantid::MDDataObjects;
 
-    MockFileFormat* mockFileFormat = new MockFileFormat;
+    MockFileFormat* mockFileFormat = new MockFileFormat("");
     MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
 
     TSM_ASSERT_EQUALS("The memory buffer size following construction is not correct.", 0, points->getMemorySize());
@@ -94,7 +94,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace Mantid::MDDataObjects;
 
-    MockFileFormat* mockFileFormat = new MockFileFormat;
+    MockFileFormat* mockFileFormat = new MockFileFormat("");
     MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
 
     TSM_ASSERT_EQUALS("The MDDataPoints should not be in memory.", false, points->isMemoryBased());
@@ -106,7 +106,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace Mantid::MDDataObjects;
 
-    MockFileFormat* mockFileFormat = new MockFileFormat;
+    MockFileFormat* mockFileFormat = new MockFileFormat("");
     EXPECT_CALL(*mockFileFormat, getNPix()).Times(1).WillOnce(testing::Return(2));
     MDDataPoints* points=new MDDataPoints(boost::shared_ptr<MDImage>(constructMDGeometry().release()),pixDescription);
     points->alloc_pix_array(boost::shared_ptr<IMD_FileFormat>(mockFileFormat));

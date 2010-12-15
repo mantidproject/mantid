@@ -26,7 +26,8 @@ private:
   class MockFileFormat : public IMD_FileFormat
   {
   public:
-
+  
+	MockFileFormat(const char *file_name):IMD_FileFormat(file_name){};
     MOCK_CONST_METHOD0(is_open, bool());
     virtual void read_MDImg_data(Mantid::MDDataObjects::MDImage& dnd)
     {
@@ -83,7 +84,7 @@ public:
     this->selection.assign(2,1);
 
  
-    MockFileFormat file;
+    MockFileFormat file("");
   
     MDImage* pImageData = new MDImage(getMDGeometry().release());
     std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
@@ -108,7 +109,7 @@ public:
     // returns 3D image with 4-th dimension selected at 20;
     selection.assign(1,20);
 
-    MockFileFormat file;
+    MockFileFormat file("");
     MDImage* pImageData = new MDImage(getMDGeometry().release());
     std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
 
@@ -130,7 +131,7 @@ public:
     std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
 
     Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-    MockFileFormat file;
+    MockFileFormat file("");
 	file.read_MDGeomDescription(geom_description);
 
 	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
@@ -145,7 +146,7 @@ public:
     selection.assign(3,10);
     std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
  
-	MockFileFormat file;
+	MockFileFormat file("");
     Mantid::Geometry::MDGeometryDescription geom_description(4,3);
  	file.read_MDGeomDescription(geom_description);
 

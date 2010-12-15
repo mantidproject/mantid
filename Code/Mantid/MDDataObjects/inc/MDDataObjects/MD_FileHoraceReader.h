@@ -96,14 +96,9 @@ public:
     
 	virtual ~MD_FileHoraceReader(void);
 
-  /// Get the file name associated with this reader
-  virtual std::string getFileName() const;
-
 	// private, but protected for test purposes;
 protected:
-    /// name of a file which keeps mdd dataset;
-    std::string File_name;
-	/// the variable which keeps the opened Horace data stream
+ 	/// the variable which keeps the opened Horace data stream
 	std::ifstream fileStreamHolder;
 	/// the structure holding positions for all important parts of the file
 	data_positions positions;

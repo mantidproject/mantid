@@ -41,6 +41,7 @@ MD_File_hdfMatlab::read_basis(Geometry::MDGeometryBasis &basisGeometry)
 }
 
 MD_File_hdfMatlab::MD_File_hdfMatlab(const char *file_name):
+IMD_FileFormat(file_name),
 file_access_mode(H5P_DEFAULT),
 pixel_dataset_h(-1),
 file_handler(-1),
@@ -845,10 +846,6 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
     return NULL;
 }
 
-std::string MD_File_hdfMatlab::getFileName() const
-{
-  return this->File_name; 
-}
 
 }
 }

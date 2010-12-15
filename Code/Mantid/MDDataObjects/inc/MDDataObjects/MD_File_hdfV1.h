@@ -33,7 +33,7 @@ namespace Mantid{
 class DLLExport MD_File_hdfV1 :    public IMD_FileFormat
 {
 public:
-    MD_File_hdfV1(const char  *file_name){throw("this format is not written yet");}
+    MD_File_hdfV1(const char  *file_name);
     virtual ~MD_File_hdfV1(void){};
     virtual bool is_open(void)const{return false;}
     virtual void read_MDImg_data(MDImage &){};
@@ -52,7 +52,7 @@ public:
 //  virtual void write_pix(const MDDataPoints &)=0;
 //  virtual void write_pix_subset(const std::vector<size_t> &cell_indexes, const str::vector<char> &pix_buf)=0;
 
-    virtual std::string getFileName() const;
+ 
 };
     }
 }

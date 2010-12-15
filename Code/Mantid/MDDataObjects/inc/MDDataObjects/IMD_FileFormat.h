@@ -45,10 +45,10 @@ class Mantid::Kernel::Logger;
 
 /** class describes the interface to file operations, which are supported by generic MD dataset
 */
-class IMD_FileFormat
+class DLLExport IMD_FileFormat
 {
 public:
-    IMD_FileFormat(void){};
+    IMD_FileFormat(const char *file_name);
 	/// is the file with underlying MDWorkspace is open;
     virtual bool is_open(void)const{return false;}
 
@@ -80,9 +80,11 @@ public:
 //  virtual void write_pix_subset(const std::vector<size_t> &cell_indexes, const str::vector<char> &pix_buf)=0;
     virtual ~IMD_FileFormat(void){};
 
-    /// Get the file name associated this this instance of the reader.
-    virtual std::string getFileName() const = 0;
+     /// Get the file name associated with this reader.
+	virtual std::string getFileName() const{return File_name;}
 protected: 
+   /// name of a file which keeps mdd dataset;
+    std::string File_name;
 
      /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& f_log;

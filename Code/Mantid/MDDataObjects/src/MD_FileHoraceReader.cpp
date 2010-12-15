@@ -13,7 +13,7 @@ using namespace Mantid::Geometry;
 typedef float float32;
 //
 MD_FileHoraceReader::MD_FileHoraceReader(const char *file_name):
-File_name(file_name),
+IMD_FileFormat(file_name),
 positions(),
 mdImageSize(0),
 nDataPoints(0)
@@ -67,11 +67,6 @@ nDataPoints(0)
 	parse_data_locations(positions.data_start);
 }
 
-
-std::string MD_FileHoraceReader::getFileName() const
-{
-  return this->File_name;
-}
 
 //
 void 
