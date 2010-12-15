@@ -59,8 +59,7 @@ class LoadRun(ReductionStep):
     
         if pWorksp.isGroup() :
             #get the number of periods in a group using the fact that each period has a different name
-            nNames = len(pWorksp.getNames())
-            numPeriods = nNames - 1
+            numPeriods = len(pWorksp.getNames())
             workspace = self._leaveSinglePeriod(pWorksp, self._period)
             pWorksp = mantid[workspace]
         else :
