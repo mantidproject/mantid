@@ -71,9 +71,9 @@ MDGeometry::getDimensions(void)const
 }
     //
 void 
-MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
+MDGeometry::initialize(const MDGeometryDescription &trf)
 {
-  this->reinit_Geometry(trf.getDimensionsTags());
+  this->initialize(trf.getDimensionsTags());
   this->setRanges(trf);
 
   /*
@@ -96,7 +96,7 @@ MDGeometry::reinit_Geometry(const MDGeometryDescription &trf)
 
     //
 void 
-MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags)
+MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
 {
 
 
@@ -114,7 +114,7 @@ MDGeometry::reinit_Geometry(const std::vector<std::string> &DimensionTags)
   if(!congruent_geometries){
     g_log.error()<<"builing geometry with the basis different from the current geometry is prohibited\n";
     throw(std::invalid_argument("builing geometry with the basis different from the current geometry is prohibited"));
-    // m_basis( = .reinit_GeometryBasis(DimensionTags,nReciprocalDims);
+    // m_basis( = .initializeBasis(DimensionTags,nReciprocalDims);
 
     //// clear old dimensions if any
     //for(i=0;i<this->theDimension.size();i++){
@@ -274,6 +274,7 @@ void
       return tmp;
     }
 
+// now protected;
     boost::shared_ptr<MDDimension>
     MDGeometry::getDimension(unsigned int i)
     {
@@ -296,6 +297,7 @@ MDGeometry::get_constDimension(unsigned int i)const
       return theDimension[i];
 }
 
+// now protected;
     boost::shared_ptr<MDDimension>
       MDGeometry::getDimension(const std::string &tag,bool do_throw)
     {
@@ -339,7 +341,7 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
   this->theDimension.resize(basis.getNumDims());
   this->init_empty_dimensions();
   // arrange dimensions in accordence with the descriptions and sets dimension ranges
-  this->reinit_Geometry(description);
+  this->initialize(description);
 }
 
 MDGeometry::MDGeometry(const MDGeometryBasis &basis) :
@@ -457,17 +459,17 @@ MDGeometry::~MDGeometry(void)
     this->dimensions_map.clear();
 }
 
-    std::vector<std::string> MDGeometry::getBasisTags(void)const //TODO: consider removing this function.
-    {
-      std::vector<std::string> tags; 
-      std::set<MDBasisDimension> basisDimensions = this->m_basis.getBasisDimensions(); 
-      std::set<MDBasisDimension>::const_iterator it = basisDimensions.begin();
-      for(;it != basisDimensions.end(); ++it)
-      {  
-        tags.push_back(it->getId());
-      }
-      return tags;
-    }
-
+std::vector<std::string> MDGeometry::getBasisTags(void)const //TODO: consider removing this function.
+{
+  std::vector<std::string> tags; 
+  std::set<MDBasisDimension> basisDimensions = this->m_basis.getBasisDimensions(); 
+  std::set<MDBasisDimension>::const_iterator it = basisDimensions.begin();
+  for(;it != basisDimensions.end(); ++it)
+  {  
+    tags.push_back(it->getId());
   }
+  return tags;
+}
+
+} // end namespaces;
 }

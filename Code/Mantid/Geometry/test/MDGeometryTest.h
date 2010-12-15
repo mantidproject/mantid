@@ -75,7 +75,10 @@ public:
     basisDimensions.insert(MDBasisDimension("p", false, 0));
 
     UnitCell cell;
-    tDND_geometry= std::auto_ptr<testMDGeometry>(new testMDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    TSM_ASSERT_THROWS_NOTHING("Valid MD geometry constructor should not throw",tDND_geometry= std::auto_ptr<testMDGeometry>(new testMDGeometry(MDGeometryBasis(basisDimensions, cell))));
+    
+	TSM_ASSERT_EQUALS("Empty geometry initiated by MDBasis only should be size 0",0,tDND_geometry->getGeometryExtend());
+
   }
 
   void testMDGeometryDimAccessors(void){
@@ -130,13 +133,14 @@ public:
 		TS_ASSERT_EQUALS(names[i],pSlice->dimDescription(i).Tag);
 		TS_ASSERT_EQUALS(names[i],pSlice->dimDescription(i).AxisName);
     }
-
+	TSM_ASSERT_EQUALS("The slice describes grid of specific size: ",100*200,pSlice->getImageSize());
   }
   void testMDGeomSetFromSlice1(void){
    // pSlice describes 4x3 geometry with 200x100 dimensions expanded and others integrated;
-    TS_ASSERT_THROWS_NOTHING(tDND_geometry->reinit_Geometry(*pSlice));
+    TS_ASSERT_THROWS_NOTHING(tDND_geometry->initialize(*pSlice));
     unsigned int i,ic;
 
+	TSM_ASSERT_EQUALS("The geometry initialized by the slicing property above has to have specific extend",200*100,tDND_geometry->getGeometryExtend());
     boost::shared_ptr<MDDimension> pDim;
 
     std::vector<std::string> expanded_tags(tDND_geometry->getNumDims());
@@ -180,8 +184,8 @@ public:
   void testMDGeomSetFromSlice2(void){
     // this should be fully equivalent to 1
 
-    // arrange final dimensions according to pAxis, this will run through one branch of reinit_Geometry only
-    TS_ASSERT_THROWS_NOTHING(tDND_geometry->reinit_Geometry(*pSlice));
+    // arrange final dimensions according to pAxis, this will run through one branch of initialize only
+    TS_ASSERT_THROWS_NOTHING(tDND_geometry->initialize(*pSlice));
 
     boost::shared_ptr<MDDimension> pDim;
 

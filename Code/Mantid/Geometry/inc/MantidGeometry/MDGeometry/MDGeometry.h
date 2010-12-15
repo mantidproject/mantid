@@ -96,7 +96,7 @@ namespace Mantid{
 	  *  modified substantially from initial idea
 	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
       */
-      void reinit_Geometry(const MDGeometryDescription &trf);
+      void initialize(const MDGeometryDescription &trf);
 
       /// Get the geometry in an xml/serialised form.
       std::string toXMLString() const;
@@ -134,7 +134,7 @@ namespace Mantid{
       static Kernel::Logger& g_log;
 
       /// currently similar to arrangeDimensionsProperly as reinit is currently disabled but checks if tags are valid;
-      void reinit_Geometry(const std::vector<std::string> &DimensionTags);
+      void initialize(const std::vector<std::string> &DimensionTags);
       /** function used to arrange dimensions properly, e.g. according to the order of the dimension tags supplied as input argument
       and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
       void arrangeDimensionsProperly(const std::vector<std::string> &tags);
