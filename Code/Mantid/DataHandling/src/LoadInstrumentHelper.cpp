@@ -193,6 +193,8 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
     instrument = "SEQUOIA";
   if (instrument == "PG3")
     instrument = "POWGEN";
+  if (instrument == "EQSANS")
+    instrument = "EQ-SANS";
 
   // Get the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
