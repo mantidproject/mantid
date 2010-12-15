@@ -204,7 +204,7 @@ public:
 
 	MDPointDescription HorDescription(horStruct,fieldNames4D);
 
-	MDDataPointEven<float,uint32_t,float> hp(testBuffer,HorDescription);
+	MDDataPointEqual<float,uint32_t,float> hp(testBuffer,HorDescription);
 
     float     Dim[4];
     float     SE[2];

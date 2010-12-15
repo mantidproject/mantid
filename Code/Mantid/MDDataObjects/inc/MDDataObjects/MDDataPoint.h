@@ -49,7 +49,7 @@ namespace MDDataObjects
 //********************************************************************************************************************************************************************
 /** the class to work with the pixels buffer itself. Class works the MDpoints having equal index fields*/
  template<class T=float, class I=uint16_t,class S=double>
- class MDDataPointEven: public MDPointDescription
+ class MDDataPointEqual: public MDPointDescription
  {
   
  public:
@@ -59,7 +59,7 @@ namespace MDDataObjects
    *
    *  This constructor should be used mainly for debugging and unit tests as relies on default column names only,
    */
-   MDDataPointEven(char * buf, unsigned int nDims=4,unsigned int nData=2,unsigned int nIDfields=3):
+   MDDataPointEqual(char * buf, unsigned int nDims=4,unsigned int nData=2,unsigned int nIDfields=3):
    pDataBuffer(buf),
    MDPointDescription()
    {
@@ -81,7 +81,7 @@ namespace MDDataObjects
    * number of fields in this dataset and data location in memory and on hdd.
    *   
    */
-   MDDataPointEven(char * buf, const MDPointDescription &pixSignature):
+   MDDataPointEqual(char * buf, const MDPointDescription &pixSignature):
    pDataBuffer(buf),
    MDPointDescription(pixSignature)    
    {
@@ -138,7 +138,7 @@ namespace MDDataObjects
 
    }
    //
-   ~MDDataPointEven(){
+   ~MDDataPointEqual(){
      delete [] field_loc;
    }
 // 
@@ -204,7 +204,7 @@ namespace MDDataObjects
 //********************************************************************************************************************************************************************
 /** the class to work with the pixels buffer itself*/
  template<class T=float, class I=uint16_t,class S=double>
- class MDDataPoint: public MDDataPointEven<T,I,S>
+ class MDDataPoint: public MDDataPointEqual<T,I,S>
  {
   
  public:
@@ -215,7 +215,7 @@ namespace MDDataObjects
    *  This constructor should be used mainly for debugging and unit tests as relies on default column names only,
    */
    MDDataPoint(char * buf, unsigned int nDims=4,unsigned int nData=2,unsigned int nIDfields=3):
-   MDDataPointEven(buf,nDims,nData,nIDfields),
+   MDDataPointEqual<T,I,S>(buf,nDims,nData,nIDfields),
    pix_id_shift(0),PixIDMask(0),RunIDMask(0),indexBufSize(0)
    {
      this->modifyPixel();
@@ -227,7 +227,7 @@ namespace MDDataObjects
    *   
    */
    MDDataPoint(char * buf, const MDPointDescription &pixSignature):
-   MDDataPointEven(buf,pixSignature),
+   MDDataPointEqual<T,I,S>(buf,pixSignature),
    pix_id_shift(0),PixIDMask(0),RunIDMask(0),indexBufSize(0)
    {
 	this->modifyPixel();
