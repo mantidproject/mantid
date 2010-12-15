@@ -110,30 +110,147 @@ public:
 		pImg->identify_SP_points_locations();
 		// check what has been read;
 	}
-	//void testReadAllPixels(){
-	//	MDPointDescription defaultDescr;
-	//	boost::shared_ptr<MDImage const> emptyImg = boost::shared_ptr<MDImage const>(new MDImage());
-	//	MDDataPointsDescription pd(defaultDescr);
-	//	MDDataPoints points(emptyImg,pd);
-	//	TSM_ASSERT_THROWS("You implemented the Horace reader, write test for it",pReader->read_pix(points),Kernel::Exception::NotImplementedError);
-	//}
+	void testReadAllPixels(){
+		MDPointDescription defaultDescr;
+		boost::shared_ptr<MDImage const> emptyImg = boost::shared_ptr<MDImage const>(new MDImage());
+		MDDataPointsDescription pd(defaultDescr);
+		MDDataPoints points(emptyImg,pd);
+		TSM_ASSERT_THROWS("You implemented the Horace all_pix reader, write test for it",pReader->read_pix(points),Kernel::Exception::NotImplementedError);
+	}
+	void testReadPixelsSelectionAll(){
+		// read all 
+		int nCells = this->pImg->getGeometry()->getGeometryExtend();
 
-	void testReadPixelsSelection(){
-		// t
-		const int nCells = this->pImg->getGeometry()->getGeometryExtend();
-		std::vector<size_t> selected_cells(nCells);
-		size_t starting_cell(0),final_cell;
-		std::vector<char> pix_buf(pReader->getNConributedPixels()*9*8);
+    	selected_cells.resize(nCells);
+        pix_buf.resize(pReader->getNConributedPixels()*9*8);
+
+		size_t starting_cell(0),n_cell_read;
 		size_t n_pix_in_buffer(0);
 		for(int i=0;i<nCells;i++){
 			selected_cells[i]=i;
 		}
 
 		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-			final_cell=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
 		// check if the data coinside with what was put there;
+        TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1523850,n_pix_in_buffer);
+        TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 64,n_cell_read);
 	}
+	void testReadFirst2Selection(){
+		// read first two (buffer is already allocated above)
+	
+		size_t starting_cell(0),n_cell_read;
+		size_t n_pix_in_buffer(0);
+
+        selected_cells.resize(2);
+	    selected_cells[0]=0;
+	    selected_cells[1]=1;
+   
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+        TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",77292,n_pix_in_buffer);
+        TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
+	}
+	void testReadOneSelection(){
+		// read first two (buffer is already allocated above)
+	
+		size_t starting_cell(0),n_cell_read;
+		size_t n_pix_in_buffer(0);
+
+        selected_cells.resize(1);
+	    selected_cells[0]=3;
+
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+        TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1,n_pix_in_buffer);
+        TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 1,n_cell_read);
+	}
+	void testRead2Selection(){
+	// read random two (buffer is already allocated above)
+		size_t starting_cell(0),n_cell_read;
+		size_t n_pix_in_buffer(0);
+
+        selected_cells.resize(2);
+	    selected_cells[0]=3;
+	    selected_cells[1]=10;
+   
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+       TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",447,n_pix_in_buffer);
+       TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
+
+	}
+
+	void testReadFirstLastSelection(){
+		size_t starting_cell(0),n_cell_read;
+		size_t n_pix_in_buffer(0);
+
+        selected_cells[0]=0;
+        selected_cells[1]=this->pImg->getGeometry()->getGeometryExtend()-1;
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+        TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",21496,n_pix_in_buffer);
+        TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
+	}
+	
+	void testReadSmallBufferSelectionResized(){
+	// read random two (buffer is already allocated above)
+		size_t starting_cell(0),n_cell_read;
+		size_t n_pix_in_buffer(0);
+
+	    selected_cells[0]=1;
+	    selected_cells[1]=10;
+        pix_buf.resize(100);
+
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+
+		// check if the data coinside with what was put there;
+        TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",63006,n_pix_in_buffer);
+        TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 1,n_cell_read);
+        TSM_ASSERT_EQUALS("Data buffer size differs from expected: ", n_pix_in_buffer*9*4,pix_buf.size());
+
+	}
+	void testReadSmallBufferSelection(){
+	// read random two (buffer is already allocated above)
+		size_t starting_cell(0);
+		size_t n_pix_in_buffer(0);
+
+        selected_cells.resize(3);
+        // cells should be usually sorted for efficiency but will do for the time being;
+        selected_cells[0]=3;
+	    selected_cells[1]=1;
+	    selected_cells[2]=10;
+
+        pix_buf.resize(100);
+
+        unsigned int ic(0);
+        while(starting_cell<selected_cells.size()){
+		TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
+			starting_cell=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+            ic++;
+        }
+		// check if the data coinside with what was put there;
+        // the buffer size defived from the largest cell exceeding 100
+       TSM_ASSERT_EQUALS("Data buffer size differs from expected: ", 63006*9*4,pix_buf.size());
+       TSM_ASSERT_EQUALS("Number of cells read differs from expected: ",selected_cells.size(),starting_cell);
+       TSM_ASSERT_EQUALS("Number of read attempts differs from expected: ",3,ic);
+	}
+
+
 	void testWriteMDD(){
 		TSM_ASSERT_THROWS("Looks like Horace writer has been implemented, why? ",pReader->write_mdd(*pImg),Kernel::Exception::NotImplementedError);
 	}
@@ -145,6 +262,9 @@ private:
 	std::auto_ptr<Geometry::MDGeometryDescription> pGeomDescription;
 	std::auto_ptr<MDDataObjects::MDImage> pImg;
 //******************************************************************
+	std::vector<size_t> selected_cells;
+    std::vector<char> pix_buf;
+
    std::string findTestFileLocation(const char *filePath=NULL){
 
     std::string search_path = Mantid::Kernel::getDirectoryOfExecutable();

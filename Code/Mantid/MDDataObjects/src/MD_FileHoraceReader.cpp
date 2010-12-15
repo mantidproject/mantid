@@ -288,8 +288,8 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         // end the loop earlier
         if(n_pix_in_buffer>buffer_availible){ 
             if(i==starting_cell){
-                pix_buf.resize(n_pix_in_buffer);
-                iCellRead++;
+                pix_buf.resize(n_pix_in_buffer*hbs);
+                iCellRead=i;
             }else{
                 iCellRead=i-1;
                 n_pix_in_buffer-=pImgData[cell_index].npix;
@@ -306,8 +306,9 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 //	
     size_t ic      = starting_cell;
     size_t ic_next = ic+1;
+    if(ic_next>iCellRead)ic_next = iCellRead;
 
-    while(ic<iCellRead){
+    while(true){
 
         cell_index      = selected_cells[ic];
         pixels_start  =   this->positions.pix_start+hbs*pImgData[cell_index].chunk_location; 
@@ -323,7 +324,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
                 block_size    += hbs*pImgData[next_index].npix;
                 ic = ic_next;
                 ic_next++;
-                if(ic_next == iCellRead)break;
+                if(ic_next > iCellRead)break;
 
                 cell_index = selected_cells[ic];
                 next_block = pImgData[cell_index].chunk_location+pImgData[cell_index].npix;
@@ -338,11 +339,14 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         this->compact_hor_data(&pix_buf[block_start],block_size);
         block_start+=block_size;
 
-        ic = ic_next;
+        // for single cell it is important to add but not to assign the next value, for more then one -- no difference
+        ic++;
         ic_next++;
+        if(ic>iCellRead)break;
+        if(ic_next>iCellRead)ic_next=iCellRead;
     }
-
-    return iCellRead;
+    // returns next cell to read if any or size of the selection
+    return ic;
 }
 void 
 MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
