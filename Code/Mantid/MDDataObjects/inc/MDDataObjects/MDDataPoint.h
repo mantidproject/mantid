@@ -318,7 +318,7 @@ namespace MDDataObjects
    // auxiliary 
    I*           pWorkingBuf;
  //*************************************************************************************************************
- /// the overloaded constructor function, modifies the 
+ /// the overloaded constructor function, modifies the pixel representation in memory
    void modifyPixel(void)
    {
      unsigned int i;

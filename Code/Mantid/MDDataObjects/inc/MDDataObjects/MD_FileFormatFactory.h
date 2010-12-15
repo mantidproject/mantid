@@ -80,6 +80,7 @@ private:
 	IMD_FileFormat* select_file_reader(const char *file_name,user_request rec=best_fit);
 	/// function checks if the file provided is binary Horace format file;
 	bool isHoraceFile(const char *fileName);
+
 };
 } // end namespaces
 }

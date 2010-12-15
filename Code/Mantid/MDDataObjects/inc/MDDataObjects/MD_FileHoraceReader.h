@@ -129,14 +129,8 @@ private:
 	static const unsigned int hbs=9*4;
 
 	// Function performing work previously in GOTO statement.
-  void inline validateFileStreamHolder(std::ifstream& fileStreamHolder)
-  {
-    if (fileStreamHolder.bad())
-    {
-      f_log.error() << " Error reading main sqw file header for file " << this->File_name << "\n";
-      throw(Kernel::Exception::FileError("Error reading main sqw file header ", this->File_name));
-    }
-  }
+    void inline validateFileStreamHolder(std::ifstream& fileStreamHolder);
+ 
 };
 
 

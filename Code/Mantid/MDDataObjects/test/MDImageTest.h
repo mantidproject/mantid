@@ -70,38 +70,61 @@ private:
 
   std::vector<point3D> img;
   std::vector<unsigned int> selection;
+  std::auto_ptr<MDImage> pImage;
 
 public:
-	void testMDImageConstructor1(){
+	void testMDImageConstructorEmptyDefault(){
 		std::auto_ptr<MDImage> pImg;
 		TSM_ASSERT_THROWS_NOTHING("MDImage constructor builds empty object and should not throw",pImg = std::auto_ptr<MDImage>(new MDImage()));
 
 		TSM_ASSERT_EQUALS("emtpy image should not be initialized",false,pImg->is_initialized());
 	}
+	void testMDImageConstructorFromEmptyGeometry(){
+		// an image initiated by an emtpy geometry is not empty and consists of one cell
+		std::auto_ptr<MDImage> pImg;
+		std::auto_ptr<MDGeometry> pGeom = getMDGeometry();
+		TSM_ASSERT_THROWS_NOTHING("MDImage constructor builds Image object and should not throw",pImg = std::auto_ptr<MDImage>(new MDImage(pGeom.get())));
+		// the responsibility for geometry is now with Image
+		pGeom.release();
+		//
+		TSM_ASSERT_EQUALS("Image with emtpy geometry should be initialized",true,pImg->is_initialized());
+		TSM_ASSERT_EQUALS("An image with empty geometry should be size 1 ",1,pImg->getDataSize());
+	}
+	void testMDImageWrongInitiation(){
+		// this construction wis used nelow
+	    pImage = std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
+		Mantid::Geometry::MDGeometryDescription geom_description(5,3);	
+		TSM_ASSERT_THROWS("Geometry is initiated by 4x3 basis and should not be possible to initiate it with different N-dims",pImage->initialize(geom_description),std::invalid_argument);
 
-  void testMDImageGet2DData(void){
+		TSM_ASSERT_EQUALS("Image with emtpy geometry should be initialized",true,pImage->is_initialized());
+		TSM_ASSERT_EQUALS("An image with empty geometry should be size 1 ",1,pImage->getDataSize());
+
+
+	}
+	void testMDImageReadDescription(){
+		MockFileFormat file("");
+
+        Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+		file.read_MDGeomDescription(geom_description);
+		TS_ASSERT_THROWS_NOTHING(pImage->initialize(geom_description));
+
+		TSM_ASSERT_EQUALS("An image with this geometry should be specific size ",50*50*50*50,pImage->getDataSize());
+	}
+  void testGet2DData(void){
 
     this->selection.assign(2,1);
 
- 
-    MockFileFormat file("");
+    // returns 2D image 
   
-    MDImage* pImageData = new MDImage(getMDGeometry().release());
-    std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
-    // returns 2D image
- 
-	Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-	file.read_MDGeomDescription(geom_description);
-	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-
-	// this should read real data 
-   //file.read_MDImg_data(*pDND);
-    pDND->getPointData(selection,img);
+    pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),2500);
+  }
+
+  void testExpandedSelectionFails(){
 
     // fails as we select 5 dimensions but the dataset is actually 4-D
     selection.assign(5,20);
-    TS_ASSERT_THROWS_ANYTHING(pDND->getPointData(selection,img) );
+    TS_ASSERT_THROWS_ANYTHING(pImage->getPointData(selection,img) );
   }
 
   void testGet3DData(void){
@@ -109,51 +132,24 @@ public:
     // returns 3D image with 4-th dimension selected at 20;
     selection.assign(1,20);
 
-    MockFileFormat file("");
-    MDImage* pImageData = new MDImage(getMDGeometry().release());
-    std::auto_ptr<MDImage>pDND=std::auto_ptr<MDImage>(pImageData);
-
-
-	Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-	file.read_MDGeomDescription(geom_description);
-
-	//
-	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-    //file.read_MDImg_data(*pDND);
-
-    pDND->getPointData(selection,img);
+  
+    pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50*50*50); 
   }
 
-  void testGet1Ddata(void){
+  void testGet0Ddata(void){
     // this should return single point at (20,20,20,20)
     selection.assign(4,20);
-    std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
 
-    Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-    MockFileFormat file("");
-	file.read_MDGeomDescription(geom_description);
-
-	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-//    file.read_MDImg_data(*pDND);
-
-    pDND->getPointData(selection,img);
+    pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),1);
   }
 
-  void testGet2Ddata(void){
+  void testGet1Ddata(void){
     // this should return line of size 50 
     selection.assign(3,10);
-    std::auto_ptr<MDImage> pDND=std::auto_ptr<MDImage>(new MDImage(getMDGeometry().release()));
  
-	MockFileFormat file("");
-    Mantid::Geometry::MDGeometryDescription geom_description(4,3);
- 	file.read_MDGeomDescription(geom_description);
-
-	TS_ASSERT_THROWS_NOTHING(pDND->initialize(geom_description));
-//    file.read_MDImg_data(*pDND);
-
-    pDND->getPointData(selection,img);
+    pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
 

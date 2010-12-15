@@ -178,7 +178,7 @@ namespace Mantid
       static Kernel::Logger& g_log;
 	  /// pointer to the geometry basis e.g. the unit cell of the bravis latice of the crystal and additional dimensions
 	  boost::shared_ptr<Mantid::Geometry::MDGeometryBasis> m_spMDBasis;
-      /// Not sure
+      /// Pointer to MD Image of cells, which aslo provides the data 
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> m_spMDImage;
 
       /// Internal data storage, class provides placement and IO (pack/unpack) operations for sparce array of data points.

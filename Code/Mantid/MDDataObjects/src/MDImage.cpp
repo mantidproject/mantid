@@ -141,7 +141,7 @@ MDImage::get_const_pData(void)const
 bool 
 MDImage::is_initialized(void)const
 {
-	if(!pMDGeometry.get()||!this->get_const_pData())return false;
+	if(!pMDGeometry.get()||!this->MD_IMG_array.data)return false;
 	return true;
 }
 
