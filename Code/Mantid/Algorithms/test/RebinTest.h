@@ -198,9 +198,9 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void testEventWorkspace_SameOutputWorkspace()
+  void do_testEventWorkspace_SameOutputWorkspace(bool weighted)
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, weighted);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
 
     const EventList el(test_in->getEventList(1));
@@ -259,9 +259,9 @@ public:
   }
 
 
-  void testEventWorkspace_DifferentOutputWorkspace()
+  void dotestEventWorkspace_DifferentOutputWorkspace(bool weighted)
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, weighted);
     AnalysisDataService::Instance().add("test_inEvent2", test_in);
 
     const EventList el(test_in->getEventList(1));
@@ -317,11 +317,31 @@ public:
 
   }
     
+  void testEventWorkspace_SameOutputWorkspace()
+  {
+    do_testEventWorkspace_SameOutputWorkspace(false);
+  }
+
+  void testEventWorkspace_SameOutputWorkspace_weighted()
+  {
+    do_testEventWorkspace_SameOutputWorkspace(true);
+  }
+
+  void testEventWorkspace_DifferentOutputWorkspace()
+  {
+    dotestEventWorkspace_DifferentOutputWorkspace(false);
+  }
+
+  void testEventWorkspace_Weighted_And_DifferentOutputWorkspace()
+  {
+    dotestEventWorkspace_DifferentOutputWorkspace(true);
+  }
+
 
 
 private:
 
-  EventWorkspace_sptr CreateEventWorkspace(int numbins, int numpixels)
+  EventWorkspace_sptr CreateEventWorkspace(int numbins, int numpixels, bool weighted)
   {
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numpixels,numbins,numbins-1);
@@ -345,7 +365,11 @@ private:
         //Create a list of events in order, one per bin.
         events += TofEvent((ie*BIN_DELTA)+0.5, 1);
       }
+      if (weighted)
+        events.switchToWeightedEvents();
    }
+
+
     retVal->doneLoadingData();
     retVal->setAllX(axis);
 
