@@ -35,6 +35,12 @@ LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
 
 void LoadDetectorInfo::init()
 {
+  this->setOptionalMessage(
+      "Subtracts detector delay times from the time of flight X values in the workspace and \n"
+      "modifies its information about detector pressures and wall thicknesses. \n"
+      "This information can read from a DAT file or RAW file that corresponds \n"
+      "to the same run or series of experimental runs as the workspace.");
+
   // Declare required input parameters for algorithm
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));
