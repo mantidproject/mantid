@@ -8730,8 +8730,17 @@ void ApplicationWindow::windowsMenuAboutToShow()
   windowsMenu->addAction(actionResizeActiveWindow);
   windowsMenu->insertItem(tr("&Hide Window"),
       this, SLOT(hideActiveWindow()));
+
+  // Having the shorcut set here is neccessary on Windows, but
+  // leads to an error message elsewhere. Don't know why and don't 
+  // have a better solution than this right now.
+#ifdef _WIN32
+  windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"),  
+                   this, SLOT(closeActiveWindow()), Qt::CTRL+Qt::Key_W );  
+#else
   windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"),
 			  this, SLOT(closeActiveWindow()) );
+#endif
 
   if (n>0 && n<10){
     windowsMenu->insertSeparator();
