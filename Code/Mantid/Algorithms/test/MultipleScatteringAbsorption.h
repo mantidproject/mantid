@@ -15,18 +15,6 @@ using namespace Mantid::Kernel;
 class MultipleScatteringAbsorptionTest : public CxxTest::TestSuite
 {
 public:
-  MultipleScatteringAbsorptionTest()
-  {
-    Workspace2D_sptr wksp = WorkspaceCreationHelper::Create2DWorkspaceBinned(9,16,1000,1000);
-    std::vector<int> specdetmap;
-    for(size_t i = 0; i < 9; ++i)
-      specdetmap.push_back(i+1);
-    wksp->mutableSpectraMap().clear();
-    wksp->mutableSpectraMap().populateWithVector(specdetmap);
-    wksp->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    AnalysisDataService::Instance().add("TestInputWS",wksp);
-  }
-
   void testName()
   {
     TS_ASSERT_EQUALS( algorithm.name(), "MultipleScatteringCylinderAbsorption" );
@@ -79,7 +67,18 @@ public:
   }
 
   void testCalculation()
-  {                                             // create and execute the algorithm
+  {
+    // setup the test workspace
+    Workspace2D_sptr wksp = WorkspaceCreationHelper::Create2DWorkspaceBinned(9,16,1000,1000);
+    std::vector<int> specdetmap;
+    for(size_t i = 0; i < 9; ++i)
+      specdetmap.push_back(i+1);
+    wksp->mutableSpectraMap().clear();
+    wksp->mutableSpectraMap().populateWithVector(specdetmap);
+    wksp->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    AnalysisDataService::Instance().add("TestInputWS",wksp);
+
+    // create and execute the algorithm
     Mantid::Algorithms::MultipleScatteringAbsorption   algorithm_c;
     TS_ASSERT_THROWS_NOTHING(algorithm_c.initialize() );
     TS_ASSERT( algorithm_c.isInitialized() );
