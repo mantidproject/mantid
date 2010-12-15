@@ -215,7 +215,7 @@ namespace MDDataObjects
    *  This constructor should be used mainly for debugging and unit tests as relies on default column names only,
    */
    MDDataPoint(char * buf, unsigned int nDims=4,unsigned int nData=2,unsigned int nIDfields=3):
-   MDDataPointEqual<T,I,S>(buf,nDims,nData,nIDfields),
+	   MDDataPointEqual<T,I,S>::MDDataPointEqual(buf,nDims,nData,nIDfields),
    pix_id_shift(0),PixIDMask(0),RunIDMask(0),indexBufSize(0)
    {
      this->modifyPixel();
@@ -227,7 +227,7 @@ namespace MDDataObjects
    *   
    */
    MDDataPoint(char * buf, const MDPointDescription &pixSignature):
-   MDDataPointEqual<T,I,S>(buf,pixSignature),
+	   MDDataPointEqual<T,I,S>::MDDataPointEqual(buf,pixSignature),
    pix_id_shift(0),PixIDMask(0),RunIDMask(0),indexBufSize(0)
    {
 	this->modifyPixel();
@@ -236,8 +236,8 @@ namespace MDDataObjects
  public:
    // Additional Accessors:;
    // these two are coded for particular type of experiments -> number of runs (2^pix_id_shift-1) <~2^9, number of pixels <~ 2^(23)
-   uint32_t getRunID(size_t n_point)  const{return   RunIDMask&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride+pPixIndex)));}
-   uint32_t getPixID(size_t n_point)  const{return ((PixIDMask)&(*(reinterpret_cast<uint32_t *>(pDataBuffer+n_point*MDPointStride +pPixIndex)))>>pix_id_shift);}
+   uint32_t getRunID(size_t n_point)  const{return   RunIDMask&(*(reinterpret_cast<uint32_t *>(MDDataPointEqual<T,I,S>::pDataBuffer+n_point*MDDataPointEqual<T,I,S>::MDPointStride+ MDDataPointEqual<T,I,S>::pPixIndex)));}
+   uint32_t getPixID(size_t n_point)  const{return ((PixIDMask)&(*(reinterpret_cast<uint32_t *>(MDDataPointEqual<T,I,S>::pDataBuffer+n_point*MDDataPointEqual<T,I,S>::MDPointStride +MDDataPointEqual<T,I,S>::pPixIndex)))>>pix_id_shift);}
    //************************************************************************************************************************
    //Mutators
      
@@ -255,15 +255,15 @@ namespace MDDataObjects
    void setData(unsigned int ind,T dim_fields[],S SignalFields[],int iFields[]){
      unsigned int i,i0;
 
-     char *const base = pDataBuffer+ind*MDPointStride;
+     char *const base = MDDataPointEqual<T,I,S>::pDataBuffer+ind*MDDataPointEqual<T,I,S>::MDPointStride;
      // copy dimension values (axis values)
-     memcpy(base,dim_fields,sizeof(T)*n_dimensions);
+     memcpy(base,dim_fields,sizeof(T)*MDDataPointEqual<T,I,S>::n_dimensions);
      // copy signals
-     i0 = n_dimensions;
-     memcpy(base+field_loc[i0],SignalFields,sizeof(S)*n_signals);
+     i0 = MDDataPointEqual<T,I,S>::n_dimensions;
+     memcpy(base+MDDataPointEqual<T,I,S>::field_loc[i0],SignalFields,sizeof(S)*MDDataPointEqual<T,I,S>::n_signals);
 
      // this part is specialized for coding detectors from runID and dimID
-     i0=PixIndex;
+     i0=MDDataPointEqual<T,I,S>::PixIndex;
      // compress n_runs and n_pixels into single 32 bit word
      uint32_t *pBuf = (uint32_t *)pWorkingBuf;
      uint32_t  w1   = (uint32_t)iFields[0];
@@ -273,24 +273,24 @@ namespace MDDataObjects
      // deal with remaining dimention indexes
      unsigned int ic = sizeof(uint32_t)/sizeof(I);
      if(ic==0)ic=1;
-     for(i=2;i<n_indFields;i++){
+     for(i=2;i<MDDataPointEqual<T,I,S>::n_indFields;i++){
        pWorkingBuf[ic]=(I)iFields[i];
        ic++;
      }
      // copy indexes into data buffer;
-      memcpy(base + field_loc[i0],pWorkingBuf,indexBufSize);
+      memcpy(base + MDDataPointEqual<T,I,S>::field_loc[i0],pWorkingBuf,indexBufSize);
 
    }
    /// modified version of above, used when signal and dimension fields are the same width
   void setData(unsigned int ind,T dim_sig_fields[],int iFields[]){
      unsigned int i,i0;
 
-     char *const base = pDataBuffer+ind*MDPointStride;
+     char *const base = MDDataPointEqual<T,I,S>::pDataBuffer+ind*MDDataPointEqual<T,I,S>::MDPointStride;
      // copy dimension values (axis values) and short signals
-     memcpy(base,dim_sig_fields,sizeof(T)*(n_dimensions+n_signals));
+     memcpy(base,dim_sig_fields,sizeof(T)*(MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals));
    
      // this part is specialized for coding detectors from runID and dimID
-     i0=PixIndex;
+     i0=MDDataPointEqual<T,I,S>::PixIndex;
      // compress n_runs and n_pixels into single 32 bit word
      uint32_t *pBuf = (uint32_t *)pWorkingBuf;
      uint32_t  w1   = (uint32_t)iFields[0];
@@ -300,12 +300,12 @@ namespace MDDataObjects
      // deal with remaining dimention indexes
      unsigned int ic = sizeof(uint32_t)/sizeof(I);
      if(ic==0)ic=1;
-     for(i=2;i<n_indFields;i++){
+     for(i=2;i<MDDataPointEqual<T,I,S>::n_indFields;i++){
        pWorkingBuf[ic]=(I)iFields[i];
        ic++;
      }
      // copy indexes into data buffer;
-      memcpy(base + field_loc[i0],pWorkingBuf,indexBufSize);
+      memcpy(base + MDDataPointEqual<T,I,S>::field_loc[i0],pWorkingBuf,indexBufSize);
 
    }
    ~MDDataPoint(){
@@ -325,24 +325,24 @@ namespace MDDataObjects
 
      pix_id_shift= this->PixDescriptor.NumPixCompressionBits;
 
-     pWorkingBuf = new I[n_indFields];
+     pWorkingBuf = new I[MDDataPointEqual<T,I,S>::n_indFields];
   
      // specialisation : two first fields are packed into one 32 bit field
-     this->field_lengths[n_dimensions+n_signals]  =2;
-     this->field_lengths[n_dimensions+n_signals+1]=2;
+     this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals]  =2;
+     this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+1]=2;
 	 //
-     unsigned int n_fields      = n_dimensions+n_signals+n_indFields;
+     unsigned int n_fields      = MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+MDDataPointEqual<T,I,S>::n_indFields;
 
      // recalculate new field length
-     field_loc[0] = 0;
+     MDDataPointEqual<T,I,S>::field_loc[0] = 0;
      for(i=1;i<n_fields;i++){
-        field_loc[i]=field_loc[i-1]+field_lengths[i-1];
+    	 MDDataPointEqual<T,I,S>::field_loc[i]=MDDataPointEqual<T,I,S>::field_loc[i-1]+ MDDataPointEqual<T,I,S>::field_lengths[i-1];
      }
    // set up specific pointers for fast accessors;
-     MDPointStride= field_loc[n_fields-1]+field_lengths[n_fields-1];
-     pSignal      = field_loc[n_dimensions];
-     pError       = field_loc[n_dimensions+1];
-     pPixIndex    = field_loc[PixIndex];
+     MDDataPointEqual<T,I,S>::MDPointStride= MDDataPointEqual<T,I,S>::field_loc[n_fields-1]+MDDataPointEqual<T,I,S>::field_lengths[n_fields-1];
+     MDDataPointEqual<T,I,S>::pSignal      = MDDataPointEqual<T,I,S>::field_loc[MDDataPointEqual<T,I,S>::n_dimensions];
+     MDDataPointEqual<T,I,S>::pError       = MDDataPointEqual<T,I,S>::field_loc[MDDataPointEqual<T,I,S>::n_dimensions+1];
+     MDDataPointEqual<T,I,S>::pPixIndex    = MDDataPointEqual<T,I,S>::field_loc[MDDataPointEqual<T,I,S>::PixIndex];
 
    // this defines PixID masks and RinID mask -- it is assumed that these data are present in all experiments and are packed into one 32bit word
      RunIDMask=0;
@@ -351,8 +351,8 @@ namespace MDDataObjects
      PixIDMask=(~RunIDMask)>>pix_id_shift;
     // calculate the size of buffer for data indexes;
      indexBufSize = sizeof(uint32_t);
-     if(n_indFields>2){
-       indexBufSize+=sizeof(I)*(n_indFields-2);
+     if(MDDataPointEqual<T,I,S>::n_indFields>2){
+       indexBufSize+=sizeof(I)*(MDDataPointEqual<T,I,S>::n_indFields-2);
      }
       
    }

@@ -115,7 +115,7 @@ MD_FileFormatFactory::isHoraceFile(const char *fileName)
 
 	double version = *(reinterpret_cast<double *>(DataBuffer+10));
 
-	if(abs(version-2)>FLT_EPSILON){
+	if(abs(version-2)>std::numeric_limits<float>::epsilon()){
 		f_log.debug()<<" Only version 2 of Horace format file is currently supported and we got the version :"<<version<<std::endl;
 		return false;
 	}

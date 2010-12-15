@@ -127,7 +127,20 @@ private:
 	void compact_hor_data(char *buffer,size_t &buf_size);
 	// the size of data block for Horace reader;
 	static const unsigned int hbs=9*4;
+
+	// Function performing work previously in GOTO statement.
+  void inline validateFileStreamHolder(std::ifstream& fileStreamHolder)
+  {
+    if (fileStreamHolder.bad())
+    {
+      f_log.error() << " Error reading main sqw file header for file " << this->File_name << "\n";
+      throw(Kernel::Exception::FileError("Error reading main sqw file header ", this->File_name));
+    }
+  }
 };
+
+
+
 } // end namespaces
 } 
 }

@@ -153,7 +153,7 @@ MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
 
    // all paxis in the transformation matrix have to be defined properly and in accordance with the transformation data.
    // also sets the the dimension limits and object limits as the limits from transf class
-   this->pMDGeometry->reinit_Geometry(transf);
+   this->pMDGeometry->initialize(transf);
 
    
    this->MD_IMG_array.dimSize.assign(this->pMDGeometry->getNumDims(),0);

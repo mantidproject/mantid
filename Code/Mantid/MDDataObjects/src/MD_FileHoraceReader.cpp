@@ -20,7 +20,7 @@ nDataPoints(0)
 {
 	if(sizeof(float32)!=4){
 		f_log.error()<<"MD_FileHoraceReader is not defined on a computer with non-32-bit float\n";
-		throw(std::bad_cast("MD_FileHoraceReader can not cast non-32 bif float properly "));
+		throw(std::bad_cast());
 	}
 
 	std::vector<char> data_buffer;
@@ -386,45 +386,55 @@ MD_FileHoraceReader::getNPix(void)
 {
 	return this->nDataPoints;
 }
+
 // auxiliary functions
 void
 MD_FileHoraceReader::parse_sqw_main_header()
 { // we do not need this header  at the moment -> just need to calculated its length;
 
-		std::vector<char> data_buffer(4*3);
-		this->fileStreamHolder.read(&data_buffer[0],4);		           if(fileStreamHolder.bad())goto Error;
+	std::vector<char> data_buffer(4 * 3);
+  this->fileStreamHolder.read(&data_buffer[0], 4);
+  validateFileStreamHolder(fileStreamHolder);
 
-		unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
-		//skip main header file name
-		fileStreamHolder.seekg(file_name_length,std::ios_base::cur);   if(fileStreamHolder.bad())goto Error;
+  unsigned int file_name_length = *((uint32_t*) (&data_buffer[0]));
+  //skip main header file name
+  fileStreamHolder.seekg(file_name_length, std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
-		this->fileStreamHolder.read(&data_buffer[0],4);
-		unsigned int file_path_length= *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
-		//skip main header file path
-		fileStreamHolder.seekg(file_path_length,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+  this->fileStreamHolder.read(&data_buffer[0], 4);
+  unsigned int file_path_length = *((uint32_t*) (&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
 
-		this->fileStreamHolder.read(&data_buffer[0],4);
-		unsigned int file_title = *((uint32_t*)(&data_buffer[0]));      if(fileStreamHolder.bad())goto Error;
-		//skip main header file path
-		fileStreamHolder.seekg(file_title,std::ios_base::cur);          if(fileStreamHolder.bad())goto Error;
+  //skip main header file path
+  fileStreamHolder.seekg(file_path_length, std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
-		// indentify number of file headers, contributed into the dataset
-		this->fileStreamHolder.read(&data_buffer[0],4);
-		unsigned int nFiles= *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
-       /// allocate space for the component headers positions;
-		positions.component_headers_starts.assign(nFiles,0);
+  this->fileStreamHolder.read(&data_buffer[0], 4);
+  unsigned int file_title = *((uint32_t*) (&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
 
-		std::streamoff last_location = fileStreamHolder.tellg();
-		if(nFiles>0){
-			positions.component_headers_starts[0] = last_location;
-		}
-	//return last_location;
-		return;
-Error:
-		f_log.error()<<" Error reading main sqw file header for file " <<this->File_name<<"\n";
-		throw(Kernel::Exception::FileError("Error reading main sqw file header ",this->File_name));
-		
+  //skip main header file path
+  fileStreamHolder.seekg(file_title, std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
+
+  // indentify number of file headers, contributed into the dataset
+  this->fileStreamHolder.read(&data_buffer[0], 4);
+  unsigned int nFiles = *((uint32_t*) (&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
+
+  /// allocate space for the component headers positions;
+  positions.component_headers_starts.assign(nFiles, 0);
+
+  std::streamoff last_location = fileStreamHolder.tellg();
+  if (nFiles > 0)
+  {
+    positions.component_headers_starts[0] = last_location;
+  }
+  //return last_location;
+  return;
+
 }
+
 // 
 std::streamoff 
 MD_FileHoraceReader::parse_component_header(std::streamoff start_location)
@@ -464,43 +474,53 @@ data.ulabel=cellstr(ulabel)';
 	std::streamoff end_location = start_location;
 	std::streamoff shift = start_location-this->fileStreamHolder.tellg();
 	// move to spefied location, which should be usually 0;
-	fileStreamHolder.seekg(shift,std::ios_base::cur);               if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(shift,std::ios_base::cur);
 
 
-	this->fileStreamHolder.read(&data_buffer[0],4);		             if(fileStreamHolder.bad())goto Error;
+
+	this->fileStreamHolder.read(&data_buffer[0],4);
+	validateFileStreamHolder(fileStreamHolder);
 
 	unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
 	//skip component header file name
-	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);   if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 
 	this->fileStreamHolder.read(&data_buffer[0],4);
-	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
+	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
+	validateFileStreamHolder(fileStreamHolder);
+
 	//skip component header file path
-	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 
 	// move to by specifified nuber of bytes, see Matlab header above;
-	fileStreamHolder.seekg(4*(7+3*4),std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(4*(7+3*4),std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
+
 	// read number of energy bins;
 	this->fileStreamHolder.read(&data_buffer[0],4);
 	unsigned int nEn_bins = *((uint32_t*)(&data_buffer[0]));
 	// skip energy values;
-	fileStreamHolder.seekg(4*(nEn_bins),std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(4*(nEn_bins),std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 	// skip offsets and conversions;
-	fileStreamHolder.seekg(4*(4+4*4+4),std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(4*(4+4*4+4),std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 
 	// get labels matix size;
-	this->fileStreamHolder.read(&data_buffer[0],8);		       if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],8);
+	validateFileStreamHolder(fileStreamHolder);
 	unsigned int nRows = *((uint32_t*)(&data_buffer[0]));
 	unsigned int nCols = *((uint32_t*)(&data_buffer[4]));
 
 	// skip labels
-	fileStreamHolder.seekg(nRows*nCols,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(nRows*nCols,std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 
 	end_location = (unsigned int)fileStreamHolder.tellg();
 	return end_location;
-Error:
-		f_log.error()<<" Error reading sqw component file header for file " <<this->File_name<<"\n";
-		throw(Kernel::Exception::FileError("Error reading sqw component file header ",this->File_name));
+
 
 }
 //
@@ -527,24 +547,30 @@ MD_FileHoraceReader::parse_sqw_detpar(std::streamoff start_location)
 	std::streamoff end_location = start_location;
 	std::streamoff shift = start_location-this->fileStreamHolder.tellg();
 	// move to specified location, which should be usually 0;
-	fileStreamHolder.seekg(shift,std::ios_base::cur);   if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(shift,std::ios_base::cur);
+	validateFileStreamHolder(fileStreamHolder);
 
 
-	this->fileStreamHolder.read(&data_buffer[0],4);		            if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],4);
+	validateFileStreamHolder(fileStreamHolder);
 
 	unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
 	//skip component header file name
-	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);   if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	this->fileStreamHolder.read(&data_buffer[0],4);
-	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
+	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
 	//skip component header file path
-	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	this->fileStreamHolder.read(&data_buffer[0],4);
 	unsigned int num_detectors = *((uint32_t*)(&data_buffer[0]));
 //skip detector information
-	fileStreamHolder.seekg(num_detectors*6*4,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(num_detectors*6*4,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	end_location = fileStreamHolder.tellg();
 	return end_location;
@@ -562,7 +588,8 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 	std::streamoff end_location = data_start;
 	std::streamoff shift = data_start-this->fileStreamHolder.tellg();
 	// move to specified location, which should be usually 0;
-	fileStreamHolder.seekg(shift,std::ios_base::cur);       if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(shift,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 /*   
 	[n, count, ok, mess] = fread_catch(fid,1,'int32'); if ~all(ok); return; end;
     [dummy_filename, count, ok, mess] = fread_catch(fid,[1,n],'*char'); if ~all(ok); return; end;
@@ -573,21 +600,27 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
     [n, count, ok, mess] = fread_catch(fid,1,'int32'); if ~all(ok); return; end;
     [data.title, count, ok, mess] = fread_catch(fid,[1,n],'*char'); if ~all(ok); return; end;
 */
-	this->fileStreamHolder.read(&data_buffer[0],4);		            if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],4);
+  validateFileStreamHolder(fileStreamHolder);
 
 	unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
 	//skip dummy file name
-	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);   if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_name_length,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	this->fileStreamHolder.read(&data_buffer[0],4);
-	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
+	unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
 	//skip dummy file path
-	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(file_path_length,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	this->fileStreamHolder.read(&data_buffer[0],4);
-	unsigned int data_title_length = *((uint32_t*)(&data_buffer[0])); if(fileStreamHolder.bad())goto Error;
+	unsigned int data_title_length = *((uint32_t*)(&data_buffer[0]));
+  validateFileStreamHolder(fileStreamHolder);
 	//skip data title
-	fileStreamHolder.seekg(data_title_length,std::ios_base::cur);    if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(data_title_length,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 
 	this->positions.geom_start = fileStreamHolder.tellg();
 	// skip geometry information
@@ -606,7 +639,8 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 	data.ulabel=cellstr(ulabel)';
 */
 	// get label information and skip labels;
-	this->fileStreamHolder.read(&data_buffer[0],8);  if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],8);
+  validateFileStreamHolder(fileStreamHolder);
 	unsigned int n_labels      = *((uint32_t*)(&data_buffer[0])); 
 	unsigned int labels_length = *((uint32_t*)(&data_buffer[4])); 
 	fileStreamHolder.seekg(n_labels*labels_length,std::ios_base::cur);
@@ -623,11 +657,13 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 		data.iint=zeros(2,0);
 	end
 */
-	this->fileStreamHolder.read(&data_buffer[0],4);           if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],4);
+  validateFileStreamHolder(fileStreamHolder);;
     unsigned int npax = *((uint32_t*)(&data_buffer[0])); 
 	unsigned int niax = npax-4;
 	if(niax!=0){
-		fileStreamHolder.seekg(3*niax*4,std::ios_base::cur);  if(fileStreamHolder.bad())goto Error;
+		fileStreamHolder.seekg(3*niax*4,std::ios_base::cur);
+	  validateFileStreamHolder(fileStreamHolder);
 	}
 	if(npax!=0){
 		this->nBins.resize(npax);
@@ -641,15 +677,18 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 		end
 		*/
 		// skip projection axis
-		fileStreamHolder.seekg(npax*4,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+		fileStreamHolder.seekg(npax*4,std::ios_base::cur);
+	  validateFileStreamHolder(fileStreamHolder);
 		this->mdImageSize = 1;
 		unsigned int nAxisPoints;
 		for(i=0;i<npax;i++){
-			this->fileStreamHolder.read(&data_buffer[0],4);           if(fileStreamHolder.bad())goto Error;
+			this->fileStreamHolder.read(&data_buffer[0],4);
+		  validateFileStreamHolder(fileStreamHolder);
 			nAxisPoints = *((uint32_t*)(&data_buffer[0])); 
 			nBins[i] = nAxisPoints-1;
 			this->mdImageSize *= nBins[i] ;
-		    fileStreamHolder.seekg(nAxisPoints*4,std::ios_base::cur);     if(fileStreamHolder.bad())goto Error;
+		    fileStreamHolder.seekg(nAxisPoints*4,std::ios_base::cur);
+		    validateFileStreamHolder(fileStreamHolder);
 		}
 		/*
 		[data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
@@ -658,15 +697,18 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 		end
 		*/
 		// skip display indexes;
-		fileStreamHolder.seekg(npax*4,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+		fileStreamHolder.seekg(npax*4,std::ios_base::cur);
+	  validateFileStreamHolder(fileStreamHolder);
 	}
 	// signal start:
 	this->positions.s_start = fileStreamHolder.tellg();
 	// and skip to errors
-    fileStreamHolder.seekg(this->mdImageSize*4,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+    fileStreamHolder.seekg(this->mdImageSize*4,std::ios_base::cur);
+    validateFileStreamHolder(fileStreamHolder);
 	// error start:
 	this->positions.err_start= fileStreamHolder.tellg();
-    fileStreamHolder.seekg(this->mdImageSize*4,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+    fileStreamHolder.seekg(this->mdImageSize*4,std::ios_base::cur);
+    validateFileStreamHolder(fileStreamHolder);
 	// dnd data file.  we do not suppor this?
 	if(fileStreamHolder.eof()){
 		f_log.error()<<" DND horace data file supplied. This file reader needs SQW Horace type data file\n";
@@ -682,7 +724,8 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 
     this->positions.n_cell_pix_start=fileStreamHolder.tellg();
 	// skip to the end of pixels;
-	fileStreamHolder.seekg(this->mdImageSize*8,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(this->mdImageSize*8,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 	if(fileStreamHolder.eof()){
 		f_log.error()<<" DND b+ horace data file supplied. This file reader needs full SQW Horace type data file\n";
 		throw(std::invalid_argument("DND b+ Horace datasets are not supported by Mantid"));
@@ -690,28 +733,25 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
 	this->positions.min_max_start = fileStreamHolder.tellg();
 	// skip min-max start
     //[data.urange,count,ok,mess] = fread_catch(fid,[2,4],'float32'); if ~all(ok); return; end;
-	fileStreamHolder.seekg(8*4,std::ios_base::cur);            if(fileStreamHolder.bad())goto Error;
+	fileStreamHolder.seekg(8*4,std::ios_base::cur);
+  validateFileStreamHolder(fileStreamHolder);
 	if(fileStreamHolder.eof()){
 		f_log.error()<<" SQW a- horace data file supplied. This file reader needs full SQW Horace type data file\n";
 		throw(std::invalid_argument("SQW a- Horace datasets are not supported by Mantid"));
 	}
 	// skip redundant field and read nPix (number of data points)
-	this->fileStreamHolder.read(&data_buffer[0],12);              if(fileStreamHolder.bad())goto Error;
+	this->fileStreamHolder.read(&data_buffer[0],12);
+  validateFileStreamHolder(fileStreamHolder);
 	this->nDataPoints =(size_t)( *((uint64_t*)(&data_buffer[4])));
 	this->positions.pix_start = this->fileStreamHolder.tellg();
-
-	return ;
-Error:
-		f_log.error()<<" Error identifying data locations for file " <<this->File_name<<"\n";
-		throw(Kernel::Exception::FileError("Error identifying data locations ",this->File_name));
-
-
 }
 
 MD_FileHoraceReader::~MD_FileHoraceReader(void)
 {
 	fileStreamHolder.close();
 }
+
+
 } // end namespaces
 }
 }
