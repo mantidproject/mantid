@@ -134,7 +134,7 @@ void AbsorptionCorrection::exec()
     try
     {
       det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError)
+    } catch (Exception::NotFoundError&)
     {
       // Catch when a spectrum doesn't have an attached detector and go to next one
       continue;
@@ -156,7 +156,7 @@ void AbsorptionCorrection::exec()
           energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),factor,power);
           lambda_f = factor * std::pow(par->value<double>(),power);
         }
-      } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+      } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
     }
 
 

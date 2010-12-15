@@ -175,6 +175,8 @@ private:
 
 DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);
 
+typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
+
 } //Namespace Geometry
 } //Namespace Mantid
 

@@ -6,13 +6,15 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 namespace ComponentCreationHelper
 {
 
-  using namespace Mantid::Geometry;
+using namespace Mantid;
+using namespace Mantid::Geometry;
 
   /** 
   A set of helper functions for creating various component structures for the unit tests.
@@ -277,6 +279,71 @@ namespace ComponentCreationHelper
       std::cout << "==================================\n";
     }
     
+    return testInst;
+  }
+
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
+   *
+   * @param num_banks: number of 9-cylinder banks to create
+   * @param verbose: prints out the instrument after creation.
+   */
+  static IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels)
+  {
+    boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+
+    const double cylRadius(0.004);
+    const double cylHeight(0.0002);
+    // One object
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
+
+    //Just increment pixel ID's
+    int pixelID = 1;
+
+    for (int banknum=1; banknum <= num_banks; banknum++)
+    {
+      //Make a new bank
+      std::ostringstream bankname;
+      bankname << "bank" << banknum;
+
+      RectangularDetector * bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape,
+          pixels, 0.0, cylRadius*2,
+          pixels, 0.0, cylRadius*2,
+          banknum*pixels*pixels, true, pixels);
+
+      // Mark them all as detectors
+      for (int i=0; i < bank->nelements(); i++)
+      {
+        boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*bank)[i]);
+        if (detector)
+        {
+          //Mark it as a detector (add to the instrument cache)
+          testInst->markAsDetector(detector.get());
+        }
+      }
+
+      testInst->add(bank);
+      bank->setPos(V3D(0.0, 0.0, 5.0*banknum));
+    }
+
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
+    source->setPos(V3D(0.0, 0.0, -10.));
+    testInst->add(source);
+    testInst->markAsSource(source);
+
+    // Define a sample as a simple sphere
+    Object_sptr sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+    ObjComponent *sample = new ObjComponent("sample", sampleSphere, testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+
     return testInst;
   }
 }
