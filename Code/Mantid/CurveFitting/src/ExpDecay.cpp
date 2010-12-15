@@ -16,15 +16,15 @@ DECLARE_FUNCTION(ExpDecay)
 
 ExpDecay::ExpDecay()
 {
-  declareParameter("h", 1.0);
-  declareParameter("t", 1.0);
+  declareParameter("Height", 1.0);
+  declareParameter("Lifetime", 1.0);
 }
 
 
 void ExpDecay::function(double* out, const double* xValues, const int& nData)const
 {
-    const double& h = getParameter("h");
-    const double& t = getParameter("t");
+    const double& h = getParameter("Height");
+    const double& t = getParameter("Lifetime");
 
     for (int i = 0; i < nData; i++) 
     {
@@ -34,8 +34,8 @@ void ExpDecay::function(double* out, const double* xValues, const int& nData)con
 
 void ExpDecay::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
-    const double& h = getParameter("h");
-    const double& t = getParameter("t");
+    const double& h = getParameter("Height");
+    const double& t = getParameter("Lifetime");
 
     for (int i = 0; i < nData; i++) {
         double x = xValues[i];

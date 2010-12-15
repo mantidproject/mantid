@@ -102,8 +102,8 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
 
-    TS_ASSERT_DELTA( fn->getParameter("h"), 5 ,0.0001);
-    TS_ASSERT_DELTA( fn->getParameter("t"), 3 ,0.001);
+    TS_ASSERT_DELTA( fn->getParameter("Height"), 5 ,0.0001);
+    TS_ASSERT_DELTA( fn->getParameter("Lifetime"), 3 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
 
