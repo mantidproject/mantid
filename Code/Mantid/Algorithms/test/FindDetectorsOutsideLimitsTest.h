@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "WorkspaceCreationHelper.hh"
 #include "Poco/File.h"
 #include <fstream>
@@ -110,28 +111,28 @@ public:
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if ( i%2 == 0 || i == 19 )
       {
-	valExpected = maskValue;
-	maskExpected = true;
+        valExpected = maskValue;
+        maskExpected = true;
       }
       if(det)
       {
-	TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
+        TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
       }
-      
+
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
-    
+
     // Set cut off much of the range and yTooDead will stop failing on high counts
     alg.setPropertyValue("RangeUpper", "4.9");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     //retrieve the output workspace
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")))
+    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
 
     const int numFailed2 = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed2, 11); 
-    
+
     //Check the dead detectors found agrees with what was setup above
     for (int i=0; i< sizey; i++)
     {
@@ -144,17 +145,51 @@ public:
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if ( i%2 == 0 || i == 19 )
       {
-	valExpected = maskValue;
-	maskExpected = true;
+        valExpected = maskValue;
+        maskExpected = true;
       }
       if(det)
       {
-	TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
+        TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
       }
-      
+
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
     
+    AnalysisDataService::Instance().remove("testdead_in");
+    AnalysisDataService::Instance().remove("testdead_out");
+  }
+
+
+  void testExec_Event()
+  {
+    // Make a workspace with 50 pixels, 200 events per pixel.
+    EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace2();
+    // Add ten more at #10
+    for (int i=300; i<310; i++)
+      work_in->getEventList(10).addEventQuickly( TofEvent( i, 10) );
+
+    AnalysisDataService::Instance().add("testdead_in", work_in);
+
+    FindDetectorsOutsideLimits alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace","testdead_in");
+    alg.setPropertyValue("OutputWorkspace","testdead_out");
+    alg.setPropertyValue("LowThreshold","1");
+    alg.setPropertyValue("HighThreshold","201");
+    alg.setPropertyValue("RangeLower", "-1");
+    alg.setPropertyValue("RangeUpper", "1000");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr work_out;
+    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
+
+    TS_ASSERT_EQUALS( work_out->dataY(0)[0], 1.0);
+    TS_ASSERT_EQUALS( work_out->dataY(9)[0], 1.0);
+    TS_ASSERT_EQUALS( work_out->dataY(10)[0], 0.0);
+    TS_ASSERT_EQUALS( work_out->dataY(11)[0], 1.0);
+
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");
   }

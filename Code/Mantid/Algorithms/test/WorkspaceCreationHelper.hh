@@ -209,6 +209,16 @@ public:
     return CreateEventWorkspace(500,1001,100,1000);
   }
 
+  /** Create event workspace with:
+   * 50 pixels
+   * 100 histogrammed bins from 0.0 in steps of 1.0
+   * 200 events; two in each bin.
+   */
+  static EventWorkspace_sptr CreateEventWorkspace2()
+  {
+    return CreateEventWorkspace(50, 100, 100, 0.0, 1.0, 2);
+  }
+
   /** Create event workspace
    */
   static EventWorkspace_sptr CreateEventWorkspace(int numPixels,

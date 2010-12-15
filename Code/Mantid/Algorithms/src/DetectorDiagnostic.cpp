@@ -1,9 +1,11 @@
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/DetectorDiagnostic.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
+#include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
@@ -17,6 +19,8 @@ namespace Mantid
     using API::MatrixWorkspace_sptr;
     using API::IAlgorithm_sptr;
     using Geometry::IDetector_sptr;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::API;
 
     //--------------------------------------------------------------------------
     // Public member functions
@@ -37,6 +41,7 @@ namespace Mantid
      * @param indexMax The upper bound of the spectra to integrate
      * @param lower The lower bound
      * @param upper The upper bound
+     * @param outputWorkspace2D :: set to true to output a workspace 2D even if the input is an EventWorkspace
      * @returns A workspace containing the integrated counts
      */
     MatrixWorkspace_sptr 
@@ -44,7 +49,8 @@ namespace Mantid
 					 const int indexMin,
 					 const int indexMax,
 					 const double lower, 
-					 const double upper)
+					 const double upper,
+					 const bool outputWorkspace2D)
     {
       g_log.information() << "Integrating input spectra.\n";
       // If the input spectra only has one bin, assume it has been integrated already
@@ -60,23 +66,29 @@ namespace Mantid
       childAlg->setProperty("RangeLower",  lower );
       childAlg->setProperty("RangeUpper", upper);
       try
+
       {
-	// Now execute integrate
-	childAlg->execute();
+        // Now execute integrate
+        childAlg->execute();
       }
       catch (std::runtime_error&)
       {
-	g_log.error("Exception thrown while running the Integration sub-algorithm");
-	throw;
+        g_log.error("Exception thrown while running the Integration sub-algorithm");
+        throw;
       }
 
       if ( ! childAlg->isExecuted() )
       {
-	g_log.error("The Integration algorithm failed unexpectedly, aborting.");
-	throw std::runtime_error(name() + " failed trying to run Integration");
+        g_log.error("The Integration algorithm failed unexpectedly, aborting.");
+        throw std::runtime_error(name() + " failed trying to run Integration");
       }
-      return childAlg->getProperty("OutputWorkspace");
 
+      // Convert to 2D if desired, and if the input was an EventWorkspace.
+      MatrixWorkspace_sptr outputW = childAlg->getProperty("OutputWorkspace");
+      if (outputWorkspace2D && boost::dynamic_pointer_cast<EventWorkspace>(outputW))
+        outputW = EventWorkspaceHelpers::convertEventTo2D(outputW);
+
+      return outputW;
     }
 
     

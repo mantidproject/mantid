@@ -419,5 +419,9 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
   workspace->isDistribution(forwards);
 }
 
+
+
+
+
 } // namespace API
 } // namespace Mantid

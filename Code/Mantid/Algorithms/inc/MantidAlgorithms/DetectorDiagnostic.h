@@ -53,7 +53,8 @@ namespace Mantid
       /// Get the total counts for each spectra
       API::MatrixWorkspace_sptr integrateSpectra(API::MatrixWorkspace_sptr inputWS, const int indexMin,
 						 const int indexMax, const double lower,
-						 const double upper);
+						 const double upper, const bool outputWorkspace2D = false);
+
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts
       double calculateMedian(API::MatrixWorkspace_sptr workspace, std::set<int> & skippedIndices);
