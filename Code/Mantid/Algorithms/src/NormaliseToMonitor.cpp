@@ -144,40 +144,40 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   else
   { 
     // Get the workspace from the ADS. Will throw if it's not there.
-    m_monitor = boost::dynamic_pointer_cast<MatrixWorkspace>
+    MatrixWorkspace_sptr monitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve(getPropertyValue("MonitorWorkspace")));
     // Check it's the right type
-    if (!m_monitor)
+    if (!monitorWS)
     {
       g_log.error("MonitorWorkspace must be a MatrixWorkspace");
       throw std::runtime_error("MonitorWorkspace must be a MatrixWorkspace");
     }
     // Check that it's a single spectrum workspace
-    if ( m_monitor->getNumberHistograms() != 1 )
+    if ( monitorWS->getNumberHistograms() != 1 )
     {
       g_log.error("The MonitorWorkspace must contain only 1 spectrum");
       throw std::runtime_error("The MonitorWorkspace must contain only 1 spectrum");
     }
     // Check it's not a distribution
-    if ( m_monitor->isDistribution() )
+    if ( monitorWS->isDistribution() )
     {
       g_log.error("The MonitorWorkspace must not be a distribution");
       throw std::runtime_error("The MonitorWorkspace must not be a distribution");
     }
     // Check that it contains histogram data
-    if ( !m_monitor->isHistogramData() )
+    if ( !monitorWS->isHistogramData() )
     {
       g_log.error("The MonitorWorkspace must contain histogram data");
       throw std::runtime_error("The MonitorWorkspace must contain histogram data");
     }
     // Check that the two workspace come from the same instrument
-    if ( m_monitor->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
+    if ( monitorWS->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
     {
       g_log.error("The Input and Monitor workspaces must come from the same instrument");
       throw std::runtime_error("The Input and Monitor workspaces must come from the same instrument");
     }
     // Check that they're in the same units
-    if ( m_monitor->getAxis(0)->unit() != inputWorkspace->getAxis(0)->unit() )
+    if ( monitorWS->getAxis(0)->unit() != inputWorkspace->getAxis(0)->unit() )
     {
       g_log.error("The Input and Monitor workspaces must have the same unit");
       throw std::runtime_error("The Input and Monitor workspaces must have the same unit");
@@ -185,7 +185,11 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 
     // In this case we need to test whether the bins in the monitor workspace match
     m_commonBins = (m_commonBins && 
-                    API::WorkspaceHelpers::matchingBins(inputWorkspace,m_monitor,true) );
+                    API::WorkspaceHelpers::matchingBins(inputWorkspace,monitorWS,true) );
+
+    // If the workspace passes all these tests, then make a local copy because this will
+    // get changed
+    m_monitor = this->extractMonitorSpectrum(monitorWS,0);
   }
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if not
