@@ -34,6 +34,8 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_u_max(-DBL_MAX),
     m_v_min(DBL_MAX),
     m_v_max(-DBL_MAX),
+    m_height_max(0),
+    m_width_max(0),
     m_unwrappedImage(NULL),
     m_pickImage(NULL),
     m_unwrappedViewChanged(true),
@@ -61,6 +63,8 @@ void UnwrappedSurface::init()
   m_instrActor->detectorCallback(this);
   double du = fabs(m_u_max - m_u_min) * 0.05;
   double dv = fabs(m_v_max - m_v_min) * 0.05;
+  if (m_width_max > du) du = m_width_max;
+  if (m_height_max > dv) dv = m_height_max;
   m_u_min -= du;
   m_u_max += du;
   m_v_min -= dv;
@@ -92,6 +96,9 @@ void UnwrappedSurface::clear()
   m_v_max = -DBL_MAX;
 }
 
+/**
+  * Calculate 2D uv corrdinates for a detector
+  */
 void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data)
 {
   if (det->isMonitor()) return;
@@ -128,6 +135,11 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
   }
 }
 
+/**
+  * Calculate the rectangular region in uv coordinates occupied by an assembly.
+  * @param comp A member of the assebmly. The total area of the assembly is a sum of areas of its members
+  * @param compRect A rect. area occupied by comp in uv space
+  */
 void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
 {
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
@@ -190,6 +202,13 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
     glOrtho(m_unwrappedView.left(),m_unwrappedView.right(),
             m_unwrappedView.bottom(),m_unwrappedView.top(),
             -10,10);
+    if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
+    {
+      OpenGLError::log() << "glOrtho arguments:\n";
+      OpenGLError::log() << m_unwrappedView.left()<<','<<m_unwrappedView.right()<<','<<
+      m_unwrappedView.bottom()<<','<<m_unwrappedView.top()<<','<<
+      -10<<','<<10<<'\n';
+    }
     glMatrixMode(GL_MODELVIEW);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -220,7 +239,6 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
         {
           glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
         }
-
       }
       else
       {
@@ -246,7 +264,14 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 
     }
 
+    OpenGLError::check("UnwrappedSurface::drawSurface");
+
     glLineWidth(oldLineWidth);
+
+    if (OpenGLError::check("UnwrappedSurface::drawSurface"))
+    {
+      OpenGLError::log()<<"oldLineWidth="<<oldLineWidth<<'\n';
+    }
 
     if (*image)
     {
@@ -276,7 +301,6 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
     }
     painter.end();
   }
-  OpenGLError::check("UnwrappedSurface::drawSurface");
 }
 
 void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
@@ -316,6 +340,9 @@ void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::
 
   udet.width *= udet.uscale;
   udet.height *= udet.vscale;
+
+  if (udet.width > m_width_max) m_width_max = udet.width;
+  if (udet.height > m_height_max) m_height_max = udet.height;
 
 }
 
@@ -582,6 +609,12 @@ QRectF UnwrappedSurface::selectionRectUV()const
   return QRectF(x_min,y_min,x_size,y_size);
 }
 
+/**
+  * Set detector color in OpenGL context.
+  * @param index Detector's index in m_unwrappedDetectors
+  * @param picking True if detector is being drawn in the picking mode.
+  *   In this case index is transformed into color
+  */
 void UnwrappedSurface::setColor(int index,bool picking)
 {
   if (picking)

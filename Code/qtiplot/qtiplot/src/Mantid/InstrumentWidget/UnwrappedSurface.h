@@ -103,6 +103,8 @@ protected:
   double m_u_max;                      ///< Maximum u
   double m_v_min;                      ///< Minimum v
   double m_v_max;                      ///< Maximum v
+  double m_height_max;  ///< Maximum detector height
+  double m_width_max;   ///< Maximum detector width
   QImage* m_unwrappedImage;      ///< storage for unwrapped image
   QImage* m_pickImage;      ///< storage for picking image
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn
