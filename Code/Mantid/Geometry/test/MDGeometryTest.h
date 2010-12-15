@@ -5,6 +5,17 @@
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
+#include "boost/scoped_ptr.hpp"
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
+
 using namespace Mantid::Geometry;
 class testMDGeometry: public MDGeometry
 {
@@ -19,6 +30,38 @@ public:
 
 class testMulitDimensionalGeometry : public CxxTest::TestSuite
 {
+  // helper method to construct a near-complete geometry.
+  static MDGeometry* constructGeometry()
+  {
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("q3", true, 4));
+    basisDimensions.insert(MDBasisDimension("p", false, 0));
+    basisDimensions.insert(MDBasisDimension("T", false, 5));
+    UnitCell cell;
+    MDGeometryBasis basis(basisDimensions, cell);
+
+    //Dimensions generated, but have default values for bins and extents.
+    std::vector<boost::shared_ptr<IMDDimension> > dimensions; 
+    boost::shared_ptr<IMDDimension> dimX = boost::shared_ptr<IMDDimension>(new MDDimension("q1"));
+    boost::shared_ptr<IMDDimension> dimY = boost::shared_ptr<IMDDimension>(new MDDimension("q2"));
+    boost::shared_ptr<IMDDimension> dimZ = boost::shared_ptr<IMDDimension>(new MDDimension("q3"));
+    boost::shared_ptr<IMDDimension> dimt = boost::shared_ptr<IMDDimension>(new MDDimension("p"));
+    boost::shared_ptr<IMDDimension> dimTemp = boost::shared_ptr<IMDDimension>(new MDDimension("T"));
+
+    dimensions.push_back(dimX);
+    dimensions.push_back(dimY);
+    dimensions.push_back(dimZ);
+    dimensions.push_back(dimt);
+    dimensions.push_back(dimTemp);
+    MDGeometryDescription description(dimensions, dimX, dimY, dimZ, dimTemp);
+
+    //Create a geometry.
+    return new MDGeometry(basis, description);
+
+  }
+
   std::auto_ptr<testMDGeometry> tDND_geometry;
   std::auto_ptr<MDGeometryDescription> pSlice;
 public:
@@ -169,6 +212,36 @@ public:
   void testGetNumExpandedDims()
   {
     TSM_ASSERT_EQUALS("The number of expanded dimensions returned is not equal to the expected value.", 2, tDND_geometry->getNumExpandedDims());
+  }
+
+  void testToXMLString()
+  {
+
+    boost::scoped_ptr<MDGeometry> geometry(constructGeometry());
+
+    //Only practicle way to check the xml output in the absense of xsd is as part of a dom tree.
+    Poco::XML::DOMParser pParser;
+    std::string xmlToParse = geometry->toXMLString(); //Serialize the geometry.
+    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+
+    //Check that the number of dimensions provided is correct.
+    TSM_ASSERT_EQUALS("Wrong number of dimension in geometry xml", 5, pRootElem->getElementsByTagName("Dimension")->length());
+
+    //Check that mapping nodes have been provided.
+    TSM_ASSERT_EQUALS("No DimensionX in geometry xml", 1, pRootElem->getElementsByTagName("XDimension")->length());
+    TSM_ASSERT_EQUALS("No DimensionY in geometry xml", 1, pRootElem->getElementsByTagName("YDimension")->length());
+    TSM_ASSERT_EQUALS("No DimensionZ in geometry xml", 1, pRootElem->getElementsByTagName("ZDimension")->length());
+    TSM_ASSERT_EQUALS("No DimensionT in geometry xml", 1, pRootElem->getElementsByTagName("TDimension")->length());
+
+    //Check that mapping nodes give correct mappings.
+    Poco::XML::Element* dimensionSetElement = pRootElem;
+    TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "q1", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+    TSM_ASSERT_EQUALS("No DimensionY mapping is incorrect", "q2", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+    TSM_ASSERT_EQUALS("No DimensionZ mapping is incorrect", "q3", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+    TSM_ASSERT_EQUALS("No DimensionT mapping is incorrect", "T",  dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+
+
   }
 
 };

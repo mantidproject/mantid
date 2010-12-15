@@ -168,6 +168,9 @@ namespace Mantid
       /// Get the location of the workspace on disk, supports Horace implementation of rebinning.
       virtual std::string getWSLocation() const;
 
+      /// Get the geometry xml.
+      virtual std::string getGeometryXML() const;
+
     private:
 
       MDPointMap m_mdPointMap;

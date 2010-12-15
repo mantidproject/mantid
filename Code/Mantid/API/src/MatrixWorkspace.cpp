@@ -1112,6 +1112,12 @@ namespace Mantid
       throw std::logic_error("Cannot access the workspace location on a MatrixWS");
     }
 
+    std::string MatrixWorkspace::getGeometryXML() const
+    {
+      throw std::runtime_error("Cannot access the workspace location on a MatrixWS");
+      //TODO: the matrix workspace as an IMD Workspace does have an effective geometry.
+    }
+
 
   } // namespace API
 } // Namespace Mantid

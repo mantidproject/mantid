@@ -91,6 +91,9 @@ namespace Mantid
       /// Horace sytle implementations need to have access to the underlying file. 
       virtual std::string getWSLocation() const = 0;
 
+      /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
+      virtual std::string getGeometryXML() const = 0;
+
       virtual ~IMDWorkspace();
 
     };

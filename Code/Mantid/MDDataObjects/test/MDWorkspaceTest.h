@@ -10,6 +10,7 @@
 #include "boost/scoped_ptr.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "boost/regex.hpp"
 
 
 using namespace Mantid::API;
@@ -329,6 +330,43 @@ public:
     TSM_ASSERT_EQUALS("The const geometry getter is not wired-up correctly", workspace->getGeometry(), geometry);
     TSM_ASSERT("The ImageData getter is not wired-up correctly", workspace->get_spMDImage().get() != NULL);
     TSM_ASSERT("The MDDataPoints getter is not wired-up correctly", workspace->get_spMDDPoints().get() != NULL);
+  }
+
+  void testGetWorkspaceLocation()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::Geometry;
+
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
+
+    MockFileFormat* mockFile = new MockFileFormat("");
+    EXPECT_CALL(*mockFile, getFileName()).Times(1).WillOnce(testing::Return("somelocalfile.sqw"));
+    MDGeometry* geometry = constructMDGeometry();
+
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
+
+    TSM_ASSERT_EQUALS("Workspace location is empty", "somelocalfile.sqw", workspace->getWSLocation());
+  }
+
+  void testGetWorkspaceGeometry()
+  {
+        using namespace Mantid::MDDataObjects;
+    using namespace Mantid::Geometry;
+
+    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
+
+    MockFileFormat* mockFile = new MockFileFormat("");
+    MDGeometry* geometry = constructMDGeometry();
+
+    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
+
+
+    static const boost::regex condition("^<(.)*>$");
+    //Quick test for xml like string.
+    TSM_ASSERT("Geometry xml string returned does not look like xml", regex_match(workspace->getGeometryXML(), condition));
+    //Test against geometry xml to ensure pass through.
+    TSM_ASSERT_EQUALS("Geometry xml does not match xml provided by workspace.", geometry->toXMLString(), workspace->getGeometryXML());
+ 
   }
 
 

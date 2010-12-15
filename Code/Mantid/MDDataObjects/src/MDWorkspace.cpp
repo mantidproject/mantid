@@ -224,6 +224,12 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return this->m_spFile->getFileName();
     }
 
+    std::string MDWorkspace::getGeometryXML() const
+    {
+      //Forward request via image and geometry.
+      return this->m_spMDImage->getGeometry()->toXMLString();
+    }
+
 
 } // namespace
 }

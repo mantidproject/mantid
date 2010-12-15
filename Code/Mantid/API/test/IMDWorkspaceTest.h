@@ -226,6 +226,12 @@ public:
     TSM_ASSERT_THROWS("Getting the workspace location should not be possible.", workspace.getWSLocation(), std::logic_error);
   }
 
+  void testGetGeometryXMLThrows()
+  {
+    //Characterisation test for existing behaviour.
+    TSM_ASSERT_THROWS("No proper formulation of an underlying geometry yet in MatrixWorkspace", workspace.getGeometryXML(), std::runtime_error);
+  }
+
 };
 
 #endif /*IMD_MATRIX_WORKSPACETEST_H_*/

@@ -237,6 +237,9 @@ namespace Mantid
       /// Provide the location of the underlying file. 
       virtual std::string getWSLocation() const;
 
+      /// Provide the underlying xml for 
+      virtual std::string getGeometryXML() const;
+
     protected:
       MatrixWorkspace();
 
