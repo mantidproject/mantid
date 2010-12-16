@@ -75,6 +75,7 @@ public slots:
   void setWireframe(bool);
   void resetUnwrappedViews();
   void componentSelected(Mantid::Geometry::ComponentID);
+  void hidePickBox(){mPickBox->hide();}
 
 protected:
   void initializeGL();

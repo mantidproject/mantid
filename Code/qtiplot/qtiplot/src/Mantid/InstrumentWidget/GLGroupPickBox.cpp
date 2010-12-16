@@ -166,9 +166,12 @@ QRgb GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate of 
  */
 void GLGroupPickBox::draw(QPainter* painter)
 {
-	painter->drawImage(0,0,mDisplayImage);
-	drawPickBox(painter);
-}
+    painter->drawImage(0,0,mDisplayImage);
+    if (mBoxEndPtX != mBoxStartPtX && mBoxEndPtY != mBoxStartPtY)
+    {
+      drawPickBox(painter);
+    }
+  }
 
 /**
  * This method draws the pick box
@@ -177,4 +180,10 @@ void GLGroupPickBox::drawPickBox(QPainter* painter)
 {
     painter->setPen(Qt::blue);
     painter->drawRect(mBoxStartPtX,mBoxStartPtY,mBoxEndPtX-mBoxStartPtX,mBoxEndPtY-mBoxStartPtY);
+}
+
+void GLGroupPickBox::hide()
+{
+  mBoxEndPtX = mBoxStartPtX;
+  mBoxEndPtY = mBoxStartPtY;
 }

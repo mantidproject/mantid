@@ -102,6 +102,8 @@ public:
     }
 
   }
+
+  /// Make grouping file where each detector is put into its own group
   void makeListFile(const QSet<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
@@ -112,6 +114,8 @@ public:
     }
     out << "</detector-grouping>\n";
   }
+
+  /// Make grouping file for putting the detectors into one group (summing the detectors)
   void makeSumFile(const QSet<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
@@ -132,11 +136,13 @@ public:
       dir.remove(m_fileName);
     }
   }
+
+  /// Return the name of the created grouping file
   const std::string operator()()const{return m_fileName.toStdString();}
 
 private:
-  QString m_fileName;
-  bool m_delete;
+  QString m_fileName; ///< holds the grouping file name
+  bool m_delete;      ///< if true delete the file on destruction
 };
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
@@ -199,6 +205,9 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
     }
   }
   if( detectorIds.empty() ) return;
+
+  // fill in m_detector_ids and m_workspace_indices with the selected detector ids
+  createWorkspaceIndexList(detectorIds, true);
 
   emit detectorsSelected();
 }
@@ -1157,3 +1166,4 @@ void Instrument3DWidget::createExcludeGroupingFile()
     DetXMLFile mapFile(detector_list,dets,fname);
   }
 }
+

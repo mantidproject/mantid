@@ -202,6 +202,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   observeAfterReplace();
   observeADSClear();
 
+  resize(600,650);
 }
 
 /**
@@ -280,7 +281,10 @@ void InstrumentWindow::showPickOptions()
   }
 
   context.exec(QCursor::pos());
-}  /**
+  mInstrumentDisplay->hidePickBox();
+}
+
+/**
  * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
  * @param information about the detector that is at the location of the users mouse pointer
  */
@@ -866,11 +870,14 @@ void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_p
   }
 }
 
-void InstrumentWindow::afterReplaceHandle(const std::string&,
+void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
 					  const boost::shared_ptr<Mantid::API::Workspace>)
 {
   //Replace current workspace
-  updateWindow();
+  if (wsName == mWorkspaceName)
+  {
+    updateWindow();
+  }
 }
 
 void InstrumentWindow::clearADSHandle()

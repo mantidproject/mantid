@@ -195,9 +195,6 @@ void UnwrappedSurface::draw(GL3DWidget *widget)
   */
 void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 {
-//  std::cerr<<"drawing to:\n";
-//  std::cerr<<m_unwrappedView.left()<<','<<m_unwrappedView.top()<<' '
-//      <<m_unwrappedView.width()<<','<<m_unwrappedView.height()<<'\n'<<'\n';
   int vwidth,vheight;
   widget->getViewport(vwidth,vheight);
   const double dw = fabs(m_unwrappedView.width() / vwidth);
@@ -212,6 +209,11 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 
   if (m_unwrappedViewChanged)
   {
+//    std::cerr<<"drawing to:\n";
+//    std::cerr<<m_unwrappedView.left()<<','<<m_unwrappedView.top()<<' '
+//        <<m_unwrappedView.width()<<','<<m_unwrappedView.height()<<'\n'<<'\n';
+//    std::cerr<<"zoom stack "<<m_zoomStack.size()<<' '<<this<<'\n';
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, vwidth, vheight);
@@ -516,8 +518,10 @@ void UnwrappedSurface::endSelection(int x,int y)
 void UnwrappedSurface::zoom()
 {
   if (!m_unwrappedImage) return;
+  QRectF newView = selectionRectUV();
+  if (newView.isNull()) return;
   m_zoomStack.push(m_unwrappedView);
-  m_unwrappedView = selectionRectUV();
+  m_unwrappedView = newView;
   m_unwrappedViewChanged = true;
 }
 
@@ -576,7 +580,7 @@ void UnwrappedSurface::updateDetectors()
 
 QRect UnwrappedSurface::selectionRect()const
 {
-  if (m_selectRect.width() == 0 || m_selectRect.height() == 0) return QRect();
+  if (m_selectRect.width() <= 1 || m_selectRect.height() <= 1) return QRect();
 
   int x_min  = m_selectRect.left();
   int x_size = m_selectRect.width();
@@ -600,7 +604,7 @@ QRect UnwrappedSurface::selectionRect()const
 
 QRectF UnwrappedSurface::selectionRectUV()const
 {
-  if (m_selectRect.width() == 0 || m_selectRect.height() == 0) return QRectF();
+  if (m_selectRect.width() <= 1 || m_selectRect.height() <= 1) return QRectF();
 
   double x_min  = double(m_selectRect.left())/m_unwrappedImage->width();
   double x_size = double(m_selectRect.width())/m_unwrappedImage->width();
@@ -675,7 +679,6 @@ void UnwrappedSurface::showPickedDetector()
 {
   if (m_selectRect.isNull())
   {
-    std::cerr<<"nothing selected\n";
     return;
   }
   QRect rect = selectionRect();
@@ -724,7 +727,11 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
     {
       if (udet.detector->getID() == detID)
       {
-        QRectF area(udet.u - udet.width,udet.v - udet.height,udet.width*2,udet.height*2);
+        double w = udet.width;
+        if (w > m_width_max) w = m_width_max;
+        double h = udet.height;
+        if (h > m_height_max) h = m_height_max;
+        QRectF area(udet.u - w,udet.v - h,w*2,h*2);
         zoom(area);
         break;
       }

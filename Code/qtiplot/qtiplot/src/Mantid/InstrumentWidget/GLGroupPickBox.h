@@ -19,7 +19,7 @@
   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -40,28 +40,29 @@ class GLActor;
 class GLGroupPickBox
 {
 public:
-    GLGroupPickBox();  ///< Constructor
-    ~GLGroupPickBox();                   ///< Destructor
-	void setImages(QImage,QImage);
-	void setDisplayImage(QImage);
-	void setPickImage(QImage);
-	void draw(QPainter*);
-	void drawPickBox(QPainter* painter);
-	void mousePressed (Qt::MouseButtons buttons, const QPoint & pos );
-	void mouseMoveEvent ( QMouseEvent * event );
-	void mouseReleased(Qt::MouseButtons buttons, const QPoint & pos); 
-	QRgb pickPoint(int x, int y);
-	std::set<QRgb> getListOfColorsPicked();
+  GLGroupPickBox();  ///< Constructor
+  ~GLGroupPickBox();                   ///< Destructor
+  void setImages(QImage,QImage);
+  void setDisplayImage(QImage);
+  void setPickImage(QImage);
+  void draw(QPainter*);
+  void drawPickBox(QPainter* painter);
+  void mousePressed (Qt::MouseButtons buttons, const QPoint & pos );
+  void mouseMoveEvent ( QMouseEvent * event );
+  void mouseReleased(Qt::MouseButtons buttons, const QPoint & pos);
+  QRgb pickPoint(int x, int y);
+  std::set<QRgb> getListOfColorsPicked();
+  void hide();
 
-	QImage mDisplayImage;  ///< This image is used for rendering in the window.
-	QImage mPickImage;     ///< This image is used for picking the objects.
+  QImage mDisplayImage;  ///< This image is used for rendering in the window.
+  QImage mPickImage;     ///< This image is used for picking the objects.
 private:
-	std::set<QRgb> mColorSet;
-	int    mBoxStartPtX; ///< X-dim value of start point in Rectangular Box for the pick selection
-	int    mBoxEndPtX; ///< X-dim value of end point in Rectangular Box for the pick selection
-	int    mBoxStartPtY; ///< Y-dim value of start point in Rectangular Box for the pick selection
-	int    mBoxEndPtY; ///< Y-dim value of end point Rectangular Box for the pick selection
-	bool   mPickingActive; ///< Holds whether picking is active or not
+  std::set<QRgb> mColorSet;
+  int    mBoxStartPtX; ///< X-dim value of start point in Rectangular Box for the pick selection
+  int    mBoxEndPtX; ///< X-dim value of end point in Rectangular Box for the pick selection
+  int    mBoxStartPtY; ///< Y-dim value of start point in Rectangular Box for the pick selection
+  int    mBoxEndPtY; ///< Y-dim value of end point Rectangular Box for the pick selection
+  bool   mPickingActive; ///< Holds whether picking is active or not
 };
 
 #endif /*GLGROUPPICKBOX_H_*/
