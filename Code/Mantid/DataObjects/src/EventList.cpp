@@ -366,6 +366,12 @@ using Kernel::DateAndTime;
   /// Destructor
   EventList::~EventList()
   {
+    // Note: These two lines do not seem to have an effect on releasing memory
+    //  at least on Linux. (Memory usage seems to increase event after deleting EventWorkspaces.
+    //  Therefore, for performance, they are kept commented:
+
+    //this->events.clear();
+    //std::vector<TofEvent>().swap(events); //Trick to release the vector memory.
   }
 
   // --------------------------------------------------------------------------
