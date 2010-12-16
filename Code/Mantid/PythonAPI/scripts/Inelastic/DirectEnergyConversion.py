@@ -179,24 +179,27 @@ class DirectEnergyConversion(object):
             self.apply_detector_eff = True
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             mono_run = common.loaded_file('mono-sample')
+                           
+            if mono_run.endswith("_event.nxs"):
+                loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
+            elif mono_run.endswith("_event.dat"):
+                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
+                loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+            monitor_ws = loader.workspace()
+            alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
+            
+            Tzero = float(alg.getPropertyValue("Tzero"))
+                    
             if (self.fix_ei):
-                if mono_run.endswith("_event.nxs"):
-                     loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
-                elif mono_run.endswith("_event.dat"):
-                     InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-                     loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
-                monitor_ws = loader.workspace()
-                alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
-                ei_value = monitor_ws.getRun().getLogData("Ei").value
+                ei_value = ei_guess    
             else:
-                ei_value = ei_guess
-                
+                ei_value = monitor_ws.getRun().getLogData("Ei").value
+            
             if (Tzero is None):
-                # TODO: Calculate T0
-                #tzero = float(alg.getPropertyValue("Tzero"))
                 tzero = 0.0
             else:	
             	tzero = Tzero
+            
             mon1_peak = 0.0
             # apply T0 shift
             ChangeBinOffset(data_ws, result_name, -tzero)
