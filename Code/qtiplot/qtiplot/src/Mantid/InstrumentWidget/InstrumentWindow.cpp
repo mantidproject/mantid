@@ -315,6 +315,10 @@ void InstrumentWindow::spectraInfoDialog()
 void InstrumentWindow::plotSelectedSpectra()
 {
   std::set<int> indices(mInstrumentDisplay->getSelectedWorkspaceIndices().begin(), mInstrumentDisplay->getSelectedWorkspaceIndices().end());
+  if (indices.count(-1) > 0)
+  {
+    indices.erase(-1);
+  }
   emit plotSpectra( mInstrumentDisplay->getWorkspaceName(), indices);
 }
 
