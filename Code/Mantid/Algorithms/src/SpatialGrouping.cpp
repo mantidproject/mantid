@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(SpatialGrouping)
 void SpatialGrouping::init()
 {
   declareProperty(new Mantid::API::WorkspaceProperty<>("InputWorkspace","",Mantid::Kernel::Direction::Input),"The input workspace.");
-  declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save));
+  declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save, ".xml"));
   declareProperty("SearchDistance", 1.9, Mantid::Kernel::Direction::Input);
   declareProperty("GridSize", 3, Mantid::Kernel::Direction::Input); 
 }
