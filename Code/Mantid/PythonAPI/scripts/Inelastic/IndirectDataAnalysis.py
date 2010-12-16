@@ -260,7 +260,7 @@ def furyfitCreateXAxis(inputWS):
         try:
             efixed = detector.getNumberParameter("Efixed")[0]
         except AttributeError: # Detector Group
-            ids = det.getDetectorIDs()
+            ids = detector.getDetectorIDs()
             det = inst.getDetector(ids[0])
             efixed = det.getNumberParameter("Efixed")[0]
         theta = detector.getTwoTheta(samplePos, beamPos) / 2
