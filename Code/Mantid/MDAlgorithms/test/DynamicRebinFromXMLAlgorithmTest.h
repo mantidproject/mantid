@@ -354,15 +354,6 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->gettDimension()->getNBins());
     //840 = 7 * 5* 6 * 4
     TSM_ASSERT_EQUALS("The image size should be the product of the number of bins accross dimensions", 840, output->get_spMDImage()->getDataSize());
-    const MD_image_point  *const data   = output->get_const_MDImage().get_const_pData();
-    for(int i = 0; i< output->get_spMDImage()->getDataSize(); i++)
-    {
-      MD_image_point point = data[i];
-      if(point.s > 0)
-      {
-
-      }
-    }
     
   }
 
