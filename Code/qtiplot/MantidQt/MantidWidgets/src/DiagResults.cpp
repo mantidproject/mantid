@@ -67,6 +67,11 @@ DiagResults::DiagResults(QWidget *parent): MantidDialog(parent),
  */
 void DiagResults::updateResults(const QString & testSummary)
 {
+  if( !testSummary.contains("Diagnostic Test Summary") )
+  {
+    throw std::runtime_error("Diagnostic results string does not have expected format.");
+  }
+
   QStringList results = testSummary.split("\n");
   // First result line is the header
   for(int i = 1; i <= NUMTESTS; ++i)
