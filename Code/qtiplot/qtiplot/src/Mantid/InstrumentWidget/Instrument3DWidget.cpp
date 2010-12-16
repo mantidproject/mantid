@@ -58,16 +58,17 @@ public:
     m_fileName = fname;
     m_delete = false;
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<group name=\"sum\"> <detids val=\"";
     std::vector<int>::const_iterator idet = detector_list.begin();
     for(; idet != detector_list.end(); ++idet)
     {
       if (!dets.contains(*idet))
       {
-        out << "<group name=\"" << *idet << "\"> <detids val=\"" << *idet << "\"/> </group> \n";
+        out <<  *idet << ',';
       }
     }
-    out << "</detector-grouping>\n";
+    out << "\"/> </group> \n</detector-grouping>\n";
   }
 
   /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
@@ -107,7 +108,7 @@ public:
   void makeListFile(const QSet<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
     foreach(int det,dets)
     {
       out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
@@ -119,7 +120,7 @@ public:
   void makeSumFile(const QSet<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> <detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
     out << "<group name=\"sum\"> <detids val=\"";
     foreach(int det,dets)
     {
@@ -1149,7 +1150,7 @@ void Instrument3DWidget::createIncludeGroupingFile()
   QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
   if (!fname.isEmpty())
   {
-    DetXMLFile mapFile(dets,DetXMLFile::List,fname);
+    DetXMLFile mapFile(dets,DetXMLFile::Sum,fname);
   }
 
 }
