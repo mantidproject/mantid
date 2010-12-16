@@ -24,7 +24,7 @@ class EQSANSTofOffset(PythonAlgorithm):
         return "EQSANSTofOffset"
 
     def PyInit(self):
-        self.declareProperty("InputWorkspace", "")
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty("FrameSkipping", False)
         self.declareProperty("Offset", 0.0, Direction=Direction.Output)
 

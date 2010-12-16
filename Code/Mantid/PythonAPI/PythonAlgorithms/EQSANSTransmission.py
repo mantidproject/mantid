@@ -40,7 +40,7 @@ class EQSANSTransmission(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareProperty("InputWorkspace", "")
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input)
         # Output workspace to put the transmission histo into
         self.declareProperty("OutputWorkspace", "")
         # X position of the beam center
