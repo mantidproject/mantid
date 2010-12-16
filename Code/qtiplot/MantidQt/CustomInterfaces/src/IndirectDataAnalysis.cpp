@@ -42,11 +42,12 @@ namespace CustomInterfaces
 DECLARE_SUBWINDOW(IndirectDataAnalysis);
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), m_furyResFileType(true), m_ffDataCurve(NULL), m_ffFitCurve(NULL),
-  m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange),
-  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
+  UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), 
+  m_furyResFileType(true), m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
   m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdTree(NULL), m_msdDblMng(NULL),
-  m_cfDataCurve(NULL), m_cfCalcCurve(NULL)
+  m_ffDataCurve(NULL), m_ffFitCurve(NULL),
+  m_cfDataCurve(NULL), m_cfCalcCurve(NULL),
+  m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
 {
 }
 
