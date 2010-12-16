@@ -23,24 +23,11 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/IDataFileChecker.h"
+
 namespace Mantid
 {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-namespace kernel
-{
-  class Logger;
-}
-
 namespace API
 {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-
-
 /** Creates instances of concrete DataFileLoder.
     The factory is a singleton that hands out shared pointers to the base DataFileLoder class.
     It overrides the base class DynamicFactory::create method so that only a single
@@ -50,7 +37,7 @@ namespace API
     @author Sofia Antony
     @date 23/11/2010
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
