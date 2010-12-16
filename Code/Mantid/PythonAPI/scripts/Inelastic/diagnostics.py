@@ -72,6 +72,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     if white_run is not None and str(white_run) != '':
         # Load and integrate
         data_ws = common.load_run(white_run, 'white-beam')
+        # Make sure we have a matrix workspace otherwise Integration() returns all zeros.
+        ConvertToMatrixWorkspace(data_ws, data_ws)
         white_counts = Integration(data_ws, "__counts_white-beam").workspace()
         MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run first white beam tests
@@ -158,6 +160,9 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
     else:
         ws_name = '__do_white_test'
 
+    # Make sure we are a MatrixWorkspace
+    ConvertToMatrixWorkspace(white_counts, white_counts)
+    
     # The output workspace will have the failed detectors masked
     range_check = FindDetectorsOutsideLimits(white_counts, ws_name, HighThreshold=large, LowThreshold=tiny)
     median_test = MedianDetectorTest(white_counts, ws_name, SignificanceTest=signif,
@@ -200,6 +205,10 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
         ws_name = lhs_names[0]
     else:
         ws_name = '__do_second_white_test'
+    
+    # Make sure we are a MatrixWorkspace
+    ConvertToMatrixWorkspace(white_counts, white_counts)
+    ConvertToMatrixWorkspace(comp_white_counts, comp_white_counts)
     
     # Do the white beam test
     __second_white_tests, failed = _do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, signif)
@@ -273,6 +282,10 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     if comp_white_counts is not None:
         MaskDetectors(sample_counts, MaskedWorkspace=comp_white_counts)
         white_count_mean = (comp_white_counts * white_counts)/(comp_white_counts + white_counts)
+
+    # Make sure we have matrix workspaces before this division
+    ConvertToMatrixWorkspace(white_count_mean, white_count_mean)
+    ConvertToMatrixWorkspace(sample_counts, sample_counts)
         
     # Normalise the sample run
     sample_counts = Divide(sample_counts, white_count_mean, sample_counts).workspace()
