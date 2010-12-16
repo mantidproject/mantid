@@ -130,45 +130,21 @@ def sum_files(accumulator, files, prefix):
     else:
         pass
 
-# -- TODO: Remove this stuff in favour of the mask workspace concept --
-
-# returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
-def listToString(list):
-  stringIt = str(list).strip()
-  
-  if stringIt == '' : return ''
-  if stringIt[0] == '[' or stringIt[0] == '(' :
-    stringIt = stringIt[1:]
-    lastInd = len(stringIt) - 1
-    if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
-      stringIt = stringIt[0:lastInd]
-  return stringIt
-
-def stringToList(commaSeparated):
-  if commaSeparated == '' : return []
-  #remove any leading or trailing ','
-  if commaSeparated[0] == ',':
-    commaSeparated = commaSeparated[1:]
-  if commaSeparated[len(commaSeparated) - 1] == ',':
-    commaSeparated = commaSeparated[0:len(commaSeparated) - 1]
-
-  theList = []
-  numbers = commaSeparated.split(',')
-  for quoted in numbers :
-    try :
-      num = int(quoted)
-      theList.append(num)
-    except : #we're not demanding that the entries are all integers
-      theList.append(quoted)                       
-  return theList
-    
 def load_mask(hard_mask):
     """
-    Load the hard mask file
+    Load a hard mask file and return the
+    list of spectra numbers it contains as a string
+
+    Each line of the file specifies spectra to be masked by either specifying a range
+    using a hypen or a single spectra number using a space as a delimiter between fields i.e.
+
+    48897 - 49152
+    50000
+    60100-60105
     """
-    inFile = open(hard_mask)
-    spectraList = ""
-    for line in inFile:
+    mask_file = open(hard_mask)
+    spectra_list = ""
+    for line in mask_file:
         numbers = line.split()
         if len(numbers) == 0:
             continue
@@ -176,15 +152,60 @@ def load_mask(hard_mask):
         # check the first character of the first word
         if not numbers[0][0].isdigit():
             continue
-        for specNumber in numbers :
-            # If there is a hyphen we don't need commas 
-            if specNumber == '-' :
-                spectraList[len(spectraList) - 1] = spectraList + '-'   
-            else: 
-                spectraList = spectraList + "," + specNumber
-
-    if len(spectraList) < 1:
+        num_cols = len(numbers)
+        remainder = num_cols % 3
+        group_end = num_cols - remainder
+        # Jump in steps of 3 where there are whole blocks
+        for index in range(0, group_end, 3):
+            # Can either have a range specified with a "-" or single numbers
+            n_i = numbers[index]
+            n_ip1 = numbers[index+1]
+            n_ip2 = numbers[index+2]
+            # If there is a dash it will have to be the middle value
+            if n_ip1 == '-':
+                spectra_list += n_i + '-' + n_ip2
+            else:
+                spectra_list += n_i + "," + n_ip1 + ',' + n_ip2
+            spectra_list += ","
+        # Now deal with the remainder
+        for index in range(group_end,num_cols):
+            spectra_list += numbers[index] + ","
+            
+    if len(spectra_list) < 1:
         mantid.sendLogMessage('Only comment lines found in mask file ' + hard_mask)
         return ''
     # Return everything after the very first comma we added in the line above
-    return spectraList[1:]
+    return spectra_list.rstrip(',')
+
+
+# -- TODO: Remove this stuff in favour of the mask workspace concept --
+# # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
+# def listToString(list):
+#   stringIt = str(list).strip()
+  
+#   if stringIt == '' : return ''
+#   if stringIt[0] == '[' or stringIt[0] == '(' :
+#     stringIt = stringIt[1:]
+#     lastInd = len(stringIt) - 1
+#     if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
+#       stringIt = stringIt[0:lastInd]
+#   return stringIt
+
+# def stringToList(commaSeparated):
+#   if commaSeparated == '' : return []
+#   #remove any leading or trailing ','
+#   if commaSeparated[0] == ',':
+#     commaSeparated = commaSeparated[1:]
+#   if commaSeparated[len(commaSeparated) - 1] == ',':
+#     commaSeparated = commaSeparated[0:len(commaSeparated) - 1]
+
+#   theList = []
+#   numbers = commaSeparated.split(',')
+#   for quoted in numbers :
+#     try :
+#       num = int(quoted)
+#       theList.append(num)
+#     except : #we're not demanding that the entries are all integers
+#       theList.append(quoted)                       
+#   return theList
+    

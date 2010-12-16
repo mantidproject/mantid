@@ -55,7 +55,8 @@ class DirectEnergyConversion(object):
 
     def diagnose(self, white_run, sample_run=None, other_white=None, remove_zero=None, 
                  tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-                 bkgd_threshold=None, bkgd_range=None, variation=None, print_results=False):
+                 bkgd_threshold=None, bkgd_range=None, variation=None, hard_mask=None,
+                 print_results=False):
         """
         A pass through method to the 'real' one in diagnostics.py
 
@@ -85,14 +86,15 @@ class DirectEnergyConversion(object):
                        If not present then they are taken from the parameter file. (default = None)
           variation  - The number of medians the ratio of the first/second white beam can deviate from
                        the average by (default=1.1)
+          hard_mask  - A file specifying those spectra that should be masked without testing
           print_results - If True then the results are printed to std out
           inst_name  - The name of the instrument to perform the diagnosis.
                        If it is not provided then the default instrument is used (default = None)
           """
         return diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
                                     tiny, large, median_lo, median_hi, signif,
-                                    bkgd_threshold, bkgd_range, variation, print_results,
-                                    self.instr_name)
+                                    bkgd_threshold, bkgd_range, variation, hard_mask,
+                                    print_results, self.instr_name)
     
     def do_white(self, white_run, spectra_masks, map_file): 
         """

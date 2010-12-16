@@ -13,9 +13,8 @@ import CommonFunctions as common
 
 def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None, 
              tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-             bkgd_threshold=None, bkgd_range=None, variation=None, print_results=False,
-             inst_name=None,
-             ):
+             bkgd_threshold=None, bkgd_range=None, variation=None, hard_mask=None,
+             print_results=False, inst_name=None):
     """
     Run diagnostics on the provided run and white beam files.
 
@@ -44,6 +43,7 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
                    If not present then they are taken from the parameter file. (default = None)
       variation  - The number of medians the ratio of the first/second white beam can deviate from
                    the average by (default=1.1)
+      hard_mask  - A file specifying those spectra that should be masked without testing
       print_results - If True then the results are printed to std out
       inst_name  - The name of the instrument to perform the diagnosis.
                    If it is not provided then the default instrument is used (default = None)
@@ -57,10 +57,14 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         mtd.settings["default.instrument"] = inst_name
     else: pass
 
+    # Load the hard mask file if necessary
+    hard_mask_spectra = ''
+    if hard_mask is not None:
+        hard_mask_spectra = common.load_mask(hard_mask)
+
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
     test_results = [ [None, None], [None, None], [None, None] ]
-
     ##
     ## White beam Test
     ##
@@ -68,7 +72,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     if white_run is not None and str(white_run) != '':
         # Load and integrate
         data_ws = common.load_run(white_run, 'white-beam')
-        white_counts = Integration(data_ws, "__counts_white-beam").workspace()        
+        white_counts = Integration(data_ws, "__counts_white-beam").workspace()
+        MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run first white beam tests
         _white_masks, num_failed = \
                       _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
@@ -83,7 +88,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     if other_white is not None and str(other_white) != '':
         # Load and integrate
         data_ws = common.load_run(other_white, 'white-beam2')
-        second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()        
+        second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()
+        MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run tests
         _second_white_masks, num_failed = \
                              _do_second_white_test(white_counts, second_white_counts,
@@ -98,7 +104,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         # Run the tests
         _bkgd_masks, num_failed = \
                      _do_background_test(sample_run, white_counts, second_white_counts,
-                                         bkgd_range, bkgd_threshold, remove_zero, signif)
+                                         bkgd_range, bkgd_threshold, remove_zero, signif,
+                                         hard_mask_spectra)
         test_results[2] = [str(_bkgd_masks), num_failed]
     else:
         raise RuntimeError('Invalid input for sample run "%s"' % str(sample_run))
@@ -165,7 +172,7 @@ def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
 #-------------------------------------------------------------------------------
 
 def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_lo,
-                          median_hi, signif, variation, prev_masks=None):
+                          median_hi, signif, variation):
     """
     Run additional tests comparing given another white beam count workspace, comparing
     to the first
@@ -212,7 +219,7 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
 #------------------------------------------------------------------------------
 
 def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
-                        bkgd_threshold, remove_zero, signif, prev_masks = None):
+                        bkgd_threshold, remove_zero, signif, hard_mask_spectra):
     """
     Run the background tests on the integrated sample run normalised by an
     integrated white beam run
@@ -256,8 +263,8 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     sample_counts = Integration(data_ws, '__counts_mono-sample', RangeLower=min_value, \
                                 RangeUpper=max_value).workspace()
 
-    # Apply previous masking first
-    MaskDetectors(sample_counts, MaskedWorkspace=white_counts)
+    # Apply hard mask spectra and previous masking first
+    MaskDetectors(sample_counts, SpectraList=hard_mask_spectra, MaskedWorkspace=white_counts)
     
     # If we have another white beam then compute the harmonic mean of the counts
     # The harmonic mean: 1/av = (1/Iwbv1 + 1/Iwbv2)/2
