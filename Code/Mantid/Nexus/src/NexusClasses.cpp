@@ -259,7 +259,15 @@ std::string NXClass::getString(const std::string& name)const
 {
     NXChar buff = openNXChar(name);
     buff.load();
-    return std::string(buff(),buff.dim0());
+    try
+    {
+      return std::string(buff(),buff.dim0());
+    }
+    catch(std::runtime_error &e)
+    {
+        // deals with reading uninitialized data
+        return std::string();
+    }
 }
 
 double NXClass::getDouble(const std::string& name)const
