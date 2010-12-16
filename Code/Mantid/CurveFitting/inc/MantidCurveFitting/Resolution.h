@@ -59,7 +59,7 @@ public:
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName
-  IFunction::Attribute getAttribute(const std::string& attName)const{return IFunction::Attribute(m_fileName);}
+  IFunction::Attribute getAttribute(const std::string& attName)const{return IFunction::Attribute(m_fileName, true);}
   /// Set a value to attribute attName
   void setAttribute(const std::string& attName,const IFunction::Attribute& value);
   /// Check if attribute attName exists

@@ -44,6 +44,8 @@ namespace Mantid
   {
     struct EXPORT_OPT_MANTID_GEOMETRY coordinate
     {
+      // Default constructor to avoid compiler warning about unitialized variables
+      coordinate() : x(0.0), y(0.0), z(0.0), t(0.0) {}
       double x;
       double y;
       double z;

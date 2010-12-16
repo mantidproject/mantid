@@ -80,7 +80,7 @@ void Resolution::setAttribute(const std::string& attName,const IFunction::Attrib
 {
   if (attName == "FileName")
   {
-    std::string fileName = value.asString();
+    std::string fileName = value.asUnquotedString();
     FileValidator fval;
     std::string error = fval.isValid(fileName);
     if (error == "")

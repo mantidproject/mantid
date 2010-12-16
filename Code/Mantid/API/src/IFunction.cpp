@@ -470,23 +470,39 @@ std::string IFunction::Attribute::type()const
  */
 class AttValue: public IFunction::ConstAttributeVisitor<std::string>
 {
+public:
+  AttValue(bool quoteString=false) : 
+    IFunction::ConstAttributeVisitor<std::string>(),
+    m_quoteString(quoteString) 
+  {
+  }
+
 protected:
   /// Apply if string
-  std::string apply(const std::string& str)const{return str;}
+  std::string apply(const std::string& str)const
+  {
+    return (m_quoteString) ? std::string("\"" + str + "\"") : str;
+  }
   /// Apply if int
   std::string apply(const int& i)const{return boost::lexical_cast<std::string>(i);}
   /// Apply if double
   std::string apply(const double& d)const{return boost::lexical_cast<std::string>(d);}
+
+private:
+  /// Flag to quote a string value returned
+  bool m_quoteString;
 };
 
 std::string IFunction::Attribute::value()const
 {
-  AttValue tmp;
+  AttValue tmp(m_quoteValue);
   return apply(tmp);
 }
 
 std::string IFunction::Attribute::asString()const
 {
+  if( m_quoteValue ) return asQuotedString();
+  
   try
   {
     return boost::get<std::string>(m_data);
@@ -496,6 +512,46 @@ std::string IFunction::Attribute::asString()const
     throw std::runtime_error("Trying to access a "+type()+" attribute "
       "as string");
   }
+}
+
+std::string IFunction::Attribute::asQuotedString()const
+{
+  std::string attr;
+
+  try
+  {
+    attr = boost::get<std::string>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as string");
+  }
+  std::string quoted(attr);
+  if( *(attr.begin()) != '\"' ) quoted = "\"" + attr;
+  if( *(quoted.end()) != '\"' ) quoted += "\"";
+
+  return quoted;
+}
+
+std::string IFunction::Attribute::asUnquotedString()const
+{
+  std::string attr;
+
+  try
+  {
+    attr = boost::get<std::string>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as string");
+  }
+  std::string unquoted(attr);
+  if( *(attr.begin()) == '\"' ) unquoted = std::string(attr.begin() + 1, attr.end());
+  if( *(unquoted.end()) == '\"' ) unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
+  
+  return unquoted;
 }
 
 int IFunction::Attribute::asInt()const

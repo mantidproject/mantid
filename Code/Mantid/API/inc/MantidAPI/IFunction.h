@@ -172,7 +172,7 @@ public:
   {
   public:
     /// Create string attribute
-    explicit Attribute(const std::string& str):m_data(str){}
+    explicit Attribute(const std::string& str, bool quoteValue=false):m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute
     explicit Attribute(const int& i):m_data(i){}
     /// Create double attribute
@@ -189,6 +189,10 @@ public:
     std::string value()const;
     /// Returns string value if attribute is a string, throws exception otherwise
     std::string asString()const;
+    /// Returns a string value that is guarenteed to be quoted for use in places where the string is used as the displayed value.
+    std::string asQuotedString() const;
+    /// Returns a string value that is guarenteed to be unquoted.
+    std::string asUnquotedString() const;
     /// Returns int value if attribute is a int, throws exception otherwise
     int asInt()const;
     /// Returns double value if attribute is a double, throws exception otherwise
@@ -204,6 +208,8 @@ public:
   private:
     /// The data holder as boost variant
     mutable boost::variant<std::string,int,double> m_data;
+    /// Flag indicating if the string value should be returned quoted
+    bool m_quoteValue;
   };
 
   //---------------------------------------------------------//
