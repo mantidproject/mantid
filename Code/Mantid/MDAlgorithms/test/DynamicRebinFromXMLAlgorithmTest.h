@@ -331,8 +331,7 @@ public:
   void testExecute()
   {
     using namespace Mantid::MDDataObjects;
-    std::string xin;
-    std::cin >> xin;
+
 
     MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace());
     AnalysisDataService::Instance().add("Input", baseWs);
