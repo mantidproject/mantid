@@ -86,7 +86,10 @@ namespace Mantid
       // Convert to 2D if desired, and if the input was an EventWorkspace.
       MatrixWorkspace_sptr outputW = childAlg->getProperty("OutputWorkspace");
       if (outputWorkspace2D && boost::dynamic_pointer_cast<EventWorkspace>(outputW))
+      {
+        g_log.debug() << "Converting output Event Workspace into a Workspace2D." << std::endl;
         outputW = EventWorkspaceHelpers::convertEventTo2D(outputW);
+      }
 
       return outputW;
     }
