@@ -298,7 +298,19 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     //Check the filename and append the selected filter if necessary
     if( QFileInfo(filename).completeSuffix().isEmpty() )
     {
-      filename += selectedFilter;
+      // Hack off the first star that the filter returns
+      QString ext = selectedFilter;
+      if( selectedFilter.startsWith("*") )
+      {
+	// 1 character from the start
+	ext = ext.remove(0,1);
+      }
+      if( filename.endsWith(".") && ext.startsWith(".") )
+      {
+	ext = ext.remove(0,1);
+      }
+      // Construct the full file name
+      filename += ext;
     }
   }
   else if ( prop->isDirectoryProperty() )
