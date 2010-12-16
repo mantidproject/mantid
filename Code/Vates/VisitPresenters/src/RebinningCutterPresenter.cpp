@@ -5,7 +5,20 @@
 #include <boost/shared_ptr.hpp>
 #include <vtkImplicitFunction.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
+#include "MantidVisitPresenters/RebinningXMLGenerator.h"
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
 
 #include <boost/algorithm/string.hpp>
 namespace Mantid
@@ -13,17 +26,13 @@ namespace Mantid
 namespace VATES
 {
 
-RebinningCutterPresenter::RebinningCutterPresenter(vtkDataSet* inputDataSet) : m_initalized(false), m_inputDataSet(inputDataSet), m_function(NULL)
+RebinningCutterPresenter::RebinningCutterPresenter(vtkDataSet* inputDataSet) : m_initalized(false), m_inputDataSet(inputDataSet)
 {
 }
 
 RebinningCutterPresenter::~RebinningCutterPresenter()
 {
-  if (m_function != NULL)
-  {
-    delete m_function;
-    m_function = NULL;
-  }
+
 }
 
 void RebinningCutterPresenter::constructReductionKnowledge(
@@ -67,7 +76,16 @@ void RebinningCutterPresenter::constructReductionKnowledge(
     compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
   }
 
-  m_function = compFunction;
+  m_function = boost::shared_ptr<Mantid::API::ImplicitFunction>(compFunction);
+  //Apply the implicit function.
+  m_serializing.setImplicitFunction(m_function);
+  //Apply the geometry.
+  m_serializing.setGeometryXML( constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, height, width, depth, origin) );
+  //Apply the workspace name after extraction from the input xml.
+  m_serializing.setWorkspaceName( findExistingWorkspaceNameFromXML(m_inputDataSet, getMetadataID()));
+  //Apply the workspace location after extraction from the input xml.
+  m_serializing.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(m_inputDataSet, getMetadataID()));
+
   this->m_initalized = true;
 }
 
@@ -77,21 +95,59 @@ vtkUnstructuredGrid* RebinningCutterPresenter::applyReductionKnowledge(Clipper* 
   if(true == m_initalized)
   {
   vtkUnstructuredGrid *ug = vtkUnstructuredGrid::New();
-  applyReductionKnowledgeToComposite(clipper, m_inputDataSet, ug, this->m_function);
-  persistReductionKnowledge(ug, this->m_function, getMetadataID());
+  applyReductionKnowledgeToComposite(clipper, m_inputDataSet, ug, this->m_function.get());
+  persistReductionKnowledge(ug, this->m_serializing, getMetadataID());
   return ug;
   }
   else
   {
     //To ensure that constructReductionKnowledge is always called first.
-    throw std::runtime_error("This instance has not been properly initalized via the contruct method.");
+    throw std::runtime_error("This instance has not been properly initalized via the construct method.");
   }
 
 }
 
-Mantid::API::ImplicitFunction const * const RebinningCutterPresenter::getFunction() const
+boost::shared_ptr<const Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFunction() const
 {
   return m_function;
+}
+
+// helper method to construct a near-complete geometry.
+std::string constructGeometryXML(
+  DimensionVec dimensions,
+  Dimension_sptr dimensionX,
+  Dimension_sptr dimensionY,
+  Dimension_sptr dimensionZ,
+  Dimension_sptr dimensiont,
+  double height,
+  double width,
+  double depth,
+  std::vector<double>& origin)
+{
+  using namespace Mantid::Geometry;
+  std::set<MDBasisDimension> basisDimensions;
+  for(unsigned int i = 0; i < dimensions.size(); i++)
+  {
+    //read dimension.
+    std::string dimensionId = dimensions[i]->getDimensionId();
+    bool isReciprocal = dimensions[i]->isReciprocal();
+    //basis dimension.
+    basisDimensions.insert(MDBasisDimension(dimensionId, isReciprocal, i));
+
+    //NB: Geometry requires both a basis and geometry description to work. Initially all cuts and dimensions treated as orthogonal.
+    //So that congruent checks pass on the geometry, the basis is fabricated from the dimensions. This is not an ideal implementation. Other designs will
+    //be considered.
+  }
+
+  UnitCell cell; // Unit cell currently does nothing.
+  MDGeometryBasis basis(basisDimensions, cell);
+
+  MDGeometryDescription description(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont);
+
+  //Create a geometry.
+  MDGeometry geometry(basis, description);
+  return geometry.toXMLString();
+
 }
 
 void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
@@ -138,12 +194,12 @@ std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
 }
 
 
-void persistReductionKnowledge(vtkUnstructuredGrid * out_ds,
-    Mantid::API::ImplicitFunction const * const function, const char* id)
+void persistReductionKnowledge(vtkUnstructuredGrid * out_ds, const
+    RebinningXMLGenerator& xmlGenerator, const char* id)
 {
   vtkFieldData* fd = vtkFieldData::New();
 
-  metaDataToFieldData(fd, function->toXMLString().c_str(), id);
+  metaDataToFieldData(fd, xmlGenerator.createXMLString().c_str(), id);
   out_ds->SetFieldData(fd);
 }
 
@@ -159,15 +215,53 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
   std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
   if (false == xmlString.empty())
   {
-    function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(xmlString);
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc = pParser.parseString(xmlString);
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    Poco::XML::Element* functionElem = pRootElem->getChildElement(XMLDefinitions::functionElementName);
+
+    function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
   }
   return function;
 }
 
+//Get the workspace location from the xmlstring.
+ std::string findExistingWorkspaceNameFromXML(vtkDataSet *inputDataSet, const char* id)
+{
+  std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+
+  Poco::XML::DOMParser pParser;
+  Poco::XML::Document* pDoc = pParser.parseString(xmlString);
+  Poco::XML::Element* pRootElem = pDoc->documentElement();
+  Poco::XML::Element* wsNameElem = pRootElem->getChildElement(XMLDefinitions::workspaceNameElementName);
+  if(wsNameElem == NULL)
+  {
+    throw std::runtime_error("The element containing the workspace name must be present.");
+  }
+  return wsNameElem->innerText();
+
+}
+
+ //Get the workspace location from the xmlstring.
+ std::string findExistingWorkspaceLocationFromXML(vtkDataSet *inputDataSet, const char* id)
+ {
+   std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+
+   Poco::XML::DOMParser pParser;
+   Poco::XML::Document* pDoc = pParser.parseString(xmlString);
+   Poco::XML::Element* pRootElem = pDoc->documentElement();
+   Poco::XML::Element* wsLocationElem = pRootElem->getChildElement(XMLDefinitions::workspaceLocationElementName);
+   if(wsLocationElem == NULL)
+   {
+     throw std::runtime_error("The element containing the workspace location must be present.");
+   }
+   return wsLocationElem->innerText();
+ }
+
 
 
 void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
-    vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction * const function)
+    vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction* function)
 {
   using namespace Mantid::MDAlgorithms;
   using namespace Mantid::API;

@@ -55,6 +55,7 @@ private:
   std::string m_wsName;
   std::string m_geomXML;
 
+
 public:
 
   /// Set the implicit function to use called.
@@ -75,6 +76,8 @@ public:
   /// Creat ethe xml string correponding to the set values.
   std::string createXMLString() const;
 };
+
+
 
 
 }

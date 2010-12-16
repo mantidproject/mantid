@@ -154,9 +154,9 @@ void testCreateXMLWithWorkspace() //Uses the workspace settter.
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
 
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("<WorkspaceName/>");
+  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("name");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("<WorkspaceLocation/>"));
+  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("location"));
 
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
@@ -168,7 +168,7 @@ void testCreateXMLWithWorkspace() //Uses the workspace settter.
 
   std::string xml = generator.createXMLString();
 
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><WorkspaceName/><WorkspaceLocation/><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
 
 void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.
@@ -180,13 +180,13 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
   RebinningXMLGenerator generator;
   //Apply setters.
   generator.setImplicitFunction(impFunction);
-  generator.setWorkspaceName("<WorkspaceName/>");
-  generator.setWorkspaceLocation("<WorkspaceLocation/>");
+  generator.setWorkspaceName("name");
+  generator.setWorkspaceLocation("location");
   generator.setGeometryXML("<DimensionSet/>");
 
   std::string xml = generator.createXMLString();
 
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><WorkspaceName/><WorkspaceLocation/><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
 
 

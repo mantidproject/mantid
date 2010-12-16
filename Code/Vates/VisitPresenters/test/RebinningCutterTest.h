@@ -8,7 +8,7 @@
 #include <cmath>
 #include <typeinfo>
 
-#include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
@@ -56,9 +56,9 @@ public:
     RebinningCutterPresenter presenter(in_ds);
 
     DimensionVec vec;
-    Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
-    Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
-    Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
+    Dimension_sptr dimX = Dimension_sptr(new MDDimensionRes("1", q1));
+    Dimension_sptr dimY = Dimension_sptr(new MDDimensionRes("2", q2));
+    Dimension_sptr dimZ = Dimension_sptr(new MDDimensionRes("3", q3));
     Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
 
     vec.push_back(dimX);
@@ -75,9 +75,9 @@ public:
 
     vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(clipper);
 
-    std::cout << "---- Ouput --- " << std::endl;
-    std::cout << presenter.getFunction()->toXMLString() << std::endl;
-    std::cout << "---- Ouput End --- " << std::endl;
+//    std::cout << "---- Ouput --- " << std::endl;
+//    std::cout << presenter.getFunction()->toXMLString() << std::endl;
+//    std::cout << "---- Ouput End --- " << std::endl;
 
     in_ds->Delete();
     return ug;
@@ -93,7 +93,10 @@ std::string getXMLInstructions()
 //helper method
 std::string getComplexXMLInstructions()
 {
-  return std::string("<Function>"
+  return std::string("<MDInstruction>"
+      "<MDWorkspaceName>name</MDWorkspaceName>"
+      "<MDWorkspaceLocation>location</MDWorkspaceLocation>"
+      "<Function>"
 		  "<Type>CompositeImplicitFunction</Type>"
 		  "<ParameterList/>"
 		  "<Function>"
@@ -142,7 +145,7 @@ std::string getComplexXMLInstructions()
 		  "</ParameterList>"
 		  "</Function>"
 		  "</Function>"
-		  "</Function>");
+		  "</Function></MDInstruction>");
 }
 
 //helper method
@@ -180,29 +183,40 @@ vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
   fieldData->AddArray(charArray);
   return fieldData;
 }
+
+//Helper method to construct a dataset identical to what would be expected as the input to a RebinningCutterFilter without the any geometric/topological data.
+vtkDataSet* constructInputDataSet()
+{
+  vtkDataSet* dataset = vtkUnstructuredGrid::New();
+  std::string id = "1";
+  dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
+  return dataset;
+}
+
 public:
 
 void testInChainedFilterSchenario()
 {
   using namespace Mantid::VATES;
 
-  vtkDataSet* in_ds = vtkUnstructuredGrid::New();
+  //Create an input dataset with the field data.
+  vtkDataSet* in_ds = constructInputDataSet();
+
 
   MockClipper* clipper = new MockClipper;
-      EXPECT_CALL(*clipper, SetInput(testing::_)).Times(testing::Between(3,6));
-      EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(testing::Between(3,6));
-      EXPECT_CALL(*clipper, SetInsideOut(true)).Times(testing::Between(3,6));
-      EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(testing::Between(3,6));
-      EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(testing::Between(3,6));
-      EXPECT_CALL(*clipper, Update()).Times(testing::Between(3,6));
-
+  EXPECT_CALL(*clipper, SetInput(testing::_)).Times(testing::AtLeast(1));
+  EXPECT_CALL(*clipper, SetClipFunction(testing::_)).Times(testing::AtLeast(1));
+  EXPECT_CALL(*clipper, SetInsideOut(true)).Times(testing::AtLeast(1));
+  EXPECT_CALL(*clipper, SetRemoveWholeCells(true)).Times(testing::AtLeast(1));
+  EXPECT_CALL(*clipper, SetOutput(testing::_)).Times(testing::AtLeast(1));
+  EXPECT_CALL(*clipper, Update()).Times(testing::AtLeast(1));
+  boost::scoped_ptr<MockClipper> smrtClipper(clipper); //Exception safety during stack unwinding.
 
   PsudoFilter a(std::vector<double>(3,1),std::vector<double>(3,1));
   PsudoFilter b(std::vector<double>(3,2),std::vector<double>(3,2));
   PsudoFilter c(std::vector<double>(3,3),std::vector<double>(3,3));
 
-  vtkDataSet* out_ds =  c.Execute(clipper, b.Execute(clipper, a.Execute(clipper, in_ds)));
-  delete clipper;
+  vtkDataSet* out_ds = c.Execute(clipper, b.Execute(clipper, a.Execute(clipper, in_ds)));
 }
 
 void testgetMetaDataID()
@@ -271,10 +285,8 @@ void testFindExistingRebinningDefinitions()
   using namespace Mantid::VATES;
   using namespace Mantid::API;
   using namespace Mantid::MDAlgorithms;
-
-  vtkDataSet* dataset = vtkUnstructuredGrid::New();
   std::string id = "1";
-  dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
+  vtkDataSet* dataset = constructInputDataSet();
 
   ImplicitFunction* func = findExistingRebinningDefinitions(dataset, id.c_str());
 
@@ -339,6 +351,36 @@ void testApplyReductionThrows()
 
     TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.applyReductionKnowledge(clipper), std::runtime_error);
     delete clipper;
+}
+
+void testFindWorkspaceName()
+{
+  using namespace Mantid::VATES;
+  std::string id = "1";
+  vtkDataSet* dataset = constructInputDataSet();
+
+  std::string name = findExistingWorkspaceNameFromXML(dataset, id.c_str());
+
+  TSM_ASSERT_EQUALS("The workspace name is different from the xml value.", "name", name );
+}
+
+void testFindWorkspaceLocation()
+{
+  using namespace Mantid::VATES;
+  std::string id = "1";
+  vtkDataSet* dataset = constructInputDataSet();
+
+  std::string location = findExistingWorkspaceLocationFromXML(dataset, id.c_str());
+
+  TSM_ASSERT_EQUALS("The workspace location is differrent from the xml value.", "location", location);
+}
+
+void testFindWorkspaceNameThrows()
+{
+}
+
+void testFindWorkspaceLocationThrows()
+{
 }
 
 

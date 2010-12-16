@@ -8,7 +8,8 @@
 #include <MantidAPI/ImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
-
+#include <boost/shared_ptr.hpp>
+#include <MantidVisitPresenters/RebinningXMLGenerator.h>
 
 namespace Mantid
 {
@@ -68,7 +69,10 @@ class RebinningCutterPresenter
 private:
 
   /// Implicit function representing current and historical operations
-  Mantid::API::ImplicitFunction* m_function;
+  boost::shared_ptr<Mantid::API::ImplicitFunction> m_function;
+
+  /// Rebining xml generator for serialising the current and historical operations.
+  RebinningXMLGenerator m_serializing;
 
   vtkDataSet* m_inputDataSet;
 
@@ -84,7 +88,7 @@ public:
 	~RebinningCutterPresenter();
 
 	/// Get the generated function.
-	Mantid::API::ImplicitFunction const * const getFunction() const;
+	boost::shared_ptr<const Mantid::API::ImplicitFunction> getFunction() const;
 
   /// Construct reduction knowledge objects
   void constructReductionKnowledge(
@@ -107,11 +111,11 @@ public:
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkUnstructuredGrid * out_ds,
-      Mantid::API::ImplicitFunction const * const function , const char* id);
+      const RebinningXMLGenerator& xmlGenerator, const char* id);
 
   /// Walk composite functions and apply their operations to the visualisation dataset.
   void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
-      vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction * const function);
+      vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction* function);
 
   /// Convert field data to xml string meta data.
   std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id);
@@ -119,11 +123,29 @@ public:
   /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
   Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
+  //Get the workspace location from the xmlstring.
+  std::string findExistingWorkspaceNameFromXML(vtkDataSet *in_ds, const char* id);
+
+  //Get the workspace location from the xmlstring.
+  std::string findExistingWorkspaceLocationFromXML(vtkDataSet *in_ds, const char* id);
+
   /// Gets the effective constant meta data id for keying cutting information.
   const char*  getMetadataID();
 
   /// Converts field data into metadata xml/string.
   void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
+
+  /// Create a geometry from dimensions and then serialise it.
+  std::string constructGeometryXML(DimensionVec dimensions,
+      Dimension_sptr dimensionX,
+      Dimension_sptr dimensionY,
+      Dimension_sptr dimensionZ,
+      Dimension_sptr dimensiont,
+      double height,
+      double width,
+      double depth,
+      std::vector<double>& origin);
+
 
 
 
