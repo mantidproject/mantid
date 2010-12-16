@@ -92,7 +92,8 @@ def confitParsToWS(Table, Data):
         else:
             nSpec -= 1
     CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
-        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text',
+        VerticalAxisValues=names)
     return outNm
 
 def confitPlotSeq(inputWS, plot):
@@ -295,7 +296,8 @@ def furyfitParsToWS(Table, Data):
         else:
             nSpec -= 1
     CreateWorkspace(wsname, xAxisVals, dataY, dataE, nSpec,
-        UnitX='MomentumTransfer', UnitY='Text', YAxisValues=names)
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text',
+        VerticalAxisValues=names)
     return wsname
 
 def furyfitPlotSeq(inputWS, plot):

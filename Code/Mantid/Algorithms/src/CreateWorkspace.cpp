@@ -29,7 +29,7 @@ void CreateWorkspace::init()
   declareProperty(new Kernel::ArrayProperty<double>("DataX"),
     "X-axis data values for workspace.");
   declareProperty(new Kernel::ArrayProperty<double>("DataY"),
-    "Y-axis data values for workspace.");
+    "Y-axis data values for workspace (measures).");
   declareProperty(new Kernel::ArrayProperty<double>("DataE"),
     "Error values for workspace.");
   declareProperty(new Kernel::PropertyWithValue<int>("NSpec", 1),
@@ -39,10 +39,10 @@ void CreateWorkspace::init()
   declareProperty("UnitX","",new Mantid::Kernel::ListValidator(unitOptions),
       "The unit to assign to the XAxis");
   unitOptions.push_back("Text");
-  declareProperty("UnitY","",new Mantid::Kernel::ListValidator(unitOptions),
-      "The unit to assign to the YAxis");
-  declareProperty(new Kernel::ArrayProperty<std::string>("YAxisValues"),
-    "Values for labels of Y Axis."); // This property taken as strings to allow for Text Axis.
+  declareProperty("VerticalAxisUnit","",new Mantid::Kernel::ListValidator(unitOptions),
+      "The unit to assign to the second Axis (leave blank for default Spectra number)");
+  declareProperty(new Kernel::ArrayProperty<std::string>("VerticalAxisValues"),
+    "Values for the VerticalAxis."); // This property taken as strings to allow for Text Axis.
   declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
     "Name to be given to the created workspace.");
 }
@@ -55,10 +55,10 @@ void CreateWorkspace::exec()
   const std::vector<double> dataE = getProperty("DataE");
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
-  const std::string yUnit = getProperty("UnitY");
-  const std::vector<std::string> yAxis = getProperty("YAxisValues");
+  const std::string vUnit = getProperty("VerticalAxisUnit");
+  const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
-  if ( ( yUnit != "" ) && ( static_cast<int>(yAxis.size()) != nSpec ) )
+  if ( ( vUnit != "" ) && ( static_cast<int>(vAxis.size()) != nSpec ) )
   {
     throw std::invalid_argument("Number of y-axis labels must match number of histograms.");
   }
@@ -107,27 +107,29 @@ void CreateWorkspace::exec()
   {
     outputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create(xUnit);
   }
-  if ( yUnit != "" )
+
+  // Populate the VerticalAxis
+  if ( vUnit != "" )
   {
-    if ( yUnit == "Text" )
+    if ( vUnit == "Text" )
     {
-      Mantid::API::TextAxis* const newAxis = new Mantid::API::TextAxis(yAxis.size());
+      Mantid::API::TextAxis* const newAxis = new Mantid::API::TextAxis(vAxis.size());
       outputWS->replaceAxis(1, newAxis);
-      for ( size_t i = 0; i < yAxis.size(); i++ )
+      for ( size_t i = 0; i < vAxis.size(); i++ )
       {
-        newAxis->setLabel(i, yAxis[i]);
+        newAxis->setLabel(i, vAxis[i]);
       }
     }
     else
     {
-      Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(yAxis.size());
-      newAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create(yUnit);
+      Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(vAxis.size());
+      newAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create(vUnit);
       outputWS->replaceAxis(1, newAxis);
-      for ( size_t i = 0; i < yAxis.size(); i++ )
+      for ( size_t i = 0; i < vAxis.size(); i++ )
       {
         try
         {
-          newAxis->setValue(i, boost::lexical_cast<double, std::string>(yAxis[i]) );
+          newAxis->setValue(i, boost::lexical_cast<double, std::string>(vAxis[i]) );
         }
         catch ( boost::bad_lexical_cast & )
         {
