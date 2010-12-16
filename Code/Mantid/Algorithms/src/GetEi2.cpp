@@ -151,6 +151,8 @@ double GetEi2::calculateEi(const double initial_guess)
     double tzero = peak_times[1] - ((1.0/mean_speed)*det_distances[1]);
     setProperty("Tzero", tzero);
     
+    g_log.debug() << "T0 = " << tzero << std::endl;
+    
     g_log.debug() << "Mean Speed = " << mean_speed << std::endl;
     g_log.debug() << "Energy (meV) = " << mean_speed*mean_speed*m_t_to_mev << std::endl;
         
