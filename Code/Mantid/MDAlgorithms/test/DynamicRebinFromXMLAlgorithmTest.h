@@ -331,8 +331,8 @@ public:
   void testExecute()
   {
     using namespace Mantid::MDDataObjects;
-    //std::string xin;
-    //std::cin >> xin;
+    std::string xin;
+    std::cin >> xin;
 
     MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace());
     AnalysisDataService::Instance().add("Input", baseWs);
@@ -352,8 +352,17 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace y-dimension.", 5, output->getYDimension()->getNBins());
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace z-dimension.", 6, output->getZDimension()->getNBins());
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->gettDimension()->getNBins());
+    //840 = 7 * 5* 6 * 4
+    TSM_ASSERT_EQUALS("The image size should be the product of the number of bins accross dimensions", 840, output->get_spMDImage()->getDataSize());
+    const MD_image_point  *const data   = output->get_const_MDImage().get_const_pData();
+    for(int i = 0; i< output->get_spMDImage()->getDataSize(); i++)
+    {
+      MD_image_point point = data[i];
+      if(point.s > 0)
+      {
 
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in rebinned workspace", 4, output->getNumDims());
+      }
+    }
     
   }
 

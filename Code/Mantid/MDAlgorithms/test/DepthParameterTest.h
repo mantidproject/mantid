@@ -8,53 +8,54 @@
 
 using namespace Mantid::MDAlgorithms;
 
-class DepthParameterTest :  public CxxTest::TestSuite, public SingleValueParameterTests<DepthParameter>
+typedef SingleValueParameterTests<DepthParameter> SVPTDepth;
+class DepthParameterTest :  public CxxTest::TestSuite, public SVPTDepth
 {
 public:
 
   void testGetName()
   {
-    SingleValueParameterTests::testGetName("DepthParameter");
+    SVPTDepth::testGetName("DepthParameter");
   }
 
   void testIsValid()
   {
-    SingleValueParameterTests::testIsValid();
+    SVPTDepth::testIsValid();
   }
 
   void testIsNotValid()
   {
-    SingleValueParameterTests::testIsNotValid();
+    SVPTDepth::testIsNotValid();
   }
 
   void testAssigment()
   {
-    SingleValueParameterTests::testAssigment();
+    SVPTDepth::testAssigment();
   }
 
   void testClone()
   {
-    SingleValueParameterTests::testClone();
+    SVPTDepth::testClone();
   }
 
   void testCopy()
   {
-    SingleValueParameterTests::testCopy();
+    SVPTDepth::testCopy();
   }
 
   void testToXML()
   {
-    SingleValueParameterTests::testToXML();    
+    SVPTDepth::testToXML();
   }
 
   void testEqual()
   {
-    SingleValueParameterTests::testEqual();
+    SVPTDepth::testEqual();
   }
 
   void testNotEqual()
   {
-    SingleValueParameterTests::testNotEqual();
+    SVPTDepth::testNotEqual();
   }
 };
 

@@ -7,54 +7,54 @@
 #include "MantidMDAlgorithms/WidthParameter.h"
 
 using namespace Mantid::MDAlgorithms;
-
-class WidthParameterTest :  public CxxTest::TestSuite, public SingleValueParameterTests<WidthParameter>
+typedef SingleValueParameterTests<WidthParameter> SVPTWidth;
+class WidthParameterTest :  public CxxTest::TestSuite, public SVPTWidth
 {
 public:
 
   void testGetName()
   {
-    SingleValueParameterTests::testGetName("WidthParameter");
+    SVPTWidth::testGetName("WidthParameter");
   }
 
   void testIsValid()
   {
-    SingleValueParameterTests::testIsValid();
+    SVPTWidth::testIsValid();
   }
 
   void testIsNotValid()
   {
-    SingleValueParameterTests::testIsNotValid();
+    SVPTWidth::testIsNotValid();
   }
 
   void testAssigment()
   {
-    SingleValueParameterTests::testAssigment();
+    SVPTWidth::testAssigment();
   }
 
   void testClone()
   {
-    SingleValueParameterTests::testClone();
+    SVPTWidth::testClone();
   }
 
   void testCopy()
   {
-    SingleValueParameterTests::testCopy();
+    SVPTWidth::testCopy();
   }
 
   void testToXML()
   {
-    SingleValueParameterTests::testToXML();    
+    SVPTWidth::testToXML();
   }
 
   void testEqual()
   {
-    SingleValueParameterTests::testEqual();
+    SVPTWidth::testEqual();
   }
 
   void testNotEqual()
   {
-    SingleValueParameterTests::testNotEqual();
+    SVPTWidth::testNotEqual();
   }
 };
 

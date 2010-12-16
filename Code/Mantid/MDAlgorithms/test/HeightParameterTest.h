@@ -8,53 +8,54 @@
 
 using namespace Mantid::MDAlgorithms;
 
-class HeightParameterTest :  public CxxTest::TestSuite, public SingleValueParameterTests<HeightParameter>
+typedef SingleValueParameterTests<HeightParameter> SVPTHeight;
+class HeightParameterTest :  public CxxTest::TestSuite, public SVPTHeight
 {
 public:
 
   void testGetName()
   {
-    SingleValueParameterTests::testGetName("HeightParameter");
+    SVPTHeight::testGetName("HeightParameter");
   }
 
   void testIsValid()
   {
-    SingleValueParameterTests::testIsValid();
+    SVPTHeight::testIsValid();
   }
 
   void testIsNotValid()
   {
-    SingleValueParameterTests::testIsNotValid();
+    SVPTHeight::testIsNotValid();
   }
 
   void testAssigment()
   {
-    SingleValueParameterTests::testAssigment();
+    SVPTHeight::testAssigment();
   }
 
   void testClone()
   {
-    SingleValueParameterTests::testClone();
+    SVPTHeight::testClone();
   }
 
   void testCopy()
   {
-    SingleValueParameterTests::testCopy();
+    SVPTHeight::testCopy();
   }
 
   void testToXML()
   {
-    SingleValueParameterTests::testToXML();    
+    SVPTHeight::testToXML();
   }
 
   void testEqual()
   {
-    SingleValueParameterTests::testEqual();
+    SVPTHeight::testEqual();
   }
 
   void testNotEqual()
   {
-    SingleValueParameterTests::testNotEqual();
+    SVPTHeight::testNotEqual();
   }
 };
 

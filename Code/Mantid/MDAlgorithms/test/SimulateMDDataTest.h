@@ -122,6 +122,14 @@ public:
       virtual unsigned int getNumDims()const{return 4;}
       /// Get the footprint in memory in KB - return 0 for now
       virtual long int getMemorySize() const {return 0;};
+      virtual std::string getWSLocation() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+      virtual std::string getGeometryXML() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
 
    TestCut()
    {
