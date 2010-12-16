@@ -78,7 +78,8 @@ void RealFFT::exec()
     if (!IgnoreXBins)
     {
       for(size_t i=0;i<X.size()-2;i++)
-          if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
+          if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7)
+            throw std::invalid_argument("X axis must be linear (all bins have same width). This can be ignored if IgnoreXBins is set to true.");
     }
 
     API::MatrixWorkspace_sptr outWS;
