@@ -162,6 +162,7 @@
     <ClCompile Include="src\CompressedWorkspace2D.cpp" />
     <ClCompile Include="src\EventList.cpp" />
     <ClCompile Include="src\EventWorkspace.cpp" />
+    <ClCompile Include="src\EventWorkspaceHelpers.cpp" />
     <ClCompile Include="src\Histogram1D.cpp" />
     <ClCompile Include="src\ManagedDataBlock2D.cpp" />
     <ClCompile Include="src\ManagedWorkspace2D.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="inc\MantidDataObjects\CompressedWorkspace2D.h" />
     <ClInclude Include="inc\MantidDataObjects\EventList.h" />
     <ClInclude Include="inc\MantidDataObjects\EventWorkspace.h" />
+    <ClInclude Include="inc\MantidDataObjects\EventWorkspaceHelpers.h" />
     <ClInclude Include="inc\MantidDataObjects\Histogram1D.h" />
     <ClInclude Include="test\Histogram1DTest.h" />
     <ClInclude Include="inc\MantidDataObjects\ManagedDataBlock2D.h" />

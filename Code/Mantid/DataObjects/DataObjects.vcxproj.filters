@@ -51,6 +51,9 @@
     <ClCompile Include="src\CompressedWorkspace2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventWorkspaceHelpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidDataObjects\AbsManagedWorkspace2D.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\WorkspaceValidatorsTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataObjects\EventWorkspaceHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
