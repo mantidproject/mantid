@@ -2086,6 +2086,10 @@ void FitPropertyBrowser::findPeaks()
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+  Mantid::API::MatrixWorkspace_sptr inputWS =
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
+
   try
   {
     alg->execute();
@@ -2104,6 +2108,7 @@ void FitPropertyBrowser::findPeaks()
         );
       if (!f) break;
       f->initialize();
+      f->setWorkspace(inputWS,workspaceIndex(),-1,-1);
       f->setCentre(centre[i]);
       f->setWidth(width[i]);
       f->setHeight(height[i]);
