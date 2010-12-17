@@ -27,7 +27,7 @@ private:
 public:
   WorkspaceValidatorsTest()
   {
-	  wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");
+    wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");
     anyUnitVal = new WorkspaceUnitValidator<>("");
     histVal = new HistogramValidator<>();
     rawVal = new RawCountValidator<>();
@@ -60,7 +60,7 @@ public:
 
   void testWorkspaceUnitValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator<> val; );
+    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator<>() );
   }
 
   void testWorkspaceUnitValidator_getType()
@@ -87,7 +87,7 @@ public:
 
   void testHistogramValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( HistogramValidator<> val(false) );
+    TS_ASSERT_THROWS_NOTHING( HistogramValidator<>(false) );
   }
 
   void testHistogramValidator_getType()
@@ -121,9 +121,9 @@ public:
   {
     TS_ASSERT_EQUALS( rawVal->isValid(ws1), "" );
     TS_ASSERT_EQUALS( rawVal->isValid(ws2),
-	  "A workspace containing numbers of counts is required here" );
+        "A workspace containing numbers of counts is required here" );
     TS_ASSERT_EQUALS( nonRawVal->isValid(ws1),
-	  "A workspace of numbers of counts is not allowed here" );
+        "A workspace of numbers of counts is not allowed here" );
     TS_ASSERT_EQUALS( nonRawVal->isValid(ws2), "" );
   }
 
@@ -148,7 +148,7 @@ public:
     TS_ASSERT_EQUALS( binVal->isValid(ws1), "" );
     ws1->dataX(0)[5] = 1.1;
     TS_ASSERT_EQUALS( binVal->isValid(ws1),
-		"The workspace must have common bin boundaries for all histograms");
+        "The workspace must have common bin boundaries for all histograms");
   }
 
   void testCommonBinsValidator_clone()
@@ -179,27 +179,27 @@ public:
     TS_ASSERT_EQUALS( compVal.isValid(ws2), "" );
     compVal.add(wavUnitVal->clone());
     TS_ASSERT_EQUALS( compVal.isValid(ws1),
-	  "The workspace must have units of Wavelength");
+        "The workspace must have units of Wavelength");
     TS_ASSERT_EQUALS( compVal.isValid(ws2), "" );
 
-	CompositeValidator<> compVal2;
+    CompositeValidator<> compVal2;
     compVal2.add(histVal->clone());
     TS_ASSERT_EQUALS( compVal2.isValid(ws1), "" );
     TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-	  "The workspace must contain histogram data" );
+        "The workspace must contain histogram data" );
     compVal2.add(rawVal->clone());
     TS_ASSERT_EQUALS( compVal2.isValid(ws1), "" );
     TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-	  "The workspace must contain histogram data" );
+        "The workspace must contain histogram data" );
     compVal2.add(anyUnitVal->clone());
     TS_ASSERT_EQUALS( compVal2.isValid(ws1),
-	  "The workspace must have units" );
+        "The workspace must have units" );
     TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-	  "The workspace must contain histogram data" );
+        "The workspace must contain histogram data" );
 
     IValidator<MatrixWorkspace_sptr>* compVal3 = compVal.clone();
     TS_ASSERT_EQUALS( compVal3->isValid(ws1),
-	  "The workspace must have units of Wavelength");
+        "The workspace must have units of Wavelength");
     TS_ASSERT_EQUALS( compVal3->isValid(ws2), "" );
     delete compVal3;
   }
@@ -218,10 +218,27 @@ public:
     TS_ASSERT_EQUALS( wsp1.isValid(), "" );;
 
     //fine and no unit
-    TS_ASSERT_THROWS( wsp1 = ws1, const std::invalid_argument)
+    TS_ASSERT_THROWS( wsp1 = ws1, std::invalid_argument);
 
     TS_ASSERT_EQUALS( wsp1.setValue(""),  "Enter a name for the Input/InOut workspace" );
     TS_ASSERT_EQUALS( wsp1.isValid(), "Enter a name for the Input/InOut workspace" );
+  }
+
+  void testInstrumentValidator()
+  {
+    IValidator<MatrixWorkspace_sptr> * instVal = new InstrumentValidator<>();
+    MatrixWorkspace_sptr ws = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
+
+    // Fails if no instrument
+    TS_ASSERT_EQUALS( instVal->isValid(ws), "The workspace must have an instrument defined" );
+
+    // Add a sample pos and then things will be fine
+    Mantid::Geometry::ObjComponent * sample = new Mantid::Geometry::ObjComponent("Sample");
+    ws->getBaseInstrument()->add(sample);  // This takes care of deletion
+    ws->getBaseInstrument()->markAsSamplePos(sample);
+    TS_ASSERT_EQUALS( instVal->isValid(ws), "" );
+
+    delete instVal;
   }
 
 };

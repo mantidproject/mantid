@@ -20,11 +20,11 @@ namespace API
 //===============================================================================================
 /** A validator for workspaces which can contain a number of individual validators,
     all of which must pass for the overall validator to do so.
-Workspace
+
     @author Russell Taylor, Tessella Support Services plc
     @date 16/09/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -149,10 +149,10 @@ private:
     else
     {
       if ( (!unit) || ( unit->unitID().compare(m_unitID) ) )
-	  {
-		  return "The workspace must have units of " + m_unitID; //+ "; its unit is: " + unit->caption();
-	  }
-	  else return "";
+      {
+        return "The workspace must have units of " + m_unitID; //+ "; its unit is: " + unit->caption();
+      }
+      else return "";
     }
   }
 
@@ -294,16 +294,16 @@ private:
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
-	  if (m_mustNotBeDistribution)
-	  {
-		  if ( !value->isDistribution() ) return "";
-		  else return "A workspace containing numbers of counts is required here";
-	  }
-	  else
-	  {
-		  if ( value->isDistribution() ) return "";
-		  else return "A workspace of numbers of counts is not allowed here";
-	  }
+    if (m_mustNotBeDistribution)
+    {
+      if ( !value->isDistribution() ) return "";
+      else return "A workspace containing numbers of counts is required here";
+    }
+    else
+    {
+      if ( value->isDistribution() ) return "";
+      else return "A workspace of numbers of counts is not allowed here";
+    }
   }
 
   /// A flag indicating whether this validator requires that the workspace must be a distribution (false) or not (true, the default)
@@ -425,6 +425,52 @@ private:
   const int m_axisNumber; ///< axis number to check on, defaults to 1
 
 };
+
+//===============================================================================================
+/** A validator which checks that a workspace has a valid instrument
+ *  or point data as required.
+ *
+ *  @author Russell Taylor, Tessella
+ *  @date 17/12/2010
+ */
+template <typename TYPE = MatrixWorkspace>
+class DLLExport InstrumentValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+{
+public:
+  /** Constructor
+   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
+   *                         contain histogram data (true, default) or shouldn't (false).
+   */
+  explicit InstrumentValidator() {}
+
+  virtual ~InstrumentValidator() {}
+
+  ///Gets the type of the validator
+  std::string getType() const { return "Instrument"; }
+
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new InstrumentValidator(*this); }
+
+private:
+  /** Checks that the workspace has an instrument defined
+   *  @param value The workspace to test
+   *  @return A user level description if a problem exists or ""
+   */
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  {
+    // Just checks that an instrument has a sample position.
+    // Could be extended for more detailed checks if needed.
+    if ( value->getBaseInstrument()->getSample() == NULL )
+    {
+      return "The workspace must have an instrument defined";
+    }
+    else
+    {
+      return "";
+    }
+  }
+};
+
+
 } // namespace API
 } // namespace Mantid
 
