@@ -309,6 +309,7 @@ class ISISReducer(SANSReducer):
                         RenameWorkspace(old_name, value)
 
         self.clean = False
+        return self.wksp_name
 
 
     def post_process(self):
