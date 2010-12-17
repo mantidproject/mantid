@@ -452,6 +452,7 @@ public:
     TS_ASSERT_EQUALS( times[2], DateAndTime("1990-01-02 03:04:05.500"));
     TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
   }
+
 };
 
 

@@ -182,7 +182,7 @@ namespace Mantid
 				tab = facing->Nodes();
 				for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
 					gp_Pnt pnt=tab.Value(i);
-					fprintf(fp,"%lf %lf %lf\n",pnt.X(),pnt.Y(),pnt.Z());
+					fprintf(fp,"%f %f %f\n",pnt.X(),pnt.Y(),pnt.Z());
 				}
 			}
 			fprintf(fp,"POLYGONS %d %d\n",countFace,countFace*4);

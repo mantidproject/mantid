@@ -144,11 +144,13 @@ namespace NeXus {
 #define ARRAY_OFFSET	0	/* can dimension an array with zero elements */
 #endif /* _MSC_VER */
 
+/* Unused variables
 static int check_float_too_big[4 - sizeof(float) + ARRAY_OFFSET]; // error if float > 4 bytes
 static int check_float_too_small[sizeof(float) - 4 + ARRAY_OFFSET]; // error if float < 4 bytes
 static int check_double_too_big[8 - sizeof(double) + ARRAY_OFFSET]; // error if double > 8 bytes
 static int check_double_too_small[sizeof(double) - 8 + ARRAY_OFFSET]; // error if double < 8 bytes
 static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char > 1 byte
+*/
 
 static void inner_malloc(void* & data, const std::vector<int>& dims, NXnumtype type) {
   int rank = dims.size();

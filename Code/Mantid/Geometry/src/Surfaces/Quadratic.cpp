@@ -265,8 +265,7 @@ Quadratic::distance(const Geometry::V3D& Pt) const
     const double daI=1.0+2* (*vc) *da;
     const double dbI=1.0+2* (*vc) *db;
     const double dcI=1.0+2* (*vc) *dc;
-    if ((daI*daI)>Tolerance || (dbI*dbI)>Tolerance
-        && (dcI*dcI)<Tolerance)
+    if ((daI*daI)>Tolerance || ((dbI*dbI)>Tolerance  && (dcI*dcI)<Tolerance) )
     {
       Geometry::Matrix<double> DI(3,3);
       DI[0][0]=1.0/daI;

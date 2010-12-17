@@ -363,7 +363,7 @@ std::string MDGeometry::toXMLString() const
 
   //Loop through dimensions and generate xml for each.
   std::string dimensionXMLString;
-  for(int i = 0; i <this->theDimension.size(); i++)
+  for(size_t i = 0; i <this->theDimension.size(); i++)
   {
     dimensionXMLString += theDimension[i]->toXMLString();
   }

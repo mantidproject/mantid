@@ -776,6 +776,8 @@ namespace Mantid
         return "11";
       if ( month == "DEC" )
         return "12";
+
+      throw std::runtime_error("LoadRawHelper::convertMonthLabelToIntStr(): Invalid month label found.");
     }
 
     ///sets optional properties for the loadraw algorithm

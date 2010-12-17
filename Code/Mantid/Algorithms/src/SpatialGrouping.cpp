@@ -77,17 +77,17 @@ void SpatialGrouping::exec()
     if ( nNeighbours > 8 )
     {
       bool extend = true;
-      while ( ( nNeighbours > nearest.size() ) && extend )
+      while ( ( nNeighbours > static_cast<int>(nearest.size()) ) && extend )
       {
         extend = expandNet(nearest, detIt->second, nNeighbours);
       }
     }
-    else if ( nNeighbours < 8  && nearest.size() > nNeighbours )
+    else if ( nNeighbours < 8  && static_cast<int>(nearest.size()) > nNeighbours )
     {
       sortByDistance(nearest, nNeighbours);
     }
 
-    if ( nearest.size() != nNeighbours ) continue;
+    if ( static_cast<int>(nearest.size()) != nNeighbours ) continue;
 
     // if any of these nearest are already included, we'll continue too
     // but we want a seperate function for this to make it a little bit saner
@@ -126,7 +126,7 @@ void SpatialGrouping::exec()
   for ( grpIt = m_groups.begin(); grpIt != m_groups.end(); ++grpIt )
   {
     xml << "<group name=\"group" << grpID++ << "\"><detids val=\"" << (*grpIt)[0];
-    for ( int i = 1; i < (*grpIt).size(); i++ )
+    for ( size_t i = 1; i < (*grpIt).size(); i++ )
     {
       xml << "," << (*grpIt)[i];
     }
@@ -208,9 +208,9 @@ bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry
     nearest[potIt->first] = distance;
   }
 
-  if ( nearest.size() == incoming ) { return false; }
+  if ( static_cast<int>(nearest.size()) == incoming ) { return false; }
 
-  if ( nearest.size() > noNeighbours )
+  if ( static_cast<int>(nearest.size()) > noNeighbours )
   {
     sortByDistance(nearest, noNeighbours);
   }
@@ -242,7 +242,7 @@ void SpatialGrouping::sortByDistance(std::map<int,double> & input, const int noN
   do
   {
     swp = false;
-    for ( int i = 0; i < order.size() - 1; i++ )
+    for ( size_t i = 0; i < order.size() - 1; i++ )
     {
       if ( order[i].second > order[i+1].second )
       {
