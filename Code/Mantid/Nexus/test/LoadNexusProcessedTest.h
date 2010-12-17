@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "Poco/File.h"
 
 using namespace Mantid::NeXus;
 using namespace Mantid::API;
@@ -346,6 +347,9 @@ public:
      TS_ASSERT(workspace->hasMaskedBins(3));
      TS_ASSERT(workspace->hasMaskedBins(4));
      TS_ASSERT(workspace->hasMaskedBins(5));
+
+     if( Poco::File(filename).exists() )
+       Poco::File(filename).remove();
    }
 
 

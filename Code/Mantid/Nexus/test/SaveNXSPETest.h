@@ -81,7 +81,8 @@ public:
     // TODO: Test the files contents...
 
     AnalysisDataService::Instance().remove(WSName);
-    //Poco::File(outputFile).remove();
+    if( Poco::File(outputFile).exists() )
+      Poco::File(outputFile).remove();
   }
 
   void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
@@ -100,7 +101,7 @@ public:
     TS_ASSERT( Poco::File(outputFile).exists() );
     if( Poco::File(outputFile).exists() )
     {
-      //Poco::File(outputFile).remove();
+      Poco::File(outputFile).remove();
     }
   }
 
