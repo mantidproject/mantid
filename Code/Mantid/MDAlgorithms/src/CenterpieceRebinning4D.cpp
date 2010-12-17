@@ -161,7 +161,7 @@ CenterpieceRebinning4D::exec()
   boxMax[0]=boxMax[1]=boxMax[2]=boxMax[3]=FLT_MIN;
 
    // reduction dimensions; if stride = 0, the dimension is reduced;
-  const std::vector<boost::shared_ptr<MDDimension> >  dims = outputWS->get_const_MDImage().getGeometry()->getDimensions();
+  const std::vector<boost::shared_ptr<IMDDimension> >  dims = outputWS->get_const_MDImage().getGeometry()->getDimensions();
 
   std::vector<size_t> strides(dims.size());
   for(unsigned int i=0;i<dims.size();i++){
