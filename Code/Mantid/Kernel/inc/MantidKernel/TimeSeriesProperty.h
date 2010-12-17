@@ -989,10 +989,7 @@ public:
   TimeSeriesPropertyStatistics getStatistics()
   {
     TimeSeriesPropertyStatistics out = getDataStatistics(this->valuesAsVector());
-
-    //Duration: the last - the first times
-    std::map<DateAndTime, TYPE> map = this->valueAsCorrectMap();
-    out.duration = DateAndTime::seconds_from_duration(  map.rbegin()->first - map.begin()->first  );
+    out.duration = DateAndTime::seconds_from_duration(this->lastTime() - this->firstTime());
 
     return out;
   }
