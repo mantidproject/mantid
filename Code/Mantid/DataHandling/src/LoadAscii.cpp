@@ -172,14 +172,14 @@ namespace Mantid
  *  @param header_buffer - buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-    bool LoadAscii::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    bool LoadAscii::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
     {
       std::string extn=extension(filePath);
       bool bascii(false);
       (!extn.compare("dat")||!extn.compare("csv")|| extn.compare("txt"))?bascii=true:bascii=false;
 
       bool is_ascii (true);
-      for(int i=0; i<nread; i++)
+      for(size_t i=0; i<nread; i++)
       {
         if (!isascii(header_buffer[i]))
           is_ascii =false;

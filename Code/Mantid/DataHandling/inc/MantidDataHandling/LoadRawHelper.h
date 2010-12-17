@@ -65,7 +65,7 @@ namespace Mantid
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
 
       /// do a quick check that this file can be loaded 
-     virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer);
+     virtual bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer);
       /// check the structure of the file and if this file can be loaded return a value between 1 and 100
      virtual int fileCheck(const std::string& filePath);
       

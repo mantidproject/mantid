@@ -670,7 +670,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
  *  @param header_buffer - buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-bool LoadRaw3::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+bool LoadRaw3::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
 { 
   return(LoadRawHelper::quickFileCheck(filePath,nread,header_buffer)?true:false);
  

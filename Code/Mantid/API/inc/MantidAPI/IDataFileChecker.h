@@ -58,7 +58,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
       
       /// quick file check by reading first 100 bytes of the file or by checking the extension
-      virtual bool quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)=0;
+      virtual bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)=0;
       
       /// file check by looking at the structure of the data file
       virtual int fileCheck(const std::string& filePath)=0;

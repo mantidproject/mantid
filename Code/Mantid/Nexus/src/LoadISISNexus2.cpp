@@ -763,7 +763,7 @@ namespace Mantid
     *  @param header_buffer - buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
-    bool LoadISISNexus2::quickFileCheck(const std::string& filePath, int nread,unsigned char* header_buffer)
+    bool LoadISISNexus2::quickFileCheck(const std::string& filePath, size_t nread,unsigned char* header_buffer)
     {
       std::string extn=extension(filePath);
       bool bnexs(false);
@@ -771,12 +771,12 @@ namespace Mantid
       /*
       * HDF files have magic cookie 0x0e031301 in the first 4 bytes
       */
-      if ( ((static_cast<size_t>(nread) >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)) || bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)) || bnexs )
       {
         //hdf
         return true;
       }
-      else if ( (static_cast<size_t>(nread) >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature))) )
+      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature))) )
       { 
         //hdf5
         return true;

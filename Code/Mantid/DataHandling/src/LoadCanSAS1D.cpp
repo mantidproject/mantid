@@ -296,7 +296,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element * const sasEntry, API::Ma
  *  @param header_buffer - buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-bool LoadCanSAS1D::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+bool LoadCanSAS1D::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
 {
   std::string extn=extension(filePath);
   bool bspice2d(false);

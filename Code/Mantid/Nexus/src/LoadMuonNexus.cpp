@@ -610,7 +610,7 @@ namespace Mantid
     *  @param header_buffer - buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
-    bool LoadMuonNexus::quickFileCheck(const std::string& filePath,int nread,unsigned char* header_buffer)
+    bool LoadMuonNexus::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
     {
       std::string extn=extension(filePath);
       bool bnexs(false);
@@ -618,7 +618,7 @@ namespace Mantid
       /*
       * HDF files have magic cookie 0x0e031301 in the first 4 bytes
       */
-      if ( (nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)||bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)) || bnexs )
       {
         //hdf
         return true;
