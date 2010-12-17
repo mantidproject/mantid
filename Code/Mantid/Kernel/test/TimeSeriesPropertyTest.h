@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/DateAndTime.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -302,7 +303,18 @@ public:
     TS_ASSERT_DELTA( stats.mean, 6.0, 1e-3);
     TS_ASSERT_DELTA( stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA( stats.standard_deviation, 3.1622, 1e-3);
+  }
 
+  void test_empty_statistics()
+  {
+    TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
+    TimeSeriesPropertyStatistics stats = log->getStatistics();
+    TS_ASSERT( boost::math::isnan(stats.minimum) );
+    TS_ASSERT( boost::math::isnan(stats.maximum) );
+    TS_ASSERT( boost::math::isnan(stats.median) );
+    TS_ASSERT( boost::math::isnan(stats.mean) );
+    TS_ASSERT( boost::math::isnan(stats.standard_deviation) );
+    TS_ASSERT( boost::math::isnan(stats.duration) );
   }
 
   void testPlusEqualsOperator_Incompatible_Types()
