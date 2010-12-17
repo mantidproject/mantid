@@ -64,7 +64,8 @@ class EQSANSTransmission(PythonAlgorithm):
         ny_max = ycenter + self.NY_TRANS_PIX
 
         # Sum up all TOF bins
-        Integration(input_ws, input_ws+'_int')
+        Integration(input_ws, input_ws.getName()+'_int')
+        integrated_ws = mantid.getMatrixWorkspace(input_ws.getName()+'_int')
         
         # Find pixel with highest and lowest signal
         counts_2D = numpy.zeros([2*self.NY_TRANS_PIX+1, 2*self.NX_TRANS_PIX+1])
@@ -80,7 +81,7 @@ class EQSANSTransmission(PythonAlgorithm):
         for ix in range(nx_min, nx_max+1):
             for iy in range(ny_min, ny_max+1):
                 i_pixel = 256*ix+iy
-                signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+                signal = integrated_ws.readY(i_pixel)[0]
                 
                 if signal_min is None or signal < signal_min:
                     signal_min = signal
@@ -100,13 +101,13 @@ class EQSANSTransmission(PythonAlgorithm):
         xpeakmax = nx_max
         for i in range(xmax+1, nx_max+1):
             i_pixel = 256*i+ymax
-            signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+            signal = integrated_ws.readY(i_pixel)[0]
             if signal*self.transmission_peak_to_bg_ratio < signal_max:
                 xpeakmax = i-1
                 break
             
             i_pixel_low = 256*(i-1)+ymax
-            signal_low = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_low)[0]
+            signal_low = integrated_ws.readY(i_pixel_low)[0]
             if signal > signal_low:
                 xpeakmax = i-1
                 break
@@ -114,13 +115,13 @@ class EQSANSTransmission(PythonAlgorithm):
         xpeakmin = nx_min
         for i in range(xmax-1, nx_min+1, -1):
             i_pixel = 256*i+ymax
-            signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+            signal = integrated_ws.readY(i_pixel)[0]
             if signal*self.transmission_peak_to_bg_ratio < signal_max:
                 xpeakmin = i+1
                 break
             
             i_pixel_high = 256*(i+1)+ymax
-            signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+            signal_high = integrated_ws.readY(i_pixel_high)[0]
             if signal > signal_high:
                 xpeakmin = i+1
                 break
@@ -128,13 +129,13 @@ class EQSANSTransmission(PythonAlgorithm):
         ypeakmax = ny_max
         for i in range(ymax+1, ny_max+1):
             i_pixel = 256*xmax+i
-            signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+            signal = integrated_ws.readY(i_pixel)[0]
             if signal*self.transmission_peak_to_bg_ratio < signal_max:
                 ypeakmax = i-1
                 break
             
             i_pixel_low = 256*xmax+(i-1)
-            signal_low = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_low)[0]
+            signal_low = integrated_ws.readY(i_pixel_low)[0]
             if signal > signal_low:
                 ypeakmax = i-1
                 break
@@ -142,13 +143,13 @@ class EQSANSTransmission(PythonAlgorithm):
         ypeakmin = ny_min
         for i in range(ymax-1, ny_min+1, -1):
             i_pixel = 256*xmax+i
-            signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+            signal = integrated_ws.readY(i_pixel)[0]
             if signal*self.transmission_peak_to_bg_ratio < signal_max:
                 ypeakmin = i+1
                 break
             
             i_pixel_high = 256*xmax+(i-1)
-            signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+            signal_high = integrated_ws.readY(i_pixel_high)[0]
             if signal > signal_high:
                 ypeakmin = i+1
                 break
@@ -167,9 +168,9 @@ class EQSANSTransmission(PythonAlgorithm):
         for iy in range(ypeakmin, ypeakmax+1):
             for ix in range(xpeakmin, xcenter):
                 i_pixel = 256*ix+iy
-                signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+                signal = integrated_ws.readY(i_pixel)[0]
                 i_pixel_high = 256*(ix+1)+iy
-                signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+                signal_high = integrated_ws.readY(i_pixel_high)[0]
                 
                 if signal > signal_high and signal*self.min_transmission_peak_to_bg_ratio<signal_max: 
                     if i_pixel in mask:
@@ -180,9 +181,9 @@ class EQSANSTransmission(PythonAlgorithm):
         for iy in range(ypeakmin, ypeakmax+1):
             for ix in range(xpeakmax, xcenter, -1):
                 i_pixel = 256*ix+iy
-                signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+                signal = integrated_ws.readY(i_pixel)[0]
                 i_pixel_high = 256*(ix-1)+iy
-                signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+                signal_high = integrated_ws.readY(i_pixel_high)[0]
                 
                 if signal > signal_high and signal*self.min_transmission_peak_to_bg_ratio<signal_max: 
                     if i_pixel in mask:
@@ -193,9 +194,9 @@ class EQSANSTransmission(PythonAlgorithm):
         for iy in range(xpeakmin, xpeakmax+1):
             for ix in range(ypeakmin, ycenter):
                 i_pixel = 256*ix+iy
-                signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+                signal = integrated_ws.readY(i_pixel)[0]
                 i_pixel_high = 256*ix+iy+1
-                signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+                signal_high = integrated_ws.readY(i_pixel_high)[0]
                 
                 if signal > signal_high and signal*self.min_transmission_peak_to_bg_ratio<signal_max: 
                     if i_pixel in mask:
@@ -206,9 +207,9 @@ class EQSANSTransmission(PythonAlgorithm):
         for iy in range(xpeakmin, xpeakmax+1):
             for ix in range(ypeakmax, ycenter, -1):
                 i_pixel = 256*ix+iy
-                signal = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel)[0]
+                signal = integrated_ws.readY(i_pixel)[0]
                 i_pixel_high = 256*ix+iy-1
-                signal_high = mantid.getMatrixWorkspace(input_ws+'_int').readY(i_pixel_high)[0]
+                signal_high = integrated_ws.readY(i_pixel_high)[0]
                 
                 if signal > signal_high and signal*self.min_transmission_peak_to_bg_ratio<signal_max: 
                     if i_pixel in mask:
@@ -217,7 +218,7 @@ class EQSANSTransmission(PythonAlgorithm):
                     break
         
         # Sum transmission peak counts as a function of TOF
-        dataX = mantid.getMatrixWorkspace(input_ws).readX(0)
+        dataX = input_ws.readX(0)
         if HAS_NUMPY:
             dataX = dataX.tolist()
         nTOF = len(dataX)
@@ -228,17 +229,17 @@ class EQSANSTransmission(PythonAlgorithm):
         total_pixels = 0
 
         # We will normalize the transmission by the accelerator current  
-        proton_charge = mantid.getMatrixWorkspace(input_ws).getRun()["proton_charge"].getStatistics().mean
-        duration = mantid.getMatrixWorkspace(input_ws).getRun()["proton_charge"].getStatistics().duration
-        frequency = mantid.getMatrixWorkspace(input_ws).getRun()["frequency"].getStatistics().mean
+        proton_charge = input_ws.getRun()["proton_charge"].getStatistics().mean
+        duration = input_ws.getRun()["proton_charge"].getStatistics().duration
+        frequency = input_ws.getRun()["frequency"].getStatistics().mean
         acc_current = 1.0e-12 * proton_charge * duration * frequency
         
         for itof in range(nTOF-1):
             for ix in range(xpeakmin, xpeakmax+1):
                 for iy in range(ypeakmin, ypeakmax+1):
                     i_pixel = 256*ix+iy
-                    signal = mantid.getMatrixWorkspace(input_ws).readY(i_pixel)[itof]
-                    error = mantid.getMatrixWorkspace(input_ws).readE(i_pixel)[itof]
+                    signal = input_ws.readY(i_pixel)[itof]
+                    error = input_ws.readE(i_pixel)[itof]
                     if i_pixel in mask:
                         total_pixels += 1
                         dataY[itof] += signal
@@ -254,7 +255,7 @@ class EQSANSTransmission(PythonAlgorithm):
                 dataY[itof] /= factor
                 dataE[itof] /= factor
         
-        unitX = mantid.getMatrixWorkspace(input_ws).getAxis(0).getUnit().name()
+        unitX = input_ws.getAxis(0).getUnit().name()
         CreateWorkspace(output_ws, dataX, dataY, dataE, NSpec=1, UnitX=unitX)
         
         total_pixels /= (nTOF-1)
