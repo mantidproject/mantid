@@ -63,9 +63,9 @@ class EQSANSTofOffset(PythonAlgorithm):
         for i in range(4):
             # Read chopper information
             log_str = 'Phase'+str(i+1)
-            chopper_set_phase[i] = mtd[input_ws].getRun()[log_str].getStatistics().mean
+            chopper_set_phase[i] = input_ws.getRun()[log_str].getStatistics().mean
             log_str = 'Speed'+str(i+1)
-            chopper_speed[i] = mtd[input_ws].getRun()[log_str].getStatistics().mean
+            chopper_speed[i] = input_ws.getRun()[log_str].getStatistics().mean
 
             # Only process choppers with non-zero speed
             if chopper_speed[i]<=0:
@@ -206,8 +206,8 @@ class EQSANSTofOffset(PythonAlgorithm):
                 frame_srcpulse_wl_1=0.0
 
         # Get source and detector locations
-        source_z = mtd[input_ws].getInstrument().getSource().getPos().getZ()
-        detector_z = mtd[input_ws].getInstrument().getComponentByName("detector1").getPos().getZ()
+        source_z = input_ws.getInstrument().getSource().getPos().getZ()
+        detector_z = input_ws.getInstrument().getComponentByName("detector1").getPos().getZ()
     
         source_to_detector = (detector_z - source_z)*1000.0
         frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector ;
