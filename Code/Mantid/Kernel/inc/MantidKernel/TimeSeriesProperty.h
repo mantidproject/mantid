@@ -11,6 +11,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <iostream>
+#include <limits>
 #include <map>
 #include <vector>
 #include <sstream>
@@ -59,8 +60,6 @@ inline TimeSeriesPropertyStatistics getDataStatistics<double>(const std::vector<
 
   TimeSeriesPropertyStatistics out;
   int num = static_cast<int>(data.size());
-  if (num <= 0)
-    return out;
 
   //First you need the mean
   int counter = 0;
@@ -988,8 +987,19 @@ public:
    */
   TimeSeriesPropertyStatistics getStatistics()
   {
-    TimeSeriesPropertyStatistics out = getDataStatistics(this->valuesAsVector());
-    out.duration = DateAndTime::seconds_from_duration(this->lastTime() - this->firstTime());
+    TimeSeriesPropertyStatistics out;
+    if (this->size() > 0) {
+      out = getDataStatistics(this->valuesAsVector());
+      out.duration = DateAndTime::seconds_from_duration(this->lastTime() - this->firstTime());
+    } else {
+      double nan = std::numeric_limits<double>::quiet_NaN();
+      out.mean = nan;
+      out.median = nan;
+      out.standard_deviation = nan;
+      out.minimum = nan;
+      out.maximum = nan;
+      out.duration = nan;
+    }
 
     return out;
   }
