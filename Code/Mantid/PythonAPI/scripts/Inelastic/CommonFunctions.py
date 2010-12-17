@@ -18,7 +18,7 @@ def create_resultname(run_number, prefix='', suffix=''):
     suffix.    
     """
     if type(run_number) == list:
-        name = create_resultname(run_number[0], prefix,suffix)
+        name = create_resultname(run_number[0], prefix, suffix)
     elif type(run_number) == int:
         name = prefix + str(run_number) + '.spe' + suffix
     else:
@@ -94,8 +94,8 @@ def load_run(run_number, file_type='mono-sample',force=False):
         return mtd[output_name]
 
     # Don't have the file already so load it but first the delete the old one
-    if mtd.workspaceExists(os.path.basename(prev_file)):
-        mtd.deleteWorkspace(os.path.basename(prev_file))
+    #if mtd.workspaceExists(os.path.basename(prev_file)):
+    #    mtd.deleteWorkspace(os.path.basename(prev_file))
 
     ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
@@ -116,7 +116,7 @@ def load_run(run_number, file_type='mono-sample',force=False):
 
     return mtd[output_name]
 
-def sum_files(accumulator, files, prefix):
+def sum_files(accumulator, files):
     """
     Sum a current workspace and a list of files, acculating the results in the
     given workspace

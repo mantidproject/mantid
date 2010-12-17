@@ -318,9 +318,9 @@ class DirectEnergyConversion(object):
             norm_factor = None
 
         # Figure out what to call the workspace 
-        result_name = save_path
+        result_name = mono_run
         if not result_name is None:
-            result_name = common.create_resultname(save_path)
+            result_name = common.create_resultname(mono_run)
         
         # Main run file conversion
         sample_wkspace = self.mono_sample(mono_run, ei, white_run, self.map_file,
@@ -539,7 +539,8 @@ class DirectEnergyConversion(object):
             if len(runs) > 1:
                 del runs[0]
                 common.sum_files(result_ws.getName(), runs)
-                RenameWorkspace(result_ws, 'summed-' + file_type)
+                alg = RenameWorkspace(result_ws, 'summed-' + file_type)
+                result_ws = alg.workspace()
         elif type(str):
             result_ws = common.load_run(runs, file_type)
         else:
