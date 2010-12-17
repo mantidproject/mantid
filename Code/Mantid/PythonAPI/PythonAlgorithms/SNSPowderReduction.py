@@ -148,9 +148,10 @@ class SNSPowderReduction(PythonAlgorithm):
         # take care of filtering events
         if self._filterBadPulses:
             pcharge = wksp.getRun()['proton_charge']
-            pcharge = pcharge.getStatistics().mean
+            pcharge_min = pcharge.getStatistics().mean * .95
+            pcharge_max = pcharge.getStatistics().maximum * 1.1
             FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName="proton_charge",
-                             MinimumValue=.95*pcharge, MaximumValue=2.*pcharge)
+                             MinimumValue=pcharge_min, MaximumValue=pcharge_max)
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
