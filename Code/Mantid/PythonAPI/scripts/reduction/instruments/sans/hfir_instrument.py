@@ -61,13 +61,11 @@ class HFIRSANS(Instrument):
         
         return masked_pts
         
-    def get_masked_detectors(self, masked_pixels):
+    def get_detector_from_pixel(self, pixel_list):
         """
-            Returns a list of masked detector channels from the list of pixels.
-            This is very instrument-dependent, because it depends on the actual
-            mapping of the detector pxiels to Mantid detector IDs.
-            TODO: think about a way to clean this up
+            Returns a list of detector IDs from a list of [x,y] pixels,
+            where the pixel coordinates are in pixel units.
         """
-        return [ 1000000 + p[0]*1000 + p[1] for p in masked_pixels ]
+        return [ 1000000 + p[0]*1000 + p[1] for p in pixel_list ]
         
         

@@ -596,27 +596,37 @@ class SensitivityCorrection(ReductionStep):
 class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
-        TODO: Maintain HFIR-ISIS compatibility
     """
-    def __init__(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
+    def __init__(self):
         """
-            Initalize masking and optionally define a "picture frame" outside of
-            which the spectra from all detectors are to be masked.
-            @param nx_low: number of pixels to mask on the lower-x side of the detector
-            @param nx_high: number of pixels to mask on the higher-x side of the detector
-            @param ny_low: number of pixels to mask on the lower-y side of the detector
-            @param ny_high: number of pixels to mask on the higher-y side of the detector
+            Initalize masking 
         """
         super(Mask, self).__init__()
-        self._nx_low = nx_low
-        self._nx_high = nx_high
-        self._ny_low = ny_low
-        self._ny_high = ny_high
+        self._nx_low = 0
+        self._nx_high = 0
+        self._ny_low = 0
+        self._ny_high = 0
         
         self._xml = []
 
         #these spectra will be masked by the algorithm MaskDetectors
-        self.spec_list = ''
+        self.spec_list = []
+        
+        # List of pixels to mask
+        self.masked_pixels = []
+        
+    def mask_edges(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
+    	"""
+			Define a "picture frame" outside of which the spectra from all detectors are to be masked.
+            @param nx_low: number of pixels to mask on the lower-x side of the detector
+            @param nx_high: number of pixels to mask on the higher-x side of the detector
+            @param ny_low: number of pixels to mask on the lower-y side of the detector
+            @param ny_high: number of pixels to mask on the higher-y side of the detector    	
+        """
+        self._nx_low = nx_low
+        self._nx_high = nx_high
+        self._ny_low = ny_low
+        self._ny_high = ny_high    	
         
     def add_xml_shape(self, complete_xml_element):
         if not complete_xml_element.startswith('<') :
@@ -657,6 +667,18 @@ class Mask(ReductionStep):
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
             complement=True, id=ID))
 
+	def add_pixel_rectangle(self, x_min, x_max, y_min, y_max):
+		"""
+			Mask out a rectangle area defined in pixel coordinates.
+			@param x_min: Minimum x to mask
+			@param x_max: Maximum x to mask
+			@param y_min: Minimum y to mask
+			@param y_max: Maximum y to mask
+		"""
+		for ix in range(x_min, x_max+1):
+			for iy in rangE(y_min, y_max+1):
+				self.masked_pixels.append([ix, iy])
+
     def execute(self, reducer, workspace, instrument=None):
         for shape in self._xml:
             MaskDetectorsInShape(workspace, shape)
@@ -670,14 +692,19 @@ class Mask(ReductionStep):
                                                              self._ny_low,
                                                              self._ny_high)
             # Transform the list of pixels into a list of Mantid detector IDs
-            masked_detectors = instrument.get_masked_detectors(masked_pixels)
+            masked_detectors = instrument.get_detector_from_pixel(masked_pixels)
             
             # Mask the pixels by passing the list of IDs
-            MaskDetectors(workspace, None, masked_detectors)
+            MaskDetectors(workspace, DetectorList = masked_detectors)
 
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
             
+        # Mask out internal list of pixels
+        if len(self.masked_pixels)>0:
+        	masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels)
+        	MaskDetectors(workspace, DetectorList = masked_detectors)
+        	
         return "Mask applied"
 
     def view_mask(self):

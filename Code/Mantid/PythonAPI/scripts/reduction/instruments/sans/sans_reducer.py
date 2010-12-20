@@ -70,6 +70,9 @@ class SANSReducer(Reducer):
         
         # Default data loader
         self._data_loader = sans_reduction_steps.LoadRun()
+        
+        # Default mask object
+        self._mask = sans_reduction_steps.Mask()
     
     def set_normalizer(self, option):
         """

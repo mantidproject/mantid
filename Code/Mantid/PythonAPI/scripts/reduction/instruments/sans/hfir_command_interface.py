@@ -72,7 +72,7 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                       spreader_transmission_err=spreader_transmission_err))
   
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
-    ReductionSingleton().set_mask(sans_reduction_steps.Mask(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high))
+    ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
 
 def Background(datafile):
     ReductionSingleton().set_background(datafile) 
