@@ -27,7 +27,7 @@ namespace Algorithms
 
     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-    This file is part of Mantid.
+    This file is part of Mantid.  
 
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
