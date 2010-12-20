@@ -97,7 +97,6 @@ class TestCommands(unittest.TestCase):
         # The reducer is a singleton, so create a new instance for each unit test
         ReductionSingleton.clean(SANSReducer)
         self.assertEqual(ReductionSingleton()._sensitivity_correcter, None)
-        self.assertEqual(ReductionSingleton()._mask, None)
         self.assertEqual(ReductionSingleton()._transmission_calculator, None)
         self.assertEqual(ReductionSingleton()._save_iq, None)
         self.assertEqual(ReductionSingleton()._azimuthal_averager, None)
@@ -203,7 +202,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
         self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 6000.0)    
         
-        self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt"))
+        self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt", tolerance=1e-4))
     
     def test_reduction_1(self):
         HFIRSANS()
