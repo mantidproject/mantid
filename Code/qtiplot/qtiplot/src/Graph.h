@@ -299,7 +299,7 @@ public slots:
                                   bool through = true, bool minus = true, bool plus = true);
 
   /// Adds the errors to an existing MantidCurve
-  void addMantidErrorBars(const QString& curveName);
+  void addMantidErrorBars(const QString& curveName,bool drawAll);
   /// Removes the errors off an existing MantidCurve
   void removeMantidErrorBars(const QString& curveName);
 

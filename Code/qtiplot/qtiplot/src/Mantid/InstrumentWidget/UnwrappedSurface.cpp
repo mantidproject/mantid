@@ -505,6 +505,8 @@ void UnwrappedSurface::moveSelection(int x,int y)
 
 void UnwrappedSurface::endSelection(int x,int y)
 {
+  (void) x; //avoid compiler warning
+  (void) y; //avoid compiler warning
   if (!m_pickImage) // we are in normal mode
   {
     if (!m_selectRect.isNull())

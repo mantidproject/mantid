@@ -486,6 +486,7 @@ std::string DateAndTime::to_simple_string() const
   return boost::posix_time::to_simple_string(this->to_ptime());
 }
 
+
 //------------------------------------------------------------------------------------------------
 /** Return the date and time as a string, using formatting of strftime().
  * Default format gives "1990-Jan-02 03:04:05"
@@ -510,12 +511,13 @@ std::string DateAndTime::to_ISO8601_string() const
 }
 
 
+////------------------------------------------------------------------------------------------------
 ///** Stream operator
 // */
-//std::ostream& DateAndTime::operator<<(std::ostream& s)
+//std::ostream& DateAndTime::operator<< (std::ostream& stream, const DateAndTime & obj)
 //{
-//  s << this->to_simple_string();
-//  return s;
+//  stream << obj->to_simple_string();
+//  return stream;
 //}
 
 //------------------------------------------------------------------------------------------------
@@ -972,16 +974,4 @@ std::string TimeInterval::end_str()const
 
 
 
-/** Stream output operator  */
-std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
-{
-  s << t.begin() << " - " << t.end();
-  return s;
-}
 
-/** Stream output operator  */
-std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::DateAndTime& t)
-{
-  s << t.to_simple_string();
-  return s;
-}

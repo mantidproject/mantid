@@ -9,7 +9,7 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid:
 
 void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
 {
-  static const double pi2 = 2*acos(-1.);
+  //static const double pi2 = 2*acos(-1.);
   Mantid::Geometry::V3D pos = udet.detector->getPos() - m_pos;
 
   // projection to cylinder axis

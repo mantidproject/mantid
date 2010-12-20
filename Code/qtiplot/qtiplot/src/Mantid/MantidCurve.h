@@ -88,7 +88,7 @@ public:
   const MantidQwtData* mantidData()const;
 
   /// Enables/disables drawing of error bars
-  void setErrorBars(bool yes=true){m_drawErrorBars = yes;}
+  void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
 
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
@@ -143,6 +143,7 @@ private:
   /// Make a name for a copied curve
   static QString createCopyName(const QString& curveName);
   bool m_drawErrorBars;///< True for drawing error bars
+  bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
   /// workspace index
   int  m_index;

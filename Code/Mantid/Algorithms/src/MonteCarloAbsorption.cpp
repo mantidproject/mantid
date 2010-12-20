@@ -120,10 +120,8 @@ namespace Mantid
       message.str("");
       
       Progress prog(this,0.0,1.0,numHists);
-      PARALLEL_FOR2(m_inputWS, correctionFactors)
       for( int i = 0; i < numHists; ++i )
       {
-        PARALLEL_START_INTERUPT_REGION
 
         // Copy over the X-values
         const MantidVec & xValues = m_inputWS->readX(i);
@@ -161,10 +159,7 @@ namespace Mantid
         }
         prog.report();
 
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-
+     }
 
       // Save the results
       setProperty("OutputWorkspace", correctionFactors);
@@ -195,10 +190,17 @@ namespace Mantid
       error = 0.0;
       while( numDetected < m_numberOfEvents )
       {
-        V3D startPos = sampleBeamProfile();
-        V3D scatterPoint = selectScatterPoint();
-        attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
-        ++numDetected;
+	V3D startPos = sampleBeamProfile();
+	V3D scatterPoint = selectScatterPoint();
+	try
+	{
+	  attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
+	}
+	catch(std::logic_error &)
+	{
+	  continue;
+	}
+    	++numDetected;
       }
 
       // Attenuation factor is simply the average value
@@ -273,7 +275,7 @@ namespace Mantid
       if( m_sampleShape->interceptSurface(beforeScatter) == 0 || 
           m_sampleShape->interceptSurface(afterScatter) == 0 )
       {
-        return 0.0;
+	throw std::logic_error("Track has no surfaces intersections.");
       }
 
       double length = beforeScatter.begin()->distInsideObject;

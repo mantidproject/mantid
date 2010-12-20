@@ -94,7 +94,7 @@ namespace DataObjects
     /// Return the workspace typeID
     virtual const std::string id() const{return "TableWorkspace";}
     /// Get the footprint in memory in KB.
-    virtual long int getMemorySize() const;
+    virtual size_t getMemorySize() const;
 
     /// Creates a new column.
     bool addColumn(const std::string& type, const std::string& name);

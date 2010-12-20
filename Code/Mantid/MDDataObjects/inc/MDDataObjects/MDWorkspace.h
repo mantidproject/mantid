@@ -75,7 +75,7 @@ namespace Mantid
 
       MDWorkspace(unsigned int nDimensions=4,unsigned int nRecDims=3);
 
-      virtual long getMemorySize(void)const;
+      virtual size_t getMemorySize(void) const;
 
       //  IMD workspace interface functions
      /// return ID specifying the workspace kind

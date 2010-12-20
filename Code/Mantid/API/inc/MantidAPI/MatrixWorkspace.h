@@ -117,7 +117,7 @@ namespace Mantid
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
 
       /// Get the footprint in memory in KB.
-      virtual long int getMemorySize() const;
+      virtual size_t getMemorySize() const;
 
       /// Returns the set of parameters modifying the base instrument
       Geometry::ParameterMap& instrumentParameters()const;
@@ -271,9 +271,12 @@ namespace Mantid
       Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
       /// The information on the sample environment
       Kernel::cow_ptr<Sample> m_sample;
+
+    protected:
       /// The run information
       Kernel::cow_ptr<Run> m_run;
 
+    private:
       /// The unit for the data values (e.g. Counts)
       std::string m_YUnit;
       /// A text label for use when plotting spectra

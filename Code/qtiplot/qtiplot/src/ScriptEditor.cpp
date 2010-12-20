@@ -118,7 +118,10 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
   m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL),m_previousKey(0),
-  m_bmulti_line(false),m_originalIndent(0),m_multi_line_count(0),m_compiled(false)
+  m_bmulti_line(false),
+  m_multi_line_count(0),
+  m_originalIndent(0),
+  m_compiled(false)
 
 {
   // Undo action

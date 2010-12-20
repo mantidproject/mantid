@@ -1234,7 +1234,7 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
       /*
       * HDF files have magic cookie 0x0e031301 in the first 4 bytes
       */
-      if ( (nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)||bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u)) == 0x0e031301)||bnexs )
       {
         //hdf
         return true;

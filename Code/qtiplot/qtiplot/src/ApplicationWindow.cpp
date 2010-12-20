@@ -3340,7 +3340,7 @@ void ApplicationWindow::addErrorBars()
 
   ErrDialog* ed = new ErrDialog(this);
   ed->setAttribute(Qt::WA_DeleteOnClose);
-  connect (ed,SIGNAL(options(const QString&,int,const QString&,int)),this,SLOT(defineErrorBars(const QString&,int,const QString&,int)));
+  connect (ed,SIGNAL(options(const QString&,int,const QString&,int,bool)),this,SLOT(defineErrorBars(const QString&,int,const QString&,int,bool))); 
   connect (ed,SIGNAL(options(const QString&,const QString&,int)),this,SLOT(defineErrorBars(const QString&,const QString&,int)));
 
   ed->setCurveNames(g->analysableCurvesList());
@@ -3397,7 +3397,7 @@ void ApplicationWindow::removeErrorBars(const QString& name)
 
 }
 
-void ApplicationWindow::defineErrorBars(const QString& name, int type, const QString& percent, int direction)
+void ApplicationWindow::defineErrorBars(const QString& name, int type, const QString& percent, int direction, bool drawAll)
 {
   MdiSubWindow *w = activeWindow(MultiLayerWindow);
   if (!w)
@@ -3409,7 +3409,7 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
 
   if (type == 2) // A MantidCurve - do all the work in the Graph method
   {
-    g->addMantidErrorBars(name);
+    g->addMantidErrorBars(name, drawAll);
     return;
   }
 
@@ -14489,7 +14489,10 @@ void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compr
   f.close();
 
   if (compress)
+  {
+    char w9[]="w9";
     file_compress((char *)fn.ascii(), "w9");
+  }
 
   QApplication::restoreOverrideCursor();
 }

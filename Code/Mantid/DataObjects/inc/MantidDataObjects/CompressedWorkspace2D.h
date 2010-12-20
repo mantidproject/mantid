@@ -56,7 +56,7 @@ namespace DataObjects
     ~CompressedWorkspace2D();
     virtual const std::string id() const {return "CompressedWorkspace2D";}
     /// Returns the size of physical memory the workspace takes
-    long int getMemorySize() const;
+    size_t getMemorySize() const;
 
   protected:
 

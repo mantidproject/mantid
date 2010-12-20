@@ -84,6 +84,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
  */
 Qt::ItemFlags InstrumentTreeModel::flags(const QModelIndex &index) const
 {
+  (void) index; //avoid compiler warning
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -92,6 +93,9 @@ Qt::ItemFlags InstrumentTreeModel::flags(const QModelIndex &index) const
  */
 QVariant InstrumentTreeModel::headerData(int section, Qt::Orientation orientation,int role) const
 {
+  (void) section; //avoid compiler warning
+  (void) orientation; //avoid compiler warning
+  (void) role; //avoid compiler warning
 	return QVariant();
 }
 

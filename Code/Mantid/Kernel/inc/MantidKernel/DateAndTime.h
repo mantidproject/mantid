@@ -55,6 +55,12 @@ public:
   std::string to_string(const std::string format = "%Y-%b-%d %H:%M:%S") const;
   std::string to_ISO8601_string() const;
 
+  /// Stream output operator
+  friend std::ostream& operator<< (std::ostream& stream, const DateAndTime & t)
+  {
+    stream << t.to_simple_string(); return stream;
+  }
+
   void set_to_maximum();
   void set_to_minimum();
 
@@ -90,6 +96,7 @@ public:
   DateAndTime& operator-=(const double seconds);
 
   time_duration operator-(const DateAndTime& rhs) const;
+
 
   //-------------- STATIC FUNCTIONS -----------------------
   static DateAndTime get_current_time();
@@ -183,6 +190,14 @@ public:
     std::string begin_str()const;
     /// String representation of the end time
     std::string end_str()const;
+
+    /** Stream output operator  */
+    friend std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
+    {
+      s << t.begin().to_simple_string() << " - " << t.end().to_simple_string();
+      return s;
+    }
+
 private:
     /// begin
     DateAndTime m_begin;
@@ -193,11 +208,6 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-//DLLExport std::ostream& operator<<(std::ostream&,const Mantid::Kernel::TimeInterval&);
-
-// Stream outputting of DateAndTime
-DLLExport std::ostream& operator<<(std::ostream&, const Mantid::Kernel::DateAndTime&);
 
 #endif // DATE_AND_TIME_H
 

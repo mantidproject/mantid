@@ -56,7 +56,7 @@ public:
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 
-  virtual long int getMemorySize() const;
+  virtual size_t getMemorySize() const;
 	virtual bool threadSafe() const { return false; }
 
 protected:

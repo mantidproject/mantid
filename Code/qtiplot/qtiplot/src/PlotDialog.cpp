@@ -2720,7 +2720,7 @@ void PlotDialog::setPenStyle(Qt::PenStyle style)
 	switch (style)
 	{
 		case Qt::SolidLine:
-			boxLineStyle->setCurrentIndex(0);
+      boxLineStyle->setCurrentIndex(0);
 			break;
 		case Qt::DashLine:
 			boxLineStyle->setCurrentIndex(1);
@@ -2734,6 +2734,9 @@ void PlotDialog::setPenStyle(Qt::PenStyle style)
 		case Qt::DashDotDotLine:
 			boxLineStyle->setCurrentIndex(4);
 			break;
+		default:
+      boxLineStyle->setCurrentIndex(0);
+      break;
 	}
 }
 

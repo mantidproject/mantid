@@ -229,8 +229,17 @@ TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b
   TimeSplitterType out;
 
   //Concatenate the two lists
-  TimeSplitterType temp = a;
-  temp.insert(temp.end(), b.begin(), b.end());
+  TimeSplitterType temp;
+  //temp.insert(temp.end(), b.begin(), b.end());
+
+  // Add the intervals, but don't add any invalid (empty) ranges
+  TimeSplitterType::const_iterator it;;
+  for (it = a.begin(); it != a.end(); it++)
+    if (it->stop() > it->start())
+      temp.push_back(*it);
+  for (it = b.begin(); it != b.end(); it++)
+    if (it->stop() > it->start())
+      temp.push_back(*it);
 
   //Sort by start time
   std::sort(temp.begin(), temp.end(), compareSplittingInterval);

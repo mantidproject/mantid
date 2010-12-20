@@ -134,7 +134,7 @@ void GLViewport::issueGL() const
 
   Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
   //Window Aspect ratio
-  GLdouble windowAspect=(GLdouble)mWidth/(GLdouble)mHeight;
+  GLdouble windowAspect= mHeight > 0 ? (GLdouble)mWidth/(GLdouble)mHeight : 1.0;
   //Adjust width and height to show the dimensions correct
   //Adjust window aspect ratio
   if(windowAspect<1.0) //window height is higher than width (x<y)
@@ -199,9 +199,10 @@ void GLViewport::issueGL() const
     if (OpenGLError::hasError("GLViewport::issueGL()"))
     {
       OpenGLError::log() << "Arguments to glOrtho:\n";
-      OpenGLError::log() << center[0]-distance[0]-mXTrans <<','<< center[0]+distance[0]-mXTrans <<','<<
-                            center[1]-distance[1]-mYTrans <<','<< center[1]+distance[1]-mYTrans <<','<<
-                            nearVal <<','<< farVal << "\n\n";
+      OpenGLError::log() << center << '\n'
+                         << distance << '\n'
+                         << mXTrans << ' ' << mYTrans << '\n'
+                         << nearVal << ' ' << farVal << "\n\n";
     }
   }
   glMatrixMode(GL_MODELVIEW);

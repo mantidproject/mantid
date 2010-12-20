@@ -100,6 +100,20 @@ void FilterByLogValue::exec()
   double tolerance = getProperty("TimeTolerance");
   std::string logname = getPropertyValue("LogName");
 
+  // Find the start and stop times of the run, but handle it if they are not found.
+  DateAndTime run_start, run_stop;
+  double handle_edge_values = false;
+  try
+  {
+    run_start = inputWS->getFirstPulseTime() - tolerance;
+    run_stop = inputWS->getLastPulseTime() + tolerance;
+    handle_edge_values = true;
+  }
+  catch (Exception::NotFoundError & e)
+  {
+  }
+
+
   if (max <= min)
     throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
 
@@ -111,6 +125,33 @@ void FilterByLogValue::exec()
   {
     //This function creates the splitter vector we will use to filter out stuff.
     log->makeFilterByValue(splitter, min, max, tolerance);
+
+    if (log->realSize() >= 1 && handle_edge_values)
+    {
+      double val;
+      // Assume everything before the 1st value is constant
+      val = log->firstValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(run_start, log->firstTime(), 0));
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        splitter = splitter | extraFilter;
+      }
+
+      // Assume everything after the LAST value is constant
+      val = log->lastValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(log->lastTime(), run_stop, 0) );
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        splitter = splitter | extraFilter;
+      }
+    }
+
+
+
     // for (int i=0; i < splitter.size(); i++)   std::cout << splitter[i].start() << " to " << splitter[i].stop() << "\n";
   }
 

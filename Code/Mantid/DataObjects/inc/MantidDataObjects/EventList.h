@@ -271,7 +271,7 @@ public:
 
   virtual std::size_t getNumberEvents() const;
 
-  long int getMemorySize() const;
+  size_t getMemorySize() const;
 
   virtual size_t histogram_size() const;
 

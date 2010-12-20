@@ -157,6 +157,12 @@ public:
   /// 'Virtual copy constructor'
   Property* clone() { return new TimeSeriesProperty<TYPE>(*this); }
 
+  /** Return the memory used by the property, in bytes */
+  size_t getMemorySize() const
+  {
+    //Rough estimate
+    return m_propertySeries.size() * (sizeof(TYPE) + sizeof(DateAndTime));
+  }
 
   //--------------------------------------------------------------------------------------
   ///Add the value of another property
@@ -313,12 +319,13 @@ public:
   //-----------------------------------------------------------------------------------------------
   /**
    * Fill a TimeSplitterType that will filter the events by matching
-   * log values >= min and < max.
+   * log values >= min and < max. Creates SplittingInterval's where
+   * times match the log values, and going to index==0.
    *
-   * @param split Splitter that will be filled.
-   * @param min min value
-   * @param max max value
-   * @param TimeTolerance offset added to times in seconds.
+   * @param split :: Splitter that will be filled.
+   * @param min :: min value
+   * @param max :: max value
+   * @param TimeTolerance :: offset added to times in seconds.
    */
   void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance)
   {
@@ -333,20 +340,13 @@ public:
     int numgood = 0;
     DateAndTime lastTime, t;
     DateAndTime start, stop;
-//    int count = 0;
 
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
     {
-//      count++;
-
       lastTime = t;
       //The new entry
       t = it->first;
       TYPE val = it->second;
-
-//      //The time cannot have gone backwards! But it could be the same twice
-//      if (t < lastTime)
-//        std::cout << "Time has gone backwards!" << count <<"\n";
 
       //A good value?
       isGood = ((val >= min) && (val < max));

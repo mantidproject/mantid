@@ -93,8 +93,16 @@ public:
     runInfo_2 = runInfo;
     TS_ASSERT_EQUALS( runInfo_2.getProperties().size(), 1);
     TS_ASSERT_DELTA( runInfo_2.getProtonCharge(), 15.0, 1e-8);
-    
+  }
 
+  void testMemory()
+  {
+    Run runInfo;
+    TS_ASSERT_EQUALS( runInfo.getMemorySize(), 0);
+    
+    Property *p = new ConcreteProperty();
+    runInfo.addProperty(p);
+    TS_ASSERT_EQUALS( runInfo.getMemorySize(), sizeof(ConcreteProperty) + sizeof( void *));
   }
 };
 

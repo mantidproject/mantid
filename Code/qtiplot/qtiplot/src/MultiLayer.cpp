@@ -690,6 +690,8 @@ void MultiLayer::exportPDF(const QString& fname)
 
 void MultiLayer::exportVector(const QString& fileName, int res, bool color, bool keepAspect, QPrinter::PageSize pageSize)
 {
+  (void) res; //avoid compiler warning
+
 	if ( fileName.isEmpty() ){
 		QMessageBox::critical(this, tr("MantidPlot - Error"),
 		tr("Please provide a valid file name!"));

@@ -63,11 +63,12 @@ private:
 	QPushButton *insertBtn, *deleteBtn;
 	QCheckBox *scaleColorsBox;
 
+  //! Levels range
+  double min_val, max_val;
+
 	//! Color map object
 	QwtLinearColorMap color_map;
 
-	//! Levels range
-	double min_val, max_val;
 };
    
 #endif

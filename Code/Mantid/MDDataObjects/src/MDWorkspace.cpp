@@ -140,7 +140,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return this->m_spMDImage->getGeometry();
     }
 
-    long MDWorkspace::getMemorySize(void) const
+    size_t MDWorkspace::getMemorySize(void) const
     {
       return m_spMDImage->getMemorySize() + m_spDataPoints->getMemorySize() ;
     } 

@@ -579,7 +579,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				legend = graph->newLegend(parseOriginText(QString::fromLocal8Bit(opj.layerLegend(g,l).txt.c_str())));
 			}
 			int auto_color=0;
-			int auto_color1=0;
+			//int auto_color1=0;
 			int style=0;
 			for(int c=0; c<opj.numCurves(g,l); c++)
 			{

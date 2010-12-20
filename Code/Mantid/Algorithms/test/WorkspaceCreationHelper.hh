@@ -16,6 +16,8 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
+#include "../../Geometry/test/ComponentCreationHelpers.hh"
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -165,7 +167,7 @@ public:
   }
 
   /** Create a 2D workspace with this many histograms and bins.
-   * Filled with Y = 2.0 and E = sqrt(2.0)
+   * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0)
   {
@@ -188,6 +190,54 @@ public:
     return retVal;
   }
 
+  /**
+   * Create a test workspace with a fully defined instrument
+   * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the
+   * pervious. 
+   * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
+   */
+  static Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins)
+  {
+    Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins);
+    boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    space->setInstrument(testInst);
+
+    // Create detectors for each spectra and set a simple mapping between pixel ID = spectrum number = index
+    const double pixelRadius(0.05);
+    Object_sptr pixelShape = 
+      ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+
+    const double detXPos(5.0);
+    for( int i = 0; i < nhist; ++i )
+    {
+      std::ostringstream lexer;
+      lexer << "pixel-" << i << ")";
+      Detector * physicalPixel = new Detector(lexer.str(), pixelShape, testInst.get());
+      const double ypos = i*2.0*pixelRadius;
+      physicalPixel->setPos(detXPos, ypos,0.0);
+      physicalPixel->setID(i);
+      testInst->add(physicalPixel);
+      testInst->markAsDetector(physicalPixel);
+    }
+    
+    space->mutableSpectraMap().populateSimple(0, nhist);
+
+    // Define a source and sample position
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(), testInst.get());
+    source->setPos(V3D(-20.0, 0.0, 0.0));
+    testInst->add(source);
+    testInst->markAsSource(source);
+
+    // Define a sample as a simple sphere
+    ObjComponent *sample = new ObjComponent("samplePos", Object_sptr(), testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+
+    return space;
+  }
+
   static WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {
     WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value,sqrt(value)));
@@ -199,6 +249,14 @@ public:
     WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value, error));
     return retVal;
   }
+
+  /** Perform some finalization on event workspace stuff */
+  static void EventWorkspace_Finalize(EventWorkspace_sptr ew)
+  {
+    // get a proton charge
+    ew->mutableRun().integrateProtonCharge();
+  }
+
 
   /** Create event workspace with:
    * 500 pixels
@@ -212,7 +270,8 @@ public:
   /** Create event workspace with:
    * 50 pixels
    * 100 histogrammed bins from 0.0 in steps of 1.0
-   * 200 events; two in each bin.
+   * 200 events; two in each bin, at time 0.5, 1.5, etc.
+   * PulseTime = 1 second, 2 seconds, etc.
    */
   static EventWorkspace_sptr CreateEventWorkspace2()
   {
@@ -239,15 +298,15 @@ public:
         for (int i=0; i<numEvents; i++)
         {
           if (eventPattern == 1) // 0, 1 diagonal pattern
-            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, 1); 
+            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, Kernel::DateAndTime(i,0));
           else if (eventPattern == 2) // solid 2
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1); 
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1); 
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
           }
           else if (eventPattern == 3) // solid 1
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1);
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
           }
         }
       }

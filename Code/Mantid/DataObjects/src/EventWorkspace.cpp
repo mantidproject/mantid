@@ -279,9 +279,9 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// Returns the amount of memory used in KB
-  long int EventWorkspace::getMemorySize() const
+  size_t EventWorkspace::getMemorySize() const
   {
-    long int  total = 0;
+    size_t  total = 0;
 
     //Add up the two buffers
     total += (this->m_bufferedDataY.size() + this->m_bufferedDataE.size()) * this->blocksize() * sizeof(double);
@@ -292,6 +292,8 @@ namespace DataObjects
     {
       total += (*it)->getMemorySize();
     }
+
+    total += m_run->getMemorySize();
 
     // Return in KB
     return total / 1024;
@@ -988,7 +990,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /** Return the time of the first pulse received, by accessing the run's
-   * sample logs to find the ProtonCharge
+   * sample logs to find the proton_charge
    *
    * @return the time of the first pulse
    * @throw runtime_error if the log is not found; or if it is empty.
@@ -1001,6 +1003,23 @@ namespace DataObjects
     DateAndTime startDate = log->firstTime();
     //Return as DateAndTime.
     return startDate;
+  }
+
+  //-----------------------------------------------------------------------------
+  /** Return the time of the last pulse received, by accessing the run's
+   * sample logs to find the proton_charge
+   *
+   * @return the time of the first pulse
+   * @throw runtime_error if the log is not found; or if it is empty.
+   */
+  Kernel::DateAndTime EventWorkspace::getLastPulseTime() const
+  {
+    TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
+    if (!log)
+      throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
+    DateAndTime stopDate = log->lastTime();
+    //Return as DateAndTime.
+    return stopDate;
   }
 
 

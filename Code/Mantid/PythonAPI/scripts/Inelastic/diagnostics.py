@@ -90,8 +90,6 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     if other_white is not None and str(other_white) != '':
         # Load and integrate
         data_ws = common.load_run(other_white, 'white-beam2')
-        # Make sure we have a matrix workspace otherwise Integration() returns all zeros.
-        ConvertToMatrixWorkspace(data_ws, data_ws)
         second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()
         MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run tests

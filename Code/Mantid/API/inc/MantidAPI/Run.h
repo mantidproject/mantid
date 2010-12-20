@@ -58,6 +58,8 @@ namespace Mantid
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
 
+      size_t getMemorySize() const;
+
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop, bool overwrite = false);
       /// Add a property of given type

@@ -132,6 +132,9 @@ public:
 
   virtual void setUnits(std::string unit);
 
+  virtual size_t getMemorySize() const
+  { return sizeof(Property); }
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);

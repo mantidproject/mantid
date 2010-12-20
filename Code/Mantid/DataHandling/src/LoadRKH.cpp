@@ -203,7 +203,7 @@ bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,unsigned c
   (!extn.compare("txt")|| extn.compare("q"))?bascii=true:bascii=false;
 
   bool is_ascii (true);
-  for(int i=0; i<nread; i++)
+  for(size_t i=0; i<nread; i++)
   {
     if (!isascii(header_buffer[i]))
       is_ascii =false;

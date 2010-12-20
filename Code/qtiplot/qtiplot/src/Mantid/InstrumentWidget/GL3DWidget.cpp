@@ -346,6 +346,7 @@ void GL3DWidget::switchToPickingMode()
  */
 void GL3DWidget::paintEvent(QPaintEvent *event)
 {
+  (void) event; //avoid compiler warning
   makeCurrent();
   if(iInteractionMode == GL3DWidget::PickMode)
   {
@@ -464,6 +465,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
  */
 void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
 {
+  (void) event; //avoid compiler warning
   if( iInteractionMode == GL3DWidget::PickMode )
   {
     mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
@@ -583,7 +585,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
   makeCurrent();
   setCursor(Qt::SizeVerCursor);
   _trackball->initZoomFrom(event->x(),event->y());
-  _trackball->generateZoomTo(event->x(),event->y()+event->delta());
+  _trackball->generateZoomTo(event->x(),event->y()-event->delta());
   update();
   setCursor(Qt::PointingHandCursor);
   OpenGLError::check("GL3DWidget::wheelEvent");
@@ -734,9 +736,6 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
 {
   scene=col;
-  int width,height;
-  _viewport->getViewport(&width,&height);
-  resizeGL(width,height);
   update();
   OpenGLError::check("GL3DWidget::setActorCollection");
 }

@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
+#include "MantidQtCustomInterfaces/SANSRunWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"

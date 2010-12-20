@@ -62,7 +62,7 @@ public:
     const std::string& getComment() const;
     const std::string& getName() const;
     /// Get the footprint in memory in KB.
-    virtual long int getMemorySize() const = 0;
+    virtual size_t getMemorySize() const = 0;
 
     /** Marks the workspace as safe for multiple threads to edit data simutaneously.
      * Workspace creation is always considered to be a single threaded operation.

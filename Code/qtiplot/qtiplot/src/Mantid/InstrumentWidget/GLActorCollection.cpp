@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <float.h>
 
-static int hash(unsigned char r, unsigned char g, unsigned char b)
-{
-	 return r*65536+g*256+b;
-}
+//static int hash(unsigned char r, unsigned char g, unsigned char b)
+//{
+//	 return r*65536+g*256+b;
+//}
 
 GLActorCollection::GLActorCollection():GLObject(true)
 {
@@ -89,6 +89,8 @@ GLActor* GLActorCollection::getActor(int index)
  */
 GLActor* GLActorCollection::findColorID(unsigned char color[3])
 {
+  (void) color; //avoid compiler warning
+
 	GLActor* picked=0;
 	throw std::runtime_error("Find colorid not implemented");
 	//int key=hash(color[0],color[1],color[2]);

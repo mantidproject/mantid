@@ -94,6 +94,8 @@ void GLGroupPickBox::mousePressed(Qt::MouseButtons buttons, const QPoint & pos)
  */
 void GLGroupPickBox::mouseReleased (Qt::MouseButtons buttons, const QPoint & pos )
 {
+  (void) buttons; //avoid compiler warning
+
   if(mPickingActive)
   {
     mPickingActive=false;

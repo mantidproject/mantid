@@ -40,7 +40,7 @@ namespace Algorithms
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DiffractionEventReadDetCal: public API::Algorithm
+class DLLExport DiffractionEventReadDetCal: public API::Algorithm, public Geometry::Quat
 {
 public:
   /// Default constructor
@@ -54,7 +54,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Function to optimize
-  void intensity(double x, double y, double z, double ax, double ay, double az, double angle, std::string detname, std::string inname);
+  void center(double x, double y, double z, std::string detname, std::string inname);
 private:
   // Overridden Algorithm methods
   void init();

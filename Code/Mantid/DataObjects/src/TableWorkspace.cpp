@@ -26,15 +26,15 @@ namespace Mantid
     TableWorkspace::~TableWorkspace()
     {}
 
-    long int TableWorkspace::getMemorySize() const
+    size_t TableWorkspace::getMemorySize() const
     {
-        long int data_size = 0;
-        for(column_const_it c = m_columns.begin();c!=m_columns.end();c++)
-        {
-            data_size += (*c)->sizeOfData();
+      size_t data_size = 0;
+      for(column_const_it c = m_columns.begin();c!=m_columns.end();c++)
+      {
+        data_size += (*c)->sizeOfData();
 
-        }
-        return data_size;
+      }
+      return data_size;
     }
 
     /** @param type Data type of the column.

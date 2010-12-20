@@ -38,6 +38,7 @@ class QLineEdit;
 class QPushButton;
 class QGroupBox;
 class QButtonGroup;
+class QCheckBox;
 class MdiSubWindow;
 
 //! Add error bars dialog
@@ -69,6 +70,7 @@ private:
   QList<MdiSubWindow*> srcTables;
 
   QRadioButton* mantidBox;
+  QCheckBox* drawAllErrors;
 
 protected slots:
   //! Set all string in the current language
@@ -86,7 +88,7 @@ public slots:
 
 signals:
   //! This is usually connected to the main window's defineErrorBars() slot
-  void options(const QString& curveName, int type, const QString& percent,int direction);
+  void options(const QString& curveName, int type, const QString& percent,int direction,bool all);
   //! This is usually connected to the main window's defineErrorBars() slot
   void options(const QString& curveName, const QString& errColumnName, int direction);
 };

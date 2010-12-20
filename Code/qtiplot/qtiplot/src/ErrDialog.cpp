@@ -42,6 +42,7 @@
 #include <QButtonGroup>
 #include <QList>
 #include <QWidget>
+#include <QCheckBox>
 
 
 ErrDialog::ErrDialog( QWidget* parent, Qt::WFlags fl )
@@ -76,6 +77,11 @@ ErrDialog::ErrDialog( QWidget* parent, Qt::WFlags fl )
   mantidBox->setChecked( true );
   buttonGroup1->addButton(mantidBox);
   gridLayout->addWidget(mantidBox, 0, 0);
+
+  drawAllErrors = new QCheckBox(this);
+  drawAllErrors->setText("Draw all errors");
+  drawAllErrors->setChecked( false );
+  gridLayout->addWidget(drawAllErrors, 0, 1);
 
   columnBox = new QRadioButton();
   //columnBox->setChecked( true );  // Mantid button now takes this
@@ -200,7 +206,7 @@ void ErrDialog::add()
     else // Use this if the Mantid box is checked
       type = 2;
 
-    emit options(nameLabel->currentText(),type, valueBox->text(), direction);
+    emit options(nameLabel->currentText(),type, valueBox->text(), direction,drawAllErrors->isChecked());
   }
 
   // If there's only one curve, close the dialog now

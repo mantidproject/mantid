@@ -82,7 +82,7 @@ namespace DataObjects
     virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
 
     /// Returns the size of physical memory the workspace takes
-    virtual long int getMemorySize() const = 0;
+    virtual size_t getMemorySize() const = 0;
     virtual bool threadSafe() const { return false; }
 
   protected:

@@ -283,6 +283,49 @@ public:
     TS_ASSERT_EQUALS( i.stop(),  DateAndTime("2007-11-30T16:18:55") );
   }
 
+
+
+
+  //----------------------------------------------------------------------------
+  void test_OR_with_a_bad_input()
+  {
+    //Make a splitter
+    DateAndTime start, stop;
+    TimeSplitterType a,b;
+
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop =  DateAndTime("2007-11-30T16:17:30");
+    a.push_back( SplittingInterval(start, stop, 0) );
+
+    // A bad (reversed) interval
+    start = DateAndTime("2007-11-30T16:17:32");
+    stop =  DateAndTime("2007-11-30T16:17:31");
+    a.push_back( SplittingInterval(start, stop, 0) );
+
+    // REVERSED interval that is before the first one
+    start = DateAndTime("2007-11-30T16:17:15");
+    stop =  DateAndTime("2007-11-30T16:17:00");
+    b.push_back( SplittingInterval(start, stop, 0) );
+
+    // Another bad interval
+    start = DateAndTime("2007-11-30T16:17:45");
+    stop =  DateAndTime("2007-11-30T16:17:35");
+    b.push_back( SplittingInterval(start, stop, 0) );
+
+    //Now AND the splitters (filters) together
+    TimeSplitterType c;
+    c = a | b;
+
+    TS_ASSERT_EQUALS( c.size(), 1);
+    if (c.size() < 1) return; //avoid segfaults if this part of the test fails
+
+    SplittingInterval i;
+    i = c[0];
+    TS_ASSERT_EQUALS( i.start(), DateAndTime("2007-11-30T16:17:20") );
+    TS_ASSERT_EQUALS( i.stop(),  DateAndTime("2007-11-30T16:17:30") );
+  }
+
+
   //----------------------------------------------------------------------------
   void test_NOT_Normal()
   {

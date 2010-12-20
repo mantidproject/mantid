@@ -175,7 +175,7 @@ using namespace Kernel;
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**
+    /**
    * Calculate the total proton charge by summing up all the entries in the
    * "proton_charge" time series log. This is then saved in the log entry
    * using setProtonCharge().
@@ -210,6 +210,22 @@ using namespace Kernel;
     {
       return -1;
     }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Return the total memory used by the run object, in bytes.
+   */
+  size_t Run::getMemorySize() const
+  {
+    size_t total = 0;
+    std::vector< Property*> props = m_manager.getProperties();
+    for (size_t i=0; i < props.size(); i++)
+    {
+      Property * p = props[i];
+      if (p)
+        total += p->getMemorySize() + sizeof(Property *);
+    }
+    return total;
   }
 
 

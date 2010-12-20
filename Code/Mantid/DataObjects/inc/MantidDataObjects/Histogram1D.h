@@ -111,7 +111,7 @@ public:
   /// Checks for errors
   bool isError() const { return refE->empty(); }
   /// Gets the memory size of the histogram
-  long int getMemorySize() const 
+  size_t getMemorySize() const 
     { return static_cast<long int>((refX->size()+refY->size()+refE->size())*sizeof(double)); }
 };
 

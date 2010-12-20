@@ -156,6 +156,9 @@ public:
     a = DateAndTime("1990-01-02 03:04:05.678");
     message << a;
     TS_ASSERT_EQUALS( message.str(), a.to_simple_string() );
+    std::ostringstream message2;
+    message2 << a << "\n";
+    TS_ASSERT_EQUALS( message2.str(), a.to_simple_string()+"\n" );
   }
 
 

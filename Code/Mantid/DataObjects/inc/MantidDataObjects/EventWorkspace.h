@@ -141,7 +141,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Get the number of histograms. aka the number of pixels or detectors.
   int getNumberHistograms() const;
 
-  long int getMemorySize() const;
+  size_t getMemorySize() const;
 
   void copyDataFrom(const EventWorkspace& source,
       int sourceStartWorkspaceIndex=-1, int sourceEndWorkspaceIndex=-1);
@@ -229,6 +229,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog) const;
 
   Kernel::DateAndTime getFirstPulseTime() const;
+  Kernel::DateAndTime getLastPulseTime() const;
 
   virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
 

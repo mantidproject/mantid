@@ -78,7 +78,7 @@ void GLTrackball::initZoomFrom(int a,int b)
 
 void GLTrackball::generateZoomTo(int a, int b)
 {
-  double x,y,z=0;
+  double x,y=0;
   int _viewport_w, _viewport_h;
   _viewport->getViewport(&_viewport_w,&_viewport_h);
   if(a>=_viewport_w || b>=_viewport_h||a <= 0||b<=0)return;

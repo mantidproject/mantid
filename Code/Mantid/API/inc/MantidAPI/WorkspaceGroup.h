@@ -57,7 +57,7 @@ public:
   ~WorkspaceGroup();
   
   virtual const std::string id() const { return "WorkspaceGroup"; }
-  virtual long int getMemorySize() const { return 0; }
+  virtual size_t getMemorySize() const { return 0; }
   void add(const std::string& wsName);
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;

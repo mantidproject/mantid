@@ -1265,12 +1265,12 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
   QwtScaleTransformation::Type type = sc_engine->type();
   if ( scaleType == QwtScaleTransformation::Log10 )
   {
-    if ( type == GraphOptions::Log10 )
+    if ( type ==  QwtScaleTransformation::Log10 )
     {
       return;
     }
   }
-  else if ( type == GraphOptions::Linear )
+  else if ( type == QwtScaleTransformation::Linear )
   {
     return;
   }
@@ -2936,7 +2936,7 @@ QwtErrorPlotCurve* Graph::addErrorBars(const QString& xColName, const QString& y
 /** Adds the display of error to an existing MantidCurve
  *  @param curveName The name of the curve
  */
-void Graph::addMantidErrorBars(const QString& curveName)
+void Graph::addMantidErrorBars(const QString& curveName,bool drawAll)
 {
   MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
   // Give a message if this isn't a MantidCurve
@@ -2946,7 +2946,7 @@ void Graph::addMantidErrorBars(const QString& curveName)
     return;
   }
 
-  c->setErrorBars(true);
+  c->setErrorBars(true,drawAll);
   updatePlot();
   return;
 }

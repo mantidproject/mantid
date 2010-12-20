@@ -746,10 +746,10 @@ namespace Mantid
       return it->second;
     }
 
-    long int MatrixWorkspace::getMemorySize() const
+    size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      return 3*size()*sizeof(double)/1024;
+      return 3*size()*sizeof(double)/1024 + m_run->getMemorySize();
     }
 
     /** Add parameters to the instrument parameter map that are defined in instrument

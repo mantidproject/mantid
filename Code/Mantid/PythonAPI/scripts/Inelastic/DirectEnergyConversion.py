@@ -91,10 +91,12 @@ class DirectEnergyConversion(object):
           inst_name  - The name of the instrument to perform the diagnosis.
                        If it is not provided then the default instrument is used (default = None)
           """
-        return diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
-                                    tiny, large, median_lo, median_hi, signif,
-                                    bkgd_threshold, bkgd_range, variation, hard_mask,
-                                    print_results, self.instr_name)
+        self.spectra_masks = \
+                           diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
+                                                tiny, large, median_lo, median_hi, signif,
+                                                bkgd_threshold, bkgd_range, variation, hard_mask,
+                                                print_results, self.instr_name)
+        return self.spectra_masks
     
     def do_white(self, white_run, spectra_masks, map_file): 
         """

@@ -64,7 +64,7 @@ public:
     *  @param someDetID id of detector to be queried
     */
     int operator()(const int someDetID) const{return getIndexOf(someDetID);}
-    /// Get pointers to the workspace that contain informtion about detectors
+    /// Get pointers to the workspace that contain information about detectors
     DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace=Mantid::API::MatrixWorkspace_const_sptr(), const std::vector<double> * const counts=NULL);
 
     void setDet(const int detID);                                 ///< set up the object to contain data for only one detector

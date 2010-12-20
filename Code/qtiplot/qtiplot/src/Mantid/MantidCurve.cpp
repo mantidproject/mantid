@@ -23,8 +23,10 @@ using namespace Mantid::API;
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,const QString& type,int index,bool err)
-  :PlotCurve(name), WorkspaceObserver(),m_drawErrorBars(err),m_wsName(wsName),m_index(index)
+  :PlotCurve(name), WorkspaceObserver(),m_drawErrorBars(err),m_drawAllErrorBars(false),m_wsName(wsName),m_index(index)
 {
+  (void) type; //avoid compiler warning
+
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
 
@@ -50,8 +52,10 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,cons
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,const QString& type,int index,bool err)
-  :PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),m_wsName(wsName),m_index(index)
+  :PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),m_drawAllErrorBars(false),m_wsName(wsName),m_index(index)
 {
+  (void) type; //avoid compiler warning
+
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
 
@@ -73,7 +77,12 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,const QString& type,int 
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-  :PlotCurve(createCopyName(c.title().text())), WorkspaceObserver(), m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_index(c.m_index)
+  :PlotCurve(createCopyName(c.title().text())),
+  WorkspaceObserver(),
+  m_drawErrorBars(c.m_drawErrorBars),
+  m_drawAllErrorBars(c.m_drawAllErrorBars),
+  m_wsName(c.m_wsName),
+  m_index(c.m_index)
 {
   setData(c.data());
   observeDelete();
@@ -176,7 +185,7 @@ void MantidCurve::draw(QPainter *p,
     for (int i = 0; i < d->esize(); i++)
     {
       const int xi = xMap.transform(d->ex(i));
-      if (xi > x1 && xi < x2 && abs(xi - xi0) > dx2)
+      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && abs(xi - xi0) > dx2))
       {
         const double Y = y(i);
         const double E = d->e(i);
@@ -278,6 +287,8 @@ void MantidCurve::dataReset(const QString& wsName)
 
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
+  (void) ws;
+
   invalidateBoundingRect();
   emit resetData(QString::fromStdString(wsName));
 }
@@ -332,7 +343,8 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 
 /// Constructor
 MantidQwtData::MantidQwtData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex)
-:m_workspace(workspace),
+: QObject(),
+m_workspace(workspace),
 m_spec(specIndex),
 m_X(workspace->readX(specIndex)),
 m_Y(workspace->readY(specIndex)),
@@ -345,7 +357,8 @@ m_tmp(0)
 
 /// Copy constructor
 MantidQwtData::MantidQwtData(const MantidQwtData& data)
-:m_workspace(data.m_workspace),
+: QObject(),
+m_workspace(data.m_workspace),
 m_spec(data.m_spec),
 m_X(data.m_workspace->readX(data.m_spec)),
 m_Y(data.m_workspace->readY(data.m_spec)),

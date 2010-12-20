@@ -1090,7 +1090,7 @@ using Kernel::DateAndTime;
 
   // --------------------------------------------------------------------------
   /** Return the memory used by the EventList. */
-  long int EventList::getMemorySize() const
+  size_t EventList::getMemorySize() const
   {
     if (has_weights)
       return this->weightedEvents.size() * sizeof(WeightedEvent) + sizeof(EventList);

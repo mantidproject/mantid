@@ -74,9 +74,11 @@ namespace MDDataObjects
 
     /** The vertices of each corner of the data point, describing
      * a n-dimensional parallepiped.
-     * TODO: Define exactly what each dimension represents.
+     *
+     * The vertices are stored as a nv*nd array of coordinate. There are
+     * nv vertices, each with nd dimensions.
      */
-    CoordType corners[nd][nv];
+    CoordType corners[nv*nd];
 
     /** Template-specified bit of extra data that can be carried around
      * in each point. For example, this could be a single uint32 representing
@@ -146,22 +148,35 @@ namespace MDDataObjects
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Returns the n-th center coordinate axis value.
-     * @param n :: index (0-based) of the dimension you want to set
-     * @param n2 :: the second index (0-based) of the corner to set
-     * */
-    CoordType getCorner(const size_t n, const size_t n2) const
-    {
-      return corners[n][n2];
-    }
-
-    //---------------------------------------------------------------------------------------------
     /** Returns a direct pointer to the center coordinates of this point,
      * which is a [nd]-sized array.
      * */
     CoordType * getCenters()
     {
       return &center;
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------
+    /** Returns the n-th corner coordinate axis value, one dimension at a time
+     *
+     * @param nvert :: index (0-based) of the corner to set
+     * @param ndim :: index (0-based) of the dimension you want to set. Must be 0 <= ndim <= nd
+     * */
+    CoordType getCorner(const size_t nvert, const size_t ndim) const
+    {
+      return corners[nvert*nd + ndim];
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Returns a pointer to the n-th corner coordinate.
+     *
+     * @param nvert :: index (0-based) of the corner to set
+     * */
+    CoordType * getCorner(const size_t nvert)
+    {
+      return &corners[nvert*nd];
     }
 
     //---------------------------------------------------------------------------------------------
@@ -195,24 +210,37 @@ namespace MDDataObjects
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Sets the n-th center coordinate axis value.
-     * @param n :: index (0-based) of the dimension you want to set
-     * @param n2 :: the second index (0-based) of the corner to set
+    /** Returns the n-th center coordinate axis value, one dimension at a time
+     *
+     * @param nvert :: index (0-based) of the corner to set
+     * @param ndim :: index (0-based) of the dimension you want to set. Must be 0 <= ndim <= nd
      * @param value :: value to set.
      * */
-    void setCorner(const size_t n, const size_t n2, const CoordType value)
+    CoordType setCorner(const size_t nvert, const size_t ndim, const CoordType value)
     {
-      corners[n][n2] = value;
+      corners[nvert*nd + ndim] = value;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Returns the n-th center coordinate axis value, one vertex at a time
+     *
+     * @param nvert :: index (0-based) of the corner to set
+     * @param coords :: an array, sized (nd), of coordinates to set.
+     * */
+    CoordType setCorner(const size_t nvert, const CoordType * coords)
+    {
+      for (size_t i=0; i<nd; i++)
+        corners[nvert*nd + i] = coords[i];
     }
 
     //---------------------------------------------------------------------------------------------
     /** Sets all the center coordinates.
      *
-     * @param coords :: pointer to a [nd][nv]-sized array of the values to set.
+     * @param coords :: pointer to a [nv*nd]-sized array of the values to set.
      * */
     void setCorners(const CoordType * coords)
     {
-      for (size_t i=0; i<nd*nv; i++)
+      for (size_t i=0; i<nv*nd; i++)
         corners[i] = coords[i];
     }
 
@@ -248,6 +276,35 @@ namespace MDDataObjects
       return sqrt(errorSquared);
     }
 
+    //---------------------------------------------------------------------------------------------
+    /** Returns a reference to the extra type.
+     * */
+    TE & getExtra()
+    {
+      return extra;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Returns a const reference to the extra type.
+     * NOTE: For friend classes, you may access the .extra field directly. This will be faster.
+     *
+     * */
+    TE & getExtra() const
+    {
+      return extra;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Sets the extra data. The extra data is copied into this MDPoint.
+     * Note: It may be advantageous to use getExtra() and modify the
+     * extra field directly, since that function returns a reference.
+     *
+     * @param _extra :: reference to an instance of type TE.
+     * */
+    void setExtra(TE & _extra)
+    {
+      extra = _extra;
+    }
 
   };
 
