@@ -7,7 +7,7 @@ class EQSANS(Instrument):
     """
         HFIR SANS instrument description
     """
-    _NAME = "EQSANS"
+    _NAME = "EQ-SANS"
     
     def __init__(self) :
         super(EQSANS, self).__init__()
@@ -43,12 +43,10 @@ class EQSANS(Instrument):
         
         return masked_pts
         
-    def get_masked_detectors(self, masked_pixels):
+    def get_detector_from_pixel(self, pixel_list):
         """
-            Returns a list of masked detector channels from the list of pixels.
-            This is very instrument-dependent, because it depends on the actual
-            mapping of the detector pxiels to Mantid detector IDs.
+            Returns a list of detector IDs from a list of [x,y] pixels,
+            where the pixel coordinates are in pixel units.
         """
-        return NotImplemented
-        
+        return [ self.ny_pixels*p[0] + p[1] for p in pixel_list ]
         

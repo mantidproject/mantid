@@ -27,6 +27,8 @@ class EqSansReducer(SANSReducer):
         self._normalizer = sns_reduction_steps.Normalize()
         ## Transmission calculator
         self._transmission_calculator = sns_reduction_steps.Transmission()
+        
+        self._solid_angle_correcter = sans_reduction_steps.SolidAngle()
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)

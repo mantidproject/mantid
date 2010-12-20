@@ -6,6 +6,7 @@
 import os
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission
+from reduction import extract_workspace_name
 
 # Mantid imports
 from mantidsimple import *
@@ -83,9 +84,15 @@ class LoadRun(ReductionStep):
         mantid.sendLogMessage("Frame-skipping option: %s" % str(reducer.frame_skipping))
         offset = EQSANSTofOffset(InputWorkspace=workspace, FrameSkipping=reducer.frame_skipping)
         offset_calc = offset["Offset"].value
-        ChangeBinOffset(workspace, workspace, offset_calc) 
+        
+        # Modify TOF
+        EQSANSTofStructure(InputWorkspace=workspace, OutputWorkspace=workspace, TOFOffset=offset_calc)
 
         ConvertUnits(workspace, workspace, "Wavelength")
+        
+        # Need to properly rebin. Need to do this if we want to compare transmission
+        # to "fatcat" output.
+        #Rebin(workspace, workspace, "1.5,0.01,6.")
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
@@ -117,7 +124,7 @@ class Transmission(BaseTransmission):
     """
         Perform the transmission correction for EQ-SANS
     """
-    def __init__(self, normalize_to_unity=True):
+    def __init__(self, normalize_to_unity=False):
         super(Transmission, self).__init__()
         self._normalize = normalize_to_unity
     
@@ -139,8 +146,55 @@ class Transmission(BaseTransmission):
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
-        Divide(workspace, "transmission", workspace)
+        #Divide(workspace, "transmission", workspace)
+        ApplyTransmissionCorrection(workspace, workspace, "transmission")
+        ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         return "Transmission correction applied"
     
     
+class SubtractDarkCurrent(ReductionStep):
+    """
+        Subtract the dark current from the input workspace.
+        Works only if the proton charge time series is available from DASlogs.
+    """
+    def __init__(self, dark_current_file):
+        super(SubtractDarkCurrent, self).__init__()
+        self._dark_current_file = dark_current_file
+        self._dark_current_ws = None
+        
+    def execute(self, reducer, workspace):
+        """
+            Subtract the dark current from the input workspace.
+            If no timer workspace is provided, the counting time will be extracted
+            from the input workspace.
+            
+            @param reducer: Reducer object for which this step is executed
+            @param workspace: input workspace
+        """
+        # Sanity check
+        if self._dark_current_file is None:
+            raise RuntimeError, "SubtractDarkCurrent called with no defined dark current file"
+
+        # Check whether the dark current was already loaded, otherwise load it
+        # Load dark current, which will be used repeatedly
+        if self._dark_current_ws is None:
+            filepath = reducer._full_file_path(self._dark_current_file)
+            self._dark_current_ws = extract_workspace_name(filepath)
+            reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
+            
+        # Normalize the dark current data to counting time
+        dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
+        duration = mtd[workspace].getRun()["proton_charge"].getStatistics().duration
+        scaling_factor = duration/dark_duration
+    
+        # Scale the stored dark current by the counting time
+        scaled_dark_ws = "scaled_dark_current"
+        Scale(InputWorkspace=self._dark_current_ws, OutputWorkspace=scaled_dark_ws, Factor=scaling_factor, Operation="Multiply")
+        
+        # Perform subtraction
+        Minus(workspace, scaled_dark_ws, workspace)  
+        
+        return "Dark current subtracted [%s]" % (scaled_dark_ws)
+    
+        
