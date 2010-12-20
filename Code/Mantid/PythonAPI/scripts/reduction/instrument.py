@@ -76,3 +76,10 @@ class Instrument(object):
         instrument_win.showWindow()
 
         return workspace_name
+    
+    def get_detector_from_pixel(self, pixel_list):
+        """
+            Returns a list of detector IDs from a list of [x,y] pixels,
+            where the pixel coordinates are in pixel units.
+        """
+        return []
