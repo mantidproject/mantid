@@ -72,8 +72,10 @@ public:
 
   void xtestExec_EventWorkspaces()
   {
+
+//This test does not pass. In fact the algorithm does not work with event workspaces
     //Load a CNCS file
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     Mantid::DataHandling::LoadEventPreNeXus * eventLoader;
     eventLoader = new Mantid::DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile);
@@ -89,12 +91,12 @@ public:
 
     // Now set it...
     // specify name of file to save workspace to
-    alg.setPropertyValue("InputWorkspace", "cncs");
+    alg.setPropertyValue("InputWorkspace", "cncs_pad");
     outputFile = "testOfSaveNexusProcessed.nxs";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
+    alg.setPropertyValue("Filename", outputFile);
     outputFile = alg.getPropertyValue("Filename");
     alg.setPropertyValue("Title", title);
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();

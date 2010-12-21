@@ -23,7 +23,7 @@ public:
     LoadNexusMonitors ld;
     std::string outws_name = "cncs";
     ld.initialize();
-    ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+    ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
 
     ld.execute();
@@ -36,14 +36,14 @@ public:
     TS_ASSERT_EQUALS( WS->getNumberHistograms(), 3 );
     // Check some histogram data
     // TOF
-    TS_ASSERT_EQUALS( (*WS->refX(0)).size(), 200002 );
-    TS_ASSERT_DELTA( (*WS->refX(0))[1], 1.0, 1e-6 );
+    TS_ASSERT_EQUALS( (*WS->refX(1)).size(), 200002 );
+    TS_ASSERT_DELTA( (*WS->refX(1))[3412], 3412.0, 1e-6 );
     // Data
-    TS_ASSERT_EQUALS( WS->dataY(0).size(), 200001 );
-    TS_ASSERT_DELTA( WS->dataY(0)[12], 0.0, 1e-6 );
+    TS_ASSERT_EQUALS( WS->dataY(1).size(), 200001 );
+    TS_ASSERT_DELTA( WS->dataY(1)[3412], 197., 1e-6 );
     // Error
-    TS_ASSERT_EQUALS( WS->dataE(0).size(), 200001 );
-    TS_ASSERT_DELTA( WS->dataE(0)[12], 0.0, 1e-6 );
+    TS_ASSERT_EQUALS( WS->dataE(1).size(), 200001 );
+    TS_ASSERT_DELTA( WS->dataE(1)[3412], 14.03567, 1e-4 );
     // Check geometry for a monitor
     IDetector_sptr mon = WS->getDetector(2);
     TS_ASSERT( mon->isMonitor() );

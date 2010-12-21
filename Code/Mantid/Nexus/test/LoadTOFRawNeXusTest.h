@@ -22,14 +22,14 @@ public:
     Mantid::API::FrameworkManager::Instance();
     LoadTOFRawNeXus ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7850_100us_binning.nxs");
+    ld.setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7860.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
-    TS_ASSERT_EQUALS(ws->blocksize(), 202);
+    TS_ASSERT_EQUALS(ws->blocksize(), 2000);
   }
 
 };

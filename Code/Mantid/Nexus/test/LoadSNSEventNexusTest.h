@@ -37,7 +37,7 @@ public:
         LoadSNSEventNexus ld;
         std::string outws_name = "cncs";
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
         ld.setPropertyValue("OutputWorkspace",outws_name);
         ld.setPropertyValue("FilterByTof_Min", "-1e6");
         ld.setPropertyValue("FilterByTof_Max", "1e6");
@@ -53,10 +53,10 @@ public:
         //Pixels have to be padded
         TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
         //Events
-        TS_ASSERT_EQUALS( WS->getNumberEvents(), 1208875);
+        TS_ASSERT_EQUALS( WS->getNumberEvents(), 112266);
         //TOF limits found. There is a pad of +-1 given around the actual TOF founds.
-        TS_ASSERT_DELTA( (*WS->refX(0))[0],  44138.7, 0.05);
-        TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.4, 0.05);
+        TS_ASSERT_DELTA( (*WS->refX(0))[0],  44162.6, 0.05);
+        TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.2, 0.05);
 
         //Check one event from one pixel - does it have a reasonable pulse time
         TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
@@ -66,8 +66,8 @@ public:
         {
           IAlgorithm_sptr load =  AlgorithmManager::Instance().create("LoadEventPreNeXus", 1);
           load->setPropertyValue("OutputWorkspace", "cncs_pre");
-          load->setPropertyValue("EventFilename","../../../../Test/AutoTestData/CNCS_7850_neutron_event.dat");
-          load->setPropertyValue("PulseidFilename","../../../../Test/AutoTestData/CNCS_7850_pulseid.dat");
+          load->setPropertyValue("EventFilename","../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat");
+          load->setPropertyValue("PulseidFilename","../../../../Test/AutoTestData/CNCS_7860_pulseid.dat");
           load->setPropertyValue("MappingFilename","../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
           load->setPropertyValue("PadEmptyPixels","1");
           load->execute();
@@ -128,9 +128,9 @@ public:
         std::string outws_name = "cncs";
         ld.initialize();
         ld.setPropertyValue("OutputWorkspace",outws_name);
-        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
-        ld.setPropertyValue("FilterByTime_Start", "300.0");
-        ld.setPropertyValue("FilterByTime_Stop", "600.0");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+        ld.setPropertyValue("FilterByTime_Start", "60.0");
+        ld.setPropertyValue("FilterByTime_Stop", "120.0");
         ld.setPropertyValue("FilterByTof_Min", "-1e10");
         ld.setPropertyValue("FilterByTof_Max", "1e10");
 
@@ -143,7 +143,7 @@ public:
         //Pixels have to be padded
         TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
         //Events
-        TS_ASSERT_EQUALS( WS->getNumberEvents(), 83774);
+        TS_ASSERT_EQUALS( WS->getNumberEvents(), 29753);
 
         //Check one event from one pixel - does it have a reasonable pulse time
         TS_ASSERT( WS->getEventListPtr(7)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
@@ -155,7 +155,7 @@ public:
       LoadSNSEventNexus ld;
       std::string outws_name = "cncs";
       ld.initialize();
-      ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+      ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
       ld.setPropertyValue("OutputWorkspace",outws_name);
       ld.setProperty<bool>("LoadMonitors", true);
 
