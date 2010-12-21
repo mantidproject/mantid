@@ -101,7 +101,6 @@ private:
   void calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const;
   inline double doIntegration(const double& lambda,const std::vector<double>& L2s) const;
   inline double doIntegration(const double& lambda_i,const double& lambda_f,const std::vector<double>& L2s) const;
-  void interpolate(const MantidVec& x, MantidVec& y, bool is_histogram);
   
   double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
   double m_scattering;  ///< The scattering cross-section in barns

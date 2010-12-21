@@ -62,17 +62,17 @@ std::string FlatPlateAbsorption::sampleXML()
   //Get the sample position, which is typically the origin but we should be generic
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   // Shift so that plate is centered at sample position
-  const double szX = (m_slabWidth/2)+samplePos.X();
-  const double szY = (m_slabHeight/2)+samplePos.Y();
-  const double szZ = (m_slabThickness/2)+samplePos.Z();
+  const double szX = (m_slabWidth/2);
+  const double szY = (m_slabHeight/2);
+  const double szZ = (m_slabThickness/2);
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream 
       << " <cuboid id=\"sample-shape\"> " 
-      << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> " 
-      << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> " 
-      << "<left-back-bottom-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> " 
-      << "<right-front-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> " 
+      << "<left-front-bottom-point x=\""<<szX+samplePos.X()<<"\" y=\""<<-szY+samplePos.Y()<<"\" z=\""<<-szZ+samplePos.Z()<<"\"  /> "
+      << "<left-front-top-point  x=\""<<szX+samplePos.X()<<"\" y=\""<<szY+samplePos.Y()<<"\" z=\""<<-szZ+samplePos.Z()<<"\"  /> "
+      << "<left-back-bottom-point  x=\""<<szX+samplePos.X()<<"\" y=\""<<-szY+samplePos.Y()<<"\" z=\""<<szZ+samplePos.Z()<<"\"  /> "
+      << "<right-front-bottom-point  x=\""<<-szX+samplePos.X()<<"\" y=\""<<-szY+samplePos.Y()<<"\" z=\""<<-szZ+samplePos.Z()<<"\"  /> "
       << "</cuboid>";
   
   return xmlShapeStream.str();

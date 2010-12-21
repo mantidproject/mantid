@@ -255,7 +255,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
     // This means that we should use the shape already defined on the sample.
     m_sampleObject = &sample.getShape();
     // Check there is one, and fail if not
-    if ( ! m_sampleObject->topRule() )
+    if ( ! m_sampleObject->hasValidShape() )
     {
       const std::string mess("No shape has been defined for the sample in the input workspace");
       g_log.error(mess);
@@ -353,34 +353,6 @@ double AbsorptionCorrection::doIntegration(const double& lambda_i,const double& 
   }
   
   return integral;
-}
-
-/// Calculate the value of the correction at the points not explicitly numerically integrated
-void AbsorptionCorrection::interpolate(const MantidVec& x, MantidVec& y, bool is_histogram)
-{
-  int step = x_step, index2;
-  double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp, overgap = 0;
-  int specsize = y.size();
-  for (int i = 0; i < specsize - 1; ++i) // Last point has been calculated
-  {
-    if (step == x_step) //Point numerically integrated, does not need interpolation
-    {
-      x1 = (is_histogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
-      index2 = ((i + x_step) >= specsize ? specsize - 1 : (i + x_step));
-      x2 = (is_histogram ? (0.5 * (x[index2] + x[index2 + 1])) : x[index2]);
-      overgap = 1.0 / (x2 - x1);
-      y1 = y[i];
-      y2 = y[index2];
-      step = 1;
-      continue;
-    }
-    xp = (is_histogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
-    // Interpolation
-    y[i] = (xp - x1) * y2 + (x2 - xp) * y1;
-    y[i] *= overgap;
-    step++;
-  }
-  return;
 }
 
 } // namespace Algorithms
