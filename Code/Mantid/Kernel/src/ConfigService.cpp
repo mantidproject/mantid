@@ -920,41 +920,51 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
   // Set up the DOM parser and parse xml file
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc;
+
   try
   {
-    pDoc = pParser.parse(fileName);
-  } catch (...)
-  {
-    g_log.error("Unable to parse file " + fileName);
-    throw Kernel::Exception::FileError("Unable to parse file:", fileName);
-  }
-  // Get pointer to root element
-  Poco::XML::Element* pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes())
-  {
-    g_log.error("XML file: " + fileName + "contains no root element.");
-    throw std::runtime_error("No root element in Facilities.xml file");
-  }
-
-  Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
-  unsigned int n = pNL_facility->length();
-
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*> (pNL_facility->item(i));
-    if (elem)
+    try
     {
-      m_facilities.push_back(new FacilityInfo(elem));
+      pDoc = pParser.parse(fileName);
+    } catch (...)
+    {
+      throw Kernel::Exception::FileError("Unable to parse file:", fileName);
     }
-  }
+    // Get pointer to root element
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    if (!pRootElem->hasChildNodes())
+    {
+      pDoc->release();
+      throw std::runtime_error("No root element in Facilities.xml file");
+    }
 
-  if (m_facilities.empty())
+    Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
+    unsigned int n = pNL_facility->length();
+
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*> (pNL_facility->item(i));
+      if (elem)
+      {
+        m_facilities.push_back(new FacilityInfo(elem));
+      }
+    }
+
+    if (m_facilities.empty())
+    {
+      pNL_facility->release();
+      pDoc->release();
+      throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
+    }
+    
+    pNL_facility->release();
+    pDoc->release();
+  }
+  catch(std::exception& e)
   {
-    throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
+    g_log.error(e.what());
   }
 
-  pNL_facility->release();
-  pDoc->release();
 }
 
 /** Get the default `
