@@ -57,8 +57,8 @@ void LoadRKH::init()
 
   declareProperty("FirstColumnValue", "Wavelength",
     new Kernel::ListValidator(propOptions),
-    "The units of the first column in the RKH file (default\n"
-    "Wavelength)" );
+    "Only used for 1D files, the units of the first column in the RKH\n"
+    "file (default Wavelength)" );
 }
 
 /**
@@ -229,7 +229,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
 
   MatrixWorkspace_sptr outWrksp;
   MantidVec axis0Data, axis1Data;
-  Progress prog(  read2DHeader(firstLine, outWrksp, axis0Data, axis1Data) );
+  Progress prog(  read2DHeader(firstLine, outWrksp, axis0Data) );
   const int nAxis1Values = outWrksp->getNumberHistograms();
   Axis * axis1 = outWrksp->getAxis(1);
 
@@ -239,8 +239,6 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
     MantidVecPtr toPass;
     toPass.access() = axis0Data;
     outWrksp->setX(i, toPass);
-
-    axis1->setValue(i, axis1Data[i]);
 
     //now read in the Y values
     MantidVec & YOut = outWrksp->dataY(i);
@@ -268,12 +266,11 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
 *  @param[in] initalLine the second line in the file
 *  @param[out] outWrksp the workspace that the data will be writen to
 *  @param[out] axis0Data x-values for the workspace
-*  @param[out] axis1Data values that should be writen to axis1
 *  @return a progress bar object
 *  @throws NotFoundError if there is compulsulary data is missing from the file
 *  @throws invalid_argument if there is an inconsistency in the header information
 */
-Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data, MantidVec & axis1Data)
+Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data)
 {
   const std::string XUnit(readUnit(initalLine));
 
@@ -309,7 +306,7 @@ Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_s
     boost::trim(fileLine);
     nAxis1Boundaries = boost::lexical_cast<int>(fileLine);
   }
-  axis1Data.resize(nAxis1Boundaries);
+  MantidVec axis1Data(nAxis1Boundaries);
   readNumEntrys(nAxis1Boundaries, axis1Data);
 
   std::getline(m_fileIn, fileLine);
@@ -341,7 +338,13 @@ Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_s
   NumericAxis* const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
   axis1->unit() = Mantid::Kernel::UnitFactory::Instance().create(YUnit);
   outWrksp->replaceAxis(1, axis1);
+  for ( int i = 0; i < nAxis1Boundaries; ++i )
+  {
+    axis1->setValue(i, axis1Data[i]);
+  }
 
+
+  outWrksp->setTitle(title);
   // move over the next line which is there to help with loading from Fortran routines
   std::getline(m_fileIn, fileLine);
 
@@ -367,30 +370,47 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec & output)
 */
 const std::string LoadRKH::readUnit(const std::string & line)
 {
-  const Poco::StringTokenizer code(line, " ", Poco::StringTokenizer::TOK_TRIM);
-  // the symbol for the quantity q = MomentumTransfer, etc.
-  const std::string theQuantity(code[1]);
-  // this is units used to measure the quantity e.g. angstroms, counts, ...
-  const std::string unit(code[2]);
-
-  if ( code.count() == 3 )
+  // split the line into words
+  const Poco::StringTokenizer codes(line, " ", Poco::StringTokenizer::TOK_TRIM);
+  if ( codes.count() < 1 )
   {
-    //this is a syntax check for the line
+      return "C++ no unit found";
+  }
+
+  // the symbol for the quantity q = MomentumTransfer, etc.
+  const std::string symbol(codes[0]);
+  // this is units used to measure the quantity e.g. angstroms, counts, ...
+  const std::string unit( *(codes.end()-1) );
+  
+  // theQuantity will contain the name of the unit, which can be many words long
+  std::string theQuantity;
+  Poco::StringTokenizer::Iterator current = codes.begin()+1, end = codes.end();
+  for ( ; current != end; ++current)
+  {
+    if ( current != end - 1 )
+    {
+      theQuantity += *current;
+    }
+  }
+
+  //this is a syntax check the line before returning its data
+  if ( codes.count() >= 3 )
+  {
     if ( unit.find('(') != 0 || unit.find(')') != unit.size() )
     {
       std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);
-      if ( code[0] == qCode && theQuantity == "q" && unit == "(1/Angstrom)" )
+      if ( symbol == qCode && theQuantity == "q" && unit == "(1/Angstrom)" )
       {// 6 q (1/Angstrom) is the synatx for MomentumTransfer
         return "MomentumTransfer";
       }
 
-      if ( code[0] == "0" && theQuantity != "q" )
+      if ( symbol == "0" && theQuantity != "q" )
       {// zero means the unit is not q but something else, which I'm assuming is legal
         return theQuantity + " " + unit;
       }
     }
   }
-  // the line isn't valid for 2D data
+  // the line doesn't contain a valid 2D data file unit line
   return "C++ no unit found";
 }
 /**

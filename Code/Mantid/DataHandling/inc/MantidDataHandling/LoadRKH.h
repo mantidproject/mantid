@@ -78,7 +78,7 @@ private:
   bool is2D(const std::string & testLine);
   const API::MatrixWorkspace_sptr read1D();
   const API::MatrixWorkspace_sptr read2D(const std::string & firstLine);
-  API::Progress read2DHeader(const std::string & initalLine, API::MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data, MantidVec & axis1Data);
+  API::Progress read2DHeader(const std::string & initalLine, API::MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data);
   const std::string readUnit(const std::string & line);
   void readNumEntrys(const int nEntries, MantidVec & output);
   void binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) const;
