@@ -118,7 +118,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_pConf(NULL), m_pSysConfig(NULL), g_log(Logger::get("ConfigService")), m_changed_keys(),
       m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
       m_properties_file_name("Mantid.properties"),
-      m_user_properties_file_name("Mantid.user.properties"), m_DataSearchDirs(), m_instr_prefixes()
+      m_user_properties_file_name("Mantid.user.properties"), m_DataSearchDirs(), m_UserSearchDirs(), m_instr_prefixes()
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -444,6 +444,27 @@ void ConfigServiceImpl::cacheDataSearchPaths()
 }
 
 /**
+ * Create the store of user search paths from the 'usersearch.directories' key within the Mantid.properties file.
+ * The value of the key should be a semi-colon separated list of directories
+ */
+void ConfigServiceImpl::cacheUserSearchPaths()
+{
+  m_UserSearchDirs.clear();
+  std::string paths = getString("usersearch.directories");
+  //Nothing to do
+  if (paths.empty())
+    return;
+  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+  Poco::StringTokenizer tokenizer(paths, ";,", options);
+  Poco::StringTokenizer::Iterator iend = tokenizer.end();
+  m_UserSearchDirs.reserve(tokenizer.count());
+  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
+  {
+    m_UserSearchDirs.push_back(*itr);
+  }
+}
+
+/**
  * writes a basic placeholder user.properties file to disk
  * any errors are caught and logged, but not propagated
  */
@@ -533,6 +554,7 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
     convertRelativeToAbsolute();
     //Configure search paths into a specially saved store as they will be used frequently
     cacheDataSearchPaths();
+    cacheUserSearchPaths();
   }
 }
 
@@ -704,6 +726,11 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
     cacheDataSearchPaths();
   }
 
+  if (key == "usersearch.directories")
+  {
+    cacheUserSearchPaths();
+  }
+
   // If this key exists within the loaded configuration then mark that its value will have
   // changed from the default
   if (m_pConf->hasProperty(key))
@@ -842,6 +869,15 @@ std::string ConfigServiceImpl::getOutputDir() const
 const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
 {
   return m_DataSearchDirs;
+}
+
+/**
+ * Return the list of user search paths
+ * @returns A vector of strings containing the defined search directories
+ */
+const std::vector<std::string>& ConfigServiceImpl::getUserSearchDirs() const
+{
+  return m_UserSearchDirs;
 }
 
 

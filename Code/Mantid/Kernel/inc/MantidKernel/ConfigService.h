@@ -148,6 +148,8 @@ namespace Mantid
       std::string getOutputDir() const;
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
+      /// Get the list of user search paths
+      const std::vector<std::string>& getUserSearchDirs() const;
       /// Get instrument search directory
       const std::string getInstrumentDirectory() const;
 
@@ -193,6 +195,8 @@ namespace Mantid
       std::string makeAbsolute(const std::string & dir, const std::string & key) const;
       /// Create the storage of the data search directories
       void cacheDataSearchPaths();
+      /// Create the storage of the user search directories
+      void cacheUserSearchPaths();
 
       // Forward declaration of inner class
       template <class T>
@@ -224,6 +228,8 @@ namespace Mantid
       const std::string m_user_properties_file_name;
       /// Store a list of data search paths
       std::vector<std::string> m_DataSearchDirs;
+      /// Store a list of user search paths
+      std::vector<std::string> m_UserSearchDirs;
       /// A map of facilities to instruments
       std::map<std::string,std::vector<std::string> > m_instr_prefixes;
 
