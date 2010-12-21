@@ -157,9 +157,9 @@ public:
   }
 
 
-  void xtest_LoadPreNeXus_CNCS_7850()
+  void xtest_LoadPreNeXus_CNCS_7860()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7850_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
@@ -193,7 +193,7 @@ public:
 
   void test_LoadPreNeXus_CNCS()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
@@ -214,7 +214,7 @@ public:
     //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
 
     //Only some of the pixels weretof loaded, because of lot of them are empty
-    int numpixels_with_events = 42515;
+    int numpixels_with_events = 39733;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
     //This seems to be the size of the spectra map.
@@ -265,7 +265,7 @@ public:
 
   void test_LoadPreNeXus_CNCS_PadPixels()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
@@ -306,7 +306,7 @@ public:
 
   void test_LoadPreNeXus_CNCS_SkipPixels()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs_skipped");
