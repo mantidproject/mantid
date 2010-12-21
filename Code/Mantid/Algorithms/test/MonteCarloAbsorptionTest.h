@@ -70,13 +70,13 @@ public:
     TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.00011295,delta);
         
     // Different spectra
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.01038474, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.00035950 , delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.00011640,delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.01137836, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.00026730 , delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.00035921,delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00648708, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.00005169 , delta);
-    TS_ASSERT_DELTA(factorWS->readY(8).back(), 8.56639187e-07, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00680700, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 7.93578e-05 , delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).back(), 1.81556e-07, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);

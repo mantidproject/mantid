@@ -185,6 +185,7 @@ public:
     {
       retVal->setX(i,x);
       retVal->setData(i,y,e);
+      retVal->getAxis(1)->setValue(i,i);
     }
 
     return retVal;
