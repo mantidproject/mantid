@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -47,11 +48,30 @@ MDDimension::MDDimension(const std::string &ID):
     isIntegrated(true),
     nBins(1),
     nStride(0),
-    latticeParam(1)
+    latticeParam(1),
+    data_shift(0)
 {
   // default name coinside with the tag but can be overwritten later
   this->setRange();
   this->setName(dimTag);
+
+}
+void 
+MDDimension::initialize(const DimensionDescription &descr)
+{
+    if(descr.Tag!=this->dimTag){
+        g_log.error()<<"Attempt to initialize the dimension, ID"<<this->dimTag<<" with wrong dimension description: "<<descr.Tag<<std::endl;
+    }
+    //TODO:  the dimensin direction to be introduced and set-up here soon;
+    this->setRange(descr.cut_min,descr.cut_max,descr.nBins);
+    // stride now reset which makes this dimension invalid in group of dimensions
+    this->nStride = 0;
+    this->latticeParam= descr.data_scale;
+    this->data_shift  = descr.data_shift;
+
+	if(!descr.AxisName.empty()){
+			this->setName(descr.AxisName);
+    }
 
 }
 /// this function sets Linear range. 

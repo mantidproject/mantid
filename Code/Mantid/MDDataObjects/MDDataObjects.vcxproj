@@ -175,6 +175,7 @@
   <ItemGroup>
     <ClCompile Include="src\IMD_FileFormat.cpp" />
     <ClCompile Include="src\MDDataPoint.cpp" />
+    <ClCompile Include="src\MDDataPointDescription.cpp" />
     <ClCompile Include="src\MDDataPoints.cpp" />
     <ClCompile Include="src\MDImage.cpp" />
     <ClCompile Include="src\MDWorkspace.cpp" />

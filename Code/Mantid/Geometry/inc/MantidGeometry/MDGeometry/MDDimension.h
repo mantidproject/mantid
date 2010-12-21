@@ -59,6 +59,8 @@ namespace Mantid
 {
 namespace Geometry
 {
+ // forward declaration;
+  class DimensionDescription;
 
   class DLLExport MDDimension : public IMDDimension
   {
@@ -101,6 +103,8 @@ namespace Geometry
     virtual double getX(unsigned int ind)const{return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
+    /// get data shif in this direction (original data were shifted when rebinnded)
+    virtual double getDataShift()const{return data_shift;}
 
     MDDimension(const std::string &ID);
 
@@ -113,6 +117,8 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
   protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
+    // set all non-inter-dimension-dependent values on the dimesion from the dimension description
+    virtual void initialize(const DimensionDescription &descr);
 
     //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
@@ -135,7 +141,8 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     void   setExpanded(unsigned int nBins);
     /// differs from setRange by the fact that the limits has to be within the existing ranges
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
-
+    /// set shift in the direction of this dimension
+    void  setShift(double newShift){data_shift= newShift;}
     /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
     /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is.
@@ -167,6 +174,8 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// lattice sacale in this direction
     double latticeParam;
 
+    /// data shift in correspondent direction
+    double data_shift; 
     // *************  should be prohibited?:
     //MDDimension(const MDDimension &);
   public:

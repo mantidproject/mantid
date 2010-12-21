@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <hdf5.h>
+
 #include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"

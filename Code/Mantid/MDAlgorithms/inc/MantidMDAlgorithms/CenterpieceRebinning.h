@@ -11,7 +11,6 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 
-#include "MantidMDAlgorithms/CenterpieceRebinningFunctions.h"
 
 namespace Mantid
 {
@@ -41,16 +40,9 @@ private:
       void init();
       void exec();
 
-      /// The progress reporting object
-      API::Progress *m_progress;
-
-      /// the parameters which describe how to treat nan and inf data in the dataset (used for masking etc)
-      bool ignore_nan,ignore_inf;
-
-  // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
-   // void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
-
-  // the function protected for testing purposes; they are actually private to this algorithm.
+  
+ 
+  
 protected:
 
  

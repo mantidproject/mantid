@@ -47,6 +47,8 @@ namespace Mantid
 
     /// if the dimension is integrated (e.g. have single bin)
       virtual bool getIsIntegrated() const = 0;
+      // it is sometimes convinient to shift image data by some number along specific dimension
+      virtual double getDataShift()const = 0;
 
       virtual double getMaximum() const = 0;
 

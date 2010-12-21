@@ -113,20 +113,24 @@ public:
 
 //   void renameTag(unsigned int num,const std::string &newID);
    // access to all 
-   DimensionDescription & dimDescription(unsigned int i){
-	   check_index(i,"dimDescription");
-	   return data[i];
+   DimensionDescription * pDimDescription(unsigned int i){
+	   check_index(i,"pDimDescription");
+	   return &data[i];
    }
-   DimensionDescription & dimDescription(unsigned int i)const{
-	   check_index(i,"dimDescription");
-	   return const_cast<DimensionDescription &>(data[i]);
+   DimensionDescription * pDimDescription(unsigned int i)const{
+	   check_index(i,"pDimDescription");
+	   return const_cast<DimensionDescription *>(&data[i]);
+   }
+   // access to all 
+   DimensionDescription * pDimDescription(const std::string &Tag){
+	int index = getTagNum(Tag,true);
+	   return &data[index];
+   }
+  DimensionDescription * pDimDescription(const std::string &Tag)const{
+	int index = getTagNum(Tag,true);
+	   return const_cast<DimensionDescription *>(&data[index]);
    }
 
-   // access to all 
-   DimensionDescription & dimDescription(const std::string &Tag){
-	int index = getTagNum(Tag,true);
-	   return data[index];
-   }
 
 ////*** SET -> t
    void setCoord(const std::string &Tag,const std::vector<double> &coord){

@@ -87,6 +87,7 @@ MD_FileHoraceReader::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeometry
 void 
 MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &dscrptn)
 {
+    DimensionDescription *pDimDescr;
     // the description has to already have proper shape of dimensions
     if(dscrptn.getNumDims()!=this->nDims||dscrptn.getNumRecDims()!=3){
         f_log.error()<<"read geometry description should receive correct inital object with proper number of orthogonal and reciprocal dimensions\n";
@@ -116,7 +117,7 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
     i0 = 4*(3+3) ; 
     for(i=0;i<this->nDims;i++){
         double val = (double)*((float32*)(&buf[i0+i*4]));
-        dscrptn.dimDescription(i).data_shift = val;
+        dscrptn.pDimDescription(i)->data_shift = val;
     }
     //TODO: how to use it in our framework?
     std::vector<double> u_to_Rlu(this->nDims*this->nDims);
@@ -133,7 +134,7 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
 // [data.ulen, count, ok, mess] = fread_catch(fid,[1,4],'float32'); if ~all(ok); return; end;
 //  Length of projection axes vectors in Ang^-1 or meV [row vector]
     for(i=0;i<this->nDims;i++){
-        dscrptn.dimDescription(i).data_scale= *((float32*)(&buf[i0+i*4]));
+        dscrptn.pDimDescription(i)->data_scale= *((float32*)(&buf[i0+i*4]));
     }
 
     // axis labels size 
@@ -157,9 +158,9 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
             symb   =buf[i+j*nRows]; 
             name[j] =symb;  // should be trim here;
         }
-        dscrptn.dimDescription(i).AxisName = name;
+        dscrptn.pDimDescription(i)->AxisName = name;
         // hardcoded here as we read the dimensions ID (tags and Horace does not do it)
-        dscrptn.dimDescription(i).Tag    = Horace_tags[i];
+        dscrptn.pDimDescription(i)->Tag    = Horace_tags[i];
     }
 
 // pax dax fax...
@@ -176,16 +177,17 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
     if(niax>0){
    //    [data.iax, count, ok, mess] = fread_catch(fid,[1,niax],'int32'); if ~all(ok); return; end;
    //   [data.iint, count, ok, mess] = fread_catch(fid,[2,niax],'float32'); if ~all(ok); return; end;
-
+        DimensionDescription *pDimDescr;
 
         this->fileStreamHolder.read(&buf[0],buf.size());
         int i_axis_index;
         for(i=0;i<niax;i++){
             i_axis_index = *((uint32_t*)(&buf[i*4]));
+            pDimDescr  = dscrptn.pDimDescription(dimID[i_axis_index]);
 
-            dscrptn.dimDescription(dimID[i_axis_index]).nBins = 1; // this sets this axis integrated
-            dscrptn.dimDescription(dimID[i_axis_index]).cut_min = *((float32*)(&buf[4*(niax+i*2)])); // min integration value
-            dscrptn.dimDescription(dimID[i_axis_index]).cut_max = *((float32*)(&buf[4*(niax+i*2+1)])); // max integration value
+            pDimDescr->nBins = 1; // this sets this axis integrated
+            pDimDescr->cut_min = *((float32*)(&buf[4*(niax+i*2)])); // min integration value
+            pDimDescr->cut_max = *((float32*)(&buf[4*(niax+i*2+1)])); // max integration value
         }
 
     }
@@ -206,11 +208,12 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
             if(axis_buffer.size()<nAxisPoints*4)axis_buffer.resize(nAxisPoints*4);
             this->fileStreamHolder.read(&axis_buffer[0],4*nAxisPoints);
 
+            pDimDescr = dscrptn.pDimDescription(current_tag);
             // this do not describes axis on an irregular grid. 
             //TODO: implement irregular axis and put check if the grid is regular or not. 
-            dscrptn.dimDescription(current_tag).nBins   = nAxisPoints-1; // this sets num-bins
-            dscrptn.dimDescription(current_tag).cut_min = *((float32*)(&axis_buffer[4*(0)])); // min axis value
-            dscrptn.dimDescription(current_tag).cut_max = *((float32*)(&axis_buffer[4*(nAxisPoints-1)])); // max axis value
+            pDimDescr->nBins   = nAxisPoints-1; // this sets num-bins
+            pDimDescr->cut_min = *((float32*)(&axis_buffer[4*(0)])); // min axis value
+            pDimDescr->cut_max = *((float32*)(&axis_buffer[4*(nAxisPoints-1)])); // max axis value
 
 
         }
@@ -258,7 +261,10 @@ MD_FileHoraceReader::read_MDImg_data(MDImage & mdd)
 MDPointDescription 
 MD_FileHoraceReader::read_pointDescriptions(void)const
 {
-    MDPointDescription defaultDescr;
+    const char *HoraceDataTags[]={"qx","qy","qz","en","S","err","iRunID","iDetID","iEn"};
+    MDPointStructure  aPointDescr;
+    std::vector<std::string> dataID(HoraceDataTags,HoraceDataTags+9);
+    MDPointDescription defaultDescr(aPointDescr,dataID);
     return defaultDescr;
 }
  //read whole pixels information in memory; usually impossible, then returns false;
@@ -273,6 +279,9 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 {
     size_t i,buffer_availible,cell_index;
     size_t iCellRead(starting_cell);
+    // timing
+    time_t start,end;
+    time(&start);  //***********************************************>>>
 
     const MD_image_point *pImgData = dnd.get_const_pData();
     // buffer size provided;
@@ -298,6 +307,9 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         }
         iCellRead=i;
     }
+    time(&end);     //***********************************************<<<<
+    f_log.debug()<<" cells preselected in: "<<difftime (end,start)<<" sec\n";;
+
     // read data cell after cells indexes as provided;
     
     std::streamoff pixels_start;
@@ -308,6 +320,8 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     size_t ic      = starting_cell;
     size_t ic_next = ic+1;
     if(ic_next>iCellRead)ic_next = iCellRead;
+    time(&start);  //***********************************************>>>
+
 
 	// read untill data buffer is full
     while(true){
@@ -334,7 +348,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
             
         }
 
-
+       
         this->fileStreamHolder.seekg(pixels_start,std::ios::beg);
         this->fileStreamHolder.read(&pix_buf[block_start],block_size);
         block_start+=block_size;
@@ -345,10 +359,15 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         if(ic>iCellRead)break;
         if(ic_next>iCellRead)ic_next=iCellRead;
     }
+    time(&end);     //***********************************************<<<<
+    f_log.debug()<<" cells read in: "<<difftime (end,start)<<" sec\n";;
+    //
+    time(&start);  //*******
 
-	data_buffer_size = block_start+block_size;
+	data_buffer_size = block_start; // latest block size has been already added
 	compact_hor_data(&pix_buf[0],data_buffer_size);
-
+    time(&end);   
+    f_log.debug()<<" cells transformed in: "<<difftime (end,start)<<" sec\n";;
     // returns next cell to read if any or size of the selection
     return ic;
 }

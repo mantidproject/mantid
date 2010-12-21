@@ -78,7 +78,7 @@ public:
           TS_FAIL("workspace property has not been casted to MDProperty geometry");
       }
 
-	  TS_ASSERT_THROWS_NOTHING(wsp2->dimDescription(0).cut_min=10);
+	  TS_ASSERT_THROWS_NOTHING(wsp2->pDimDescription(0)->cut_min=10);
       
   }
 
@@ -88,10 +88,10 @@ public:
        TS_FAIL("workspace property has not been casted to MDProperty geometry");
    }else{
         TS_ASSERT_THROWS_NOTHING(unsigned int ndims=wsp2->getNumDims());
-		TS_ASSERT_THROWS_NOTHING(wsp2->dimDescription(0).nBins = 100);
-		TS_ASSERT_THROWS_NOTHING(wsp2->dimDescription("q3").nBins=200);
-		TS_ASSERT_EQUALS(wsp2->dimDescription(0).nBins,100);
-		TS_ASSERT_EQUALS(wsp2->dimDescription(2).nBins,200);
+		TS_ASSERT_THROWS_NOTHING(wsp2->pDimDescription(0)->nBins = 100);
+		TS_ASSERT_THROWS_NOTHING(wsp2->pDimDescription("q3")->nBins=200);
+		TS_ASSERT_EQUALS(wsp2->pDimDescription(0)->nBins,100);
+		TS_ASSERT_EQUALS(wsp2->pDimDescription(2)->nBins,200);
    }
   }
 

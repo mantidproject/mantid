@@ -113,11 +113,11 @@ public:
     pSlice = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*tDND_geometry));
 
     //       we want these data to be non-integrated;
-	TS_ASSERT_THROWS_NOTHING(pSlice->dimDescription("p").nBins=100);
+	TS_ASSERT_THROWS_NOTHING(pSlice->pDimDescription("p")->nBins=100);
     // wrong tag
-	TS_ASSERT_THROWS_ANYTHING(pSlice->dimDescription("eh").nBins=200);
+	TS_ASSERT_THROWS_ANYTHING(pSlice->pDimDescription("eh")->nBins=200);
     // right tag
-	TS_ASSERT_THROWS_NOTHING(pSlice->dimDescription("qx").nBins=200);
+	TS_ASSERT_THROWS_NOTHING(pSlice->pDimDescription("qx")->nBins=200);
 
     // we want first (0) axis to be energy 
     TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"p"));
@@ -130,8 +130,8 @@ public:
 
     std::vector<std::string> names = pSlice->getDimensionsTags();
     for(unsigned int i=0;i<names.size();i++){
-		TS_ASSERT_EQUALS(names[i],pSlice->dimDescription(i).Tag);
-		TS_ASSERT_EQUALS(names[i],pSlice->dimDescription(i).AxisName);
+		TS_ASSERT_EQUALS(names[i],pSlice->pDimDescription(i)->Tag);
+		TS_ASSERT_EQUALS(names[i],pSlice->pDimDescription(i)->AxisName);
     }
 	TSM_ASSERT_EQUALS("The slice describes grid of specific size: ",100*200,pSlice->getImageSize());
   }
@@ -149,14 +149,14 @@ public:
     ic=0;
     TS_ASSERT_THROWS_NOTHING(
       for(i=0;i<expanded_tags.size();i++){
-		  if(pSlice->dimDescription(i).nBins>1){  // non-integrated;
-          expanded_tags[ic]=pSlice->dimDescription(i).Tag;
+		  if(pSlice->pDimDescription(i)->nBins>1){  // non-integrated;
+          expanded_tags[ic]=pSlice->pDimDescription(i)->Tag;
           ic++;
         }
       }
       for(i=0;i<expanded_tags.size();i++){
-        if(pSlice->dimDescription(i).nBins<2){  // non-integrated;
-          expanded_tags[ic]=pSlice->dimDescription(i).Tag;
+        if(pSlice->pDimDescription(i)->nBins<2){  // non-integrated;
+          expanded_tags[ic]=pSlice->pDimDescription(i)->Tag;
           ic++;
         }
       }

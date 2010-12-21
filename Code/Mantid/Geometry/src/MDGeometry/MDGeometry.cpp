@@ -39,13 +39,10 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
       // let's analyse the dimensions, which were mentioned in transformation matrix and set the ranges of these dimensions 
       // as requested
       for(i=0;i<n_new_dims;i++){
+
         pDim=this->getDimension(tag[i]);
-		DimensionDescription descr = trf.dimDescription(i);
-		pDim->setRange(descr.cut_min,descr.cut_max,descr.nBins);
-        // set new axis name ;
-		if(!descr.AxisName.empty()){
-			pDim->setName(descr.AxisName);
-        }
+		DimensionDescription* descr = trf.pDimDescription(i);
+        pDim->initialize(*descr);
 
       }
       this->n_expanded_dim=0;
@@ -55,7 +52,7 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
           this->n_expanded_dim++;
         }
       }
-      this->arrangeDimensionsProperly(trf.getDimensionsTags());
+  
 
 }
 std::vector<boost::shared_ptr<IMDDimension> > 
@@ -73,8 +70,10 @@ MDGeometry::getDimensions(void)const
 void 
 MDGeometry::initialize(const MDGeometryDescription &trf)
 {
-  this->initialize(trf.getDimensionsTags());
-  this->setRanges(trf);
+    std::vector<std::string> dimID = trf.getDimensionsTags();
+    this->initialize(dimID);
+    this->setRanges(trf);
+    this->arrangeDimensionsProperly(dimID);
 
   /*
   // all reciprocal dimensions may have new coordinates in the WorkspaceGeometry coordinate system, so these coordinates have to 
@@ -298,24 +297,25 @@ MDGeometry::get_constDimension(unsigned int i)const
 }
 
 // now protected;
-    boost::shared_ptr<MDDimension>
-      MDGeometry::getDimension(const std::string &tag,bool do_throw)
-    {
-      boost::shared_ptr<MDDimension> pDim;
-      std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
-      it = dimensions_map.find(tag);
-      if(it == dimensions_map.end()){
-        if(do_throw){
-          g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
-          throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
-        }else{
-			return pDim;
-		}
-      }
-      pDim = it->second;
+boost::shared_ptr<MDDimension>
+MDGeometry::getDimension(const std::string &tag,bool do_throw)
+{
+  boost::shared_ptr<MDDimension> pDim;
+  std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
+  it = dimensions_map.find(tag);
+  if(it == dimensions_map.end()){
+    if(do_throw){
+      g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
+      throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
+    }else{
+		return pDim;
+	}
+  }
+  pDim = it->second;
 
-      return pDim;
-    }
+  return pDim;
+}
+//
 boost::shared_ptr<const IMDDimension>
 MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
 {

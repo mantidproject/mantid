@@ -1,7 +1,8 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
-#include <boost/ptr_container/ptr_vector.hpp>
-// temporary -- to provide size of sqw pixel
-#include "MDDataObjects/MD_File_hdfMatlab.h"
+#include <sstream>
+// Availble rebinning methods: Eventually will go to factory
+#include "MantidMDAlgorithms/CpRebinningNx3.h"
+#include "MantidMDAlgorithms/CpRebinning4x3StructHR.h"
 
 namespace Mantid{
     namespace MDAlgorithms{
@@ -15,16 +16,13 @@ namespace Mantid{
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CenterpieceRebinning)
 
-CenterpieceRebinning::CenterpieceRebinning(void): API::Algorithm(), m_progress(NULL) 
+CenterpieceRebinning::CenterpieceRebinning(void): API::Algorithm() 
 {}
 
 /** Destructor     */
 CenterpieceRebinning::~CenterpieceRebinning()
 {
-    if( m_progress ){
-            delete m_progress;
-            m_progress=NULL;
-    }
+ 
 }
 void 
 CenterpieceRebinning::init_property(MDWorkspace_sptr inputWSX)
@@ -69,10 +67,6 @@ CenterpieceRebinning::init()
       declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
 	  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save), "The file containing output MD dataset");
 
-
-      m_progress = new Progress(this,0,1,10);
-
- 
    
 }
 //
@@ -83,7 +77,7 @@ CenterpieceRebinning::exec()
  MDWorkspace_sptr outputWS;
 
    if(existsProperty("Input")){
-        inputWS = getProperty("Input");
+        inputWS = this->getProperty("Input");
         if(!inputWS){
               throw(std::runtime_error("input workspace has to exist"));
         }
@@ -92,12 +86,23 @@ CenterpieceRebinning::exec()
    }
 
 
-  // Now create the output workspace
+   MDPropertyGeometry  *pSlicing; 
+   if(existsProperty("SlicingData")){ 
+ // get slicing data from property manager. At this stage the data has to be shaped to the form desribing the final resulting cut
+    pSlicing = dynamic_cast< MDPropertyGeometry *>((Property *)(this->getProperty("SlicingData")));
+    if(!pSlicing){
+                throw(std::runtime_error("can not obtain slicing property from the property manager"));
+    }
+  }else{
+        throw(std::runtime_error("slising property has to exist and has to be defined "));
+  }
+
+  // Now create the output workspace or get the one which is ready for this purpose;
   if(existsProperty("Result")){
  
      outputWS = getProperty("Result");
      if(!outputWS){
-        outputWS      = MDWorkspace_sptr(new MDWorkspace(4));
+        outputWS      = MDWorkspace_sptr(new MDWorkspace());
         setProperty("Result", outputWS);
      }
   }else{
@@ -107,57 +112,45 @@ CenterpieceRebinning::exec()
       throw(std::runtime_error("input and output workspaces have to be different"));
   }
 
- 
-  MDPropertyGeometry  *pSlicing; 
-  if(existsProperty("SlicingData")){ 
- // get slicing data from property manager. These data has to bebeen shaped to proper form . 
-    pSlicing = dynamic_cast< MDPropertyGeometry *>((Property *)(this->getProperty("SlicingData")));
-    if(!pSlicing){
-                throw(std::runtime_error("can not obtain slicing property from the property manager"));
-    }
-  }else{
-        throw(std::runtime_error("slising property has to exist and has to be defined "));
-  }
-
- // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->init(inputWS,pSlicing);
-
-
-  std::vector<size_t> preselected_cells_indexes;
-  size_t  n_precelected_pixels(0);
-  // identify MDImageCells which may contribute into cut
-  preselect_cells(*inputWS,*pSlicing,preselected_cells_indexes,n_precelected_pixels);
-  if(n_precelected_pixels == 0)return;
-
-  unsigned int n_hits = n_precelected_pixels/PIX_BUFFER_SIZE+1;
-
-  size_t    n_pixels_read(0),
-            n_pixels_selected(0),
-            n_pix_in_buffer(0),pix_buffer_size(PIX_BUFFER_SIZE);
+   // here we should have the call to factory, providing best rebinning method for the job
+   std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinningNx3(inputWS,pSlicing,outputWS));
+  //  std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinning4x3StructHR(inputWS,pSlicing,outputWS));
   
-  std::vector<char  > pix_buf;
-  //TODO: Give correct pixel size from the workspace method
-  pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
- 
+    bool selection_valid(false);
+    // indicate cells, which may contribute into cut
+    size_t  n_precelected_cells = pRebin->preselect_cells();
+    if(n_precelected_cells==0)return;
 
-  // get pointer for data to rebin to; 
-  MD_image_point*pImage     = outputWS->get_spMDImage()->get_pData();
+    // find out how many steps is needed to take to make the cut
+    unsigned int nSteps = pRebin->getNumDataChunks();
 
-  // and the number of elements the image has;
-  size_t         image_size=  outputWS->get_const_MDImage().getDataSize();
- //
-  transf_matrix trf = build_scaled_transformation_matrix(*(inputWS->getGeometry()),*pSlicing,this->ignore_inf,this->ignore_nan);
-// start reading and rebinning;
-  size_t n_starting_cell(0);
-  for(unsigned int i=0;i<n_hits;i++){
-      n_starting_cell  += inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,n_pix_in_buffer);
-      n_pixels_read    += n_pix_in_buffer;
-      
-      n_pixels_selected+= rebin_Nx3dataset(trf,&pix_buf[0],n_pix_in_buffer,*outputWS);
-  } 
-  finalise_rebinning(pImage,image_size);
+   /// The progress reporting object
+    std::auto_ptr<API::Progress> pProgress;
+    if(nSteps>1){
+      pProgress = std::auto_ptr<API::Progress>(new Progress(this,0,1,nSteps));
+    }
 
-  pix_buf.clear();
+    selection_valid = true;
+
+    // to the cut reporting the progress
+    unsigned int ic(0);
+    std::stringstream message_buf;
+    while(selection_valid){
+        selection_valid=pRebin->rebin_data_chunk();
+
+        if(pProgress.get()){
+            message_buf<<"Making cut; step "<<ic<<" out of: "<<nSteps<<std::endl;
+            pProgress->report(ic,message_buf.str());
+            // check if canceled
+            //if(this->c
+        }
+        ic++;
+    }
+    // calculate necessary statistical properties of the cut
+    pRebin->finalize_rebinning();
+
+
+
 
 
 }

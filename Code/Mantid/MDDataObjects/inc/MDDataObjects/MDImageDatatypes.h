@@ -1,5 +1,5 @@
-#ifndef MD_IMAGE_DATATYPES
-#define MD_IMAGE_DATATYPES
+#ifndef MD_IMAGE_DATATYPES_H
+#define MD_IMAGE_DATATYPES_H
 /** The header contains the description of the datatypes, used by MDImage
  * There are currently three structures:
  <ul>
@@ -59,10 +59,9 @@ struct MD_img_data{
     // descriptors for dimensions;
     std::vector<size_t>dimStride;
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
-	// this should be calculated by algorithm and currently is not here. Do we need it here?
-    std::vector<double> min_value;  /**< min value of real data in the selected dimension -- differs from the MDGeometry ranges, as geometry 
-	                                 specifies  ranges for rebinning */
-    std::vector<double> max_value;  ///< max value of data extend in the selected dimension -- differs from ranges, set in geometry
+	// Min-max values for real data should sit with MDData points
+    std::vector<double> min_value;  /**< min value of cut upplied in the selected dimension   -- should be the range set in geometry*/ 
+    std::vector<double> max_value;  /**< max value of data extend in the selected dimension  */
     MD_img_data():data_size(0),data_array_size(0),data(NULL){}
 
 };

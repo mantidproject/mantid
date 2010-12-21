@@ -110,14 +110,17 @@ MDGeometryDescription::MDGeometryDescription(
       count++;
     }
     it++;
-    
+   
+   rotations.assign(9,0);
+   rotations[0]=rotations[4]=rotations[8]=1;
+
   }
 }
 
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {
   this->data[i].Tag            = dimension->getDimensionId();
-  this->data[i].data_shift     = 0;
+  this->data[i].data_shift     = dimension->getDataShift();
   this->data[i].cut_min        = dimension->getMinimum();
   this->data[i].cut_max        = dimension->getMaximum()*(1+FLT_EPSILON);
   this->data[i].nBins          = dimension->getNBins();

@@ -51,6 +51,9 @@
     <ClCompile Include="src\MD_FileHoraceReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MDDataPointDescription.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h">

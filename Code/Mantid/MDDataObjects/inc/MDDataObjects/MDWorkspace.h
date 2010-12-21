@@ -122,12 +122,14 @@ namespace Mantid
       Mantid::Geometry::MDGeometry      &   get_const_MDGeometry()const{return *(m_spMDImage->getGeometry());}
       Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage.get());}
       Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints.get());}
+      IMD_FileFormat                      & get_const_FileReader()const{return *(m_spFile);}      
 
 	  // it seems we can not alow this for safety reasons; From other size, how algorithms  would modify this?
 	  // geometry should be unmutable from outside of workspace and withoug MDImageData;
       //Mantid::Geometry::MDGeometry const *        get_spMDGeometry(){return m_spMDImage->getGeometry();}
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
+      IMD_FileFormat *                                  get_pFileReader(){return m_spFile.get();}                             
 
         /// Gets the number of points available on the workspace.
       virtual int getNPoints() const;

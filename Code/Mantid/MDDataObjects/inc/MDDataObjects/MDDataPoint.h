@@ -71,7 +71,7 @@ namespace MDDataObjects
      this->PixDescriptor.NumDataFields = nData;
      this->PixDescriptor.NumDimIDs     = nIDfields;
      if(!old_column_names){
-       this->buildDefaultTags(this->PixDescriptor);
+       this->buildDefaultIDs(this->PixDescriptor);
      }
      this->buildPixel();
    }

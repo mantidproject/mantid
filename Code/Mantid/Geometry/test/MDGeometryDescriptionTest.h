@@ -89,9 +89,9 @@ public:
   {
     boost::shared_ptr<MDGeometryDescription> pDescr = boost::shared_ptr<MDGeometryDescription>(
         constructDescription());
-	TS_ASSERT_THROWS_NOTHING(pDescr->dimDescription("q1").nBins=100);
-	TS_ASSERT_THROWS_NOTHING(pDescr->dimDescription("q2").nBins=100);
-	TS_ASSERT_THROWS_NOTHING(pDescr->dimDescription("T").nBins =100);
+	TS_ASSERT_THROWS_NOTHING(pDescr->pDimDescription("q1")->nBins=100);
+	TS_ASSERT_THROWS_NOTHING(pDescr->pDimDescription("q2")->nBins=100);
+	TS_ASSERT_THROWS_NOTHING(pDescr->pDimDescription("T")->nBins =100);
 
     TSM_ASSERT_EQUALS("The image size described by this description differs from expected", 100 * 100
         * 100, pDescr->getImageSize());

@@ -82,12 +82,6 @@
     <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning4D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinningFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\DynamicRebinFromXML.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -114,6 +108,18 @@
     </ClInclude>
     <ClInclude Include="test\DynamicRebinFromXMLAlgorithmTest.h">
       <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\IDynamicRebinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CpRebinningNx3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\DynamicCPRRebinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CpRebinning4x3StructHR.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -171,9 +177,6 @@
     <ClCompile Include="src\CenterpieceRebinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CenterpieceRebinningFunctions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\DynamicRebinFromXML.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -196,6 +199,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SingleValueParameterParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CpRebinningNx3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicCPRRebinning.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CpRebinning4x3StructHR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IDynamicRebinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

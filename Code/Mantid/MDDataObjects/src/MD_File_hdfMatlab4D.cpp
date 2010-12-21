@@ -193,6 +193,7 @@ MD_File_hdfMatlab4D::read_pix_subset(const MDImage &SQW,const std::vector<size_t
                 n_cells_processed=1;
             }else{
                 n_selected_cells=i-1;
+                max_npix_in_buffer-=npix_tt;
             }
             break;
         }

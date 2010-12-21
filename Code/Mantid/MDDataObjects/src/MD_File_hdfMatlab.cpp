@@ -134,7 +134,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 
   //  for(i=0;i<nDims;i++){
   //      unsigned int dim_size=(unsigned int)*((double*)(data)+i);
-		//DND_shape.dimDescription(i).nBins = dim_size;
+		//DND_shape.pDimDescription(i).nBins = dim_size;
   //  }
     delete [] data;
     arr_dims_vector.clear();
@@ -160,8 +160,8 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
         throw(Exception::FileError(err.str(),this->File_name));
     }
     for(i=0;i<nDims;i++){
-		DND_shape.dimDescription(i).cut_min=*((double*)(data)+2*i);
-        DND_shape.dimDescription(i).cut_max=*((double*)(data)+2*i+1);
+		DND_shape.pDimDescription(i)->cut_min=*((double*)(data)+2*i);
+        DND_shape.pDimDescription(i)->cut_max=*((double*)(data)+2*i+1);
     }
     delete [] data;
     arr_dims_vector.clear();
@@ -189,7 +189,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 		  // this provides number of points along an axis and axis has nBins+1 points
 		  if(dim_lentgh > 1) dim_lentgh--;
           delete rez[i];
-		  DND_shape.dimDescription(i).nBins = dim_lentgh;
+		  DND_shape.pDimDescription(i)->nBins = dim_lentgh;
     }  
 	// we need to set expanded instead
     delete [] data;
@@ -208,7 +208,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 	 tags[2]="qz";
 	 tags[3]="en";
 	 for(i=0;i<indMax;i++){
-		 DND_shape.dimDescription(i).Tag = tags[i];
+		 DND_shape.pDimDescription(i)->Tag = tags[i];
 
 	 }
 
@@ -484,6 +484,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
                 n_cells_processed=1;
             }else{
                 n_selected_cells=i-1;
+                max_npix_in_buffer -=npix_tt;
             }
             break;
         }

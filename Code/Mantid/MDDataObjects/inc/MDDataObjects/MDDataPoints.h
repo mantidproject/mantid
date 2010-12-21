@@ -42,14 +42,14 @@ namespace MDDataObjects
 {
 
   class MDImage;
-  class MDDataPointsDescription{
+  class MDDataPointsDescription: public MDPointDescription
+  {
   public:
 	  MDDataPointsDescription(const MDPointDescription &descr):
-      point_description(descr)
+	  /// this one describes structure of single pixel as it is defined and written on HDD
+      MDPointDescription(descr)
 	  { }
   private:
-	  /// this one describes structure of single pixel as it is defined and written on HDD
-	  MDPointDescription point_description;
 	  // this has not been defined at the moment, but will provide the description for possible lookup tables
 	  std::vector<double> lookup_tables;
   };
@@ -85,6 +85,9 @@ namespace MDDataObjects
     // initiates memory for part of the pixels, which should be located in memory;
     void alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile);
 
+    /** function returns the part of the colum-names which corresponds to the dimensions information;
+     * the order of the ID corresponds to the order of the data in the datatables */
+    std::vector<std::string> getDimensionsID(void)const{return description.getDimensionsID();}
   protected:
 
     /** the parameter identify if the class data are file or memory based

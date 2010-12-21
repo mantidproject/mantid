@@ -29,8 +29,12 @@ class testCPRebinning :    public CxxTest::TestSuite
          AnalysisDataService::Instance().add("InWorkspace", pOrigin);
 
 		 // should go to Load workspace algorithm ----->
-		 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo_bin.sqw");
-	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
+         // this is for fast testing
+         	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/AutoTestData/test_horace_reader.sqw");
+             // this is for testing real data
+	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo_bin.sqw");
+     //   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
+	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
 		 boost::shared_ptr<IMD_FileFormat> spFile = boost::shared_ptr<IMD_FileFormat>(pFile.get());
 		 pFile.release();
 
@@ -67,7 +71,7 @@ class testCPRebinning :    public CxxTest::TestSuite
 
 
     // set up slicing property to the shape of current workspace;
-         Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+        Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
         if(!pSlicing){
             throw(std::runtime_error("can not obtain slicing property from the property manager"));
         }
@@ -76,13 +80,14 @@ class testCPRebinning :    public CxxTest::TestSuite
  
 
         double r0=0;
-		pSlicing->dimDescription("qx").cut_min = r0;
-		pSlicing->dimDescription("qx").cut_max = r0+2;
-		pSlicing->dimDescription("qy").cut_min = r0;
-		pSlicing->dimDescription("qy").cut_max = r0+2;
-		pSlicing->dimDescription("qz").cut_min = r0;
-		pSlicing->dimDescription("qz").cut_max = r0+2;
-		pSlicing->dimDescription("en").cut_max = 50;
+        pSlicing->pDimDescription("qx")->cut_min = r0;
+		pSlicing->pDimDescription("qx")->cut_max = r0+1;
+		pSlicing->pDimDescription("qy")->cut_min = r0;
+		pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		pSlicing->pDimDescription("qz")->cut_min = r0;
+		pSlicing->pDimDescription("qz")->cut_max = r0+1;
+		pSlicing->pDimDescription("en")->cut_max = 50;
+        
 
 
    

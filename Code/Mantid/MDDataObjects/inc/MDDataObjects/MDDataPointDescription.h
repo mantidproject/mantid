@@ -68,7 +68,7 @@ struct MDPointStructure{
 //********************************************************************************************************************************************************************
 /** Small helper class describing format of the MDDataPoint in a form, 
  *  which can be conveniently stored on HDD or transferred between classes
- *  allowing to instanciatei proper version of MDDataPoint which does the
+ *  allowing to instanciate  proper version of MDDataPoint which does the
  * job transforming data from and to the HDD format
  */
 class DLLExport MDPointDescription
@@ -87,10 +87,12 @@ MDPointStructure & PixInfo(){return PixDescriptor;}
    *  the indexes except counting them and comparing with the numbers of dimensions,
    *  signals and indexes from the MDPoindDescriptor
    */
-std::string getColumnName(unsigned int nColumn)const{return dataTags.at(nColumn);}
+std::string getColumnName(unsigned int nColumn)const{return dataIDs.at(nColumn);}
 
-/// gets all column names together; see the getColumnName description
-std::vector<std::string> const getColumnNames(void) const{return dataTags;}
+ /// gets all column names together; see the getColumnName description
+ std::vector<std::string> getColumnNames(void) const{return dataIDs;}
+ /// function returns the part of the colum-names which corresponds to the dimensions information;
+ std::vector<std::string> getDimensionsID(void)const;
 
 protected:
         MDPointStructure PixDescriptor;
@@ -99,9 +101,9 @@ protected:
    * and first columns (if present) have to represent
    * reciprocal dimensions;
    */
-   std::vector<std::string> dataTags;
+   std::vector<std::string> dataIDs;
 
-   void buildDefaultTags(const MDPointStructure &pixInfo);
+   void buildDefaultIDs(const MDPointStructure &pixInfo);
 };
 } // endnamespaces;
 }
