@@ -142,8 +142,8 @@ public:
     // Turn off the archive searching
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
 
-    std::string path = FileFinder::Instance().findRun("CNCS7850");
-    TS_ASSERT(path.find("CNCS_7850_event.nxs") != std::string::npos);
+    std::string path = FileFinder::Instance().findRun("CNCS7860");
+    TS_ASSERT(path.find("CNCS_7860_event.nxs") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
 

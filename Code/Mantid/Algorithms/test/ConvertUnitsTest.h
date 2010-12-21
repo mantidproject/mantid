@@ -239,8 +239,8 @@ public:
     this->inputSpace = "eventWS";
     Mantid::DataHandling::LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_11514_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_11514_pulseid.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_7860_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");

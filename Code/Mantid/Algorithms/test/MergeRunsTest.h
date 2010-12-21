@@ -39,8 +39,8 @@ public:
   //-----------------------------------------------------------------------------------------------
   void testExec_Event_CNCS()
   {
-    std::string eventfile1( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
-    std::string eventfile2( "../../../../Test/AutoTestData/CNCS_7850_neutron_event.dat" );
+    std::string eventfile1( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile2( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
     DataHandling::LoadEventPreNeXus * eventLoader;
 
     TimeSeriesProperty<double>* log;
