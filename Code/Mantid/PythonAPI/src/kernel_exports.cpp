@@ -4,14 +4,15 @@
 #include <boost/python.hpp>
 #include <string>
 #include <vector>
-#include <MantidPythonAPI/kernel_exports.h>
+#include "MantidPythonAPI/kernel_exports.h"
 //Kernel
 #include "MantidKernel/ArrayProperty.h"
-#include<MantidKernel/Property.h>
-#include<MantidKernel/BoundedValidator.h>
-#include<MantidKernel/MandatoryValidator.h>
-#include<MantidKernel/ListValidator.h>
-#include<MantidKernel/Logger.h>
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -102,6 +103,9 @@ namespace PythonAPI
               .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
               .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
     	      ;
+
+    class_<Mantid::Kernel::DateAndTime>("DateAndTime", no_init)
+        .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string);
   }
   
   void export_validators()

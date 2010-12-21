@@ -3,6 +3,7 @@
 //------------------------
 // Boost
 #include <boost/python/module.hpp>
+#include "MantidKernel/DateAndTime.h"
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
 
@@ -34,6 +35,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
   MantidVecHelper::initializeDependencies();
   // Export some frequently used stl containers
+  vector_proxy<Mantid::Kernel::DateAndTime>::wrap("cpp_list_dateandtime");
   vector_proxy<int>::wrap("cpp_list_int");
   vector_proxy<long>::wrap("cpp_list_long");
   vector_proxy<double>::wrap("cpp_list_dbl");
