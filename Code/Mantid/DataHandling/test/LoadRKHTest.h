@@ -8,6 +8,7 @@
 
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "Poco/Path.h"
 
 class LoadRKHTest : public CxxTest::TestSuite
@@ -15,9 +16,9 @@ class LoadRKHTest : public CxxTest::TestSuite
 public:
 
   // A sample file is in the repository
-  LoadRKHTest() : inputFile("")
+  LoadRKHTest() : dataFile(""), tempFile("LoadRKH_test_file_2D")
   {    
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/DIRECT.041").toString();
+    dataFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/DIRECT.041").toString();
   }
 
   void testInit()
@@ -26,7 +27,7 @@ public:
     TS_ASSERT( loadrkh.isInitialized() );
   }
 
-  void testExec()
+  void test1D()
   {
     if ( !loadrkh.isInitialized() ) loadrkh.initialize();
 
@@ -34,7 +35,7 @@ public:
     TS_ASSERT_THROWS(loadrkh.execute(), std::runtime_error);
 
     //Set the file name
-    loadrkh.setPropertyValue("Filename", inputFile);
+    loadrkh.setPropertyValue("Filename", dataFile);
     
     std::string outputSpace = "outer";
     //Set an output workspace
@@ -43,7 +44,7 @@ public:
     //check that retrieving the filename gets the correct value
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loadrkh.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(inputFile) == 0 );
+    TS_ASSERT( result.compare(dataFile) == 0 );
 
     TS_ASSERT_THROWS_NOTHING( result = loadrkh.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( result == outputSpace );
@@ -95,10 +96,105 @@ public:
     TS_ASSERT_DELTA( data->dataE(0)[99], 0.0, tolerance );
 
   }
+  void test2D()
+  {
+    // write a small file to load
+    writeTestFile();
+
+    Mantid::DataHandling::LoadRKH rkhAlg;
+
+    rkhAlg.initialize();
+
+    //Set the file name
+    rkhAlg.setPropertyValue("Filename", tempFile);
+    
+    std::string outputSpace = "outer";
+    //Set an output workspace
+    rkhAlg.setPropertyValue("OutputWorkspace", outputSpace);
+    
+    //check that retrieving the filename gets the correct value
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = rkhAlg.getPropertyValue("Filename") )
+    TS_ASSERT_EQUALS( result, tempFile );
+
+    TS_ASSERT_THROWS_NOTHING( result = rkhAlg.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT( result == outputSpace );
+
+    //Should now throw nothing
+    TS_ASSERT_THROWS_NOTHING( rkhAlg.execute() );
+    TS_ASSERT( rkhAlg.isExecuted() );
+    
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    //Now need to test the resultant workspace, first retrieve it
+    Workspace_sptr rkhspace;
+    TS_ASSERT_THROWS_NOTHING( rkhspace = AnalysisDataService::Instance().retrieve(outputSpace) );
+    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    
+
+    TS_ASSERT_EQUALS( data->getNumberHistograms(), 2 );
+
+    TS_ASSERT_EQUALS( static_cast<int>(data->dataX(0).size()), 3);
+    TS_ASSERT_EQUALS( static_cast<int>(data->dataY(0).size()), 2);
+    TS_ASSERT_EQUALS( static_cast<int>(data->dataY(1).size()), 2);
+    TS_ASSERT_EQUALS( static_cast<int>(data->dataE(0).size()), 2);
+
+    double tolerance(1e-06);
+    // check a sample of values, the workspace is pretty small and so this will check nearly all of them
+    TS_ASSERT_DELTA( data->dataX(0)[0], -3.000000e-01, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[1], -2.900000e-01 , tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[2], -2.800000e-01, tolerance ); 
+
+    TS_ASSERT_DELTA( data->dataX(1)[0], -3.000000e-01, tolerance );  
+    TS_ASSERT_DELTA( data->dataX(1)[1], -2.900000e-01, tolerance );
+    TS_ASSERT_DELTA( data->dataX(1)[2], -2.800000e-01, tolerance );
+
+    TS_ASSERT_DELTA( data->dataY(0)[0], 11, tolerance );
+    TS_ASSERT_DELTA( data->dataY(0)[1], 12, tolerance );
+    TS_ASSERT_DELTA( data->dataY(1)[1], 22, tolerance );
+
+    //Now E values
+    TS_ASSERT_DELTA( data->dataE(0)[1], 2, tolerance );
+    TS_ASSERT_DELTA( data->dataE(1)[0], 3, tolerance );
+    TS_ASSERT_DELTA( data->dataE(1)[1], 4, tolerance );
+
+    Axis* secondAxis = data->getAxis(1);
+    TS_ASSERT_EQUALS( secondAxis->length(), 3 )
+    TS_ASSERT_DELTA( (*secondAxis)(1), -2.850000e-01, tolerance );
+
+    TS_ASSERT( data->isHistogramData() )
+
+    remove(tempFile.c_str());
+  }
 
 private:
   Mantid::DataHandling::LoadRKH loadrkh;
-  std::string inputFile;
+  std::string dataFile, tempFile;
+  
+  /** Create a tiny 2x2 workspace in a tempory file that should
+  *  be deleted
+  */
+  void writeTestFile()
+    {
+      std::ofstream file(tempFile.c_str());
+      
+      file << "Fri 17-DEC-2010 15:47 Workspace: mantid\n";
+      file << "  6 q (1/Angstrom)\n";
+      file << "  6 q (1/Angstrom)\n";
+      file << "  0 C++ no unit found\n";
+      file << "  1\n";
+      file << "\n";
+      file << "  3\n";
+      file << "-3.000000e-01 -2.900000e-01 -2.800000e-01\n";
+      file << "  3\n";
+      file << "-2.950000e-01 -2.850000e-01 -2.750000e-01\n";
+      file << "   2   2  1.000000000000e+00\n";
+      file << "  3(8E12.4)\n";
+      file << "11.0000e+00  12.0000e+00\n";
+      file << "21.0000e+00  22.0000e+00\n";
+      file << "1 2 3 4\n";
+      file.close();
+    }
 };
 
 

@@ -6,7 +6,7 @@
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"
-#include <istream>
+#include <fstream>
 
 namespace Mantid
 {
@@ -63,18 +63,28 @@ public:
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
 private:
+  /// Store the units known to the UnitFactory
+  std::set<std::string> m_unitKeys;
+  /// Store the units added as options for this algorithm
+  std::set<std::string> m_RKHKeys;
+  /// the input stream for the file being loaded
+  std::ifstream m_fileIn;
+
   // Initialisation code
   void init();
   // Execution code
   void exec();
 
+  bool is2D(const std::string & testLine);
+  const API::MatrixWorkspace_sptr read1D();
+  const API::MatrixWorkspace_sptr read2D(const std::string & firstLine);
+  API::Progress read2DHeader(const std::string & initalLine, API::MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data, MantidVec & axis1Data);
+  const std::string readUnit(const std::string & line);
+  void readNumEntrys(const int nEntries, MantidVec & output);
+  void binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) const;
+
   // Remove lines from an input stream
   void skipLines(std::istream & strm, int nlines);
-
-  /// Store the units known to the UnitFactory
-  std::set<std::string> m_unitKeys;
-  /// Store the units added as options for this algorithm
-  std::set<std::string> m_RKHKeys;
 
 };
 

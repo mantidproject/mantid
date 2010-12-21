@@ -57,6 +57,11 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
 
+  /// this is the integer code the RKH file format associates with the unit Q
+  static const int Q_CODE = 6;
+  /// the maximum number of numbers that a line can contain
+  static const int LINE_LENGTH = 8;
+
 private:
   /// Initialisation code
   void init();

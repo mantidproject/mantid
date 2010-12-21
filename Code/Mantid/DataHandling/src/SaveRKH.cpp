@@ -107,8 +107,8 @@ void SaveRKH::writeHeader()
     // The units that the data is in
     const Kernel::Unit_const_sptr unit1 = m_workspace->getAxis(0)->unit();
     const Kernel::Unit_const_sptr unit2 = m_workspace->getAxis(1)->unit();
-    const int unitCode1 = unit1->caption() == "q" ? 6 : 0;
-    const int unitCode2 = unit2->caption() == "q" ? 6 : 0;
+    const int unitCode1 = unit1->caption() == "q" ? Q_CODE : 0;
+    const int unitCode2 = unit2->caption() == "q" ? Q_CODE : 0;
     m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label() << ")\n"
              << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label() << ")\n"
              << "  0 " << m_workspace->YUnitLabel() << "\n"
@@ -171,7 +171,7 @@ void SaveRKH::write2D()
   for (int i = 0; i < Xbins; ++i) 
   {
     m_outRKH << " " << std::scientific << std::setprecision(6) << (*X)(i);
-    if ((i+1)%8 == 0) m_outRKH << "\n";
+    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
   const Axis* const Y = m_workspace->getAxis(1);
   const int Ybins = Y->length();
@@ -179,7 +179,7 @@ void SaveRKH::write2D()
   for (int i = 0; i < Ybins; ++i) 
   {
     m_outRKH << " " << std::scientific << std::setprecision(6) << (*Y)(i);
-    if ((i+1)%8 == 0) m_outRKH << "\n";
+    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
 
   // Now the data
@@ -195,14 +195,14 @@ void SaveRKH::write2D()
   for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
   {
     m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << wsIt->Y();
-    if ((i+1)%8 == 0) m_outRKH << "\n";
+    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
   // Then all the error values
   wsIt.begin();
   for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
   {
     m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << wsIt->E();
-    if ((i+1)%8 == 0) m_outRKH << "\n";
+    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
 }
 
