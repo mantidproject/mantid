@@ -181,6 +181,9 @@ public:
 //      LoadSNSEventNexus ld;
 //
 //      ld.initialize();
+
+//      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
+
 //      ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
 //      ld.setPropertyValue("OutputWorkspace",outws_name);
 //      ld.setPropertyValue("FilterByTof_Min", "-1e6");
@@ -210,6 +213,9 @@ public:
 //      IAlgorithm_sptr ld = AlgorithmFactory::Instance().create("LoadSNSEventNexus",1);
 //      std::string outws_name = "cncs";
 //      ld->initialize();
+
+//      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
+
 //      ld->setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
 //      ld->setPropertyValue("OutputWorkspace",outws_name);
 //      ld->setPropertyValue("FilterByTof_Min", "-1e6");
@@ -240,6 +246,9 @@ public:
 //
 //      std::string outws_name = "cncs";
 //      ld->initialize();
+
+//      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
+
 //      ld->setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
 //      ld->setPropertyValue("OutputWorkspace",outws_name);
 //      ld->setPropertyValue("FilterByTof_Min", "-1e6");
