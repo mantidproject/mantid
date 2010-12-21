@@ -67,7 +67,7 @@ public:
     //We set the minimum high enough to cut out some real charge too, not just zeros.
     alg->setPropertyValue("MinimumValue", "1.e7");
     alg->setPropertyValue("MaximumValue", "1e20");
-    alg->setPropertyValue("TimeTolerance", "4e-2");
+    alg->setPropertyValue("TimeTolerance", "4e-12");
 
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
@@ -98,14 +98,14 @@ public:
 
   }
 
-  void xtest_exec_renamed()
+  void test_exec_renamed()
   {
     doTest(inputWS + "_filtered");
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(inputWS + "_filtered");
   }
 
-  void xtest_exec_inplace()
+  void test_exec_inplace()
   {
     doTest(inputWS);
     AnalysisDataService::Instance().remove(inputWS);
