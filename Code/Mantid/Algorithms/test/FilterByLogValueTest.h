@@ -38,10 +38,8 @@ public:
   {
     IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadSNSEventNexus");
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7860_event.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWS);
-    loader->setPropertyValue("filterByTof_Min", "45000");
-    loader->setPropertyValue("filterByTof_Min", "50000");
     loader->execute();
     TS_ASSERT (loader->isExecuted() );
   }
@@ -59,8 +57,7 @@ public:
     size_t num_events = WS->getNumberEvents();
     double start_proton_charge = WS->run().getProtonCharge();
     size_t num_sample_logs = WS->run().getProperties().size();
-    TS_ASSERT_EQUALS( num_events, 1208875 );
-
+    TS_ASSERT_EQUALS( num_events, 112266 );
     //Do the filtering now.
     FilterByLogValue * alg = new FilterByLogValue();
     alg->initialize();
@@ -68,7 +65,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputWS);
     alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg->setPropertyValue("MinimumValue", "1.85e7");
+    alg->setPropertyValue("MinimumValue", "1.e7");
     alg->setPropertyValue("MaximumValue", "1e20");
     alg->setPropertyValue("TimeTolerance", "4e-2");
 
@@ -88,7 +85,7 @@ public:
     TS_ASSERT_LESS_THAN( 0, outWS->getNumberEvents());
 
     TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), num_events);
-    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 6536, 100);
+    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 83434, 100);
 
     //Proton charge is lower
     TS_ASSERT_EQUALS( outWS->run().getProperties().size(), num_sample_logs);
