@@ -35,8 +35,8 @@ public:
     inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_12772_pulseid.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_7860_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
@@ -54,7 +54,7 @@ public:
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "eventWS");
     alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "360");
+    alg->setPropertyValue("StopTime", "120");
     alg->setPropertyValue("AbsoluteStartTime", "2010");
     alg->execute();
     TS_ASSERT( !alg->isExecuted() );
@@ -63,7 +63,7 @@ public:
     alg->setPropertyValue("InputWorkspace", "eventWS");
     alg->setPropertyValue("OutputWorkspace", "out");
     alg->setPropertyValue("StartTime", "60");
-    alg->setPropertyValue("StopTime", "360");
+    alg->setPropertyValue("StopTime", "120");
     alg->setPropertyValue("AbsoluteStartTime", "2010");
     alg->execute();
     TS_ASSERT( !alg->isExecuted() );
@@ -71,9 +71,9 @@ public:
     alg = new FilterByTime(); alg->initialize();
     alg->setPropertyValue("InputWorkspace", "eventWS");
     alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "360");
+    alg->setPropertyValue("StopTime", "120");
     alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->setPropertyValue("AbsoluteStopTime", "2010-09");
+    alg->setPropertyValue("AbsoluteStopTime", "2010-03");
     alg->execute();
     TS_ASSERT( !alg->isExecuted() );
 
@@ -104,9 +104,9 @@ public:
     alg->setPropertyValue("InputWorkspace", inputWS);
     outputWS = "eventWS_relative";
     alg->setPropertyValue("OutputWorkspace", outputWS);
-    //Get 5 minutes worth
+    //Get 1 minute worth
     alg->setPropertyValue("StartTime", "60");
-    alg->setPropertyValue("StopTime", "360");
+    alg->setPropertyValue("StopTime", "120");
 
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
@@ -131,9 +131,9 @@ public:
     alg->setPropertyValue("InputWorkspace", inputWS);
     outputWS = "eventWS_absolute";
     alg->setPropertyValue("OutputWorkspace", outputWS);
-    //Get 5 minutes worth, starting at minute 1
-    alg->setPropertyValue("AbsoluteStartTime", "2010-06-29T17:47:15");
-    alg->setPropertyValue("AbsoluteStopTime", "2010-06-29T17:52:15");
+    //Get 1 minutes worth, starting at minute 1
+    alg->setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46");
+    alg->setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46");
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
 
@@ -155,7 +155,7 @@ public:
     for (int i=0; i<outWS->getNumberHistograms(); i++)
     {
       double diff = fabs(double(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents()));
-      //No more than 2 events difference because of rounding to second
+      //No more than 2 events difference because of rounding to 0.01 second
       TS_ASSERT_LESS_THAN( diff, 3);
       if (diff > 3) count++;
       if (count > 50) break;
