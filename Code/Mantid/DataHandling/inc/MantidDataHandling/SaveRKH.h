@@ -58,7 +58,7 @@ public:
   virtual const std::string category() const { return "DataHandling"; }
 
   /// Constants used in RKH files
-  enum
+  enum FileConstants
   {
     Q_CODE = 6,                           ///< this is the integer code the RKH file format associates with the unit Q
     LINE_LENGTH = 8                       ///< the maximum number of numbers that a line can contain

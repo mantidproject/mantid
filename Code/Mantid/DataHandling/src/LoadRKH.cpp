@@ -228,10 +228,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
   g_log.information() << "file appears to contain 2D information, reading in 2D data mode\n";
 
   MatrixWorkspace_sptr outWrksp;
-  MantidVec axis0Data, axis1Data;
+  MantidVec axis0Data;
   Progress prog(  read2DHeader(firstLine, outWrksp, axis0Data) );
   const int nAxis1Values = outWrksp->getNumberHistograms();
-  Axis * axis1 = outWrksp->getAxis(1);
 
   for ( int i = 0; i < nAxis1Values; ++i )
   {
