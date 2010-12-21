@@ -26,8 +26,12 @@ AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
 
 void AbsorptionCorrection::init()
 {
-  declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,
-    new WorkspaceUnitValidator<> ("Wavelength")),
+  // The input workspace must have an instrument and units of wavelength
+  CompositeValidator<> * wsValidator = new CompositeValidator<>;
+  wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
+  wsValidator->add(new InstrumentValidator<>());
+
+  declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
     "The X values for the input workspace must be in units of wavelength");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");

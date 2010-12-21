@@ -87,11 +87,11 @@ using namespace Mantid::Geometry;
 
   //----------------------------------------------------------------------------------------------
   /** Create a cuboid shape for your pixels */
-  Object_sptr createCuboid(double side_length)
+  Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, double z_side_length = -1.0)
   {
-    double szX=side_length;
-    double szY=szX;
-    double szZ=szX;
+    double szX = x_side_length;
+    double szY = (y_side_length == -1.0 ? szX : y_side_length);
+    double szZ = (z_side_length == -1.0 ? szX : z_side_length);
     std::ostringstream xmlShapeStream;
     xmlShapeStream
     << " <cuboid id=\"detector-shape\"> "
