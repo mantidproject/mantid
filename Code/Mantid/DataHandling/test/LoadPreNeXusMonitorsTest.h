@@ -18,7 +18,7 @@ public:
     // Path to test input file assumes Test directory checked out from SVN
 	// You will need to make sure the bmon* files are in the same directory
     runinfoFile = Poco::Path(Poco::Path::current()).resolve(
-        "../../../../Test/AutoTestData/CNCS_7850_runinfo.xml").toString();
+        "../../../../Test/AutoTestData/CNCS_7860_runinfo.xml").toString();
   }
 
   void testInit()
@@ -61,7 +61,7 @@ public:
     TS_ASSERT( (ws->dataX(0)) == (ws->dataX(1)) );
 
     // Check a particular value
-    TS_ASSERT_EQUALS( ws->dataY(2)[46138], 1.0);
+    TS_ASSERT_EQUALS( ws->dataY(1)[3424], 858);
 
     Mantid::API::AnalysisDataService::Instance().remove(outWS);
 
