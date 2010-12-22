@@ -89,8 +89,9 @@ void SpatialGrouping::exec()
 
     std::map<int, double> nearest;
 
-    Mantid::Geometry::V3D scale(DBL_MIN,DBL_MIN,DBL_MIN);
-    Mantid::Geometry::BoundingBox bbox(DBL_MIN,DBL_MIN,DBL_MIN,DBL_MIN,DBL_MIN,DBL_MIN);
+    const double empty = EMPTY_DBL();
+    Mantid::Geometry::V3D scale(empty,empty,empty);
+    Mantid::Geometry::BoundingBox bbox(empty,empty,empty,empty,empty,empty);
 
     createBox(detIt->second, bbox, scale);
 
