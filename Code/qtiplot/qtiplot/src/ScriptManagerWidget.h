@@ -24,8 +24,8 @@ class QCheckBox;
 class QComboBox;
 
 class FindReplaceDialog;
-
-
+class QMenu;
+class QStringList;
 
 /** 
     This class manages ScriptEdit objects and displays them in a series
@@ -95,7 +95,12 @@ public:
  /// this method appens the file names of scripts
  ///in different tabs to a string and returns 
   QString saveToString();
-
+  ///this method returns a list containing  recent scripts
+  QStringList recentScripts() ;
+  /// update the Recent Scripts menu items
+  void updateRecentScriptList();
+  ///set the recent script list
+  void setRecentScripts(const QStringList & scriptList);
 
 signals:
   ///A message is ready to be printed
@@ -165,6 +170,8 @@ private slots:
   void toggleCallTips(bool on);
   ///execute multi line code
   void executeMultiLine();
+  /// open recent scripts
+  void openRecentScript(int index);
 
 private:
   /// Initialize the actions relevant to this object
@@ -189,6 +196,8 @@ private:
   void setCallTipsBehaviour(ScriptEditor *editor, bool state);
   ///Set auto complete behaviour for the given editor
   void setCodeFoldingBehaviour(ScriptEditor *editor, bool state);
+
+  
 
  private:
   /// So that the window can access the actions that are relevant
@@ -219,12 +228,18 @@ private:
   QAction *m_toggle_completion;
   /// Toggle code folding
   QAction *m_toggle_calltips;
+  /// Recent scripts option
+  QMenu* m_recent_scripts;
 
   /// The find replace dialog
   FindReplaceDialog *m_findrep_dlg;
 
   ///Display mode boolean
   bool m_interpreter_mode;
+  ///list storing the recent scripts
+  QStringList m_recentScriptList;
+  /// enum used for maximum of recent scripts size
+  enum {MaxRecentScripts = 5};
 };
 
 
@@ -293,6 +308,7 @@ private:
 
   /// If a find is in progress
   bool m_find_inprogress;
+  
 };
 
 

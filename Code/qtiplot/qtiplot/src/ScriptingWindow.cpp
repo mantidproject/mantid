@@ -275,13 +275,6 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
 	  SLOT(displayOutputMessage(const QString&, bool,bool)));
   connect(m_manager, SIGNAL(ScriptIsActive(bool)), m_output_dock, SLOT(setScriptIsRunning(bool)));
 
-  // Create menus and actions
-  initMenus();
-  fileAboutToShow();
-  editAboutToShow();
-
-  // This connection must occur after the objects have been created and initialized
-  connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
 
   QSettings settings;
   settings.beginGroup("/ScriptWindow");
@@ -300,9 +293,17 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
   {
     m_manager->m_toggle_progress->setChecked(false);
   }
-
+  //get the recent scripts values from registry
+  m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
   settings.endGroup();
 
+  // Create menus and actions
+  initMenus();
+  fileAboutToShow();
+  editAboutToShow();
+
+  // This connection must occur after the objects have been created and initialized
+  connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window");
@@ -344,6 +345,7 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/height", window_size.height());
   settings.setValue("/ProgressArrow", m_manager->m_toggle_progress->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
+  settings.setValue("/RecentScripts",m_manager->recentScripts());
   settings.endGroup();
 
   m_manager->closeAllTabs();
@@ -415,6 +417,9 @@ void ScriptingWindow::fileAboutToShow()
   m_file_menu->insertSeparator();
   m_file_menu->addAction(m_scripting_lang);
 
+  m_file_menu->insertSeparator();
+  m_file_menu->addMenu(m_manager->m_recent_scripts);
+  m_manager->updateRecentScriptList();
 
   // Close current tab
   m_file_menu->insertSeparator();

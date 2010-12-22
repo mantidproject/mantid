@@ -845,6 +845,10 @@ void ScriptManagerWidget::initActions()
   m_close_tab = new QAction(tr("&Close Tab"), this);
   m_close_tab->setShortcut(tr("Ctrl+W"));
   connect(m_close_tab,SIGNAL(activated()), this, SLOT(closeCurrentTab()));
+
+  // recent scripts option
+  m_recent_scripts = new QMenu(tr("&Recent Scripts"),this);
+  connect(m_recent_scripts,SIGNAL(activated(int)),this,SLOT(openRecentScript(int)));
   
   // **Edit** actions
   m_find = new QAction(tr("&Find/Replace"), this);
@@ -963,6 +967,13 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
       return;
     }
   }
+    /// remove the file name from script list
+    m_recentScriptList.remove(file_to_open); 
+    //add the script file to recent scripts list 
+    m_recentScriptList.push_front(file_to_open); 
+    //update the recent scripts menu 
+    updateRecentScriptList();
+ 
   //Save last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();
   
@@ -1137,7 +1148,53 @@ void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool sta
   editor->setFolding(fold_option);
 }
 
+/** 
+ * open the selected script from the File->Recent Scripts  in a new tab
+ * @param index The index of the selected script
+ */
+void ScriptManagerWidget::openRecentScript(int index)
+{
+  QString scriptname=m_recent_scripts->text(index);
+  scriptname.remove(0,3);
+  scriptname.trimmed();
+  openInNewTab(scriptname); 
+}
 
+/** 
+* update the Recent Scripts menu items
+* @param index The index of the selected script
+*/
+void ScriptManagerWidget::updateRecentScriptList()
+{
+  if (m_recentScriptList.isEmpty())
+    return;
+
+  while ((int)m_recentScriptList.size() > MaxRecentScripts)
+    m_recentScriptList.pop_back();
+
+  m_recent_scripts->clear();
+  for (int i = 0; i<m_recentScriptList.size(); i++ )
+    m_recent_scripts->insertItem("&" + QString::number(i+1) + " " + m_recentScriptList[i]);
+
+}
+
+/** 
+* This method returns the recent scripts list
+* @returns a list containing the name of the recent scripts.
+*/
+QStringList ScriptManagerWidget::recentScripts() 
+{
+  return m_recentScriptList;
+}
+
+/** 
+ * sets the recent scripts list
+ * @param rslist list containing the name of the recent scripts.
+ */
+void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
+{
+  m_recentScriptList=rslist;
+}
 //***************************************************************************
 //
 // FindReplaceDialog class
