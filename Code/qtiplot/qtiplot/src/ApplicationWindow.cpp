@@ -713,15 +713,13 @@ void ApplicationWindow::initToolBars()
   fileTools->addSeparator ();
   fileTools->addAction(actionManageDirs);
   fileTools->addSeparator ();
-  //fileTools->addAction(actionOpen);
+  
   fileTools->addAction(actionOpenProj);
   fileTools->addAction(actionOpenRaw);
   fileTools->addAction(actionOpenNexus);
+  fileTools->addAction(actionLoadFile);
 
-  //fileTools->addAction(actionOpenTemplate);
-  //fileTools->addAction(actionSaveProject);
   fileTools->addAction(actionSaveProject);
-  //fileTools->addAction(actionSaveTemplate);
   fileTools->addSeparator ();
   fileTools->addAction(actionLoad);
   fileTools->addSeparator ();
@@ -5727,6 +5725,13 @@ void ApplicationWindow::loadRaw()
 
 }
 
+void ApplicationWindow::loadDataFile()
+{
+  if(mantidUI)
+  {
+    mantidUI->executeAlgorithm("Load",-1);
+  }
+}
 void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
 {
 #ifdef QTIPLOT_DEMO
@@ -7884,7 +7889,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8601,6 +8605,7 @@ void ApplicationWindow::fileMenuAboutToShow()
   openMenu->addAction(actionOpenProj);
   openMenu->addAction(actionOpenRaw);
   openMenu->addAction(actionOpenNexus);
+  openMenu->addAction(actionLoadFile);
 
   recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recent);
 
@@ -8962,11 +8967,12 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       return;
     }
   }
-
+  
   //Save the settings and exit
   saveSettings();
   mantidUI->shutdown();
   ce->accept();
+
 }
 
 void ApplicationWindow::customEvent(QEvent *e)
@@ -11941,6 +11947,10 @@ void ApplicationWindow::createActions()
   actionOpenRaw->setShortcut( tr("Ctrl+Shift+R") );
   connect(actionOpenRaw, SIGNAL(activated()), this, SLOT(loadRaw()));
 
+  actionLoadFile=new QAction(QIcon(getQPixmap("fileopen_raw_xpm")), tr("File"), this);
+  actionLoadFile->setShortcut( tr("Ctrl+Shift+F") );
+  connect(actionLoadFile, SIGNAL(activated()), this, SLOT(loadDataFile()));
+
   actionLoadImage = new QAction(tr("Open Image &File"), this);
   actionLoadImage->setShortcut( tr("Ctrl+I") );
   connect(actionLoadImage, SIGNAL(activated()), this, SLOT(loadImage()));
@@ -12780,6 +12790,10 @@ void ApplicationWindow::translateActionsStrings()
   actionOpenNexus->setShortcut(tr("Ctrl+Shift+N"));
   actionOpenNexus->setToolTip(tr("Load Nexus File"));
 
+  actionLoadFile->setMenuText(tr("&File"));
+  actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
+  actionLoadFile->setToolTip(tr("Load Data File"));
+ 
 
   actionLoadImage->setMenuText(tr("Open Image &File"));
   actionLoadImage->setShortcut(tr("Ctrl+I"));
@@ -12821,14 +12835,16 @@ void ApplicationWindow::translateActionsStrings()
   actionCutSelection->setMenuText(tr("Cu&t Selection"));
   actionCutSelection->setToolTip(tr("Cut selection"));
   actionCutSelection->setShortcut(tr("Ctrl+X"));
-
+  
   actionCopySelection->setMenuText(tr("&Copy Selection"));
   actionCopySelection->setToolTip(tr("Copy selection"));
   actionCopySelection->setShortcut(tr("Ctrl+C"));
+  
 
   actionPasteSelection->setMenuText(tr("&Paste Selection"));
   actionPasteSelection->setToolTip(tr("Paste selection"));
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
+  
 
   actionClearSelection->setMenuText(tr("&Delete Selection"));
   actionClearSelection->setToolTip(tr("Delete selection"));
@@ -15546,13 +15562,12 @@ void ApplicationWindow::showScriptInterpreter()
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
     m_interpreterDock->setFocusProxy(m_scriptInterpreter);
   }
-
   if( m_interpreterDock->isVisible() )
   {
     m_interpreterDock->hide();
   }
   else
-  {
+  { 
     m_interpreterDock->show();
     m_scriptInterpreter->setFocus();
   }

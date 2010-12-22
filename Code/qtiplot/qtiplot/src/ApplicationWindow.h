@@ -188,7 +188,8 @@ public slots:
 	void loadNexus();
 	///Load Raw File from File->Load Menu
 	void loadRaw();
-
+  /// Load mantid data files using generic load algorithm
+  void loadDataFile();
 	/**
 	 * \brief Create a new project from a data file.
 	 *
@@ -1288,7 +1289,7 @@ private:
     QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
     QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
     QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj,*actionOpenRaw,*actionOpenNexus;
-    QAction *actionLoad, *actionUndo, *actionRedo;
+      QAction *actionLoad, *actionUndo, *actionRedo;
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
     QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;

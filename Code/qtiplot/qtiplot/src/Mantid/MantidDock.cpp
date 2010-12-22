@@ -61,25 +61,29 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   //
 
   m_loadMenu = new QMenu(this);
-  QAction *loadRawAction = new QAction("Load RAW file",this);
-  QAction *loadDAEAction = new QAction("Load from DAE",this);
-  QAction *loadNexusAction = new QAction("Load Nexus",this);
-  QAction *loadEventAction = new QAction("Load Event file", this);
+  QAction *loadRawAction = new QAction("Raw",this);
+  QAction *loadDAEAction = new QAction("from DAE",this);
+  QAction *loadNexusAction = new QAction("Nexus",this);
+  QAction* loadFileAction = new QAction("File",this);
+  QAction *loadEventAction = new QAction("Event file", this);
   m_loadMapper = new QSignalMapper(this);
   m_loadMapper->setMapping(loadRawAction,"LoadRaw");
   m_loadMapper->setMapping(loadDAEAction,"LoadDAE");
   m_loadMapper->setMapping(loadNexusAction,"LoadNexus");
   m_loadMapper->setMapping(loadEventAction,"LoadEventPreNeXus");
+  m_loadMapper->setMapping(loadFileAction,"Load");
   connect(loadRawAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadDAEAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadNexusAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadEventAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(loadFileAction,SIGNAL(activated()),m_loadMapper,SLOT(map()));
 
   connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
   m_loadMenu->addAction(loadRawAction);
-  m_loadMenu->addAction(loadDAEAction);
   m_loadMenu->addAction(loadNexusAction);
+  m_loadMenu->addAction(loadDAEAction);
   m_loadMenu->addAction(loadEventAction);
+   m_loadMenu->addAction(loadFileAction);
   m_loadButton->setMenu(m_loadMenu);
 
   createWorkspaceMenuActions();
