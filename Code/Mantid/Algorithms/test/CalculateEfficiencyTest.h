@@ -117,6 +117,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS) );
     ws2d_out = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
+    TS_ASSERT_DELTA( ws2d_out->dataX(1+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataX(1+SANSInstrumentCreationHelper::nMonitors)[1], 2.0, tolerance );
+
     TS_ASSERT_DELTA( ws2d_out->dataY(1+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
     TS_ASSERT_DELTA( ws2d_out->dataY(15+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
     TS_ASSERT_DELTA( ws2d_out->dataY(6+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
