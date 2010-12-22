@@ -14,6 +14,8 @@ namespace Geometry
 /// Forward Declarations
 class IDetector;
 class IInstrument;
+class BoundingBox;
+class V3D;
 }
 
 namespace Algorithms
@@ -66,12 +68,15 @@ private:
   /// Execution code
   void exec();
 
-  /// check whether a Detector ID has already been assosciated with a group
-  bool included(std::map<int,double> nearest);
   /// expand our search out to the next neighbours along
-  bool expandNet(std::map<int,double> & nearest, boost::shared_ptr<Mantid::Geometry::IDetector> det, const int noNeighbours);
+  bool expandNet(std::map<int,double> & nearest, boost::shared_ptr<Mantid::Geometry::IDetector> det, const int & noNeighbours, 
+    const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale);
   /// sort by distance
-  void sortByDistance(std::map<int, double> & nearest, const int noNeighbours);
+  void sortByDistance(std::map<int, double> & nearest, const int & noNeighbours);
+  /// create expanded bounding box for our purposes
+  void createBox(boost::shared_ptr<Mantid::Geometry::IDetector> det, Mantid::Geometry::BoundingBox & bndbox, Mantid::Geometry::V3D & scale);
+  /// grow dimensions of our bounding box to the factor
+  void growBox(double & min, double & max, const double & factor);
 
   /// map of detectors in the instrument
   std::map<int, boost::shared_ptr<Mantid::Geometry::IDetector> > m_detectors;
@@ -79,12 +84,8 @@ private:
   std::map<int, bool> m_included;
   /// first and last values for each group
   std::vector<std::vector<int> > m_groups;
-  /// distance (radius) parameter for search
-  double m_radius;
-  /// map of Detector ID to Workspace Index (for seeing which detectors are in the workspace, and creating grouping file)
-  Mantid::API::IndexToIndexMap* m_detIDtoWI;
-  /// map of Workspace Index to Spectrum Number (for creating grouping file)
-  Mantid::API::IndexToIndexMap* m_wiToSpect;
+  /// number of pixels to search through for finding group
+  double m_pix;
 };
 
 } // namespace Algorithms
