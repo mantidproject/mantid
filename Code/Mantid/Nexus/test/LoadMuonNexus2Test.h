@@ -22,8 +22,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-//using namespace Mantid::NeXus;
-//using namespace Mantid::DataHandling;
+using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite

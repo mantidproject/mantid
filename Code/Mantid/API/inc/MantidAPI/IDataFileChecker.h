@@ -39,10 +39,8 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
-*/
-
-
-    class DLLExport IDataFileChecker: public API::Algorithm
+    */
+    class DLLExport IDataFileChecker : public Algorithm
     {
     public:
       ///constructor
@@ -50,13 +48,6 @@ namespace Mantid
       /// virtual destructor
       virtual ~IDataFileChecker();
 
-      /// Algorithm's name
-      virtual const std::string name() const { return ""; }
-      /// Algorithm's version
-      virtual int version() const { return 1; }
-      /// Algorithm's category for identification
-      virtual const std::string category() const { return "DataHandling"; }
-      
       /// quick file check by reading first 100 bytes of the file or by checking the extension
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)=0;
       
@@ -70,18 +61,9 @@ namespace Mantid
         unsigned long ul; 
         unsigned char c[bufferSize+1]; 
       } header_buffer_union;
-      
-    
-     private:
-       /// initilaisation code
-       void init();
-       ///execution code
-       void exec();
 
     };
 
-    typedef boost::shared_ptr<IDataFileChecker> IDataFileChecker_sptr;
-    typedef boost::shared_ptr<const IDataFileChecker> IDataFileChecker_const_sptr;
   }
 }
 #endif

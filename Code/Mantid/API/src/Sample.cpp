@@ -93,11 +93,11 @@ namespace Mantid
     {
       if( object.hasValidShape() )
       {
-	m_shape = object;
+        m_shape = object;
       }
       else
       {
-	throw std::invalid_argument("Sample::setShape - Object has an invalid shape.");
+        throw std::invalid_argument("Sample::setShape - Object has an invalid shape.");
       }
     }
 
