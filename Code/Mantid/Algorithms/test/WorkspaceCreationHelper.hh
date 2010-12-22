@@ -191,6 +191,32 @@ public:
     return retVal;
   }
 
+  /** Create a 2D workspace with this many histograms and bins. The bins are assumed to be non-uniform and given by the input array
+   * Filled with Y = 2.0 and E = sqrt(2.0)w
+   */
+  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries, const double xBoundaries[])
+  {
+    MantidVecPtr x,y,e;
+    const int numBins = numBoundaries - 1;
+    x.access().resize(numBoundaries);
+    y.access().resize(numBins,2);
+    e.access().resize(numBins,sqrt(2.0));
+    for (int i = 0; i < numBoundaries; ++i)
+    {
+      x.access()[i] = xBoundaries[i];
+    }
+    Workspace2D_sptr retVal(new Workspace2D);
+    retVal->initialize(nhist,numBins+1,numBins);
+    for (int i=0; i< nhist; i++)
+    {
+      retVal->setX(i,x);
+      retVal->setData(i,y,e);
+    }
+
+    return retVal;
+  }
+
+
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the

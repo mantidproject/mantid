@@ -1,19 +1,20 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_
-#define MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_
+#ifndef MANTID_ALGORITHMS_XDATACONVERTER_H_
+#define MANTID_ALGORITHMS_XDATACONVERTER_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAlgorithms/XDataConverter.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
     /** 
-      Converts a histogram workspace to point data by simply taking the centre point of the bin
-      as the new point on the X axis
-      
+      This is an abstract base class for sharing methods between algorithms that operate only
+      on X data. Inheriting classes should overide the isRequired, checkInputWorkspace, getNewXSize and 
+      setXData methods to return the appropriate values.
+
       @author Martyn Gigg, Tessella plc
       @date 2010-12-14
       
@@ -37,24 +38,44 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ConvertToPointData: public XDataConverter
+    class DLLExport XDataConverter : public API::Algorithm
     {
     public:
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "ConvertToPointData"; }
+      /// Default constructor
+      XDataConverter();
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "General";}
 
-    private:
+    protected:
       /// Returns true if the algorithm needs to be run. 
-      bool isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const;
+      virtual bool isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const = 0;
       /// Checks the input workspace is consistent, throwing if not
-      bool isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const;
+      virtual bool isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const = 0;
       /// Returns the size of the new X vector
-      int getNewXSize(const API::MatrixWorkspace_sptr inputWS) const;
+      virtual int getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
       /// Calculate the X point values. Implement in an inheriting class.
-      void calculateXPoints(const MantidVec & inputX, MantidVec &outputX) const;
+      virtual void calculateXPoints(const MantidVec & inputX, MantidVec &outputX) const = 0;
+      
+    private:
+      /// Override init
+      virtual void init();
+      /// Override exec
+      virtual void exec();
+
+      /// Set the X data on given spectra
+      void setXData(API::MatrixWorkspace_sptr outputWS, 
+		    const API::MatrixWorkspace_sptr inputWS,
+		    const int index);
+      
+      /// Flag if the X data is shared
+      bool m_sharedX;
+      /// Cached data for shared X values
+      MantidVecPtr m_cachedX;
     };
 
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_*/
+#endif /*MANTID_ALGORITHMS_XDATACONVERTER_H_*/

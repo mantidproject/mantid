@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_
-#define MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_
+#ifndef MANTID_ALGORITHMS_CONVERTTOHISTOGRAM_H_
+#define MANTID_ALGORITHMS_CONVERTTOHISTOGRAM_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -15,7 +15,7 @@ namespace Mantid
       as the new point on the X axis
       
       @author Martyn Gigg, Tessella plc
-      @date 2010-12-14
+      @date 2010-12-21
       
       Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
       
@@ -37,11 +37,11 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ConvertToPointData: public XDataConverter
+    class DLLExport ConvertToHistogram : public XDataConverter
     {
     public:
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "ConvertToPointData"; }
+      virtual const std::string name() const { return "ConvertToHistogram"; }
 
     private:
       /// Returns true if the algorithm needs to be run. 
@@ -57,4 +57,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_*/
+#endif /*MANTID_ALGORITHMS_CONVERTTOHISTOGRAM_H_*/
