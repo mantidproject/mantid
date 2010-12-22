@@ -18,6 +18,9 @@ namespace Algorithms
     maximum efficiency is provided, the  pixels falling outside the limits will be taken out
     of the normalization and masked.
 
+    For workspaces with more than one TOF bins, the bins are summed up before the calculation
+    and the resulting efficiency has a single TOF bin.
+
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>

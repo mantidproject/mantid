@@ -55,37 +55,35 @@ void CalculateEfficiency::exec()
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if ( outputWS != inputWS )
-  {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
-    setProperty("OutputWorkspace",outputWS);
-  }
 
   Progress progress(this,0.0,1.0,5);
 
-  // Number of X bins
-  const int xLength = inputWS->readY(0).size();
-
   // Sum up all the wavelength bins
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebunch");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
   try
   {
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    childAlg->setProperty<int>("NBunch", xLength);
     childAlg->execute();
   } catch (std::invalid_argument& err)
   {
     std::stringstream e;
-    e << "Invalid argument to Rebunch sub-algorithm: " << err.what();
+    e << "Invalid argument to Integration sub-algorithm: " << err.what();
     g_log.error(e.str());
   } catch (std::runtime_error& err)
   {
     std::stringstream e;
-    e << "Unable to successfully run Rebunch sub-algorithm: " << err.what();
+    e << "Unable to successfully run Integration sub-algorithm: " << err.what();
     g_log.error(e.str());
   }
 
   MatrixWorkspace_sptr rebinnedWS = childAlg->getProperty("OutputWorkspace");
+
+  outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
+  for (int i=0; i<(int)rebinnedWS->getNumberHistograms(); i++)
+  {
+    outputWS->dataX(i) = rebinnedWS->readX(i);
+  }
+  setProperty("OutputWorkspace",outputWS);
 
   progress.report();
 

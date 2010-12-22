@@ -557,32 +557,29 @@ class SensitivityCorrection(ReductionStep):
     def execute(self, reducer, workspace):
         # If the sensitivity correction workspace exists, just apply it.
         # Otherwise create it.      
+        #TODO: check that the workspaces have the same binning!
         if self._efficiency_ws is None:
             # Load the flood data
             filepath = reducer._full_file_path(self._flood_data)
             flood_ws = extract_workspace_name(filepath)
             
-            Load(filepath, flood_ws)
+            reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
+            #TODO: May need a rebin here if the TOF bin boundaries are not all the same
+            #Rebin(flood_ws, flood_ws, "8,1,13")
 
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
                 reducer._dark_current_subtracter.execute(reducer, flood_ws)
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
+            # Note: Moving according to the beam center is done in LoadRun above
             if reducer._solid_angle_correcter is not None:
-                # Move detector array to correct position, necessary to apply solid angle correction
-                # Note: the position of the detector in Z is now part of the load
-                MoveInstrumentComponent(flood_ws, reducer.instrument.detector_ID, 
-                                        X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                        Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
-                                        RelativePosition="1")
-                        
                 reducer._solid_angle_correcter.execute(reducer, flood_ws)
         
             # Create efficiency profile: 
             # Divide each pixel by average signal, and mask high and low pixels.
-            CalculateEfficiency(flood_ws, flood_ws, self._min_sensitivity, self._max_sensitivity)
-            self._efficiency_ws = flood_ws
+            CalculateEfficiency(flood_ws, "efficiency", self._min_sensitivity, self._max_sensitivity)
+            self._efficiency_ws = "efficiency"
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)
