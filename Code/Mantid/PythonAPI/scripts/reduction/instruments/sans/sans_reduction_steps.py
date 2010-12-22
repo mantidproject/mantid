@@ -564,8 +564,6 @@ class SensitivityCorrection(ReductionStep):
             flood_ws = extract_workspace_name(filepath)
             
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
-            #TODO: May need a rebin here if the TOF bin boundaries are not all the same
-            #Rebin(flood_ws, flood_ws, "8,1,13")
 
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
@@ -583,6 +581,7 @@ class SensitivityCorrection(ReductionStep):
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)
+        ReplaceSpecialValues(workspace, workspace, InfinityValue=0.0, InfinityError=0.0)
         
         # Copy over the efficiency's masked pixels to the reduced workspace
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)

@@ -90,9 +90,10 @@ class LoadRun(ReductionStep):
 
         ConvertUnits(workspace, workspace, "Wavelength")
         
-        # Need to properly rebin. Need to do this if we want to compare transmission
-        # to "fatcat" output.
-        #Rebin(workspace, workspace, "1.5,0.01,6.")
+        # Rebin so all the wavelength bins are aligned
+        min_lambda = min(mtd[workspace].readX(0))
+        max_lambda = max(mtd[workspace].readX(0))
+        Rebin(workspace, workspace, "%4.1f,%4.1f,%4.1f" % (min_lambda, 0.1, max_lambda))
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
