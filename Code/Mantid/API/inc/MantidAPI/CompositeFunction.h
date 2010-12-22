@@ -50,7 +50,7 @@ public:
               /* Overriden methods */
 
   /// Set the workspace
-  void setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
   /// Returns the function's name
   std::string name()const{return "CompositeFunction";}
   /// Writes itself into a string
@@ -107,9 +107,9 @@ public:
   /// Return parameter index from a parameter reference.
   int getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const ParameterReference& ref)const;
+  IFitFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const IFunction* fun);
+  IFitFunction* getContainingFunction(const IFitFunction* fun);
 
   /// Apply the ties
   void applyTies();

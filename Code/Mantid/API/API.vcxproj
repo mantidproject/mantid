@@ -185,6 +185,7 @@
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
     <ClCompile Include="src\IDataFileChecker.cpp" />
+    <ClCompile Include="src\IFitFunction.cpp" />
     <ClCompile Include="src\IFunction.cpp" />
     <ClCompile Include="src\IMDWorkspace.cpp" />
     <ClCompile Include="src\ImplicitFunctionParserFactory.cpp" />
@@ -208,6 +209,7 @@
     <ClCompile Include="src\RefAxis.cpp" />
     <ClCompile Include="src\Run.cpp" />
     <ClCompile Include="src\Sample.cpp" />
+    <ClCompile Include="src\SampleEnvironment.cpp" />
     <ClCompile Include="src\SpectraAxis.cpp" />
     <ClCompile Include="src\SpectraDetectorMap.cpp" />
     <ClCompile Include="src\TableRow.cpp" />
@@ -231,6 +233,7 @@
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
     <ClInclude Include="inc\MantidAPI\ICatalog.h" />
     <ClInclude Include="inc\MantidAPI\IDataFileChecker.h" />
+    <ClInclude Include="inc\MantidAPI\IFitFunction.h" />
     <ClInclude Include="inc\MantidAPI\IMDWorkspace.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunction.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionBuilder.h" />
@@ -245,6 +248,7 @@
     <ClInclude Include="inc\MantidAPI\MDPropertyGeometry.h" />
     <ClInclude Include="inc\MantidAPI\Point3D.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
+    <ClInclude Include="inc\MantidAPI\SampleEnvironment.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />
     <ClInclude Include="inc\MantidAPI\AlgorithmManager.h" />
     <ClInclude Include="test\AlgorithmManagerTest.h" />

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllExport.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
 namespace mu
@@ -49,7 +49,7 @@ namespace API
 {
 public:
   /// Constructor
-  ParameterTie(IFunction* funct,const std::string& parName);
+  ParameterTie(IFitFunction* funct,const std::string& parName);
   /// Destructor
   virtual ~ParameterTie();
   /// Set the tie expression
@@ -57,17 +57,17 @@ public:
   /// Evaluate the expression
   virtual double eval();
   /// Return the string that can be used to recreate this tie
-  virtual std::string asString(const IFunction* fun = 0)const;
+  virtual std::string asString(const IFitFunction* fun = 0)const;
 
   /// Check if the tie has any references to certain parameters
-  bool findParametersOf(const IFunction* fun)const;
+  bool findParametersOf(const IFitFunction* fun)const;
 
 protected:
   mu::Parser* m_parser;         ///< math parser
   /// Store for parameters used in the tie. The map's key is address used bu the mu::Parser
   std::map<double*,ParameterReference> m_varMap;
   /// Keep the function that was passed to the constructor
-  IFunction* m_function1;
+  IFitFunction* m_function1;
   /// Keep the template for the input string passed to this->set(...)
   /// In the template CompositeFunction prefixes are replaced with placeholders
   std::string m_expression;

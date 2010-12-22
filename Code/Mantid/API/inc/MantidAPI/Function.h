@@ -103,9 +103,9 @@ public:
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual int getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const ParameterReference& ref)const;
+  IFitFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const IFunction* fun);
+  IFitFunction* getContainingFunction(const IFitFunction* fun);
 
   /// Apply the ties
   virtual void applyTies();

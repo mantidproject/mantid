@@ -32,9 +32,10 @@ PropertyHandler::PropertyHandler(Mantid::API::IFunction* fun,
                 Mantid::API::CompositeFunction* parent,
                 FitPropertyBrowser* browser,
                 QtBrowserItem* item)
-                :FunctionHandler(fun),m_browser(browser),
+                :FitFunctionHandler(fun),m_browser(browser),
                 m_cf(dynamic_cast<Mantid::API::CompositeFunction*>(fun)),
                 m_pf(dynamic_cast<Mantid::API::IPeakFunction*>(fun)),
+                m_if(fun),
                 m_parent(parent),
                 m_type(NULL),
                 m_item(item),
@@ -510,7 +511,7 @@ const Mantid::API::CompositeFunction* PropertyHandler::findCompositeFunction(QtB
 */
 const Mantid::API::IFunction* PropertyHandler::findFunction(QtBrowserItem* item)const
 {
-  if (item == m_item) return function();
+  if (item == m_item) return static_cast<const Mantid::API::IFunction*>(function());
   if (!m_cf) return 0;
   for(int i=0;i<m_cf->nFunctions();i++)
   {
@@ -570,7 +571,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_doubleManager->value(prop);
     m_fun->setParameter(parName,parValue);
-    m_browser->sendParameterChanged(m_fun);
+    m_browser->sendParameterChanged(m_if);
     return true;
   }
   if (m_cf)
@@ -840,7 +841,7 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
 
     removePlot();
 
-    const Mantid::API::IFunction* f_old = function();
+    const Mantid::API::IFunction* f_old = static_cast<const Mantid::API::IFunction*>(function());
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
     if (this == m_browser->m_autoBackground)
     {
@@ -1001,10 +1002,10 @@ void PropertyHandler::removeTie(const QString& parName)
 void PropertyHandler::calcBase()
 {
   if (!m_browser->m_autoBackground) return;
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_fun->getWorkspace();
+  Mantid::API::MatrixWorkspace_const_sptr ws = m_if->getMatrixWorkspace();
   if (ws)
   {
-    int wi = m_fun->getWorkspaceIndex();
+    int wi = m_if->getWorkspaceIndex();
     const Mantid::MantidVec& X = ws->readX(wi);
     const Mantid::MantidVec& Y = ws->readY(wi);
     int n = Y.size() - 1;
@@ -1016,7 +1017,7 @@ void PropertyHandler::calcBase()
     {
       double x = X[m_ci];
       double y = 0;
-      m_browser->m_autoBackground->function()->function(&y,&x,1);
+      static_cast<const Mantid::API::IFunction*>(m_browser->m_autoBackground->function())->function(&y,&x,1);
       m_base = y;
     }
   }
@@ -1057,10 +1058,10 @@ void PropertyHandler::setCentre(const double& c)
   if (m_pf)
   {
     m_pf->setCentre(c);
-    Mantid::API::MatrixWorkspace_const_sptr ws = m_fun->getWorkspace();
+    Mantid::API::MatrixWorkspace_const_sptr ws = m_if->getMatrixWorkspace();
     if (ws)
     {
-      int wi = m_fun->getWorkspaceIndex();
+      int wi = m_if->getWorkspaceIndex();
       const Mantid::MantidVec& X = ws->readX(wi);
       int n = X.size() - 2;
       if (m_ci < 0) m_ci = 0;
@@ -1252,7 +1253,7 @@ void PropertyHandler::plot(Graph* g)const
   if (!m_curve)
   {
     m_curve = new FunctionCurve(
-      m_fun,
+      m_if,
       QString::fromStdString(m_browser->m_groupMember),//m_browser->workspaceName()),
       m_browser->workspaceIndex(),
       functionName());

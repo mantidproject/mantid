@@ -14,7 +14,7 @@ namespace API
    * @param funct A pointer to the function which parameter will be tied
    * @param parName The name of the parameter to be tied
    */
-  ParameterTie::ParameterTie(IFunction* funct,const std::string& parName)
+  ParameterTie::ParameterTie(IFitFunction* funct,const std::string& parName)
     :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser()),m_function1(funct)
   {
     m_parser->DefineNameChars("0123456789_."
@@ -131,7 +131,7 @@ namespace API
    * @param fun Function that can re-create the tie from the output string.
    * @return string representation of function
    */
-  std::string ParameterTie::asString(const IFunction* fun)const
+  std::string ParameterTie::asString(const IFitFunction* fun)const
   {
     if (!fun)
     {
@@ -184,7 +184,7 @@ namespace API
    * @param fun A function
    * @return True if any of the parameters is used as a variable in the mu::Parser
    */
-  bool ParameterTie::findParametersOf(const IFunction* fun)const
+  bool ParameterTie::findParametersOf(const IFitFunction* fun)const
   {
     for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
     {

@@ -558,7 +558,7 @@ int Function::getParameterIndex(const ParameterReference& ref)const
  * @param ref The reference
  * @return A function containing parameter pointed to by ref
  */
-IFunction* Function::getContainingFunction(const ParameterReference& ref)const
+IFitFunction* Function::getContainingFunction(const ParameterReference& ref)const
 {
   if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
@@ -571,7 +571,7 @@ IFunction* Function::getContainingFunction(const ParameterReference& ref)const
  * @param fun The function
  * @return A function containing fun
  */
-IFunction* Function::getContainingFunction(const IFunction* fun)
+IFitFunction* Function::getContainingFunction(const IFitFunction* fun)
 {
   if (fun == this)
   {

@@ -530,7 +530,7 @@ void CompositeFunction::replaceFunction(const IFunction* f_old,IFunction* f_new)
   std::vector<IFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
-  f_new->setWorkspace(f_old->getWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
+  f_new->setMatrixWorkspace(f_old->getMatrixWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
   int iFun = it - m_functions.begin();
   replaceFunction(iFun,f_new);
 }
@@ -707,11 +707,11 @@ std::string CompositeFunction::parameterLocalName(int i)const
  * @param xMin The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
+void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 {
-  IFunction::setWorkspace(workspace,spec,xMin,xMax);
+  IFunction::setMatrixWorkspace(workspace,spec,xMin,xMax);
   for(int i=0;i<nFunctions();i++)
-    getFunction(i)->setWorkspace(workspace,spec,xMin,xMax);
+    getFunction(i)->setMatrixWorkspace(workspace,spec,xMin,xMax);
 }
 
 /**
@@ -861,7 +861,7 @@ int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
  * @param ref The reference
  * @return A function containing parameter pointed to by ref
  */
-IFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
+IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
 {
   if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
@@ -869,7 +869,7 @@ IFunction* CompositeFunction::getContainingFunction(const ParameterReference& re
   }
   for(int iFun=0;iFun<nFunctions();iFun++)
   {
-    IFunction* fun = getFunction(iFun)->getContainingFunction(ref);
+    IFunction* fun = static_cast<IFunction*>(getFunction(iFun)->getContainingFunction(ref));
     if (fun)
     {
       return getFunction(iFun);
@@ -882,7 +882,7 @@ IFunction* CompositeFunction::getContainingFunction(const ParameterReference& re
  * @param fun The searched function
  * @return A function containing the argument function fun
  */
-IFunction* CompositeFunction::getContainingFunction(const IFunction* fun)
+IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
 {
   if (fun == this)
   {
@@ -890,7 +890,7 @@ IFunction* CompositeFunction::getContainingFunction(const IFunction* fun)
   }
   for(int iFun=0;iFun<nFunctions();iFun++)
   {
-    IFunction* f = getFunction(iFun)->getContainingFunction(fun);
+    IFunction* f = static_cast<IFunction*>(getFunction(iFun)->getContainingFunction(fun));
     if (f)
     {
       return getFunction(iFun);

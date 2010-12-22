@@ -23,14 +23,14 @@ namespace Mantid
     {
     }
 
-    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const std::string& input) const
+    IConstraint* ConstraintFactoryImpl::createInitialized(IFitFunction* fun, const std::string& input) const
     {
       Expression expr;
       expr.parse(input);
       return createInitialized(fun,expr);
     }
 
-    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const Expression& expr) const
+    IConstraint* ConstraintFactoryImpl::createInitialized(IFitFunction* fun, const Expression& expr) const
     {
       IConstraint* c = 0;
       if (expr.name() == "==")

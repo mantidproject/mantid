@@ -28,7 +28,7 @@ class QtProperty;
 /**
  * Helps display and edit functions in FitPropertyBrowser
  */
-class PropertyHandler:public QObject, public Mantid::API::FunctionHandler
+class PropertyHandler:public QObject, public Mantid::API::FitFunctionHandler
 {
   Q_OBJECT
 public:
@@ -179,6 +179,7 @@ private:
   Mantid::API::CompositeFunction* m_cf;//< if the function is composite holds pointer to it
   Mantid::API::IPeakFunction* m_pf;//< if the function is peak holds pointer to it
   Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
+  Mantid::API::IFunction* m_if;//< pointer to IFunction
   QtProperty* m_type;
   QtBrowserItem* m_item;//< the browser item
   QList<QtProperty*> m_attributes; //< function attribute properties

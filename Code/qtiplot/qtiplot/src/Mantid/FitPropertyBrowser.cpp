@@ -1413,7 +1413,7 @@ void FitPropertyBrowser::addTie()
   if (!h->isParameter(paramProp)) return;
   if (!h) return;
 
-  const Mantid::API::IFunction* f = h->function();
+  const Mantid::API::IFitFunction* f = h->function();
   if (!f) return;
 
   bool ok = false;
@@ -1447,7 +1447,7 @@ void FitPropertyBrowser::addTieToFunction()
   for(int i=0;i<m_compositeFunction->nParams();i++)
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
-    Mantid::API::IFunction* fun = ref.getFunction();
+    Mantid::API::IFitFunction* fun = ref.getFunction();
     // Pick out parameters with the same name as the one we're tying from
     if ( fun->parameterName(ref.getIndex()) == parName )
     {
@@ -1860,7 +1860,7 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
           }
           if (X[xMax] > eX) break;
         }
-        f->setWorkspace(ws,workspaceIndex(),xMin,xMax);
+        f->setMatrixWorkspace(ws,workspaceIndex(),xMin,xMax);
       }
     }
     catch(...){}
@@ -2108,7 +2108,7 @@ void FitPropertyBrowser::findPeaks()
         );
       if (!f) break;
       f->initialize();
-      f->setWorkspace(inputWS,workspaceIndex(),-1,-1);
+      f->setMatrixWorkspace(inputWS,workspaceIndex(),-1,-1);
       f->setCentre(centre[i]);
       f->setWidth(width[i]);
       f->setHeight(height[i]);

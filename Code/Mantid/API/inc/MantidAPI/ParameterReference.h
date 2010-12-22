@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllExport.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 
 namespace mu
 {
@@ -49,19 +49,19 @@ public:
   /// Default constructor
   ParameterReference():m_function(0),m_index(-1){}
   /// Constructor
-  ParameterReference(IFunction* fun,int index){reset(fun,index);}
+  ParameterReference(IFitFunction* fun,int index){reset(fun,index);}
   /// Return pointer to the function
-  IFunction* getFunction()const{return m_function;}
+  IFitFunction* getFunction()const{return m_function;}
   /// Return parameter index in that function
   int getIndex()const{return m_index;}
   /// Reset the reference
-  void reset(IFunction* fun,int index);
+  void reset(IFitFunction* fun,int index);
   /// Set the parameter
   void setParameter(const double& value) {m_function->setParameter(m_index,value);}
   /// Get the value of the parameter
   double getParameter()const{return m_function->getParameter(m_index);}
 private:
-  IFunction* m_function; ///< pointer to the function
+  IFitFunction* m_function; ///< pointer to the function
   int m_index; ///< parameter index
 };
 

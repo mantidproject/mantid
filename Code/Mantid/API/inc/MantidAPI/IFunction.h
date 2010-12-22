@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/variant.hpp"
@@ -109,130 +110,40 @@ class FunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFunction
+class DLLExport IFunction: public IFitFunction
 {
 public:
 
-  /**
-   * Atribute visitor class. It provides a separate access method
-   * for each attribute type. When applied to a particular attribue
-   * the appropriate method will be used. The child classes must
-   * implement the virtual AttributeVisitor::apply methods. See 
-   * implementation of Attribute::value() method for an example.
-   */
-  template<typename T = void>
-  class DLLExport AttributeVisitor: public boost::static_visitor<T>
-  {
-  public:
-    /// Virtual destructor
-    virtual ~AttributeVisitor() {}
-    /// implements static_visitor's operator() for std::string
-    T operator()(std::string& str)const{return apply(str);}
-    /// implements static_visitor's operator() for double
-    T operator()(double& d)const{return apply(d);}
-    /// implements static_visitor's operator() for int
-    T operator()(int& i)const{return apply(i);}
-  protected:
-    /// Implement this mathod to access attribute as string
-    virtual T apply(std::string&)const = 0;
-    /// Implement this mathod to access attribute as double
-    virtual T apply(double&)const = 0;
-    /// Implement this mathod to access attribute as int
-    virtual T apply(int&)const = 0;
-  };
-
-  /**
-   * Const version of AttributeVisitor. 
-   */
-  template<typename T = void>
-  class DLLExport ConstAttributeVisitor: public boost::static_visitor<T>
-  {
-  public:
-    /// Virtual destructor
-    virtual ~ConstAttributeVisitor() {}
-    /// implements static_visitor's operator() for std::string
-    T operator()(std::string& str)const{return apply(str);}
-    /// implements static_visitor's operator() for double
-    T operator()(double& d)const{return apply(d);}
-    /// implements static_visitor's operator() for int
-    T operator()(int& i)const{return apply(i);}
-  protected:
-    /// Implement this mathod to access attribute as string
-    virtual T apply(const std::string& str)const = 0;
-    /// Implement this mathod to access attribute as double
-    virtual T apply(const double& d)const = 0;
-    /// Implement this mathod to access attribute as int
-    virtual T apply(const int& i)const = 0;
-  };
-
-  /// Attribute is a non-fitting parameter.
-  /// It can be one of the types: std::string, int, or double
-  /// Examples: file name, polinomial order
-  class DLLExport Attribute
-  {
-  public:
-    /// Create string attribute
-    explicit Attribute(const std::string& str, bool quoteValue=false):m_data(str), m_quoteValue(quoteValue) {}
-    /// Create int attribute
-    explicit Attribute(const int& i):m_data(i){}
-    /// Create double attribute
-    explicit Attribute(const double& d):m_data(d){}
-    /// Apply an attribute visitor
-    template<typename T>
-    T apply(AttributeVisitor<T>& v){return boost::apply_visitor(v,m_data);}
-    /// Apply a const attribute visitor
-    template<typename T>
-    T apply(ConstAttributeVisitor<T>& v)const{return boost::apply_visitor(v,m_data);}
-    /// Returns type of the attribute
-    std::string type()const;
-    /// Returns the attribute value as a string
-    std::string value()const;
-    /// Returns string value if attribute is a string, throws exception otherwise
-    std::string asString()const;
-    /// Returns a string value that is guarenteed to be quoted for use in places where the string is used as the displayed value.
-    std::string asQuotedString() const;
-    /// Returns a string value that is guarenteed to be unquoted.
-    std::string asUnquotedString() const;
-    /// Returns int value if attribute is a int, throws exception otherwise
-    int asInt()const;
-    /// Returns double value if attribute is a double, throws exception otherwise
-    double asDouble()const;
-    /// Sets new value if attribute is a string
-    void setString(const std::string& str);
-    /// Sets new value if attribute is a double
-    void setDouble(const double&);
-    /// Sets new value if attribute is a int
-    void setInt(const int&);
-    /// Set value from a string.
-    void fromString(const std::string& str);
-  private:
-    /// The data holder as boost variant
-    mutable boost::variant<std::string,int,double> m_data;
-    /// Flag indicating if the string value should be returned quoted
-    bool m_quoteValue;
-  };
-
-  //---------------------------------------------------------//
-
   /// Constructor
-  IFunction():m_handler(NULL){}
-  /// Virtual destructor
-  virtual ~IFunction();
+  IFunction():IFitFunction(){}
 
-  /// Returns the function's name
-  virtual std::string name()const = 0;
-  /// Writes itself into a string
-  virtual std::string asString()const;
-  /// The string operator
-  virtual operator std::string()const{return asString();}
+  /* Overidden methods */
+
   /// Set the workspace
-  virtual void setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax);
+  /// @param wsIDString A string identifying the data to be fitted, e.g. workspace name and spectrum index separated by a comma
+  virtual void setWorkspace(const std::string& wsIDString);
   /// Get the workspace
-  virtual boost::shared_ptr<const API::MatrixWorkspace> getWorkspace()const{return m_workspace;}
+  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
+
+  /// Returns the size of the fitted data (number of double values returned by the function)
+  virtual int dataSize()const;
+  /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
+  /// Must be true: getData().size() == dataSize()
+  virtual const std::vector<double>& getData()const;
+  /// Function you want to fit to. 
+  /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  virtual void function(double* out)const;
+  /// Derivatives of function with respect to active parameters
+  virtual void functionDeriv(Jacobian* out);
+
+  /* MatrixWorkspace specific methods */
+
+  /// Set the workspace
+  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax);
+  /// Get the workspace
+  virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
   /// Get workspace index
   virtual int getWorkspaceIndex()const{return m_workspaceIndex;}
-  /// Iinialize the function
-  virtual void initialize(){this->init();}
 
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData)const = 0;
@@ -242,124 +153,12 @@ public:
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
-  /// Set i-th parameter
-  virtual void setParameter(int, const double& value, bool explicitlySet = true) = 0;
-  /// Get i-th parameter
-  virtual double getParameter(int i)const = 0;
-  /// Set parameter by name.
-  virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true) = 0;
-  /// Get parameter by name.
-  virtual double getParameter(const std::string& name)const = 0;
-  /// Total number of parameters
-  virtual int nParams()const = 0;
-  /// Returns the index of parameter name
-  virtual int parameterIndex(const std::string& name)const = 0;
-  /// Returns the name of parameter i
-  virtual std::string parameterName(int i)const = 0;
-  /// Checks if a parameter has been set explicitly
-  virtual bool isExplicitlySet(int i)const = 0;
-
-  /// Number of active (in terms of fitting) parameters
-  virtual int nActive()const = 0;
-  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(int i)const;
-  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual void setActiveParameter(int i, double value);
-  /// Update parameters after a fitting iteration
-  virtual void updateActive(const double* in);
-  /// Returns "global" index of active parameter i
-  virtual int indexOfActive(int i)const = 0;
-  /// Returns the name of active parameter i
-  virtual std::string nameOfActive(int i)const = 0;
-
-  /// Check if a declared parameter i is active
-  virtual bool isActive(int i)const = 0;
-  /// Get active index for a declared parameter i
-  virtual int activeIndex(int i)const = 0;
-  /// Removes a declared parameter i from the list of active
-  virtual void removeActive(int i) = 0;
-  /// Restores a declared parameter i to the active status
-  virtual void restoreActive(int i) = 0;
-
-  /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
-  virtual int getParameterIndex(const ParameterReference& ref)const = 0;
-  /// Get a function containing the parameter refered to by the reference. In case of a simple function
-  /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
-  /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
-  /// @param ref The Parameter reference
-  /// @return A pointer to the containing function
-  virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
-  /// The same as the method above but the argument is a function
-  virtual IFunction* getContainingFunction(const IFunction* fun) = 0;
-
-  /// Tie a parameter to other parameters (or a constant)
-  virtual ParameterTie* tie(const std::string& parName,const std::string& expr);
-  /// Apply the ties
-  virtual void applyTies() = 0;
-  /// Removes the tie off a parameter
-  virtual void removeTie(const std::string& parName);
-  /// Remove all ties
-  virtual void clearTies() = 0;
-  /// Removes i-th parameter's tie
-  virtual bool removeTie(int i) = 0;
-  /// Get the tie of i-th parameter
-  virtual ParameterTie* getTie(int i)const = 0;
-
-  /// Add a constraint to function
-  virtual void addConstraint(IConstraint* ic) = 0;
-  /// Get constraint of i-th parameter
-  virtual IConstraint* getConstraint(int i)const = 0;
-  /// Remove a constraint
-  virtual void removeConstraint(const std::string& parName) = 0;
-
-  /// Set the parameters of the function to satisfy the constraints of
-  /// of the function. For example
-  /// for a BoundaryConstraint this if param value less than lower boundary
-  /// it is set to that value and vice versa for if the param value is larger
-  /// than the upper boundary value.
-  virtual void setParametersToSatisfyConstraints() {};
-
-  /// Returns the number of attributes associated with the function
-  virtual int nAttributes()const{return 0;}
-  /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
-  /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string& attName)const
-  {
-    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
-  }
-  /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const Attribute& )
-  {
-    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
-  }
-  /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return false;}
-
-  /// Set a function handler
-  void setHandler(FunctionHandler* handler);
-  /// Return the handler
-  FunctionHandler* getHandler()const{return m_handler;}
-
 protected:
-
-  /// Function initialization. Declare function parameters in this method.
-  virtual void init(){};
-  /// Declare a new parameter
-  virtual void declareParameter(const std::string& name,double initValue = 0) = 0;
-
-  /// Create an instance of a tie without actually tying it to anything
-  virtual ParameterTie* createTie(const std::string& parName);
-  /// Add a new tie
-  virtual void addTie(ParameterTie* tie) = 0;
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       int wsIndex);
-
-  friend class ParameterTie;
-  friend class CompositeFunction;
 
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
@@ -370,64 +169,10 @@ protected:
   /// Upper bin index
   int m_xMaxIndex;
 
-  /// Pointer to a function handler
-  FunctionHandler* m_handler;
-
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
-};
 
-/** Represents the Jacobian in functionDeriv. 
-*  It is abstract to abstract from any GSL
-*/
-class Jacobian
-{
-public:
-  /**  Set a value to a Jacobian matrix element.
-  *   @param iY The index of a data point.
-  *   @param iP The index of a declared parameter.
-  *   @param value The derivative value.
-  */
-  virtual void set(int iY, int iP, double value) = 0;
-
-  ///@cond do not document
-  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value Value to add
-  */
-  virtual void addNumberToColumn(const double& IGNORE_IFUNCTION_ARGUMENT(value), const int& IGNORE_IFUNCTION_ARGUMENT(iActiveP)) 
-  {
-    throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
-  }
-  ///@endcond
-
-  /// Virtual destructor
-  virtual ~Jacobian() {};
-protected:
-};
-
-/// Overload operator <<
-DLLExport std::ostream& operator<<(std::ostream& ostr,const IFunction& f);
-
-/**
- * Classes inherited from FunctionHandler will handle the function.
- * The intended purpose is to help with displaying nested composite
- * functions in a tree view. This way a display handler shows only
- * single function and there is no need to duplicate the function tree
- * structure.
- */
-class FunctionHandler
-{
-public:
-  /// Constructor
-  FunctionHandler(IFunction* fun):m_fun(fun){}
-  /// Virtual destructor
-  virtual ~FunctionHandler(){}
-  /// abstract init method. It is called after setting handler to the function
-  virtual void init() = 0;
-  /// Return the handled function
-  const IFunction* function()const{return m_fun;}
-protected:
-  IFunction* m_fun;///< pointer to the handled function
+  static std::vector<double> g_empty;
 };
 
 } // namespace API

@@ -56,6 +56,8 @@
     <ClCompile Include="src\WorkspaceProperty.cpp" />
     <ClCompile Include="src\WorkspaceTracer.cpp" />
     <ClCompile Include="src\IDataFileChecker.cpp" />
+    <ClCompile Include="src\IFitFunction.cpp" />
+    <ClCompile Include="src\SampleEnvironment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAPI\Algorithm.h" />
@@ -154,5 +156,7 @@
     <ClInclude Include="inc\MantidAPI\WorkspaceTracer.h" />
     <ClInclude Include="inc\MantidAPI\WorkspaceValidators.h" />
     <ClInclude Include="inc\MantidAPI\IDataFileChecker.h" />
+    <ClInclude Include="inc\MantidAPI\IFitFunction.h" />
+    <ClInclude Include="inc\MantidAPI\SampleEnvironment.h" />
   </ItemGroup>
 </Project>

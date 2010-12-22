@@ -27,7 +27,7 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param lowerBound The lower bound
  * @param upperBound The upper bound
  */
-BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
+BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
 m_activeParameterIndex(-1),
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
@@ -46,7 +46,7 @@ m_upperBound(upperBound)
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
  */
-void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
+void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expression& expr)
 {
   if ( expr.size() < 2 || expr.name() != "==")
   {
@@ -171,7 +171,7 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
  *  @param fn fitting function
  *  @return active parameter index or -1 if no active parameter index found
  */
-//int BoundaryConstraint::determineParameterIndex(IFunction* fn)
+//int BoundaryConstraint::determineParameterIndex(IFitFunction* fn)
 //{
 //  //if (m_activeParameterIndex < 0)
 //  //{

@@ -157,7 +157,7 @@ namespace CurveFitting
     if (m_function == NULL)
       throw std::runtime_error("Function was not set.");
 
-    m_function->setWorkspace(localworkspace,histNumber,m_minX, m_maxX);
+    m_function->setMatrixWorkspace(localworkspace,histNumber,m_minX, m_maxX);
 
     // force initial parameters to satisfy constraints of function
     m_function->setParametersToSatisfyConstraints();

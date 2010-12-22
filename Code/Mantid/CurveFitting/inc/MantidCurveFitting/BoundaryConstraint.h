@@ -65,13 +65,13 @@ namespace Mantid
       }
 
       /// Constructor with boundary arguments
-      BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
+      BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
 
       /// Destructor
       virtual ~BoundaryConstraint() {}
 
       /// Initialize the constraint from an expression
-      void initialize(API::IFunction* fun, const API::Expression& expr);
+      void initialize(API::IFitFunction* fun, const API::Expression& expr);
 
       /// implement IConstraint virtual functions
       void setPenaltyFactor(const double& c); 
@@ -125,9 +125,9 @@ namespace Mantid
       int m_activeParameterIndex;
 
       /// instantiate m_activeParameterIndex if not already instantiated
-      //void instantiateParameterIndex(API::IFunction* fn);
+      //void instantiateParameterIndex(API::IFitFunction* fn);
 
-      //int determineParameterIndex(API::IFunction* fn);
+      //int determineParameterIndex(API::IFitFunction* fn);
 
 
       double m_penaltyFactor;

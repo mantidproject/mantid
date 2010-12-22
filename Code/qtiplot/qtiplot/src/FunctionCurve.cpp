@@ -188,7 +188,7 @@ void FunctionCurve::loadData(int points)
       // Create the function and initialize it using fnInput which was saved in d_formulas[1]
       boost::shared_ptr<Mantid::API::IFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
       if (!f) return;
-      f->setWorkspace(ws,wsIndex,-1,-1);
+      f->setMatrixWorkspace(ws,wsIndex,-1,-1);
       f->applyTies();
       f->function(Y.data(),X.constData(),nPoints);
 

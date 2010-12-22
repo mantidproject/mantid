@@ -6,9 +6,9 @@ namespace Mantid
 namespace API
 {
 
-void ParameterReference::reset(IFunction* fun,int index)
+void ParameterReference::reset(IFitFunction* fun,int index)
 {
-  IFunction* fLocal = fun;
+  IFitFunction* fLocal = fun;
   int iLocal = index;
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)

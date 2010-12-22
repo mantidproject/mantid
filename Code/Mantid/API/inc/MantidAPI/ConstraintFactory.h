@@ -27,7 +27,7 @@ namespace API
 // More forward declarations
 //----------------------------------------------------------------------
   class IConstraint;
-  class IFunction;
+  class IFitFunction;
   class Expression;
 
 /** @class Mantid::API::ConstraintFactoryImpl
@@ -68,13 +68,13 @@ namespace API
      * @param input The creation expression
      * @return A pointer to the created Constraint
      */
-    IConstraint* createInitialized(IFunction* fun, const std::string& input) const;
+    IConstraint* createInitialized(IFitFunction* fun, const std::string& input) const;
     /**Creates an instance of a Constraint
      * @param fun The function
      * @param expr The creation expression
      * @return A pointer to the created Constraint
      */
-    IConstraint* createInitialized(IFunction* fun, const Expression& expr) const;
+    IConstraint* createInitialized(IFitFunction* fun, const Expression& expr) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;
