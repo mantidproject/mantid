@@ -209,7 +209,7 @@ namespace CxxTest
             {
         	std::ostringstream timeStream;
         	timeStream << runtime;
-            o << "    <testcase classname=\"" << className.c_str() 
+            o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str() 
               << "\" name=\"" << testName.c_str() 
               << "\" line=\"" << line.c_str()
               << "\" time=\"" << timeStream.str().c_str() << "\"";
@@ -263,7 +263,7 @@ namespace CxxTest
             ntests=0;
             nfail=0;
             nerror=0;
-            totaltime=1.0;
+            totaltime=0.0;
         }
 
         static void totalTests( OutputStream &o )
@@ -371,6 +371,7 @@ namespace CxxTest
                 (*_o) << " tests=\"" << ntests 
                       << "\" errors=\"" << nerror 
                       << "\" failures=\"" << nfail 
+                      << "\" package=\"" << desc.worldName()
                       << "\" time=\"" << os.str().c_str() << "\" >";
                 _o->endl(*_o);
                 (*_o) << _os->str().c_str();
