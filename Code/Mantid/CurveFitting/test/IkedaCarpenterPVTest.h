@@ -141,7 +141,7 @@ public:
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV(1.0);
     icpv->initialize();
-    icpv->setWorkspace(ws2D, 1,0,1);
+    icpv->setMatrixWorkspace(ws2D, 1,0,1);
 
     icpv->setParameter("I",95000);
     icpv->tie("Alpha0", "1.597107");
@@ -226,7 +226,7 @@ public:
     //icpv->setParameter("Gamma",1);
     //icpv->tie("Gamma", "1");
 
-    icpv->setWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
+    icpv->setMatrixWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
 
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);
@@ -291,7 +291,7 @@ public:
     icpv->setParameter("Gamma",1);
     icpv->tie("Gamma", "1");
 
-    icpv->setWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
+    icpv->setMatrixWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
 
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);

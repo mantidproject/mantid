@@ -207,7 +207,7 @@ public:
     addNoise(ws,0.1);
     storeWS("mfun",ws);
 
-    mfun->setWorkspace(ws,7,12,3);
+    mfun->setMatrixWorkspace(ws,7,12,3);
     mfun->testInit(ws,7,12,3);
 
     Fit alg;

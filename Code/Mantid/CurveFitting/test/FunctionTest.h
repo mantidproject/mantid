@@ -126,7 +126,7 @@ public:
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
 
-    g->setWorkspace(ws,12,7,9);
+    g->setMatrixWorkspace(ws,12,7,9);
     g->testInit(ws,12,7,9);
 
     Fit alg;
