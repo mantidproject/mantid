@@ -99,7 +99,6 @@ public:
     Mantid::Algorithms::CylinderAbsorption cyl;
     cyl.initialize();
     TS_ASSERT_THROWS_NOTHING( cyl.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS) );
-//    TS_ASSERT_THROWS_NOTHING( cyl.setPropertyValue("InputWorkspace",inputWS) );
     std::string cylWS("cyl");
     TS_ASSERT_THROWS_NOTHING( cyl.setPropertyValue("OutputWorkspace",cylWS) );
     TS_ASSERT_THROWS_NOTHING( cyl.setPropertyValue("AttenuationXSection","5.08") );
