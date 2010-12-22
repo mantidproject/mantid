@@ -129,8 +129,9 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
   std::string& outValidTo)
 {
       SAXParser pParser;
-      myContentHandler*  conHand = new myContentHandler();
-      pParser.setContentHandler(conHand);
+      // Create on stack to ensure deletion. Relies on pParser also being local variable.
+      myContentHandler  conHand;
+      pParser.setContentHandler(&conHand);
 
       try
       {
