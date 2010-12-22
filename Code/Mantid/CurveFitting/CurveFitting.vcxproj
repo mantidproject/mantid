@@ -211,6 +211,7 @@
     <ClCompile Include="src\Gaussian.cpp" />
     <ClCompile Include="src\Gaussian1D.cpp" />
     <ClCompile Include="src\GaussianLinearBG1D.cpp" />
+    <ClCompile Include="src\GenericFit.cpp" />
     <ClCompile Include="src\GSLFunctions.cpp" />
     <ClCompile Include="src\IkedaCarpenterPV.cpp" />
     <ClCompile Include="src\LevenbergMarquardtMinimizer.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="inc\MantidCurveFitting\BackToBackExponential.h" />
     <ClInclude Include="inc\MantidCurveFitting\DeltaFunction.h" />
     <ClInclude Include="inc\MantidCurveFitting\ExpDecay.h" />
+    <ClInclude Include="inc\MantidCurveFitting\GenericFit.h" />
     <ClInclude Include="test\BackToBackExponentialTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\BFGS_Minimizer.h" />
     <ClInclude Include="inc\MantidCurveFitting\BoundaryConstraint.h" />
