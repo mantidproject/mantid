@@ -95,7 +95,7 @@ MDFileReaderGeneralPluginInfo::GetName() const
 const char *
 MDFileReaderGeneralPluginInfo::GetVersion() const
 {
-    return "1";
+    return "2";
 }
 
 // ****************************************************************************
@@ -114,7 +114,7 @@ MDFileReaderGeneralPluginInfo::GetVersion() const
 const char *
 MDFileReaderGeneralPluginInfo::GetID() const
 {
-    return "MDFileReader_1";
+    return "MDFileReader_2";
 }
 // ****************************************************************************
 //  Method: MDFileReaderGeneralPluginInfo::EnabledByDefault
@@ -168,10 +168,10 @@ MDFileReaderGeneralPluginInfo::GetDefaultFilePatterns() const
     std::vector<std::string> defaultPatterns;
     defaultPatterns.push_back("sqw");
     defaultPatterns.push_back("SQW");
-    defaultPatterns.push_back("*.sqw");
-    defaultPatterns.push_back("*.SQW");
     defaultPatterns.push_back(".sqw");
     defaultPatterns.push_back(".SQW");
+    defaultPatterns.push_back("*.sqw");
+    defaultPatterns.push_back("*.SQW");
 
     return defaultPatterns;
 }

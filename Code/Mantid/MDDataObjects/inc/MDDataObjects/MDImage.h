@@ -97,6 +97,12 @@ public:
      return this->MD_IMG_array.data[nCell(i, j, k)];
    }
 
+   //Temporary fix to get4-D image data.
+   MD_image_point getPoint(int i, int j, int k, int t) const
+   {
+     return this->MD_IMG_array.data[nCell(i, j, k, t)];
+   }
+
   /// build allocation table of sparce data points (pixels) -> will be moved into points;
     void identify_SP_points_locations();
 

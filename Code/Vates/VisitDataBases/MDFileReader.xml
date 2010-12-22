@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+  <Plugin name="MDFileReader" type="database" label="MD File Reader" version="2" enabled="true" mdspecificcode="false" engspecificcode="false" onlyengine="false" noengine="false" dbtype="MTSD" haswriter="false" hasoptions="false" filePatternsStrict="false" opensWholeDirectory="false">
+    <FilePatterns>
+      sqw
+      SQW
+      .sqw
+      .SQW
+    </FilePatterns>
+    <Attribute name="" purpose="" persistent="false" keyframe="true" exportAPI="" exportInclude="">
+    </Attribute>
+  </Plugin>

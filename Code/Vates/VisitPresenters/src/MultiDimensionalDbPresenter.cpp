@@ -40,6 +40,18 @@ void MultiDimensionalDbPresenter::execute(const std::string& fileName)
   //HACK: this is the only way to provide slicing data for centrepiece rebinning code.
   Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Mantid::Kernel::Property *)(rebinAlg.getProperty("SlicingData")));
   pSlicing->build_from_geometry(*(inputWS->getGeometry()));
+
+
+  double r0=0;
+   pSlicing->pDimDescription("qx")->cut_min = r0;
+pSlicing->pDimDescription("qx")->cut_max = r0+1;
+pSlicing->pDimDescription("qy")->cut_min = r0;
+pSlicing->pDimDescription("qy")->cut_max = r0+1;
+pSlicing->pDimDescription("qz")->cut_min = r0;
+pSlicing->pDimDescription("qz")->cut_max = r0+1;
+pSlicing->pDimDescription("en")->cut_max = 50;
+
+
   rebinAlg.execute();
   this->m_MDWorkspace = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("OutWorkspace"));
 
@@ -115,11 +127,21 @@ void MultiDimensionalDbPresenter::metaDataToFieldData(vtkFieldData* fieldData, s
   }
 }
 
-vtkDataArray* MultiDimensionalDbPresenter::getScalarData() const
+int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
+{
+  verifyExecution();
+  return m_MDWorkspace->gettDimension()->getNBins();
+}
+
+vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin) const
 {
   using namespace Mantid::MDDataObjects;
 
   verifyExecution();
+  if(timeBin >= getNumberOfTimesteps())
+  {
+    throw std::range_error("A timestep larger than the range of available timesteps has been requested.");
+  }
 
   boost::shared_ptr<const MDImage> spImage(m_MDWorkspace->get_spMDImage());
   const int sizeX = m_MDWorkspace->getXDimension()->getNBins();
@@ -137,7 +159,7 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData() const
     {
       for (int k = 0; k < sizeZ-1; k++)
       {
-        MD_image_point point = spImage->getPoint(i, j, k);
+        MD_image_point point = spImage->getPoint(i, j, k, timeBin);
         scalars->InsertNextValue(point.s);
       }
     }

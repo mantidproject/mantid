@@ -38,7 +38,7 @@
 
 #include <MDFileReaderPluginInfo.h>
 #include <avtMDFileReaderFileFormat.h>
-#include <avtSTSDFileFormatInterface.h>
+#include <avtMTSDFileFormatInterface.h>
 #include <avtGenericDatabase.h>
 
 // ****************************************************************************
@@ -54,7 +54,7 @@
 DatabaseType
 MDFileReaderCommonPluginInfo::GetDatabaseType()
 {
-    return DB_TYPE_STSD;
+    return DB_TYPE_MTSD;
 }
 
 // ****************************************************************************
@@ -78,17 +78,17 @@ avtDatabase *
 MDFileReaderCommonPluginInfo::SetupDatabase(const char *const *list,
                                    int nList, int nBlock)
 {
-    int nTimestep = nList / nBlock;
-    avtSTSDFileFormat ***ffl = new avtSTSDFileFormat**[nTimestep];
-    for (int i = 0 ; i < nTimestep ; i++)
+    int nTimestepGroups = nList / nBlock;
+    avtMTSDFileFormat ***ffl = new avtMTSDFileFormat**[nTimestepGroups];
+    for (int i = 0 ; i < nTimestepGroups ; i++)
     {
-        ffl[i] = new avtSTSDFileFormat*[nBlock];
+        ffl[i] = new avtMTSDFileFormat*[nBlock];
         for (int j = 0 ; j < nBlock ; j++)
         {
             ffl[i][j] = new avtMDFileReaderFileFormat(list[i*nBlock + j]);
         }
     }
-    avtSTSDFileFormatInterface *inter 
-           = new avtSTSDFileFormatInterface(ffl, nTimestep, nBlock);
+    avtMTSDFileFormatInterface *inter 
+           = new avtMTSDFileFormatInterface(ffl, nTimestepGroups, nBlock);
     return new avtGenericDatabase(inter);
 }

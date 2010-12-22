@@ -67,8 +67,11 @@ public:
   /// Gets the vtk mesh;
   vtkDataSet* getMesh() const;
 
-  /// Gets the vtk scalar data for the mesh;
-  vtkDataArray* getScalarData() const;
+  /// Gets the vtk scalar data for the mesh
+  vtkDataArray* getScalarData(int timeBin) const;
+
+  /// Gets the number of timesteps in the workspace.
+  int getNumberOfTimesteps() const;
 
   /// Destructor
   ~MultiDimensionalDbPresenter();
