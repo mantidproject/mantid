@@ -31,6 +31,7 @@ void Q1DWeighted::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
+  wsValidator->add(new InstrumentValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));

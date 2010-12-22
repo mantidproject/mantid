@@ -281,9 +281,14 @@ void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double&
   IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  // Check for valid instrument
+  if (sample == NULL)
+  {
+    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get sample");
+  }
+
   l1 = instrument->getSource()->getDistance(*sample);
   Geometry::IDetector_const_sptr det = m_inputWorkspace->getDetector(index);
-  //Geometry::V3D detPos = det->getPos();
   // Get the sample-detector distance for this detector (in metres)
   if ( ! det->isMonitor() )
   {

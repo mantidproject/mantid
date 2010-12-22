@@ -18,6 +18,7 @@ void TofCorrection::init()
   wsVal->add(new WorkspaceUnitValidator<>("TOF"));
   wsVal->add(new HistogramValidator<>);
   wsVal->add(new SpectraAxisValidator<>);
+  wsVal->add(new InstrumentValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsVal));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
 }

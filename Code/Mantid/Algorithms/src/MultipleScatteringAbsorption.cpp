@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringAbsorption.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -59,7 +60,7 @@ using std::vector;
 void MultipleScatteringAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
-                  "",Direction::Input), "The name of the input workspace.");
+                  "",Direction::Input, new InstrumentValidator<>), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 

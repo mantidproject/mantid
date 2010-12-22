@@ -65,7 +65,7 @@ public:
 
   void testExecWithoutEiThrowsInvalidArgument()
   {
-    Workspace2D_sptr dummyWS = WorkspaceCreationHelper::Create2DWorkspace(2, 1);
+    Workspace2D_sptr dummyWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
     dummyWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     const std::string inputWS = "testInput";
     AnalysisDataService::Instance().add(inputWS, dummyWS);

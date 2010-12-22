@@ -34,7 +34,7 @@ namespace Mantid
     void SolidAngle::init()
     {
       declareProperty(
-        new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
         "This workspace is used to identify the instrument to use and also which\n"
         "spectra to create a solid angle for. If the Max and Min spectra values are\n"
         "not provided one solid angle will be created for each spectra in the input\n"

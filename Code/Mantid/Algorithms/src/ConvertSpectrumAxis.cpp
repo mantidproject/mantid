@@ -31,6 +31,7 @@ namespace
   };
 } // end anonynmous namespace
 /// @endcond
+
 namespace Mantid
 {
 namespace Algorithms
@@ -40,12 +41,14 @@ namespace Algorithms
   using namespace Kernel;
   using namespace API;
   using namespace Geometry;
+
   void ConvertSpectrumAxis::init()
   {
     // Validator for Input Workspace
     CompositeValidator<> *wsVal = new CompositeValidator<>;
     wsVal->add(new HistogramValidator<>);
     wsVal->add(new SpectraAxisValidator<>);
+    wsVal->add(new InstrumentValidator<>);
     
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsVal));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
@@ -59,6 +62,7 @@ namespace Algorithms
     declareProperty("EMode", "Direct",new ListValidator(eModeOptions),
       "The energy mode type required for some conversions");
   }
+
   void ConvertSpectrumAxis::exec()
   {
     // Get the input workspace

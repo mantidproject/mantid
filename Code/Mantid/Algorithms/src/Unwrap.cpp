@@ -32,6 +32,7 @@ void Unwrap::init()
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);
+  wsValidator->add(new InstrumentValidator<>);
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with x values in units of TOF and y values in counts" );

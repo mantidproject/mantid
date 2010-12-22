@@ -49,6 +49,7 @@ void He3TubeEfficiency::init()
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   wsValidator->add(new API::WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new API::HistogramValidator<>);
+  wsValidator->add(new API::InstrumentValidator<>);
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
       "", Kernel::Direction::Input, wsValidator), "Name of the input workspace");
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",

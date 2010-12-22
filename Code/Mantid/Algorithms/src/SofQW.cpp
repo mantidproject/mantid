@@ -27,6 +27,7 @@ void SofQW::init()
   wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
   wsValidator->add(new CommonBinsValidator<>);
   wsValidator->add(new HistogramValidator<>);
+  wsValidator->add(new InstrumentValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 

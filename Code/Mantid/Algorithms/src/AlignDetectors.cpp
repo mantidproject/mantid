@@ -219,6 +219,7 @@ void AlignDetectors::init()
   //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
+  wsValidator->add(new InstrumentValidator<>);
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with units of TOF" );

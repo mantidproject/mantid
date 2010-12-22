@@ -43,6 +43,7 @@ void GetEi::init()
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));
   val->add(new HistogramValidator<>);
+  val->add(new InstrumentValidator<>);
   declareProperty(new WorkspaceProperty<>(
     "InputWorkspace","",Direction::Input,val),
     "The X units of this workspace must be time of flight with times in\n"
