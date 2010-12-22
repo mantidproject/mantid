@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "WorkspaceCreationHelper.hh"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
 
 class FlatPlateAbsorptionTest : public CxxTest::TestSuite
 {

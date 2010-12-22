@@ -177,14 +177,14 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   }
   catch (std::runtime_error&)
   {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
+    g_log.error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
     throw;
   }
 
   if ( ! childAlg->isExecuted() )
   {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Rebinning sub-algorithm");
+    g_log.error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
+    throw std::runtime_error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
   }
 
   return childAlg->getProperty("OutputWorkspace");
