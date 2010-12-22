@@ -4,12 +4,19 @@
 #include <exception>
 #include <boost/shared_ptr.hpp>
 #include <vtkImplicitFunction.h>
+#include <vtkStructuredGrid.h>
+#include <vtkDoubleArray.h>
+#include <vtkPointData.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MDDataObjects/MD_FileFormatFactory.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -53,16 +60,16 @@ void RebinningCutterPresenter::constructReductionKnowledge(
     throw std::invalid_argument("Three origin components expected.");
   }
 
+  //Create domain parameters.
   OriginParameter originParam = OriginParameter(origin.at(0), origin.at(1), origin.at(2));
-
   WidthParameter widthParam = WidthParameter(width);
   HeightParameter heightParam = HeightParameter(height);
   DepthParameter depthParam = DepthParameter(depth);
 
-  //create the composite holder.
+  //Create the composite holder.
   Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
-  //create the box.
+  //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
   BoxImplicitFunction* boxFunc =
       new BoxImplicitFunction(widthParam, heightParam, depthParam, originParam);
 
@@ -70,7 +77,7 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunc));
 
   //Add existing functions.
-  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, getMetadataID());
+  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, metaDataId.c_str());
   if (existingFunctions != NULL)
   {
     compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
@@ -82,27 +89,29 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   //Apply the geometry.
   m_serializing.setGeometryXML( constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, height, width, depth, origin) );
   //Apply the workspace name after extraction from the input xml.
-  m_serializing.setWorkspaceName( findExistingWorkspaceNameFromXML(m_inputDataSet, getMetadataID()));
+  m_serializing.setWorkspaceName( findExistingWorkspaceNameFromXML(m_inputDataSet, metaDataId.c_str()));
   //Apply the workspace location after extraction from the input xml.
-  m_serializing.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(m_inputDataSet, getMetadataID()));
+  m_serializing.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(m_inputDataSet, metaDataId.c_str()));
 
   this->m_initalized = true;
 }
 
-vtkUnstructuredGrid* RebinningCutterPresenter::applyReductionKnowledge(Clipper* clipper)
+vtkDataSet* RebinningCutterPresenter::applyReductionKnowledge()
 {
 
-  if(true == m_initalized)
+  if (true == m_initalized)
   {
-  vtkUnstructuredGrid *ug = vtkUnstructuredGrid::New();
-  applyReductionKnowledgeToComposite(clipper, m_inputDataSet, ug, this->m_function.get());
-  persistReductionKnowledge(ug, this->m_serializing, getMetadataID());
-  return ug;
+    //call the rebinning routines and generate a resulting image for visualisation.
+    vtkDataSet* visualImageData = generateVisualImage(m_serializing);
+
+    //save the work performed as part of this filter instance into the pipeline.
+    persistReductionKnowledge(visualImageData, this->m_serializing, metaDataId.c_str());
+    return visualImageData;
   }
   else
   {
     //To ensure that constructReductionKnowledge is always called first.
-    throw std::runtime_error("This instance has not been properly initalized via the construct method.");
+    throw std::runtime_error("This instance has not been properly initialised via the construct method.");
   }
 
 }
@@ -194,7 +203,7 @@ std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
 }
 
 
-void persistReductionKnowledge(vtkUnstructuredGrid * out_ds, const
+void persistReductionKnowledge(vtkDataSet* out_ds, const
     RebinningXMLGenerator& xmlGenerator, const char* id)
 {
   vtkFieldData* fd = vtkFieldData::New();
@@ -203,10 +212,6 @@ void persistReductionKnowledge(vtkUnstructuredGrid * out_ds, const
   out_ds->SetFieldData(fd);
 }
 
-const char* getMetadataID()
-{
-  return "1"; //value unimportant. Identifier to recognise a particular vktArray in the vtkFieldData.
-}
 
 Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
     vtkDataSet* inputDataSet, const char* id)
@@ -258,46 +263,85 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
    return wsLocationElem->innerText();
  }
 
+ //NB: At present, the input workspace is required by the dynamicrebinningfromxml algorithm, but not by the
+ //sub-algorithm running centerpiece rebinning.
+ Mantid::MDDataObjects::MDWorkspace* constructMDWorkspace(const std::string& wsLocation)
+ {
+   using namespace Mantid::MDDataObjects;
+   using namespace Mantid::Geometry;
+
+   MDWorkspace* workspace = new MDWorkspace;
+   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader(wsLocation.c_str());
+   workspace->load_workspace(boost::shared_ptr<IMD_FileFormat>(pFile.release()));
+   return workspace;
+ }
 
 
-void applyReductionKnowledgeToComposite(Clipper* clipper, vtkDataSet* in_ds,
-    vtkUnstructuredGrid * out_ds, Mantid::API::ImplicitFunction* function)
+vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
 {
-  using namespace Mantid::MDAlgorithms;
+  using namespace Mantid::MDDataObjects;
   using namespace Mantid::API;
+  //Get the input workspace location and name.
+  std::string wsLocation = serializingUtility.getWorkspaceLocation();
+  std::string wsName = serializingUtility.getWorkspaceName();
+  MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace(wsLocation));
+  AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
 
-  CompositeImplicitFunction* compFunction = dynamic_cast<CompositeImplicitFunction*> (function);
-  if (NULL != compFunction)
+  Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+  xmlRebinAlg.setRethrows(true);
+  xmlRebinAlg.initialize();
+  xmlRebinAlg.setPropertyValue("OutputWorkspace", "RebinnedWS");
+
+  //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
+  std::string xmlString = serializingUtility.createXMLString();
+  xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+
+  //Run the rebinning algorithm.
+  xmlRebinAlg.execute();
+
+  //Use the generated workspace to access the underlying image, which may be rendered.
+  MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
+      AnalysisDataService::Instance().retrieve("RebinnedWS"));
+
+  const int imageSize = outputWs->get_spMDImage()->getDataSize();
+
+  vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
+  vtkPoints *points = vtkPoints::New();
+  points->Allocate(imageSize);
+  vtkDoubleArray* scalars = vtkDoubleArray::New();
+  scalars->SetName("Signal");
+  scalars->Allocate(imageSize);
+
+  const int sizeX = outputWs->getXDimension()->getNBins();
+  const int sizeY = outputWs->getYDimension()->getNBins();
+  const int sizeZ = outputWs->getZDimension()->getNBins();
+
+  //Loop through dimensions
+  for (int i = 0; i < sizeX; i++)
   {
-    std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > returnedFuncs =
-        compFunction->getFunctions();
-    std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it =
-        returnedFuncs.begin();
-    for (it; it != returnedFuncs.end(); ++it)
+    for (int j = 0; j < sizeY; j++)
     {
-      BoxImplicitFunction* boxFunction = dynamic_cast<BoxImplicitFunction*> ((*it).get());
-      if (NULL != boxFunction)
+      for (int k = 0; k < sizeZ; k++)
       {
-        vtkBox* box = vtkBox::New();
-
-        //Map implicit function to box function.
-        box->SetBounds(boxFunction->getLowerX(), boxFunction->getUpperX(), boxFunction->getLowerY(), boxFunction->getUpperY(), boxFunction->getLowerZ(), boxFunction->getUpperZ());
-
-        clipper->SetInput(in_ds);
-        clipper->SetClipFunction(box);
-        clipper->SetInsideOut(true);
-        clipper->SetRemoveWholeCells(true);
-        clipper->SetOutput(out_ds);
-        clipper->Update();
-        box->Delete();
-      }
-      else
-      {
-        applyReductionKnowledgeToComposite(clipper, in_ds, out_ds, (*it).get());
+        //Create an image from the point data.
+        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k);
+        scalars->InsertNextValue(point.s);
+        points->InsertNextPoint(i, j, k);
       }
     }
   }
+
+  //Attach points to dataset.
+  visualDataSet->SetPoints(points);
+  visualDataSet->GetPointData()->AddArray(scalars);
+  visualDataSet->SetDimensions(sizeX, sizeY, sizeZ);
+  points->Delete();
+  scalars->Delete();
+  return visualDataSet;
 }
+
+const std::string RebinningCutterPresenter::metaDataId="1";
+
 
 }
 

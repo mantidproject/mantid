@@ -27,6 +27,7 @@ namespace Mantid
 
     ImplicitFunctionParser* ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(Poco::XML::Element* functionElement) const
     {
+      std::string name = functionElement->localName();
       if(functionElement->localName() != "Function")
       {
         throw std::runtime_error("Root node must be a Funtion element. Unable to determine parsers.");

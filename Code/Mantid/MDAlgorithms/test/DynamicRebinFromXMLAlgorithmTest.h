@@ -102,44 +102,40 @@ private:
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>c:/Manid/Test/VATES/fe_demo.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>../../../fe_demo.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
-      "<UpperBounds>10</UpperBounds>" +
+      "<UpperBounds>150</UpperBounds>" +
       "<LowerBounds>0</LowerBounds>" +
       "<NumberOfBins>4</NumberOfBins>" +
-      "<Integrated>" +
-        "<UpperLimit>0</UpperLimit>" +
-        "<LowerLimit>0</LowerLimit>" +
-      "</Integrated>" +
     "</Dimension>" +
     "<Dimension ID=\"qx\">" +
       "<Name>Qx</Name>" +
-      "<UpperBounds>20</UpperBounds>" +
-      "<LowerBounds>0</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
+      "<UpperBounds>5</UpperBounds>" +
+      "<LowerBounds>-1.5</LowerBounds>" +
+      "<NumberOfBins>7</NumberOfBins>" +
       "<ReciprocalDimensionMapping>q1</ReciprocalDimensionMapping>" +
     "</Dimension>" +
     "<Dimension ID=\"qy\">" +
       "<Name>Qy</Name>" +
-      "<UpperBounds>20</UpperBounds>" +
-      "<LowerBounds>0</LowerBounds>" +
-      "<NumberOfBins>7</NumberOfBins>" +
+      "<UpperBounds>6.6</UpperBounds>" +
+      "<LowerBounds>-6.6</LowerBounds>" +
+      "<NumberOfBins>5</NumberOfBins>" +
       "<ReciprocalDimensionMapping>q2</ReciprocalDimensionMapping>" +
     "</Dimension>" +
     "<Dimension ID=\"qz\">" +
       "<Name>Qz</Name>" +
-      "<UpperBounds>20</UpperBounds>" +
-      "<LowerBounds>6</LowerBounds>" +
+      "<UpperBounds>6.6</UpperBounds>" +
+      "<LowerBounds>-6.6</LowerBounds>" +
       "<NumberOfBins>6</NumberOfBins>" +
       "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" +
     "</Dimension>" +
     "<XDimension>" +
-      "<RefDimensionId>qy</RefDimensionId>" +
+      "<RefDimensionId>qx</RefDimensionId>" +
     "</XDimension>" +
     "<YDimension>" +
-      "<RefDimensionId>qx</RefDimensionId>" +
+      "<RefDimensionId>qy</RefDimensionId>" +
     "</YDimension>" +
     "<ZDimension>" +
       "<RefDimensionId>qz</RefDimensionId>" +
@@ -156,11 +152,11 @@ private:
       "<ParameterList>" +
         "<Parameter>" +
           "<Type>HeightParameter</Type>" +
-          "<Value>8</Value>" +
+          "<Value>6</Value>" +
        "</Parameter>" +
         "<Parameter>" +
           "<Type>WidthParameter</Type>" +
-          "<Value>6</Value>" +
+          "<Value>1.5</Value>" +
        "</Parameter>" +
        "<Parameter>" +
           "<Type>DepthParameter</Type>" +
@@ -173,30 +169,30 @@ private:
       "</ParameterList>" +
     "</Function>" +
     "<Function>" +
-      "<Type>CompositeImplicitFunction</Type>" +
-      "<ParameterList/>" +
-        "<Function>" +
-          "<Type>BoxImplicitFunction</Type>" +
-          "<ParameterList>" +
-            "<Parameter>" +
-              "<Type>WidthParameter</Type>" +
-              "<Value>4</Value>" +
-            "</Parameter>" +
-            "<Parameter>" +
-              "<Type>HeightParameter</Type>" + 
-              "<Value>6</Value>" +
-           "</Parameter>" +
-           "<Parameter>" +
-              "<Type>DepthParameter</Type>" +
-              "<Value>6</Value>" +
-           "</Parameter>" +
-           "<Parameter>" +
-              "<Type>OriginParameter</Type>" +
-              "<Value>1, 1, 1</Value>" +
-           "</Parameter>" +
-      "</ParameterList>" +
-    "</Function>" +
-  "</Function>" 
+          "<Type>CompositeImplicitFunction</Type>" +
+          "<ParameterList/>" +
+            "<Function>" +
+              "<Type>BoxImplicitFunction</Type>" +
+              "<ParameterList>" +
+                "<Parameter>" +
+                  "<Type>WidthParameter</Type>" +
+                  "<Value>4</Value>" +
+                "</Parameter>" +
+                "<Parameter>" +
+                  "<Type>HeightParameter</Type>" +
+                  "<Value>1.5</Value>" +
+               "</Parameter>" +
+               "<Parameter>" +
+                  "<Type>DepthParameter</Type>" +
+                  "<Value>6</Value>" +
+               "</Parameter>" +
+               "<Parameter>" +
+                  "<Type>OriginParameter</Type>" +
+                  "<Value>0, 0, 0</Value>" +
+               "</Parameter>" +
+              "</ParameterList>" +
+            "</Function>" +
+      "</Function>" +
   "</Function>" +
 "</MDInstruction>";
   }
@@ -259,7 +255,7 @@ public:
   void testGetWorkspaceLocation()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "c:/Manid/Test/VATES/fe_demo.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
+    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "../../../fe_demo.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
   }
 
   void testGetImplicitFunction()
@@ -287,13 +283,13 @@ public:
 	TSM_ASSERT_EQUALS("Wrong number of bins returned for third dimension", 6,  geomDescription->pDimDescription(2)->nBins);
 	TSM_ASSERT_EQUALS("Wrong number of bins returned for fourth dimension", 4, geomDescription->pDimDescription(3)->nBins);
  
-	TSM_ASSERT_EQUALS("Incorrect axis name for first dimension", "Qy",     geomDescription->pDimDescription(0)->AxisName);
-	TSM_ASSERT_EQUALS("Incorrect axis name for second dimension", "Qx",    geomDescription->pDimDescription(1)->AxisName);
+	TSM_ASSERT_EQUALS("Incorrect axis name for first dimension", "Qx",     geomDescription->pDimDescription(0)->AxisName);
+	TSM_ASSERT_EQUALS("Incorrect axis name for second dimension", "Qy",    geomDescription->pDimDescription(1)->AxisName);
 	TSM_ASSERT_EQUALS("Incorrect axis name for third dimension", "Qz",     geomDescription->pDimDescription(2)->AxisName);
 	TSM_ASSERT_EQUALS("Incorrect axis name for fourth dimension", "Energy",geomDescription->pDimDescription(3)->AxisName);
     
-	TSM_ASSERT_EQUALS("Incorrect id for first dimension", "qy",  geomDescription->pDimDescription(0)->Tag);
-    TSM_ASSERT_EQUALS("Incorrect id for second dimension", "qx", geomDescription->pDimDescription(1)->Tag);
+	TSM_ASSERT_EQUALS("Incorrect id for first dimension", "qx",  geomDescription->pDimDescription(0)->Tag);
+    TSM_ASSERT_EQUALS("Incorrect id for second dimension", "qy", geomDescription->pDimDescription(1)->Tag);
 	TSM_ASSERT_EQUALS("Incorrect id for third dimension", "qz",  geomDescription->pDimDescription(2)->Tag);
 	TSM_ASSERT_EQUALS("Incorrect id for fourth dimension", "en", geomDescription->pDimDescription(3)->Tag);
 
@@ -320,10 +316,10 @@ public:
     ImplicitFunction* impFunction = xmlRebinAlg.getImplicitFunction(MDInstructionXML());
     xmlRebinAlg.ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);
 
-	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -3, description->pDimDescription(0)->cut_min);
-    TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 3,  description->pDimDescription(0)->cut_max);
-    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -4, description->pDimDescription(1)->cut_min);
-    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 4,  description->pDimDescription(1)->cut_max);
+	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -2, description->pDimDescription(0)->cut_min);
+    TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 0.75,  description->pDimDescription(0)->cut_max);
+    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -3, description->pDimDescription(1)->cut_min);
+    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 0.75,  description->pDimDescription(1)->cut_max);
 	TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", -3, description->pDimDescription(2)->cut_min);
     TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
   }
@@ -331,7 +327,6 @@ public:
   void testExecute()
   {
     using namespace Mantid::MDDataObjects;
-
 
     MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace());
     AnalysisDataService::Instance().add("Input", baseWs);
@@ -353,7 +348,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->gettDimension()->getNBins());
     //840 = 7 * 5* 6 * 4
     TSM_ASSERT_EQUALS("The image size should be the product of the number of bins accross dimensions", 840, output->get_spMDImage()->getDataSize());
-    
+
   }
 
 };

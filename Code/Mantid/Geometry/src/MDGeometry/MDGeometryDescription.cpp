@@ -94,6 +94,7 @@ MDGeometryDescription::MDGeometryDescription(
   DimensionVecIterator dimZ = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionZ));
   DimensionVecIterator dimT = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensiont));
 
+  //Check dimensions;
   createDimensionDescription(*dimX, 0);
   createDimensionDescription(*dimY, 1);
   createDimensionDescription(*dimZ, 2);
@@ -115,18 +116,21 @@ MDGeometryDescription::MDGeometryDescription(
    rotations[0]=rotations[4]=rotations[8]=1;
 
   }
+  //Rotations ignored. HACK: Rotations must be dealt with properly.
+  rotations.assign(9,0);
+  rotations[0]=rotations[4]=rotations[8]=1;
 }
 
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {
-  this->data[i].Tag            = dimension->getDimensionId();
-  this->data[i].data_shift     = dimension->getDataShift();
-  this->data[i].cut_min        = dimension->getMinimum();
-  this->data[i].cut_max        = dimension->getMaximum()*(1+FLT_EPSILON);
-  this->data[i].nBins          = dimension->getNBins();
-  this->data[i].AxisName       = dimension->getName();
-  this->data[i].isReciprocal   = dimension->isReciprocal();
-  this->data[i].data_scale     = dimension->getScale(); 
+  this->data[i].data_shift = 0;
+  this->data[i].cut_min = dimension->getMinimum();
+  this->data[i].cut_max = dimension->getMaximum()*(1+FLT_EPSILON);
+  this->data[i].nBins = dimension->getNBins();
+  this->data[i].AxisName  = dimension->getName();
+  this->data[i].isReciprocal = dimension->isReciprocal();
+  this->data[i].data_scale = dimension->getScale();
+  this->data[i].Tag = dimension->getDimensionId();
 
   //Handle reciprocal dimensions.
   if(dimension->isReciprocal())

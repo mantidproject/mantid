@@ -3,6 +3,12 @@
 	<name>VisitPresenters</name>
 	<comment></comment>
 	<projects>
+		<project>API</project>
+		<project>DataObjects</project>
+		<project>Geometry</project>
+		<project>Kernel</project>
+		<project>MDAlgorithms</project>
+		<project>MDDataObjects</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

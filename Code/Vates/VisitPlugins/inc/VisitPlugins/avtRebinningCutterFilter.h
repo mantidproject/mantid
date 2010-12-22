@@ -66,49 +66,6 @@ class vtkDataSet;
 // ****************************************************************************
 
 
-class ClipperAdapter : public Mantid::VATES::Clipper
-{
-private:
-  vtkVisItClipper* m_clipper;
-public:
-  ClipperAdapter(vtkVisItClipper* pClipper) : m_clipper(pClipper)
-  {
-  }
-  void SetInput(::vtkDataSet* in_ds)
-  {
-    m_clipper->SetInput(in_ds);
-  }
-  void SetClipFunction(vtkImplicitFunction* func)
-  {
-    m_clipper->SetClipFunction(func);
-  }
-  void SetInsideOut(bool insideout)
-  {
-    m_clipper->SetInsideOut(insideout);
-  }
-  void SetRemoveWholeCells(bool removeWholeCells)
-  {
-    m_clipper->SetRemoveWholeCells(removeWholeCells);
-  }
-  void SetOutput(vtkUnstructuredGrid* out_ds)
-  {
-    m_clipper->SetOutput(out_ds);
-  }
-  void Update()
-  {
-    m_clipper->Update();
-  }
-  void Delete()
-  {
-    delete this;
-  }
-  ~ClipperAdapter()
-  {
-    m_clipper->Delete();
-  }
-
-};
-
 class avtRebinningCutterFilter: public avtPluginDataTreeIterator
 {
 

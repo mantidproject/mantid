@@ -35,7 +35,7 @@ private:
   public:
 
     MOCK_CONST_METHOD0(id, const std::string());
-    MOCK_CONST_METHOD0(getMemorySize, long int());
+    MOCK_CONST_METHOD0(getMemorySize, size_t());
     MOCK_CONST_METHOD0(getNPoints,int());
     MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(int index));
     MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment));

@@ -99,6 +99,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Kernel/inc/
 ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Geometry/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/API/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDAlgorithms/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDDataObjects/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
 ${CMAKE_CURRENT_SOURCE_DIR}/../VisitPresenters/inc/
 )
@@ -167,7 +168,7 @@ find_library(HDF5_LIBRARY
 
 find_library(VisitPresenters_LIBRARY
   NAMES VisitPresenters
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../VisitPresenters/Debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
 )
 
 ADD_LIBRARY(ERebinningCutterOperator_ser ${LIBE_SOURCES})

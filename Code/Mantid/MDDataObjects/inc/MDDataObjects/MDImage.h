@@ -91,7 +91,11 @@ public:
     /// get acces to the whole MDga structure;
     MD_img_data         * get_pMDImgData(void){return (&MD_IMG_array);}
 
- 
+   //Temporary fix to get 3-D image data.
+   MD_image_point getPoint(int i,int j,int k)       const
+   {
+     return this->MD_IMG_array.data[nCell(i, j, k)];
+   }
 
   /// build allocation table of sparce data points (pixels) -> will be moved into points;
     void identify_SP_points_locations();
@@ -112,7 +116,7 @@ public:
 	 // not used at the moment; if will, should be uncommented and pData pointer defined properly
 	 //MD_image_point thePoint(int i)                   const{   return MD_IMG_array.data[nCell(i)];}
   //   MD_image_point thePoint(int i,int j)             const{   return pData[nCell(i,j)];}
-  //   MD_image_point thePoint(int i,int j,int k)       const{   return pData[nCell(i,j,k)];}
+  //
   //   MD_image_point thePoint(int i,int j,int k, int n)const{   return pData[nCell(i,j,k,n)];}
 
       static Kernel::Logger& g_log;

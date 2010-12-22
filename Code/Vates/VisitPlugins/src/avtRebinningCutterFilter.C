@@ -132,47 +132,184 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 {
   return (atts == *(RebinningCutterAttributes*) a);
 }
-
-
-vtkDataSet *
-avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
+//helper method
+std::string getComplexXMLInstructions()
 {
-  using namespace Mantid::Geometry;
+    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+"<MDInstruction>" +
+  "<MDWorkspaceName>Input</MDWorkspaceName>" +
+  "<MDWorkspaceLocation>/home/owen/mantid/Test/VATES/fe_demo.sqw</MDWorkspaceLocation>" +
+  "<DimensionSet>" +
+    "<Dimension ID=\"en\">" +
+      "<Name>Energy</Name>" +
+      "<UpperBounds>150</UpperBounds>" +
+      "<LowerBounds>0</LowerBounds>" +
+      "<NumberOfBins>5</NumberOfBins>" +
+    "</Dimension>" +
+    "<Dimension ID=\"qx\">" +
+      "<Name>Qx</Name>" +
+      "<UpperBounds>5</UpperBounds>" +
+      "<LowerBounds>-1.5</LowerBounds>" +
+      "<NumberOfBins>5</NumberOfBins>" +
+      "<ReciprocalDimensionMapping>q1</ReciprocalDimensionMapping>" +
+    "</Dimension>" +
+    "<Dimension ID=\"qy\">" +
+      "<Name>Qy</Name>" +
+      "<UpperBounds>6.6</UpperBounds>" +
+      "<LowerBounds>-6.6</LowerBounds>" +
+      "<NumberOfBins>5</NumberOfBins>" +
+      "<ReciprocalDimensionMapping>q2</ReciprocalDimensionMapping>" +
+    "</Dimension>" +
+    "<Dimension ID=\"qz\">" +
+      "<Name>Qz</Name>" +
+      "<UpperBounds>6.6</UpperBounds>" +
+      "<LowerBounds>-6.6</LowerBounds>" +
+      "<NumberOfBins>5</NumberOfBins>" +
+      "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" +
+    "</Dimension>" +
+    "<XDimension>" +
+      "<RefDimensionId>qx</RefDimensionId>" +
+    "</XDimension>" +
+    "<YDimension>" +
+      "<RefDimensionId>qy</RefDimensionId>" +
+    "</YDimension>" +
+    "<ZDimension>" +
+      "<RefDimensionId>qz</RefDimensionId>" +
+    "</ZDimension>" +
+    "<TDimension>" +
+      "<RefDimensionId>en</RefDimensionId>" +
+    "</TDimension>" +
+  "</DimensionSet>" +
+  "<Function>" +
+    "<Type>CompositeImplicitFunction</Type>" +
+    "<ParameterList/>" +
+    "<Function>" +
+      "<Type>BoxImplicitFunction</Type>" +
+      "<ParameterList>" +
+        "<Parameter>" +
+          "<Type>HeightParameter</Type>" +
+          "<Value>6</Value>" +
+       "</Parameter>" +
+        "<Parameter>" +
+          "<Type>WidthParameter</Type>" +
+          "<Value>1.5</Value>" +
+       "</Parameter>" +
+       "<Parameter>" +
+          "<Type>DepthParameter</Type>" +
+          "<Value>6</Value>" +
+       "</Parameter>" +
+        "<Parameter>" +
+          "<Type>OriginParameter</Type>" +
+          "<Value>0, 0, 0</Value>" +
+        "</Parameter>" +
+      "</ParameterList>" +
+    "</Function>" +
+    "<Function>" +
+          "<Type>CompositeImplicitFunction</Type>" +
+          "<ParameterList/>" +
+            "<Function>" +
+              "<Type>BoxImplicitFunction</Type>" +
+              "<ParameterList>" +
+                "<Parameter>" +
+                  "<Type>WidthParameter</Type>" +
+                  "<Value>4</Value>" +
+                "</Parameter>" +
+                "<Parameter>" +
+                  "<Type>HeightParameter</Type>" +
+                  "<Value>1.5</Value>" +
+               "</Parameter>" +
+               "<Parameter>" +
+                  "<Type>DepthParameter</Type>" +
+                  "<Value>6</Value>" +
+               "</Parameter>" +
+               "<Parameter>" +
+                  "<Type>OriginParameter</Type>" +
+                  "<Value>0, 0, 0</Value>" +
+               "</Parameter>" +
+              "</ParameterList>" +
+            "</Function>" +
+      "</Function>" +
+  "</Function>" +
+"</MDInstruction>";
+  }
+
+//helper method
+vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
+{
+  vtkFieldData* fieldData = vtkFieldData::New();
+  vtkCharArray* charArray = vtkCharArray::New();
+  charArray->SetName(id.c_str());
+  charArray->Allocate(100);
+  for(int i = 0; i < testData.size(); i++)
+  {
+    char cNextVal = testData.at(i);
+    if(int(cNextVal) > 1)
+    {
+      charArray->InsertNextValue(cNextVal);
+
+    }
+  }
+  fieldData->AddArray(charArray);
+  return fieldData;
+}
+
+
+//Helper method to construct a dataset identical to what would be expected as the input to a RebinningCutterFilter without the any geometric/topological data.
+vtkDataSet* constructInputDataSet()
+{
   using namespace Mantid::VATES;
+  vtkDataSet* dataset = vtkUnstructuredGrid::New();
+  std::string id =  RebinningCutterPresenter::metaDataId;
+  dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
+  return dataset;
+}
 
-  RebinningCutterPresenter presenter(in_ds);
-
-  doubleVector normal;
-  normal.push_back(atts.GetNormalX());
-  normal.push_back(atts.GetNormalY());
-  normal.push_back(atts.GetNormalZ());
-  doubleVector origin;
-  origin.push_back(atts.GetOriginX());
-  origin.push_back(atts.GetOriginY());
-  origin.push_back(atts.GetOriginZ());
+vtkDataSet* avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
+{
+  using namespace Mantid::VATES;
+  using namespace Mantid::Geometry;
+  using Mantid::VATES::DimensionVec;
+  using Mantid::VATES::Dimension_sptr;
+  RebinningCutterPresenter presenter(constructInputDataSet());
 
   DimensionVec vec;
-  Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
-  Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
-  Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
-  Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
+  MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
+  pDimQx->setRange(-1.5, 5, 5);
+  Dimension_sptr dimX = Dimension_sptr(pDimQx);
+
+  MDDimensionRes* pDimQy = new MDDimensionRes("qy", q2); //In reality these commands come from UI inputs.
+  pDimQy->setRange(-6.6, 6.6, 5);
+  Dimension_sptr dimY = Dimension_sptr(pDimQy);
+
+  MDDimensionRes* pDimQz = new MDDimensionRes("qz", q3); //In reality these commands come from UI inputs.
+  pDimQz->setRange(-6.6, 6.6, 5);
+  Dimension_sptr dimZ = Dimension_sptr(pDimQz);
+
+  MDDimension* pDimEn = new MDDimension("en");
+  pDimEn->setRange(0, 150, 5);
+  Dimension_sptr dimT = Dimension_sptr(pDimEn);
 
   vec.push_back(dimX);
   vec.push_back(dimY);
   vec.push_back(dimZ);
   vec.push_back(dimT);
 
-  std::vector<double> badOrigin;
+  doubleVector origin;
+  origin.push_back(atts.GetOriginX());
+  origin.push_back(atts.GetOriginY());
+  origin.push_back(atts.GetOriginZ());
 
-  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 1, 1, origin);
+  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, origin);
 
-  vtkVisItClipper* adaptee = vtkVisItClipper::New();
-  vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee));
+  vtkDataSet *ug = presenter.applyReductionKnowledge();
 
   debug5
     << "-------------------------- Output ------------------------" << endl;
-  debug5 << presenter.getFunction()->toXMLString() << endl;
-  debug5 << "-------------------------- End Output ------------------------" << endl;
+  debug5
+    << presenter.getFunction()->toXMLString() << endl;
+  debug5
+    << "-------------------------- End Output ------------------------" << endl;
 
+  in_ds->Delete();
   return ug;
 }
