@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
@@ -43,59 +44,6 @@ struct TimeSeriesPropertyStatistics
   /// Duration in seconds
   double duration;
 };
-
-//================================================================================================
-/**
- * Function for getting the statistics on the values of a time series property.
- */
-template<typename TYPE>
-TimeSeriesPropertyStatistics getDataStatistics(const std::vector<TYPE> &data)
-{
-  throw Exception::NotImplementedError("Cannot calculate statistics for this type");
-}
-
-template<>
-inline TimeSeriesPropertyStatistics getDataStatistics<double>(const std::vector<double> &data)
-{
-
-  TimeSeriesPropertyStatistics out;
-  int num = static_cast<int>(data.size());
-
-  //First you need the mean
-  int counter = 0;
-  double total = 0.;
-  double min = std::numeric_limits<double>::max();
-  double max = -min;
-  double val;
-  for (std::vector<double>::const_iterator it = data.begin(); it != data.end(); it++)
-  {
-    val = (*it);
-    //We will also find the limits and median at the same time.
-    if (val < min) min = val;
-    if (val > max) max = val;
-    if (counter == num/2)
-      out.median = val;
-    total += val;
-    counter++;
-  }
-  out.maximum=max;
-  out.minimum=min;
-
-  //Now the mean
-  double mean = total/num;
-  out.mean = mean;
-
-  //Now the standard deviation
-  total = 0;
-  for (std::vector<double>::const_iterator it = data.begin(); it != data.end(); it++)
-  {
-    val = (*it)-mean;
-    total += val*val;
-  }
-  out.standard_deviation = sqrt( double( total / num ) );
-
-  return out;
-}
 
 //================================================================================================
 /** 
@@ -988,17 +936,20 @@ public:
   TimeSeriesPropertyStatistics getStatistics()
   {
     TimeSeriesPropertyStatistics out;
-    if (this->size() > 0) {
-      out = getDataStatistics(this->valuesAsVector());
+    Mantid::Kernel::Statistics raw_stats
+                       = Mantid::Kernel::getStatistics(this->valuesAsVector());
+    out.mean = raw_stats.mean;
+    out.standard_deviation = raw_stats.standard_deviation;
+    out.median = raw_stats.median;
+    out.minimum = raw_stats.minimum;
+    out.maximum = raw_stats.maximum;
+    if (this->size() > 0)
+    {
       out.duration = DateAndTime::seconds_from_duration(this->lastTime() - this->firstTime());
-    } else {
-      double nan = std::numeric_limits<double>::quiet_NaN();
-      out.mean = nan;
-      out.median = nan;
-      out.standard_deviation = nan;
-      out.minimum = nan;
-      out.maximum = nan;
-      out.duration = nan;
+    }
+    else
+    {
+      out.duration = std::numeric_limits<double>::quiet_NaN();
     }
 
     return out;
