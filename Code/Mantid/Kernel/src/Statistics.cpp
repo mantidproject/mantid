@@ -102,7 +102,7 @@ Statistics getStatistics(const vector<TYPE>& data, const bool sorted)
 
 /// Getting statistics of a string array should just give a bunch of NaNs
 template<>
-Statistics getStatistics<string>(const vector<string>& data, const bool sorted)
+DLLExport Statistics getStatistics<string>(const vector<string>& data, const bool sorted)
 {
   return getNanStatistics();
 }
