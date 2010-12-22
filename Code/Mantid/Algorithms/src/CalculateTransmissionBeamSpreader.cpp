@@ -113,20 +113,20 @@ void CalculateTransmissionBeamSpreader::exec()
   MatrixWorkspace_sptr sample_spreader_sum;
   MatrixWorkspace_sptr direct_spreader_sum;
 
-//  PARALLEL
-//  {
-//    PARALLEL_SECTIONS
-//    {
-//      PARALLEL_SECTION
+  PARALLEL
+  {
+    PARALLEL_SECTIONS
+    {
+      PARALLEL_SECTION
         sample_scatter_sum = this->sumSpectra(sample_scatterWS);
-//      PARALLEL_SECTION
+      PARALLEL_SECTION
         direct_scatter_sum = this->sumSpectra(direct_scatterWS);
-//      PARALLEL_SECTION
+      PARALLEL_SECTION
         sample_spreader_sum = this->sumSpectra(sample_spreaderWS);
-//      PARALLEL_SECTION
+      PARALLEL_SECTION
         direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
-//    }
-//  }
+    }
+  }
 
   // Beam spreader transmission
   MatrixWorkspace_sptr spreader_trans = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
