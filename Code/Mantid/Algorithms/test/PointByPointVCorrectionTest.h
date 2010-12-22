@@ -4,73 +4,63 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/PointByPointVCorrection.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidNexus/LoadNeXus.h"
+#include "WorkspaceCreationHelper.hh"
 
 class PointByPointVCorrectionTest : public CxxTest::TestSuite
 {
 public:
 	void testName()
   {
-	  TS_ASSERT_EQUALS( pbpv.name(), "PointByPointVCorrection")
+	  TS_ASSERT_EQUALS( pbpv.name(), "PointByPointVCorrection");
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( pbpv.version(), 1 )
+    TS_ASSERT_EQUALS( pbpv.version(), 1 );
   }
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( pbpv.category(), "Diffraction" )
+    TS_ASSERT_EQUALS( pbpv.category(), "Diffraction" );
   }
   
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( pbpv.initialize() )
-    TS_ASSERT( pbpv.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( pbpv.initialize() );
+    TS_ASSERT( pbpv.isInitialized() );
   }
   
   void testExec()
   {
     using namespace Mantid::API;
-    Mantid::NeXus::LoadNexus loader1;
-    loader1.initialize();
-    loader1.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39182_cutdown.nx5");
-    loader1.setPropertyValue("OutputWorkspace", "sample");
-    loader1.setPropertyValue("SpectrumMin","1");
-    loader1.setPropertyValue("SpectrumMax","10");
-    loader1.execute();
-    
-    Mantid::NeXus::LoadNexus loader2;
-    loader2.initialize();
-    loader2.setPropertyValue("Filename", "../../../../Test/Nexus/HRP39191_cutdown.nx5");
-    loader2.setPropertyValue("OutputWorkspace", "vanadium");
-    loader2.setPropertyValue("SpectrumMin","1");
-    loader2.setPropertyValue("SpectrumMax","10");
-    loader2.execute();
     
     if ( !pbpv.isInitialized() ) pbpv.initialize();
     
-    pbpv.setPropertyValue("InputW1","sample");
-    pbpv.setPropertyValue("InputW2","vanadium");
+    MatrixWorkspace_sptr testSample = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,5,0.5,1.5);
+    MatrixWorkspace_sptr testVanadium = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,5,0.5,1.5);
+    // Make the instruments match
+    testVanadium->setInstrument(testSample->getBaseInstrument());
+    // Change the Y values
+    testSample->dataY(1) = Mantid::MantidVec(5,3.0);
+    testVanadium->dataY(1) = Mantid::MantidVec(5,5.5);
+    
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW1",testSample);
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW2",testVanadium);
     pbpv.setPropertyValue("OutputWorkspace","out");
-    TS_ASSERT_THROWS_NOTHING( pbpv.execute() )
-    TS_ASSERT( pbpv.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( pbpv.execute() );
+    TS_ASSERT( pbpv.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out")) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out")) );
 
     // Check a few values
-    TS_ASSERT_DELTA( output->readY(6)[9623], 2.9667, 0.0001 )
-    TS_ASSERT_DELTA( output->readY(4)[23161], 55.1607, 0.0001 )
-    TS_ASSERT_DELTA( output->readY(0)[0], 0, 0.000001 )
-    TS_ASSERT_DELTA( output->readE(9)[15909], 1.3791, 0.0001 )
-    TS_ASSERT_DELTA( output->readE(2)[5513], 0.4299, 0.0001 )
-    TS_ASSERT_DELTA( output->readE(0)[0], 0, 0.000001 )
+    TS_ASSERT_DELTA( output->readY(1)[4], 2.9999, 0.0001 );
+    TS_ASSERT_DELTA( output->readY(1)[1], 2.9999, 0.0001 );
+    TS_ASSERT_DELTA( output->readY(0)[0], 2.0, 0.000001 );
+    TS_ASSERT_DELTA( output->readE(1)[3], 1.8745, 0.0001 );
+    TS_ASSERT_DELTA( output->readE(1)[2], 1.8745, 0.0001 );
+    TS_ASSERT_DELTA( output->readE(0)[0], 2.2803, 0.0001 );
 
-    AnalysisDataService::Instance().remove("sample");
-    AnalysisDataService::Instance().remove("vanadium");
     AnalysisDataService::Instance().remove("out");
   }
 
