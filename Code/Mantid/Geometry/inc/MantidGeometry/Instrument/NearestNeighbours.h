@@ -15,6 +15,7 @@ namespace Geometry
 // Forward Declarations
 class IInstrument;
 class IComponent;
+class V3D;
 
 /**
 *  This class is used to find the nearest neighbours of a detector in the instrument
@@ -104,6 +105,8 @@ private:
   boost::property_map<Graph, boost::vertex_name_t>::type m_vertexID;
   /// property map holding the edge's related Distance value.
   boost::property_map<Graph, boost::edge_name_t>::type m_edgeLength;
+  /// V3D for scaling
+  V3D* m_scale;
 
 };
 

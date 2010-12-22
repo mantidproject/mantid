@@ -7,11 +7,10 @@
 
 using namespace Mantid::Geometry;
 
-
 /**
 * @param instrument shared pointer to IInstrument object
 */
-NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Mantid::Geometry::IInstrument> instrument) : m_instrument(instrument), m_noNeighbours(8), m_isPopulated(false)
+NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Mantid::Geometry::IInstrument> instrument) : m_instrument(instrument), m_noNeighbours(8), m_isPopulated(false), m_scale(NULL)
 {
 }
 
@@ -147,24 +146,48 @@ void NearestNeighbours::populate()
   // maps
   MapIV pointNoToVertex;
   
-  // Compile a list of detectors, with the positions and create ANNpoint s from these
   std::map<int, Mantid::Geometry::IDetector_sptr> detectors = m_instrument->getDetectors();
   std::map<int, Mantid::Geometry::IDetector_sptr>::iterator detIt;
 
-  int ndet = detectors.size(); // also number of points in array
+  int ndets = detectors.size(); // also number of points in array  
+  int ndet = 0;
+
+  for ( detIt = detectors.begin(); detIt != detectors.end(); detIt++ )
+  {
+    if ( detIt->second->isMonitor() ) { continue; }
+    else { ndet++; }
+
+    if ( m_scale == NULL && ndets / ndet == 1 )
+    {
+      // create scaling vector      
+      boost::shared_ptr<Mantid::Geometry::Detector> det = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(detIt->second);
+      BoundingBox bbox;
+      det->getBoundingBox(bbox);
+      double xmax = bbox.xMax();
+      double ymax = bbox.yMax();
+      double zmax = bbox.zMax();
+      double xmin = bbox.xMin();
+      double ymin = bbox.yMin();
+      double zmin = bbox.zMin();
+      m_scale = new Mantid::Geometry::V3D((xmax-xmin), (ymax-ymin), (zmax-zmin));
+    }
+  }
 
   dataPoints = annAllocPts(ndet, 3);
-
   int pointNo = 0;
 
   for ( detIt = detectors.begin(); detIt != detectors.end(); detIt++ )
   {
     Mantid::Geometry::IDetector_sptr detector = detIt->second;
+
+    // We do not want to consider monitors
+    if ( detector->isMonitor() ) { continue; }
+
     const int detID = detector->getID();
-    Mantid::Geometry::V3D pos = detector->getPos();
+    Mantid::Geometry::V3D pos = detector->getPos() / *m_scale;
     dataPoints[pointNo][0] = pos.X();
     dataPoints[pointNo][1] = pos.Y();
-    dataPoints[pointNo][2] = pos.Z();    
+    dataPoints[pointNo][2] = pos.Z();
     Vertex vertex = boost::add_vertex(detID, m_graph);
     pointNoToVertex[pointNo] = vertex;
     m_detIDtoVertex[detID] = vertex;
@@ -175,6 +198,9 @@ void NearestNeighbours::populate()
   pointNo = 0;
   for ( detIt = detectors.begin(); detIt != detectors.end(); detIt++ )
   {
+    // we don't want to consider monitors
+    if ( detIt->second->isMonitor() ) { continue; }
+
     // run the nearest neighbour search on each detector.
     ANNidxArray nnIndexList = new ANNidx[m_noNeighbours];
     ANNdistArray nnDistList = new ANNdist[m_noNeighbours];
