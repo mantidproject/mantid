@@ -14,6 +14,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Expression.h"
 #include "MantidKernel/UnitFactory.h"
 #include <muParser.h>
 
@@ -30,31 +32,131 @@ namespace API
   
   Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
 
-  std::vector<double> IFunction::g_empty(0);
-
   /// Set the workspace
-  /// @param wsIDString A string identifying the data to be fitted, e.g. workspace name and spectrum index separated by a comma
+  /// @param wsIDString A string identifying the data to be fitted. Format for IFunction:
+  ///  "WorkspaceName,WorkspaceIndex=int,StartX=double,EndX=double"
   void IFunction::setWorkspace(const std::string& wsIDString)
   {
+    try
+    {
+      Expression expr;
+      expr.parse(wsIDString);
+      if (expr.name() != "," || expr.size() < 2 ) // TODO: Expression needs pattern matching
+      {
+        throw std::invalid_argument("Syntax error in argument");
+      }
+      std::string wsName = expr[0].name();
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+      if (!ws)
+      {
+        throw std::invalid_argument("Workspace has wrong type (not a MatrixWorkspace)");
+      }
+
+      int index = -1;
+      int xMin = -1;
+      int xMax = -1;
+      double startX,endX;
+      for(int i = 1; i < expr.size(); ++i)
+      {
+        const Expression& e = expr[i];
+        if (e.size() == 2 && e.name() == "=")
+        {
+          if (e[0].name() == "WorkspaceIndex")
+          {
+            index = boost::lexical_cast<int>(e[1].name());
+          }
+          else if (e[0].name() == "StartX")
+          {
+            startX = boost::lexical_cast<double>(e[1].name());
+            xMin = 0;
+          }
+          else if (e[0].name() == "EndX")
+          {
+            endX = boost::lexical_cast<double>(e[1].name());
+            xMax = 0;
+          }
+        }
+      }
+
+      if (index < 0)
+      {
+        g_log.warning("WorkspaceIndex not set, defaulting to 0");
+      }
+      else if (index >= ws->getNumberHistograms())
+      {
+        throw std::range_error("WorkspaceIndex outside range");
+      }
+      const MantidVec& x = ws->readX(index);
+      const MantidVec& y = ws->readY(index);
+      int n = int(y.size());
+      if (xMin < 0)
+      {
+        xMin = 0;
+      }
+      else
+      {
+        for(; xMin < n - 1; ++xMin)
+        {
+          if (x[xMin] > startX)
+          {
+            xMin--;
+            break;
+          }
+        }
+        if (xMin < 0) xMin = 0;
+      }
+
+      if (xMax < 0)
+      {
+        xMax = n - 1;
+      }
+      else
+      {
+        for(; xMax < n - 1; ++xMax)
+        {
+          if (x[xMax] > endX)
+          {
+            xMax--;
+            break;
+          }
+        }
+        if (xMax < 0) xMax = 0;
+      }
+
+      if (xMin > xMax)
+      {
+        int tmp = xMin;
+        xMin = xMax;
+        xMax = tmp;
+      }
+      setMatrixWorkspace(ws,index,xMin,xMax);
+      
+      m_dataSize = xMax - xMin;
+      m_dataPointer = &y[xMin];
+    }
+    catch(std::exception& e)
+    {
+      g_log.error() << "IFunction::setWorkspace failed with error: " << e.what() << '\n';
+      throw;
+    }
   }
 
   /// Get the workspace
   boost::shared_ptr<const API::Workspace> IFunction::getWorkspace()const
   {
-    return boost::shared_ptr<const API::Workspace>();
+    return m_workspace;
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
   int IFunction::dataSize()const
   {
-    return 0;
+    return m_dataSize;
   }
 
-  /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  /// Must be true: getData().size() == dataSize()
-  const std::vector<double>& IFunction::getData()const
+  /// Returns a pointer to the fitted data. These data are taken from the workspace set by setWorkspace() method.
+  const double* IFunction::getData()const
   {
-    return g_empty;
+    return m_dataPointer;
   }
 
   /// Function you want to fit to. 

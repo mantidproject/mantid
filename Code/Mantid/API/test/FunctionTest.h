@@ -4,6 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Function.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -413,6 +416,26 @@ public:
     TS_ASSERT(f.isExplicitlySet(1));
     TS_ASSERT(!f.isExplicitlySet(2));
     TS_ASSERT(!f.isExplicitlySet(3));
+  }
+
+  void test_setWorkspace_works()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+
+    MantidVec& x = ws->dataX(3);
+    MantidVec& y = ws->dataY(3);
+    for(int i=0; i < y.size(); ++i)
+    {
+      x[i] = 0.1 * i;
+      y[i] = i;
+    }
+    x.back() = 0.1 * y.size();
+    AnalysisDataService::Instance().add("IFT_Test_WS",ws);
+    IFT_Funct f;
+    TS_ASSERT_THROWS_NOTHING(f.setWorkspace("IFT_Test_WS,WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    TS_ASSERT_EQUALS(f.dataSize(),7);
+    TS_ASSERT_EQUALS(f.getData(),&y[2]);
+    AnalysisDataService::Instance().remove("IFT_Test_WS");
   }
 
   private:

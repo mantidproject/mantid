@@ -115,7 +115,7 @@ class DLLExport IFunction: public IFitFunction
 public:
 
   /// Constructor
-  IFunction():IFitFunction(){}
+  IFunction():IFitFunction(),m_dataSize(0),m_dataPointer(NULL){}
 
   /* Overidden methods */
 
@@ -129,7 +129,7 @@ public:
   virtual int dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   /// Must be true: getData().size() == dataSize()
-  virtual const std::vector<double>& getData()const;
+  virtual const double* getData()const;
   /// Function you want to fit to. 
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(double* out)const;
@@ -168,11 +168,14 @@ protected:
   int m_xMinIndex;
   /// Upper bin index
   int m_xMaxIndex;
+  /// Size of the fitted data
+  int m_dataSize;
+  /// Pointer to the fitted data
+  const double* m_dataPointer;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 
-  static std::vector<double> g_empty;
 };
 
 } // namespace API
