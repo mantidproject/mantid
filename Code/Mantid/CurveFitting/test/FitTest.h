@@ -304,7 +304,7 @@ public:
     removeWS("out_Parameters");
   }
 
-  void testNotMasked()
+  void t1estNotMasked()
   {
 
     WS_type ws = mkWS(FitExpression1(),1,0,10,0.1,1);
@@ -352,7 +352,7 @@ public:
     removeWS("out_Parameters");
   }
 
-  void testMasked()
+  void t1estMasked()
   {
 
     WS_type ws = mkWS(FitExpression1(),1,0,10,0.1,1);
