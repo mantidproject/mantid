@@ -105,7 +105,7 @@ public:
     */
   }
 
-  void testAgainstHRPDdataPeak()
+  void t1estAgainstHRPDdataPeak()
   {
 
     // load dataset
@@ -175,7 +175,7 @@ public:
   }
 
 
-  void testAgainstHRPDdataPeakSimplex()
+  void t1estAgainstHRPDdataPeakSimplex()
   {
     // load dataset
     std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
@@ -240,7 +240,7 @@ public:
   }
 
   // here set Minimizer = Simplex
-  void testAgainstHRPDdataPeakForceSimplex()
+  void t1estAgainstHRPDdataPeakForceSimplex()
   {
     // load dataset
     std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";

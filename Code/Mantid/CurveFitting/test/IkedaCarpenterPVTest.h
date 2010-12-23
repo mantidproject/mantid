@@ -185,7 +185,7 @@ public:
 
   // motivation for this test is to figure out way IC function goes absolutely
   // nuts when a large data range are selection
-  void testAgainstGEM_dataLargeDataRange()
+  void t1estAgainstGEM_dataLargeDataRange()
   {
     LoadNexus load;
     load.initialize();
@@ -250,7 +250,7 @@ public:
   }
 
 
-  void testAgainstGEM_data()
+  void t1estAgainstGEM_data()
   {
     LoadNexus load;
     load.initialize();
