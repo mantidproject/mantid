@@ -182,6 +182,7 @@
     <ClCompile Include="src\MDWorkspaceMockData10.cpp" />
     <ClCompile Include="src\MD_FileFormatFactory.cpp" />
     <ClCompile Include="src\MD_FileHoraceReader.cpp" />
+    <ClCompile Include="src\MD_FileTestDataGenerator.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab4D.cpp" />
     <ClCompile Include="src\MD_File_hdfV1.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="inc\MDDataObjects\MDWorkspaceHelper.h" />
     <ClInclude Include="inc\MDDataObjects\MD_FileFormatFactory.h" />
     <ClInclude Include="inc\MDDataObjects\MD_FileHoraceReader.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_FileTestDataGenerator.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab4D.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />

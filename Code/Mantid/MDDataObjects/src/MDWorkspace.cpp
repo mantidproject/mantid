@@ -32,32 +32,6 @@ namespace Mantid{
        return boost::shared_ptr<Mantid::MDDataObjects::MDImage>(new MDImage(geometry));
 	 }
 //
-void 
-MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile)
-{
-	this->m_spFile = spFile;
-	this->m_spMDBasis = boost::shared_ptr<Geometry::MDGeometryBasis>(new Geometry::MDGeometryBasis());
-	this->m_spFile->read_basis(*m_spMDBasis);
-
-	// read the geometry description
-	MDGeometryDescription description(m_spMDBasis->getNumDims(),m_spMDBasis->getNumReciprocalDims());
-	this->m_spFile->read_MDGeomDescription(description);
-
-	//build image from basis and description
-	this->m_spMDImage  = boost::shared_ptr<MDImage>(new MDImage(description,*m_spMDBasis));
-
-	// obtain the MDPoint description now (and MDPointsDescription in a future)
-	MDPointDescription pd = this->m_spFile->read_pointDescriptions();
-
-	// temporary constructor --> have not been finished and ugly
-	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(m_spMDImage,pd));
-
-    //  read image part of the data
-     this->m_spFile->read_MDImg_data(*this->m_spMDImage);
-	 // need to be moved to to dataPoints;
-	 this->m_spMDImage->identify_SP_points_locations();
-   
-}
 //
      void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
      {
@@ -65,6 +39,27 @@ MDWorkspace::load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFor
        this->m_spMDImage = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spMDImage); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
      }
+void
+MDWorkspace::init(std::auto_ptr<IMD_FileFormat> pFile,
+                std::auto_ptr<Geometry::MDGeometryBasis> pBasis,
+                const Geometry::MDGeometryDescription &geomDescr,
+                const MDPointDescription &pd)
+{
+    // store file reader,
+    this->m_spFile   = boost::shared_ptr<IMD_FileFormat>(pFile.get());
+    pFile.release();
+    // store basis (description?)
+    this->m_spMDBasis =boost::shared_ptr<Geometry::MDGeometryBasis>(pBasis.get());
+    pBasis.release();
+
+    // create new empty image form of its description and the basis
+    this->m_spMDImage  = boost::shared_ptr<MDImage>(new MDImage(geomDescr,*m_spMDBasis));
+    
+   	// temporary constructor for MD points--> have not been finished and ugly
+	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(m_spMDImage,pd));
+ 
+
+}
 
 //
 void
@@ -155,9 +150,9 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     }
 
 
-    int MDWorkspace::getNPoints() const
-    {
-      throw std::runtime_error("Not implemented"); //TODO: implement
+    unsigned long MDWorkspace::getNPoints() const
+    {// TODO: change implementation on request to MDDataPoints
+        return this->m_spFile->getNPix();
     }
 
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const

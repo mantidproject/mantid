@@ -21,8 +21,14 @@
     <CustomBuild Include="DynamicRebinFromXMLAlgorithmTest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Load_MDWorkspaceTest.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Load_MDWorkspaceTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="testCPrebinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -31,7 +37,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="testCPComponents.h">
+    <ClInclude Include="CPR_preselectCellsTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

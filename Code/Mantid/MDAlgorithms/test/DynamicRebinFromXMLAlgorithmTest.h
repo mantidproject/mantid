@@ -9,6 +9,7 @@
 #include "Poco/DOM/NodeFilter.h"
 
 #include <cxxtest/TestSuite.h>
+#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
@@ -20,7 +21,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include "MDDataObjects/MD_FileFormatFactory.h"
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -54,9 +55,16 @@ private:
     using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
-    MDWorkspace* workspace = new MDWorkspace;
-    std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
-    workspace->load_workspace(boost::shared_ptr<IMD_FileFormat>(pFile.release()));
+    Load_MDWorkspace loader;
+    loader.initialize();
+    loader.setPropertyValue("inFilename","../../../../Test/VATES/fe_demo.sqw");
+    std::string targetWorkspaceName = "Input";
+    loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
+    loader.execute();
+
+    Workspace_sptr result=AnalysisDataService::Instance().retrieve(targetWorkspaceName);
+    MDWorkspace* workspace = dynamic_cast<MDWorkspace *>(result.get());
+
     return workspace;
   }
 
@@ -329,7 +337,7 @@ public:
     using namespace Mantid::MDDataObjects;
 
     MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace());
-    AnalysisDataService::Instance().add("Input", baseWs);
+    //AnalysisDataService::Instance().add("Input", baseWs); // you can not do it twice
 
     Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
     xmlRebinAlg.setRethrows(true); 

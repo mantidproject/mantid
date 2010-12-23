@@ -10,11 +10,7 @@
 #include <cxxtest/TestTracker.h>
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
-#include <cxxtest/ParenPrinter.h>
 
-int main() {
- return CxxTest::ParenPrinter().run();
-}
 #include "C:/Users/wkc26243/Documents/work/MANTID/Code/Mantid/MDAlgorithms/test/testCPrebinning.h"
 
 static testCPRebinning suite_testCPRebinning;
@@ -28,4 +24,3 @@ public:
  void runTest() { suite_testCPRebinning.testRebinInit(); }
 } testDescription_testCPRebinning_testRebinInit;
 
-#include <cxxtest/Root.cpp>

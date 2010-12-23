@@ -408,7 +408,7 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
 }
 
  /// get number of data pixels(points) contributing into the dataset;
-size_t 
+unsigned long
 MD_FileHoraceReader::getNPix(void)
 {
     return this->nDataPoints;

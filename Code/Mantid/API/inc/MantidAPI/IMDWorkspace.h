@@ -53,7 +53,7 @@ namespace Mantid
     public:
       
       /// Get the number of points associated with the workspace.
-      virtual int getNPoints() const = 0;
+      virtual unsigned long getNPoints() const = 0;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;

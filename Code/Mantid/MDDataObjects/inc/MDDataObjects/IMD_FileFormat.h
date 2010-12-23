@@ -72,7 +72,7 @@ public:
     /// read part of the dataset, specified by the vector of MDImage cell numbers. 
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0; 
     /// obtain the number of data points (pixels) stored in the dataset;
-    virtual size_t getNPix(void)=0;
+    virtual unsigned long getNPix(void)=0;
 
 //
     virtual void write_mdd(const MDImage &)=0;

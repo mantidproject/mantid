@@ -90,7 +90,7 @@ public:
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels(points) contributing into the dataset;
-    virtual size_t getNPix(void);
+    virtual unsigned long getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
     virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Horace format function is not supported and should not be used"));}
     
@@ -109,7 +109,7 @@ protected:
 	// size of the multidimensional image in the HDD file (in cells)
 	size_t     mdImageSize;
 	/// number of data points (pixels) contributing into the MD image and present in the file;
-	size_t     nDataPoints;
+	unsigned long     nDataPoints;
 
 ///**** auxilary functions dealing with different parts of Horace file;
 	/// skips main sqw header, calculates its size and reads the number of contributing files and sets the location of first contributed

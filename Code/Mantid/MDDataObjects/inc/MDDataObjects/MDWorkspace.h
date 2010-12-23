@@ -84,7 +84,7 @@ namespace Mantid
       virtual unsigned int getNumDims(void) const{return m_spMDImage->getGeometry()->getNumDims();}
 
 	  ///OBSOLETE? or should be modified as does not work properly at the moment  Total share pointers mess;
-      void init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
+      void init(boost::shared_ptr<IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
 	  /** initialize from another workspace but with different MD image and (sub) set of data points; 
 	   the basis and the instrument description(s) are the same and copied from the source
 
@@ -95,9 +95,13 @@ namespace Mantid
 	   save algorithm will have this file property and should create proper file manager.
 	   the workspace itself will allocate temporary file for its internal usage -- this file will be basis for final workspace file when saved;
 	   */
-	  void init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Mantid::Geometry::MDGeometryDescription *const transf=NULL);
-	  /// this should be moved in data loading routines soon
-	  void load_workspace(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile);
+
+	  void init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Geometry::MDGeometryDescription *const transf=NULL);
+      /** Initialize on the basis of separate components */
+	  void init(std::auto_ptr<IMD_FileFormat> pFile,
+                std::auto_ptr<Geometry::MDGeometryBasis> pBasis,
+                const Geometry::MDGeometryDescription &geomDescr,
+                const MDPointDescription &pd);
 
       virtual ~MDWorkspace(void)
       {
@@ -130,9 +134,11 @@ namespace Mantid
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
       IMD_FileFormat *                                  get_pFileReader(){return m_spFile.get();}                             
-
-        /// Gets the number of points available on the workspace.
-      virtual int getNPoints() const;
+      
+        /// Gets the number of points(MDDataPoints, events) contributed to the workspace.
+      ///TODO: resolve -- do we need number of points contributed to workspace or availible in it -- > different things if we 
+      /// assume existence of DND objects
+      virtual unsigned long getNPoints() const;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;

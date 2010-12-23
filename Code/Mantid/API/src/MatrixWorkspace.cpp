@@ -948,9 +948,9 @@ namespace Mantid
       return hops - 1;
     }
 
-    int MatrixWorkspace::getNPoints() const
+    unsigned long MatrixWorkspace::getNPoints() const
     {
-      return this->size();
+      return (unsigned long)(this->size());
     }
 
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(int index) const

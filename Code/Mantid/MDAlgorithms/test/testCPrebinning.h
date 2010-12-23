@@ -4,8 +4,8 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
-#include "MDDataObjects/MD_FileFormatFactory.h"
-#include "Poco/Path.h"
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
+
 
 using namespace Mantid;
 using namespace API;
@@ -17,57 +17,39 @@ std::string findTestFileLocation(void);
 
 class testCPRebinning :    public CxxTest::TestSuite
 {
-       MDWorkspace_sptr pOrigin;
+       MDWorkspace*  pOrigin;
  public:
     void testRebinInit(void){
-       
-        TS_ASSERT_THROWS_NOTHING(pOrigin = MDWorkspace_sptr(new MDWorkspace(4)));
-        if(!pOrigin)return;
+ 	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
+//    std::string dataFileName("../../../../Test/VATES/fe_demo.sqw");
+//    std::string dataFileName("../../../../Test/VATES/fe_demo_bin.sqw");
+    std::string dataFileName("../../../../Test/AutoTestData/test_horace_reader.sqw");
 
-     
-   
-         AnalysisDataService::Instance().add("InWorkspace", pOrigin);
+    Load_MDWorkspace loader;
+    loader.initialize();
+    loader.setPropertyValue("inFilename",dataFileName);
+    std::string InputWorkspaceName = "MyTestMDWorkspace";
+    loader.setPropertyValue("MDWorkspace",InputWorkspaceName);
+    loader.execute();
 
-		 // should go to Load workspace algorithm ----->
-         // this is for fast testing
-         	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/AutoTestData/test_horace_reader.sqw");
-             // this is for testing real data
-	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo_bin.sqw");
-     //   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw");
-	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
-		 boost::shared_ptr<IMD_FileFormat> spFile = boost::shared_ptr<IMD_FileFormat>(pFile.get());
-		 pFile.release();
+    Workspace_sptr result=AnalysisDataService::Instance().retrieve(InputWorkspaceName);
+    pOrigin = dynamic_cast<MDWorkspace *>(result.get());
+    // no workspace loaded -- no point to continue
+    if(!pOrigin)return;
 
-		 pOrigin->load_workspace(spFile);
-		 //<----- should go to Load workspace algorithm 
+    // test centerpiece rebinning 
+     CenterpieceRebinning cpr;
 
-        CenterpieceRebinning cpr;
+     TS_ASSERT_THROWS_NOTHING(cpr.initialize());
+     TS_ASSERT( cpr.isInitialized() );
 
-         TS_ASSERT_THROWS_NOTHING(cpr.initialize());
-         TS_ASSERT( cpr.isInitialized() );
-
-         cpr.setPropertyValue("Filename", "new_datafile.sqw");
-         cpr.setPropertyValue("Input", "InWorkspace");      
-         cpr.setPropertyValue("Result","OutWorkspace");
+      cpr.setPropertyValue("Filename", "new_datafile.sqw");
+      cpr.setPropertyValue("Input", InputWorkspaceName);      
+      cpr.setPropertyValue("Result","OutWorkspace");
 
       
 
 
-         //Geometry::MDGeometryDescription *const pSlicing=cpr.pSlicingProperty();
-
- //       TS_ASSERT_THROWS_NOTHING(cpr.init_property(pOrigin));
-   // input workspace has to exist and be loaded;
-    	MDWorkspace_sptr inputWS;
-    // Get the input workspace
-      if(cpr.existsProperty("Input")){
-            inputWS = cpr.getProperty("Input");
-            if(!inputWS){
-                throw(std::runtime_error("input workspace has to exist"));
-            }
-
-       }else{
-           throw(std::runtime_error("input workspace has to be availible through properties"));
-        }
 
 
     // set up slicing property to the shape of current workspace;
@@ -76,7 +58,7 @@ class testCPRebinning :    public CxxTest::TestSuite
             throw(std::runtime_error("can not obtain slicing property from the property manager"));
         }
 
-        pSlicing->build_from_geometry(*(inputWS->getGeometry()));
+        pSlicing->build_from_geometry(*(pOrigin->getGeometry()));
  
 
         double r0=0;
@@ -88,33 +70,11 @@ class testCPRebinning :    public CxxTest::TestSuite
 		pSlicing->pDimDescription("qz")->cut_max = r0+1;
 		pSlicing->pDimDescription("en")->cut_max = 50;
         
-
-
    
         TS_ASSERT_THROWS_NOTHING(cpr.execute());
-         pSlicing=NULL; 
+        pSlicing=NULL; 
     }
 };
 
-std::string findTestFileLocation(void){
-
-       std::string path = Mantid::Kernel::getDirectoryOfExecutable();
-        
-        char pps[2];
-        pps[0]=Poco::Path::separator();
-        pps[1]=0; 
-        std::string sps(pps);
-
-        std::string root_path;
-        size_t   nPos = path.find("Mantid"+sps+"Code");
-        if(nPos==std::string::npos){
-            std::cout <<" can not identify application location\n";
-            root_path="../../../../Test/VATES/fe_demo.sqw";
-        }else{
-            root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
-        }
-        std::cout << " test file location: "<< root_path<< std::endl;
-        return root_path;
-}
 
 #endif

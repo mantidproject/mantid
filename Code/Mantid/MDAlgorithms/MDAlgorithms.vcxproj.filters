@@ -121,6 +121,9 @@
     <ClInclude Include="inc\MantidMDAlgorithms\CpRebinning4x3StructHR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\Load_MDWorkspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DimensionParameter.cpp">
@@ -211,6 +214,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\IDynamicRebinning.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Load_MDWorkspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

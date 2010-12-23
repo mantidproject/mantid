@@ -299,7 +299,7 @@ MD_File_hdfMatlab::read_pointDescriptions(void)const
 	return MDPointDescription(defaultPixel,dataTags);
 }
  
-size_t
+unsigned long
 MD_File_hdfMatlab::getNPix(void)
 {
     if(this->file_handler<0)return -1;
@@ -371,7 +371,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
       f_log.fatal()<<" pixel array has not been properly allocated\n";
 	  throw(std::runtime_error("pixels array has not been allocated properly"));
     }
-    size_t n_pix_inDataset  = this->getNPix();
+    unsigned long n_pix_inDataset  = this->getNPix();
   
     // let's verify if we indeed can read pixels into the buffer;
     size_t buf_size = sqw.get_pix_bufSize();
@@ -517,7 +517,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     std::vector<hsize_t> cells_preselection_buf;
     cells_preselection_buf.resize(max_npix_selected);
     size_t ic(0);
-    size_t max_npix_indataset = this->getNPix();
+    unsigned long max_npix_indataset = this->getNPix();
     size_t pixel_num,block_location;
     for(i=starting_cell;i<=n_selected_cells;i++){
         npix_tt          =pData[selected_cells[i]].npix; 

@@ -153,6 +153,7 @@
     <ClInclude Include="inc\MantidMDAlgorithms\IDynamicRebinning.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\Load_MDWorkspace.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\OriginParameter.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\IDynamicRebinning.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />
     <ClCompile Include="src\InvalidParameterParser.cpp" />
+    <ClCompile Include="src\Load_MDWorkspace.cpp" />
     <ClCompile Include="src\NormalParameter.cpp" />
     <ClCompile Include="src\NormalParameterParser.cpp" />
     <ClCompile Include="src\OriginParameter.cpp" />
