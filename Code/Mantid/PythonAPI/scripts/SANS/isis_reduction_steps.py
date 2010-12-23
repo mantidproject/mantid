@@ -24,7 +24,8 @@ def _issueWarning(msg):
         Prints a message to the log marked as warning
         @param msg: message to be issued
     """
-    _issueInfo('::SANS::Warning: ' + msg)
+    print msg
+    mantid.sendLogMessage('::SANS::Warning: ' + msg)
 
 def _issueInfo(msg):
     """
@@ -1294,6 +1295,12 @@ class UserFile(ReductionStep):
             return
         limits = limits[1]
         limit_type = ''
+
+        if limits.startswith('SP '):
+            # We don't use the L/SP line
+            _issueWarning("L/SP lines are ignored")
+            return
+
         if not ',' in limit_line:
             # Split with no arguments defaults to any whitespace character and in particular
             # multiple spaces are include
@@ -1315,10 +1322,7 @@ class UserFile(ReductionStep):
             elif len(elements) == 3:
                 limit_type, minval, maxval = elements[0], elements[1], elements[2]
             else:
-                # We don't use the L/SP line
-                if not 'L/SP' in limit_line:
-                    _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
-                    return
+                _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
         else:
             limit_type = limits[0].lstrip().rstrip()
             rebin_str = limits[1:].lstrip().rstrip()
