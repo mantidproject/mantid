@@ -53,7 +53,7 @@ namespace Mantid
 			/// Destructor
 			~CDownloadDataFile(){}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "DownloadDataFiles"; }
+			virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method

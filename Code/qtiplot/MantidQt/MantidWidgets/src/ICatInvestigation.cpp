@@ -129,7 +129,7 @@ void ICatInvestigation::tableItemSelected(QTableWidgetItem*)
 /// execute getdatafIles algorithm
 ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
 {
-	QString algName("GetDataFiles");
+	QString algName("CatalogGetDataFiles");
 	const int version=1;
 	Mantid::API::ITableWorkspace_sptr  ws_sptr;
 	Mantid::API::IAlgorithm_sptr alg;
@@ -181,7 +181,7 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
 /// This  executes the GetDataSets algorithm and creates workspace
 ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
 {
-	QString algName("GetDataSets");
+	QString algName("CatalogGetDataSets");
 	const int version=1;
 	ITableWorkspace_sptr ws_sptr;
 	Mantid::API::IAlgorithm_sptr alg;

@@ -232,7 +232,7 @@ void ICatSearch::getSelectedInstrument(QString& instrName)
 
 Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
 {
-	QString algName("Search");
+	QString algName("CatalogSearch");
 	Mantid::API::IAlgorithm_sptr alg;
 	const int version=-1;
 	try

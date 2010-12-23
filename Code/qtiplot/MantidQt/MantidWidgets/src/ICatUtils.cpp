@@ -177,7 +177,7 @@ void ICatUtils::investigationSelected(QTableWidget* tablewidget,QTableWidgetItem
 */
 std::vector<std::string> ICatUtils::executeListInstruments()
 {
-	QString algName("ListInstruments");
+	QString algName("CatalogListInstruments");
 	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
@@ -244,7 +244,7 @@ bool ICatUtils::isSessionValid(const Mantid::API::IAlgorithm_sptr& alg)
 }
 bool ICatUtils::login()
 {
-	QString algName("Login");
+	QString algName("CatalogLogin");
 	const int version =-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
@@ -276,8 +276,7 @@ bool ICatUtils::login()
 		return true;
 	}
   else
-  {    
-    dlg->close();
+  {        
     return false;
   }
 }

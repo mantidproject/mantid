@@ -19,8 +19,15 @@ namespace Mantid
 
     Required Properties:
     <UL>
+    <LI> Investigation name -The name of the investigation to search
+	  <LI> Investigation Abstract - The abstract of the investigation to be searched
+	  <LI> Sample - The name of the sample 
+	  <LI> Investigators surname Investigators name
+	  <LI> DataFile Name -The name of teh data file
     <LI> StartRun - The the start run number for search </LI>
     <LI> EndRun - The end run number for search </LI>
+	  <LI> Rb Number - The RB number of the investigation
+	  <LI> Investigation Type - The tye of the investigation
 	  <LI> Instruments - The list of instruments used for search </LI>
 	  <LI> StartDate - The start date used for search </LI>
 	  <LI> EndDate - The end date used for search </LI>
@@ -61,7 +68,7 @@ namespace Mantid
 			{
 			}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "Search"; }
+			virtual const std::string name() const { return "CatalogSearch"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method

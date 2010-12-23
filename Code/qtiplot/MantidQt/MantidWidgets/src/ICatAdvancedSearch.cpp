@@ -148,7 +148,7 @@ void ICatAdvancedSearch::populateInvestigationType()
 
 std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
 {	
-	QString algName("ListInvestigationTypes");
+	QString algName("CatalogListInvestigationTypes");
 	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
@@ -208,7 +208,7 @@ std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
 
 Mantid::API::IAlgorithm_sptr ICatAdvancedSearch::createAlgorithm()
 {
-	QString algName("Search");
+	QString algName("CatalogSearch");
 	Mantid::API::IAlgorithm_sptr alg;
 	const int version=-1;
 	try

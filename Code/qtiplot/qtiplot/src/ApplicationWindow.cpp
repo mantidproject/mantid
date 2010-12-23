@@ -16634,7 +16634,7 @@ void ApplicationWindow::magnify()
 /// Handler for ICat Login Menu
 void ApplicationWindow::ICatLogin()
 {
-  mantidUI->executeAlgorithm("Login",1);
+  mantidUI->executeAlgorithm("CatalogLogin",1);
 }
 
 void ApplicationWindow::ICatIsisSearch()

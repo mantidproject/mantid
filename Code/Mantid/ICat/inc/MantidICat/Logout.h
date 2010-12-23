@@ -42,7 +42,7 @@ namespace Mantid
 			/// Destructor
 			~CLogout(){}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "Logout"; }
+			virtual const std::string name() const { return "CatalogLogout"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method

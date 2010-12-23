@@ -52,7 +52,7 @@ bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 	Mantid::API::IAlgorithm_sptr alg;
 	try
 	{
-		alg = Mantid::API::AlgorithmManager::Instance().create("MyDataSearch",1);
+		alg = Mantid::API::AlgorithmManager::Instance().create("CatalogMyDataSearch",1);
 	}
 	catch(...)
 	{
