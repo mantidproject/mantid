@@ -63,9 +63,8 @@ void Qxy::exec()
   // the samplePos is often not (0, 0, 0) because the instruments components are moved to account for the beam centre
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
   
-  // Set up the progress reporting object
-  Progress progress(this,0.0,1.0,numSpec);
-  const int prog_int = numSpec/100 > 0 ? numSpec/100 : 1;
+  // Set up the progress bar reporting object, and limit updates to 100 times or less
+  Progress prog(this, 0.05, 1.0, numSpec, numSpec/100);
 
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)
@@ -175,10 +174,7 @@ void Qxy::exec()
       }
     } // loop over single spectrum
     
-    if ( i % prog_int == 0 )
-    {
-      progress.report("Calculating Q");
-    }
+    prog.report("Calculating Q");
 
     PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra

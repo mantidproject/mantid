@@ -5,31 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
-/** Part of the 1D data reduction chain for SANS instruments.
-    Takes a workspace in Wavelength as input, with many of the corrections
-    applied, converts it to Q, rebins to the given parameters, corrects
-    for solid angle (taking account of any bin or detector masking) and sums
-    all spectra to produce a final single spectrum result workspace
+/** Takes account of the effects of gravity for instruments where the y-axis points upwards, for
+    example SANS instruments
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace    - The (partly) corrected data in units of wavelength. </LI>
-    <LI> InputForErrors    - The workspace containing the counts to use for the error calculation
-                             Must also be in units of wavelength and have matching bins to the InputWorkspace. </LI>
-    <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
-    <LI> OutputBinning     - The bin parameters to use for the final result. </LI>
-    <LI> AccountForGravity - Whether to correct for the effects of gravity (default: false). </LI>
-    </UL>
- 
-    @author Russell Taylor, Tessella plc
-    @date 16/10/2009
+    @author Steve Williams ISIS Rutherford Appleton Laboratory 
+    @date 10/12/2010
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -68,6 +56,7 @@ private:
   void init();
   /// Execution code
   void exec();
+
 };
 
 } // namespace Algorithms

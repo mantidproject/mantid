@@ -106,7 +106,7 @@ private:
   /// Trim python print markers
   void trimPyMarkers(QString & txt);
   /// Load the user file specified in the text field
-  bool loadUserFile();
+  bool loadUserFile(QString & errors);
   /// Load a CSV file
   bool loadCSVFile();
   /// Set limits step and type options

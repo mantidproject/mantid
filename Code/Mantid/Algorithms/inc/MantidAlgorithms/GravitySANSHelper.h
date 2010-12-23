@@ -1,14 +1,37 @@
 #ifndef MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
 #define MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
 #include "MantidAPI/MatrixWorkspace.h"
-//#include "MantidGeometry/Instrument/IDetector.h"
+
 namespace Mantid
 {
   namespace Algorithms
   {
-    /// A helper class for calculating neutron's gravitional drop. Only works for
-    /// SANS because Mantid has no convention on which was is up or down. For this
-    /// to work y must increase with distance from the earth
+    /** A helper class for calculating neutron's gravitional drop. Only works for
+    SANS because Mantid has no convention on which was is up or down. For this
+    to work y must increase with distance from the earth
+    @author Steve Williams, ISIS Rutherford Appleton Laboratory 
+    @date 26/01/2009
+     
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     
+    This file is part of Mantid.
+     
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+     
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+     
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+ */
     class GravitySANSHelper
     {
     public:

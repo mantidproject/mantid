@@ -510,7 +510,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
   if ( allOutput.count() < 2 )
   {
-    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script\n" + pythonOut);
+    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script, more information maybe found in the scripting console");
     return "Error";
   }
 
@@ -673,20 +673,36 @@ bool SANSRunWindow::oldLoadUserFile()
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
   return true;
 }
-
-bool SANSRunWindow::loadUserFile()
+/** Issues a Python command to load the user file and returns any output if
+*  there are warnings or errors
+*  @param[out] errors the output produced by the string
+*  @return the output printed by the Python commands
+*/
+bool SANSRunWindow::loadUserFile(QString & errors)
 {
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
-  if( filetext.isEmpty() ) return false;
+  if( filetext.isEmpty() )
+  {
+    errors = "No user file has been specified";
+    return false;
+  }
+
   if( QFileInfo(filetext).isRelative() )
   {
     filetext = QDir(m_data_dir).absoluteFilePath(filetext);
   }
-  
-  if( !QFileInfo(filetext).exists() ) return false;
+  if( !QFileInfo(filetext).exists() )
+  {
+    errors = "File \""+filetext+"\" not found aborting";
+    return false;
+  }
   
   QFile user_file(filetext);
-  if( !user_file.open(QIODevice::ReadOnly) ) return false;
+  if( !user_file.open(QIODevice::ReadOnly) )
+  {
+    errors = "Could not open user file \""+filetext+"\"";
+    return false;
+  }
 
   user_file.close();
   
@@ -699,17 +715,32 @@ bool SANSRunWindow::loadUserFile()
 
   // Use python function to read the file and then extract the fields
   runReduceScriptFunction(
-//    "i.ISIS_global().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')\n");
-      "i.ISIS_global().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");
+    "i.ISIS_global().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");
 
-  QString status = runReduceScriptFunction(
-      "print i.ISIS_global().user_settings.execute(i.ISIS_global())").trimmed();
-  if ( status != "True" )
+  errors = runReduceScriptFunction(
+    "print i.ISIS_global().user_settings.execute(i.ISIS_global())").trimmed();
+  // create a string list with a string for each line
+  const QStringList allOutput = errors.split("\n");
+  errors.clear();
+  bool canContinue = false;
+  for (int i = 0; i < allOutput.count(); ++i)
+  {
+    if ( i < allOutput.count()-1 )
+    {
+      errors += allOutput[i]+"\n";
+    }
+    else
+    {
+      canContinue = allOutput[i].trimmed() == "True";
+    }
+  }
+
+  if ( ! canContinue )
   {
     return false;
   }
 
-  double unit_conv(1000.);
+  const double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
       "print i.ISIS_global().mask.min_radius").toDouble();
@@ -1592,12 +1623,20 @@ void SANSRunWindow::selectUserFile()
   runReduceScriptFunction("i.ISIS_global().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'");
 
-  if( !loadUserFile() )
-  {
+  QString loadErrors;
+  if( loadUserFile(loadErrors) )
+  {// the load was successful
+    if ( ! loadErrors.isEmpty() )
+    {//but there are some warnings to display
+      showInformationBox("User file opened with some warnings:\n"+loadErrors);
+    }
+  }
+  else
+  {// there was a fatal problem with the load we can not continue, the error should already have been raised at this point
     m_cfg_loaded = false;
-    showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
     return;
   }
+
   //Check for warnings
   checkLogFlags();
 

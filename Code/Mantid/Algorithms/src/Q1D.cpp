@@ -87,23 +87,10 @@ void Q1D::exec()
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
 
-  const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
-  const V3D beamline = samplePos-sourcePos;
-  // 2 * norm of beamline.
-  const double beamline_norm=2.0*beamline.norm();
 
   const bool doGravity = getProperty("AccountForGravity");
-  double gm2over2h2 = 0.0;
-  if (doGravity) 
-  {
-    g_log.debug("Correcting for gravity");
-    // Calculate pre-factor in gravity calculation: gm^2/2h^2
-    gm2over2h2 = ( PhysicalConstants::g * PhysicalConstants::NeutronMass * PhysicalConstants::NeutronMass )
-                / ( 2.0 * PhysicalConstants::h * PhysicalConstants::h );
-    // Adjust for fact that wavelength is in angstroms
-    gm2over2h2 *= 1.0e-20;
-  }
+
 
   const int xLength = inputWS->readX(0).size();
   const double fmp=4.0*M_PI;
@@ -150,30 +137,14 @@ void Q1D::exec()
     // A temporary vector to store intermediate Q values
     MantidVec Qx(xLength);
 
-    if ( doGravity )
+    if (doGravity)
     {
       // Get the vector to get at the 3 components of the pixel position
-      V3D detPos = det->getPos();
-      // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
-      const double L2 = gm2over2h2*std::pow(detPos.distance(samplePos),2);
-      // Now detPos will be set with respect to samplePos
-      detPos-=samplePos;
-      // Keep a track of the drop for the previous bin, so we avoid create new V3D all the time
-      double previous_drop=0;
+      GravitySANSHelper grav(inputWS, det);
       for ( int j = 0; j < xLength; ++j)
       {
-        // Lots more to do in this loop than for the non-gravity case
-        // since we have a number of calculations to do for each bin boundary
-
-        // Calculate the drop (I'm fairly confident that Y is up!)
-        // Using approx. constant prefix - will fix next week
-        const double drop =  XIn[j] * XIn[j] * L2;
-        detPos[1] += (drop-previous_drop);
-        previous_drop=drop;
-        // This is 0.5*cos(2theta)
-        double halfcosTheta=detPos.scalar_prod(beamline)/detPos.norm()/beamline_norm;
-        // This is sin(theta)
-        double sinTheta=sqrt(0.5-halfcosTheta);
+        // as the fall under gravity is wavelength dependent sin theta is now different for each bin with each detector 
+        const double sinTheta = grav.calcSinTheta(XIn[j]);
         // Now we're ready to go to Q
         Qx[xLength-j-1] = fmp*sinTheta/XIn[j];
       }
