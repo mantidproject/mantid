@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
-#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 #include <gsl/gsl_multimin.h>
 
@@ -47,7 +46,7 @@ public:
   SimplexMinimizer(): m_name("Simplex"), m_size(1.0) {}
 
   void resetSize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, const double& size, Fit* fit, const std::string& costFunction);
+    gsl_vector* startGuess, const double& size, API::IFitFunction* function, const std::string& costFunction);
 
   /// Overloading base class methods
   std::string name()const;
@@ -56,7 +55,7 @@ public:
   double costFunctionVal();
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
   void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, Fit* fit, const std::string& costFunction);
+    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction);
 
 private:
   /// name of this minimizer

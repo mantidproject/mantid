@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/CostFunctionFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -17,11 +19,11 @@ Kernel::Logger& FRConjugateGradientMinimizer::g_log = Kernel::Logger::get("FRCon
 
 void FRConjugateGradientMinimizer::initialize(double* X, const double* Y, 
                                               double *sqrtWeight, const int& nData, 
-                                              const int& nParam, gsl_vector* startGuess, Fit* fit, 
+                                              const int& nParam, gsl_vector* startGuess, API::IFitFunction* function, 
                                               const std::string& costFunction) 
 {
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(fit);  //,X, Y, sqrtWeight, nData, nParam);
+  m_data = new GSL_FitData(function);  //,X, Y, sqrtWeight, nData, nParam);
   m_data->p = nParam;
   m_data->n = nData; 
   m_data->X = X;

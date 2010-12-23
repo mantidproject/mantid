@@ -234,8 +234,8 @@ public:
   /// Returns the size of the fitted data (number of double values returned by the function)
   virtual int dataSize()const = 0;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  /// Must be true: getData().size() == dataSize()
   virtual const double* getData()const = 0;
+  virtual const double* getWeights()const = 0;
   /// Function you want to fit to. 
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(double* out)const = 0;

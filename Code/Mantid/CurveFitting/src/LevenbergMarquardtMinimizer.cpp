@@ -2,8 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
-#include <gsl/gsl_blas.h>
+#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+
+#include <gsl/gsl_blas.h>
 #include <iostream>
 
 namespace Mantid
@@ -18,10 +23,10 @@ Kernel::Logger& LevenbergMarquardtMinimizer::g_log = Kernel::Logger::get("Levenb
 void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y, 
                                              double *sqrtWeight, const int& nData, 
                                              const int& nParam, gsl_vector* startGuess, 
-                                             Fit* fit, const std::string& costFunction)
+                                             API::IFitFunction* function, const std::string& costFunction)
 {
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(fit);  //,X, Y, sqrtWeight, nData, nParam);
+  m_data = new GSL_FitData(function);  //,X, Y, sqrtWeight, nData, nParam);
   m_data->p = nParam;
   m_data->n = nData; 
   m_data->X = X;
@@ -53,7 +58,7 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, nData, nParam);
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, startGuess);
 
-  m_function = fit->getFunction();
+  m_function = function;
 
 }
 

@@ -2,8 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidCurveFitting/CostFunctionFactory.h"
 #include "MantidKernel/Exception.h"
-#include "MantidCurveFitting/GSLFunctions.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -17,7 +18,7 @@ Kernel::Logger& SimplexMinimizer::g_log = Kernel::Logger::get("SimplexMinimizer"
 void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight, 
                                    const int& nData, const int& nParam, 
                                    gsl_vector* startGuess,
-                                   Fit* fit, const std::string& costFunction) 
+                                   API::IFitFunction* function, const std::string& costFunction) 
 {
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
@@ -26,7 +27,7 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   gsl_vector_set_all (m_simplexStepSize, m_size);  
 
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(fit);  //,X, Y, sqrtWeight, nData, nParam);
+  m_data = new GSL_FitData(function);  //,X, Y, sqrtWeight, nData, nParam);
   m_data->p = nParam;
   m_data->n = nData; 
   m_data->X = X;
@@ -50,11 +51,11 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
 void SimplexMinimizer::resetSize(double* X, const double* Y, double *sqrtWeight, 
                                    const int& nData, const int& nParam, 
                                    gsl_vector* startGuess, const double& size,
-                                   Fit* fit, const std::string& costFunction) 
+                                   API::IFitFunction* function, const std::string& costFunction) 
 {
   m_size = size;
   clearMemory();
-  initialize(X, Y, sqrtWeight, nData, nParam, startGuess, fit, costFunction);
+  initialize(X, Y, sqrtWeight, nData, nParam, startGuess, function, costFunction);
 }
 
 SimplexMinimizer::~SimplexMinimizer()

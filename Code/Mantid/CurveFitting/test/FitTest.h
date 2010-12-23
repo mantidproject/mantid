@@ -25,6 +25,13 @@ public:
   {return 1+0.3*x+exp(-0.5*(x-4)*(x-4)*2)+2*exp(-0.5*(x-6)*(x-6)*3);}
 };
 
+class FitExpression1
+{
+public:
+  double operator()(double x)
+  {return 1+0.3*x+0.01*exp(-0.5*(x-4)*(x-4)*2);}
+};
+
 class FitExp
 {
 public:
@@ -297,10 +304,10 @@ public:
     removeWS("out_Parameters");
   }
 
-  void t1estNotMasked()
+  void testNotMasked()
   {
 
-    WS_type ws = mkWS(FitExpression(),1,0,10,0.1,1);
+    WS_type ws = mkWS(FitExpression1(),1,0,10,0.1,1);
     storeWS("Exp",ws);
 
     Fit alg;
@@ -328,15 +335,15 @@ public:
     TS_ASSERT(outParams);
 
     TS_ASSERT_EQUALS(outParams->rowCount(),2);
-    TS_ASSERT_EQUALS(outParams->columnCount(),2);
+    TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"a");
-    TS_ASSERT_DELTA(row.Double(1),1.3703,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.0028,0.0001);
 
     row = outParams->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"b");
-    TS_ASSERT_DELTA(row.Double(1),0.3162,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.2998,0.0001);
 
 
 
@@ -348,13 +355,13 @@ public:
   void testMasked()
   {
 
-    WS_type ws = mkWS(FitExpression(),1,0,10,0.1,1);
+    WS_type ws = mkWS(FitExpression1(),1,0,10,0.1,1);
 
     // Mask some bins
     for(int i=0;i<ws->blocksize();i++)
     {
       double x = ws->readX(0)[i];
-      if (x > 2.5 && x < 8)
+      if (x > 2 && x < 6)
       {
         ws->maskBin(0,i,1.0);
       }
@@ -390,11 +397,11 @@ public:
 
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"a");
-    TS_ASSERT_DELTA(row.Double(1),0.9982,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.,0.0001);
 
     row = outParams->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"b");
-    TS_ASSERT_DELTA(row.Double(1),0.2988,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.3,0.0001);
 
 
 

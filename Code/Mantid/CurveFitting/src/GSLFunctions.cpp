@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/ICostFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 
 
 namespace Mantid
@@ -15,7 +15,7 @@ namespace CurveFitting
   using API::Jacobian;
 
   /** Fit GSL function wrapper
-  * @param x Input function arguments
+  * @param x Input function parameters
   * @param params Input data
   * @param f Output function values = (y_cal-y_data)/sigma for each data point
   * @return A GSL status information
@@ -23,7 +23,9 @@ namespace CurveFitting
   int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
     struct GSL_FitData *p = (struct GSL_FitData *)params;
-    p->fit->function (x->data, f->data, p->X, p->n);
+
+    if (x->data) p->function->updateActive(x->data);
+    p->function->function (f->data);
 
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
@@ -47,7 +49,8 @@ namespace CurveFitting
 
     p->J.setJ(J);
 
-    p->fit->functionDeriv (x->data, &p->J, p->X, p->n);
+    if (x->data) p->function->updateActive(x->data);
+    p->function->functionDeriv (&p->J);
 
     // functionDeriv() return derivatives of calculated data values. Need to convert this values into
     // derivatives of calculated-observed devided by error values used by GSL
@@ -88,7 +91,8 @@ namespace CurveFitting
     double * l_holdCalculatedData = p->holdCalculatedData;
 
     // calculate yCal and store in l_holdCalculatedData
-    p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
+    if (x->data) p->function->updateActive(x->data);
+    p->function->function (l_holdCalculatedData);
 
     return p->costFunc->val(p->Y, p->sqrtWeightData, l_holdCalculatedData, p->n);
   }
@@ -105,10 +109,10 @@ namespace CurveFitting
     struct GSL_FitData *p = (struct GSL_FitData *)params;
     double * l_holdCalculatedData = p->holdCalculatedData;
 
-    p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
-
+    if (x->data) p->function->updateActive(x->data);
+    p->function->function (l_holdCalculatedData);
     p->J.setJ(p->holdCalculatedJacobian);
-    p->fit->functionDeriv (x->data, &p->J, p->X, p->n);
+    p->function->functionDeriv (&p->J);
 
     p->costFunc->deriv(p->Y, p->sqrtWeightData, l_holdCalculatedData, 
                      p->holdCalculatedJacobian->data, df->data, p->p, p->n);
@@ -132,12 +136,12 @@ namespace CurveFitting
    * Constructor. Creates declared -> active index map
    * @param f Pointer to the Fit algorithm
    */
-  GSL_FitData::GSL_FitData(Fit* f):fit(f)
+  GSL_FitData::GSL_FitData(API::IFitFunction* fun):function(fun)
   {
     int j = 0;
-    for(int i=0;i<f->getFunction()->nParams();++i)
+    for(int i=0;i<fun->nParams();++i)
     {
-      if (f->getFunction()->isActive(i))
+      if (fun->isActive(i))
       {
         J.m_index.push_back(j);
         j++;

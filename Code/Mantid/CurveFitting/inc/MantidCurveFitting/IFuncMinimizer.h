@@ -7,11 +7,14 @@
 #include "MantidKernel/System.h"
 #include <string>
 #include <gsl/gsl_multifit_nlin.h>
-#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/FuncMinimizerFactory.h"
 
 namespace Mantid
 {
+namespace API
+{
+  class IFitFunction;
+}
 namespace CurveFitting
 {
 /** An interface for function minimizers.
@@ -47,7 +50,7 @@ public:
 
   /// Initialize minimizer, i.e. pass costFunction, data etc
   virtual void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, Fit* fit, const std::string& costFunction) = 0;
+    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;

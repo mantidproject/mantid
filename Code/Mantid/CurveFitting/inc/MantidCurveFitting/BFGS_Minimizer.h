@@ -5,10 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_multifit_nlin.h>
-#include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid
 {
@@ -54,7 +53,7 @@ public:
   double costFunctionVal();
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
   void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, Fit* fit, const std::string& costFunction);
+    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction);
 
 private:
   /// name of this minimizer

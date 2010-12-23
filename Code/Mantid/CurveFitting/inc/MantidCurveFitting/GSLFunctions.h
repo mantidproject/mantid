@@ -9,10 +9,15 @@
 
 namespace Mantid
 {
+  namespace API
+  {
+    class IFitFunction;
+  }
+
   namespace CurveFitting
   {
     // forward declaration
-    class Fit;
+    //class Fit;
     class ICostFunction;
 
     /**
@@ -84,7 +89,7 @@ namespace Mantid
   /// Structure to contain least squares data and used by GSL
   struct GSL_FitData {
     /// Constructor
-    GSL_FitData(Fit* f);
+    GSL_FitData(API::IFitFunction* fun);
     /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
     size_t n;
     /// number of (active) fit parameters
@@ -96,7 +101,9 @@ namespace Mantid
     /// the standard deviations of the Y data points
     double * sqrtWeightData;
     /// pointer to instance of Fit
-    Fit* fit;
+    //Fit* fit;
+    /// Pointer to the function
+    API::IFitFunction* function;
     /// pointer to the cost function
     ICostFunction* costFunc;
     /// Jacobi matrix interface

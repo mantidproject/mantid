@@ -115,7 +115,7 @@ class DLLExport IFunction: public IFitFunction
 public:
 
   /// Constructor
-  IFunction():IFitFunction(),m_dataSize(0),m_dataPointer(NULL){}
+  IFunction():IFitFunction(),m_dataSize(0),m_data(NULL){}
 
   /* Overidden methods */
 
@@ -128,8 +128,8 @@ public:
   /// Returns the size of the fitted data (number of double values returned by the function)
   virtual int dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  /// Must be true: getData().size() == dataSize()
   virtual const double* getData()const;
+  virtual const double* getWeights()const;
   /// Function you want to fit to. 
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(double* out)const;
@@ -153,6 +153,9 @@ public:
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
+  /// To be used temporarily with the old Fit algorithm. 
+  void setUpNewStuff();
+
 protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
@@ -171,7 +174,11 @@ protected:
   /// Size of the fitted data
   int m_dataSize;
   /// Pointer to the fitted data
-  const double* m_dataPointer;
+  const double* m_data;
+  /// Pointer to the fitting weights
+  std::vector<double> m_weights;
+  /// Pointer to the x (function argument as in f(x)) data
+  const double* m_xValues;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

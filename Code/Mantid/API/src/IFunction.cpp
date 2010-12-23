@@ -1,11 +1,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
@@ -16,7 +11,12 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Expression.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Exception.h"
 #include <muParser.h>
 
 #include "boost/lexical_cast.hpp"
@@ -88,6 +88,7 @@ namespace API
       }
       const MantidVec& x = ws->readX(index);
       const MantidVec& y = ws->readY(index);
+      const MantidVec& e = ws->readE(index);
       int n = int(y.size());
       if (xMin < 0)
       {
@@ -129,10 +130,31 @@ namespace API
         xMin = xMax;
         xMax = tmp;
       }
+      m_dataSize = xMax - xMin;
+      m_data = &y[xMin];
+      m_xValues = &x[xMin];
+      m_weights.resize(m_dataSize);
+
+      for (int i = 0; i < m_dataSize; ++i)
+      {
+        if (e[xMin + i] <= 0.0)
+          m_weights[i] = 1.0;
+        else
+          m_weights[i] = 1./e[xMin + i];
+      }
+
+      if (ws->hasMaskedBins(index))
+      {
+        const MatrixWorkspace::MaskList& mlist = ws->maskedBins(index);
+        MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
+        for(;it!=mlist.end();it++)
+        {
+          m_weights[it->first - xMin] = 0.;
+        }
+      }
+
       setMatrixWorkspace(ws,index,xMin,xMax);
       
-      m_dataSize = xMax - xMin;
-      m_dataPointer = &y[xMin];
     }
     catch(std::exception& e)
     {
@@ -156,18 +178,68 @@ namespace API
   /// Returns a pointer to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   const double* IFunction::getData()const
   {
-    return m_dataPointer;
+    return m_data;
+  }
+
+  const double* IFunction::getWeights()const
+  {
+    return &m_weights[0];
   }
 
   /// Function you want to fit to. 
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   void IFunction::function(double* out)const
   {
+    if (m_weights.empty()) return;
+    function(out,m_xValues,m_dataSize);
+    // Add penalty factor to function if any constraint is violated
+
+    double penalty = 0.;
+    for(int i=0;i<nParams();++i)
+    {
+      API::IConstraint* c = getConstraint(i);
+      if (c)
+      {
+        penalty += c->check();
+      }
+    }
+
+    // add penalty to first and last point and every 10th point in between
+    if ( penalty != 0.0 )
+    {
+      out[0] += penalty;
+      out[m_dataSize - 1] += penalty;
+
+      for (int i = 9; i < m_dataSize - 1; i+=10)
+      {
+        out[i] += penalty;
+      }
+    }
+
   }
 
   /// Derivatives of function with respect to active parameters
   void IFunction::functionDeriv(Jacobian* out)
   {
+    if (m_weights.empty()) return;
+    functionDeriv(out,m_xValues,m_dataSize);
+
+    if (m_dataSize <= 0) return;
+
+    for(int i=0;i<nParams();++i)
+    {  
+      API::IConstraint* c = getConstraint(i);
+      if (c)
+      {
+        double penalty = c->checkDeriv();
+        out->addNumberToColumn(penalty, activeIndex(i));
+      }
+    }
+
+    //std::cerr<<"-------------- Jacobian ---------------\n";
+    //for(int i=0;i<nActive();i++)
+    //  for(int j=0;j<nData;j++)
+    //    std::cerr<<i<<' '<<j<<' '<<gsl_matrix_get(((JacobianImpl1*)out)->m_J,j,i)<<'\n';
   }
 
 
@@ -405,6 +477,35 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
 void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
   this->functionDeriv(out,xValues,nData);
+}
+
+/// Called after setMatrixWorkspace if setWorkspace hadn't been called before
+void IFunction::setUpNewStuff()
+{
+  m_dataSize = m_xMaxIndex - m_xMinIndex;
+  m_data = &m_workspace->readY(m_workspaceIndex)[m_xMinIndex];
+  m_xValues = &m_workspace->readX(m_workspaceIndex)[m_xMinIndex];
+  m_weights.resize(m_dataSize);
+  const MantidVec& e = m_workspace->readE(m_workspaceIndex);
+
+  for (int i = 0; i < m_dataSize; ++i)
+  {
+    if (e[m_xMinIndex + i] <= 0.0)
+      m_weights[i] = 1.0;
+    else
+      m_weights[i] = 1./e[m_xMinIndex + i];
+  }
+
+  if (m_workspace->hasMaskedBins(m_workspaceIndex))
+  {
+    const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(m_workspaceIndex);
+    MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
+    for(;it!=mlist.end();it++)
+    {
+      m_weights[it->first - m_xMinIndex] = 0.;
+    }
+  }
+
 }
 
 } // namespace API

@@ -158,22 +158,23 @@ namespace CurveFitting
       throw std::runtime_error("Function was not set.");
 
     m_function->setMatrixWorkspace(localworkspace,histNumber,m_minX, m_maxX);
+    m_function->setUpNewStuff();
 
     // force initial parameters to satisfy constraints of function
     m_function->setParametersToSatisfyConstraints();
 
     // check if derivative defined in derived class
     bool isDerivDefined = true;
-      const std::vector<double> inTest(nActive(),1.0);
-      std::vector<double> outTest(nActive());
-      const double xValuesTest = 0;
-      JacobianImpl1 J;
-      gsl_matrix* M( gsl_matrix_alloc(1,nActive()) );
-      J.setJ(M);
-      try
-      {
+    const std::vector<double> inTest(nActive(),1.0);
+    std::vector<double> outTest(nActive());
+    const double xValuesTest = 0;
+    JacobianImpl1 J;
+    gsl_matrix* M( gsl_matrix_alloc(1,nActive()) );
+    J.setJ(M);
+    try
+    {
       // note nData set to zero (last argument) hence this should avoid further memory problems
-      functionDeriv(NULL, &J, &xValuesTest, 0);
+      m_function->functionDeriv(&J, &xValuesTest, 0);
     }
     catch (Exception::NotImplementedError&)
     {
@@ -266,7 +267,7 @@ namespace CurveFitting
     std::string costFunction = getProperty("CostFunction");
     IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
     minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                     initFuncArg, this, costFunction);
+                     initFuncArg, m_function, costFunction);
     
 
     // finally do the fitting
@@ -300,7 +301,7 @@ namespace CurveFitting
             delete minimizer;
             minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
             minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                                  initFuncArg, this, costFunction);
+                                  initFuncArg, m_function, costFunction);
             iter = 0;
           }
           break;
@@ -330,9 +331,9 @@ namespace CurveFitting
             delete minimizer;
             SimplexMinimizer* sm = new SimplexMinimizer;
             sm->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                           initFuncArg, this, costFunction);
+                           initFuncArg, m_function, costFunction);
             sm->resetSize(X, Y, sqrtWeightData, nData, nParam, 
-                           initFuncArg, 0.1, this, costFunction);
+                           initFuncArg, 0.1, m_function, costFunction);
             minimizer = sm;
             status = GSL_CONTINUE;
             continue;
@@ -567,36 +568,11 @@ namespace CurveFitting
  *  @param xValues The array of nData x-values.
  *  @param nData The size of the fitted data.
  */
-  void Fit::function(const double* in, double* out, const double* xValues, const int& nData)
-  {
-
-    if (in) m_function->updateActive(in);
-    m_function->function(out,xValues,nData);
-  
-    // Add penalty factor to function if any constraint is violated
-
-    double penalty = 0.;
-    for(int i=0;i<m_function->nParams();++i)
-    {
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
-      {
-        penalty += c->check();
-      }
-    }
-
-    // add penalty to first and last point and every 10th point in between
-    if ( penalty != 0.0 )
-    {
-      out[0] += penalty;
-      out[nData-1] += penalty;
-
-      for (int i = 9; i < nData-1; i+=10)
-      {
-        out[i] += penalty;
-      }
-    }
-  }
+  //void Fit::function(const double* in, double* out, const double* xValues, const int& nData)
+  //{
+  //  m_function->function(out,xValues,nData);
+  //
+  //}
 
   /** Calculate derivates of fitting function
   *
@@ -605,28 +581,11 @@ namespace CurveFitting
   * @param xValues X values for data points
   * @param nData Number of data points
   */
-  void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
-  {
-    if (in) m_function->updateActive(in);
-    m_function->functionDeriv(out,xValues,nData);
-
-    if (nData <= 0) return;
-
-    for(int i=0;i<m_function->nParams();++i)
-    {  
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
-      {
-        double penalty = c->checkDeriv();
-        out->addNumberToColumn(penalty, m_function->activeIndex(i));
-      }
-    }
-
-    //std::cerr<<"-------------- Jacobian ---------------\n";
-    //for(int i=0;i<nActive();i++)
-    //  for(int j=0;j<nData;j++)
-    //    std::cerr<<i<<' '<<j<<' '<<gsl_matrix_get(((JacobianImpl1*)out)->m_J,j,i)<<'\n';
-  }
+  //void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
+  //{
+  //  if (in) m_function->updateActive(in);
+  //  m_function->functionDeriv(out,xValues,nData);
+  //}
 
   /**
    * Process input parameters and create the fitting function.

@@ -69,9 +69,9 @@ namespace Mantid
       virtual const std::string category() const { return "CurveFitting";}
 
       /// Function you want to fit to.
-      virtual void function(const double* in, double* out, const double* xValues, const int& nData);
+      //virtual void function(const double* in, double* out, const double* xValues, const int& nData);
       /// Derivatives of function with respect to parameters you are trying to fit
-      virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const int& nData);
+      //virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const int& nData);
 
       /// Set a function for fitting
       void setFunction(API::IFunction* fun);
