@@ -21,10 +21,18 @@ DEL__FINDING_CENTRE_ = False
 
 def _issueWarning(msg):
     """
-        Issues a Mantid message
+        Prints a message to the log marked as warning
         @param msg: message to be issued
     """
-    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    _issueInfo('::SANS::Warning: ' + msg)
+
+def _issueInfo(msg):
+    """
+        Prints a message to the log
+        @param msg: message to be issued
+    """
+    print msg
+    mantid.sendLogMessage(msg)
 
 
 class LoadRun(ReductionStep):
@@ -428,9 +436,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                     else:
                         _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
                 else:
-                    _issueWarning('Unrecognized masking option "' + details + '"')
+                    _issueWarning('Unrecognized masking line "' + details + '"')
         else:
-            pass
+             _issueWarning('Unrecognized masking line "' + details + '"')
 
     def add_mask_string(self, mask_string, detect):
         if detect.upper() == 'FRONT':
@@ -502,9 +510,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 #empty entries are allowed
                 pass
             elif len(x.split()) == 4:
-                _issueWarning('Box mask entry %s ignored. Box masking is not supported by Mantid'%'mask '+x)
+                _issueWarning('Box mask entry "%s" ignored. Box masking is not supported by Mantid'%('mask '+x))
             else:
-                raise SyntaxError('Problem reading a mask entry: %s' %x)
+                raise SyntaxError('Problem reading a mask entry: "%s"' % x)
         
         return speclist.rpartition(',')[0]
 
@@ -1175,85 +1183,94 @@ class UserFile(ReductionStep):
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
-            if line.startswith('!'):
-                continue
-            # This is so that I can be sure all EOL characters have been removed
-            line = line.lstrip().rstrip()
-            upper_line = line.upper()
-            if upper_line.startswith('L/'):
-                self.readLimitValues(line, reducer)
-            
-            elif upper_line.startswith('MON/'):
-                self._readMONValues(line, reducer)
-            
-            elif upper_line.startswith('MASK'):
-                reducer.mask.parse_instruction(upper_line)
-            
-            elif upper_line.startswith('SET CENTRE'):
-                values = upper_line.split()
-                reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(values[2])/1000.0, float(values[3])/1000.0))
-            
-            elif upper_line.startswith('SET SCALES'):
-                values = upper_line.split()
-                reducer._corr_and_scale.rescale = \
-                    float(values[2])*reducer._corr_and_scale.DEFAULT_SCALING
-            
-            elif upper_line.startswith('SAMPLE/OFFSET'):
-                values = upper_line.split()
-                reducer.instrument.set_sample_offset(values[1])
-            
-            elif upper_line.startswith('DET/'):
-                det_specif = upper_line[4:]
-                if det_specif.startswith('CORR'):
-                    self._readDetectorCorrections(upper_line[8:], reducer)
-                else:
-                    # This checks whether the type is correct and issues warnings if it is not
-                    reducer.instrument.setDetector(det_specif)
-            
-            elif upper_line.startswith('GRAVITY'):
-                flag = upper_line[8:]
-                if flag == 'ON':
-                    reducer.to_Q.set_gravity(True, override=False)
-                elif flag == 'OFF':
-                    reducer.to_Q.set_gravity(False, override=False)
-                else:
-                    _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
-                    reducer.to_Q.set_gravity(False)
-            
-            elif upper_line.startswith('BACK/MON/TIMES'):
-                tokens = upper_line.split()
-                if len(tokens) == 3:
-                    reducer.BACKMON_START = int(tokens[1])
-                    reducer.BACKMON_END = int(tokens[2])
-                else:
-                    _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
-                    reducer.BACKMON_START = None
-                    reducer.BACKMON_END = None
-            
-            elif upper_line.startswith("FIT/TRANS/"):
-                params = upper_line[10:].split()
-                nparams = len(params)
-                if nparams == 3 or nparams == 1:
-                    if nparams == 1:
-                        fit_type = params[0]
-                        lambdamin = lambdamax = None
-                    else:
-                        fit_type, lambdamin, lambdamax = params
-                    reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
-                        max=lambdamax, fit_method=fit_type, override=False)
-                else:
-                    _issueWarning('Incorrectly formatted FIT/TRANS line, $s, line ignored' % upper_line)
+            self.read_line(line, reducer)
 
-            else:
-                continue
-    
         # Close the handle
         file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
         
         return True
+
+    def read_line(self, line, reducer):
+        # This is so that I can be sure all EOL characters have been removed
+        line = line.lstrip().rstrip()
+        upper_line = line.upper()
+        if upper_line.startswith('L/'):
+            self.readLimitValues(line, reducer)
         
+        elif upper_line.startswith('MON/'):
+            self._readMONValues(line, reducer)
+        
+        elif upper_line.startswith('MASK'):
+            reducer.mask.parse_instruction(upper_line)
+        
+        elif upper_line.startswith('SET CENTRE'):
+            values = upper_line.split()
+            reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(values[2])/1000.0, float(values[3])/1000.0))
+        
+        elif upper_line.startswith('SET SCALES'):
+            values = upper_line.split()
+            reducer._corr_and_scale.rescale = \
+                float(values[2])*reducer._corr_and_scale.DEFAULT_SCALING
+        
+        elif upper_line.startswith('SAMPLE/OFFSET'):
+            values = upper_line.split()
+            reducer.instrument.set_sample_offset(values[1])
+        
+        elif upper_line.startswith('DET/'):
+            det_specif = upper_line[4:]
+            if det_specif.startswith('CORR'):
+                self._readDetectorCorrections(upper_line[8:], reducer)
+            else:
+                # This checks whether the type is correct and issues warnings if it is not
+                reducer.instrument.setDetector(det_specif)
+        
+        elif upper_line.startswith('GRAVITY'):
+            flag = upper_line[8:]
+            if flag == 'ON':
+                reducer.to_Q.set_gravity(True, override=False)
+            elif flag == 'OFF':
+                reducer.to_Q.set_gravity(False, override=False)
+            else:
+                _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
+                reducer.to_Q.set_gravity(False)
+        
+        elif upper_line.startswith('BACK/MON/TIMES'):
+            tokens = upper_line.split()
+            if len(tokens) == 3:
+                reducer.BACKMON_START = int(tokens[1])
+                reducer.BACKMON_END = int(tokens[2])
+            else:
+                _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
+                reducer.BACKMON_START = None
+                reducer.BACKMON_END = None
+        
+        elif upper_line.startswith("FIT/TRANS/"):
+            params = upper_line[10:].split()
+            nparams = len(params)
+            if nparams == 3 or nparams == 1:
+                if nparams == 1:
+                    fit_type = params[0]
+                    lambdamin = lambdamax = None
+                else:
+                    fit_type, lambdamin, lambdamax = params
+
+                reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
+                    max=lambdamax, fit_method=fit_type, override=False)
+            else:
+                _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
+
+        elif upper_line.startswith('PRINT '):
+            _issueInfo(upper_line[6:])
+        
+        elif line.startswith('!') or not line:
+            # this is a comment or empty line, these are allowed
+            pass
+
+        else:
+            _issueWarning('Unrecognized line in user file the line %s, ignoring' % upper_line)
+    
     def _initialize_mask(self, reducer):
         self._restore_defaults(reducer)
 
@@ -1329,7 +1346,7 @@ class UserFile(ReductionStep):
             reducer.mask.set_phi_limit(
                 float(minval), float(maxval), False, override=False)
         else:
-            pass
+            _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
     def _readMONValues(self, line, reducer):
         details = line[4:]
@@ -1397,6 +1414,8 @@ class UserFile(ReductionStep):
                     _issueWarning('Unable to parse monitor line "' + line + '"')
             else:
                 _issueWarning('Unable to parse monitor line "' + line + '"')
+        else:
+            _issueWarning('Unable to parse monitor line "' + line + '"')
 
     def _readDetectorCorrections(self, details, reducer):
         values = details.split()

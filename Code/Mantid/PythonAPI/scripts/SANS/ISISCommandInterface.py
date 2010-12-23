@@ -186,12 +186,12 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, n
         @param no_clean best to leave this at the default (false) as then all old settings are cleared
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
-    _printMessage('Running reduction for ' + str(ISIS_global().to_wavelen))
 
     if not full_trans_wav is None:
         ISIS_global().full_trans_wav = full_trans_wav
 
     ISIS_global().to_wavelen.set_range(wav_start, wav_end)
+    _printMessage('Running reduction for ' + str(ISIS_global().to_wavelen))
 
 
 
