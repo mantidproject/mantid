@@ -2033,13 +2033,13 @@ void IndirectDataAnalysis::openDirectoryDialog()
 void IndirectDataAnalysis::help()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
-  QString url = "http://www.mantidproject.org/IDA#";
+  QString url = "http://www.mantidproject.org/IDA:";
   if ( tabName == "Initial Settings" )
     url += "";
   else if ( tabName == "Elwin" )
     url += "Elwin";
   else if ( tabName == "MSD Fit" )
-    url += "MSD";
+    url += "MSDFit";
   else if ( tabName == "Fury" )
     url += "Fury";
   else if ( tabName == "FuryFit" )

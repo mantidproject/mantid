@@ -143,13 +143,13 @@ void Indirect::initLocalPython()
 void Indirect::helpClicked()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
-  QString url = "http://www.mantidproject.org/ConvertToEnergy#";
+  QString url = "http://www.mantidproject.org/Indirect:";
   if ( tabName == "Energy Transfer" )
-    url += "Energy Transfer";
+    url += "EnergyTransfer";
   else if ( tabName == "Calibration" )
     url += "Calibration";
   else if ( tabName == "Diagnostics" )
-    url += "Time Slice";
+    url += "Diagnostics";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
   QDesktopServices::openUrl(QUrl(url));

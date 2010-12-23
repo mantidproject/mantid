@@ -127,7 +127,7 @@ void IndirectDiffractionReduction::openDirectoryDialog()
 
 void IndirectDiffractionReduction::help()
 {
-  QString url = "http://www.mantidproject.org/DEMON";
+  QString url = "http://www.mantidproject.org/Indirect_Diffraction_Reduction";
   QDesktopServices::openUrl(QUrl(url));
 }
 
