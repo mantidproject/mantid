@@ -36,9 +36,15 @@ public:
  void runTest() { suite_testCPRebinning.testCPRExec(); }
 } testDescription_testCPRebinning_testCPRExec;
 
+static class TestDescription_testCPRebinning_testCPRExecAgain : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testCPRebinning_testCPRExecAgain() : CxxTest::RealTestDescription( Tests_testCPRebinning, suiteDescription_testCPRebinning, 87, "testCPRExecAgain" ) {}
+ void runTest() { suite_testCPRebinning.testCPRExecAgain(); }
+} testDescription_testCPRebinning_testCPRExecAgain;
+
 static class TestDescription_testCPRebinning_testRebinningResults : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPRebinning_testRebinningResults() : CxxTest::RealTestDescription( Tests_testCPRebinning, suiteDescription_testCPRebinning, 86, "testRebinningResults" ) {}
+ TestDescription_testCPRebinning_testRebinningResults() : CxxTest::RealTestDescription( Tests_testCPRebinning, suiteDescription_testCPRebinning, 95, "testRebinningResults" ) {}
  void runTest() { suite_testCPRebinning.testRebinningResults(); }
 } testDescription_testCPRebinning_testRebinningResults;
 

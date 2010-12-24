@@ -83,12 +83,21 @@ class testCPRebinning :    public CxxTest::TestSuite
     void testCPRExec(){
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
+
+    void testCPRExecAgain(){
+  // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+
+        pSlicing->pDimDescription("qx")->cut_max = 0+2;
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
     void testRebinningResults(){
         // now test if we have rebinned things properly
         Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
 
         MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
-        TSM_ASSERT("The workspace obtained is not target workspace",targetWS!=0);
+        TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
 
     }
 };
