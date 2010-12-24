@@ -508,6 +508,7 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
     workspace->getInstrument()->getDefaultAxis());
     axisName = axisName.toUpper();
     int axisInd = mAxisCombo->findText(axisName.toUpper());
+    if (axisInd < 0) axisInd = 0;
     mAxisCombo->setCurrentIndex(axisInd);
     // this was an automatic view change, only flag that the view changed if the user initiated the change
     mViewChanged = false;
