@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
+#include <boost/shared_ptr.hpp>
 
 
 using namespace Mantid;
@@ -15,12 +16,10 @@ using namespace MDAlgorithms;
 
 std::string findTestFileLocation(void);
 
-class testCPRebinning :    public CxxTest::TestSuite
-{
-       MDWorkspace*  pOrigin;
- public:
-    void testRebinInit(void){
- 	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
+bool load_existing_workspace(const std::string &workspace_name){
+// helper function to load a workpsace -- something a user should do before rebinning
+
+	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
 //    std::string dataFileName("../../../../Test/VATES/fe_demo.sqw");
 //    std::string dataFileName("../../../../Test/VATES/fe_demo_bin.sqw");
     std::string dataFileName("../../../../Test/AutoTestData/test_horace_reader.sqw");
@@ -28,35 +27,47 @@ class testCPRebinning :    public CxxTest::TestSuite
     Load_MDWorkspace loader;
     loader.initialize();
     loader.setPropertyValue("inFilename",dataFileName);
-    std::string InputWorkspaceName = "MyTestMDWorkspace";
-    loader.setPropertyValue("MDWorkspace",InputWorkspaceName);
+ 
+    loader.setPropertyValue("MDWorkspace",workspace_name);
     loader.execute();
 
-    Workspace_sptr result=AnalysisDataService::Instance().retrieve(InputWorkspaceName);
-    pOrigin = dynamic_cast<MDWorkspace *>(result.get());
+    Workspace_sptr result=AnalysisDataService::Instance().retrieve(workspace_name);
+    MDWorkspace*  pOrigin = dynamic_cast<MDWorkspace *>(result.get());
     // no workspace loaded -- no point to continue
-    if(!pOrigin)return;
+    if(!pOrigin)return false;
 
-    // test centerpiece rebinning 
-     CenterpieceRebinning cpr;
+    return true;
+
+}
+
+class testCPRebinning :    public CxxTest::TestSuite
+{
+       std::string InputWorkspaceName;
+   // test centerpiece rebinning 
+       CenterpieceRebinning cpr;
+ public:
+    void testRebinInit(void){
+
+     InputWorkspaceName = "MyTestMDWorkspace";
 
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
      TS_ASSERT( cpr.isInitialized() );
 
+     TSM_ASSERT("We should be able to load the initial workspace successfully",load_existing_workspace(InputWorkspaceName));
+
    
       cpr.setPropertyValue("Input", InputWorkspaceName);      
       cpr.setPropertyValue("Result","OutWorkspace");
-
-      
-      // set slicing property to the size and shape of current workspace
+      // set slicing property to the size and shape of the current workspace
       cpr.init_slicing_property();
+
+    }
+    void testInitSlicingProperty(){      
 
 
     // retrieve slicing property for modifications
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-      if(!pSlicing){
-            throw(std::runtime_error("can not obtain slicing property from the property manager"));
-      }
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
      // now modify it as we need;
         double r0=0;
@@ -68,9 +79,17 @@ class testCPRebinning :    public CxxTest::TestSuite
 		pSlicing->pDimDescription("qz")->cut_max = r0+1;
 		pSlicing->pDimDescription("en")->cut_max = 50;
         
-   
-        TS_ASSERT_THROWS_NOTHING(cpr.execute());
-        pSlicing=NULL; 
+    }
+    void testCPRExec(){
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
+    void testRebinningResults(){
+        // now test if we have rebinned things properly
+        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
+
+        MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
+        TSM_ASSERT("The workspace obtained is not target workspace",targetWS!=0);
+
     }
 };
 

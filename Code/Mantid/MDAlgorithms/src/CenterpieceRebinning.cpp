@@ -16,6 +16,8 @@ namespace Mantid{
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CenterpieceRebinning)
 
+Kernel::Logger& CenterpieceRebinning::bin_log=Kernel::Logger::get("MD rebinning Operations");
+
 CenterpieceRebinning::CenterpieceRebinning(void): API::Algorithm() 
 {}
 
@@ -33,10 +35,12 @@ CenterpieceRebinning::init_slicing_property()
     if(existsProperty("Input")){
          inputWS = getProperty("Input");
          if(!inputWS){
-              throw(std::runtime_error("input workspace has to exist"));
+             bin_log.error()<<"Can not identify initial workspace to do rebinning from\n";
+             throw(std::runtime_error("input workspace has to exist"));
          }
 
     }else{
+       bin_log.error()<<"Input workspace has not been defined in properties\n";
        throw(std::runtime_error("input workspace has to be availible through properties"));
     }
 
@@ -44,7 +48,8 @@ CenterpieceRebinning::init_slicing_property()
     // set up slicing property to the shape of current workspace;
     MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
     if(!pSlicing){
-            throw(std::runtime_error("can not obtain slicing property from the property manager"));
+          bin_log.error()<<"Rebinning request can not be retrieved from properties\n";
+          throw(std::runtime_error("can not obtain slicing property from the property manager"));
      }
 
     pSlicing->build_from_geometry(*(inputWS->getGeometry()));
@@ -85,41 +90,46 @@ CenterpieceRebinning::exec()
    if(existsProperty("Input")){
         inputWS = this->getProperty("Input");
         if(!inputWS){
-              throw(std::runtime_error("input workspace has to exist"));
+            bin_log.error()<<"Can not identify initial workspace to do rebinning from\n";
+            throw(std::runtime_error("input workspace has to exist"));
         }
    }else{
+      bin_log.error()<<"Input workspace has not been defined in properties\n";
        throw(std::runtime_error("input workspace has to be availible through properties"));
    }
 
 
    MDPropertyGeometry  *pSlicing; 
-   if(existsProperty("SlicingData")){ 
- // get slicing data from property manager. At this stage the data has to be shaped to the form desribing the final resulting cut
-    pSlicing = dynamic_cast< MDPropertyGeometry *>((Property *)(this->getProperty("SlicingData")));
-    if(!pSlicing){
-                throw(std::runtime_error("can not obtain slicing property from the property manager"));
-    }
-  }else{
-        throw(std::runtime_error("slising property has to exist and has to be defined "));
-  }
 
+ // get slicing data from property manager. At this stage the data has to be shaped to the form desribing the final resulting cut
+   pSlicing = dynamic_cast< MDPropertyGeometry *>((Property *)(this->getProperty("SlicingData")));
+   if(!pSlicing){
+         bin_log.error()<<"Rebinning request can not be retrieved from properties manager\n";
+         throw(std::runtime_error("can not obtain slicing property from the property manager"));
+   }
+ 
   // Now create the output workspace or get the one which is ready for this purpose;
-  if(existsProperty("Result")){
  
      outputWS = getProperty("Result");
+     std::string ws_name = this->getPropertyValue("Result");
      if(!outputWS){
-        outputWS      = MDWorkspace_sptr(new MDWorkspace());
+         bin_log.information()<<" new target MD Worokspace "<<ws_name<<" will be created\n";
+         outputWS      = MDWorkspace_sptr(new MDWorkspace());
         // this adds workspace to dataservice
         setProperty("Result", outputWS);
      }else{
-
-     }
-  }else{
-        throw(std::runtime_error("output workspace has to be created "));
-  }
-  if(inputWS==outputWS){
+         bin_log.information()<<" Target MD Wororkspace "<<ws_name<<" will be owerwritten\n";
+         Workspace_sptr result = AnalysisDataService::Instance().retrieve(ws_name);
+         outputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
+         if(outputWS.get()==NULL){
+             bin_log.error()<<" Can not retrieve workspace "<<ws_name<<" from Analysis data service or it is not a multidimensional workspace\n";
+             throw(std::runtime_error(" Can not get any or proper kind of workspace from Abalysis data service"));
+         }
+    }
+    if(inputWS==outputWS){
+      bin_log.error()<<" input and output workspace have to be different do to rebinnning\n";
       throw(std::runtime_error("input and output workspaces have to be different"));
-  }
+    }
 
    // here we should have the call to factory, providing best rebinning method for the job
    std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinningNx3(inputWS,pSlicing,outputWS));

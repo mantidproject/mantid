@@ -11,6 +11,33 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 
+    /**  The algorithm implements centerpiece rebinning  for multidimensional workspaces
+
+
+
+        @author  Alex Buts,  ISIS RAL 
+        @date 01/10/2010
+
+        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
+        */
 
 namespace Mantid
 {
@@ -34,7 +61,8 @@ public:
       virtual const std::string category() const { return "MD-Algorithms";}
 
 
-      /// set up slicing property as to the state of input workspace 
+      /// set up slicing property as to the state of input workspace e.g. the rebinning would be
+      /// done on the whole workspace and would provide a workspace, which is equivalent to the input workspace
       void init_slicing_property();
     
 private:
@@ -44,8 +72,8 @@ private:
 
   
 protected:
-
- 
+ /// logger -> to provide logging, for MD dataset file operations
+    static Mantid::Kernel::Logger& bin_log; 
 
 };
 }

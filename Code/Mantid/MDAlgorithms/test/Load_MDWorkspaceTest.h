@@ -20,18 +20,16 @@ class testLoadMDWorkspace :    public CxxTest::TestSuite
    std::string targetWorkspaceName;
  public:
      void testLoadMDWSInit(){
-      
-
-         TSM_ASSERT_THROWS_NOTHING("loader should initialize without throwing",loader.initialize());
-         TSM_ASSERT("Loader should be initialized before going any further",loader.isInitialized());
+        TSM_ASSERT_THROWS_NOTHING("loader should initialize without throwing",loader.initialize());
+        TSM_ASSERT("Loader should be initialized before going any further",loader.isInitialized());
      }
      void testLoadMDWSParams(){
          // Should fail because mandatory parameter has not been set
         TSM_ASSERT_THROWS("The loader should throw now as necessary parameters have not been set",loader.execute(),std::runtime_error);
          
-        // this should throw if file exists
-        TSM_ASSERT_THROWS("this file should not exist",loader.setPropertyValue("inFilename","../Test/AutoTestData/test_horace_reader.sqw"),std::invalid_argument);
-        // and this if does not
+        // this should throw if file does not exist
+        TSM_ASSERT_THROWS("This file should not exist",loader.setPropertyValue("inFilename","../Test/AutoTestData/test_horace_reader.sqw"),std::invalid_argument);
+        // and so this
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","../../../../Test/AutoTestData/test_horace_reader.sqw"));
      }
      void testMDWSExec(){
@@ -53,7 +51,7 @@ class testLoadMDWorkspace :    public CxxTest::TestSuite
 
          TSM_ASSERT_EQUALS("The number of pixels contributed into this workspace should be 1523850",1523850,loadedWS->getNPoints());
 
-         TSM_ASSERT_EQUALS("The MD image in this workspace have to had 64 data cells",64,loadedWS->get_const_MDImage().getDataSize());
+         TSM_ASSERT_EQUALS("The MD image in this workspace has to had 64 data cells",64,loadedWS->get_const_MDImage().getDataSize());
      }
 
 };
