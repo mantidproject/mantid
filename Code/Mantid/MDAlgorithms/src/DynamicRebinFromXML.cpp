@@ -325,8 +325,8 @@ namespace Mantid
       IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.001, 1, true, 1);
       rebinningAlg->setPropertyValue("Input", name);
       
-      
-      rebinningAlg->setPropertyValue("FileName", location);
+      // filename will be in save or load workspace algorithm
+     // rebinningAlg->setPropertyValue("FileName", location);
       rebinningAlg->initialize();
       
       //HACK: only way to apply a geometry description seems to be to grab it from the algorithm and apply it after initalize!

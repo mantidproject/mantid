@@ -43,24 +43,22 @@ class testCPRebinning :    public CxxTest::TestSuite
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
      TS_ASSERT( cpr.isInitialized() );
 
-      cpr.setPropertyValue("Filename", "new_datafile.sqw");
+   
       cpr.setPropertyValue("Input", InputWorkspaceName);      
       cpr.setPropertyValue("Result","OutWorkspace");
 
       
+      // set slicing property to the size and shape of current workspace
+      cpr.init_slicing_property();
 
 
-
-
-    // set up slicing property to the shape of current workspace;
-        Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-        if(!pSlicing){
+    // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      if(!pSlicing){
             throw(std::runtime_error("can not obtain slicing property from the property manager"));
-        }
+      }
 
-        pSlicing->build_from_geometry(*(pOrigin->getGeometry()));
- 
-
+     // now modify it as we need;
         double r0=0;
         pSlicing->pDimDescription("qx")->cut_min = r0;
 		pSlicing->pDimDescription("qx")->cut_max = r0+1;

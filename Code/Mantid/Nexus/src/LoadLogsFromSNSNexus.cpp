@@ -99,7 +99,7 @@ void LoadLogsFromSNSNexus::exec()
     //Use the DAS logs to integrate the proton charge (if any).
     WS->mutableRun().integrateProtonCharge();
   }
-  catch (Exception::NotFoundError &e)
+  catch (Exception::NotFoundError &)
   {
     //Ignore not found property error.
   }
@@ -149,7 +149,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   {
     file.getAttr("units", units);
   }
-  catch (::NeXus::Exception &ex)
+  catch (::NeXus::Exception &)
   {
     //Ignore missing units field.
     units = "";
@@ -219,13 +219,13 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     try {
       file.getAttr("start", start);
     }
-    catch (::NeXus::Exception &e)
+    catch (::NeXus::Exception &)
     {
       //Some logs have "offset" instead of start
       try {
         file.getAttr("offset", start);
       }
-      catch (::NeXus::Exception &e)
+      catch (::NeXus::Exception &)
       {
         g_log.warning() << "NXlog entry " << entry_name << " has no start time indicated.\n";
         file.closeData();

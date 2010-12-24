@@ -32,16 +32,16 @@ public:
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "MD-Algorithms";}
-      ///
-      void init_property(MDDataObjects::MDWorkspace_sptr inputWSX);
-     
+
+
+      /// set up slicing property as to the state of input workspace 
+      void init_slicing_property();
+    
 private:
-    // Overridden Algorithm methods
+    // Overridden Pivate Algorithm methods
       void init();
       void exec();
 
-  
- 
   
 protected:
 

@@ -57,7 +57,7 @@ private:
 
     Load_MDWorkspace loader;
     loader.initialize();
-    loader.setPropertyValue("inFilename","../../../../Test/VATES/fe_demo.sqw");
+    loader.setPropertyValue("inFilename","../../../../Test/VATES/fe_demo_bin.sqw");
     std::string targetWorkspaceName = "Input";
     loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
     loader.execute();
@@ -336,7 +336,7 @@ public:
   {
     using namespace Mantid::MDDataObjects;
 
-    MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace());
+    MDWorkspace * baseWs = constructMDWorkspace();
     //AnalysisDataService::Instance().add("Input", baseWs); // you can not do it twice
 
     Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;

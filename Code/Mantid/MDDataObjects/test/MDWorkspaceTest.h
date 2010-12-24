@@ -31,7 +31,7 @@ private:
     MOCK_METHOD1(read_MDImg_data, void(Mantid::MDDataObjects::MDImage&)); 
     MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
     MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
-    size_t getNPix()
+    unsigned long getNPix()
     {
       return 0;
     }
@@ -92,7 +92,7 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getNPoints() is not yet implemented. Should have thrown runtime exception", workspace->getNPoints(), std::runtime_error);
+    TSM_ASSERT_EQUALS("MDWorkspace::getNPoints() is mainly implemented. this implementation should return 0",0, workspace->getNPoints());
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.

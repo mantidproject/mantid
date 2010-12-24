@@ -86,7 +86,7 @@ namespace Mantid
       const std::vector<Geometry::V3D>& getPoints() const 
       { return PtOut; }
       /// Get the number of intersection points
-      int getNPoints() const { return PtOut.size(); }
+      unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
 
       /// Re-set the line
       void setLine(const Geometry::V3D&,const Geometry::V3D&);

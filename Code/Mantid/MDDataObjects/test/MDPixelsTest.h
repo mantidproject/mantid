@@ -32,7 +32,7 @@ private:
     {
       return 0;
     }
-    MOCK_METHOD0(getNPix, size_t());
+    MOCK_METHOD0(getNPix, unsigned long());
     void write_mdd(const MDImage &)
     {
     }

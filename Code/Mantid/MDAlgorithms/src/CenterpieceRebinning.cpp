@@ -25,7 +25,7 @@ CenterpieceRebinning::~CenterpieceRebinning()
  
 }
 void 
-CenterpieceRebinning::init_property(MDWorkspace_sptr inputWSX)
+CenterpieceRebinning::init_slicing_property()
 {
     // input workspace has to exist and be loaded;
 	MDWorkspace_sptr inputWS;
@@ -65,10 +65,16 @@ CenterpieceRebinning::init()
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
 
       declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
-	  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save), "The file containing output MD dataset");
 
+  // prospective property does nothing at the moment TODO: enable
+    declareProperty(new Kernel::PropertyWithValue<bool>("KeepPixels",false,Direction::Input),
+        " This property specifies if user wants to keep"
+        " all pixels(events) contributing in the target MD workspace during rebinning operation; This is to accelerate work if the user sure that he wants"
+        " to save the workspace after rebinning. If he does not specify this option, a rebinning which keeps contributing pixels will be performed"
+        " when user decides to save the final multidimensional workspace. DISABLED AT THE MOMENT" );	
    
 }
+
 //
 void 
 CenterpieceRebinning::exec()
@@ -103,7 +109,10 @@ CenterpieceRebinning::exec()
      outputWS = getProperty("Result");
      if(!outputWS){
         outputWS      = MDWorkspace_sptr(new MDWorkspace());
+        // this adds workspace to dataservice
         setProperty("Result", outputWS);
+     }else{
+
      }
   }else{
         throw(std::runtime_error("output workspace has to be created "));

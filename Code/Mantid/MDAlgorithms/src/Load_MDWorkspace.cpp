@@ -32,7 +32,10 @@ Load_MDWorkspace::init()
     ext[0]=".sqw";
     declareProperty(new API::FileProperty("inFilename","", API::FileProperty::Load,ext), "The file containing initial MD dataset");
     declareProperty(new WorkspaceProperty<MDWorkspace>("MDWorkspace","",Direction::Output),"final MD workspace");
-  
+    // prospective property TODO: implement
+    declareProperty((new Kernel::PropertyWithValue<bool>("TryLoadPixels",false,Direction::InOut)),
+        "This property specifies if user wants to try loading in memory"
+        " all pixels(events) availible in the MD workspace; If there is enough memory system will try to do it but may fail");
 }
 //
 void 
@@ -77,7 +80,7 @@ std::string workspaceFileName;
 
 
     inputWS->init(pFile,pBasis,geomDescr,pd);
-   // currently supported only for image;
+   // currently is_initiated supported only for image;
   //  if(!inputWS->is_initiated()){
     // throw and end
   //  }

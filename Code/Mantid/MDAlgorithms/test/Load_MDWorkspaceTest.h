@@ -16,15 +16,16 @@ using namespace MDAlgorithms;
 
 class testLoadMDWorkspace :    public CxxTest::TestSuite
 {
-   
+   Load_MDWorkspace loader;
+   std::string targetWorkspaceName;
  public:
-     void testFullLoadMDWorkspace(){
-
-         Load_MDWorkspace loader;
+     void testLoadMDWSInit(){
+      
 
          TSM_ASSERT_THROWS_NOTHING("loader should initialize without throwing",loader.initialize());
          TSM_ASSERT("Loader should be initialized before going any further",loader.isInitialized());
-
+     }
+     void testLoadMDWSParams(){
          // Should fail because mandatory parameter has not been set
         TSM_ASSERT_THROWS("The loader should throw now as necessary parameters have not been set",loader.execute(),std::runtime_error);
          
@@ -32,13 +33,15 @@ class testLoadMDWorkspace :    public CxxTest::TestSuite
         TSM_ASSERT_THROWS("this file should not exist",loader.setPropertyValue("inFilename","../Test/AutoTestData/test_horace_reader.sqw"),std::invalid_argument);
         // and this if does not
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","../../../../Test/AutoTestData/test_horace_reader.sqw"));
-
+     }
+     void testMDWSExec(){
          // does it add it to analysis data service? -- no
-         std::string targetWorkspaceName = "MyTestWorkspace";
+         targetWorkspaceName = "MyTestWorkspace";
          loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
 
          TSM_ASSERT_THROWS_NOTHING("workspace loading should not throw",loader.execute());
-
+     }
+     void testMDWSDoneWell(){
          // now verify if we loaded the right thing
          Workspace_sptr result;
          TSM_ASSERT_THROWS_NOTHING("We should retrieve loaded workspace without throwing",result=AnalysisDataService::Instance().retrieve(targetWorkspaceName));

@@ -396,7 +396,7 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
       {
         file.openData("event_id");
       }
-      catch (::NeXus::Exception& e)
+      catch (::NeXus::Exception& )
       {
         //Older files (before Nov 5, 2010) used this field.
         file.openData("event_pixel_id");
