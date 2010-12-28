@@ -26,7 +26,7 @@ const double NeutronAtom::ReferenceLambda = 1.7982;
  * @param tot_xs The total neutron cross-section
  * @param abs_xs The absolute neutron cross-section
  */
-NeutronAtom::NeutronAtom(const uint8_t z,
+NeutronAtom::NeutronAtom(const uint16_t z,
                          const double coh_b_real, const double inc_b_real,
                          const double coh_xs, const double inc_xs,
                          const double tot_xs, const double abs_xs):
@@ -46,7 +46,7 @@ NeutronAtom::NeutronAtom(const uint8_t z,
  * @param tot_xs The total neutron cross-section
  * @param abs_xs The absolute neutron cross-section
  */
-NeutronAtom::NeutronAtom(const uint8_t z, const uint8_t a,
+NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double inc_b_real,
                          const double coh_xs, const double inc_xs,
                          const double tot_xs, const double abs_xs):
@@ -68,7 +68,7 @@ NeutronAtom::NeutronAtom(const uint8_t z, const uint8_t a,
  * @param tot_xs The total neutron cross-section
  * @param abs_xs The absolute neutron cross-section
  */
-NeutronAtom::NeutronAtom(const uint8_t z, const uint8_t a,
+NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double coh_b_img,
                          const double inc_b_real, const double inc_b_img,
                          const double coh_xs, const double inc_xs,
@@ -518,7 +518,7 @@ NeutronAtom getNeutronAtom(const int z_number, const int a_number)
   if (result == &(ATOMS[NUM_ATOMS]))
   {
     std::stringstream msg;
-    msg << "Failed to find an atom with z=" << z_number << " and a=" << a_number;
+    msg << "Failed to find a NeutronAtom with z=" << z_number << " and a=" << a_number;
     throw std::runtime_error(msg.str());
   }
 

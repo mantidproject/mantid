@@ -41,28 +41,28 @@ namespace Mantid
       /// The reference wavelength value for absorption cross sections
       static const double ReferenceLambda;
 
-      NeutronAtom(const uint8_t z,
+      NeutronAtom(const uint16_t z,
           const double coh_b_real, const double inc_b_real,
           const double coh_xs, const double inc_xs,
           const double tot_xs, const double abs_xs);
 
-      NeutronAtom(const uint8_t z, const uint8_t a,
+      NeutronAtom(const uint16_t z, const uint16_t a,
           const double coh_b_real, const double inc_b_real,
           const double coh_xs, const double inc_xs,
           const double tot_xs, const double abs_xs);
 
-      NeutronAtom(const uint8_t z, const uint8_t a,
+      NeutronAtom(const uint16_t z, const uint16_t a,
           const double coh_b_real, const double coh_b_img,
           const double inc_b_real, const double inc_b_img,
           const double coh_xs, const double inc_xs,
           const double tot_xs, const double abs_xs);
 
       /// The atomic number, or number of protons, for the atom.
-      uint8_t z_number;
+      uint16_t z_number;
 
       /// The total number of protons and neutrons, or mass number, 
       /// for the atom for isotopic averages this is set to zero.
-      uint8_t a_number;
+      uint16_t a_number;
 
       /// The real part of the coherent scattering length in fm.
       double coh_scatt_length_real;
