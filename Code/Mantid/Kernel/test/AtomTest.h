@@ -15,6 +15,8 @@ public:
   {
     Atom hydrogen = getAtom(1,2);
     Atom deuterium = getAtom("D");
+    std::cout << "***" << hydrogen << std::endl;
+    std::cout << "***" << deuterium << std::endl;
     TS_ASSERT_EQUALS(hydrogen, deuterium);
     TS_ASSERT_EQUALS(hydrogen.z_number, 1);
     TS_ASSERT_EQUALS(hydrogen.a_number, 2);
