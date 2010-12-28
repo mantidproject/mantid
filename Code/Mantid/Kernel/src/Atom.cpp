@@ -3395,6 +3395,9 @@ static const size_t NUM_ATOMS = 3049;
 // ---------- END DO NOT EDIT AREA----------
 bool operator==(const Atom& left, const Atom & right)
 {
+  if (&left == &right)
+    return true;
+
   if (left.z_number != right.z_number)
     return false;
   if (left.a_number != right.a_number)
