@@ -35,7 +35,12 @@ namespace Mantid
 */
 namespace PhysicalConstants
 {
-  /** Planck constant. Taken from <http://physics.nist.gov/cuu/Constants> on 31/10/2007. */
+  /** Avagodro constant in mol<SUP>-1</SUP>. Taken from
+      <http://physics.nist.gov/cuu/Constants> on 2010-12-28. */
+  static const double N_A = 6.02214179e23;
+
+  /** Planck constant in J*s. Taken from <http://physics.nist.gov/cuu/Constants>
+      on 2007-10-31 and confirmed again on 2010-12-28. */
   static const double h = 6.62606896e-34;
 
   /** Standard acceleration due to gravity. Precise value in ms<SUP>-2</SUP>. */
