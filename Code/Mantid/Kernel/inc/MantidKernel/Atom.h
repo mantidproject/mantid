@@ -18,6 +18,7 @@ namespace PhysicalConstants
   struct EXPORT_OPT_MANTID_KERNEL Atom {
     Atom(const std::string & symbol, const uint16_t z, const uint16_t a, const double abundance,
          const double mass, const double density);
+    Atom(const Atom& other);
 
     /// The atomic symbol. In other words the one or two character abbreviation.
     std::string symbol;

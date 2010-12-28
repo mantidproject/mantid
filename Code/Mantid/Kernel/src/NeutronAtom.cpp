@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/NeutronAtom.h"
 #include <algorithm>
+#include <iostream> // REMOVE
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -78,6 +79,19 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          inc_scatt_length_real(inc_b_real), inc_scatt_length_img(inc_b_img),
                          coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
                          tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+
+/// Copy constructor.
+NeutronAtom::NeutronAtom(const NeutronAtom& other):
+             z_number(other.z_number), a_number(other.a_number),
+             coh_scatt_length_real(other.coh_scatt_length_real),
+             coh_scatt_length_img(other.coh_scatt_length_img),
+             inc_scatt_length_real(other.inc_scatt_length_real),
+             inc_scatt_length_img(other.inc_scatt_length_img),
+             coh_scatt_xs(other.coh_scatt_xs),
+             inc_scatt_xs(other.inc_scatt_xs),
+             tot_scatt_xs(other.tot_scatt_xs),
+             abs_scatt_xs(other.abs_scatt_xs)
+{}
 
 static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
@@ -507,27 +521,45 @@ static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
 
+
+inline bool NeutronAtomIsNaN(const double number)
+{
+  return (number != number);
+}
+
+bool NeutronAtomEqualsWithNaN(const double left, const double right)
+{
+  if (left == right)
+    return true;
+  if (NeutronAtomIsNaN(left) && NeutronAtomIsNaN(right))
+    return true;
+  return false;
+}
+
 bool operator==(const NeutronAtom& left, const NeutronAtom& right)
 {
+  if (&left == &right)
+    return true;
+
   if (left.z_number != right.z_number)
     return false;
   if (left.a_number != right.a_number)
     return false;
-  if (left.coh_scatt_length_real != right.coh_scatt_length_real)
+  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_real, right.coh_scatt_length_real))
     return false;
-  if (left.coh_scatt_length_img != right.coh_scatt_length_img)
+  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_img, right.coh_scatt_length_img))
     return false;
-  if (left.inc_scatt_length_real != right.inc_scatt_length_real)
+  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_real, right.inc_scatt_length_real))
     return false;
-  if (left.inc_scatt_length_img != right.inc_scatt_length_img)
+  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_img, right.inc_scatt_length_img))
     return false;
-  if (left.coh_scatt_xs != right.coh_scatt_xs)
+  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_xs, right.coh_scatt_xs))
     return false;
-  if (left.inc_scatt_xs != right.inc_scatt_xs)
+  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_xs, right.inc_scatt_xs))
     return false;
-  if (left.tot_scatt_xs != right.tot_scatt_xs)
+  if (!NeutronAtomEqualsWithNaN(left.tot_scatt_xs, right.tot_scatt_xs))
     return false;
-  if (left.abs_scatt_xs != right.abs_scatt_xs)
+  if (!NeutronAtomEqualsWithNaN(left.abs_scatt_xs, right.abs_scatt_xs))
     return false;
 
   // all of the tests pass
@@ -537,6 +569,12 @@ bool operator==(const NeutronAtom& left, const NeutronAtom& right)
 bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
 {
   return !(left == right);
+}
+
+std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom)
+{
+  out << "NeutronAtom(" << atom.z_number << ", " << atom.a_number << ")";
+  return out;
 }
 
 bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)

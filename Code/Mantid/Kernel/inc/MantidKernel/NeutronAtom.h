@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 // Include
 //------------------------------------------------------------------------------
+#include <ostream>
 #include <string>
 #include "MantidKernel/DllExport.h"
 
@@ -57,6 +58,8 @@ namespace Mantid
           const double coh_xs, const double inc_xs,
           const double tot_xs, const double abs_xs);
 
+      NeutronAtom(const NeutronAtom& other);
+
       NeutronAtom();
 
       /// The atomic number, or number of protons, for the atom.
@@ -93,6 +96,7 @@ namespace Mantid
 
     DLLExport bool operator==(const NeutronAtom& left, const NeutronAtom& right);
     DLLExport bool operator!=(const NeutronAtom& left, const NeutronAtom& right);
+    DLLExport std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom);
     DLLExport NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
 
   } //Namespace PhysicalConstants

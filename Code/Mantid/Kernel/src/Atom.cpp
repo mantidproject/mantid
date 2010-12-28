@@ -31,6 +31,13 @@ Atom::Atom(const string& symbol, const uint16_t z, const uint16_t a,
   }
 }
 
+/// Copy constructor.
+Atom::Atom(const Atom& other):
+    symbol(other.symbol), z_number(other.z_number), a_number(other.a_number),
+    abundance(other.abundance), mass(other.mass), mass_density(other.mass_density),
+    number_density(other.number_density), neutron(other.neutron)
+  {}
+
 // ---------- START DO NOT EDIT AREA----------
 static const Atom H("H", 1, 0, 0.000000, 1.007940, 0.0708);
 static const Atom H1("H", 1, 1, 99.988500, 1.007825, 0.070791924393);
@@ -3393,6 +3400,20 @@ Ds281, Rg, Rg272, Cn, Cn285, Uuq, Uuq289, Uuh, Uuh292
 static const size_t NUM_ATOMS = 3049;
 
 // ---------- END DO NOT EDIT AREA----------
+inline bool AtomIsNaN(const double number)
+{
+  return (number != number);
+}
+
+bool AtomEqualsWithNaN(const double left, const double right)
+{
+  if (left == right)
+    return true;
+  if (AtomIsNaN(left) && AtomIsNaN(right))
+    return true;
+  return false;
+}
+
 bool operator==(const Atom& left, const Atom & right)
 {
   if (&left == &right)
@@ -3402,13 +3423,13 @@ bool operator==(const Atom& left, const Atom & right)
     return false;
   if (left.a_number != right.a_number)
     return false;
-  if (left.abundance != right.abundance)
+  if (!AtomEqualsWithNaN(left.abundance, right.abundance))
     return false;
-  if (left.mass != right.mass)
+  if (!AtomEqualsWithNaN(left.mass, right.mass))
     return false;
-  if (left.mass_density != right.mass_density)
+  if (!AtomEqualsWithNaN(left.mass_density, right.mass_density))
     return false;
-  if (left.number_density != right.number_density)
+  if (!AtomEqualsWithNaN(left.number_density, right.number_density))
     return false;
   if (left.neutron != right.neutron)
     return false;
