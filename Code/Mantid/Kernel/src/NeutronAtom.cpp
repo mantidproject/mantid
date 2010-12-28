@@ -81,6 +81,18 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
 
 static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
+/**
+ * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
+ * that is only available to allow for callers to declare variables then
+ * initialize them.
+ */
+NeutronAtom::NeutronAtom():
+  z_number(0), a_number(0),
+  coh_scatt_length_real(NAN), coh_scatt_length_img(NAN),
+  inc_scatt_length_real(NAN), inc_scatt_length_img(NAN),
+  coh_scatt_xs(NAN), inc_scatt_xs(NAN),
+  tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
+
 static const NeutronAtom H( 1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
 static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03, 0.3326);
 static const NeutronAtom H2(1, 2, 6.671, 4.04, 5.592, 2.05, 7.64, 0.000519);
@@ -495,6 +507,38 @@ static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
 
+bool operator==(const NeutronAtom& left, const NeutronAtom& right)
+{
+  if (left.z_number != right.z_number)
+    return false;
+  if (left.a_number != right.a_number)
+    return false;
+  if (left.coh_scatt_length_real != right.coh_scatt_length_real)
+    return false;
+  if (left.coh_scatt_length_img != right.coh_scatt_length_img)
+    return false;
+  if (left.inc_scatt_length_real != right.inc_scatt_length_real)
+    return false;
+  if (left.inc_scatt_length_img != right.inc_scatt_length_img)
+    return false;
+  if (left.coh_scatt_xs != right.coh_scatt_xs)
+    return false;
+  if (left.inc_scatt_xs != right.inc_scatt_xs)
+    return false;
+  if (left.tot_scatt_xs != right.tot_scatt_xs)
+    return false;
+  if (left.abs_scatt_xs != right.abs_scatt_xs)
+    return false;
+
+  // all of the tests pass
+  return true;
+}
+
+bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
+{
+  return !(left == right);
+}
+
 bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
 {
   if (left.z_number == right.z_number) {
@@ -515,7 +559,8 @@ NeutronAtom getNeutronAtom(const int z_number, const int a_number)
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
 
   NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
-  if (result == &(ATOMS[NUM_ATOMS]))
+  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number
+      || result->a_number != a_number)
   {
     std::stringstream msg;
     msg << "Failed to find a NeutronAtom with z=" << z_number << " and a=" << a_number;

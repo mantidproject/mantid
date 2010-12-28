@@ -28,6 +28,7 @@ public:
 
   void testError()
   {
+    TS_ASSERT_THROWS(getNeutronAtom(1, 15), std::runtime_error);
     TS_ASSERT_THROWS(getNeutronAtom(97), std::runtime_error);
   }
 };

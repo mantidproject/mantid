@@ -57,6 +57,8 @@ namespace Mantid
           const double coh_xs, const double inc_xs,
           const double tot_xs, const double abs_xs);
 
+      NeutronAtom();
+
       /// The atomic number, or number of protons, for the atom.
       uint16_t z_number;
 
@@ -89,6 +91,8 @@ namespace Mantid
       double abs_scatt_xs;
     };
 
+    DLLExport bool operator==(const NeutronAtom& left, const NeutronAtom& right);
+    DLLExport bool operator!=(const NeutronAtom& left, const NeutronAtom& right);
     DLLExport NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
 
   } //Namespace PhysicalConstants
