@@ -1,6 +1,7 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
+#include <ostream>
 #include <string>
 #include "MantidKernel/DllExport.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -47,6 +48,7 @@ namespace PhysicalConstants
 
   DLLExport bool operator==(const Atom& left, const Atom & right);
   DLLExport bool operator!=(const Atom& left, const Atom & right);
+  DLLExport std::ostream& operator<<(std::ostream& out, const Atom &atom);
   DLLExport Atom getAtom(const uint16_t z_number, const uint16_t a_number = 0);
   DLLExport Atom getAtom(const std::string& symbol, const uint16_t a_number = 0);
 

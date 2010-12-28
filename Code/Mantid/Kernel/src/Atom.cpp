@@ -3418,6 +3418,12 @@ bool operator!=(const Atom& left, const Atom & right)
   return !(left == right);
 }
 
+std::ostream& operator<<(std::ostream& out, const Atom &atom)
+{
+  out << atom.symbol << atom.a_number;
+  return out;
+}
+
 bool compareAtoms(const Atom &left, const Atom &right)
 {
   if (left.z_number == right.z_number) {
