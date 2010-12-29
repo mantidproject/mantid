@@ -13,12 +13,12 @@ libDirList = env['MYLIBDIRLIST']
 cppPath = env['CPPPATH']
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
-myenv.Append(CPPPATH=['../../../Third_Party/src/cxxtest'])
+myenv.Append(CPPPATH=['../../../../Third_Party/src/cxxtest'])
 myenv.Append(LIBPATH=libDirList)
 
 # Add the location of the gmock library
-myenv.Append(CPPPATH=['../../../TestingTools/include'])
-third_party_path = '../../../TestingTools/lib/'
+myenv.Append(CPPPATH=['../../../../TestingTools/include'])
+third_party_path = '../../../../TestingTools/lib/'
 
 # For Windows and Mac, the gmock library is in Third_Party
 # which is already in the path. Just add the path for linux.
@@ -43,7 +43,7 @@ testsToRun = []
 dirList = os.listdir(path)
 
 #Find Cxxtestgen
-cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
+cxxtestgen = 'python ../../../../Third_Party/src/cxxtest/cxxtestgen.py'
 
 for fname in dirList:
   # Disable tests that are to do with multi-dimensional objects/algorithms until something useful is there

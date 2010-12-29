@@ -42,12 +42,12 @@ public:
 
   void testFileWrongSize()
   {
-    TS_ASSERT_THROWS( file.open("../../../../Test/AutoTestData/DataFileOfBadSize.dat"), std::runtime_error);
+    TS_ASSERT_THROWS( file.open("../../../../../Test/AutoTestData/DataFileOfBadSize.dat"), std::runtime_error);
   }
 
   void testOpen()
   {
-    TS_ASSERT_THROWS_NOTHING( file.open("../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
+    TS_ASSERT_THROWS_NOTHING( file.open("../../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
     //Right size?
     size_t num = 400104/8;
     TS_ASSERT_EQUALS(file.getNumElements(), num);
@@ -67,7 +67,7 @@ public:
 
   void testLoadAllInto()
   {
-    TS_ASSERT_THROWS_NOTHING( file.open("../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
+    TS_ASSERT_THROWS_NOTHING( file.open("../../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
     //Right size?
     size_t num = 400104/8;
     TS_ASSERT_EQUALS(file.getNumElements(), num);
@@ -85,7 +85,7 @@ public:
 
   void testLoadInBlocks()
   {
-    TS_ASSERT_THROWS_NOTHING( file.open("../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
+    TS_ASSERT_THROWS_NOTHING( file.open("../../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat"));
     //Right size?
     size_t num = 400104/8;
     TS_ASSERT_EQUALS(file.getNumElements(), num);

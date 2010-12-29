@@ -84,7 +84,7 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.directories",
-        "../../../../Test/AutoTestData;../../../../Test/");
+        "../../../../../Test/AutoTestData");
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
     TS_ASSERT(!path.empty());
   }

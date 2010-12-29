@@ -21,7 +21,7 @@ else:
 if use_system_scons:
     build_cmd = setenv + "scons "
 else:
-    build_cmd = setenv + "python ../Third_Party/src/scons-local/scons.py "
+    build_cmd = setenv + "python ../../Third_Party/src/scons-local/scons.py "
 
 # Add command line arguments
 build_cmd += ' '.join(sys.argv[1:])

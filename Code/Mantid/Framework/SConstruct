@@ -365,10 +365,6 @@ for subproj in subProjs:
     if ( len(ret) > 0 ):
        env.Install(dest_dir, ret['shared'])    
 
-# main program
-ret = SConscript(['Main/SConscript'])
-env.Install(dest_dir, ret['shared'])
-
 # User Algs
 # Currently has a dependency on CurveFitting (which ought to be removed)
 env.Append(MYLIBLIST='MantidCurveFitting')

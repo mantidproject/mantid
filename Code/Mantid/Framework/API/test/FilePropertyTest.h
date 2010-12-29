@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(msg, "");
 
     // Absolute path
-    Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
+    Poco::Path test_dir = Poco::Path("../../../../../Test/AutoTestData/").absolute();
     msg = fp->setValue(test_dir.resolve(Poco::Path(test_file)).toString());
     TS_ASSERT_EQUALS(msg, "");
 
@@ -146,7 +146,7 @@ public:
   
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
-    Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
+    Poco::Path test_dir = Poco::Path("../../../../../Test/AutoTestData/").absolute();
     Poco::Path test_file = test_dir.resolve("LOQ48127.raw");
     
 
