@@ -14,7 +14,8 @@ except ImportError, e:
 import sys
 
 # elements not to put in the output file
-BANNED = ['n']
+BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
+          'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Uuq', 'Uuh']
 
 DELIMITOR_START = "// ---------- START DO NOT EDIT AREA----------"
 DELIMITOR_STOP = "// ---------- END DO NOT EDIT AREA----------"
