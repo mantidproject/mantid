@@ -23,7 +23,7 @@ public:
     LoadNexusMonitors ld;
     std::string outws_name = "cncs";
     ld.initialize();
-    ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
 
     ld.execute();

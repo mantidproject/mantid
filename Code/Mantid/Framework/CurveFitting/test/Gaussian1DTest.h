@@ -52,7 +52,7 @@ public:
     if ( !alg.isInitialized() ) alg.initialize();
 
     // load MAR dataset to test against
-    std::string inputFile = "../../../../Test/AutoTestData/MAR11060.raw";
+    std::string inputFile = "MAR11060.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);

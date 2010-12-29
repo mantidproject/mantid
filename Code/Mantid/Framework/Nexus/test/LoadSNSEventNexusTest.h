@@ -37,7 +37,7 @@ public:
         LoadSNSEventNexus ld;
         std::string outws_name = "cncs";
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+        ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
         ld.setPropertyValue("OutputWorkspace",outws_name);
         ld.setPropertyValue("FilterByTof_Min", "-1e6");
         ld.setPropertyValue("FilterByTof_Max", "1e6");
@@ -66,9 +66,9 @@ public:
         {
           IAlgorithm_sptr load =  AlgorithmManager::Instance().create("LoadEventPreNeXus", 1);
           load->setPropertyValue("OutputWorkspace", "cncs_pre");
-          load->setPropertyValue("EventFilename","../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat");
-          load->setPropertyValue("PulseidFilename","../../../../Test/AutoTestData/CNCS_7860_pulseid.dat");
-          load->setPropertyValue("MappingFilename","../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+          load->setPropertyValue("EventFilename","CNCS_7860_neutron_event.dat");
+          load->setPropertyValue("PulseidFilename","CNCS_7860_pulseid.dat");
+          load->setPropertyValue("MappingFilename","CNCS_TS_2008_08_18.dat");
           load->setPropertyValue("PadEmptyPixels","1");
           load->execute();
           TS_ASSERT( load->isExecuted() );
@@ -128,7 +128,7 @@ public:
         std::string outws_name = "cncs";
         ld.initialize();
         ld.setPropertyValue("OutputWorkspace",outws_name);
-        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+        ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
         ld.setPropertyValue("FilterByTime_Start", "60.0");
         ld.setPropertyValue("FilterByTime_Stop", "120.0");
         ld.setPropertyValue("FilterByTof_Min", "-1e10");
@@ -155,7 +155,7 @@ public:
       LoadSNSEventNexus ld;
       std::string outws_name = "cncs";
       ld.initialize();
-      ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+      ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
       ld.setPropertyValue("OutputWorkspace",outws_name);
       ld.setProperty<bool>("LoadMonitors", true);
 

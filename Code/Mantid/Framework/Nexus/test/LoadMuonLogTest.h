@@ -53,7 +53,7 @@ public:
     loaderNexusFile.initialize();
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
+    inputFile = "emu00006473.nxs";
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";
@@ -62,14 +62,6 @@ public:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
-
-	  std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderNexusFile.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderNexusFile.getPropertyValue("Workspace") )
-    TS_ASSERT( ! result.compare(outputSpace));
-
 
     loaderNexusFile.setChild(true);
     loaderNexusFile.execute();

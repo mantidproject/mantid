@@ -11,7 +11,7 @@
 
 # Clean up any old executable
 rm -rf runner.*
-rm -f *.properties
+#rm -f *.properties
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
@@ -23,19 +23,19 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
 mantid_libpath=../../debug
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
-    -I../../DataObjects/inc -I../../DataHandling/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
+    -I../../DataObjects/inc -I../../DataHandling/inc -I ../inc -I ../../../../Third_Party/src/cxxtest \
     -L$mantid_libpath -lMantidNexus -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling
 echo
 
 echo "Running the tests..."
-ln ../../Build/Tests/*.properties .
+#ln ../../Build/Tests/*.properties .
 LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./runner.exe
 echo
 

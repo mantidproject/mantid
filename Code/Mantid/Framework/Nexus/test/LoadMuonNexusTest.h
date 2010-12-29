@@ -49,15 +49,12 @@ public:
     TS_ASSERT_THROWS(nxLoad.execute(),std::runtime_error);
 
     // Now set required filename and output workspace name
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
+    inputFile = "emu00006473.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
     
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile)); 
     //
     // Test execute to read file and populate workspace
     //
@@ -180,7 +177,7 @@ public:
     if ( !nxL.isInitialized() ) nxL.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile_musr00022725 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/MUSR00022725.nxs").toString();
+    std::string inputFile_musr00022725 = "MUSR00022725.nxs";
     nxL.setPropertyValue("FileName", inputFile_musr00022725);
 
     outputSpace="outermusr00022725";
@@ -207,17 +204,14 @@ public:
 #ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
-    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
+    inputFile2 = "emu00006475.nxs";
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace); 
-	nxLoad.setPropertyValue("EntryNumber", "1");  
-	int entryNumber=nxLoad.getProperty("EntryNumber");
+    nxLoad.setPropertyValue("EntryNumber", "1");  
+    int entryNumber=nxLoad.getProperty("EntryNumber");
     
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile2)); 
     //
     // Test execute to read file and populate workspace
     //
@@ -308,7 +302,7 @@ public:
 #ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
-    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
+    inputFile2 = "emu00006475.nxs";
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";
@@ -316,9 +310,6 @@ public:
 	nxLoad.setPropertyValue("EntryNumber", "0");  
 	int entryNumber=nxLoad.getProperty("EntryNumber");
     
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile2)); 
     //
     // Test execute to read file and populate workspace
     //

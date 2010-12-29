@@ -155,7 +155,7 @@ void testExecOnMuon()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
+    inputFile = "emu00006473.nxs";
     nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
@@ -210,7 +210,7 @@ void testExecOnMuon()
 
 void testExecOnLoadraw()
 {
-    std::string inputFile = "../../../../Test/AutoTestData/HET15869.raw";
+    std::string inputFile = "HET15869.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -268,7 +268,7 @@ void testExecOnMuonXml()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = "../../../../Test/AutoTestData/emu00006473.nxs";
+    inputFile = "emu00006473.nxs";
     nxLoad.setPropertyValue("Filename", inputFile);
     inputFile = nxLoad.getPropertyValue("Filename"); //Get the absolute path
     outputSpace="outer";

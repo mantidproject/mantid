@@ -29,7 +29,7 @@ def getSVNRevision():
     
 def getFileVersion():
   try:
-    VERSIONFILE = '../MantidVersion.txt'
+    VERSIONFILE = '../../MantidVersion.txt'
     f = open(VERSIONFILE,'r')
     line = f.readline()
     f.close()

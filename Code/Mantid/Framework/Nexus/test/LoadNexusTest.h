@@ -51,13 +51,9 @@ public:
     
     // Now set it...
     // specify name of file to load workspace from
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
+    inputFile = "emu00006473.nxs";
     algToBeTested.setPropertyValue("FileName", inputFile);
    
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile)); 
-  
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );
     //
@@ -93,13 +89,9 @@ public:
     alg2.setPropertyValue("OutputWorkspace", outputSpace);     
     
     // specify name of file to load workspace from
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
+    inputFile = "emu00006475.nxs";
     alg2.setPropertyValue("FileName", inputFile);
    
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = alg2.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile)); 
-  
     TS_ASSERT_THROWS_NOTHING(alg2.execute());    
     TS_ASSERT( alg2.isExecuted() );    
     //
