@@ -9,7 +9,7 @@ import time
 retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
 if retcode != 0:
     sys.exit(1)
-svnlog = open("../../../../logs/Mantid/svn.log","w")
+svnlog = open("../../../../../logs/Mantid/svn.log","w")
 sp.call("svn log -v -rBASE",stdout=svnlog,shell=True)
 svnlog.close()
 
@@ -18,13 +18,13 @@ sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../Th
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Test", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Images", shell=True)
 
-doxylog = open("../../../../logs/Mantid/doxy.log","w")
+doxylog = open("../../../../../logs/Mantid/doxy.log","w")
 sp.call("python DoxyWrapper.py Mantid.doxyfile",stderr=doxylog,shell=True,cwd="Build")
 doxylog.close()
 
 timeStart = time.time()
-sconslog = open("../../../../logs/Mantid/scons.log","w")
-sconserr = open("../../../../logs/Mantid/sconsErr.log","w")
+sconslog = open("../../../../../logs/Mantid/scons.log","w")
+sconserr = open("../../../../../logs/Mantid/sconsErr.log","w")
 buildargs = ["-j2","skiptest=1"]
 if platform.system() == 'Windows':
 	# Set the appropriate environment
@@ -40,7 +40,7 @@ sconserr.close()
 timeFinish = time.time()
 
 timeBuild = timeFinish - timeStart
-BuildTimeLog = open("../../../../logs/Mantid/timebuild.log", "w")
+BuildTimeLog = open("../../../../../logs/Mantid/timebuild.log", "w")
 BuildTimeLog.write(str(timeBuild))
 BuildTimeLog.close()
 

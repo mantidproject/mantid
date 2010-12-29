@@ -7,13 +7,13 @@ import time
 # First build the tests
 timeBuildStart = time.time()
 
-log_dir = '../../../../logs/'
+log_dir = '../../../../../logs/'
 buildlog = open(log_dir + "Mantid/testsBuild.log","w")
 builderr = open(log_dir + "Mantid/testsBuildErr.log","w")
 buildargs=[]
 thirdparty_libpath=""
 if platform.system() == 'Windows':
-    thirdparty_libpath = "..\\Third_Party\\lib\\win"
+    thirdparty_libpath = "..\\..\\Third_Party\\lib\\win"
     if platform.architecture()[0] == '64bit':
         buildargs.append("win64=1")
         thirdparty_libpath += "64"
@@ -22,7 +22,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     buildargs.append('gcc44=1')
 elif platform.system() == "Darwin":
-    thirdparty_libpath = '../Third_Party/lib/mac'
+    thirdparty_libpath = '../../Third_Party/lib/mac'
 sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()
 builderr.close()

@@ -21,7 +21,7 @@ base_url = buildNotification.base_url
 trac_link = 'http://trac.mantidproject.org/mantid/'
 
 project = 'Mantid'
-localLogDir = '../../../../logs/' + project + '/'
+localLogDir = '../../../../../logs/' + project + '/'
 #localLogDir = ''
 
 def ParseSubversionString(mssgSvn):
