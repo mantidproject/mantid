@@ -1,33 +1,33 @@
 set ( SRC_FILES src/IDetector.cpp src/IInstrument.cpp
       src/InstrumentRayTracer.cpp src/IObjComponent.cpp src/Quat.cpp
-      src/V3D.cpp src/Instrument/CompAssembly.cpp
+      src/V3D.cpp 
+      src/Instrument/CompAssembly.cpp
       src/Instrument/Component.cpp src/Instrument/Detector.cpp
       src/Instrument/DetectorGroup.cpp src/Instrument/FitParameter.cpp
-      src/Instrument/Instrument.cpp src/Instrument/ObjCompAssembly.cpp
+      src/Instrument/Instrument.cpp src/Instrument/NearestNeighbours.cpp
+      src/Instrument/ObjCompAssembly.cpp
       src/Instrument/ObjComponent.cpp src/Instrument/Parameter.cpp
       src/Instrument/ParameterMap.cpp
-      src/Instrument/ParametrizedComponent.cpp
-      src/Instrument/ParCompAssembly.cpp
       src/Instrument/ParComponentFactory.cpp
-      src/Instrument/ParDetector.cpp src/Instrument/ParInstrument.cpp
-      src/Instrument/ParObjCompAssembly.cpp
-      src/Instrument/ParObjComponent.cpp
-      src/Instrument/ParRectangularDetector.cpp
       src/Instrument/RectangularDetector.cpp
-      src/Instrument/XMLlogfile.cpp src/Math/Acomp.cpp
+      src/Instrument/XMLlogfile.cpp 
+      src/Math/Acomp.cpp
       src/Math/Algebra.cpp src/Math/BnId.cpp src/Math/mathSupport.cpp
       src/Math/MatrixBase.cpp src/Math/Matrix.cpp
       src/Math/PolyBase.cpp src/Math/PolyFunction.cpp
       src/Math/PolyVar.cpp src/Math/PolyVarOne.cpp
       src/Math/RegexSupport.cpp src/Math/RotCounter.cpp
       src/Math/SupportGeometry.cpp src/Math/Triple.cpp
+      src/MDGeometry/IMDDimension.cpp src/MDGeometry/MDBasisDimension.cpp
+      src/MDGeometry/MDCell.cpp
       src/MDGeometry/MDDimension.cpp src/MDGeometry/MDDimensionRes.cpp
       src/MDGeometry/MDGeometryBasis.cpp src/MDGeometry/MDGeometry.cpp
-      src/MDGeometry/MDGeometryDescription.cpp
+      src/MDGeometry/MDGeometryDescription.cpp src/MDGeometry/MDPoint.cpp
       src/Objects/BoundingBox.cpp src/Objects/Material.cpp
       src/Objects/Object.cpp src/Objects/RuleItems.cpp
       src/Objects/Rules.cpp src/Objects/ShapeFactory.cpp
-      src/Objects/Track.cpp src/Rendering/BitmapGeometryHandler.cpp
+      src/Objects/Track.cpp 
+      src/Rendering/BitmapGeometryHandler.cpp
       src/Rendering/CacheGeometryGenerator.cpp
       src/Rendering/CacheGeometryHandler.cpp
       src/Rendering/CacheGeometryRenderer.cpp
@@ -38,18 +38,20 @@ set ( SRC_FILES src/IDetector.cpp src/IInstrument.cpp
       src/Rendering/OCGeometryHandler.cpp
       src/Rendering/OCGeometryRenderer.cpp
       src/Rendering/vtkGeometryCacheReader.cpp
-      src/Rendering/vtkGeometryCacheWriter.cpp src/Surfaces/Cone.cpp
+      src/Rendering/vtkGeometryCacheWriter.cpp 
+      src/Surfaces/Cone.cpp
       src/Surfaces/Cylinder.cpp src/Surfaces/General.cpp
       src/Surfaces/Line.cpp src/Surfaces/LineIntersectVisit.cpp
       src/Surfaces/Plane.cpp src/Surfaces/Quadratic.cpp
       src/Surfaces/Sphere.cpp src/Surfaces/Surface.cpp
       src/Surfaces/SurfaceFactory.cpp src/Surfaces/Torus.cpp )
 
-set ( INC_FILES inc/MantidGeometry/ICompAssembly.h
+set ( INC_FILES 
+      inc/MantidGeometry/DllExport.h
+      inc/MantidGeometry/ICompAssembly.h
       inc/MantidGeometry/IComponent.h inc/MantidGeometry/IDetector.h
       inc/MantidGeometry/IInstrument.h
       inc/MantidGeometry/IObjComponent.h
-      inc/MantidGeometry/IRectangularDetector.h
       inc/MantidGeometry/Quat.h inc/MantidGeometry/Tolerance.h
       inc/MantidGeometry/V3D.h
       inc/MantidGeometry/Instrument/CompAssembly.h
@@ -58,19 +60,13 @@ set ( INC_FILES inc/MantidGeometry/ICompAssembly.h
       inc/MantidGeometry/Instrument/Detector.h
       inc/MantidGeometry/Instrument/FitParameter.h
       inc/MantidGeometry/Instrument/Instrument.h
+      inc/MantidGeometry/Instrument/NearestNeighbours.h
       inc/MantidGeometry/Instrument/ObjCompAssembly.h
       inc/MantidGeometry/Instrument/ObjComponent.h
       inc/MantidGeometry/Instrument/ParameterFactory.h
       inc/MantidGeometry/Instrument/Parameter.h
       inc/MantidGeometry/Instrument/ParameterMap.h
-      inc/MantidGeometry/Instrument/ParametrizedComponent.h
-      inc/MantidGeometry/Instrument/ParCompAssembly.h
       inc/MantidGeometry/Instrument/ParComponentFactory.h
-      inc/MantidGeometry/Instrument/ParDetector.h
-      inc/MantidGeometry/Instrument/ParInstrument.h
-      inc/MantidGeometry/Instrument/ParObjCompAssembly.h
-      inc/MantidGeometry/Instrument/ParObjComponent.h
-      inc/MantidGeometry/Instrument/ParRectangularDetector.h
       inc/MantidGeometry/Instrument/RectangularDetector.h
       inc/MantidGeometry/Instrument/XMLlogfile.h
       inc/MantidGeometry/Math/Acomp.h
@@ -85,11 +81,15 @@ set ( INC_FILES inc/MantidGeometry/ICompAssembly.h
       inc/MantidGeometry/Math/RegexSupport.h
       inc/MantidGeometry/Math/RotCounter.h
       inc/MantidGeometry/Math/Triple.h
+      inc/MantidGeometry/MDGeometry/IMDDimension.h
+      inc/MantidGeometry/MDGeometry/MDBasisDimension.h
+      inc/MantidGeometry/MDGeometry/MDCell.h
       inc/MantidGeometry/MDGeometry/MDDimension.h
       inc/MantidGeometry/MDGeometry/MDDimensionRes.h
       inc/MantidGeometry/MDGeometry/MDGeometryBasis.h
       inc/MantidGeometry/MDGeometry/MDGeometryDescription.h
       inc/MantidGeometry/MDGeometry/MDGeometry.h
+      inc/MantidGeometry/MDGeometry/MDPoint.h
       inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
       inc/MantidGeometry/Objects/BoundingBox.h
       inc/MantidGeometry/Objects/InstrumentRayTracer.h
@@ -121,7 +121,9 @@ set ( INC_FILES inc/MantidGeometry/ICompAssembly.h
       inc/MantidGeometry/Surfaces/Quadratic.h
       inc/MantidGeometry/Surfaces/Sphere.h
       inc/MantidGeometry/Surfaces/SurfaceFactory.h
-      inc/MantidGeometry/Surfaces/Surface.h )
+      inc/MantidGeometry/Surfaces/Surface.h 
+      inc/MantidGeometry/Surfaces/Torus.h 
+)
 
 set ( TEST_FILES test/AcompTest.h
       test/AlgebraTest.h 

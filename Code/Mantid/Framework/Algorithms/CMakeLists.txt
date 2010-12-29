@@ -42,7 +42,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp src/AddSampleLog.cpp
       src/Rebin.cpp src/RebinToWorkspace.cpp src/Rebunch.cpp
       src/Regroup.cpp src/RemoveBins.cpp src/RenameWorkspace.cpp
       src/ReplaceSpecialValues.cpp src/Scale.cpp
-      src/SimpleIntegration.cpp src/SmoothData.cpp src/SofQW.cpp
+      src/Integration.cpp src/SmoothData.cpp src/SofQW.cpp
       src/SolidAngleCorrection.cpp src/SolidAngle.cpp src/Sort.cpp
       src/StripPeaks.cpp src/StripVanadiumPeaks.cpp
       src/SumNeighbours.cpp src/SumRowColumn.cpp src/SumSpectra.cpp
@@ -136,7 +136,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
       inc/MantidAlgorithms/RenameWorkspace.h
       inc/MantidAlgorithms/ReplaceSpecialValues.h
       inc/MantidAlgorithms/Scale.h
-      inc/MantidAlgorithms/SimpleIntegration.h
+      inc/MantidAlgorithms/Integration.h
       inc/MantidAlgorithms/SmoothData.h inc/MantidAlgorithms/SofQW.h
       inc/MantidAlgorithms/SolidAngleCorrection.h
       inc/MantidAlgorithms/SolidAngle.h inc/MantidAlgorithms/Sort.h
