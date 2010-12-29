@@ -102,13 +102,17 @@ if __name__ == "__main__":
     handle = open(filename, 'w')
     handle.write(code_before) # write out what was before the delimitor
     handle.write(DELIMITOR_START+"\n")
+    handle.write("/// @cond\n")
 
     # write the elements and isotopes
     atomNames = []
     for element in periodictable.elements:
         atomNames.extend(writeElement(handle, element))
+    handle.write("/// @endcond\n")
+    handle.write("\n")
 
     # write an array of all atoms and elements
+    handle.write("/// All of the atoms in a single array so it can be searched.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
     for i in xrange(0, numAtoms, 10):
