@@ -15,7 +15,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/LOQ48094.raw");
+    loader.setPropertyValue("Filename","LOQ48094.raw");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumMin","3");
     loader.setPropertyValue("SpectrumMax","16386");

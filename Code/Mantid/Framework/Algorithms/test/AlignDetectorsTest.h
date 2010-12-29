@@ -27,7 +27,7 @@ public:
   {
     LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/HRP38692.raw");
+    loader.setPropertyValue("Filename","HRP38692.raw");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setProperty("SpectrumMin",320);
@@ -64,7 +64,7 @@ public:
     align.setPropertyValue("InputWorkspace", inputWS);
     const std::string outputWS = "aligned";
     align.setPropertyValue("OutputWorkspace", outputWS);
-    align.setPropertyValue("CalibrationFile", "../../../../Test/AutoTestData/hrpd_new_072_01.cal");
+    align.setPropertyValue("CalibrationFile", "hrpd_new_072_01.cal");
 
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
@@ -92,11 +92,11 @@ public:
     inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_7860_pulseid.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
+    std::string pulsefile( "CNCS_7860_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", inputWS);
 //    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     loader.execute();
@@ -123,7 +123,7 @@ public:
     align.setPropertyValue("InputWorkspace", inputWS);
     const std::string outputWS = inputWS;
     align.setPropertyValue("OutputWorkspace", outputWS);
-    align.setPropertyValue("CalibrationFile", "../../../../Test/AutoTestData/refl_fake.cal");
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
@@ -157,7 +157,7 @@ public:
     align.setPropertyValue("InputWorkspace", inputWS);
     const std::string outputWS = "eventWS_changed";
     align.setPropertyValue("OutputWorkspace", outputWS);
-    align.setPropertyValue("CalibrationFile", "../../../../Test/AutoTestData/refl_fake.cal");
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );

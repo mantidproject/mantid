@@ -58,7 +58,7 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48097.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48097.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48097"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
@@ -78,14 +78,14 @@ public:
 			
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48097.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48097.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48097"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
 		LoadRaw3 alg1;
 		alg1.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48098.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","LOQ48098.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace","LOQ48098"));
 		TS_ASSERT_THROWS_NOTHING( alg1.execute());
 		TS_ASSERT( alg1.isExecuted() );
@@ -115,21 +115,21 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48094.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48094.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48094"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
 		LoadRaw3 alg1;
 		alg1.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48098.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","LOQ48098.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace","LOQ48098"));
 		TS_ASSERT_THROWS_NOTHING( alg1.execute());
 		TS_ASSERT( alg1.isExecuted() );
 
 		LoadRaw3 alg2;
 		alg2.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48097.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("FileName","LOQ48097.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("OutputWorkspace","LOQ48097"));
 		TS_ASSERT_THROWS_NOTHING( alg2.execute());
 		TS_ASSERT( alg2.isExecuted() );
@@ -162,14 +162,14 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/EVS13895.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","EVS13895.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","EVS13895"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
 		LoadRaw3 alg1;
 	    alg1.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48098.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("FileName","LOQ48098.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace","LOQ48098"));
 		TS_ASSERT_THROWS_NOTHING( alg1.execute());
 		TS_ASSERT( alg1.isExecuted() );
@@ -215,14 +215,14 @@ public:
 	{
 		 LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48094.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48094.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48094"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
 		Mantid::NeXus::LoadNexusProcessed loader;
 		loader.initialize();
-		loader.setProperty("Filename","../../../../Test/AutoTestData/focussed.nxs");
+		loader.setProperty("Filename","focussed.nxs");
 		loader.setProperty("OutputWorkspace","peaksWS");
 		TS_ASSERT_THROWS_NOTHING(loader.execute());
 

@@ -150,7 +150,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/IRS38633.raw");
+    loader.setPropertyValue("Filename","IRS38633.raw");
     const std::string initialWS("IRS");
     const std::string intermediaryWS("IRSenergy");
     const std::string finalWS("Corrected");

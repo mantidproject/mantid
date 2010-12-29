@@ -187,7 +187,7 @@ public:
 #ifndef _WIN64
 		Mantid::NeXus::LoadMuonNexus loader;
 		loader.initialize();
-		loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/emu00006473.nxs");
+		loader.setPropertyValue("Filename", "emu00006473.nxs");
 		loader.setPropertyValue("OutputWorkspace", "EMU6473");
 		loader.execute();
 		

@@ -23,7 +23,7 @@ public:
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/OSI11886.raw");
+    loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "top");
     loader->setPropertyValue("SpectrumMin","1");
     loader->setPropertyValue("SpectrumMax","10");
@@ -33,7 +33,7 @@ public:
 
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/OSI11886.raw");
+    loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "bottom");
     loader->setPropertyValue("SpectrumMin","11");
     loader->setPropertyValue("SpectrumMax","25");
@@ -44,7 +44,7 @@ public:
     //Now some event workspaces
     loader = new Mantid::DataHandling::LoadEventPreNeXus;
     loader->initialize();
-    loader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/VULCAN_2916_neutron0_event.dat");
+    loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron0_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan0");
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );
@@ -52,7 +52,7 @@ public:
 
     loader = new Mantid::DataHandling::LoadEventPreNeXus;
     loader->initialize();
-    loader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/VULCAN_2916_neutron1_event.dat");
+    loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron1_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan1");
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );

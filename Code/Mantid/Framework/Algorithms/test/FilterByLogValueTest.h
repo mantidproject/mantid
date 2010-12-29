@@ -38,7 +38,7 @@ public:
   {
     IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadSNSEventNexus");
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7860_event.nxs");
+    loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWS);
     loader->execute();
     TS_ASSERT (loader->isExecuted() );

@@ -39,7 +39,7 @@ public:
 
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/AutoTestData/IRS26173_ipg.nxs");
+    loader.setProperty("Filename","IRS26173_ipg.nxs");
     const std::string inputWS = "inputWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.execute();

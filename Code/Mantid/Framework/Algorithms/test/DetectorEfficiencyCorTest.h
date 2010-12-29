@@ -43,7 +43,7 @@ public:
       m_DatFile("DetectorEfficiencyCorTest_filename.dat")
   {
     // the Ei value depends on the RAW file, during normal testing only use the small RAW file
-    m_Ei = 12.9462875; m_rawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/MAR11001.raw").toString();
+    m_Ei = 12.9462875; m_rawFile = Poco::Path(Poco::Path::current()).resolve("MAR11001.raw").toString();
   }
 
   void setUp()

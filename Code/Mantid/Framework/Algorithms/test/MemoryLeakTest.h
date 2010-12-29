@@ -159,7 +159,7 @@ public:
 //      IAlgorithm_sptr ld = AlgorithmFactory::Instance().create("LoadLogsFromSNSNexus",1);
 //      std::string outws_name = "cncs";
 //      ld->initialize();
-//      ld->setPropertyValue("Filename","/home/8oz/data/PG3_1370_event.nxs");
+//      ld->setPropertyValue("Filename","PG3_1370_event.nxs");
 //      ld->setPropertyValue("Workspace","fake");
 //      ld->execute();
 //      TS_ASSERT( ld->isExecuted() );
@@ -184,7 +184,7 @@ public:
 
 //      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
 
-//      ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+//      ld.setPropertyValue("Filename","CNCS_7850_event.nxs");
 //      ld.setPropertyValue("OutputWorkspace",outws_name);
 //      ld.setPropertyValue("FilterByTof_Min", "-1e6");
 //      ld.setPropertyValue("FilterByTof_Max", "1e6");
@@ -216,7 +216,7 @@ public:
 
 //      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
 
-//      ld->setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+//      ld->setPropertyValue("Filename","CNCS_7850_event.nxs");
 //      ld->setPropertyValue("OutputWorkspace",outws_name);
 //      ld->setPropertyValue("FilterByTof_Min", "-1e6");
 //      ld->setPropertyValue("FilterByTof_Max", "1e6");
@@ -249,7 +249,7 @@ public:
 
 //      CNCS_7850_event.nxs should be replaced by CNCS_7860_event.nxs and check if you need to change anything else
 
-//      ld->setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+//      ld->setPropertyValue("Filename","CNCS_7850_event.nxs");
 //      ld->setPropertyValue("OutputWorkspace",outws_name);
 //      ld->setPropertyValue("FilterByTof_Min", "-1e6");
 //      ld->setPropertyValue("FilterByTof_Max", "1e6");

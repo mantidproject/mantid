@@ -193,7 +193,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/MAR11060.raw");
+    loader.setPropertyValue("Filename", "MAR11060.raw");
     loader.setPropertyValue("SpectrumList", "900");
     std::string ws = "mar";
     loader.setPropertyValue("OutputWorkspace", ws);
@@ -239,11 +239,11 @@ public:
     this->inputSpace = "eventWS";
     Mantid::DataHandling::LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_7860_pulseid.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
+    std::string pulsefile( "CNCS_7860_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", this->inputSpace);
 //    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     loader.execute();

@@ -54,7 +54,7 @@ public:
   {
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw2;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/OSI11886.raw");
+    loader->setPropertyValue("Filename", "OSI11886.raw");
 
     std::string outputSpace = "toUnwrap";
     loader->setPropertyValue("OutputWorkspace", outputSpace);

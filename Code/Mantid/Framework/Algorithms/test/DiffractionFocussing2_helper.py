@@ -1,6 +1,6 @@
 """This script outputs a fake refl calibration file."""
 numpix = 304*256+100
-outfile = "../../../../Test/AutoTestData/refl_fake.cal"
+outfile = "../../../../../Test/AutoTestData/refl_fake.cal"
 f = open(outfile, 'w')
 f.write("# refl FAKE detector file, written for a test\n")
 f.write("# Format: number  UDET offset  select  group\n")

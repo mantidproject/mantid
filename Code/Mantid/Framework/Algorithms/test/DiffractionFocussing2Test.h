@@ -47,7 +47,7 @@ public:
 	{
     Mantid::DataHandling::LoadRaw loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.raw");
+    loader.setPropertyValue("Filename", "HRP38692.raw");
 
     std::string outputSpace = "tofocus";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -61,13 +61,13 @@ public:
     align.initialize();
     align.setPropertyValue("InputWorkspace",outputSpace);
     align.setPropertyValue("OutputWorkspace",outputSpace);
-    align.setPropertyValue("CalibrationFile","../../../../Test/AutoTestData/hrpd_new_072_01.cal");
+    align.setPropertyValue("CalibrationFile","hrpd_new_072_01.cal");
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
     focus.setPropertyValue("OutputWorkspace", "focusedWS" );
-    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/hrpd_new_072_01.cal");
+    focus.setPropertyValue("GroupingFileName","hrpd_new_072_01.cal");
 
 	  TS_ASSERT_THROWS_NOTHING( focus.execute() );
 	  TS_ASSERT( focus.isExecuted() );
@@ -88,9 +88,9 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename",  "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("EventFilename", "REF_L_32035_neutron_event.dat");
+    eventLoader->setProperty("PulseidFilename",  "REF_L_32035_pulseid.dat");
+    eventLoader->setPropertyValue("MappingFilename", "REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
     TS_ASSERT( eventLoader->execute() );
 
@@ -122,7 +122,7 @@ public:
     focus.setPropertyValue("OutputWorkspace", outputws);
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
-    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/refl_fake.cal");
+    focus.setPropertyValue("GroupingFileName","refl_fake.cal");
 
     //OK, run the algorithm
     focus.execute();

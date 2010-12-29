@@ -39,8 +39,8 @@ public:
   //-----------------------------------------------------------------------------------------------
   void testExec_Event_CNCS()
   {
-    std::string eventfile1( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
-    std::string eventfile2( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile1( "CNCS_7860_neutron_event.dat" );
+    std::string eventfile2( "CNCS_7860_neutron_event.dat" );
     DataHandling::LoadEventPreNeXus * eventLoader;
 
     TimeSeriesProperty<double>* log;
@@ -51,7 +51,7 @@ public:
 
     eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile1);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
     eventLoader->setProperty("PadEmptyPixels", true);
     TS_ASSERT( eventLoader->execute() );
@@ -66,7 +66,7 @@ public:
     //For the second one, we wont pad the pixels
     eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile2);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
     eventLoader->setProperty("PadEmptyPixels", false);
     TS_ASSERT( eventLoader->execute() );

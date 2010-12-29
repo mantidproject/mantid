@@ -19,7 +19,7 @@ public:
   {
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/AutoTestData/focussed.nxs");
+    loader.setProperty("Filename","focussed.nxs");
     loader.setProperty("OutputWorkspace","peaksWS");
     loader.execute();
   }
@@ -71,7 +71,7 @@ public:
   {
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/AutoTestData/PG3_733_focussed.nxs");
+    loader.setProperty("Filename","PG3_733_focussed.nxs");
     loader.setProperty("OutputWorkspace","vanadium");
     loader.execute();
   }

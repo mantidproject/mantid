@@ -43,7 +43,7 @@ public:
     IAlgorithm* loader;
     loader = new LoadNexus;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/IRS26176_ipg.nxs");
+    loader->setPropertyValue("Filename", "IRS26176_ipg.nxs");
     loader->setPropertyValue("OutputWorkspace", "alg_irs_r");
     loader->setPropertyValue("SpectrumMin", "2");
     loader->setPropertyValue("SpectrumMax", "3");

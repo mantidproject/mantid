@@ -38,7 +38,7 @@ public:
 
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/OFFSPEC00004622.raw");
+    loader.setPropertyValue("Filename","OFFSPEC00004622.raw");
     loader.setPropertyValue("OutputWorkspace","first");
     loader.setPropertyValue("SpectrumList","1");
     loader.setPropertyValue("LoadLogFiles","0");
@@ -46,7 +46,7 @@ public:
 
     Mantid::DataHandling::LoadRaw3 loader2;
     loader2.initialize();
-    loader2.setPropertyValue("Filename","../../../../Test/AutoTestData/OFFSPEC00004622.raw");
+    loader2.setPropertyValue("Filename","OFFSPEC00004622.raw");
     loader2.setPropertyValue("OutputWorkspace","second");
     loader2.setPropertyValue("SpectrumList","2");
     loader2.setPropertyValue("LoadLogFiles","0");

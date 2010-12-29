@@ -38,7 +38,7 @@ public:
 
     // Start by loading our NXS file
     IAlgorithm* loader = Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
-    loader->setPropertyValue("Filename","../../../../Test/AutoTestData/PG3_733.nxs");
+    loader->setPropertyValue("Filename","PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();
     TS_ASSERT( loader->isExecuted());
