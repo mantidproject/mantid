@@ -38,6 +38,7 @@ Atom::Atom(const Atom& other):
     number_density(other.number_density), neutron(other.neutron)
   {}
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // ---------- START DO NOT EDIT AREA----------
 static const Atom H("H", 1, 0, 0.000000, 1.007940, 0.0708);
 static const Atom H1("H", 1, 1, 99.988500, 1.007825, 0.070791924393);
@@ -3400,6 +3401,8 @@ Ds281, Rg, Rg272, Cn, Cn285, Uuq, Uuq289, Uuh, Uuh292
 static const size_t NUM_ATOMS = 3049;
 
 // ---------- END DO NOT EDIT AREA----------
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 inline bool AtomIsNaN(const double number)
 {
   return (number != number);

@@ -107,6 +107,7 @@ NeutronAtom::NeutronAtom():
   coh_scatt_xs(NAN), inc_scatt_xs(NAN),
   tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 static const NeutronAtom H( 1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
 static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03, 0.3326);
 static const NeutronAtom H2(1, 2, 6.671, 4.04, 5.592, 2.05, 7.64, 0.000519);
@@ -517,6 +518,8 @@ static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, 
 				    Tl205, Pb, Pb204, Pb206, Pb207, Pb208, Bi, Po, At, Rn, Fr, Ra,
 				    Ac, Th, Pa, U, U233, U234, U235, U238, Np, Pu, Pu238, Pu239,
 				    Pu240, Pu242, Am, Cm, Cm244, Cm246, Cm248};
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
