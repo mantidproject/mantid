@@ -21,30 +21,30 @@ namespace PhysicalConstants
     Atom(const Atom& other);
 
     /// The atomic symbol. In other words the one or two character abbreviation.
-    std::string symbol;
+    const std::string symbol;
 
     /// The atomic number, or number of protons, for the atom.
-    uint16_t z_number;
+    const uint16_t z_number;
 
     /// The total number of protons and neutrons, or mass number,
     /// for the atom for isotopic averages this is set to zero.
-    uint16_t a_number;
+    const uint16_t a_number;
 
     /** The natural abundance of the isotope as a percentage between 0 and 100. For
         isotopic averages this is zero. */
-    double abundance;
+    const double abundance;
 
     /** The atomic mass in units of 'u' (=1g/mol/Na). This is from the normalized
         scale where C12 has an atomic mass of 12. */
-    double mass;
+    const double mass;
 
     /** The atomic mass density in units of g/cm<SUP>3</SUP>. */
-    double mass_density;
+    const double mass_density;
 
     /** The number density in units of cm<SUP>-3</SUP> as calculated from the mass density. */
-    double number_density;
+    const double number_density;
 
-    NeutronAtom neutron;
+    const NeutronAtom& neutron;
   };
 
   DLLExport bool operator==(const Atom& left, const Atom & right);

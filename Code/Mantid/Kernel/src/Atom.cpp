@@ -16,19 +16,24 @@ using std::string;
 /// constant to use for garbage numbers
 static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
+const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
+{
+  try {
+    return getNeutronAtom(z, a);
+  } catch (std::runtime_error& e) {
+    return NeutronAtom(z, a,
+		       NAN, NAN, NAN, NAN,
+		       NAN, NAN, NAN, NAN); // set to junk value
+  }
+}
+
 Atom::Atom(const string& symbol, const uint16_t z, const uint16_t a,
            const double abundance, const double mass, const double density) :
            symbol(symbol), z_number(z), a_number(a), abundance(abundance),
-           mass(mass), mass_density(density)
+           mass(mass), mass_density(density),
+	   number_density(density * N_A / mass),
+	   neutron(getNeutronNoExceptions(z, a))
 {
-  this->number_density = this->mass_density * N_A / this->mass;
-  try {
-    this->neutron = getNeutronAtom(this->z_number, this->a_number);
-  } catch (std::runtime_error& e) {
-    this->neutron = NeutronAtom(this->z_number, this->a_number,
-                                NAN, NAN, NAN, NAN,
-                                NAN, NAN, NAN, NAN); // set to junk value
-  }
 }
 
 /// Copy constructor.
