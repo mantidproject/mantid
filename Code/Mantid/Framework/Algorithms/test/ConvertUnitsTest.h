@@ -63,7 +63,7 @@ public:
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../../Test/Instrument/HET_Definition.xml";
+    std::string inputFile = "../../../Instrument/HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", this->inputSpace);
     loader.execute();
@@ -245,7 +245,7 @@ public:
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", this->inputSpace);
-//    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+//    loader.setPropertyValue("InstrumentFilename", "../../../Instrument/CNCS_Definition.xml");
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
   }

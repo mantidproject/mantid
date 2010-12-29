@@ -38,7 +38,7 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename", "../../../../Test/Instrument/INES_Definition.xml");
+    loaderCAL.setPropertyValue("Filename", "../../../Instrument/INES_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);

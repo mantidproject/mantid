@@ -156,7 +156,7 @@ private:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename",
-        "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+        "../../../Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputWS);
     loader.execute();
   }
@@ -171,7 +171,7 @@ private:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename",
-        "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+        "../../../Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputEvWS);
     loader.execute();
   }
