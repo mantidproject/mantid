@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "CNCS" date = "20th May 2010">
+    
+    <component-link name="CNCS">
+
+        <parameter name="deltaE-mode" type="string">
+            <value val="direct"/>
+        </parameter>
+        
+        <parameter name="ei-mon1-spec">
+            <value val="-2"/>
+        </parameter>
+        
+        <parameter name="ei-mon2-spec">
+            <value val="-3"/>
+        </parameter>
+        
+        <parameter name="TS_mapping_file" type="string">
+            <value val="CNCS_TS_2008_08_18.dat"/>
+        </parameter>
+        
+        <parameter name="vanadium-mass">
+            <value val="-1"/>
+        </parameter>
+        
+        <parameter name="vanadium-rmm">
+            <value val="-1"/>
+        </parameter>
+        
+	<parameter name="bkgd-range-min">
+            <value val="44500"/>
+        </parameter>
+        
+        <parameter name="bkgd-range-max">
+            <value val="48000"/>
+        </parameter>
+       
+        <parameter name="scale-factor">
+            <value val="1.0"/>
+        </parameter>
+	
+	 <!-- All the following parameters are taken directly from the MARI
+        definition and are WRONG!  They are only here for now to get things working -->
+        
+        
+        <parameter name="wb-scale-factor">
+            <value val="1.0"/>
+        </parameter>
+        
+        <parameter name="wb-integr-min">
+            <value val="0"/>
+        </parameter>
+        
+        <parameter name="wb-integr-max">
+            <value val="100"/>
+        </parameter>
+        
+        <parameter name="norm-mon1-spec">
+            <value val="1"/>
+        </parameter>
+        
+        <parameter name="norm-mon1-min">
+            <value val="1000"/>
+        </parameter>
+        
+        <parameter name="norm-mon1-max">
+            <value val="2000"/>
+        </parameter>
+        
+        <parameter name="monovan-integr-min">
+            <value val="-1"/>
+        </parameter>
+        
+        <parameter name="monovan-integr-max">
+            <value val="1"/>
+        </parameter>
+        
+        
+        <parameter name="abs-average-min">
+            <value val="1e-10"/>
+        </parameter>
+        
+        <parameter name="abs-average-max">
+            <value val="1e10"/>
+        </parameter>
+        
+        <parameter name="abs-median-lbound">
+            <value val="0.01"/>
+        </parameter>
+        
+        <parameter name="abs-median-ubound">
+            <value val="100"/>
+        </parameter>
+        
+        <parameter name="abs-median-lo-frac">
+            <value val="0.8"/>
+        </parameter>
+        
+        <parameter name="abs-median-hi-frac">
+            <value val="1.2"/>
+        </parameter>
+        
+        <parameter name="abs-median-signif">
+            <value val="3.3"/>
+        </parameter>
+        
+        
+    </component-link>
+</parameter-file>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<instrument name="rectangular detector unit testing" valid-from   ="1900-01-31 23:59:59"
+                                         valid-to     ="2100-01-31 23:59:59"
+					 last-modified="2010-10-06T16:21:30">
+
+<!-- This will create a rectangular (XY) detector -->
+
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+</defaults>
+
+  <!--SOURCE-->
+<!--
+  <component type="moderator">
+    <location z="-15.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+-->
+
+
+  <!--SAMPLE-->
+<!--
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+    <axis y="0.0" x="0.0" z="1.0"/>
+    <radius radius="0.1"/>
+    <height height="0.3"/>
+  </cylinder>
+  <algebra val="cyl-approx"/>
+  </type>
+-->
+
+
+
+<component type="panel"  idstart="1000" idfillbyfirst="y" idstepbyrow="300">
+  <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1">
+  </location>
+</component>
+
+<component type="panel"  idstart="100000" idfillbyfirst="y" idstepbyrow="300">
+  <location r="45.0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank2">
+  </location>
+</component>
+
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel" 
+    xpixels="100" xstart="-0.100" xstep="+0.002"
+    ypixels="200" ystart="-0.200" ystep="+0.002" >
+  <properties/>
+</type>
+
+<!-- Pixel for Detectors-->
+<!--
+<type is="detector" name="pixel">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.001" x="-0.001" z="0.0"/>
+    <left-front-top-point y="0.001" x="-0.001" z="0.0"/>
+    <left-back-bottom-point y="-0.001" x="-0.001" z="-0.0001"/>
+    <right-front-bottom-point y="-0.001" x="0.001" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+-->
+<type is="detector" name="pixel">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-1" x="-1" z="-1"/>
+    <left-front-top-point y="1" x="-1" z="1"/>
+    <left-back-bottom-point y="-1" x="-1" z="-1"/>
+    <right-front-bottom-point y="-1" x="1" z="-1"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+
+</instrument>

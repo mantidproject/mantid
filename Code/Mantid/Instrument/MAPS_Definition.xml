@@ -1,0 +1,1869 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="MAPS" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-11-25 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+    The data for MAPS was obtained from Toby Perring.
+  
+  -->
+
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="undulator">
+    <location z="-12.0" />
+  </component>
+  <type name="undulator" is="Source"> </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  <type name="sample-position" is="SamplePos"></type>
+  
+  
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <!-- MONITORS -->  
+  
+  <type name="monitors">
+    <component type="monitor" mark-as="monitor">
+      <location z="-3.045" />
+      <location z="-1.695" />
+      <location z="8.350" />
+      <location z="6.000" />
+    </component>
+  </type>  
+  
+  <!-- DETECTORS -->
+  
+  <component type="A1_window" idlist="A1_window">
+    <!-- rotate coordinate system so x-axis points down and y-axis to the left
+         seen from the sample looking at the detectors -->
+    <location rot="-90"/> 
+  </component>   
+  
+  <type name="A1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->
+      <location rot="-3.0000" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-5.1008" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-7.2016" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-9.3024" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-11.6658" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-13.7666" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-15.8674" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-17.9682" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+  </type>   
+  
+  <component type="A2_window" idlist="A2_window">
+    <location rot="-90"/>  
+  </component>   
+  
+  <type name="A2_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="3.0000" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="5.1008" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="7.2016" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="9.3024" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="11.6658" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="13.7666" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="15.8674" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="17.9682" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+  </type> 
+
+  
+  <component type="B1_window" idlist="B1_window">
+    <location />  
+  </component>  
+  
+  <type name="B1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->    
+      <location rot="-6.1512" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-10.8780" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-13.2414" axis-x="1" axis-y="0" axis-z="0"/>  
+      <location rot="-17.9682" axis-x="1" axis-y="0" axis-z="0"/>      
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->    
+      <location rot="-8.2520" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-15.3422" axis-x="1" axis-y="0" axis-z="0"/>       
+    </component>    
+  </type> 
+  
+  <component type="B2_window" idlist="B2_window">
+    <location />  
+  </component>  
+  
+  <type name="B2_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->    
+      <location rot="6.1512" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="10.8780" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="13.2414" axis-x="1" axis-y="0" axis-z="0"/>  
+      <location rot="17.9682" axis-x="1" axis-y="0" axis-z="0"/>      
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->    
+      <location rot="8.2520" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="15.3422" axis-x="1" axis-y="0" axis-z="0"/>       
+    </component>    
+  </type> 
+
+  <component type="C1_window" idlist="C1_window">
+    <location rot="-90"/>  
+  </component>   
+
+  <type name="C1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="21.1194" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="25.8462" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="27.9470" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->      
+      <location rot="23.2202" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>      
+  </type>   
+
+  <component type="C2_window" idlist="C2_window">
+    <location rot="-90"/>  
+  </component> 
+
+  <type name="C2_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="31.0982" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="35.8250" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="37.9258" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->      
+      <location rot="33.1990" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>      
+  </type>
+
+  <component type="C3_window" idlist="C3_window">
+    <location rot="-90"/>  
+  </component> 
+
+  <type name="C3_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="41.0770" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="45.8038" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="47.9046" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->      
+      <location rot="43.1778" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>      
+  </type>
+
+  <component type="C4_window" idlist="C4_window">
+    <location rot="-90"/>  
+  </component> 
+
+  <type name="C4_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="51.0558" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="55.7826" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="57.8834" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->      
+      <location rot="53.1566" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>      
+  </type>
+  
+  <component type="D1_window" idlist="D1_window">
+    <!-- rotate coordinate system around y-axis -->  
+    <location rot="12.655" axis-x="0" axis-y="1" axis-z="0"/> 
+  </component>   
+  
+  <type name="D1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up for D window"> 
+      <!-- translate the origin of the coordinate system in the positive x-axis
+           direction and then rotate the z-axis towards the y-axis -->
+      <location x="0.0412" rot="-6.1512" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="-8.2520" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="0.0412" rot="-10.3528" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="-12.7162" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="0.0412" rot="-14.8170" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="-16.9178" axis-x="1" axis-y="0" axis-z="0"/> 
+    </component>
+  </type>   
+
+  <component type="D2_window" idlist="D2_window">
+    <!-- rotate coordinate system around y-axis -->  
+    <location rot="-12.655" axis-x="0" axis-y="1" axis-z="0"/> 
+  </component>   
+  
+  <type name="D2_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up for D window"> 
+      <!-- translate the origin of the coordinate system in the negative x-axis
+           direction and then rotate the z-axis towards the y-axis -->
+      <location x="-0.0412" rot="-6.1512" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="-8.2520" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="-0.0412" rot="-10.3528" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="-12.7162" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="-0.0412" rot="-14.8170" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="-16.9178" axis-x="1" axis-y="0" axis-z="0"/> 
+    </component>
+  </type> 
+
+  <component type="D3_window" idlist="D3_window">
+     <!-- rotate coordinate system around y-axis -->  
+    <location rot="12.655" axis-x="0" axis-y="1" axis-z="0"/> 
+  </component> 
+  
+  <type name="D3_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down for D window"> 
+      <!-- translate the origin of the coordinate system in the positive x-axis
+           direction and then rotate the y-axis towards the z-axis -->
+      <location x="0.0412" rot="6.1512" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="8.2520" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="0.0412" rot="10.3528" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="12.7162" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="0.0412" rot="14.8170" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="0.0412" rot="16.9178" axis-x="1" axis-y="0" axis-z="0"/> 
+    </component>
+  </type>  
+  
+  <component type="D4_window" idlist="D4_window">
+     <!-- rotate coordinate system around y-axis -->  
+    <location rot="-12.655" axis-x="0" axis-y="1" axis-z="0"/> 
+  </component> 
+  
+  <type name="D4_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down for D window"> 
+      <!-- translate the origin of the coordinate system in the positive x-axis
+           direction and then rotate the y-axis towards the z-axis -->
+      <location x="-0.0412" rot="6.1512" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="8.2520" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="-0.0412" rot="10.3528" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="12.7162" axis-x="1" axis-y="0" axis-z="0"/>
+      <location x="-0.0412" rot="14.8170" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location x="-0.0412" rot="16.9178" axis-x="1" axis-y="0" axis-z="0"/> 
+    </component>
+  </type>  
+
+  <component type="E1_window" idlist="E1_window">
+    <location /> 
+  </component>   
+
+  <type name="E1_window" >
+    <component type="PSD_TUBE_STRIP for E window">
+      <location r="6.0" t="3.0000" p="90"/>
+      <location r="6.0" t="3.2626" p="90"/>
+      <location r="6.0" t="3.5252" p="90"/>
+      <location r="6.0" t="3.7878" p="90"/>
+      <location r="6.0" t="4.0504" p="90"/>
+      <location r="6.0" t="4.3130" p="90"/> 
+      <location r="6.0" t="4.5756" p="90"/>
+      <location r="6.0" t="4.8382" p="90"/>  
+    </component>
+  </type>    
+
+  <component type="E2_window" idlist="E2_window">
+    <location /> 
+  </component>   
+
+  <type name="E2_window" >
+    <component type="PSD_TUBE_STRIP for E window">
+      <location r="6.0" t="-3.0000" p="90"/>
+      <location r="6.0" t="-3.2626" p="90"/>
+      <location r="6.0" t="-3.5252" p="90"/>
+      <location r="6.0" t="-3.7878" p="90"/>
+      <location r="6.0" t="-4.0504" p="90"/>
+      <location r="6.0" t="-4.3130" p="90"/> 
+      <location r="6.0" t="-4.5756" p="90"/>
+      <location r="6.0" t="-4.8382" p="90"/>  
+    </component>
+  </type>    
+  
+  <!-- pack of 8 designed initially for the B1 window, i.e. with the
+       tubes horizontally aligned and stacked upwards -->
+  <type name="PSD_TUBE_STRIP 8 pack up">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="0.2626" p="90"/>
+      <location r="6.0" t="0.5252" p="90"/>
+      <location r="6.0" t="0.7878" p="90"/>
+      <location r="6.0" t="1.0504" p="90"/>
+      <location r="6.0" t="1.3130" p="90"/> 
+      <location r="6.0" t="1.5756" p="90"/>
+      <location r="6.0" t="1.8382" p="90"/>  
+      </component>
+  </type>
+  
+  <!-- mirrow image of type "PSD_TUBE_STRIP 8 pack up". Perhaps there is a 
+       more elegant way of avoiding having to use this mirrow type but for 
+       now this works. -->
+  <type name="PSD_TUBE_STRIP 8 pack down">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="-0.2626" p="90"/>
+      <location r="6.0" t="-0.5252" p="90"/>
+      <location r="6.0" t="-0.7878" p="90"/>
+      <location r="6.0" t="-1.0504" p="90"/>
+      <location r="6.0" t="-1.3130" p="90"/> 
+      <location r="6.0" t="-1.5756" p="90"/>
+      <location r="6.0" t="-1.8382" p="90"/>  
+      </component>
+  </type>  
+
+  <!-- pack of 8 designed initially for the B1 window, i.e. with the
+       tubes horizontally aligned and stacked upwards -->
+  <type name="PSD_TUBE_STRIP 8 pack up for D window">
+    <component type="PSD_TUBE_STRIP for D window">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="0.2626" p="90"/>
+      <location r="6.0" t="0.5252" p="90"/>
+      <location r="6.0" t="0.7878" p="90"/>
+      <location r="6.0" t="1.0504" p="90"/>
+      <location r="6.0" t="1.3130" p="90"/> 
+      <location r="6.0" t="1.5756" p="90"/>
+      <location r="6.0" t="1.8382" p="90"/>  
+      </component>
+  </type>
+  
+  <!-- mirrow image of type "PSD_TUBE_STRIP 8 pack up". Perhaps there is a 
+       more elegant way of avoiding having to use this mirrow type but for 
+       now this works. -->
+  <type name="PSD_TUBE_STRIP 8 pack down for D window">
+    <component type="PSD_TUBE_STRIP for D window">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="-0.2626" p="90"/>
+      <location r="6.0" t="-0.5252" p="90"/>
+      <location r="6.0" t="-0.7878" p="90"/>
+      <location r="6.0" t="-1.0504" p="90"/>
+      <location r="6.0" t="-1.3130" p="90"/> 
+      <location r="6.0" t="-1.5756" p="90"/>
+      <location r="6.0" t="-1.8382" p="90"/>  
+      </component>
+  </type>  
+
+    
+  
+  
+  <type name="PSD_TUBE_STRIP 10 pack up">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="0.2626" p="90"/>
+      <location r="6.0" t="0.5252" p="90"/>
+      <location r="6.0" t="0.7878" p="90"/>
+      <location r="6.0" t="1.0504" p="90"/>
+      <location r="6.0" t="1.3130" p="90"/> 
+      <location r="6.0" t="1.5756" p="90"/>
+      <location r="6.0" t="1.8382" p="90"/>  
+      <location r="6.0" t="2.1008" p="90"/>
+      <location r="6.0" t="2.3634" p="90"/>       
+      </component>
+  </type>
+  
+  <type name="PSD_TUBE_STRIP 10 pack down">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="-0.2626" p="90"/>
+      <location r="6.0" t="-0.5252" p="90"/>
+      <location r="6.0" t="-0.7878" p="90"/>
+      <location r="6.0" t="-1.0504" p="90"/>
+      <location r="6.0" t="-1.3130" p="90"/> 
+      <location r="6.0" t="-1.5756" p="90"/>
+      <location r="6.0" t="-1.8382" p="90"/>  
+      <location r="6.0" t="-2.1008" p="90"/>
+      <location r="6.0" t="-2.3634" p="90"/>       
+      </component>
+  </type>  
+   
+  <!-- Set the origin at centre of tube, i.e. between to two middle pixels 
+       This tube is of the type used for the A, B and C windows -->
+  <type name="PSD_TUBE_STRIP" outline="yes">
+    <component type="PSD_TUBE_STRIP pixel">
+      <location x="-0.535898"/>
+      <location x="-0.531695"/>
+      <location x="-0.527492"/>
+      <location x="-0.523289"/>
+      <location x="-0.519086"/>
+      <location x="-0.514883"/>
+      <location x="-0.510680"/>
+      <location x="-0.506477"/>
+      <location x="-0.502273"/>
+      <location x="-0.498070"/>
+      <location x="-0.493867"/>
+      <location x="-0.489664"/>
+      <location x="-0.485461"/>
+      <location x="-0.481258"/>
+      <location x="-0.477055"/>
+      <location x="-0.472852"/>
+      <location x="-0.468648"/>
+      <location x="-0.464445"/>
+      <location x="-0.460242"/>
+      <location x="-0.456039"/>
+      <location x="-0.451836"/>
+      <location x="-0.447633"/>
+      <location x="-0.443430"/>
+      <location x="-0.439227"/>
+      <location x="-0.435023"/>
+      <location x="-0.430820"/>
+      <location x="-0.426617"/>
+      <location x="-0.422414"/>
+      <location x="-0.418211"/>
+      <location x="-0.414008"/>
+      <location x="-0.409805"/>
+      <location x="-0.405602"/>
+      <location x="-0.401398"/>
+      <location x="-0.397195"/>
+      <location x="-0.392992"/>
+      <location x="-0.388789"/>
+      <location x="-0.384586"/>
+      <location x="-0.380383"/>
+      <location x="-0.376180"/>
+      <location x="-0.371977"/>
+      <location x="-0.367773"/>
+      <location x="-0.363570"/>
+      <location x="-0.359367"/>
+      <location x="-0.355164"/>
+      <location x="-0.350961"/>
+      <location x="-0.346758"/>
+      <location x="-0.342555"/>
+      <location x="-0.338352"/>
+      <location x="-0.334148"/>
+      <location x="-0.329945"/>
+      <location x="-0.325742"/>
+      <location x="-0.321539"/>
+      <location x="-0.317336"/>
+      <location x="-0.313133"/>
+      <location x="-0.308930"/>
+      <location x="-0.304727"/>
+      <location x="-0.300523"/>
+      <location x="-0.296320"/>
+      <location x="-0.292117"/>
+      <location x="-0.287914"/>
+      <location x="-0.283711"/>
+      <location x="-0.279508"/>
+      <location x="-0.275305"/>
+      <location x="-0.271102"/>
+      <location x="-0.266898"/>
+      <location x="-0.262695"/>
+      <location x="-0.258492"/>
+      <location x="-0.254289"/>
+      <location x="-0.250086"/>
+      <location x="-0.245883"/>
+      <location x="-0.241680"/>
+      <location x="-0.237477"/>
+      <location x="-0.233273"/>
+      <location x="-0.229070"/>
+      <location x="-0.224867"/>
+      <location x="-0.220664"/>
+      <location x="-0.216461"/>
+      <location x="-0.212258"/>
+      <location x="-0.208055"/>
+      <location x="-0.203852"/>
+      <location x="-0.199648"/>
+      <location x="-0.195445"/>
+      <location x="-0.191242"/>
+      <location x="-0.187039"/>
+      <location x="-0.182836"/>
+      <location x="-0.178633"/>
+      <location x="-0.174430"/>
+      <location x="-0.170227"/>
+      <location x="-0.166023"/>
+      <location x="-0.161820"/>
+      <location x="-0.157617"/>
+      <location x="-0.153414"/>
+      <location x="-0.149211"/>
+      <location x="-0.145008"/>
+      <location x="-0.140805"/>
+      <location x="-0.136602"/>
+      <location x="-0.132398"/>
+      <location x="-0.128195"/>
+      <location x="-0.123992"/>
+      <location x="-0.119789"/>
+      <location x="-0.115586"/>
+      <location x="-0.111383"/>
+      <location x="-0.107180"/>
+      <location x="-0.102977"/>
+      <location x="-0.098773"/>
+      <location x="-0.094570"/>
+      <location x="-0.090367"/>
+      <location x="-0.086164"/>
+      <location x="-0.081961"/>
+      <location x="-0.077758"/>
+      <location x="-0.073555"/>
+      <location x="-0.069352"/>
+      <location x="-0.065148"/>
+      <location x="-0.060945"/>
+      <location x="-0.056742"/>
+      <location x="-0.052539"/>
+      <location x="-0.048336"/>
+      <location x="-0.044133"/>
+      <location x="-0.039930"/>
+      <location x="-0.035727"/>
+      <location x="-0.031523"/>
+      <location x="-0.027320"/>
+      <location x="-0.023117"/>
+      <location x="-0.018914"/>
+      <location x="-0.014711"/>
+      <location x="-0.010508"/>
+      <location x="-0.006305"/>
+      <location x="-0.002102"/>
+      <location x="0.002102"/>
+      <location x="0.006305"/>
+      <location x="0.010508"/>
+      <location x="0.014711"/>
+      <location x="0.018914"/>
+      <location x="0.023117"/>
+      <location x="0.027320"/>
+      <location x="0.031523"/>
+      <location x="0.035727"/>
+      <location x="0.039930"/>
+      <location x="0.044133"/>
+      <location x="0.048336"/>
+      <location x="0.052539"/>
+      <location x="0.056742"/>
+      <location x="0.060945"/>
+      <location x="0.065148"/>
+      <location x="0.069352"/>
+      <location x="0.073555"/>
+      <location x="0.077758"/>
+      <location x="0.081961"/>
+      <location x="0.086164"/>
+      <location x="0.090367"/>
+      <location x="0.094570"/>
+      <location x="0.098773"/>
+      <location x="0.102977"/>
+      <location x="0.107180"/>
+      <location x="0.111383"/>
+      <location x="0.115586"/>
+      <location x="0.119789"/>
+      <location x="0.123992"/>
+      <location x="0.128195"/>
+      <location x="0.132398"/>
+      <location x="0.136602"/>
+      <location x="0.140805"/>
+      <location x="0.145008"/>
+      <location x="0.149211"/>
+      <location x="0.153414"/>
+      <location x="0.157617"/>
+      <location x="0.161820"/>
+      <location x="0.166023"/>
+      <location x="0.170227"/>
+      <location x="0.174430"/>
+      <location x="0.178633"/>
+      <location x="0.182836"/>
+      <location x="0.187039"/>
+      <location x="0.191242"/>
+      <location x="0.195445"/>
+      <location x="0.199648"/>
+      <location x="0.203852"/>
+      <location x="0.208055"/>
+      <location x="0.212258"/>
+      <location x="0.216461"/>
+      <location x="0.220664"/>
+      <location x="0.224867"/>
+      <location x="0.229070"/>
+      <location x="0.233273"/>
+      <location x="0.237477"/>
+      <location x="0.241680"/>
+      <location x="0.245883"/>
+      <location x="0.250086"/>
+      <location x="0.254289"/>
+      <location x="0.258492"/>
+      <location x="0.262695"/>
+      <location x="0.266898"/>
+      <location x="0.271102"/>
+      <location x="0.275305"/>
+      <location x="0.279508"/>
+      <location x="0.283711"/>
+      <location x="0.287914"/>
+      <location x="0.292117"/>
+      <location x="0.296320"/>
+      <location x="0.300523"/>
+      <location x="0.304727"/>
+      <location x="0.308930"/>
+      <location x="0.313133"/>
+      <location x="0.317336"/>
+      <location x="0.321539"/>
+      <location x="0.325742"/>
+      <location x="0.329945"/>
+      <location x="0.334148"/>
+      <location x="0.338352"/>
+      <location x="0.342555"/>
+      <location x="0.346758"/>
+      <location x="0.350961"/>
+      <location x="0.355164"/>
+      <location x="0.359367"/>
+      <location x="0.363570"/>
+      <location x="0.367773"/>
+      <location x="0.371977"/>
+      <location x="0.376180"/>
+      <location x="0.380383"/>
+      <location x="0.384586"/>
+      <location x="0.388789"/>
+      <location x="0.392992"/>
+      <location x="0.397195"/>
+      <location x="0.401398"/>
+      <location x="0.405602"/>
+      <location x="0.409805"/>
+      <location x="0.414008"/>
+      <location x="0.418211"/>
+      <location x="0.422414"/>
+      <location x="0.426617"/>
+      <location x="0.430820"/>
+      <location x="0.435023"/>
+      <location x="0.439227"/>
+      <location x="0.443430"/>
+      <location x="0.447633"/>
+      <location x="0.451836"/>
+      <location x="0.456039"/>
+      <location x="0.460242"/>
+      <location x="0.464445"/>
+      <location x="0.468648"/>
+      <location x="0.472852"/>
+      <location x="0.477055"/>
+      <location x="0.481258"/>
+      <location x="0.485461"/>
+      <location x="0.489664"/>
+      <location x="0.493867"/>
+      <location x="0.498070"/>
+      <location x="0.502273"/>
+      <location x="0.506477"/>
+      <location x="0.510680"/>
+      <location x="0.514883"/>
+      <location x="0.519086"/>
+      <location x="0.523289"/>
+      <location x="0.527492"/>
+      <location x="0.531695"/>
+      <location x="0.535898"/>
+    </component>
+  </type>
+  
+  <!-- Set the origin at centre of tube, i.e. between to two middle pixels 
+       This tube is of the type used for the D windows -->
+  <type name="PSD_TUBE_STRIP for D window" outline="yes">
+    <component type="PSD_TUBE_STRIP D pixel">  
+      <location x="-0.715693"/>
+      <location x="-0.710080"/>
+      <location x="-0.704467"/>
+      <location x="-0.698854"/>
+      <location x="-0.693240"/>
+      <location x="-0.687627"/>
+      <location x="-0.682014"/>
+      <location x="-0.676400"/>
+      <location x="-0.670787"/>
+      <location x="-0.665174"/>
+      <location x="-0.659561"/>
+      <location x="-0.653947"/>
+      <location x="-0.648334"/>
+      <location x="-0.642721"/>
+      <location x="-0.637107"/>
+      <location x="-0.631494"/>
+      <location x="-0.625881"/>
+      <location x="-0.620268"/>
+      <location x="-0.614654"/>
+      <location x="-0.609041"/>
+      <location x="-0.603428"/>
+      <location x="-0.597814"/>
+      <location x="-0.592201"/>
+      <location x="-0.586588"/>
+      <location x="-0.580975"/>
+      <location x="-0.575361"/>
+      <location x="-0.569748"/>
+      <location x="-0.564135"/>
+      <location x="-0.558521"/>
+      <location x="-0.552908"/>
+      <location x="-0.547295"/>
+      <location x="-0.541682"/>
+      <location x="-0.536068"/>
+      <location x="-0.530455"/>
+      <location x="-0.524842"/>
+      <location x="-0.519229"/>
+      <location x="-0.513615"/>
+      <location x="-0.508002"/>
+      <location x="-0.502389"/>
+      <location x="-0.496775"/>
+      <location x="-0.491162"/>
+      <location x="-0.485549"/>
+      <location x="-0.479936"/>
+      <location x="-0.474322"/>
+      <location x="-0.468709"/>
+      <location x="-0.463096"/>
+      <location x="-0.457482"/>
+      <location x="-0.451869"/>
+      <location x="-0.446256"/>
+      <location x="-0.440643"/>
+      <location x="-0.435029"/>
+      <location x="-0.429416"/>
+      <location x="-0.423803"/>
+      <location x="-0.418189"/>
+      <location x="-0.412576"/>
+      <location x="-0.406963"/>
+      <location x="-0.401350"/>
+      <location x="-0.395736"/>
+      <location x="-0.390123"/>
+      <location x="-0.384510"/>
+      <location x="-0.378896"/>
+      <location x="-0.373283"/>
+      <location x="-0.367670"/>
+      <location x="-0.362057"/>
+      <location x="-0.356443"/>
+      <location x="-0.350830"/>
+      <location x="-0.345217"/>
+      <location x="-0.339604"/>
+      <location x="-0.333990"/>
+      <location x="-0.328377"/>
+      <location x="-0.322764"/>
+      <location x="-0.317150"/>
+      <location x="-0.311537"/>
+      <location x="-0.305924"/>
+      <location x="-0.300311"/>
+      <location x="-0.294697"/>
+      <location x="-0.289084"/>
+      <location x="-0.283471"/>
+      <location x="-0.277857"/>
+      <location x="-0.272244"/>
+      <location x="-0.266631"/>
+      <location x="-0.261018"/>
+      <location x="-0.255404"/>
+      <location x="-0.249791"/>
+      <location x="-0.244178"/>
+      <location x="-0.238564"/>
+      <location x="-0.232951"/>
+      <location x="-0.227338"/>
+      <location x="-0.221725"/>
+      <location x="-0.216111"/>
+      <location x="-0.210498"/>
+      <location x="-0.204885"/>
+      <location x="-0.199271"/>
+      <location x="-0.193658"/>
+      <location x="-0.188045"/>
+      <location x="-0.182432"/>
+      <location x="-0.176818"/>
+      <location x="-0.171205"/>
+      <location x="-0.165592"/>
+      <location x="-0.159979"/>
+      <location x="-0.154365"/>
+      <location x="-0.148752"/>
+      <location x="-0.143139"/>
+      <location x="-0.137525"/>
+      <location x="-0.131912"/>
+      <location x="-0.126299"/>
+      <location x="-0.120686"/>
+      <location x="-0.115072"/>
+      <location x="-0.109459"/>
+      <location x="-0.103846"/>
+      <location x="-0.098232"/>
+      <location x="-0.092619"/>
+      <location x="-0.087006"/>
+      <location x="-0.081393"/>
+      <location x="-0.075779"/>
+      <location x="-0.070166"/>
+      <location x="-0.064553"/>
+      <location x="-0.058939"/>
+      <location x="-0.053326"/>
+      <location x="-0.047713"/>
+      <location x="-0.042100"/>
+      <location x="-0.036486"/>
+      <location x="-0.030873"/>
+      <location x="-0.025260"/>
+      <location x="-0.019646"/>
+      <location x="-0.014033"/>
+      <location x="-0.008420"/>
+      <location x="-0.002807"/>
+      <location x="0.002807"/>
+      <location x="0.008420"/>
+      <location x="0.014033"/>
+      <location x="0.019646"/>
+      <location x="0.025260"/>
+      <location x="0.030873"/>
+      <location x="0.036486"/>
+      <location x="0.042100"/>
+      <location x="0.047713"/>
+      <location x="0.053326"/>
+      <location x="0.058939"/>
+      <location x="0.064553"/>
+      <location x="0.070166"/>
+      <location x="0.075779"/>
+      <location x="0.081393"/>
+      <location x="0.087006"/>
+      <location x="0.092619"/>
+      <location x="0.098232"/>
+      <location x="0.103846"/>
+      <location x="0.109459"/>
+      <location x="0.115072"/>
+      <location x="0.120686"/>
+      <location x="0.126299"/>
+      <location x="0.131912"/>
+      <location x="0.137525"/>
+      <location x="0.143139"/>
+      <location x="0.148752"/>
+      <location x="0.154365"/>
+      <location x="0.159979"/>
+      <location x="0.165592"/>
+      <location x="0.171205"/>
+      <location x="0.176818"/>
+      <location x="0.182432"/>
+      <location x="0.188045"/>
+      <location x="0.193658"/>
+      <location x="0.199271"/>
+      <location x="0.204885"/>
+      <location x="0.210498"/>
+      <location x="0.216111"/>
+      <location x="0.221725"/>
+      <location x="0.227338"/>
+      <location x="0.232951"/>
+      <location x="0.238564"/>
+      <location x="0.244178"/>
+      <location x="0.249791"/>
+      <location x="0.255404"/>
+      <location x="0.261018"/>
+      <location x="0.266631"/>
+      <location x="0.272244"/>
+      <location x="0.277857"/>
+      <location x="0.283471"/>
+      <location x="0.289084"/>
+      <location x="0.294697"/>
+      <location x="0.300311"/>
+      <location x="0.305924"/>
+      <location x="0.311537"/>
+      <location x="0.317150"/>
+      <location x="0.322764"/>
+      <location x="0.328377"/>
+      <location x="0.333990"/>
+      <location x="0.339604"/>
+      <location x="0.345217"/>
+      <location x="0.350830"/>
+      <location x="0.356443"/>
+      <location x="0.362057"/>
+      <location x="0.367670"/>
+      <location x="0.373283"/>
+      <location x="0.378896"/>
+      <location x="0.384510"/>
+      <location x="0.390123"/>
+      <location x="0.395736"/>
+      <location x="0.401350"/>
+      <location x="0.406963"/>
+      <location x="0.412576"/>
+      <location x="0.418189"/>
+      <location x="0.423803"/>
+      <location x="0.429416"/>
+      <location x="0.435029"/>
+      <location x="0.440643"/>
+      <location x="0.446256"/>
+      <location x="0.451869"/>
+      <location x="0.457482"/>
+      <location x="0.463096"/>
+      <location x="0.468709"/>
+      <location x="0.474322"/>
+      <location x="0.479936"/>
+      <location x="0.485549"/>
+      <location x="0.491162"/>
+      <location x="0.496775"/>
+      <location x="0.502389"/>
+      <location x="0.508002"/>
+      <location x="0.513615"/>
+      <location x="0.519229"/>
+      <location x="0.524842"/>
+      <location x="0.530455"/>
+      <location x="0.536068"/>
+      <location x="0.541682"/>
+      <location x="0.547295"/>
+      <location x="0.552908"/>
+      <location x="0.558521"/>
+      <location x="0.564135"/>
+      <location x="0.569748"/>
+      <location x="0.575361"/>
+      <location x="0.580975"/>
+      <location x="0.586588"/>
+      <location x="0.592201"/>
+      <location x="0.597814"/>
+      <location x="0.603428"/>
+      <location x="0.609041"/>
+      <location x="0.614654"/>
+      <location x="0.620268"/>
+      <location x="0.625881"/>
+      <location x="0.631494"/>
+      <location x="0.637107"/>
+      <location x="0.642721"/>
+      <location x="0.648334"/>
+      <location x="0.653947"/>
+      <location x="0.659561"/>
+      <location x="0.665174"/>
+      <location x="0.670787"/>
+      <location x="0.676400"/>
+      <location x="0.682014"/>
+      <location x="0.687627"/>
+      <location x="0.693240"/>
+      <location x="0.698854"/>
+      <location x="0.704467"/>
+      <location x="0.710080"/>
+      <location x="0.715693"/> 
+    </component>
+  </type>  
+    
+  <!-- Set the origin at centre of tube, i.e. between to two middle pixels 
+       This tube is of the type used for the E windows -->
+  <type name="PSD_TUBE_STRIP for E window" outline="yes">
+    <component type="PSD_TUBE_STRIP E pixel">    
+      <location x="-0.222129"/>
+      <location x="-0.220387"/>
+      <location x="-0.218645"/>
+      <location x="-0.216902"/>
+      <location x="-0.215160"/>
+      <location x="-0.213418"/>
+      <location x="-0.211676"/>
+      <location x="-0.209934"/>
+      <location x="-0.208191"/>
+      <location x="-0.206449"/>
+      <location x="-0.204707"/>
+      <location x="-0.202965"/>
+      <location x="-0.201223"/>
+      <location x="-0.199480"/>
+      <location x="-0.197738"/>
+      <location x="-0.195996"/>
+      <location x="-0.194254"/>
+      <location x="-0.192512"/>
+      <location x="-0.190770"/>
+      <location x="-0.189027"/>
+      <location x="-0.187285"/>
+      <location x="-0.185543"/>
+      <location x="-0.183801"/>
+      <location x="-0.182059"/>
+      <location x="-0.180316"/>
+      <location x="-0.178574"/>
+      <location x="-0.176832"/>
+      <location x="-0.175090"/>
+      <location x="-0.173348"/>
+      <location x="-0.171605"/>
+      <location x="-0.169863"/>
+      <location x="-0.168121"/>
+      <location x="-0.166379"/>
+      <location x="-0.164637"/>
+      <location x="-0.162895"/>
+      <location x="-0.161152"/>
+      <location x="-0.159410"/>
+      <location x="-0.157668"/>
+      <location x="-0.155926"/>
+      <location x="-0.154184"/>
+      <location x="-0.152441"/>
+      <location x="-0.150699"/>
+      <location x="-0.148957"/>
+      <location x="-0.147215"/>
+      <location x="-0.145473"/>
+      <location x="-0.143730"/>
+      <location x="-0.141988"/>
+      <location x="-0.140246"/>
+      <location x="-0.138504"/>
+      <location x="-0.136762"/>
+      <location x="-0.135020"/>
+      <location x="-0.133277"/>
+      <location x="-0.131535"/>
+      <location x="-0.129793"/>
+      <location x="-0.128051"/>
+      <location x="-0.126309"/>
+      <location x="-0.124566"/>
+      <location x="-0.122824"/>
+      <location x="-0.121082"/>
+      <location x="-0.119340"/>
+      <location x="-0.117598"/>
+      <location x="-0.115855"/>
+      <location x="-0.114113"/>
+      <location x="-0.112371"/>
+      <location x="-0.110629"/>
+      <location x="-0.108887"/>
+      <location x="-0.107145"/>
+      <location x="-0.105402"/>
+      <location x="-0.103660"/>
+      <location x="-0.101918"/>
+      <location x="-0.100176"/>
+      <location x="-0.098434"/>
+      <location x="-0.096691"/>
+      <location x="-0.094949"/>
+      <location x="-0.093207"/>
+      <location x="-0.091465"/>
+      <location x="-0.089723"/>
+      <location x="-0.087980"/>
+      <location x="-0.086238"/>
+      <location x="-0.084496"/>
+      <location x="-0.082754"/>
+      <location x="-0.081012"/>
+      <location x="-0.079270"/>
+      <location x="-0.077527"/>
+      <location x="-0.075785"/>
+      <location x="-0.074043"/>
+      <location x="-0.072301"/>
+      <location x="-0.070559"/>
+      <location x="-0.068816"/>
+      <location x="-0.067074"/>
+      <location x="-0.065332"/>
+      <location x="-0.063590"/>
+      <location x="-0.061848"/>
+      <location x="-0.060105"/>
+      <location x="-0.058363"/>
+      <location x="-0.056621"/>
+      <location x="-0.054879"/>
+      <location x="-0.053137"/>
+      <location x="-0.051395"/>
+      <location x="-0.049652"/>
+      <location x="-0.047910"/>
+      <location x="-0.046168"/>
+      <location x="-0.044426"/>
+      <location x="-0.042684"/>
+      <location x="-0.040941"/>
+      <location x="-0.039199"/>
+      <location x="-0.037457"/>
+      <location x="-0.035715"/>
+      <location x="-0.033973"/>
+      <location x="-0.032230"/>
+      <location x="-0.030488"/>
+      <location x="-0.028746"/>
+      <location x="-0.027004"/>
+      <location x="-0.025262"/>
+      <location x="-0.023520"/>
+      <location x="-0.021777"/>
+      <location x="-0.020035"/>
+      <location x="-0.018293"/>
+      <location x="-0.016551"/>
+      <location x="-0.014809"/>
+      <location x="-0.013066"/>
+      <location x="-0.011324"/>
+      <location x="-0.009582"/>
+      <location x="-0.007840"/>
+      <location x="-0.006098"/>
+      <location x="-0.004355"/>
+      <location x="-0.002613"/>
+      <location x="-0.000871"/>
+      <location x="0.000871"/>
+      <location x="0.002613"/>
+      <location x="0.004355"/>
+      <location x="0.006098"/>
+      <location x="0.007840"/>
+      <location x="0.009582"/>
+      <location x="0.011324"/>
+      <location x="0.013066"/>
+      <location x="0.014809"/>
+      <location x="0.016551"/>
+      <location x="0.018293"/>
+      <location x="0.020035"/>
+      <location x="0.021777"/>
+      <location x="0.023520"/>
+      <location x="0.025262"/>
+      <location x="0.027004"/>
+      <location x="0.028746"/>
+      <location x="0.030488"/>
+      <location x="0.032230"/>
+      <location x="0.033973"/>
+      <location x="0.035715"/>
+      <location x="0.037457"/>
+      <location x="0.039199"/>
+      <location x="0.040941"/>
+      <location x="0.042684"/>
+      <location x="0.044426"/>
+      <location x="0.046168"/>
+      <location x="0.047910"/>
+      <location x="0.049652"/>
+      <location x="0.051395"/>
+      <location x="0.053137"/>
+      <location x="0.054879"/>
+      <location x="0.056621"/>
+      <location x="0.058363"/>
+      <location x="0.060105"/>
+      <location x="0.061848"/>
+      <location x="0.063590"/>
+      <location x="0.065332"/>
+      <location x="0.067074"/>
+      <location x="0.068816"/>
+      <location x="0.070559"/>
+      <location x="0.072301"/>
+      <location x="0.074043"/>
+      <location x="0.075785"/>
+      <location x="0.077527"/>
+      <location x="0.079270"/>
+      <location x="0.081012"/>
+      <location x="0.082754"/>
+      <location x="0.084496"/>
+      <location x="0.086238"/>
+      <location x="0.087980"/>
+      <location x="0.089723"/>
+      <location x="0.091465"/>
+      <location x="0.093207"/>
+      <location x="0.094949"/>
+      <location x="0.096691"/>
+      <location x="0.098434"/>
+      <location x="0.100176"/>
+      <location x="0.101918"/>
+      <location x="0.103660"/>
+      <location x="0.105402"/>
+      <location x="0.107145"/>
+      <location x="0.108887"/>
+      <location x="0.110629"/>
+      <location x="0.112371"/>
+      <location x="0.114113"/>
+      <location x="0.115855"/>
+      <location x="0.117598"/>
+      <location x="0.119340"/>
+      <location x="0.121082"/>
+      <location x="0.122824"/>
+      <location x="0.124566"/>
+      <location x="0.126309"/>
+      <location x="0.128051"/>
+      <location x="0.129793"/>
+      <location x="0.131535"/>
+      <location x="0.133277"/>
+      <location x="0.135020"/>
+      <location x="0.136762"/>
+      <location x="0.138504"/>
+      <location x="0.140246"/>
+      <location x="0.141988"/>
+      <location x="0.143730"/>
+      <location x="0.145473"/>
+      <location x="0.147215"/>
+      <location x="0.148957"/>
+      <location x="0.150699"/>
+      <location x="0.152441"/>
+      <location x="0.154184"/>
+      <location x="0.155926"/>
+      <location x="0.157668"/>
+      <location x="0.159410"/>
+      <location x="0.161152"/>
+      <location x="0.162895"/>
+      <location x="0.164637"/>
+      <location x="0.166379"/>
+      <location x="0.168121"/>
+      <location x="0.169863"/>
+      <location x="0.171605"/>
+      <location x="0.173348"/>
+      <location x="0.175090"/>
+      <location x="0.176832"/>
+      <location x="0.178574"/>
+      <location x="0.180316"/>
+      <location x="0.182059"/>
+      <location x="0.183801"/>
+      <location x="0.185543"/>
+      <location x="0.187285"/>
+      <location x="0.189027"/>
+      <location x="0.190770"/>
+      <location x="0.192512"/>
+      <location x="0.194254"/>
+      <location x="0.195996"/>
+      <location x="0.197738"/>
+      <location x="0.199480"/>
+      <location x="0.201223"/>
+      <location x="0.202965"/>
+      <location x="0.204707"/>
+      <location x="0.206449"/>
+      <location x="0.208191"/>
+      <location x="0.209934"/>
+      <location x="0.211676"/>
+      <location x="0.213418"/>
+      <location x="0.215160"/>
+      <location x="0.216902"/>
+      <location x="0.218645"/>
+      <location x="0.220387"/>
+      <location x="0.222129"/>  
+    </component>
+  </type>
+  
+  <!-- cylinder pixel of length 1.076/256 -->
+  <type name="PSD_TUBE_STRIP pixel" is="detector">
+    <parameter name="He3 pressure"> <value val="10"/> </parameter> 
+    <parameter name="delay time"> <value val="10.6"/> </parameter> 
+    <parameter name="dead time"> <value val="10.6"/> </parameter> 
+    <cylinder id="shape1">
+      <centre-of-bottom-base x="-0.0021015625" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.004203125" />
+    </cylinder>     
+  </type>
+  
+  <!-- cylinder pixel of length 1.437/256 -->
+  <type name="PSD_TUBE_STRIP D pixel" is="detector">
+    <parameter name="He3 pressure"> <value val="10"/> </parameter> 
+    <parameter name="delay time"> <value val="10.6"/> </parameter> 
+    <parameter name="dead time"> <value val="10.6"/> </parameter> 
+    <cylinder id="shape1">
+      <centre-of-bottom-base x="-0.002806640625" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.00561328125" />
+    </cylinder>     
+  </type>
+
+  <!-- cylinder pixel of length 0.446/256 -->
+  <type name="PSD_TUBE_STRIP E pixel" is="detector">
+    <parameter name="He3 pressure"> <value val="10"/> </parameter> 
+    <parameter name="delay time"> <value val="10.6"/> </parameter> 
+    <parameter name="dead time"> <value val="10.6"/> </parameter> 
+    <cylinder id="shape1">
+      <centre-of-bottom-base x="-0.00087109375" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.0017421875" />
+    </cylinder>     
+  </type>  
+
+  <!-- Note better shape info should be added here -->
+  <type name="monitor" is="detector">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="monitors">
+    <id start="1000001" end="1000004" />
+  </idlist>
+
+  <idlist idname="A1_window">
+    <id start="11101001" end="11101256" />
+    <id start="11102001" end="11102256" />    
+    <id start="11103001" end="11103256" />
+    <id start="11104001" end="11104256" />
+    <id start="11105001" end="11105256" />
+    <id start="11106001" end="11106256" />
+    <id start="11107001" end="11107256" />
+    <id start="11108001" end="11108256" />  
+    <id start="11201001" end="11201256" />
+    <id start="11202001" end="11202256" />    
+    <id start="11203001" end="11203256" />
+    <id start="11204001" end="11204256" />
+    <id start="11205001" end="11205256" />
+    <id start="11206001" end="11206256" />
+    <id start="11207001" end="11207256" />
+    <id start="11208001" end="11208256" />  
+    <id start="11301001" end="11301256" />
+    <id start="11302001" end="11302256" />    
+    <id start="11303001" end="11303256" />
+    <id start="11304001" end="11304256" />
+    <id start="11305001" end="11305256" />
+    <id start="11306001" end="11306256" />
+    <id start="11307001" end="11307256" />
+    <id start="11308001" end="11308256" />  
+    <id start="11401001" end="11401256" />
+    <id start="11402001" end="11402256" />    
+    <id start="11403001" end="11403256" />
+    <id start="11404001" end="11404256" />
+    <id start="11405001" end="11405256" />
+    <id start="11406001" end="11406256" />
+    <id start="11407001" end="11407256" />
+    <id start="11408001" end="11408256" />  
+    <id start="11501001" end="11501256" />
+    <id start="11502001" end="11502256" />    
+    <id start="11503001" end="11503256" />
+    <id start="11504001" end="11504256" />
+    <id start="11505001" end="11505256" />
+    <id start="11506001" end="11506256" />
+    <id start="11507001" end="11507256" />
+    <id start="11508001" end="11508256" />  
+    <id start="11601001" end="11601256" />
+    <id start="11602001" end="11602256" />    
+    <id start="11603001" end="11603256" />
+    <id start="11604001" end="11604256" />
+    <id start="11605001" end="11605256" />
+    <id start="11606001" end="11606256" />
+    <id start="11607001" end="11607256" />
+    <id start="11608001" end="11608256" />  
+    <id start="11701001" end="11701256" />
+    <id start="11702001" end="11702256" />    
+    <id start="11703001" end="11703256" />
+    <id start="11704001" end="11704256" />
+    <id start="11705001" end="11705256" />
+    <id start="11706001" end="11706256" />
+    <id start="11707001" end="11707256" />
+    <id start="11708001" end="11708256" />  
+    <id start="11801001" end="11801256" />
+    <id start="11802001" end="11802256" />    
+    <id start="11803001" end="11803256" />
+    <id start="11804001" end="11804256" />
+    <id start="11805001" end="11805256" />
+    <id start="11806001" end="11806256" />
+    <id start="11807001" end="11807256" />
+    <id start="11808001" end="11808256" />      
+  </idlist>    
+  
+  <idlist idname="A2_window">
+    <id start="12101001" end="12101256" />
+    <id start="12102001" end="12102256" />    
+    <id start="12103001" end="12103256" />
+    <id start="12104001" end="12104256" />
+    <id start="12105001" end="12105256" />
+    <id start="12106001" end="12106256" />
+    <id start="12107001" end="12107256" />
+    <id start="12108001" end="12108256" />  
+    <id start="12201001" end="12201256" />
+    <id start="12202001" end="12202256" />    
+    <id start="12203001" end="12203256" />
+    <id start="12204001" end="12204256" />
+    <id start="12205001" end="12205256" />
+    <id start="12206001" end="12206256" />
+    <id start="12207001" end="12207256" />
+    <id start="12208001" end="12208256" />  
+    <id start="12301001" end="12301256" />
+    <id start="12302001" end="12302256" />    
+    <id start="12303001" end="12303256" />
+    <id start="12304001" end="12304256" />
+    <id start="12305001" end="12305256" />
+    <id start="12306001" end="12306256" />
+    <id start="12307001" end="12307256" />
+    <id start="12308001" end="12308256" />  
+    <id start="12401001" end="12401256" />
+    <id start="12402001" end="12402256" />    
+    <id start="12403001" end="12403256" />
+    <id start="12404001" end="12404256" />
+    <id start="12405001" end="12405256" />
+    <id start="12406001" end="12406256" />
+    <id start="12407001" end="12407256" />
+    <id start="12408001" end="12408256" />  
+    <id start="12501001" end="12501256" />
+    <id start="12502001" end="12502256" />    
+    <id start="12503001" end="12503256" />
+    <id start="12504001" end="12504256" />
+    <id start="12505001" end="12505256" />
+    <id start="12506001" end="12506256" />
+    <id start="12507001" end="12507256" />
+    <id start="12508001" end="12508256" />  
+    <id start="12601001" end="12601256" />
+    <id start="12602001" end="12602256" />    
+    <id start="12603001" end="12603256" />
+    <id start="12604001" end="12604256" />
+    <id start="12605001" end="12605256" />
+    <id start="12606001" end="12606256" />
+    <id start="12607001" end="12607256" />
+    <id start="12608001" end="12608256" />  
+    <id start="12701001" end="12701256" />
+    <id start="12702001" end="12702256" />    
+    <id start="12703001" end="12703256" />
+    <id start="12704001" end="12704256" />
+    <id start="12705001" end="12705256" />
+    <id start="12706001" end="12706256" />
+    <id start="12707001" end="12707256" />
+    <id start="12708001" end="12708256" />  
+    <id start="12801001" end="12801256" />
+    <id start="12802001" end="12802256" />    
+    <id start="12803001" end="12803256" />
+    <id start="12804001" end="12804256" />
+    <id start="12805001" end="12805256" />
+    <id start="12806001" end="12806256" />
+    <id start="12807001" end="12807256" />
+    <id start="12808001" end="12808256" />      
+  </idlist>      
+
+  
+  <idlist idname="B1_window">
+    <id start="21101001" end="21101256" />
+    <id start="21102001" end="21102256" />    
+    <id start="21103001" end="21103256" />
+    <id start="21104001" end="21104256" />
+    <id start="21105001" end="21105256" />
+    <id start="21106001" end="21106256" />
+    <id start="21107001" end="21107256" />
+    <id start="21108001" end="21108256" />   
+    <id start="21301001" end="21301256" />
+    <id start="21302001" end="21302256" />    
+    <id start="21303001" end="21303256" />
+    <id start="21304001" end="21304256" />
+    <id start="21305001" end="21305256" />
+    <id start="21306001" end="21306256" />
+    <id start="21307001" end="21307256" />
+    <id start="21308001" end="21308256" />       
+    <id start="21401001" end="21401256" />
+    <id start="21402001" end="21402256" />    
+    <id start="21403001" end="21403256" />
+    <id start="21404001" end="21404256" />
+    <id start="21405001" end="21405256" />
+    <id start="21406001" end="21406256" />
+    <id start="21407001" end="21407256" />
+    <id start="21408001" end="21408256" />   
+    <id start="21601001" end="21601256" />
+    <id start="21602001" end="21602256" />    
+    <id start="21603001" end="21603256" />
+    <id start="21604001" end="21604256" />
+    <id start="21605001" end="21605256" />
+    <id start="21606001" end="21606256" />
+    <id start="21607001" end="21607256" />
+    <id start="21608001" end="21608256" />           
+    <id start="21201001" end="21201256" />
+    <id start="21202001" end="21202256" />    
+    <id start="21203001" end="21203256" />
+    <id start="21204001" end="21204256" />
+    <id start="21205001" end="21205256" />
+    <id start="21206001" end="21206256" />
+    <id start="21207001" end="21207256" />
+    <id start="21208001" end="21208256" /> 
+    <id start="21209001" end="21209256" />
+    <id start="21210001" end="21210256" />     
+    <id start="21501001" end="21501256" />
+    <id start="21502001" end="21502256" />    
+    <id start="21503001" end="21503256" />
+    <id start="21504001" end="21504256" />
+    <id start="21505001" end="21505256" />
+    <id start="21506001" end="21506256" />
+    <id start="21507001" end="21507256" />
+    <id start="21508001" end="21508256" /> 
+    <id start="21509001" end="21509256" />
+    <id start="21510001" end="21510256" />    
+  </idlist>
+
+  <idlist idname="B2_window">
+    <id start="22101001" end="22101256" />
+    <id start="22102001" end="22102256" />    
+    <id start="22103001" end="22103256" />
+    <id start="22104001" end="22104256" />
+    <id start="22105001" end="22105256" />
+    <id start="22106001" end="22106256" />
+    <id start="22107001" end="22107256" />
+    <id start="22108001" end="22108256" />  
+    <id start="22301001" end="22301256" />
+    <id start="22302001" end="22302256" />    
+    <id start="22303001" end="22303256" />
+    <id start="22304001" end="22304256" />
+    <id start="22305001" end="22305256" />
+    <id start="22306001" end="22306256" />
+    <id start="22307001" end="22307256" />
+    <id start="22308001" end="22308256" />      
+    <id start="22401001" end="22401256" />
+    <id start="22402001" end="22402256" />    
+    <id start="22403001" end="22403256" />
+    <id start="22404001" end="22404256" />
+    <id start="22405001" end="22405256" />
+    <id start="22406001" end="22406256" />
+    <id start="22407001" end="22407256" />
+    <id start="22408001" end="22408256" />   
+    <id start="22601001" end="22601256" />
+    <id start="22602001" end="22602256" />    
+    <id start="22603001" end="22603256" />
+    <id start="22604001" end="22604256" />
+    <id start="22605001" end="22605256" />
+    <id start="22606001" end="22606256" />
+    <id start="22607001" end="22607256" />
+    <id start="22608001" end="22608256" />           
+    <id start="22201001" end="22201256" />
+    <id start="22202001" end="22202256" />    
+    <id start="22203001" end="22203256" />
+    <id start="22204001" end="22204256" />
+    <id start="22205001" end="22205256" />
+    <id start="22206001" end="22206256" />
+    <id start="22207001" end="22207256" />
+    <id start="22208001" end="22208256" /> 
+    <id start="22209001" end="22209256" />
+    <id start="22210001" end="22210256" />     
+    <id start="22501001" end="22501256" />
+    <id start="22502001" end="22502256" />    
+    <id start="22503001" end="22503256" />
+    <id start="22504001" end="22504256" />
+    <id start="22505001" end="22505256" />
+    <id start="22506001" end="22506256" />
+    <id start="22507001" end="22507256" />
+    <id start="22508001" end="22508256" /> 
+    <id start="22509001" end="22509256" />
+    <id start="22510001" end="22510256" />    
+  </idlist>  
+
+
+  <idlist idname="C1_window">
+    <id start="31101001" end="31101256" />
+    <id start="31102001" end="31102256" />    
+    <id start="31103001" end="31103256" />
+    <id start="31104001" end="31104256" />
+    <id start="31105001" end="31105256" />
+    <id start="31106001" end="31106256" />
+    <id start="31107001" end="31107256" />
+    <id start="31108001" end="31108256" />   
+    <id start="31301001" end="31301256" />
+    <id start="31302001" end="31302256" />    
+    <id start="31303001" end="31303256" />
+    <id start="31304001" end="31304256" />
+    <id start="31305001" end="31305256" />
+    <id start="31306001" end="31306256" />
+    <id start="31307001" end="31307256" />
+    <id start="31308001" end="31308256" />  
+    <id start="31401001" end="31401256" />
+    <id start="31402001" end="31402256" />    
+    <id start="31403001" end="31403256" />
+    <id start="31404001" end="31404256" />
+    <id start="31405001" end="31405256" />
+    <id start="31406001" end="31406256" />
+    <id start="31407001" end="31407256" />
+    <id start="31408001" end="31408256" /> 
+    <id start="31201001" end="31201256" />
+    <id start="31202001" end="31202256" />    
+    <id start="31203001" end="31203256" />
+    <id start="31204001" end="31204256" />
+    <id start="31205001" end="31205256" />
+    <id start="31206001" end="31206256" />
+    <id start="31207001" end="31207256" />
+    <id start="31208001" end="31208256" /> 
+    <id start="31209001" end="31209256" />
+    <id start="31210001" end="31210256" />     
+  </idlist>
+
+  <idlist idname="C2_window">
+    <id start="32101001" end="32101256" />
+    <id start="32102001" end="32102256" />    
+    <id start="32103001" end="32103256" />
+    <id start="32104001" end="32104256" />
+    <id start="32105001" end="32105256" />
+    <id start="32106001" end="32106256" />
+    <id start="32107001" end="32107256" />
+    <id start="32108001" end="32108256" />   
+    <id start="32301001" end="32301256" />
+    <id start="32302001" end="32302256" />    
+    <id start="32303001" end="32303256" />
+    <id start="32304001" end="32304256" />
+    <id start="32305001" end="32305256" />
+    <id start="32306001" end="32306256" />
+    <id start="32307001" end="32307256" />
+    <id start="32308001" end="32308256" />  
+    <id start="32401001" end="32401256" />
+    <id start="32402001" end="32402256" />    
+    <id start="32403001" end="32403256" />
+    <id start="32404001" end="32404256" />
+    <id start="32405001" end="32405256" />
+    <id start="32406001" end="32406256" />
+    <id start="32407001" end="32407256" />
+    <id start="32408001" end="32408256" /> 
+    <id start="32201001" end="32201256" />
+    <id start="32202001" end="32202256" />    
+    <id start="32203001" end="32203256" />
+    <id start="32204001" end="32204256" />
+    <id start="32205001" end="32205256" />
+    <id start="32206001" end="32206256" />
+    <id start="32207001" end="32207256" />
+    <id start="32208001" end="32208256" /> 
+    <id start="32209001" end="32209256" />
+    <id start="32210001" end="32210256" />     
+  </idlist>
+
+  <idlist idname="C3_window">
+    <id start="33101001" end="33101256" />
+    <id start="33102001" end="33102256" />    
+    <id start="33103001" end="33103256" />
+    <id start="33104001" end="33104256" />
+    <id start="33105001" end="33105256" />
+    <id start="33106001" end="33106256" />
+    <id start="33107001" end="33107256" />
+    <id start="33108001" end="33108256" />   
+    <id start="33301001" end="33301256" />
+    <id start="33302001" end="33302256" />    
+    <id start="33303001" end="33303256" />
+    <id start="33304001" end="33304256" />
+    <id start="33305001" end="33305256" />
+    <id start="33306001" end="33306256" />
+    <id start="33307001" end="33307256" />
+    <id start="33308001" end="33308256" />  
+    <id start="33401001" end="33401256" />
+    <id start="33402001" end="33402256" />    
+    <id start="33403001" end="33403256" />
+    <id start="33404001" end="33404256" />
+    <id start="33405001" end="33405256" />
+    <id start="33406001" end="33406256" />
+    <id start="33407001" end="33407256" />
+    <id start="33408001" end="33408256" /> 
+    <id start="33201001" end="33201256" />
+    <id start="33202001" end="33202256" />    
+    <id start="33203001" end="33203256" />
+    <id start="33204001" end="33204256" />
+    <id start="33205001" end="33205256" />
+    <id start="33206001" end="33206256" />
+    <id start="33207001" end="33207256" />
+    <id start="33208001" end="33208256" /> 
+    <id start="33209001" end="33209256" />
+    <id start="33210001" end="33210256" />     
+  </idlist>
+ 
+  <idlist idname="C4_window">
+    <id start="34101001" end="34101256" />
+    <id start="34102001" end="34102256" />    
+    <id start="34103001" end="34103256" />
+    <id start="34104001" end="34104256" />
+    <id start="34105001" end="34105256" />
+    <id start="34106001" end="34106256" />
+    <id start="34107001" end="34107256" />
+    <id start="34108001" end="34108256" />   
+    <id start="34301001" end="34301256" />
+    <id start="34302001" end="34302256" />    
+    <id start="34303001" end="34303256" />
+    <id start="34304001" end="34304256" />
+    <id start="34305001" end="34305256" />
+    <id start="34306001" end="34306256" />
+    <id start="34307001" end="34307256" />
+    <id start="34308001" end="34308256" />  
+    <id start="34401001" end="34401256" />
+    <id start="34402001" end="34402256" />    
+    <id start="34403001" end="34403256" />
+    <id start="34404001" end="34404256" />
+    <id start="34405001" end="34405256" />
+    <id start="34406001" end="34406256" />
+    <id start="34407001" end="34407256" />
+    <id start="34408001" end="34408256" /> 
+    <id start="34201001" end="34201256" />
+    <id start="34202001" end="34202256" />    
+    <id start="34203001" end="34203256" />
+    <id start="34204001" end="34204256" />
+    <id start="34205001" end="34205256" />
+    <id start="34206001" end="34206256" />
+    <id start="34207001" end="34207256" />
+    <id start="34208001" end="34208256" /> 
+    <id start="34209001" end="34209256" />
+    <id start="34210001" end="34210256" />     
+  </idlist>
+
+  <idlist idname="D1_window">
+    <id start="41101001" end="41101256" />
+    <id start="41102001" end="41102256" />    
+    <id start="41103001" end="41103256" />
+    <id start="41104001" end="41104256" />
+    <id start="41105001" end="41105256" />
+    <id start="41106001" end="41106256" />
+    <id start="41107001" end="41107256" />
+    <id start="41108001" end="41108256" />    
+    <id start="41201001" end="41201256" />
+    <id start="41202001" end="41202256" />    
+    <id start="41203001" end="41203256" />
+    <id start="41204001" end="41204256" />
+    <id start="41205001" end="41205256" />
+    <id start="41206001" end="41206256" />
+    <id start="41207001" end="41207256" />
+    <id start="41208001" end="41208256" />  
+    <id start="41301001" end="41301256" />
+    <id start="41302001" end="41302256" />    
+    <id start="41303001" end="41303256" />
+    <id start="41304001" end="41304256" />
+    <id start="41305001" end="41305256" />
+    <id start="41306001" end="41306256" />
+    <id start="41307001" end="41307256" />
+    <id start="41308001" end="41308256" />      
+    <id start="41401001" end="41401256" />
+    <id start="41402001" end="41402256" />    
+    <id start="41403001" end="41403256" />
+    <id start="41404001" end="41404256" />
+    <id start="41405001" end="41405256" />
+    <id start="41406001" end="41406256" />
+    <id start="41407001" end="41407256" />
+    <id start="41408001" end="41408256" />      
+    <id start="41501001" end="41501256" />
+    <id start="41502001" end="41502256" />    
+    <id start="41503001" end="41503256" />
+    <id start="41504001" end="41504256" />
+    <id start="41505001" end="41505256" />
+    <id start="41506001" end="41506256" />
+    <id start="41507001" end="41507256" />
+    <id start="41508001" end="41508256" />      
+    <id start="41601001" end="41601256" />
+    <id start="41602001" end="41602256" />    
+    <id start="41603001" end="41603256" />
+    <id start="41604001" end="41604256" />
+    <id start="41605001" end="41605256" />
+    <id start="41606001" end="41606256" />  
+    <id start="41607001" end="41607256" />
+    <id start="41608001" end="41608256" />      
+  </idlist>   
+
+  <idlist idname="D2_window">
+    <id start="42101001" end="42101256" />
+    <id start="42102001" end="42102256" />    
+    <id start="42103001" end="42103256" />
+    <id start="42104001" end="42104256" />
+    <id start="42105001" end="42105256" />
+    <id start="42106001" end="42106256" />
+    <id start="42107001" end="42107256" />
+    <id start="42108001" end="42108256" />    
+    <id start="42201001" end="42201256" />
+    <id start="42202001" end="42202256" />    
+    <id start="42203001" end="42203256" />
+    <id start="42204001" end="42204256" />
+    <id start="42205001" end="42205256" />
+    <id start="42206001" end="42206256" />
+    <id start="42207001" end="42207256" />
+    <id start="42208001" end="42208256" />  
+    <id start="42301001" end="42301256" />
+    <id start="42302001" end="42302256" />    
+    <id start="42303001" end="42303256" />
+    <id start="42304001" end="42304256" />
+    <id start="42305001" end="42305256" />
+    <id start="42306001" end="42306256" />
+    <id start="42307001" end="42307256" />
+    <id start="42308001" end="42308256" />      
+    <id start="42401001" end="42401256" />
+    <id start="42402001" end="42402256" />    
+    <id start="42403001" end="42403256" />
+    <id start="42404001" end="42404256" />
+    <id start="42405001" end="42405256" />
+    <id start="42406001" end="42406256" />
+    <id start="42407001" end="42407256" />
+    <id start="42408001" end="42408256" />      
+    <id start="42501001" end="42501256" />
+    <id start="42502001" end="42502256" />    
+    <id start="42503001" end="42503256" />
+    <id start="42504001" end="42504256" />
+    <id start="42505001" end="42505256" />
+    <id start="42506001" end="42506256" />
+    <id start="42507001" end="42507256" />
+    <id start="42508001" end="42508256" />      
+    <id start="42601001" end="42601256" />
+    <id start="42602001" end="42602256" />    
+    <id start="42603001" end="42603256" />
+    <id start="42604001" end="42604256" />
+    <id start="42605001" end="42605256" />
+    <id start="42606001" end="42606256" />  
+    <id start="42607001" end="42607256" />
+    <id start="42608001" end="42608256" />      
+  </idlist>   
+
+  <idlist idname="D3_window">
+    <id start="43101001" end="43101256" />
+    <id start="43102001" end="43102256" />    
+    <id start="43103001" end="43103256" />
+    <id start="43104001" end="43104256" />
+    <id start="43105001" end="43105256" />
+    <id start="43106001" end="43106256" />
+    <id start="43107001" end="43107256" />
+    <id start="43108001" end="43108256" />    
+    <id start="43201001" end="43201256" />
+    <id start="43202001" end="43202256" />    
+    <id start="43203001" end="43203256" />
+    <id start="43204001" end="43204256" />
+    <id start="43205001" end="43205256" />
+    <id start="43206001" end="43206256" />
+    <id start="43207001" end="43207256" />
+    <id start="43208001" end="43208256" />  
+    <id start="43301001" end="43301256" />
+    <id start="43302001" end="43302256" />    
+    <id start="43303001" end="43303256" />
+    <id start="43304001" end="43304256" />
+    <id start="43305001" end="43305256" />
+    <id start="43306001" end="43306256" />
+    <id start="43307001" end="43307256" />
+    <id start="43308001" end="43308256" />      
+    <id start="43401001" end="43401256" />
+    <id start="43402001" end="43402256" />    
+    <id start="43403001" end="43403256" />
+    <id start="43404001" end="43404256" />
+    <id start="43405001" end="43405256" />
+    <id start="43406001" end="43406256" />
+    <id start="43407001" end="43407256" />
+    <id start="43408001" end="43408256" />      
+    <id start="43501001" end="43501256" />
+    <id start="43502001" end="43502256" />    
+    <id start="43503001" end="43503256" />
+    <id start="43504001" end="43504256" />
+    <id start="43505001" end="43505256" />
+    <id start="43506001" end="43506256" />
+    <id start="43507001" end="43507256" />
+    <id start="43508001" end="43508256" />      
+    <id start="43601001" end="43601256" />
+    <id start="43602001" end="43602256" />    
+    <id start="43603001" end="43603256" />
+    <id start="43604001" end="43604256" />
+    <id start="43605001" end="43605256" />
+    <id start="43606001" end="43606256" />  
+    <id start="43607001" end="43607256" />
+    <id start="43608001" end="43608256" />      
+  </idlist>   
+  
+  <idlist idname="D4_window">
+    <id start="44101001" end="44101256" />
+    <id start="44102001" end="44102256" />    
+    <id start="44103001" end="44103256" />
+    <id start="44104001" end="44104256" />
+    <id start="44105001" end="44105256" />
+    <id start="44106001" end="44106256" />
+    <id start="44107001" end="44107256" />
+    <id start="44108001" end="44108256" />    
+    <id start="44201001" end="44201256" />
+    <id start="44202001" end="44202256" />    
+    <id start="44203001" end="44203256" />
+    <id start="44204001" end="44204256" />
+    <id start="44205001" end="44205256" />
+    <id start="44206001" end="44206256" />
+    <id start="44207001" end="44207256" />
+    <id start="44208001" end="44208256" />  
+    <id start="44301001" end="44301256" />
+    <id start="44302001" end="44302256" />    
+    <id start="44303001" end="44303256" />
+    <id start="44304001" end="44304256" />
+    <id start="44305001" end="44305256" />
+    <id start="44306001" end="44306256" />
+    <id start="44307001" end="44307256" />
+    <id start="44308001" end="44308256" />      
+    <id start="44401001" end="44401256" />
+    <id start="44402001" end="44402256" />    
+    <id start="44403001" end="44403256" />
+    <id start="44404001" end="44404256" />
+    <id start="44405001" end="44405256" />
+    <id start="44406001" end="44406256" />
+    <id start="44407001" end="44407256" />
+    <id start="44408001" end="44408256" />      
+    <id start="44501001" end="44501256" />
+    <id start="44502001" end="44502256" />    
+    <id start="44503001" end="44503256" />
+    <id start="44504001" end="44504256" />
+    <id start="44505001" end="44505256" />
+    <id start="44506001" end="44506256" />
+    <id start="44507001" end="44507256" />
+    <id start="44508001" end="44508256" />      
+    <id start="44601001" end="44601256" />
+    <id start="44602001" end="44602256" />    
+    <id start="44603001" end="44603256" />
+    <id start="44604001" end="44604256" />
+    <id start="44605001" end="44605256" />
+    <id start="44606001" end="44606256" />  
+    <id start="44607001" end="44607256" />
+    <id start="44608001" end="44608256" />      
+  </idlist>     
+ 
+  <idlist idname="E1_window">
+    <id start="51101001" end="51101256" />
+    <id start="51102001" end="51102256" />    
+    <id start="51103001" end="51103256" />
+    <id start="51104001" end="51104256" />
+    <id start="51105001" end="51105256" />
+    <id start="51106001" end="51106256" />
+    <id start="51107001" end="51107256" />
+    <id start="51108001" end="51108256" />    
+  </idlist> 
+
+  <idlist idname="E2_window">
+    <id start="52101001" end="52101256" />
+    <id start="52102001" end="52102256" />    
+    <id start="52103001" end="52103256" />
+    <id start="52104001" end="52104256" />
+    <id start="52105001" end="52105256" />
+    <id start="52106001" end="52106256" />
+    <id start="52107001" end="52107256" />
+    <id start="52108001" end="52108256" />    
+  </idlist>   
+</instrument>

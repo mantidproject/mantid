@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<!-- Purpose of this unit testing IDF is to 
+
+   1. Tests when  <offsets spherical="delta" /> is set
+   2. and when angle="radian" set
+   
+-->
+
+<instrument name="unit testing 4" valid-from   ="1900-01-31 23:59:59"
+                                  valid-to     ="2100-01-31 23:59:59"
+				  last-modified="2010-10-06T16:21:30">
+<defaults>
+  <length unit="meter" />
+  <angle unit="radian" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <offsets spherical="delta" /> 
+</defaults>
+
+
+
+
+<!--  Source and sample-position components and their types 
+
+<component type="undulator">
+  <location z="-95." /> 
+</component>
+<component type="nickel-holder">
+  <location />
+</component>
+
+<type name="undulator" is="Source">
+  <properties />
+</type>
+<type name="nickel-holder" is="SamplePos">
+  <properties />
+</type>
+-->
+
+<component type="monitors" idlist="monitors">
+  <location r="10">
+  </location>
+</component>
+
+<type name="monitors">
+<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+  
+  <location name="combined translationA">
+  </location>
+  
+  <location  r="10" t="1.570796326794897" name="combined translationB">
+  </location>  
+
+  <location  name="combined translation">
+    <trans r="10" t="1.570796326794897" />
+  </location>
+  
+  <location r="5" name="combined translation2">
+    <trans r="10" t="1.570796326794897" />
+  </location>
+
+  <location  r="10" t="1.570796326794897" name="combined translation3">
+    <!-- <rot val="1.570796326794897" />  this one should be ignored -->
+    <trans r="8" t="-1.570796326794897" />
+  </location>
+  
+  <location  r="10" t="1.570796326794897" name="combined translation4">
+      <trans r="8" t="-1.570796326794897" />
+  </location>
+
+  <location  r="10" t="1.570796326794897" name="combined translation5">
+    <rot val="1.570796326794897" />  <!--  this one should be ignored -->
+    <trans r="8" t="-1.570796326794897" />
+    <trans r="8" t="-1.570796326794897" /> <!-- this one should be ignored -->  
+  </location>  
+  
+  <location  r="8" t="-1.570796326794897" name="combined translation6">
+    <trans r="10" t="1.570796326794897" />  
+  </location>   
+  
+  <location  r="1" name="combined translation7">
+      <trans r="8" />
+  </location>  
+  
+  <location  r="1" t="1.570796326794897" rot="-1.570796326794897" axis-x="0" axis-y="1" axis-z="0" name="combined translation8">
+      <trans x="8"/>  
+  </location>  
+  
+  <location  r="1" t="1.570796326794897" rot="-1.570796326794897" axis-x="0" axis-y="1" axis-z="0" name="combined translation9">
+    <rot val="3.141592653589793" axis-x="0" axis-y="0" axis-z="1" >
+      <trans x="8"/>
+    </rot>    
+  </location>  
+
+  <location  r="1" t="1.570796326794897" rot="-1.570796326794897" axis-x="0" axis-y="1" axis-z="0" name="combined translation10">
+      <trans y="8"/>  
+  </location>  
+  
+  <location  r="1" t="1.570796326794897" rot="-1.570796326794897" axis-x="0" axis-y="1" axis-z="0" name="combined translation11">
+    <rot val="3.141592653589793" axis-x="0" axis-y="0" axis-z="1" >
+      <trans y="8"/>
+    </rot>    
+  </location>  
+</component>
+</type>
+
+<type name="monitor-cylinder-ring-shape" is="detector">
+</type>
+
+
+
+
+<idlist idname="monitors">
+  <id start="1001" end="1013" />
+</idlist>
+
+
+
+
+
+</instrument>

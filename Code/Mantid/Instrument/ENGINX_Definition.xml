@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="ENGIN-X" valid-from   ="1900-01-31 23:59:59"
+                           valid-to     ="2100-01-31 23:59:59"
+		           last-modified="2010-10-18 17:49:49">
+<!-- Instrument description for ENGIN-X, Joe Kelleher 2010 -->
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <!-- Comment 'components-are-facing' out if you don't want the
+  components defined in this file to face a position by default -->    
+  <!-- <components-are-facing x="0.0" y="0.0" z="0.0" />-->
+</defaults>
+<!-- Engin-X description starts here -->
+<!-- Two banks (north & south), each bank made of 5 modules, each module made of 240 pixels -->
+<!-- The process of facing is: Make the xy-plane of the geometric shape of the component face
+     the specified location by rotating the z-axis of this component so that the z-axis points
+     in the direction from the location to this component.  -->
+
+<!-- First, the source, sample and monitors -->
+
+<component type="some source type">
+  <location z="-50.0" />
+</component>
+<component type="sample position">
+  <location />
+</component>
+<type name="some source type" is="Source">
+  <properties />
+</type>
+<type name="sample position" is="SamplePos">
+  <properties />
+</type>
+
+<!-- Monitor locations are approximate guesses for now! -->
+<component type="monitor1" idlist="Monitor1">
+  <location z="-49.0" mark-as="monitor" />
+</component>
+<component type="monitor2" idlist="Monitor2">
+  <location z="-1.0" mark-as="monitor" />
+</component>
+
+<type name="monitor1" is="detector" />
+<type name="monitor2" is="detector" />
+ 
+
+<!-- There are two banks, North and South. 
+     Each bank contains five modules, stacked vertically above each other. 
+     The modules are of identical design, but the modules are not quite symmetrical in the horizontal direction.
+     Accordingly, the modules in the South bank are installed upside down relative to those in the North bank.
+     This ensures that the range of two-theta angles is the same for both banks. -->
+<component name="NorthBank" type="detector-bank" idlist="NorthBank">
+  <!-- The North bank is on the left, as viewed from the neutron source looking towards the sample.
+       In the coordinate system of the bank, X axis points in direction of increasing two theta (to the
+	   left as viewed from the sample position), Y axis points upwards, and the Z axis faces away from gauge volume. -->
+  <location x="0" y="0" z="0" rot="90" axis-x="0" axis-y="1" axis-z="0"/>
+</component>
+
+<component name="SouthBank" type="detector-bank" idlist="SouthBank">
+  <!-- The South bank is on the right, so rotate 90 degrees the other way this time -->
+  <location x="0" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0">
+    <!-- However, this would mean that the X axis is pointing towards the low end of the two theta range.
+	     The detector pixels are not symmetrically distributed around the centre of the module, and this
+		 would make the pixel distribution back to front. So, we rotate the entire bank around the (new)
+		 Z-axis, turning it upside down. The pixel two theta values will be correct, but the order of the
+		 modules is therefore top-to-bottom for the South bank, even though they are defined below from
+		 bottom to top. The new Y axis will also point downwards. -->
+    <rot val="180" axis-x="0" axis-y="0" axis-z="1" />
+  </location>
+</component>
+
+<type name="detector-bank">
+  <properties />
+  <component type="detector-module">
+    <location  x="0" y="0" z="0" rot="-17" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="-8.5" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="8.5" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="17" axis-x="1" axis-y="0" axis-z="0"/>
+  </component>
+</type>
+
+<type name="detector-module">
+  <!-- Z axis faces away from gauge volume, so that we can use 'facing'.
+       Note that all components created so far (both the banks and the modules within
+       the banks) are located at 0,0,0 (the sample position) but with different orientations. -->
+  <!-- The modules are divided internally into 9 blocks of 27 pixels each, giving 243 pixels.
+       The pixel at the lowest two-theta and the two pixels at the highest two-theta are not used,
+	   giving 240 active pixels over the width of the module. The is a small gap of about 2.2 mm
+	   between the blocks, although the design is specified in terms of a 3 mm pixel pitch within
+	   the block, and 3.2 degree two-theta offset between the centre of neighbouring blocks.
+	   The blocks, and the pixels within each block, are specified in order from the lowest to the
+	   highest two-theta -->
+  <component type="detector-block">
+    <!-- One of these -->
+    <location  r="1.5" t="-12.8" p="0">
+	    <facing x="0.0" y="0.0" z="0.0"/>
+		<exclude sub-part="pixel1" />
+	</location>
+    <!-- Seven of these -->
+    <location  r="1.5" t="-9.6" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="-6.4" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="-3.2" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="0.0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="3.2" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="6.4" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location  r="1.5" t="9.6" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <!-- One of these -->
+    <location  r="1.5" t="12.8" p="0">
+	    <facing x="0.0" y="0.0" z="0.0"/>
+		<exclude sub-part="pixel26" />
+		<exclude sub-part="pixel27" />
+	</location>
+  </component>
+</type>
+
+<type name="detector-block">
+<component type="detector-pixel">
+<location x="-0.039" y="0" z="0" name="pixel1" />
+<location x="-0.036" y="0" z="0" name="pixel2" />
+<location x="-0.033" y="0" z="0" name="pixel3" />
+<location x="-0.030" y="0" z="0" name="pixel4" />
+<location x="-0.027" y="0" z="0" name="pixel5" />
+<location x="-0.024" y="0" z="0" name="pixel6" />
+<location x="-0.021" y="0" z="0" name="pixel7" />
+<location x="-0.018" y="0" z="0" name="pixel8" />
+<location x="-0.015" y="0" z="0" name="pixel9" />
+<location x="-0.012" y="0" z="0" name="pixel10" />
+<location x="-0.009" y="0" z="0" name="pixel11" />
+<location x="-0.006" y="0" z="0" name="pixel12" />
+<location x="-0.003" y="0" z="0" name="pixel13" />
+<location x="0.000" y="0" z="0" name="pixel14" />
+<location x="0.003" y="0" z="0" name="pixel15" />
+<location x="0.006" y="0" z="0" name="pixel16" />
+<location x="0.009" y="0" z="0" name="pixel17" />
+<location x="0.012" y="0" z="0" name="pixel18" />
+<location x="0.015" y="0" z="0" name="pixel19" />
+<location x="0.018" y="0" z="0" name="pixel20" />
+<location x="0.021" y="0" z="0" name="pixel21" />
+<location x="0.024" y="0" z="0" name="pixel22" />
+<location x="0.027" y="0" z="0" name="pixel23" />
+<location x="0.030" y="0" z="0" name="pixel24" />
+<location x="0.033" y="0" z="0" name="pixel25" />
+<location x="0.036" y="0" z="0" name="pixel26" />
+<location x="0.039" y="0" z="0" name="pixel27" />
+</component>
+</type>
+
+<type name="detector-pixel" is="detector">
+  <cuboid id="shape">
+    <left-front-bottom-point x="-0.0015" y="-0.092" z="0.0"  />
+    <left-front-top-point  x="-0.0015" y="0.092" z="0.0"  />
+    <left-back-bottom-point  x="-0.0015" y="-0.092" z="0.001"  />
+    <right-front-bottom-point  x="0.0015" y="-0.092" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+<component name="TransmissionBank" type="transmission-detector-bank" idlist="TransmissionBank">
+   <location x="0" y="0" z="1.0" />
+</component>
+
+<type name="transmission-detector-bank">
+<component type="transmission-detector-column">
+<location x="0.01125" y="0" z="0" />
+<location x="0.00875" y="0" z="0" />
+<location x="0.00625" y="0" z="0" />
+<location x="0.00375" y="0" z="0" />
+<location x="0.00125" y="0" z="0" />
+<location x="-0.00125" y="0" z="0" />
+<location x="-0.00375" y="0" z="0" />
+<location x="-0.00625" y="0" z="0" />
+<location x="-0.00875" y="0" z="0" />
+<location x="-0.01125" y="0" z="0" />
+</component>
+</type>
+
+<type name="transmission-detector-column">
+<component type="transmission-detector-pixel">
+<location x="0" y="-0.01125" z="0" />
+<location x="0" y="-0.00875" z="0" />
+<location x="0" y="-0.00625" z="0" />
+<location x="0" y="-0.00375" z="0" />
+<location x="0" y="-0.00125" z="0" />
+<location x="0" y="0.00125" z="0" />
+<location x="0" y="0.00375" z="0" />
+<location x="0" y="0.00625" z="0" />
+<location x="0" y="0.00875" z="0" />
+<location x="0" y="0.01125" z="0" />
+</component>
+</type>
+
+<type name="transmission-detector-pixel" is="detector">
+  <cuboid id="shape">
+    <left-front-bottom-point x="0.001" y="-0.001" z="0.0" />
+    <left-front-top-point  x="0.001" y="0.001" z="0.0" />
+    <left-back-bottom-point  x="0.001" y="-0.001" z="0.1" />
+    <right-front-bottom-point  x="-0.001" y="-0.001" z="0.0" />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+<idlist idname="NorthBank">
+  <id start="100001" end="100120"/>
+  <id start="101001" end="101120"/>
+  <id start="102001" end="102120"/>
+  <id start="103001" end="103120"/>
+  <id start="104001" end="104120"/>
+  <id start="105001" end="105120"/>
+  <id start="106001" end="106120"/>
+  <id start="107001" end="107120"/>
+  <id start="108001" end="108120"/>
+  <id start="109001" end="109120"/>  
+</idlist>
+
+<idlist idname="SouthBank">
+  <id start="118001" end="118120"/>
+  <id start="119001" end="119120"/>  
+  <id start="116001" end="116120"/>
+  <id start="117001" end="117120"/>
+  <id start="114001" end="114120"/>
+  <id start="115001" end="115120"/>
+  <id start="112001" end="112120"/>
+  <id start="113001" end="113120"/>
+  <id start="110001" end="110120"/>
+  <id start="111001" end="111120"/>
+</idlist>
+
+<idlist idname="TransmissionBank">
+  <id start="200001" end="200100"/>
+</idlist>
+
+<idlist idname="Monitor1">
+  <id val="601"/>
+</idlist>
+
+<idlist idname="Monitor2">
+  <id val="602"/>
+</idlist>
+
+</instrument>

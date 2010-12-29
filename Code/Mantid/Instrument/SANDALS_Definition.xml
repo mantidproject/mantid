@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="SANDALS" valid-from   ="1900-01-31 23:59:59"
+                           valid-to     ="2100-01-31 23:59:59"
+		           last-modified="2009-04-24 00:00:00">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF INSTRUMENT: 
+  
+       Assume for now the instrument consists of one bank and all detector positions
+       are given relative to the sample. Data obtained from Alan Soper.
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- detector components -->
+  
+  <component type="bank" name="Detectors" idlist="fdb">
+    <description>All the detectors</description>
+    <properties />
+    <location />
+  </component>
+
+  <!-- source and sample-position components -->
+
+  <component type="undulator">
+    <location z="-11.016" />
+  </component>
+
+  <component type="nickel-holder">
+    <location />
+  </component>
+
+
+  <!-- DEFINITION OF TYPES -->
+
+  <!-- Source types -->
+
+  <type name="undulator" is="Source">
+    <properties />
+  </type>
+  
+  <!-- Sample-position types -->
+
+  <type name="nickel-holder" is="SamplePos">
+    <properties />
+    
+    <cuboid id="some-test-shape">
+      <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.005" y="-0.1" z="0.02"  />
+      <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="some-test-shape" />
+  </type>  
+
+  <!-- Detectors types -->
+
+  <type name="bank">
+    <properties />
+    <component type="pixel">
+      <location r="-2.242" t="180" p="0" mark-as="monitor" />
+      <location r="4.679" t="0.01" p="0" mark-as="monitor" />
+      <location r="-2.242" t="180" p="0" mark-as="monitor" />
+<!--  These do exist in the ISIS raw file for this instrument but do not
+      actually physical exist on the instrument
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      <location r="2.6" t="15" p="0" />
+      -->
+      <location r="4.516" t="5.465" p="180" />
+      <location r="4.535" t="5.351" p="180" />
+      <location r="4.554" t="5.238" p="180" />
+      <location r="4.573" t="5.125" p="180" />
+      <location r="4.592" t="5.014" p="180" />
+      <location r="4.611" t="4.904" p="180" />
+      <location r="4.63" t="4.794" p="180" />
+      <location r="4.649" t="4.686" p="180" />
+      <location r="4.668" t="4.578" p="180" />
+      <location r="4.687" t="4.472" p="180" />
+      <location r="4.707" t="4.366" p="180" />
+      <location r="4.726" t="4.261" p="180" />
+      <location r="4.745" t="4.156" p="180" />
+      <location r="4.764" t="4.053" p="180" />
+      <location r="4.783" t="3.951" p="180" />
+      <location r="4.802" t="3.849" p="180" />
+      <location r="4.822" t="3.748" p="180" />
+      <location r="4.841" t="3.648" p="180" />
+      <location r="4.86" t="3.549" p="180" />
+      <location r="4.879" t="3.45" p="180" />
+      <location r="4.519" t="5.466" p="123" />
+      <location r="4.538" t="5.344" p="123" />
+      <location r="4.556" t="5.222" p="123" />
+      <location r="4.575" t="5.102" p="123" />
+      <location r="4.594" t="4.983" p="123" />
+      <location r="4.613" t="4.864" p="123" />
+      <location r="4.631" t="4.747" p="123" />
+      <location r="4.65" t="4.631" p="123" />
+      <location r="4.669" t="4.515" p="123" />
+      <location r="4.688" t="4.4" p="123" />
+      <location r="4.706" t="4.287" p="123" />
+      <location r="4.725" t="4.174" p="123" />
+      <location r="4.744" t="4.062" p="123" />
+      <location r="4.763" t="3.951" p="123" />
+      <location r="4.782" t="3.841" p="123" />
+      <location r="4.801" t="3.732" p="123" />
+      <location r="4.82" t="3.623" p="123" />
+      <location r="4.839" t="3.516" p="123" />
+      <location r="4.858" t="3.409" p="123" />
+      <location r="4.877" t="3.303" p="123" />
+      <location r="4.059" t="7.878" p="226" />
+      <location r="4.078" t="7.75" p="226" />
+      <location r="4.096" t="7.622" p="226" />
+      <location r="4.115" t="7.496" p="226" />
+      <location r="4.134" t="7.37" p="226" />
+      <location r="4.153" t="7.246" p="226" />
+      <location r="4.172" t="7.123" p="226" />
+      <location r="4.191" t="7.001" p="226" />
+      <location r="4.21" t="6.88" p="226" />
+      <location r="4.229" t="6.761" p="226" />
+      <location r="4.249" t="6.642" p="226" />
+      <location r="4.268" t="6.525" p="226" />
+      <location r="4.287" t="6.408" p="226" />
+      <location r="4.306" t="6.293" p="226" />
+      <location r="4.325" t="6.178" p="226" />
+      <location r="4.344" t="6.065" p="226" />
+      <location r="4.363" t="5.952" p="226" />
+      <location r="4.383" t="5.841" p="226" />
+      <location r="4.402" t="5.73" p="226" />
+      <location r="4.421" t="5.621" p="226" />
+      <location r="4.062" t="7.95" p="192" />
+      <location r="4.08" t="7.812" p="192" />
+      <location r="4.099" t="7.675" p="192" />
+      <location r="4.117" t="7.539" p="192" />
+      <location r="4.136" t="7.405" p="192" />
+      <location r="4.155" t="7.272" p="192" />
+      <location r="4.173" t="7.139" p="192" />
+      <location r="4.192" t="7.008" p="192" />
+      <location r="4.211" t="6.879" p="192" />
+      <location r="4.23" t="6.75" p="192" />
+      <location r="4.248" t="6.623" p="192" />
+      <location r="4.267" t="6.496" p="192" />
+      <location r="4.286" t="6.371" p="192" />
+      <location r="4.305" t="6.247" p="192" />
+      <location r="4.324" t="6.124" p="192" />
+      <location r="4.343" t="6.002" p="192" />
+      <location r="4.361" t="5.881" p="192" />
+      <location r="4.38" t="5.761" p="192" />
+      <location r="4.399" t="5.642" p="192" />
+      <location r="4.418" t="5.524" p="192" />
+      <location r="4.062" t="7.884" p="168" />
+      <location r="4.08" t="7.746" p="168" />
+      <location r="4.099" t="7.61" p="168" />
+      <location r="4.117" t="7.474" p="168" />
+      <location r="4.136" t="7.34" p="168" />
+      <location r="4.155" t="7.207" p="168" />
+      <location r="4.173" t="7.075" p="168" />
+      <location r="4.192" t="6.945" p="168" />
+      <location r="4.211" t="6.815" p="168" />
+      <location r="4.23" t="6.687" p="168" />
+      <location r="4.248" t="6.56" p="168" />
+      <location r="4.267" t="6.433" p="168" />
+      <location r="4.286" t="6.309" p="168" />
+      <location r="4.305" t="6.185" p="168" />
+      <location r="4.324" t="6.062" p="168" />
+      <location r="4.343" t="5.94" p="168" />
+      <location r="4.361" t="5.819" p="168" />
+      <location r="4.38" t="5.7" p="168" />
+      <location r="4.399" t="5.581" p="168" />
+      <location r="4.418" t="5.464" p="168" />
+      <location r="4.062" t="7.93" p="134" />
+      <location r="4.08" t="7.792" p="134" />
+      <location r="4.099" t="7.655" p="134" />
+      <location r="4.117" t="7.519" p="134" />
+      <location r="4.136" t="7.385" p="134" />
+      <location r="4.155" t="7.252" p="134" />
+      <location r="4.173" t="7.12" p="134" />
+      <location r="4.192" t="6.989" p="134" />
+      <location r="4.211" t="6.859" p="134" />
+      <location r="4.23" t="6.731" p="134" />
+      <location r="4.248" t="6.603" p="134" />
+      <location r="4.267" t="6.477" p="134" />
+      <location r="4.286" t="6.352" p="134" />
+      <location r="4.305" t="6.228" p="134" />
+      <location r="4.324" t="6.105" p="134" />
+      <location r="4.343" t="5.983" p="134" />
+      <location r="4.361" t="5.862" p="134" />
+      <location r="4.38" t="5.742" p="134" />
+      <location r="4.399" t="5.623" p="134" />
+      <location r="4.418" t="5.505" p="134" />
+      <location r="3.591" t="10.555" p="226" />
+      <location r="3.61" t="10.411" p="226" />
+      <location r="3.629" t="10.269" p="226" />
+      <location r="3.648" t="10.128" p="226" />
+      <location r="3.667" t="9.989" p="226" />
+      <location r="3.686" t="9.851" p="226" />
+      <location r="3.705" t="9.714" p="226" />
+      <location r="3.724" t="9.579" p="226" />
+      <location r="3.743" t="9.445" p="226" />
+      <location r="3.762" t="9.313" p="226" />
+      <location r="3.782" t="9.182" p="226" />
+      <location r="3.801" t="9.052" p="226" />
+      <location r="3.82" t="8.924" p="226" />
+      <location r="3.839" t="8.797" p="226" />
+      <location r="3.858" t="8.671" p="226" />
+      <location r="3.878" t="8.546" p="226" />
+      <location r="3.897" t="8.423" p="226" />
+      <location r="3.916" t="8.301" p="226" />
+      <location r="3.935" t="8.18" p="226" />
+      <location r="3.955" t="8.06" p="226" />
+      <location r="3.594" t="10.67" p="192" />
+      <location r="3.613" t="10.516" p="192" />
+      <location r="3.631" t="10.363" p="192" />
+      <location r="3.65" t="10.211" p="192" />
+      <location r="3.669" t="10.061" p="192" />
+      <location r="3.687" t="9.913" p="192" />
+      <location r="3.706" t="9.766" p="192" />
+      <location r="3.725" t="9.62" p="192" />
+      <location r="3.744" t="9.476" p="192" />
+      <location r="3.763" t="9.334" p="192" />
+      <location r="3.781" t="9.193" p="192" />
+      <location r="3.8" t="9.053" p="192" />
+      <location r="3.819" t="8.915" p="192" />
+      <location r="3.838" t="8.778" p="192" />
+      <location r="3.857" t="8.642" p="192" />
+      <location r="3.876" t="8.508" p="192" />
+      <location r="3.895" t="8.375" p="192" />
+      <location r="3.914" t="8.243" p="192" />
+      <location r="3.933" t="8.112" p="192" />
+      <location r="3.952" t="7.983" p="192" />
+      <location r="3.593" t="10.604" p="168" />
+      <location r="3.611" t="10.454" p="168" />
+      <location r="3.63" t="10.307" p="168" />
+      <location r="3.649" t="10.161" p="168" />
+      <location r="3.668" t="10.016" p="168" />
+      <location r="3.687" t="9.873" p="168" />
+      <location r="3.706" t="9.731" p="168" />
+      <location r="3.725" t="9.591" p="168" />
+      <location r="3.744" t="9.452" p="168" />
+      <location r="3.763" t="9.315" p="168" />
+      <location r="3.782" t="9.179" p="168" />
+      <location r="3.801" t="9.044" p="168" />
+      <location r="3.82" t="8.911" p="168" />
+      <location r="3.839" t="8.779" p="168" />
+      <location r="3.858" t="8.648" p="168" />
+      <location r="3.877" t="8.518" p="168" />
+      <location r="3.896" t="8.39" p="168" />
+      <location r="3.915" t="8.263" p="168" />
+      <location r="3.934" t="8.138" p="168" />
+      <location r="3.953" t="8.013" p="168" />
+      <location r="3.594" t="10.681" p="134" />
+      <location r="3.613" t="10.526" p="134" />
+      <location r="3.631" t="10.373" p="134" />
+      <location r="3.65" t="10.221" p="134" />
+      <location r="3.669" t="10.071" p="134" />
+      <location r="3.688" t="9.923" p="134" />
+      <location r="3.706" t="9.776" p="134" />
+      <location r="3.725" t="9.63" p="134" />
+      <location r="3.744" t="9.486" p="134" />
+      <location r="3.763" t="9.344" p="134" />
+      <location r="3.781" t="9.202" p="134" />
+      <location r="3.8" t="9.063" p="134" />
+      <location r="3.819" t="8.924" p="134" />
+      <location r="3.838" t="8.787" p="134" />
+      <location r="3.857" t="8.651" p="134" />
+      <location r="3.876" t="8.517" p="134" />
+      <location r="3.895" t="8.384" p="134" />
+      <location r="3.914" t="8.252" p="134" />
+      <location r="3.933" t="8.122" p="134" />
+      <location r="3.952" t="7.992" p="134" />
+      <location r="4.01" t="13.609" p="-26.5" />
+      <location r="4.028" t="13.476" p="-26.5" />
+      <location r="4.047" t="13.343" p="-26.5" />
+      <location r="4.066" t="13.212" p="-26.5" />
+      <location r="4.085" t="13.082" p="-26.5" />
+      <location r="4.104" t="12.953" p="-26.5" />
+      <location r="4.123" t="12.825" p="-26.5" />
+      <location r="4.142" t="12.699" p="-26.5" />
+      <location r="4.161" t="12.573" p="-26.5" />
+      <location r="4.18" t="12.449" p="-26.5" />
+      <location r="4.198" t="12.326" p="-26.5" />
+      <location r="4.217" t="12.204" p="-26.5" />
+      <location r="4.236" t="12.083" p="-26.5" />
+      <location r="4.256" t="11.963" p="-26.5" />
+      <location r="4.275" t="11.844" p="-26.5" />
+      <location r="4.294" t="11.726" p="-26.5" />
+      <location r="4.313" t="11.61" p="-26.5" />
+      <location r="4.332" t="11.494" p="-26.5" />
+      <location r="4.351" t="11.379" p="-26.5" />
+      <location r="4.37" t="11.266" p="-26.5" />
+      <location r="4.013" t="13.7" p="-8.5" />
+      <location r="4.031" t="13.556" p="-8.5" />
+      <location r="4.05" t="13.414" p="-8.5" />
+      <location r="4.068" t="13.273" p="-8.5" />
+      <location r="4.087" t="13.134" p="-8.5" />
+      <location r="4.105" t="12.996" p="-8.5" />
+      <location r="4.124" t="12.859" p="-8.5" />
+      <location r="4.142" t="12.723" p="-8.5" />
+      <location r="4.161" t="12.589" p="-8.5" />
+      <location r="4.18" t="12.455" p="-8.5" />
+      <location r="4.198" t="12.323" p="-8.5" />
+      <location r="4.217" t="12.192" p="-8.5" />
+      <location r="4.236" t="12.062" p="-8.5" />
+      <location r="4.254" t="11.934" p="-8.5" />
+      <location r="4.273" t="11.806" p="-8.5" />
+      <location r="4.292" t="11.68" p="-8.5" />
+      <location r="4.311" t="11.554" p="-8.5" />
+      <location r="4.329" t="11.43" p="-8.5" />
+      <location r="4.348" t="11.307" p="-8.5" />
+      <location r="4.367" t="11.185" p="-8.5" />
+      <location r="4.01" t="13.697" p="8.5" />
+      <location r="4.029" t="13.563" p="8.5" />
+      <location r="4.047" t="13.43" p="8.5" />
+      <location r="4.066" t="13.298" p="8.5" />
+      <location r="4.085" t="13.168" p="8.5" />
+      <location r="4.104" t="13.038" p="8.5" />
+      <location r="4.123" t="12.91" p="8.5" />
+      <location r="4.142" t="12.783" p="8.5" />
+      <location r="4.161" t="12.658" p="8.5" />
+      <location r="4.18" t="12.533" p="8.5" />
+      <location r="4.198" t="12.409" p="8.5" />
+      <location r="4.217" t="12.287" p="8.5" />
+      <location r="4.236" t="12.166" p="8.5" />
+      <location r="4.255" t="12.045" p="8.5" />
+      <location r="4.275" t="11.926" p="8.5" />
+      <location r="4.294" t="11.808" p="8.5" />
+      <location r="4.313" t="11.691" p="8.5" />
+      <location r="4.332" t="11.575" p="8.5" />
+      <location r="4.351" t="11.46" p="8.5" />
+      <location r="4.37" t="11.346" p="8.5" />
+      <location r="4.012" t="13.838" p="26.5" />
+      <location r="4.03" t="13.699" p="26.5" />
+      <location r="4.049" t="13.561" p="26.5" />
+      <location r="4.067" t="13.424" p="26.5" />
+      <location r="4.086" t="13.288" p="26.5" />
+      <location r="4.105" t="13.154" p="26.5" />
+      <location r="4.123" t="13.021" p="26.5" />
+      <location r="4.142" t="12.889" p="26.5" />
+      <location r="4.161" t="12.758" p="26.5" />
+      <location r="4.18" t="12.628" p="26.5" />
+      <location r="4.198" t="12.5" p="26.5" />
+      <location r="4.217" t="12.373" p="26.5" />
+      <location r="4.236" t="12.247" p="26.5" />
+      <location r="4.255" t="12.121" p="26.5" />
+      <location r="4.274" t="11.998" p="26.5" />
+      <location r="4.293" t="11.875" p="26.5" />
+      <location r="4.312" t="11.753" p="26.5" />
+      <location r="4.33" t="11.632" p="26.5" />
+      <location r="4.349" t="11.512" p="26.5" />
+      <location r="4.368" t="11.394" p="26.5" />
+      <location r="3.128" t="16.848" p="-26.5" />
+      <location r="3.147" t="16.669" p="-26.5" />
+      <location r="3.165" t="16.493" p="-26.5" />
+      <location r="3.184" t="16.318" p="-26.5" />
+      <location r="3.203" t="16.146" p="-26.5" />
+      <location r="3.222" t="15.976" p="-26.5" />
+      <location r="3.24" t="15.807" p="-26.5" />
+      <location r="3.259" t="15.641" p="-26.5" />
+      <location r="3.278" t="15.476" p="-26.5" />
+      <location r="3.297" t="15.313" p="-26.5" />
+      <location r="3.315" t="15.152" p="-26.5" />
+      <location r="3.334" t="14.993" p="-26.5" />
+      <location r="3.353" t="14.836" p="-26.5" />
+      <location r="3.372" t="14.681" p="-26.5" />
+      <location r="3.391" t="14.527" p="-26.5" />
+      <location r="3.41" t="14.375" p="-26.5" />
+      <location r="3.429" t="14.224" p="-26.5" />
+      <location r="3.448" t="14.076" p="-26.5" />
+      <location r="3.467" t="13.929" p="-26.5" />
+      <location r="3.486" t="13.783" p="-26.5" />
+      <location r="3.13" t="16.901" p="-8.5" />
+      <location r="3.148" t="16.716" p="-8.5" />
+      <location r="3.167" t="16.534" p="-8.5" />
+      <location r="3.185" t="16.353" p="-8.5" />
+      <location r="3.204" t="16.175" p="-8.5" />
+      <location r="3.222" t="15.998" p="-8.5" />
+      <location r="3.241" t="15.824" p="-8.5" />
+      <location r="3.259" t="15.652" p="-8.5" />
+      <location r="3.278" t="15.482" p="-8.5" />
+      <location r="3.297" t="15.313" p="-8.5" />
+      <location r="3.315" t="15.147" p="-8.5" />
+      <location r="3.334" t="14.982" p="-8.5" />
+      <location r="3.353" t="14.819" p="-8.5" />
+      <location r="3.372" t="14.658" p="-8.5" />
+      <location r="3.39" t="14.499" p="-8.5" />
+      <location r="3.409" t="14.341" p="-8.5" />
+      <location r="3.428" t="14.186" p="-8.5" />
+      <location r="3.447" t="14.032" p="-8.5" />
+      <location r="3.466" t="13.879" p="-8.5" />
+      <location r="3.485" t="13.729" p="-8.5" />
+      <location r="3.129" t="17.285" p="8.5" />
+      <location r="3.147" t="17.104" p="8.5" />
+      <location r="3.166" t="16.925" p="8.5" />
+      <location r="3.185" t="16.748" p="8.5" />
+      <location r="3.203" t="16.573" p="8.5" />
+      <location r="3.222" t="16.4" p="8.5" />
+      <location r="3.24" t="16.229" p="8.5" />
+      <location r="3.259" t="16.06" p="8.5" />
+      <location r="3.278" t="15.893" p="8.5" />
+      <location r="3.297" t="15.728" p="8.5" />
+      <location r="3.315" t="15.565" p="8.5" />
+      <location r="3.334" t="15.404" p="8.5" />
+      <location r="3.353" t="15.244" p="8.5" />
+      <location r="3.372" t="15.086" p="8.5" />
+      <location r="3.391" t="14.93" p="8.5" />
+      <location r="3.41" t="14.776" p="8.5" />
+      <location r="3.429" t="14.623" p="8.5" />
+      <location r="3.447" t="14.472" p="8.5" />
+      <location r="3.466" t="14.323" p="8.5" />
+      <location r="3.485" t="14.176" p="8.5" />
+      <location r="3.127" t="17.1" p="26.5" />
+      <location r="3.146" t="16.926" p="26.5" />
+      <location r="3.165" t="16.754" p="26.5" />
+      <location r="3.183" t="16.584" p="26.5" />
+      <location r="3.202" t="16.416" p="26.5" />
+      <location r="3.221" t="16.25" p="26.5" />
+      <location r="3.24" t="16.085" p="26.5" />
+      <location r="3.259" t="15.923" p="26.5" />
+      <location r="3.278" t="15.762" p="26.5" />
+      <location r="3.297" t="15.604" p="26.5" />
+      <location r="3.315" t="15.447" p="26.5" />
+      <location r="3.334" t="15.292" p="26.5" />
+      <location r="3.353" t="15.139" p="26.5" />
+      <location r="3.372" t="14.987" p="26.5" />
+      <location r="3.392" t="14.837" p="26.5" />
+      <location r="3.411" t="14.689" p="26.5" />
+      <location r="3.43" t="14.543" p="26.5" />
+      <location r="3.449" t="14.398" p="26.5" />
+      <location r="3.468" t="14.254" p="26.5" />
+      <location r="3.487" t="14.113" p="26.5" />
+      <location r="2.426" t="20.921" p="-26.5" />
+      <location r="2.445" t="20.69" p="-26.5" />
+      <location r="2.463" t="20.463" p="-26.5" />
+      <location r="2.482" t="20.24" p="-26.5" />
+      <location r="2.501" t="20.019" p="-26.5" />
+      <location r="2.519" t="19.802" p="-26.5" />
+      <location r="2.538" t="19.589" p="-26.5" />
+      <location r="2.557" t="19.378" p="-26.5" />
+      <location r="2.576" t="19.17" p="-26.5" />
+      <location r="2.595" t="18.966" p="-26.5" />
+      <location r="2.613" t="18.764" p="-26.5" />
+      <location r="2.632" t="18.566" p="-26.5" />
+      <location r="2.651" t="18.37" p="-26.5" />
+      <location r="2.67" t="18.177" p="-26.5" />
+      <location r="2.689" t="17.986" p="-26.5" />
+      <location r="2.708" t="17.799" p="-26.5" />
+      <location r="2.727" t="17.614" p="-26.5" />
+      <location r="2.747" t="17.431" p="-26.5" />
+      <location r="2.766" t="17.251" p="-26.5" />
+      <location r="2.785" t="17.074" p="-26.5" />
+      <location r="2.426" t="20.871" p="-8.5" />
+      <location r="2.445" t="20.641" p="-8.5" />
+      <location r="2.463" t="20.414" p="-8.5" />
+      <location r="2.482" t="20.191" p="-8.5" />
+      <location r="2.501" t="19.971" p="-8.5" />
+      <location r="2.519" t="19.754" p="-8.5" />
+      <location r="2.538" t="19.541" p="-8.5" />
+      <location r="2.557" t="19.331" p="-8.5" />
+      <location r="2.576" t="19.124" p="-8.5" />
+      <location r="2.595" t="18.919" p="-8.5" />
+      <location r="2.613" t="18.718" p="-8.5" />
+      <location r="2.632" t="18.52" p="-8.5" />
+      <location r="2.651" t="18.324" p="-8.5" />
+      <location r="2.67" t="18.132" p="-8.5" />
+      <location r="2.689" t="17.942" p="-8.5" />
+      <location r="2.708" t="17.754" p="-8.5" />
+      <location r="2.728" t="17.569" p="-8.5" />
+      <location r="2.747" t="17.387" p="-8.5" />
+      <location r="2.766" t="17.208" p="-8.5" />
+      <location r="2.785" t="17.031" p="-8.5" />
+      <location r="2.427" t="21.562" p="8.5" />
+      <location r="2.445" t="21.327" p="8.5" />
+      <location r="2.464" t="21.095" p="8.5" />
+      <location r="2.483" t="20.867" p="8.5" />
+      <location r="2.501" t="20.642" p="8.5" />
+      <location r="2.52" t="20.42" p="8.5" />
+      <location r="2.538" t="20.202" p="8.5" />
+      <location r="2.557" t="19.987" p="8.5" />
+      <location r="2.576" t="19.775" p="8.5" />
+      <location r="2.595" t="19.566" p="8.5" />
+      <location r="2.613" t="19.36" p="8.5" />
+      <location r="2.632" t="19.157" p="8.5" />
+      <location r="2.651" t="18.957" p="8.5" />
+      <location r="2.67" t="18.76" p="8.5" />
+      <location r="2.689" t="18.565" p="8.5" />
+      <location r="2.708" t="18.374" p="8.5" />
+      <location r="2.727" t="18.185" p="8.5" />
+      <location r="2.746" t="17.998" p="8.5" />
+      <location r="2.765" t="17.814" p="8.5" />
+      <location r="2.784" t="17.633" p="8.5" />
+      <location r="2.427" t="21.449" p="26.5" />
+      <location r="2.445" t="21.215" p="26.5" />
+      <location r="2.464" t="20.984" p="26.5" />
+      <location r="2.482" t="20.756" p="26.5" />
+      <location r="2.501" t="20.532" p="26.5" />
+      <location r="2.52" t="20.312" p="26.5" />
+      <location r="2.538" t="20.094" p="26.5" />
+      <location r="2.557" t="19.88" p="26.5" />
+      <location r="2.576" t="19.669" p="26.5" />
+      <location r="2.595" t="19.46" p="26.5" />
+      <location r="2.613" t="19.255" p="26.5" />
+      <location r="2.632" t="19.053" p="26.5" />
+      <location r="2.651" t="18.854" p="26.5" />
+      <location r="2.67" t="18.657" p="26.5" />
+      <location r="2.689" t="18.464" p="26.5" />
+      <location r="2.708" t="18.272" p="26.5" />
+      <location r="2.727" t="18.084" p="26.5" />
+      <location r="2.746" t="17.898" p="26.5" />
+      <location r="2.765" t="17.715" p="26.5" />
+      <location r="2.784" t="17.534" p="26.5" />
+      <location r="1.951" t="25.861" p="204.5" />
+      <location r="1.969" t="25.548" p="204.5" />
+      <location r="1.987" t="25.24" p="204.5" />
+      <location r="2.005" t="24.938" p="204.5" />
+      <location r="2.023" t="24.641" p="204.5" />
+      <location r="2.041" t="24.349" p="204.5" />
+      <location r="2.06" t="24.063" p="204.5" />
+      <location r="2.078" t="23.782" p="204.5" />
+      <location r="2.097" t="23.506" p="204.5" />
+      <location r="2.115" t="23.234" p="204.5" />
+      <location r="2.134" t="22.967" p="204.5" />
+      <location r="2.152" t="22.705" p="204.5" />
+      <location r="2.171" t="22.447" p="204.5" />
+      <location r="2.189" t="22.194" p="204.5" />
+      <location r="2.208" t="21.945" p="204.5" />
+      <location r="2.227" t="21.7" p="204.5" />
+      <location r="2.246" t="21.459" p="204.5" />
+      <location r="2.264" t="21.223" p="204.5" />
+      <location r="2.283" t="20.99" p="204.5" />
+      <location r="2.302" t="20.761" p="204.5" />
+      <location r="1.951" t="26.216" p="187" />
+      <location r="1.969" t="25.899" p="187" />
+      <location r="1.987" t="25.588" p="187" />
+      <location r="2.005" t="25.283" p="187" />
+      <location r="2.023" t="24.983" p="187" />
+      <location r="2.042" t="24.689" p="187" />
+      <location r="2.06" t="24.399" p="187" />
+      <location r="2.078" t="24.115" p="187" />
+      <location r="2.097" t="23.836" p="187" />
+      <location r="2.115" t="23.561" p="187" />
+      <location r="2.134" t="23.292" p="187" />
+      <location r="2.152" t="23.027" p="187" />
+      <location r="2.171" t="22.766" p="187" />
+      <location r="2.189" t="22.51" p="187" />
+      <location r="2.208" t="22.259" p="187" />
+      <location r="2.227" t="22.011" p="187" />
+      <location r="2.245" t="21.768" p="187" />
+      <location r="2.264" t="21.528" p="187" />
+      <location r="2.283" t="21.293" p="187" />
+      <location r="2.302" t="21.061" p="187" />
+      <location r="1.951" t="25.943" p="173" />
+      <location r="1.969" t="25.629" p="173" />
+      <location r="1.987" t="25.32" p="173" />
+      <location r="2.005" t="25.017" p="173" />
+      <location r="2.023" t="24.72" p="173" />
+      <location r="2.041" t="24.427" p="173" />
+      <location r="2.06" t="24.14" p="173" />
+      <location r="2.078" t="23.859" p="173" />
+      <location r="2.097" t="23.582" p="173" />
+      <location r="2.115" t="23.309" p="173" />
+      <location r="2.134" t="23.042" p="173" />
+      <location r="2.152" t="22.779" p="173" />
+      <location r="2.171" t="22.521" p="173" />
+      <location r="2.189" t="22.267" p="173" />
+      <location r="2.208" t="22.017" p="173" />
+      <location r="2.227" t="21.772" p="173" />
+      <location r="2.246" t="21.53" p="173" />
+      <location r="2.264" t="21.293" p="173" />
+      <location r="2.283" t="21.06" p="173" />
+      <location r="2.302" t="20.83" p="173" />
+      <location r="1.952" t="26.565" p="155.5" />
+      <location r="1.97" t="26.246" p="155.5" />
+      <location r="1.988" t="25.932" p="155.5" />
+      <location r="2.006" t="25.623" p="155.5" />
+      <location r="2.024" t="25.32" p="155.5" />
+      <location r="2.042" t="25.023" p="155.5" />
+      <location r="2.06" t="24.731" p="155.5" />
+      <location r="2.078" t="24.444" p="155.5" />
+      <location r="2.097" t="24.161" p="155.5" />
+      <location r="2.115" t="23.884" p="155.5" />
+      <location r="2.134" t="23.612" p="155.5" />
+      <location r="2.152" t="23.344" p="155.5" />
+      <location r="2.17" t="23.081" p="155.5" />
+      <location r="2.189" t="22.822" p="155.5" />
+      <location r="2.208" t="22.568" p="155.5" />
+      <location r="2.226" t="22.318" p="155.5" />
+      <location r="2.245" t="22.072" p="155.5" />
+      <location r="2.264" t="21.83" p="155.5" />
+      <location r="2.282" t="21.592" p="155.5" />
+      <location r="2.301" t="21.358" p="155.5" />
+      <location r="1.471" t="33.078" p="187" />
+      <location r="1.489" t="32.661" p="187" />
+      <location r="1.507" t="32.254" p="187" />
+      <location r="1.525" t="31.856" p="187" />
+      <location r="1.543" t="31.468" p="187" />
+      <location r="1.562" t="31.089" p="187" />
+      <location r="1.58" t="30.719" p="187" />
+      <location r="1.599" t="30.357" p="187" />
+      <location r="1.617" t="30.004" p="187" />
+      <location r="1.636" t="29.659" p="187" />
+      <location r="1.654" t="29.321" p="187" />
+      <location r="1.673" t="28.991" p="187" />
+      <location r="1.692" t="28.668" p="187" />
+      <location r="1.71" t="28.352" p="187" />
+      <location r="1.729" t="28.043" p="187" />
+      <location r="1.748" t="27.741" p="187" />
+      <location r="1.767" t="27.445" p="187" />
+      <location r="1.786" t="27.156" p="187" />
+      <location r="1.805" t="26.873" p="187" />
+      <location r="1.824" t="26.595" p="187" />
+      <location r="1.471" t="33.415" p="173" />
+      <location r="1.489" t="32.993" p="173" />
+      <location r="1.507" t="32.582" p="173" />
+      <location r="1.525" t="32.181" p="173" />
+      <location r="1.544" t="31.789" p="173" />
+      <location r="1.562" t="31.406" p="173" />
+      <location r="1.58" t="31.033" p="173" />
+      <location r="1.599" t="30.667" p="173" />
+      <location r="1.617" t="30.31" p="173" />
+      <location r="1.636" t="29.962" p="173" />
+      <location r="1.654" t="29.621" p="173" />
+      <location r="1.673" t="29.287" p="173" />
+      <location r="1.692" t="28.961" p="173" />
+      <location r="1.71" t="28.642" p="173" />
+      <location r="1.729" t="28.33" p="173" />
+      <location r="1.748" t="28.025" p="173" />
+      <location r="1.767" t="27.726" p="173" />
+      <location r="1.786" t="27.433" p="173" />
+      <location r="1.805" t="27.147" p="173" />
+      <location r="1.824" t="26.867" p="173" />
+      <location r="1.471" t="33.479" p="156.5" />
+      <location r="1.489" t="33.057" p="156.5" />
+      <location r="1.507" t="32.646" p="156.5" />
+      <location r="1.526" t="32.244" p="156.5" />
+      <location r="1.544" t="31.851" p="156.5" />
+      <location r="1.562" t="31.468" p="156.5" />
+      <location r="1.58" t="31.093" p="156.5" />
+      <location r="1.599" t="30.727" p="156.5" />
+      <location r="1.617" t="30.369" p="156.5" />
+      <location r="1.636" t="30.02" p="156.5" />
+      <location r="1.654" t="29.678" p="156.5" />
+      <location r="1.673" t="29.344" p="156.5" />
+      <location r="1.691" t="29.017" p="156.5" />
+      <location r="1.71" t="28.698" p="156.5" />
+      <location r="1.729" t="28.385" p="156.5" />
+      <location r="1.748" t="28.079" p="156.5" />
+      <location r="1.767" t="27.78" p="156.5" />
+      <location r="1.786" t="27.487" p="156.5" />
+      <location r="1.805" t="27.2" p="156.5" />
+      <location r="1.824" t="26.919" p="156.5" />
+      <location r="1.228" t="37.977" p="-26.5" />
+      <location r="1.245" t="37.382" p="-26.5" />
+      <location r="1.262" t="36.803" p="-26.5" />
+      <location r="1.279" t="36.239" p="-26.5" />
+      <location r="1.296" t="35.69" p="-26.5" />
+      <location r="1.313" t="35.155" p="-26.5" />
+      <location r="1.33" t="34.634" p="-26.5" />
+      <location r="1.347" t="34.127" p="-26.5" />
+      <location r="1.365" t="33.632" p="-26.5" />
+      <location r="1.382" t="33.15" p="-26.5" />
+      <location r="1.4" t="32.68" p="-26.5" />
+      <location r="1.418" t="32.222" p="-26.5" />
+      <location r="1.435" t="31.775" p="-26.5" />
+      <location r="1.453" t="31.339" p="-26.5" />
+      <location r="1.471" t="30.913" p="-26.5" />
+      <location r="1.489" t="30.498" p="-26.5" />
+      <location r="1.507" t="30.093" p="-26.5" />
+      <location r="1.526" t="29.698" p="-26.5" />
+      <location r="1.544" t="29.312" p="-26.5" />
+      <location r="1.562" t="28.935" p="-26.5" />
+      <location r="1.228" t="38.007" p="-8.5" />
+      <location r="1.245" t="37.412" p="-8.5" />
+      <location r="1.262" t="36.833" p="-8.5" />
+      <location r="1.279" t="36.269" p="-8.5" />
+      <location r="1.296" t="35.719" p="-8.5" />
+      <location r="1.313" t="35.184" p="-8.5" />
+      <location r="1.33" t="34.663" p="-8.5" />
+      <location r="1.347" t="34.155" p="-8.5" />
+      <location r="1.365" t="33.66" p="-8.5" />
+      <location r="1.382" t="33.177" p="-8.5" />
+      <location r="1.4" t="32.707" p="-8.5" />
+      <location r="1.418" t="32.248" p="-8.5" />
+      <location r="1.435" t="31.801" p="-8.5" />
+      <location r="1.453" t="31.365" p="-8.5" />
+      <location r="1.471" t="30.939" p="-8.5" />
+      <location r="1.489" t="30.524" p="-8.5" />
+      <location r="1.507" t="30.118" p="-8.5" />
+      <location r="1.526" t="29.722" p="-8.5" />
+      <location r="1.544" t="29.336" p="-8.5" />
+      <location r="1.562" t="28.959" p="-8.5" />
+      <location r="1.228" t="37.933" p="8.5" />
+      <location r="1.245" t="37.339" p="8.5" />
+      <location r="1.262" t="36.761" p="8.5" />
+      <location r="1.279" t="36.197" p="8.5" />
+      <location r="1.296" t="35.649" p="8.5" />
+      <location r="1.313" t="35.115" p="8.5" />
+      <location r="1.33" t="34.594" p="8.5" />
+      <location r="1.347" t="34.087" p="8.5" />
+      <location r="1.365" t="33.593" p="8.5" />
+      <location r="1.382" t="33.111" p="8.5" />
+      <location r="1.4" t="32.642" p="8.5" />
+      <location r="1.418" t="32.184" p="8.5" />
+      <location r="1.435" t="31.737" p="8.5" />
+      <location r="1.453" t="31.302" p="8.5" />
+      <location r="1.471" t="30.877" p="8.5" />
+      <location r="1.489" t="30.462" p="8.5" />
+      <location r="1.507" t="30.058" p="8.5" />
+      <location r="1.526" t="29.663" p="8.5" />
+      <location r="1.544" t="29.277" p="8.5" />
+      <location r="1.562" t="28.9" p="8.5" />
+      <location r="1.228" t="37.833" p="26.5" />
+      <location r="1.245" t="37.24" p="26.5" />
+      <location r="1.261" t="36.663" p="26.5" />
+      <location r="1.278" t="36.101" p="26.5" />
+      <location r="1.295" t="35.553" p="26.5" />
+      <location r="1.313" t="35.02" p="26.5" />
+      <location r="1.33" t="34.501" p="26.5" />
+      <location r="1.347" t="33.995" p="26.5" />
+      <location r="1.365" t="33.502" p="26.5" />
+      <location r="1.382" t="33.022" p="26.5" />
+      <location r="1.4" t="32.553" p="26.5" />
+      <location r="1.418" t="32.097" p="26.5" />
+      <location r="1.435" t="31.651" p="26.5" />
+      <location r="1.453" t="31.217" p="26.5" />
+      <location r="1.471" t="30.793" p="26.5" />
+      <location r="1.489" t="30.379" p="26.5" />
+      <location r="1.508" t="29.976" p="26.5" />
+      <location r="1.526" t="29.582" p="26.5" />
+      <location r="1.544" t="29.197" p="26.5" />
+      <location r="1.562" t="28.821" p="26.5" />
+      <location r="1.228" t="37.833" p="26.5" />
+      <location r="1.245" t="37.24" p="26.5" />
+      <location r="1.261" t="36.663" p="26.5" />
+      <location r="1.278" t="36.101" p="26.5" />
+      <location r="1.295" t="35.553" p="26.5" />
+      <location r="1.313" t="35.02" p="26.5" />
+      <location r="1.33" t="34.501" p="26.5" />
+      <location r="1.347" t="33.995" p="26.5" />
+      <location r="1.365" t="33.502" p="26.5" />
+      <location r="1.382" t="33.022" p="26.5" />
+      <location r="1.4" t="32.553" p="26.5" />
+      <location r="1.418" t="32.097" p="26.5" />
+      <location r="1.435" t="31.651" p="26.5" />
+      <location r="1.453" t="31.217" p="26.5" />
+      <location r="1.471" t="30.793" p="26.5" />
+      <location r="1.489" t="30.379" p="26.5" />
+      <location r="1.508" t="29.976" p="26.5" />
+      <location r="1.526" t="29.582" p="26.5" />
+      <location r="1.544" t="29.197" p="26.5" />
+      <location r="1.562" t="28.821" p="26.5" />
+    </component>
+  </type>
+
+  <type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.005" y="-0.1" z="0.0001"  />
+      <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+
+  <idlist idname="fdb">
+    <id start="1" end="3" />  <!-- monitors -->
+    <id start="101" end="140" />
+    <id start="201" end="280" />
+    <id start="301" end="380" />
+    <id start="401" end="480" />
+    <id start="501" end="580" />
+    <id start="601" end="680" />
+    <id start="701" end="780" />
+    <id start="801" end="860" />
+    <id start="901" end="980" />
+    <id start="1001" end="1020" />
+  </idlist>
+  
+</instrument>

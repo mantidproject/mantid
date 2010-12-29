@@ -1,0 +1,2855 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="MERLIN" valid-from   ="1900-01-31 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2010-11-03 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+    The data for Merlin was obtained from Robert Bewley.
+  
+  -->
+
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="undulator">
+    <location z="-11.8" />
+  </component>
+  <type name="undulator" is="Source"> </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  <type name="sample-position" is="SamplePos"></type>
+  
+  
+  <!-- DETECTORS -->
+  
+  <component type="door1" idlist="door1">
+    <location />
+  </component>
+  
+  <!-- Uncomment to include door 6. If this is done you MUST also
+       uncomment the <idlist name="door6"> at the bottom of this file
+       -->
+  <component type="door2" idlist="door2">
+    <location />
+  </component>
+  
+  <component type="door3" idlist="door3">
+    <location />
+  </component>
+  
+  <component type="door4" idlist="door4">
+    <location />
+  </component>
+  
+  <component type="door5" idlist="door5">
+    <location />
+  </component>
+  
+  <component type="door6" idlist="door6">
+    <location />
+  </component>
+  
+  <component type="door7" idlist="door7">
+    <location />
+  </component>
+  
+  <component type="door8" idlist="door8">
+    <location />
+  </component>
+  
+  <component type="door9" idlist="door9">
+    <location />
+  </component>
+
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <type name="monitors">
+    <component type="monitor" mark-as="monitor">
+      <location r="3.25800" t="180.0" p="0.0" />
+      <location r="1.50400" t="180.0" p="0.0" />
+      <location r="1.50400" t="180.0" p="0.0" />
+      <location r="1.50400" t="180.0" p="0.0" />
+      <location r="1.50400" t="180.0" p="0.0" />
+      <location r="4.24700" t="0.000" p="0.0" />
+      <location r="4.24700" t="0.000" p="0.0" />
+      <location r="4.24700" t="0.000" p="0.0" />
+      <location r="4.24700" t="0.000" p="0.0" />
+    </component>
+  </type>
+
+  <type name="door1">
+    <component type="standard-tube">
+      <location r="2.5" t="-45.01000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-44.37977"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-43.74954"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-43.11931"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-42.48908"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-41.85885"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-41.22862"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-40.59839"> <facing x="0" y="0" z="0"/> </location>
+
+      <location r="2.5" t="-39.97000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-39.33977"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-38.70954"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-38.07931"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-37.44908"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-36.81885"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-36.18862"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-35.55839"> <facing x="0" y="0" z="0"/> </location>
+                                    
+      <location r="2.5" t="-34.93000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-34.29977"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-33.66954"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-33.03931"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-32.40908"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-31.77885"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-31.14863"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-30.51840"> <facing x="0" y="0" z="0"/> </location>
+                                    
+      <location r="2.5" t="-29.89001"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-29.25978"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-28.62955"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-27.99932"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-27.36909"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-26.73886"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-26.10863"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-25.47840"> <facing x="0" y="0" z="0"/> </location>      
+    </component>      
+  </type>
+  
+  <type name="door2">
+    <component type="standard-tube">
+      <location r="2.5" t="-23.57801"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-22.94778"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-22.31755"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-21.68732"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-21.05709"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-20.42686"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-19.79664"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-19.16641"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="-18.53802"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-17.90779"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-17.27756"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-16.64733"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-16.01710"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-15.38687"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-14.75664"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-14.12642"> <facing x="0" y="0" z="0"/> </location> 
+      
+      <location r="2.5" t="-13.49803"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-12.86780"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-12.23757"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-11.60734"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-10.97712"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-10.34689"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-9.716660"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-9.086440"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="-8.458050"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-7.827830"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-7.197600"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-6.567380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-5.937160"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-5.306940"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-4.676720"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-4.046510"> <facing x="0" y="0" z="0"/> </location> 
+    </component>
+  </type>
+  
+  <type name="door3">
+    <component type="straight-through-beam-tube" >
+      <location r="2.50937" t="5.41821" p="113.91585" > </location>
+      <location r="2.50937" t="5.19467" p="107.56693" > </location>   
+      <location r="2.50937" t="5.04030" p="100.73910" > </location>
+      <location r="2.50937" t="4.96155" p="93.58839" > </location>   
+      <location r="2.50937" t="4.96203" p="86.32413" > </location>
+      <location r="2.50937" t="5.04172" p="79.17615" > </location>   
+      <location r="2.50937" t="5.19697" p="72.35330" > </location>
+      <location r="2.50937" t="5.42130" p="66.01085" > </location>   
+
+      <location r="2.88977" t="30.17630" p="-93.79165" > </location>
+      <location r="2.88977" t="30.14056" p="-92.70872" > </location>   
+      <location r="2.88977" t="30.11674" p="-91.62351" > </location>
+      <location r="2.88977" t="30.10486" p="-90.53695" > </location>   
+      <location r="2.88977" t="30.10493" p="-89.44993" > </location>
+      <location r="2.88977" t="30.11696" p="-88.36337" > </location>   
+      <location r="2.88977" t="30.14092" p="-87.27819" > </location>
+      <location r="2.88977" t="30.17680" p="-86.19529" > </location>         
+    </component>
+    <component type="standard-tube"> 
+      <location r="2.5" t="2.838180 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="3.468370 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="4.098580 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="4.728790 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="5.359010 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="5.989230 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="6.619450 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="7.249670 "> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="7.878060 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="8.508280 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="9.138510 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="9.768730 "> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="10.398960"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="11.029190"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="11.659410"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="12.289640"> <facing x="0" y="0" z="0"/> </location>    
+      <location r="2.5" t="12.918030"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="13.548260"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="14.178490"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="14.808710"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="15.438940"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="16.069170"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="16.699400"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="17.329630"> <facing x="0" y="0" z="0"/> </location> 
+    </component>
+  </type>
+  
+  <type name="door4">
+    <component type="standard-tube">
+      <location r="2.5" t="19.163020"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="19.793250"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="20.423470"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="21.053700"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="21.683930"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="22.314160"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="22.944390"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="23.574620"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="24.204010"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="24.834240"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="25.464470"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="26.094700"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="26.724930"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="27.355160"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="27.985390"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="28.615620"> <facing x="0" y="0" z="0"/> </location> 
+      
+      <location r="2.5" t="29.247010"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="29.877240"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="30.507470"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="31.137700"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="31.767920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="32.398150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="33.028380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="33.658610"> <facing x="0" y="0" z="0"/> </location> 
+      
+      <location r="2.5" t="34.288000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="34.918230"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="35.548460"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="36.178690"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="36.808920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="37.439150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="38.069380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="38.699610"> <facing x="0" y="0" z="0"/> </location>      
+    </component>  
+  </type>
+  
+  <type name="door5">
+    <component type="standard-tube">
+      <location r="2.5" t="40.587000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="41.217230"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="41.847460"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="42.477690"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="43.107920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="43.738150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="44.368380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="44.998610"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="45.629000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="46.259230"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="46.889460"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="47.519690"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="48.149920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="48.780150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="49.410380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="50.040610"> <facing x="0" y="0" z="0"/> </location>  
+      
+      <location r="2.5" t="50.671000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="51.301230"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="51.931460"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="52.561690"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="53.191920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="53.822150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="54.452380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="55.082610"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="55.713000"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="56.343230"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="56.973460"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="57.603690"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="58.233920"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="58.864150"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="59.494380"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="60.124610"> <facing x="0" y="0" z="0"/> </location>      
+    </component>  
+  </type>
+  
+  <type name="door6">
+    <component type="standard-tube">
+      <location r="2.5" t="61.817990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="62.448220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="63.078450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="63.708680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="64.338910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="64.969140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="65.599370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="66.229600"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="66.859990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="67.490220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="68.120450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="68.750680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="69.380910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="70.011140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="70.641370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="71.271600"> <facing x="0" y="0" z="0"/> </location> 
+      
+      <location r="2.5" t="71.901990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="72.532220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="73.162450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="73.792680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="74.422910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="75.053140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="75.683370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="76.313600"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="76.943990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="77.574220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="78.204450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="78.834680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="79.464910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="80.095140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="80.725370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="81.355600"> <facing x="0" y="0" z="0"/> </location>      
+    </component>  
+  </type>
+  
+  <type name="door7">
+    <component type="standard-tube">
+      <location r="2.5" t="83.278990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="83.909220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="84.539450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="85.169680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="85.799910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="86.430140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="87.060370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="87.690600"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="88.320990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="88.951220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="89.581450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="90.211680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="90.841910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="91.472140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="92.102370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="92.732600"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="93.362990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="93.993220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="94.623450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="95.253680"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="95.883910"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="96.514140"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="97.144370"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="97.774600"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="98.404990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="99.035220"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="99.665450"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="100.29568"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="100.92591"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="101.55614"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="102.18637"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="102.81660"> <facing x="0" y="0" z="0"/> </location>      
+    </component>  
+  </type>
+  
+  <type name="door8">
+    <component type="standard-tube">
+      <location r="2.5" t="104.71099"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="105.34122"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="105.97145"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="106.60168"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="107.23191"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="107.86214"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="108.49237"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="109.12260"> <facing x="0" y="0" z="0"/> </location>
+                                    
+      <location r="2.5" t="109.75299"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="110.38322"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="111.01345"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="111.64368"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="112.27391"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="112.90414"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="113.53437"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="114.16460"> <facing x="0" y="0" z="0"/> </location>
+                                    
+      <location r="2.5" t="114.79499"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="115.42522"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="116.05545"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="116.68568"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="117.31591"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="117.94614"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="118.57636"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="119.20659"> <facing x="0" y="0" z="0"/> </location>                                        
+    </component>  
+  </type>
+  
+  <type name="door9">
+    <component type="standard-tube">
+      <location r="2.5" t="121.19498"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="121.82521"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="122.45544"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="123.08567"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="123.71590"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="124.34613"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="124.97636"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="125.60659"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="126.23698"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="126.86721"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="127.49744"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="128.12767"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="128.75790"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="129.38813"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="130.01836"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="130.64859"> <facing x="0" y="0" z="0"/> </location>
+      
+      <location r="2.5" t="131.27898"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="131.90921"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="132.53944"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="133.16967"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="133.79990"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="134.43013"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="135.06036"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="135.69059"> <facing x="0" y="0" z="0"/> </location>                                        
+    </component>  
+  </type>
+   
+  <type name="standard-tube" outline="yes">
+    <component type="standard-pixel">
+      <location y="-1.4635693359375"/>
+      <location y="-1.4607080078125"/>
+      <location y="-1.4578466796875"/>
+      <location y="-1.4549853515625"/>
+      <location y="-1.4521240234375"/>
+      <location y="-1.4492626953125"/>
+      <location y="-1.4464013671875"/>
+      <location y="-1.4435400390625"/>
+      <location y="-1.4406787109375"/>
+      <location y="-1.4378173828125"/>
+      <location y="-1.4349560546875"/>
+      <location y="-1.4320947265625"/>
+      <location y="-1.4292333984375"/>
+      <location y="-1.4263720703125"/>
+      <location y="-1.4235107421875"/>
+      <location y="-1.4206494140625"/>
+      <location y="-1.4177880859375"/>
+      <location y="-1.4149267578125"/>
+      <location y="-1.4120654296875"/>
+      <location y="-1.4092041015625"/>
+      <location y="-1.4063427734375"/>
+      <location y="-1.4034814453125"/>
+      <location y="-1.4006201171875"/>
+      <location y="-1.3977587890625"/>
+      <location y="-1.3948974609375"/>
+      <location y="-1.3920361328125"/>
+      <location y="-1.3891748046875"/>
+      <location y="-1.3863134765625"/>
+      <location y="-1.3834521484375"/>
+      <location y="-1.3805908203125"/>
+      <location y="-1.3777294921875"/>
+      <location y="-1.3748681640625"/>
+      <location y="-1.3720068359375"/>
+      <location y="-1.3691455078125"/>
+      <location y="-1.3662841796875"/>
+      <location y="-1.3634228515625"/>
+      <location y="-1.3605615234375"/>
+      <location y="-1.3577001953125"/>
+      <location y="-1.3548388671875"/>
+      <location y="-1.3519775390625"/>
+      <location y="-1.3491162109375"/>
+      <location y="-1.3462548828125"/>
+      <location y="-1.3433935546875"/>
+      <location y="-1.3405322265625"/>
+      <location y="-1.3376708984375"/>
+      <location y="-1.3348095703125"/>
+      <location y="-1.3319482421875"/>
+      <location y="-1.3290869140625"/>
+      <location y="-1.3262255859375"/>
+      <location y="-1.3233642578125"/>
+      <location y="-1.3205029296875"/>
+      <location y="-1.3176416015625"/>
+      <location y="-1.3147802734375"/>
+      <location y="-1.3119189453125"/>
+      <location y="-1.3090576171875"/>
+      <location y="-1.3061962890625"/>
+      <location y="-1.3033349609375"/>
+      <location y="-1.3004736328125"/>
+      <location y="-1.2976123046875"/>
+      <location y="-1.2947509765625"/>
+      <location y="-1.2918896484375"/>
+      <location y="-1.2890283203125"/>
+      <location y="-1.2861669921875"/>
+      <location y="-1.2833056640625"/>
+      <location y="-1.2804443359375"/>
+      <location y="-1.2775830078125"/>
+      <location y="-1.2747216796875"/>
+      <location y="-1.2718603515625"/>
+      <location y="-1.2689990234375"/>
+      <location y="-1.2661376953125"/>
+      <location y="-1.2632763671875"/>
+      <location y="-1.2604150390625"/>
+      <location y="-1.2575537109375"/>
+      <location y="-1.2546923828125"/>
+      <location y="-1.2518310546875"/>
+      <location y="-1.2489697265625"/>
+      <location y="-1.2461083984375"/>
+      <location y="-1.2432470703125"/>
+      <location y="-1.2403857421875"/>
+      <location y="-1.2375244140625"/>
+      <location y="-1.23466308593749"/>
+      <location y="-1.23180175781249"/>
+      <location y="-1.22894042968749"/>
+      <location y="-1.22607910156249"/>
+      <location y="-1.22321777343749"/>
+      <location y="-1.22035644531249"/>
+      <location y="-1.21749511718749"/>
+      <location y="-1.21463378906249"/>
+      <location y="-1.21177246093749"/>
+      <location y="-1.20891113281249"/>
+      <location y="-1.20604980468749"/>
+      <location y="-1.20318847656249"/>
+      <location y="-1.20032714843749"/>
+      <location y="-1.19746582031249"/>
+      <location y="-1.19460449218749"/>
+      <location y="-1.19174316406249"/>
+      <location y="-1.18888183593749"/>
+      <location y="-1.18602050781249"/>
+      <location y="-1.18315917968749"/>
+      <location y="-1.18029785156249"/>
+      <location y="-1.17743652343749"/>
+      <location y="-1.17457519531249"/>
+      <location y="-1.17171386718749"/>
+      <location y="-1.16885253906249"/>
+      <location y="-1.16599121093749"/>
+      <location y="-1.16312988281249"/>
+      <location y="-1.16026855468749"/>
+      <location y="-1.15740722656249"/>
+      <location y="-1.15454589843749"/>
+      <location y="-1.15168457031249"/>
+      <location y="-1.14882324218749"/>
+      <location y="-1.14596191406249"/>
+      <location y="-1.14310058593749"/>
+      <location y="-1.14023925781249"/>
+      <location y="-1.13737792968749"/>
+      <location y="-1.13451660156249"/>
+      <location y="-1.13165527343749"/>
+      <location y="-1.12879394531249"/>
+      <location y="-1.12593261718749"/>
+      <location y="-1.12307128906249"/>
+      <location y="-1.12020996093749"/>
+      <location y="-1.11734863281249"/>
+      <location y="-1.11448730468749"/>
+      <location y="-1.11162597656249"/>
+      <location y="-1.10876464843749"/>
+      <location y="-1.10590332031249"/>
+      <location y="-1.10304199218749"/>
+      <location y="-1.10018066406249"/>
+      <location y="-1.09731933593749"/>
+      <location y="-1.09445800781249"/>
+      <location y="-1.09159667968749"/>
+      <location y="-1.08873535156249"/>
+      <location y="-1.08587402343749"/>
+      <location y="-1.08301269531249"/>
+      <location y="-1.08015136718749"/>
+      <location y="-1.07729003906249"/>
+      <location y="-1.07442871093749"/>
+      <location y="-1.07156738281249"/>
+      <location y="-1.06870605468749"/>
+      <location y="-1.06584472656249"/>
+      <location y="-1.06298339843749"/>
+      <location y="-1.06012207031249"/>
+      <location y="-1.05726074218749"/>
+      <location y="-1.05439941406249"/>
+      <location y="-1.05153808593749"/>
+      <location y="-1.04867675781249"/>
+      <location y="-1.04581542968749"/>
+      <location y="-1.04295410156249"/>
+      <location y="-1.04009277343749"/>
+      <location y="-1.03723144531249"/>
+      <location y="-1.03437011718749"/>
+      <location y="-1.03150878906249"/>
+      <location y="-1.02864746093749"/>
+      <location y="-1.02578613281249"/>
+      <location y="-1.02292480468749"/>
+      <location y="-1.02006347656249"/>
+      <location y="-1.01720214843749"/>
+      <location y="-1.01434082031249"/>
+      <location y="-1.01147949218749"/>
+      <location y="-1.00861816406249"/>
+      <location y="-1.00575683593749"/>
+      <location y="-1.00289550781249"/>
+      <location y="-1.00003417968749"/>
+      <location y="-0.99717285156249"/>
+      <location y="-0.99431152343749"/>
+      <location y="-0.99145019531249"/>
+      <location y="-0.98858886718749"/>
+      <location y="-0.98572753906249"/>
+      <location y="-0.98286621093749"/>
+      <location y="-0.98000488281249"/>
+      <location y="-0.97714355468749"/>
+      <location y="-0.97428222656249"/>
+      <location y="-0.97142089843749"/>
+      <location y="-0.96855957031249"/>
+      <location y="-0.96569824218749"/>
+      <location y="-0.962836914062491"/>
+      <location y="-0.959975585937491"/>
+      <location y="-0.957114257812491"/>
+      <location y="-0.954252929687491"/>
+      <location y="-0.951391601562491"/>
+      <location y="-0.948530273437491"/>
+      <location y="-0.945668945312491"/>
+      <location y="-0.942807617187491"/>
+      <location y="-0.939946289062491"/>
+      <location y="-0.937084960937491"/>
+      <location y="-0.934223632812491"/>
+      <location y="-0.931362304687491"/>
+      <location y="-0.928500976562491"/>
+      <location y="-0.925639648437491"/>
+      <location y="-0.922778320312491"/>
+      <location y="-0.919916992187491"/>
+      <location y="-0.917055664062491"/>
+      <location y="-0.914194335937491"/>
+      <location y="-0.911333007812491"/>
+      <location y="-0.908471679687491"/>
+      <location y="-0.905610351562491"/>
+      <location y="-0.902749023437492"/>
+      <location y="-0.899887695312492"/>
+      <location y="-0.897026367187492"/>
+      <location y="-0.894165039062492"/>
+      <location y="-0.891303710937492"/>
+      <location y="-0.888442382812492"/>
+      <location y="-0.885581054687492"/>
+      <location y="-0.882719726562492"/>
+      <location y="-0.879858398437492"/>
+      <location y="-0.876997070312492"/>
+      <location y="-0.874135742187492"/>
+      <location y="-0.871274414062492"/>
+      <location y="-0.868413085937492"/>
+      <location y="-0.865551757812492"/>
+      <location y="-0.862690429687492"/>
+      <location y="-0.859829101562492"/>
+      <location y="-0.856967773437492"/>
+      <location y="-0.854106445312492"/>
+      <location y="-0.851245117187492"/>
+      <location y="-0.848383789062492"/>
+      <location y="-0.845522460937493"/>
+      <location y="-0.842661132812493"/>
+      <location y="-0.839799804687493"/>
+      <location y="-0.836938476562493"/>
+      <location y="-0.834077148437493"/>
+      <location y="-0.831215820312493"/>
+      <location y="-0.828354492187493"/>
+      <location y="-0.825493164062493"/>
+      <location y="-0.822631835937493"/>
+      <location y="-0.819770507812493"/>
+      <location y="-0.816909179687493"/>
+      <location y="-0.814047851562493"/>
+      <location y="-0.811186523437493"/>
+      <location y="-0.808325195312493"/>
+      <location y="-0.805463867187493"/>
+      <location y="-0.802602539062493"/>
+      <location y="-0.799741210937493"/>
+      <location y="-0.796879882812493"/>
+      <location y="-0.794018554687493"/>
+      <location y="-0.791157226562493"/>
+      <location y="-0.788295898437493"/>
+      <location y="-0.785434570312494"/>
+      <location y="-0.782573242187494"/>
+      <location y="-0.779711914062494"/>
+      <location y="-0.776850585937494"/>
+      <location y="-0.773989257812494"/>
+      <location y="-0.771127929687494"/>
+      <location y="-0.768266601562494"/>
+      <location y="-0.765405273437494"/>
+      <location y="-0.762543945312494"/>
+      <location y="-0.759682617187494"/>
+      <location y="-0.756821289062494"/>
+      <location y="-0.753959960937494"/>
+      <location y="-0.751098632812494"/>
+      <location y="-0.748237304687494"/>
+      <location y="-0.745375976562494"/>
+      <location y="-0.742514648437494"/>
+      <location y="-0.739653320312494"/>
+      <location y="-0.736791992187494"/>
+      <location y="-0.733930664062494"/>
+      <location y="-0.731069335937494"/>
+      <location y="-0.728208007812495"/>
+      <location y="-0.725346679687495"/>
+      <location y="-0.722485351562495"/>
+      <location y="-0.719624023437495"/>
+      <location y="-0.716762695312495"/>
+      <location y="-0.713901367187495"/>
+      <location y="-0.711040039062495"/>
+      <location y="-0.708178710937495"/>
+      <location y="-0.705317382812495"/>
+      <location y="-0.702456054687495"/>
+      <location y="-0.699594726562495"/>
+      <location y="-0.696733398437495"/>
+      <location y="-0.693872070312495"/>
+      <location y="-0.691010742187495"/>
+      <location y="-0.688149414062495"/>
+      <location y="-0.685288085937495"/>
+      <location y="-0.682426757812495"/>
+      <location y="-0.679565429687495"/>
+      <location y="-0.676704101562495"/>
+      <location y="-0.673842773437495"/>
+      <location y="-0.670981445312495"/>
+      <location y="-0.668120117187496"/>
+      <location y="-0.665258789062496"/>
+      <location y="-0.662397460937496"/>
+      <location y="-0.659536132812496"/>
+      <location y="-0.656674804687496"/>
+      <location y="-0.653813476562496"/>
+      <location y="-0.650952148437496"/>
+      <location y="-0.648090820312496"/>
+      <location y="-0.645229492187496"/>
+      <location y="-0.642368164062496"/>
+      <location y="-0.639506835937496"/>
+      <location y="-0.636645507812496"/>
+      <location y="-0.633784179687496"/>
+      <location y="-0.630922851562496"/>
+      <location y="-0.628061523437496"/>
+      <location y="-0.625200195312496"/>
+      <location y="-0.622338867187496"/>
+      <location y="-0.619477539062496"/>
+      <location y="-0.616616210937496"/>
+      <location y="-0.613754882812496"/>
+      <location y="-0.610893554687497"/>
+      <location y="-0.608032226562497"/>
+      <location y="-0.605170898437497"/>
+      <location y="-0.602309570312497"/>
+      <location y="-0.599448242187497"/>
+      <location y="-0.596586914062497"/>
+      <location y="-0.593725585937497"/>
+      <location y="-0.590864257812497"/>
+      <location y="-0.588002929687497"/>
+      <location y="-0.585141601562497"/>
+      <location y="-0.582280273437497"/>
+      <location y="-0.579418945312497"/>
+      <location y="-0.576557617187497"/>
+      <location y="-0.573696289062497"/>
+      <location y="-0.570834960937497"/>
+      <location y="-0.567973632812497"/>
+      <location y="-0.565112304687497"/>
+      <location y="-0.562250976562497"/>
+      <location y="-0.559389648437497"/>
+      <location y="-0.556528320312497"/>
+      <location y="-0.553666992187497"/>
+      <location y="-0.550805664062498"/>
+      <location y="-0.547944335937498"/>
+      <location y="-0.545083007812498"/>
+      <location y="-0.542221679687498"/>
+      <location y="-0.539360351562498"/>
+      <location y="-0.536499023437498"/>
+      <location y="-0.533637695312498"/>
+      <location y="-0.530776367187498"/>
+      <location y="-0.527915039062498"/>
+      <location y="-0.525053710937498"/>
+      <location y="-0.522192382812498"/>
+      <location y="-0.519331054687498"/>
+      <location y="-0.516469726562498"/>
+      <location y="-0.513608398437498"/>
+      <location y="-0.510747070312498"/>
+      <location y="-0.507885742187498"/>
+      <location y="-0.505024414062498"/>
+      <location y="-0.502163085937498"/>
+      <location y="-0.499301757812498"/>
+      <location y="-0.496440429687498"/>
+      <location y="-0.493579101562498"/>
+      <location y="-0.490717773437498"/>
+      <location y="-0.487856445312498"/>
+      <location y="-0.484995117187498"/>
+      <location y="-0.482133789062498"/>
+      <location y="-0.479272460937498"/>
+      <location y="-0.476411132812498"/>
+      <location y="-0.473549804687498"/>
+      <location y="-0.470688476562498"/>
+      <location y="-0.467827148437498"/>
+      <location y="-0.464965820312498"/>
+      <location y="-0.462104492187498"/>
+      <location y="-0.459243164062498"/>
+      <location y="-0.456381835937498"/>
+      <location y="-0.453520507812498"/>
+      <location y="-0.450659179687498"/>
+      <location y="-0.447797851562498"/>
+      <location y="-0.444936523437498"/>
+      <location y="-0.442075195312498"/>
+      <location y="-0.439213867187498"/>
+      <location y="-0.436352539062498"/>
+      <location y="-0.433491210937498"/>
+      <location y="-0.430629882812498"/>
+      <location y="-0.427768554687498"/>
+      <location y="-0.424907226562498"/>
+      <location y="-0.422045898437498"/>
+      <location y="-0.419184570312498"/>
+      <location y="-0.416323242187498"/>
+      <location y="-0.413461914062498"/>
+      <location y="-0.410600585937498"/>
+      <location y="-0.407739257812498"/>
+      <location y="-0.404877929687498"/>
+      <location y="-0.402016601562498"/>
+      <location y="-0.399155273437498"/>
+      <location y="-0.396293945312498"/>
+      <location y="-0.393432617187498"/>
+      <location y="-0.390571289062498"/>
+      <location y="-0.387709960937498"/>
+      <location y="-0.384848632812498"/>
+      <location y="-0.381987304687498"/>
+      <location y="-0.379125976562498"/>
+      <location y="-0.376264648437498"/>
+      <location y="-0.373403320312498"/>
+      <location y="-0.370541992187498"/>
+      <location y="-0.367680664062498"/>
+      <location y="-0.364819335937498"/>
+      <location y="-0.361958007812498"/>
+      <location y="-0.359096679687498"/>
+      <location y="-0.356235351562498"/>
+      <location y="-0.353374023437498"/>
+      <location y="-0.350512695312498"/>
+      <location y="-0.347651367187498"/>
+      <location y="-0.344790039062498"/>
+      <location y="-0.341928710937498"/>
+      <location y="-0.339067382812498"/>
+      <location y="-0.336206054687498"/>
+      <location y="-0.333344726562498"/>
+      <location y="-0.330483398437498"/>
+      <location y="-0.327622070312498"/>
+      <location y="-0.324760742187498"/>
+      <location y="-0.321899414062498"/>
+      <location y="-0.319038085937498"/>
+      <location y="-0.316176757812498"/>
+      <location y="-0.313315429687498"/>
+      <location y="-0.310454101562498"/>
+      <location y="-0.307592773437498"/>
+      <location y="-0.304731445312498"/>
+      <location y="-0.301870117187498"/>
+      <location y="-0.299008789062498"/>
+      <location y="-0.296147460937498"/>
+      <location y="-0.293286132812498"/>
+      <location y="-0.290424804687498"/>
+      <location y="-0.287563476562498"/>
+      <location y="-0.284702148437498"/>
+      <location y="-0.281840820312498"/>
+      <location y="-0.278979492187498"/>
+      <location y="-0.276118164062498"/>
+      <location y="-0.273256835937498"/>
+      <location y="-0.270395507812498"/>
+      <location y="-0.267534179687498"/>
+      <location y="-0.264672851562498"/>
+      <location y="-0.261811523437498"/>
+      <location y="-0.258950195312498"/>
+      <location y="-0.256088867187498"/>
+      <location y="-0.253227539062498"/>
+      <location y="-0.250366210937498"/>
+      <location y="-0.247504882812498"/>
+      <location y="-0.244643554687498"/>
+      <location y="-0.241782226562498"/>
+      <location y="-0.238920898437498"/>
+      <location y="-0.236059570312498"/>
+      <location y="-0.233198242187498"/>
+      <location y="-0.230336914062498"/>
+      <location y="-0.227475585937498"/>
+      <location y="-0.224614257812498"/>
+      <location y="-0.221752929687498"/>
+      <location y="-0.218891601562498"/>
+      <location y="-0.216030273437498"/>
+      <location y="-0.213168945312498"/>
+      <location y="-0.210307617187498"/>
+      <location y="-0.207446289062498"/>
+      <location y="-0.204584960937498"/>
+      <location y="-0.201723632812498"/>
+      <location y="-0.198862304687498"/>
+      <location y="-0.196000976562498"/>
+      <location y="-0.193139648437498"/>
+      <location y="-0.190278320312498"/>
+      <location y="-0.187416992187498"/>
+      <location y="-0.184555664062498"/>
+      <location y="-0.181694335937498"/>
+      <location y="-0.178833007812498"/>
+      <location y="-0.175971679687498"/>
+      <location y="-0.173110351562498"/>
+      <location y="-0.170249023437498"/>
+      <location y="-0.167387695312498"/>
+      <location y="-0.164526367187498"/>
+      <location y="-0.161665039062498"/>
+      <location y="-0.158803710937498"/>
+      <location y="-0.155942382812498"/>
+      <location y="-0.153081054687498"/>
+      <location y="-0.150219726562498"/>
+      <location y="-0.147358398437498"/>
+      <location y="-0.144497070312498"/>
+      <location y="-0.141635742187498"/>
+      <location y="-0.138774414062498"/>
+      <location y="-0.135913085937498"/>
+      <location y="-0.133051757812498"/>
+      <location y="-0.130190429687497"/>
+      <location y="-0.127329101562497"/>
+      <location y="-0.124467773437497"/>
+      <location y="-0.121606445312497"/>
+      <location y="-0.118745117187497"/>
+      <location y="-0.115883789062497"/>
+      <location y="-0.113022460937497"/>
+      <location y="-0.110161132812497"/>
+      <location y="-0.107299804687497"/>
+      <location y="-0.104438476562497"/>
+      <location y="-0.101577148437497"/>
+      <location y="-0.0987158203124974"/>
+      <location y="-0.0958544921874974"/>
+      <location y="-0.0929931640624974"/>
+      <location y="-0.0901318359374974"/>
+      <location y="-0.0872705078124974"/>
+      <location y="-0.0844091796874974"/>
+      <location y="-0.0815478515624974"/>
+      <location y="-0.0786865234374974"/>
+      <location y="-0.0758251953124974"/>
+      <location y="-0.0729638671874974"/>
+      <location y="-0.0701025390624974"/>
+      <location y="-0.0672412109374974"/>
+      <location y="-0.0643798828124973"/>
+      <location y="-0.0615185546874973"/>
+      <location y="-0.0586572265624973"/>
+      <location y="-0.0557958984374973"/>
+      <location y="-0.0529345703124973"/>
+      <location y="-0.0500732421874973"/>
+      <location y="-0.0472119140624973"/>
+      <location y="-0.0443505859374973"/>
+      <location y="-0.0414892578124973"/>
+      <location y="-0.0386279296874973"/>
+      <location y="-0.0357666015624973"/>
+      <location y="-0.0329052734374973"/>
+      <location y="-0.0300439453124973"/>
+      <location y="-0.0271826171874974"/>
+      <location y="-0.0243212890624974"/>
+      <location y="-0.0214599609374974"/>
+      <location y="-0.0185986328124974"/>
+      <location y="-0.0157373046874974"/>
+      <location y="-0.0128759765624974"/>
+      <location y="-0.0100146484374974"/>
+      <location y="-0.00715332031249735"/>
+      <location y="-0.00429199218749735"/>
+      <location y="-0.00143066406249735"/>
+      <location y="0.00143066406250265"/>
+      <location y="0.00429199218750265"/>
+      <location y="0.00715332031250265"/>
+      <location y="0.0100146484375026"/>
+      <location y="0.0128759765625026"/>
+      <location y="0.0157373046875026"/>
+      <location y="0.0185986328125026"/>
+      <location y="0.0214599609375026"/>
+      <location y="0.0243212890625026"/>
+      <location y="0.0271826171875026"/>
+      <location y="0.0300439453125026"/>
+      <location y="0.0329052734375027"/>
+      <location y="0.0357666015625027"/>
+      <location y="0.0386279296875027"/>
+      <location y="0.0414892578125027"/>
+      <location y="0.0443505859375026"/>
+      <location y="0.0472119140625026"/>
+      <location y="0.0500732421875026"/>
+      <location y="0.0529345703125026"/>
+      <location y="0.0557958984375026"/>
+      <location y="0.0586572265625026"/>
+      <location y="0.0615185546875026"/>
+      <location y="0.0643798828125026"/>
+      <location y="0.0672412109375027"/>
+      <location y="0.0701025390625027"/>
+      <location y="0.0729638671875027"/>
+      <location y="0.0758251953125027"/>
+      <location y="0.0786865234375027"/>
+      <location y="0.0815478515625027"/>
+      <location y="0.0844091796875027"/>
+      <location y="0.0872705078125027"/>
+      <location y="0.0901318359375027"/>
+      <location y="0.0929931640625027"/>
+      <location y="0.0958544921875027"/>
+      <location y="0.0987158203125027"/>
+      <location y="0.101577148437503"/>
+      <location y="0.104438476562503"/>
+      <location y="0.107299804687503"/>
+      <location y="0.110161132812503"/>
+      <location y="0.113022460937503"/>
+      <location y="0.115883789062503"/>
+      <location y="0.118745117187503"/>
+      <location y="0.121606445312503"/>
+      <location y="0.124467773437503"/>
+      <location y="0.127329101562503"/>
+      <location y="0.130190429687503"/>
+      <location y="0.133051757812503"/>
+      <location y="0.135913085937503"/>
+      <location y="0.138774414062503"/>
+      <location y="0.141635742187503"/>
+      <location y="0.144497070312503"/>
+      <location y="0.147358398437503"/>
+      <location y="0.150219726562503"/>
+      <location y="0.153081054687503"/>
+      <location y="0.155942382812503"/>
+      <location y="0.158803710937503"/>
+      <location y="0.161665039062503"/>
+      <location y="0.164526367187503"/>
+      <location y="0.167387695312503"/>
+      <location y="0.170249023437503"/>
+      <location y="0.173110351562503"/>
+      <location y="0.175971679687503"/>
+      <location y="0.178833007812503"/>
+      <location y="0.181694335937503"/>
+      <location y="0.184555664062503"/>
+      <location y="0.187416992187503"/>
+      <location y="0.190278320312503"/>
+      <location y="0.193139648437503"/>
+      <location y="0.196000976562503"/>
+      <location y="0.198862304687503"/>
+      <location y="0.201723632812503"/>
+      <location y="0.204584960937503"/>
+      <location y="0.207446289062503"/>
+      <location y="0.210307617187503"/>
+      <location y="0.213168945312503"/>
+      <location y="0.216030273437503"/>
+      <location y="0.218891601562503"/>
+      <location y="0.221752929687503"/>
+      <location y="0.224614257812503"/>
+      <location y="0.227475585937503"/>
+      <location y="0.230336914062503"/>
+      <location y="0.233198242187503"/>
+      <location y="0.236059570312503"/>
+      <location y="0.238920898437503"/>
+      <location y="0.241782226562503"/>
+      <location y="0.244643554687503"/>
+      <location y="0.247504882812503"/>
+      <location y="0.250366210937503"/>
+      <location y="0.253227539062503"/>
+      <location y="0.256088867187503"/>
+      <location y="0.258950195312503"/>
+      <location y="0.261811523437503"/>
+      <location y="0.264672851562503"/>
+      <location y="0.267534179687503"/>
+      <location y="0.270395507812503"/>
+      <location y="0.273256835937503"/>
+      <location y="0.276118164062503"/>
+      <location y="0.278979492187503"/>
+      <location y="0.281840820312503"/>
+      <location y="0.284702148437503"/>
+      <location y="0.287563476562503"/>
+      <location y="0.290424804687503"/>
+      <location y="0.293286132812503"/>
+      <location y="0.296147460937503"/>
+      <location y="0.299008789062503"/>
+      <location y="0.301870117187503"/>
+      <location y="0.304731445312503"/>
+      <location y="0.307592773437503"/>
+      <location y="0.310454101562503"/>
+      <location y="0.313315429687503"/>
+      <location y="0.316176757812503"/>
+      <location y="0.319038085937503"/>
+      <location y="0.321899414062503"/>
+      <location y="0.324760742187503"/>
+      <location y="0.327622070312503"/>
+      <location y="0.330483398437503"/>
+      <location y="0.333344726562503"/>
+      <location y="0.336206054687503"/>
+      <location y="0.339067382812503"/>
+      <location y="0.341928710937503"/>
+      <location y="0.344790039062503"/>
+      <location y="0.347651367187503"/>
+      <location y="0.350512695312503"/>
+      <location y="0.353374023437503"/>
+      <location y="0.356235351562503"/>
+      <location y="0.359096679687503"/>
+      <location y="0.361958007812503"/>
+      <location y="0.364819335937503"/>
+      <location y="0.367680664062503"/>
+      <location y="0.370541992187503"/>
+      <location y="0.373403320312503"/>
+      <location y="0.376264648437503"/>
+      <location y="0.379125976562503"/>
+      <location y="0.381987304687503"/>
+      <location y="0.384848632812503"/>
+      <location y="0.387709960937503"/>
+      <location y="0.390571289062503"/>
+      <location y="0.393432617187503"/>
+      <location y="0.396293945312503"/>
+      <location y="0.399155273437503"/>
+      <location y="0.402016601562503"/>
+      <location y="0.404877929687503"/>
+      <location y="0.407739257812503"/>
+      <location y="0.410600585937503"/>
+      <location y="0.413461914062503"/>
+      <location y="0.416323242187503"/>
+      <location y="0.419184570312503"/>
+      <location y="0.422045898437503"/>
+      <location y="0.424907226562503"/>
+      <location y="0.427768554687503"/>
+      <location y="0.430629882812503"/>
+      <location y="0.433491210937503"/>
+      <location y="0.436352539062503"/>
+      <location y="0.439213867187503"/>
+      <location y="0.442075195312503"/>
+      <location y="0.444936523437504"/>
+      <location y="0.447797851562504"/>
+      <location y="0.450659179687504"/>
+      <location y="0.453520507812504"/>
+      <location y="0.456381835937504"/>
+      <location y="0.459243164062504"/>
+      <location y="0.462104492187504"/>
+      <location y="0.464965820312504"/>
+      <location y="0.467827148437504"/>
+      <location y="0.470688476562504"/>
+      <location y="0.473549804687504"/>
+      <location y="0.476411132812504"/>
+      <location y="0.479272460937504"/>
+      <location y="0.482133789062504"/>
+      <location y="0.484995117187504"/>
+      <location y="0.487856445312504"/>
+      <location y="0.490717773437504"/>
+      <location y="0.493579101562504"/>
+      <location y="0.496440429687504"/>
+      <location y="0.499301757812504"/>
+      <location y="0.502163085937504"/>
+      <location y="0.505024414062504"/>
+      <location y="0.507885742187503"/>
+      <location y="0.510747070312503"/>
+      <location y="0.513608398437503"/>
+      <location y="0.516469726562503"/>
+      <location y="0.519331054687503"/>
+      <location y="0.522192382812503"/>
+      <location y="0.525053710937503"/>
+      <location y="0.527915039062503"/>
+      <location y="0.530776367187503"/>
+      <location y="0.533637695312503"/>
+      <location y="0.536499023437503"/>
+      <location y="0.539360351562503"/>
+      <location y="0.542221679687503"/>
+      <location y="0.545083007812503"/>
+      <location y="0.547944335937503"/>
+      <location y="0.550805664062503"/>
+      <location y="0.553666992187503"/>
+      <location y="0.556528320312503"/>
+      <location y="0.559389648437503"/>
+      <location y="0.562250976562503"/>
+      <location y="0.565112304687503"/>
+      <location y="0.567973632812502"/>
+      <location y="0.570834960937502"/>
+      <location y="0.573696289062502"/>
+      <location y="0.576557617187502"/>
+      <location y="0.579418945312502"/>
+      <location y="0.582280273437502"/>
+      <location y="0.585141601562502"/>
+      <location y="0.588002929687502"/>
+      <location y="0.590864257812502"/>
+      <location y="0.593725585937502"/>
+      <location y="0.596586914062502"/>
+      <location y="0.599448242187502"/>
+      <location y="0.602309570312502"/>
+      <location y="0.605170898437502"/>
+      <location y="0.608032226562502"/>
+      <location y="0.610893554687502"/>
+      <location y="0.613754882812502"/>
+      <location y="0.616616210937502"/>
+      <location y="0.619477539062502"/>
+      <location y="0.622338867187502"/>
+      <location y="0.625200195312501"/>
+      <location y="0.628061523437501"/>
+      <location y="0.630922851562501"/>
+      <location y="0.633784179687501"/>
+      <location y="0.636645507812501"/>
+      <location y="0.639506835937501"/>
+      <location y="0.642368164062501"/>
+      <location y="0.645229492187501"/>
+      <location y="0.648090820312501"/>
+      <location y="0.650952148437501"/>
+      <location y="0.653813476562501"/>
+      <location y="0.656674804687501"/>
+      <location y="0.659536132812501"/>
+      <location y="0.662397460937501"/>
+      <location y="0.665258789062501"/>
+      <location y="0.668120117187501"/>
+      <location y="0.670981445312501"/>
+      <location y="0.673842773437501"/>
+      <location y="0.676704101562501"/>
+      <location y="0.679565429687501"/>
+      <location y="0.682426757812501"/>
+      <location y="0.6852880859375"/>
+      <location y="0.6881494140625"/>
+      <location y="0.6910107421875"/>
+      <location y="0.6938720703125"/>
+      <location y="0.6967333984375"/>
+      <location y="0.6995947265625"/>
+      <location y="0.7024560546875"/>
+      <location y="0.7053173828125"/>
+      <location y="0.7081787109375"/>
+      <location y="0.7110400390625"/>
+      <location y="0.7139013671875"/>
+      <location y="0.7167626953125"/>
+      <location y="0.7196240234375"/>
+      <location y="0.7224853515625"/>
+      <location y="0.7253466796875"/>
+      <location y="0.7282080078125"/>
+      <location y="0.7310693359375"/>
+      <location y="0.7339306640625"/>
+      <location y="0.7367919921875"/>
+      <location y="0.7396533203125"/>
+      <location y="0.742514648437499"/>
+      <location y="0.745375976562499"/>
+      <location y="0.748237304687499"/>
+      <location y="0.751098632812499"/>
+      <location y="0.753959960937499"/>
+      <location y="0.756821289062499"/>
+      <location y="0.759682617187499"/>
+      <location y="0.762543945312499"/>
+      <location y="0.765405273437499"/>
+      <location y="0.768266601562499"/>
+      <location y="0.771127929687499"/>
+      <location y="0.773989257812499"/>
+      <location y="0.776850585937499"/>
+      <location y="0.779711914062499"/>
+      <location y="0.782573242187499"/>
+      <location y="0.785434570312499"/>
+      <location y="0.788295898437499"/>
+      <location y="0.791157226562499"/>
+      <location y="0.794018554687499"/>
+      <location y="0.796879882812499"/>
+      <location y="0.799741210937499"/>
+      <location y="0.802602539062498"/>
+      <location y="0.805463867187498"/>
+      <location y="0.808325195312498"/>
+      <location y="0.811186523437498"/>
+      <location y="0.814047851562498"/>
+      <location y="0.816909179687498"/>
+      <location y="0.819770507812498"/>
+      <location y="0.822631835937498"/>
+      <location y="0.825493164062498"/>
+      <location y="0.828354492187498"/>
+      <location y="0.831215820312498"/>
+      <location y="0.834077148437498"/>
+      <location y="0.836938476562498"/>
+      <location y="0.839799804687498"/>
+      <location y="0.842661132812498"/>
+      <location y="0.845522460937498"/>
+      <location y="0.848383789062498"/>
+      <location y="0.851245117187498"/>
+      <location y="0.854106445312498"/>
+      <location y="0.856967773437498"/>
+      <location y="0.859829101562497"/>
+      <location y="0.862690429687497"/>
+      <location y="0.865551757812497"/>
+      <location y="0.868413085937497"/>
+      <location y="0.871274414062497"/>
+      <location y="0.874135742187497"/>
+      <location y="0.876997070312497"/>
+      <location y="0.879858398437497"/>
+      <location y="0.882719726562497"/>
+      <location y="0.885581054687497"/>
+      <location y="0.888442382812497"/>
+      <location y="0.891303710937497"/>
+      <location y="0.894165039062497"/>
+      <location y="0.897026367187497"/>
+      <location y="0.899887695312497"/>
+      <location y="0.902749023437497"/>
+      <location y="0.905610351562497"/>
+      <location y="0.908471679687497"/>
+      <location y="0.911333007812497"/>
+      <location y="0.914194335937497"/>
+      <location y="0.917055664062497"/>
+      <location y="0.919916992187496"/>
+      <location y="0.922778320312496"/>
+      <location y="0.925639648437496"/>
+      <location y="0.928500976562496"/>
+      <location y="0.931362304687496"/>
+      <location y="0.934223632812496"/>
+      <location y="0.937084960937496"/>
+      <location y="0.939946289062496"/>
+      <location y="0.942807617187496"/>
+      <location y="0.945668945312496"/>
+      <location y="0.948530273437496"/>
+      <location y="0.951391601562496"/>
+      <location y="0.954252929687496"/>
+      <location y="0.957114257812496"/>
+      <location y="0.959975585937496"/>
+      <location y="0.962836914062496"/>
+      <location y="0.965698242187496"/>
+      <location y="0.968559570312496"/>
+      <location y="0.971420898437496"/>
+      <location y="0.974282226562496"/>
+      <location y="0.977143554687495"/>
+      <location y="0.980004882812495"/>
+      <location y="0.982866210937495"/>
+      <location y="0.985727539062495"/>
+      <location y="0.988588867187495"/>
+      <location y="0.991450195312495"/>
+      <location y="0.994311523437495"/>
+      <location y="0.997172851562495"/>
+      <location y="1.0000341796875"/>
+      <location y="1.0028955078125"/>
+      <location y="1.0057568359375"/>
+      <location y="1.0086181640625"/>
+      <location y="1.0114794921875"/>
+      <location y="1.0143408203125"/>
+      <location y="1.0172021484375"/>
+      <location y="1.0200634765625"/>
+      <location y="1.0229248046875"/>
+      <location y="1.0257861328125"/>
+      <location y="1.0286474609375"/>
+      <location y="1.0315087890625"/>
+      <location y="1.0343701171875"/>
+      <location y="1.0372314453125"/>
+      <location y="1.0400927734375"/>
+      <location y="1.0429541015625"/>
+      <location y="1.0458154296875"/>
+      <location y="1.0486767578125"/>
+      <location y="1.0515380859375"/>
+      <location y="1.0543994140625"/>
+      <location y="1.0572607421875"/>
+      <location y="1.0601220703125"/>
+      <location y="1.0629833984375"/>
+      <location y="1.0658447265625"/>
+      <location y="1.0687060546875"/>
+      <location y="1.0715673828125"/>
+      <location y="1.0744287109375"/>
+      <location y="1.0772900390625"/>
+      <location y="1.0801513671875"/>
+      <location y="1.0830126953125"/>
+      <location y="1.0858740234375"/>
+      <location y="1.0887353515625"/>
+      <location y="1.0915966796875"/>
+      <location y="1.0944580078125"/>
+      <location y="1.0973193359375"/>
+      <location y="1.1001806640625"/>
+      <location y="1.1030419921875"/>
+      <location y="1.1059033203125"/>
+      <location y="1.1087646484375"/>
+      <location y="1.1116259765625"/>
+      <location y="1.1144873046875"/>
+      <location y="1.1173486328125"/>
+      <location y="1.1202099609375"/>
+      <location y="1.1230712890625"/>
+      <location y="1.1259326171875"/>
+      <location y="1.1287939453125"/>
+      <location y="1.1316552734375"/>
+      <location y="1.1345166015625"/>
+      <location y="1.1373779296875"/>
+      <location y="1.1402392578125"/>
+      <location y="1.1431005859375"/>
+      <location y="1.1459619140625"/>
+      <location y="1.1488232421875"/>
+      <location y="1.1516845703125"/>
+      <location y="1.1545458984375"/>
+      <location y="1.1574072265625"/>
+      <location y="1.1602685546875"/>
+      <location y="1.1631298828125"/>
+      <location y="1.1659912109375"/>
+      <location y="1.1688525390625"/>
+      <location y="1.1717138671875"/>
+      <location y="1.1745751953125"/>
+      <location y="1.1774365234375"/>
+      <location y="1.1802978515625"/>
+      <location y="1.1831591796875"/>
+      <location y="1.1860205078125"/>
+      <location y="1.1888818359375"/>
+      <location y="1.1917431640625"/>
+      <location y="1.1946044921875"/>
+      <location y="1.1974658203125"/>
+      <location y="1.2003271484375"/>
+      <location y="1.2031884765625"/>
+      <location y="1.2060498046875"/>
+      <location y="1.2089111328125"/>
+      <location y="1.2117724609375"/>
+      <location y="1.2146337890625"/>
+      <location y="1.2174951171875"/>
+      <location y="1.2203564453125"/>
+      <location y="1.2232177734375"/>
+      <location y="1.2260791015625"/>
+      <location y="1.2289404296875"/>
+      <location y="1.2318017578125"/>
+      <location y="1.2346630859375"/>
+      <location y="1.2375244140625"/>
+      <location y="1.2403857421875"/>
+      <location y="1.2432470703125"/>
+      <location y="1.2461083984375"/>
+      <location y="1.2489697265625"/>
+      <location y="1.2518310546875"/>
+      <location y="1.2546923828125"/>
+      <location y="1.2575537109375"/>
+      <location y="1.2604150390625"/>
+      <location y="1.2632763671875"/>
+      <location y="1.2661376953125"/>
+      <location y="1.2689990234375"/>
+      <location y="1.2718603515625"/>
+      <location y="1.2747216796875"/>
+      <location y="1.2775830078125"/>
+      <location y="1.2804443359375"/>
+      <location y="1.2833056640625"/>
+      <location y="1.2861669921875"/>
+      <location y="1.2890283203125"/>
+      <location y="1.2918896484375"/>
+      <location y="1.2947509765625"/>
+      <location y="1.2976123046875"/>
+      <location y="1.3004736328125"/>
+      <location y="1.3033349609375"/>
+      <location y="1.3061962890625"/>
+      <location y="1.3090576171875"/>
+      <location y="1.3119189453125"/>
+      <location y="1.3147802734375"/>
+      <location y="1.3176416015625"/>
+      <location y="1.3205029296875"/>
+      <location y="1.3233642578125"/>
+      <location y="1.3262255859375"/>
+      <location y="1.3290869140625"/>
+      <location y="1.3319482421875"/>
+      <location y="1.3348095703125"/>
+      <location y="1.3376708984375"/>
+      <location y="1.3405322265625"/>
+      <location y="1.3433935546875"/>
+      <location y="1.3462548828125"/>
+      <location y="1.3491162109375"/>
+      <location y="1.3519775390625"/>
+      <location y="1.3548388671875"/>
+      <location y="1.3577001953125"/>
+      <location y="1.3605615234375"/>
+      <location y="1.3634228515625"/>
+      <location y="1.3662841796875"/>
+      <location y="1.3691455078125"/>
+      <location y="1.3720068359375"/>
+      <location y="1.3748681640625"/>
+      <location y="1.3777294921875"/>
+      <location y="1.3805908203125"/>
+      <location y="1.3834521484375"/>
+      <location y="1.3863134765625"/>
+      <location y="1.3891748046875"/>
+      <location y="1.3920361328125"/>
+      <location y="1.3948974609375"/>
+      <location y="1.3977587890625"/>
+      <location y="1.4006201171875"/>
+      <location y="1.4034814453125"/>
+      <location y="1.4063427734375"/>
+      <location y="1.4092041015625"/>
+      <location y="1.4120654296875"/>
+      <location y="1.4149267578125"/>
+      <location y="1.4177880859375"/>
+      <location y="1.4206494140625"/>
+      <location y="1.4235107421875"/>
+      <location y="1.4263720703125"/>
+      <location y="1.4292333984375"/>
+      <location y="1.4320947265625"/>
+      <location y="1.4349560546875"/>
+      <location y="1.4378173828125"/>
+      <location y="1.4406787109375"/>
+      <location y="1.4435400390625"/>
+      <location y="1.4464013671875"/>
+      <location y="1.4492626953125"/>
+      <location y="1.45212402343751"/>
+      <location y="1.45498535156251"/>
+      <location y="1.45784667968751"/>
+      <location y="1.46070800781251"/>
+      <location y="1.46356933593751"/>
+    </component>
+  </type>
+    
+   
+  <type name="straight-through-beam-tube" outline="yes">
+    <component type="straight-through-beam-pixel">
+      <location y="0"/>
+      <location y="0.001201171875"/>
+      <location y="0.00240234375"/>
+      <location y="0.003603515625"/>
+      <location y="0.0048046875"/>
+      <location y="0.006005859375"/>
+      <location y="0.00720703125"/>
+      <location y="0.008408203125"/>
+      <location y="0.009609375"/>
+      <location y="0.010810546875"/>
+      <location y="0.01201171875"/>
+      <location y="0.013212890625"/>
+      <location y="0.0144140625"/>
+      <location y="0.015615234375"/>
+      <location y="0.01681640625"/>
+      <location y="0.018017578125"/>
+      <location y="0.01921875"/>
+      <location y="0.020419921875"/>
+      <location y="0.02162109375"/>
+      <location y="0.022822265625"/>
+      <location y="0.0240234375"/>
+      <location y="0.025224609375"/>
+      <location y="0.02642578125"/>
+      <location y="0.027626953125"/>
+      <location y="0.028828125"/>
+      <location y="0.030029296875"/>
+      <location y="0.03123046875"/>
+      <location y="0.032431640625"/>
+      <location y="0.0336328125"/>
+      <location y="0.034833984375"/>
+      <location y="0.03603515625"/>
+      <location y="0.037236328125"/>
+      <location y="0.0384375"/>
+      <location y="0.039638671875"/>
+      <location y="0.04083984375"/>
+      <location y="0.042041015625"/>
+      <location y="0.0432421875"/>
+      <location y="0.044443359375"/>
+      <location y="0.04564453125"/>
+      <location y="0.046845703125"/>
+      <location y="0.048046875"/>
+      <location y="0.049248046875"/>
+      <location y="0.05044921875"/>
+      <location y="0.051650390625"/>
+      <location y="0.0528515625"/>
+      <location y="0.054052734375"/>
+      <location y="0.0552539062499999"/>
+      <location y="0.0564550781249999"/>
+      <location y="0.0576562499999999"/>
+      <location y="0.0588574218749999"/>
+      <location y="0.0600585937499999"/>
+      <location y="0.0612597656249999"/>
+      <location y="0.0624609374999999"/>
+      <location y="0.0636621093749999"/>
+      <location y="0.0648632812499999"/>
+      <location y="0.0660644531249999"/>
+      <location y="0.0672656249999999"/>
+      <location y="0.0684667968749999"/>
+      <location y="0.0696679687499999"/>
+      <location y="0.070869140625"/>
+      <location y="0.0720703125"/>
+      <location y="0.073271484375"/>
+      <location y="0.07447265625"/>
+      <location y="0.075673828125"/>
+      <location y="0.076875"/>
+      <location y="0.078076171875"/>
+      <location y="0.07927734375"/>
+      <location y="0.080478515625"/>
+      <location y="0.0816796875"/>
+      <location y="0.082880859375"/>
+      <location y="0.08408203125"/>
+      <location y="0.085283203125"/>
+      <location y="0.086484375"/>
+      <location y="0.087685546875"/>
+      <location y="0.08888671875"/>
+      <location y="0.090087890625"/>
+      <location y="0.0912890625"/>
+      <location y="0.092490234375"/>
+      <location y="0.09369140625"/>
+      <location y="0.094892578125"/>
+      <location y="0.09609375"/>
+      <location y="0.097294921875"/>
+      <location y="0.09849609375"/>
+      <location y="0.099697265625"/>
+      <location y="0.1008984375"/>
+      <location y="0.102099609375"/>
+      <location y="0.10330078125"/>
+      <location y="0.104501953125"/>
+      <location y="0.105703125"/>
+      <location y="0.106904296875"/>
+      <location y="0.10810546875"/>
+      <location y="0.109306640625"/>
+      <location y="0.1105078125"/>
+      <location y="0.111708984375"/>
+      <location y="0.11291015625"/>
+      <location y="0.114111328125"/>
+      <location y="0.1153125"/>
+      <location y="0.116513671875"/>
+      <location y="0.11771484375"/>
+      <location y="0.118916015625"/>
+      <location y="0.1201171875"/>
+      <location y="0.121318359375"/>
+      <location y="0.12251953125"/>
+      <location y="0.123720703125"/>
+      <location y="0.124921875"/>
+      <location y="0.126123046875"/>
+      <location y="0.12732421875"/>
+      <location y="0.128525390625"/>
+      <location y="0.1297265625"/>
+      <location y="0.130927734375"/>
+      <location y="0.13212890625"/>
+      <location y="0.133330078125"/>
+      <location y="0.13453125"/>
+      <location y="0.135732421875"/>
+      <location y="0.13693359375"/>
+      <location y="0.138134765625"/>
+      <location y="0.1393359375"/>
+      <location y="0.140537109375"/>
+      <location y="0.14173828125"/>
+      <location y="0.142939453125"/>
+      <location y="0.144140625"/>
+      <location y="0.145341796875"/>
+      <location y="0.14654296875"/>
+      <location y="0.147744140625"/>
+      <location y="0.1489453125"/>
+      <location y="0.150146484375"/>
+      <location y="0.15134765625"/>
+      <location y="0.152548828125"/>
+      <location y="0.15375"/>
+      <location y="0.154951171875"/>
+      <location y="0.15615234375"/>
+      <location y="0.157353515625"/>
+      <location y="0.1585546875"/>
+      <location y="0.159755859375"/>
+      <location y="0.16095703125"/>
+      <location y="0.162158203125"/>
+      <location y="0.163359375"/>
+      <location y="0.164560546875"/>
+      <location y="0.16576171875"/>
+      <location y="0.166962890625"/>
+      <location y="0.1681640625"/>
+      <location y="0.169365234375"/>
+      <location y="0.17056640625"/>
+      <location y="0.171767578125"/>
+      <location y="0.17296875"/>
+      <location y="0.174169921875"/>
+      <location y="0.17537109375"/>
+      <location y="0.176572265625"/>
+      <location y="0.1777734375"/>
+      <location y="0.178974609375"/>
+      <location y="0.18017578125"/>
+      <location y="0.181376953125"/>
+      <location y="0.182578125"/>
+      <location y="0.183779296875"/>
+      <location y="0.18498046875"/>
+      <location y="0.186181640625"/>
+      <location y="0.1873828125"/>
+      <location y="0.188583984375"/>
+      <location y="0.18978515625"/>
+      <location y="0.190986328125"/>
+      <location y="0.1921875"/>
+      <location y="0.193388671875"/>
+      <location y="0.19458984375"/>
+      <location y="0.195791015625"/>
+      <location y="0.1969921875"/>
+      <location y="0.198193359375"/>
+      <location y="0.19939453125"/>
+      <location y="0.200595703124999"/>
+      <location y="0.201796874999999"/>
+      <location y="0.202998046874999"/>
+      <location y="0.204199218749999"/>
+      <location y="0.205400390624999"/>
+      <location y="0.206601562499999"/>
+      <location y="0.207802734374999"/>
+      <location y="0.209003906249999"/>
+      <location y="0.210205078124999"/>
+      <location y="0.211406249999999"/>
+      <location y="0.212607421874999"/>
+      <location y="0.213808593749999"/>
+      <location y="0.215009765624999"/>
+      <location y="0.216210937499999"/>
+      <location y="0.217412109374999"/>
+      <location y="0.218613281249999"/>
+      <location y="0.219814453124999"/>
+      <location y="0.221015624999999"/>
+      <location y="0.222216796874999"/>
+      <location y="0.223417968749999"/>
+      <location y="0.224619140624999"/>
+      <location y="0.225820312499999"/>
+      <location y="0.227021484374999"/>
+      <location y="0.228222656249999"/>
+      <location y="0.229423828124999"/>
+      <location y="0.230624999999999"/>
+      <location y="0.231826171874999"/>
+      <location y="0.233027343749999"/>
+      <location y="0.234228515624999"/>
+      <location y="0.235429687499999"/>
+      <location y="0.236630859374999"/>
+      <location y="0.237832031249999"/>
+      <location y="0.239033203124999"/>
+      <location y="0.240234374999999"/>
+      <location y="0.241435546874999"/>
+      <location y="0.242636718749999"/>
+      <location y="0.243837890624999"/>
+      <location y="0.245039062499999"/>
+      <location y="0.246240234374999"/>
+      <location y="0.247441406249999"/>
+      <location y="0.248642578124999"/>
+      <location y="0.249843749999999"/>
+      <location y="0.251044921874999"/>
+      <location y="0.252246093749999"/>
+      <location y="0.253447265624999"/>
+      <location y="0.254648437499999"/>
+      <location y="0.255849609374999"/>
+      <location y="0.257050781249999"/>
+      <location y="0.258251953124999"/>
+      <location y="0.259453124999999"/>
+      <location y="0.260654296874999"/>
+      <location y="0.261855468749999"/>
+      <location y="0.263056640624999"/>
+      <location y="0.264257812499999"/>
+      <location y="0.265458984374999"/>
+      <location y="0.266660156249999"/>
+      <location y="0.267861328124999"/>
+      <location y="0.269062499999999"/>
+      <location y="0.270263671874999"/>
+      <location y="0.271464843749999"/>
+      <location y="0.272666015624999"/>
+      <location y="0.273867187499999"/>
+      <location y="0.275068359374999"/>
+      <location y="0.276269531249999"/>
+      <location y="0.277470703124999"/>
+      <location y="0.278671875"/>
+      <location y="0.279873046875"/>
+      <location y="0.28107421875"/>
+      <location y="0.282275390625"/>
+      <location y="0.2834765625"/>
+      <location y="0.284677734375"/>
+      <location y="0.28587890625"/>
+      <location y="0.287080078125"/>
+      <location y="0.28828125"/>
+      <location y="0.289482421875"/>
+      <location y="0.29068359375"/>
+      <location y="0.291884765625"/>
+      <location y="0.2930859375"/>
+      <location y="0.294287109375"/>
+      <location y="0.29548828125"/>
+      <location y="0.296689453125"/>
+      <location y="0.297890625"/>
+      <location y="0.299091796875"/>
+      <location y="0.30029296875"/>
+      <location y="0.301494140625"/>
+      <location y="0.3026953125"/>
+      <location y="0.303896484375"/>
+      <location y="0.30509765625"/>
+      <location y="0.306298828125"/>
+      <location y="0.3075"/>
+      <location y="0.308701171875"/>
+      <location y="0.30990234375"/>
+      <location y="0.311103515625"/>
+      <location y="0.3123046875"/>
+      <location y="0.313505859375"/>
+      <location y="0.31470703125"/>
+      <location y="0.315908203125"/>
+      <location y="0.317109375"/>
+      <location y="0.318310546875"/>
+      <location y="0.31951171875"/>
+      <location y="0.320712890625"/>
+      <location y="0.3219140625"/>
+      <location y="0.323115234375"/>
+      <location y="0.32431640625"/>
+      <location y="0.325517578125"/>
+      <location y="0.32671875"/>
+      <location y="0.327919921875"/>
+      <location y="0.32912109375"/>
+      <location y="0.330322265625"/>
+      <location y="0.3315234375"/>
+      <location y="0.332724609375"/>
+      <location y="0.33392578125"/>
+      <location y="0.335126953125"/>
+      <location y="0.336328125"/>
+      <location y="0.337529296875"/>
+      <location y="0.33873046875"/>
+      <location y="0.339931640625"/>
+      <location y="0.3411328125"/>
+      <location y="0.342333984375"/>
+      <location y="0.34353515625"/>
+      <location y="0.344736328125"/>
+      <location y="0.345937500000001"/>
+      <location y="0.347138671875001"/>
+      <location y="0.348339843750001"/>
+      <location y="0.349541015625001"/>
+      <location y="0.350742187500001"/>
+      <location y="0.351943359375001"/>
+      <location y="0.353144531250001"/>
+      <location y="0.354345703125001"/>
+      <location y="0.355546875000001"/>
+      <location y="0.356748046875001"/>
+      <location y="0.357949218750001"/>
+      <location y="0.359150390625001"/>
+      <location y="0.360351562500001"/>
+      <location y="0.361552734375001"/>
+      <location y="0.362753906250001"/>
+      <location y="0.363955078125001"/>
+      <location y="0.365156250000001"/>
+      <location y="0.366357421875001"/>
+      <location y="0.367558593750001"/>
+      <location y="0.368759765625001"/>
+      <location y="0.369960937500001"/>
+      <location y="0.371162109375001"/>
+      <location y="0.372363281250001"/>
+      <location y="0.373564453125001"/>
+      <location y="0.374765625000001"/>
+      <location y="0.375966796875001"/>
+      <location y="0.377167968750001"/>
+      <location y="0.378369140625001"/>
+      <location y="0.379570312500001"/>
+      <location y="0.380771484375001"/>
+      <location y="0.381972656250001"/>
+      <location y="0.383173828125001"/>
+      <location y="0.384375000000001"/>
+      <location y="0.385576171875001"/>
+      <location y="0.386777343750001"/>
+      <location y="0.387978515625001"/>
+      <location y="0.389179687500001"/>
+      <location y="0.390380859375001"/>
+      <location y="0.391582031250001"/>
+      <location y="0.392783203125001"/>
+      <location y="0.393984375000001"/>
+      <location y="0.395185546875001"/>
+      <location y="0.396386718750001"/>
+      <location y="0.397587890625001"/>
+      <location y="0.398789062500001"/>
+      <location y="0.399990234375001"/>
+      <location y="0.401191406250001"/>
+      <location y="0.402392578125001"/>
+      <location y="0.403593750000001"/>
+      <location y="0.404794921875001"/>
+      <location y="0.405996093750001"/>
+      <location y="0.407197265625001"/>
+      <location y="0.408398437500001"/>
+      <location y="0.409599609375001"/>
+      <location y="0.410800781250001"/>
+      <location y="0.412001953125001"/>
+      <location y="0.413203125000002"/>
+      <location y="0.414404296875002"/>
+      <location y="0.415605468750002"/>
+      <location y="0.416806640625002"/>
+      <location y="0.418007812500002"/>
+      <location y="0.419208984375002"/>
+      <location y="0.420410156250002"/>
+      <location y="0.421611328125002"/>
+      <location y="0.422812500000002"/>
+      <location y="0.424013671875002"/>
+      <location y="0.425214843750002"/>
+      <location y="0.426416015625002"/>
+      <location y="0.427617187500002"/>
+      <location y="0.428818359375002"/>
+      <location y="0.430019531250002"/>
+      <location y="0.431220703125002"/>
+      <location y="0.432421875000002"/>
+      <location y="0.433623046875002"/>
+      <location y="0.434824218750002"/>
+      <location y="0.436025390625002"/>
+      <location y="0.437226562500002"/>
+      <location y="0.438427734375002"/>
+      <location y="0.439628906250002"/>
+      <location y="0.440830078125002"/>
+      <location y="0.442031250000002"/>
+      <location y="0.443232421875002"/>
+      <location y="0.444433593750002"/>
+      <location y="0.445634765625002"/>
+      <location y="0.446835937500002"/>
+      <location y="0.448037109375002"/>
+      <location y="0.449238281250002"/>
+      <location y="0.450439453125002"/>
+      <location y="0.451640625000002"/>
+      <location y="0.452841796875002"/>
+      <location y="0.454042968750002"/>
+      <location y="0.455244140625002"/>
+      <location y="0.456445312500002"/>
+      <location y="0.457646484375002"/>
+      <location y="0.458847656250002"/>
+      <location y="0.460048828125002"/>
+      <location y="0.461250000000002"/>
+      <location y="0.462451171875002"/>
+      <location y="0.463652343750002"/>
+      <location y="0.464853515625002"/>
+      <location y="0.466054687500002"/>
+      <location y="0.467255859375002"/>
+      <location y="0.468457031250002"/>
+      <location y="0.469658203125002"/>
+      <location y="0.470859375000002"/>
+      <location y="0.472060546875002"/>
+      <location y="0.473261718750002"/>
+      <location y="0.474462890625002"/>
+      <location y="0.475664062500002"/>
+      <location y="0.476865234375002"/>
+      <location y="0.478066406250002"/>
+      <location y="0.479267578125002"/>
+      <location y="0.480468750000002"/>
+      <location y="0.481669921875003"/>
+      <location y="0.482871093750003"/>
+      <location y="0.484072265625003"/>
+      <location y="0.485273437500003"/>
+      <location y="0.486474609375003"/>
+      <location y="0.487675781250003"/>
+      <location y="0.488876953125003"/>
+      <location y="0.490078125000003"/>
+      <location y="0.491279296875003"/>
+      <location y="0.492480468750003"/>
+      <location y="0.493681640625003"/>
+      <location y="0.494882812500003"/>
+      <location y="0.496083984375003"/>
+      <location y="0.497285156250003"/>
+      <location y="0.498486328125003"/>
+      <location y="0.499687500000003"/>
+      <location y="0.500888671875003"/>
+      <location y="0.502089843750003"/>
+      <location y="0.503291015625003"/>
+      <location y="0.504492187500003"/>
+      <location y="0.505693359375003"/>
+      <location y="0.506894531250003"/>
+      <location y="0.508095703125003"/>
+      <location y="0.509296875000003"/>
+      <location y="0.510498046875003"/>
+      <location y="0.511699218750003"/>
+      <location y="0.512900390625003"/>
+      <location y="0.514101562500003"/>
+      <location y="0.515302734375003"/>
+      <location y="0.516503906250003"/>
+      <location y="0.517705078125003"/>
+      <location y="0.518906250000003"/>
+      <location y="0.520107421875003"/>
+      <location y="0.521308593750003"/>
+      <location y="0.522509765625003"/>
+      <location y="0.523710937500003"/>
+      <location y="0.524912109375003"/>
+      <location y="0.526113281250003"/>
+      <location y="0.527314453125003"/>
+      <location y="0.528515625000003"/>
+      <location y="0.529716796875003"/>
+      <location y="0.530917968750003"/>
+      <location y="0.532119140625003"/>
+      <location y="0.533320312500003"/>
+      <location y="0.534521484375003"/>
+      <location y="0.535722656250003"/>
+      <location y="0.536923828125003"/>
+      <location y="0.538125000000003"/>
+      <location y="0.539326171875003"/>
+      <location y="0.540527343750003"/>
+      <location y="0.541728515625003"/>
+      <location y="0.542929687500003"/>
+      <location y="0.544130859375003"/>
+      <location y="0.545332031250003"/>
+      <location y="0.546533203125003"/>
+      <location y="0.547734375000003"/>
+      <location y="0.548935546875003"/>
+      <location y="0.550136718750003"/>
+      <location y="0.551337890625003"/>
+      <location y="0.552539062500004"/>
+      <location y="0.553740234375004"/>
+      <location y="0.554941406250004"/>
+      <location y="0.556142578125004"/>
+      <location y="0.557343750000004"/>
+      <location y="0.558544921875004"/>
+      <location y="0.559746093750004"/>
+      <location y="0.560947265625004"/>
+      <location y="0.562148437500004"/>
+      <location y="0.563349609375004"/>
+      <location y="0.564550781250004"/>
+      <location y="0.565751953125004"/>
+      <location y="0.566953125000004"/>
+      <location y="0.568154296875004"/>
+      <location y="0.569355468750004"/>
+      <location y="0.570556640625004"/>
+      <location y="0.571757812500004"/>
+      <location y="0.572958984375004"/>
+      <location y="0.574160156250004"/>
+      <location y="0.575361328125004"/>
+      <location y="0.576562500000004"/>
+      <location y="0.577763671875004"/>
+      <location y="0.578964843750004"/>
+      <location y="0.580166015625004"/>
+      <location y="0.581367187500004"/>
+      <location y="0.582568359375004"/>
+      <location y="0.583769531250004"/>
+      <location y="0.584970703125004"/>
+      <location y="0.586171875000004"/>
+      <location y="0.587373046875004"/>
+      <location y="0.588574218750004"/>
+      <location y="0.589775390625004"/>
+      <location y="0.590976562500004"/>
+      <location y="0.592177734375004"/>
+      <location y="0.593378906250004"/>
+      <location y="0.594580078125004"/>
+      <location y="0.595781250000004"/>
+      <location y="0.596982421875004"/>
+      <location y="0.598183593750004"/>
+      <location y="0.599384765625004"/>
+      <location y="0.600585937500004"/>
+      <location y="0.601787109375004"/>
+      <location y="0.602988281250004"/>
+      <location y="0.604189453125004"/>
+      <location y="0.605390625000004"/>
+      <location y="0.606591796875004"/>
+      <location y="0.607792968750004"/>
+      <location y="0.608994140625004"/>
+      <location y="0.610195312500004"/>
+      <location y="0.611396484375004"/>
+      <location y="0.612597656250004"/>
+      <location y="0.613798828125004"/>
+      <location y="0.615000000000004"/>
+      <location y="0.616201171875004"/>
+      <location y="0.617402343750004"/>
+      <location y="0.618603515625004"/>
+      <location y="0.619804687500005"/>
+      <location y="0.621005859375005"/>
+      <location y="0.622207031250005"/>
+      <location y="0.623408203125005"/>
+      <location y="0.624609375000005"/>
+      <location y="0.625810546875005"/>
+      <location y="0.627011718750005"/>
+      <location y="0.628212890625005"/>
+      <location y="0.629414062500005"/>
+      <location y="0.630615234375005"/>
+      <location y="0.631816406250005"/>
+      <location y="0.633017578125005"/>
+      <location y="0.634218750000005"/>
+      <location y="0.635419921875005"/>
+      <location y="0.636621093750005"/>
+      <location y="0.637822265625005"/>
+      <location y="0.639023437500005"/>
+      <location y="0.640224609375005"/>
+      <location y="0.641425781250005"/>
+      <location y="0.642626953125005"/>
+      <location y="0.643828125000005"/>
+      <location y="0.645029296875005"/>
+      <location y="0.646230468750005"/>
+      <location y="0.647431640625005"/>
+      <location y="0.648632812500005"/>
+      <location y="0.649833984375005"/>
+      <location y="0.651035156250005"/>
+      <location y="0.652236328125005"/>
+      <location y="0.653437500000005"/>
+      <location y="0.654638671875005"/>
+      <location y="0.655839843750005"/>
+      <location y="0.657041015625005"/>
+      <location y="0.658242187500005"/>
+      <location y="0.659443359375005"/>
+      <location y="0.660644531250005"/>
+      <location y="0.661845703125005"/>
+      <location y="0.663046875000005"/>
+      <location y="0.664248046875005"/>
+      <location y="0.665449218750005"/>
+      <location y="0.666650390625005"/>
+      <location y="0.667851562500005"/>
+      <location y="0.669052734375005"/>
+      <location y="0.670253906250005"/>
+      <location y="0.671455078125005"/>
+      <location y="0.672656250000005"/>
+      <location y="0.673857421875005"/>
+      <location y="0.675058593750005"/>
+      <location y="0.676259765625005"/>
+      <location y="0.677460937500005"/>
+      <location y="0.678662109375005"/>
+      <location y="0.679863281250005"/>
+      <location y="0.681064453125005"/>
+      <location y="0.682265625000005"/>
+      <location y="0.683466796875005"/>
+      <location y="0.684667968750005"/>
+      <location y="0.685869140625005"/>
+      <location y="0.687070312500005"/>
+      <location y="0.688271484375006"/>
+      <location y="0.689472656250006"/>
+      <location y="0.690673828125006"/>
+      <location y="0.691875000000006"/>
+      <location y="0.693076171875006"/>
+      <location y="0.694277343750006"/>
+      <location y="0.695478515625006"/>
+      <location y="0.696679687500006"/>
+      <location y="0.697880859375006"/>
+      <location y="0.699082031250006"/>
+      <location y="0.700283203125006"/>
+      <location y="0.701484375000006"/>
+      <location y="0.702685546875006"/>
+      <location y="0.703886718750006"/>
+      <location y="0.705087890625006"/>
+      <location y="0.706289062500006"/>
+      <location y="0.707490234375006"/>
+      <location y="0.708691406250006"/>
+      <location y="0.709892578125006"/>
+      <location y="0.711093750000006"/>
+      <location y="0.712294921875006"/>
+      <location y="0.713496093750006"/>
+      <location y="0.714697265625006"/>
+      <location y="0.715898437500006"/>
+      <location y="0.717099609375006"/>
+      <location y="0.718300781250006"/>
+      <location y="0.719501953125006"/>
+      <location y="0.720703125000006"/>
+      <location y="0.721904296875006"/>
+      <location y="0.723105468750006"/>
+      <location y="0.724306640625006"/>
+      <location y="0.725507812500006"/>
+      <location y="0.726708984375006"/>
+      <location y="0.727910156250006"/>
+      <location y="0.729111328125006"/>
+      <location y="0.730312500000006"/>
+      <location y="0.731513671875006"/>
+      <location y="0.732714843750006"/>
+      <location y="0.733916015625006"/>
+      <location y="0.735117187500006"/>
+      <location y="0.736318359375006"/>
+      <location y="0.737519531250006"/>
+      <location y="0.738720703125006"/>
+      <location y="0.739921875000006"/>
+      <location y="0.741123046875006"/>
+      <location y="0.742324218750006"/>
+      <location y="0.743525390625006"/>
+      <location y="0.744726562500006"/>
+      <location y="0.745927734375006"/>
+      <location y="0.747128906250006"/>
+      <location y="0.748330078125006"/>
+      <location y="0.749531250000006"/>
+      <location y="0.750732421875006"/>
+      <location y="0.751933593750006"/>
+      <location y="0.753134765625006"/>
+      <location y="0.754335937500006"/>
+      <location y="0.755537109375007"/>
+      <location y="0.756738281250007"/>
+      <location y="0.757939453125007"/>
+      <location y="0.759140625000007"/>
+      <location y="0.760341796875007"/>
+      <location y="0.761542968750007"/>
+      <location y="0.762744140625007"/>
+      <location y="0.763945312500007"/>
+      <location y="0.765146484375007"/>
+      <location y="0.766347656250007"/>
+      <location y="0.767548828125007"/>
+      <location y="0.768750000000007"/>
+      <location y="0.769951171875007"/>
+      <location y="0.771152343750007"/>
+      <location y="0.772353515625007"/>
+      <location y="0.773554687500007"/>
+      <location y="0.774755859375007"/>
+      <location y="0.775957031250007"/>
+      <location y="0.777158203125007"/>
+      <location y="0.778359375000007"/>
+      <location y="0.779560546875007"/>
+      <location y="0.780761718750007"/>
+      <location y="0.781962890625007"/>
+      <location y="0.783164062500007"/>
+      <location y="0.784365234375007"/>
+      <location y="0.785566406250007"/>
+      <location y="0.786767578125007"/>
+      <location y="0.787968750000007"/>
+      <location y="0.789169921875007"/>
+      <location y="0.790371093750007"/>
+      <location y="0.791572265625007"/>
+      <location y="0.792773437500007"/>
+      <location y="0.793974609375007"/>
+      <location y="0.795175781250007"/>
+      <location y="0.796376953125007"/>
+      <location y="0.797578125000007"/>
+      <location y="0.798779296875007"/>
+      <location y="0.799980468750007"/>
+      <location y="0.801181640625007"/>
+      <location y="0.802382812500007"/>
+      <location y="0.803583984375007"/>
+      <location y="0.804785156250007"/>
+      <location y="0.805986328125007"/>
+      <location y="0.807187500000007"/>
+      <location y="0.808388671875007"/>
+      <location y="0.809589843750007"/>
+      <location y="0.810791015625007"/>
+      <location y="0.811992187500007"/>
+      <location y="0.813193359375007"/>
+      <location y="0.814394531250007"/>
+      <location y="0.815595703125007"/>
+      <location y="0.816796875000007"/>
+      <location y="0.817998046875007"/>
+      <location y="0.819199218750007"/>
+      <location y="0.820400390625007"/>
+      <location y="0.821601562500007"/>
+      <location y="0.822802734375008"/>
+      <location y="0.824003906250008"/>
+      <location y="0.825205078125008"/>
+      <location y="0.826406250000008"/>
+      <location y="0.827607421875008"/>
+      <location y="0.828808593750008"/>
+      <location y="0.830009765625008"/>
+      <location y="0.831210937500008"/>
+      <location y="0.832412109375008"/>
+      <location y="0.833613281250008"/>
+      <location y="0.834814453125008"/>
+      <location y="0.836015625000008"/>
+      <location y="0.837216796875008"/>
+      <location y="0.838417968750008"/>
+      <location y="0.839619140625008"/>
+      <location y="0.840820312500008"/>
+      <location y="0.842021484375008"/>
+      <location y="0.843222656250008"/>
+      <location y="0.844423828125008"/>
+      <location y="0.845625000000008"/>
+      <location y="0.846826171875008"/>
+      <location y="0.848027343750008"/>
+      <location y="0.849228515625008"/>
+      <location y="0.850429687500008"/>
+      <location y="0.851630859375008"/>
+      <location y="0.852832031250008"/>
+      <location y="0.854033203125008"/>
+      <location y="0.855234375000008"/>
+      <location y="0.856435546875008"/>
+      <location y="0.857636718750008"/>
+      <location y="0.858837890625008"/>
+      <location y="0.860039062500008"/>
+      <location y="0.861240234375008"/>
+      <location y="0.862441406250008"/>
+      <location y="0.863642578125008"/>
+      <location y="0.864843750000008"/>
+      <location y="0.866044921875008"/>
+      <location y="0.867246093750008"/>
+      <location y="0.868447265625008"/>
+      <location y="0.869648437500008"/>
+      <location y="0.870849609375008"/>
+      <location y="0.872050781250008"/>
+      <location y="0.873251953125008"/>
+      <location y="0.874453125000008"/>
+      <location y="0.875654296875008"/>
+      <location y="0.876855468750008"/>
+      <location y="0.878056640625008"/>
+      <location y="0.879257812500008"/>
+      <location y="0.880458984375008"/>
+      <location y="0.881660156250008"/>
+      <location y="0.882861328125008"/>
+      <location y="0.884062500000008"/>
+      <location y="0.885263671875008"/>
+      <location y="0.886464843750008"/>
+      <location y="0.887666015625008"/>
+      <location y="0.888867187500008"/>
+      <location y="0.890068359375008"/>
+      <location y="0.891269531250009"/>
+      <location y="0.892470703125009"/>
+      <location y="0.893671875000009"/>
+      <location y="0.894873046875009"/>
+      <location y="0.896074218750009"/>
+      <location y="0.897275390625009"/>
+      <location y="0.898476562500009"/>
+      <location y="0.899677734375009"/>
+      <location y="0.900878906250009"/>
+      <location y="0.902080078125009"/>
+      <location y="0.903281250000009"/>
+      <location y="0.904482421875009"/>
+      <location y="0.905683593750009"/>
+      <location y="0.906884765625009"/>
+      <location y="0.908085937500009"/>
+      <location y="0.909287109375009"/>
+      <location y="0.910488281250009"/>
+      <location y="0.911689453125009"/>
+      <location y="0.912890625000009"/>
+      <location y="0.914091796875009"/>
+      <location y="0.915292968750009"/>
+      <location y="0.916494140625009"/>
+      <location y="0.917695312500009"/>
+      <location y="0.918896484375009"/>
+      <location y="0.920097656250009"/>
+      <location y="0.921298828125009"/>
+      <location y="0.922500000000009"/>
+      <location y="0.923701171875009"/>
+      <location y="0.924902343750009"/>
+      <location y="0.926103515625009"/>
+      <location y="0.927304687500009"/>
+      <location y="0.928505859375009"/>
+      <location y="0.929707031250009"/>
+      <location y="0.930908203125009"/>
+      <location y="0.932109375000009"/>
+      <location y="0.933310546875009"/>
+      <location y="0.934511718750009"/>
+      <location y="0.935712890625009"/>
+      <location y="0.936914062500009"/>
+      <location y="0.938115234375009"/>
+      <location y="0.939316406250009"/>
+      <location y="0.940517578125009"/>
+      <location y="0.941718750000009"/>
+      <location y="0.942919921875009"/>
+      <location y="0.944121093750009"/>
+      <location y="0.945322265625009"/>
+      <location y="0.946523437500009"/>
+      <location y="0.947724609375009"/>
+      <location y="0.948925781250009"/>
+      <location y="0.950126953125009"/>
+      <location y="0.951328125000009"/>
+      <location y="0.952529296875009"/>
+      <location y="0.953730468750009"/>
+      <location y="0.954931640625009"/>
+      <location y="0.956132812500009"/>
+      <location y="0.957333984375009"/>
+      <location y="0.95853515625001"/>
+      <location y="0.95973632812501"/>
+      <location y="0.96093750000001"/>
+      <location y="0.96213867187501"/>
+      <location y="0.96333984375001"/>
+      <location y="0.96454101562501"/>
+      <location y="0.96574218750001"/>
+      <location y="0.96694335937501"/>
+      <location y="0.96814453125001"/>
+      <location y="0.96934570312501"/>
+      <location y="0.97054687500001"/>
+      <location y="0.97174804687501"/>
+      <location y="0.97294921875001"/>
+      <location y="0.97415039062501"/>
+      <location y="0.97535156250001"/>
+      <location y="0.97655273437501"/>
+      <location y="0.97775390625001"/>
+      <location y="0.97895507812501"/>
+      <location y="0.98015625000001"/>
+      <location y="0.98135742187501"/>
+      <location y="0.98255859375001"/>
+      <location y="0.98375976562501"/>
+      <location y="0.98496093750001"/>
+      <location y="0.98616210937501"/>
+      <location y="0.98736328125001"/>
+      <location y="0.98856445312501"/>
+      <location y="0.98976562500001"/>
+      <location y="0.99096679687501"/>
+      <location y="0.99216796875001"/>
+      <location y="0.99336914062501"/>
+      <location y="0.99457031250001"/>
+      <location y="0.99577148437501"/>
+      <location y="0.99697265625001"/>
+      <location y="0.99817382812501"/>
+      <location y="0.99937500000001"/>
+      <location y="1.00057617187501"/>
+      <location y="1.00177734375001"/>
+      <location y="1.00297851562501"/>
+      <location y="1.00417968750001"/>
+      <location y="1.00538085937501"/>
+      <location y="1.00658203125001"/>
+      <location y="1.00778320312501"/>
+      <location y="1.00898437500001"/>
+      <location y="1.01018554687501"/>
+      <location y="1.01138671875001"/>
+      <location y="1.01258789062501"/>
+      <location y="1.01378906250001"/>
+      <location y="1.01499023437501"/>
+      <location y="1.01619140625001"/>
+      <location y="1.01739257812501"/>
+      <location y="1.01859375000001"/>
+      <location y="1.01979492187501"/>
+      <location y="1.02099609375001"/>
+      <location y="1.02219726562501"/>
+      <location y="1.02339843750001"/>
+      <location y="1.02459960937501"/>
+      <location y="1.02580078125001"/>
+      <location y="1.02700195312501"/>
+      <location y="1.02820312500001"/>
+      <location y="1.02940429687501"/>
+      <location y="1.03060546875001"/>
+      <location y="1.03180664062501"/>
+      <location y="1.03300781250001"/>
+      <location y="1.03420898437501"/>
+      <location y="1.03541015625001"/>
+      <location y="1.03661132812501"/>
+      <location y="1.03781250000001"/>
+      <location y="1.03901367187501"/>
+      <location y="1.04021484375001"/>
+      <location y="1.04141601562501"/>
+      <location y="1.04261718750001"/>
+      <location y="1.04381835937501"/>
+      <location y="1.04501953125001"/>
+      <location y="1.04622070312501"/>
+      <location y="1.04742187500001"/>
+      <location y="1.04862304687501"/>
+      <location y="1.04982421875001"/>
+      <location y="1.05102539062501"/>
+      <location y="1.05222656250001"/>
+      <location y="1.05342773437501"/>
+      <location y="1.05462890625001"/>
+      <location y="1.05583007812501"/>
+      <location y="1.05703125000001"/>
+      <location y="1.05823242187501"/>
+      <location y="1.05943359375001"/>
+      <location y="1.06063476562501"/>
+      <location y="1.06183593750001"/>
+      <location y="1.06303710937501"/>
+      <location y="1.06423828125001"/>
+      <location y="1.06543945312501"/>
+      <location y="1.06664062500001"/>
+      <location y="1.06784179687501"/>
+      <location y="1.06904296875001"/>
+      <location y="1.07024414062501"/>
+      <location y="1.07144531250001"/>
+      <location y="1.07264648437501"/>
+      <location y="1.07384765625001"/>
+      <location y="1.07504882812501"/>
+      <location y="1.07625000000001"/>
+      <location y="1.07745117187501"/>
+      <location y="1.07865234375001"/>
+      <location y="1.07985351562501"/>
+      <location y="1.08105468750001"/>
+      <location y="1.08225585937501"/>
+      <location y="1.08345703125001"/>
+      <location y="1.08465820312501"/>
+      <location y="1.08585937500001"/>
+      <location y="1.08706054687501"/>
+      <location y="1.08826171875001"/>
+      <location y="1.08946289062501"/>
+      <location y="1.09066406250001"/>
+      <location y="1.09186523437501"/>
+      <location y="1.09306640625001"/>
+      <location y="1.09426757812501"/>
+      <location y="1.09546875000001"/>
+      <location y="1.09666992187501"/>
+      <location y="1.09787109375001"/>
+      <location y="1.09907226562501"/>
+      <location y="1.10027343750001"/>
+      <location y="1.10147460937501"/>
+      <location y="1.10267578125001"/>
+      <location y="1.10387695312501"/>
+      <location y="1.10507812500001"/>
+      <location y="1.10627929687501"/>
+      <location y="1.10748046875001"/>
+      <location y="1.10868164062501"/>
+      <location y="1.10988281250001"/>
+      <location y="1.11108398437501"/>
+      <location y="1.11228515625001"/>
+      <location y="1.11348632812501"/>
+      <location y="1.11468750000001"/>
+      <location y="1.11588867187501"/>
+      <location y="1.11708984375001"/>
+      <location y="1.11829101562501"/>
+      <location y="1.11949218750001"/>
+      <location y="1.12069335937501"/>
+      <location y="1.12189453125001"/>
+      <location y="1.12309570312501"/>
+      <location y="1.12429687500001"/>
+      <location y="1.12549804687501"/>
+      <location y="1.12669921875001"/>
+      <location y="1.12790039062501"/>
+      <location y="1.12910156250001"/>
+      <location y="1.13030273437501"/>
+      <location y="1.13150390625001"/>
+      <location y="1.13270507812501"/>
+      <location y="1.13390625000001"/>
+      <location y="1.13510742187501"/>
+      <location y="1.13630859375001"/>
+      <location y="1.13750976562501"/>
+      <location y="1.13871093750001"/>
+      <location y="1.13991210937501"/>
+      <location y="1.14111328125001"/>
+      <location y="1.14231445312501"/>
+      <location y="1.14351562500001"/>
+      <location y="1.14471679687501"/>
+      <location y="1.14591796875001"/>
+      <location y="1.14711914062501"/>
+      <location y="1.14832031250001"/>
+      <location y="1.14952148437501"/>
+      <location y="1.15072265625001"/>
+      <location y="1.15192382812501"/>
+      <location y="1.15312500000001"/>
+      <location y="1.15432617187501"/>
+      <location y="1.15552734375001"/>
+      <location y="1.15672851562501"/>
+      <location y="1.15792968750001"/>
+      <location y="1.15913085937501"/>
+      <location y="1.16033203125001"/>
+      <location y="1.16153320312501"/>
+      <location y="1.16273437500001"/>
+      <location y="1.16393554687501"/>
+      <location y="1.16513671875001"/>
+      <location y="1.16633789062501"/>
+      <location y="1.16753906250001"/>
+      <location y="1.16874023437501"/>
+      <location y="1.16994140625001"/>
+      <location y="1.17114257812501"/>
+      <location y="1.17234375000001"/>
+      <location y="1.17354492187501"/>
+      <location y="1.17474609375001"/>
+      <location y="1.17594726562501"/>
+      <location y="1.17714843750001"/>
+      <location y="1.17834960937501"/>
+      <location y="1.17955078125001"/>
+      <location y="1.18075195312501"/>
+      <location y="1.18195312500001"/>
+      <location y="1.18315429687501"/>
+      <location y="1.18435546875001"/>
+      <location y="1.18555664062501"/>
+      <location y="1.18675781250001"/>
+      <location y="1.18795898437501"/>
+      <location y="1.18916015625001"/>
+      <location y="1.19036132812501"/>
+      <location y="1.19156250000001"/>
+      <location y="1.19276367187501"/>
+      <location y="1.19396484375001"/>
+      <location y="1.19516601562501"/>
+      <location y="1.19636718750001"/>
+      <location y="1.19756835937501"/>
+      <location y="1.19876953125001"/>
+      <location y="1.19997070312501"/>
+      <location y="1.20117187500001"/>
+      <location y="1.20237304687501"/>
+      <location y="1.20357421875001"/>
+      <location y="1.20477539062501"/>
+      <location y="1.20597656250001"/>
+      <location y="1.20717773437501"/>
+      <location y="1.20837890625001"/>
+      <location y="1.20958007812501"/>
+      <location y="1.21078125000001"/>
+      <location y="1.21198242187501"/>
+      <location y="1.21318359375001"/>
+      <location y="1.21438476562501"/>
+      <location y="1.21558593750001"/>
+      <location y="1.21678710937501"/>
+      <location y="1.21798828125001"/>
+      <location y="1.21918945312501"/>
+      <location y="1.22039062500001"/>
+      <location y="1.22159179687501"/>
+      <location y="1.22279296875001"/>
+      <location y="1.22399414062501"/>
+      <location y="1.22519531250001"/>
+      <location y="1.22639648437501"/>
+      <location y="1.22759765625001"/>
+      <location y="1.22879882812501"/>
+    </component>
+  </type>
+  
+  <type name="standard-pixel" is="detector">    
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.0014307" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.00286" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+
+  <type name="straight-through-beam-pixel" is="detector">    
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.000600586" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.0012012" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+
+  <type name="monitor" is="detector">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="monitors">
+    <id val="11" />
+    <id start="21" end="24" />
+    <id start="31" end="34" />    
+  </idlist>
+  
+  <idlist idname="door1">
+    <id start="1110001" end="1111024" />
+    <id start="1120001" end="1121024" />
+    <id start="1130001" end="1131024" />
+    <id start="1140001" end="1141024" />
+    <id start="1150001" end="1151024" />
+    <id start="1160001" end="1161024" />
+    <id start="1170001" end="1171024" />
+    <id start="1180001" end="1181024" />   
+    <id start="1210001" end="1211024" />
+    <id start="1220001" end="1221024" />
+    <id start="1230001" end="1231024" />
+    <id start="1240001" end="1241024" />
+    <id start="1250001" end="1251024" />
+    <id start="1260001" end="1261024" />
+    <id start="1270001" end="1271024" />
+    <id start="1280001" end="1281024" />    
+    <id start="1310001" end="1311024" />
+    <id start="1320001" end="1321024" />
+    <id start="1330001" end="1331024" />
+    <id start="1340001" end="1341024" />
+    <id start="1350001" end="1351024" />
+    <id start="1360001" end="1361024" />
+    <id start="1370001" end="1371024" />
+    <id start="1380001" end="1381024" />    
+    <id start="1410001" end="1411024" />
+    <id start="1420001" end="1421024" />
+    <id start="1430001" end="1431024" />
+    <id start="1440001" end="1441024" />
+    <id start="1450001" end="1451024" />
+    <id start="1460001" end="1461024" />
+    <id start="1470001" end="1471024" />
+    <id start="1480001" end="1481024" />    
+  </idlist>
+  
+  <idlist idname="door2">
+    <id start="2110001" end="2111024" />
+    <id start="2120001" end="2121024" />
+    <id start="2130001" end="2131024" />
+    <id start="2140001" end="2141024" />
+    <id start="2150001" end="2151024" />
+    <id start="2160001" end="2161024" />
+    <id start="2170001" end="2171024" />
+    <id start="2180001" end="2181024" />   
+    <id start="2210001" end="2211024" />
+    <id start="2220001" end="2221024" />
+    <id start="2230001" end="2231024" />
+    <id start="2240001" end="2241024" />
+    <id start="2250001" end="2251024" />
+    <id start="2260001" end="2261024" />
+    <id start="2270001" end="2271024" />
+    <id start="2280001" end="2281024" />   
+    <id start="2310001" end="2311024" />
+    <id start="2320001" end="2321024" />
+    <id start="2330001" end="2331024" />
+    <id start="2340001" end="2341024" />
+    <id start="2350001" end="2351024" />
+    <id start="2360001" end="2361024" />
+    <id start="2370001" end="2371024" />
+    <id start="2380001" end="2381024" />    
+    <id start="2410001" end="2411024" />
+    <id start="2420001" end="2421024" />
+    <id start="2430001" end="2431024" />
+    <id start="2440001" end="2441024" />
+    <id start="2450001" end="2451024" />
+    <id start="2460001" end="2461024" />
+    <id start="2470001" end="2471024" />
+    <id start="2480001" end="2481024" />    
+  </idlist>  
+  
+  <idlist idname="door3">
+    <id start="3110001" end="3111024" />
+    <id start="3120001" end="3121024" />
+    <id start="3130001" end="3131024" />
+    <id start="3140001" end="3141024" />
+    <id start="3150001" end="3151024" />
+    <id start="3160001" end="3161024" />
+    <id start="3170001" end="3171024" />
+    <id start="3180001" end="3181024" />   
+    <id start="3210001" end="3211024" />
+    <id start="3220001" end="3221024" />
+    <id start="3230001" end="3231024" />
+    <id start="3240001" end="3241024" />
+    <id start="3250001" end="3251024" />
+    <id start="3260001" end="3261024" />
+    <id start="3270001" end="3271024" />
+    <id start="3280001" end="3281024" />   
+    <id start="3310001" end="3311024" />
+    <id start="3320001" end="3321024" />
+    <id start="3330001" end="3331024" />
+    <id start="3340001" end="3341024" />
+    <id start="3350001" end="3351024" />
+    <id start="3360001" end="3361024" />
+    <id start="3370001" end="3371024" />
+    <id start="3380001" end="3381024" />    
+    <id start="3410001" end="3411024" />
+    <id start="3420001" end="3421024" />
+    <id start="3430001" end="3431024" />
+    <id start="3440001" end="3441024" />
+    <id start="3450001" end="3451024" />
+    <id start="3460001" end="3461024" />
+    <id start="3470001" end="3471024" />
+    <id start="3480001" end="3481024" />    
+    <id start="3510001" end="3511024" />
+    <id start="3520001" end="3521024" />
+    <id start="3530001" end="3531024" />
+    <id start="3540001" end="3541024" />
+    <id start="3550001" end="3551024" />
+    <id start="3560001" end="3561024" />
+    <id start="3570001" end="3571024" />
+    <id start="3580001" end="3581024" />     
+  </idlist>    
+
+  <idlist idname="door4">
+    <id start="4110001" end="4111024" />
+    <id start="4120001" end="4121024" />
+    <id start="4130001" end="4131024" />
+    <id start="4140001" end="4141024" />
+    <id start="4150001" end="4151024" />
+    <id start="4160001" end="4161024" />
+    <id start="4170001" end="4171024" />
+    <id start="4180001" end="4181024" />   
+    <id start="4210001" end="4211024" />
+    <id start="4220001" end="4221024" />
+    <id start="4230001" end="4231024" />
+    <id start="4240001" end="4241024" />
+    <id start="4250001" end="4251024" />
+    <id start="4260001" end="4261024" />
+    <id start="4270001" end="4271024" />
+    <id start="4280001" end="4281024" />   
+    <id start="4310001" end="4311024" />
+    <id start="4320001" end="4321024" />
+    <id start="4330001" end="4331024" />
+    <id start="4340001" end="4341024" />
+    <id start="4350001" end="4351024" />
+    <id start="4360001" end="4361024" />
+    <id start="4370001" end="4371024" />
+    <id start="4380001" end="4381024" />    
+    <id start="4410001" end="4411024" />
+    <id start="4420001" end="4421024" />
+    <id start="4430001" end="4431024" />
+    <id start="4440001" end="4441024" />
+    <id start="4450001" end="4451024" />
+    <id start="4460001" end="4461024" />
+    <id start="4470001" end="4471024" />
+    <id start="4480001" end="4481024" />    
+  </idlist>  
+
+  <idlist idname="door5">
+    <id start="5110001" end="5111024" />
+    <id start="5120001" end="5121024" />
+    <id start="5130001" end="5131024" />
+    <id start="5140001" end="5141024" />
+    <id start="5150001" end="5151024" />
+    <id start="5160001" end="5161024" />
+    <id start="5170001" end="5171024" />
+    <id start="5180001" end="5181024" />   
+    <id start="5210001" end="5211024" />
+    <id start="5220001" end="5221024" />
+    <id start="5230001" end="5231024" />
+    <id start="5240001" end="5241024" />
+    <id start="5250001" end="5251024" />
+    <id start="5260001" end="5261024" />
+    <id start="5270001" end="5271024" />
+    <id start="5280001" end="5281024" />   
+    <id start="5310001" end="5311024" />
+    <id start="5320001" end="5321024" />
+    <id start="5330001" end="5331024" />
+    <id start="5340001" end="5341024" />
+    <id start="5350001" end="5351024" />
+    <id start="5360001" end="5361024" />
+    <id start="5370001" end="5371024" />
+    <id start="5380001" end="5381024" />    
+    <id start="5410001" end="5411024" />
+    <id start="5420001" end="5421024" />
+    <id start="5430001" end="5431024" />
+    <id start="5440001" end="5441024" />
+    <id start="5450001" end="5451024" />
+    <id start="5460001" end="5461024" />
+    <id start="5470001" end="5471024" />
+    <id start="5480001" end="5481024" />    
+  </idlist>    
+
+  <idlist idname="door6">
+    <id start="6110001" end="6111024" />
+    <id start="6120001" end="6121024" />
+    <id start="6130001" end="6131024" />
+    <id start="6140001" end="6141024" />
+    <id start="6150001" end="6151024" />
+    <id start="6160001" end="6161024" />
+    <id start="6170001" end="6171024" />
+    <id start="6180001" end="6181024" />   
+    <id start="6210001" end="6211024" />
+    <id start="6220001" end="6221024" />
+    <id start="6230001" end="6231024" />
+    <id start="6240001" end="6241024" />
+    <id start="6250001" end="6251024" />
+    <id start="6260001" end="6261024" />
+    <id start="6270001" end="6271024" />
+    <id start="6280001" end="6281024" />   
+    <id start="6310001" end="6311024" />
+    <id start="6320001" end="6321024" />
+    <id start="6330001" end="6331024" />
+    <id start="6340001" end="6341024" />
+    <id start="6350001" end="6351024" />
+    <id start="6360001" end="6361024" />
+    <id start="6370001" end="6371024" />
+    <id start="6380001" end="6381024" />    
+    <id start="6410001" end="6411024" />
+    <id start="6420001" end="6421024" />
+    <id start="6430001" end="6431024" />
+    <id start="6440001" end="6441024" />
+    <id start="6450001" end="6451024" />
+    <id start="6460001" end="6461024" />
+    <id start="6470001" end="6471024" />
+    <id start="6480001" end="6481024" />    
+  </idlist>   
+  
+  <idlist idname="door7">
+    <id start="7110001" end="7111024" />
+    <id start="7120001" end="7121024" />
+    <id start="7130001" end="7131024" />
+    <id start="7140001" end="7141024" />
+    <id start="7150001" end="7151024" />
+    <id start="7160001" end="7161024" />
+    <id start="7170001" end="7171024" />
+    <id start="7180001" end="7181024" />   
+    <id start="7210001" end="7211024" />
+    <id start="7220001" end="7221024" />
+    <id start="7230001" end="7231024" />
+    <id start="7240001" end="7241024" />
+    <id start="7250001" end="7251024" />
+    <id start="7260001" end="7261024" />
+    <id start="7270001" end="7271024" />
+    <id start="7280001" end="7281024" />   
+    <id start="7310001" end="7311024" />
+    <id start="7320001" end="7321024" />
+    <id start="7330001" end="7331024" />
+    <id start="7340001" end="7341024" />
+    <id start="7350001" end="7351024" />
+    <id start="7360001" end="7361024" />
+    <id start="7370001" end="7371024" />
+    <id start="7380001" end="7381024" />    
+    <id start="7410001" end="7411024" />
+    <id start="7420001" end="7421024" />
+    <id start="7430001" end="7431024" />
+    <id start="7440001" end="7441024" />
+    <id start="7450001" end="7451024" />
+    <id start="7460001" end="7461024" />
+    <id start="7470001" end="7471024" />
+    <id start="7480001" end="7481024" />    
+  </idlist>     
+  
+  <idlist idname="door8">
+    <id start="8110001" end="8111024" />
+    <id start="8120001" end="8121024" />
+    <id start="8130001" end="8131024" />
+    <id start="8140001" end="8141024" />
+    <id start="8150001" end="8151024" />
+    <id start="8160001" end="8161024" />
+    <id start="8170001" end="8171024" />
+    <id start="8180001" end="8181024" />   
+    <id start="8210001" end="8211024" />
+    <id start="8220001" end="8221024" />
+    <id start="8230001" end="8231024" />
+    <id start="8240001" end="8241024" />
+    <id start="8250001" end="8251024" />
+    <id start="8260001" end="8261024" />
+    <id start="8270001" end="8271024" />
+    <id start="8280001" end="8281024" />   
+    <id start="8310001" end="8311024" />
+    <id start="8320001" end="8321024" />
+    <id start="8330001" end="8331024" />
+    <id start="8340001" end="8341024" />
+    <id start="8350001" end="8351024" />
+    <id start="8360001" end="8361024" />
+    <id start="8370001" end="8371024" />
+    <id start="8380001" end="8381024" />    
+  </idlist>    
+  
+  <idlist idname="door9">
+    <id start="9110001" end="9111024" />
+    <id start="9120001" end="9121024" />
+    <id start="9130001" end="9131024" />
+    <id start="9140001" end="9141024" />
+    <id start="9150001" end="9151024" />
+    <id start="9160001" end="9161024" />
+    <id start="9170001" end="9171024" />
+    <id start="9180001" end="9181024" />   
+    <id start="9210001" end="9211024" />
+    <id start="9220001" end="9221024" />
+    <id start="9230001" end="9231024" />
+    <id start="9240001" end="9241024" />
+    <id start="9250001" end="9251024" />
+    <id start="9260001" end="9261024" />
+    <id start="9270001" end="9271024" />
+    <id start="9280001" end="9281024" />   
+    <id start="9310001" end="9311024" />
+    <id start="9320001" end="9321024" />
+    <id start="9330001" end="9331024" />
+    <id start="9340001" end="9341024" />
+    <id start="9350001" end="9351024" />
+    <id start="9360001" end="9361024" />
+    <id start="9370001" end="9371024" />
+    <id start="9380001" end="9381024" />    
+  </idlist>   
+  
+</instrument>

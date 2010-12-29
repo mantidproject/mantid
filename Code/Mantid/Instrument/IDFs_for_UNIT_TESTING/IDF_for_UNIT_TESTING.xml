@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instrument name="For Unit Testing" valid-from   ="1900-01-31 23:59:59"
+                                         valid-to     ="2100-01-31 23:59:59">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <location x="0.0" y="0.0" z="0.0" ang="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <!-- Comment 'components-are-facing' out if you don't want the
+    components defined in this file to face a position by default -->
+    <components-are-facing x="0.0" y="0.0" z="0.0" />    
+  </defaults>
+
+
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+
+  <!-- detector components -->
+
+<component type="cylinder-right" idlist="cylinder-right">
+  <location x="0.0" y="10.0" z="0.0" />
+</component>
+
+<component type="cylinder-left" idlist="cylinder-left">
+  <location x="0.0" y="-10.0" z="0.0" />
+</component>
+
+<component type="cylinder-above" idlist="cylinder-above">
+  <location x="0.0" y="0.0" z="10.0" />
+</component>
+
+<component type="cylinder-below" idlist="cylinder-below">
+  <location x="0.0" y="0.0" z="-10.0" />
+</component>
+
+<component type="cylinder-below" idlist="cylinder-further-below">
+  <location x="0.0" y="0.0" z="-100.0"> <facing x="1.0" z="-100.0"/> </location>
+</component>
+
+<component type="infinite-cone-test" idlist="infinite-cone-test">
+  <location x="0.0" y="0.0" z="-200.0"> <facing val="none"/> </location>
+</component>
+
+<component type="cone-test" idlist="cone-test">
+  <location x="0.0" y="0.0" z="-200.0"> <facing val="none"/> </location>
+</component>
+
+<component type="hexahedron-test" idlist="hexahedron-test">
+  <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
+</component>
+
+<component type="cuboid-rotating-test" idlist="cuboid-rotating-test">
+  <location x="0.0" y="100.0" z="0.0"> </location>
+  <location x="0.0" y="200.0" z="0.0">  <facing rot="45"/> </location>
+</component>
+
+<component type="infinite-cylinder-test" idlist="infinite-cylinder-test">
+  <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
+</component>
+
+<component type="finite-cylinder-test" idlist="finite-cylinder-test">
+  <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
+</component>
+
+<component type="complement-test" idlist="complement-test">
+  <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
+</component>
+
+<component type="rotation-of-element-test" idlist="rotation-of-element-test">
+  <location x="0.0" y="0.0" z="0.0" rot="90"> <facing val="none"/> </location>
+  <location x="0.0" y="0.0" z="0.0" rot="90" axis-x="1" axis-y="0" axis-z="0"> <facing val="none"/> </location>
+  <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
+</component>
+
+  <!-- source and sample-position components -->
+
+  <component type="undulator">
+    <location z="-17.0"> <facing val="none"/> </location>
+  </component>
+
+  <component type="nickel-holder">
+    <location> <facing val="none"/> </location>
+  </component>
+
+
+  <!-- DEFINITION OF TYPES -->
+
+  <!-- Source types -->
+
+  <type name="undulator" is="Source">
+    <properties />
+    
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+    <sphere id="some-shape2">
+      <centre x="0.0"  y="0.0" z="0.0" />
+      <radius val="0.01" />
+    </sphere>     
+    <algebra val="some-shape some-shape2" />  <!-- intersection example -->
+  </type>    
+
+  <!-- Sample-position types -->
+
+  <type name="nickel-holder" is="SamplePos">
+    <properties />
+    
+    <sphere id="some-shape1">
+      <centre x="0.0"  y="0.0" z="0.0" />
+      <radius val="0.03" />
+    </sphere>
+    <sphere id="some-shape2">
+      <centre x="10.0"  y="0.0" z="0.0" />
+      <radius val="0.03" />
+    </sphere>    
+    <algebra val="some-shape1 : some-shape2" />  <!-- union example -->
+  </type>
+
+  <!-- Detectors types -->
+
+  <type name="cylinder-right" is="detector">
+    <properties />
+
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+    
+  </type>
+
+  <type name="cylinder-left" is="detector">
+  <properties />
+
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />  
+  
+  </type>
+
+  <type name="cylinder-above" is="detector">
+    <properties />
+
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+    
+  </type>
+
+  <type name="cylinder-below" is="detector">
+  <properties />
+
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />  
+  
+  </type>
+  
+  <type name="infinite-cone-test" is="detector">
+    <infinite-cone id="some-shape">
+      <tip-point x="0.0" y="0.0" z="0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <angle val="1.0" />
+    </infinite-cone>
+    <algebra val="some-shape" />  
+  </type> 
+
+  <type name="cone-test" is="detector">
+    <cone id="some-shape">
+      <tip-point x="0.0" y="0.0" z="0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <angle val="1.0" />
+      <height val="1.0" />
+    </cone>
+    <algebra val="some-shape" />  
+  </type>   
+  
+  <type name="hexahedron-test" is="detector">
+    <hexahedron id="some-shape">
+      <left-back-bottom-point  x="0.0" y="0.0" z="0.0"  />
+      <left-front-bottom-point x="1.0" y="0.0" z="0.0"  />
+      <right-front-bottom-point x="1.0" y="1.0" z="0.0"  />
+      <right-back-bottom-point  x="0.0" y="1.0" z="0.0"  />
+      <left-back-top-point  x="0.0" y="0.0" z="2.0"  />
+      <left-front-top-point  x="0.5" y="0.0" z="2.0"  />
+      <right-front-top-point  x="0.5" y="0.5" z="2.0"  />
+      <right-back-top-point  x="0.0" y="0.5" z="2.0"  />
+    </hexahedron>
+    <algebra val="some-shape" />  
+  </type>    
+  
+  <type name="cuboid-rotating-test" is="detector">
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" /> 
+  </type>    
+  
+  <type name="infinite-cylinder-test" is="detector">
+    <infinite-cylinder id="some-shape">
+      <centre x="0.0" y="0.0" z="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="1.0" />
+    </infinite-cylinder> 
+    <algebra val="some-shape" /> 
+  </type>   
+
+  <type name="finite-cylinder-test" is="detector">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="1.0" />
+      <height val="5.0" />
+    </cylinder> 
+    <algebra val="some-shape" />
+  </type>    
+  
+  <type name="complement-test" is="detector">    
+    <cylinder id="stick">
+      <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.05" />
+      <height val="1.0" />
+    </cylinder>
+    <sphere id="some-sphere">
+      <centre x="0.0"  y="0.0" z="0.0" />
+      <radius val="0.5" />
+    </sphere>     
+    <algebra val="some-sphere # stick" />  <!-- complement example -->    
+  </type>  
+  
+  <type name="rotation-of-element-test" is="detector">
+    <cuboid id="some-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="some-shape" />
+  </type>      
+  
+  
+  
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="cylinder-right">
+    <id start="1" end="1" />
+    <!-- <id val="1" />  -->
+  </idlist>
+  
+  <idlist idname="cylinder-left">
+    <id start="2" end="2" />
+    <!-- <id val="2" />  -->
+  </idlist>
+  
+  <idlist idname="cylinder-above">
+    <id val="3" />
+  </idlist>
+  
+  <idlist idname="cylinder-below">
+    <id start="4" end="4" />
+  </idlist>
+  
+  <idlist idname="cylinder-further-below">
+    <id val="5" />
+  </idlist>    
+  
+  <idlist idname="infinite-cone-test">
+    <id val="6" />
+  </idlist>     
+  
+  <idlist idname="cone-test">
+    <id val="7" />
+  </idlist>    
+  
+  <idlist idname="hexahedron-test">
+    <id val="8" />
+  </idlist> 
+  
+  <idlist idname="cuboid-rotating-test">
+    <id start="10" end="11" />
+  </idlist>    
+
+  <idlist idname="infinite-cylinder-test">
+    <id val="12" />
+  </idlist> 
+  
+  <idlist idname="finite-cylinder-test">
+    <id val="13" />
+  </idlist>   
+  
+  <idlist idname="complement-test">
+    <id val="14" />
+  </idlist>   
+  
+  <idlist idname="rotation-of-element-test">
+    <id start="15" end="17" />
+  </idlist>   
+  
+  
+</instrument>

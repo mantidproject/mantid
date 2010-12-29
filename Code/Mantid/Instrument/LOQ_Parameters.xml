@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "LOQ" date = "2010-07-28T00:00:00">
+
+<component-link name = "LOQ">
+
+<parameter name="low-angle-detector-name" type="string">
+  <value val="main-detector-bank"/>
+</parameter>
+
+<parameter name="low-angle-detector-short-name" type="string">
+  <value val="main"/>
+</parameter>
+<!-- this is the first spectrum number for an empty instrument (used for instrument view), runs generally have a different first number spectrum number-->
+<parameter name="first-low-angle-spec-number">
+  <value val="3"/>
+</parameter>
+<parameter name="low-angle-detector-num-columns">
+  <value val="128"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-rows">
+  <value val="128"/>
+</parameter>
+
+<parameter name="high-angle-detector-name" type="string">
+  <value val="HAB"/>
+</parameter>
+
+<parameter name="high-angle-detector-short-name" type="string">
+  <value val="HAB"/>
+</parameter>
+
+<!-- the following few lines respond to the hole in LOQs front detector -->
+<parameter name="high-angle-detector-non-rectangle-height">
+  <value val="128"/>
+</parameter>
+
+<parameter name="high-angle-detector-non-rectangle-width">
+  <value val="128"/>
+</parameter>
+<parameter name="high-angle-detector-num-pixels">
+  <value val="1406"/>
+</parameter>
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="2"/>
+</parameter>
+
+<parameter name="default-transmission-monitor-spectrum">
+  <value val="3"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

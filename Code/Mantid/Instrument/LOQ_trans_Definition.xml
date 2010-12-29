@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="LOQ" valid-from   ="1900-01-31 23:59:59"
+                       valid-to     ="2100-01-31 23:59:59"
+		       last-modified="2009-03-10 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
+  
+      Data provided by Richard Heenan. This is for the TRANS configuration.
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location />
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location z="11.0"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+  
+  
+  <!-- detector components (including monitors) -->
+  
+  <component type="monitor1" idlist="monitor1">
+    <location z="6.356" mark-as="monitor" />
+  </component>
+  
+  <type name="monitor1" is="detector">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+  
+  
+  <component type="aperture1">
+    <location z="6.48"/>
+  </component>
+  <type name="aperture1" />
+  
+ 
+  <component type="monitor2" idlist="monitor2">
+    <location z="10.424" mark-as="monitor" />
+  </component>
+  
+  <type name="monitor2" is="detector">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type> 
+
+  
+  <component type="aperture2">
+    <location z="10.694"/>
+  </component>
+  <type name="aperture2" />
+  
+  
+  <component type="monitor3" idlist="monitor3">
+    <location z="11.497" mark-as="monitor" />
+  </component>
+  
+  <type name="monitor3" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.015" y="-0.03" z="0.0"  />
+      <left-front-top-point  x="0.015" y="-0.03" z="0.005"  />
+      <left-back-bottom-point  x="-0.015" y="-0.03" z="0.0"  />
+      <right-front-bottom-point  x="0.015" y="0.03" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+  
+  
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  
+  <idlist idname="monitor2">
+    <id val="2" />  
+  </idlist>
+
+  <idlist idname="monitor3">
+    <id val="3" />  
+  </idlist>
+  
+</instrument>

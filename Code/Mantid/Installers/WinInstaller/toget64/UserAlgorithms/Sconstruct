@@ -1,0 +1,44 @@
+#For Framework
+import os
+import platform
+import sys
+import shutil
+import re
+import string
+from socket import gethostname
+
+includes = '../include'
+
+env = Environment(ENV=os.environ,  
+                  CPPPATH = includes, 
+                  PATH = '.', 
+                  LIBS = [
+                           'MantidKernel',
+                           'MantidAPI',
+                           'MantidGeometry',
+                           'MantidDataObjects',
+                           'MantidCurveFitting'
+                         ], 
+                  LINKFLAGS = '/MACHINE:X64',
+                  LIBPATH = '../UserAlgorithms',
+                  CCFLAGS = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/DNOMINMAX', '/wd4275']
+                  )
+                  
+sources = Glob('*.cpp')
+
+# make library name == directory name
+cwd = os.getcwd()
+lst = cwd.split('/')
+n = len(lst)
+if n == 1:
+    lst = cwd.split('\\')
+    n = len(lst)
+    
+libName = lst[n-1]
+
+# install in ../plugins/
+installDir = '../plugins'
+
+shared = env.SharedLibrary(libName, sources, PDB=libName+'.pdb')
+env.Install(installDir,shared)
+env.Alias('install',installDir)

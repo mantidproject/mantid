@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IRIS" date = "2010-05-05T00:00:00">
+
+<component-link name = "IRIS">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="indirect"/>
+</parameter>
+
+<parameter name="analysers" type="string">
+  <value val="graphite,mica,fmica,diffraction" />
+</parameter>
+
+<parameter name="refl-graphite" type="string">
+  <value val="002,004" />
+</parameter>
+
+<parameter name="refl-mica" type="string">
+  <value val="002,004,006" />
+</parameter>
+
+<parameter name="refl-fmica" type="string">
+  <value val="002,006" />
+</parameter>
+
+<parameter name="refl-diffraction" type="string">
+  <value val="diffspec,diffonly" />
+</parameter>
+
+<parameter name="mon-area" >
+  <value val="1.276e-3" />
+</parameter>
+<parameter name="mon-thickness" >
+  <value val="0.025" />
+</parameter>
+
+<!-- IRIS_analyser_reflection_Parameters.xml -->
+
+</component-link>
+
+</parameter-file>

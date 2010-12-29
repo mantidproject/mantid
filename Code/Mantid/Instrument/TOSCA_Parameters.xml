@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "TOSCA" date = "2010-05-05T00:00:00">
+
+<component-link name = "TOSCA">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="indirect"/>
+</parameter>
+
+<parameter name="adjustTOF">
+  <value val="1" />
+</parameter>
+
+<parameter name="analysers" type="string">
+  <value val="abc" />
+</parameter>
+
+<parameter name="refl-abc" type="string">
+  <value val="001" />
+</parameter>
+
+<!-- THESE VALUES COPIED FROM IRIS - NEED CHANGING? -->
+<parameter name="mon-area" >
+  <value val="5.39e-5" />
+</parameter>
+<parameter name="mon-thickness" >
+  <value val="0.0013" />
+</parameter>
+
+
+</component-link>
+
+</parameter-file>

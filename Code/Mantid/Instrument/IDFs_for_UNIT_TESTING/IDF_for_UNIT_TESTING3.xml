@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<instrument name="unit testing 3" valid-from   ="1900-01-31 23:59:59"
+                                  valid-to     ="2100-01-31 23:59:59"
+				  last-modified="2010-10-06T16:21:30">
+
+<!-- XY detector -->
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+ <!-- <offsets spherical="delta" /> -->
+</defaults>
+
+
+  <component type="panel" idlist="idlist_for_bank1">
+    <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1"  xpixels="3" ypixels="2" >
+    </location>
+  </component>
+
+<!-- Detector Panel -->
+<type is="detector" name="panel">
+  <properties/>
+  <component type="pixel">
+    <location y="0" x="0"/>
+    <location y="1" x="0"/>
+    <location y="0" x="1"/>
+    <location y="1" x="1"/>
+    <location y="0" x="2"/>
+    <location y="1" x="2"/>
+  </component>
+</type>
+
+<!-- Pixel for Detectors-->
+<type is="detector" name="pixel">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+    <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+    <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+    <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+
+
+<!-- detector and monitor IDs -->
+
+
+<idlist idname="idlist_for_bank1">
+  <id start="1000" end="1005" />
+</idlist>
+
+
+
+
+
+</instrument>

@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument name="DUM" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-10-01 09:56:20.177358">
+  <!--Created by Michael Reuter-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness axis="right"/>
+    </reference-frame>
+  </defaults>
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="moderator">
+    <location z="-5.0"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component mark-as="monitor" type="monitor">
+      <location z="-2.5" name="monitor1"/>
+    </component>
+  </type>
+  <!--DETECTOR POSITIONS-->
+  <component type="dummy" idlist="dummy">
+    <location/>
+    <parameter name="tube_pressure2">
+      <value units="atm" val="35.0"/>
+    </parameter>  
+  </component>
+  <type name="dummy">
+    <component type="pixel">  
+      <location y="0.0" x="0.707" z="0.707"/>
+    </component>
+    <component type="pixel">
+      <location y="0.0" x="1.0" z="0.0"/>
+    </component>
+    <component type="pixel">
+      <location y="1.0" x="0.707" z="0.707"/>
+    </component>
+  </type>
+  <!--PIXEL DEFINITION-->
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
+      <radius val="0.0127"/>
+      <height val="0.1"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="detector" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius radius="0.01"/>
+      <height height="0.03"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR ID-->
+  <idlist idname="monitors">
+    <id val="0"/>
+  </idlist>
+  <!--DETECTOR IDs-->
+  <idlist idname="dummy">
+    <id start="1" end="3"/>
+  </idlist>
+  <component-link name="pixel">
+    <parameter name="tube_pressure">
+      <value units="atm" val="10.0"/>
+    </parameter>
+    <parameter name="tube_thickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+    <parameter name="tube_temperature">
+      <value units="K" val="290.0"/>
+    </parameter>
+  </component-link>
+</instrument>

@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<!-- Purpose of this unit testing IDF is to 
+
+   a) Test the 'slice-of-cylinder-ring' XML element
+   b) <parameter> tag
+   
+-->
+
+<instrument name="For Unit Testing" valid-from   ="1900-01-31 23:59:59"
+                                         valid-to     ="2100-01-31 23:59:59">
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+ <!-- <offsets spherical="delta" /> -->
+</defaults>
+
+<parameter name="somefunction:toplevel" type="fitting"> <value val="100.0" /> <min val="80"/> <max val="120"/> </parameter>
+
+<parameter name="somefunction:percentage" type="fitting"> <value val="250.0" /> <min val="80%"/> <max val="120%"/> <penalty-factor val="9.1" /> </parameter> 
+
+<parameter name="somefunction:formula" type="fitting"> <formula eq="100.0+10*centre+centre^2" unit="TOF" result-unit="dSpacing"/> </parameter> 
+
+
+<component-link name="nickel-holder" >
+  <parameter name="fjols"> <value val="200.0" /> </parameter>
+  <parameter name="fjols-string" type="string"> <value val="boevs" /> </parameter>
+</component-link>
+
+<component-link name="combined translation6" >
+  <parameter name="fjols"> <value val="20.0" /> </parameter>
+</component-link>
+
+
+<parameter name="somefunction:toplevel2" type="fitting"> 
+  <lookuptable interpolation="linear" x-unit="TOF" y-unit="dSpacing">
+    <point x="1" y="1" />
+    <point x="3" y="100" />
+    <point x="5" y="1120" />
+    <point x="10" y="1140" />    
+  </lookuptable>
+</parameter> 
+
+<!-- Test r-position, t-position and p-position parameters -->
+
+<component type="dummy" name="rtpTest1">
+  <location x="12" y="12" z="12"/>
+  <parameter name="r-position"> <value val="20.0" /> </parameter>
+</component>
+<component type="dummy" name="rtpTest2">
+  <location x="12" y="12" z="12"/>
+  <!-- this should have no effect -->  
+  <parameter name="t-position"> <value val="20.0" /> </parameter>
+</component>
+<component type="dummy" name="rtpTest3">
+  <location x="12" y="12" z="12"/>
+  <!-- this should have no effect -->  
+  <parameter name="p-position"> <value val="20.0" /> </parameter>
+</component>
+<component type="dummy" name="rtpTest4">
+  <location x="12" y="12" z="12"/>
+  <!-- this should have no effect -->  
+  <parameter name="p-position"> <value val="20.0" /> </parameter>
+  <parameter name="t-position"> <value val="20.0" /> </parameter>  
+</component>
+
+<component type="dummy" name="rtpTest5">
+  <location x="12" y="12" z="12"/>
+  <parameter name="r-position"> <value val="20.0" /> </parameter>
+  <parameter name="t-position"> <value val="90.0" /> </parameter>  
+</component>
+
+<type name="dummy" />
+
+
+
+<!--  Source and sample-position components and their types -->
+
+<component type="undulator">
+  <location z="-95." /> 
+</component>
+<component type="nickel-holder">
+  <location />
+  <parameter name="klovn"> <value val="2.0" /> </parameter>   
+  <parameter name="klovn"> <value val="3.0" /> </parameter>  
+  <parameter name="klovn"> <value val="1.0" /> </parameter>   
+  <parameter name="pos"> <value val="2.0" /> </parameter> <!-- reserved keyword -->
+  <parameter name="rot"> <value val="2.0" /> </parameter> <!-- reserved keyword -->
+  <parameter name="taabe"> 
+    <logfile id="nedtur"/>   
+    <value val="200.0" />     
+  </parameter>     
+  <parameter name="mistake"> </parameter> 
+</component>
+
+<type name="undulator" is="Source">
+  <properties />
+</type>
+<type name="nickel-holder" is="SamplePos">
+  <properties />
+</type>
+
+<!-- For testing roty -->
+<component type="roty-testing" idlist="roty-testing">
+  <location x="10" rot="60" axis-x="0" axis-y="1" axis-z="0"/>
+  <location x="10" >
+    <parameter name="roty"> <value val="60.0"/> </parameter> 
+  </location>
+  
+  <location x="10" rot="90" axis-x="0" axis-y="0" axis-z="1"/>
+  <location x="10" >
+    <parameter name="rotz"> <value val="90"/> </parameter> 
+  </location> 
+  
+  <location x="10" >
+    <parameter name="rotz"> <value val="90"/> </parameter> 
+    <parameter name="roty"> <value val="90"/> </parameter>     
+  </location>
+  <location x="10" >
+    <parameter name="roty"> <value val="90"/> </parameter>  
+    <parameter name="rotz"> <value val="90"/> </parameter> 
+  </location>   
+  <location x="10" >
+    <parameter name="rotx"> <value val="90"/> </parameter>  
+    <parameter name="rotz"> <value val="90"/> </parameter> 
+  </location>   
+</component>
+
+<type name="roty-testing">
+<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+  <location  x="1" name="param rot-test"/>  
+</component>
+</type>
+  
+
+<!-- Monitors and their types -->
+
+<component type="monitors" idlist="monitors">
+  <location x="10">
+    <parameter name="x"> <value val="10.0" />  </parameter>
+    <parameter name="boevs"> <value val="8.0" /> </parameter> 
+    <parameter name="somefunction:fiddo" type="fitting"> <value val="84.0" /> </parameter> 
+  </location>
+  
+  <location>
+    <exclude sub-part="combined translation2"/>   
+    <exclude sub-part="combined translation3"/>     
+    <exclude sub-part="does not exit"/>      
+  </location>
+</component>
+
+<type name="monitors">
+<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+  <location name="upstream_monitor_det"/>
+  <location  r="1.74" t="0" p="0" name="downstream_monitor_det"/>  
+  
+  <location  r="10" t="90" name="combined translation">
+    <trans r="8" t="-90" />
+  </location>
+  
+  <location  r="10" t="90" rot="90" name="combined translation2">
+    <trans r="8" t="-90" >
+      <trans z="2" >
+        <trans z="1" />
+      </trans>
+    </trans>
+  </location> 
+
+  <location  r="10" t="90" name="combined translation3">
+    <rot val="90" />  <!-- this one should be ignored -->
+    <trans r="8" t="-90" />
+  </location>
+  
+  <location  r="10" t="90" name="combined translation4">
+    <rot val="90" >
+      <trans r="8" t="-90" />
+    </rot>
+  </location>
+
+  <location  r="10" t="90" name="combined translation5">
+    <rot val="90" />   <!-- this one should be ignored -->
+    <trans r="8" t="-90" />
+    <trans r="8" t="-90" /> <!-- this one should be ignored -->  
+  </location>  
+  
+  <location  r="8" t="-90" name="combined translation6">
+    <trans r="10" t="90" />
+    <parameter name="nedtur"> <value val="77"/> </parameter>    
+  </location>   
+  
+  <location  r="1" t="90" name="combined translation7">
+    <rot val="90" >
+      <trans r="8" t="90"/>
+    </rot>
+  </location>  
+  
+  <location  r="1" t="90" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="combined translation8">
+      <trans x="8"/>  
+  </location>  
+  
+  <location  r="1" t="90" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="combined translation9">
+    <rot val="180" axis-x="0" axis-y="0" axis-z="1" >
+      <trans x="8"/>
+    </rot>    
+  </location>  
+
+  <location  r="1" t="90" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="combined translation10">
+      <trans y="8"/>  
+  </location>  
+  
+  <location  r="1" t="90" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="combined translation11">
+    <rot val="180" axis-x="0" axis-y="0" axis-z="1" >
+      <trans y="8"/>
+    </rot>    
+  </location>  
+  
+  <!-- note the parameters below are here defined for all the location elements listed here -->
+  <parameter name="boevs2"> <value val="16.0" /> </parameter>
+  <parameter name="boevs3"> <value val="32.0" /> </parameter>   
+  
+</component>
+</type>
+
+<type name="monitor-cylinder-ring-shape" is="detector">
+
+  <cylinder id="inner-cylinder">
+    <centre-of-bottom-base x="-0.0621" y="0.0" z="0.0" />
+    <axis x="0.0" y="0.0" z="1.0" /> 
+    <radius val="0.0596" />
+    <height val="0.01" />
+  </cylinder> 
+ 
+  <cylinder id="outer-cylinder">
+    <centre-of-bottom-base x="-0.0621" y="0.0" z="0.0" />
+    <axis x="0.0" y="0.0" z="1.0" /> 
+    <radius val="0.0646" />
+    <height val="0.01" />
+  </cylinder>  
+  
+  <algebra val="outer-cylinder # inner-cylinder" />    
+  
+  <bounding-box>
+    <x-min val="-0.1368" />
+    <x-max val="0.036" />
+    <y-min val="-0.0756" />
+    <y-max val="0.0756" />
+    <z-min val="-0.011" />
+    <z-max val="0.021" />
+  </bounding-box>
+</type>
+
+
+<!-- Curved detector and its type -->
+
+<component type="bank_bsk" idlist="bank0">
+  <location  r="0.89" t="0" p="0" />
+</component>
+
+<type name="bank_bsk">
+  <component type="module_bsk">
+    <location  r="0" t="0" p="0" name="mod2"/>
+  </component>
+</type>
+
+<type name="module_bsk">
+  <component type="arc0"> 
+    <location r="0" t="176.000" p="0" name="Det0" /> 
+  </component>
+</type>
+
+
+<type name="arc0" is="detector"> 
+
+  <cuboid id="90deg-shape">
+    <left-front-bottom-point x="0.01" y="-0.1" z="0.0"  />
+    <left-front-top-point  x="0.01" y="-0.1" z="0.02"  />
+    <left-back-bottom-point  x="-0.01" y="-0.1" z="0.0"  />
+    <right-front-bottom-point  x="0.01" y="0.1" z="0.0"  />
+  </cuboid>
+  <algebra val="90deg-shape" />
+</type>
+
+
+
+<!-- XY detector -->
+
+
+  <component type="panel" idlist="idlist_for_bank1" >
+    <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1" >
+    </location>
+  </component>
+
+<!-- Detector Panel -->
+<type is="detector" name="panel">
+  <properties/>
+  <component type="pixel" xpixels="3" ypixels="2">
+    <location y="0" x="0"/>
+    <location y="1" x="0"/>
+    <location y="0" x="1"/>
+    <location y="1" x="1"/>
+    <location y="0" x="2"/>
+    <location y="1" x="2"/>
+  </component>
+</type>
+<!-- Pixel for Detectors-->
+<type is="detector" name="pixel">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+    <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+    <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+    <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+
+
+<!-- detector and monitor IDs -->
+
+<idlist idname="monitors">
+  <id start="1001" end="1013" />
+  <id start="1011" end="1021" />  
+</idlist>
+
+<idlist idname="bank0">
+  <id start="1100" end="1100" />
+</idlist>
+
+<idlist idname="roty-testing">
+  <id start="1200" end="1206" />
+</idlist>
+
+
+<idlist idname="idlist_for_bank1">
+  <id start="1300" end="1305" />
+</idlist>
+
+</instrument>

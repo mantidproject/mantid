@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="IRIS" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-10-07 00:00:00">
+<!-- modified by FD 7/10/2010 -->
+
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <offsets spherical="delta" />
+</defaults>
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+<!-- source and sample-position components -->
+
+<component type="moderator">
+  <location z="-36.41" />
+</component>
+
+<type name="moderator" is="Source">
+  <properties />
+</type>
+
+<component type="sample">
+  <location z="0.0" />
+</component>
+
+<type name="sample" is="SamplePos">
+  <cuboid id="shape">
+    <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
+    <left-front-top-point  x="0.02" y="-0.02" z="0.02"  />
+    <left-back-bottom-point  x="-0.02" y="-0.02" z="0.0"  />
+    <right-front-bottom-point  x="0.02" y="0.02" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+<!-- LIST OF DETECTORS AND MONITORS -->
+
+<!-- monitor components -->
+
+  <component type="monitor1" mark-as="monitor" idlist="monitor1">
+    <location z="-0.335" />
+  </component>
+
+  <type name="monitor1" is="detector">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  
+  <component type="monitor2" mark-as="monitor" idlist="monitor2">
+    <location z="2.35" />
+  </component>
+  
+  <type name="monitor2" is="detector">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type> 
+
+  <idlist idname="monitor2">
+    <id val="2" />  
+  </idlist>
+
+<!--  detector components -->
+
+<component type="graphite" idlist="graphite">
+  <properties />
+  <parameter name="Efixed"> <value val="1.845" /> </parameter>
+  <location  />
+</component>
+
+<type name="graphite">
+ <component type="pix1">
+  <location r="1.45" t="27.07" p="0" name="S3" />
+  <location r="1.45" t="29.70" p="0" name="S4" />
+  <location r="1.45" t="32.32" p="0" name="S5" />
+  <location r="1.45" t="34.95" p="0" name="S6" />
+  <location r="1.45" t="37.58" p="0" name="S7" />
+  <location r="1.45" t="40.21" p="0" name="S8" />
+  <location r="1.45" t="42.83" p="0" name="S9" />
+  <location r="1.45" t="45.46" p="0" name="S10" />
+  <location r="1.45" t="48.08" p="0" name="S11" />
+  <location r="1.45" t="50.71" p="0" name="S12" />
+  <location r="1.45" t="53.34" p="0" name="S13" />
+  <location r="1.45" t="55.96" p="0" name="S14" />
+  <location r="1.45" t="58.59" p="0" name="S15" />
+  <location r="1.45" t="61.21" p="0" name="S16" />
+  <location r="1.45" t="63.84" p="0" name="S17" />
+  <location r="1.45" t="66.47" p="0" name="S18" />
+  <location r="1.45" t="69.10" p="0" name="S19" />
+  <location r="1.45" t="71.72" p="0" name="S20" />
+  <location r="1.45" t="74.35" p="0" name="S21" />
+  <location r="1.45" t="76.98" p="0" name="S22" />
+  <location r="1.45" t="79.60" p="0" name="S23" />
+  <location r="1.45" t="82.23" p="0" name="S24" />
+  <location r="1.45" t="84.85" p="0" name="S25" />
+  <location r="1.45" t="87.48" p="0" name="S26" />
+  <location r="1.45" t="90.11" p="0" name="S27" />
+  <location r="1.45" t="92.74" p="0" name="S28" />
+  <location r="1.45" t="95.36" p="0" name="S29" />
+  <location r="1.45" t="97.99" p="0" name="S30" />
+  <location r="1.45" t="100.61" p="0" name="S31" />
+  <location r="1.45" t="103.24" p="0" name="S32" />
+  <location r="1.45" t="105.87" p="0" name="S33" />
+  <location r="1.45" t="108.50" p="0" name="S34" />
+  <location r="1.45" t="111.12" p="0" name="S35" />
+  <location r="1.45" t="113.75" p="0" name="S36" />
+  <location r="1.45" t="116.38" p="0" name="S37" />
+  <location r="1.45" t="119.00" p="0" name="S38" />
+  <location r="1.45" t="121.63" p="0" name="S39" />
+  <location r="1.45" t="124.26" p="0" name="S40" />
+  <location r="1.45" t="126.88" p="0" name="S41" />
+  <location r="1.45" t="129.51" p="0" name="S42" />
+  <location r="1.45" t="132.13" p="0" name="S43" />
+  <location r="1.45" t="134.76" p="0" name="S44" />
+  <location r="1.45" t="137.39" p="0" name="S45" />
+  <location r="1.45" t="140.02" p="0" name="S46" />
+  <location r="1.45" t="142.64" p="0" name="S47" />
+  <location r="1.45" t="145.26" p="0" name="S48" />
+  <location r="1.45" t="147.89" p="0" name="S49" />
+  <location r="1.45" t="150.52" p="0" name="S50" />
+  <location r="1.45" t="153.15" p="0" name="S51" />
+  <location r="1.45" t="155.77" p="0" name="S52" />
+  <location r="1.45" t="158.40" p="0" name="S53" />
+ </component>
+</type>
+
+<idlist idname="graphite">
+  <id start="3" end="53" />
+</idlist>
+
+<type name="pix1" is="detector">
+  <cuboid id="app-shape">
+    <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+    <left-front-top-point  x="0.005" y="-0.1" z="0.0002"  />
+    <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+    <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+  </cuboid>
+  <algebra val="app-shape" />
+</type>
+
+<component type="mica" idlist="mica">
+  <properties />
+  <location  />
+</component>
+
+<type name="mica">
+ <component type="pix1">
+  <location r="1.47" t="-21.70" p="0" name="S54" />
+  <location r="1.47" t="-24.43" p="0" name="S55" />
+  <location r="1.47" t="-27.16" p="0" name="S56" />
+  <location r="1.47" t="-29.89" p="0" name="S57" />
+  <location r="1.47" t="-32.62" p="0" name="S58" />
+  <location r="1.47" t="-35.35" p="0" name="S59" />
+  <location r="1.47" t="-38.08" p="0" name="S60" /> 
+  <location r="1.47" t="-40.81" p="0" name="S61" />
+  <location r="1.47" t="-43.54" p="0" name="S62" />
+  <location r="1.47" t="-46.27" p="0" name="S63" />
+  <location r="1.47" t="-49.00" p="0" name="S64" />
+  <location r="1.47" t="-51.73" p="0" name="S65" />
+  <location r="1.47" t="-54.46" p="0" name="S66" />
+  <location r="1.47" t="-57.19" p="0" name="S67" />
+  <location r="1.47" t="-59.92" p="0" name="S68" />
+  <location r="1.47" t="-62.65" p="0" name="S69" />
+  <location r="1.47" t="-65.38" p="0" name="S70" />
+ <location r="1.47" t="-68.11" p="0" name="S71" />
+  <location r="1.47" t="-70.84" p="0" name="S72" />
+  <location r="1.47" t="-73.57" p="0" name="S73" />
+  <location r="1.47" t="-76.30" p="0" name="S74" />
+  <location r="1.47" t="-79.00" p="0" name="S75" />
+  <location r="1.47" t="-81.70" p="0" name="S76" />
+  <location r="1.47" t="-84.20" p="0" name="S77" />
+  <location r="1.47" t="-86.70" p="0" name="S78" />
+  <location r="1.47" t="-89.20" p="0" name="S79" />
+  <location r="1.47" t="-91.70" p="0" name="S80" />
+  <location r="1.47" t="-94.20" p="0" name="S81" />
+  <location r="1.47" t="-96.70" p="0" name="S82" />
+  <location r="1.47" t="-99.20" p="0" name="S83" />
+  <location r="1.47" t="-101.70" p="0" name="S84" />
+  <location r="1.47" t="-104.20" p="0" name="S85" />
+  <location r="1.47" t="-106.70" p="0" name="S86" />
+  <location r="1.47" t="-109.70" p="0" name="S87" />
+  <location r="1.47" t="-112.70" p="0" name="S88" />
+  <location r="1.47" t="-115.70" p="0" name="S89" />
+  <location r="1.47" t="-118.70" p="0" name="S90" />
+  <location r="1.47" t="-121.70" p="0" name="S91" />
+  <location r="1.47" t="-124.70" p="0" name="S92" />
+  <location r="1.47" t="-127.70" p="0" name="S93" />
+  <location r="1.47" t="-130.70" p="0" name="S94" />
+  <location r="1.47" t="-133.45" p="0" name="S95" />
+  <location r="1.47" t="-136.18" p="0" name="S96" />
+  <location r="1.47" t="-138.91" p="0" name="S97" />
+  <location r="1.47" t="-141.64" p="0" name="S98" />
+  <location r="1.47" t="-144.37" p="0" name="S99" />
+  <location r="1.47" t="-147.10" p="0" name="S100" />
+  <location r="1.47" t="-149.83" p="0" name="S101" />
+  <location r="1.47" t="-152.56" p="0" name="S102" />
+  <location r="1.47" t="-155.29" p="0" name="S103" />
+  <location r="1.47" t="-158.02" p="0" name="S104" />
+ </component>
+</type>
+
+<idlist idname="mica">
+  <id start="54" end="104" />
+</idlist>
+
+<component type="diffraction" idlist="diffraction">
+  <properties />
+  <location  />
+</component>
+
+<type name="diffraction">
+ <component type="pix2">
+  <location r="0.8576" t="-167.15" p="0" name="S105" />
+  <location r="0.8502" t="-167.72" p="0" name="S106" />
+  <location r="0.8570" t="-168.33" p="0" name="S107" />
+  <location r="0.8499" t="-168.91" p="0" name="S108" />
+  <location r="0.8568" t="-169.50" p="0" name="S109" />
+  <location r="0.8499" t="-170.09" p="0" name="S110" />
+  <location r="0.8570" t="-170.67" p="0" name="S111" />
+  <location r="0.8502" t="-171.26" p="0" name="S112" />
+  <location r="0.8576" t="-171.83" p="0" name="S113" />
+  <location r="0.8510" t="-172.41" p="0" name="S114" />
+ </component>
+</type>
+
+<type name="pix2" is="detector">
+  <cuboid id="app-shape">
+    <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+    <left-front-top-point  x="0.0025" y="-0.1" z="0.0002"  />
+    <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+    <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+  </cuboid>
+  <algebra val="app-shape" />
+</type>
+
+<idlist idname="diffraction">
+  <id start="105" end="114" />
+</idlist>
+
+</instrument>

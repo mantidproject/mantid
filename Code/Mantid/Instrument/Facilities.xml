@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facilities>
+
+<facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,">
+  <archive>
+    <archiveSearch plugin="ISISDataSearch" />
+  </archive>
+  
+  <catalog name="ICat3Catalog">
+  </catalog>
+
+  <instrument name="ALF">  
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="CRISP" shortname="CSP">  
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="ENGIN-X" shortname="ENGINX" zeropadding="8">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="GEM">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="HET">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+  
+  <instrument name="HRPD" shortname="HRP">  
+    <technique>Powder Diffraction</technique>
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="INES" shortname="INS" beamline="N8">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="IRIS" shortname="IRS" beamline="N6">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LOQ">
+    <technique>Small angle scattering</technique>
+  </instrument>
+
+  <instrument name="MAPS" shortname="MAP">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="MARI" shortname="MAR">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="MERLIN" shortname="MER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="OSIRIS" shortname="OSI" beamline="N6">
+    <technique>Neutron Diffraction</technique>
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="PEARL" shortname="PRL">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="POLARIS" shortname="POL">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="SANDALS" shortname="SLS">
+    <technique>Neutron Diffraction</technique>
+    <technique>Neutron Diffraction with isotopic substitution</technique>
+    <technique>Small angle scattering</technique>
+  </instrument>
+
+  <instrument name="SURF" shortname="SRF">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="SXD">
+    <technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="TOSCA" shortname="TSC">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LET" zeropadding="8">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="NIMROD" zeropadding="8">
+    <technique>Neutron Diffraction</technique>
+    <technique>Neutron Diffraction with isotopic substitution</technique>
+    <technique>Small angle scattering</technique>
+  </instrument>
+
+  <instrument name="OFFSPEC" zeropadding="8">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="POLREF" zeropadding="8">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="SANS2D" zeropadding="8">
+    <technique>Small angle scattering</technique>
+  </instrument>
+  
+  <instrument name="WISH" zeropadding="8">
+    <technique>Neutron Diffraction</technique>
+    <technique>Powder Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+  
+  <instrument name="HIFI" zeropadding="8">
+    <technique>Muon level crossing resonance</technique>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>
+  
+  <instrument name="MUSR" zeropadding="8">
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>
+  
+  <instrument name="EMU" zeropadding="8">
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>  
+  
+</facility>
+
+<facility name="HFIR" FileExtensions=".nxs,.dat">
+   
+   <catalog name="ICat3Catalog">
+   </catalog>
+   
+   <instrument name="HB1"> 
+      <technique>Triple Axis Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="HB1A"> 
+      <technique>Triple Axis Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="HB2A"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="HB2B"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="WAND"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="HB2D"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="HB3"> 
+      <technique>Triple Axis Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="HiResSANS" shortname="SANS1"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="BioSANS" shortname="SANS2"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+</facility> 
+
+<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat">
+
+   <catalog name="VFSCatalog">
+   </catalog>
+  
+   <instrument name="DAS"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   <instrument name="BASIS" shortname="BSS" beamline="2"> 
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="SNAP" beamline="3">  
+	<technique>Neutron Diffraction</technique>
+   </instrument> 
+   
+   <instrument name="REF_M" beamline="4A"> 
+      <technique>Reflectometry</technique>
+   </instrument> 
+   
+   <instrument name="REF_L" beamline="4B"> 
+      <technique>Reflectometry</technique>
+   </instrument> 
+   
+   <instrument name="CNCS" beamline="5"> 
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="EQ-SANS" shortname="EQSANS" beamline="6"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
+   <instrument name="VULCAN" beamline="7"> 
+	<technique>Neutron Diffraction</technique>
+   </instrument> 
+   
+   <instrument name="VENUS"> 
+      <technique>Imaging</technique>
+      <technique>Tomography</technique>
+   </instrument> 
+   
+   <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
+	<technique>Neutron Diffraction</technique>
+   </instrument> 
+   
+   <instrument name="TOPAZ" beamline="12"> 
+	<technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+   </instrument> 
+   
+   <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
+    <technique>Neutron Spectroscopy</technique>
+   </instrument> 
+
+  <instrument name="VISION" shortname="VIS" beamline="16B">
+    <technique>Neutron Spectroscopy</technique>
+  </instrument>
+
+   <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="ARCS" beamline="18"> 
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+   </instrument> 
+   
+</facility>
+
+</facilities>

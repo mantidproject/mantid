@@ -1,0 +1,13 @@
+<detector-grouping description="Some kind of gouping">
+	<group name="fwd">
+		<ids val="1-32"/>
+	</group>
+	<group name="bwd">
+		<ids val="33-64"/>
+	</group>
+	<pair name="long">
+		<forward-group val="fwd"/>
+		<backward-group val="bwd"/>
+		<alpha val="1"/>
+	</pair>
+</detector-grouping>

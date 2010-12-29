@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "OSIRIS" date = "2010-07-15T00:00:00">
+
+<component-link name = "OSIRIS">
+
+<parameter name="analysis-type" type="string">
+  <value val="spectroscopy" />
+</parameter>
+
+<parameter name="spectra-min">
+	<value val="963" />
+</parameter>
+
+<parameter name="spectra-max">
+	<value val="1004" />
+</parameter>
+
+<parameter name="efixed-val">
+	<value val="7.3812" />
+</parameter>
+
+<parameter name="peak-start">
+	<value val="29500" />
+</parameter>
+
+<parameter name="peak-end">
+	<value val="30500" />
+</parameter>
+
+<parameter name="back-start">
+	<value val="24000" />
+</parameter>
+
+<parameter name="back-end">
+	<value val="26000" />
+</parameter>
+
+<component-link name="graphite">
+<parameter name="EFixed"> <value val="7.3812" /> </parameter>
+</component-link>
+
+</component-link>
+
+</parameter-file>

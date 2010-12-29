@@ -1,0 +1,224 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="SNAP" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-11-11 00:00:00">
+  <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
+  <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness axis="right"/>
+    </reference-frame>
+  </defaults>
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-15.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor" mark-as="monitor">
+      <location z="-3.0" name="monitor1"/>
+    </component>
+  </type>
+  <component type="East" idstart="983040" idfillbyfirst="y" idstepbyrow="256">
+    <location >
+      <parameter name="roty">
+        <logfile id="det_arc2" eq="180.0+value"/>
+      </parameter>
+      <parameter name="r-position">
+        <logfile id="det_lin2" eq="0.5+value" />
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="det_arc2" />
+      </parameter>
+    </location>
+  </component>
+  <component type="West" idstart="0" idfillbyfirst="y" idstepbyrow="256">
+    <location >
+      <parameter name="roty">
+        <logfile id="det_arc1" eq="180.0+value"/>
+      </parameter>
+      <parameter name="r-position">
+        <logfile id="det_lin1" eq="0.5+value" />
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="det_arc1" />
+      </parameter>
+    </location>
+  </component>
+  <type name="East">
+  <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E1">
+      <trans x="-0.167548" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E2">
+      <trans x="0.0" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E3">
+      <trans x="0.167548" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E4">
+      <trans x="-0.167548" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"  idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E5">
+      <trans x="0.0" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E6">
+      <trans x="0.167548" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"   idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E7">
+      <trans x="-0.167548" y="-0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E8">
+      <trans x="0.0" y="-0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="E9">
+      <trans x="0.167548" y="-0.167548" />
+    </location>
+  </component>
+  </type>
+  <type name="West">
+  <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W1">
+      <trans x="0.167548" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W2">
+      <trans x="0.0" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W3">
+      <trans x="-0.167548" y="0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W4">
+      <trans x="0.167548" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"   idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W5">
+      <trans x="0.0" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W6">
+      <trans x="-0.167548" y="0.0" />
+    </location>
+  </component>
+  <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W7">
+      <trans x="0.167548" y="-0.167548" />
+    </location>
+  </component>
+  <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
+    <location name="W8">
+      <trans x="0.0" y="-0.167548" />
+    </location>
+  </component>
+  <component type="panel"  idstart="0" idfillbyfirst="y" idstepbyrow="256" > 
+    <location name="W9">
+      <trans x="-0.167548" y="-0.167548" />
+    </location>
+  </component>
+  </type>
+
+
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel" 
+    xpixels="256" xstart="-0.078795" xstep="+0.000618"
+    ypixels="256" ystart="-0.078795" ystep="+0.000618" >
+  <properties/>
+</type>
+
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+      <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+      <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="detector" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+<!-- 
+  <idlist idname="East">
+    <id start="720896" end="786431"/>
+    <id start="917504" end="983039"/>
+    <id start="1114112" end="1179647"/>
+    <id start="655360" end="720895"/>
+    <id start="851968" end="917503"/>
+    <id start="1048576" end="1114111"/>
+    <id start="589824" end="655359"/>
+    <id start="786432" end="851967"/>
+    <id start="983040" end="1048575"/>
+  </idlist>
+  <idlist idname="West">
+    <id start="524288" end="589823"/>
+    <id start="327680" end="393215"/>
+    <id start="131072" end="196607"/>
+    <id start="458752" end="524287"/>
+    <id start="262144" end="327679"/>
+    <id start="65536" end="131071"/>
+    <id start="393216" end="458751"/>
+    <id start="196608" end="262143"/>
+    <id start="0" end="65535"/>
+  </idlist>
+
+-->
+
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+</instrument>
+
+

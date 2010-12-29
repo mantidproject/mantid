@@ -1,0 +1,2105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="WISH" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2009-01-15 00:00:00">
+ 
+   <defaults>
+     <length unit="meter"/>
+     <angle unit="degree"/>
+ <location r="0.0" t="0.0" p="0.0" ang="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
+     <reference-frame>
+       <!-- The z-axis is set parallel to and in the direction of the beam. the 
+        y-axis points up and the coordinate system is right handed. -->
+       <along-beam axis="z"/>
+       <pointing-up axis="y"/>
+       <handedness val="right"/>
+       <origin val="beam" /> 
+     </reference-frame>
+     <offsets spherical="vectors" />
+     <!-- Comment "components-are-facing" out if you dont want the
+     components defined in this file to face a position by default -->    
+     <components-are-facing x="0.0" y="0.0" z="0.0" />
+   </defaults>
+   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+   <!-- detector components -->
+    <properties>
+   </properties>
+   <component type="monitors" idlist="monitors">
+     <location/>
+   </component>
+ <component type="panel01" idlist="panel01">
+ <location />
+ </component>
+ <component type="panel02" idlist="panel02">
+ <location />
+ </component>
+ <component type="panel03" idlist="panel03">
+ <location />
+ </component>
+ <component type="panel04" idlist="panel04">
+ <location />
+ </component>
+ <component type="panel05" idlist="panel05">
+ <location />
+ </component>
+ <!-- source and sample-position components -->
+   <component type="undulator">
+     <location z="-40.0"> <facing val="none"/> </location>
+   </component>
+ 
+   <component type="nickel-holder">
+     <location> <facing val="none"/> </location>
+   </component>
+ 
+   <!-- DEFINITION OF TYPES -->
+   <!-- Source types -->
+   <type name="undulator" is="Source">
+     <properties />
+     <cylinder id="some-shape">
+       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+       <axis x="0.0" y="0.0" z="1.0" /> 
+       <radius val="0.01" />
+       <height val="0.03" />
+     </cylinder> 
+     <algebra val="some-shape" />
+   </type>
+ 
+   <!-- Sample-position types -->
+   <type name="nickel-holder" is="SamplePos">
+     <properties />
+     <sphere id="some-shape">
+       <centre x="0.0"  y="0.0" z="0.0" />
+       <radius val="0.03" />
+     </sphere>
+     <algebra val="some-shape" />
+   </type>
+ 
+   <!-- Detectors types -->
+   <type name="monitors">
+     <component type="monitor" mark-as="monitor">
+       <location r="32.70" t="180.0" p="0.0" name="monitor1" />
+       <location r="30.964" t="180.0" p="0.0" name="monitor2" />
+       <location r="9.95" t="180.0" p="0.0" name="monitor3" />
+       <location r="1.5" t="180.0" p="0.0" name="monitor4" />
+       <location r="1.50" t="0.0" p="0.0" name="monitor5" />
+     </component>
+   </type>
+ 
+<type name="panel01">
+ <component type="WISHpanel">
+<location  x="-0.96521    " z="  1.9790    "> <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel02">
+ <component type="WISHpanel">
+<location  x=" -1.8672    " z="  1.1668    "> <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel03">
+ <component type="WISHpanel">
+<location  x=" -2.2018    " z="-0.96244E-07"> <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel04">
+ <component type="WISHpanel">
+<location  x=" -1.8672    " z=" -1.1668    "> <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel05">
+ <component type="WISHpanel">
+<location  x="-0.96521    " z=" -1.9790    "> <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+ <type name="WISHpanel">
+ <properties />
+ <component type="tubeup">
+<location  x="   0.603717    " z="  -0.825844E-01" name="tube001" />
+<location  x="   0.588122    " z="  -0.781998E-01" name="tube003" />
+<location  x="   0.572495    " z="  -0.739301E-01" name="tube005" />
+<location  x="   0.556837    " z="  -0.697755E-01" name="tube007" />
+<location  x="   0.541148    " z="  -0.657362E-01" name="tube009" />
+<location  x="   0.525431    " z="  -0.618124E-01" name="tube011" />
+<location  x="   0.509685    " z="  -0.580044E-01" name="tube013" />
+<location  x="   0.493911    " z="  -0.543124E-01" name="tube015" />
+<location  x="   0.478111    " z="  -0.507365E-01" name="tube017" />
+<location  x="   0.462284    " z="  -0.472769E-01" name="tube019" />
+<location  x="   0.446433    " z="  -0.439339E-01" name="tube021" />
+<location  x="   0.430558    " z="  -0.407076E-01" name="tube023" />
+<location  x="   0.414659    " z="  -0.375982E-01" name="tube025" />
+<location  x="   0.398738    " z="  -0.346059E-01" name="tube027" />
+<location  x="   0.382795    " z="  -0.317307E-01" name="tube029" />
+<location  x="   0.366831    " z="  -0.289730E-01" name="tube031" />
+<location  x="   0.350848    " z="  -0.263328E-01" name="tube033" />
+<location  x="   0.334846    " z="  -0.238102E-01" name="tube035" />
+<location  x="   0.318825    " z="  -0.214055E-01" name="tube037" />
+<location  x="   0.302787    " z="  -0.191187E-01" name="tube039" />
+<location  x="   0.286733    " z="  -0.169500E-01" name="tube041" />
+<location  x="   0.270664    " z="  -0.148994E-01" name="tube043" />
+<location  x="   0.254579    " z="  -0.129671E-01" name="tube045" />
+<location  x="   0.238481    " z="  -0.111532E-01" name="tube047" />
+<location  x="   0.222370    " z="  -0.945783E-02" name="tube049" />
+<location  x="   0.206247    " z="  -0.788102E-02" name="tube051" />
+<location  x="   0.190113    " z="  -0.642288E-02" name="tube053" />
+<location  x="   0.173968    " z="  -0.508349E-02" name="tube055" />
+<location  x="   0.157815    " z="  -0.386292E-02" name="tube057" />
+<location  x="   0.141652    " z="  -0.276124E-02" name="tube059" />
+<location  x="   0.125482    " z="  -0.177850E-02" name="tube061" />
+<location  x="   0.109305    " z="  -0.914756E-03" name="tube063" />
+<location  x="   0.931222E-01" z="  -0.170062E-03" name="tube065" />
+<location  x="   0.769343E-01" z="   0.455547E-03" name="tube067" />
+<location  x="   0.607423E-01" z="   0.962035E-03" name="tube069" />
+<location  x="   0.445470E-01" z="   0.134938E-02" name="tube071" />
+<location  x="   0.283492E-01" z="   0.161755E-02" name="tube073" />
+<location  x="   0.121499E-01" z="   0.176654E-02" name="tube075" />
+<location  x="  -0.405000E-02" z="   0.179634E-02" name="tube077" />
+<location  x="  -0.202497E-01" z="   0.170694E-02" name="tube079" />
+<location  x="  -0.364483E-01" z="   0.149836E-02" name="tube081" />
+<location  x="  -0.526450E-01" z="   0.117060E-02" name="tube083" />
+<location  x="  -0.688388E-01" z="   0.723683E-03" name="tube085" />
+<location  x="  -0.850289E-01" z="   0.157631E-03" name="tube087" />
+<location  x="  -0.101214    " z="  -0.527525E-03" name="tube089" />
+<location  x="  -0.117394    " z="  -0.133175E-02" name="tube091" />
+<location  x="  -0.133568    " z="  -0.225499E-02" name="tube093" />
+<location  x="  -0.149734    " z="  -0.329721E-02" name="tube095" />
+<location  x="  -0.165893    " z="  -0.445835E-02" name="tube097" />
+<location  x="  -0.182042    " z="  -0.573834E-02" name="tube099" />
+<location  x="  -0.198181    " z="  -0.713712E-02" name="tube101" />
+<location  x="  -0.214310    " z="  -0.865460E-02" name="tube103" />
+<location  x="  -0.230427    " z="  -0.102907E-01" name="tube105" />
+<location  x="  -0.246532    " z="  -0.120454E-01" name="tube107" />
+<location  x="  -0.262623    " z="  -0.139185E-01" name="tube109" />
+<location  x="  -0.278700    " z="  -0.159099E-01" name="tube111" />
+<location  x="  -0.294762    " z="  -0.180196E-01" name="tube113" />
+<location  x="  -0.310808    " z="  -0.202473E-01" name="tube115" />
+<location  x="  -0.326838    " z="  -0.225931E-01" name="tube117" />
+<location  x="  -0.342849    " z="  -0.250568E-01" name="tube119" />
+<location  x="  -0.358842    " z="  -0.276382E-01" name="tube121" />
+<location  x="  -0.374816    " z="  -0.303372E-01" name="tube123" />
+<location  x="  -0.390769    " z="  -0.331536E-01" name="tube125" />
+<location  x="  -0.406701    " z="  -0.360874E-01" name="tube127" />
+<location  x="  -0.422611    " z="  -0.391383E-01" name="tube129" />
+<location  x="  -0.438498    " z="  -0.423062E-01" name="tube131" />
+<location  x="  -0.454362    " z="  -0.455908E-01" name="tube133" />
+<location  x="  -0.470201    " z="  -0.489921E-01" name="tube135" />
+<location  x="  -0.486014    " z="  -0.525099E-01" name="tube137" />
+<location  x="  -0.501801    " z="  -0.561439E-01" name="tube139" />
+<location  x="  -0.517561    " z="  -0.598939E-01" name="tube141" />
+<location  x="  -0.533293    " z="  -0.637599E-01" name="tube143" />
+<location  x="  -0.548996    " z="  -0.677414E-01" name="tube145" />
+<location  x="  -0.564670    " z="  -0.718384E-01" name="tube147" />
+<location  x="  -0.580312    " z="  -0.760506E-01" name="tube149" />
+<location  x="  -0.595924    " z="  -0.803777E-01" name="tube151" />
+ </component>
+ <component type="tubedown">
+<location  x="   0.595924    " z="  -0.803777E-01" name="tube002" />
+<location  x="   0.580312    " z="  -0.760506E-01" name="tube004" />
+<location  x="   0.564670    " z="  -0.718384E-01" name="tube006" />
+<location  x="   0.548996    " z="  -0.677414E-01" name="tube008" />
+<location  x="   0.533293    " z="  -0.637599E-01" name="tube010" />
+<location  x="   0.517561    " z="  -0.598939E-01" name="tube012" />
+<location  x="   0.501801    " z="  -0.561439E-01" name="tube014" />
+<location  x="   0.486014    " z="  -0.525099E-01" name="tube016" />
+<location  x="   0.470201    " z="  -0.489921E-01" name="tube018" />
+<location  x="   0.454362    " z="  -0.455908E-01" name="tube020" />
+<location  x="   0.438498    " z="  -0.423062E-01" name="tube022" />
+<location  x="   0.422611    " z="  -0.391383E-01" name="tube024" />
+<location  x="   0.406701    " z="  -0.360874E-01" name="tube026" />
+<location  x="   0.390769    " z="  -0.331536E-01" name="tube028" />
+<location  x="   0.374816    " z="  -0.303372E-01" name="tube030" />
+<location  x="   0.358842    " z="  -0.276382E-01" name="tube032" />
+<location  x="   0.342849    " z="  -0.250568E-01" name="tube034" />
+<location  x="   0.326838    " z="  -0.225931E-01" name="tube036" />
+<location  x="   0.310808    " z="  -0.202473E-01" name="tube038" />
+<location  x="   0.294762    " z="  -0.180196E-01" name="tube040" />
+<location  x="   0.278700    " z="  -0.159099E-01" name="tube042" />
+<location  x="   0.262623    " z="  -0.139185E-01" name="tube044" />
+<location  x="   0.246532    " z="  -0.120454E-01" name="tube046" />
+<location  x="   0.230427    " z="  -0.102907E-01" name="tube048" />
+<location  x="   0.214310    " z="  -0.865460E-02" name="tube050" />
+<location  x="   0.198181    " z="  -0.713712E-02" name="tube052" />
+<location  x="   0.182042    " z="  -0.573834E-02" name="tube054" />
+<location  x="   0.165893    " z="  -0.445835E-02" name="tube056" />
+<location  x="   0.149734    " z="  -0.329721E-02" name="tube058" />
+<location  x="   0.133568    " z="  -0.225499E-02" name="tube060" />
+<location  x="   0.117394    " z="  -0.133175E-02" name="tube062" />
+<location  x="   0.101214    " z="  -0.527525E-03" name="tube064" />
+<location  x="   0.850289E-01" z="   0.157631E-03" name="tube066" />
+<location  x="   0.688388E-01" z="   0.723683E-03" name="tube068" />
+<location  x="   0.526450E-01" z="   0.117060E-02" name="tube070" />
+<location  x="   0.364483E-01" z="   0.149836E-02" name="tube072" />
+<location  x="   0.202497E-01" z="   0.170694E-02" name="tube074" />
+<location  x="   0.405000E-02" z="   0.179634E-02" name="tube076" />
+<location  x="  -0.121499E-01" z="   0.176654E-02" name="tube078" />
+<location  x="  -0.283492E-01" z="   0.161755E-02" name="tube080" />
+<location  x="  -0.445470E-01" z="   0.134938E-02" name="tube082" />
+<location  x="  -0.607423E-01" z="   0.962035E-03" name="tube084" />
+<location  x="  -0.769343E-01" z="   0.455547E-03" name="tube086" />
+<location  x="  -0.931222E-01" z="  -0.170062E-03" name="tube088" />
+<location  x="  -0.109305    " z="  -0.914756E-03" name="tube090" />
+<location  x="  -0.125482    " z="  -0.177850E-02" name="tube092" />
+<location  x="  -0.141652    " z="  -0.276124E-02" name="tube094" />
+<location  x="  -0.157815    " z="  -0.386292E-02" name="tube096" />
+<location  x="  -0.173968    " z="  -0.508349E-02" name="tube098" />
+<location  x="  -0.190113    " z="  -0.642288E-02" name="tube100" />
+<location  x="  -0.206247    " z="  -0.788102E-02" name="tube102" />
+<location  x="  -0.222370    " z="  -0.945783E-02" name="tube104" />
+<location  x="  -0.238481    " z="  -0.111532E-01" name="tube106" />
+<location  x="  -0.254579    " z="  -0.129671E-01" name="tube108" />
+<location  x="  -0.270664    " z="  -0.148994E-01" name="tube110" />
+<location  x="  -0.286733    " z="  -0.169500E-01" name="tube112" />
+<location  x="  -0.302787    " z="  -0.191187E-01" name="tube114" />
+<location  x="  -0.318825    " z="  -0.214055E-01" name="tube116" />
+<location  x="  -0.334846    " z="  -0.238102E-01" name="tube118" />
+<location  x="  -0.350848    " z="  -0.263328E-01" name="tube120" />
+<location  x="  -0.366831    " z="  -0.289730E-01" name="tube122" />
+<location  x="  -0.382795    " z="  -0.317307E-01" name="tube124" />
+<location  x="  -0.398738    " z="  -0.346059E-01" name="tube126" />
+<location  x="  -0.414659    " z="  -0.375982E-01" name="tube128" />
+<location  x="  -0.430558    " z="  -0.407076E-01" name="tube130" />
+<location  x="  -0.446433    " z="  -0.439339E-01" name="tube132" />
+<location  x="  -0.462284    " z="  -0.472769E-01" name="tube134" />
+<location  x="  -0.478111    " z="  -0.507365E-01" name="tube136" />
+<location  x="  -0.493911    " z="  -0.543124E-01" name="tube138" />
+<location  x="  -0.509685    " z="  -0.580044E-01" name="tube140" />
+<location  x="  -0.525431    " z="  -0.618124E-01" name="tube142" />
+<location  x="  -0.541148    " z="  -0.657362E-01" name="tube144" />
+<location  x="  -0.556837    " z="  -0.697755E-01" name="tube146" />
+<location  x="  -0.572495    " z="  -0.739301E-01" name="tube148" />
+<location  x="  -0.588122    " z="  -0.781998E-01" name="tube150" />
+<location  x="  -0.603717    " z="  -0.825844E-01" name="tube152" />
+ </component>
+ </type>
+ 
+ <type name="tubeup" outline="yes">
+ <component type="pixel">
+   <location y="  -0.517983    "/>
+   <location y="  -0.515950    "/>
+   <location y="  -0.513917    "/>
+   <location y="  -0.511884    "/>
+   <location y="  -0.509851    "/>
+   <location y="  -0.507817    "/>
+   <location y="  -0.505784    "/>
+   <location y="  -0.503751    "/>
+   <location y="  -0.501718    "/>
+   <location y="  -0.499685    "/>
+   <location y="  -0.497651    "/>
+   <location y="  -0.495618    "/>
+   <location y="  -0.493585    "/>
+   <location y="  -0.491552    "/>
+   <location y="  -0.489519    "/>
+   <location y="  -0.487485    "/>
+   <location y="  -0.485452    "/>
+   <location y="  -0.483419    "/>
+   <location y="  -0.481386    "/>
+   <location y="  -0.479353    "/>
+   <location y="  -0.477319    "/>
+   <location y="  -0.475286    "/>
+   <location y="  -0.473253    "/>
+   <location y="  -0.471220    "/>
+   <location y="  -0.469187    "/>
+   <location y="  -0.467153    "/>
+   <location y="  -0.465120    "/>
+   <location y="  -0.463087    "/>
+   <location y="  -0.461054    "/>
+   <location y="  -0.459021    "/>
+   <location y="  -0.456987    "/>
+   <location y="  -0.454954    "/>
+   <location y="  -0.452921    "/>
+   <location y="  -0.450888    "/>
+   <location y="  -0.448854    "/>
+   <location y="  -0.446821    "/>
+   <location y="  -0.444788    "/>
+   <location y="  -0.442755    "/>
+   <location y="  -0.440722    "/>
+   <location y="  -0.438688    "/>
+   <location y="  -0.436655    "/>
+   <location y="  -0.434622    "/>
+   <location y="  -0.432589    "/>
+   <location y="  -0.430556    "/>
+   <location y="  -0.428522    "/>
+   <location y="  -0.426489    "/>
+   <location y="  -0.424456    "/>
+   <location y="  -0.422423    "/>
+   <location y="  -0.420390    "/>
+   <location y="  -0.418356    "/>
+   <location y="  -0.416323    "/>
+   <location y="  -0.414290    "/>
+   <location y="  -0.412257    "/>
+   <location y="  -0.410224    "/>
+   <location y="  -0.408190    "/>
+   <location y="  -0.406157    "/>
+   <location y="  -0.404124    "/>
+   <location y="  -0.402091    "/>
+   <location y="  -0.400058    "/>
+   <location y="  -0.398024    "/>
+   <location y="  -0.395991    "/>
+   <location y="  -0.393958    "/>
+   <location y="  -0.391925    "/>
+   <location y="  -0.389892    "/>
+   <location y="  -0.387858    "/>
+   <location y="  -0.385825    "/>
+   <location y="  -0.383792    "/>
+   <location y="  -0.381759    "/>
+   <location y="  -0.379726    "/>
+   <location y="  -0.377692    "/>
+   <location y="  -0.375659    "/>
+   <location y="  -0.373626    "/>
+   <location y="  -0.371593    "/>
+   <location y="  -0.369560    "/>
+   <location y="  -0.367526    "/>
+   <location y="  -0.365493    "/>
+   <location y="  -0.363460    "/>
+   <location y="  -0.361427    "/>
+   <location y="  -0.359394    "/>
+   <location y="  -0.357360    "/>
+   <location y="  -0.355327    "/>
+   <location y="  -0.353294    "/>
+   <location y="  -0.351261    "/>
+   <location y="  -0.349228    "/>
+   <location y="  -0.347194    "/>
+   <location y="  -0.345161    "/>
+   <location y="  -0.343128    "/>
+   <location y="  -0.341095    "/>
+   <location y="  -0.339062    "/>
+   <location y="  -0.337028    "/>
+   <location y="  -0.334995    "/>
+   <location y="  -0.332962    "/>
+   <location y="  -0.330929    "/>
+   <location y="  -0.328896    "/>
+   <location y="  -0.326862    "/>
+   <location y="  -0.324829    "/>
+   <location y="  -0.322796    "/>
+   <location y="  -0.320763    "/>
+   <location y="  -0.318729    "/>
+   <location y="  -0.316696    "/>
+   <location y="  -0.314663    "/>
+   <location y="  -0.312630    "/>
+   <location y="  -0.310597    "/>
+   <location y="  -0.308563    "/>
+   <location y="  -0.306530    "/>
+   <location y="  -0.304497    "/>
+   <location y="  -0.302464    "/>
+   <location y="  -0.300431    "/>
+   <location y="  -0.298397    "/>
+   <location y="  -0.296364    "/>
+   <location y="  -0.294331    "/>
+   <location y="  -0.292298    "/>
+   <location y="  -0.290265    "/>
+   <location y="  -0.288231    "/>
+   <location y="  -0.286198    "/>
+   <location y="  -0.284165    "/>
+   <location y="  -0.282132    "/>
+   <location y="  -0.280099    "/>
+   <location y="  -0.278065    "/>
+   <location y="  -0.276032    "/>
+   <location y="  -0.273999    "/>
+   <location y="  -0.271966    "/>
+   <location y="  -0.269933    "/>
+   <location y="  -0.267899    "/>
+   <location y="  -0.265866    "/>
+   <location y="  -0.263833    "/>
+   <location y="  -0.261800    "/>
+   <location y="  -0.259767    "/>
+   <location y="  -0.257733    "/>
+   <location y="  -0.255700    "/>
+   <location y="  -0.253667    "/>
+   <location y="  -0.251634    "/>
+   <location y="  -0.249601    "/>
+   <location y="  -0.247567    "/>
+   <location y="  -0.245534    "/>
+   <location y="  -0.243501    "/>
+   <location y="  -0.241468    "/>
+   <location y="  -0.239435    "/>
+   <location y="  -0.237401    "/>
+   <location y="  -0.235368    "/>
+   <location y="  -0.233335    "/>
+   <location y="  -0.231302    "/>
+   <location y="  -0.229269    "/>
+   <location y="  -0.227235    "/>
+   <location y="  -0.225202    "/>
+   <location y="  -0.223169    "/>
+   <location y="  -0.221136    "/>
+   <location y="  -0.219103    "/>
+   <location y="  -0.217069    "/>
+   <location y="  -0.215036    "/>
+   <location y="  -0.213003    "/>
+   <location y="  -0.210970    "/>
+   <location y="  -0.208937    "/>
+   <location y="  -0.206903    "/>
+   <location y="  -0.204870    "/>
+   <location y="  -0.202837    "/>
+   <location y="  -0.200804    "/>
+   <location y="  -0.198771    "/>
+   <location y="  -0.196737    "/>
+   <location y="  -0.194704    "/>
+   <location y="  -0.192671    "/>
+   <location y="  -0.190638    "/>
+   <location y="  -0.188604    "/>
+   <location y="  -0.186571    "/>
+   <location y="  -0.184538    "/>
+   <location y="  -0.182505    "/>
+   <location y="  -0.180472    "/>
+   <location y="  -0.178438    "/>
+   <location y="  -0.176405    "/>
+   <location y="  -0.174372    "/>
+   <location y="  -0.172339    "/>
+   <location y="  -0.170306    "/>
+   <location y="  -0.168272    "/>
+   <location y="  -0.166239    "/>
+   <location y="  -0.164206    "/>
+   <location y="  -0.162173    "/>
+   <location y="  -0.160140    "/>
+   <location y="  -0.158106    "/>
+   <location y="  -0.156073    "/>
+   <location y="  -0.154040    "/>
+   <location y="  -0.152007    "/>
+   <location y="  -0.149974    "/>
+   <location y="  -0.147940    "/>
+   <location y="  -0.145907    "/>
+   <location y="  -0.143874    "/>
+   <location y="  -0.141841    "/>
+   <location y="  -0.139808    "/>
+   <location y="  -0.137774    "/>
+   <location y="  -0.135741    "/>
+   <location y="  -0.133708    "/>
+   <location y="  -0.131675    "/>
+   <location y="  -0.129642    "/>
+   <location y="  -0.127608    "/>
+   <location y="  -0.125575    "/>
+   <location y="  -0.123542    "/>
+   <location y="  -0.121509    "/>
+   <location y="  -0.119476    "/>
+   <location y="  -0.117442    "/>
+   <location y="  -0.115409    "/>
+   <location y="  -0.113376    "/>
+   <location y="  -0.111343    "/>
+   <location y="  -0.109310    "/>
+   <location y="  -0.107276    "/>
+   <location y="  -0.105243    "/>
+   <location y="  -0.103210    "/>
+   <location y="  -0.101177    "/>
+   <location y="  -0.991436E-01"/>
+   <location y="  -0.971104E-01"/>
+   <location y="  -0.950771E-01"/>
+   <location y="  -0.930439E-01"/>
+   <location y="  -0.910107E-01"/>
+   <location y="  -0.889775E-01"/>
+   <location y="  -0.869443E-01"/>
+   <location y="  -0.849111E-01"/>
+   <location y="  -0.828779E-01"/>
+   <location y="  -0.808447E-01"/>
+   <location y="  -0.788115E-01"/>
+   <location y="  -0.767783E-01"/>
+   <location y="  -0.747451E-01"/>
+   <location y="  -0.727119E-01"/>
+   <location y="  -0.706787E-01"/>
+   <location y="  -0.686455E-01"/>
+   <location y="  -0.666123E-01"/>
+   <location y="  -0.645791E-01"/>
+   <location y="  -0.625459E-01"/>
+   <location y="  -0.605127E-01"/>
+   <location y="  -0.584795E-01"/>
+   <location y="  -0.564463E-01"/>
+   <location y="  -0.544131E-01"/>
+   <location y="  -0.523799E-01"/>
+   <location y="  -0.503467E-01"/>
+   <location y="  -0.483135E-01"/>
+   <location y="  -0.462803E-01"/>
+   <location y="  -0.442471E-01"/>
+   <location y="  -0.422139E-01"/>
+   <location y="  -0.401807E-01"/>
+   <location y="  -0.381475E-01"/>
+   <location y="  -0.361143E-01"/>
+   <location y="  -0.340811E-01"/>
+   <location y="  -0.320479E-01"/>
+   <location y="  -0.300146E-01"/>
+   <location y="  -0.279814E-01"/>
+   <location y="  -0.259482E-01"/>
+   <location y="  -0.239150E-01"/>
+   <location y="  -0.218818E-01"/>
+   <location y="  -0.198486E-01"/>
+   <location y="  -0.178154E-01"/>
+   <location y="  -0.157822E-01"/>
+   <location y="  -0.137490E-01"/>
+   <location y="  -0.117158E-01"/>
+   <location y="  -0.968262E-02"/>
+   <location y="  -0.764941E-02"/>
+   <location y="  -0.561621E-02"/>
+   <location y="  -0.358301E-02"/>
+   <location y="  -0.154980E-02"/>
+   <location y="   0.483398E-03"/>
+   <location y="   0.251660E-02"/>
+   <location y="   0.454980E-02"/>
+   <location y="   0.658301E-02"/>
+   <location y="   0.861621E-02"/>
+   <location y="   0.106494E-01"/>
+   <location y="   0.126826E-01"/>
+   <location y="   0.147158E-01"/>
+   <location y="   0.167490E-01"/>
+   <location y="   0.187822E-01"/>
+   <location y="   0.208154E-01"/>
+   <location y="   0.228486E-01"/>
+   <location y="   0.248818E-01"/>
+   <location y="   0.269150E-01"/>
+   <location y="   0.289482E-01"/>
+   <location y="   0.309814E-01"/>
+   <location y="   0.330146E-01"/>
+   <location y="   0.350479E-01"/>
+   <location y="   0.370811E-01"/>
+   <location y="   0.391143E-01"/>
+   <location y="   0.411475E-01"/>
+   <location y="   0.431807E-01"/>
+   <location y="   0.452139E-01"/>
+   <location y="   0.472471E-01"/>
+   <location y="   0.492803E-01"/>
+   <location y="   0.513135E-01"/>
+   <location y="   0.533467E-01"/>
+   <location y="   0.553799E-01"/>
+   <location y="   0.574131E-01"/>
+   <location y="   0.594463E-01"/>
+   <location y="   0.614795E-01"/>
+   <location y="   0.635127E-01"/>
+   <location y="   0.655459E-01"/>
+   <location y="   0.675791E-01"/>
+   <location y="   0.696123E-01"/>
+   <location y="   0.716455E-01"/>
+   <location y="   0.736787E-01"/>
+   <location y="   0.757119E-01"/>
+   <location y="   0.777451E-01"/>
+   <location y="   0.797783E-01"/>
+   <location y="   0.818115E-01"/>
+   <location y="   0.838447E-01"/>
+   <location y="   0.858779E-01"/>
+   <location y="   0.879111E-01"/>
+   <location y="   0.899443E-01"/>
+   <location y="   0.919775E-01"/>
+   <location y="   0.940107E-01"/>
+   <location y="   0.960439E-01"/>
+   <location y="   0.980771E-01"/>
+   <location y="   0.100110    "/>
+   <location y="   0.102144    "/>
+   <location y="   0.104177    "/>
+   <location y="   0.106210    "/>
+   <location y="   0.108243    "/>
+   <location y="   0.110276    "/>
+   <location y="   0.112310    "/>
+   <location y="   0.114343    "/>
+   <location y="   0.116376    "/>
+   <location y="   0.118409    "/>
+   <location y="   0.120442    "/>
+   <location y="   0.122476    "/>
+   <location y="   0.124509    "/>
+   <location y="   0.126542    "/>
+   <location y="   0.128575    "/>
+   <location y="   0.130608    "/>
+   <location y="   0.132642    "/>
+   <location y="   0.134675    "/>
+   <location y="   0.136708    "/>
+   <location y="   0.138741    "/>
+   <location y="   0.140774    "/>
+   <location y="   0.142808    "/>
+   <location y="   0.144841    "/>
+   <location y="   0.146874    "/>
+   <location y="   0.148907    "/>
+   <location y="   0.150940    "/>
+   <location y="   0.152974    "/>
+   <location y="   0.155007    "/>
+   <location y="   0.157040    "/>
+   <location y="   0.159073    "/>
+   <location y="   0.161106    "/>
+   <location y="   0.163140    "/>
+   <location y="   0.165173    "/>
+   <location y="   0.167206    "/>
+   <location y="   0.169239    "/>
+   <location y="   0.171272    "/>
+   <location y="   0.173306    "/>
+   <location y="   0.175339    "/>
+   <location y="   0.177372    "/>
+   <location y="   0.179405    "/>
+   <location y="   0.181438    "/>
+   <location y="   0.183472    "/>
+   <location y="   0.185505    "/>
+   <location y="   0.187538    "/>
+   <location y="   0.189571    "/>
+   <location y="   0.191604    "/>
+   <location y="   0.193638    "/>
+   <location y="   0.195671    "/>
+   <location y="   0.197704    "/>
+   <location y="   0.199737    "/>
+   <location y="   0.201771    "/>
+   <location y="   0.203804    "/>
+   <location y="   0.205837    "/>
+   <location y="   0.207870    "/>
+   <location y="   0.209903    "/>
+   <location y="   0.211937    "/>
+   <location y="   0.213970    "/>
+   <location y="   0.216003    "/>
+   <location y="   0.218036    "/>
+   <location y="   0.220069    "/>
+   <location y="   0.222103    "/>
+   <location y="   0.224136    "/>
+   <location y="   0.226169    "/>
+   <location y="   0.228202    "/>
+   <location y="   0.230235    "/>
+   <location y="   0.232269    "/>
+   <location y="   0.234302    "/>
+   <location y="   0.236335    "/>
+   <location y="   0.238368    "/>
+   <location y="   0.240401    "/>
+   <location y="   0.242435    "/>
+   <location y="   0.244468    "/>
+   <location y="   0.246501    "/>
+   <location y="   0.248534    "/>
+   <location y="   0.250567    "/>
+   <location y="   0.252601    "/>
+   <location y="   0.254634    "/>
+   <location y="   0.256667    "/>
+   <location y="   0.258700    "/>
+   <location y="   0.260733    "/>
+   <location y="   0.262767    "/>
+   <location y="   0.264800    "/>
+   <location y="   0.266833    "/>
+   <location y="   0.268866    "/>
+   <location y="   0.270899    "/>
+   <location y="   0.272933    "/>
+   <location y="   0.274966    "/>
+   <location y="   0.276999    "/>
+   <location y="   0.279032    "/>
+   <location y="   0.281065    "/>
+   <location y="   0.283099    "/>
+   <location y="   0.285132    "/>
+   <location y="   0.287165    "/>
+   <location y="   0.289198    "/>
+   <location y="   0.291231    "/>
+   <location y="   0.293265    "/>
+   <location y="   0.295298    "/>
+   <location y="   0.297331    "/>
+   <location y="   0.299364    "/>
+   <location y="   0.301397    "/>
+   <location y="   0.303431    "/>
+   <location y="   0.305464    "/>
+   <location y="   0.307497    "/>
+   <location y="   0.309530    "/>
+   <location y="   0.311563    "/>
+   <location y="   0.313597    "/>
+   <location y="   0.315630    "/>
+   <location y="   0.317663    "/>
+   <location y="   0.319696    "/>
+   <location y="   0.321729    "/>
+   <location y="   0.323763    "/>
+   <location y="   0.325796    "/>
+   <location y="   0.327829    "/>
+   <location y="   0.329862    "/>
+   <location y="   0.331896    "/>
+   <location y="   0.333929    "/>
+   <location y="   0.335962    "/>
+   <location y="   0.337995    "/>
+   <location y="   0.340028    "/>
+   <location y="   0.342062    "/>
+   <location y="   0.344095    "/>
+   <location y="   0.346128    "/>
+   <location y="   0.348161    "/>
+   <location y="   0.350194    "/>
+   <location y="   0.352228    "/>
+   <location y="   0.354261    "/>
+   <location y="   0.356294    "/>
+   <location y="   0.358327    "/>
+   <location y="   0.360360    "/>
+   <location y="   0.362394    "/>
+   <location y="   0.364427    "/>
+   <location y="   0.366460    "/>
+   <location y="   0.368493    "/>
+   <location y="   0.370526    "/>
+   <location y="   0.372560    "/>
+   <location y="   0.374593    "/>
+   <location y="   0.376626    "/>
+   <location y="   0.378659    "/>
+   <location y="   0.380692    "/>
+   <location y="   0.382726    "/>
+   <location y="   0.384759    "/>
+   <location y="   0.386792    "/>
+   <location y="   0.388825    "/>
+   <location y="   0.390858    "/>
+   <location y="   0.392892    "/>
+   <location y="   0.394925    "/>
+   <location y="   0.396958    "/>
+   <location y="   0.398991    "/>
+   <location y="   0.401024    "/>
+   <location y="   0.403058    "/>
+   <location y="   0.405091    "/>
+   <location y="   0.407124    "/>
+   <location y="   0.409157    "/>
+   <location y="   0.411190    "/>
+   <location y="   0.413224    "/>
+   <location y="   0.415257    "/>
+   <location y="   0.417290    "/>
+   <location y="   0.419323    "/>
+   <location y="   0.421356    "/>
+   <location y="   0.423390    "/>
+   <location y="   0.425423    "/>
+   <location y="   0.427456    "/>
+   <location y="   0.429489    "/>
+   <location y="   0.431522    "/>
+   <location y="   0.433556    "/>
+   <location y="   0.435589    "/>
+   <location y="   0.437622    "/>
+   <location y="   0.439655    "/>
+   <location y="   0.441688    "/>
+   <location y="   0.443722    "/>
+   <location y="   0.445755    "/>
+   <location y="   0.447788    "/>
+   <location y="   0.449821    "/>
+   <location y="   0.451854    "/>
+   <location y="   0.453888    "/>
+   <location y="   0.455921    "/>
+   <location y="   0.457954    "/>
+   <location y="   0.459987    "/>
+   <location y="   0.462021    "/>
+   <location y="   0.464054    "/>
+   <location y="   0.466087    "/>
+   <location y="   0.468120    "/>
+   <location y="   0.470153    "/>
+   <location y="   0.472187    "/>
+   <location y="   0.474220    "/>
+   <location y="   0.476253    "/>
+   <location y="   0.478286    "/>
+   <location y="   0.480319    "/>
+   <location y="   0.482353    "/>
+   <location y="   0.484386    "/>
+   <location y="   0.486419    "/>
+   <location y="   0.488452    "/>
+   <location y="   0.490485    "/>
+   <location y="   0.492519    "/>
+   <location y="   0.494552    "/>
+   <location y="   0.496585    "/>
+   <location y="   0.498618    "/>
+   <location y="   0.500651    "/>
+   <location y="   0.502685    "/>
+   <location y="   0.504718    "/>
+   <location y="   0.506751    "/>
+   <location y="   0.508784    "/>
+   <location y="   0.510817    "/>
+   <location y="   0.512851    "/>
+   <location y="   0.514884    "/>
+   <location y="   0.516917    "/>
+   <location y="   0.518950    "/>
+   <location y="   0.520983    "/>
+ </component>
+ </type>
+ <type name="tubedown" outline="yes">
+ <component type="pixel">
+   <location y="  -0.520983    "/>
+   <location y="  -0.518950    "/>
+   <location y="  -0.516917    "/>
+   <location y="  -0.514884    "/>
+   <location y="  -0.512851    "/>
+   <location y="  -0.510817    "/>
+   <location y="  -0.508784    "/>
+   <location y="  -0.506751    "/>
+   <location y="  -0.504718    "/>
+   <location y="  -0.502685    "/>
+   <location y="  -0.500651    "/>
+   <location y="  -0.498618    "/>
+   <location y="  -0.496585    "/>
+   <location y="  -0.494552    "/>
+   <location y="  -0.492519    "/>
+   <location y="  -0.490485    "/>
+   <location y="  -0.488452    "/>
+   <location y="  -0.486419    "/>
+   <location y="  -0.484386    "/>
+   <location y="  -0.482353    "/>
+   <location y="  -0.480319    "/>
+   <location y="  -0.478286    "/>
+   <location y="  -0.476253    "/>
+   <location y="  -0.474220    "/>
+   <location y="  -0.472187    "/>
+   <location y="  -0.470153    "/>
+   <location y="  -0.468120    "/>
+   <location y="  -0.466087    "/>
+   <location y="  -0.464054    "/>
+   <location y="  -0.462021    "/>
+   <location y="  -0.459987    "/>
+   <location y="  -0.457954    "/>
+   <location y="  -0.455921    "/>
+   <location y="  -0.453888    "/>
+   <location y="  -0.451854    "/>
+   <location y="  -0.449821    "/>
+   <location y="  -0.447788    "/>
+   <location y="  -0.445755    "/>
+   <location y="  -0.443722    "/>
+   <location y="  -0.441688    "/>
+   <location y="  -0.439655    "/>
+   <location y="  -0.437622    "/>
+   <location y="  -0.435589    "/>
+   <location y="  -0.433556    "/>
+   <location y="  -0.431522    "/>
+   <location y="  -0.429489    "/>
+   <location y="  -0.427456    "/>
+   <location y="  -0.425423    "/>
+   <location y="  -0.423390    "/>
+   <location y="  -0.421356    "/>
+   <location y="  -0.419323    "/>
+   <location y="  -0.417290    "/>
+   <location y="  -0.415257    "/>
+   <location y="  -0.413224    "/>
+   <location y="  -0.411190    "/>
+   <location y="  -0.409157    "/>
+   <location y="  -0.407124    "/>
+   <location y="  -0.405091    "/>
+   <location y="  -0.403058    "/>
+   <location y="  -0.401024    "/>
+   <location y="  -0.398991    "/>
+   <location y="  -0.396958    "/>
+   <location y="  -0.394925    "/>
+   <location y="  -0.392892    "/>
+   <location y="  -0.390858    "/>
+   <location y="  -0.388825    "/>
+   <location y="  -0.386792    "/>
+   <location y="  -0.384759    "/>
+   <location y="  -0.382726    "/>
+   <location y="  -0.380692    "/>
+   <location y="  -0.378659    "/>
+   <location y="  -0.376626    "/>
+   <location y="  -0.374593    "/>
+   <location y="  -0.372560    "/>
+   <location y="  -0.370526    "/>
+   <location y="  -0.368493    "/>
+   <location y="  -0.366460    "/>
+   <location y="  -0.364427    "/>
+   <location y="  -0.362394    "/>
+   <location y="  -0.360360    "/>
+   <location y="  -0.358327    "/>
+   <location y="  -0.356294    "/>
+   <location y="  -0.354261    "/>
+   <location y="  -0.352228    "/>
+   <location y="  -0.350194    "/>
+   <location y="  -0.348161    "/>
+   <location y="  -0.346128    "/>
+   <location y="  -0.344095    "/>
+   <location y="  -0.342062    "/>
+   <location y="  -0.340028    "/>
+   <location y="  -0.337995    "/>
+   <location y="  -0.335962    "/>
+   <location y="  -0.333929    "/>
+   <location y="  -0.331896    "/>
+   <location y="  -0.329862    "/>
+   <location y="  -0.327829    "/>
+   <location y="  -0.325796    "/>
+   <location y="  -0.323763    "/>
+   <location y="  -0.321729    "/>
+   <location y="  -0.319696    "/>
+   <location y="  -0.317663    "/>
+   <location y="  -0.315630    "/>
+   <location y="  -0.313597    "/>
+   <location y="  -0.311563    "/>
+   <location y="  -0.309530    "/>
+   <location y="  -0.307497    "/>
+   <location y="  -0.305464    "/>
+   <location y="  -0.303431    "/>
+   <location y="  -0.301397    "/>
+   <location y="  -0.299364    "/>
+   <location y="  -0.297331    "/>
+   <location y="  -0.295298    "/>
+   <location y="  -0.293265    "/>
+   <location y="  -0.291231    "/>
+   <location y="  -0.289198    "/>
+   <location y="  -0.287165    "/>
+   <location y="  -0.285132    "/>
+   <location y="  -0.283099    "/>
+   <location y="  -0.281065    "/>
+   <location y="  -0.279032    "/>
+   <location y="  -0.276999    "/>
+   <location y="  -0.274966    "/>
+   <location y="  -0.272933    "/>
+   <location y="  -0.270899    "/>
+   <location y="  -0.268866    "/>
+   <location y="  -0.266833    "/>
+   <location y="  -0.264800    "/>
+   <location y="  -0.262767    "/>
+   <location y="  -0.260733    "/>
+   <location y="  -0.258700    "/>
+   <location y="  -0.256667    "/>
+   <location y="  -0.254634    "/>
+   <location y="  -0.252601    "/>
+   <location y="  -0.250567    "/>
+   <location y="  -0.248534    "/>
+   <location y="  -0.246501    "/>
+   <location y="  -0.244468    "/>
+   <location y="  -0.242435    "/>
+   <location y="  -0.240401    "/>
+   <location y="  -0.238368    "/>
+   <location y="  -0.236335    "/>
+   <location y="  -0.234302    "/>
+   <location y="  -0.232269    "/>
+   <location y="  -0.230235    "/>
+   <location y="  -0.228202    "/>
+   <location y="  -0.226169    "/>
+   <location y="  -0.224136    "/>
+   <location y="  -0.222103    "/>
+   <location y="  -0.220069    "/>
+   <location y="  -0.218036    "/>
+   <location y="  -0.216003    "/>
+   <location y="  -0.213970    "/>
+   <location y="  -0.211937    "/>
+   <location y="  -0.209903    "/>
+   <location y="  -0.207870    "/>
+   <location y="  -0.205837    "/>
+   <location y="  -0.203804    "/>
+   <location y="  -0.201771    "/>
+   <location y="  -0.199737    "/>
+   <location y="  -0.197704    "/>
+   <location y="  -0.195671    "/>
+   <location y="  -0.193638    "/>
+   <location y="  -0.191604    "/>
+   <location y="  -0.189571    "/>
+   <location y="  -0.187538    "/>
+   <location y="  -0.185505    "/>
+   <location y="  -0.183472    "/>
+   <location y="  -0.181438    "/>
+   <location y="  -0.179405    "/>
+   <location y="  -0.177372    "/>
+   <location y="  -0.175339    "/>
+   <location y="  -0.173306    "/>
+   <location y="  -0.171272    "/>
+   <location y="  -0.169239    "/>
+   <location y="  -0.167206    "/>
+   <location y="  -0.165173    "/>
+   <location y="  -0.163140    "/>
+   <location y="  -0.161106    "/>
+   <location y="  -0.159073    "/>
+   <location y="  -0.157040    "/>
+   <location y="  -0.155007    "/>
+   <location y="  -0.152974    "/>
+   <location y="  -0.150940    "/>
+   <location y="  -0.148907    "/>
+   <location y="  -0.146874    "/>
+   <location y="  -0.144841    "/>
+   <location y="  -0.142808    "/>
+   <location y="  -0.140774    "/>
+   <location y="  -0.138741    "/>
+   <location y="  -0.136708    "/>
+   <location y="  -0.134675    "/>
+   <location y="  -0.132642    "/>
+   <location y="  -0.130608    "/>
+   <location y="  -0.128575    "/>
+   <location y="  -0.126542    "/>
+   <location y="  -0.124509    "/>
+   <location y="  -0.122476    "/>
+   <location y="  -0.120442    "/>
+   <location y="  -0.118409    "/>
+   <location y="  -0.116376    "/>
+   <location y="  -0.114343    "/>
+   <location y="  -0.112310    "/>
+   <location y="  -0.110276    "/>
+   <location y="  -0.108243    "/>
+   <location y="  -0.106210    "/>
+   <location y="  -0.104177    "/>
+   <location y="  -0.102144    "/>
+   <location y="  -0.100110    "/>
+   <location y="  -0.980771E-01"/>
+   <location y="  -0.960439E-01"/>
+   <location y="  -0.940107E-01"/>
+   <location y="  -0.919775E-01"/>
+   <location y="  -0.899443E-01"/>
+   <location y="  -0.879111E-01"/>
+   <location y="  -0.858779E-01"/>
+   <location y="  -0.838447E-01"/>
+   <location y="  -0.818115E-01"/>
+   <location y="  -0.797783E-01"/>
+   <location y="  -0.777451E-01"/>
+   <location y="  -0.757119E-01"/>
+   <location y="  -0.736787E-01"/>
+   <location y="  -0.716455E-01"/>
+   <location y="  -0.696123E-01"/>
+   <location y="  -0.675791E-01"/>
+   <location y="  -0.655459E-01"/>
+   <location y="  -0.635127E-01"/>
+   <location y="  -0.614795E-01"/>
+   <location y="  -0.594463E-01"/>
+   <location y="  -0.574131E-01"/>
+   <location y="  -0.553799E-01"/>
+   <location y="  -0.533467E-01"/>
+   <location y="  -0.513135E-01"/>
+   <location y="  -0.492803E-01"/>
+   <location y="  -0.472471E-01"/>
+   <location y="  -0.452139E-01"/>
+   <location y="  -0.431807E-01"/>
+   <location y="  -0.411475E-01"/>
+   <location y="  -0.391143E-01"/>
+   <location y="  -0.370811E-01"/>
+   <location y="  -0.350479E-01"/>
+   <location y="  -0.330146E-01"/>
+   <location y="  -0.309814E-01"/>
+   <location y="  -0.289482E-01"/>
+   <location y="  -0.269150E-01"/>
+   <location y="  -0.248818E-01"/>
+   <location y="  -0.228486E-01"/>
+   <location y="  -0.208154E-01"/>
+   <location y="  -0.187822E-01"/>
+   <location y="  -0.167490E-01"/>
+   <location y="  -0.147158E-01"/>
+   <location y="  -0.126826E-01"/>
+   <location y="  -0.106494E-01"/>
+   <location y="  -0.861621E-02"/>
+   <location y="  -0.658301E-02"/>
+   <location y="  -0.454980E-02"/>
+   <location y="  -0.251660E-02"/>
+   <location y="  -0.483398E-03"/>
+   <location y="   0.154980E-02"/>
+   <location y="   0.358301E-02"/>
+   <location y="   0.561621E-02"/>
+   <location y="   0.764941E-02"/>
+   <location y="   0.968262E-02"/>
+   <location y="   0.117158E-01"/>
+   <location y="   0.137490E-01"/>
+   <location y="   0.157822E-01"/>
+   <location y="   0.178154E-01"/>
+   <location y="   0.198486E-01"/>
+   <location y="   0.218818E-01"/>
+   <location y="   0.239150E-01"/>
+   <location y="   0.259482E-01"/>
+   <location y="   0.279814E-01"/>
+   <location y="   0.300146E-01"/>
+   <location y="   0.320479E-01"/>
+   <location y="   0.340811E-01"/>
+   <location y="   0.361143E-01"/>
+   <location y="   0.381475E-01"/>
+   <location y="   0.401807E-01"/>
+   <location y="   0.422139E-01"/>
+   <location y="   0.442471E-01"/>
+   <location y="   0.462803E-01"/>
+   <location y="   0.483135E-01"/>
+   <location y="   0.503467E-01"/>
+   <location y="   0.523799E-01"/>
+   <location y="   0.544131E-01"/>
+   <location y="   0.564463E-01"/>
+   <location y="   0.584795E-01"/>
+   <location y="   0.605127E-01"/>
+   <location y="   0.625459E-01"/>
+   <location y="   0.645791E-01"/>
+   <location y="   0.666123E-01"/>
+   <location y="   0.686455E-01"/>
+   <location y="   0.706787E-01"/>
+   <location y="   0.727119E-01"/>
+   <location y="   0.747451E-01"/>
+   <location y="   0.767783E-01"/>
+   <location y="   0.788115E-01"/>
+   <location y="   0.808447E-01"/>
+   <location y="   0.828779E-01"/>
+   <location y="   0.849111E-01"/>
+   <location y="   0.869443E-01"/>
+   <location y="   0.889775E-01"/>
+   <location y="   0.910107E-01"/>
+   <location y="   0.930439E-01"/>
+   <location y="   0.950771E-01"/>
+   <location y="   0.971104E-01"/>
+   <location y="   0.991436E-01"/>
+   <location y="   0.101177    "/>
+   <location y="   0.103210    "/>
+   <location y="   0.105243    "/>
+   <location y="   0.107276    "/>
+   <location y="   0.109310    "/>
+   <location y="   0.111343    "/>
+   <location y="   0.113376    "/>
+   <location y="   0.115409    "/>
+   <location y="   0.117442    "/>
+   <location y="   0.119476    "/>
+   <location y="   0.121509    "/>
+   <location y="   0.123542    "/>
+   <location y="   0.125575    "/>
+   <location y="   0.127608    "/>
+   <location y="   0.129642    "/>
+   <location y="   0.131675    "/>
+   <location y="   0.133708    "/>
+   <location y="   0.135741    "/>
+   <location y="   0.137774    "/>
+   <location y="   0.139808    "/>
+   <location y="   0.141841    "/>
+   <location y="   0.143874    "/>
+   <location y="   0.145907    "/>
+   <location y="   0.147940    "/>
+   <location y="   0.149974    "/>
+   <location y="   0.152007    "/>
+   <location y="   0.154040    "/>
+   <location y="   0.156073    "/>
+   <location y="   0.158106    "/>
+   <location y="   0.160140    "/>
+   <location y="   0.162173    "/>
+   <location y="   0.164206    "/>
+   <location y="   0.166239    "/>
+   <location y="   0.168272    "/>
+   <location y="   0.170306    "/>
+   <location y="   0.172339    "/>
+   <location y="   0.174372    "/>
+   <location y="   0.176405    "/>
+   <location y="   0.178438    "/>
+   <location y="   0.180472    "/>
+   <location y="   0.182505    "/>
+   <location y="   0.184538    "/>
+   <location y="   0.186571    "/>
+   <location y="   0.188604    "/>
+   <location y="   0.190638    "/>
+   <location y="   0.192671    "/>
+   <location y="   0.194704    "/>
+   <location y="   0.196737    "/>
+   <location y="   0.198771    "/>
+   <location y="   0.200804    "/>
+   <location y="   0.202837    "/>
+   <location y="   0.204870    "/>
+   <location y="   0.206903    "/>
+   <location y="   0.208937    "/>
+   <location y="   0.210970    "/>
+   <location y="   0.213003    "/>
+   <location y="   0.215036    "/>
+   <location y="   0.217069    "/>
+   <location y="   0.219103    "/>
+   <location y="   0.221136    "/>
+   <location y="   0.223169    "/>
+   <location y="   0.225202    "/>
+   <location y="   0.227235    "/>
+   <location y="   0.229269    "/>
+   <location y="   0.231302    "/>
+   <location y="   0.233335    "/>
+   <location y="   0.235368    "/>
+   <location y="   0.237401    "/>
+   <location y="   0.239435    "/>
+   <location y="   0.241468    "/>
+   <location y="   0.243501    "/>
+   <location y="   0.245534    "/>
+   <location y="   0.247567    "/>
+   <location y="   0.249601    "/>
+   <location y="   0.251634    "/>
+   <location y="   0.253667    "/>
+   <location y="   0.255700    "/>
+   <location y="   0.257733    "/>
+   <location y="   0.259767    "/>
+   <location y="   0.261800    "/>
+   <location y="   0.263833    "/>
+   <location y="   0.265866    "/>
+   <location y="   0.267899    "/>
+   <location y="   0.269933    "/>
+   <location y="   0.271966    "/>
+   <location y="   0.273999    "/>
+   <location y="   0.276032    "/>
+   <location y="   0.278065    "/>
+   <location y="   0.280099    "/>
+   <location y="   0.282132    "/>
+   <location y="   0.284165    "/>
+   <location y="   0.286198    "/>
+   <location y="   0.288231    "/>
+   <location y="   0.290265    "/>
+   <location y="   0.292298    "/>
+   <location y="   0.294331    "/>
+   <location y="   0.296364    "/>
+   <location y="   0.298397    "/>
+   <location y="   0.300431    "/>
+   <location y="   0.302464    "/>
+   <location y="   0.304497    "/>
+   <location y="   0.306530    "/>
+   <location y="   0.308563    "/>
+   <location y="   0.310597    "/>
+   <location y="   0.312630    "/>
+   <location y="   0.314663    "/>
+   <location y="   0.316696    "/>
+   <location y="   0.318729    "/>
+   <location y="   0.320763    "/>
+   <location y="   0.322796    "/>
+   <location y="   0.324829    "/>
+   <location y="   0.326862    "/>
+   <location y="   0.328896    "/>
+   <location y="   0.330929    "/>
+   <location y="   0.332962    "/>
+   <location y="   0.334995    "/>
+   <location y="   0.337028    "/>
+   <location y="   0.339062    "/>
+   <location y="   0.341095    "/>
+   <location y="   0.343128    "/>
+   <location y="   0.345161    "/>
+   <location y="   0.347194    "/>
+   <location y="   0.349228    "/>
+   <location y="   0.351261    "/>
+   <location y="   0.353294    "/>
+   <location y="   0.355327    "/>
+   <location y="   0.357360    "/>
+   <location y="   0.359394    "/>
+   <location y="   0.361427    "/>
+   <location y="   0.363460    "/>
+   <location y="   0.365493    "/>
+   <location y="   0.367526    "/>
+   <location y="   0.369560    "/>
+   <location y="   0.371593    "/>
+   <location y="   0.373626    "/>
+   <location y="   0.375659    "/>
+   <location y="   0.377692    "/>
+   <location y="   0.379726    "/>
+   <location y="   0.381759    "/>
+   <location y="   0.383792    "/>
+   <location y="   0.385825    "/>
+   <location y="   0.387858    "/>
+   <location y="   0.389892    "/>
+   <location y="   0.391925    "/>
+   <location y="   0.393958    "/>
+   <location y="   0.395991    "/>
+   <location y="   0.398024    "/>
+   <location y="   0.400058    "/>
+   <location y="   0.402091    "/>
+   <location y="   0.404124    "/>
+   <location y="   0.406157    "/>
+   <location y="   0.408190    "/>
+   <location y="   0.410224    "/>
+   <location y="   0.412257    "/>
+   <location y="   0.414290    "/>
+   <location y="   0.416323    "/>
+   <location y="   0.418356    "/>
+   <location y="   0.420390    "/>
+   <location y="   0.422423    "/>
+   <location y="   0.424456    "/>
+   <location y="   0.426489    "/>
+   <location y="   0.428522    "/>
+   <location y="   0.430556    "/>
+   <location y="   0.432589    "/>
+   <location y="   0.434622    "/>
+   <location y="   0.436655    "/>
+   <location y="   0.438688    "/>
+   <location y="   0.440722    "/>
+   <location y="   0.442755    "/>
+   <location y="   0.444788    "/>
+   <location y="   0.446821    "/>
+   <location y="   0.448854    "/>
+   <location y="   0.450888    "/>
+   <location y="   0.452921    "/>
+   <location y="   0.454954    "/>
+   <location y="   0.456987    "/>
+   <location y="   0.459021    "/>
+   <location y="   0.461054    "/>
+   <location y="   0.463087    "/>
+   <location y="   0.465120    "/>
+   <location y="   0.467153    "/>
+   <location y="   0.469187    "/>
+   <location y="   0.471220    "/>
+   <location y="   0.473253    "/>
+   <location y="   0.475286    "/>
+   <location y="   0.477319    "/>
+   <location y="   0.479353    "/>
+   <location y="   0.481386    "/>
+   <location y="   0.483419    "/>
+   <location y="   0.485452    "/>
+   <location y="   0.487485    "/>
+   <location y="   0.489519    "/>
+   <location y="   0.491552    "/>
+   <location y="   0.493585    "/>
+   <location y="   0.495618    "/>
+   <location y="   0.497651    "/>
+   <location y="   0.499685    "/>
+   <location y="   0.501718    "/>
+   <location y="   0.503751    "/>
+   <location y="   0.505784    "/>
+   <location y="   0.507817    "/>
+   <location y="   0.509851    "/>
+   <location y="   0.511884    "/>
+   <location y="   0.513917    "/>
+   <location y="   0.515950    "/>
+   <location y="   0.517983    "/>
+ </component>
+ </type>
+ 
+ <type name="monitor" is="detector">
+  <properties/>
+  <cylinder id="some-shape">
+ <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+ <axis x="0.0" y="0.0" z="1.0" />
+ <radius val="0.01" />
+ <height val="0.03" />
+ </cylinder>
+ <algebra val="some-shape" />
+ </type>
+ 
+ <type name="pixel" is="detector">
+ <cylinder id="cyl-approx">
+   <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+   <axis x="0.0" y="0.2" z="0.0" />
+   <radius val="0.004" />
+  <height val="   0.203320E-02" />
+ </cylinder>
+ <algebra val="cyl-approx" />
+  </type>
+ 
+  <!-- MONITOR ID LISTS -->
+   <idlist idname="monitors">
+     <id start="1" end="5" />
+   </idlist>
+ 
+   <!-- DETECTOR ID LISTS -->
+  <idlist idname="panel01">
+   <id start="01707000" end="01707511" />
+   <id start="01705000" end="01705511" />
+   <id start="01703000" end="01703511" />
+   <id start="01701000" end="01701511" />
+   <id start="01623000" end="01623511" />
+   <id start="01621000" end="01621511" />
+   <id start="01619000" end="01619511" />
+   <id start="01617000" end="01617511" />
+   <id start="01615000" end="01615511" />
+   <id start="01613000" end="01613511" />
+   <id start="01611000" end="01611511" />
+   <id start="01609000" end="01609511" />
+   <id start="01607000" end="01607511" />
+   <id start="01605000" end="01605511" />
+   <id start="01603000" end="01603511" />
+   <id start="01601000" end="01601511" />
+   <id start="01523000" end="01523511" />
+   <id start="01521000" end="01521511" />
+   <id start="01519000" end="01519511" />
+   <id start="01517000" end="01517511" />
+   <id start="01515000" end="01515511" />
+   <id start="01513000" end="01513511" />
+   <id start="01511000" end="01511511" />
+   <id start="01509000" end="01509511" />
+   <id start="01507000" end="01507511" />
+   <id start="01505000" end="01505511" />
+   <id start="01503000" end="01503511" />
+   <id start="01501000" end="01501511" />
+   <id start="01423000" end="01423511" />
+   <id start="01421000" end="01421511" />
+   <id start="01419000" end="01419511" />
+   <id start="01417000" end="01417511" />
+   <id start="01415000" end="01415511" />
+   <id start="01413000" end="01413511" />
+   <id start="01411000" end="01411511" />
+   <id start="01409000" end="01409511" />
+   <id start="01407000" end="01407511" />
+   <id start="01405000" end="01405511" />
+   <id start="01403000" end="01403511" />
+   <id start="01401000" end="01401511" />
+   <id start="01323000" end="01323511" />
+   <id start="01321000" end="01321511" />
+   <id start="01319000" end="01319511" />
+   <id start="01317000" end="01317511" />
+   <id start="01315000" end="01315511" />
+   <id start="01313000" end="01313511" />
+   <id start="01311000" end="01311511" />
+   <id start="01309000" end="01309511" />
+   <id start="01307000" end="01307511" />
+   <id start="01305000" end="01305511" />
+   <id start="01303000" end="01303511" />
+   <id start="01301000" end="01301511" />
+   <id start="01223000" end="01223511" />
+   <id start="01221000" end="01221511" />
+   <id start="01219000" end="01219511" />
+   <id start="01217000" end="01217511" />
+   <id start="01215000" end="01215511" />
+   <id start="01213000" end="01213511" />
+   <id start="01211000" end="01211511" />
+   <id start="01209000" end="01209511" />
+   <id start="01207000" end="01207511" />
+   <id start="01205000" end="01205511" />
+   <id start="01203000" end="01203511" />
+   <id start="01201000" end="01201511" />
+   <id start="01123000" end="01123511" />
+   <id start="01121000" end="01121511" />
+   <id start="01119000" end="01119511" />
+   <id start="01117000" end="01117511" />
+   <id start="01115000" end="01115511" />
+   <id start="01113000" end="01113511" />
+   <id start="01111000" end="01111511" />
+   <id start="01109000" end="01109511" />
+   <id start="01107000" end="01107511" />
+   <id start="01105000" end="01105511" />
+   <id start="01103000" end="01103511" />
+   <id start="01101000" end="01101511" />
+   <id start="01706000" end="01706511" />
+   <id start="01704000" end="01704511" />
+   <id start="01702000" end="01702511" />
+   <id start="01700000" end="01700511" />
+   <id start="01622000" end="01622511" />
+   <id start="01620000" end="01620511" />
+   <id start="01618000" end="01618511" />
+   <id start="01616000" end="01616511" />
+   <id start="01614000" end="01614511" />
+   <id start="01612000" end="01612511" />
+   <id start="01610000" end="01610511" />
+   <id start="01608000" end="01608511" />
+   <id start="01606000" end="01606511" />
+   <id start="01604000" end="01604511" />
+   <id start="01602000" end="01602511" />
+   <id start="01600000" end="01600511" />
+   <id start="01522000" end="01522511" />
+   <id start="01520000" end="01520511" />
+   <id start="01518000" end="01518511" />
+   <id start="01516000" end="01516511" />
+   <id start="01514000" end="01514511" />
+   <id start="01512000" end="01512511" />
+   <id start="01510000" end="01510511" />
+   <id start="01508000" end="01508511" />
+   <id start="01506000" end="01506511" />
+   <id start="01504000" end="01504511" />
+   <id start="01502000" end="01502511" />
+   <id start="01500000" end="01500511" />
+   <id start="01422000" end="01422511" />
+   <id start="01420000" end="01420511" />
+   <id start="01418000" end="01418511" />
+   <id start="01416000" end="01416511" />
+   <id start="01414000" end="01414511" />
+   <id start="01412000" end="01412511" />
+   <id start="01410000" end="01410511" />
+   <id start="01408000" end="01408511" />
+   <id start="01406000" end="01406511" />
+   <id start="01404000" end="01404511" />
+   <id start="01402000" end="01402511" />
+   <id start="01400000" end="01400511" />
+   <id start="01322000" end="01322511" />
+   <id start="01320000" end="01320511" />
+   <id start="01318000" end="01318511" />
+   <id start="01316000" end="01316511" />
+   <id start="01314000" end="01314511" />
+   <id start="01312000" end="01312511" />
+   <id start="01310000" end="01310511" />
+   <id start="01308000" end="01308511" />
+   <id start="01306000" end="01306511" />
+   <id start="01304000" end="01304511" />
+   <id start="01302000" end="01302511" />
+   <id start="01300000" end="01300511" />
+   <id start="01222000" end="01222511" />
+   <id start="01220000" end="01220511" />
+   <id start="01218000" end="01218511" />
+   <id start="01216000" end="01216511" />
+   <id start="01214000" end="01214511" />
+   <id start="01212000" end="01212511" />
+   <id start="01210000" end="01210511" />
+   <id start="01208000" end="01208511" />
+   <id start="01206000" end="01206511" />
+   <id start="01204000" end="01204511" />
+   <id start="01202000" end="01202511" />
+   <id start="01200000" end="01200511" />
+   <id start="01122000" end="01122511" />
+   <id start="01120000" end="01120511" />
+   <id start="01118000" end="01118511" />
+   <id start="01116000" end="01116511" />
+   <id start="01114000" end="01114511" />
+   <id start="01112000" end="01112511" />
+   <id start="01110000" end="01110511" />
+   <id start="01108000" end="01108511" />
+   <id start="01106000" end="01106511" />
+   <id start="01104000" end="01104511" />
+   <id start="01102000" end="01102511" />
+   <id start="01100000" end="01100511" />
+   </idlist>
+  <idlist idname="panel02">
+   <id start="02707000" end="02707511" />
+   <id start="02705000" end="02705511" />
+   <id start="02703000" end="02703511" />
+   <id start="02701000" end="02701511" />
+   <id start="02623000" end="02623511" />
+   <id start="02621000" end="02621511" />
+   <id start="02619000" end="02619511" />
+   <id start="02617000" end="02617511" />
+   <id start="02615000" end="02615511" />
+   <id start="02613000" end="02613511" />
+   <id start="02611000" end="02611511" />
+   <id start="02609000" end="02609511" />
+   <id start="02607000" end="02607511" />
+   <id start="02605000" end="02605511" />
+   <id start="02603000" end="02603511" />
+   <id start="02601000" end="02601511" />
+   <id start="02523000" end="02523511" />
+   <id start="02521000" end="02521511" />
+   <id start="02519000" end="02519511" />
+   <id start="02517000" end="02517511" />
+   <id start="02515000" end="02515511" />
+   <id start="02513000" end="02513511" />
+   <id start="02511000" end="02511511" />
+   <id start="02509000" end="02509511" />
+   <id start="02507000" end="02507511" />
+   <id start="02505000" end="02505511" />
+   <id start="02503000" end="02503511" />
+   <id start="02501000" end="02501511" />
+   <id start="02423000" end="02423511" />
+   <id start="02421000" end="02421511" />
+   <id start="02419000" end="02419511" />
+   <id start="02417000" end="02417511" />
+   <id start="02415000" end="02415511" />
+   <id start="02413000" end="02413511" />
+   <id start="02411000" end="02411511" />
+   <id start="02409000" end="02409511" />
+   <id start="02407000" end="02407511" />
+   <id start="02405000" end="02405511" />
+   <id start="02403000" end="02403511" />
+   <id start="02401000" end="02401511" />
+   <id start="02323000" end="02323511" />
+   <id start="02321000" end="02321511" />
+   <id start="02319000" end="02319511" />
+   <id start="02317000" end="02317511" />
+   <id start="02315000" end="02315511" />
+   <id start="02313000" end="02313511" />
+   <id start="02311000" end="02311511" />
+   <id start="02309000" end="02309511" />
+   <id start="02307000" end="02307511" />
+   <id start="02305000" end="02305511" />
+   <id start="02303000" end="02303511" />
+   <id start="02301000" end="02301511" />
+   <id start="02223000" end="02223511" />
+   <id start="02221000" end="02221511" />
+   <id start="02219000" end="02219511" />
+   <id start="02217000" end="02217511" />
+   <id start="02215000" end="02215511" />
+   <id start="02213000" end="02213511" />
+   <id start="02211000" end="02211511" />
+   <id start="02209000" end="02209511" />
+   <id start="02207000" end="02207511" />
+   <id start="02205000" end="02205511" />
+   <id start="02203000" end="02203511" />
+   <id start="02201000" end="02201511" />
+   <id start="02123000" end="02123511" />
+   <id start="02121000" end="02121511" />
+   <id start="02119000" end="02119511" />
+   <id start="02117000" end="02117511" />
+   <id start="02115000" end="02115511" />
+   <id start="02113000" end="02113511" />
+   <id start="02111000" end="02111511" />
+   <id start="02109000" end="02109511" />
+   <id start="02107000" end="02107511" />
+   <id start="02105000" end="02105511" />
+   <id start="02103000" end="02103511" />
+   <id start="02101000" end="02101511" />
+   <id start="02706000" end="02706511" />
+   <id start="02704000" end="02704511" />
+   <id start="02702000" end="02702511" />
+   <id start="02700000" end="02700511" />
+   <id start="02622000" end="02622511" />
+   <id start="02620000" end="02620511" />
+   <id start="02618000" end="02618511" />
+   <id start="02616000" end="02616511" />
+   <id start="02614000" end="02614511" />
+   <id start="02612000" end="02612511" />
+   <id start="02610000" end="02610511" />
+   <id start="02608000" end="02608511" />
+   <id start="02606000" end="02606511" />
+   <id start="02604000" end="02604511" />
+   <id start="02602000" end="02602511" />
+   <id start="02600000" end="02600511" />
+   <id start="02522000" end="02522511" />
+   <id start="02520000" end="02520511" />
+   <id start="02518000" end="02518511" />
+   <id start="02516000" end="02516511" />
+   <id start="02514000" end="02514511" />
+   <id start="02512000" end="02512511" />
+   <id start="02510000" end="02510511" />
+   <id start="02508000" end="02508511" />
+   <id start="02506000" end="02506511" />
+   <id start="02504000" end="02504511" />
+   <id start="02502000" end="02502511" />
+   <id start="02500000" end="02500511" />
+   <id start="02422000" end="02422511" />
+   <id start="02420000" end="02420511" />
+   <id start="02418000" end="02418511" />
+   <id start="02416000" end="02416511" />
+   <id start="02414000" end="02414511" />
+   <id start="02412000" end="02412511" />
+   <id start="02410000" end="02410511" />
+   <id start="02408000" end="02408511" />
+   <id start="02406000" end="02406511" />
+   <id start="02404000" end="02404511" />
+   <id start="02402000" end="02402511" />
+   <id start="02400000" end="02400511" />
+   <id start="02322000" end="02322511" />
+   <id start="02320000" end="02320511" />
+   <id start="02318000" end="02318511" />
+   <id start="02316000" end="02316511" />
+   <id start="02314000" end="02314511" />
+   <id start="02312000" end="02312511" />
+   <id start="02310000" end="02310511" />
+   <id start="02308000" end="02308511" />
+   <id start="02306000" end="02306511" />
+   <id start="02304000" end="02304511" />
+   <id start="02302000" end="02302511" />
+   <id start="02300000" end="02300511" />
+   <id start="02222000" end="02222511" />
+   <id start="02220000" end="02220511" />
+   <id start="02218000" end="02218511" />
+   <id start="02216000" end="02216511" />
+   <id start="02214000" end="02214511" />
+   <id start="02212000" end="02212511" />
+   <id start="02210000" end="02210511" />
+   <id start="02208000" end="02208511" />
+   <id start="02206000" end="02206511" />
+   <id start="02204000" end="02204511" />
+   <id start="02202000" end="02202511" />
+   <id start="02200000" end="02200511" />
+   <id start="02122000" end="02122511" />
+   <id start="02120000" end="02120511" />
+   <id start="02118000" end="02118511" />
+   <id start="02116000" end="02116511" />
+   <id start="02114000" end="02114511" />
+   <id start="02112000" end="02112511" />
+   <id start="02110000" end="02110511" />
+   <id start="02108000" end="02108511" />
+   <id start="02106000" end="02106511" />
+   <id start="02104000" end="02104511" />
+   <id start="02102000" end="02102511" />
+   <id start="02100000" end="02100511" />
+   </idlist>
+  <idlist idname="panel03">
+   <id start="03707000" end="03707511" />
+   <id start="03705000" end="03705511" />
+   <id start="03703000" end="03703511" />
+   <id start="03701000" end="03701511" />
+   <id start="03623000" end="03623511" />
+   <id start="03621000" end="03621511" />
+   <id start="03619000" end="03619511" />
+   <id start="03617000" end="03617511" />
+   <id start="03615000" end="03615511" />
+   <id start="03613000" end="03613511" />
+   <id start="03611000" end="03611511" />
+   <id start="03609000" end="03609511" />
+   <id start="03607000" end="03607511" />
+   <id start="03605000" end="03605511" />
+   <id start="03603000" end="03603511" />
+   <id start="03601000" end="03601511" />
+   <id start="03523000" end="03523511" />
+   <id start="03521000" end="03521511" />
+   <id start="03519000" end="03519511" />
+   <id start="03517000" end="03517511" />
+   <id start="03515000" end="03515511" />
+   <id start="03513000" end="03513511" />
+   <id start="03511000" end="03511511" />
+   <id start="03509000" end="03509511" />
+   <id start="03507000" end="03507511" />
+   <id start="03505000" end="03505511" />
+   <id start="03503000" end="03503511" />
+   <id start="03501000" end="03501511" />
+   <id start="03423000" end="03423511" />
+   <id start="03421000" end="03421511" />
+   <id start="03419000" end="03419511" />
+   <id start="03417000" end="03417511" />
+   <id start="03415000" end="03415511" />
+   <id start="03413000" end="03413511" />
+   <id start="03411000" end="03411511" />
+   <id start="03409000" end="03409511" />
+   <id start="03407000" end="03407511" />
+   <id start="03405000" end="03405511" />
+   <id start="03403000" end="03403511" />
+   <id start="03401000" end="03401511" />
+   <id start="03323000" end="03323511" />
+   <id start="03321000" end="03321511" />
+   <id start="03319000" end="03319511" />
+   <id start="03317000" end="03317511" />
+   <id start="03315000" end="03315511" />
+   <id start="03313000" end="03313511" />
+   <id start="03311000" end="03311511" />
+   <id start="03309000" end="03309511" />
+   <id start="03307000" end="03307511" />
+   <id start="03305000" end="03305511" />
+   <id start="03303000" end="03303511" />
+   <id start="03301000" end="03301511" />
+   <id start="03223000" end="03223511" />
+   <id start="03221000" end="03221511" />
+   <id start="03219000" end="03219511" />
+   <id start="03217000" end="03217511" />
+   <id start="03215000" end="03215511" />
+   <id start="03213000" end="03213511" />
+   <id start="03211000" end="03211511" />
+   <id start="03209000" end="03209511" />
+   <id start="03207000" end="03207511" />
+   <id start="03205000" end="03205511" />
+   <id start="03203000" end="03203511" />
+   <id start="03201000" end="03201511" />
+   <id start="03123000" end="03123511" />
+   <id start="03121000" end="03121511" />
+   <id start="03119000" end="03119511" />
+   <id start="03117000" end="03117511" />
+   <id start="03115000" end="03115511" />
+   <id start="03113000" end="03113511" />
+   <id start="03111000" end="03111511" />
+   <id start="03109000" end="03109511" />
+   <id start="03107000" end="03107511" />
+   <id start="03105000" end="03105511" />
+   <id start="03103000" end="03103511" />
+   <id start="03101000" end="03101511" />
+   <id start="03706000" end="03706511" />
+   <id start="03704000" end="03704511" />
+   <id start="03702000" end="03702511" />
+   <id start="03700000" end="03700511" />
+   <id start="03622000" end="03622511" />
+   <id start="03620000" end="03620511" />
+   <id start="03618000" end="03618511" />
+   <id start="03616000" end="03616511" />
+   <id start="03614000" end="03614511" />
+   <id start="03612000" end="03612511" />
+   <id start="03610000" end="03610511" />
+   <id start="03608000" end="03608511" />
+   <id start="03606000" end="03606511" />
+   <id start="03604000" end="03604511" />
+   <id start="03602000" end="03602511" />
+   <id start="03600000" end="03600511" />
+   <id start="03522000" end="03522511" />
+   <id start="03520000" end="03520511" />
+   <id start="03518000" end="03518511" />
+   <id start="03516000" end="03516511" />
+   <id start="03514000" end="03514511" />
+   <id start="03512000" end="03512511" />
+   <id start="03510000" end="03510511" />
+   <id start="03508000" end="03508511" />
+   <id start="03506000" end="03506511" />
+   <id start="03504000" end="03504511" />
+   <id start="03502000" end="03502511" />
+   <id start="03500000" end="03500511" />
+   <id start="03422000" end="03422511" />
+   <id start="03420000" end="03420511" />
+   <id start="03418000" end="03418511" />
+   <id start="03416000" end="03416511" />
+   <id start="03414000" end="03414511" />
+   <id start="03412000" end="03412511" />
+   <id start="03410000" end="03410511" />
+   <id start="03408000" end="03408511" />
+   <id start="03406000" end="03406511" />
+   <id start="03404000" end="03404511" />
+   <id start="03402000" end="03402511" />
+   <id start="03400000" end="03400511" />
+   <id start="03322000" end="03322511" />
+   <id start="03320000" end="03320511" />
+   <id start="03318000" end="03318511" />
+   <id start="03316000" end="03316511" />
+   <id start="03314000" end="03314511" />
+   <id start="03312000" end="03312511" />
+   <id start="03310000" end="03310511" />
+   <id start="03308000" end="03308511" />
+   <id start="03306000" end="03306511" />
+   <id start="03304000" end="03304511" />
+   <id start="03302000" end="03302511" />
+   <id start="03300000" end="03300511" />
+   <id start="03222000" end="03222511" />
+   <id start="03220000" end="03220511" />
+   <id start="03218000" end="03218511" />
+   <id start="03216000" end="03216511" />
+   <id start="03214000" end="03214511" />
+   <id start="03212000" end="03212511" />
+   <id start="03210000" end="03210511" />
+   <id start="03208000" end="03208511" />
+   <id start="03206000" end="03206511" />
+   <id start="03204000" end="03204511" />
+   <id start="03202000" end="03202511" />
+   <id start="03200000" end="03200511" />
+   <id start="03122000" end="03122511" />
+   <id start="03120000" end="03120511" />
+   <id start="03118000" end="03118511" />
+   <id start="03116000" end="03116511" />
+   <id start="03114000" end="03114511" />
+   <id start="03112000" end="03112511" />
+   <id start="03110000" end="03110511" />
+   <id start="03108000" end="03108511" />
+   <id start="03106000" end="03106511" />
+   <id start="03104000" end="03104511" />
+   <id start="03102000" end="03102511" />
+   <id start="03100000" end="03100511" />
+   </idlist>
+  <idlist idname="panel04">
+   <id start="04707000" end="04707511" />
+   <id start="04705000" end="04705511" />
+   <id start="04703000" end="04703511" />
+   <id start="04701000" end="04701511" />
+   <id start="04623000" end="04623511" />
+   <id start="04621000" end="04621511" />
+   <id start="04619000" end="04619511" />
+   <id start="04617000" end="04617511" />
+   <id start="04615000" end="04615511" />
+   <id start="04613000" end="04613511" />
+   <id start="04611000" end="04611511" />
+   <id start="04609000" end="04609511" />
+   <id start="04607000" end="04607511" />
+   <id start="04605000" end="04605511" />
+   <id start="04603000" end="04603511" />
+   <id start="04601000" end="04601511" />
+   <id start="04523000" end="04523511" />
+   <id start="04521000" end="04521511" />
+   <id start="04519000" end="04519511" />
+   <id start="04517000" end="04517511" />
+   <id start="04515000" end="04515511" />
+   <id start="04513000" end="04513511" />
+   <id start="04511000" end="04511511" />
+   <id start="04509000" end="04509511" />
+   <id start="04507000" end="04507511" />
+   <id start="04505000" end="04505511" />
+   <id start="04503000" end="04503511" />
+   <id start="04501000" end="04501511" />
+   <id start="04423000" end="04423511" />
+   <id start="04421000" end="04421511" />
+   <id start="04419000" end="04419511" />
+   <id start="04417000" end="04417511" />
+   <id start="04415000" end="04415511" />
+   <id start="04413000" end="04413511" />
+   <id start="04411000" end="04411511" />
+   <id start="04409000" end="04409511" />
+   <id start="04407000" end="04407511" />
+   <id start="04405000" end="04405511" />
+   <id start="04403000" end="04403511" />
+   <id start="04401000" end="04401511" />
+   <id start="04323000" end="04323511" />
+   <id start="04321000" end="04321511" />
+   <id start="04319000" end="04319511" />
+   <id start="04317000" end="04317511" />
+   <id start="04315000" end="04315511" />
+   <id start="04313000" end="04313511" />
+   <id start="04311000" end="04311511" />
+   <id start="04309000" end="04309511" />
+   <id start="04307000" end="04307511" />
+   <id start="04305000" end="04305511" />
+   <id start="04303000" end="04303511" />
+   <id start="04301000" end="04301511" />
+   <id start="04223000" end="04223511" />
+   <id start="04221000" end="04221511" />
+   <id start="04219000" end="04219511" />
+   <id start="04217000" end="04217511" />
+   <id start="04215000" end="04215511" />
+   <id start="04213000" end="04213511" />
+   <id start="04211000" end="04211511" />
+   <id start="04209000" end="04209511" />
+   <id start="04207000" end="04207511" />
+   <id start="04205000" end="04205511" />
+   <id start="04203000" end="04203511" />
+   <id start="04201000" end="04201511" />
+   <id start="04123000" end="04123511" />
+   <id start="04121000" end="04121511" />
+   <id start="04119000" end="04119511" />
+   <id start="04117000" end="04117511" />
+   <id start="04115000" end="04115511" />
+   <id start="04113000" end="04113511" />
+   <id start="04111000" end="04111511" />
+   <id start="04109000" end="04109511" />
+   <id start="04107000" end="04107511" />
+   <id start="04105000" end="04105511" />
+   <id start="04103000" end="04103511" />
+   <id start="04101000" end="04101511" />
+   <id start="04706000" end="04706511" />
+   <id start="04704000" end="04704511" />
+   <id start="04702000" end="04702511" />
+   <id start="04700000" end="04700511" />
+   <id start="04622000" end="04622511" />
+   <id start="04620000" end="04620511" />
+   <id start="04618000" end="04618511" />
+   <id start="04616000" end="04616511" />
+   <id start="04614000" end="04614511" />
+   <id start="04612000" end="04612511" />
+   <id start="04610000" end="04610511" />
+   <id start="04608000" end="04608511" />
+   <id start="04606000" end="04606511" />
+   <id start="04604000" end="04604511" />
+   <id start="04602000" end="04602511" />
+   <id start="04600000" end="04600511" />
+   <id start="04522000" end="04522511" />
+   <id start="04520000" end="04520511" />
+   <id start="04518000" end="04518511" />
+   <id start="04516000" end="04516511" />
+   <id start="04514000" end="04514511" />
+   <id start="04512000" end="04512511" />
+   <id start="04510000" end="04510511" />
+   <id start="04508000" end="04508511" />
+   <id start="04506000" end="04506511" />
+   <id start="04504000" end="04504511" />
+   <id start="04502000" end="04502511" />
+   <id start="04500000" end="04500511" />
+   <id start="04422000" end="04422511" />
+   <id start="04420000" end="04420511" />
+   <id start="04418000" end="04418511" />
+   <id start="04416000" end="04416511" />
+   <id start="04414000" end="04414511" />
+   <id start="04412000" end="04412511" />
+   <id start="04410000" end="04410511" />
+   <id start="04408000" end="04408511" />
+   <id start="04406000" end="04406511" />
+   <id start="04404000" end="04404511" />
+   <id start="04402000" end="04402511" />
+   <id start="04400000" end="04400511" />
+   <id start="04322000" end="04322511" />
+   <id start="04320000" end="04320511" />
+   <id start="04318000" end="04318511" />
+   <id start="04316000" end="04316511" />
+   <id start="04314000" end="04314511" />
+   <id start="04312000" end="04312511" />
+   <id start="04310000" end="04310511" />
+   <id start="04308000" end="04308511" />
+   <id start="04306000" end="04306511" />
+   <id start="04304000" end="04304511" />
+   <id start="04302000" end="04302511" />
+   <id start="04300000" end="04300511" />
+   <id start="04222000" end="04222511" />
+   <id start="04220000" end="04220511" />
+   <id start="04218000" end="04218511" />
+   <id start="04216000" end="04216511" />
+   <id start="04214000" end="04214511" />
+   <id start="04212000" end="04212511" />
+   <id start="04210000" end="04210511" />
+   <id start="04208000" end="04208511" />
+   <id start="04206000" end="04206511" />
+   <id start="04204000" end="04204511" />
+   <id start="04202000" end="04202511" />
+   <id start="04200000" end="04200511" />
+   <id start="04122000" end="04122511" />
+   <id start="04120000" end="04120511" />
+   <id start="04118000" end="04118511" />
+   <id start="04116000" end="04116511" />
+   <id start="04114000" end="04114511" />
+   <id start="04112000" end="04112511" />
+   <id start="04110000" end="04110511" />
+   <id start="04108000" end="04108511" />
+   <id start="04106000" end="04106511" />
+   <id start="04104000" end="04104511" />
+   <id start="04102000" end="04102511" />
+   <id start="04100000" end="04100511" />
+   </idlist>
+  <idlist idname="panel05">
+   <id start="05707000" end="05707511" />
+   <id start="05705000" end="05705511" />
+   <id start="05703000" end="05703511" />
+   <id start="05701000" end="05701511" />
+   <id start="05623000" end="05623511" />
+   <id start="05621000" end="05621511" />
+   <id start="05619000" end="05619511" />
+   <id start="05617000" end="05617511" />
+   <id start="05615000" end="05615511" />
+   <id start="05613000" end="05613511" />
+   <id start="05611000" end="05611511" />
+   <id start="05609000" end="05609511" />
+   <id start="05607000" end="05607511" />
+   <id start="05605000" end="05605511" />
+   <id start="05603000" end="05603511" />
+   <id start="05601000" end="05601511" />
+   <id start="05523000" end="05523511" />
+   <id start="05521000" end="05521511" />
+   <id start="05519000" end="05519511" />
+   <id start="05517000" end="05517511" />
+   <id start="05515000" end="05515511" />
+   <id start="05513000" end="05513511" />
+   <id start="05511000" end="05511511" />
+   <id start="05509000" end="05509511" />
+   <id start="05507000" end="05507511" />
+   <id start="05505000" end="05505511" />
+   <id start="05503000" end="05503511" />
+   <id start="05501000" end="05501511" />
+   <id start="05423000" end="05423511" />
+   <id start="05421000" end="05421511" />
+   <id start="05419000" end="05419511" />
+   <id start="05417000" end="05417511" />
+   <id start="05415000" end="05415511" />
+   <id start="05413000" end="05413511" />
+   <id start="05411000" end="05411511" />
+   <id start="05409000" end="05409511" />
+   <id start="05407000" end="05407511" />
+   <id start="05405000" end="05405511" />
+   <id start="05403000" end="05403511" />
+   <id start="05401000" end="05401511" />
+   <id start="05323000" end="05323511" />
+   <id start="05321000" end="05321511" />
+   <id start="05319000" end="05319511" />
+   <id start="05317000" end="05317511" />
+   <id start="05315000" end="05315511" />
+   <id start="05313000" end="05313511" />
+   <id start="05311000" end="05311511" />
+   <id start="05309000" end="05309511" />
+   <id start="05307000" end="05307511" />
+   <id start="05305000" end="05305511" />
+   <id start="05303000" end="05303511" />
+   <id start="05301000" end="05301511" />
+   <id start="05223000" end="05223511" />
+   <id start="05221000" end="05221511" />
+   <id start="05219000" end="05219511" />
+   <id start="05217000" end="05217511" />
+   <id start="05215000" end="05215511" />
+   <id start="05213000" end="05213511" />
+   <id start="05211000" end="05211511" />
+   <id start="05209000" end="05209511" />
+   <id start="05207000" end="05207511" />
+   <id start="05205000" end="05205511" />
+   <id start="05203000" end="05203511" />
+   <id start="05201000" end="05201511" />
+   <id start="05123000" end="05123511" />
+   <id start="05121000" end="05121511" />
+   <id start="05119000" end="05119511" />
+   <id start="05117000" end="05117511" />
+   <id start="05115000" end="05115511" />
+   <id start="05113000" end="05113511" />
+   <id start="05111000" end="05111511" />
+   <id start="05109000" end="05109511" />
+   <id start="05107000" end="05107511" />
+   <id start="05105000" end="05105511" />
+   <id start="05103000" end="05103511" />
+   <id start="05101000" end="05101511" />
+   <id start="05706000" end="05706511" />
+   <id start="05704000" end="05704511" />
+   <id start="05702000" end="05702511" />
+   <id start="05700000" end="05700511" />
+   <id start="05622000" end="05622511" />
+   <id start="05620000" end="05620511" />
+   <id start="05618000" end="05618511" />
+   <id start="05616000" end="05616511" />
+   <id start="05614000" end="05614511" />
+   <id start="05612000" end="05612511" />
+   <id start="05610000" end="05610511" />
+   <id start="05608000" end="05608511" />
+   <id start="05606000" end="05606511" />
+   <id start="05604000" end="05604511" />
+   <id start="05602000" end="05602511" />
+   <id start="05600000" end="05600511" />
+   <id start="05522000" end="05522511" />
+   <id start="05520000" end="05520511" />
+   <id start="05518000" end="05518511" />
+   <id start="05516000" end="05516511" />
+   <id start="05514000" end="05514511" />
+   <id start="05512000" end="05512511" />
+   <id start="05510000" end="05510511" />
+   <id start="05508000" end="05508511" />
+   <id start="05506000" end="05506511" />
+   <id start="05504000" end="05504511" />
+   <id start="05502000" end="05502511" />
+   <id start="05500000" end="05500511" />
+   <id start="05422000" end="05422511" />
+   <id start="05420000" end="05420511" />
+   <id start="05418000" end="05418511" />
+   <id start="05416000" end="05416511" />
+   <id start="05414000" end="05414511" />
+   <id start="05412000" end="05412511" />
+   <id start="05410000" end="05410511" />
+   <id start="05408000" end="05408511" />
+   <id start="05406000" end="05406511" />
+   <id start="05404000" end="05404511" />
+   <id start="05402000" end="05402511" />
+   <id start="05400000" end="05400511" />
+   <id start="05322000" end="05322511" />
+   <id start="05320000" end="05320511" />
+   <id start="05318000" end="05318511" />
+   <id start="05316000" end="05316511" />
+   <id start="05314000" end="05314511" />
+   <id start="05312000" end="05312511" />
+   <id start="05310000" end="05310511" />
+   <id start="05308000" end="05308511" />
+   <id start="05306000" end="05306511" />
+   <id start="05304000" end="05304511" />
+   <id start="05302000" end="05302511" />
+   <id start="05300000" end="05300511" />
+   <id start="05222000" end="05222511" />
+   <id start="05220000" end="05220511" />
+   <id start="05218000" end="05218511" />
+   <id start="05216000" end="05216511" />
+   <id start="05214000" end="05214511" />
+   <id start="05212000" end="05212511" />
+   <id start="05210000" end="05210511" />
+   <id start="05208000" end="05208511" />
+   <id start="05206000" end="05206511" />
+   <id start="05204000" end="05204511" />
+   <id start="05202000" end="05202511" />
+   <id start="05200000" end="05200511" />
+   <id start="05122000" end="05122511" />
+   <id start="05120000" end="05120511" />
+   <id start="05118000" end="05118511" />
+   <id start="05116000" end="05116511" />
+   <id start="05114000" end="05114511" />
+   <id start="05112000" end="05112511" />
+   <id start="05110000" end="05110511" />
+   <id start="05108000" end="05108511" />
+   <id start="05106000" end="05106511" />
+   <id start="05104000" end="05104511" />
+   <id start="05102000" end="05102511" />
+   <id start="05100000" end="05100511" />
+   </idlist>
+ </instrument>

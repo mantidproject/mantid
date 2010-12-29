@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "EQ-SANS" date = "20th May 2010">
+    
+    <component-link name="EQ-SANS">
+    
+        <parameter name="TS_mapping_file" type="string">
+            <value val="EQSANS_TS_2009_07_20.dat"/>
+        </parameter>
+
+    </component-link>
+</parameter-file>    

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "OSIRIS" date = "2010-05-05T00:00:00">
+
+<component-link name = "OSIRIS">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="indirect"/>
+</parameter>
+
+<parameter name="analysers" type="string">
+  <value val="graphite,diffraction" />
+</parameter>
+
+<parameter name="refl-graphite" type="string">
+  <value val="002,004" />
+</parameter>
+
+<parameter name="refl-diffraction" type="string">
+  <value val="diffraction" />
+</parameter>
+
+<parameter name="mon-area" >
+  <value val="1.276e-3" />
+</parameter>
+<parameter name="mon-thickness" >
+  <value val="0.025" />
+</parameter>
+
+</component-link>
+
+</parameter-file>

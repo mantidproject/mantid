@@ -1,0 +1,1271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="MARI" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2009-09-15 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+    The data for Mari was obtained from Jon Taylor.
+  
+  -->
+
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="Moderator">
+    <location z="-11.739" />
+  </component>
+  <type name="Moderator" is="Source"> </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  <type name="sample-position" is="SamplePos"></type>
+  
+
+  <!-- MONITORS -->
+
+  <component type="monitor" idlist="monitor" mark-as="monitor">
+    <location z="-4.739" />
+    <location z="-1.442" />
+    <location z="5.82" />
+  </component>
+  
+  <type name="monitor" is="detector">
+     <cuboid id="shape">
+       <left-front-bottom-point x="0.025" y="-0.025" z="0.0"  />
+       <left-front-top-point  x="0.025" y="-0.025" z="0.02"  />
+       <left-back-bottom-point  x="-0.025" y="-0.025" z="0.0"  />
+       <right-front-bottom-point  x="0.025" y="0.025" z="0.0"  />
+     </cuboid>
+  </type>  
+  
+  
+  <!-- DETECTORS -->
+  
+  <component type="low angle bank" idlist="low angle bank">
+    <location />
+  </component>
+  
+  <component type="wide angle bank" idlist="wide angle bank">
+    <location />
+  </component>  
+  
+  <type name="low angle bank"> 
+    <component type="W11 north"> <location /> </component> 
+    <component type="W12 north east"> <location /> </component>     
+    <component type="W13 east"> <location /> </component>   
+    <component type="W14 south east"> <location /> </component>     
+    <component type="W15 south"> <location /> </component>   
+    <component type="W16 south west"> <location /> </component>      
+    <component type="W17 west"> <location /> </component>   
+    <component type="W18 north west"> <location /> </component>          
+  </type>   
+  
+  <type name="wide angle bank"> 
+    <component type="W1-1"> <location /> </component>
+    <component type="W2-1"> <location /> </component>
+    <component type="W3-1"> <location /> </component>
+    <component type="W4-1"> <location /> </component>
+    <component type="W5-1"> <location /> </component>
+    <component type="W6-1"> <location /> </component>
+    <component type="W7-1"> <location /> </component>
+    <component type="W8-1"> <location /> </component>  
+
+    <component type="W1-2"> <location /> </component>
+    <component type="W2-2"> <location /> </component>
+    <component type="W3-2"> <location /> </component>
+    <component type="W4-2"> <location /> </component>
+    <component type="W5-2"> <location /> </component>
+    <component type="W6-2"> <location /> </component>
+    <component type="W7-2"> <location /> </component>
+    <component type="W8-2"> <location /> </component>    
+    
+    <component type="W1-3"> <location /> </component>
+    <component type="W2-3"> <location /> </component>
+    <component type="W3-3"> <location /> </component>
+    <component type="W4-3"> <location /> </component>
+    <component type="W5-3"> <location /> </component>
+    <component type="W6-3"> <location /> </component>
+    <component type="W7-3"> <location /> </component>
+    <component type="W8-3"> <location /> </component>    
+  </type> 
+
+
+  <type name="W1-1">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="13.71" p="-68.64" rot="-90" />
+      <location r="4.022" t="14.14" p="-69.3" rot="-90" />
+      <location r="4.022" t="14.57" p="-69.92" rot="-90" />
+      <location r="4.022" t="15" p="-70.51" rot="-90" />
+      <location r="4.022" t="15.43" p="-71.06" rot="-90" />
+      <location r="4.022" t="15.86" p="-71.57" rot="-90" />
+      <location r="4.022" t="16.29" p="-72.06" rot="-90" />
+      <location r="4.022" t="16.71" p="-72.52" rot="-90" />
+      <location r="4.022" t="17.14" p="-72.96" rot="-90" />
+      <location r="4.022" t="17.57" p="-73.38" rot="-90" />
+      <location r="4.022" t="18" p="-73.77" rot="-90" />
+      <location r="4.022" t="18.43" p="-74.14" rot="-90" />
+      <location r="4.022" t="18.86" p="-74.5" rot="-90" />
+      <location r="4.022" t="19.29" p="-74.84" rot="-90" />
+      <location r="4.022" t="19.71" p="-75.17" rot="-90" />
+      <location r="4.022" t="20.14" p="-75.47" rot="-90" />
+      <location r="4.022" t="20.57" p="-75.77" rot="-90" />
+      <location r="4.022" t="21" p="-76.05" rot="-90" />
+      <location r="4.022" t="21.43" p="-76.33" rot="-90" />
+      <location r="4.022" t="21.86" p="-76.59" rot="-90" />
+      <location r="4.022" t="22.29" p="-76.84" rot="-90" />
+      <location r="4.022" t="22.71" p="-77.08" rot="-90" />
+      <location r="4.022" t="23.14" p="-77.31" rot="-90" />
+      <location r="4.022" t="23.57" p="-77.53" rot="-90" />
+      <location r="4.022" t="24" p="-77.74" rot="-90" />
+      <location r="4.022" t="24.43" p="-77.95" rot="-90" />
+      <location r="4.022" t="24.86" p="-78.14" rot="-90" />
+      <location r="4.022" t="25.29" p="-78.33" rot="-90" />
+      <location r="4.022" t="25.71" p="-78.52" rot="-90" />
+      <location r="4.022" t="26.14" p="-78.7" rot="-90" />
+      <location r="4.022" t="26.57" p="-78.87" rot="-90" />
+      <location r="4.022" t="27" p="-79.03" rot="-90" />
+      <location r="4.022" t="27.43" p="-79.19" rot="-90" />
+      <location r="4.022" t="27.86" p="-79.35" rot="-90" />
+      <location r="4.022" t="28.29" p="-79.5" rot="-90" />
+      <location r="4.022" t="28.71" p="-79.64" rot="-90" />
+      <location r="4.022" t="29.14" p="-79.78" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W2-1">  
+    <component type="tall He3 element">
+      <location r="4.022" t="31.71" p="-80.54" rot="-90" />
+      <location r="4.022" t="32.14" p="-80.66" rot="-90" />
+      <location r="4.022" t="32.57" p="-80.77" rot="-90" />
+      <location r="4.022" t="33" p="-80.88" rot="-90" />
+      <location r="4.022" t="33.43" p="-80.98" rot="-90" />
+      <location r="4.022" t="33.86" p="-81.08" rot="-90" />
+      <location r="4.022" t="34.29" p="-81.18" rot="-90" />
+      <location r="4.022" t="34.71" p="-81.28" rot="-90" />
+      <location r="4.022" t="35.14" p="-81.37" rot="-90" />
+      <location r="4.022" t="35.57" p="-81.46" rot="-90" />
+      <location r="4.022" t="36" p="-81.55" rot="-90" />
+      <location r="4.022" t="36.43" p="-81.64" rot="-90" />
+      <location r="4.022" t="36.86" p="-81.72" rot="-90" />
+      <location r="4.022" t="37.29" p="-81.8" rot="-90" />
+      <location r="4.022" t="37.71" p="-81.88" rot="-90" />
+      <location r="4.022" t="38.14" p="-81.96" rot="-90" />
+      <location r="4.022" t="38.57" p="-82.04" rot="-90" />
+      <location r="4.022" t="39" p="-82.11" rot="-90" />
+      <location r="4.022" t="39.43" p="-82.18" rot="-90" />
+      <location r="4.022" t="39.86" p="-82.26" rot="-90" />
+      <location r="4.022" t="40.29" p="-82.32" rot="-90" />
+      <location r="4.022" t="40.71" p="-82.39" rot="-90" />
+      <location r="4.022" t="41.14" p="-82.46" rot="-90" />
+      <location r="4.022" t="41.57" p="-82.52" rot="-90" />
+      <location r="4.022" t="42" p="-82.58" rot="-90" />
+      <location r="4.022" t="42.43" p="-82.65" rot="-90" />
+      <location r="4.022" t="42.86" p="-82.71" rot="-90" />
+      <location r="4.022" t="43.29" p="-82.76" rot="-90" />
+      <location r="4.022" t="43.71" p="-82.82" rot="-90" />
+      <location r="4.022" t="44.14" p="-82.88" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W3-1">  
+    <component type="tall He3 element">
+      <location r="4.022" t="45.86" p="-83.09" rot="-90" />
+      <location r="4.022" t="46.29" p="-83.14" rot="-90" />
+      <location r="4.022" t="46.71" p="-83.19" rot="-90" />
+      <location r="4.022" t="47.14" p="-83.23" rot="-90" />
+      <location r="4.022" t="47.57" p="-83.28" rot="-90" />
+      <location r="4.022" t="48" p="-83.33" rot="-90" />
+      <location r="4.022" t="48.43" p="-83.37" rot="-90" />
+      <location r="4.022" t="48.86" p="-83.41" rot="-90" />
+      <location r="4.022" t="49.29" p="-83.46" rot="-90" />
+      <location r="4.022" t="49.71" p="-83.5" rot="-90" />
+      <location r="4.022" t="50.14" p="-83.54" rot="-90" />
+      <location r="4.022" t="50.57" p="-83.58" rot="-90" />
+      <location r="4.022" t="51" p="-83.62" rot="-90" />
+      <location r="4.022" t="51.43" p="-83.66" rot="-90" />
+      <location r="4.022" t="51.86" p="-83.7" rot="-90" />
+      <location r="4.022" t="52.29" p="-83.73" rot="-90" />
+      <location r="4.022" t="52.71" p="-83.77" rot="-90" />
+      <location r="4.022" t="53.14" p="-83.8" rot="-90" />
+      <location r="4.022" t="53.57" p="-83.84" rot="-90" />
+      <location r="4.022" t="54" p="-83.87" rot="-90" />
+      <location r="4.022" t="54.43" p="-83.9" rot="-90" />
+      <location r="4.022" t="54.86" p="-83.94" rot="-90" />
+      <location r="4.022" t="55.29" p="-83.97" rot="-90" />
+      <location r="4.022" t="55.71" p="-84" rot="-90" />
+      <location r="4.022" t="56.14" p="-84.03" rot="-90" />
+      <location r="4.022" t="56.57" p="-84.06" rot="-90" />
+      <location r="4.022" t="57" p="-84.09" rot="-90" />
+      <location r="4.022" t="57.43" p="-84.12" rot="-90" />
+      <location r="4.022" t="57.86" p="-84.15" rot="-90" />
+      <location r="4.022" t="58.29" p="-84.17" rot="-90" />
+      <location r="4.022" t="58.71" p="-84.2" rot="-90" />
+      <location r="4.022" t="59.14" p="-84.23" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W4-1">  
+    <component type="tall He3 element">
+      <location r="4.022" t="60.86" p="-84.33" rot="-90" />
+      <location r="4.022" t="61.29" p="-84.35" rot="-90" />
+      <location r="4.022" t="61.71" p="-84.37" rot="-90" />
+      <location r="4.022" t="62.14" p="-84.39" rot="-90" />
+      <location r="4.022" t="62.57" p="-84.42" rot="-90" />
+      <location r="4.022" t="63" p="-84.44" rot="-90" />
+      <location r="4.022" t="63.43" p="-84.46" rot="-90" />
+      <location r="4.022" t="63.86" p="-84.48" rot="-90" />
+      <location r="4.022" t="64.29" p="-84.5" rot="-90" />
+      <location r="4.022" t="64.71" p="-84.52" rot="-90" />
+      <location r="4.022" t="65.14" p="-84.54" rot="-90" />
+      <location r="4.022" t="65.57" p="-84.56" rot="-90" />
+      <location r="4.022" t="66" p="-84.58" rot="-90" />
+      <location r="4.022" t="66.43" p="-84.59" rot="-90" />
+      <location r="4.022" t="66.86" p="-84.61" rot="-90" />
+      <location r="4.022" t="67.29" p="-84.63" rot="-90" />
+      <location r="4.022" t="67.71" p="-84.64" rot="-90" />
+      <location r="4.022" t="68.14" p="-84.66" rot="-90" />
+      <location r="4.022" t="68.57" p="-84.68" rot="-90" />
+      <location r="4.022" t="69" p="-84.69" rot="-90" />
+      <location r="4.022" t="69.43" p="-84.71" rot="-90" />
+      <location r="4.022" t="69.86" p="-84.72" rot="-90" />
+      <location r="4.022" t="70.29" p="-84.74" rot="-90" />
+      <location r="4.022" t="70.71" p="-84.75" rot="-90" />
+      <location r="4.022" t="71.14" p="-84.76" rot="-90" />
+      <location r="4.022" t="71.57" p="-84.78" rot="-90" />
+      <location r="4.022" t="72" p="-84.79" rot="-90" />
+      <location r="4.022" t="72.43" p="-84.8" rot="-90" />
+      <location r="4.022" t="72.86" p="-84.81" rot="-90" />
+      <location r="4.022" t="73.29" p="-84.83" rot="-90" />
+      <location r="4.022" t="73.71" p="-84.84" rot="-90" />
+      <location r="4.022" t="74.14" p="-84.85" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W5-1">  
+    <component type="tall He3 element">
+      <location r="4.022" t="75.86" p="-84.89" rot="-90" />
+      <location r="4.022" t="76.29" p="-84.9" rot="-90" />
+      <location r="4.022" t="76.71" p="-84.91" rot="-90" />
+      <location r="4.022" t="77.14" p="-84.92" rot="-90" />
+      <location r="4.022" t="77.57" p="-84.93" rot="-90" />
+      <location r="4.022" t="78" p="-84.93" rot="-90" />
+      <location r="4.022" t="78.43" p="-84.94" rot="-90" />
+      <location r="4.022" t="78.86" p="-84.95" rot="-90" />
+      <location r="4.022" t="79.29" p="-84.96" rot="-90" />
+      <location r="4.022" t="79.71" p="-84.96" rot="-90" />
+      <location r="4.022" t="80.14" p="-84.97" rot="-90" />
+      <location r="4.022" t="80.57" p="-84.98" rot="-90" />
+      <location r="4.022" t="81" p="-84.98" rot="-90" />
+      <location r="4.022" t="81.43" p="-84.99" rot="-90" />
+      <location r="4.022" t="81.86" p="-84.99" rot="-90" />
+      <location r="4.022" t="82.29" p="-85" rot="-90" />
+      <location r="4.022" t="82.71" p="-85" rot="-90" />
+      <location r="4.022" t="83.14" p="-85.01" rot="-90" />
+      <location r="4.022" t="83.57" p="-85.01" rot="-90" />
+      <location r="4.022" t="84" p="-85.02" rot="-90" />
+      <location r="4.022" t="84.43" p="-85.02" rot="-90" />
+      <location r="4.022" t="84.86" p="-85.03" rot="-90" />
+      <location r="4.022" t="85.29" p="-85.03" rot="-90" />
+      <location r="4.022" t="85.71" p="-85.03" rot="-90" />
+      <location r="4.022" t="86.14" p="-85.03" rot="-90" />
+      <location r="4.022" t="86.57" p="-85.04" rot="-90" />
+      <location r="4.022" t="87" p="-85.04" rot="-90" />
+      <location r="4.022" t="87.43" p="-85.04" rot="-90" />
+      <location r="4.022" t="87.86" p="-85.04" rot="-90" />
+      <location r="4.022" t="88.29" p="-85.04" rot="-90" />
+      <location r="4.022" t="88.71" p="-85.04" rot="-90" />
+      <location r="4.022" t="89.14" p="-85.04" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W6-1">  
+    <component type="tall He3 element">
+      <location r="4.022" t="90.86" p="-85.04" rot="-90" />
+      <location r="4.022" t="91.29" p="-85.04" rot="-90" />
+      <location r="4.022" t="91.71" p="-85.04" rot="-90" />
+      <location r="4.022" t="92.14" p="-85.04" rot="-90" />
+      <location r="4.022" t="92.57" p="-85.04" rot="-90" />
+      <location r="4.022" t="93" p="-85.04" rot="-90" />
+      <location r="4.022" t="93.43" p="-85.04" rot="-90" />
+      <location r="4.022" t="93.86" p="-85.03" rot="-90" />
+      <location r="4.022" t="94.29" p="-85.03" rot="-90" />
+      <location r="4.022" t="94.71" p="-85.03" rot="-90" />
+      <location r="4.022" t="95.14" p="-85.03" rot="-90" />
+      <location r="4.022" t="95.57" p="-85.02" rot="-90" />
+      <location r="4.022" t="96" p="-85.02" rot="-90" />
+      <location r="4.022" t="96.43" p="-85.01" rot="-90" />
+      <location r="4.022" t="96.86" p="-85.01" rot="-90" />
+      <location r="4.022" t="97.29" p="-85" rot="-90" />
+      <location r="4.022" t="97.71" p="-85" rot="-90" />
+      <location r="4.022" t="98.14" p="-84.99" rot="-90" />
+      <location r="4.022" t="98.57" p="-84.99" rot="-90" />
+      <location r="4.022" t="99" p="-84.98" rot="-90" />
+      <location r="4.022" t="99.43" p="-84.98" rot="-90" />
+      <location r="4.022" t="99.86" p="-84.97" rot="-90" />
+      <location r="4.022" t="100.29" p="-84.96" rot="-90" />
+      <location r="4.022" t="100.71" p="-84.96" rot="-90" />
+      <location r="4.022" t="101.14" p="-84.95" rot="-90" />
+      <location r="4.022" t="101.57" p="-84.94" rot="-90" />
+      <location r="4.022" t="102" p="-84.93" rot="-90" />
+      <location r="4.022" t="102.43" p="-84.93" rot="-90" />
+      <location r="4.022" t="102.86" p="-84.92" rot="-90" />
+      <location r="4.022" t="103.29" p="-84.91" rot="-90" />
+      <location r="4.022" t="103.71" p="-84.9" rot="-90" />
+      <location r="4.022" t="104.14" p="-84.89" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W7-1">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="105.86" p="-84.85" rot="-90" />
+      <location r="4.022" t="106.29" p="-84.84" rot="-90" />
+      <location r="4.022" t="106.71" p="-84.83" rot="-90" />
+      <location r="4.022" t="107.14" p="-84.81" rot="-90" />
+      <location r="4.022" t="107.57" p="-84.8" rot="-90" />
+      <location r="4.022" t="108" p="-84.79" rot="-90" />
+      <location r="4.022" t="108.43" p="-84.78" rot="-90" />
+      <location r="4.022" t="108.86" p="-84.76" rot="-90" />
+      <location r="4.022" t="109.29" p="-84.75" rot="-90" />
+      <location r="4.022" t="109.71" p="-84.74" rot="-90" />
+      <location r="4.022" t="110.14" p="-84.72" rot="-90" />
+      <location r="4.022" t="110.57" p="-84.71" rot="-90" />
+      <location r="4.022" t="111" p="-84.69" rot="-90" />
+      <location r="4.022" t="111.43" p="-84.68" rot="-90" />
+      <location r="4.022" t="111.86" p="-84.66" rot="-90" />
+      <location r="4.022" t="112.29" p="-84.64" rot="-90" />
+      <location r="4.022" t="112.71" p="-84.63" rot="-90" />
+      <location r="4.022" t="113.14" p="-84.61" rot="-90" />
+      <location r="4.022" t="113.57" p="-84.59" rot="-90" />
+      <location r="4.022" t="114" p="-84.58" rot="-90" />
+      <location r="4.022" t="114.43" p="-84.56" rot="-90" />
+      <location r="4.022" t="114.86" p="-84.54" rot="-90" />
+      <location r="4.022" t="115.29" p="-84.52" rot="-90" />
+      <location r="4.022" t="115.71" p="-84.5" rot="-90" />
+      <location r="4.022" t="116.14" p="-84.48" rot="-90" />
+      <location r="4.022" t="116.57" p="-84.46" rot="-90" />
+      <location r="4.022" t="117" p="-84.44" rot="-90" />
+      <location r="4.022" t="117.43" p="-84.42" rot="-90" />
+      <location r="4.022" t="117.86" p="-84.39" rot="-90" />
+      <location r="4.022" t="118.29" p="-84.37" rot="-90" />
+      <location r="4.022" t="118.71" p="-84.35" rot="-90" />
+      <location r="4.022" t="119.14" p="-84.33" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W8-1">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="120.86" p="-84.23" rot="-90" />
+      <location r="4.022" t="121.29" p="-84.2" rot="-90" />
+      <location r="4.022" t="121.71" p="-84.17" rot="-90" />
+      <location r="4.022" t="122.14" p="-84.15" rot="-90" />
+      <location r="4.022" t="122.57" p="-84.12" rot="-90" />
+      <location r="4.022" t="123" p="-84.09" rot="-90" />
+      <location r="4.022" t="123.43" p="-84.06" rot="-90" />
+      <location r="4.022" t="123.86" p="-84.03" rot="-90" />
+      <location r="4.022" t="124.29" p="-84" rot="-90" />
+      <location r="4.022" t="124.71" p="-83.97" rot="-90" />
+      <location r="4.022" t="125.14" p="-83.94" rot="-90" />
+      <location r="4.022" t="125.57" p="-83.9" rot="-90" />
+      <location r="4.022" t="126" p="-83.87" rot="-90" />
+      <location r="4.022" t="126.43" p="-83.84" rot="-90" />
+      <location r="4.022" t="126.86" p="-83.8" rot="-90" />
+      <location r="4.022" t="127.29" p="-83.77" rot="-90" />
+      <location r="4.022" t="127.71" p="-83.73" rot="-90" />
+      <location r="4.022" t="128.14" p="-83.7" rot="-90" />
+      <location r="4.022" t="128.57" p="-83.66" rot="-90" />
+      <location r="4.022" t="129" p="-83.62" rot="-90" />
+      <location r="4.022" t="129.43" p="-83.58" rot="-90" />
+      <location r="4.022" t="129.86" p="-83.54" rot="-90" />
+      <location r="4.022" t="130.29" p="-83.5" rot="-90" />
+      <location r="4.022" t="130.71" p="-83.46" rot="-90" />
+      <location r="4.022" t="131.14" p="-83.41" rot="-90" />
+      <location r="4.022" t="131.57" p="-83.37" rot="-90" />
+      <location r="4.022" t="132" p="-83.33" rot="-90" />
+      <location r="4.022" t="132.43" p="-83.28" rot="-90" />
+      <location r="4.022" t="132.86" p="-83.23" rot="-90" />
+      <location r="4.022" t="133.29" p="-83.19" rot="-90" />
+      <location r="4.022" t="133.71" p="-83.14" rot="-90" />
+      <location r="4.022" t="134.14" p="-83.09" rot="-90" />
+    </component>
+  </type>   
+  
+  <type name="W1-2">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="12.43" p="-90" rot="-90" />
+      <location r="4.022" t="12.86" p="-90" rot="-90" />
+      <location r="4.022" t="13.29" p="-90" rot="-90" />
+      <location r="4.022" t="13.71" p="-90" rot="-90" />
+      <location r="4.022" t="14.14" p="-90" rot="-90" />
+      <location r="4.022" t="14.57" p="-90" rot="-90" />
+      <location r="4.022" t="15" p="-90" rot="-90" />
+      <location r="4.022" t="15.43" p="-90" rot="-90" />
+      <location r="4.022" t="15.86" p="-90" rot="-90" />
+      <location r="4.022" t="16.29" p="-90" rot="-90" />
+      <location r="4.022" t="16.71" p="-90" rot="-90" />
+      <location r="4.022" t="17.14" p="-90" rot="-90" />
+      <location r="4.022" t="17.57" p="-90" rot="-90" />
+      <location r="4.022" t="18" p="-90" rot="-90" />
+      <location r="4.022" t="18.43" p="-90" rot="-90" />
+      <location r="4.022" t="18.86" p="-90" rot="-90" />
+      <location r="4.022" t="19.29" p="-90" rot="-90" />
+      <location r="4.022" t="19.71" p="-90" rot="-90" />
+      <location r="4.022" t="20.14" p="-90" rot="-90" />
+      <location r="4.022" t="20.57" p="-90" rot="-90" />
+      <location r="4.022" t="21" p="-90" rot="-90" />
+      <location r="4.022" t="21.43" p="-90" rot="-90" />
+      <location r="4.022" t="21.86" p="-90" rot="-90" />
+      <location r="4.022" t="22.29" p="-90" rot="-90" />
+      <location r="4.022" t="22.71" p="-90" rot="-90" />
+      <location r="4.022" t="23.14" p="-90" rot="-90" />
+      <location r="4.022" t="23.57" p="-90" rot="-90" />
+      <location r="4.022" t="24" p="-90" rot="-90" />
+      <location r="4.022" t="24.43" p="-90" rot="-90" />
+      <location r="4.022" t="24.86" p="-90" rot="-90" />
+      <location r="4.022" t="25.29" p="-90" rot="-90" />
+      <location r="4.022" t="25.71" p="-90" rot="-90" />
+      <location r="4.022" t="26.14" p="-90" rot="-90" />
+      <location r="4.022" t="26.57" p="-90" rot="-90" />
+      <location r="4.022" t="27" p="-90" rot="-90" />
+      <location r="4.022" t="27.43" p="-90" rot="-90" />
+      <location r="4.022" t="27.86" p="-90" rot="-90" />
+      <location r="4.022" t="28.29" p="-90" rot="-90" />
+      <location r="4.022" t="28.71" p="-90" rot="-90" />
+      <location r="4.022" t="29.14" p="-90" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W2-2">  
+    <component type="tall He3 element">
+      <location r="4.022" t="30.86" p="-90" rot="-90" />
+      <location r="4.022" t="31.29" p="-90" rot="-90" />
+      <location r="4.022" t="31.71" p="-90" rot="-90" />
+      <location r="4.022" t="32.14" p="-90" rot="-90" />
+      <location r="4.022" t="32.57" p="-90" rot="-90" />
+      <location r="4.022" t="33" p="-90" rot="-90" />
+      <location r="4.022" t="33.43" p="-90" rot="-90" />
+      <location r="4.022" t="33.86" p="-90" rot="-90" />
+      <location r="4.022" t="34.29" p="-90" rot="-90" />
+      <location r="4.022" t="34.71" p="-90" rot="-90" />
+      <location r="4.022" t="35.14" p="-90" rot="-90" />
+      <location r="4.022" t="35.57" p="-90" rot="-90" />
+      <location r="4.022" t="36" p="-90" rot="-90" />
+      <location r="4.022" t="36.43" p="-90" rot="-90" />
+      <location r="4.022" t="36.86" p="-90" rot="-90" />
+      <location r="4.022" t="37.29" p="-90" rot="-90" />
+      <location r="4.022" t="37.71" p="-90" rot="-90" />
+      <location r="4.022" t="38.14" p="-90" rot="-90" />
+      <location r="4.022" t="38.57" p="-90" rot="-90" />
+      <location r="4.022" t="39" p="-90" rot="-90" />
+      <location r="4.022" t="39.43" p="-90" rot="-90" />
+      <location r="4.022" t="39.86" p="-90" rot="-90" />
+      <location r="4.022" t="40.29" p="-90" rot="-90" />
+      <location r="4.022" t="40.71" p="-90" rot="-90" />
+      <location r="4.022" t="41.14" p="-90" rot="-90" />
+      <location r="4.022" t="41.57" p="-90" rot="-90" />
+      <location r="4.022" t="42" p="-90" rot="-90" />
+      <location r="4.022" t="42.43" p="-90" rot="-90" />
+      <location r="4.022" t="42.86" p="-90" rot="-90" />
+      <location r="4.022" t="43.29" p="-90" rot="-90" />
+      <location r="4.022" t="43.71" p="-90" rot="-90" />
+      <location r="4.022" t="44.14" p="-90" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W3-2">  
+    <component type="tall He3 element">
+      <location r="4.022" t="45.86" p="-90" rot="-90" />
+      <location r="4.022" t="46.29" p="-90" rot="-90" />
+      <location r="4.022" t="46.71" p="-90" rot="-90" />
+      <location r="4.022" t="47.14" p="-90" rot="-90" />
+      <location r="4.022" t="47.57" p="-90" rot="-90" />
+      <location r="4.022" t="48" p="-90" rot="-90" />
+      <location r="4.022" t="48.43" p="-90" rot="-90" />
+      <location r="4.022" t="48.86" p="-90" rot="-90" />
+      <location r="4.022" t="49.29" p="-90" rot="-90" />
+      <location r="4.022" t="49.71" p="-90" rot="-90" />
+      <location r="4.022" t="50.14" p="-90" rot="-90" />
+      <location r="4.022" t="50.57" p="-90" rot="-90" />
+      <location r="4.022" t="51" p="-90" rot="-90" />
+      <location r="4.022" t="51.43" p="-90" rot="-90" />
+      <location r="4.022" t="51.86" p="-90" rot="-90" />
+      <location r="4.022" t="52.29" p="-90" rot="-90" />
+      <location r="4.022" t="52.71" p="-90" rot="-90" />
+      <location r="4.022" t="53.14" p="-90" rot="-90" />
+      <location r="4.022" t="53.57" p="-90" rot="-90" />
+      <location r="4.022" t="54" p="-90" rot="-90" />
+      <location r="4.022" t="54.43" p="-90" rot="-90" />
+      <location r="4.022" t="54.86" p="-90" rot="-90" />
+      <location r="4.022" t="55.29" p="-90" rot="-90" />
+      <location r="4.022" t="55.71" p="-90" rot="-90" />
+      <location r="4.022" t="56.14" p="-90" rot="-90" />
+      <location r="4.022" t="56.57" p="-90" rot="-90" />
+      <location r="4.022" t="57" p="-90" rot="-90" />
+      <location r="4.022" t="57.43" p="-90" rot="-90" />
+      <location r="4.022" t="57.86" p="-90" rot="-90" />
+      <location r="4.022" t="58.29" p="-90" rot="-90" />
+      <location r="4.022" t="58.71" p="-90" rot="-90" />
+      <location r="4.022" t="59.14" p="-90" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W4-2">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="60.86" p="-90" rot="-90" />
+      <location r="4.022" t="61.29" p="-90" rot="-90" />
+      <location r="4.022" t="61.71" p="-90" rot="-90" />
+      <location r="4.022" t="62.14" p="-90" rot="-90" />
+      <location r="4.022" t="62.57" p="-90" rot="-90" />
+      <location r="4.022" t="63" p="-90" rot="-90" />
+      <location r="4.022" t="63.43" p="-90" rot="-90" />
+      <location r="4.022" t="63.86" p="-90" rot="-90" />
+      <location r="4.022" t="64.29" p="-90" rot="-90" />
+      <location r="4.022" t="64.71" p="-90" rot="-90" />
+      <location r="4.022" t="65.14" p="-90" rot="-90" />
+      <location r="4.022" t="65.57" p="-90" rot="-90" />
+      <location r="4.022" t="66" p="-90" rot="-90" />
+      <location r="4.022" t="66.43" p="-90" rot="-90" />
+      <location r="4.022" t="66.86" p="-90" rot="-90" />
+      <location r="4.022" t="67.29" p="-90" rot="-90" />
+      <location r="4.022" t="67.71" p="-90" rot="-90" />
+      <location r="4.022" t="68.14" p="-90" rot="-90" />
+      <location r="4.022" t="68.57" p="-90" rot="-90" />
+      <location r="4.022" t="69" p="-90" rot="-90" />
+      <location r="4.022" t="69.43" p="-90" rot="-90" />
+      <location r="4.022" t="69.86" p="-90" rot="-90" />
+      <location r="4.022" t="70.29" p="-90" rot="-90" />
+      <location r="4.022" t="70.71" p="-90" rot="-90" />
+      <location r="4.022" t="71.14" p="-90" rot="-90" />
+      <location r="4.022" t="71.57" p="-90" rot="-90" />
+      <location r="4.022" t="72" p="-90" rot="-90" />
+      <location r="4.022" t="72.43" p="-90" rot="-90" />
+      <location r="4.022" t="72.86" p="-90" rot="-90" />
+      <location r="4.022" t="73.29" p="-90" rot="-90" />
+      <location r="4.022" t="73.71" p="-90" rot="-90" />
+      <location r="4.022" t="74.14" p="-90" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W5-2">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="75.86" p="-90" rot="-90" />
+      <location r="4.022" t="76.29" p="-90" rot="-90" />
+      <location r="4.022" t="76.71" p="-90" rot="-90" />
+      <location r="4.022" t="77.14" p="-90" rot="-90" />
+      <location r="4.022" t="77.57" p="-90" rot="-90" />
+      <location r="4.022" t="78" p="-90" rot="-90" />
+      <location r="4.022" t="78.43" p="-90" rot="-90" />
+      <location r="4.022" t="78.86" p="-90" rot="-90" />
+      <location r="4.022" t="79.29" p="-90" rot="-90" />
+      <location r="4.022" t="79.71" p="-90" rot="-90" />
+      <location r="4.022" t="80.14" p="-90" rot="-90" />
+      <location r="4.022" t="80.57" p="-90" rot="-90" />
+      <location r="4.022" t="81" p="-90" rot="-90" />
+      <location r="4.022" t="81.43" p="-90" rot="-90" />
+      <location r="4.022" t="81.86" p="-90" rot="-90" />
+      <location r="4.022" t="82.29" p="-90" rot="-90" />
+      <location r="4.022" t="82.71" p="-90" rot="-90" />
+      <location r="4.022" t="83.14" p="-90" rot="-90" />
+      <location r="4.022" t="83.57" p="-90" rot="-90" />
+      <location r="4.022" t="84" p="-90" rot="-90" />
+      <location r="4.022" t="84.43" p="-90" rot="-90" />
+      <location r="4.022" t="84.86" p="-90" rot="-90" />
+      <location r="4.022" t="85.29" p="-90" rot="-90" />
+      <location r="4.022" t="85.71" p="-90" rot="-90" />
+      <location r="4.022" t="86.14" p="-90" rot="-90" />
+      <location r="4.022" t="86.57" p="-90" rot="-90" />
+      <location r="4.022" t="87" p="-90" rot="-90" />
+      <location r="4.022" t="87.43" p="-90" rot="-90" />
+      <location r="4.022" t="87.86" p="-90" rot="-90" />
+      <location r="4.022" t="88.29" p="-90" rot="-90" />
+      <location r="4.022" t="88.71" p="-90" rot="-90" />
+      <location r="4.022" t="89.14" p="-90" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W6-2">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="90.86" p="-90" rot="-90" />
+      <location r="4.022" t="91.29" p="-90" rot="-90" />
+      <location r="4.022" t="91.71" p="-90" rot="-90" />
+      <location r="4.022" t="92.14" p="-90" rot="-90" />
+      <location r="4.022" t="92.57" p="-90" rot="-90" />
+      <location r="4.022" t="93" p="-90" rot="-90" />
+      <location r="4.022" t="93.43" p="-90" rot="-90" />
+      <location r="4.022" t="93.86" p="-90" rot="-90" />
+      <location r="4.022" t="94.29" p="-90" rot="-90" />
+      <location r="4.022" t="94.71" p="-90" rot="-90" />
+      <location r="4.022" t="95.14" p="-90" rot="-90" />
+      <location r="4.022" t="95.57" p="-90" rot="-90" />
+      <location r="4.022" t="96" p="-90" rot="-90" />
+      <location r="4.022" t="96.43" p="-90" rot="-90" />
+      <location r="4.022" t="96.86" p="-90" rot="-90" />
+      <location r="4.022" t="97.29" p="-90" rot="-90" />
+      <location r="4.022" t="97.71" p="-90" rot="-90" />
+      <location r="4.022" t="98.14" p="-90" rot="-90" />
+      <location r="4.022" t="98.57" p="-90" rot="-90" />
+      <location r="4.022" t="99" p="-90" rot="-90" />
+      <location r="4.022" t="99.43" p="-90" rot="-90" />
+      <location r="4.022" t="99.86" p="-90" rot="-90" />
+      <location r="4.022" t="100.29" p="-90" rot="-90" />
+      <location r="4.022" t="100.72" p="-90" rot="-90" />
+      <location r="4.022" t="101.15" p="-90" rot="-90" />
+      <location r="4.022" t="101.58" p="-90" rot="-90" />
+      <location r="4.022" t="102.01" p="-90" rot="-90" />
+      <location r="4.022" t="102.44" p="-90" rot="-90" />
+      <location r="4.022" t="102.87" p="-90" rot="-90" />
+      <location r="4.022" t="103.3" p="-90" rot="-90" />
+      <location r="4.022" t="103.73" p="-90" rot="-90" />
+      <location r="4.022" t="104.16" p="-90" rot="-90" />
+    </component>
+  </type>
+  
+  <type name="W7-2">  
+    <component type="tall He3 element">   
+      <location r="4.022" t="105.86" p="-90" rot="-90" />
+      <location r="4.022" t="106.29" p="-90" rot="-90" />
+      <location r="4.022" t="106.71" p="-90" rot="-90" />
+      <location r="4.022" t="107.14" p="-90" rot="-90" />
+      <location r="4.022" t="107.57" p="-90" rot="-90" />
+      <location r="4.022" t="108" p="-90" rot="-90" />
+      <location r="4.022" t="108.43" p="-90" rot="-90" />
+      <location r="4.022" t="108.86" p="-90" rot="-90" />
+      <location r="4.022" t="109.29" p="-90" rot="-90" />
+      <location r="4.022" t="109.71" p="-90" rot="-90" />
+      <location r="4.022" t="110.14" p="-90" rot="-90" />
+      <location r="4.022" t="110.57" p="-90" rot="-90" />
+      <location r="4.022" t="111" p="-90" rot="-90" />
+      <location r="4.022" t="111.43" p="-90" rot="-90" />
+      <location r="4.022" t="111.86" p="-90" rot="-90" />
+      <location r="4.022" t="112.29" p="-90" rot="-90" />
+      <location r="4.022" t="112.71" p="-90" rot="-90" />
+      <location r="4.022" t="113.14" p="-90" rot="-90" />
+      <location r="4.022" t="113.57" p="-90" rot="-90" />
+      <location r="4.022" t="114" p="-90" rot="-90" />
+      <location r="4.022" t="114.43" p="-90" rot="-90" />
+      <location r="4.022" t="114.86" p="-90" rot="-90" />
+      <location r="4.022" t="115.29" p="-90" rot="-90" />
+      <location r="4.022" t="115.71" p="-90" rot="-90" />
+      <location r="4.022" t="116.14" p="-90" rot="-90" />
+      <location r="4.022" t="116.57" p="-90" rot="-90" />
+      <location r="4.022" t="117" p="-90" rot="-90" />
+      <location r="4.022" t="117.43" p="-90" rot="-90" />
+      <location r="4.022" t="117.86" p="-90" rot="-90" />
+      <location r="4.022" t="118.29" p="-90" rot="-90" />
+      <location r="4.022" t="118.71" p="-90" rot="-90" />
+      <location r="4.022" t="119.14" p="-90" rot="-90" />
+    </component>
+  </type>
+  
+  <type name="W8-2">  
+    <component type="tall He3 element">   
+      <location r="4.022" t="120.86" p="-90" rot="-90" />
+      <location r="4.022" t="121.29" p="-90" rot="-90" />
+      <location r="4.022" t="121.71" p="-90" rot="-90" />
+      <location r="4.022" t="122.14" p="-90" rot="-90" />
+      <location r="4.022" t="122.57" p="-90" rot="-90" />
+      <location r="4.022" t="123" p="-90" rot="-90" />
+      <location r="4.022" t="123.43" p="-90" rot="-90" />
+      <location r="4.022" t="123.86" p="-90" rot="-90" />
+      <location r="4.022" t="124.29" p="-90" rot="-90" />
+      <location r="4.022" t="124.71" p="-90" rot="-90" />
+      <location r="4.022" t="125.14" p="-90" rot="-90" />
+      <location r="4.022" t="125.57" p="-90" rot="-90" />
+      <location r="4.022" t="126" p="-90" rot="-90" />
+      <location r="4.022" t="126.43" p="-90" rot="-90" />
+      <location r="4.022" t="126.86" p="-90" rot="-90" />
+      <location r="4.022" t="127.29" p="-90" rot="-90" />
+      <location r="4.022" t="127.71" p="-90" rot="-90" />
+      <location r="4.022" t="128.14" p="-90" rot="-90" />
+      <location r="4.022" t="128.57" p="-90" rot="-90" />
+      <location r="4.022" t="129" p="-90" rot="-90" />
+      <location r="4.022" t="129.43" p="-90" rot="-90" />
+      <location r="4.022" t="129.86" p="-90" rot="-90" />
+      <location r="4.022" t="130.29" p="-90" rot="-90" />
+      <location r="4.022" t="130.71" p="-90" rot="-90" />
+      <location r="4.022" t="131.14" p="-90" rot="-90" />
+      <location r="4.022" t="131.57" p="-90" rot="-90" />
+      <location r="4.022" t="132" p="-90" rot="-90" />
+      <location r="4.022" t="132.43" p="-90" rot="-90" />
+      <location r="4.022" t="132.86" p="-90" rot="-90" />
+      <location r="4.022" t="133.29" p="-90" rot="-90" />
+      <location r="4.022" t="133.71" p="-90" rot="-90" />
+      <location r="4.022" t="134.14" p="-90" rot="-90" />
+    </component>
+  </type>
+  
+
+
+  <type name="W1-3">  
+    <component type="tall He3 element">   
+      <location r="4.022" t="13.71" p="-113.66" rot="-90" />
+      <location r="4.022" t="14.14" p="-112.84" rot="-90" />
+      <location r="4.022" t="14.57" p="-112.08" rot="-90" />
+      <location r="4.022" t="15" p="-111.36" rot="-90" />
+      <location r="4.022" t="15.43" p="-110.7" rot="-90" />
+      <location r="4.022" t="15.86" p="-110.08" rot="-90" />
+      <location r="4.022" t="16.29" p="-109.49" rot="-90" />
+      <location r="4.022" t="16.71" p="-108.94" rot="-90" />
+      <location r="4.022" t="17.14" p="-108.43" rot="-90" />
+      <location r="4.022" t="17.57" p="-107.94" rot="-90" />
+      <location r="4.022" t="18" p="-107.48" rot="-90" />
+      <location r="4.022" t="18.43" p="-107.04" rot="-90" />
+      <location r="4.022" t="18.86" p="-106.62" rot="-90" />
+      <location r="4.022" t="19.29" p="-106.23" rot="-90" />
+      <location r="4.022" t="19.71" p="-105.86" rot="-90" />
+      <location r="4.022" t="20.14" p="-105.5" rot="-90" />
+      <location r="4.022" t="20.57" p="-105.16" rot="-90" />
+      <location r="4.022" t="21" p="-104.83" rot="-90" />
+      <location r="4.022" t="21.43" p="-104.53" rot="-90" />
+      <location r="4.022" t="21.86" p="-104.23" rot="-90" />
+      <location r="4.022" t="22.29" p="-103.95" rot="-90" />
+      <location r="4.022" t="22.71" p="-103.67" rot="-90" />
+      <location r="4.022" t="23.14" p="-103.41" rot="-90" />
+      <location r="4.022" t="23.57" p="-103.16" rot="-90" />
+      <location r="4.022" t="24" p="-102.92" rot="-90" />
+      <location r="4.022" t="24.43" p="-102.69" rot="-90" />
+      <location r="4.022" t="24.86" p="-102.47" rot="-90" />
+      <location r="4.022" t="25.29" p="-102.26" rot="-90" />
+      <location r="4.022" t="25.71" p="-102.05" rot="-90" />
+      <location r="4.022" t="26.14" p="-101.86" rot="-90" />
+      <location r="4.022" t="26.57" p="-101.67" rot="-90" />
+      <location r="4.022" t="27" p="-101.48" rot="-90" />
+      <location r="4.022" t="27.43" p="-101.3" rot="-90" />
+      <location r="4.022" t="27.86" p="-101.13" rot="-90" />
+      <location r="4.022" t="28.29" p="-100.97" rot="-90" />
+      <location r="4.022" t="28.71" p="-100.81" rot="-90" />
+      <location r="4.022" t="29.14" p="-100.65" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W2-3">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="31.71" p="-99.69" rot="-90" />
+      <location r="4.022" t="32.14" p="-99.57" rot="-90" />
+      <location r="4.022" t="32.57" p="-99.46" rot="-90" />
+      <location r="4.022" t="33" p="-99.34" rot="-90" />
+      <location r="4.022" t="33.43" p="-99.23" rot="-90" />
+      <location r="4.022" t="33.86" p="-99.12" rot="-90" />
+      <location r="4.022" t="34.29" p="-99.02" rot="-90" />
+      <location r="4.022" t="34.71" p="-98.92" rot="-90" />
+      <location r="4.022" t="35.14" p="-98.82" rot="-90" />
+      <location r="4.022" t="35.57" p="-98.72" rot="-90" />
+      <location r="4.022" t="36" p="-98.63" rot="-90" />
+      <location r="4.022" t="36.43" p="-98.54" rot="-90" />
+      <location r="4.022" t="36.86" p="-98.45" rot="-90" />
+      <location r="4.022" t="37.29" p="-98.36" rot="-90" />
+      <location r="4.022" t="37.71" p="-98.28" rot="-90" />
+      <location r="4.022" t="38.14" p="-98.2" rot="-90" />
+      <location r="4.022" t="38.57" p="-98.12" rot="-90" />
+      <location r="4.022" t="39" p="-98.04" rot="-90" />
+      <location r="4.022" t="39.43" p="-97.96" rot="-90" />
+      <location r="4.022" t="39.86" p="-97.89" rot="-90" />
+      <location r="4.022" t="40.29" p="-97.82" rot="-90" />
+      <location r="4.022" t="40.71" p="-97.74" rot="-90" />
+      <location r="4.022" t="41.14" p="-97.68" rot="-90" />
+      <location r="4.022" t="41.57" p="-97.61" rot="-90" />
+      <location r="4.022" t="42" p="-97.54" rot="-90" />
+      <location r="4.022" t="42.43" p="-97.48" rot="-90" />
+      <location r="4.022" t="42.86" p="-97.42" rot="-90" />
+      <location r="4.022" t="43.29" p="-97.35" rot="-90" />
+      <location r="4.022" t="43.71" p="-97.29" rot="-90" />
+      <location r="4.022" t="44.14" p="-97.24" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W3-3">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="45.86" p="-96.91" rot="-90" />
+      <location r="4.022" t="46.29" p="-96.86" rot="-90" />
+      <location r="4.022" t="46.71" p="-96.81" rot="-90" />
+      <location r="4.022" t="47.14" p="-96.77" rot="-90" />
+      <location r="4.022" t="47.57" p="-96.72" rot="-90" />
+      <location r="4.022" t="48" p="-96.67" rot="-90" />
+      <location r="4.022" t="48.43" p="-96.63" rot="-90" />
+      <location r="4.022" t="48.86" p="-96.59" rot="-90" />
+      <location r="4.022" t="49.29" p="-96.54" rot="-90" />
+      <location r="4.022" t="49.71" p="-96.5" rot="-90" />
+      <location r="4.022" t="50.14" p="-96.46" rot="-90" />
+      <location r="4.022" t="50.57" p="-96.42" rot="-90" />
+      <location r="4.022" t="51" p="-96.38" rot="-90" />
+      <location r="4.022" t="51.43" p="-96.34" rot="-90" />
+      <location r="4.022" t="51.86" p="-96.3" rot="-90" />
+      <location r="4.022" t="52.29" p="-96.27" rot="-90" />
+      <location r="4.022" t="52.71" p="-96.23" rot="-90" />
+      <location r="4.022" t="53.14" p="-96.2" rot="-90" />
+      <location r="4.022" t="53.57" p="-96.16" rot="-90" />
+      <location r="4.022" t="54" p="-96.13" rot="-90" />
+      <location r="4.022" t="54.43" p="-96.1" rot="-90" />
+      <location r="4.022" t="54.86" p="-96.06" rot="-90" />
+      <location r="4.022" t="55.29" p="-96.03" rot="-90" />
+      <location r="4.022" t="55.71" p="-96" rot="-90" />
+      <location r="4.022" t="56.14" p="-95.97" rot="-90" />
+      <location r="4.022" t="56.57" p="-95.94" rot="-90" />
+      <location r="4.022" t="57" p="-95.91" rot="-90" />
+      <location r="4.022" t="57.43" p="-95.88" rot="-90" />
+      <location r="4.022" t="57.86" p="-95.85" rot="-90" />
+      <location r="4.022" t="58.29" p="-95.83" rot="-90" />
+      <location r="4.022" t="58.71" p="-95.8" rot="-90" />
+      <location r="4.022" t="59.14" p="-95.77" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W4-3">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="60.86" p="-95.67" rot="-90" />
+      <location r="4.022" t="61.29" p="-95.65" rot="-90" />
+      <location r="4.022" t="61.71" p="-95.63" rot="-90" />
+      <location r="4.022" t="62.14" p="-95.61" rot="-90" />
+      <location r="4.022" t="62.57" p="-95.58" rot="-90" />
+      <location r="4.022" t="63" p="-95.56" rot="-90" />
+      <location r="4.022" t="63.43" p="-95.54" rot="-90" />
+      <location r="4.022" t="63.86" p="-95.52" rot="-90" />
+      <location r="4.022" t="64.29" p="-95.5" rot="-90" />
+      <location r="4.022" t="64.71" p="-95.48" rot="-90" />
+      <location r="4.022" t="65.14" p="-95.46" rot="-90" />
+      <location r="4.022" t="65.57" p="-95.44" rot="-90" />
+      <location r="4.022" t="66" p="-95.42" rot="-90" />
+      <location r="4.022" t="66.43" p="-95.41" rot="-90" />
+      <location r="4.022" t="66.86" p="-95.39" rot="-90" />
+      <location r="4.022" t="67.29" p="-95.37" rot="-90" />
+      <location r="4.022" t="67.71" p="-95.36" rot="-90" />
+      <location r="4.022" t="68.14" p="-95.34" rot="-90" />
+      <location r="4.022" t="68.57" p="-95.32" rot="-90" />
+      <location r="4.022" t="69" p="-95.31" rot="-90" />
+      <location r="4.022" t="69.43" p="-95.29" rot="-90" />
+      <location r="4.022" t="69.86" p="-95.28" rot="-90" />
+      <location r="4.022" t="70.29" p="-95.26" rot="-90" />
+      <location r="4.022" t="70.71" p="-95.25" rot="-90" />
+      <location r="4.022" t="71.14" p="-95.24" rot="-90" />
+      <location r="4.022" t="71.57" p="-95.22" rot="-90" />
+      <location r="4.022" t="72" p="-95.21" rot="-90" />
+      <location r="4.022" t="72.43" p="-95.2" rot="-90" />
+      <location r="4.022" t="72.86" p="-95.19" rot="-90" />
+      <location r="4.022" t="73.29" p="-95.17" rot="-90" />
+      <location r="4.022" t="73.71" p="-95.16" rot="-90" />
+      <location r="4.022" t="74.14" p="-95.15" rot="-90" />
+    </component>
+  </type>
+
+  <type name="W5-3">  
+    <component type="tall He3 element"> 
+      <location r="4.022" t="75.86" p="-95.11" rot="-90" />
+      <location r="4.022" t="76.29" p="-95.1" rot="-90" />
+      <location r="4.022" t="76.71" p="-95.09" rot="-90" />
+      <location r="4.022" t="77.14" p="-95.08" rot="-90" />
+      <location r="4.022" t="77.57" p="-95.07" rot="-90" />
+      <location r="4.022" t="78" p="-95.07" rot="-90" />
+      <location r="4.022" t="78.43" p="-95.06" rot="-90" />
+      <location r="4.022" t="78.86" p="-95.05" rot="-90" />
+      <location r="4.022" t="79.29" p="-95.04" rot="-90" />
+      <location r="4.022" t="79.71" p="-95.04" rot="-90" />
+      <location r="4.022" t="80.14" p="-95.03" rot="-90" />
+      <location r="4.022" t="80.57" p="-95.02" rot="-90" />
+      <location r="4.022" t="81" p="-95.02" rot="-90" />
+      <location r="4.022" t="81.43" p="-95.01" rot="-90" />
+      <location r="4.022" t="81.86" p="-95.01" rot="-90" />
+      <location r="4.022" t="82.29" p="-95" rot="-90" />
+      <location r="4.022" t="82.71" p="-95" rot="-90" />
+      <location r="4.022" t="83.14" p="-94.99" rot="-90" />
+      <location r="4.022" t="83.57" p="-94.99" rot="-90" />
+      <location r="4.022" t="84" p="-94.98" rot="-90" />
+      <location r="4.022" t="84.43" p="-94.98" rot="-90" />
+      <location r="4.022" t="84.86" p="-94.97" rot="-90" />
+      <location r="4.022" t="85.29" p="-94.97" rot="-90" />
+      <location r="4.022" t="85.71" p="-94.97" rot="-90" />
+      <location r="4.022" t="86.14" p="-94.97" rot="-90" />
+      <location r="4.022" t="86.57" p="-94.96" rot="-90" />
+      <location r="4.022" t="87" p="-94.96" rot="-90" />
+      <location r="4.022" t="87.43" p="-94.96" rot="-90" />
+      <location r="4.022" t="87.86" p="-94.96" rot="-90" />
+      <location r="4.022" t="88.29" p="-94.96" rot="-90" />
+      <location r="4.022" t="88.71" p="-94.96" rot="-90" />
+      <location r="4.022" t="89.14" p="-94.96" rot="-90" />
+    </component>
+  </type>   
+
+  <type name="W6-3">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="90.86" p="-94.96" rot="-90" />
+      <location r="4.022" t="91.29" p="-94.96" rot="-90" />
+      <location r="4.022" t="91.71" p="-94.96" rot="-90" />
+      <location r="4.022" t="92.14" p="-94.96" rot="-90" />
+      <location r="4.022" t="92.57" p="-94.96" rot="-90" />
+      <location r="4.022" t="93" p="-94.96" rot="-90" />
+      <location r="4.022" t="93.43" p="-94.96" rot="-90" />
+      <location r="4.022" t="93.86" p="-94.97" rot="-90" />
+      <location r="4.022" t="94.29" p="-94.97" rot="-90" />
+      <location r="4.022" t="94.71" p="-94.97" rot="-90" />
+      <location r="4.022" t="95.14" p="-94.97" rot="-90" />
+      <location r="4.022" t="95.57" p="-94.98" rot="-90" />
+      <location r="4.022" t="96" p="-94.98" rot="-90" />
+      <location r="4.022" t="96.43" p="-94.99" rot="-90" />
+      <location r="4.022" t="96.86" p="-94.99" rot="-90" />
+      <location r="4.022" t="97.29" p="-95" rot="-90" />
+      <location r="4.022" t="97.71" p="-95" rot="-90" />
+      <location r="4.022" t="98.14" p="-95.01" rot="-90" />
+      <location r="4.022" t="98.57" p="-95.01" rot="-90" />
+      <location r="4.022" t="99" p="-95.02" rot="-90" />
+      <location r="4.022" t="99.43" p="-95.02" rot="-90" />
+      <location r="4.022" t="99.86" p="-95.03" rot="-90" />
+      <location r="4.022" t="100.29" p="-95.04" rot="-90" />
+      <location r="4.022" t="100.71" p="-95.04" rot="-90" />
+      <location r="4.022" t="101.14" p="-95.05" rot="-90" />
+      <location r="4.022" t="101.57" p="-95.06" rot="-90" />
+      <location r="4.022" t="102" p="-95.07" rot="-90" />
+      <location r="4.022" t="102.43" p="-95.07" rot="-90" />
+      <location r="4.022" t="102.86" p="-95.08" rot="-90" />
+      <location r="4.022" t="103.29" p="-95.09" rot="-90" />
+      <location r="4.022" t="103.71" p="-95.1" rot="-90" />
+      <location r="4.022" t="104.14" p="-95.11" rot="-90" />
+    </component>
+  </type>   
+
+  <type name="W7-3">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="105.86" p="-95.15" rot="-90" />
+      <location r="4.022" t="106.29" p="-95.16" rot="-90" />
+      <location r="4.022" t="106.71" p="-95.17" rot="-90" />
+      <location r="4.022" t="107.14" p="-95.19" rot="-90" />
+      <location r="4.022" t="107.57" p="-95.2" rot="-90" />
+      <location r="4.022" t="108" p="-95.21" rot="-90" />
+      <location r="4.022" t="108.43" p="-95.22" rot="-90" />
+      <location r="4.022" t="108.86" p="-95.24" rot="-90" />
+      <location r="4.022" t="109.29" p="-95.25" rot="-90" />
+      <location r="4.022" t="109.71" p="-95.26" rot="-90" />
+      <location r="4.022" t="110.14" p="-95.28" rot="-90" />
+      <location r="4.022" t="110.57" p="-95.29" rot="-90" />
+      <location r="4.022" t="111" p="-95.31" rot="-90" />
+      <location r="4.022" t="111.43" p="-95.32" rot="-90" />
+      <location r="4.022" t="111.86" p="-95.34" rot="-90" />
+      <location r="4.022" t="112.29" p="-95.36" rot="-90" />
+      <location r="4.022" t="112.71" p="-95.37" rot="-90" />
+      <location r="4.022" t="113.14" p="-95.39" rot="-90" />
+      <location r="4.022" t="113.57" p="-95.41" rot="-90" />
+      <location r="4.022" t="114" p="-95.42" rot="-90" />
+      <location r="4.022" t="114.43" p="-95.44" rot="-90" />
+      <location r="4.022" t="114.86" p="-95.46" rot="-90" />
+      <location r="4.022" t="115.29" p="-95.48" rot="-90" />
+      <location r="4.022" t="115.71" p="-95.5" rot="-90" />
+      <location r="4.022" t="116.14" p="-95.52" rot="-90" />
+      <location r="4.022" t="116.57" p="-95.54" rot="-90" />
+      <location r="4.022" t="117" p="-95.56" rot="-90" />
+      <location r="4.022" t="117.43" p="-95.58" rot="-90" />
+      <location r="4.022" t="117.86" p="-95.61" rot="-90" />
+      <location r="4.022" t="118.29" p="-95.63" rot="-90" />
+      <location r="4.022" t="118.71" p="-95.65" rot="-90" />
+      <location r="4.022" t="119.14" p="-95.67" rot="-90" />
+    </component>
+  </type>   
+  
+  <type name="W8-3">  
+    <component type="tall He3 element">  
+      <location r="4.022" t="120.86" p="-95.77" rot="-90" />
+      <location r="4.022" t="121.29" p="-95.8" rot="-90" />
+      <location r="4.022" t="121.71" p="-95.83" rot="-90" />
+      <location r="4.022" t="122.14" p="-95.85" rot="-90" />
+      <location r="4.022" t="122.57" p="-95.88" rot="-90" />
+      <location r="4.022" t="123" p="-95.91" rot="-90" />
+      <location r="4.022" t="123.43" p="-95.94" rot="-90" />
+      <location r="4.022" t="123.86" p="-95.97" rot="-90" />
+      <location r="4.022" t="124.29" p="-96" rot="-90" />
+      <location r="4.022" t="124.71" p="-96.03" rot="-90" />
+      <location r="4.022" t="125.14" p="-96.06" rot="-90" />
+      <location r="4.022" t="125.57" p="-96.1" rot="-90" />
+      <location r="4.022" t="126" p="-96.13" rot="-90" />
+      <location r="4.022" t="126.43" p="-96.16" rot="-90" />
+      <location r="4.022" t="126.86" p="-96.2" rot="-90" />
+      <location r="4.022" t="127.29" p="-96.23" rot="-90" />
+      <location r="4.022" t="127.71" p="-96.27" rot="-90" />
+      <location r="4.022" t="128.14" p="-96.3" rot="-90" />
+      <location r="4.022" t="128.57" p="-96.34" rot="-90" />
+      <location r="4.022" t="129" p="-96.38" rot="-90" />
+      <location r="4.022" t="129.43" p="-96.42" rot="-90" />
+      <location r="4.022" t="129.86" p="-96.46" rot="-90" />
+      <location r="4.022" t="130.29" p="-96.5" rot="-90" />
+      <location r="4.022" t="130.71" p="-96.54" rot="-90" />
+      <location r="4.022" t="131.14" p="-96.59" rot="-90" />
+      <location r="4.022" t="131.57" p="-96.63" rot="-90" />
+      <location r="4.022" t="132" p="-96.67" rot="-90" />
+      <location r="4.022" t="132.43" p="-96.72" rot="-90" />
+      <location r="4.022" t="132.86" p="-96.77" rot="-90" />
+      <location r="4.022" t="133.29" p="-96.81" rot="-90" />
+      <location r="4.022" t="133.71" p="-96.86" rot="-90" />
+      <location r="4.022" t="134.14" p="-96.91" rot="-90" />
+    </component>
+  </type>   
+  
+  
+  <type name="W11 north"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="3.43" p="90" rot="90" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="3.86" p="90" rot="90" />
+      <location r="4.022" t="4.29" p="90" rot="90" />
+      <location r="4.022" t="4.71" p="90" rot="90" />
+      <location r="4.022" t="5.14" p="90" rot="90" />
+      <location r="4.022" t="5.57" p="90" rot="90" />
+      <location r="4.022" t="6" p="90" rot="90" />
+      <location r="4.022" t="6.43" p="90" rot="90" />
+      <location r="4.022" t="6.86" p="90" rot="90" />
+      <location r="4.022" t="7.29" p="90" rot="90" />
+      <location r="4.022" t="7.71" p="90" rot="90" />
+      <location r="4.022" t="8.14" p="90" rot="90" />
+      <location r="4.022" t="8.57" p="90" rot="90" />
+      <location r="4.022" t="9" p="90" rot="90" />
+      <location r="4.022" t="9.43" p="90" rot="90" />
+      <location r="4.022" t="9.86" p="90" rot="90" />
+      <location r="4.022" t="10.29" p="90" rot="90" />
+      <location r="4.022" t="10.71" p="90" rot="90" />
+      <location r="4.022" t="11.14" p="90" rot="90" />
+      <location r="4.022" t="11.57" p="90" rot="90" />
+      <location r="4.022" t="12" p="90" rot="90" />
+      <location r="4.022" t="12.43" p="90" rot="90" />
+      <location r="4.022" t="12.86" p="90" rot="90" />
+      <location r="4.022" t="13.29" p="90" rot="90" />
+    </component>
+  </type>   
+  
+  <type name="W12 north east"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="6.43" p="135" rot="135" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="6.86" p="135" rot="135" />
+      <location r="4.022" t="7.29" p="135" rot="135" />
+      <location r="4.022" t="7.71" p="135" rot="135" />
+      <location r="4.022" t="8.14" p="135" rot="135" />
+      <location r="4.022" t="8.57" p="135" rot="135" />
+      <location r="4.022" t="9" p="135" rot="135" />
+      <location r="4.022" t="9.43" p="135" rot="135" />
+      <location r="4.022" t="9.86" p="135" rot="135" />
+      <location r="4.022" t="10.29" p="135" rot="135" />
+      <location r="4.022" t="10.71" p="135" rot="135" />
+      <location r="4.022" t="11.14" p="135" rot="135" />
+      <location r="4.022" t="11.57" p="135" rot="135" />
+      <location r="4.022" t="12" p="135" rot="135" />
+      <location r="4.022" t="12.43" p="135" rot="135" />
+      <location r="4.022" t="12.86" p="135" rot="135" />
+    </component>
+  </type> 
+  
+  <type name="W13 east"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="3.43" p="180" rot="180" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="3.86" p="180" rot="180" />
+      <location r="4.022" t="4.29" p="180" rot="180" />
+      <location r="4.022" t="4.71" p="180" rot="180" />
+      <location r="4.022" t="5.14" p="180" rot="180" />
+      <location r="4.022" t="5.57" p="180" rot="180" />
+      <location r="4.022" t="6" p="180" rot="180" />
+      <location r="4.022" t="6.43" p="180" rot="180" />
+      <location r="4.022" t="6.86" p="180" rot="180" />
+      <location r="4.022" t="7.29" p="180" rot="180" />
+      <location r="4.022" t="7.71" p="180" rot="180" />
+      <location r="4.022" t="8.14" p="180" rot="180" />
+      <location r="4.022" t="8.57" p="180" rot="180" />
+      <location r="4.022" t="9" p="180" rot="180" />
+      <location r="4.022" t="9.43" p="180" rot="180" />
+      <location r="4.022" t="9.86" p="180" rot="180" />
+    </component>
+  </type> 
+  
+  <type name="W14 south east"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="6.43" p="-135" rot="-135" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="6.86" p="-135" rot="-135" />
+      <location r="4.022" t="7.29" p="-135" rot="-135" />
+      <location r="4.022" t="7.71" p="-135" rot="-135" />
+      <location r="4.022" t="8.14" p="-135" rot="-135" />
+      <location r="4.022" t="8.57" p="-135" rot="-135" />
+      <location r="4.022" t="9" p="-135" rot="-135" />
+      <location r="4.022" t="9.43" p="-135" rot="-135" />
+      <location r="4.022" t="9.86" p="-135" rot="-135" />
+      <location r="4.022" t="10.29" p="-135" rot="-135" />
+      <location r="4.022" t="10.71" p="-135" rot="-135" />
+      <location r="4.022" t="11.14" p="-135" rot="-135" />
+      <location r="4.022" t="11.57" p="-135" rot="-135" />
+      <location r="4.022" t="12" p="-135" rot="-135" />
+      <location r="4.022" t="12.43" p="-135" rot="-135" />
+      <location r="4.022" t="12.86" p="-135" rot="-135" />
+    </component>
+  </type>   
+  
+  <type name="W15 south"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="3.43" p="-90" rot="-90" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="3.86" p="-90" rot="-90" />
+      <location r="4.022" t="4.29" p="-90" rot="-90" />
+      <location r="4.022" t="4.71" p="-90" rot="-90" />
+      <location r="4.022" t="5.14" p="-90" rot="-90" />
+      <location r="4.022" t="5.57" p="-90" rot="-90" />
+      <location r="4.022" t="6" p="-90" rot="-90" />
+      <location r="4.022" t="6.43" p="-90" rot="-90" />
+      <location r="4.022" t="6.86" p="-90" rot="-90" />
+      <location r="4.022" t="7.29" p="-90" rot="-90" />
+      <location r="4.022" t="7.71" p="-90" rot="-90" />
+      <location r="4.022" t="8.14" p="-90" rot="-90" />
+      <location r="4.022" t="8.57" p="-90" rot="-90" />
+      <location r="4.022" t="9" p="-90" rot="-90" />
+      <location r="4.022" t="9.43" p="-90" rot="-90" />
+      <location r="4.022" t="9.86" p="-90" rot="-90" />
+    </component>
+  </type>     
+  
+  <type name="W16 south west"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="6.43" p="-45" rot="-45" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="6.86" p="-45" rot="-45" />
+      <location r="4.022" t="7.29" p="-45" rot="-45" />
+      <location r="4.022" t="7.71" p="-45" rot="-45" />
+      <location r="4.022" t="8.14" p="-45" rot="-45" />
+      <location r="4.022" t="8.57" p="-45" rot="-45" />
+      <location r="4.022" t="9" p="-45" rot="-45" />
+      <location r="4.022" t="9.43" p="-45" rot="-45" />
+      <location r="4.022" t="9.86" p="-45" rot="-45" />
+      <location r="4.022" t="10.29" p="-45" rot="-45" />
+      <location r="4.022" t="10.71" p="-45" rot="-45" />
+      <location r="4.022" t="11.14" p="-45" rot="-45" />
+      <location r="4.022" t="11.57" p="-45" rot="-45" />
+      <location r="4.022" t="12" p="-45" rot="-45" />
+      <location r="4.022" t="12.43" p="-45" rot="-45" />
+      <location r="4.022" t="12.86" p="-45" rot="-45" />
+    </component>
+  </type>    
+
+  <type name="W17 west"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="3.43" p="0" rot="0" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="3.86" p="0" rot="0" />
+      <location r="4.022" t="4.29" p="0" rot="0" />
+      <location r="4.022" t="4.71" p="0" rot="0" />
+      <location r="4.022" t="5.14" p="0" rot="0" />
+      <location r="4.022" t="5.57" p="0" rot="0" />
+      <location r="4.022" t="6" p="0" rot="0" />
+      <location r="4.022" t="6.43" p="0" rot="0" />
+      <location r="4.022" t="6.86" p="0" rot="0" />
+      <location r="4.022" t="7.29" p="0" rot="0" />
+      <location r="4.022" t="7.71" p="0" rot="0" />
+      <location r="4.022" t="8.14" p="0" rot="0" />
+      <location r="4.022" t="8.57" p="0" rot="0" />
+      <location r="4.022" t="9" p="0" rot="0" />
+      <location r="4.022" t="9.43" p="0" rot="0" />
+      <location r="4.022" t="9.86" p="0" rot="0" />
+    </component>
+  </type>  
+  
+  <type name="W18 north west"> 
+    <component type="small He3 element">  
+      <location r="4.022" t="6.43" p="45" rot="45" />
+    </component>   
+    <component type="tall He3 element">  
+      <location r="4.022" t="6.86" p="45" rot="45" />
+      <location r="4.022" t="7.29" p="45" rot="45" />
+      <location r="4.022" t="7.71" p="45" rot="45" />
+      <location r="4.022" t="8.14" p="45" rot="45" />
+      <location r="4.022" t="8.57" p="45" rot="45" />
+      <location r="4.022" t="9" p="45" rot="45" />
+      <location r="4.022" t="9.43" p="45" rot="45" />
+      <location r="4.022" t="9.86" p="45" rot="45" />
+      <location r="4.022" t="10.29" p="45" rot="45" />
+      <location r="4.022" t="10.71" p="45" rot="45" />
+      <location r="4.022" t="11.14" p="45" rot="45" />
+      <location r="4.022" t="11.57" p="45" rot="45" />
+      <location r="4.022" t="12" p="45" rot="45" />
+      <location r="4.022" t="12.43" p="45" rot="45" />
+      <location r="4.022" t="12.86" p="45" rot="45" />
+    </component>
+  </type>
+  
+  <type name="small He3 element" is="detector">    
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.1" z="0.0" />
+      <axis x="0.0" y="1.0" z="0" /> 
+      <radius val="0.0125" />
+      <height val="0.2" />
+    </cylinder> 
+  </type>
+  
+  <type name="tall He3 element" is="detector">     
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
+      <axis x="0.0" y="1.0" z="0" /> 
+      <radius val="0.0125" />
+      <height val="0.3" />
+    </cylinder> 
+  </type>  
+
+
+  
+  <!-- DETECTOR ID LISTS -->
+  <idlist idname="low angle bank">
+    <id start="4101" end="4124" />
+    <id start="4201" end="4216" />    
+    <id start="4301" end="4316" />        
+    <id start="4401" end="4416" />   
+    <id start="4501" end="4516" />        
+    <id start="4601" end="4616" />  
+    <id start="4701" end="4716" />        
+    <id start="4801" end="4816" />     
+  </idlist>
+  
+  <idlist idname="wide angle bank">
+    <id start="1101" end="1137" />
+    <id start="1201" end="1230" />    
+    <id start="1301" end="1332" />        
+    <id start="1401" end="1432" />   
+    <id start="1501" end="1532" />        
+    <id start="1601" end="1632" />  
+    <id start="1701" end="1732" />        
+    <id start="1801" end="1832" /> 
+    
+    <id start="2101" end="2140" />
+    <id start="2201" end="2232" />    
+    <id start="2301" end="2332" />        
+    <id start="2401" end="2432" />   
+    <id start="2501" end="2532" />        
+    <id start="2601" end="2632" />  
+    <id start="2701" end="2732" />        
+    <id start="2801" end="2832" />  
+    
+    <id start="3101" end="3137" />
+    <id start="3201" end="3230" />    
+    <id start="3301" end="3332" />        
+    <id start="3401" end="3432" />   
+    <id start="3501" end="3532" />        
+    <id start="3601" end="3632" />  
+    <id start="3701" end="3732" />        
+    <id start="3801" end="3832" />     
+  </idlist> 
+  
+  <idlist idname="monitor">
+    <id start="1" end="3" />   
+  </idlist>  
+</instrument>

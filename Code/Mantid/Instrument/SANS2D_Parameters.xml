@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "SANS2D" date = "2010-07-28T00:00:00">
+
+<component-link name = "SANS2D">
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="2"/>
+</parameter>
+
+<parameter name="default-transmission-monitor-spectrum">
+  <value val="3"/>
+</parameter>
+
+<parameter name="low-angle-detector-name" type="string">
+  <value val="rear-detector"/>
+</parameter>
+
+<parameter name="low-angle-detector-short-name" type="string">
+  <value val="rear"/>
+</parameter>
+<!-- this is the first spectrum number for an empty instrument (used for instrument view), runs generally have a different first number spectrum number-->
+<parameter name="first-low-angle-spec-number">
+  <value val="5"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-columns">
+  <value val="192"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-rows">
+  <value val="192"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-columns">
+  <value val="192"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-rows">
+  <value val="192"/>
+</parameter>
+
+<parameter name="high-angle-detector-name" type="string">
+  <value val="front-detector"/>
+</parameter>
+
+<parameter name="high-angle-detector-short-name" type="string">
+  <value val="front"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

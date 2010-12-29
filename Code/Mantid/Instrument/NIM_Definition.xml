@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="NIMROD" valid-from   ="1900-01-31 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2009-06-12 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+    NIMROD instrument definition file
+  
+  -->
+
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="undulator">
+    <location z="-20.0" />
+  </component>
+  
+  <type name="undulator" is="Source">
+    <properties>write a story </properties>
+  </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  
+  <type name="sample-position" is="SamplePos"></type>
+  
+  
+  <!-- DETECTORS -->
+  
+  <component type="detector-pack" name="North side" idlist="North side">
+    <location r="4.806700" t="5.340000" p="102.857143" name="N2-R1" rot="102.857143"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="102.857143" name="N3-R1" rot="102.857143"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0" /></location>
+    <location r="3.588500" t="11.510000" p="102.857143" name="N4-R1" rot="102.857143"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="102.857143" name="N5-R1" rot="102.857143"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="102.857143" name="N6-R1" rot="102.857143"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="102.857143" name="N7-R1" rot="102.857143"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="102.857143" name="N8-R1" rot="102.857143"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="128.571429" name="N2-R2" rot="128.571429"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="128.571429" name="N3-R2" rot="128.571429"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="128.571429" name="N4-R2" rot="128.571429"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="128.571429" name="N5-R2" rot="128.571429"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="128.571429" name="N6-R2" rot="128.571429"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="128.571429" name="N7-R2" rot="128.571429"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="128.571429" name="N8-R2" rot="128.571429"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="154.285714" name="N2-R3" rot="154.285714"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="154.285714" name="N3-R3" rot="154.285714"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="154.285714" name="N4-R3" rot="154.285714"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="154.285714" name="N5-R3" rot="154.285714"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="154.285714" name="N6-R3" rot="154.285714"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="154.285714" name="N7-R3" rot="154.285714"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="154.285714" name="N8-R3" rot="154.285714"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="180.000000" name="N2-R4" rot="180.000000"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="180.000000" name="N3-R4" rot="180.000000"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="180.000000" name="N4-R4" rot="180.000000"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="180.000000" name="N5-R4" rot="180.000000"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="180.000000" name="N6-R4" rot="180.000000"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="180.000000" name="N7-R4" rot="180.000000"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="180.000000" name="N8-R4" rot="180.000000"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="205.714286" name="N2-R5" rot="205.714286"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="205.714286" name="N3-R5" rot="205.714286"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="205.714286" name="N4-R5" rot="205.714286"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="205.714286" name="N5-R5" rot="205.714286"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="205.714286" name="N6-R5" rot="205.714286"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="205.714286" name="N7-R5" rot="205.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="205.714286" name="N8-R5" rot="205.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="231.428571" name="N2-R6" rot="231.428571"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="231.428571" name="N3-R6" rot="231.428571"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="231.428571" name="N4-R6" rot="231.428571"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="231.428571" name="N5-R6" rot="231.428571"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="231.428571" name="N6-R6" rot="231.428571"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="231.428571" name="N7-R6" rot="231.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="231.428571" name="N8-R6" rot="231.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+  </component>
+  
+  <component type="detector-pack" name="South side" idlist="South side">
+    <location r="4.806700" t="5.340000" p="77.142857" name="S2-R1" rot="77.142857"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="77.142857" name="S3-R1" rot="77.142857"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="77.142857" name="S4-R1" rot="77.142857"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="77.142857" name="S5-R1" rot="77.142857"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="77.142857" name="S6-R1" rot="77.142857"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="77.142857" name="S7-R1" rot="77.142857"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="77.142857" name="S8-R1" rot="77.142857"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="51.428571" name="S2-R2" rot="51.428571"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="51.428571" name="S3-R2" rot="51.428571"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="51.428571" name="S4-R2" rot="51.428571"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="51.428571" name="S5-R2" rot="51.428571"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="51.428571" name="S6-R2" rot="51.428571"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="51.428571" name="S7-R2" rot="51.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="51.428571" name="S8-R2" rot="51.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="25.714286" name="S2-R3" rot="25.714286"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="25.714286" name="S3-R3" rot="25.714286"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="25.714286" name="S4-R3" rot="25.714286"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="25.714286" name="S5-R3" rot="25.714286"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="25.714286" name="S6-R3" rot="25.714286"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="25.714286" name="S7-R3" rot="25.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="25.714286" name="S8-R3" rot="25.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="0.000000" name="S2-R4" rot="0.000000"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="0.000000" name="S3-R4" rot="0.000000"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="0.000000" name="S4-R4" rot="0.000000"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="0.000000" name="S5-R4" rot="0.000000"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="0.000000" name="S6-R4" rot="0.000000"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="0.000000" name="S7-R4" rot="0.000000"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="0.000000" name="S8-R4" rot="0.000000"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="-25.714286" name="S2-R5" rot="-25.714286"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="-25.714286" name="S3-R5" rot="-25.714286"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="-25.714286" name="S4-R5" rot="-25.714286"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="-25.714286" name="S5-R5" rot="-25.714286"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="-25.714286" name="S6-R5" rot="-25.714286"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="-25.714286" name="S7-R5" rot="-25.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="-25.714286" name="S8-R5" rot="-25.714286"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.806700" t="5.340000" p="-51.428571" name="S2-R6" rot="-51.428571"><rot val="-20.600000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="4.361000" t="8.040000" p="-51.428571" name="S3-R6" rot="-51.428571"><rot val="-18.000000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="3.588500" t="11.510000" p="-51.428571" name="S4-R6" rot="-51.428571"><rot val="-14.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="2.791200" t="14.860000" p="-51.428571" name="S5-R6" rot="-51.428571"><rot val="-11.800000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.924300" t="22.280000" p="-51.428571" name="S6-R6" rot="-51.428571"><rot val="-5.200000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.512300" t="29.060000" p="-51.428571" name="S7-R6" rot="-51.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+    <location r="1.095300" t="40.600000" p="-51.428571" name="S8-R6" rot="-51.428571"><rot val="-0.900000" axis-x="0" axis-y="1" axis-z="0"/></location>
+  </component>  
+  
+  <type name="detector-pack">
+    <component type="pixel">
+      <location z="0.11" name="det 1"/>
+      <location z="0.13" name="det 2"/>
+      <location z="0.15" name="det 3"/>
+      <location z="0.17" name="det 4"/>
+      <location z="0.19" name="det 5"/>
+      <location z="0.21" name="det 6"/>
+      <location z="0.23" name="det 7"/>
+      <location z="0.25" name="det 8"/>
+      <location z="0.27" name="det 9"/>
+      <location z="0.29" name="det 10"/>
+      <location z="0.31" name="det 11"/>
+      <location z="0.33" name="det 12"/>
+      <location z="0.35" name="det 13"/>
+      <location z="0.37" name="det 14"/>
+      <location z="0.39" name="det 15"/>
+      <location z="0.41" name="det 16"/>    
+      <location z="0.43" name="det 17"/>
+      <location z="0.45" name="det 18"/>       
+    </component>
+  </type>
+  
+  <type name="pixel" is="detector">    
+  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam. This surface is
+	 20cm along y and 2cm along z and the dept along x is taken to be some
+	 small number.  -->
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0" y="-0.1" z="-0.01"  />
+      <left-front-top-point  x="0.0" y="0.1" z="-0.01"  />
+      <left-back-bottom-point  x="0.001" y="-0.1" z="-0.01"  />
+      <right-front-bottom-point  x="0.0" y="-0.1" z="0.01"  />
+    </cuboid>
+    <algebra val="shape" />     
+  </type>
+  
+  
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <type name="monitors">
+    <component type="monitor" mark-as="monitor">
+      <location r="13.542" t="180.0" p="0.0" />
+      <location r="11.928" t="180.0" p="0.0" />
+      <location r="7.928"  t="180.0" p="0.0" />
+      <location r="4.56"   t="180.0" p="0.0" />
+      <location r="4.56"   t="180.0" p="0.0" />
+      <location r="2.66"   t="180.0" p="0.0" />
+      <location r="2.66"   t="180.0" p="0.0" />
+      <location r="6.4"    t="0.0" p="0.0" />
+      <location r="6.4"    t="0.0" p="0.0" />
+    </component>
+  </type>
+
+
+
+  <type name="monitor" is="detector">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="monitors">
+    <id start="10101001" step="1000" end="10104001" />  
+    <id val="10104002" /> 
+    <id start="10105001" end="10105002" /> 
+    <id start="10106001" end="10106002" /> 
+  </idlist>
+  
+  <idlist idname="North side">
+    <id start="20201001" end="20201018"/>
+    <id start="20301001" end="20301018"/>
+    <id start="20401001" end="20401018"/>
+    <id start="20501001" end="20501018"/>
+    <id start="20601001" end="20601018"/>
+    <id start="20701001" end="20701018"/>
+    <id start="20801001" end="20801018"/>
+    <id start="20202001" end="20202018"/>
+    <id start="20302001" end="20302018"/>
+    <id start="20402001" end="20402018"/>
+    <id start="20502001" end="20502018"/>
+    <id start="20602001" end="20602018"/>
+    <id start="20702001" end="20702018"/>
+    <id start="20802001" end="20802018"/>
+    <id start="20203001" end="20203018"/>
+    <id start="20303001" end="20303018"/>
+    <id start="20403001" end="20403018"/>
+    <id start="20503001" end="20503018"/>
+    <id start="20603001" end="20603018"/>
+    <id start="20703001" end="20703018"/>
+    <id start="20803001" end="20803018"/>
+    <id start="20204001" end="20204018"/>
+    <id start="20304001" end="20304018"/>
+    <id start="20404001" end="20404018"/>
+    <id start="20504001" end="20504018"/>
+    <id start="20604001" end="20604018"/>
+    <id start="20704001" end="20704018"/>
+    <id start="20804001" end="20804018"/>
+    <id start="20205001" end="20205018"/>
+    <id start="20305001" end="20305018"/>
+    <id start="20405001" end="20405018"/>
+    <id start="20505001" end="20505018"/>
+    <id start="20605001" end="20605018"/>
+    <id start="20705001" end="20705018"/>
+    <id start="20805001" end="20805018"/>
+    <id start="20206001" end="20206018"/>
+    <id start="20306001" end="20306018"/>
+    <id start="20406001" end="20406018"/>
+    <id start="20506001" end="20506018"/>
+    <id start="20606001" end="20606018"/>
+    <id start="20706001" end="20706018"/>
+    <id start="20806001" end="20806018"/>
+  </idlist>
+
+  <idlist idname="South side">
+    <id start="30201001" end="30201018"/>
+    <id start="30301001" end="30301018"/>
+    <id start="30401001" end="30401018"/>
+    <id start="30501001" end="30501018"/>
+    <id start="30601001" end="30601018"/>
+    <id start="30701001" end="30701018"/>
+    <id start="30801001" end="30801018"/>
+    <id start="30202001" end="30202018"/>
+    <id start="30302001" end="30302018"/>
+    <id start="30402001" end="30402018"/>
+    <id start="30502001" end="30502018"/>
+    <id start="30602001" end="30602018"/>
+    <id start="30702001" end="30702018"/>
+    <id start="30802001" end="30802018"/>
+    <id start="30203001" end="30203018"/>
+    <id start="30303001" end="30303018"/>
+    <id start="30403001" end="30403018"/>
+    <id start="30503001" end="30503018"/>
+    <id start="30603001" end="30603018"/>
+    <id start="30703001" end="30703018"/>
+    <id start="30803001" end="30803018"/>
+    <id start="30204001" end="30204018"/>
+    <id start="30304001" end="30304018"/>
+    <id start="30404001" end="30404018"/>
+    <id start="30504001" end="30504018"/>
+    <id start="30604001" end="30604018"/>
+    <id start="30704001" end="30704018"/>
+    <id start="30804001" end="30804018"/>
+    <id start="30205001" end="30205018"/>
+    <id start="30305001" end="30305018"/>
+    <id start="30405001" end="30405018"/>
+    <id start="30505001" end="30505018"/>
+    <id start="30605001" end="30605018"/>
+    <id start="30705001" end="30705018"/>
+    <id start="30805001" end="30805018"/>
+    <id start="30206001" end="30206018"/>
+    <id start="30306001" end="30306018"/>
+    <id start="30406001" end="30406018"/>
+    <id start="30506001" end="30506018"/>
+    <id start="30606001" end="30606018"/>
+    <id start="30706001" end="30706018"/>
+    <id start="30806001" end="30806018"/>
+  </idlist>
+
+
+  
+</instrument>

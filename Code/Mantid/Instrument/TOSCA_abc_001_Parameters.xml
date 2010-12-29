@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "TOSCA" date = "2010-07-15T00:00:00">
+
+<component-link name = "TOSCA">
+
+<!-- [[62500 ,  65000] , [59000 ,  61500]] -->
+
+<parameter name="analysis-type" type="string">
+  <value val="spectroscopy" />
+</parameter>
+
+<parameter name="spectra-min">
+	<value val="1" />
+</parameter>
+
+<parameter name="spectra-max">
+	<value val="140" />
+</parameter>
+
+<parameter name="efixed-val">
+	<value val="0" />
+</parameter>
+
+<parameter name="peak-start">
+	<value val="0" />
+</parameter>
+
+<parameter name="peak-end">
+	<value val="0" />
+</parameter>
+
+<parameter name="back-start">
+	<value val="0" />
+</parameter>
+
+<parameter name="back-end">
+	<value val="0" />
+</parameter>
+
+
+
+</component-link>
+
+</parameter-file>
