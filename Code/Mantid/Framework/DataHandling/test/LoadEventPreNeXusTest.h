@@ -96,11 +96,11 @@ public:
 
   void test_LoadPreNeXus_REFL()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat" );
+    std::string eventfile( "../../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat" );
+    std::string pulsefile( "../../../../../Test/AutoTestData/REF_L_32035_pulseid.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setProperty("PulseidFilename", pulsefile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
 
     //Get the event file size
@@ -159,9 +159,9 @@ public:
 
   void xtest_LoadPreNeXus_CNCS_7860()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty<bool>("PadEmptyPixels", true);
 
@@ -193,9 +193,9 @@ public:
 
   void test_LoadPreNeXus_CNCS()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty<bool>("PadEmptyPixels", false);
 
@@ -265,9 +265,9 @@ public:
 
   void test_LoadPreNeXus_CNCS_PadPixels()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty("PadEmptyPixels", true);
 
@@ -306,9 +306,9 @@ public:
 
   void test_LoadPreNeXus_CNCS_SkipPixels()
   {
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
+    std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs_skipped");
     //Load just 2 pixels
     eventLoader->setProperty("SpectrumList", "45, 110");

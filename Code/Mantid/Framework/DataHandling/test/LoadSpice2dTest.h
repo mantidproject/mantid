@@ -25,7 +25,7 @@ class LoadSpice2DTest : public CxxTest::TestSuite
 public:
   LoadSpice2DTest()
   {
-     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/BioSANS_exp61_scan0004_0001.xml").toString();
+     inputFile = "BioSANS_exp61_scan0004_0001.xml";
   }
   void testInit()
   {
@@ -49,9 +49,6 @@ public:
     
     //check that retrieving the filename gets the correct value
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = spice2d.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(inputFile) == 0 );
-
     TS_ASSERT_THROWS_NOTHING( result = spice2d.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( result == outputSpace );
 

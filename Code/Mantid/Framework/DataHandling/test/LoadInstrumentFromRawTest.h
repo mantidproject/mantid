@@ -50,7 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set properties and check this are set ok
-    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HET15869.raw");
+    loader.setPropertyValue("Filename", "HET15869.raw");
     inputFile = loader.getPropertyValue("Filename");
     loader.setPropertyValue("Workspace", wsName);
 

@@ -150,7 +150,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    inputFile = "../../../../Test/Instrument/SANDALS_Definition.xml";
+    inputFile = "SANDALS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", inputFile);
     wsName = "FindDetectorsInShapeTestSLS";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);

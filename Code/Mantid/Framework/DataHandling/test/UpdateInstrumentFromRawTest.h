@@ -46,7 +46,7 @@ public:
     // load instrument def file
     LoadInstrument loaderHRP;
     TS_ASSERT_THROWS_NOTHING(loaderHRP.initialize());
-    loaderHRP.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/HRPD_for_UNIT_TESTING.xml");
+    loaderHRP.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_for_UNIT_TESTING.xml");
     inputFile = loaderHRP.getPropertyValue("Filename");
     loaderHRP.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
@@ -55,7 +55,7 @@ public:
     // now try to reload in detector positions from raw file
     UpdateInstrumentFromRaw loadRawPos;
     loadRawPos.initialize();
-    loadRawPos.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.raw");
+    loadRawPos.setPropertyValue("Filename", "HRP38692.raw");
     loadRawPos.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(loadRawPos.execute());
     TS_ASSERT( loadRawPos.isExecuted() );

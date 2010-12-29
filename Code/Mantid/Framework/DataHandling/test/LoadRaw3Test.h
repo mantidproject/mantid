@@ -28,7 +28,7 @@ public:
   LoadRaw3Test()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
+    inputFile = "HET15869.raw";
   }
 
   void testInit()
@@ -51,10 +51,6 @@ public:
 
     outputSpace = "outer";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
@@ -319,7 +315,7 @@ public:
   {
     LoadRaw3 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
+    loader5.setPropertyValue("Filename", "EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     
@@ -403,7 +399,7 @@ public:
   {
 	 LoadRaw3 loader4;
     loader4.initialize();
-    loader4.setPropertyValue("Filename", "../../../../Test/AutoTestData/TSC10076.raw");
+    loader4.setPropertyValue("Filename", "TSC10076.raw");
     loader4.setPropertyValue("OutputWorkspace", "parameterIDF");
     TS_ASSERT_THROWS_NOTHING( loader4.execute() )
     TS_ASSERT( loader4.isExecuted() )
@@ -427,7 +423,7 @@ public:
   {
     LoadRaw3 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/IRS38633.raw");
+    loader5.setPropertyValue("Filename", "IRS38633.raw");
     loader5.setPropertyValue("OutputWorkspace", "twoRegimes");
     loader5.setPropertyValue("SpectrumList", "2,3");
 	loader.setPropertyValue("LoadMonitors", "Include");
@@ -457,10 +453,6 @@ public:
 
     outputSpace = "outer1";
     loader6.setPropertyValue("OutputWorkspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader6.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING(loader6.execute());
     TS_ASSERT( loader6.isExecuted() );
@@ -557,7 +549,7 @@ public:
   {
 	LoadRaw3 loader7;
     loader7.initialize();
-    loader7.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
+    loader7.setPropertyValue("Filename", "EVS13895.raw");
     loader7.setPropertyValue("OutputWorkspace", "multiperiod");
 	loader7.setPropertyValue("LoadMonitors", "Separate");
     

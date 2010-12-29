@@ -17,7 +17,7 @@ class LoadCanSAS1dTest : public CxxTest::TestSuite
 public:
 	LoadCanSAS1dTest()
 	{
-		 inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/LOQ_CANSAS1D.xml").toString();
+		 inputFile = "LOQ_CANSAS1D.xml";
 	}
 	 void testInit()
   {
@@ -39,11 +39,7 @@ public:
     //Set an output workspace
     cansas1d.setPropertyValue("OutputWorkspace", outputSpace);
     
-    //check that retrieving the filename gets the correct value
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = cansas1d.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(inputFile) == 0 );
-
     TS_ASSERT_THROWS_NOTHING( result = cansas1d.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( result == outputSpace );
 
@@ -106,7 +102,7 @@ public:
     std::string outputSpace = "LoadCanSAS1DTest_out";
     //Set an output workspace
     alg.setPropertyValue("OutputWorkspace", outputSpace); 
-    alg.setPropertyValue("Filename", "../../../../Test/AutoTestData/testCansas1DMultiEntry.xml");
+    alg.setPropertyValue("Filename", "testCansas1DMultiEntry.xml");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() );

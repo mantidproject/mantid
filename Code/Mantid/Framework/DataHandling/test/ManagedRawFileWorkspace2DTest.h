@@ -21,7 +21,7 @@ class ManagedRawFileWorkspace2DTest : public CxxTest::TestSuite
 public:
   ManagedRawFileWorkspace2DTest()
   {
-    Workspace = new ManagedRawFileWorkspace2D("../../../../Test/AutoTestData/HET15869.raw",2);
+    Workspace = new ManagedRawFileWorkspace2D("../../../../../Test/AutoTestData/HET15869.raw",2);
   }
 
   ~ManagedRawFileWorkspace2DTest()
@@ -52,7 +52,7 @@ public:
 
   void testData()
   {
-    ManagedRawFileWorkspace2D ws("../../../../Test/AutoTestData/HET15869.raw");
+    ManagedRawFileWorkspace2D ws("../../../../../Test/AutoTestData/HET15869.raw");
 
     const MantidVec& x0 = ws.readX(0);
     TS_ASSERT_EQUALS( x0[0], 5. )
@@ -72,7 +72,7 @@ public:
 
   void testChanges()
   {
-    ManagedRawFileWorkspace2D ws("../../../../Test/AutoTestData/HET15869.raw");
+    ManagedRawFileWorkspace2D ws("../../../../../Test/AutoTestData/HET15869.raw");
 
     MantidVec& y0 = ws.dataY(0);
     y0[100] = 1234.;
@@ -98,17 +98,13 @@ public:
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);
 
-      std::string    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
+      std::string    inputFile = "HET15869.raw";
 
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
 
     std::string outputSpace = "outer";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );

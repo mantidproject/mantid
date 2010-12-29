@@ -25,7 +25,7 @@ public:
 	LoadMappingTableTest()
 	{
 	  //
-	  inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
+	  inputFile = "HET15869.raw";
 		 outputSpace = "outerWS";
 		//initialise framework manager to allow logging
 		Mantid::API::FrameworkManager::Instance();
@@ -54,9 +54,6 @@ public:
 	    // Path to test input file assumes Test directory checked out from SVN
 	    loader.setPropertyValue("Filename", inputFile);
 	    loader.setPropertyValue("Workspace", outputSpace);
-	    std::string result;
-	    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-	    TS_ASSERT( ! result.compare(inputFile));
 	    TS_ASSERT_THROWS_NOTHING(loader.execute());
 	    TS_ASSERT( loader.isExecuted());
 

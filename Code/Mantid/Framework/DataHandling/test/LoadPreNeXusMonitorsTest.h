@@ -17,8 +17,7 @@ public:
   {
     // Path to test input file assumes Test directory checked out from SVN
 	// You will need to make sure the bmon* files are in the same directory
-    runinfoFile = Poco::Path(Poco::Path::current()).resolve(
-        "../../../../Test/AutoTestData/CNCS_7860_runinfo.xml").toString();
+    runinfoFile = "CNCS_7860_runinfo.xml";
   }
 
   void testInit()
@@ -39,12 +38,6 @@ public:
     // Check we can set the properties
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("RunInfoFilename", runinfoFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWS));
-
-    // Check that the filename was set properly.
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("RunInfoFilename"));
-    TS_ASSERT(!result.compare(runinfoFile));
-
     // Actually run it and test is has been run.
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());

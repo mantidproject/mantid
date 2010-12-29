@@ -34,7 +34,7 @@ public:
 
   void testLoadMer()
   {
-    std::string inputFile = "../../../../Test/AutoTestData/MER02257.raw";
+    std::string inputFile = "MER02257.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -57,7 +57,7 @@ public:
   void testInitProperties()
   {
     // get scaling from raw file
-    alg.setPropertyValue("ScalingFilename", "../../../../Test/AutoTestData/MER02257.raw");
+    alg.setPropertyValue("ScalingFilename", "MER02257.raw");
     alg.setPropertyValue("Workspace", "testWS");
        alg.setPropertyValue("ScalingOption", "2");
     std::string result;

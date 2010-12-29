@@ -35,8 +35,7 @@ public:
 
   void testLoadMer()
   {
-    //std::string inputFile = "../../../../Test/AutoTestData/HET15869.raw";
-    std::string inputFile = "../../../../Test/AutoTestData/MER02257.raw";
+    std::string inputFile = "MER02257.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -59,8 +58,8 @@ public:
   void testInitProperties()
   {
     // for testing we only use a small part of the full scaling file as it takes too long
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScalingFileName", "../../../../Test/AutoTestData/merlin_detector.sca"));
-    //alg.setPropertyValue("ScalingFileName", "../../../../Test/AutoTestData/merlin_detector_partial.sca");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScalingFileName", "merlin_detector.sca"));
+    //alg.setPropertyValue("ScalingFileName", "merlin_detector_partial.sca");
     alg.setPropertyValue("Workspace", "testWS");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") );

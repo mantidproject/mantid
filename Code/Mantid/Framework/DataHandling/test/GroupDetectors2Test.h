@@ -39,7 +39,7 @@ public:
       WorkspaceFactory::Instance().create("Workspace2D", NHIST, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr xs, errors, data[NHIST];
+    Mantid::MantidVecPtr xs, errors, data[NHIST];
     xs.access().resize(NBINS+1, 10.0);
     errors.access().resize(NBINS, 1.0);
     int detIDs[NHIST];
@@ -328,7 +328,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../../Test/AutoTestData/MUSR00015190.nxs";
+    std::string inputFile = "MUSR00015190.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
@@ -349,7 +349,7 @@ public:
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", outputSpace+"_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
-    groupAlg.setPropertyValue("MapFile", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping.xml");
+    groupAlg.setPropertyValue("MapFile", "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());    
     TS_ASSERT( groupAlg.isExecuted() );
 

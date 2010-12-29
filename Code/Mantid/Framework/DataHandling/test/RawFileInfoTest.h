@@ -16,7 +16,7 @@ class RawFileInfoTest : public CxxTest::TestSuite
 public:
   
   // Perform test with a GEM file
-  RawFileInfoTest() : m_filetotest("../../../../Test/AutoTestData/LOQ48127.raw") 
+  RawFileInfoTest() : m_filetotest("LOQ48127.raw") 
   {
   }
   

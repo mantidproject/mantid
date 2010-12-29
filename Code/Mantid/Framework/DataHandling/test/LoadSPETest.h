@@ -36,7 +36,7 @@ public:
 
     std::string outWS("outWS");
 
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename","../../../../Test/AutoTestData/Example.spe") );
+    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename","Example.spe") );
     TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("OutputWorkspace",outWS) );
 
     TS_ASSERT_THROWS_NOTHING( loader.execute() );

@@ -27,7 +27,7 @@ public:
   LoadRawBin0Test()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
+    inputFile = "HET15869.raw";
   }
 
   void testInit()
@@ -49,10 +49,6 @@ public:
 	
     outputSpace = "bin0";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
@@ -88,7 +84,7 @@ public:
 	
 	LoadRawBin0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
+    loader5.setPropertyValue("Filename", "EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     //loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     

@@ -31,7 +31,8 @@ using namespace Mantid::DataObjects;
  */
 
 //MARI                               MAPS                         MERLIN
-static const std::string RAWFILE =  "../../../../Test/AutoTestData/MAR11015.raw" /*"../../../../Test/AutoTestData/MAP10241.raw" "../../../../Test/AutoTestData/MER02257.raw"*/;
+static const std::string RAWFILE =  "MAR11015.raw"
+ /*"MAP10241.raw" "MER02257.raw"*/;
 static const double TIMEOFF  =      3.9                                 /*9.5                         5.3/**/   ;
 static const int MONITOR =          2                                   /*41473                         69634/**/  ;
 static const int NUMRANDOM =        7;
@@ -269,7 +270,7 @@ public:
   {
     // create a .dat file in the current directory that we'll load later
     writeDatFile();
-    m_rawFile = Poco::Path(Poco::Path::current()).resolve(RAWFILE).toString();
+    m_rawFile = RAWFILE;
   }
 
   ~LoadDetectorInfoTest()

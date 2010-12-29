@@ -30,7 +30,7 @@ public:
   {
     LoadRaw2 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/CSP79590.raw");
+    loader.setPropertyValue("Filename", "CSP79590.raw");
     loader.setPropertyValue("OutputWorkspace", "CRISPdata");
 
     TS_ASSERT_THROWS_NOTHING( loader.execute() )

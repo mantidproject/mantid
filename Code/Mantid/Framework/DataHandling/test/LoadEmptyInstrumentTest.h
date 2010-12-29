@@ -33,7 +33,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    loaderSLS.setPropertyValue("Filename", "../../../../Test/Instrument/SANDALS_Definition.xml");
+    loaderSLS.setPropertyValue("Filename", "SANDALS_Definition.xml");
     inputFile = loaderSLS.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestSLS";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
@@ -64,7 +64,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    loaderSLS.setPropertyValue("Filename", "../../../../Test/Instrument/ENGINX_Definition.xml");
+    loaderSLS.setPropertyValue("Filename", "ENGINX_Definition.xml");
     inputFile = loaderSLS.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestEngineX";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
@@ -94,7 +94,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderMUSR.initialize());
     TS_ASSERT( loaderMUSR.isInitialized() );
-    loaderMUSR.setPropertyValue("Filename", "../../../../Test/Instrument/MUSR_Definition.xml");
+    loaderMUSR.setPropertyValue("Filename", "MUSR_Definition.xml");
     inputFile = loaderMUSR.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestMUSR";
     loaderMUSR.setPropertyValue("OutputWorkspace", wsName);
@@ -125,7 +125,7 @@ public:
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    loader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -405,7 +405,7 @@ public:
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
+    loader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -519,7 +519,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/TOSCA_Definition.xml");
+    loader.setPropertyValue("Filename", "TOSCA_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamToscaTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -550,7 +550,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/TOSCA_Definition.xml");
+    loader.setPropertyValue("Filename", "TOSCA_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamToscaTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -581,7 +581,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/HRPD_Definition.xml");
+    loader.setPropertyValue("Filename", "HRPD_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamHRPDTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -608,7 +608,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/HRPD_Definition.xml");
+    loader.setPropertyValue("Filename", "HRPD_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     std::string wsName2 = "LoadEmptyInstrumentParamHRPDTest";
     loader.setPropertyValue("OutputWorkspace", wsName2);
@@ -639,7 +639,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/GEM_Definition.xml");
+    loader.setPropertyValue("Filename", "GEM_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamGemTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -684,7 +684,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -743,7 +743,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/BIOSANS_Definition.xml");
+    loader.setPropertyValue("Filename", "BIOSANS_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadBIOSANS";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -775,7 +775,7 @@ void testCheckIfVariousInstrumentsLoad()
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/SANS2D_Definition.xml");
+    loader.setPropertyValue("Filename", "SANS2D_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParaSans2dTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -787,7 +787,7 @@ void testCheckIfVariousInstrumentsLoad()
 
     LoadEmptyInstrument loaderPolRef;
     loaderPolRef.initialize();
-    loaderPolRef.setPropertyValue("Filename", "../../../../Test/Instrument/POLREF_Definition.xml");
+    loaderPolRef.setPropertyValue("Filename", "POLREF_Definition.xml");
     inputFile = loaderPolRef.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamPOLREFTest";
     loaderPolRef.setPropertyValue("OutputWorkspace", wsName);
@@ -799,7 +799,7 @@ void testCheckIfVariousInstrumentsLoad()
 
     LoadEmptyInstrument loaderEMU;
     loaderEMU.initialize();
-    loaderEMU.setPropertyValue("Filename", "../../../../Test/Instrument/EMU_Definition.xml");
+    loaderEMU.setPropertyValue("Filename", "EMU_Definition.xml");
     inputFile = loaderEMU.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamEMUTest";
     loaderEMU.setPropertyValue("OutputWorkspace", wsName);
@@ -811,7 +811,7 @@ void testCheckIfVariousInstrumentsLoad()
 
     LoadEmptyInstrument loaderEMU2;
     loaderEMU2.initialize();
-    loaderEMU2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
+    loaderEMU2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
     inputFile = loaderEMU2.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);

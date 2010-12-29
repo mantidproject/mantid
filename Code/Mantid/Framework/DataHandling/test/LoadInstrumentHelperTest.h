@@ -71,7 +71,7 @@ public:
     std::multimap<std::string, fromToEntry> idfFiles;
     std::set<std::string> idfIdentifiers;
 
-    std::string m_filename = "../../../../Test/Instrument/HET_Definition.xml";
+    std::string m_filename = "../../../Instrument/HET_Definition.xml";
     Poco::RegularExpression regex(".*_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
     Poco::DirectoryIterator end_iter;
     for ( Poco::DirectoryIterator dir_itr(Poco::Path(m_filename).parent()); dir_itr != end_iter; ++dir_itr )

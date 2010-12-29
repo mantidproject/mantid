@@ -26,7 +26,7 @@ public:
   LoadRawTest()
   {
     // Path to test input file assumes Test/AutoTestData directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
+    inputFile = "HET15869.raw";
   }
 
   void testInit()
@@ -47,10 +47,6 @@ public:
 
     outputSpace = "outer";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
@@ -82,7 +78,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<IInstrument> i = output2D->getInstrument();
+    boost::shared_ptr<Mantid::Geometry::IInstrument> i = output2D->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -226,7 +222,7 @@ public:
   {
 	 LoadRaw loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/CSP78173.raw");
+    loader5.setPropertyValue("Filename", "CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     // Set these properties to check they're ignored
     //loader5.setPropertyValue("SpectrumList", "998,999,1000");

@@ -18,7 +18,7 @@ public:
   // A sample file is in the repository
   LoadRKHTest() : dataFile(""), tempFile("LoadRKH_test_file_2D")
   {    
-    dataFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/DIRECT.041").toString();
+    dataFile = "DIRECT.041";
   }
 
   void testInit()
@@ -41,11 +41,7 @@ public:
     //Set an output workspace
     loadrkh.setPropertyValue("OutputWorkspace", outputSpace);
     
-    //check that retrieving the filename gets the correct value
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loadrkh.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(dataFile) == 0 );
-
     TS_ASSERT_THROWS_NOTHING( result = loadrkh.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( result == outputSpace );
 

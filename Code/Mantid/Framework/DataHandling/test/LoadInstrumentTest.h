@@ -72,7 +72,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/HET_Definition.xml");
+    loader.setPropertyValue("Filename", "HET_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     loader.setPropertyValue("Workspace", wsName);
 
@@ -156,7 +156,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loaderGEM.setPropertyValue("Filename", "../../../../Test/Instrument/GEM_Definition.xml");
+    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
     inputFile = loaderGEM.getPropertyValue("Filename");
 
     loaderGEM.setPropertyValue("Workspace", wsName);
@@ -230,7 +230,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderSLS.setPropertyValue("Filename", "../../../../Test/Instrument/SANDALS_Definition.xml");
+    loaderSLS.setPropertyValue("Filename", "SANDALS_Definition.xml");
     inputFile = loaderSLS.getPropertyValue("Filename");
 
     loaderSLS.setPropertyValue("Workspace", wsName);
@@ -292,7 +292,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderNIMROD.setPropertyValue("Filename", "../../../../Test/Instrument/NIM_Definition.xml");
+    loaderNIMROD.setPropertyValue("Filename", "NIM_Definition.xml");
     inputFile = loaderNIMROD.getPropertyValue("Filename");
 
     loaderNIMROD.setPropertyValue("Workspace", wsName);
@@ -341,7 +341,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderHRP.setPropertyValue("Filename", "../../../../Test/Instrument/HRPD_Definition.xml");
+    loaderHRP.setPropertyValue("Filename", "HRPD_Definition.xml");
     inputFile = loaderHRP.getPropertyValue("Filename");
 
     loaderHRP.setPropertyValue("Workspace", wsName);
@@ -405,7 +405,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    loaderIDF.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
     inputFile = loaderIDF.getPropertyValue("Filename");
 
     loaderIDF.setPropertyValue("Workspace", wsName);
@@ -626,7 +626,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    loaderIDF2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     inputFile = loaderIDF2.getPropertyValue("Filename");
 
     loaderIDF2.setPropertyValue("Workspace", wsName);
@@ -686,7 +686,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
       // Path to test input file assumes Test directory checked out from SVN
-      loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_RECTANGULAR_UNIT_TESTING.xml");
+      loaderIDF2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_RECTANGULAR_UNIT_TESTING.xml");
       inputFile = loaderIDF2.getPropertyValue("Filename");
       loaderIDF2.setPropertyValue("Workspace", wsName);
       loaderIDF2.execute();
@@ -742,7 +742,7 @@ public:
 //      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 //      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 //      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/SNAP_Definition.xml");
+//      loaderIDF2->setPropertyValue("Filename", "SNAP_Definition.xml");
 //      inputFile = loaderIDF2->getPropertyValue("Filename");
 //      loaderIDF2->setPropertyValue("Workspace", wsName);
 //      loaderIDF2->execute();
@@ -760,7 +760,7 @@ public:
 //      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 //      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 //      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/SNAPOLD_Definition.xml");
+//      loaderIDF2->setPropertyValue("Filename", "SNAPOLD_Definition.xml");
 //      inputFile = loaderIDF2->getPropertyValue("Filename");
 //      loaderIDF2->setPropertyValue("Workspace", wsName);
 //      loaderIDF2->execute();
@@ -811,7 +811,7 @@ public:
 //      ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
 //      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 //      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3_Definition.xml");
+//      loaderIDF2->setPropertyValue("Filename", "PG3_Definition.xml");
 //      inputFile = loaderIDF2->getPropertyValue("Filename");
 //      loaderIDF2->setPropertyValue("Workspace", wsName);
 //      loaderIDF2->execute();
@@ -827,7 +827,7 @@ public:
 //      ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
 //      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 //      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3OLD_Definition.xml");
+//      loaderIDF2->setPropertyValue("Filename", "PG3OLD_Definition.xml");
 //      inputFile = loaderIDF2->getPropertyValue("Filename");
 //      loaderIDF2->setPropertyValue("Workspace", wsName);
 //      loaderIDF2->execute();
