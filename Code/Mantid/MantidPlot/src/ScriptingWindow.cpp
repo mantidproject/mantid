@@ -414,8 +414,8 @@ void ScriptingWindow::fileAboutToShow()
   }
 
   // Scripting language
-  m_file_menu->insertSeparator();
-  m_file_menu->addAction(m_scripting_lang);
+  //m_file_menu->insertSeparator();
+  //m_file_menu->addAction(m_scripting_lang);
 
   m_file_menu->insertSeparator();
   m_file_menu->addMenu(m_manager->m_recent_scripts);
