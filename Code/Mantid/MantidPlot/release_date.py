@@ -24,7 +24,7 @@ def getSVNRevision():
 
 def getFileVersion():
   try:
-    VERSIONFILE = '../MantidVersion.txt'
+    VERSIONFILE = '../../MantidVersion.txt'
     f = open(VERSIONFILE,'r')
     line = f.readline()
     f.close()
@@ -44,7 +44,7 @@ def main(argv=None):
     svn = argv[2]
   else:
     svn = getSVNRevision()
-  f = open('qtiplot/src/Mantid/MantidPlotReleaseDate.h','w')
+  f = open('src/MantidPlotReleaseDate.h','w')
   f.write('#ifndef MANTIDPLOT_RELEASE_DATE\n')
   f.write('#define MANTIDPLOT_RELEASE_DATE "')
   f.write(date.today().strftime("%d %b %Y"))

@@ -54,7 +54,7 @@ win32:build_pass:CONFIG(debug, debug|release) {
   QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrt.lib
 }
 
-MANTIDPATH = ../../Mantid
+MANTIDPATH = ../Framework
 MANTIDLIBPATH = $$MANTIDPATH/release
 build_pass:CONFIG(debug, debug|release) {
   MANTIDLIBPATH = $$MANTIDPATH/debug
@@ -71,16 +71,20 @@ mac:CXXFLAGS+=-headerpad_max_install_names
 #############################################################################
 # Global 
 
-DEPENDPATH  += ../../Mantid/Kernel/inc/
-DEPENDPATH  += ../../Mantid/Geometry/inc/
-DEPENDPATH  += ../../Mantid/API/inc/
-DEPENDPATH  += ../MantidQt/includes
-INCLUDEPATH  += ../../Mantid/Kernel/inc/
-INCLUDEPATH  += ../../Mantid/Geometry/inc/
-INCLUDEPATH  += ../../Mantid/API/inc/
-INCLUDEPATH  += ../MantidQt/includes
+DEPENDPATH  += ../Framework/Kernel/inc/
+DEPENDPATH  += ../Framework/Geometry/inc/
+DEPENDPATH  += ../Framework/API/inc/
+DEPENDPATH  += ../MantidQt/MantidWidgets/inc
+DEPENDPATH  += ../MantidQt/API/inc
+INCLUDEPATH  += ../Framework/Kernel/inc/
+INCLUDEPATH  += ../Framework/Geometry/inc/
+INCLUDEPATH  += ../Framework/API/inc/
+INCLUDEPATH  += ../MantidQt/API/inc
+INCLUDEPATH  += ../MantidQt/MantidWidgets/inc
 INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../QtPropertyBrowser/src
+INCLUDEPATH  += src
+INCLUDEPATH  += ../tmp/qtiplot
 
 unix:!macx {
 
@@ -468,7 +472,7 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidMatrix.h \
 	    src/Mantid/MantidDock.h \
 	    src/Mantid/AlgMonitor.h \
-	    src/Mantid/MantidPlotReleaseDate.h \
+	    src/MantidPlotReleaseDate.h \
 	    src/Mantid/MantidAbout.h \
 	    src/Mantid/InputHistory.h \
 	    src/Mantid/Preferences.h \
@@ -708,14 +712,14 @@ SOURCES  += src/ApplicationWindow.cpp \
 ##################### Compression (zlib123) ###################
 ###############################################################
 
-SOURCES += ../3rdparty/zlib123/minigzip.c
+SOURCES += src/zlib123/minigzip.c
 
 ###############################################################
 ################# Origin Import (liborigin) ###################
 ###############################################################
 
-HEADERS += ../3rdparty/liborigin/OPJFile.h
-SOURCES += ../3rdparty/liborigin/OPJFile.cpp
+HEADERS += src/origin/OPJFile.h
+SOURCES += src/origin/OPJFile.cpp
 
 ###############################################################
 ################# Module: Plot 2D #############################
