@@ -1265,12 +1265,12 @@ private:
 	QTranslator *appTranslator, *qtTranslator;
 	QDockWidget *explorerWindow, *undoStackWindow;
 	QTextEdit *results;
-#ifdef SCRIPTING_CONSOLE
+	//#ifdef SCRIPTING_CONSOLE
 	QDockWidget *consoleWindow;
 	QTextEdit *console;
         QDockWidget *m_interpreterDock;
         ScriptManagerWidget *m_scriptInterpreter;
-#endif
+	//#endif
 	QMdiArea *d_workspace;
 
   QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;
@@ -1294,9 +1294,9 @@ private:
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
     QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
 	QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
-#ifdef SCRIPTING_CONSOLE
+	//#ifdef SCRIPTING_CONSOLE
     QAction *actionShowConsole;
-#endif
+    //#endif
     QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
     QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
     QAction *actionExportPDF, *actionReadOnlyCol;

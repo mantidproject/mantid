@@ -30,7 +30,7 @@
 #define IMPORTOPJ_H
 
 #include "ApplicationWindow.h"
-#include <OPJFile.h>
+#include "origin/OPJFile.h"
 
 //! Origin project import class
 class ImportOPJ

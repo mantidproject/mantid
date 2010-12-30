@@ -169,7 +169,7 @@
 #include "ScriptingWindow.h"
 
 #include "Mantid/MantidUI.h"
-#include "Mantid/MantidPlotReleaseDate.h"
+#include "MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
@@ -284,7 +284,7 @@ void ApplicationWindow::init(bool factorySettings)
   logWindow->setWidget(results);
   logWindow->hide();
 
-#ifdef SCRIPTING_CONSOLE
+  //#ifdef SCRIPTING_CONSOLE
   consoleWindow = new QDockWidget(this);
   consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
   consoleWindow->setWindowTitle(tr("Scripting Console"));
@@ -296,7 +296,7 @@ void ApplicationWindow::init(bool factorySettings)
 	  SLOT(showScriptConsoleContextMenu(const QPoint &)));
   consoleWindow->setWidget(console);
   consoleWindow->hide();
-#endif
+  //#endif
   m_interpreterDock = new QDockWidget(this);
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
@@ -1015,9 +1015,9 @@ void ApplicationWindow::insertTranslatedStrings()
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
-#ifdef SCRIPTING_CONSOLE
+  //#ifdef SCRIPTING_CONSOLE
   consoleWindow->setWindowTitle(tr("Scripting Console"));
-#endif
+  //#endif
   displayBar->setWindowTitle(tr("Data Display"));
   tableTools->setWindowTitle(tr("Table"));
   columnTools->setWindowTitle(tr("Column"));
@@ -1069,9 +1069,9 @@ void ApplicationWindow::initMainMenu()
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
   //view->addAction(actionShowUndoStack);
-#ifdef SCRIPTING_CONSOLE
+  //#ifdef SCRIPTING_CONSOLE
   view->addAction(actionShowConsole);
-#endif
+  //#endif
 
   graph = new QMenu(this);
   graph->setObjectName("graphMenu");
@@ -12009,9 +12009,9 @@ void ApplicationWindow::createActions()
 
   actionShowUndoStack = undoStackWindow->toggleViewAction();
 
-#ifdef SCRIPTING_CONSOLE
+    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole = consoleWindow->toggleViewAction();
-#endif
+    //#endif
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("ALT+L") );
@@ -12860,10 +12860,10 @@ void ApplicationWindow::translateActionsStrings()
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
-#ifdef SCRIPTING_CONSOLE
+    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole->setMenuText(tr("&Console"));
   actionShowConsole->setToolTip(tr("Show Scripting console"));
-#endif
+    //#endif
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));

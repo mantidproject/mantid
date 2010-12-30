@@ -34,7 +34,7 @@
 #include <QThread>
 
 #include "ApplicationWindow.h"
-#include "Mantid/MantidPlotReleaseDate.h"
+#include "MantidPlotReleaseDate.h"
 #include "MantidKernel/Logger.h"
 
 #include "Mantid/MantidApplication.h"

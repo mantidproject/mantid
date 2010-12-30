@@ -44,7 +44,7 @@
 #include <Qsci/qscilexerpython.h> 
 #include "MantidKernel/ConfigService.h"
 
-#include "../sipAPIqti.h"
+#include "sipAPIqti.h"
 
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary

@@ -36,8 +36,8 @@ unix|macx|win32-msvc2008|win32-msvc2010 {
    }
 }
 
-RESOURCES        = ../../../Images/images.qrc
-RESOURCES        += ../MantidQt/MantidWidgets/inc/ICatSearchBackGround.qrc
+RESOURCES        = ../Images/images.qrc
+RESOURCES        += ../Images/ICatSearchBackGround.qrc
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
 #RESTRICTED_MODULES += EMF
