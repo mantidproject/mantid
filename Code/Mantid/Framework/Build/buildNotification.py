@@ -176,7 +176,7 @@ def moveToArchive(logfile, archiveDir):
     scplog.close()
 
 # Move send email
-def sendResultMail(message, logdir, sender, recipients=['russell.taylor@stfc.ac.uk'], \
+def sendResultMail(message, logdir, sender, recipients=['mantid-buildserver@mantidproject.org'], \
                    mailserver="outbox.nd.rl.ac.uk"):
   #timeout in seconds
   socket.setdefaulttimeout(60)
