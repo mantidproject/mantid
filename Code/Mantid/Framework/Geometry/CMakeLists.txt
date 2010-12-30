@@ -4,6 +4,34 @@ set ( SRC_FILES src/IDetector.cpp
 		src/IObjComponent.cpp
 		src/Quat.cpp
 		src/V3D.cpp
+		src/Instrument/CompAssembly.cpp
+		src/Instrument/Component.cpp
+		src/Instrument/Detector.cpp
+		src/Instrument/DetectorGroup.cpp
+		src/Instrument/FitParameter.cpp
+		src/Instrument/Instrument.cpp
+		src/Instrument/NearestNeighbours.cpp
+		src/Instrument/ObjCompAssembly.cpp
+		src/Instrument/ObjComponent.cpp
+		src/Instrument/Parameter.cpp
+		src/Instrument/ParameterMap.cpp
+		src/Instrument/ParComponentFactory.cpp
+		src/Instrument/RectangularDetector.cpp
+		src/Instrument/XMLlogfile.cpp
+		src/Math/Acomp.cpp
+		src/Math/Algebra.cpp
+		src/Math/BnId.cpp
+		src/Math/mathSupport.cpp
+		src/Math/MatrixBase.cpp
+		src/Math/Matrix.cpp
+		src/Math/PolyBase.cpp
+		src/Math/PolyFunction.cpp
+		src/Math/PolyVar.cpp
+		src/Math/PolyVarOne.cpp
+		src/Math/RegexSupport.cpp
+		src/Math/RotCounter.cpp
+		src/Math/SupportGeometry.cpp
+		src/Math/Triple.cpp
 		src/MDGeometry/IMDDimension.cpp
 		src/MDGeometry/MDBasisDimension.cpp
 		src/MDGeometry/MDCell.cpp
@@ -20,20 +48,6 @@ set ( SRC_FILES src/IDetector.cpp
 		src/Objects/Rules.cpp
 		src/Objects/ShapeFactory.cpp
 		src/Objects/Track.cpp
-		src/Instrument/CompAssembly.cpp
-		src/Instrument/Component.cpp
-		src/Instrument/Detector.cpp
-		src/Instrument/DetectorGroup.cpp
-		src/Instrument/FitParameter.cpp
-		src/Instrument/Instrument.cpp
-		src/Instrument/NearestNeighbours.cpp
-		src/Instrument/ObjCompAssembly.cpp
-		src/Instrument/ObjComponent.cpp
-		src/Instrument/Parameter.cpp
-		src/Instrument/ParameterMap.cpp
-		src/Instrument/ParComponentFactory.cpp
-		src/Instrument/RectangularDetector.cpp
-		src/Instrument/XMLlogfile.cpp
 		src/Rendering/BitmapGeometryHandler.cpp
 		src/Rendering/CacheGeometryGenerator.cpp
 		src/Rendering/CacheGeometryHandler.cpp
@@ -128,9 +142,56 @@ set ( INC_FILES inc/MantidGeometry/DllExport.h
 		inc/MantidGeometry/Surfaces/BaseVisit.h )
 
 set ( TEST_FILES test/AcompTest.h
-      test/AlgebraTest.h 
-      test/BnIdTest.h
-      test/BoundingBoxTest.h)
+                 test/AlgebraTest.h
+		 test/BnIdTest.h
+		 test/BoundingBoxTest.h
+		 test/CompAssemblyTest.h
+		 test/ComponentTest.h
+		 test/ConeTest.h
+		 test/CylinderTest.h
+		 test/DetectorGroupTest.h
+		 test/DetectorTest.h
+		 test/FitParameterTest.h
+		 test/GeneralTest.h
+		 test/InstrumentRayTracerTest.h
+		 test/InstrumentTest.h
+		 test/LineIntersectVisitTest.h
+		 test/LineTest.h
+		 test/MapSupportTest.h
+		 test/MaterialTest.h
+		 test/MathSupportTest.h
+		 test/MatrixTest.h
+		 test/MDCellTest.h
+		 test/MDDimensionTest.h
+		 test/MDGeometryBasisTest.h
+		 test/MDGeometryDescriptionTest.h
+		 test/MDGeometryTest.h
+		 test/MDPointTest.h
+		 test/NearestNeighboursTest.h
+		 test/ObjCompAssemblyTest.h
+		 test/ObjComponentTest.h
+		 test/ObjectTest.h
+		 test/ParametrizedComponentTest.h
+		 test/ParCompAssemblyTest.h
+		 test/ParDetectorTest.h
+		 test/ParInstrumentTest.h
+		 test/ParObjCompAssemblyTest.h
+		 test/ParObjComponentTest.h
+		 test/PlaneTest.h
+		 test/PolyTest.h
+		 test/QuatTest.h
+		 test/RectangularDetectorTest.h
+		 #test/RegexSupportTest.h # TODO fails
+		 test/RotCounterTest.h
+		 test/RulesTest.h
+		 test/ShapeFactoryTest.h
+		 test/SphereTest.h
+		 test/SurfaceFactoryTest.h
+		 test/SurfaceTest.h
+		 test/TorusTest.h
+		 test/TrackTest.h
+		 test/TripleTest.h
+		 test/V3DTest.h )
 
 # For Windows:
 add_definitions ( -DIN_MANTID_GEOMETRY )
