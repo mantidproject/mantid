@@ -3,7 +3,8 @@ set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
       src/EventWorkspace.cpp src/Histogram1D.cpp
       src/ManagedDataBlock2D.cpp src/ManagedWorkspace2D.cpp
       src/TableColumn.cpp src/TableWorkspace.cpp src/Workspace1D.cpp
-      src/Workspace2D.cpp src/WorkspaceSingleValue.cpp )
+      src/Workspace2D.cpp src/WorkspaceSingleValue.cpp 
+      src/EventWorkspaceHelpers.cpp src/EventWorkspaceHelpers.cpp)
 
 set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
       inc/MantidDataObjects/CompressedWorkspace2D.h

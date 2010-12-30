@@ -7,6 +7,7 @@ set ( SRC_FILES src/CreateSampleShape.cpp src/DefineGaugeVolume.cpp
       src/LoadEmptyInstrument.cpp src/LoadEventPreNeXus.cpp
       src/LoadGSS.cpp src/LoadInstrument.cpp
       src/LoadInstrumentFromRaw.cpp src/LoadLog.cpp
+      src/LoadInstrumentHelper.cpp src/LoadInstrumentHelper.cpp 
       src/LoadLOQDistancesFromRaw.cpp src/LoadMappingTable.cpp
       src/LoadParameterFile.cpp src/LoadPreNeXusMonitors.cpp
       src/LoadRaw2.cpp src/LoadRaw3.cpp src/LoadRawBin0.cpp
