@@ -44,7 +44,7 @@ testsToRun = []
 dirList = os.listdir(path)
 
 #Find Cxxtestgen
-cxxtestgen = 'python ../../../Tools/cxxtest/python/scripts/cxxtestgen'
+cxxtestgen = 'python ../../../TestingTools/cxxtest/python/scripts/cxxtestgen'
 
 for fname in dirList:
   # Disable tests that are to do with multi-dimensional objects/algorithms until something useful is there
