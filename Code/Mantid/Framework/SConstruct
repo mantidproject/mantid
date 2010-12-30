@@ -112,7 +112,7 @@ if os.name == 'nt':
 	libList.append('gsl')
 	libList.append('ws2_32')   # winsock library
 	libList.append('muparser') # Muparser used in DataHandling
-	libList.append('zlib1')    # used in DataObjects
+	libList.append('zlib')    # used in DataObjects
 
 	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123', third_party+'/include/hdf5']
 
