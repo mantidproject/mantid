@@ -22,17 +22,17 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../debug
+mantid_libpath=../../bin
 gmock_libpath=../../../TestingTools/lib/ubuntu-10.4/lib
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp \
  -I../../Kernel/inc -I../../Geometry/inc -I ../inc -I../../MDDataObjects/inc \
  -I../../MDAlgorithms/inc -I../../API/inc -I../../../TestingTools/include \
- -I ../../../Third_Party/src/cxxtest \
+ -I ../../../../Third_Party/src/cxxtest \
  -L$mantid_libpath -L$gmock_libpath \
  -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time -lgmock -lMDDataObjects -lhdf5 -lMDAlgorithms
 

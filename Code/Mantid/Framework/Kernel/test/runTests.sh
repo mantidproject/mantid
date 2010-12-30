@@ -22,13 +22,13 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../debug
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/src/cxxtest \
+mantid_libpath=../../bin
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG -o runner.exe runner.cpp -I ../inc -I ../../../../Third_Party/src/cxxtest \
     -L$mantid_libpath  -lMantidKernel -lboost_date_time
 echo
 

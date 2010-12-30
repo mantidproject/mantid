@@ -22,14 +22,14 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
-mantid_libpath=../../debug
+mantid_libpath=../../bin
 echo "Compiling the test executable... Libraries in $mantid_libpath"
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
-    -I../../DataObjects/inc -I ../inc -I ../../../Third_Party/src/cxxtest -I../../Nexus/inc \
+    -I../../DataObjects/inc -I ../inc -I ../../../../Third_Party/src/cxxtest -I../../Nexus/inc \
     -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidNexus \
     -lboost_date_time -lPocoFoundationd -lPocoNetd
 echo

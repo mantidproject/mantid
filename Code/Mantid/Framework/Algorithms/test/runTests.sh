@@ -39,7 +39,7 @@ python $cxxtestgen --runner=MantidPrinter -o $executable.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../release
+mantid_libpath=../../bin
 
 
 	
@@ -49,7 +49,7 @@ g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG -o $executable.exe $executab
 echo
 
 echo "Running the tests..."
-#ln ../../Build/Tests/*.properties .
+ln ../../Build/Tests/*.properties .
 LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./$executable.exe
 echo
 
