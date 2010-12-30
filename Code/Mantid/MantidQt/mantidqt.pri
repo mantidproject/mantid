@@ -40,10 +40,10 @@ win32 {
 TOPBUILDDIR = $$CWD
 
 # Icons
-RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
+RESOURCES = "$$TOPBUILDDIR/../Images/images.qrc"
 
 # My variables
-MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
+MANTIDPATH = "$$TOPBUILDDIR/../Framework"
 MANTIDLIBPATH = "$$MANTIDPATH/release"
 build_pass:CONFIG(debug, debug|release) {
   MANTIDLIBPATH = "$$MANTIDPATH/debug"
@@ -53,16 +53,16 @@ win32:LIBPATH += $$MANTIDLIBPATH
 
 THIRDPARTY = "$$TOPBUILDDIR/../../Third_Party"
 
-unix {
-    MANTIDQTINCLUDES = $$TOPBUILDDIR/includes
-}
-win32 {
-    MANTIDQTINCLUDES = $$TOPBUILDDIR\includes
-}
+#unix {
+#    MANTIDQTINCLUDES = $$TOPBUILDDIR/includes
+#}
+#win32 {
+#    MANTIDQTINCLUDES = $$TOPBUILDDIR\includes
+#}
 
-!exists(\"$$MANTIDQTINCLUDES\") {
-  system(mkdir \"$$MANTIDQTINCLUDES\")
-}
+#!exists(\"$$MANTIDQTINCLUDES\") {
+#  system(mkdir \"$$MANTIDQTINCLUDES\")
+#}
 
 TMPDIR = $$TOPBUILDDIR/qtbuild/MantidQt
 
@@ -74,7 +74,10 @@ DEPENDPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Kernel/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Geometry/inc/"
 INCLUDEPATH += "$$MANTIDPATH/API/inc/"
-INCLUDEPATH += "$$MANTIDQTINCLUDES"
+INCLUDEPATH += "$$TOPBUILDDIR/API/inc"
+INCLUDEPATH += "$$TOPBUILDDIR/MantidWidgets/inc"
+INCLUDEPATH += "$$TOPBUILDDIR/CustomDialogs/inc"
+INCLUDEPATH += "$$TOPBUILDDIR/CustomInterfaces/inc"
 INCLUDEPATH += "$$TOPBUILDDIR/../QtPropertyBrowser/src/"
 
 unix:!macx {

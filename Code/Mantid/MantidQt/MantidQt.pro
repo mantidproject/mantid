@@ -8,16 +8,9 @@ SUBDIRS = API MantidWidgets CustomDialogs CustomInterfaces DesignerPlugins
 # Clean this directory as well
 #-----------------------------
 unix {
-QMAKE_CLEAN += ./lib/* $$MANTIDQTINCLUDES/MantidQtAPI/*.h \
-               $$MANTIDQTINCLUDES/MantidQtCustomDialogs/*.h \
-               $$MANTIDQTINCLUDES/MantidQtCustomInterfaces/*.h \
-               $$MANTIDQTINCLUDES/MantidQtMantidWidgets/*.h
+QMAKE_CLEAN += ./lib/* 
 }
 win32 {
 QMAKE_CLEAN += $$DESTDIR\*.lib $$DESTDIR\*.dll $$DESTDIR\*.dll.manifest \
-			   "$$MANTIDQTINCLUDES"\MantidQtAPI\*.h" \
-         "$$MANTIDQTINCLUDES"\MantidQtCustomDialogs\*.h" \
-			   "$$MANTIDQTINCLUDES"\MantidQtCustomInterfaces\*.h" \
-			   "$$MANTIDQTINCLUDES"\MantidQtCustomWidgets\*.h" \
 			   qtbuild\MantidQt\sip*
 }

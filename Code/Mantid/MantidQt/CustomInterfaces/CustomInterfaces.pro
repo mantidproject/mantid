@@ -7,9 +7,9 @@ TEMPLATE = lib
 # Import the global config file
 include(../mantidqt.pri)
 
-!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\") {
-  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\")
-}
+#!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\") {
+#  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\")
+#}
 
 
 # Link with the libraries it is CustomInterfaces uses
@@ -20,7 +20,7 @@ win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib"
 # Source fies
 #------------------------
 
-HEADERDIR = inc
+HEADERDIR = inc/MantidQtCustomInterfaces
 SRCDIR = src
 
 SOURCES = \
@@ -61,22 +61,22 @@ FORMS = \
   $$HEADERDIR/MuonAnalysis.ui \
   $$HEADERDIR/IndirectDiffractionReduction.ui
 
-UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
+UI_HEADERS_DIR = "$$HEADERDIR"
 
 TARGET = MantidQtCustomInterfaces
 
 unix{
   HEADERDIR = $$TOPBUILDDIR/CustomInterfaces/inc
   SRCDIR = $$TOPBUILDDIR/CustomInterfaces/src
-  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"'
+#  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"'
 }
 
 win32{
   HEADERDIR = $$TOPBUILDDIR\CustomInterfaces\inc
   SRCDIR = $$TOPBUILDDIR\CustomInterfaces\src
-  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"'
+#  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"'
 }
 
-PRE_TARGETDEPS = headercopy
+#PRE_TARGETDEPS = headercopy
 
-QMAKE_EXTRA_TARGETS += headercopy
+#QMAKE_EXTRA_TARGETS += headercopy

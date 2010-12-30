@@ -6,9 +6,9 @@ TEMPLATE = lib
 # Import the config file
 include(../mantidqt.pri)
 
-!exists(\"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\") {
-  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\")
-}
+#!exists(\"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\") {
+#  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\")
+#}
 
 # Need to link with the API
 unix:LIBS += -lMantidQtAPI
@@ -20,7 +20,7 @@ DEFINES += IN_MANTIDQT_MANTIDWIDGETS
 # Source fies
 #------------------------
 
-HEADERDIR = inc
+HEADERDIR = inc/MantidQtMantidWidgets
 SRCDIR = src
 
 SOURCES = \
@@ -69,7 +69,7 @@ FORMS = \
   $$HEADERDIR/ICatMyDataSearch.ui  \
   $$HEADERDIR/ICatAdvancedSearch.ui
 
-UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
+UI_HEADERS_DIR = "$$HEADERDIR"
   
 #-----------------------------
 # Target and dependancies
@@ -78,16 +78,16 @@ UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
 unix{
   HEADERDIR = $$TOPBUILDDIR/MantidWidgets/inc
   SRCDIR = $$TOPBUILDDIR/MantidWidgets/src
-  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"'
+#  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"'
 }
 
 win32{
   HEADERDIR = $$TOPBUILDDIR\MantidWidgets\inc
   SRCDIR = $$TOPBUILDDIR\MantidWidgets\src
-  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"'
+#  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"'
 }
 
-PRE_TARGETDEPS = headercopy
+#PRE_TARGETDEPS = headercopy
 
-QMAKE_EXTRA_TARGETS += headercopy
+#QMAKE_EXTRA_TARGETS += headercopy
 

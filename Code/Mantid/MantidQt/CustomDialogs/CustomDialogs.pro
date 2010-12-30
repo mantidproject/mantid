@@ -10,9 +10,9 @@ CONFIG += qt
 QT += opengl
 
 
-!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\") {
-  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\")
-}
+#!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\") {
+#  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\")
+#}
 
 # Need to link with the API
 unix:LIBS += -L$$TOPBUILDDIR/lib \
@@ -22,7 +22,7 @@ win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
 # ------------------------
 # Source fies
 # ------------------------
-HEADERDIR = inc
+HEADERDIR = inc/MantidQtCustomDialogs
 SRCDIR = src
 
 SOURCES = $$SRCDIR/LoadRawDialog.cpp \
@@ -53,30 +53,30 @@ FORMS = $$HEADERDIR/LOQScriptInputDialog.ui \
     $$HEADERDIR/PlotAsymmetryByLogValueDialog.ui \
     $$HEADERDIR/LoginDialog.ui
     
-UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
+UI_HEADERS_DIR = "$$HEADERDIR"
 
 TARGET = MantidQtCustomDialogs
 unix{
   HEADERDIR = $$TOPBUILDDIR/CustomDialogs/inc
   SRCDIR = $$TOPBUILDDIR/CustomDialogs/src
-  headercopy.commands = cd \
-    $$HEADERDIR \
-    && \
-    $(COPY) \
-    *.h \
-    '"$$MANTIDQTINCLUDES/MantidQtCustomDialogs"'
+#  headercopy.commands = cd \
+#    $$HEADERDIR \
+#    && \
+#    $(COPY) \
+#    *.h \
+#    '"$$MANTIDQTINCLUDES/MantidQtCustomDialogs"'
 }
 
 win32{
   HEADERDIR = $$TOPBUILDDIR\CustomDialogs\inc
   SRCDIR = $$TOPBUILDDIR\CustomDialogs\src
-  headercopy.commands = cd \
-    $$HEADERDIR \
-    && \
-    $(COPY) \
-    *.h \
-    '"$$MANTIDQTINCLUDES\MantidQtCustomDialogs"'
+#  headercopy.commands = cd \
+#    $$HEADERDIR \
+#    && \
+#    $(COPY) \
+#    *.h \
+#    '"$$MANTIDQTINCLUDES\MantidQtCustomDialogs"'
 }
 
-PRE_TARGETDEPS = headercopy
-QMAKE_EXTRA_TARGETS += headercopy
+#PRE_TARGETDEPS = headercopy
+#QMAKE_EXTRA_TARGETS += headercopy

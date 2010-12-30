@@ -6,9 +6,9 @@ TEMPLATE = lib
 # Import the config file
 include(../mantidqt.pri)
 
-!exists(\"$$MANTIDQTINCLUDES/MantidQtAPI\") {
-  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtAPI\")
-}
+#!exists(\"$$MANTIDQTINCLUDES/MantidQtAPI\") {
+#  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtAPI\")
+#}
 
 DEFINES += IN_MANTIDQT_API
 
@@ -16,7 +16,7 @@ DEFINES += IN_MANTIDQT_API
 # Source fies
 #------------------------
 
-HEADERDIR = inc
+HEADERDIR = inc/MantidQtAPI
 SRCDIR = src
 
 SOURCES = \
@@ -51,7 +51,7 @@ UI_DIR = $$HEADERDIR
 FORMS = \
   $$HEADERDIR/ManageUserDirectories.ui
   
-UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtAPI"
+UI_HEADERS_DIR = "$$HEADERDIR"
 #-----------------------------
 # Target and dependancies
 #-----------------------------
@@ -61,16 +61,16 @@ TARGET = MantidQtAPI
 unix{
   HEADERDIR = $$TOPBUILDDIR/API/inc
   SRCDIR = $$TOPBUILDDIR/API/src
-  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '$$MANTIDQTINCLUDES/MantidQtAPI'
+#  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '$$MANTIDQTINCLUDES/MantidQtAPI'
 }
 
 win32{
   HEADERDIR = $$TOPBUILDDIR\API\inc
   SRCDIR = $$TOPBUILDDIR\API\src
-  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\\MantidQtAPI"'
+#  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\\MantidQtAPI"'
 }
 
-PRE_TARGETDEPS = headercopy
+#PRE_TARGETDEPS = headercopy
 
-QMAKE_EXTRA_TARGETS += headercopy
+#QMAKE_EXTRA_TARGETS += headercopy
 
