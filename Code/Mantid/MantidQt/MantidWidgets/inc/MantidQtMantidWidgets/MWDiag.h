@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MWDIAG_H_
 #define MANTIDQTCUSTOMINTERFACES_MWDIAG_H_
 
-#include "MantidQtMantidWidgets/ui_MWDiag.h"
+#include "ui_MWDiag.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QSettings>

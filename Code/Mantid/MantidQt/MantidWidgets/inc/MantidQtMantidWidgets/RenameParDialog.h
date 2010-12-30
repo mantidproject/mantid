@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
 
-#include "MantidQtMantidWidgets/ui_RenameParDialog.h"
+#include "ui_RenameParDialog.h"
 #include "WidgetDllOption.h"
 
 #include <vector>

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_HOMER_H_
 #define MANTIDQTCUSTOMINTERFACES_HOMER_H_
 
-#include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
+#include "ui_ConvertToEnergy.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IAlgorithm.h"
 #include <QString>

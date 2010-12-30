@@ -2,7 +2,7 @@
 #define MANTIDWIDGETS_ICATADVANCEDSEARCH_H_
 
 #include "WidgetDllOption.h"
-#include "MantidQtMantidWidgets/ui_ICatAdvancedSearch.h"
+#include "ui_ICatAdvancedSearch.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/ICatUtils.h"
 #include <algorithm>

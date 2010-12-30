@@ -1,7 +1,7 @@
 #ifndef MANTIDWIDGETS_ICATMYDATASEARCH_H_
 #define MANTIDWIDGETS_ICATMYDATASEARCH_H_
 
-#include "MantidQtMantidWidgets/ui_ICatMyDataSearch.h"
+#include "ui_ICatMyDataSearch.h"
 #include "WidgetDllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/ICatUtils.h"

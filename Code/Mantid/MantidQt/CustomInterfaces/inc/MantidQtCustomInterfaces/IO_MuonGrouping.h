@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_MuonAnalysis.h"
+#include "ui_MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 

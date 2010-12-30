@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
+#include "ui_ConvertToEnergy.h"
 #include <QFileInfo>
 
 namespace MantidQt

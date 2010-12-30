@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_SANSRunWindow.h"
+#include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"

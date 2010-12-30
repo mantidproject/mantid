@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomDialogs/ui_LoginDialog.h"
+#include "ui_LoginDialog.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 
 namespace MantidQt

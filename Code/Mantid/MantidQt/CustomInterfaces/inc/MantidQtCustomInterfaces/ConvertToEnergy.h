@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
+#include "ui_ConvertToEnergy.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 

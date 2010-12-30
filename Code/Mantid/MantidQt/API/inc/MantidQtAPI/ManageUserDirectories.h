@@ -2,7 +2,7 @@
 #define MANTIDQT_MANAGE_USER_DIRECTORIES_H
 
 #include <QDialog>
-#include "MantidQtAPI/ui_ManageUserDirectories.h"
+#include "ui_ManageUserDirectories.h"
 #include "DllOption.h"
 
 namespace MantidQt

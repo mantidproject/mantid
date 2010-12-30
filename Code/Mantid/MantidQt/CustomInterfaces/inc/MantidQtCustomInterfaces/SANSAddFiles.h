@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 
-#include "MantidQtCustomInterfaces/ui_SANSRunWindow.h"
+#include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include <QString>
 

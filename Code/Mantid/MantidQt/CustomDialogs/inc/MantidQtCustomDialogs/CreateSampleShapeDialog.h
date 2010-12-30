@@ -4,7 +4,7 @@
 //---------------------------
 // Includes
 //--------------------------
-#include "MantidQtCustomDialogs/ui_CreateSampleShapeDialog.h"
+#include "ui_CreateSampleShapeDialog.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 
 #include <QTreeWidget>

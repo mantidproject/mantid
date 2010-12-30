@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
-#include "MantidQtMantidWidgets/ui_MWRunFiles.h"
+#include "ui_MWRunFiles.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QString>

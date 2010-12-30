@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_IndirectDataAnalysis.h"
+#include "ui_IndirectDataAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <Poco/NObserver.h>

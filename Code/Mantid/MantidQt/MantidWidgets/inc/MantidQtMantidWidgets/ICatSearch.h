@@ -6,7 +6,7 @@
 // Includes
 //----------------------
 
-#include "MantidQtMantidWidgets/ui_ICatSearch.h"
+#include "ui_ICatSearch.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/ICatInvestigation.h"
 #include "MantidQtMantidWidgets/ICatUtils.h"

@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
+#include "ui_ConvertToEnergy.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
