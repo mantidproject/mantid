@@ -106,11 +106,11 @@ public:
 
   GetEiTest() : m_WS("GetEi_input_workspace")
   {
-    m_MARI1 = Poco::Path(Poco::Path::current()).resolve("MAR11001.raw").toString();
-    m_MARI2 = Poco::Path(Poco::Path::current()).resolve("MAR15306.raw").toString();
-    m_MARI3 = Poco::Path(Poco::Path::current()).resolve("MAR15317.raw").toString();
-    m_MAPS = Poco::Path(Poco::Path::current()).resolve("MAP10266.raw").toString();
-    m_MERLIN = Poco::Path(Poco::Path::current()).resolve("MER02257.raw").toString();
+    m_MARI1 = "MAR11001.raw";
+    m_MARI2 = "MAR15306.raw";
+    m_MARI3 = "MAR15317.raw";
+    m_MAPS = "MAP10266.raw";
+    m_MERLIN = "MER02257.raw";
   }
 
   private:

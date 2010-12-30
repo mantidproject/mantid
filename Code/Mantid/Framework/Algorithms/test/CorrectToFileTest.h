@@ -15,10 +15,8 @@ class CorrectToFileTest : public CxxTest::TestSuite
 {
 public:
 
-  CorrectToFileTest() : inputFile("")
-  {
-    inputFile = Poco::Path(Poco::Path::current()).resolve("DIRECT.041").toString();
-  }
+  CorrectToFileTest() : inputFile("DIRECT.041")
+  {}
 
   void testInit()
   {
@@ -152,11 +150,8 @@ public:
     if ( ! newWksp ) outputSpace = correctToFile.getPropertyValue("WorkspaceToCorrect");
     TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("OutputWorkspace", outputSpace));
 
-    //check that retrieving the filename and output workspace gets the correct value
+    //check that retrieving the output workspace gets the correct value
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = correctToFile.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(inputFile) == 0 );
-
     TS_ASSERT_THROWS_NOTHING( result = correctToFile.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( result == outputSpace );
 

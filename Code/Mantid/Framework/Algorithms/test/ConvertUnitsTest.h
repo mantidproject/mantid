@@ -242,7 +242,7 @@ public:
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     std::string pulsefile( "CNCS_7860_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
-    loader.setProperty("PulseidFilename", pulsefile);
+    loader.setPropertyValue("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", this->inputSpace);
 //    loader.setPropertyValue("InstrumentFilename", "../../../Instrument/CNCS_Definition.xml");
