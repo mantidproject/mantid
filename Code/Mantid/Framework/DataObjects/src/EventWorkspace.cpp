@@ -237,6 +237,7 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /** Return how many entries in the Y MRU list are used.
    * Only used in tests. It only returns the 0-th MRU list size.
+   * @return :: number of entries in the MRU list.
    */
   int EventWorkspace::MRUSize() const
   {

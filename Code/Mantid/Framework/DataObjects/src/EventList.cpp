@@ -51,6 +51,7 @@ using Kernel::DateAndTime;
   /** () operator: return the tof (X value) of the event.
    * This is useful for std operations like comparisons
    * and std::lower_bound
+   * @return :: double, the tof (X value) of the event.
    */
   double TofEvent::operator()() const
   {
@@ -568,6 +569,7 @@ using Kernel::DateAndTime;
   // --------------------------------------------------------------------------
   /** Equality operator between EventList's
    * @param rhs :: other EventList to compare
+   * @return :: true if equal.
    */
   bool EventList::operator==(const EventList& rhs) const
   {
@@ -584,6 +586,7 @@ using Kernel::DateAndTime;
 
   /** Inequality comparator
   * @param rhs :: other EventList to compare
+   * @return :: true if not equal.
   */
   bool EventList::operator!=(const EventList& rhs) const
   {
@@ -1089,7 +1092,8 @@ using Kernel::DateAndTime;
 
 
   // --------------------------------------------------------------------------
-  /** Return the memory used by the EventList. */
+  /** @return :: the memory used by the EventList, in bytes.
+   * */
   size_t EventList::getMemorySize() const
   {
     if (has_weights)
@@ -1726,7 +1730,7 @@ using Kernel::DateAndTime;
   }
 
   /** Fill a vector with the list of TOFs
-   *  @param A reference to the vector to be filled
+   *  @param tofs :: A reference to the vector to be filled
    */
   void EventList::getTofs(std::vector<double>& tofs) const
   {
