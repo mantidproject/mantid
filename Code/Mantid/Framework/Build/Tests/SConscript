@@ -17,8 +17,8 @@ myenv.Append(CPPPATH=['../../../../Third_Party/src/cxxtest'])
 myenv.Append(LIBPATH=libDirList)
 
 # Add the location of the gmock library
-myenv.Append(CPPPATH=['../../../../TestingTools/include'])
-third_party_path = '../../../../TestingTools/lib/'
+myenv.Append(CPPPATH=['../../../TestingTools/include'])
+third_party_path = '../../../TestingTools/lib/'
 
 # For Windows and Mac, the gmock library is in Third_Party
 # which is already in the path. Just add the path for linux.
