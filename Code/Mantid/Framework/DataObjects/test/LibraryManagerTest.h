@@ -24,7 +24,7 @@ public:
 
 	void testOpenLibrary()
 	{
-		TS_ASSERT_LESS_THAN(0, LibraryManager::Instance().OpenAllLibraries("../../Build/Plugins/", false));
+		TS_ASSERT_LESS_THAN(0, LibraryManager::Instance().OpenAllLibraries("../../bin", false));
 	}
 
 	void testLoadedAlgorithm()
