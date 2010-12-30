@@ -248,118 +248,118 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/TofCorrection.h )
 
 set ( TEST_FILES test/AddSampleLogTest.h
-                 test/AlignDetectorsTest.h
+                 #test/AlignDetectorsTest.h # TODO requires DataHandling
 		 test/AnyShapeAbsorptionTest.h
-		 test/ApplyTransmissionCorrectionTest.h
+		 #test/ApplyTransmissionCorrectionTest.h # TODO requires DataHandling
 		 test/BinaryOperationTest.h
-		 test/CalculateEfficiencyTest.h
-		 test/CalculateTransmissionBeamSpreaderTest.h
-		 test/CalculateTransmissionTest.h
+		 #test/CalculateEfficiencyTest.h # TODO requires DataHandling
+		 #test/CalculateTransmissionBeamSpreaderTest.h # TODO requires DataHandling
+		 #test/CalculateTransmissionTest.h # TODO requires DataHandling
 		 test/ChainedOperatorTest.h
-		 test/ChangeBinOffsetTest.h
-		 test/CheckWorkspacesMatchTest.h
-		 test/CloneWorkspaceTest.h
+		 #test/ChangeBinOffsetTest.h # TODO requires DataHandling
+		 #test/CheckWorkspacesMatchTest.h # TODO requires DataHandling
+		 #test/CloneWorkspaceTest.h # TODO requires DataHandling
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
-		 test/ConjoinWorkspacesTest.h
+		 #test/ConjoinWorkspacesTest.h # TODO requires DataHandling
 		 test/ConvertFromDistributionTest.h
-		 test/ConvertSpectrumAxisTest.h
+		 #test/ConvertSpectrumAxisTest.h # TODO requires DataHandling
 		 test/ConvertToDistributionTest.h
 		 test/ConvertToHistogramTest.h
-		 test/ConvertToMatrixWorkspaceTest.h
+		 #test/ConvertToMatrixWorkspaceTest.h # TODO requires DataHandling
 		 test/ConvertToPointDataTest.h
-		 test/ConvertUnitsTest.h
-		 test/CorrectKiKfTest.h
-		 test/CorrectToFileTest.h
-		 test/CreateCalFileByNamesTest.h
-		 test/CreateDummyCalFileTest.h
+		 #test/ConvertUnitsTest.h # TODO requires DataHandling
+		 #test/CorrectKiKfTest.h # TODO requires DataHandling
+		 #test/CorrectToFileTest.h # TODO requires DataHandling
+		 #test/CreateCalFileByNamesTest.h # TODO requires DataHandling
+		 #test/CreateDummyCalFileTest.h # TODO requires DataHandling
 		 test/CreateSingleValuedWorkspaceTest.h
 		 test/CreateWorkspaceTest.h
 		 test/CropWorkspaceTest.h
 		 test/CuboidGaugeVolumeAbsorptionTest.h
 		 test/CylinderAbsorptionTest.h
-		 test/DetectorEfficiencyCorTest.h
-		 test/DetectorEfficiencyVariationTest.h
-		 test/DiffractionEventReadDetCalTest.h
-		 test/DiffractionFocussing2Test.h
-		 test/DiffractionFocussingTest.h
+		 #test/DetectorEfficiencyCorTest.h # TODO requires DataHandling
+		 #test/DetectorEfficiencyVariationTest.h # TODO requires DataHandling
+		 #test/DiffractionEventReadDetCalTest.h # TODO requires DataHandling
+		 #test/DiffractionFocussing2Test.h # TODO requires DataHandling
+		 #test/DiffractionFocussingTest.h # TODO requires DataHandling
 		 test/DivideTest.h
 		 test/ExponentialCorrectionTest.h
 		 test/ExponentialTest.h
-		 test/ExtractFFTSpectrumTest.h
+		 #test/ExtractFFTSpectrumTest.h # TODO requires Nexus
 		 test/ExtractMaskingTest.h
 		 test/ExtractSingleSpectrumTest.h
-		 test/FFTSmooth2Test.h
+		 #test/FFTSmooth2Test.h # TODO requires Nexus
 		 test/FFTTest.h
-		 test/FilterByLogValueTest.h
-		 test/FilterByTimeTest.h
-		 test/FindCenterOfMassPositionTest.h
+		 #test/FilterByLogValueTest.h # TODO requires DataHandling
+		 #test/FilterByTimeTest.h # TODO requires DataHandling
+		 #test/FindCenterOfMassPositionTest.h # TODO requires DataHandling
 		 test/FindDeadDetectorsTest.h
 		 test/FindDetectorsOutsideLimitsTest.h
-		 test/FindPeaksTest.h
-		 test/FlatBackgroundTest.h
+		 #test/FindPeaksTest.h # TODO requires Nexus
+		 #test/FlatBackgroundTest.h # TODO requires CurveFitting
 		 test/FlatPlateAbsorptionTest.h
-		 test/GetDetectorOffsetsTest.h
-		 test/GetEiTest.h
-		 test/GhostCorrectionTest.h
-		 test/GroupWorkspacesTest.h
-		 test/He3TubeEfficiencyTest.h
+		 #test/GetDetectorOffsetsTest.h # TODO requires CurveFitting
+		 #test/GetEiTest.h # TODO requires DataHandling
+		 #test/GhostCorrectionTest.h # TODO requires DataHandling
+		 #test/GroupWorkspacesTest.h # TODO requires DataHandling
+		 #test/He3TubeEfficiencyTest.h # TODO requires DataHandling
 		 test/HRPDSlabCanAbsorptionTest.h
 		 test/IntegrationTest.h
 		 test/InterpolatingRebinTest.h
 		 test/LogarithmTest.h
-		 test/MaskBinsTest.h
-		 test/MedianDetectorTestTest.h
-		 test/MemoryLeakTest.h
-		 test/MergeRunsTest.h
+		 #test/MaskBinsTest.h # TODO requires DataHandling
+		 #test/MedianDetectorTestTest.h # TODO requires DataHandling
+		 #test/MemoryLeakTest.h # TODO requires Nexus
+		 #test/MergeRunsTest.h # TODO requires DataHandling
 		 test/MinusTest.h
 		 test/MonteCarloAbsorptionTest.h
 		 test/MultipleScatteringAbsorption.h
-		 test/MultiplyRangeTest.h
+		 #test/MultiplyRangeTest.h # TODO requires DataHandling
 		 test/MultiplyTest.h
-		 test/MuonAlphaCalcTest.h
-		 test/MuonAsymmetryCalcTest.h
-		 test/MuonRemoveExpDecayTest.h
+		 #test/MuonAlphaCalcTest.h # TODO requires Nexus
+		 #test/MuonAsymmetryCalcTest.h # TODO requires Nexus
+		 #test/MuonRemoveExpDecayTest.h # TODO requires DataHandling
 		 test/NormaliseByCurrentTest.h
 		 test/NormaliseToMonitorTest.h
 		 test/OneMinusExponentialCorTest.h
-		 test/PlotAsymmetryByLogValueTest.h
+		 #test/PlotAsymmetryByLogValueTest.h # TODO requires Nexus
 		 test/PlusTest.h
 		 test/PointByPointVCorrectionTest.h
 		 test/PoissonErrorsTest.h
 		 test/PolynomialCorrectionTest.h
 		 test/PowerLawCorrectionTest.h
 		 test/PowerTest.h
-		 test/Q1DTest.h
-		 test/Q1DWeightedTest.h
-		 test/QxyTest.h
+		 #test/Q1DTest.h # TODO requires DataHandling
+		 #test/Q1DWeightedTest.h # TODO requires DataHandling
+		 #test/QxyTest.h # TODO requires DataHandling
 		 test/RealFFTTest.h
 		 test/RebinTest.h
 		 test/RebinToWorkspaceTest.h
 		 test/RebunchTest.h
 		 test/RegroupTest.h
-		 test/RemoveBinsTest.h
+		 #test/RemoveBinsTest.h # TODO requires Nexus
 		 test/RenameWorkspaceTest.h
 		 test/ReplaceSpecialValuesTest.h
 		 test/SANSInstrumentCreationHelper.h
-		 test/SaveSNSNexusTest.h
+		 #test/SaveSNSNexusTest.h # TODO requires DataHandling
 		 test/ScaleTest.h
 		 test/SmoothDataTest.h
-		 test/SofQWTest.h
-		 test/SolidAngleCorrectionTest.h
-		 test/SolidAngleTest.h
+		 #test/SofQWTest.h # TODO requires DataHandling
+		 #test/SolidAngleCorrectionTest.h # TODO requires DataHandling
+		 #test/SolidAngleTest.h # TODO requires DataHandling
 		 test/SortTest.h
-		 test/StripPeaksTest.h
+		 #test/StripPeaksTest.h # TODO requires CurveFitting
 		 test/StripVanadiumPeaksTest.h
-		 test/SumNeighboursTest.h
-		 test/SumRowColumnTest.h
-		 test/SumSpectraTest.h
-		 test/TofCorrectionTest.h
-		 test/TransposeTest.h
+		 #test/SumNeighboursTest.h # TODO requires DataHandling
+		 #test/SumRowColumnTest.h # TODO requires DataHandling
+		 #test/SumSpectraTest.h # TODO requires DataHandling
+		 #test/TofCorrectionTest.h # TODO requires DataHandling
+		 #test/TransposeTest.h # TODO requires DataHandling
 		 test/UnaryOperationTest.h
-		 test/UnGroupWorkspacesTest.h
-		 test/UnwrapTest.h
-		 test/WeightedMeanTest.h
+		 #test/UnGroupWorkspacesTest.h # TODO requires DataHandling
+		 #test/UnwrapTest.h # TODO requires DataHandling
+		 #test/WeightedMeanTest.h # TODO requires DataHandling
 		 test/WorkspaceGroupTest.h )
 
 # Add the target for this directory
@@ -375,6 +375,5 @@ target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 #if ( CXXTEST_FOUND ) # TODO uncomment
 #  cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-#  target_link_libraries( AlgorithmsTest Algorithms DataHandling Nexus
-#                         CurveFitting )
+#  target_link_libraries( AlgorithmsTest Algorithms )
 #endif ()
