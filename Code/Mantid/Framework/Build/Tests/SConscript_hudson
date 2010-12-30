@@ -15,7 +15,7 @@ myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
 myenv.Append(LIBS=libList)
 myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
-myenv.Append(CPPPATH=cppPath + ['../../../Tools/cxxtest'])
+myenv.Append(CPPPATH=cppPath + ['../../../TestingTools/cxxtest'])
 
 # Add the location of the gmock library
 myenv.Append(CPPPATH=['../../../TestingTools/include'])
