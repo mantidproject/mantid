@@ -34,7 +34,13 @@ else:
     pass
 
 # Update the local copy
-retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True, cwd="../Mantid/QtPropertyBrowser")
+if retcode != 0:
+    sys.exit(1)
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True, cwd="../Mantid/MantidQt")
+if retcode != 0:
+    sys.exit(1)
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True, cwd="../Mantid/MantidPlot")
 if retcode != 0:
     sys.exit(1)
 
@@ -44,15 +50,15 @@ sp.call("svn log -v -rBASE",stdout=svnlog,shell=True)
 svnlog.close()
 
 # Update the header containing the revision number
-sp.call("python release_date.py",shell=True)
+sp.call("python release_date.py",shell=True,cwd="../Mantid/MantidPlot")
 
 buildlog = open(log_dir + "qtiplot/build.log","w") 
 errorlog = open(log_dir + "qtiplot/error.log","w")
 
 buildStart = time.time()
 #Build QtPropertyBrowser
-sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
-ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/QtPropertyBrowser")
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/QtPropertyBrowser")
 if ret != 0:
     outcome = "QtPropertyBrowser build failed"
     buildlog.write(outcome)
@@ -60,9 +66,9 @@ if ret != 0:
 
 # Build MantidQt
 # Updates to UI files alone don't always seem to get picked up without a clean first, so do that until we can figure out why
-sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
-sp.call(make + ' clean',stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
-ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/MantidQt")
+sp.call(make + ' clean',stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/MantidQt")
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/MantidQt")
 
 if ret != 0:
     outcome = "MantidQt build failed"
@@ -71,8 +77,8 @@ if ret != 0:
 
 
 #Now build MantidPlot
-sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
-ret = sp.call(make + ' ' + ''.join(buildargs),stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/MantidPlot")
+ret = sp.call(make + ' ' + ''.join(buildargs),stdout=buildlog,stderr=errorlog,shell=True,cwd="../Mantid/MantidPlot")
 if ret != 0:
     outcome = "MantidPlot build failed"
     buildlog.write(outcome)

@@ -17,7 +17,7 @@ myenv.Append(CPPDEFINES=[('IN_MANTID_GEOMETRY',1)])
 #For Windows, OpenCascade stuff is still in the main SConstruct
 if platform.system() == 'Darwin':
    myenv.Append(CPPDEFINES=['HAVE_IOSTREAM','HAVE_LIMITS','HAVE_IOMANIP'])
-   myenv.Append(CPPPATH=['../../Third_Party/include/OpenCascade'])
+   myenv.Append(CPPPATH=['../../../Third_Party/include/OpenCascade'])
 
    # In Mac-land we should link to the OpenGL framework rather than
    # specific libraries

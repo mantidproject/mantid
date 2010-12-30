@@ -106,7 +106,7 @@ unix:!macx {
   INCLUDEPATH       += ../../Third_Party/include
   INCLUDEPATH       += ../../Third_Party/include/zlib123
   INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
-  INCLUDEPATH       += ../3rdparty/qwt/src
+  INCLUDEPATH       += ../../Third_Party/include/qwt
 }
 
 ##################### 3rd PARTY LIBRARIES SECTION ###########################

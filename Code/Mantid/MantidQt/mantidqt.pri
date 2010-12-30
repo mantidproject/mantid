@@ -87,7 +87,7 @@ unix:!macx {
 	INCLUDEPATH += /usr/include/qwt/
 	}
 } else {
-	INCLUDEPATH += "$$TOPBUILDDIR/../3rdparty/qwt/src/"
+	INCLUDEPATH += "$$THIRDPARTY/include/qwt"
 }
 
 
@@ -114,7 +114,7 @@ unix {
 
   macx {
 	LIBS += -lboost_signals
-	LIBS += -L$$TOPBUILDDIR/../3rdparty/qwt/lib -lqwt
+	LIBS += -L$$THIRDPARTY/lib/mac -lqwt
 	} else {
 		LIBS += -lboost_signals-mt
 		exists ( /usr/lib64/libqwt-qt4.so ) {
