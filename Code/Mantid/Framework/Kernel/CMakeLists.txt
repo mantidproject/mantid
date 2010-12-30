@@ -137,10 +137,47 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 		inc/MantidKernel/ANN/ANNperf.h
 		inc/MantidKernel/ANN/ANNx.h )
 
-set ( TEST_FILES test/ArrayPropertyTest.h 
-                 #test/BinaryFileTest.h
-                 test/BinFinderTest.h 
-                 test/BoundedValidatorTest.h )
+set ( TEST_FILES test/ArrayBoundedValidatorTest.h
+                 test/ArrayPropertyTest.h
+		 test/AtomTest.h
+		 #test/BinaryFileTest.h # TODO segfaults
+		 test/BinFinderTest.h
+		 test/BoundedValidatorTest.h
+		 test/CacheTest.h
+		 #test/ConfigServiceTest.h # TODO fails
+		 test/DateAndTimeTest.h
+		 test/DateValidatorTest.h
+		 test/DirectoryValidatorTest.h
+		 test/DynamicFactoryTest.h
+		 test/EnvironmentHistoryTest.h
+		 #test/FacilitiesTest.h # TODO fails
+		 test/FileValidatorTest.h
+		 test/FilterChannelTest.h
+		 test/InterpolationTest.h
+		 test/ListValidatorTest.h
+		 test/LogFilterTest.h
+		 test/LogParserTest.h
+		 test/MandatoryValidatorTest.h
+		 test/MaskedPropertyTest.h
+		 test/MersenneTwisterTest.h
+		 test/MRUListTest.h
+		 test/NeutronAtomTest.h
+		 test/NullValidatorTest.h
+		 test/PropertyHistoryTest.h
+		 test/PropertyManagerTest.h
+		 test/PropertyTest.h
+		 test/PropertyWithValueTest.h
+		 test/RandomNumberGeneratorTest.h
+		 test/RebinHistogramTest.h
+		 test/RebinParamsValidatorTest.h
+		 test/SignalChannelTest.h
+		 test/StatisticsTest.h
+		 test/SupportTest.h
+		 test/TimerTest.h
+		 test/TimeSeriesPropertyTest.h
+		 test/TimeSplitterTest.h
+		 test/UnitFactoryTest.h
+		 test/UnitTest.h )
 
 # For Windows:
 add_definitions ( -DIN_MANTID_KERNEL )
