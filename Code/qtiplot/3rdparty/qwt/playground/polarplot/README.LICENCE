@@ -1,6 +1,0 @@
-In opposite to the Qwt library, the QwtPolar library is released under 
-the GPL 2.0. The reason for this is temporarily and the Qwt licence will
-be used for later releases of the QwtPolar package too.
-
-In the meantime you need to contact the author, if you like to use it in
-a closed source environment.
