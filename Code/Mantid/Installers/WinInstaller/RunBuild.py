@@ -12,13 +12,13 @@ else:
     pass
 
 buildStart = time.time()
-build_cmd += ' 1> ../../../../logs/Installer/build.log 2> ../../../../logs/Installer/error.log'
+build_cmd += ' 1> ../../../../../../logs/Installer/build.log 2> ../../../../../../logs/Installer/error.log'
 retcode = os.system(build_cmd)
 buildFinish = time.time()
 
 buildTime = buildFinish - buildStart
 
-BuildTimeLog = open("../../../../logs/Installer/timebuild.log", "w")
+BuildTimeLog = open("../../../../../../logs/Installer/timebuild.log", "w")
 BuildTimeLog.write(str(buildTime))
 BuildTimeLog.close()
 

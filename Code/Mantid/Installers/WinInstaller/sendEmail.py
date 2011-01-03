@@ -5,7 +5,7 @@ import platform
 from shutil import move
 from time import strftime
 import sys
-sys.path.append('../Mantid/Build')
+sys.path.append('../../Framework/Build')
 import buildNotification as notifier
 import urllib
 import time
@@ -49,7 +49,7 @@ buildSuccess = True
 mssgBuild = ''
 mssgBuildErr = ''
 
-localLogDir = '../../../../logs/Installer/'
+localLogDir = '../../../../../../logs/Installer/'
 
 #create archive directory
 remoteArchiveDir,relativeLogDir = notifier.getArchiveDir(project)
