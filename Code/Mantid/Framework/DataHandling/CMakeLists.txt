@@ -7,7 +7,7 @@ set ( SRC_FILES src/CreateSampleShape.cpp src/DefineGaugeVolume.cpp
       src/LoadEmptyInstrument.cpp src/LoadEventPreNeXus.cpp
       src/LoadGSS.cpp src/LoadInstrument.cpp
       src/LoadInstrumentFromRaw.cpp src/LoadLog.cpp
-      src/LoadInstrumentHelper.cpp src/LoadInstrumentHelper.cpp 
+      src/LoadInstrumentHelper.cpp
       src/LoadLOQDistancesFromRaw.cpp src/LoadMappingTable.cpp
       src/LoadParameterFile.cpp src/LoadPreNeXusMonitors.cpp
       src/LoadRaw2.cpp src/LoadRaw3.cpp src/LoadRawBin0.cpp
@@ -24,7 +24,8 @@ set ( SRC_FILES src/CreateSampleShape.cpp src/DefineGaugeVolume.cpp
       src/SaveCanSAS1D.cpp src/SaveCSV.cpp src/SaveDASC.cpp
       src/SaveFocusedXYE.cpp src/SaveGSS.cpp src/SavePHX.cpp
       src/SaveRKH.cpp src/SaveSPE.cpp src/SaveVTK.cpp
-      src/SetScalingPSD.cpp src/UpdateInstrumentFromRaw.cpp )
+      src/SetScalingPSD.cpp src/UpdateInstrumentFromRaw.cpp 
+)
 
 set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
       inc/MantidDataHandling/DefineGaugeVolume.h
@@ -76,7 +77,8 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
       inc/MantidDataHandling/SaveSPE.h
       inc/MantidDataHandling/SaveVTK.h
       inc/MantidDataHandling/SetScalingPSD.h
-      inc/MantidDataHandling/UpdateInstrumentFromRaw.h )
+      inc/MantidDataHandling/UpdateInstrumentFromRaw.h 
+)
 
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})

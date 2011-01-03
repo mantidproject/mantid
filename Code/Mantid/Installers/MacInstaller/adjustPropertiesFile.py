@@ -19,7 +19,7 @@ replacements = {
     "pythonalgorithms.directories":"pythonalgorithms.directories = ../../plugins/PythonAlgs"
 }
 
-template = open('../Mantid/Properties/Mantid.properties','r')
+template = open('../../Framework/Properties/Mantid.properties','r')
 original = template.readlines()
 prop_file = open('MantidPlot.app/Contents/MacOS/Mantid.properties','w')
 continuation = False

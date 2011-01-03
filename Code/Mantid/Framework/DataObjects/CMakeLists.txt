@@ -4,7 +4,8 @@ set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
       src/ManagedDataBlock2D.cpp src/ManagedWorkspace2D.cpp
       src/TableColumn.cpp src/TableWorkspace.cpp src/Workspace1D.cpp
       src/Workspace2D.cpp src/WorkspaceSingleValue.cpp 
-      src/EventWorkspaceHelpers.cpp src/EventWorkspaceHelpers.cpp)
+      src/EventWorkspaceHelpers.cpp 
+)
 
 set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
       inc/MantidDataObjects/CompressedWorkspace2D.h
@@ -18,7 +19,8 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
       inc/MantidDataObjects/TableWorkspace.h
       inc/MantidDataObjects/Workspace1D.h
       inc/MantidDataObjects/Workspace2D.h
-      inc/MantidDataObjects/WorkspaceSingleValue.h )
+      inc/MantidDataObjects/WorkspaceSingleValue.h
+)
 
 # For Windows:
 add_definitions ( -DIN_MANTID_DATA_OBJECTS )
