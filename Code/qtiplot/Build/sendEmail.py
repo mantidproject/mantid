@@ -6,7 +6,7 @@ import sys
 import platform
 import subprocess as sp
 from shutil import move
-sys.path.insert(0,'../Mantid/Build')
+sys.path.insert(0,'../Mantid/Framework/Build')
 import buildNotification as notifier
 from time import strftime
 import urllib
