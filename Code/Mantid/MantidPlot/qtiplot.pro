@@ -194,7 +194,7 @@ win32 {
   }
   
   LIBPATH += $${THIRD_PARTY}
-  LIBS += zlib1.lib
+  LIBS += zlib.lib
   build_pass:CONFIG(debug, debug|release) {
     LIBS += -lqscintilla2d
     LIBS += muparser_d.lib
@@ -222,10 +222,10 @@ win32 {
   
   build_pass:CONFIG(debug, debug|release) {
     # Just looks at the place where Visual Studio will put a debug build
-    LIBPATH += ../../Mantid/debug
+    LIBPATH += ../Framework/debug
   } else {
     # Look in the right place for both Scons and Visual Studio builds
-    LIBPATH += ../../Mantid/release
+    LIBPATH += ../Framework/release
   } 
 
   LIBS += MantidAPI.lib
