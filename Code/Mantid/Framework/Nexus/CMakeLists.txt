@@ -45,23 +45,23 @@ set ( INC_FILES inc/MantidNexus/LoadInstrumentFromNexus.h
 		inc/MantidNexus/SaveNXSPE.h
 		inc/MantidNexus/SaveSNSNexus.h )
 
-set ( TEST_FILES #test/LoadInstrumentFromSNSNexusTest.h # TODO requires DataHandling
-                 #test/LoadISISNexusTest.h # TODO requires DataHandling
+set ( TEST_FILES #test/LoadInstrumentFromSNSNexusTest.h # TODO fails
+                 #test/LoadISISNexusTest.h # TODO fails
 		 #test/LoadLogsFromSNSNexusTest.h # TODO fails
-		 #test/LoadMuonLogTest.h # TODO requires DataHandling
-		 #test/LoadMuonNexus2Test.h # TODO requires DataHandling
-		 #test/LoadMuonNexusTest.h # TODO requires DataHandling
+		 #test/LoadMuonLogTest.h # TODO fails
+		 #test/LoadMuonNexus2Test.h # TODO fails
+		 #test/LoadMuonNexusTest.h # TODO fails
 		 #test/LoadNexusMonitorsTest.h # TODO fails
-		 #test/LoadNexusProcessedTest.h # TODO requires DataHandling
-		 #test/LoadNexusTest.h # TODO requires DataHandling
-		 #test/LoadRSaveNLoadNcspTest.h # TODO requires DataHandling
-		 #test/LoadSNSEventNexusTest.h # TODO requires DataHandling
+		 #test/LoadNexusProcessedTest.h # TODO fails
+		 #test/LoadNexusTest.h # TODO fails
+		 #test/LoadRSaveNLoadNcspTest.h # TODO fails
+		 #test/LoadSNSEventNexusTest.h # TODO fails
 		 test/LoadSNSNexusTest.h
-		 #test/LoadTOFRawNeXusTest.h # TODO fails to compile
+		 #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
 		 test/NexusAPITest.h
-		 #test/SaveNexusProcessedTest.h # TODO requires DataHandling
-		 #test/SaveNeXusTest.h # TODO requires DataHandling
-		 #test/SaveNXSPETest.h # TODO requires DataHandling
+		 #test/SaveNexusProcessedTest.h # TODO fails
+		 #test/SaveNeXusTest.h # TODO fails
+		 #test/SaveNXSPETest.h # TODO fails
 		 )
 
 # For Windows:
@@ -83,6 +83,7 @@ include_directories ( inc )
 target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
+  include_directories (../DataHandling/inc )
   cxxtest_add_test ( NexusTest ${TEST_FILES} )
-  target_link_libraries( NexusTest Nexus )
+  target_link_libraries( NexusTest Nexus DataHandling )
 endif ()
