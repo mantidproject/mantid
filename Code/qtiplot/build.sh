@@ -34,15 +34,15 @@ python release_date.py $VERSION $SVN_VERSION
 ROOTDIR=`pwd`
 
 # QtPropertyBrowser library
-cd $ROOTDIR/QtPropertyBrowser
+cd $ROOTDIR/../Mantid/QtPropertyBrowser
 build_library "QtPropertyBrowser" $CLEAN
 
 # Build dialog library
-cd $ROOTDIR/MantidQt
+cd $ROOTDIR/../Mantid/MantidQt
 build_library "MantidQt" $CLEAN
 
 # Now build qtiplot
-cd $ROOTDIR/qtiplot
+cd $ROOTDIR/../Mantid/MantidPlot
 build_library "MantidPlot" $CLEAN
 
 # If we reached this point then the build was successful
