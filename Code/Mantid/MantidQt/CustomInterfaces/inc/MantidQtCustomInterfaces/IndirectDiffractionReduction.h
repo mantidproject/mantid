@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_IndirectDiffractionReduction.h"
+#include "ui_IndirectDiffractionReduction.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 namespace MantidQt
