@@ -83,7 +83,7 @@ set ( TEST_FILES test/BackToBackExponentialTest.h
 		 test/FuncMinimizerFactoryTest.h
 		 test/FunctionFactoryTest.h
 		 test/FunctionTest.h
-		 #test/Gaussian1DTest.h # TODO fails
+		 test/Gaussian1DTest.h
 		 test/GaussianTest.h
 		 test/IkedaCarpenterPVTest.h
 		 test/LinearBackgroundTest.h

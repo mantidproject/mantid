@@ -45,23 +45,23 @@ set ( INC_FILES inc/MantidNexus/LoadInstrumentFromNexus.h
 		inc/MantidNexus/SaveNXSPE.h
 		inc/MantidNexus/SaveSNSNexus.h )
 
-set ( TEST_FILES #test/LoadInstrumentFromSNSNexusTest.h # TODO fails
-                 #test/LoadISISNexusTest.h # TODO fails
-		 #test/LoadLogsFromSNSNexusTest.h # TODO fails
-		 #test/LoadMuonLogTest.h # TODO fails
-		 #test/LoadMuonNexus2Test.h # TODO fails
-		 #test/LoadMuonNexusTest.h # TODO fails
-		 #test/LoadNexusMonitorsTest.h # TODO fails
-		 #test/LoadNexusProcessedTest.h # TODO fails
-		 #test/LoadNexusTest.h # TODO fails
-		 #test/LoadRSaveNLoadNcspTest.h # TODO fails
-		 #test/LoadSNSEventNexusTest.h # TODO fails
+set ( TEST_FILES test/LoadInstrumentFromSNSNexusTest.h
+                 test/LoadISISNexusTest.h
+		 test/LoadLogsFromSNSNexusTest.h
+		 test/LoadMuonLogTest.h
+		 test/LoadMuonNexus2Test.h
+		 test/LoadMuonNexusTest.h
+		 test/LoadNexusMonitorsTest.h
+		 test/LoadNexusProcessedTest.h
+		 test/LoadNexusTest.h
+		 test/LoadRSaveNLoadNcspTest.h
+		 test/LoadSNSEventNexusTest.h
 		 test/LoadSNSNexusTest.h
 		 #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
 		 test/NexusAPITest.h
-		 #test/SaveNexusProcessedTest.h # TODO fails
-		 #test/SaveNeXusTest.h # TODO fails
-		 #test/SaveNXSPETest.h # TODO fails
+		 test/SaveNexusProcessedTest.h
+		 test/SaveNeXusTest.h
+		 test/SaveNXSPETest.h
 		 )
 
 # For Windows:

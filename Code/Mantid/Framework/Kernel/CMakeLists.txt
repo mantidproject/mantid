@@ -144,13 +144,13 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/BinFinderTest.h
 		 test/BoundedValidatorTest.h
 		 test/CacheTest.h
-		 #test/ConfigServiceTest.h # TODO fails
+		 test/ConfigServiceTest.h # TODO fails
 		 test/DateAndTimeTest.h
 		 test/DateValidatorTest.h
 		 test/DirectoryValidatorTest.h
 		 test/DynamicFactoryTest.h
 		 test/EnvironmentHistoryTest.h
-		 #test/FacilitiesTest.h # TODO fails
+		 test/FacilitiesTest.h # TODO fails
 		 test/FileValidatorTest.h
 		 test/FilterChannelTest.h
 		 test/InterpolationTest.h

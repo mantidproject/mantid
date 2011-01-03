@@ -146,10 +146,10 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/AxisTest.h
 		 test/CompositeFunctionTest.h
 		 test/ExpressionTest.h
-		 #test/FileFinderTest.h # TODO fails
-		 #test/FilePropertyTest.h # TODO fails
+		 test/FileFinderTest.h
+		 test/FilePropertyTest.h
 		 test/FrameworkManagerTest.h
-		 #test/FunctionTest.h # TODO fails
+		 test/FunctionTest.h
 		 test/IMDWorkspaceTest.h
 		 #test/ImplicitFunctionFactoryTest.h # TODO failed to build - gmock
 		 #test/ImplicitFunctionParameterParserFactoryTest.h # TODO failed to build - gmock

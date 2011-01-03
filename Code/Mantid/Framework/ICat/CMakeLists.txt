@@ -37,16 +37,15 @@ set ( INC_FILES inc/MantidICat/AdvancedSearch.h
 		inc/MantidICat/SearchParam.h
 		inc/MantidICat/Session.h )
 
-set ( TEST_FILES #test/AdvancedSearchTest.h # TODO fails
+set ( TEST_FILES test/AdvancedSearchTest.h
                  test/DownloadDataFileTest.h
-		 #test/GetDataFilesTest.h # TODO fails
-		 #test/GetDataSetsTest.h # TODO fails
-		 #test/ListInstrumentsTest.h # TODO fails
-		 #test/ListInvestigationTypesTest.h # TODO fails
-		 #test/LoginTest.h # TODO fails
-		 #test/MyDataSearchTest.h # TODO fails
-		 #test/SearchTest.h # TODO fails
- )
+		 test/GetDataFilesTest.h
+		 test/GetDataSetsTest.h
+		 test/ListInstrumentsTest.h
+		 test/ListInvestigationTypesTest.h
+		 test/LoginTest.h
+		 test/MyDataSearchTest.h
+		 test/SearchTest.h )
 
 # For Windows:
 add_definitions ( -DIN_MANTID_ICAT )

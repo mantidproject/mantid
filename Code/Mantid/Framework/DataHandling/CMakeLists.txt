@@ -122,51 +122,50 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
 
 set ( TEST_FILES test/CreateSampleShapeTest.h
                  test/DefineGaugeVolumeTest.h
-		 #test/FindDetectorsInShapeTest.h # TODO fails
-		 #test/GetMaskedDetectorsTest.h # TODO fails
-		 #test/GroupDetectors2Test.h # TODO fails
-		 #test/GroupDetectorsTest.h # TODO fails
+		 #test/FindDetectorsInShapeTest.h # TODO exception
+		 test/GetMaskedDetectorsTest.h
+		 test/GroupDetectors2Test.h
+		 test/GroupDetectorsTest.h
 		 test/ISISDataArchiveTest.h
-		 #test/LoadCanSAS1dTest.h # TODO fails
+		 test/LoadCanSAS1dTest.h
 		 test/LoadDAETest.h
-		 #test/LoadDetectorInfoTest.h # TODO fails
-		 #test/LoadEmptyInstrumentTest.h # TODO fails
-		 #test/LoadEventPreNeXusTest.h # TODO fails
-		 #test/LoadInstrumentFromRawTest.h # TODO fails
-		 #test/LoadInstrumentHelperTest.h # TODO fails
-		 #test/LoadInstrumentTest.h # TODO fails
-		 #test/LoadLogTest.h # TODO fails
-		 #test/LoadMappingTableTest.h # TODO fails
-		 #test/LoadParameterFileTest.h # TODO fails
-		 #test/LoadPreNeXusMonitorsTest.h # TODO fails
-		 #test/LoadRaw2Test.h # TODO fails
-		 #test/LoadRaw3Test.h # TODO fails
-		 #test/LoadRawBin0Test.h # TODO fails
-		 #test/LoadRawSpectrum0Test.h # TODO fails
-		 #test/LoadRawTest.h # TODO fails
-		 #test/LoadRKHTest.h # TODO fails
-		 #test/LoadSaveAsciiTest.h # TODO fails
-		 #test/LoadSNSspecTest.h # TODO fails
-		 #test/LoadSPETest.h # TODO fails
-		 #test/LoadSpice2dTest.h # TODO fails
-		 #test/LoadTest.h # TODO fails
-		 #test/ManagedRawFileWorkspace2DTest.h # TODO fails
-		 #test/MaskDetectorsInShapeTest.h # TODO fails
+		 test/LoadDetectorInfoTest.h
+		 test/LoadEmptyInstrumentTest.h
+		 test/LoadEventPreNeXusTest.h
+		 test/LoadInstrumentFromRawTest.h
+		 test/LoadInstrumentHelperTest.h
+		 test/LoadInstrumentTest.h
+		 test/LoadLogTest.h
+		 test/LoadMappingTableTest.h
+		 test/LoadParameterFileTest.h
+		 test/LoadPreNeXusMonitorsTest.h
+		 test/LoadRaw2Test.h
+		 test/LoadRaw3Test.h
+		 test/LoadRawBin0Test.h
+		 test/LoadRawSpectrum0Test.h
+		 test/LoadRawTest.h
+		 test/LoadRKHTest.h
+		 test/LoadSaveAsciiTest.h
+		 test/LoadSNSspecTest.h
+		 test/LoadSPETest.h
+		 test/LoadSpice2dTest.h
+		 test/LoadTest.h
+		 #test/ManagedRawFileWorkspace2DTest.h # TODO exception
+		 #test/MaskDetectorsInShapeTest.h # TODO exception
 		 test/MaskDetectorsTest.h
 		 test/MoveInstrumentComponentTest.h
-		 #test/RawFileInfoTest.h # TODO fails
-		 #test/SaveCanSAS1dTest.h # TODO fails
+		 test/RawFileInfoTest.h
+		 #test/SaveCanSAS1dTest.h # TODO exception
 		 test/SaveCSVTest.h
-		 #test/saveDASCTest.h # TODO fails to compile
+		 test/saveDASCTest.h
 		 test/SaveFocussedXYETest.h
 		 test/SavePHXTest.h
 		 test/SaveRKHTest.h
-		 #test/SaveSPETest.h # TODO fails
-		 #test/SetScalingPSDrawtest.h # TODO fails
-		 #test/SetScalingPSDtest.h # TODO fails
-		 #test/UpdateInstrumentFromRawTest.h # TODO fails
-		 #test/XMLlogfileTest.h # TODO fails
- )
+		 test/SaveSPETest.h
+		 #test/SetScalingPSDrawtest.h # TODO exception
+		 #test/SetScalingPSDtest.h # TODO exception
+		 test/UpdateInstrumentFromRawTest.h
+		 test/XMLlogfileTest.h )
 
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})

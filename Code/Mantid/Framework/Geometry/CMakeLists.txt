@@ -181,7 +181,7 @@ set ( TEST_FILES test/AcompTest.h
 		 test/PolyTest.h
 		 test/QuatTest.h
 		 test/RectangularDetectorTest.h
-		 #test/RegexSupportTest.h # TODO fails
+		 test/RegexSupportTest.h
 		 test/RotCounterTest.h
 		 test/RulesTest.h
 		 test/ShapeFactoryTest.h
