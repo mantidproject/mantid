@@ -15,6 +15,9 @@ set ( INC_FILES inc/MantidPythonAPI/api_exports.h
       inc/MantidPythonAPI/stl_proxies.h
       inc/MantidPythonAPI/WorkspaceProxies.h )
 
+set ( TEST_FILES test/PythonFrameworkTests.h
+                 test/SimplePythonAPITest.h )
+
 # Add local dependencies
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
@@ -59,3 +62,8 @@ add_custom_command ( TARGET PythonAPI POST_BUILD
                                ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 
+if ( CXXTEST_FOUND )
+  include_directories ( ../DataHandling/inc ../DataObjects/inc )
+  cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
+  target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects )
+endif ()
