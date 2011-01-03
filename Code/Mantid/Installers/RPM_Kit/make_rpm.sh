@@ -38,9 +38,9 @@ done
 shift $(($OPTIND - 1))
 
 # Get Mantid version from MantidVersion.txt file
-cd ../
+cd ../..
 mantid_versionfile=`pwd`/MantidVersion.txt
-cd RPM_Kit
+cd Installers/RPM_Kit
 if test -f $mantid_versionfile; then
     mantid_version=`cat $mantid_versionfile`
 else
@@ -58,6 +58,7 @@ if $do_local; then
     cd Mantid-$mantid_version
     # we use `pwd` to make absolute links; that way the link will
     # still work when the area is tarred up
+  #RJT, 03/01/2011 - These paths need fixing but I'm not sure what the starting point is for these relative paths
     ln -s `pwd`/../../../Images .
     ln -s `pwd`/../../../Test/Instrument instrument
     cd Code
@@ -72,13 +73,13 @@ else
 #
     cd Mantid-$mantid_version
     echo "Images ..."
-    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Images Images; do echo "Retrying svn"; rm -fr Images; sleep 30; done
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/Mantid/Images Images; do echo "Retrying svn"; rm -fr Images; sleep 30; done
     echo "MantidPlot ..."
     while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/qtiplot Code/qtiplot; do echo "Retrying svn"; rm -fr Code/qtiplot; sleep 30; done
     echo "src ..."
     while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid Code/Mantid; do echo "Retrying svn"; rm -fr Code/Mantid; sleep 30; done
     echo "instrument ..."
-    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Test/Instrument instrument; do echo "Retrying svn"; rm -fr instrument; sleep 30; done
+    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid/Instrument instrument; do echo "Retrying svn"; rm -fr instrument; sleep 30; done
     cd ..
 fi
 #mantid_release="0.`date +%Y%m%d`svnR$svn_version"

@@ -74,7 +74,7 @@ sed -i -e "s!MANTIDLIB = .*'!MANTIDLIB = '%{mantidlibdir}'!" SConstruct
 sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstruct
 
 %build
-cd Code/Mantid
+cd Code/Mantid/Framework
 sh build.sh rpmbuild=1 skiptest=1 debug=0
 cd ../qtiplot
 sh build.sh clean %{version} SVN_VERSION
@@ -94,13 +94,14 @@ mkdir -p $RPM_BUILD_ROOT/%{mantidpythonalgdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidpythonalgdir}/Examples
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
-install -m755 Code/Mantid/release/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/release/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/release/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
-install -m755 Code/Mantid/release/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
-install -m755 Code/Mantid/release/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/Build/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
-for i in Code/Mantid/release/*.so; do
+BUILDDIR=Code/Mantid/Framework/release
+install -m755 $BUILDDIR/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 $BUILDDIR/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 $BUILDDIR/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
+install -m755 $BUILDDIR/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
+install -m755 $BUILDDIR/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
+# install -m755 Code/Mantid/Build/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+for i in $BUILDDIR/*.so; do
     case `basename $i` in
 	libMantidAlgorithms.so | libMantidCurveFitting.so | libMantidDataHandling.so | libMantidDataObjects.so | libMantidNexus.so | libMantidICat.so )
 	    install -m755 $i $RPM_BUILD_ROOT/%{mantidpluginsdir}
@@ -110,19 +111,19 @@ for i in Code/Mantid/release/*.so; do
 	    ;;
     esac
 done
-install -m755 Code/Mantid/release/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+install -m755 $BUILDDIR/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
 for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
-    install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
+    install -m755 Code/Mantid/MantidPlot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
 done
-install -m755 Code/Mantid/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
+install -m755 Code/Mantid/Framework/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
 
 # Real Python algorithms
-for i in Code/Mantid/PythonAPI/PythonAlgorithms/*.py; do
+for i in Code/Mantid/Framework/PythonAPI/PythonAlgorithms/*.py; do
     install -m755 $i $RPM_BUILD_ROOT/%{mantidpythonalgdir}
 done
 
 # Example Python algorithms
-for i in Code/Mantid/PythonAPI/PythonAlgorithms/Examples/*.py; do
+for i in Code/Mantid/Framework/PythonAPI/PythonAlgorithms/Examples/*.py; do
     install -m755 $i $RPM_BUILD_ROOT/%{mantidpythonalgdir}/Examples
 done
     
@@ -136,15 +137,15 @@ chmod -R 755 $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 %endif
 
 cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
-cp -r Code/Mantid/PythonAPI/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
-cp -r Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
-cp -r Code/Mantid/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
+cp -r Code/Mantid/Scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
+cp -r Code/Mantid/Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
+cp -r Code/Mantid/Framwork/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
 sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.sh > $RPM_BUILD_ROOT/etc/profile.d/mantid.sh
 sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.csh > $RPM_BUILD_ROOT/etc/profile.d/mantid.csh
 echo %{mantidlibdir} > $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 echo %{mantidpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 echo %{mantidqtpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
-install -m644 Code/Mantid/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
+install -m644 Code/Mantid/Framework/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
 sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!mantidqt\.plugins\.directory.*!mantidqt.plugins.directory = %{mantidqtpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
@@ -171,6 +172,8 @@ if test `whoami` = root; then ldconfig; fi
 if test `whoami` = root; then ldconfig; fi
 
 %changelog
+* Mon Jan 03 2011 Russell Taylor <Russell.Taylor@ornl.gov> - 1.0.4
+- Update paths following repository restructure
 * Thu May 13 2010 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.3
 - Configure Debian/Ubuntu builds via alien
 * Mon Apr 07 2010 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.2
