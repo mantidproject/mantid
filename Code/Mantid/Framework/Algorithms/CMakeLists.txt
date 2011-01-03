@@ -248,59 +248,59 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/TofCorrection.h )
 
 set ( TEST_FILES test/AddSampleLogTest.h
-                 #test/AlignDetectorsTest.h # TODO fails
+                 test/AlignDetectorsTest.h
 		 test/AnyShapeAbsorptionTest.h
-		 #test/ApplyTransmissionCorrectionTest.h # TODO fails
+		 #test/ApplyTransmissionCorrectionTest.h # TODO exception
 		 test/BinaryOperationTest.h
-		 #test/CalculateEfficiencyTest.h # TODO fails to build
-		 #test/CalculateTransmissionBeamSpreaderTest.h # TODO fails to build
-		 #test/CalculateTransmissionTest.h # TODO fails to build
+		 test/CalculateEfficiencyTest.h
+		 test/CalculateTransmissionBeamSpreaderTest.h
+		 #test/CalculateTransmissionTest.h # TODO exception
 		 test/ChainedOperatorTest.h
-		 #test/ChangeBinOffsetTest.h # TODO fails
-		 #test/CheckWorkspacesMatchTest.h # TODO fails
-		 #test/CloneWorkspaceTest.h # TODO fails
+		 test/ChangeBinOffsetTest.h
+		 #test/CheckWorkspacesMatchTest.h # TODO exception
+		 test/CloneWorkspaceTest.h
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
-		 #test/ConjoinWorkspacesTest.h # TODO fails to build
+		 test/ConjoinWorkspacesTest.h
 		 test/ConvertFromDistributionTest.h
-		 #test/ConvertSpectrumAxisTest.h # TODO fails
+		 test/ConvertSpectrumAxisTest.h
 		 test/ConvertToDistributionTest.h
 		 test/ConvertToHistogramTest.h
-		 #test/ConvertToMatrixWorkspaceTest.h # TODO fails
+		 test/ConvertToMatrixWorkspaceTest.h
 		 test/ConvertToPointDataTest.h
-		 #test/ConvertUnitsTest.h # TODO fails
-		 #test/CorrectKiKfTest.h # TODO fails
-		 #test/CorrectToFileTest.h # TODO fails
-		 #test/CreateCalFileByNamesTest.h # TODO fails
-		 #test/CreateDummyCalFileTest.h # TODO fails
+		 test/ConvertUnitsTest.h
+		 test/CorrectKiKfTest.h
+		 test/CorrectToFileTest.h
+		 test/CreateCalFileByNamesTest.h
+		 test/CreateDummyCalFileTest.h
 		 test/CreateSingleValuedWorkspaceTest.h
 		 test/CreateWorkspaceTest.h
 		 test/CropWorkspaceTest.h
 		 test/CuboidGaugeVolumeAbsorptionTest.h
 		 test/CylinderAbsorptionTest.h
-		 #test/DetectorEfficiencyCorTest.h # TODO fails
-		 #test/DetectorEfficiencyVariationTest.h # TODO fails
-		 #test/DiffractionEventReadDetCalTest.h # TODO fails
-		 #test/DiffractionFocussing2Test.h # TODO fails
-		 #test/DiffractionFocussingTest.h # TODO fails
+		 test/DetectorEfficiencyCorTest.h
+		 #test/DetectorEfficiencyVariationTest.h # TODO exception
+		 test/DiffractionEventReadDetCalTest.h
+		 test/DiffractionFocussing2Test.h
+		 test/DiffractionFocussingTest.h
 		 test/DivideTest.h
 		 test/ExponentialCorrectionTest.h
 		 test/ExponentialTest.h
-		 #test/ExtractFFTSpectrumTest.h # TODO fails
-		 #test/ExtractMaskingTest.h # TODO fails to build
+		 test/ExtractFFTSpectrumTest.h
+		 test/ExtractMaskingTest.h
 		 test/ExtractSingleSpectrumTest.h
-		 #test/FFTSmooth2Test.h # TODO fails
+		 test/FFTSmooth2Test.h
 		 test/FFTTest.h
-		 #test/FilterByLogValueTest.h # TODO fails
-		 #test/FilterByTimeTest.h # TODO fails
-		 #test/FindCenterOfMassPositionTest.h # TODO fails to build
+		 test/FilterByLogValueTest.h
+		 test/FilterByTimeTest.h
+		 test/FindCenterOfMassPositionTest.h
 		 test/FindDeadDetectorsTest.h
 		 test/FindDetectorsOutsideLimitsTest.h
-		 #test/FindPeaksTest.h # TODO fails
+		 #test/FindPeaksTest.h # TODO exception
 		 test/FlatBackgroundTest.h
 		 test/FlatPlateAbsorptionTest.h
 		 test/GetDetectorOffsetsTest.h
-		 #test/GetEiTest.h # TODO  fails
+		 test/GetEiTest.h
 		 #test/GhostCorrectionTest.h # TODO  fails
 		 #test/GroupWorkspacesTest.h # TODO  fails
 		 #test/He3TubeEfficiencyTest.h # TODO  fails
