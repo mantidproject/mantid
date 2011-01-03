@@ -96,8 +96,9 @@ cd ../../..
 # ...the Mantid python library and associated files
 cp $BUILDPATH/libMantidPythonAPI.so MantidPlot.app/Contents/MacOS/
 cp $PYTHONAPI/MantidFramework.py MantidPlot.app/Contents/MacOS/
-cp $PYTHONAPI/MantidHeader.py MantidPlot.app/Contents/MacOS/
 cp $PYTHONAPI/MantidStartup.py MantidPlot.app/Contents/MacOS/
+cp $PYTHONAPI/setup.py MantidPlot.app/Contents/MacOS/
+cp $PYTHONAPI/__init__.py MantidPlot.app/Contents/MacOS/
 cp ../../MantidPlot/qtiplotrc.py MantidPlot.app/Contents/MacOS/
 cp ../../MantidPlot/qtiUtil.py MantidPlot.app/Contents/MacOS/
 cp ../../MantidPlot/mantidplotrc.py MantidPlot.app/Contents/MacOS/
