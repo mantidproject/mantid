@@ -86,6 +86,7 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
+# TODO: add_subdirectory (MatlabAPI)
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
@@ -96,3 +97,8 @@ add_subdirectory (Nexus)
 add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
+
+if ( ${MAKE_VATES} )
+  add_subdirectory (MDDataObjects)
+  add_subdirectory (MDAlgorithms)
+endif ()
