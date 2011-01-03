@@ -695,8 +695,8 @@ addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib','../../Framework/API/lib/Man
 addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib','../../Framework/DataObjects/lib/MantidDataObjects.lib',UserAlgorithms)
 addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib','../../Framework/Geometry/lib/MantidGeometry.lib',UserAlgorithms)
 addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib','../../Framework/CurveFitting/lib/MantidCurveFitting.lib',UserAlgorithms)
-addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
-addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib','../Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
+addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../../../Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
+addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib','../../../Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
 
 #--------------- Python ---------------------------------------------------------------------------------
 Sip = addComponent('Sip',comp_guid['Sip'],binDir)
