@@ -140,7 +140,8 @@ endmacro(CXXTEST_ADD_TEST)
 #=============================================================
 
 find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h
-          PATHS ${PROJECT_SOURCE_DIR}/../Tools/cxxtest
+          PATHS ${PROJECT_SOURCE_DIR}/TestingTools/cxxtest
+	        ${PROJECT_SOURCE_DIR}/../Tools/cxxtest
                 ${PROJECT_SOURCE_DIR}/../../Tools/cxxtest )
 find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen cxxtestgen.py
     PATHS ${CXXTEST_INCLUDE_DIR})
