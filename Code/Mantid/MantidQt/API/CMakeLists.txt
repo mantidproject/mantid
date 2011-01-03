@@ -3,7 +3,9 @@ file ( GLOB SRC_FILES src/*.cpp )
 set ( MOC_FILES inc/MantidQtAPI/AlgorithmDialog.h 
                 inc/MantidQtAPI/GenericDialog.h
                 inc/MantidQtAPI/ManageUserDirectories.h
-                inc/MantidQtAPI/MantidQtDialog.h
+                inc/MantidQtAPI/MantidDialog.h
+                inc/MantidQtAPI/MantidWidget.h
+                inc/MantidQtAPI/PythonRunner.h
                 inc/MantidQtAPI/UserSubWindow.h
 )
 
