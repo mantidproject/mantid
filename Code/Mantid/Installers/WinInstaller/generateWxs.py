@@ -482,7 +482,7 @@ addTo(MantidDlls,'Environment',{'Id':'AddMtdPath','Name':'PATH','Action':'set','
 # Only on 32bit windows for the moment
 if ARCH == '32':
     addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll',MANTIDRELEASE + 'MantidMatlabAPI.dll',MantidDlls)
-    Matlab=addCompList('MatlabMFiles','../../Framework/Mantid/MatlabAPI/mfiles','Matlab',binDir)[0]
+    Matlab=addCompList('MatlabMFiles','../../Framework/MatlabAPI/mfiles','Matlab',binDir)[0]
 
     #Add mantid_setup file
     setupfile = open('mantid_setup.m','w')
