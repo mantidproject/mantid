@@ -119,9 +119,9 @@ if __name__ == "__main__":
     source_dir = getSourceDir()
     import os
     if options.release_libs:
-        shared_objs = os.path.join(source_dir, "release")
+        shared_objs = os.path.join(source_dir, "bin")
     else:
-        shared_objs = os.path.join(source_dir, "debug")
+        shared_objs = os.path.join(source_dir, "bin")
     shared_objs = os.path.join(shared_objs, "*" + getSharedObjExt())
 
     # get the test directory and hpp files
