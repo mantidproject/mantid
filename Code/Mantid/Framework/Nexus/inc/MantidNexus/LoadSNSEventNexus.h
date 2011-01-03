@@ -73,6 +73,13 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Nexus";}
 
+      /** Sets whether the pixel counts will be pre-counted.
+       * @param value :: true if you want to precount. */
+      void setPrecount(bool value)
+      {
+        precount = value;
+      }
+
     private:
 
       void init();
@@ -105,6 +112,9 @@ namespace Mantid
 
       /// List of the absolute time of each pulse
       std::vector<Kernel::DateAndTime> pulseTimes;
+
+      /// Do we pre-count the # of events in each pixel ID?
+      bool precount;
 
       void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map);
       void loadEntryMetadata(const std::string &entry_name);

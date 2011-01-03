@@ -244,6 +244,8 @@ public:
 
   void clear();
 
+  void reserve(size_t num);
+
   void sort(const EventSortType order) const;
 
   void sortTof() const;

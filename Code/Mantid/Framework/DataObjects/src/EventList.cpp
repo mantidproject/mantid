@@ -735,6 +735,17 @@ using Kernel::DateAndTime;
     this->detectorIDs.clear();
   }
 
+  /** Resrve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT call
+   * on weighted events!
+   *
+   * Calls std::vector<>::reserve() in order to pre-allocate the length of the event list vector.
+   *
+   * @param num :: number of events that will be in this EventList
+   */
+  void EventList::reserve(size_t num)
+  {
+    this->events.reserve(num);
+  }
 
 
   // ==============================================================================================

@@ -8,6 +8,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Timer.h"
 
 #include <fstream>
 #include <sstream>
@@ -77,6 +78,10 @@ void LoadSNSEventNexus::init()
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
       "Load the monitors from the file.");
+
+//  declareProperty(
+//      new PropertyWithValue<bool>("Precount", false, Direction::Input),
+//      "Pre-count the number of events in each pixel. This may reduce memory fragmentation and speed up loading.");
 }
 
 
@@ -90,6 +95,8 @@ void LoadSNSEventNexus::exec()
 
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
+
+//  precount = getProperty("Precount");
 
   //Get the limits to the filter
   filter_tof_min = getProperty("FilterByTof_Min");
@@ -258,7 +265,6 @@ void LoadSNSEventNexus::exec()
 
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
-  //PARALLEL_FOR_NO_WSP_CHECK()
   PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
@@ -461,6 +467,35 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
     g_log.warning() << "Entry " << entry_name << "'s event_time_offset and event_id vectors are not the same size! It will be skipped.\n";
     return;
   }
+
+//  // ---- Pre-counting events per pixel ID ----
+//  if (precount)
+//  {
+//    std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
+//    std::vector<uint32_t>::const_iterator it;
+//    for (it = event_id.begin(); it != event_id.end(); it++)
+//    {
+//      std::map<uint32_t, size_t>::iterator map_found = counts.find(*it);
+//      if (map_found != counts.end())
+//      {
+//        map_found->second++;
+//      }
+//      else
+//      {
+//        counts[*it] = 1; // First entry
+//      }
+//    }
+//
+//    // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+//    std::map<uint32_t, size_t>::iterator pixID;
+//    for (pixID = counts.begin(); pixID != counts.end(); pixID++)
+//    {
+//      //Find the the workspace index corresponding to that pixel ID
+//      int wi((*pixelID_to_wi_map)[ pixID->first ]);
+//      // Allocate it
+//      WS->getEventList(wi).reserve( pixID->second );
+//    }
+//  }
 
   //Default pulse time (if none are found)
   Mantid::Kernel::DateAndTime pulsetime;

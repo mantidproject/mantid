@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Timer.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -186,28 +187,38 @@ public:
       TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
     }
 
-//    void testExec_TOPAZ()
+//    void do_LoadWithPrecount(bool precount)
 //    {
+//    	Timer time;
 //      Mantid::API::FrameworkManager::Instance();
-//      LoadSNSEventNexus ld;
+//      LoadSNSEventNexus * ld = new LoadSNSEventNexus();
 //      std::string outws_name = "TOPAZ_1715";
-//      ld.initialize();
-//      ld.setPropertyValue("Filename","/home/8oz/data/TOPAZ_1715_event.nxs");
-//      ld.setPropertyValue("OutputWorkspace",outws_name);
-//      ld.setPropertyValue("FilterByTof_Min", "-1e10");
-//      ld.setPropertyValue("FilterByTof_Max", "1e10");
-//      ld.setPropertyValue("FilterByTime_Start", "-1e10");
-//      ld.setPropertyValue("FilterByTime_Stop", "1e10");
+//      ld->initialize();
+//      //ld->setPropertyValue("Filename","/home/8oz/data/TOPAZ_1715_event.nxs");
+//      ld->setPropertyValue("Filename","/home/8oz/data/SEQ_4533_event.nxs");
+//      ld->setPropertyValue("OutputWorkspace",outws_name);
+//      ld->setPropertyValue("FilterByTof_Min", "-1e10");
+//      ld->setPropertyValue("FilterByTof_Max", "1e10");
+//      ld->setPropertyValue("FilterByTime_Start", "-1e10");
+//      ld->setPropertyValue("FilterByTime_Stop", "1e10");
+//      ld->setProperty("Precount", precount);
+//      ld->execute();
+//      TS_ASSERT( ld->isExecuted() );
 //
-//      ld.execute();
-//      TS_ASSERT( ld.isExecuted() );
+//      std::cout << time.elapsed() << " seconds to load.\n";
 //
 //      DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
 //      //Valid WS and it is an EventWorkspace
 //      TS_ASSERT( WS );
 //      //Pixels have to be padded
-//      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 15);
-//      TS_ASSERT_EQUALS( WS->getNumberEvents(), 2942639);
+////      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 15);
+////      TS_ASSERT_EQUALS( WS->getNumberEvents(), 2942639);
+//    }
+//
+//    void testTOPAZ()
+//    {
+//      do_LoadWithPrecount(false);
+//      do_LoadWithPrecount(true);
 //    }
 
 
