@@ -221,4 +221,5 @@ target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( GeometryTest ${TEST_FILES} )
   target_link_libraries( GeometryTest Geometry )
+  add_dependencies ( FrameworkTests GeometryTest )
 endif ()

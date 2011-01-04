@@ -202,4 +202,5 @@ add_custom_command ( TARGET Kernel POST_BUILD
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   target_link_libraries( KernelTest Kernel )
+  add_dependencies ( FrameworkTests KernelTest )
 endif ()

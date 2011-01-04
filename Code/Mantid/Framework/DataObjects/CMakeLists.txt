@@ -58,7 +58,7 @@ include_directories ( ${ZLIB_INCLUDE_DIRS} )
 target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  #include_directories ( ../Nexus/inc )
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
   target_link_libraries( DataObjectsTest DataObjects )
+  add_dependencies ( FrameworkTests DataObjectsTest )
 endif ()
