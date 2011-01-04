@@ -26,8 +26,7 @@ set ( VISIT_PLUGIN_DIR "$ENV{HOME}/.visit/${VISIT_ARCH}/plugins" )
 # handle the QUIETLY and REQUIRED arguments and set VISIT_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(VisIt DEFAULT_MSG VISIT_INCLUDE_DIR 
-  VISIT_PLUGIN_DIR)
+find_package_handle_standard_args(VisIt DEFAULT_MSG VISIT_ROOT VISIT_PLUGIN_DIR)
 
 mark_as_advanced ( VISIT_INCLUDE_DIR VISIT_LIBRARY_DIR VISIT_BINARY_DIR 
   VISIT_ARCHIVE_DIR VISIT_PLUGIN_DIR )
