@@ -22,16 +22,21 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtest_dir=../../../TestingTools/cxxtest
+cxxtestgen=${cxxtest_dir}/python/scripts/cxxtestgen
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
-mantid_libpath=../../bin
-echo "Compiling the test executable... Libraries in $mantid_libpath"
+echo "Compiling to runner.exe"
+if [ -z "$MANTIDPATH" ]; then
+    mantid_libpath=../../bin
+else
+    mantid_libpath=$MANTIDPATH
+fi
+echo "Libraries in $mantid_libpath"
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
-    -I../../DataObjects/inc -I ../inc -I ../../../../Third_Party/src/cxxtest -I../../Nexus/inc \
-    -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidNexus \
-    -lboost_date_time -lPocoFoundationd -lPocoNetd
+    -I../../DataObjects/inc -I ../inc  -I${cxxtest_dir} -I../../Nexus/inc \
+    -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidNexus
 echo
 
 echo "Running the tests..."

@@ -223,7 +223,7 @@ public:
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  static Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins)
+  static Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors = false)
   {
     Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins);
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
@@ -235,7 +235,9 @@ public:
       ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
 
     const double detXPos(5.0);
-    for( int i = 0; i < nhist; ++i )
+    int ndets = nhist;
+    if( includeMonitors ) ndets -= 2;
+    for( int i = 0; i < ndets; ++i )
     {
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
@@ -246,13 +248,32 @@ public:
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
     }
-    
-    space->mutableSpectraMap().populateSimple(0, nhist);
+
+    if( includeMonitors )
+    {
+      Detector *monitor1 = new Detector("mon1", Object_sptr(), testInst.get());
+      monitor1->setPos(-9.0,0.0,0.0);
+      monitor1->setID(ndets);
+      testInst->add(monitor1);
+      testInst->markAsMonitor(monitor1);
+
+      Detector *monitor2 = new Detector("mon2", Object_sptr(), testInst.get());
+      monitor2->setPos(-2.0,0.0,0.0);
+      monitor2->setID(ndets+1);
+      testInst->add(monitor2);
+      testInst->markAsMonitor(monitor2);
+      
+      space->mutableSpectraMap().populateSimple(0, ndets+2);
+    }
+    else
+    {
+      space->mutableSpectraMap().populateSimple(0, ndets);
+    }
 
     // Define a source and sample position
     //Define a source component
     ObjComponent *source = new ObjComponent("moderator", Object_sptr(), testInst.get());
-    source->setPos(V3D(-20.0, 0.0, 0.0));
+    source->setPos(V3D(-20, 0.0, 0.0));
     testInst->add(source);
     testInst->markAsSource(source);
 
@@ -261,6 +282,7 @@ public:
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
+
 
     return space;
   }

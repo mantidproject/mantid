@@ -33,18 +33,20 @@ if [ "$1" = "2" ]; then
 fi
 echo "Compiling to $executable"
 
-
-cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
-python $cxxtestgen --runner=MantidPrinter -o $executable.cpp $test_files
+cxxtest_dir=../../../TestingTools/cxxtest
+cxxtestgen=${cxxtest_dir}/python/scripts/cxxtestgen
+python ${cxxtestgen} --runner=MantidPrinter -o $executable.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../bin
-
-
-	
+if [ -z "$MANTIDPATH" ]; then
+    mantid_libpath=../../bin
+else
+    mantid_libpath=$MANTIDPATH
+fi
+echo "Libraries in $mantid_libpath"
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG -o $executable.exe $executable.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
-    -I../../DataObjects/inc -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../CurveFitting/inc -I ../inc -I ../../../../Third_Party/src/cxxtest \
+    -I../../DataObjects/inc -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../CurveFitting/inc -I ../inc -I${cxxtest_dir} \
     -L$mantid_libpath -lMantidAlgorithms -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling -lMantidNexus -lMantidCurveFitting
 echo
 

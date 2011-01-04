@@ -30,14 +30,12 @@ using namespace Mantid::DataObjects;
  * is enough as the other workspaces take a long time to process (Steve Williams)
  */
 
-//MARI                               MAPS                         MERLIN
-static const std::string RAWFILE =  "MAR11015.raw"
- /*"MAP10241.raw" "MER02257.raw"*/;
-static const double TIMEOFF  =      3.9                                 /*9.5                         5.3/**/   ;
-static const int MONITOR =          2                                   /*41473                         69634/**/  ;
+//MARI
+static const std::string RAWFILE =  "MAR11015.raw";
+static const double TIMEOFF  =      3.9;
+static const int MONITOR =          2;  
 static const int NUMRANDOM =        7;
-static const int DETECTS[NUMRANDOM]={4101,4804,1323,1101,3805,1323,3832} /*{22301173,12607241,11305101,52102085,41501009,43306001,32404209}/*
-                                                                                                       {6470765, 6470769, 6470773, 6470777, 6470781, 6470785, 6470789}/**/;
+static const int DETECTS[NUMRANDOM]={4101,4804,1323,1101,3805,1323,3832};
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite
 {
@@ -227,18 +225,7 @@ public:
     for (int i = firstIndex+1; i < lastIndex+1; ++i)
     {
       TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) );
-    }/*
-// to test Different Bins Same Offsets comment out the code above and uncomment the code below
-    for (int i = firstIndex; i < lastIndex+1; i++ )
-    {
-      for (int j = 0; j < WS->readX(i).size(); j++ )
-      {
-        if (i == alteredHist && j == alteredBin)
-          TS_ASSERT_DELTA( WS->readX(i)[j] - WS->readX(MONITOR)[j], -(TIMEOFF-alteredAmount), 1e-6 )
-        else
-          TS_ASSERT_DELTA( WS->readX(i)[j] - WS->readX(MONITOR)[j] , -TIMEOFF, 1e-6 )
-      }
-    }/**/
+    }
 
     // the code above proves that the X-values for each histogram are the same so just check one histogram
     TS_ASSERT( WS->readX(1).size() > 0 );
