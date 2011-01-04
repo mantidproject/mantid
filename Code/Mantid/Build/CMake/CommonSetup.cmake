@@ -1,3 +1,9 @@
+# Make the default build type Release
+if ( NOT CMAKE_BUILD_TYPE )
+  message ( STATUS "No build type selected, default to Release (n/a for Visual Studio)." )
+  set ( CMAKE_BUILD_TYPE "Release" )
+endif ()
+
 # We want shared libraries everywhere
 set ( BUILD_SHARED_LIBS On )
 
