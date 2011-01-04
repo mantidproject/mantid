@@ -49,7 +49,7 @@ class DLLExport BinaryFile
 public:
   //------------------------------------------------------------------------------------
   /// Empty constructor
-  BinaryFile()
+  BinaryFile() : handle(NULL), num_elements(0), offset(0)
   { }
 
   //------------------------------------------------------------------------------------
@@ -73,6 +73,7 @@ public:
    * */
   void open(std::string filename)
   {
+    this->handle = NULL;
     if (!Poco::File(filename).exists())
     {
       stringstream msg;
@@ -167,6 +168,10 @@ public:
    */
   std::vector<T> * loadAll()
   {
+    if (!handle) {
+      throw runtime_error("BinaryFile: file is not open.");
+    }
+
     //Initialize the pointer
     std::vector<T> * data = new std::vector<T>;
 
@@ -204,6 +209,10 @@ public:
    */
   void loadAllInto(std::vector<T> &data)
   {
+    if (!handle) {
+      throw runtime_error("BinaryFile: file is not open.");
+    }
+
     //Clear the vector
     data.clear();
 
@@ -243,6 +252,10 @@ public:
    */
   size_t loadBlock(T * buffer, size_t block_size)
   {
+    if (!handle) {
+      throw runtime_error("BinaryFile: file is not open.");
+    }
+
     size_t loaded_size;
     //Limit how much is loaded
     loaded_size = block_size;

@@ -140,7 +140,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 set ( TEST_FILES test/ArrayBoundedValidatorTest.h
                  test/ArrayPropertyTest.h
 		 test/AtomTest.h
-		 #test/BinaryFileTest.h # TODO segfaults
+		 test/BinaryFileTest.h 
 		 test/BinFinderTest.h
 		 test/BoundedValidatorTest.h
 		 test/CacheTest.h
