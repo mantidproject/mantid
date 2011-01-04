@@ -102,3 +102,17 @@ if ( ${MAKE_VATES} )
   add_subdirectory (MDDataObjects)
   add_subdirectory (MDAlgorithms)
 endif ()
+
+###########################################################################
+# Add a custom target to build all of the Framework
+###########################################################################
+
+set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
+                     DataHandling Nexus Algorithms CurveFitting ICat
+)
+
+if ( ${MAKE_VATES} )
+  set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms )
+endif ()
+
+add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS} )
