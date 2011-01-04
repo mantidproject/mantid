@@ -301,65 +301,65 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/FlatPlateAbsorptionTest.h
 		 test/GetDetectorOffsetsTest.h
 		 test/GetEiTest.h
-		 #test/GhostCorrectionTest.h # TODO  fails
-		 #test/GroupWorkspacesTest.h # TODO  fails
-		 #test/He3TubeEfficiencyTest.h # TODO  fails
+		 test/GhostCorrectionTest.h
+		 test/GroupWorkspacesTest.h
+		 #test/He3TubeEfficiencyTest.h # TODO break the build of lots of things
 		 test/HRPDSlabCanAbsorptionTest.h
 		 test/IntegrationTest.h
 		 test/InterpolatingRebinTest.h
 		 test/LogarithmTest.h
 		 test/MaskBinsTest.h
-		 #test/MedianDetectorTestTest.h # TODO  fails
+		 #test/MedianDetectorTestTest.h # TODO  exception
 		 test/MemoryLeakTest.h
-		 #test/MergeRunsTest.h # TODO fails
-		 #test/MinusTest.h # TODO fails
+		 test/MergeRunsTest.h
+		 test/MinusTest.h
 		 test/MonteCarloAbsorptionTest.h
 		 test/MultipleScatteringAbsorption.h
-		 #test/MultiplyRangeTest.h # TODO fails
-		 #test/MultiplyTest.h # TODO fails
-		 #test/MuonAlphaCalcTest.h # TODO fails
-		 #test/MuonAsymmetryCalcTest.h # TODO fails
-		 #test/MuonRemoveExpDecayTest.h # TODO fails
+		 test/MultiplyRangeTest.h
+		 test/MultiplyTest.h
+		 test/MuonAlphaCalcTest.h
+		 test/MuonAsymmetryCalcTest.h
+		 test/MuonRemoveExpDecayTest.h
 		 test/NormaliseByCurrentTest.h
 		 test/NormaliseToMonitorTest.h
 		 test/OneMinusExponentialCorTest.h
-		 #test/PlotAsymmetryByLogValueTest.h # TODO fails
-		 #test/PlusTest.h # TODO fails
+		 test/PlotAsymmetryByLogValueTest.h
+		 test/PlusTest.h
 		 test/PointByPointVCorrectionTest.h
 		 test/PoissonErrorsTest.h
 		 test/PolynomialCorrectionTest.h
 		 test/PowerLawCorrectionTest.h
 		 test/PowerTest.h
-		 #test/Q1DTest.h # TODO fails
-		 #test/Q1DWeightedTest.h # TODO fails
-		 #test/QxyTest.h # TODO fails
+		 test/Q1DTest.h
+		 test/Q1DWeightedTest.h
+		 #test/QxyTest.h # TODO exception
 		 test/RealFFTTest.h
 		 test/RebinTest.h
 		 test/RebinToWorkspaceTest.h
 		 test/RebunchTest.h
 		 test/RegroupTest.h
-		 #test/RemoveBinsTest.h # TODO fails
+		 test/RemoveBinsTest.h
 		 test/RenameWorkspaceTest.h
 		 test/ReplaceSpecialValuesTest.h
 		 test/SANSInstrumentCreationHelper.h
-		 #test/SaveSNSNexusTest.h # TODO fails
+		 #test/SaveSNSNexusTest.h # TODO breaks build of other things
 		 test/ScaleTest.h
 		 test/SmoothDataTest.h
-		 #test/SofQWTest.h # TODO fails
-		 #test/SolidAngleCorrectionTest.h # TODO fails
-		 #test/SolidAngleTest.h # TODO fails
+		 test/SofQWTest.h
+		 test/SolidAngleCorrectionTest.h
+		 #test/SolidAngleTest.h # TODO exception
 		 test/SortTest.h
 		 test/StripPeaksTest.h
-		 #test/StripVanadiumPeaksTest.h # TODO fails
+		 test/StripVanadiumPeaksTest.h
 		 test/SumNeighboursTest.h
-		 #test/SumRowColumnTest.h # TODO fails
-		 #test/SumSpectraTest.h # TODO fails
-		 #test/TofCorrectionTest.h # TODO fails
-		 #test/TransposeTest.h # TODO fails
+		 #test/SumRowColumnTest.h # TODO exception
+		 #test/SumSpectraTest.h # TODO exception
+		 test/TofCorrectionTest.h
+		 test/TransposeTest.h
 		 test/UnaryOperationTest.h
-		 #test/UnGroupWorkspacesTest.h # TODO fails
-		 #test/UnwrapTest.h # TODO fails
-                 #test/WeightedMeanTest.h # TODO fails
+		 test/UnGroupWorkspacesTest.h
+		 test/UnwrapTest.h
+                 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h )
 
 # Add the target for this directory
