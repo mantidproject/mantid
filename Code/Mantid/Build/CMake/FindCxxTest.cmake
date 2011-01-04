@@ -93,10 +93,7 @@
 #=============================================================
 # CXXTEST_ADD_TEST (public macro)
 #=============================================================
-macro(CXXTEST_ADD_TEST _cxxtest_testname)
-    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}.cpp)
-    set(_cxxtest_executable ${CXXTEST_TESTGEN_EXECUTABLE})
-
+macro (CXXTEST_ADD_TEST_INNER _cxxtest_testname _cxxtest_real_outfname)
     set (PATH_FILES "")
     foreach (part ${ARGN})
       set (PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
@@ -105,16 +102,33 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
-        COMMAND ${_cxxtest_executable}
+        COMMAND ${CXXTEST_TESTGEN_EXECUTABLE}
         --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname} ${PATH_FILES}
     )
 
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_real_outfname})
-    add_test(NAME ${_cxxtest_testname} COMMAND $<TARGET_FILE:${_cxxtest_testname}>)
+endmacro (CXXTEST_ADD_TEST_INNER)
 
+macro(CXXTEST_ADD_TEST _cxxtest_testname)
+    # add the package wide test
+    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}.cpp)
+    CXXTEST_ADD_TEST_INNER ( ${_cxxtest_testname} ${_cxxtest_real_outfname} ${ARGN} )
+    #add_test(NAME ${_cxxtest_testname} COMMAND $<TARGET_FILE:${_cxxtest_testname}>)
+
+    # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
+    # add each separate test
+    foreach ( part ${ARGN} )
+      set( _suitename "${part}" )
+      string ( REPLACE "test/" "" _suitename ${_suitename} )
+      string ( REPLACE ".h" "" _suitename ${_suitename} )
+      message (STATUS ${_suitename})
+      set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
+      add_test ( NAME ${_cxxtest_separate_name}
+	         COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+    endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)
 
 ## BROKEN MACRO FROM SOMEWHERE ELSE
