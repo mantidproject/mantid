@@ -61,6 +61,44 @@ inc/MantidMDAlgorithms/VectorMathematics.h
 inc/MantidMDAlgorithms/WidthParameter.h 
 )
 
+# Test files. Other source files required.
+set (TEST_FILES
+test/BoxBuilderTest.h
+test/BoxImplicitFunctionParserTest.h
+test/BoxImplicitFunctionTest.h
+test/CompositeBuilderTest.h
+test/CompositeImplicitFunctionParserTest.h
+test/CompositeImplicitFunctionTest.h
+test/CPR_preselectCellsTest.h
+test/DepthParameterParserTest.h
+test/DepthParameterTest.h
+test/DimensionParameterIntegrationTest.h
+test/DimensionParameterSetTest.h
+test/DimensionParameterTest.h
+test/DynamicRebinFromXMLAlgorithmTest.h
+test/FunctionParserTest.h
+test/HeightParameterParserTest.h
+test/HeightParameterTest.h
+test/InvalidParameterParserTest.h
+test/InvalidParameterTest.h
+test/Load_MDWorkspaceTest.h
+test/NormalParameterParserTest.h
+test/NormalParameterTest.h
+test/OriginParameterParserTest.h
+test/OriginParameterTest.h
+test/PlaneFunctionBuilderTest.h
+test/PlaneImplicitFunctionParserTest.h
+test/PlaneImplicitFunctionTest.h
+test/SimulateMDDataTest.h
+test/SingleValueParameterBaseTest.h
+test/testCPComponents.h
+test/testCPrebinning.cpp
+test/testCPrebinning.h
+test/VectorMathematicsTest.h
+test/WidthParameterParserTest.h
+test/WidthParameterTest.h
+)
+
 # For Windows:
 add_definitions ( -DIN_MANTID_MDALGORITHMS )
 
@@ -74,3 +112,10 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "Framework" )
 include_directories ( inc )
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
+
+# Create test file projects
+if ( CXXTEST_FOUND )
+  cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
+  target_link_libraries( MDAlgorithmsTest MDAlgorithms )
+  add_dependencies ( FrameworkTests MDAlgorithmsTest )
+endif ()
