@@ -100,7 +100,7 @@ add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
 
-if ( ${MAKE_VATES} )
+if ( MAKE_VATES )
   add_subdirectory (MDDataObjects)
   add_subdirectory (MDAlgorithms)
 endif ()
@@ -113,7 +113,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
 )
 
-if ( ${MAKE_VATES} )
+if ( MAKE_VATES )
   set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms )
 endif ()
 

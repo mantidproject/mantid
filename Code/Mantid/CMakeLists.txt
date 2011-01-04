@@ -56,6 +56,6 @@ add_subdirectory ( MantidPlot )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
-if ( ${MAKE_VATES} )
+if ( MAKE_VATES )
   add_subdirectory ( Vates )
-endif ( ${MAKE_VATES} )
+endif ( MAKE_VATES )
