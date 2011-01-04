@@ -8,7 +8,7 @@ find_path ( QWT_INCLUDE_DIR qwt.h
 				${CMAKE_INCLUDE_PATH}/qwt 
 )
 	  
-find_library ( QWT_LIBRARY NAMES qwt qwt-qt4 )
+find_library ( QWT_LIBRARY NAMES qwt-qt4 qwt )
 
 find_library ( QWT_LIBRARY_DEBUG qwtd )
 
