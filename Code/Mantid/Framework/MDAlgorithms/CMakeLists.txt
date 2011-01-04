@@ -2,12 +2,9 @@
 set ( SRC_FILES src/BoxFunctionBuilder.cpp
 src/BoxImplicitFunction.cpp
 src/BoxImplicitFunctionParser.cpp
-src/CenterpieceRebinning.cpp
 src/CompositeFunctionBuilder.cpp
 src/CompositeImplicitFunction.cpp
 src/CompositeImplicitFunctionParser.cpp
-src/CpRebinning4x3StructHR.cpp
-src/CpRebinningNx3.cpp
 src/DepthParameter.cpp
 src/DimensionParameter.cpp
 src/DimensionParameterIntegration.cpp
@@ -35,12 +32,9 @@ src/WidthParameter.cpp
 set ( INC_FILES inc/MantidMDAlgorithms/BoxFunctionBuilder.h
 inc/MantidMDAlgorithms/BoxImplicitFunction.h
 inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
-inc/MantidMDAlgorithms/CenterpieceRebinning.h
 inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
-inc/MantidMDAlgorithms/CpRebinning4x3StructHR.h
-inc/MantidMDAlgorithms/CpRebinningNx3.h
 inc/MantidMDAlgorithms/DepthParameter.h
 inc/MantidMDAlgorithms/DimensionParameter.h
 inc/MantidMDAlgorithms/DimensionParameterIntegration.h
