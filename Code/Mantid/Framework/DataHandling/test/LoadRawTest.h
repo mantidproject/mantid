@@ -12,7 +12,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -326,7 +325,11 @@ public:
 
   void testWithManagedWorkspace()
   {
-    ConfigService::Instance().updateConfig("UseManagedWS.properties");
+    ConfigServiceImpl& conf = ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+
     LoadRaw loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", inputFile);
@@ -340,7 +343,8 @@ public:
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) || dynamic_cast<CompressedWorkspace2D*>(output.get()) )
     
     AnalysisDataService::Instance().remove("managedws");
-    ConfigService::Instance().updateConfig("Mantid.properties");
+
+    conf.setString(managed,oldValue);
   }
 
 private:

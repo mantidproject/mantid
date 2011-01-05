@@ -96,15 +96,16 @@ public:
 
   void test_LoadPreNeXus_REFL()
   {
-    std::string eventfile( "../../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat" );
-    std::string pulsefile( "../../../../../Test/AutoTestData/REF_L_32035_pulseid.dat" );
+    std::string eventfile( "REF_L_32035_neutron_event.dat" );
+    std::string pulsefile( "REF_L_32035_pulseid.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setProperty("PulseidFilename", pulsefile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("PulseidFilename", pulsefile);
+    eventLoader->setPropertyValue("MappingFilename", "REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
 
     //Get the event file size
     struct stat filestatus;
+    eventfile = eventLoader->getPropertyValue("EventFilename");
     stat(eventfile.c_str(), &filestatus);
 
     //std::cout << "***** executing *****" << std::endl;

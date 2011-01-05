@@ -13,7 +13,6 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "Poco/Path.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -893,9 +892,14 @@ public:
     AnalysisDataService::Instance().remove("outWS");
     
   }
+
   void testWithManagedWorkspace()
   {
-    ConfigService::Instance().updateConfig("UseManagedWS.properties");
+    ConfigServiceImpl& conf = ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+
     LoadRaw3 loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", inputFile);
@@ -908,12 +912,17 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
 
-		AnalysisDataService::Instance().remove("managedws2");
-	
+    AnalysisDataService::Instance().remove("managedws2");
+    conf.setString(managed,oldValue);
   }
- void testSeparateMonitorsWithManagedWorkspace()
+
+  void testSeparateMonitorsWithManagedWorkspace()
   {
-	  ConfigService::Instance().updateConfig("UseManagedWS.properties");
+    ConfigServiceImpl& conf = ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+
 	  LoadRaw3 loader8;
 	  loader8.initialize();
 	  loader8.setPropertyValue("Filename", inputFile);
@@ -931,7 +940,9 @@ public:
 	 // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
 	  AnalysisDataService::Instance().remove("managedws2");
 	  AnalysisDataService::Instance().remove("managedws2_Monitors");
+    conf.setString(managed,oldValue);
   } 
+
 private:
   LoadRaw3 loader,loader2,loader3;
   std::string inputFile;

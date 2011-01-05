@@ -23,6 +23,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Glob.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -71,10 +72,9 @@ public:
     std::multimap<std::string, fromToEntry> idfFiles;
     std::set<std::string> idfIdentifiers;
 
-    std::string m_filename = "../../../Instrument/HET_Definition.xml";
     Poco::RegularExpression regex(".*_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
     Poco::DirectoryIterator end_iter;
-    for ( Poco::DirectoryIterator dir_itr(Poco::Path(m_filename).parent()); dir_itr != end_iter; ++dir_itr )
+    for ( Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString("instrumentDefinition.directory")); dir_itr != end_iter; ++dir_itr )
     {
           if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 

@@ -90,8 +90,11 @@ public:
   // Test is taken from LoadRawTest
   void testLoadRaw2()
   {
-    
-    ConfigService::Instance().updateConfig("UseManagedWS.properties");
+    ConfigServiceImpl& conf = ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+
     LoadRaw2 loader;
     if ( !loader.isInitialized() ) loader.initialize();
 
@@ -191,7 +194,7 @@ public:
     TS_ASSERT(test.empty());
     
     AnalysisDataService::Instance().remove(outputSpace);
-    ConfigService::Instance().updateConfig("Mantid.properties");
+    conf.setString(managed,oldValue);
   }
 
 private:
