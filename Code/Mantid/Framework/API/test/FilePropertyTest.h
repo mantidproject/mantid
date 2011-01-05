@@ -61,14 +61,13 @@ public:
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
 
-    ///Test a GEM file in the test directory
+    ///Test a file in the test directory
     const std::string test_file = "LOQ48127.raw";
     std::string msg = fp->setValue(test_file);
     TS_ASSERT_EQUALS(msg, "");
 
     // Absolute path
-    Poco::Path test_dir = Poco::Path("../../../../../Test/AutoTestData/").absolute();
-    msg = fp->setValue(test_dir.resolve(Poco::Path(test_file)).toString());
+    msg = fp->setValue(fp->value());
     TS_ASSERT_EQUALS(msg, "");
 
     delete fp;
@@ -146,16 +145,12 @@ public:
   
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
-    Poco::Path test_dir = Poco::Path("../../../../../Test/AutoTestData/").absolute();
-    Poco::Path test_file = test_dir.resolve("LOQ48127.raw");
-    
-
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
 				    std::vector<std::string>(1, ".raw"));
     std::string error = fp->setValue("48127");
     TS_ASSERT_EQUALS(error, "");
-    TS_ASSERT_EQUALS(test_file.toString(), fp->value());
+    TS_ASSERT_DIFFERS(fp->value().find("LOQ48127"),std::string::npos);
     
     // Now test one with an upper case extension
     ConfigService::Instance().setString("default.instrument","ALF");

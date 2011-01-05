@@ -77,7 +77,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   {
   public:
   	//  static std::string WSTYPE;
-    const std::string id() const {return "ManagedWorkspace2D";}
+    const std::string id() const {return "ManagedWorkspace2DTest";}
     int getNumberHistograms() const { return 2;}
   };
 
@@ -98,7 +98,7 @@ public:
     WorkspaceFactory::Instance().subscribe<Workspace2DTest>("Workspace2DTest");
     try
     {
-      WorkspaceFactory::Instance().subscribe<ManagedWorkspace2DTest>("ManagedWorkspace2D");
+      WorkspaceFactory::Instance().subscribe<ManagedWorkspace2DTest>("ManagedWorkspace2DTest");
     }
     catch (std::runtime_error& e)
     {
