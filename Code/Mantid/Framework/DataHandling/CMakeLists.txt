@@ -120,13 +120,13 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
 		inc/MantidDataHandling/SetScalingPSD.h
 		inc/MantidDataHandling/UpdateInstrumentFromRaw.h )
 
-set ( TEST_FILES test/CreateSampleShapeTest.h
+set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelper.hh
                  test/DefineGaugeVolumeTest.h
 		 #test/FindDetectorsInShapeTest.h # TODO exception
 		 test/GetMaskedDetectorsTest.h
 		 test/GroupDetectors2Test.h
 		 test/GroupDetectorsTest.h
-		 test/ISISDataArchiveTest.h
+		 #test/ISISDataArchiveTest.h # TODO no tests are defined
 		 test/LoadCanSAS1dTest.h
 		 test/LoadDAETest.h
 		 test/LoadDetectorInfoTest.h
@@ -158,12 +158,12 @@ set ( TEST_FILES test/CreateSampleShapeTest.h
 		 #test/SaveCanSAS1dTest.h # TODO exception
 		 test/SaveCSVTest.h
 		 test/saveDASCTest.h
-		 test/SaveFocussedXYETest.h
+		 #test/SaveFocussedXYETest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SavePHXTest.h
-		 test/SaveRKHTest.h
-		 test/SaveSPETest.h
+		 #test/SaveRKHTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/SaveSPETest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/SetScalingPSDrawtest.h # TODO exception
-		 #test/SetScalingPSDtest.h # TODO exception
+		 #test/SetScalingPSDtest.h  # TODO uses WorkspaceCreationHelper.hh
 		 test/UpdateInstrumentFromRawTest.h
 		 test/XMLlogfileTest.h )
 

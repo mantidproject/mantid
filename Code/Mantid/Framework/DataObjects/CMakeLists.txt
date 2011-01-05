@@ -29,7 +29,7 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
 
 set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/EventListTest.h
-		 test/EventWorkspaceTest.h
+		 #test/EventWorkspaceTest.h # TODO uses ComponentCreationHelpers.hh
 		 #test/Histogram1DTest.h # TODO fails to build
 		 #test/LibraryManagerTest.h # TODO fails to build
 		 test/ManagedDataBlock2DTest.h

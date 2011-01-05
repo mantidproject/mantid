@@ -249,121 +249,122 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SumSpectra.h
 		inc/MantidAlgorithms/TofCorrection.h )
 
-set ( TEST_FILES test/AddSampleLogTest.h
+set ( TEST_FILES #test/AddSampleLogTest.h # TODO uses WorkspaceCreationHelper.hh
                  test/AlignDetectorsTest.h
-		 test/AnyShapeAbsorptionTest.h
-		 test/ApplyTransmissionCorrectionTest.h
-		 test/BinaryOperationTest.h
-		 test/CalculateEfficiencyTest.h
-		 test/CalculateTransmissionBeamSpreaderTest.h
-		 test/CalculateTransmissionTest.h
-		 test/ChainedOperatorTest.h
+		 #test/AnyShapeAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ApplyTransmissionCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/BinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/CalculateEfficiencyTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
+		 #test/CalculateTransmissionBeamSpreaderTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
+		 #test/CalculateTransmissionTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
+		 #test/ChainedOperatorTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/ChangeBinOffsetTest.h
-		 test/CheckWorkspacesMatchTest.h
-		 test/CloneWorkspaceTest.h
-		 test/CommutativeBinaryOperationTest.h
+		 #test/CheckWorkspacesMatchTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/CloneWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/CommutativeBinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/CompressedRebinTest.h
 		 test/ConjoinWorkspacesTest.h
-		 test/ConvertFromDistributionTest.h
-		 test/ConvertSpectrumAxisTest.h
-		 test/ConvertToDistributionTest.h
-		 test/ConvertToHistogramTest.h
+		 #test/ConvertFromDistributionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ConvertSpectrumAxisTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ConvertToDistributionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ConvertToHistogramTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/ConvertToMatrixWorkspaceTest.h
-		 test/ConvertToPointDataTest.h
-		 test/ConvertUnitsTest.h
+		 #test/ConvertToPointDataTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ConvertUnitsTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/CorrectKiKfTest.h
-		 test/CorrectToFileTest.h
+		 #test/CorrectToFileTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/CreateCalFileByNamesTest.h
 		 test/CreateDummyCalFileTest.h
 		 test/CreateSingleValuedWorkspaceTest.h
 		 test/CreateWorkspaceTest.h
-		 test/CropWorkspaceTest.h
-		 test/CuboidGaugeVolumeAbsorptionTest.h
-		 test/CylinderAbsorptionTest.h
-		 test/DetectorEfficiencyCorTest.h
-		 test/DetectorEfficiencyVariationTest.h
+		 #test/CropWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/CuboidGaugeVolumeAbsorptionTest.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
+		 #test/CylinderAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/DetectorEfficiencyCorTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/DetectorEfficiencyVariationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/DiffractionEventReadDetCalTest.h
 		 test/DiffractionFocussing2Test.h
 		 test/DiffractionFocussingTest.h
-		 test/DivideTest.h
+		 #test/DivideTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/DspacemaptoCalTest.h
-		 test/ExponentialCorrectionTest.h
-		 test/ExponentialTest.h
-		 test/ExtractFFTSpectrumTest.h
-		 test/ExtractMaskingTest.h
-		 test/ExtractSingleSpectrumTest.h
-		 test/FFTSmooth2Test.h
+		 #test/ExponentialCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ExponentialTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ExtractFFTSpectrumTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ExtractMaskingTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ExtractSingleSpectrumTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/FFTSmooth2Test.h # TODO uses WorkspaceCreationHelper.hh
 		 test/FFTTest.h
-		 test/FilterByLogValueTest.h
+		 #test/FilterByLogValueTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/FilterByTimeTest.h
-		 test/FindCenterOfMassPositionTest.h
-		 test/FindDeadDetectorsTest.h
-		 test/FindDetectorsOutsideLimitsTest.h
-		 test/FindPeaksTest.h
+		 #test/FindCenterOfMassPositionTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
+		 #test/FindDeadDetectorsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/FindDetectorsOutsideLimitsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/FindPeaksTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/FlatBackgroundTest.h
-		 test/FlatPlateAbsorptionTest.h
-		 test/GetDetectorOffsetsTest.h
-		 test/GetEiTest.h
-		 test/GhostCorrectionTest.h
+		 #test/FlatPlateAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/GetDetectorOffsetsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/GetEiTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/GhostCorrectionTest.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
 		 test/GroupWorkspacesTest.h
 		 #test/He3TubeEfficiencyTest.h # TODO break the build of lots of things
-		 test/HRPDSlabCanAbsorptionTest.h
-		 test/IntegrationTest.h
+		 #test/HRPDSlabCanAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/IntegrationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/InterpolatingRebinTest.h
-		 test/LogarithmTest.h
-		 test/MaskBinsTest.h
-		 #test/MedianDetectorTestTest.h # TODO break the build of lots of things
-		 test/MemoryLeakTest.h
-		 test/MergeRunsTest.h
-		 test/MinusTest.h
-		 test/MonteCarloAbsorptionTest.h
-		 test/MultipleScatteringAbsorption.h
+		 #test/LogarithmTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MaskBinsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MedianDetectorTestTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MemoryLeakTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MergeRunsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MinusTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/MonteCarloAbsorptionTest.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
+		 #test/MultipleScatteringAbsorption.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
 		 test/MultiplyRangeTest.h
-		 test/MultiplyTest.h
+		 #test/MultiplyTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/MuonAlphaCalcTest.h
 		 test/MuonAsymmetryCalcTest.h
 		 test/MuonRemoveExpDecayTest.h
-		 test/NormaliseByCurrentTest.h
-		 test/NormaliseToMonitorTest.h
-		 test/OneMinusExponentialCorTest.h
+		 #test/NormaliseByCurrentTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/NormaliseToMonitorTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/OneMinusExponentialCorTest.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
 		 test/PlotAsymmetryByLogValueTest.h
-		 test/PlusTest.h
-		 test/PointByPointVCorrectionTest.h
-		 test/PoissonErrorsTest.h
-		 test/PolynomialCorrectionTest.h
-		 test/PowerLawCorrectionTest.h
+		 #test/PlusTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/PointByPointVCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/PoissonErrorsTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/PolynomialCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/PowerLawCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/PowerTest.h
 		 test/Q1DTest.h
 		 test/Q1DWeightedTest.h
 		 test/QxyTest.h
 		 test/RealFFTTest.h
 		 test/RebinTest.h
-		 test/RebinToWorkspaceTest.h
+		 #test/RebinToWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/RebunchTest.h
 		 test/RegroupTest.h
 		 test/RemoveBinsTest.h
-		 test/RenameWorkspaceTest.h
-		 test/ReplaceSpecialValuesTest.h
-		 test/SANSInstrumentCreationHelper.h
+		 #test/RenameWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/ReplaceSpecialValuesTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/SANSInstrumentCreationHelper.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/SaveSNSNexusTest.h # TODO breaks build of other things
-		 test/ScaleTest.h
+		 #test/ScaleTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SmoothDataTest.h
 		 test/SofQWTest.h
 		 test/SolidAngleCorrectionTest.h
-		 #test/SolidAngleTest.h # TODO breaks build of other things
+		 #test/SolidAngleTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SortTest.h
-		 test/StripPeaksTest.h
-		 test/StripVanadiumPeaksTest.h
+		 #test/StripPeaksTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/StripVanadiumPeaksTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SumNeighboursTest.h
 		 test/SumRowColumnTest.h
-		 test/SumSpectraTest.h
-		 test/TofCorrectionTest.h
-		 test/TransposeTest.h
-		 test/UnaryOperationTest.h
+		 #test/SumSpectraTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/TofCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/TransposeTest.h # TODO uses WorkspaceCreationHelper.hh
+		 #test/UnaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
                  test/WeightedMeanTest.h
-		 test/WorkspaceGroupTest.h )
+		 #test/WorkspaceGroupTest.h  # TODO uses WorkspaceCreationHelper.hh
+		 )
 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})

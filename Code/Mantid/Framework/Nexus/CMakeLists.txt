@@ -56,7 +56,7 @@ set ( TEST_FILES test/LoadInstrumentFromSNSNexusTest.h
 		 test/LoadNexusTest.h
 		 test/LoadRSaveNLoadNcspTest.h
 		 test/LoadSNSEventNexusTest.h
-		 test/LoadSNSNexusTest.h
+		 #test/LoadSNSNexusTest.h # TODO has no active tests in it
 		 #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
 		 test/NexusAPITest.h
 		 test/SaveNexusProcessedTest.h

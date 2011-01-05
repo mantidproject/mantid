@@ -145,15 +145,15 @@ set ( TEST_FILES test/AcompTest.h
                  test/AlgebraTest.h
 		 test/BnIdTest.h
 		 test/BoundingBoxTest.h
-		 test/CompAssemblyTest.h
+		 #test/CompAssemblyTest.h # TODO uses ComponentCreationHelpers.hh
 		 test/ComponentTest.h
 		 test/ConeTest.h
 		 test/CylinderTest.h
-		 test/DetectorGroupTest.h
+		 #test/DetectorGroupTest.h # TODO uses ComponentCreationHelpers.hh
 		 test/DetectorTest.h
 		 test/FitParameterTest.h
 		 test/GeneralTest.h
-		 test/InstrumentRayTracerTest.h
+		 #test/InstrumentRayTracerTest.h # TODO uses ComponentCreationHelpers.hh
 		 test/InstrumentTest.h
 		 test/LineIntersectVisitTest.h
 		 test/LineTest.h
@@ -167,7 +167,7 @@ set ( TEST_FILES test/AcompTest.h
 		 test/MDGeometryDescriptionTest.h
 		 test/MDGeometryTest.h
 		 test/MDPointTest.h
-		 test/NearestNeighboursTest.h
+		 #test/NearestNeighboursTest.h # TODO uses ComponentCreationHelpers.hh
 		 test/ObjCompAssemblyTest.h
 		 test/ObjComponentTest.h
 		 test/ObjectTest.h
@@ -180,7 +180,7 @@ set ( TEST_FILES test/AcompTest.h
 		 test/PlaneTest.h
 		 test/PolyTest.h
 		 test/QuatTest.h
-		 test/RectangularDetectorTest.h
+		 #test/RectangularDetectorTest.h # TODO uses ComponentCreationHelpers.hh
 		 test/RegexSupportTest.h
 		 test/RotCounterTest.h
 		 test/RulesTest.h
