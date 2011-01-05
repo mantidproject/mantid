@@ -102,6 +102,7 @@ add_subdirectory (ICat)
 
 if ( MAKE_VATES )
   add_subdirectory (MDDataObjects)
+  include_directories(MDDataObjects/inc)
   add_subdirectory (MDAlgorithms)
 endif ()
 
