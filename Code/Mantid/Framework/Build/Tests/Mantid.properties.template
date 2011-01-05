@@ -17,9 +17,6 @@ plugins.directory = .
 #Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/Instrument
 
-#Where to load instrument definition files from
-instrumentDefinition.directory = @MANTID_ROOT@/Instrument
-
 # Where to load parameter definition files from
 parameterDefinition.directory = @MANTID_ROOT@/Instrument
 
