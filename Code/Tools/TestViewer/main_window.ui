@@ -18,16 +18,43 @@
     <item>
      <layout class="QHBoxLayout" name="hlTop">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QCheckBox" name="checkMonitorTests">
+        <property name="toolTip">
+         <string>Continuously monitor the test files for any changes, and rerun them when they change.</string>
+        </property>
+        <property name="text">
+         <string>Monitor Test Files</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkMonitorLibraries">
+        <property name="toolTip">
+         <string>Continously monitor the libraries file for any changes and rerun the selected tests when changes are found.</string>
+        </property>
+        <property name="text">
+         <string>Monitor Libraries</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonRunAll">
         <property name="text">
          <string>Run All Tests</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="buttonRunSelected">
         <property name="text">
          <string>Run Selected Tests</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkInParallel">
+        <property name="text">
+         <string>In Parallel</string>
         </property>
        </widget>
       </item>
@@ -101,6 +128,32 @@
             <string>Select All</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="buttonExpandTree">
+           <property name="geometry">
+            <rect>
+             <x>110</x>
+             <y>4</y>
+             <width>98</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Expand All</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="buttonCollapseTree">
+           <property name="geometry">
+            <rect>
+             <x>220</x>
+             <y>3</y>
+             <width>98</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Collapse All</string>
+           </property>
+          </widget>
          </widget>
         </item>
         <item>
@@ -121,16 +174,49 @@
          <number>4</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Test Run Progress:</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Test Run Progress:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonAbort">
+            <property name="text">
+             <string>Abort Tests</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QProgressBar" name="progressBar">
           <property name="value">
            <number>24</number>
+          </property>
+          <property name="format">
+           <string>%p% (current test)</string>
           </property>
          </widget>
         </item>
@@ -678,6 +764,9 @@ p, li { white-space: pre-wrap; }
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="action_Preferences">
