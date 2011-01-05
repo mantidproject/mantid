@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SaveDASC.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/lexical_cast.hpp>
 #include <vector>
@@ -15,6 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVecPtr;
 
 class SaveDASCTest : public CxxTest::TestSuite
 {
