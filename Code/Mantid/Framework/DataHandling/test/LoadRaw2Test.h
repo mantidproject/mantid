@@ -8,6 +8,7 @@
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -17,6 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Geometry::IInstrument;
 
 class LoadRaw2Test : public CxxTest::TestSuite
 {

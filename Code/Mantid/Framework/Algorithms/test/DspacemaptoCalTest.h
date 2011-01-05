@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -39,7 +40,7 @@ public:
 
     loaderDSP.initialize();
     loaderDSP.isInitialized();
-    loaderDSP.setPropertyValue("Filename", Kernel::ConfigService::Instance().getString(
+    loaderDSP.setPropertyValue("Filename", ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/INES_Definition.xml");
     inputFile = loaderDSP.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";

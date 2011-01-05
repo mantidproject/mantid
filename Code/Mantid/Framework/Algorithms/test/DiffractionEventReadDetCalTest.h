@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -39,7 +40,7 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename",  Kernel::ConfigService::Instance().getString(
+    loaderCAL.setPropertyValue("Filename",  ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/SNAP_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";

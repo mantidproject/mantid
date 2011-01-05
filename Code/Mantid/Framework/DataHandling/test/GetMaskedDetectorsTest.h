@@ -16,6 +16,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::MantidVecPtr;
 
 class GetMaskedDetectorsTest : public CxxTest::TestSuite
 {

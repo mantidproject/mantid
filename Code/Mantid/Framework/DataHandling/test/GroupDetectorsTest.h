@@ -15,6 +15,7 @@
 #include <iostream>
 
 using Mantid::DataHandling::GroupDetectors;
+using Mantid::MantidVecPtr;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

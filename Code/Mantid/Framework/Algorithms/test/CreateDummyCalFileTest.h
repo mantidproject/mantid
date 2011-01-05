@@ -16,6 +16,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/ConfigService.h"
 #include "Poco/File.h"
 #include <fstream>
 #include <cstring>
@@ -38,7 +39,7 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename",  Kernel::ConfigService::Instance().getString(
+    loaderCAL.setPropertyValue("Filename",  ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/INES_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";
