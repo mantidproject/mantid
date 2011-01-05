@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace DataHandling
 {
 
   // Register the algorithm into the algorithm factory
@@ -141,7 +141,15 @@ namespace Algorithms
               truPos.spherical(fabs(l2),theta,phi);
               truepos.push_back(truPos);
               //
-              Geometry::IDetector_const_sptr det = instrument->getDetector(detIndex);
+              Geometry::IDetector_sptr det;
+	      try
+	      {
+		det = instrument->getDetector(detIndex);
+	      }
+	      catch(Kernel::Exception::NotFoundError &)
+	      {
+		continue;
+	      }
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truPos-detPos;
               double scale=1.0;
@@ -190,7 +198,15 @@ namespace Algorithms
           for(int i=0;i<detectorCount;i++)
           {
               int detIndex=detID[i];
-              Geometry::IDetector_const_sptr det = instrument->getDetector(detID[i]);
+              Geometry::IDetector_sptr det;
+	      try
+	      {
+		det = instrument->getDetector(detIndex);
+	      }
+	      catch(Kernel::Exception::NotFoundError &)
+	      {
+		continue;
+	      }
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truepos[i]-detPos;
               double scale;
@@ -419,5 +435,5 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>&
 }
 
 
-} // namespace Algorithm
+} // namespace DataHandling
 } // namespace Mantid

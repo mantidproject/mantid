@@ -3,12 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SetScalingPSD.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
+#include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <fstream>
 #include <cmath>
 
-using Mantid::Algorithms::SetScalingPSD;
+using Mantid::DataHandling::SetScalingPSD;
+using Mantid::DataHandling::LoadEmptyInstrument;
+using Mantid::Kernel::ConfigService;
 
 class SetScalingPSDTest : public CxxTest::TestSuite
 {
@@ -76,7 +81,42 @@ public:
     dataStore.remove(wsName);
   }
 
+  void test_Input_RAW_File_Scales_Correctly()
+  {
+    // No way around using a raw files here unfortunately as that's what we need to test
+    Workspace2D_sptr testWS = loadEmptyMARI();
+    TS_ASSERT(testWS);
+    if( !testWS )
+    {
+      TS_FAIL("Error loading test instrument.");
+    }
+
+    IAlgorithm_sptr scaler = createAlgorithm();
+    // The most commonly used MARI file in the repository
+    scaler->setPropertyValue("ScalingFilename", "MAR11060.raw");
+    scaler->setPropertyValue("Workspace", testWS->getName());
+    scaler->execute();    
+
+    // Test a few detectors
+    int testIndices[3] = {6,7,8};
+    V3D expectedValues[3] = { V3D(-0.08982175,-1.03708771,3.88495351), \
+			      V3D(-0.09233499,-1.06610575,3.87703178), \
+			      V3D(-0.09484302,-1.09506369,3.86889169) };
+    for( int i = 0; i < 3; ++i )
+    {
+      IDetector_sptr det = testWS->getDetector(testIndices[i]);
+      V3D pos = det->getPos();
+      V3D expectedPos = expectedValues[i];
+      TS_ASSERT_DELTA(pos.X(), expectedPos.X(), 1e-8);
+      TS_ASSERT_DELTA(pos.Y(), expectedPos.Y(), 1e-8);
+      TS_ASSERT_DELTA(pos.Z(), expectedPos.Z(), 1e-8);
+    }
+
+    AnalysisDataService::Instance().remove(testWS->getName());
+  }
+
 private:
+
 
   std::string createTestScalingFile(Workspace2D_sptr testWS)
   {
@@ -102,6 +142,20 @@ private:
 
     writer.close();
     return filename;
+  }
+
+  Workspace2D_sptr loadEmptyMARI()
+  {
+    Poco::Path mariIDF(ConfigService::Instance().getInstrumentDirectory());
+    mariIDF.resolve("MARI_Definition.xml");
+    LoadEmptyInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", mariIDF.toString());
+    const std::string outputName("test-emptyMARI");
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    loader.execute();
+    Workspace_sptr result = AnalysisDataService::Instance().retrieve(outputName);
+    return boost::dynamic_pointer_cast<Workspace2D>(result);
   }
 
   IAlgorithm_sptr createAlgorithm()

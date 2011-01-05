@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SETSCALINGPSD_H_
-#define MANTID_ALGORITHMS_SETSCALINGPSD_H_
+#ifndef MANTID_DATAHANDLING_SETSCALINGPSD_H_
+#define MANTID_DATAHANDLING_SETSCALINGPSD_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,24 +8,24 @@
 
 namespace Mantid
 {
-  namespace Algorithms
+  namespace DataHandling
   {
     /** @class SetScalingPSD SetScalingPSD.h MantidAlgorithm/SetScalingPSD.h
 
-		Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
-		and adjusts the detectors positions and scaling appropriately.
-
-    Required Properties:
-    <UL>
-			<LI> ScalingFilename - The path to the file containing the detector ositions to use either .raw or .sca</LI>
-			<LI> Workspace - The name of the workspace to adjust </LI>
-		</UL>
-		Optional Properties:
-		<UL>
-			<LI> scalingOption - 0 => use average of left and right scaling (default). 
-				1 => use maximum scaling. 
-				2 => maximum + 5%</LI>
-    </UL>
+	Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
+	and adjusts the detectors positions and scaling appropriately.
+	
+	Required Properties:
+	<UL>
+	<LI> ScalingFilename - The path to the file containing the detector ositions to use either .raw or .sca</LI>
+	<LI> Workspace - The name of the workspace to adjust </LI>
+	</UL>
+	Optional Properties:
+	<UL>
+	<LI> scalingOption - 0 => use average of left and right scaling (default). 
+	1 => use maximum scaling. 
+	2 => maximum + 5%</LI>
+	</UL>
 
     @author Ronald Fowler
 
@@ -91,7 +91,7 @@ namespace Mantid
       void getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos);
     };
 
-  } // namespace Algorithms
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SETSCALINGPSD_H_*/
+#endif /*MANTID_DATAHANDLING_SETSCALINGPSD_H_*/
