@@ -38,9 +38,9 @@ done
 shift $(($OPTIND - 1))
 
 # Get Mantid version from MantidVersion.txt file
-cd ../..
+cd ../../../
 mantid_versionfile=`pwd`/MantidVersion.txt
-cd Installers/RPM_Kit
+cd Mantid/Installers/RPM_Kit
 if test -f $mantid_versionfile; then
     mantid_version=`cat $mantid_versionfile`
 else
@@ -48,7 +48,7 @@ else
     exit 1
 fi
 #
-mantid_svn="http://svn.mantidproject.org/mantid/trunk"
+mantid_svn="http://svn.mantidproject.org/mantid/trunk/Code/Mantid"
 rm -f Mantid-$mantid_version.tar.gz
 rm -fr Mantid-$mantid_version
 if $do_local; then
@@ -58,31 +58,27 @@ if $do_local; then
     cd Mantid-$mantid_version
     # we use `pwd` to make absolute links; that way the link will
     # still work when the area is tarred up
-  #RJT, 03/01/2011 - These paths need fixing but I'm not sure what the starting point is for these relative paths
     ln -s `pwd`/../../../Images .
-    ln -s `pwd`/../../../Test/Instrument instrument
+    ln -s `pwd`/../../../Instrument instrument
     cd Code
-    ln -s `pwd`/../../../qtiplot .
-    ln -s `pwd`/../../../Mantid .
+    ln -s `pwd`/../../../Build .
+    ln -s `pwd`/../../../Framework .
+    ln -s `pwd`/../../../QtPropertyBrowser .
+    ln -s `pwd`/../../../MantidQt .
+    ln -s `pwd`/../../../MantidPlot .
+    ln -s `pwd`/../../../CMakeLists.txt .
     cd ../..
 else
     svn_version="$svn_rev"
     echo "Exporting mantid source revision $svn_rev from subversion ..."
     echo "Directory structure ..."
-    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/RPM_Kit/Mantid Mantid-$mantid_version; do echo "Retrying svn"; rm -fr Mantid-$mantid_version; sleep 30; done
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Installers/RPM_Kit/Mantid Mantid-$mantid_version; do echo "Retrying svn"; rm -fr Mantid-$mantid_version; sleep 30; done
 #
     cd Mantid-$mantid_version
-    echo "Images ..."
-    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/Mantid/Images Images; do echo "Retrying svn"; rm -fr Images; sleep 30; done
-    echo "MantidPlot ..."
-    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/qtiplot Code/qtiplot; do echo "Retrying svn"; rm -fr Code/qtiplot; sleep 30; done
-    echo "src ..."
-    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid Code/Mantid; do echo "Retrying svn"; rm -fr Code/Mantid; sleep 30; done
-    echo "instrument ..."
-    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid/Instrument instrument; do echo "Retrying svn"; rm -fr instrument; sleep 30; done
+    echo "Exporting Mantid code ..."
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn Code/Mantid; do echo "Retrying svn"; rm -fr Code/Mantid; sleep 30; done
     cd ..
 fi
-#mantid_release="0.`date +%Y%m%d`svnR$svn_version"
 mantid_release="0.svnR${svn_version}.`date +%Y%m%d`"
 echo "Exporting complete - making spec file for version $mantid_version release $mantid_release"
 #

@@ -66,7 +66,7 @@ Mantid
 
 %prep
 %setup -q
-cd Code/Mantid
+cd Code/Mantid/Framework
 sed -i -e "s!USRLOCALINCLUDE = .*'!USRLOCALINCLUDE = '/usr/local/include'!" SConstruct
 sed -i -e "s!USRINCLUDE = .*!USRINCLUDE = '%{_includedir}'!" SConstruct
 sed -i -e "s!USRLIB = .*'!USRLIB = '%{_usrlibdir}'!" SConstruct
@@ -75,9 +75,18 @@ sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstr
 
 %build
 cd Code/Mantid/Framework
-sh build.sh rpmbuild=1 skiptest=1 debug=0
-cd ../qtiplot
-sh build.sh clean %{version} SVN_VERSION
+sh build.sh rpmbuild=1 skiptest=1 debug=0 -j4
+cd ../QtPropertyBrowser
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+make -j4
+cd ../MantidQt
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+# Note that the old MantidQt stuff doesn't like being built in parallel
+make
+cd ../MantidPlot
+python release_date.py %{version} SVN_VERSION
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+make -j4
 
 %install
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
@@ -136,25 +145,26 @@ cp -R %{pythonsitepackages}/PyQt4 $RPM_BUILD_ROOT/%{mantidbindir}
 chmod -R 755 $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 %endif
 
-cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
+cp -r Code/Mantid/Instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 cp -r Code/Mantid/Scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
 cp -r Code/Mantid/Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
-cp -r Code/Mantid/Framwork/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
-sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.sh > $RPM_BUILD_ROOT/etc/profile.d/mantid.sh
-sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.csh > $RPM_BUILD_ROOT/etc/profile.d/mantid.csh
+cp -r Code/Mantid/Framework/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
+sed -e "s@MANTIDBINDIR@%{mantidbindir}@" < utils/mantid.sh > $RPM_BUILD_ROOT/etc/profile.d/mantid.sh
+sed -e "s@MANTIDBINDIR@%{mantidbindir}@" < utils/mantid.csh > $RPM_BUILD_ROOT/etc/profile.d/mantid.csh
 echo %{mantidlibdir} > $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 echo %{mantidpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 echo %{mantidqtpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 install -m644 Code/Mantid/Framework/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
-sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!mantidqt\.plugins\.directory.*!mantidqt.plugins.directory = %{mantidqtpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!pythonalgorithms\.directories.*!pythonalgorithms.directories = %{mantidpythonalgdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!parameterDefinition\.directory.*!parameterDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!ManagedWorkspace\.FilePath.*!ManagedWorkspace.FilePath = /tmp!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!logging\.channels\.fileChannel\.path.*!logging.channels.fileChannel.path = !" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!\.\./PythonAPI!%{mantiddir}!g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@plugins\.directory.*@plugins.directory = %{mantidpluginsdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@mantidqt\.plugins\.directory.*@mantidqt.plugins.directory = %{mantidqtpluginsdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@pythonscripts\.directory.*@pythonscripts.directory = %{mantidscriptsdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@pythonalgorithms\.directories.*@pythonalgorithms.directories = %{mantidpythonalgdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@instrumentDefinition\.directory.*@instrumentDefinition.directory = %{mantidinstrumentdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@parameterDefinition\.directory.*@parameterDefinition.directory = %{mantidinstrumentdir}@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@ManagedWorkspace\.FilePath.*@ManagedWorkspace.FilePath = /tmp@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@logging\.channels\.fileChannel\.path.*@logging.channels.fileChannel.path = @" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+# Remaining script paths
+sed -i -e "s@\.\./\.\./Scripts@\.\./scripts@g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 
 %clean
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
