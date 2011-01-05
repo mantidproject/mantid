@@ -121,7 +121,7 @@ public:
   void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
-  Mantid::MDDataObjects::MDWorkspace* constructMDWorkspace(const std::string& wsLocation);
+  Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
 
   /// Create a geometry from dimensions and then serialise it.
   std::string constructGeometryXML(DimensionVec dimensions,

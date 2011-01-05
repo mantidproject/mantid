@@ -2,7 +2,9 @@
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
+#include <MDDataObjects/MDWorkspace.h>
 #include <MantidMDAlgorithms/CenterpieceRebinning.h>
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <vtkDoubleArray.h>
@@ -27,10 +29,14 @@ void MultiDimensionalDbPresenter::execute(const std::string& fileName)
 
   CenterpieceRebinning rebinAlg;
 
-  MDWorkspace_sptr inputWS = MDWorkspace_sptr(new MDWorkspace(3));
+  Load_MDWorkspace wsLoaderAlg;
+  wsLoaderAlg.setPropertyValue("inFilename", fileName);
+  wsLoaderAlg.setPropertyValue("MDWorkspace","InputWs");
+  wsLoaderAlg.execute();
+  Workspace_sptr result=AnalysisDataService::Instance().retrieve("InputWs");
+  MDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
 
-  boost::shared_ptr<IMD_FileFormat> spFile(MD_FileFormatFactory::getFileReader(fileName.c_str()).release());
-  inputWS->load_workspace(spFile);
+
   AnalysisDataService::Instance().add("inputWS", inputWS);
   rebinAlg.initialize();
   rebinAlg.setPropertyValue("Input", "inputWS");

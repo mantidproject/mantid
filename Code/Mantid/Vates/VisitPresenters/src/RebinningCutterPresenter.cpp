@@ -7,6 +7,7 @@
 #include <vtkStructuredGrid.h>
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
@@ -17,6 +18,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MD_FileFormatFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -265,14 +267,19 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
 
  //NB: At present, the input workspace is required by the dynamicrebinningfromxml algorithm, but not by the
  //sub-algorithm running centerpiece rebinning.
- Mantid::MDDataObjects::MDWorkspace* constructMDWorkspace(const std::string& wsLocation)
+ Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation)
  {
    using namespace Mantid::MDDataObjects;
    using namespace Mantid::Geometry;
+   using namespace Mantid::API;
 
-   MDWorkspace* workspace = new MDWorkspace;
-   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader(wsLocation.c_str());
-   workspace->load_workspace(boost::shared_ptr<IMD_FileFormat>(pFile.release()));
+   Mantid::MDAlgorithms::Load_MDWorkspace wsLoaderAlg;
+   wsLoaderAlg.setPropertyValue("inFilename", wsLocation);
+   wsLoaderAlg.setPropertyValue("MDWorkspace","InputWs");
+   wsLoaderAlg.execute();
+   Workspace_sptr result=AnalysisDataService::Instance().retrieve("InputWs");
+   MDWorkspace_sptr workspace = boost::dynamic_pointer_cast<MDWorkspace>(result);
+
    return workspace;
  }
 
@@ -284,7 +291,7 @@ vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
   //Get the input workspace location and name.
   std::string wsLocation = serializingUtility.getWorkspaceLocation();
   std::string wsName = serializingUtility.getWorkspaceName();
-  MDWorkspace_sptr baseWs = MDWorkspace_sptr(constructMDWorkspace(wsLocation));
+  MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
   AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
 
   Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;

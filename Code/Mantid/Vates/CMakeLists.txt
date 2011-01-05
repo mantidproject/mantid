@@ -8,6 +8,7 @@ project ( Vates )
 find_package ( VisIt )
 
 if ( VISIT_FOUND )
+  add_subdirectory ( VisitPresenters )
   add_subdirectory ( VisitPlugins )
 else ( VISIT_FOUND )
   message ( STATUS "Vates-VisIt plugins and widgets will not be built." )

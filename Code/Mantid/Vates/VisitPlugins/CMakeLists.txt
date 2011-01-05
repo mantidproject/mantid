@@ -95,11 +95,11 @@ ${QT_QTGUI_INCLUDE_DIR}
 ${VTK_INCLUDE_DIRS} 
 ${PYTHON_INCLUDE_PATH} 
 ${VISIT_INCLUDE_DIR}/visit/visitpy/visitpy 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Kernel/inc/  
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Geometry/inc/ 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/API/inc/ 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDAlgorithms/inc/ 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDDataObjects/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Framework/Kernel/inc/  
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Framework/Geometry/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Framework/API/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Framework/MDAlgorithms/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Framework/MDDataObjects/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
 ${CMAKE_CURRENT_SOURCE_DIR}/../VisitPresenters/inc/
 )
@@ -138,27 +138,27 @@ ENDIF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_D
 
 find_library(MantidKernel_LIBRARY
   NAMES MantidKernel
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
 find_library(MantidGeometry_LIBRARY
   NAMES MantidGeometry
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
 find_library(MantidAPI_LIBRARY
   NAMES MantidAPI
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
 find_library(MDAlgorithms_LIBRARY
-  NAMES MDAlgorithms
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+  NAMES MantidMDAlgorithms
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
-find_library(MDDataObjects_LIBRARY
-  NAMES MDDataObjects
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+find_library(MantidMDDataObjects_LIBRARY
+  NAMES MantidMDDataObjects
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
 find_library(HDF5_LIBRARY
@@ -166,9 +166,9 @@ find_library(HDF5_LIBRARY
   PATHS ${CMAKE_CURRENT_SOURCE_DIR}/usr/lib
 )
 
-find_library(VisitPresenters_LIBRARY
+find_library(MantidVisitPresenters_LIBRARY
   NAMES VisitPresenters
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Framework/bin
 )
 
 ADD_LIBRARY(ERebinningCutterOperator_ser ${LIBE_SOURCES})
