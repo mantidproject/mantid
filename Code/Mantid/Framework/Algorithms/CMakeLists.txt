@@ -250,14 +250,14 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
 		 test/AnyShapeAbsorptionTest.h
-		 #test/ApplyTransmissionCorrectionTest.h # TODO exception
+		 test/ApplyTransmissionCorrectionTest.h
 		 test/BinaryOperationTest.h
 		 test/CalculateEfficiencyTest.h
 		 test/CalculateTransmissionBeamSpreaderTest.h
-		 #test/CalculateTransmissionTest.h # TODO exception
+		 test/CalculateTransmissionTest.h
 		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
-		 #test/CheckWorkspacesMatchTest.h # TODO exception
+		 test/CheckWorkspacesMatchTest.h
 		 test/CloneWorkspaceTest.h
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
@@ -279,7 +279,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/CuboidGaugeVolumeAbsorptionTest.h
 		 test/CylinderAbsorptionTest.h
 		 test/DetectorEfficiencyCorTest.h
-		 #test/DetectorEfficiencyVariationTest.h # TODO exception
+		 test/DetectorEfficiencyVariationTest.h
 		 test/DiffractionEventReadDetCalTest.h
 		 test/DiffractionFocussing2Test.h
 		 test/DiffractionFocussingTest.h
@@ -296,7 +296,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/FindCenterOfMassPositionTest.h
 		 test/FindDeadDetectorsTest.h
 		 test/FindDetectorsOutsideLimitsTest.h
-		 #test/FindPeaksTest.h # TODO exception
+		 test/FindPeaksTest.h
 		 test/FlatBackgroundTest.h
 		 test/FlatPlateAbsorptionTest.h
 		 test/GetDetectorOffsetsTest.h
@@ -309,7 +309,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/InterpolatingRebinTest.h
 		 test/LogarithmTest.h
 		 test/MaskBinsTest.h
-		 #test/MedianDetectorTestTest.h # TODO  exception
+		 #test/MedianDetectorTestTest.h # TODO break the build of lots of things
 		 test/MemoryLeakTest.h
 		 test/MergeRunsTest.h
 		 test/MinusTest.h
@@ -332,7 +332,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/PowerTest.h
 		 test/Q1DTest.h
 		 test/Q1DWeightedTest.h
-		 #test/QxyTest.h # TODO exception
+		 test/QxyTest.h
 		 test/RealFFTTest.h
 		 test/RebinTest.h
 		 test/RebinToWorkspaceTest.h
@@ -347,13 +347,13 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/SmoothDataTest.h
 		 test/SofQWTest.h
 		 test/SolidAngleCorrectionTest.h
-		 #test/SolidAngleTest.h # TODO exception
+		 #test/SolidAngleTest.h # TODO breaks build of other things
 		 test/SortTest.h
 		 test/StripPeaksTest.h
 		 test/StripVanadiumPeaksTest.h
 		 test/SumNeighboursTest.h
-		 #test/SumRowColumnTest.h # TODO exception
-		 #test/SumSpectraTest.h # TODO exception
+		 test/SumRowColumnTest.h
+		 test/SumSpectraTest.h
 		 test/TofCorrectionTest.h
 		 test/TransposeTest.h
 		 test/UnaryOperationTest.h
