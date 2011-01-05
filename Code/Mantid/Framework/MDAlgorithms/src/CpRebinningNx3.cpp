@@ -152,7 +152,9 @@ CpRebinningNx3::rebin_Nx3dataset()
   pix_Xmax=pix_Ymax=pix_Zmax=pix_Emax=- std::numeric_limits<double>::max();
   //
   // work at least for MSV 2008
-#ifdef _OPENMP  
+// The following code does not work cross platform. Hence the undef.
+#undef _OPENMP
+#ifdef _OPENMP
   int num_OMP_Threads(1);
   omp_set_num_threads(num_OMP_Threads);
 
@@ -172,7 +174,7 @@ CpRebinningNx3::rebin_Nx3dataset()
     //    nRealThreads= omp_get_num_threads()
     //	 mexPrintf(" n real threads %d :\n",nRealThread);}
 
-#pragma omp for schedule(static,1)
+//#pragma omp for schedule(static,1)
     for(i=0;i<n_pix_in_buffer;i++){
 
       s  = unPacker.getSignal(i);
@@ -247,13 +249,13 @@ CpRebinningNx3::rebin_Nx3dataset()
       //
       indl += indX*nDimX+indY*nDimY+indZ*nDimZ;
       // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
-#pragma omp atomic
+//#pragma omp atomic
       pTargetImgData[indl].s   +=s;
-#pragma omp atomic
+//#pragma omp atomic
       pTargetImgData[indl].err +=err;
-#pragma omp atomic
+//#pragma omp atomic
       pTargetImgData[indl].npix++;
-#pragma omp atomic
+//#pragma omp atomic
       // this request substantial thinking -- will not do it this way as it is very slow
       // this->pix_array[indl].cell_memPixels.push_back(pix);
 

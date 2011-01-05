@@ -3,11 +3,11 @@
 
 namespace Mantid{
 namespace MDAlgorithms{
-       using namespace Mantid;
-       using namespace MDDataObjects;
-       using namespace Kernel;
-       using namespace API;
-       using namespace Geometry;
+
+       using namespace Mantid::MDDataObjects;
+       using namespace Mantid::Kernel;
+       using namespace Mantid::API;
+       using namespace Mantid::Geometry;
 
 /// helper class to identify the indexes on an auxilary 3D lattice; Needed for Preselect_Cells
 class nCell3D

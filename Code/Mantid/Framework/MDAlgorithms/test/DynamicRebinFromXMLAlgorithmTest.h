@@ -57,7 +57,7 @@ private:
 
     Load_MDWorkspace loader;
     loader.initialize();
-    loader.setPropertyValue("inFilename","../../../../Test/VATES/fe_demo_bin.sqw");
+    loader.setPropertyValue("inFilename","../../../../../Test/VATES/fe_demo_bin.sqw");
     std::string targetWorkspaceName = "Input";
     loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
     loader.execute();
