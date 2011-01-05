@@ -37,6 +37,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/DiffractionFocussing2.cpp
 		src/DiffractionFocussing.cpp
 		src/Divide.cpp
+		src/DspacemaptoCal.cpp
 		src/ElasticWindow.cpp
 		src/EQSANSTofStructure.cpp
 		src/ExponentialCorrection.cpp
@@ -164,6 +165,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/DiffractionFocussing2.h
 		inc/MantidAlgorithms/DiffractionFocussing.h
 		inc/MantidAlgorithms/Divide.h
+		inc/MantidAlgorithms/DspacemaptoCal.h
 		inc/MantidAlgorithms/ElasticWindow.h
 		inc/MantidAlgorithms/EQSANSTofStructure.h
 		inc/MantidAlgorithms/ExponentialCorrection.h
@@ -284,6 +286,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/DiffractionFocussing2Test.h
 		 test/DiffractionFocussingTest.h
 		 test/DivideTest.h
+		 test/DspacemaptoCalTest.h
 		 test/ExponentialCorrectionTest.h
 		 test/ExponentialTest.h
 		 test/ExtractFFTSpectrumTest.h
