@@ -3,6 +3,7 @@ set ( SRC_FILES
 src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
+src/RebinningXMLGenerator.cpp
 )
 
 set ( INC_FILES inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h

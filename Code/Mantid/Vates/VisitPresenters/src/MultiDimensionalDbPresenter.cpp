@@ -27,20 +27,19 @@ void MultiDimensionalDbPresenter::execute(const std::string& fileName)
   using namespace Mantid::MDDataObjects;
   using namespace Mantid::API;
 
-  CenterpieceRebinning rebinAlg;
-
   Load_MDWorkspace wsLoaderAlg;
+  wsLoaderAlg.initialize();
+  std::string wsId = "InputMDWs";
   wsLoaderAlg.setPropertyValue("inFilename", fileName);
-  wsLoaderAlg.setPropertyValue("MDWorkspace","InputWs");
+  wsLoaderAlg.setPropertyValue("MDWorkspace",wsId);
   wsLoaderAlg.execute();
-  Workspace_sptr result=AnalysisDataService::Instance().retrieve("InputWs");
+  Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
   MDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
 
-
+  CenterpieceRebinning rebinAlg;
   AnalysisDataService::Instance().add("inputWS", inputWS);
   rebinAlg.initialize();
   rebinAlg.setPropertyValue("Input", "inputWS");
-  rebinAlg.setPropertyValue("FileName", fileName);
   rebinAlg.setPropertyValue("Result","OutWorkspace");
 
   //HACK: this is the only way to provide slicing data for centrepiece rebinning code.

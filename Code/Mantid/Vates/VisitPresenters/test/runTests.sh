@@ -22,22 +22,26 @@ else
     test_files=$*
 fi
 
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+cxxtestgen=../../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 
 
 echo "Compiling the test executable..."
 
-mantid_libpath=../../../Mantid/debug
+#TODO set path properly
+mantid_libpath=~/workspace/Mantid/bin
+#TODO set path properly
 vtk_libpath=/usr/local/2.1.1/linux-x86_64/lib
+#TODO set path properly
+gmock_libpath=../../../TestingTools/lib/ubuntu-10.10
 
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Mantid/Kernel/inc -I../../../Mantid/MDDataObjects/inc -I../../../Mantid/MDAlgorithms/inc -I../../../Mantid/API/inc -I../inc/VisitPlugins -I/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 -I../../../Mantid/Geometry/inc -I ../inc \
-    -I ../../../Third_Party/src/cxxtest -I ../../../Third_Party/include -I ../../../TestingTools/include -L$vtk_libpath -L$mantid_libpath -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMDAlgorithms -lMantidDataObjects -lMDDataObjects -lVisitPresenters -lhdf5 -Wno-deprecated 
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Framework/Kernel/inc -I../../../Framework/MDDataObjects/inc -I../../../Framework/MDAlgorithms/inc -I../../../Framework/API/inc -I../inc/VisitPlugins -I/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 -I../../../Framework/Geometry/inc -I ../inc \
+    -I ../../../../Third_Party/src/cxxtest -I ../../../../Third_Party/include -I ../../../TestingTools/include -L$vtk_libpath -L$mantid_libpath -L$gmock_libpath -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMantidMDAlgorithms -lMantidDataObjects -lMantidMDDataObjects -lMantidVisitPresenters -lhdf5 -Wno-deprecated 
 
 echo
 
 echo "Running the tests..."
-ln ../../../Mantid/Build/Tests/*.properties .
+ln ../../../Framework/Build/Tests/*.properties .
 LD_LIBRARY_PATH=$vtk_libpath:$mantid_libpath:$LD_LIBRARY_PATH  ./runner.exe
 #valgrind --leak-check=full --show-reachable=yes --track-origins=yes ~/mantid/Code/Vates/VisitPresenters/test/runner.exe
 echo
