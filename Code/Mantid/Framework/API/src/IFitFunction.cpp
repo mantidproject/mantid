@@ -299,7 +299,7 @@ std::string IFitFunction::Attribute::asQuotedString()const
   }
   std::string quoted(attr);
   if( *(attr.begin()) != '\"' ) quoted = "\"" + attr;
-  if( *(quoted.end()) != '\"' ) quoted += "\"";
+  if( *(quoted.end() - 1) != '\"' ) quoted += "\"";
 
   return quoted;
 }
@@ -319,7 +319,7 @@ std::string IFitFunction::Attribute::asUnquotedString()const
   }
   std::string unquoted(attr);
   if( *(attr.begin()) == '\"' ) unquoted = std::string(attr.begin() + 1, attr.end());
-  if( *(unquoted.end()) == '\"' ) unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
+  if( *(unquoted.end() - 1) == '\"' ) unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
   
   return unquoted;
 }

@@ -722,7 +722,8 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool 
   // Resolution
   func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
   index = conv->addFunction(func);
-  Mantid::API::IFunction::Attribute attr(m_uiForm.confit_resInput->getFirstFilename().toStdString()); //m_cfProp["ResFuncFile"]->valueText().toStdString()
+  std::string resfilename = m_uiForm.confit_resInput->getFirstFilename().toStdString();
+  Mantid::API::IFunction::Attribute attr(resfilename);
   func->setAttribute("FileName", attr);
 
   // Delta Function
@@ -1500,7 +1501,7 @@ void IndirectDataAnalysis::furyfitSequential()
 
 void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 {
-  if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() )
+  if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() || m_ffDataCurve == NULL )
   {
     return;
   }
@@ -1767,8 +1768,10 @@ void IndirectDataAnalysis::confitInputType(int index)
 
 void IndirectDataAnalysis::confitPlotInput()
 {
-
   std::string wsname;
+  const bool plotGuess = m_uiForm.confit_ckPlotGuess->isChecked();
+  m_uiForm.confit_ckPlotGuess->setChecked(false);
+
   switch ( m_uiForm.confit_cbInputType->currentIndex() )
   {
   case 0: // "File"
@@ -1820,12 +1823,14 @@ void IndirectDataAnalysis::confitPlotInput()
   const double & lower = m_cfDataCurve->data().x(0);
   const double & upper = m_cfDataCurve->data().x(npnts-1);
   m_cfRangeS->setRange(lower, upper);
+
+  m_uiForm.confit_ckPlotGuess->setChecked(plotGuess);
 }
 
 void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
 {
 
-  if ( ! m_uiForm.confit_ckPlotGuess->isChecked() )
+  if ( ! m_uiForm.confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
   {
     return;
   }
