@@ -28,9 +28,13 @@ inc/MDDataObjects/MDWorkspace.h
 )
 
 # Test files. Other source files required.
-set (TEST_FILES test/HoraceReaderTest.h
-test/MDDataPointTest.h
+set (TEST_FILES 
+test/HoraceReaderTest.h
 test/MD_FileFactoryTest.h
+)
+
+set ( GMOCK_TEST_FILES
+test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
 test/MDPointTest.h
@@ -61,7 +65,13 @@ target_link_libraries ( MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES})
 # Create test file projects
 if ( CXXTEST_FOUND )
   include_directories(${HDF5_INCLUDE_DIRS} inc)
-  cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
-  target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES} )
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+    target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES} gmock )
+  else ()
+    cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
+    target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES} )
+  endif ()
+
 endif ()
 
