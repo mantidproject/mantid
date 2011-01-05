@@ -4,22 +4,13 @@ cmake_minimum_required (VERSION 2.6)
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Build/CMake")
 
-# Define the project name.
-project (MantidFramework)
+# Define the project name. Allows building framework as a separate project.
+project ( MantidFramework )
 
-# TODO: split this off into a separate file
-if ( WIN32 )
-  add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
-  add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
-  add_definitions ( -DGSL_DLL )
-  set ( CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../Third_Party/include )
-  set ( BOOST_INCLUDEDIR "../../Third_Party/include" )
-  if ( CMAKE_CL_64 )
-    set ( CMAKE_LIBRARY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../Third_Party/lib/win64 )
-    set ( BOOST_LIBRARIES "../../Third_Party/lib/win64" )
-  else ()
-    set ( BOOST_LIBRARIES "../../Third_Party/lib/win32" )
-  endif ()
+# Set paths to Third_Party for Windows builds
+if ( WIN32 AND NOT THIRD_PARTY )
+  set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../../Third_Party" )
+  include ( WindowsSetup )
 endif ()
 
 # If building as a stand-alone project, call our common setup script

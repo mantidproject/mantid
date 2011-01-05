@@ -5,21 +5,21 @@
 
 find_path ( POCO_INCLUDE_DIR Poco/Poco.h )
 
-find_library ( POCO_LIB_FOUNDATION NAMES PocoFoundation PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_UTIL NAMES PocoUtil PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_XML NAMES PocoXML PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_NET NAMES PocoNet PATH  ${CMAKE_LIBRARY_PATH})
+find_library ( POCO_LIB_FOUNDATION NAMES PocoFoundation )
+find_library ( POCO_LIB_UTIL NAMES PocoUtil )
+find_library ( POCO_LIB_XML NAMES PocoXML )
+find_library ( POCO_LIB_NET NAMES PocoNet )
 
-find_library ( POCO_LIB_FOUNDATION_DEBUG NAMES PocoFoundationd PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_UTIL_DEBUG NAMES PocoUtild PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_XML_DEBUG NAMES PocoXMLd PATH  ${CMAKE_LIBRARY_PATH})
-find_library ( POCO_LIB_NET_DEBUG NAMES PocoNetd PATH  ${CMAKE_LIBRARY_PATH})
+find_library ( POCO_LIB_FOUNDATION_DEBUG NAMES PocoFoundationd )
+find_library ( POCO_LIB_UTIL_DEBUG NAMES PocoUtild )
+find_library ( POCO_LIB_XML_DEBUG NAMES PocoXMLd )
+find_library ( POCO_LIB_NET_DEBUG NAMES PocoNetd )
 
 set ( POCO_LIBRARIES optimized ${POCO_LIB_FOUNDATION}
                      optimized ${POCO_LIB_UTIL}
                      optimized ${POCO_LIB_XML}
                      optimized ${POCO_LIB_NET}
-		             debug ${POCO_LIB_FOUNDATION_DEBUG}
+                     debug ${POCO_LIB_FOUNDATION_DEBUG}
                      debug ${POCO_LIB_UTIL_DEBUG}
                      debug ${POCO_LIB_XML_DEBUG}
                      debug ${POCO_LIB_NET_DEBUG}

@@ -7,26 +7,10 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 # Define the project name.
 project ( Mantid )
 
-# TODO: split this off into a separate file
+# Set paths to Third_Party for Windows builds
 if ( WIN32 )
-  add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
-  add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
-  add_definitions ( -DGSL_DLL )
-  
-  set ( CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../Third_Party/include )
-  set ( BOOST_INCLUDEDIR "../../Third_Party/include" )
-
-  set (Boost_NO_SYSTEM_PATHS TRUE)
-
-  if (CMAKE_GENERATOR MATCHES "64")
-	set (  BOOST_LIBRARYDIR "${CMAKE_CURRENT_SOURCE_DIR}/../Third_Party/lib/win64" )   
-    set ( CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Third_Party/lib/win64" )	
-  else(CMAKE_GENERATOR MATCHES "64")
-    set ( CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Third_Party/lib/win32" ) 
- 	set (  BOOST_LIBRARYDIR  "${CMAKE_CURRENT_SOURCE_DIR}/../Third_Party/lib/win32" )    
-  endif(CMAKE_GENERATOR MATCHES "64")
-  
- 
+  set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+  include ( WindowsSetup )
 endif ()
 
 # Call our setup script
