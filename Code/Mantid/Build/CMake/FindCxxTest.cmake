@@ -95,37 +95,58 @@
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # determine the cpp filename
-    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}.cpp)
-
-    # convert the header files to have full path
-    set ( PATH_FILES "" )
-    foreach (part ${ARGN})
-      set (PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
-    endforeach (part ${ARGN})
-
-    # run cxxtestgen
+    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}_runner.cpp)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
-        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE}
-                --xunit-printer --world ${_cxxtest_testname}
-                -o ${_cxxtest_real_outfname} ${PATH_FILES}
+        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --root
+        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
     )
-
-    # declare the generated cpp file to be generated
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
+    # convert the header files to have full path
+    set (_cxxtest_cpp_files "${_cxxtest_real_outfname}")
+    foreach (part ${ARGN})
+      get_filename_component(_cxxtest_cpp ${part} NAME)
+      string ( REPLACE ".h" ".cpp" _cxxtest_cpp ${_cxxtest_cpp} )
+      set ( _cxxtest_cpp "${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_cpp}" )
+      set ( _cxxtest_h "${CMAKE_CURRENT_SOURCE_DIR}/${part}" )
+
+      add_custom_command(
+        OUTPUT  ${_cxxtest_cpp}
+        DEPENDS ${_cxxtest_h}
+        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --part
+        --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
+	)
+
+      set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
+
+      set (_cxxtest_cpp_files ${_cxxtest_cpp} ${_cxxtest_cpp_files})
+    endforeach (part ${ARGN})
+
+    # run cxxtestgen
+    #add_custom_command(
+    #    OUTPUT  ${_cxxtest_real_outfname}
+    #    DEPENDS ${PATH_FILES}
+    #    COMMAND ${CXXTEST_TESTGEN_EXECUTABLE}
+    #    --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname} ${PATH_FILES}
+    #)
+
+    # declare the generated cpp file to be generated
+    #set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
+
     # define the test executable and exclude it from the all target
-    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_real_outfname})
+    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files})
 
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
     # add each separate test to ctest
     foreach ( part ${ARGN} )
-      set( _suitename "${part}" )
-      string ( REPLACE "test/" "" _suitename ${_suitename} )
-      string ( REPLACE ".h" "" _suitename ${_suitename} )
+      get_filename_component(_suitename ${part} NAME_WE )
+      #set( _suitename "${part}" )
+      #string ( REPLACE "test/" "" _suitename ${_suitename} )
+      #string ( REPLACE ".h" "" _suitename ${_suitename} )
       set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
       add_test ( NAME ${_cxxtest_separate_name}
 	         COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
@@ -158,9 +179,8 @@ find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h
           PATHS ${PROJECT_SOURCE_DIR}/TestingTools/cxxtest
 	        ${PROJECT_SOURCE_DIR}/../TestingTools/cxxtest )
 
-find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen python/cxxtest/cxxtestgen.py
-    PATHS ${CXXTEST_INCLUDE_DIR})
-message (STATUS "${CXXTEST_TESTGEN_EXECUTABLE}" ) # REMOVE
+find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen
+             PATHS ${CXXTEST_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
