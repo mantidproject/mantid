@@ -306,7 +306,7 @@ set ( TEST_FILES #test/AddSampleLogTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/GetEiTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/GhostCorrectionTest.h # TODO uses ComponentCreationHelpers.hh AND WorkspaceCreationHelper.hh
 		 test/GroupWorkspacesTest.h
-		 #test/He3TubeEfficiencyTest.h # TODO break the build of lots of things
+		 test/He3TubeEfficiencyTest.h
 		 #test/HRPDSlabCanAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/IntegrationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/InterpolatingRebinTest.h
@@ -345,7 +345,7 @@ set ( TEST_FILES #test/AddSampleLogTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/RenameWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/ReplaceSpecialValuesTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/SANSInstrumentCreationHelper.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/SaveSNSNexusTest.h # TODO breaks build of other things
+		 test/SaveSNSNexusTest.h
 		 #test/ScaleTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SmoothDataTest.h
 		 test/SofQWTest.h

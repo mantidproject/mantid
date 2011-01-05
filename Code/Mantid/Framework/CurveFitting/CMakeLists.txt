@@ -85,7 +85,7 @@ set ( TEST_FILES #test/BackToBackExponentialTest.h # TODO tests are commented ou
 		 test/FunctionTest.h
 		 test/Gaussian1DTest.h
 		 #test/GaussianTest.h # TODO tests are commented out
-		 #test/IkedaCarpenterPVTest.h # TODO breaks build
+		 #test/IkedaCarpenterPVTest.h # TODO tests are commented out
 		 test/LinearBackgroundTest.h
 		 test/LinearTest.h
 		 test/Lorentzian1DTest.h
