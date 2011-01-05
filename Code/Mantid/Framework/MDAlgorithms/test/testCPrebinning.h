@@ -19,9 +19,9 @@ std::string findTestFileLocation(void);
 bool load_existing_workspace(const std::string &workspace_name){
 // helper function to load a workpsace -- something a user should do before rebinning
 
-	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
-//    std::string dataFileName("../../../../Test/VATES/fe_demo.sqw");
-//    std::string dataFileName("../../../../Test/VATES/fe_demo_bin.sqw");
+	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
+//    std::string dataFileName("../../../../../Test/VATES/fe_demo.sqw");
+//    std::string dataFileName("../../../../../Test/VATES/fe_demo_bin.sqw");
     std::string dataFileName("../../../../../Test/AutoTestData/test_horace_reader.sqw");
 
     Load_MDWorkspace loader;

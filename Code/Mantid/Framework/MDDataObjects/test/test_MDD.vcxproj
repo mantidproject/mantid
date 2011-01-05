@@ -89,12 +89,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\inc;..\..\Kernel\inc;..\..\Geometry\inc;..\..\API\inc;..\..\..\Third_Party\include\hdf5;..\..\..\Third_Party\include\hdf5\win32;..\..\..\Third_Party\Include;..\..\..\Third_Party\src\gmock-1.5.0;..\..\..\Third_Party\src\gmock-1.5.0\include;..\..\..\Third_Party\src\gmock-1.5.0\gtest\include;..\..\..\Third_Party\src\cxxtest;..\..\..ThirdParty\src\cxxtest</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\inc;..\..\Kernel\inc;..\..\Geometry\inc;..\..\API\inc;..\..\..\..\Third_Party\include\hdf5;..\..\..\..\Third_Party\include\hdf5\win32;..\..\..\..\Third_Party\Include;..\..\..\..\Third_Party\src\gmock-1.5.0;..\..\..\..\Third_Party\src\gmock-1.5.0\include;..\..\..\..\Third_Party\src\gmock-1.5.0\gtest\include;..\..\..\..\Third_Party\src\cxxtest;..\..\..\..ThirdParty\src\cxxtest</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);..\..\Debug;..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\Framework\Kernel\Debug;..\..\..\Win32\Framework\Geometry\Debug;..\..\..\Win32\Framework\API\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib;gmock_d.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>

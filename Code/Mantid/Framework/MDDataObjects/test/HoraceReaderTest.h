@@ -156,7 +156,7 @@ public:
         TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
 	}
 	void testReadOneSelection(){
-		// read first two (buffer is already allocated above)
+		// read one (buffer is already allocated above)
 	
 		size_t starting_cell(0),n_cell_read;
 		size_t n_pix_in_buffer(0);

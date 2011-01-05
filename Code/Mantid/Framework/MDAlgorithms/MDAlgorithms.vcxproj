@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B96C1BA5-5D6E-44A8-815B-963E7649B415}</ProjectGuid>
+    <RootNamespace>MDAlgorithms</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-x64.props" />
+    <Import Project="..\Mantid-debug.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-x64.props" />
+    <Import Project="..\Mantid-release.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.\inc;..\MDAlgorithms\inc\MDAlgorithms;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\MDDataObjects\inc;..\..\..\Third_Party\Include\hdf5;..\..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\Win32\Framework\Kernel\Debug;..\..\Win32\Framework\Geometry\Debug;..\..\Win32\Framework\API\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\Kernel\inc;..\API\inc;..\MDDataObjects\inc;inc\MantidMDAlgorithms;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\BoxImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CpRebinning4x3StructHR.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CpRebinningNx3.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DepthParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterIntegration.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterNoIntegration.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterSet.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DynamicCPRRebinning.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DynamicRebinFromXML.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\HeightParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\IDynamicRebinning.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\Load_MDWorkspace.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\NormalParameterParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\OriginParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\OriginParameterParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\SimulateMDD.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\SingleValueParameterParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\Topology.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\WidthParameter.h" />
+    <ClInclude Include="test\DynamicRebinFromXMLAlgorithmTest.h" />
+    <ClInclude Include="test\testCPrebinning.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\BoxFunctionBuilder.cpp" />
+    <ClCompile Include="src\BoxImplicitFunction.cpp" />
+    <ClCompile Include="src\BoxImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\CenterpieceRebinning.cpp" />
+    <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
+    <ClCompile Include="src\CompositeImplicitFunction.cpp" />
+    <ClCompile Include="src\CompositeImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\CpRebinning4x3StructHR.cpp" />
+    <ClCompile Include="src\CpRebinningNx3.cpp" />
+    <ClCompile Include="src\DepthParameter.cpp" />
+    <ClCompile Include="src\DimensionParameter.cpp" />
+    <ClCompile Include="src\DimensionParameterIntegration.cpp" />
+    <ClCompile Include="src\DimensionParameterNoIntegration.cpp" />
+    <ClCompile Include="src\DimensionParameterSet.cpp" />
+    <ClCompile Include="src\DynamicCPRRebinning.cpp" />
+    <ClCompile Include="src\DynamicRebinFromXML.cpp" />
+    <ClCompile Include="src\HeightParameter.cpp" />
+    <ClCompile Include="src\IDynamicRebinning.cpp" />
+    <ClCompile Include="src\InvalidParameter.cpp" />
+    <ClCompile Include="src\InvalidParameterParser.cpp" />
+    <ClCompile Include="src\Load_MDWorkspace.cpp" />
+    <ClCompile Include="src\NormalParameter.cpp" />
+    <ClCompile Include="src\NormalParameterParser.cpp" />
+    <ClCompile Include="src\OriginParameter.cpp" />
+    <ClCompile Include="src\OriginParameterParser.cpp" />
+    <ClCompile Include="src\PlaneFunctionBuilder.cpp" />
+    <ClCompile Include="src\PlaneImplicitFunction.cpp" />
+    <ClCompile Include="src\PlaneImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\SimulateMDD.cpp" />
+    <ClCompile Include="src\SingleValueParameterParser.cpp" />
+    <ClCompile Include="src\WidthParameter.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
