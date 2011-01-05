@@ -107,8 +107,9 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
-        COMMAND ${CXXTEST_TESTGEN_EXECUTABLE}
-        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname} ${PATH_FILES}
+        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE}
+                --xunit-printer --world ${_cxxtest_testname}
+                -o ${_cxxtest_real_outfname} ${PATH_FILES}
     )
 
     # declare the generated cpp file to be generated
