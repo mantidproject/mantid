@@ -203,6 +203,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="buttonAbort">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Abort Tests</string>
             </property>
@@ -211,12 +214,12 @@
          </layout>
         </item>
         <item>
-         <widget class="QProgressBar" name="progressBar">
+         <widget class="QProgressBar" name="progTest">
           <property name="value">
-           <number>24</number>
+           <number>0</number>
           </property>
           <property name="format">
-           <string>%p% (current test)</string>
+           <string/>
           </property>
          </widget>
         </item>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed Jan  5 16:28:45 2011
+# Created: Wed Jan  5 17:53:47 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -85,30 +85,27 @@ class Ui_MainWindow(object):
         self.vlResults = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.vlResults.setMargin(4)
         self.vlResults.setObjectName("vlResults")
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.label_2 = QtGui.QLabel(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setWeight(75)
         font.setBold(True)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
-        self.vlResults.addWidget(self.label_2)
-        self.labelCurrentTest = QtGui.QLabel(self.verticalLayoutWidget)
-        self.labelCurrentTest.setObjectName("labelCurrentTest")
-        self.vlResults.addWidget(self.labelCurrentTest)
-        self.progressBar = QtGui.QProgressBar(self.verticalLayoutWidget)
-        self.progressBar.setProperty("value", 24)
-        self.progressBar.setObjectName("progressBar")
-        self.vlResults.addWidget(self.progressBar)
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.addWidget(self.label_2)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.buttonAbort = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.buttonAbort.setEnabled(False)
         self.buttonAbort.setObjectName("buttonAbort")
         self.horizontalLayout.addWidget(self.buttonAbort)
-        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem2)
         self.vlResults.addLayout(self.horizontalLayout)
+        self.progTest = QtGui.QProgressBar(self.verticalLayoutWidget)
+        self.progTest.setProperty("value", 0)
+        self.progTest.setFormat("")
+        self.progTest.setObjectName("progTest")
+        self.vlResults.addWidget(self.progTest)
         self.label_3 = QtGui.QLabel(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(13)
@@ -325,8 +322,7 @@ class Ui_MainWindow(object):
         self.buttonExpandTree.setText(QtGui.QApplication.translate("MainWindow", "Expand All", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCollapseTree.setText(QtGui.QApplication.translate("MainWindow", "Collapse All", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelCurrentTest.setText(QtGui.QApplication.translate("MainWindow", "(current test running)", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Test Runners", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))

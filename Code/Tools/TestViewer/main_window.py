@@ -7,15 +7,7 @@ from PyQt4 import QtGui, uic, QtCore
 import ui_main_window
 import test_info
 
-#-----------------------------------------------------------------------------
-def test_run_print_callback(suite):
-    """ Simple callback for running tests"""
-    if isinstance(suite, test_info.TestSuite):
-        text = "Running %s" % suite.classname
-    else:
-        text = suite                
-    print text, "global"
-    
+
 
 class TestWorker(QtCore.QThread):
     """ Class to run the tests in the background of the GUI"""
@@ -24,29 +16,35 @@ class TestWorker(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self.exiting = False
         
-    def begin(self, selected_only=False, make_tests=True, parallel=False):
+    #-----------------------------------------------------------------------------
+    def set_parameters(self, mainWindow, selected_only=False, make_tests=True, parallel=False):
         """Set the parameters of how the tests will be built and run;
-        then, start the worker"""
+        Returns: the number of steps in the runner.
+        """
         self.selected_only = selected_only
         self.make_tests = make_tests
         self.parallel = parallel
-        self.start()
+        self.mainWindow = mainWindow
+        return test_info.run_tests_computation_steps(selected_only, make_tests)
         
-        
-    def test_run_print_callback(self,suite):
+
+    #-----------------------------------------------------------------------------
+    def test_run_callback(self, suite):
         """ Simple callback for running tests"""
         if isinstance(suite, test_info.TestSuite):
-            text = "Running %s" % suite.classname
+            text = "%s done." % suite.classname
         else:
-            text = suite                
-        print text,"in worker"
+            text = suite
+        self.mainWindow.emit( QtCore.SIGNAL("testRun"), text)
+        
         
     #-----------------------------------------------------------------------------
     def run(self):
-        print "Worker running"
+        print "Test Run started..."
         test_info.run_tests_in_parallel(self.selected_only, self.make_tests, 
-                          self.parallel, callback_func=self.test_run_print_callback)
-
+                          self.parallel, callback_func= self.test_run_callback)
+        
+        
         
         
 
@@ -59,41 +57,65 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         QtGui.QWidget.__init__(self, parent)
         # Populate all GUI elements
         self.setupUi(self)
-        
+             
         # Create the worker
         self.worker = TestWorker()
-        self.connect(self.worker, QtCore.SIGNAL("finished()"), self.updateUi)
-        self.connect(self.worker, QtCore.SIGNAL("terminated()"), self.updateUi)
+        self.connect(self.worker, QtCore.SIGNAL("finished()"), self.complete_run)
+        self.connect(self.worker, QtCore.SIGNAL("terminated()"), self.complete_run)
         
         # --- Menu Commands ---
         self.connect(self.action_Quit, QtCore.SIGNAL("triggered()"), self.quit)
         self.connect(self.buttonRunAll, QtCore.SIGNAL("clicked()"), self.run_all)
         self.connect(self.buttonRunSelected, QtCore.SIGNAL("clicked()"), self.run_selected)
+        self.connect(self.buttonAbort, QtCore.SIGNAL("clicked()"), self.abort)
+        
+        # Signal that will be called by the worker thread
+        self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
+
         
     #-----------------------------------------------------------------------------
-    def updateUi(self):
-        print "updateUI"
-        pass
+    def update_label(self, text):
+        val = self.progTest.value()+1 
+        self.progTest.setValue( val )
+        self.progTest.setFormat("%p% : " + text)
+        
+    #-----------------------------------------------------------------------------
+    def complete_run(self):
+        self.buttonAbort.setEnabled(False)
+        self.progTest.setValue(0)
+        self.progTest.setFormat("")
         
     #-----------------------------------------------------------------------------
     def quit(self):
         """ Exit the program """
+        test_info.abort()
         print "Exiting TestViewer. Happy coding!"
         self.close()
         
-
+    #-----------------------------------------------------------------------------
+    def abort(self):
+        test_info.abort()
+       
             
     #-----------------------------------------------------------------------------
     def run_all(self):
-        parallel = self.checkInParallel.isChecked()
-        self.worker.begin(selected_only=False, make_tests=True, 
-                          parallel=parallel)
-        
+        self.do_run(False)
 
     def run_selected(self):
-        test_info.run_tests_in_parallel(selected_only=False, make_tests=False, 
-                          parallel=True, callback_func=test_run_print_callback)
- 
+        self.do_run(True)
+        
+    def do_run(self, selected_only):
+        parallel = self.checkInParallel.isChecked()
+        # Do some setup of the worker and GUI
+        num_steps = self.worker.set_parameters(self, selected_only=False, make_tests=True, parallel=parallel)
+        if num_steps < 1: num_steps = 1 
+        self.progTest.setValue(0)
+        self.progTest.setMaximum( num_steps )
+        self.buttonAbort.setEnabled(True)
+        # Begin the thread in the background
+        self.worker.start()
+        
+        
  
         
 def start(argv=[]):
