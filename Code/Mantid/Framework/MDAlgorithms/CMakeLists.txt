@@ -116,8 +116,12 @@ target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 # Create test file projects
 if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
+    message ( STATUS "A: ${GMOCK_LIBRARIES}")
+    message ( STATUS "B: ${GMOCK_INCLUDE_DIR}")
+    message ( STATUS "C: ${GTEST_INCLUDE_DIR}")
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects gmock)
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects 
+      ${GMOCK_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
     target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects )
