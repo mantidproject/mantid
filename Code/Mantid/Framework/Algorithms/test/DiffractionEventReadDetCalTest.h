@@ -39,7 +39,8 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename", "../../../Instrument/SNAP_Definition.xml");
+    loaderCAL.setPropertyValue("Filename",  Kernel::ConfigService::Instance().getString(
+        "instrumentDefinition.directory")+"/SNAP_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
