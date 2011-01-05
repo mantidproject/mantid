@@ -151,7 +151,7 @@ private:
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../Instrument/INES_Definition.xml";
+    std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", input);
     loader.execute();
