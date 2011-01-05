@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
-#include <ostream>
-#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <sstream>
@@ -19,9 +17,23 @@
 
 using namespace Mantid;
 using namespace StrFunc;
+
 class testRegexSupport: public CxxTest::TestSuite
 {
+private:
+  std::stringstream testStream;
+
 public:
+  testRegexSupport()
+  {
+    testStream << "2007-11-16T13:25:48 END\n"
+               << "2007-11-16T13:29:36 CHANGE RUNTABLE\n"
+               << "2007-11-16T13:29:49 CHANGE RUNTABLE\n"
+               << "2007-11-16T13:30:21 CHANGE RUNTABLE\n"
+               << "2007-11-16T13:32:38 BEGIN\n"
+               << "2007-11-16T13:43:40 ABORT\n";
+  }
+
 	void testStrComp(){
 
 		double result;
@@ -109,19 +121,18 @@ public:
 	}
 
 	void testFindComp(){
-		// int findComp(std::istream&,const boost::regex&,int&);
-		//"../../../../Test/AutoTestData/HRP37129_ICPevent.txt"
-		std::ifstream fs("../../../../../Test/AutoTestData/HRP37129_ICPevent.txt",std::ifstream::in);
 		std::string output;
-		TS_ASSERT_EQUALS(findComp(fs,boost::regex("BEGIN"),output),5);
+		TS_ASSERT_EQUALS(findComp(testStream,boost::regex("BEGIN"),output),5);
 		TS_ASSERT_EQUALS(output,"");
+                // Reset the stream pointer
+		testStream.seekg(0);
 	}
 
 	void testFindPattern(){
-		std::ifstream fs("../../../../../Test/AutoTestData/HRP37129_ICPevent.txt",std::ifstream::in);
 		 std::string output;
-		 TS_ASSERT_EQUALS(findPattern(fs,boost::regex("BEGIN"),output),5);
+		 TS_ASSERT_EQUALS(findPattern(testStream,boost::regex("BEGIN"),output),5);
 		 TS_ASSERT_EQUALS(output,"2007-11-16T13:32:38 BEGIN");
 	}
 };
+
 #endif
