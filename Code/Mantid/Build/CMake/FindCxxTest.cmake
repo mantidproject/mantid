@@ -157,8 +157,9 @@ find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h
           PATHS ${PROJECT_SOURCE_DIR}/TestingTools/cxxtest
 	        ${PROJECT_SOURCE_DIR}/../TestingTools/cxxtest )
 
-find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen cxxtestgen.py
+find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen python/cxxtest/cxxtestgen.py
     PATHS ${CXXTEST_INCLUDE_DIR})
+message (STATUS "${CXXTEST_TESTGEN_EXECUTABLE}" ) # REMOVE
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
