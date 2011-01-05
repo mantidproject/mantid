@@ -47,9 +47,15 @@ set_target_properties ( MDDataObjects PROPERTIES OUTPUT_NAME MantidMDDataObjects
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDDataObjects PROPERTY FOLDER "Framework" )
 # Find hdf5 libraries
+if( WIN32 )
+#Exact libraries will need to be refined for windows 64/32 bit as they are different in third_party.
+set ( HDF5_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH}/hdf5 )
+set ( HDF5_LIBRARIES ${CMAKE_LIBRARY_PATH}/hdf5dll.lib ) 
+else()
 find_package (HDF5 REQUIRED)
-include_directories(${HDF5_INCLUDE_DIRS} inc)
+endif()
 
+include_directories(${HDF5_INCLUDE_DIRS} inc)
 target_link_libraries ( MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES})
 
 # Create test file projects
