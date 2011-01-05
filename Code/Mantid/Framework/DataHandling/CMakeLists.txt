@@ -122,7 +122,7 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
 
 set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelper.hh
                  test/DefineGaugeVolumeTest.h
-		 #test/FindDetectorsInShapeTest.h # TODO exception
+		 test/FindDetectorsInShapeTest.h
 		 test/GetMaskedDetectorsTest.h
 		 test/GroupDetectors2Test.h
 		 test/GroupDetectorsTest.h
@@ -150,19 +150,18 @@ set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelp
 		 test/LoadSPETest.h
 		 test/LoadSpice2dTest.h
 		 test/LoadTest.h
-		 #test/ManagedRawFileWorkspace2DTest.h # TODO exception
-		 #test/MaskDetectorsInShapeTest.h # TODO exception
+		 test/ManagedRawFileWorkspace2DTest.h
+		 test/MaskDetectorsInShapeTest.h
 		 test/MaskDetectorsTest.h
 		 test/MoveInstrumentComponentTest.h
 		 test/RawFileInfoTest.h
-		 #test/SaveCanSAS1dTest.h # TODO exception
+		 test/SaveCanSAS1dTest.h
 		 test/SaveCSVTest.h
 		 test/saveDASCTest.h
 		 #test/SaveFocussedXYETest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SavePHXTest.h
 		 #test/SaveRKHTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/SaveSPETest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/SetScalingPSDrawtest.h # TODO exception
 		 #test/SetScalingPSDtest.h  # TODO uses WorkspaceCreationHelper.hh
 		 test/UpdateInstrumentFromRawTest.h
 		 test/XMLlogfileTest.h )

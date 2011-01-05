@@ -197,10 +197,16 @@ if ( CXXTEST_FOUND )
   target_link_libraries( KernelTest Kernel )
   add_dependencies ( FrameworkTests KernelTest )
 
-  add_custom_command ( TARGET Kernel POST_BUILD 
+  add_custom_command ( TARGET KernelTest POST_BUILD 
                        COMMAND ${CMAKE_COMMAND}
                        ARGS -E copy_if_different 
                        ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.properties
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
+  )
+  add_custom_command ( TARGET KernelTest POST_BUILD 
+                       COMMAND ${CMAKE_COMMAND}
+                       ARGS -E copy_if_different 
+                       ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.user.properties
                        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
   )
 

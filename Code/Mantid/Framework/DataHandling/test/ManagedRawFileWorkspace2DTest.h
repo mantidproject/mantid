@@ -3,12 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
-#include <iostream>
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,7 +20,8 @@ class ManagedRawFileWorkspace2DTest : public CxxTest::TestSuite
 public:
   ManagedRawFileWorkspace2DTest()
   {
-    Workspace = new ManagedRawFileWorkspace2D("../../../../../Test/AutoTestData/HET15869.raw",2);
+    file = FileFinder::Instance().getFullPath("HET15869.raw");
+    Workspace = new ManagedRawFileWorkspace2D(file,2);
   }
 
   ~ManagedRawFileWorkspace2DTest()
@@ -52,7 +52,7 @@ public:
 
   void testData()
   {
-    ManagedRawFileWorkspace2D ws("../../../../../Test/AutoTestData/HET15869.raw");
+    ManagedRawFileWorkspace2D ws(file);
 
     const MantidVec& x0 = ws.readX(0);
     TS_ASSERT_EQUALS( x0[0], 5. )
@@ -72,7 +72,7 @@ public:
 
   void testChanges()
   {
-    ManagedRawFileWorkspace2D ws("../../../../../Test/AutoTestData/HET15869.raw");
+    ManagedRawFileWorkspace2D ws(file);
 
     MantidVec& y0 = ws.dataY(0);
     y0[100] = 1234.;
@@ -140,7 +140,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<IInstrument> i = output2D->getInstrument();
+    boost::shared_ptr<Mantid::Geometry::IInstrument> i = output2D->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -199,6 +199,7 @@ public:
 
 private:
   ManagedRawFileWorkspace2D* Workspace;
+  std::string file;
 };
 
 #endif /*ManagedRawFileWorkspace2DTEST_H_*/

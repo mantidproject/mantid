@@ -30,16 +30,16 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
 set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/EventListTest.h
 		 #test/EventWorkspaceTest.h # TODO uses ComponentCreationHelpers.hh
-		 #test/Histogram1DTest.h # TODO fails to build
-		 #test/LibraryManagerTest.h # TODO fails to build
+		 test/Histogram1DTest.h
+		 #test/LibraryManagerTest.h # TODO fails because UserAlgorithms not built
 		 test/ManagedDataBlock2DTest.h
-		 #test/ManagedWorkspace2DTest.h # TODO fails to build
+		 test/ManagedWorkspace2DTest.h
 		 test/RefAxisTest.h
 		 test/TableWorkspacePropertyTest.h
 		 test/TableWorkspaceTest.h
 		 test/Workspace2DTest.h
 		 test/WorkspaceHistoryTest.h
-		 #test/WorkspaceIteratorTest.h # TODO fails to build
+		 test/WorkspaceIteratorTest.h
 		 test/WorkspaceSingleValueTest.h
 		 test/WorkspaceValidatorsTest.h )
 
