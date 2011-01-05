@@ -118,7 +118,7 @@ public:
 
     // get the size of the file in bytes and reset the handle back to the beginning
     handle->seekg(0, std::ios::end);
-    size_t filesize = handle->tellg();
+    size_t filesize = static_cast<size_t>(handle->tellg());
     handle->seekg(0, std::ios::beg);
 
     // check the file is a compatible size
