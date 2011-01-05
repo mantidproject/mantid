@@ -103,7 +103,10 @@ double DcalcConversion(const double l1,
  * for all pixel IDs in a workspace.
  * @params: inputWS: the workspace containing the instrument geometry
  *    of interest.
+ * @params: DFileName: name of dspacemap file
+ * @params: calFileName: name of calibration/grouping file
  * @params: offsets: map between pixelID and offset (from the calibration file)
+ * @params: groups: map between pixelID and group (from the calibration file)
  */
 std::map<int, double> * DcalcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::string DFileName, std::string calFileName,
