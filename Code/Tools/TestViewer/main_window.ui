@@ -157,13 +157,25 @@
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeTests">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>1</verstretch>
-           </sizepolicy>
+         <widget class="QTreeWidget" name="treeTests">
+          <property name="columnCount">
+           <number>3</number>
           </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string notr="true">2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string notr="true">3</string>
+           </property>
+          </column>
          </widget>
         </item>
        </layout>

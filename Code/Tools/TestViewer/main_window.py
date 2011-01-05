@@ -7,6 +7,7 @@ from PyQt4 import QtGui, uic, QtCore
 import ui_main_window
 import test_info
 
+from QtGui import QTreeWidget
 
 
 class TestWorker(QtCore.QThread):
@@ -72,6 +73,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
 
+    def setup_tree(self):
+        """ Set up the QTreeWidget of the tree """
+        tree = self.treeTests
+        #@type tree QTreeWidget
+        tree.addTopLevelItem
         
     #-----------------------------------------------------------------------------
     def update_label(self, text):

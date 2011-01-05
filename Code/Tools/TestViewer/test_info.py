@@ -21,10 +21,14 @@ class TestResultState:
     PASSED = 1
     """ Test failed """
     FAILED = 2
+    """ Compilation error ! """
+    COMPILE_ERROR = 3
     """ Passed the last time it was run, but is out of date now """
-    PASSED_OLD = 3
+    PASSED_OLD = 4
     """ Failed the last time it was run, but is out of date now """
-    FAILED_OLD = 4
+    FAILED_OLD = 5
+    """ Compilation last time it was run """
+    COMPILE_ERROR_OLD = 6
 
 
 #==================================================================================================
@@ -337,7 +341,7 @@ def make_test( project ):
      
 #==================================================================================================
 def get_selected_suites(selected_only=True):
-    """Returns a list of all selected suites """
+    """Returns a list of all selected suites. """
     global test_projects
     suites = []
     for pj in test_projects:
@@ -349,7 +353,7 @@ def get_selected_suites(selected_only=True):
 #==================================================================================================
 def run_tests_computation_steps(selected_only=True, make_tests=True):
     """Returns the number of computation steps that will be done with these parameters
-    when running in parallel """
+    This is used by the GUI to know how to report progress."""
     count = 0
     if make_tests:
         for pj in test_projects:
@@ -418,6 +422,7 @@ def run_tests_in_parallel(selected_only=True, make_tests=True, parallel=True, ca
             if not callback_func is None: callback_func(result)
     print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
 
+
 #==================================================================================================
 def discover_projects(path, source_path):
     """Look for CXXTest projects in the given paths"""
@@ -445,7 +450,6 @@ def get_project_named(name):
     
 
 
-
 #==================================================================================================
 def test_run_print_callback(suite):
     """ Simple callback for running tests"""
@@ -453,8 +457,6 @@ def test_run_print_callback(suite):
         print "Running %s" % suite.classname
     else:
         print suite                
-        
-      
         
 #==================================================================================================
 if __name__ == '__main__':
