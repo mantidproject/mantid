@@ -192,15 +192,26 @@ set_property ( TARGET Kernel PROPERTY FOLDER "Framework" )
 target_link_libraries ( Kernel ${MANTIDLIBS} )
 
 
-add_custom_command ( TARGET Kernel POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/../Properties/Mantid.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
-)
-
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   target_link_libraries( KernelTest Kernel )
   add_dependencies ( FrameworkTests KernelTest )
+
+  add_custom_command ( TARGET Kernel POST_BUILD 
+                       COMMAND ${CMAKE_COMMAND}
+                       ARGS -E copy_if_different 
+                       ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.properties
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
+  )
+
 endif ()
+
+###########################################################################
+# Manipulate the Mantid.properties file to work wherever you build to
+###########################################################################
+
+set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
+
+configure_file ( ../Build/Tests/Mantid.properties.template
+                 ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+)

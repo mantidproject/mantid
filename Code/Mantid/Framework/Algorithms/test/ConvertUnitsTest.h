@@ -63,7 +63,7 @@ public:
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../Instrument/HET_Definition.xml";
+    std::string inputFile = "HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", this->inputSpace);
     loader.execute();
