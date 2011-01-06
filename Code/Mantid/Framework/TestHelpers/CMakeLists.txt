@@ -7,6 +7,8 @@ set ( INC_FILES inc/MantidTestHelpers/DLLExport.h
 		inc/MantidTestHelpers/ComponentCreationHelper.h 
 		inc/MantidTestHelpers/TestChannel.h )
 
+# Requires DataHandling for a load call
+include_directories (../DataHandling/inc)
 include_directories ( inc )
 
 # For Windows:

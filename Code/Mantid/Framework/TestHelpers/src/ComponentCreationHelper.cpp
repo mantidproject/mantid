@@ -2,6 +2,24 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+
+#include "MantidDataHandling/LoadInstrument.h"
+#include <Poco/Path.h>
+#include <boost/shared_array.hpp>
+
+using namespace Mantid::Geometry;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace ComponentCreationHelper
 {
@@ -280,7 +298,7 @@ namespace ComponentCreationHelper
       // Mark them all as detectors
       for (int i=0; i < bank->nelements(); i++)
       {
-        boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*bank)[i]);
+        boost::shared_ptr<Detector> detector = boost::dynamic_pointer_cast<Detector>((*bank)[i]);
         if (detector)
         {
           //Mark it as a detector (add to the instrument cache)
@@ -309,3 +327,125 @@ namespace ComponentCreationHelper
   }
 }
 
+/*****************************************************
+ * SANS instrument helper class
+ *****************************************************/
+
+// Number of detector pixels in each dimension
+const int SANSInstrumentCreationHelper::nBins = 30;
+// The test instrument has 2 monitors
+const int SANSInstrumentCreationHelper::nMonitors = 2;
+
+  /*
+   * Generate a SANS test workspace, with instrument geometry.
+   * The geometry is the SANSTEST geometry, with a 30x30 pixel 2D detector.
+   *
+   * @param workspace: name of the workspace to be created.
+   */
+Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std::string workspace)
+{
+  // Create a test workspace with test data with a well defined peak
+  // The test instrument has two monitor channels
+  Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins*nBins+nMonitors,1);
+  AnalysisDataService::Instance().addOrReplace(workspace, ws);
+  ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+  ws->setYUnit("");
+  for (int i = 0; i < ws->getNumberHistograms(); ++i)
+  {
+    ws->getAxis(1)->spectraNo(i) = i;
+  }
+  
+  // Load instrument geometry
+  runLoadInstrument("SANSTEST", ws);
+  runLoadMappingTable(ws, nBins, nBins);
+  
+  return ws;
+}
+
+  /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+   * @param inst_name The name written in the Nexus file
+   * @param workspace The workspace to insert the instrument into
+   */
+  void SANSInstrumentCreationHelper::runLoadInstrument(const std::string & inst_name,
+      Workspace2D_sptr workspace)
+  {
+    // Determine the search directory for XML instrument definition files (IDFs)
+    std::string directoryName = Mantid::Kernel::ConfigService::Instance().getString(
+        "instrumentDefinition.directory");
+    if (directoryName.empty())
+    {
+      // This is the assumed deployment directory for IDFs, where we need to be relative to the
+      // directory of the executable, not the current working directory.
+      directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
+          "../Instrument").toString();
+    }
+
+    // For Nexus Mantid processed, Instrument XML file name is read from nexus
+    std::string instrumentID = inst_name;
+    // force ID to upper case
+    std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+    std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+
+    Mantid::DataHandling::LoadInstrument loadInst;
+    loadInst.initialize();
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    loadInst.setPropertyValue("Filename", fullPathIDF);
+    loadInst.setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
+    loadInst.execute();
+
+  }
+
+  /**
+   * Populate spectra mapping to detector IDs
+   *
+   * @param workspace: Workspace2D object
+   * @param nxbins: number of bins in X
+   * @param nybins: number of bins in Y
+   */
+  void SANSInstrumentCreationHelper::runLoadMappingTable(Workspace2D_sptr workspace, int nxbins, int nybins)
+  {
+    // Get the number of monitor channels
+    int nMonitors = 0;
+    boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
+    std::vector<int> monitors = instrument->getMonitors();
+    nMonitors = monitors.size();
+
+    // Number of monitors should be consistent with data file format
+    if( nMonitors != 2 ) {
+      std::stringstream error;
+      error << "Geometry error for " << instrument->getName() <<
+          ": Spice data format defines 2 monitors, " << nMonitors << " were/was found";
+      throw std::runtime_error(error.str());
+    }
+
+    int ndet = nxbins*nybins + nMonitors;
+    boost::shared_array<int> udet(new int[ndet]);
+    boost::shared_array<int> spec(new int[ndet]);
+
+    // Generate mapping of detector/channel IDs to spectrum ID
+
+    // Detector/channel counter
+    int icount = 0;
+
+    // Monitor: IDs start at 1 and increment by 1
+    for(int i=0; i<nMonitors; i++)
+    {
+      spec[icount] = icount;
+      udet[icount] = icount+1;
+      icount++;
+    }
+
+    // Detector pixels
+    for(int ix=0; ix<nxbins; ix++)
+    {
+      for(int iy=0; iy<nybins; iy++)
+      {
+        spec[icount] = icount;
+        udet[icount] = 1000000 + iy*1000 + ix;
+        icount++;
+      }
+    }
+
+    // Populate the Spectra Map with parameters
+    workspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+  }

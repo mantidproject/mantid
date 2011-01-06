@@ -2,9 +2,22 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+// Other Helper
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cmath>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 namespace WorkspaceCreationHelper
 {
+
+  using namespace Mantid::DataObjects;
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+  using namespace Mantid::Geometry;
+  using Mantid::MantidVec;
+  using Mantid::MantidVecPtr;
 
   Workspace1D_sptr Create1DWorkspaceRand(int size)
   {
@@ -314,15 +327,15 @@ namespace WorkspaceCreationHelper
 	for (int i=0; i<numEvents; i++)
 	{
 	  if (eventPattern == 1) // 0, 1 diagonal pattern
-	    retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, Kernel::DateAndTime(i,0));
+	    retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, DateAndTime(i,0));
 	  else if (eventPattern == 2) // solid 2
 	  {
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
+	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
 	  }
 	  else if (eventPattern == 3) // solid 1
 	  {
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, Kernel::DateAndTime(i,0));
+	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
 	  }
 	}
       }
