@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed Jan  5 18:12:35 2011
+# Created: Thu Jan  6 11:48:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,12 +72,8 @@ class Ui_MainWindow(object):
         self.buttonCollapseTree.setGeometry(QtCore.QRect(220, 3, 98, 27))
         self.buttonCollapseTree.setObjectName("buttonCollapseTree")
         self.vlTree.addWidget(self.frameTreeFilter)
-        self.treeTests = QtGui.QTreeWidget(self.verticalLayoutWidget_2)
-        self.treeTests.setColumnCount(3)
+        self.treeTests = QtGui.QTreeView(self.verticalLayoutWidget_2)
         self.treeTests.setObjectName("treeTests")
-        self.treeTests.headerItem().setText(0, "1")
-        self.treeTests.headerItem().setText(1, "2")
-        self.treeTests.headerItem().setText(2, "3")
         self.vlTree.addWidget(self.treeTests)
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")

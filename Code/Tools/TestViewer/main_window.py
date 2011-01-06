@@ -6,8 +6,10 @@ import time
 from PyQt4 import QtGui, uic, QtCore
 import ui_main_window
 import test_info
+from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 
-from QtGui import QTreeWidget
+import test_tree
+from test_tree import TestTreeModel, TreeItem
 
 
 class TestWorker(QtCore.QThread):
@@ -26,23 +28,37 @@ class TestWorker(QtCore.QThread):
         self.make_tests = make_tests
         self.parallel = parallel
         self.mainWindow = mainWindow
-        return test_info.run_tests_computation_steps(selected_only, make_tests)
+        return test_info.all_tests.run_tests_computation_steps(selected_only, make_tests)
         
 
     #-----------------------------------------------------------------------------
-    def test_run_callback(self, suite):
-        """ Simple callback for running tests"""
-        if isinstance(suite, test_info.TestSuite):
-            text = "%s done." % suite.classname
-        else:
-            text = suite
-        self.mainWindow.emit( QtCore.SIGNAL("testRun"), text)
+    def test_run_callback(self, obj):
+        """ Simple callback for running tests. This is called into the MainProcess.
         
+        Parameters:
+            obj :: the object, either a TestSuite or TestProject that was just calculated
+        """
+        if isinstance(obj, TestSuite):
+            suite = obj
+            text = "%s done." % suite.classname
+            test_info.all_tests.replace_suite(suite)
+            
+        elif isinstance(obj, TestProject):
+            pj = obj
+            # Replace the project in THIS thread!
+            test_info.all_tests.replace_project( pj )
+            text = "Made project %s" % pj.name
+            
+        else:
+            text = str(obj)                
+                    
+        self.mainWindow.emit( QtCore.SIGNAL("testRun"), text)
+
         
     #-----------------------------------------------------------------------------
     def run(self):
         print "Test Run started..."
-        test_info.run_tests_in_parallel(self.selected_only, self.make_tests, 
+        test_info.all_tests.run_tests_in_parallel(self.selected_only, self.make_tests, 
                           self.parallel, callback_func= self.test_run_callback)
         
         
@@ -72,12 +88,19 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
+        
+        self.setup_tree()
 
+    #-----------------------------------------------------------------------------
     def setup_tree(self):
         """ Set up the QTreeWidget of the tree """
         tree = self.treeTests
         #@type tree QTreeWidget
-        tree.addTopLevelItem
+        
+        # Create the tree model and put it in there 
+        model = TestTreeModel()
+        tree.setModel(model)
+        tree.setAlternatingRowColors(True)
         
     #-----------------------------------------------------------------------------
     def update_label(self, text):
@@ -94,13 +117,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def quit(self):
         """ Exit the program """
-        test_info.abort()
+        test_info.all_tests.abort()
         print "Exiting TestViewer. Happy coding!"
         self.close()
         
     #-----------------------------------------------------------------------------
     def abort(self):
-        test_info.abort()
+        test_info.all_tests.abort()
        
             
     #-----------------------------------------------------------------------------
@@ -126,7 +149,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
 def start(argv=[]):
     # Initialize the projects ...
-    test_info.discover_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
+    test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")

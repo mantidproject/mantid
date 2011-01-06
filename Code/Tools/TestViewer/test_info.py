@@ -399,7 +399,7 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test"):
+            if fname.endswith("Test") and fname.startswith("API"): #!TODO
                 make_command = "cd %s ; make %s" % (os.path.join(path, ".."), fname)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
@@ -452,7 +452,7 @@ class MultipleProjects(object):
                     #print "get_selected_suites adding ", st.classname
                     # Suite must be built to be included here!
                     suites.append(st)
-        print "get_selected_suites ", len(suites)
+        # print "get_selected_suites ", len(suites)
         return suites             
         
     #--------------------------------------------------------------------------        
@@ -464,7 +464,7 @@ class MultipleProjects(object):
             for pj in self.projects:
                 if pj.is_anything_selected() or (not selected_only):
                     count += 1
-        count += len(get_selected_suites(selected_only))
+        count += len(self.get_selected_suites(selected_only))
         return count
                                 
 
@@ -557,7 +557,6 @@ def test_run_print_callback(obj):
         
 #==================================================================================================
 if __name__ == '__main__':
-    global all_tests
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
                           parallel=True, callback_func=test_run_print_callback)
