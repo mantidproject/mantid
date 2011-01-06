@@ -4,12 +4,15 @@ import sys
 import time
 
 from PyQt4 import QtGui, uic, QtCore
+import PyQt4.QtCore
+from PyQt4.QtCore import QModelIndex
+
 import ui_main_window
 import test_info
 from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 
 import test_tree
-from test_tree import TestTreeModel, TreeItem
+from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject
 
 
 class TestWorker(QtCore.QThread):
@@ -82,9 +85,14 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # --- Menu Commands ---
         self.connect(self.action_Quit, QtCore.SIGNAL("triggered()"), self.quit)
+        
+        # -- Button commands ----
         self.connect(self.buttonRunAll, QtCore.SIGNAL("clicked()"), self.run_all)
         self.connect(self.buttonRunSelected, QtCore.SIGNAL("clicked()"), self.run_selected)
         self.connect(self.buttonAbort, QtCore.SIGNAL("clicked()"), self.abort)
+        self.connect(self.buttonExpandProjects, QtCore.SIGNAL("clicked()"), self.expand_tree_to_projects)
+        self.connect(self.buttonExpandSuites, QtCore.SIGNAL("clicked()"), self.expand_tree_to_suites)
+        self.connect(self.buttonExpandAll, QtCore.SIGNAL("clicked()"), self.expand_tree_to_all)
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
@@ -101,6 +109,37 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         model = TestTreeModel()
         tree.setModel(model)
         tree.setAlternatingRowColors(True)
+        
+    #-----------------------------------------------------------------------------
+    def expand_tree_to_projects(self):
+        """ Collapse suites so that only the top projects are shown """
+        # Number of root projects
+        rowcount = self.treeTests.model().rowCount( QModelIndex() )
+        for i in xrange(rowcount):
+            # Collapse each project-level one
+            self.treeTests.setExpanded( self.treeTests.model().index(i, 0, QModelIndex() ), False)
+        
+    #-----------------------------------------------------------------------------
+    def expand_tree_to_suites(self):
+        """ Collapse single test results but expand projects """
+        print "expand_tree_to_suites"
+        self.treeTests.model().expand_suites()
+        # Number of root projects
+        rowcount = self.treeTests.model().rowCount( QModelIndex() )
+        for i in xrange(rowcount):
+            # Expand each project-level one
+            indx = self.treeTests.model().index(i, 0, QModelIndex() )
+            self.treeTests.setExpanded( indx, True)
+            # And go through the suites and collapse those
+            num_suites = self.treeTests.model().rowCount( indx)
+            for j in xrange(num_suites):
+                suite_indx = self.treeTests.model().index(j, 0, indx )
+                self.treeTests.setExpanded( suite_indx, False)
+        
+    #-----------------------------------------------------------------------------
+    def expand_tree_to_all(self):
+        """ Expand all tree items """
+        self.treeTests.expandAll()
         
     #-----------------------------------------------------------------------------
     def update_label(self, text):
@@ -124,6 +163,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def abort(self):
         test_info.all_tests.abort()
+        
        
             
     #-----------------------------------------------------------------------------
