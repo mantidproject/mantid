@@ -13,8 +13,9 @@
 #include "MantidDataObjects/Workspace1D.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::DataObjects::Workspace1D_sptr;
+using Mantid::Geometry::IDetector_sptr;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation
 {

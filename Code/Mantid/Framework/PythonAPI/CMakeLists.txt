@@ -63,8 +63,8 @@ add_custom_command ( TARGET PythonAPI POST_BUILD
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc )
+  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects )
+  target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects TestHelpers)
   add_dependencies ( FrameworkTests PythonAPITest )
 endif ()

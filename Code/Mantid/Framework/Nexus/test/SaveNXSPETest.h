@@ -18,6 +18,8 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::NeXus;
+using Mantid::Kernel::UnitFactory;
+using Mantid::Geometry::Instrument;
 
 static const double MASK_FLAG=-1e30;   // values here need to match what is in the SaveNXSPE.h file
 static const double MASK_ERROR=0.0;

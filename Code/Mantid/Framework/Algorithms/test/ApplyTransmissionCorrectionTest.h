@@ -11,7 +11,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::Kernel::UnitFactory;
 
 class ApplyTransmissionCorrectionTest : public CxxTest::TestSuite
 {

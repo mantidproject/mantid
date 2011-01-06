@@ -4,8 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/Plus.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,12 +12,12 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-
 
 class ComplexOpTest : public Algorithm
 {

@@ -253,15 +253,15 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
-		 test/AnyShapeAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/ApplyTransmissionCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/BinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/CalculateEfficiencyTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
-		 #test/CalculateTransmissionBeamSpreaderTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
-		 #test/CalculateTransmissionTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
-		 #test/ChainedOperatorTest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/AnyShapeAbsorptionTest.h
+		 test/ApplyTransmissionCorrectionTest.h
+		 test/BinaryOperationTest.h
+		 test/CalculateEfficiencyTest.h
+		 test/CalculateTransmissionBeamSpreaderTest.h
+		 test/CalculateTransmissionTest.h
+		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
-		 #test/CheckWorkspacesMatchTest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/CheckWorkspacesMatchTest.h
 		 #test/CloneWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/CommutativeBinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/CompressedRebinTest.h
@@ -298,7 +298,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/FFTTest.h
 		 #test/FilterByLogValueTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/FilterByTimeTest.h
-		 #test/FindCenterOfMassPositionTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
+		 test/FindCenterOfMassPositionTest.h
 		 #test/FindDeadDetectorsTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/FindDetectorsOutsideLimitsTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/FindPeaksTest.h # TODO uses WorkspaceCreationHelper.hh
