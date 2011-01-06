@@ -124,52 +124,25 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       set (_cxxtest_cpp_files ${_cxxtest_cpp} ${_cxxtest_cpp_files})
     endforeach (part ${ARGN})
 
-    # run cxxtestgen
-    #add_custom_command(
-    #    OUTPUT  ${_cxxtest_real_outfname}
-    #    DEPENDS ${PATH_FILES}
-    #    COMMAND ${CXXTEST_TESTGEN_EXECUTABLE}
-    #    --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname} ${PATH_FILES}
-    #)
-
-    # declare the generated cpp file to be generated
-    #set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
-
     # define the test executable and exclude it from the all target
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files})
 
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
+    # add the whole suite as a single test so the output xml doesn't overwrite itself
+    #add_test ( NAME ${_cxxtest_testname}
+    #           COMMAND $<TARGET_FILE:${_cxxtest_testname}> )
+
+    # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
     # add each separate test to ctest
     foreach ( part ${ARGN} )
       get_filename_component(_suitename ${part} NAME_WE )
-      #set( _suitename "${part}" )
-      #string ( REPLACE "test/" "" _suitename ${_suitename} )
-      #string ( REPLACE ".h" "" _suitename ${_suitename} )
       set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
       add_test ( NAME ${_cxxtest_separate_name}
-	         COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+                COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
     endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)
-
-## BROKEN MACRO FROM SOMEWHERE ELSE
-#macro(unit_test NAME CXX_FILE FILES)
-#	set(PATH_FILES "")
-#	foreach(part ${FILES})
-#		set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
-#	endforeach(part ${FILES})
-#	set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
-#	add_custom_command(
-#		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
-#		COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
-#		DEPENDS "${FILE}"
-#		)
-#	set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
-#	add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
-#	target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS})
-#	add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
-#endmacro(unit_test)
 
 #=============================================================
 # main()
