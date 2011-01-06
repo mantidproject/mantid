@@ -46,7 +46,7 @@ vtkFiltering
 )
 
 # Create test file projects
-if ( CXXTEST_FOUND )
+if ( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   cxxtest_add_test ( VisitPresentersTest ${TEST_FILES} )
   target_link_libraries( VisitPresentersTest VisitPresenters )
   add_dependencies ( FrameworkTests VisitPresentersTest )
