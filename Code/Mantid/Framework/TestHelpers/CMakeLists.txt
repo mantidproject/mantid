@@ -18,5 +18,11 @@ add_definitions ( -DIN_MANTID_TESTHELPERS )
 add_library ( TestHelpers ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( TestHelpers PROPERTIES OUTPUT_NAME MantidTestHelpers )
+
 # Set library dependencies
-target_link_libraries ( TestHelpers ${MANTIDLIBS} )
+# Bring in DataHandling
+set ( TMP_MANTIDLIBS ${MANTIDLIBS} DataHandling )
+target_link_libraries ( TestHelpers ${TMP_MANTIDLIBS}  )
+
+# Cleanup
+set ( TMP_MANTIDLIBS )

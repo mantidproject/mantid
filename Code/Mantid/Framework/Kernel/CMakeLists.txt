@@ -194,7 +194,8 @@ target_link_libraries ( Kernel ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  target_link_libraries( KernelTest Kernel )
+  include_directories ( ../TestHelpers/inc )
+  target_link_libraries( KernelTest Kernel TestHelpers)
   add_dependencies ( FrameworkTests KernelTest )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
