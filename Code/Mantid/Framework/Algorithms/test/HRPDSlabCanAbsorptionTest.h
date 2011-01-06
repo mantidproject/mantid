@@ -7,6 +7,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid::Geometry;
+using Mantid::API::MatrixWorkspace_sptr;
+
 class HRPDSlabCanAbsorptionTest : public CxxTest::TestSuite
 {
 public:

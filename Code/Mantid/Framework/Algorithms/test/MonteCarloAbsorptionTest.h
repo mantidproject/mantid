@@ -2,15 +2,22 @@
 #define MONTECARLOABSORPTIONTEST_H_
 
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
 using Mantid::Algorithms::MonteCarloAbsorption;
-using Mantid::API::SampleEnvironment;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::Geometry::ShapeFactory;
 
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite
 {

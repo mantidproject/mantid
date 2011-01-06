@@ -5,6 +5,8 @@
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::MantidVec;
+
 class ScaleTest : public CxxTest::TestSuite
 {
 public:

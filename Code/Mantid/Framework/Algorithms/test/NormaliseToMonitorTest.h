@@ -10,6 +10,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::Geometry::Instrument;
 
 class NormaliseToMonitorTest : public CxxTest::TestSuite
 {

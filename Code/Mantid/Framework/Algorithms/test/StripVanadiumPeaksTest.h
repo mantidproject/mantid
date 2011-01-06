@@ -11,6 +11,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel::VectorHelper;
 using Mantid::Algorithms::StripVanadiumPeaks;
+using Mantid::MantidVec;
 
 class StripVanadiumPeaksTest : public CxxTest::TestSuite
 {
