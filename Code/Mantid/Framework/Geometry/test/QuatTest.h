@@ -9,7 +9,7 @@
 
 using namespace Mantid::Geometry;
 
-class testQuat : public CxxTest::TestSuite
+class QuatTest : public CxxTest::TestSuite
 {
 private:
 

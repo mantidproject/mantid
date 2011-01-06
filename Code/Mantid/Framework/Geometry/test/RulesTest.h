@@ -18,7 +18,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testRule: public CxxTest::TestSuite{
+class RulesTest: public CxxTest::TestSuite{
 public:
 	void testMakeCNFCopy(){
 	}

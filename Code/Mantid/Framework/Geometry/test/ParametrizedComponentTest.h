@@ -18,11 +18,11 @@ using namespace Mantid::Geometry;
  * class that has (as of Nov 2010) been folded back into
  * Component.
  */
-class testParComponent : public CxxTest::TestSuite
+class ParametrizedComponentTest : public CxxTest::TestSuite
 {
 public:
 
-  testParComponent() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(),
+  ParametrizedComponentTest() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(),
   m_strName("StringParam"), m_strValue("test-string"), m_dblName("DblParam"), m_dblValue(10.0),
   m_posName("PosParam"), m_posValue(1,1,1), m_quatName("QuatParam"),
   m_quatValue(2,3,4,5)

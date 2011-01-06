@@ -16,7 +16,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testSphere: public CxxTest::TestSuite
+class SphereTest: public CxxTest::TestSuite
 {
 
 public:

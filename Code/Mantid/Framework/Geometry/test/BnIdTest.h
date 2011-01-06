@@ -10,7 +10,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testBnId: public CxxTest::TestSuite{
+class BnIdTest: public CxxTest::TestSuite{
 public:
 	void testDefaultConstructor(){
 		BnId A;

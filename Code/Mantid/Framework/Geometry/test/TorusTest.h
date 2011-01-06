@@ -13,7 +13,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testTorus: public CxxTest::TestSuite
+class TorusTest: public CxxTest::TestSuite
 {
 
 public:

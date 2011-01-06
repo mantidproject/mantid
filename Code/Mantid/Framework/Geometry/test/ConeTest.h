@@ -11,7 +11,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testCone: public CxxTest::TestSuite
+class ConeTest: public CxxTest::TestSuite
 {
 public:
     

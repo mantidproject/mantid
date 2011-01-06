@@ -12,7 +12,7 @@
 
 using namespace Mantid::Geometry;
 
-class testParCompAssembly : public CxxTest::TestSuite
+class ParCompAssemblyTest : public CxxTest::TestSuite
 {
 public:
 	void testEmptyConstructor()

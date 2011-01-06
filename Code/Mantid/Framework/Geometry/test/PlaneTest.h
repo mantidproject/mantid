@@ -9,7 +9,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testPlane: public CxxTest::TestSuite
+class PlaneTest: public CxxTest::TestSuite
 {
 
 public :

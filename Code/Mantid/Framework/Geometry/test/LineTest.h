@@ -14,7 +14,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testLine: public CxxTest::TestSuite
+class LineTest: public CxxTest::TestSuite
 {
 public:
 	void testConstructor(){

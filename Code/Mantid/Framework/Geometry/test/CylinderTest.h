@@ -13,7 +13,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testCylinder: public CxxTest::TestSuite
+class CylinderTest: public CxxTest::TestSuite
 {
 
 public:

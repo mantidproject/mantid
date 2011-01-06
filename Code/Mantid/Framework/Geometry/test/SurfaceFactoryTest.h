@@ -23,7 +23,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testSurfaceFactory: public CxxTest::TestSuite
+class SurfaceFactoryTest: public CxxTest::TestSuite
 {
 public:
 	void testCreateSurface(){

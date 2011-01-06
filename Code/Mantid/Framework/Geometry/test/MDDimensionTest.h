@@ -50,7 +50,7 @@ public:
 
 };
 
-class testMDDimension :    public CxxTest::TestSuite
+class MDDimensionTest :    public CxxTest::TestSuite
 {
     tDimensionRes *pResDim;
     tDimension    *pOrtDim;
@@ -178,8 +178,8 @@ public:
       TSM_ASSERT("Not Equivelant comparison failed", a != b);
     }
 
-    testMDDimension():pResDim(NULL),pOrtDim(NULL){}
-    ~testMDDimension(){
+    MDDimensionTest():pResDim(NULL),pOrtDim(NULL){}
+    ~MDDimensionTest(){
         if(pResDim)delete pResDim;
         if(pOrtDim)delete pOrtDim;
         pResDim=NULL;

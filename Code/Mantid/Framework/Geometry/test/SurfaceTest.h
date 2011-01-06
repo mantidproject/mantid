@@ -21,7 +21,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testSurface: public CxxTest::TestSuite
+class SurfaceTest: public CxxTest::TestSuite
 {
 
 public:

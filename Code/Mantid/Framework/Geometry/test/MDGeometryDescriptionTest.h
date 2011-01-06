@@ -6,7 +6,7 @@
 
 using namespace Mantid;
 using namespace Geometry;
-class testMDGeometryDescription: public CxxTest::TestSuite
+class MDGeometryDescriptionTest: public CxxTest::TestSuite
 {
   MDGeometryDescription *pSlice;
 
@@ -97,11 +97,11 @@ public:
         * 100, pDescr->getImageSize());
   }
 
-  testMDGeometryDescription() :
+  MDGeometryDescriptionTest() :
     pSlice(NULL)
   {
   }
-  ~testMDGeometryDescription()
+  ~MDGeometryDescriptionTest()
   {
     if (pSlice)
       delete pSlice;

@@ -28,7 +28,7 @@ public:
 };
 
 
-class testMulitDimensionalGeometry : public CxxTest::TestSuite
+class MDGeometryTest : public CxxTest::TestSuite
 {
   // helper method to construct a near-complete geometry.
   static MDGeometry* constructGeometry()
@@ -66,7 +66,7 @@ class testMulitDimensionalGeometry : public CxxTest::TestSuite
   std::auto_ptr<MDGeometryDescription> pSlice;
 public:
 
-  testMulitDimensionalGeometry()
+  MDGeometryTest()
   {
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("qx", true, 1));

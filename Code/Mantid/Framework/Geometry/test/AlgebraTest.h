@@ -12,7 +12,7 @@
 
 using namespace Mantid::Geometry;
 
-class testAlgebra: public CxxTest::TestSuite
+class AlgebraTest: public CxxTest::TestSuite
 {
 
 public:

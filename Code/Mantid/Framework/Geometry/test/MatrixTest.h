@@ -12,7 +12,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testMatrix: public CxxTest::TestSuite
+class MatrixTest: public CxxTest::TestSuite
 {
 
 public:

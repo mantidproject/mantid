@@ -24,7 +24,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class TestObject: public CxxTest::TestSuite
+class ObjectTest: public CxxTest::TestSuite
 {
 
 public:

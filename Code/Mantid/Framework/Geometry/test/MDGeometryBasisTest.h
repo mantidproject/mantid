@@ -12,7 +12,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testWorkspaceGm :   public CxxTest::TestSuite
+class MDGeometryBasisTest :   public CxxTest::TestSuite
 {
 private:
 
@@ -122,7 +122,7 @@ public:
     TS_ASSERT_EQUALS(basis->checkIdCompartibility(new_ids),false);
   }
 
-  ~testWorkspaceGm()
+  ~MDGeometryBasisTest()
   {
   }
 

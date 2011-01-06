@@ -10,7 +10,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testAcomp: public CxxTest::TestSuite{
+class AcompTest: public CxxTest::TestSuite{
 public:
 	void testDefaultConstructor(){
 		Acomp A;

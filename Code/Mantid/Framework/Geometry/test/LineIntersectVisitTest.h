@@ -14,7 +14,7 @@
 using namespace Mantid;
 using namespace Geometry;
 
-class testLineIntersectVisit: public CxxTest::TestSuite{
+class LineIntersectVisitTest: public CxxTest::TestSuite{
 public:
 	void testConstructor(){
 		LineIntersectVisit A(V3D(-1.0,-1.0,-1.0),V3D(1.0,0.0,0.0));

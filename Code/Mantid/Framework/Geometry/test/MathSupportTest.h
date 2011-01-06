@@ -15,7 +15,7 @@
 
 using namespace Mantid;
 using namespace mathSupport;
-class testMathSupport: public CxxTest::TestSuite
+class MathSupportTest: public CxxTest::TestSuite
 {
 public:
 	void testIndexSort(){

@@ -15,7 +15,7 @@ using namespace Mantid;
 using namespace Geometry;
 using namespace mathLevel;
 
-class testPoly: public CxxTest::TestSuite
+class PolyTest: public CxxTest::TestSuite
 {
 
 public:

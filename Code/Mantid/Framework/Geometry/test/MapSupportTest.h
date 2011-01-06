@@ -11,7 +11,7 @@
 using namespace Mantid;
 
 
-class testMapSupport: public CxxTest::TestSuite{
+class MapSupportTest: public CxxTest::TestSuite{
 public:
 	void testConstructor(){
 	}

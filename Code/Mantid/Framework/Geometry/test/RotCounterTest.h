@@ -10,7 +10,7 @@ using namespace Mantid;
 using namespace Geometry;
 
 
-class testRotCounter: public CxxTest::TestSuite{
+class RotCounterTest: public CxxTest::TestSuite{
 public:
 	void testConstructor(){
 		RotaryCounter A(5,7);

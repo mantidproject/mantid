@@ -18,13 +18,13 @@
 using namespace Mantid;
 using namespace StrFunc;
 
-class testRegexSupport: public CxxTest::TestSuite
+class RegexSupportTest: public CxxTest::TestSuite
 {
 private:
   std::stringstream testStream;
 
 public:
-  testRegexSupport()
+  RegexSupportTest()
   {
     testStream << "2007-11-16T13:25:48 END\n"
                << "2007-11-16T13:29:36 CHANGE RUNTABLE\n"

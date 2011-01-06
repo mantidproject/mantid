@@ -8,7 +8,7 @@
 
 using namespace Mantid;
 
-class testTriple: public CxxTest::TestSuite
+class TripleTest: public CxxTest::TestSuite
 {
 
 public:

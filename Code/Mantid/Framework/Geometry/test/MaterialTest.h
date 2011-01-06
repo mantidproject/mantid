@@ -9,7 +9,7 @@
 
 using Mantid::Geometry::Material;
 
-class testMaterial: public CxxTest::TestSuite
+class MaterialTest: public CxxTest::TestSuite
 {
 public:
 

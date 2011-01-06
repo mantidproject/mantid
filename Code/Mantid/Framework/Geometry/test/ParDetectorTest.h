@@ -8,7 +8,7 @@
 
 using namespace Mantid::Geometry;
 
-class testParDetector : public CxxTest::TestSuite
+class ParDetectorTest : public CxxTest::TestSuite
 {
 public:
   void testNameConstructor()

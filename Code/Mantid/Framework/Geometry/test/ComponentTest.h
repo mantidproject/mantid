@@ -12,7 +12,7 @@
 
 using namespace Mantid::Geometry;
 
-class testComponent : public CxxTest::TestSuite
+class ComponentTest : public CxxTest::TestSuite
 {
 public:
   void testEmptyConstructor()
