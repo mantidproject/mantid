@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CMyDataSearchTest: public CxxTest::TestSuite
+class MyDataSearchTest: public CxxTest::TestSuite
 {
 public:
 	

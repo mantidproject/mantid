@@ -16,7 +16,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 using namespace Mantid::API;
-class CDownloadDataFileTest: public CxxTest::TestSuite
+class DownloadDataFileTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()

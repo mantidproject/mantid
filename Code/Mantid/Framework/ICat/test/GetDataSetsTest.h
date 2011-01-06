@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CGetDataSetsTest: public CxxTest::TestSuite
+class GetDataSetsTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()

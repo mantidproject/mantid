@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CListInvestigationTypesTest: public CxxTest::TestSuite
+class ListInvestigationTypesTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()

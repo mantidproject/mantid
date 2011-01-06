@@ -9,7 +9,7 @@
 
 using namespace Mantid;
 using namespace Mantid::ICat;
-class CSearchByAdvancedTest: public CxxTest::TestSuite
+class SearchTest: public CxxTest::TestSuite
 {
 public:
 	

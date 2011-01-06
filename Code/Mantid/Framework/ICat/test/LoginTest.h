@@ -6,7 +6,7 @@
 #include "MantidICat/Session.h"
 
 using namespace Mantid::ICat;
-class CLoginTest: public CxxTest::TestSuite
+class LoginTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()
