@@ -147,17 +147,17 @@ ConfigServiceImpl::ConfigServiceImpl() :
   // the cases used in the names varies on different systems so we do this case insensitive
   std::transform(callingApplication.begin(), callingApplication.end(), callingApplication.begin(),
       tolower);
-  if (callingApplication.find("python") != std::string::npos || callingApplication.find("matlab")
+
+  if (Poco::Environment::has("MANTIDPATH"))
+  {
+    // Here we have to follow the convention of the rest of this code and add a trailing slash.
+    // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+  }
+  else if (callingApplication.find("python") != std::string::npos || callingApplication.find("matlab")
       != std::string::npos)
   {
-    if (Poco::Environment::has("MANTIDPATH"))
-    {
-      // Here we have to follow the convention of the rest of this code and add a trailing slash.
-      // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
-      m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
-    }
-    else
-      m_strBaseDir = Poco::Path::current();
+    m_strBaseDir = Poco::Path::current();
   }
   else
   {

@@ -35,30 +35,7 @@ void MultiDimensionalDbPresenter::execute(const std::string& fileName)
   wsLoaderAlg.execute();
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
   MDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
-
-  CenterpieceRebinning rebinAlg;
-  AnalysisDataService::Instance().add("inputWS", inputWS);
-  rebinAlg.initialize();
-  rebinAlg.setPropertyValue("Input", "inputWS");
-  rebinAlg.setPropertyValue("Result","OutWorkspace");
-
-  //HACK: this is the only way to provide slicing data for centrepiece rebinning code.
-  Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Mantid::Kernel::Property *)(rebinAlg.getProperty("SlicingData")));
-  pSlicing->build_from_geometry(*(inputWS->getGeometry()));
-
-
-  double r0=0;
-   pSlicing->pDimDescription("qx")->cut_min = r0;
-pSlicing->pDimDescription("qx")->cut_max = r0+1;
-pSlicing->pDimDescription("qy")->cut_min = r0;
-pSlicing->pDimDescription("qy")->cut_max = r0+1;
-pSlicing->pDimDescription("qz")->cut_min = r0;
-pSlicing->pDimDescription("qz")->cut_max = r0+1;
-pSlicing->pDimDescription("en")->cut_max = 50;
-
-
-  rebinAlg.execute();
-  this->m_MDWorkspace = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("OutWorkspace"));
+  this->m_MDWorkspace = inputWS;
 
   m_isExecuted = true;
 }
