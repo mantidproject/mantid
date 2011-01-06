@@ -30,7 +30,129 @@ class TestResultState:
     """ Compilation last time it was run """
     BUILD_ERROR_OLD = 6
 
+#==================================================================================================
+"""Dictionary with strings to show the contents"""
+global test_result_state_string
+test_result_state_string = {
+    TestResultState.NOT_RUN: "Not Run",
+    TestResultState.PASSED:"Passed",
+    TestResultState.FAILED:"FAILED!",
+    TestResultState.BUILD_ERROR:"BUILD ERROR!",
+    TestResultState.PASSED_OLD:"Passed (old)",
+    TestResultState.FAILED_OLD:"FAILED (old)",
+    TestResultState.BUILD_ERROR_OLD:"BUILD ERROR (old)",
+    }
 
+
+#==================================================================================================
+class TestSuiteResult:
+    """Enumeration giving the state of a test suite or project"""
+    """ Test was not run since the program started """
+    NOT_RUN = 0
+    """ Test passed """
+    ALL_PASSED = 1
+    """ At least one test failed """
+    SOME_FAILED = 2
+    """ Build error ! """
+    BUILD_ERROR = 3
+    """ All tests failed """
+    ALL_FAILED = 4
+    
+    def __init__(self, value=0):
+        self.value = value
+        
+    def __eq__(self, other):
+        if isinstance(other, TestSuiteResult):
+            return self.value == other.value
+        else:
+            return self.value == other
+        
+    def __neq__(self, other):
+        if isinstance(other, TestSuiteResult):
+            return self.value != other.value
+        else:
+            return self.value != other
+        
+    def get_string(self):
+        """Return a string summarizing the state. Used in GUI."""
+        if self.value == self.NOT_RUN: return "Not Run" 
+        if self.value == self.ALL_PASSED: return "All Passed" 
+        if self.value == self.SOME_FAILED: return "Some FAILED!" 
+        if self.value == self.BUILD_ERROR: return "BUILD ERROR!" 
+        if self.value == self.ALL_FAILED: return "ALL FAILED!"
+        return "Unknown" 
+        
+    def add_single(self, state):
+        """ Add the state from a single test result (TestResultState) to this suite result. """
+        if state == TestResultState.BUILD_ERROR:
+            self.value = self.BUILD_ERROR
+            return
+        
+        if state == TestResultState.PASSED:
+            if self.value == self.ALL_FAILED:
+                self.value = self.SOME_FAILED
+            elif self.value == self.NOT_RUN:
+                self.value = self.ALL_PASSED
+        
+        if state == TestResultState.FAILED:
+            if self.value == self.ALL_PASSED:
+                self.value = self.SOME_FAILED
+            elif self.value == self.NOT_RUN:
+                self.value = self.ALL_FAILED
+        
+    def add_suite(self, state):
+        """ Add the state from a suite aggregated test result (TestSuiteResult) to this suite/project result. """
+        if state == self.BUILD_ERROR:
+            self.value = self.BUILD_ERROR
+            return
+        
+        if state == self.ALL_PASSED:
+            if self.value == self.ALL_FAILED:
+                self.value = self.SOME_FAILED
+            elif self.value == self.NOT_RUN:
+                self.value = self.ALL_PASSED
+        
+        if state == self.ALL_FAILED:
+            if self.value == self.ALL_PASSED:
+                self.value = self.SOME_FAILED
+            elif self.value == self.NOT_RUN:
+                self.value = self.ALL_FAILED
+        
+        if state == self.SOME_FAILED:
+            if (self.value == self.ALL_PASSED) or (self.value == self.ALL_FAILED):
+                self.value = self.SOME_FAILED
+        
+        
+        
+#==================================================================================        
+def test_results_compiling():
+    r = TestSuiteResult()
+    assert r.value == TestSuiteResult.NOT_RUN
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.ALL_PASSED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.ALL_PASSED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.BUILD_ERROR)
+    assert r.value == TestSuiteResult.BUILD_ERROR
+    
+    r = TestSuiteResult()
+    assert r.value == TestSuiteResult.NOT_RUN
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.ALL_FAILED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.ALL_FAILED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+
+test_results_compiling()        
+        
+          
 #==================================================================================================
 class TestSingle(object):
     """ A single test instance (one test inside one suite) """
@@ -79,7 +201,10 @@ class TestSingle(object):
             # This is a node containing text (the firstchild) which is a Text node
             self.stdout = systemout[0].firstChild.data
             
-            
+    def get_state_str(self):
+        """Return a string summarizing the state. Used in GUI."""
+        global test_result_state_string
+        return test_result_state_string[self.state]
         
         
     def __repr__(self):
@@ -110,6 +235,11 @@ class TestSuite(object):
         self.selected = True
         # Was it made correctly?
         self.built_succeeded = True
+        # The state of the overall suite
+        self.state = TestSuiteResult()
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
         
         
     #----------------------------------------------------------------------------------
@@ -133,6 +263,38 @@ class TestSuite(object):
             test.state = TestResultState.BUILD_ERROR
             test.failure = "Build failure"
             test.stdout = output
+            
+    #----------------------------------------------------------------------------------
+    def compile_states(self):
+        """ Add up the single test results into this suite """
+        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
+        for test in self.tests:
+            state = test.state 
+            self.state.add_single( state )
+            if state==TestResultState.PASSED: 
+                self.passed += 1 
+                self.num_run += 1
+            if (state==TestResultState.FAILED) or (state==TestResultState.BUILD_ERROR): 
+                self.failed += 1 
+                self.num_run += 1
+        print "compile_states found", self.get_state_str()
+            
+    #----------------------------------------------------------------------------------
+    def get_runtime(self):
+        """Return the total runtime of contained tests """
+        runtime = 0
+        for test in self.tests:
+            runtime += test.runtime
+        return runtime
+        
+    #----------------------------------------------------------------------------------
+    def get_state_str(self):
+        """Return a string summarizing the state. Used in GUI."""
+        return self.state.get_string() + " (%d failed)" % (self.failed) #, self.num_run)
+       
         
     #----------------------------------------------------------------------------------
     def run_tests(self):
@@ -158,7 +320,10 @@ class TestSuite(object):
         try:
             shutil.rmtree(tempdir)
         except:
-            print "Error removing temporary directory ", pathtempdir  
+            print "Error removing temporary directory ", pathtempdir
+            
+        # Finalize
+        self.compile_states()  
         
         
     #----------------------------------------------------------------------------------
@@ -231,6 +396,12 @@ class TestProject(object):
         # Test suites in this project
         self.suites = []
         
+        # The state of the overall project
+        self.state = TestSuiteResult()
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
+
     #----------------------------------------------------------------------------------
     def make(self):
         """Make the project using the saved command """
@@ -265,8 +436,34 @@ class TestProject(object):
             if suite.selected:
                 return True
         return False
-        
-        
+                    
+    #----------------------------------------------------------------------------------
+    def get_runtime(self):
+        """Return the total runtime of contained tests """
+        runtime = 0
+        for suite in self.suites:
+            runtime += suite.get_runtime()
+        return runtime
+                   
+    #----------------------------------------------------------------------------------
+    def compile_states(self):
+        """ Add up the single test results into this suite """
+        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
+        for suite in self.suites:
+            state = suite.state 
+            self.state.add_suite( state )
+            self.passed += suite.passed 
+            self.num_run += suite.num_run
+            self.failed += suite.failed 
+                    
+    #----------------------------------------------------------------------------------
+    def get_state_str(self):
+        """Return a string summarizing the state. Used in GUI."""
+        return self.state.get_string()
+       
     #----------------------------------------------------------------------------------
     def populate(self):
         """ Discover the suites and single tests in this test project. """
@@ -560,9 +757,12 @@ if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
                           parallel=True, callback_func=test_run_print_callback)
-    pj = all_tests.get_project_named("KernelTest")
-    assert not pj.suites[0].is_built()
-    print pj.suites[0].tests[0].state
+    
+    for pj in all_tests.projects:
+        print pj.name, pj.get_state_str()
+        for suite in pj.suites:
+            print suite.classname, suite.get_state_str()
+        
 #    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
 #                          parallel=False, callback_func=test_run_print_callback)
 

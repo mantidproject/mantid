@@ -186,6 +186,22 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QCheckBox" name="checkShowSelected">
               <property name="text">
                <string>Selected</string>
@@ -199,12 +215,45 @@
               </property>
              </widget>
             </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
+          </widget>
+          <widget class="QPushButton" name="buttonRefresh">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>10</y>
+             <width>98</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Refresh</string>
+           </property>
           </widget>
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeTests"/>
+         <widget class="QTreeView" name="treeTests">
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <attribute name="headerStretchLastSection">
+           <bool>false</bool>
+          </attribute>
+         </widget>
         </item>
        </layout>
       </widget>

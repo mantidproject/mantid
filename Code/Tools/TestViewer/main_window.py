@@ -6,6 +6,9 @@ import time
 from PyQt4 import QtGui, uic, QtCore
 import PyQt4.QtCore
 from PyQt4.QtCore import QModelIndex
+import PyQt4.QtGui
+from PyQt4.QtGui import QHeaderView
+
 
 import ui_main_window
 import test_info
@@ -15,6 +18,8 @@ import test_tree
 from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject
 
 
+#==================================================================================================
+#==================================================================================================
 class TestWorker(QtCore.QThread):
     """ Class to run the tests in the background of the GUI"""
 
@@ -67,7 +72,8 @@ class TestWorker(QtCore.QThread):
         
         
         
-
+#==================================================================================================
+#==================================================================================================
 class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):    
     """
         The main GUI window of the test viewer.
@@ -90,6 +96,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonRunAll, QtCore.SIGNAL("clicked()"), self.run_all)
         self.connect(self.buttonRunSelected, QtCore.SIGNAL("clicked()"), self.run_selected)
         self.connect(self.buttonAbort, QtCore.SIGNAL("clicked()"), self.abort)
+        self.connect(self.buttonRefresh, QtCore.SIGNAL("clicked()"), self.setup_tree) #self.update_tree)
         self.connect(self.buttonExpandProjects, QtCore.SIGNAL("clicked()"), self.expand_tree_to_projects)
         self.connect(self.buttonExpandSuites, QtCore.SIGNAL("clicked()"), self.expand_tree_to_suites)
         self.connect(self.buttonExpandAll, QtCore.SIGNAL("clicked()"), self.expand_tree_to_all)
@@ -109,6 +116,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         model = TestTreeModel()
         tree.setModel(model)
         tree.setAlternatingRowColors(True)
+        tree.header().setResizeMode(0,QHeaderView.Stretch)
+        tree.setColumnWidth(1,200)
+        #tree.header().setResizeMode(1,QHeaderView.ResizeMode)
+        #tree.header().setColumnWidth(1, 100)
+        #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
         
     #-----------------------------------------------------------------------------
     def expand_tree_to_projects(self):
@@ -122,8 +134,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def expand_tree_to_suites(self):
         """ Collapse single test results but expand projects """
-        print "expand_tree_to_suites"
-        self.treeTests.model().expand_suites()
         # Number of root projects
         rowcount = self.treeTests.model().rowCount( QModelIndex() )
         for i in xrange(rowcount):
@@ -143,15 +153,24 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
     #-----------------------------------------------------------------------------
     def update_label(self, text):
+        """ Update the progress bar and label """
         val = self.progTest.value()+1 
         self.progTest.setValue( val )
         self.progTest.setFormat("%p% : " + text)
         
     #-----------------------------------------------------------------------------
     def complete_run(self):
+        """ Event called when completing/aborting a test run """
         self.buttonAbort.setEnabled(False)
         self.progTest.setValue(0)
         self.progTest.setFormat("")
+        self.update_tree()
+        
+    #-----------------------------------------------------------------------------
+    def update_tree(self):
+        """ Update the tree view with whatever the current results are """
+        self.treeTests.model().setupModelData()
+        self.treeTests.update()
         
     #-----------------------------------------------------------------------------
     def quit(self):
@@ -160,11 +179,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         print "Exiting TestViewer. Happy coding!"
         self.close()
         
-    #-----------------------------------------------------------------------------
-    def abort(self):
-        test_info.all_tests.abort()
-        
-       
+
             
     #-----------------------------------------------------------------------------
     def run_all(self):
@@ -174,6 +189,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.do_run(True)
         
     def do_run(self, selected_only):
+        """ Start a parallelized test running with the given parameters """
         parallel = self.checkInParallel.isChecked()
         # Do some setup of the worker and GUI
         num_steps = self.worker.set_parameters(self, selected_only=False, make_tests=True, parallel=parallel)
@@ -184,7 +200,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Begin the thread in the background
         self.worker.start()
         
+    #-----------------------------------------------------------------------------
+    def abort(self):
+        test_info.all_tests.abort()
         
+       
  
         
 def start(argv=[]):
@@ -196,8 +216,10 @@ def start(argv=[]):
     app.setOrganizationDomain("mantidproject.org")
     app.setApplicationName("Mantid Test Viewer")
     
-    main = TestViewerMainWindow()    
+    main = TestViewerMainWindow()
+    main.resize(1500, 900)    
     main.show()
+    
     app.exec_() 
         
         
