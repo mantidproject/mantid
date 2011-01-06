@@ -21,14 +21,14 @@ class TestResultState:
     PASSED = 1
     """ Test failed """
     FAILED = 2
-    """ Compilation error ! """
-    COMPILE_ERROR = 3
+    """ Build error ! """
+    BUILD_ERROR = 3
     """ Passed the last time it was run, but is out of date now """
     PASSED_OLD = 4
     """ Failed the last time it was run, but is out of date now """
     FAILED_OLD = 5
     """ Compilation last time it was run """
-    COMPILE_ERROR_OLD = 6
+    BUILD_ERROR_OLD = 6
 
 
 #==================================================================================================
@@ -90,9 +90,12 @@ class TestSingle(object):
 class TestSuite(object):
     """ A suite of tests """
 
-    def __init__(self, name, classname, command, xml_file, source_file):
+    def __init__(self, name, parent_name, classname, command, xml_file, source_file):
         """ Constructor"""
+        # Its own name, e.g. "UnitTest"
         self.name = name
+        # Name of the parent project, e.g. "KernelTest"
+        self.parent_name = parent_name
         # Full class name, e.g. KernelTest.UnitTest
         self.classname = classname
         # Full command that runs the test suite
@@ -105,13 +108,33 @@ class TestSuite(object):
         self.tests = []
         # Is it selected to run?
         self.selected = True
+        # Was it made correctly?
+        self.built_succeeded = True
         
         
+    #----------------------------------------------------------------------------------
     def add_single(self, test_name):
         """ Add a single test to this suite """
         self.tests.append( TestSingle(test_name) )
         
+    #----------------------------------------------------------------------------------
+    def is_built(self):
+        """Returns True if the test build for this suite was successful."""
+        return self.built_succeeded
+    
+    #----------------------------------------------------------------------------------
+    def set_build_failed(self, output):
+        """Sets that the build failed for all single tests in this suite.
+        Parameters:
+            output: stdout from the make command
+        """
+        self.built_succeeded = False
+        for test in self.tests:
+            test.state = TestResultState.BUILD_ERROR
+            test.failure = "Build failure"
+            test.stdout = output
         
+    #----------------------------------------------------------------------------------
     def run_tests(self):
         """ Runs this test suite, then loads the produced XML file
         and interprets its results.
@@ -138,6 +161,7 @@ class TestSuite(object):
             print "Error removing temporary directory ", pathtempdir  
         
         
+    #----------------------------------------------------------------------------------
     def find_test(self, test_name):
         """Find and return a TestSingle instance of given name"""
         for test in self.tests:
@@ -145,6 +169,8 @@ class TestSuite(object):
                 return test
         return None
         
+
+    #----------------------------------------------------------------------------------
     def parse_xml(self, xml_path):
         """Interpret a jUnit-style XML file
         Parameters
@@ -182,7 +208,7 @@ class TestSuite(object):
                     test.lastrun = this_rundate
                     test.load_results(case)
             
-        
+    #----------------------------------------------------------------------------------
     def __repr__(self):
         return "TestSuite(%s) with %d TestSingle(s).\nCommand=%s\nXML File=%s\nSource file=%s" % (self.name, len(self.tests), self.command, self.xml_file, self.source_file)
         
@@ -192,6 +218,7 @@ class TestSuite(object):
 class TestProject(object):
     """ A sub-project of several test suites, e.g. KernelTest """
     
+    #----------------------------------------------------------------------------------
     def __init__(self, name, executable, make_command):
         self.name = name
         
@@ -204,23 +231,34 @@ class TestProject(object):
         # Test suites in this project
         self.suites = []
         
+    #----------------------------------------------------------------------------------
     def make(self):
         """Make the project using the saved command """
         # print "making test : %s" % self.make_command
-        output = commands.getoutput(self.make_command)
-        # print output
+        (status, output) = commands.getstatusoutput(self.make_command)
+        if (status != 0):
+            print "! Build failure for %s !" % self.name
+            # Build failure of some kind!
+            for suite in self.suites:
+                suite.set_build_failed(output)
+        else:
+            # Build was successful
+            for suite in self.suites:
+                suite.build_succeeded = True
         
         
+    #----------------------------------------------------------------------------------
     def find_source_file(self, suite_name):
         """ Find the source file corresponding to the given suite in this project
         Returns: the full path to the test file.
-         """
+        """
         source_base_dir = "/home/8oz/Code/Mantid/Code/Mantid/Framework/"
         project_name = self.name.replace("Test", "")
         source_dir = os.path.join(source_base_dir, project_name)
         return os.path.join( source_dir, "test/" + suite_name + ".h")
     
     
+    #----------------------------------------------------------------------------------
     def is_anything_selected(self):
         """Return True if any of the suites are selected."""
         for suite in self.suites:
@@ -229,6 +267,7 @@ class TestProject(object):
         return False
         
         
+    #----------------------------------------------------------------------------------
     def populate(self):
         """ Discover the suites and single tests in this test project. """
         self.suites = []
@@ -272,7 +311,8 @@ class TestProject(object):
                         classname = self.name + "." + suite_name
                         source_file = self.find_source_file(suite_name)
                         # Create that suite
-                        suite = TestSuite(suite_name, classname, self.executable + " " + suite_name, xml_file, source_file)
+                        suite = TestSuite(suite_name, self.name, classname, 
+                                          self.executable + " " + suite_name, xml_file, source_file)
                         last_suite_name = suite_name
                         self.suites.append(suite)
                         
@@ -286,7 +326,51 @@ class TestProject(object):
         return "TestProject(%s)" % (self.name)
 
 
+#==================================================================================================
+#======== Global methods used by parallel processing ================
+#==================================================================================================
 
+
+#==================================================================================================
+def run_tests_in_suite(multiple_tests, suite ):
+    """Run all tests in a given suite. Method called
+    by the multiprocessing Pool.apply_async() method.
+    
+    Parameters:
+        multiple_tests :: a MultipleProjects instance calling this method.
+        suite :: the suite to run
+    """
+    if not multiple_tests is None: 
+        if multiple_tests.abort_run: return "Aborted."
+    if not suite is None:
+        suite.run_tests()
+    # Simply return the object back (for use by the callback function)
+    return suite
+        
+#==================================================================================================
+def make_test(multiple_tests, project):
+    """Make the tests in a given project. Method called
+    by the multiprocessing Pool.apply_async() method.
+    
+    Parameters:
+        multiple_tests :: a MultipleProjects instance calling this method.
+        project :: the project to make
+    Returns:
+        the project that was just made. Some values will have been set in it;
+        the callback function must replace the old project with this one; because
+        the changes happened in the OTHER thread!
+    """
+    if not multiple_tests is None: 
+        if multiple_tests.abort_run: return "Aborted."
+    if not project is None:
+        project.make()
+        return project
+    else:
+        return None
+     
+     
+     
+     
 #==================================================================================================
 #==================================================================================================
 #==================================================================================================
@@ -294,14 +378,20 @@ class MultipleProjects(object):
     """ A Class containing a list of all the available test projects.
     This will be made into a single global variable instance. """
     
+    #--------------------------------------------------------------------------        
     def __init__(self):
         # The projects contained
         self.projects = []
         # Abort flag
         self.abort_run = False
-        
+   
+    #--------------------------------------------------------------------------        
+    def abort(self):
+        """ Set a flag to abort all further calculations. """
+        print "... Attempting to abort ..."
+        self.abort_run = True
     
-    #==================================================================================================
+    #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
         """Look for CXXTest projects in the given paths.
         Populates all the test in it."""
@@ -317,27 +407,55 @@ class MultipleProjects(object):
                 self.projects.append(pj)
         
 
-    #==================================================================================================
+    #--------------------------------------------------------------------------        
     def get_project_named(self, name):
         """Return the TestProject named name; None if not found"""
         for pj in self.projects:
             if pj.name == name:
                 return pj
         return None
+
+    #--------------------------------------------------------------------------        
+    def replace_project(self, pj):
+        """Given a project from another thread, replace the current one with this one.
+        Will look for a matching name"""
+        for i in xrange(len(self.projects)):
+            if self.projects[i].name == pj.name:
+                self.projects[i] = pj
+                break
+            
+    #--------------------------------------------------------------------------        
+    def replace_suite(self, st):
+        """Given a suite from another thread, replace the current one with this one.
+        Will look for a matching name"""
+        pj = self.get_project_named(st.parent_name)
+        if pj is None:
+            return
+        for i in xrange(len(pj.suites)):
+            suite = pj.suites[i]
+            if suite.name == st.name:
+                pj.suites[i] = st
+                break
         
-             
-    #==================================================================================================
+    #--------------------------------------------------------------------------        
     def get_selected_suites(self, selected_only=True):
-        """Returns a list of all selected suites. """
+        """Returns a list of all selected suites. Suites where make failed
+        are excluded!
+        
+        Parameters:
+            selected_only :: set to False to return all suites """
         suites = []
         for pj in self.projects:
             for st in pj.suites:
-                if st.selected or (not selected_only):
-                    suites.append(st)           
+                # print "get_selected_suites: status of ", st.classname, st.is_built()
+                if st.is_built() and (st.selected or (not selected_only)):
+                    #print "get_selected_suites adding ", st.classname
+                    # Suite must be built to be included here!
+                    suites.append(st)
+        print "get_selected_suites ", len(suites)
         return suites             
         
-
-    #==================================================================================================
+    #--------------------------------------------------------------------------        
     def run_tests_computation_steps(self, selected_only=True, make_tests=True):
         """Returns the number of computation steps that will be done with these parameters
         This is used by the GUI to know how to report progress."""
@@ -348,44 +466,19 @@ class MultipleProjects(object):
                     count += 1
         count += len(get_selected_suites(selected_only))
         return count
-                
-                
-    
-    #==================================================================================================
-    def abort(self):
-        """ Set a flag to abort all further calculations. """
-        print "... Attempting to abort ..."
-        self.abort_run = True
-    
-    #==================================================================================================
-    def run_tests_in_suite(self, suite ):
-        """Run all tests in a given suite. Method called
-        by the multiprocessing Pool.apply_async() method."""
-        if self.abort_run: return "Aborted."
-        if not suite is None:
-            suite.run_tests()
-        # Simply return the object back (for use by the callback function)
-        return suite
-            
-    #==================================================================================================
-    def make_test(self, project ):
-        """Make the tests in a given project. Method called
-        by the multiprocessing Pool.apply_async() method."""
-        if self.abort_run: return "Aborted."
-        if not project is None:
-            project.make()
-            return "Made test project %s " % project.name
-        else:
-            return ""
-         
-    #==================================================================================================
+                                
+
+    #--------------------------------------------------------------------------        
     def run_tests_in_parallel(self, selected_only=True, make_tests=True, parallel=True, callback_func=None):
         """Run tests in parallel using multiprocessing.
         Parameters:
             selected_only: run only the selected suites.
             make_tests: set to True to make the tests before running them.
             parallel: set to True to do them in parallel, false to do linearly 
-            callback_func: function that takes as argument the suite being run; or a simple string
+            callback_func: function that takes as argument the suite that was just finished
+                or the project that was just made.
+                This function MUST replace the original object in order to synchronize the 
+                threads' data.
         """
         self.abort_run = False
         
@@ -394,9 +487,6 @@ class MultipleProjects(object):
         # How many thread in parallel?  one fewer threads than the # of cpus
         num_threads = multiprocessing.cpu_count()-1
         if num_threads < 1: num_threads = 1
-        
-        # First, need to build a long list of all (selected) suites
-        suites = self.get_selected_suites(selected_only)
                     
         # Now let's run the make test command for each one
         if make_tests:
@@ -408,15 +498,18 @@ class MultipleProjects(object):
             if parallel:
                 p = Pool(num_threads)
                 for pj in pj_to_build:
-                    p.apply_async( self.make_test, (pj, ), callback=callback_func)
+                    p.apply_async( make_test, (self, pj, ), callback=callback_func)
                 p.close()
                 # This will block until completed
                 p.join()
             else:
                 for pj in pj_to_build:
-                    result = self.make_test( pj )
+                    result = make_test( self, pj )
                     if not callback_func is None: callback_func(result)
                     
+        
+        # Build a long list of all (selected and successfully built) suites
+        suites = self.get_selected_suites(selected_only)
             
         if parallel:
             # Make the pool 
@@ -424,31 +517,41 @@ class MultipleProjects(object):
             
             # Call the method that will run each suite
             for suite in suites:
-                p.apply_async( self.run_tests_in_suite, (suite, ), callback=callback_func)
+                p.apply_async( run_tests_in_suite, (self, suite, ), callback=callback_func)
             p.close()
             # This will block until completed
             p.join()
             
         else:
             for suite in suites:
-                result = self.run_tests_in_suite( suite )
+                result = run_tests_in_suite( self, suite )
                 if not callback_func is None: callback_func(result)
         print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
 
-            
-            
+  
+                      
 # Global variable containing a list of all the available test projects
 global all_tests        
 all_tests = MultipleProjects()        
 
-
 #==================================================================================================
-def test_run_print_callback(self, suite):
-    """ Simple callback for running tests"""
-    if isinstance(suite, TestSuite):
-        print "Running %s" % suite.classname
-    else:
-        print suite                
+def test_run_print_callback(obj):
+    """ Simple callback for running tests. This is called into the MainProcess.
+    
+    Parameters:
+        obj :: the object, either a TestSuite or TestProject that was just calculated
+    """
+    global all_tests
+    if isinstance(obj, TestSuite):
+        suite = obj
+        print "Done running %s" % suite.classname
+        all_tests.replace_suite(suite)
+        
+    elif isinstance(obj, TestProject):
+        pj = obj
+        # Replace the project in THIS thread!
+        all_tests.replace_project( pj )
+        print "Made project %s" % pj.name                
         
         
         
@@ -458,8 +561,11 @@ if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
                           parallel=True, callback_func=test_run_print_callback)
-    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
-                          parallel=False, callback_func=test_run_print_callback)
+    pj = all_tests.get_project_named("KernelTest")
+    assert not pj.suites[0].is_built()
+    print pj.suites[0].tests[0].state
+#    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
+#                          parallel=False, callback_func=test_run_print_callback)
 
 
 #==================================================================================================
