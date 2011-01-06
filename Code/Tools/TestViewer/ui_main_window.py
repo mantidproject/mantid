@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Thu Jan  6 14:24:59 2011
+# Created: Thu Jan  6 15:33:56 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -144,7 +144,7 @@ class Ui_MainWindow(object):
         self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setObjectName("label_3")
         self.vlResults.addWidget(self.label_3)
-        self.label_4 = QtGui.QLabel(self.verticalLayoutWidget)
+        self.labelResult = QtGui.QLabel(self.verticalLayoutWidget)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -281,18 +281,18 @@ class Ui_MainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
-        self.label_4.setPalette(palette)
+        self.labelResult.setPalette(palette)
         font = QtGui.QFont()
         font.setPointSize(15)
         font.setWeight(75)
         font.setBold(True)
-        self.label_4.setFont(font)
-        self.label_4.setAutoFillBackground(True)
-        self.label_4.setTextFormat(QtCore.Qt.AutoText)
-        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_4.setMargin(3)
-        self.label_4.setObjectName("label_4")
-        self.vlResults.addWidget(self.label_4)
+        self.labelResult.setFont(font)
+        self.labelResult.setAutoFillBackground(True)
+        self.labelResult.setTextFormat(QtCore.Qt.AutoText)
+        self.labelResult.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelResult.setMargin(3)
+        self.labelResult.setObjectName("labelResult")
+        self.vlResults.addWidget(self.labelResult)
         self.label = QtGui.QLabel(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(13)
@@ -359,7 +359,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelResult.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
         self.textEdit.setHtml(QtGui.QApplication.translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

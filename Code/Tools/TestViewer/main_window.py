@@ -166,6 +166,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.progTest.setFormat("")
         self.update_tree()
         
+        failed = test_info.all_tests.failed
+        self.labelResult.setText("Complete. %d of %d tests failed." % (test_info.all_tests.failed, test_info.all_tests.num_run))
+        #if test_info.all_tests.failed
+        
     #-----------------------------------------------------------------------------
     def update_tree(self):
         """ Update the tree view with whatever the current results are """

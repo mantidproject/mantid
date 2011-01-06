@@ -588,7 +588,13 @@ class MultipleProjects(object):
         self.projects = []
         # Abort flag
         self.abort_run = False
-   
+           
+        # The state of the overall project
+        self.state = TestSuiteResult()
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
+        
     #--------------------------------------------------------------------------        
     def abort(self):
         """ Set a flag to abort all further calculations. """
@@ -631,9 +637,9 @@ class MultipleProjects(object):
         for pj in self.projects:
             state = pj.state 
             self.state.add_suite( state )
-            self.passed += suite.passed 
-            self.num_run += suite.num_run
-            self.failed += suite.failed
+            self.passed += pj.passed 
+            self.num_run += pj.num_run
+            self.failed += pj.failed
                     
     #----------------------------------------------------------------------------------
     def get_state_str(self):
@@ -767,7 +773,7 @@ class MultipleProjects(object):
         # Now we compile all the projects' states
         for pj in self.projects:
             pj.compile_states()
-            
+        self.compile_states()
         print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
 
   
