@@ -262,14 +262,14 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
 		 test/CheckWorkspacesMatchTest.h
-		 #test/CloneWorkspaceTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/CommutativeBinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/CloneWorkspaceTest.h
+		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
 		 test/ConjoinWorkspacesTest.h
-		 #test/ConvertFromDistributionTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/ConvertSpectrumAxisTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/ConvertToDistributionTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/ConvertToHistogramTest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/ConvertFromDistributionTest.h
+		 test/ConvertSpectrumAxisTest.h
+		 test/ConvertToDistributionTest.h
+		 test/ConvertToHistogramTest.h
 		 test/ConvertToMatrixWorkspaceTest.h
 		 #test/ConvertToPointDataTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/ConvertUnitsTest.h # TODO uses WorkspaceCreationHelper.hh
