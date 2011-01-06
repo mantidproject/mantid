@@ -130,18 +130,20 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
-    # add the whole suite as a single test so the output xml doesn't overwrite itself
-    #add_test ( NAME ${_cxxtest_testname}
-    #           COMMAND $<TARGET_FILE:${_cxxtest_testname}> )
-
-    # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
-    # add each separate test to ctest
-    foreach ( part ${ARGN} )
-      get_filename_component(_suitename ${part} NAME_WE )
-      set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
-      add_test ( NAME ${_cxxtest_separate_name}
-                COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
-    endforeach ( part ${ARGN} )
+    if (CXXTEST_SINGLE_LOGFILE)
+      # add the whole suite as a single test so the output xml doesn't overwrite itself
+      add_test ( NAME ${_cxxtest_testname}
+                 COMMAND $<TARGET_FILE:${_cxxtest_testname}> )
+    else (CXXTEST_SINGLE_LOGFILE)
+      # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
+      # add each separate test to ctest
+      foreach ( part ${ARGN} )
+        get_filename_component(_suitename ${part} NAME_WE )
+        set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
+        add_test ( NAME ${_cxxtest_separate_name}
+                  COMMAND $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+      endforeach ( part ${ARGN} )
+    endif (CXXTEST_SINGLE_LOGFILE)
 endmacro(CXXTEST_ADD_TEST)
 
 #=============================================================
@@ -159,3 +161,5 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
 
 set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
+
+set (CXXTEST_SINGLE_LOGFILE FALSE) # should be TRUE for build servers
