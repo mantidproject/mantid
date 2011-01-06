@@ -13,10 +13,11 @@
 #include "Poco/File.h"
 #include <fstream>
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
+using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class FindDetectorsOutsideLimitsTest : public CxxTest::TestSuite
 {

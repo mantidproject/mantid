@@ -5,7 +5,12 @@
 
 #include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::Geometry::Object_sptr;
 
 class CuboidGaugeVolumeAbsorptionTest : public CxxTest::TestSuite
 {

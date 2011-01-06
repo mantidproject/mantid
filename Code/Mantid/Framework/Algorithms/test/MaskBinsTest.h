@@ -12,6 +12,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
 
 class MaskBinsTest : public CxxTest::TestSuite
 {

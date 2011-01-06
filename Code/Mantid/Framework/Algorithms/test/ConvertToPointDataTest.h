@@ -6,8 +6,10 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::API::IAlgorithm_sptr;
 using Mantid::Algorithms::ConvertToPointData;
+using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 
 class ConvertToPointDataTest : public CxxTest::TestSuite

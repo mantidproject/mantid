@@ -7,6 +7,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::API::MatrixWorkspace_sptr;
+
 class CylinderAbsorptionTest : public CxxTest::TestSuite
 {
 public:

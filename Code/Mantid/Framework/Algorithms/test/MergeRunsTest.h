@@ -14,6 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::DataHandling::LoadEventPreNeXus;
 
 class MergeRunsTest : public CxxTest::TestSuite
 {
@@ -41,7 +42,7 @@ public:
   {
     std::string eventfile1( "CNCS_7860_neutron_event.dat" );
     std::string eventfile2( "CNCS_7860_neutron_event.dat" );
-    DataHandling::LoadEventPreNeXus * eventLoader;
+    LoadEventPreNeXus * eventLoader;
 
     TimeSeriesProperty<double>* log;
     EventWorkspace_sptr output;
@@ -49,7 +50,7 @@ public:
     int nev1, nev2, nevTot;
     double pc1, pc2, pcTot;
 
-    eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
+    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile1);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
@@ -64,7 +65,7 @@ public:
     pc1 = output->mutableRun().getProtonCharge();
 
     //For the second one, we wont pad the pixels
-    eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
+    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile2);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
