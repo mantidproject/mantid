@@ -6,13 +6,14 @@
 
 #include "MantidAlgorithms/MultipleScatteringAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::MantidVec;
 
 class MultipleScatteringAbsorptionTest : public CxxTest::TestSuite
 {
