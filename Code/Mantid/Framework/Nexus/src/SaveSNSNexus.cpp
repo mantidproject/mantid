@@ -328,6 +328,7 @@ namespace NeXus
                 if (NXclosedata (outId) != NX_OK) return NX_ERROR;
 
                 delete [] data;
+                delete [] errors;
               }
             }
             //---------------------------------------------------------------------------------------
