@@ -52,6 +52,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/FilterByLogValue.cpp
 		src/FilterByTime.cpp
 		src/FindCenterOfMassPosition.cpp
+		src/FindCenterOfMassPosition2.cpp
 		src/FindDeadDetectors.cpp
 		src/FindDetectorsOutsideLimits.cpp
 		src/FindPeaks.cpp
@@ -180,6 +181,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/FilterByLogValue.h
 		inc/MantidAlgorithms/FilterByTime.h
 		inc/MantidAlgorithms/FindCenterOfMassPosition.h
+		inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 		inc/MantidAlgorithms/FindDeadDetectors.h
 		inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
 		inc/MantidAlgorithms/FindPeaks.h
