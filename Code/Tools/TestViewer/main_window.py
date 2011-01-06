@@ -117,7 +117,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         tree.setModel(model)
         tree.setAlternatingRowColors(True)
         tree.header().setResizeMode(0,QHeaderView.Stretch)
-        tree.setColumnWidth(1,200)
+        tree.setColumnWidth(1,230)
         #tree.header().setResizeMode(1,QHeaderView.ResizeMode)
         #tree.header().setColumnWidth(1, 100)
         #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
@@ -210,7 +210,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 def start(argv=[]):
     # Initialize the projects ...
     test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
-    
+    test_info.all_tests.make_fake_results()
+
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")
     app.setOrganizationDomain("mantidproject.org")

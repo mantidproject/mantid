@@ -10,7 +10,7 @@ import shutil
 from xml.dom.minidom import parse, parseString
 import multiprocessing
 from multiprocessing import Pool
-
+import random
 
 #==================================================================================================
 class TestResultState:
@@ -120,6 +120,8 @@ class TestSuiteResult:
         
         if state == self.SOME_FAILED:
             if (self.value == self.ALL_PASSED) or (self.value == self.ALL_FAILED):
+                self.value = self.SOME_FAILED
+            elif self.value == self.NOT_RUN:
                 self.value = self.SOME_FAILED
         
         
@@ -280,7 +282,6 @@ class TestSuite(object):
             if (state==TestResultState.FAILED) or (state==TestResultState.BUILD_ERROR): 
                 self.failed += 1 
                 self.num_run += 1
-        print "compile_states found", self.get_state_str()
             
     #----------------------------------------------------------------------------------
     def get_runtime(self):
@@ -293,7 +294,10 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
-        return self.state.get_string() + " (%d failed)" % (self.failed) #, self.num_run)
+        if self.failed > 0:
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+        else:
+            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
        
         
     #----------------------------------------------------------------------------------
@@ -457,12 +461,15 @@ class TestProject(object):
             self.state.add_suite( state )
             self.passed += suite.passed 
             self.num_run += suite.num_run
-            self.failed += suite.failed 
+            self.failed += suite.failed
                     
     #----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
-        return self.state.get_string()
+        if self.failed > 0:
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+        else:
+            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
        
     #----------------------------------------------------------------------------------
     def populate(self):
@@ -603,6 +610,39 @@ class MultipleProjects(object):
                 pj.populate()
                 self.projects.append(pj)
         
+    #--------------------------------------------------------------------------        
+    def make_fake_results(self):
+        """Generate some fake results for quick debugging """
+        for pj in self.projects:
+            pj.state.value = random.randint(0,4)
+            for suite in pj.suites:
+                suite.state.value = random.randint(0,4)
+                for test in suite.tests:
+                    test.state = random.randint(0, 6)
+                    test.runtime = random.random()/1000
+                   
+    #----------------------------------------------------------------------------------
+    def compile_states(self):
+        """ Add up the single test results into this suite """
+        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.passed = 0
+        self.failed = 0
+        self.num_run = 0
+        for pj in self.projects:
+            state = pj.state 
+            self.state.add_suite( state )
+            self.passed += suite.passed 
+            self.num_run += suite.num_run
+            self.failed += suite.failed
+                    
+    #----------------------------------------------------------------------------------
+    def get_state_str(self):
+        """Return a string summarizing the state. Used in GUI."""
+        if self.failed > 0:
+            return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
+        else:
+            return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
+
 
     #--------------------------------------------------------------------------        
     def get_project_named(self, name):
@@ -723,6 +763,11 @@ class MultipleProjects(object):
             for suite in suites:
                 result = run_tests_in_suite( self, suite )
                 if not callback_func is None: callback_func(result)
+                
+        # Now we compile all the projects' states
+        for pj in self.projects:
+            pj.compile_states()
+            
         print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
 
   
