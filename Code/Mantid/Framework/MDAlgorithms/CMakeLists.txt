@@ -77,7 +77,6 @@ test/PlaneFunctionBuilderTest.h
 test/SimulateMDDataTest.h
 test/SingleValueParameterBaseTest.h
 test/testCPComponents.h
-test/testCPrebinning.cpp
 test/testCPrebinning.h
 test/VectorMathematicsTest.h
 test/WidthParameterTest.h
