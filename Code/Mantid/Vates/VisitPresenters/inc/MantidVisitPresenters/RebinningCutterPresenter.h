@@ -51,7 +51,7 @@ typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
 
 /// RebinningCutterPresenter does the work of implemening requests/information provided by pipeline filters. Generates new datasets from
 /// current and historical rebinning knowledge accumulated in the pipeline.
-class RebinningCutterPresenter
+class DLLExport RebinningCutterPresenter
 {
 private:
 

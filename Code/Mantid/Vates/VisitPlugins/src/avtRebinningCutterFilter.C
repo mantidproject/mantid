@@ -45,7 +45,7 @@
 #include <vtkVisItClipper.h>
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
-#include <MantidGeometry/MDGeometry/MDDimension.h>
+#include <vtkDataSet.h>
 
 
 using namespace Mantid::VATES;
@@ -132,137 +132,6 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 {
   return (atts == *(RebinningCutterAttributes*) a);
 }
-//helper method
-std::string getComplexXMLInstructions()
-{
-    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
-"<MDInstruction>" +
-  "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>/home/owen/mantid/Test/VATES/fe_demo.sqw</MDWorkspaceLocation>" +
-  "<DimensionSet>" +
-    "<Dimension ID=\"en\">" +
-      "<Name>Energy</Name>" +
-      "<UpperBounds>150</UpperBounds>" +
-      "<LowerBounds>0</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
-    "</Dimension>" +
-    "<Dimension ID=\"qx\">" +
-      "<Name>Qx</Name>" +
-      "<UpperBounds>5</UpperBounds>" +
-      "<LowerBounds>-1.5</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
-      "<ReciprocalDimensionMapping>q1</ReciprocalDimensionMapping>" +
-    "</Dimension>" +
-    "<Dimension ID=\"qy\">" +
-      "<Name>Qy</Name>" +
-      "<UpperBounds>6.6</UpperBounds>" +
-      "<LowerBounds>-6.6</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
-      "<ReciprocalDimensionMapping>q2</ReciprocalDimensionMapping>" +
-    "</Dimension>" +
-    "<Dimension ID=\"qz\">" +
-      "<Name>Qz</Name>" +
-      "<UpperBounds>6.6</UpperBounds>" +
-      "<LowerBounds>-6.6</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
-      "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" +
-    "</Dimension>" +
-    "<XDimension>" +
-      "<RefDimensionId>qx</RefDimensionId>" +
-    "</XDimension>" +
-    "<YDimension>" +
-      "<RefDimensionId>qy</RefDimensionId>" +
-    "</YDimension>" +
-    "<ZDimension>" +
-      "<RefDimensionId>qz</RefDimensionId>" +
-    "</ZDimension>" +
-    "<TDimension>" +
-      "<RefDimensionId>en</RefDimensionId>" +
-    "</TDimension>" +
-  "</DimensionSet>" +
-  "<Function>" +
-    "<Type>CompositeImplicitFunction</Type>" +
-    "<ParameterList/>" +
-    "<Function>" +
-      "<Type>BoxImplicitFunction</Type>" +
-      "<ParameterList>" +
-        "<Parameter>" +
-          "<Type>HeightParameter</Type>" +
-          "<Value>6</Value>" +
-       "</Parameter>" +
-        "<Parameter>" +
-          "<Type>WidthParameter</Type>" +
-          "<Value>1.5</Value>" +
-       "</Parameter>" +
-       "<Parameter>" +
-          "<Type>DepthParameter</Type>" +
-          "<Value>6</Value>" +
-       "</Parameter>" +
-        "<Parameter>" +
-          "<Type>OriginParameter</Type>" +
-          "<Value>0, 0, 0</Value>" +
-        "</Parameter>" +
-      "</ParameterList>" +
-    "</Function>" +
-    "<Function>" +
-          "<Type>CompositeImplicitFunction</Type>" +
-          "<ParameterList/>" +
-            "<Function>" +
-              "<Type>BoxImplicitFunction</Type>" +
-              "<ParameterList>" +
-                "<Parameter>" +
-                  "<Type>WidthParameter</Type>" +
-                  "<Value>4</Value>" +
-                "</Parameter>" +
-                "<Parameter>" +
-                  "<Type>HeightParameter</Type>" +
-                  "<Value>1.5</Value>" +
-               "</Parameter>" +
-               "<Parameter>" +
-                  "<Type>DepthParameter</Type>" +
-                  "<Value>6</Value>" +
-               "</Parameter>" +
-               "<Parameter>" +
-                  "<Type>OriginParameter</Type>" +
-                  "<Value>0, 0, 0</Value>" +
-               "</Parameter>" +
-              "</ParameterList>" +
-            "</Function>" +
-      "</Function>" +
-  "</Function>" +
-"</MDInstruction>";
-  }
-
-//helper method
-vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
-{
-  vtkFieldData* fieldData = vtkFieldData::New();
-  vtkCharArray* charArray = vtkCharArray::New();
-  charArray->SetName(id.c_str());
-  charArray->Allocate(100);
-  for(int i = 0; i < testData.size(); i++)
-  {
-    char cNextVal = testData.at(i);
-    if(int(cNextVal) > 1)
-    {
-      charArray->InsertNextValue(cNextVal);
-
-    }
-  }
-  fieldData->AddArray(charArray);
-  return fieldData;
-}
-
-
-//Helper method to construct a dataset identical to what would be expected as the input to a RebinningCutterFilter without the any geometric/topological data.
-vtkDataSet* constructInputDataSet()
-{
-  using namespace Mantid::VATES;
-  vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  RebinningCutterPresenter::metaDataId;
-  dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
-  return dataset;
-}
 
 vtkDataSet* avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
 {
@@ -270,7 +139,7 @@ vtkDataSet* avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::s
   using namespace Mantid::Geometry;
   using Mantid::VATES::DimensionVec;
   using Mantid::VATES::Dimension_sptr;
-  RebinningCutterPresenter presenter(constructInputDataSet());
+  RebinningCutterPresenter presenter(in_ds);
 
   DimensionVec vec;
   MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.

@@ -310,10 +310,10 @@ namespace Mantid
       ImplicitFunction* function = getImplicitFunction(pRootElem);
 
       //get the input workspace.
-      std::string name = getWorkspaceName(pRootElem);
+      const std::string name = getWorkspaceName(pRootElem);
 
       //get the location of the workspace. this should be redundant in future versions!
-      std::string location = getWorkspaceLocation(pRootElem);
+      const std::string location = getWorkspaceLocation(pRootElem);
 
       //get the md geometry without cuts applied. Cuts are applied by the implicit functions.
       MDGeometryDescription* geomDescription = getMDGeometryDescriptionWithoutCuts(pRootElem);
@@ -321,13 +321,15 @@ namespace Mantid
       //apply cuts to the geometrydescription.
       ApplyImplicitFunctionToMDGeometryDescription(geomDescription, function);
 
+      IAlgorithm_sptr loadWsAlg = this->createSubAlgorithm("Load MD workspace", 0.001, 0.5, true, 1);
+      loadWsAlg->initialize();
+      loadWsAlg->setPropertyValue("inFilename", location);
+      loadWsAlg->setPropertyValue("MDWorkspace",name);
 
-      IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.001, 1, true, 1);
-      rebinningAlg->setPropertyValue("Input", name);
-      
-      // filename will be in save or load workspace algorithm
-     // rebinningAlg->setPropertyValue("FileName", location);
+      IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.5, 1, true, 1);
+
       rebinningAlg->initialize();
+      rebinningAlg->setPropertyValue("Input", name);
       
       //HACK: only way to apply a geometry description seems to be to grab it from the algorithm and apply it after initalize!
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Mantid::Kernel::Property *)(rebinningAlg->getProperty("SlicingData")));
