@@ -19,7 +19,7 @@ using namespace Mantid::PythonAPI;
 
 bool FrameworkManagerProxy::g_gil_required = false;
 
-class FrameworkManagerProxyTest : public CxxTest::TestSuite
+class PythonFrameworkTests : public CxxTest::TestSuite
 {
 
 private:
@@ -27,7 +27,7 @@ private:
 
 public:
 
-  FrameworkManagerProxyTest()
+  PythonFrameworkTests()
   {
     mgr = new Mantid::PythonAPI::FrameworkManagerProxy;
   }
