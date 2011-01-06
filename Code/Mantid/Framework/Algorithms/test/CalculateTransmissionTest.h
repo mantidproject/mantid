@@ -29,7 +29,7 @@ public:
     Mantid::DataHandling::LoadInstrument inst;
     inst.initialize();
     inst.setPropertyValue("Workspace",inputWS);
-    inst.setPropertyValue("Filename","../../../Instrument/LOQ_trans_Definition.xml");
+    inst.setPropertyValue("Filename","LOQ_trans_Definition.xml");
     inst.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
