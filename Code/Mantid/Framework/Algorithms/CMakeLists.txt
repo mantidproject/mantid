@@ -251,7 +251,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
-		 #test/AnyShapeAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/AnyShapeAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/ApplyTransmissionCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/BinaryOperationTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/CalculateEfficiencyTest.h # TODO uses ComponentCreationHelper.hh via SANSInstrumentCreationHelper.h
