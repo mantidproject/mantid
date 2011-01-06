@@ -30,7 +30,7 @@ public:
 };
 
 
-class tripleIteratorTest : public CxxTest::TestSuite
+class WorkspaceIteratorTest : public CxxTest::TestSuite
 {
 private:
 
