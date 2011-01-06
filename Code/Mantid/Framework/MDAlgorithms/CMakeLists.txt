@@ -64,7 +64,7 @@ inc/MantidMDAlgorithms/WidthParameter.h
 
 # Test files. Other source files required.
 set (TEST_FILES
-test/CPR_preselectCellsTest.h
+#test/CPR_preselectCellsTest.h TODO: Is this test really necessary?
 test/DepthParameterTest.h
 test/DynamicRebinFromXMLAlgorithmTest.h
 test/HeightParameterTest.h
@@ -75,8 +75,8 @@ test/NormalParameterTest.h
 test/OriginParameterTest.h
 test/PlaneFunctionBuilderTest.h
 test/SimulateMDDataTest.h
-test/SingleValueParameterBaseTest.h
-test/testCPComponents.h
+#test/SingleValueParameterBaseTest.h TODO: Not a CxxTest? Sure looks like one.
+#test/testCPComponents.h TODO: Is this test really necessary?
 test/testCPrebinning.h
 test/VectorMathematicsTest.h
 test/WidthParameterTest.h
