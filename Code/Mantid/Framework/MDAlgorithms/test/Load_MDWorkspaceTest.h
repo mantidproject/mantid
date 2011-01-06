@@ -14,7 +14,7 @@ using namespace MDAlgorithms;
 
 
 
-class testLoadMDWorkspace :    public CxxTest::TestSuite
+class Load_MDWorkspaceTest :    public CxxTest::TestSuite
 {
    Load_MDWorkspace loader;
    std::string targetWorkspaceName;

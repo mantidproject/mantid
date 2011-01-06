@@ -147,7 +147,7 @@ public:
    ~TestCut() {};
 };
 
-class testSimulateMDD : public CxxTest::TestSuite
+class SimulateMDDataTest : public CxxTest::TestSuite
 {
 private:
   boost::shared_ptr<TestCut> myCut;
@@ -216,7 +216,7 @@ private:
 
 public:
 
-  testSimulateMDD() {};
+  SimulateMDDataTest() {};
 
   // create a test data set of 3 pixels contributing to 2 points to 1 cut
   void testInit()
