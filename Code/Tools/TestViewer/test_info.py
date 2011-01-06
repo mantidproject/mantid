@@ -284,187 +284,182 @@ class TestProject(object):
             
     def __repr__(self):
         return "TestProject(%s)" % (self.name)
+
+
+
+#==================================================================================================
+#==================================================================================================
+#==================================================================================================
+class MultipleProjects(object):
+    """ A Class containing a list of all the available test projects.
+    This will be made into a single global variable instance. """
+    
+    def __init__(self):
+        # The projects contained
+        self.projects = []
+        # Abort flag
+        self.abort_run = False
+        
+    
+    #==================================================================================================
+    def discover_CXX_projects(self, path, source_path):
+        """Look for CXXTest projects in the given paths.
+        Populates all the test in it."""
+        self.projects = []
+        dirList=os.listdir(path)
+        for fname in dirList:
+            # Look for executables ending in Test
+            if fname.endswith("Test"):
+                make_command = "cd %s ; make %s" % (os.path.join(path, ".."), fname)
+                pj = TestProject(fname, os.path.join(path, fname), make_command)
+                print "... Populating project %s ..." % fname
+                pj.populate()
+                self.projects.append(pj)
         
 
-# Global variable containing a list of all the available test projects        
-test_projects = []        
-#
-##==================================================================================================
-#def run_tests_in_suite( args ):
-#    """Run all tests in a given suite. Method called
-#    by the multiprocessing Pool.map() method."""
-#    suite = args[0]
-#    callback_func = None
-#    if len(args) > 1: callback_func = args[1]
-#    
-#    if not suite is None:
-#        if not (callback_func is None):
-#            callback_func(suite)
-#        suite.run_tests()
-#        
-
-""" Will we want to abort this run? """
-global abort_run
-abort_run = False
-
-#==================================================================================================
-def abort():
-    """ Set a flag to abort all further calculations. """
-    global abort_run
-    print "... Attempting to abort ..."
-    abort_run = True
-
-#==================================================================================================
-def run_tests_in_suite( suite ):
-    """Run all tests in a given suite. Method called
-    by the multiprocessing Pool.apply_async() method."""
-    global abort_run
-    if abort_run: return "Aborted."
-    if not suite is None:
-        suite.run_tests()
-    # Simply return the object back (for use by the callback function)
-    return suite
+    #==================================================================================================
+    def get_project_named(self, name):
+        """Return the TestProject named name; None if not found"""
+        for pj in self.projects:
+            if pj.name == name:
+                return pj
+        return None
         
+             
+    #==================================================================================================
+    def get_selected_suites(self, selected_only=True):
+        """Returns a list of all selected suites. """
+        suites = []
+        for pj in self.projects:
+            for st in pj.suites:
+                if st.selected or (not selected_only):
+                    suites.append(st)           
+        return suites             
         
-#==================================================================================================
-def make_test( project ):
-    """Make the tests in a given project. Method called
-    by the multiprocessing Pool.apply_async() method."""
-    global abort_run
-    if abort_run: return "Aborted."
-    if not project is None:
-        project.make()
-        return "Made test project %s " % project.name
-    else:
-        return ""
-     
-     
-#==================================================================================================
-def get_selected_suites(selected_only=True):
-    """Returns a list of all selected suites. """
-    global test_projects
-    suites = []
-    for pj in test_projects:
-        for st in pj.suites:
-            if st.selected or (not selected_only):
-                suites.append(st)           
-    return suites             
 
-#==================================================================================================
-def run_tests_computation_steps(selected_only=True, make_tests=True):
-    """Returns the number of computation steps that will be done with these parameters
-    This is used by the GUI to know how to report progress."""
-    count = 0
-    if make_tests:
-        for pj in test_projects:
-            if pj.is_anything_selected() or (not selected_only):
-                count += 1
-    count += len(get_selected_suites(selected_only))
-    return count
-    
-    
-#==================================================================================================
-def run_tests_in_parallel(selected_only=True, make_tests=True, parallel=True, callback_func=None):
-    """Run tests in parallel using multiprocessing.
-    Parameters:
-        selected_only: run only the selected suites.
-        make_tests: set to True to make the tests before running them.
-        parallel: set to True to do them in parallel, false to do linearly 
-        callback_func: function that takes as argument the suite being run; or a simple string
-    """
-    global abort_run
-    global test_projects
-    abort_run = False
-    
-    start = time.time()
-    
-    # How many thread in parallel?  one fewer threads than the # of cpus
-    num_threads = multiprocessing.cpu_count()-1
-    if num_threads < 1: num_threads = 1
-    
-    # First, need to build a long list of all (selected) suites
-    suites = get_selected_suites(selected_only)
+    #==================================================================================================
+    def run_tests_computation_steps(self, selected_only=True, make_tests=True):
+        """Returns the number of computation steps that will be done with these parameters
+        This is used by the GUI to know how to report progress."""
+        count = 0
+        if make_tests:
+            for pj in self.projects:
+                if pj.is_anything_selected() or (not selected_only):
+                    count += 1
+        count += len(get_selected_suites(selected_only))
+        return count
                 
-    # Now let's run the make test command for each one
-    if make_tests:
-        pj_to_build = []
-        for pj in test_projects:
-            if pj.is_anything_selected() or (not selected_only):
-                pj_to_build.append(pj)
                 
+    
+    #==================================================================================================
+    def abort(self):
+        """ Set a flag to abort all further calculations. """
+        print "... Attempting to abort ..."
+        self.abort_run = True
+    
+    #==================================================================================================
+    def run_tests_in_suite(self, suite ):
+        """Run all tests in a given suite. Method called
+        by the multiprocessing Pool.apply_async() method."""
+        if self.abort_run: return "Aborted."
+        if not suite is None:
+            suite.run_tests()
+        # Simply return the object back (for use by the callback function)
+        return suite
+            
+    #==================================================================================================
+    def make_test(self, project ):
+        """Make the tests in a given project. Method called
+        by the multiprocessing Pool.apply_async() method."""
+        if self.abort_run: return "Aborted."
+        if not project is None:
+            project.make()
+            return "Made test project %s " % project.name
+        else:
+            return ""
+         
+    #==================================================================================================
+    def run_tests_in_parallel(self, selected_only=True, make_tests=True, parallel=True, callback_func=None):
+        """Run tests in parallel using multiprocessing.
+        Parameters:
+            selected_only: run only the selected suites.
+            make_tests: set to True to make the tests before running them.
+            parallel: set to True to do them in parallel, false to do linearly 
+            callback_func: function that takes as argument the suite being run; or a simple string
+        """
+        self.abort_run = False
+        
+        start = time.time()
+        
+        # How many thread in parallel?  one fewer threads than the # of cpus
+        num_threads = multiprocessing.cpu_count()-1
+        if num_threads < 1: num_threads = 1
+        
+        # First, need to build a long list of all (selected) suites
+        suites = self.get_selected_suites(selected_only)
+                    
+        # Now let's run the make test command for each one
+        if make_tests:
+            pj_to_build = []
+            for pj in self.projects:
+                if pj.is_anything_selected() or (not selected_only):
+                    pj_to_build.append(pj)
+                    
+            if parallel:
+                p = Pool(num_threads)
+                for pj in pj_to_build:
+                    p.apply_async( self.make_test, (pj, ), callback=callback_func)
+                p.close()
+                # This will block until completed
+                p.join()
+            else:
+                for pj in pj_to_build:
+                    result = self.make_test( pj )
+                    if not callback_func is None: callback_func(result)
+                    
+            
         if parallel:
-            p = Pool(num_threads)
-            for pj in pj_to_build:
-                p.apply_async( make_test, (pj, ), callback=callback_func)
+            # Make the pool 
+            p = Pool( num_threads )
+            
+            # Call the method that will run each suite
+            for suite in suites:
+                p.apply_async( self.run_tests_in_suite, (suite, ), callback=callback_func)
             p.close()
             # This will block until completed
             p.join()
+            
         else:
-            for pj in pj_to_build:
-                result = make_test( pj )
+            for suite in suites:
+                result = self.run_tests_in_suite( suite )
                 if not callback_func is None: callback_func(result)
-                
-        
-    if parallel:
-        # Make the pool 
-        p = Pool( num_threads )
-        
-        # Call the method that will run each suite
-        for suite in suites:
-            p.apply_async( run_tests_in_suite, (suite, ), callback=callback_func)
-        p.close()
-        # This will block until completed
-        p.join()
-        
-    else:
-        for suite in suites:
-            result = run_tests_in_suite( suite )
-            if not callback_func is None: callback_func(result)
-    print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
+        print "... %s tests %sand completed in %f seconds ..." % (["All", "Selected"][selected_only], ["","built "][parallel],  (time.time() - start))
+
+            
+            
+# Global variable containing a list of all the available test projects
+global all_tests        
+all_tests = MultipleProjects()        
 
 
 #==================================================================================================
-def discover_projects(path, source_path):
-    """Look for CXXTest projects in the given paths"""
-    global test_projects
-    test_projects = []
-    dirList=os.listdir(path)
-    for fname in dirList:
-        # Look for executables ending in Test
-        if fname.endswith("Test"):
-            make_command = "cd %s ; make %s" % (os.path.join(path, ".."), fname)
-            pj = TestProject(fname, os.path.join(path, fname), make_command)
-            print "... Populating project %s ..." % fname
-            pj.populate()
-            test_projects.append(pj)
-
-    
-#==================================================================================================
-def get_project_named(name):
-    """Return the TestProject named name"""
-    global test_projects
-    for pj in test_projects:
-        if pj.name == name:
-            return pj
-    return None
-    
-
-
-#==================================================================================================
-def test_run_print_callback(suite):
+def test_run_print_callback(self, suite):
     """ Simple callback for running tests"""
     if isinstance(suite, TestSuite):
         print "Running %s" % suite.classname
     else:
         print suite                
         
+        
+        
 #==================================================================================================
 if __name__ == '__main__':
-    discover_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
-    run_tests_in_parallel(selected_only=False, make_tests=True, 
+    global all_tests
+    all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
+    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
+                          parallel=True, callback_func=test_run_print_callback)
+    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
                           parallel=False, callback_func=test_run_print_callback)
-    #kt = get_project_named("GeometryTest")
-    #kt.suites[16].run_tests()
 
 
 #==================================================================================================
