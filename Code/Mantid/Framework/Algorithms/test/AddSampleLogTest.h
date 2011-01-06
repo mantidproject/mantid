@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 
