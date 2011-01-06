@@ -122,6 +122,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         #tree.header().setColumnWidth(1, 100)
         #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
         
+        
     #-----------------------------------------------------------------------------
     def expand_tree_to_projects(self):
         """ Collapse suites so that only the top projects are shown """
@@ -167,8 +168,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.update_tree()
         
         failed = test_info.all_tests.failed
-        self.labelResult.setText("Complete. %d of %d tests failed." % (test_info.all_tests.failed, test_info.all_tests.num_run))
-        #if test_info.all_tests.failed
+        num_run = test_info.all_tests.num_run
+        if failed > 0:
+            self.labelResult.setStyleSheet("QLabel { background-color: red }")
+            self.labelResult.setText("FAILURE! %d of %d tests failed." % (failed, num_run))
+        else:
+            self.labelResult.setStyleSheet("QLabel { background-color: green }")
+            self.labelResult.setText("All Passed! %d of %d tests failed." % (failed, num_run))
         
     #-----------------------------------------------------------------------------
     def update_tree(self):
@@ -196,7 +202,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         """ Start a parallelized test running with the given parameters """
         parallel = self.checkInParallel.isChecked()
         # Do some setup of the worker and GUI
-        num_steps = self.worker.set_parameters(self, selected_only=False, make_tests=True, parallel=parallel)
+        num_steps = self.worker.set_parameters(self, selected_only=selected_only, make_tests=True, parallel=parallel)
         if num_steps < 1: num_steps = 1 
         self.progTest.setValue(0)
         self.progTest.setMaximum( num_steps )
@@ -214,7 +220,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 def start(argv=[]):
     # Initialize the projects ...
     test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
-    test_info.all_tests.make_fake_results()
+    #test_info.all_tests.make_fake_results()
 
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")

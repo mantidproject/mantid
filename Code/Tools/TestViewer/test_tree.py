@@ -83,7 +83,15 @@ class TreeItemProject(object):
 
     def columnCount(self):
         return 3
+
+    #-----------------------------------------------------------------------------------            
+    def is_checked(self):
+        return [Qt.Unchecked, Qt.Checked][self.project.selected] 
     
+    def set_checked(self, value):
+        self.project.selected = value
+
+    #-----------------------------------------------------------------------------------            
     def data(self, column):
         if self.project == None:
             if column == 0:
@@ -99,6 +107,7 @@ class TreeItemProject(object):
                 return QtCore.QVariant( format_time( self.project.get_runtime() ))
         return QtCore.QVariant()
 
+    #-----------------------------------------------------------------------------------            
     def parent(self):
         return self.parentItem
     
@@ -140,7 +149,15 @@ class TreeItemSuite(object):
     def columnCount(self):
         """Column count of the children?"""
         return 3
+            
+    #-----------------------------------------------------------------------------------            
+    def is_checked(self):
+        return [Qt.Unchecked, Qt.Checked][self.suite.selected] 
     
+    def set_checked(self, value):
+        self.suite.selected = value
+
+    #-----------------------------------------------------------------------------------            
     def data(self, column):
         if self.suite == None:
             if column == 0:
@@ -216,6 +233,14 @@ class TreeItemSingle(object):
             return QColor(Qt.darkGray)
         else:
             return QVariant()
+        
+    def is_checked(self):
+        """ Can't check at the single test level """
+        return QVariant()
+    
+    def set_checked(self, value):
+        """ Can't check at the single test level """
+        pass
     
     def data(self, column):
         if self.test == None:
@@ -261,7 +286,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         flag = Qt.ItemIsSelectable | Qt.ItemIsEnabled
         if index.column() == 0:
-            flag |= Qt.ItemIsTristate | Qt.ItemIsUserCheckable
+            flag |= Qt.ItemIsUserCheckable
         # Return the flags for the item: It is checkable, selectable and enabled.
         return  flag
 
@@ -272,7 +297,10 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         else:
             return len(HORIZONTAL_HEADERS)
 
+    #----------------------------------------------------------------------------------
     def data(self, index, role):
+        """ Request some data from the model. The role determines what you want
+        """
         if not index.isValid():
             return QtCore.QVariant()
 
@@ -284,7 +312,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         # Return the checked state 
         if role == QtCore.Qt.CheckStateRole:
             if index.column() == 0:
-                return Qt.Checked
+                return item.is_checked()
             else:
                 return QVariant() 
         
@@ -299,7 +327,30 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                 return item.suite
 
         return QtCore.QVariant()
+    
+    #----------------------------------------------------------------------------------
+    def setData(self, index, value, role):
+        """ Sets some data (from the user)?
+        The role determines what you want
+        """
+        if not index.isValid():
+            return False
+        item = index.internalPointer()
+        if item is None:
+            return False
+        
+        # Return the checked state
+        if role == QtCore.Qt.CheckStateRole:
+            item.set_checked( value==Qt.Checked )
+            return True
+        
+        return False
+#            if index.column() == 0:
+#                return Qt.Checked
+#            else:
+#                return QVariant() 
 
+    #----------------------------------------------------------------------------------
     def headerData(self, column, orientation, role):
         if (orientation == QtCore.Qt.Horizontal and
         role == QtCore.Qt.DisplayRole):
@@ -310,6 +361,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
         return QtCore.QVariant()
 
+    #----------------------------------------------------------------------------------
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
@@ -325,6 +377,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
 
+    #-----------------------------------------------------------------------------------            
     def parent(self, index):
         if not index.isValid():
             return QtCore.QModelIndex()
@@ -340,6 +393,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
         return self.createIndex(parentItem.row(), 0, parentItem)
 
+    #-----------------------------------------------------------------------------------            
     def rowCount(self, parent=QtCore.QModelIndex()):
         if parent.column() > 0:
             return 0
@@ -349,6 +403,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
             p_Item = parent.internalPointer()
         return p_Item.childCount()
     
+    #-----------------------------------------------------------------------------------            
     def setupModelData(self):
         for pj in test_info.all_tests.projects:
             # What's the corresponding TreeItemProject
@@ -373,6 +428,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                             suite_item.appendChild(test_item)
                             
         
+    #-----------------------------------------------------------------------------------            
     def setup_checks(self):
         # Number of root projects
         rowcount = self.rowCount( QModelIndex() )
@@ -389,11 +445,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                     # Sets it as checked.
                     self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole);
         
-    
-    def expand_suites(self):
-        """ Collapse single test results but expand projects """
-        pass
-            
+                
 #        
 #    def searchModel(self, person):
 #        '''

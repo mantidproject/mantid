@@ -400,6 +400,9 @@ class TestProject(object):
         # Test suites in this project
         self.suites = []
         
+        # Is it selected to run?
+        self.selected = True
+
         # The state of the overall project
         self.state = TestSuiteResult()
         self.passed = 0
