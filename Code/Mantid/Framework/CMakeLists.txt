@@ -91,6 +91,9 @@ add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
 
+# Unit test helper package -- Disabled for the moment
+#add_subdirectory (TestHelpers)
+
 if ( MAKE_VATES )
   add_subdirectory (MDDataObjects)
   include_directories(MDDataObjects/inc)
