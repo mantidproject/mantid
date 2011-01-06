@@ -31,7 +31,12 @@
 #include <cxxtest/ErrorFormatter.h>
 #include <cxxtest/StdHeaders.h>
 #include <ctime>
+#ifdef _WIN32
+#include <time.h>
+#else
 #include <sys/time.h>
+#endif
+#include <time.h>
 #include <iostream>
 #include <sstream>
 #include <cstring>
@@ -249,8 +254,13 @@ namespace CxxTest
         int nfail;
         int nerror;
         double totaltime;
-        timeval testStartTime;
-        timeval testStopTime;
+        // The type of this variable is different depending on the platform
+      #ifdef _WIN32
+        clock_t
+      #else
+        timeval
+      #endif
+        testStartTime, testStopTime;
 
         int run()
         {
@@ -316,7 +326,11 @@ namespace CxxTest
 
         void enterTest( const TestDescription & desc )
         {
-        	    gettimeofday(&testStartTime, 0);
+            #ifdef _WIN32
+                testStartTime = clock();
+            #else
+                gettimeofday(&testStartTime, 0);
+            #endif
                 testcase = info.insert(info.end(),TestCaseInfo());
                 testcase->testName = desc.testName();
                 testcase->className = classname;
@@ -350,6 +364,9 @@ namespace CxxTest
                 stream_redirect = NULL;
            }
 
+        #ifdef _WIN32
+           const double testTime = float(clock() - testStartTime)/CLOCKS_PER_SEC;
+        #else
            gettimeofday(&testStopTime, 0);
            double sec = testStopTime.tv_sec - testStartTime.tv_sec;
            double usec = testStopTime.tv_usec - testStartTime.tv_usec;
@@ -357,6 +374,7 @@ namespace CxxTest
     //       std::cout << testcase->testName << " took " << sec << "secs and " << usec << ""
 
            double testTime = sec + (usec / 1000000.0);
+        #endif
 
             // Set the run time for this test
             testcase->runtime = testTime;
