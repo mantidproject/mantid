@@ -34,8 +34,9 @@ void FindCenterOfMassPosition2::init()
   declareProperty("Output","","If not empty, a table workspace of that "
       "name will contain the center of mass position.");
 
-  declareProperty("CenterX", 0.0, "Estimate for the beam center in X [m].");
-  declareProperty("CenterY", 0.0, "Estimate for the beam center in Y [m].");
+  declareProperty("CenterX", 0.0, "Estimate for the beam center in X [m]. Default: 0");
+  declareProperty("CenterY", 0.0, "Estimate for the beam center in Y [m]. Default: 0");
+  declareProperty("Tolerance", 0.00125, "Tolerance on the center of mass position between each iteration [m]. Default: 0.00125");
 
   declareProperty("DirectBeam", true,
       "If true, a direct beam calculation will be performed. Otherwise, the center of mass "
@@ -61,6 +62,7 @@ void FindCenterOfMassPosition2::exec()
   // Initial center location
   double center_x = getProperty("CenterX");
   double center_y = getProperty("CenterY");
+  double tolerance = getProperty("Tolerance");
   // Iteration cutoff
   int max_iteration = 200;
   // Radius of the beam area, in pixels
@@ -97,7 +99,7 @@ void FindCenterOfMassPosition2::exec()
   // Find center of mass and iterate until we converge
   // to within a quarter of a pixel
   bool first_run = true;
-  while (distance > 0.25*0.00515 || distance < 0)
+  while (distance > tolerance || distance < 0)
   {
     // Count histogram for normalization
     double total_count = 0;

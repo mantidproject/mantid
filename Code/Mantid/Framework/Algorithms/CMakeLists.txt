@@ -299,6 +299,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 #test/FilterByLogValueTest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/FilterByTimeTest.h
 		 test/FindCenterOfMassPositionTest.h
+		 test/FindCenterOfMassPosition2Test.h
 		 #test/FindDeadDetectorsTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/FindDetectorsOutsideLimitsTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/FindPeaksTest.h # TODO uses WorkspaceCreationHelper.hh
