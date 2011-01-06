@@ -8,10 +8,14 @@ project ( Vates )
 find_package ( VisIt )
 
 if ( VISIT_FOUND )
-  include_directories ( VisitPresenters/inc )
+
+  # Perform common setup
+  include ( CommonVatesSetup )
+
   add_subdirectory ( VisitPresenters )
   add_subdirectory ( VisitPlugins )
   add_subdirectory ( VisitDataBases )
+
 else ( VISIT_FOUND )
   message ( STATUS "Vates-VisIt plugins and widgets will not be built." )
 endif ( VISIT_FOUND )

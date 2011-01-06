@@ -5,13 +5,7 @@ INCLUDE(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 
 PROJECT(RebinningCutter)
 
-INCLUDE(GetMantidSubProject)
-get_mantid_subproject(Framework/API)
-get_mantid_subproject(Framework/Geometry)
-get_mantid_subproject(Framework/Kernel)
-get_mantid_subproject(Framework/MDAlgorithms)
-get_mantid_subproject(Framework/MDDataObjects)
-get_mantid_subproject(Vates/VisitPresenters)
+set_mantid_subprojects(Vates/VisitPresenters)
 
 SET(COMMON_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterPluginInfo.C
@@ -97,12 +91,6 @@ ${QT_QTGUI_INCLUDE_DIR}
 ${VTK_INCLUDE_DIRS} 
 ${PYTHON_INCLUDE_PATH} 
 ${VISIT_INCLUDE_DIR}/visit/visitpy/visitpy 
-${MANTID_API_INCLUDE_DIR}
-${MANTID_GEOMETRY_INCLUDE_DIR}
-${MANTID_KERNEL_INCLUDE_DIR}
-${MANTID_MDDATAOBJECTS_INCLUDE_DIR}
-${MANTID_MDALGORITHMS_INCLUDE_DIR}
-${MANTID_VISITPRESENTERS_INCLUDE_DIR}
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
 )
 
@@ -136,22 +124,6 @@ IF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO
         ADD_DEPENDENCIES(JavaRebinningCutter JavaClient)
     ENDIF(VISIT_JAVA)
 ENDIF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
-
-# Handle Mantid subproject libraries
-set ( MANTID_SUBPROJECT_LIBS 
-Kernel
-Geometry
-API
-MDDataObjects
-MDAlgorithms
-VisitPresenters
-#${MANTID_KERNEL_LIBRARY} 
-#${MANTID_GEOMETRY_LIBRARY} 
-#${MANTID_API_LIBRARY} 
-#${MANTID_MDALGORITHMS_LIBRARY} 
-#${MANTID_MDDATAOBJECTS_LIBRARY}
-#${MANTID_VISITPRESENTERS_LIBRARY}
-)
 
 # TODO: Deal with this library better
 find_library(HDF5_LIBRARY
