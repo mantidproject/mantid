@@ -32,7 +32,8 @@ function current_revision() {
 
 build_base=$HOME/mybuilds
 find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
-cd ../..
+# Move back to repository root
+cd ../../../../
 svn update
 svn update # do twice in case of network issue
 current_revision
