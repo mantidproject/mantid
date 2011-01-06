@@ -249,7 +249,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SumSpectra.h
 		inc/MantidAlgorithms/TofCorrection.h )
 
-set ( TEST_FILES #test/AddSampleLogTest.h # TODO uses WorkspaceCreationHelper.hh
+set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
 		 #test/AnyShapeAbsorptionTest.h # TODO uses WorkspaceCreationHelper.hh
 		 #test/ApplyTransmissionCorrectionTest.h # TODO uses WorkspaceCreationHelper.hh
@@ -378,8 +378,8 @@ include_directories ( inc )
 target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc )
+  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus )
+  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests AlgorithmsTest )
 endif ()

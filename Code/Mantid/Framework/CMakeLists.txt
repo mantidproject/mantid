@@ -92,7 +92,9 @@ add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
 
 # Unit test helper package -- Disabled for the moment
-#add_subdirectory (TestHelpers)
+if ( CXXTEST_FOUND )
+  add_subdirectory (TestHelpers)
+endif ()
 
 if ( MAKE_VATES )
   add_subdirectory (MDDataObjects)

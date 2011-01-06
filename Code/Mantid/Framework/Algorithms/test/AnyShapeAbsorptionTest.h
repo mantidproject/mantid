@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite
 {
