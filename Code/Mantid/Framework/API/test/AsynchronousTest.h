@@ -41,36 +41,36 @@ public:
 
 DECLARE_ALGORITHM(AsyncAlgorithm)
 
-class AsyncAlgorithmTest : public CxxTest::TestSuite
+class AsynchronousTest : public CxxTest::TestSuite
 {
 public: 
 
-    AsyncAlgorithmTest():
-      m_finishedObserver(*this,&AsyncAlgorithmTest::handleFinished),
+    AsynchronousTest():
+      m_finishedObserver(*this,&AsynchronousTest::handleFinished),
       finishedNotificationReseived(false),
-      m_startedObserver(*this,&AsyncAlgorithmTest::handleStarted),
+      m_startedObserver(*this,&AsynchronousTest::handleStarted),
       startedNotificationReseived(false),
-      m_errorObserver(*this,&AsyncAlgorithmTest::handleError),
+      m_errorObserver(*this,&AsynchronousTest::handleError),
       errorNotificationReseived(false),
-      m_progressObserver(*this,&AsyncAlgorithmTest::handleProgress),
+      m_progressObserver(*this,&AsynchronousTest::handleProgress),
       count(0)
     {}
   
-    Poco::NObserver<AsyncAlgorithmTest, Mantid::API::Algorithm::StartedNotification> m_startedObserver;
+    Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification> m_startedObserver;
     bool startedNotificationReseived;
     void handleStarted(const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification>& pNf)
     {
         startedNotificationReseived = true;
     }
 
-    Poco::NObserver<AsyncAlgorithmTest, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
+    Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
     bool finishedNotificationReseived;
     void handleFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
     {
         finishedNotificationReseived = true;
     }
 
-    Poco::NObserver<AsyncAlgorithmTest, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
+    Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
     bool errorNotificationReseived;
     void handleError(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf)
     {
@@ -78,7 +78,7 @@ public:
         errorNotificationReseived = true;
     }
 
-    Poco::NObserver<AsyncAlgorithmTest, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+    Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
     int count;
     void handleProgress(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
     {
