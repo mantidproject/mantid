@@ -8,8 +8,10 @@
 #include "MantidAlgorithms/ExtractMasking.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 using Mantid::Algorithms::ExtractMasking;
-using Mantid::API::AnalysisDataService;
 using Mantid::Kernel::Property;
 
 class ExtractMaskingTest : public CxxTest::TestSuite
@@ -118,7 +120,7 @@ private:
 	inputDet = inputWS->getDetector(i);
 	outputDet = outputWS->getDetector(i);
       }
-      catch(Exception::NotFoundError&)
+      catch(Mantid::Kernel::Exception::NotFoundError&)
       {
 	expectedValue = 1.0;
 	inputDet = IDetector_sptr();

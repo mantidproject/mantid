@@ -18,7 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-
+using Mantid::Geometry::IDetector_sptr;
 
 /*****************************************************************************************/
 /********** PLEASE NOTE! THIS TEST IS SHARED (copy/pasted) WITH DivideTest.h *************/

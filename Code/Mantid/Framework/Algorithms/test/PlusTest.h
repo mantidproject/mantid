@@ -17,6 +17,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
+using Mantid::MantidVecPtr;
 
 class PlusTest : public CxxTest::TestSuite
 {

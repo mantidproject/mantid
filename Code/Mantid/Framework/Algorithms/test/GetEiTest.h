@@ -13,6 +13,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::MantidVecPtr;
 
 class GetEiTest : public CxxTest::TestSuite
 {
@@ -40,8 +42,8 @@ public:
     
     TS_ASSERT_DELTA(ei, expected_ei, 1e-08);
     // and verify it has been store on the run object
-    Kernel::Property *ei_runprop = testWS->run().getProperty("Ei");
-    Kernel::PropertyWithValue<double> *ei_propvalue = dynamic_cast<Kernel::PropertyWithValue<double> *>(ei_runprop);
+    Property *ei_runprop = testWS->run().getProperty("Ei");
+    PropertyWithValue<double> *ei_propvalue = dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
     TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
 
     // T0 value
