@@ -42,7 +42,7 @@ class DetectorBank:
         def n_pixels(self):
             return self._n_pixels
 
-    def __init__(self, instr, det_type) :
+    def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
         self._names = {
           'uni' : det_type,
@@ -93,7 +93,7 @@ class DetectorBank:
         
         
         #this can be set to the name of a file with correction factor against wavelength
-        correction_file = ''
+        self.correction_file = ''
         #this corrections are set by the mask file
         self.z_corr = 0.0
         self.x_corr = 0.0 
@@ -356,7 +356,6 @@ class ISISInstrument(instrument.Instrument):
             else:
                 mantid.sendLogMessage("::SANS::setDetector: Detector not found")
                 mantid.sendLogMessage("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
-                
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True

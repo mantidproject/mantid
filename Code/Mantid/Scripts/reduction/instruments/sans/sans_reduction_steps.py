@@ -911,7 +911,10 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
-        sample_details = mtd[workspace].getSampleInfo()
+        wksp = mtd[workspace] 
+        if wksp.isGroup():
+            wksp = wksp[0]
+        sample_details = wksp.getSampleInfo()
 
         if self._shape is None:
             self.shape = sample_details.getGeometryFlag()

@@ -58,11 +58,11 @@ class LoadRun(ReductionStep):
             else:
                 raise RuntimeError, "ISISReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         
-        if os.path.splitext(self._data_file)[1].lower().startswith('.n'):
-            alg = LoadNexus(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
-        else:
+        if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
             alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
             LoadSampleDetailsFromRaw(workspace, self._data_file)
+        else:
+            alg = Load(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
     
         pWorksp = mantid[workspace]
     
@@ -70,7 +70,6 @@ class LoadRun(ReductionStep):
             #get the number of periods in a group using the fact that each period has a different name
             numPeriods = len(pWorksp.getNames())
             workspace = self._leaveSinglePeriod(pWorksp, self._period)
-            pWorksp = mantid[workspace]
         else :
             #if the work space isn't a group there is only one period
             numPeriods = 1
@@ -721,6 +720,10 @@ class LoadSample(LoadRun):
 
         self.uncropped  = self.SCATTER_SAMPLE.getName()
         p_run_ws = mantid[self.uncropped]
+        
+        if p_run_ws.isGroup():
+            p_run_ws = p_run_ws[0]
+    
         try:
             run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
         except RuntimeError:
