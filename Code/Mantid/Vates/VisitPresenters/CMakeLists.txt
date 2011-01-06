@@ -1,5 +1,7 @@
 # This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required ( VERSION 2.6 )
+include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
+include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 
 project ( VisitPresenters )
 
@@ -23,6 +25,11 @@ test/RebinningCutterTest.h
 test/RebinningXMLGeneratorTest.h
 )
 
+include_directories (${VTK_INCLUDE_DIRS})
+include_directories (inc)
+
+link_directories ( ${VTK_LIBRARY_DIRS} )
+
 # For Windows:
 add_definitions ( -DIN_MANTID_VISITPRESENTERS )
 # Add the target for this directory
@@ -32,10 +39,12 @@ set_target_properties ( VisitPresenters PROPERTIES OUTPUT_NAME MantidVisitPresen
 # Add to the 'Framework' group in VS
 set_property ( TARGET VisitPresenters PROPERTY FOLDER "Framework" )
 
-include_directories (${VISIT_INCLUDE_DIR}/vtk/include/vtk-5.0)
-include_directories (inc)
+target_link_libraries (VisitPresenters 
+${MANTID_SUBPROJECT_LIBS} 
+vtkCommon 
+vtkFiltering
+)
 
-target_link_libraries (VisitPresenters ${MANTID_SUBPROJECT_LIBS} ${VISIT_ROOT}/lib/libvtkCommon${CMAKE_SHARED_LIBRARY_SUFFIX} ${VISIT_ROOT}/lib/libvtkFiltering${CMAKE_SHARED_LIBRARY_SUFFIX}) #TODO: Not the correct way to access shared libraries
 # Create test file projects
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( VisitPresentersTest ${TEST_FILES} )
