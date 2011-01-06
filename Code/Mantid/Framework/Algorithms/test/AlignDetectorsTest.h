@@ -98,7 +98,7 @@ public:
     loader.setPropertyValue("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", inputWS);
-//    loader.setPropertyValue("InstrumentFilename", "../../../Instrument/CNCS_Definition.xml");
+//    loader.setPropertyValue("InstrumentFilename", "CNCS_Definition.xml");
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
   }
