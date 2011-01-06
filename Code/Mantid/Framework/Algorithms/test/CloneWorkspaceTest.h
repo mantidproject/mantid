@@ -7,7 +7,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;

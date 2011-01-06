@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"

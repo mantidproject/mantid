@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidAlgorithms/Rebin.h"
 

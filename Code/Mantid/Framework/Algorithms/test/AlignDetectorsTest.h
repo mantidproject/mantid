@@ -145,9 +145,6 @@ public:
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     TS_ASSERT( WS ); //workspace is loaded
-    size_t start_blocksize = WS->blocksize();
-    size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventList(0).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );

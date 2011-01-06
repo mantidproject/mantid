@@ -2,7 +2,7 @@
 #define CONVERTFROMDISTRIBUTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/ConvertFromDistribution.h"
 #include "MantidAPI/AnalysisDataService.h"

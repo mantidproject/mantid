@@ -10,8 +10,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAlgorithms/AlignDetectors.h"
-#include "WorkspaceCreationHelper.hh"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Poco/File.h>
 
 using namespace Mantid;

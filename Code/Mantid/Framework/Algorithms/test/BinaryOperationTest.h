@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -12,8 +12,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation
 {
@@ -40,11 +41,11 @@ public:
   
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                              const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
+  void performBinaryOperation(const Mantid::MantidVec&, const Mantid::MantidVec& , const Mantid::MantidVec& ,
+                              const Mantid::MantidVec&, const Mantid::MantidVec& , Mantid::MantidVec&, Mantid::MantidVec&)
   {}
-  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                              const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
+  void performBinaryOperation(const Mantid::MantidVec& , const Mantid::MantidVec&, const Mantid::MantidVec&,
+                              const double& , const double&, Mantid::MantidVec& , Mantid::MantidVec& )
   {}
 };
 
@@ -94,6 +95,7 @@ public:
 
   void testcheckSizeCompatibility2D2D()
   {
+    
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
@@ -146,7 +148,7 @@ public:
       {
 	det = output->getDetector(i);
       }
-      catch(Kernel::Exception::NotFoundError&)
+      catch(Mantid::Kernel::Exception::NotFoundError&)
       {
       }
       

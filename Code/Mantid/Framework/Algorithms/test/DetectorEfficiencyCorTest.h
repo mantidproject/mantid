@@ -15,7 +15,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

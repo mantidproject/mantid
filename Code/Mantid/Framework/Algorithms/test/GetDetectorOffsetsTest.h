@@ -2,7 +2,7 @@
 #define GETDETECTOROFFSETSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/AnalysisDataService.h"

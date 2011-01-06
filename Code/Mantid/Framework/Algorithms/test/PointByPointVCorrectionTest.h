@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/PointByPointVCorrection.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class PointByPointVCorrectionTest : public CxxTest::TestSuite
 {

@@ -14,7 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include "MantidKernel/Timer.h"
 

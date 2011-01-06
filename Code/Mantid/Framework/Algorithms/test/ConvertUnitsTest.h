@@ -2,7 +2,7 @@
 #define CONVERTUNITSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidKernel/PhysicalConstants.h"

@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/ExtractMasking.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractMasking;
 using Mantid::API::AnalysisDataService;

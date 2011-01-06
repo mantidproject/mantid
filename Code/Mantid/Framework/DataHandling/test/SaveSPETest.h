@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/UnitFactory.h"
-#include "../../Algorithms/test/WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"

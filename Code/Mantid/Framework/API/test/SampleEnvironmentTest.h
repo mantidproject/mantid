@@ -5,7 +5,7 @@
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::API::SampleEnvironment;
 using namespace Mantid::PhysicalConstants;

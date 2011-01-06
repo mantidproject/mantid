@@ -382,9 +382,13 @@ Command(dest_dir+'/setup.py','PythonAPI/setup.py',Copy("$TARGET","$SOURCE"))
 skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest) and not env.GetOption('clean'):
 	print 'Building Tests.  Specify "skiptest=1" to skip the tests'
+	# Test helpers
+	ret = SConscript(['TestHelpers/SConscript'])
+	env.Install(dest_dir, ret['shared'])
 	# tests
 	hudsonbuild=ARGUMENTS.get('xunitoutput',0)
 	if not int(hudsonbuild):
+	        print 'Using MantidPrinter cxxtest output'
 		ret = SConscript(['Build/Tests/SConscript'])
 	else:
 		print 'Using xUnit Output'

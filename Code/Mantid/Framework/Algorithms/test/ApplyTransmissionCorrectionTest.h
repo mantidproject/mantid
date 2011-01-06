@@ -5,12 +5,13 @@
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/SolidAngleCorrection.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 class ApplyTransmissionCorrectionTest : public CxxTest::TestSuite
 {
@@ -71,8 +72,8 @@ public:
   {
     Mantid::Algorithms::ApplyTransmissionCorrection correction;
     const std::string transWS("trans");
-    DataObjects::Workspace2D_sptr trans_ws = WorkspaceCreationHelper::Create2DWorkspace154(1,1,1);
-    trans_ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
+    Workspace2D_sptr trans_ws = WorkspaceCreationHelper::Create2DWorkspace154(1,1,1);
+    trans_ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     trans_ws->dataY(0)[0] = 0.6;
     trans_ws->dataE(0)[0] = 0.02;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(transWS, trans_ws);

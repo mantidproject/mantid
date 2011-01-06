@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidDataHandling/LoadRaw3.h"

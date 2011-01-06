@@ -7,7 +7,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/SampleEnvironment.h"
 
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

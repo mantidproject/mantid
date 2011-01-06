@@ -8,7 +8,7 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/ConfigService.h"
-#include "ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <iterator>
 
 using namespace Mantid::Geometry;

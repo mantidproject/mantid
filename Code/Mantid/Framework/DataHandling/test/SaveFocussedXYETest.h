@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveFocusedXYE.h"
-#include "../../Algorithms/test/WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/UnitFactory.h"

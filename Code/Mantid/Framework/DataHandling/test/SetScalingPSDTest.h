@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "../../Algorithms/test/WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>

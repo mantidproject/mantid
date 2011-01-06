@@ -2,7 +2,7 @@
 #define MASKBINSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"

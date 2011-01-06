@@ -5,7 +5,7 @@
 
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Geometry;
 

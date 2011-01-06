@@ -6,7 +6,7 @@
 //--------------------
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/RebinToWorkspace.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 
 class RebinToWorkspaceTest : public CxxTest::TestSuite

@@ -7,7 +7,7 @@
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 
 // other headers
-#include "ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IDetector.h"

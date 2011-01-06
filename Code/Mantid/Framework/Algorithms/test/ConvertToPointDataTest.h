@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/ConvertToPointData.h"
 #include <cxxtest/TestSuite.h>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::Algorithms::ConvertToPointData;

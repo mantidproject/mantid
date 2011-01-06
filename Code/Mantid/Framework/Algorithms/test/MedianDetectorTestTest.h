@@ -2,7 +2,7 @@
 #define WBVMEDIANTESTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidKernel/UnitFactory.h"

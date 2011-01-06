@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "WorkspaceCreationHelper.hh"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
 #include "MantidAlgorithms/MultipleScatteringAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

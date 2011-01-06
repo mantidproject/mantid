@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class HRPDSlabCanAbsorptionTest : public CxxTest::TestSuite
 {

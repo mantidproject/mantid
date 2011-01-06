@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class CylinderAbsorptionTest : public CxxTest::TestSuite
 {

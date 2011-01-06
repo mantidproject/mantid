@@ -6,8 +6,8 @@
 #include "MantidAPI/SampleEnvironment.h"
 #include <cxxtest/TestSuite.h>
 
-#include "WorkspaceCreationHelper.hh"
-#include "../../Geometry/test/ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::MonteCarloAbsorption;
 using Mantid::API::SampleEnvironment;

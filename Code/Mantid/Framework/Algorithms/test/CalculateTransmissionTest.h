@@ -9,7 +9,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidCurveFitting/Linear.h"
-#include "SANSInstrumentCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 
@@ -91,11 +91,11 @@ public:
 
     inputWS = "sampletransdata";
 
-    DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
+    Mantid::DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, ws);
 
     const std::string emptyWS("directbeam_ws");
-    DataObjects::Workspace2D_sptr empty_ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(emptyWS);
+    Mantid::DataObjects::Workspace2D_sptr empty_ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(emptyWS);
 
     // According to this detector geometry, Monitor #1 is spectrum 0, and Monitor #2 is spectrum 1.
     empty_ws->dataY(0)[0] = 10.0;

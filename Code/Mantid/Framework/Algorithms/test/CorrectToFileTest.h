@@ -8,7 +8,7 @@
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "Poco/Path.h"
 
 class CorrectToFileTest : public CxxTest::TestSuite

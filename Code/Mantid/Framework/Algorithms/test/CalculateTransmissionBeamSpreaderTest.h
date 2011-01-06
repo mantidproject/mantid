@@ -9,9 +9,10 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidCurveFitting/Linear.h"
-#include "SANSInstrumentCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class CalculateTransmissionBeamSpreaderTest : public CxxTest::TestSuite
 {
@@ -44,28 +45,28 @@ public:
     // By default UDET=2 for the monitor, which is spectrum 1
     // Sample spreader fake. Created with Y=2, scale it to Y=10
     const std::string sample_spreader("sample_spreader_ws");
-    DataObjects::Workspace2D_sptr sample_spreaderWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(sample_spreader);
+    Workspace2D_sptr sample_spreaderWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(sample_spreader);
     sample_spreaderWS *= 5.0;
     sample_spreaderWS->dataY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(sample_spreader, sample_spreaderWS);
 
     // Sample scattering fake. Scale it to Y=8
     const std::string sample_scatt("sample_scatt_ws");
-    DataObjects::Workspace2D_sptr sample_scattWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(sample_scatt);
+    Workspace2D_sptr sample_scattWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(sample_scatt);
     sample_scattWS *= 4.0;
     sample_scattWS->dataY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(sample_scatt, sample_scattWS);
 
     // Empty spreader fake. Scale it to Y=6
     const std::string empty_spreader("empty_spreader_ws");
-    DataObjects::Workspace2D_sptr empty_spreaderWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(empty_spreader);
+    Workspace2D_sptr empty_spreaderWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(empty_spreader);
     empty_spreaderWS *= 3.0;
     empty_spreaderWS->dataY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(empty_spreader, empty_spreaderWS);
 
     // Empty scattering fake.
     const std::string empty_scatt("empty_scatt_ws");
-    DataObjects::Workspace2D_sptr empty_scattWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(empty_scatt);
+    Workspace2D_sptr empty_scattWS = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(empty_scatt);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(empty_scatt, empty_scattWS);
     empty_scattWS->dataY(1)[0] = 1.0;
 

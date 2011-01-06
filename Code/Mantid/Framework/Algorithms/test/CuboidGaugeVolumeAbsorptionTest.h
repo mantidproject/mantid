@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class CuboidGaugeVolumeAbsorptionTest : public CxxTest::TestSuite
 {

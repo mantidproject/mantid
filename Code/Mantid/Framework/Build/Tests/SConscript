@@ -14,6 +14,7 @@ cppPath = env['CPPPATH']
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
 myenv.Append(CPPPATH=['../../../../Third_Party/src/cxxtest'])
+myenv.Append(CPPPATH=['../../TestHelpers/inc'])
 myenv.Append(LIBPATH=libDirList)
 
 # Add the location of the gmock library
@@ -31,7 +32,7 @@ elif dist == 'maverick':
 elif dist == 'lucid':
     myenv.Append(LIBPATH=[third_party_path+'ubuntu-10.04'])
 
-myenv.Append(LIBS=libList+['gmock'])
+myenv.Append(LIBS=libList+['gmock', 'MantidTestHelpers'])
 
 #GET LIST OF TESTS
 path = '../../'

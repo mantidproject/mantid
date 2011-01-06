@@ -8,13 +8,14 @@
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include "boost/shared_ptr.hpp"
-#include "TestChannel.hh"
+#include "MantidTestHelpers/TestChannel.h"
 #include <string>
 #include <fstream>
 
 #include <Poco/NObserver.h>
 
 using namespace Mantid::Kernel;
+using Mantid::TestHelpers::TestChannel;
 
 class ConfigServiceTest : public CxxTest::TestSuite
 {

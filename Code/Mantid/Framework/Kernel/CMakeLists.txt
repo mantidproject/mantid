@@ -144,7 +144,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/BinFinderTest.h
 		 test/BoundedValidatorTest.h
 		 test/CacheTest.h
-		 #test/ConfigServiceTest.h # TODO uses TestChannel.hh
+		 test/ConfigServiceTest.h
 		 test/DateAndTimeTest.h
 		 test/DateValidatorTest.h
 		 test/DirectoryValidatorTest.h
@@ -152,7 +152,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/EnvironmentHistoryTest.h
 		 test/FacilitiesTest.h
 		 test/FileValidatorTest.h
-		 #test/FilterChannelTest.h # TODO uses TestChannel.hh
+		 test/FilterChannelTest.h
 		 test/InterpolationTest.h
 		 test/ListValidatorTest.h
 		 test/LogFilterTest.h

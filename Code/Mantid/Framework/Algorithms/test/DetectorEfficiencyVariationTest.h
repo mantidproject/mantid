@@ -2,7 +2,7 @@
 #define DETECTOREFFICIENCYVARIATION_H_
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidKernel/UnitFactory.h"

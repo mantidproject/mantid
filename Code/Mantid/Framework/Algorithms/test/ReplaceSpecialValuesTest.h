@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "WorkspaceCreationHelper.hh"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <limits>

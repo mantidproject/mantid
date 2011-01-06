@@ -6,7 +6,7 @@
 #include "MantidAlgorithms/SolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "SANSInstrumentCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,9 +27,9 @@ public:
     // Set up the X bin for the monitor channels
     for ( int i=0; i<SANSInstrumentCreationHelper::nMonitors; i++ )
     {
-      MantidVec& X = ws->dataX(i);
-      MantidVec& Y = ws->dataY(i);
-      MantidVec& E = ws->dataE(i);
+      Mantid::MantidVec& X = ws->dataX(i);
+      Mantid::MantidVec& Y = ws->dataY(i);
+      Mantid::MantidVec& E = ws->dataE(i);
       X[0] = 1;
       X[1] = 2;
     }
@@ -39,9 +39,9 @@ public:
       for ( int iy=0; iy<SANSInstrumentCreationHelper::nBins; iy++)
       {
         int i = ix*SANSInstrumentCreationHelper::nBins+iy+SANSInstrumentCreationHelper::nMonitors;
-        MantidVec& X = ws->dataX(i);
-        MantidVec& Y = ws->dataY(i);
-        MantidVec& E = ws->dataE(i);
+        Mantid::MantidVec& X = ws->dataX(i);
+        Mantid::MantidVec& Y = ws->dataY(i);
+        Mantid::MantidVec& E = ws->dataE(i);
         X[0] = 1;
         X[1] = 2;
         Y[0] = 2.0;
@@ -50,7 +50,7 @@ public:
       }
     }
     // Change one of the bins so that it will be excluded for having a high signal
-    MantidVec& Y = ws->dataY(SANSInstrumentCreationHelper::nMonitors+5);
+    Mantid::MantidVec& Y = ws->dataY(SANSInstrumentCreationHelper::nMonitors+5);
     Y[0] = 202.0;
 
   }

@@ -9,7 +9,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Quat.h"
-#include "ComponentCreationHelpers.hh"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 

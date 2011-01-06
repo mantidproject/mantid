@@ -10,11 +10,12 @@
 #include "Poco/LoggingFactory.h"
 #include "Poco/LoggingRegistry.h"
 #include "boost/shared_ptr.hpp"
-#include "TestChannel.hh"
+#include "MantidTestHelpers/TestChannel.h"
 #include <map>
 #include <string>
 
 using namespace Mantid::Kernel;
+using Mantid::TestHelpers::TestChannel;
 
 class FilterChannelTest : public CxxTest::TestSuite
 {
