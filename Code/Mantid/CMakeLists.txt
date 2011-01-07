@@ -48,5 +48,5 @@ set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 
 if ( MAKE_VATES )
-#  add_subdirectory ( Vates )
+  add_subdirectory ( Vates )
 endif ( MAKE_VATES )
