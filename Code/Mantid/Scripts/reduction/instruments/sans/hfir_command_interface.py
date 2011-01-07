@@ -8,10 +8,10 @@ import hfir_instrument
 
 ## List of user commands ######################################################
 def DirectBeamCenter(datafile):
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile))
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius))
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1))
 
 def SetBeamCenter(x,y):
     ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))

@@ -62,7 +62,7 @@ void FindCenterOfMassPosition2::exec()
   // Initial center location
   double center_x = getProperty("CenterX");
   double center_y = getProperty("CenterY");
-  double tolerance = getProperty("Tolerance");
+  const double tolerance = getProperty("Tolerance");
   // Iteration cutoff
   int max_iteration = 200;
   // Radius of the beam area, in pixels

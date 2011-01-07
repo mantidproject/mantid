@@ -172,6 +172,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( center.setPropertyValue("Output",outputWS) )
     center.setPropertyValue("CenterX","0");
     center.setPropertyValue("CenterY","0");
+    center.setPropertyValue("Tolerance", "0.0012875");
 
     TS_ASSERT_THROWS_NOTHING( center.execute() )
     TS_ASSERT( center.isExecuted() )
@@ -187,15 +188,19 @@ public:
     TableRow row = table->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"X (m)");
     // NOTE: Version 1 (from original IGOR HFIR code) computes everything in pixels, where
-    // the counts in a pixel is effectively put at the center of the pixel. In the BIOSANS gemotry
+    // the counts in a pixel is effectively put at the center of the pixel. In the BIOSANS geometry
     // description, the pixels are offset by half a pixel so that 0,0 is right in the middle of the detector.
     // This gives us an offset of half a pixel when transforming from pixel coordinate to real space.
-    // Accept the output to within half a pixel.
-    TS_ASSERT_DELTA(row.Double(1),(16.6038-96.0+0.5)*0.00515,0.00515/2.0);
+
+    // NOTE: The HFIR algorithm masked one pixel around the edge of the detector, so the
+    // answer is not exactly the same. It was checked that the correct output comes out
+    // of the algorithm if the one-pixel mask is applied. See python unit tests.
+    // For this test we simply compare to the correct output _without_ masking.
+    TS_ASSERT_DELTA(row.Double(1), -0.40658, 0.0001);
 
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"Y (m)");
-    TS_ASSERT_DELTA(row.Double(1),(96.771-96.0+0.5)*0.00515,0.00515/2.0);
+    TS_ASSERT_DELTA(row.Double(1), 0.0090835, 0.0001);
     
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }

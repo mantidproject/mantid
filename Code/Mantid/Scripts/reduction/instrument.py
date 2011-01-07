@@ -57,6 +57,13 @@ class Instrument(object):
         """
         return self._NAME
     
+    def get_default_beam_center(self):
+        """
+            Returns the default beam center position, or the pixel location
+            of real-space coordinates (0,0).
+        """
+        return [0, 0]
+
     def view(self, workspace_name = None):
         """
             Opens Mantidplot's InstrumentView displaying the current instrument. This

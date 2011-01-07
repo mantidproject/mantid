@@ -63,7 +63,7 @@ class SANSReducer(Reducer):
         super(SANSReducer, self).__init__()
         
         # Default beam finder
-        self._beam_finder = sans_reduction_steps.BaseBeamFinder(0,0)
+        self._beam_finder = sans_reduction_steps.BaseBeamFinder()
         
         # Default normalization
         self._normalizer = sans_reduction_steps.Normalize(SANSReducer.NORMALIZATION_TIME)
@@ -74,6 +74,16 @@ class SANSReducer(Reducer):
         # Default mask object
         self._mask = sans_reduction_steps.Mask()
     
+    def set_instrument(self, configuration):
+        """
+            Sets the instrument and put in the default beam center (usually the
+            center of the detector)
+            @param configuration: instrument object
+        """
+        super(SANSReducer, self).set_instrument(configuration)
+        center = self.instrument.get_default_beam_center()
+        self._beam_finder = sans_reduction_steps.BaseBeamFinder(center[0], center[1])
+
     def set_normalizer(self, option):
         """
             Set normalization option (time or monitor)

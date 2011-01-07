@@ -16,17 +16,37 @@ class BaseBeamFinder(ReductionStep):
         and the algorithm for calculates it using the beam's
         displacement under gravity
     """
-    def __init__(self, beam_center_x=0.0, beam_center_y=0.0):
+    def __init__(self, beam_center_x=None, beam_center_y=None):
         super(BaseBeamFinder, self).__init__()
         self._beam_center_x = beam_center_x
         self._beam_center_y = beam_center_y
         self._beam_radius = None
         
+        # Define detector edges to be be masked
+        self._x_mask_low = 0
+        self._x_mask_high = 0
+        self._y_mask_low = 0
+        self._y_mask_high = 0 
+        
+    def set_masked_edges(self, x_low=0, x_high=0, y_low=0, y_high=0):
+        """
+            Sets the number of pixels to mask on the edges before
+            doing the center of mass computation
+        """
+        self._x_mask_low = x_low
+        self._x_mask_high = x_high
+        self._y_mask_low = y_low
+        self._y_mask_high = y_high
+        return self
+        
     def get_beam_center(self):
+        """
+            Returns the beam center
+        """
         return [self._beam_center_x, self._beam_center_y]
     
     def execute(self, reducer, workspace=None):
-        return "Beam Center set at: %g %g" % (self._beam_center_x, self._beam_center_y)
+        return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
         
     def _find_beam(self, direct_beam, reducer, workspace=None):
         """
@@ -44,29 +64,46 @@ class BaseBeamFinder(ReductionStep):
                     workspace = k
                     
         reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
-        
+
         # Integrate over all wavelength bins so that we process a single detector image
         Integration(workspace, workspace+'_int')
+
+        # Mask edges of the detector
+        mantid.sendLogMessage("Masking beam data: %g %g %g %g" % (self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high))  
+        mask = Mask()
+        mask.mask_edges(self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high)
+        mask.execute(reducer, workspace+'_int')
+                        
+        # NOTE: Version 1 of this algorithm computer the center in pixel coordinates (as in the HFIR IGOR code)  
+        #
+        # beam_center = FindCenterOfMassPosition(workspace+'_int',
+        #                                       Output = None,
+        #                                       NPixelX=reducer.instrument.nx_pixels,
+        #                                       NPixelY=reducer.instrument.ny_pixels,
+        #                                       DirectBeam = direct_beam,
+        #                                       BeamRadius = self._beam_radius)
+        
+        # We must convert the beam radius from pixels to meters
+        if self._beam_radius is not None:
+            self._beam_radius *= reducer.instrument.pixel_size_x
         beam_center = FindCenterOfMassPosition(workspace+'_int',
                                                Output = None,
-                                               NPixelX=reducer.instrument.nx_pixels,
-                                               NPixelY=reducer.instrument.ny_pixels,
                                                DirectBeam = direct_beam,
                                                BeamRadius = self._beam_radius)
         ctr_str = beam_center.getPropertyValue("CenterOfMass")
         ctr = ctr_str.split(',')
+        mantid.sendLogMessage("Beam coordinate in real-space: %s" % str(ctr))  
         
-        self._beam_center_x = float(ctr[0])
-        self._beam_center_y = float(ctr[1])
-        
+        self._beam_center_x = float(ctr[0])/reducer.instrument.pixel_size_x*1000.0 + reducer.instrument.nx_pixels/2.0-0.5
+        self._beam_center_y = float(ctr[1])/reducer.instrument.pixel_size_y*1000.0 + reducer.instrument.ny_pixels/2.0-0.5
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
         # Note: the position of the detector in Z is now part of the load
-        MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
-                                RelativePosition="1")        
-        
+        if workspace is not "beam_center":
+            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
+                                    X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
+                                    Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                    RelativePosition="1")        
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
 
@@ -75,9 +112,14 @@ class ScatteringBeamCenter(BaseBeamFinder):
         Find the beam center using the scattering data
     """  
     def __init__(self, datafile, beam_radius=3):
+        """
+            @param datafile: beam center data file
+            @param beam_radius: beam radius in pixels
+        """
         super(ScatteringBeamCenter, self).__init__()
         ## Location of the data file used to find the beam center
         self._datafile = datafile
+        ## Beam radius in pixels
         self._beam_radius = beam_radius
         
     def execute(self, reducer, workspace=None):
@@ -420,10 +462,14 @@ class LoadRun(ReductionStep):
         
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
-        MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
-                                RelativePosition="1")
+        if reducer.get_beam_center()[0] is not None and reducer.get_beam_center()[1] is not None:
+            #TODO: compute the difference to the current center position so that we don't mess it up if we apply it twice!
+            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
+                                    X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
+                                    Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                    RelativePosition="1")
+        else:
+            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
         
         return "Data file loaded: %s" % (workspace)
     
@@ -477,6 +523,8 @@ class WeightedAzimuthalAverage(ReductionStep):
     def execute(self, reducer, workspace):
         # Q range                        
         beam_ctr = reducer._beam_finder.get_beam_center()
+        if beam_ctr[0] is None or beam_ctr[1] is None:
+            raise RuntimeError, "WeightedAzimuthalAverage could not proceed: beam center not set"
         if self._binning is None:
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
             x = mtd[workspace].dataX(1)
@@ -682,26 +730,26 @@ class Mask(ReductionStep):
         if instrument is None:
             instrument = reducer.instrument
         # Get a list of detector pixels to mask
-        if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
-            masked_pixels = instrument.get_masked_pixels(self._nx_low,
-                                                             self._nx_high,
-                                                             self._ny_low,
-                                                             self._ny_high)
-            # Transform the list of pixels into a list of Mantid detector IDs
-            masked_detectors = instrument.get_detector_from_pixel(masked_pixels)
-            
-            # Mask the pixels by passing the list of IDs
-            MaskDetectors(workspace, DetectorList = masked_detectors)
+        if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:            
+            self.masked_pixels.extend(instrument.get_masked_pixels(self._nx_low,
+                                                                   self._nx_high,
+                                                                   self._ny_low,
+                                                                   self._ny_high))
 
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
             
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
+            # Transform the list of pixels into a list of Mantid detector IDs
             masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels)
+            # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, DetectorList = masked_detectors)
             
-        return "Mask applied"
+        masked_detectors = GetMaskedDetectors(workspace)
+        mantid.sendLogMessage("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList"))))  
+            
+        return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList")))
 
     def view_mask(self):
         """

@@ -36,6 +36,13 @@ class HFIRSANS(Instrument):
         """
         self.wavelength = wavelength
         self.wavelength_spread = spread
+        
+    def get_default_beam_center(self):
+        """
+            Returns the default beam center position, or the pixel location
+            of real-space coordinates (0,0).
+        """
+        return [self.nx_pixels/2.0, self.ny_pixels/2.0]
 
     def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
         """
