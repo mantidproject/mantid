@@ -15,6 +15,7 @@ svnlog.close()
 
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert --depth=files ../", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../Instrument", shell=True)
+sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../Scripts", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../TestingTools", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Third_Party", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../../Test", shell=True)
