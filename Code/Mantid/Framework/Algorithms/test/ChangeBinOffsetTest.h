@@ -191,11 +191,25 @@ public:
     EventWorkspace_sptr WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(WSO);
 
-    TS_ASSERT_DIFFERS(WSI->getEventList(0).getEvents()[0].tof(),
-        WSO->getEventList(0).getEvents()[0].tof());
+    TS_ASSERT_DELTA(WSI->getEventList(0).getEvents()[0].tof()+100,
+        WSO->getEventList(0).getEvents()[0].tof(),0.001);
+    TS_ASSERT_DELTA(WSI->getEventList(0).dataX()[1]+100.,
+        WSO->getEventList(0).dataX()[1],0.001);
 
-    TS_ASSERT_DIFFERS(WSI->getEventList(0).dataX()[1],
-        WSO->getEventList(0).dataX()[1]);
+    alg.setPropertyValue("IndexMin", "2");
+    alg.setPropertyValue("IndexMax", "3");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+    WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT(WSO);
+    TS_ASSERT_DELTA(WSI->getEventList(0).getEvents()[0].tof(),
+        WSO->getEventList(0).getEvents()[0].tof(),0.001); //should be unchanged
+    TS_ASSERT_DELTA(WSI->getEventList(0).dataX()[1],
+        WSO->getEventList(0).dataX()[1],0.001);//should be unchanged
+    TS_ASSERT_DELTA(WSI->getEventList(2).getEvents()[0].tof()+100,
+        WSO->getEventList(2).getEvents()[0].tof(),0.001);//should change
+    TS_ASSERT_DELTA(WSI->getEventList(2).dataX()[1]+100.,
+        WSO->getEventList(2).dataX()[1],0.001);//should change
 	}
 
 private:
