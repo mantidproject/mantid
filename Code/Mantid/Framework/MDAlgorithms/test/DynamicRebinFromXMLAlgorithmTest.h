@@ -57,7 +57,7 @@ private:
 
     Load_MDWorkspace loader;
     loader.initialize();
-    loader.setPropertyValue("inFilename","../../../../Test/VATES/fe_demo_bin.sqw");
+    loader.setPropertyValue("inFilename","fe_demo_bin.sqw");
     std::string targetWorkspaceName = "Input";
     loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
     loader.execute();
@@ -110,7 +110,7 @@ private:
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>../../../../Test/VATES/fe_demo_bin.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>fe_demo_bin.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
@@ -263,7 +263,7 @@ public:
   void testGetWorkspaceLocation()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "../../../../Test/VATES/fe_demo_bin.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
+    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "fe_demo_bin.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
   }
 
   void testGetImplicitFunction()

@@ -18,7 +18,7 @@ public:
 void testConstruction()
 {
   MultiDimensionalDbPresenter mdPresenter;
-  mdPresenter.execute("../../../../../Test/VATES/fe_demo_bin.sqw");
+  mdPresenter.execute("fe_demo_bin.sqw");
 
   vtkDataArray* data = mdPresenter.getScalarData(1);
   vtkDataSet* visData = mdPresenter.getMesh();

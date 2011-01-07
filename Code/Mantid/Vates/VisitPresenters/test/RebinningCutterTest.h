@@ -90,7 +90,7 @@ std::string getComplexXMLInstructions()
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>../../../../../Test/VATES/fe_demo.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>fe_demo.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
@@ -394,7 +394,7 @@ void testFindWorkspaceLocation()
 
   std::string location = findExistingWorkspaceLocationFromXML(dataset, id.c_str());
 
-  TSM_ASSERT_EQUALS("The workspace location is differrent from the xml value.", "../../../../../Test/VATES/fe_demo.sqw", location);
+  TSM_ASSERT_EQUALS("The workspace location is differrent from the xml value.", "fe_demo.sqw", location);
 }
 
 void testFindWorkspaceNameThrows()
