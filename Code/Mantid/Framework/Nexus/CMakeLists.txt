@@ -53,7 +53,7 @@ set ( TEST_FILES test/LoadInstrumentFromSNSNexusTest.h
 		 test/LoadMuonNexusTest.h
 		 test/LoadNexusMonitorsTest.h
 		 test/LoadNexusProcessedTest.h
-		 test/LoadNexusTest.h
+		 test/LoadNeXusTest.h
 		 test/LoadRSaveNLoadNcspTest.h
 		 test/LoadSNSEventNexusTest.h
 		 #test/LoadSNSNexusTest.h # TODO has no active tests in it
