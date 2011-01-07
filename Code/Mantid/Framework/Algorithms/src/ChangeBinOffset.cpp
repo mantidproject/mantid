@@ -187,13 +187,32 @@ namespace Mantid
       const int numberOfSpectra = inputWS->getNumberHistograms();
 
       m_progress = new API::Progress(this, 0.0, 1.0, numberOfSpectra);
+      int wi_min = 0;
+      int wi_max = numberOfSpectra-1;
+      //check if workspace indexes have been set
+      int tempwi_min = getProperty("IndexMin");
+      int tempwi_max = getProperty("IndexMax");
+      if ( tempwi_max != Mantid::EMPTY_INT() ) 
+      {
+        //check wimin<=tempwi_min<=tempwi_max<=wi_max
+        if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
+        {
+          wi_min = tempwi_min;
+          wi_max = tempwi_max;
+        }
+        else
+        {
+          g_log.error("Invalid Workspace Index min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
+      }
 
       PARALLEL_FOR1(outputWS)
       for (int i=0; i < numberOfSpectra; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
-        outputWS->getEventList(i).addTof(offset);
+		    if ((i >= wi_min) && (i <= wi_max)) outputWS->getEventList(i).addTof(offset);
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
       }
