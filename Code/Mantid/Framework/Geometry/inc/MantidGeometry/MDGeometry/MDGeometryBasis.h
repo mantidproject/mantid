@@ -4,15 +4,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include <string>
-#include <map>
-#include <boost/unordered_set.hpp>
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/DllExport.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
+#include <vector>
+#include <string>
+#include <map>
+#include <boost/unordered_set.hpp>
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  

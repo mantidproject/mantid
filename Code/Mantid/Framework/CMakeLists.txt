@@ -79,7 +79,11 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
-# TODO: add_subdirectory (MatlabAPI)
+
+find_package ( Matlab )
+if( MATLAB_FOUND )
+  add_subdirectory (MatlabAPI)
+endif ()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
@@ -91,7 +95,7 @@ add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
 
-# Unit test helper package -- Disabled for the moment
+# Unit test helper package 
 if ( CXXTEST_FOUND )
   add_subdirectory (TestHelpers)
 endif ()
