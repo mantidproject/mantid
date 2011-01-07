@@ -15,7 +15,7 @@ include_directories ( inc )
 add_definitions ( -DIN_MANTID_TESTHELPERS )
 
 # Add the target for this directory
-add_library ( TestHelpers ${SRC_FILES} ${INC_FILES})
+add_library ( TestHelpers EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( TestHelpers PROPERTIES OUTPUT_NAME MantidTestHelpers )
 
