@@ -15,12 +15,12 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class SaveCanSAS1DTest : public CxxTest::TestSuite
+class SaveCanSAS1dTest : public CxxTest::TestSuite
 {
 public:
 
   //set up the workspace that will be loaded
-  SaveCanSAS1DTest() : m_workspace1("SaveCanSAS1DTest_in1"),
+  SaveCanSAS1dTest() : m_workspace1("SaveCanSAS1DTest_in1"),
     m_workspace2("SaveCanSAS1DTest_in2"),
     m_filename("./savecansas1d.xml")
 
