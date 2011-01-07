@@ -152,10 +152,10 @@ class TreeItemSuite(object):
             
     #-----------------------------------------------------------------------------------            
     def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked][self.suite.selected] 
+        return [Qt.Unchecked, Qt.Checked][self.suite.get_selected()] 
     
     def set_checked(self, value):
-        self.suite.selected = value
+        self.suite.set_selected( value )
 
     #-----------------------------------------------------------------------------------            
     def data(self, column):
@@ -327,7 +327,8 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                 return item.suite
 
         return QtCore.QVariant()
-    
+
+   
     #----------------------------------------------------------------------------------
     def setData(self, index, value, role):
         """ Sets some data (from the user)?
@@ -342,13 +343,30 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         # Return the checked state
         if role == QtCore.Qt.CheckStateRole:
             item.set_checked( value==Qt.Checked )
+            if isinstance(item, TreeItemProject):
+                # self.modelReset()
+                self.update_project(item.project.name)
+                
             return True
         
         return False
 #            if index.column() == 0:
 #                return Qt.Checked
 #            else:
-#                return QVariant() 
+#                return QVariant()
+
+    #----------------------------------------------------------------------------------
+    def update_project(self, project_name):
+        """ Updates the data displayed in a specific project"""
+        for row in xrange(self.rootItem.childCount()):
+            project_item = self.rootItem.child(row)
+            if project_item.project.name == project_name:
+                # Need to update the check status of all under it
+                project_indx = self.index(row, 0, QModelIndex())
+                topLeft = self.index(0, 0, project_indx)
+                bottomRight = self.index( project_item.childCount()-1, 0, project_indx)
+                self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+             
 
     #----------------------------------------------------------------------------------
     def headerData(self, column, orientation, role):

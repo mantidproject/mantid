@@ -163,6 +163,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def complete_run(self):
         """ Event called when completing/aborting a test run """
         self.buttonAbort.setEnabled(False)
+        self.buttonRunAll.setEnabled(True)
+        self.buttonRunSelected.setEnabled(True)
         self.progTest.setValue(0)
         self.progTest.setFormat("")
         self.update_tree()
@@ -207,6 +209,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.progTest.setValue(0)
         self.progTest.setMaximum( num_steps )
         self.buttonAbort.setEnabled(True)
+        self.buttonRunAll.setEnabled(False)
+        self.buttonRunSelected.setEnabled(False)
         # Begin the thread in the background
         self.worker.start()
         

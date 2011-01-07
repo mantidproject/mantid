@@ -200,7 +200,7 @@ class TestSingle(object):
             self.state = TestResultState.PASSED_OLD
         elif self.state == TestResultState.BUILD_ERROR:
             self.state = TestResultState.BUILD_ERROR_OLD
-        print "Aging %s and it is now %s " % (self.name, self.get_state_str() )
+        # print "Aging %s and it is now %s " % (self.name, self.get_state_str() )
         
     def __repr__(self):
         return "TestSingle(%s): state=%d, lastrun=%s, runtime=%s.\n%s" % (self.name, self.state, self.lastrun, self.runtime, self.stdout)
@@ -210,12 +210,12 @@ class TestSingle(object):
 class TestSuite(object):
     """ A suite of tests """
 
-    def __init__(self, name, parent_name, classname, command, xml_file, source_file):
+    def __init__(self, name, parent, classname, command, xml_file, source_file):
         """ Constructor"""
         # Its own name, e.g. "UnitTest"
         self.name = name
         # Name of the parent project, e.g. "KernelTest"
-        self.parent_name = parent_name
+        self.parent = parent
         # Full class name, e.g. KernelTest.UnitTest
         self.classname = classname
         # Full command that runs the test suite
@@ -255,6 +255,27 @@ class TestSuite(object):
     def add_single(self, test_name):
         """ Add a single test to this suite """
         self.tests.append( TestSingle(test_name) )
+        
+    #----------------------------------------------------------------------------------
+    def get_parent(self):
+        """ Return the parent Project of this suite """
+        return self.parent
+    
+    #----------------------------------------------------------------------------------
+    def get_selected(self):
+        """Return whether this is selected or not. NOTE:
+        if the parent project is not selected, this returns false."""
+        if not self.selected:
+            return False
+        else:
+            return self.parent.selected
+        
+    #----------------------------------------------------------------------------------
+    def set_selected(self, value):
+        """Sets the selection state of this suite.
+        if the parent project is not selected, this DOES NOTHING!"""
+        if self.parent.selected:
+            self.selected = value
         
     #----------------------------------------------------------------------------------
     def age(self):
@@ -439,14 +460,15 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def make(self):
         """Make the project using the saved command """
-        # print "making test : %s" % self.make_command
+        print "Making test", self.name,
         (status, output) = commands.getstatusoutput(self.make_command)
         if (status != 0):
-            print "! Build failure for %s !" % self.name
+            print ". BUILD FAILED!"
             # Build failure of some kind!
             for suite in self.suites:
                 suite.set_build_failed(output)
         else:
+            print ", succeeded."
             # Build was successful
             for suite in self.suites:
                 suite.build_succeeded = True
@@ -553,7 +575,7 @@ class TestProject(object):
                         xml_file = "TEST-" + classname + ".xml"        
 
                         # Create that suite
-                        suite = TestSuite(suite_name, self.name, classname, 
+                        suite = TestSuite(suite_name, self, classname, 
                                           self.executable + " " + suite_name, xml_file, source_file)
                         last_suite_name = suite_name
                         self.suites.append(suite)
@@ -715,7 +737,9 @@ class MultipleProjects(object):
     def replace_suite(self, st):
         """Given a suite from another thread, replace the current one with this one.
         Will look for a matching name"""
-        pj = self.get_project_named(st.parent_name)
+        # Note: You have to re-look for the parent here because st may come from
+        #    a different thread = points to the object in another thread
+        pj = self.get_project_named(st.get_parent().name)
         if pj is None:
             return
         for i in xrange(len(pj.suites)):
@@ -735,7 +759,7 @@ class MultipleProjects(object):
         for pj in self.projects:
             for st in pj.suites:
                 # print "get_selected_suites: status of ", st.classname, st.is_built()
-                if st.is_built() and (st.selected or (not selected_only)):
+                if st.is_built() and (st.get_selected() or (not selected_only)):
                     #print "get_selected_suites adding ", st.classname
                     # Suite must be built to be included here!
                     suites.append(st)
