@@ -25,7 +25,7 @@ parameterDefinition.directory = @MANTID_ROOT@/Instrument
 pythonscripts.directory = @MANTID_ROOT@/Scripts
 
 # Data search path
-datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/Instrument
+datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/../../Test/VATES;@MANTID_ROOT@/Instrument
 
 # Default save directory
 defaultsave.directory = .
