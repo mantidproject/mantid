@@ -42,8 +42,19 @@ endif ()
 if ( PYTHON_DEBUG_LIBRARY )
     set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
 endif ()
-	
-target_link_libraries ( PythonAPI ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+
+# Note: On some Linux systems, seen on various Ubuntu versions, importing Mantid into a standalone python
+# interpreter causes a segfault. It is some issue due to exception handling but the fix is 
+# to ensure that the stdc++ library appears as early in the link list as possible so that it
+# is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
+if ( UNIX ) 
+  set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+else ()
+  set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+endif ()
+
+target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
+set ( PYTHON_DEPS )
 
 # Now copy the required python files into the build destination
 add_custom_command ( TARGET PythonAPI POST_BUILD 
