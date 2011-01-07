@@ -366,6 +366,7 @@ vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
   return visualDataSet;
 }
 
+const std::string RebinningCutterPresenter::metaDataId="1";
 }
 
 }

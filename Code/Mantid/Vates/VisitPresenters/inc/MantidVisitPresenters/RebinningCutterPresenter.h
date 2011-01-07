@@ -92,6 +92,7 @@ public:
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* applyReductionKnowledge();
 
+  static const std::string metaDataId;
 };
 
 //Non-member helper functions.
@@ -131,8 +132,6 @@ public:
       double width,
       double depth,
       std::vector<double>& origin);
-
-
 
 }
 }
