@@ -518,6 +518,7 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super(TreeFilterProxyModel, self).__init__(parent)
         self.failed_only = False
+        self.selected_only = False
         
     #----------------------------------------------------------------------------------
     def set_filter_failed_only(self, value):
@@ -525,12 +526,22 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
         self.failed_only = value
         self.invalidateFilter()
         
+    def set_filter_selected_only(self, value):
+        """ Do we filter to show only the selected tests? """
+        self.selected_only = value
+        self.invalidateFilter()
+        
+    #----------------------------------------------------------------------------------
+    def filterAcceptsColumn(self, source_col, parent_index):
+        """ Always show all columns"""
+        return True
+
     #----------------------------------------------------------------------------------
     def filterAcceptsRow(self, source_row, parent_index):
         """Return true if the row is accepted by the filter """
 
         # If we're not filtering by anything, return True 
-        if not self.failed_only:
+        if not self.failed_only and not self.selected_only:
             return True
         
         source = self.sourceModel()
@@ -539,10 +550,16 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
         # Return that particular item
         item = source.data(index, Qt.UserRole)
         if not item is None:
-            print item
-            
-            if self.failed_only:
-                return (item.failed > 0)
+            if self.failed_only and (item.failed <= 0):
+                return False
+            if self.selected_only:
+                if isinstance(item, TestProject) or  isinstance(item, TestSuite) :
+                    return item.selected
+                else:
+                    # Don't filter out TestSingles based on selection (since they're all selected)
+                    return True
+            # Gets here if it passes through both filters 
+            return True 
             
         return True
         
@@ -570,7 +587,7 @@ if __name__ == "__main__":
     proxy = TreeFilterProxyModel()
     proxy.setDynamicSortFilter(True)
     proxy.setSourceModel(model)
-    proxy.set_filter_failed_only(True)
+    proxy.set_filter_failed_only(False)
     #proxy.setFilterWildcard("*G*")
     tv.setModel(proxy)
     

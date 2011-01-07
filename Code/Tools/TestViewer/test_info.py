@@ -248,6 +248,7 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def age(self):
         """ Age the results (flag them as "old" ) """
+        self.state.old = True
         for test in self.tests:
             test.age()
 
@@ -445,6 +446,7 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def age(self):
         """ Age the results (flag them as "old" ) """
+        self.state.old = True
         for suite in self.suites:
             suite.age()
             
@@ -634,7 +636,23 @@ class MultipleProjects(object):
         """ Age the results (flag them as "old" ) """
         for pj in self.projects:
             pj.age()
-    
+            
+    #----------------------------------------------------------------------------------
+    def select_all(self, value):
+        """ Select all tests """
+        for pj in self.projects:
+            pj.selected = value
+            for suite in pj.suites:
+                suite.selected = value
+        
+    #----------------------------------------------------------------------------------
+    def select_failed(self):
+        """ Select all failing tests """
+        for pj in self.projects:
+            pj.selected = (pj.failed > 0)
+            for suite in pj.suites:
+                suite.selected = (suite.failed > 0)
+            
     #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
         """Look for CXXTest projects in the given paths.
@@ -644,7 +662,7 @@ class MultipleProjects(object):
         for fname in dirList:
             # Look for executables ending in Test
             if fname.endswith("Test") and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
-                make_command = "cd %s ; make %s" % (os.path.join(path, ".."), fname)
+                make_command = "cd %s ; make %s -j4" % (os.path.join(path, ".."), fname)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
                 pj.populate()

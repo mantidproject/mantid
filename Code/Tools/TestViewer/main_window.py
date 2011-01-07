@@ -95,7 +95,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.action_Quit, QtCore.SIGNAL("triggered()"), self.quit)
 
         # -- Checkboxes toggle  ----
-        self.connect(self.checkShowFailedOnly, QtCore.SIGNAL("stateChanged(int)"), self.checked_fail_only)
+        self.connect(self.checkShowFailedOnly, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_fail_only)
+        self.connect(self.checkShowSelected, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_selected_only)
 
 
         # -- Button commands ----
@@ -107,6 +108,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonExpandSuites, QtCore.SIGNAL("clicked()"), self.expand_tree_to_suites)
         self.connect(self.buttonExpandAll, QtCore.SIGNAL("clicked()"), self.expand_tree_to_all)
         self.connect(self.buttonTest, QtCore.SIGNAL("clicked()"), self.test)
+        self.connect(self.buttonSelectAll, QtCore.SIGNAL("clicked()"), self.select_all)
+        self.connect(self.buttonSelectNone, QtCore.SIGNAL("clicked()"), self.select_none)
+        self.connect(self.buttonSelectFailed, QtCore.SIGNAL("clicked()"), self.select_failed)
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
@@ -297,9 +301,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                 
                 
     #-----------------------------------------------------------------------------
-    def checked_fail_only(self, state):
+    def checked_show_fail_only(self, state):
         """ Toggle the filtering """
         self.proxy.set_filter_failed_only(state > 0)
+        
+    def checked_show_selected_only(self, state):
+        """ Toggle the filtering """
+        self.proxy.set_filter_selected_only(state > 0)
             
     #-----------------------------------------------------------------------------
     def run_all(self):
@@ -326,6 +334,24 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def abort(self):
         test_info.all_tests.abort()
         
+    #-----------------------------------------------------------------------------
+    def select_all(self):
+        """ Select all tests """
+        test_info.all_tests.select_all(True)
+        self.proxy.invalidateFilter()
+        self.treeTests.update()
+        
+    def select_none(self):
+        """ De-Select all tests """
+        test_info.all_tests.select_all(False)
+        self.proxy.invalidateFilter()
+        self.treeTests.update()
+        
+    def select_failed(self):
+        """ Select all failing tests """
+        test_info.all_tests.select_failed()
+        self.proxy.invalidateFilter()
+        self.treeTests.update()
        
  
         

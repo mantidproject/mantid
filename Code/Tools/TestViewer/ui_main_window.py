@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Fri Jan  7 16:02:55 2011
+# Created: Fri Jan  7 16:57:13 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,13 +58,10 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frameTreeFilter.sizePolicy().hasHeightForWidth())
         self.frameTreeFilter.setSizePolicy(sizePolicy)
-        self.frameTreeFilter.setMinimumSize(QtCore.QSize(0, 80))
+        self.frameTreeFilter.setMinimumSize(QtCore.QSize(0, 120))
         self.frameTreeFilter.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frameTreeFilter.setFrameShadow(QtGui.QFrame.Raised)
         self.frameTreeFilter.setObjectName("frameTreeFilter")
-        self.checkSelectAll = QtGui.QCheckBox(self.frameTreeFilter)
-        self.checkSelectAll.setGeometry(QtCore.QRect(380, 50, 96, 22))
-        self.checkSelectAll.setObjectName("checkSelectAll")
         self.horizontalLayoutWidget_3 = QtGui.QWidget(self.frameTreeFilter)
         self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(10, 30, 361, 41))
         self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
@@ -106,6 +103,23 @@ class Ui_MainWindow(object):
         self.buttonTest = QtGui.QPushButton(self.frameTreeFilter)
         self.buttonTest.setGeometry(QtCore.QRect(550, 40, 98, 27))
         self.buttonTest.setObjectName("buttonTest")
+        self.horizontalLayoutWidget_5 = QtGui.QWidget(self.frameTreeFilter)
+        self.horizontalLayoutWidget_5.setGeometry(QtCore.QRect(10, 70, 361, 41))
+        self.horizontalLayoutWidget_5.setObjectName("horizontalLayoutWidget_5")
+        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.horizontalLayoutWidget_5)
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.label_4 = QtGui.QLabel(self.horizontalLayoutWidget_5)
+        self.label_4.setObjectName("label_4")
+        self.horizontalLayout_4.addWidget(self.label_4)
+        self.buttonSelectAll = QtGui.QPushButton(self.horizontalLayoutWidget_5)
+        self.buttonSelectAll.setObjectName("buttonSelectAll")
+        self.horizontalLayout_4.addWidget(self.buttonSelectAll)
+        self.buttonSelectNone = QtGui.QPushButton(self.horizontalLayoutWidget_5)
+        self.buttonSelectNone.setObjectName("buttonSelectNone")
+        self.horizontalLayout_4.addWidget(self.buttonSelectNone)
+        self.buttonSelectFailed = QtGui.QPushButton(self.horizontalLayoutWidget_5)
+        self.buttonSelectFailed.setObjectName("buttonSelectFailed")
+        self.horizontalLayout_4.addWidget(self.buttonSelectFailed)
         self.vlTree.addWidget(self.frameTreeFilter)
         self.treeTests = QtGui.QTreeView(self.verticalLayoutWidget_2)
         self.treeTests.setSortingEnabled(True)
@@ -350,7 +364,6 @@ class Ui_MainWindow(object):
         self.buttonRunAll.setText(QtGui.QApplication.translate("MainWindow", "Run All Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonRunSelected.setText(QtGui.QApplication.translate("MainWindow", "Run Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.checkInParallel.setText(QtGui.QApplication.translate("MainWindow", "In Parallel", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkSelectAll.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Expand to:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonExpandProjects.setText(QtGui.QApplication.translate("MainWindow", "Projects", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonExpandSuites.setText(QtGui.QApplication.translate("MainWindow", "Suites", None, QtGui.QApplication.UnicodeUTF8))
@@ -360,6 +373,10 @@ class Ui_MainWindow(object):
         self.checkShowFailedOnly.setText(QtGui.QApplication.translate("MainWindow", "Failed only", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonRefresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonTest.setText(QtGui.QApplication.translate("MainWindow", "test!", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Select:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectAll.setText(QtGui.QApplication.translate("MainWindow", "All", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectNone.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectFailed.setText(QtGui.QApplication.translate("MainWindow", "Failures", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))

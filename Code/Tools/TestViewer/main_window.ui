@@ -106,7 +106,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>80</height>
+            <height>120</height>
            </size>
           </property>
           <property name="frameShape">
@@ -115,19 +115,6 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <widget class="QCheckBox" name="checkSelectAll">
-           <property name="geometry">
-            <rect>
-             <x>380</x>
-             <y>50</y>
-             <width>96</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Select All</string>
-           </property>
-          </widget>
           <widget class="QWidget" name="horizontalLayoutWidget_3">
            <property name="geometry">
             <rect>
@@ -255,6 +242,46 @@
            <property name="text">
             <string>test!</string>
            </property>
+          </widget>
+          <widget class="QWidget" name="horizontalLayoutWidget_5">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>70</y>
+             <width>361</width>
+             <height>41</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Select:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonSelectAll">
+              <property name="text">
+               <string>All</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonSelectNone">
+              <property name="text">
+               <string>None</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonSelectFailed">
+              <property name="text">
+               <string>Failures</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
