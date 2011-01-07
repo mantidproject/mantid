@@ -109,28 +109,17 @@ public:
   void testrangeexceptionX()
   {
     h.setX(x1);
-    //	  TS_ASSERT_THROWS(h.dataX().at(-1),const std::exception&);
-    TS_ASSERT_THROWS(h.dataX().at(nel),const std::exception&);
+    TS_ASSERT_THROWS(h.dataX().at(nel),std::out_of_range);
   }
   void testrangeexceptionY()
   {
     h.setData(y1);
-    //	  TS_ASSERT_THROWS(h.dataY().at(-1),const std::exception&);
-    TS_ASSERT_THROWS(h.dataY().at(nel),const std::exception&);
+    TS_ASSERT_THROWS(h.dataY().at(nel),std::out_of_range);
   }
   void testrangeexceptionE()
   {
     h.setData(y1,e1);
-    //	    TS_ASSERT_THROWS(h.dataE().at(-1),const std::exception&);
-    TS_ASSERT_THROWS(h.dataE().at(nel),const std::exception&);
-  }
-  void testsetdatadifferentsizesException()
-  {
-    //	    e1.resize(nel+1);
-    // TS_ASSERT_THROWS(h.setData(y1,e1),const std::invalid_argument&);
-    //pb.reset();
-    //pb=MantidVecPtr::(new std::vector<double>(nel+1));
-    //TS_ASSERT_THROWS(h.setData(pa,pb),const std::invalid_argument&);
+    TS_ASSERT_THROWS(h.dataE().at(nel),std::out_of_range);
   }
 
 };
