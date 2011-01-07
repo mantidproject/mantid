@@ -124,36 +124,7 @@ class TestSuiteResult:
             elif self.value == self.NOT_RUN:
                 self.value = self.SOME_FAILED
         
-        
-        
-#==================================================================================        
-def test_results_compiling():
-    r = TestSuiteResult()
-    assert r.value == TestSuiteResult.NOT_RUN
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.ALL_PASSED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.ALL_PASSED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.BUILD_ERROR)
-    assert r.value == TestSuiteResult.BUILD_ERROR
-    
-    r = TestSuiteResult()
-    assert r.value == TestSuiteResult.NOT_RUN
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.ALL_FAILED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.ALL_FAILED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-
-test_results_compiling()        
-        
+     
           
 #==================================================================================================
 class TestSingle(object):
@@ -178,6 +149,19 @@ class TestSingle(object):
         # Stdout output for that failure 
         self.stdout = "" 
         
+    #----------------------------------------------------------------------------------
+    def replace_contents(self, other):
+        """ Replace the contents of self with those of other (coming after running in
+        a separate thread """
+        self.name = other.name
+        self.state = other.state
+        self.lastrun = other.lastrun
+        self.runtime = other.runtime
+        self.failure = other.failure
+        self.failure_line = other.failure_line
+        self.stdout = other.stdout
+        
+    #----------------------------------------------------------------------------------
     def load_results(self, case):
         """Load the results from a xml Junit file 
         Parameters
@@ -208,6 +192,15 @@ class TestSingle(object):
         global test_result_state_string
         return test_result_state_string[self.state]
         
+    def age(self):
+        """ Age the results (flag them as "old" ) """
+        if self.state == TestResultState.FAILED:
+            self.state = TestResultState.FAILED_OLD
+        elif self.state == TestResultState.PASSED:
+            self.state = TestResultState.PASSED_OLD
+        elif self.state == TestResultState.BUILD_ERROR:
+            self.state = TestResultState.BUILD_ERROR_OLD
+        print "Aging %s and it is now %s " % (self.name, self.get_state_str() )
         
     def __repr__(self):
         return "TestSingle(%s): state=%d, lastrun=%s, runtime=%s.\n%s" % (self.name, self.state, self.lastrun, self.runtime, self.stdout)
@@ -243,12 +236,32 @@ class TestSuite(object):
         self.failed = 0
         self.num_run = 0
         
+    #----------------------------------------------------------------------------------
+    def replace_contents(self, other):
+        """ Replace the contents of self with those of other (coming after running in
+        a separate thread """
+        if len(self.tests) != len(other.tests):
+            print "The number of tests in %s changed. You should refresh your view." % self.classname
+            #TODO! handle better
+            self.tests = other.tests
+        else:
+            for i in xrange(len(self.tests)):
+                self.tests[i].replace_contents( other.tests[i] )
+        # Re-compile the states from the individual tests
+        self.compile_states()
+        
         
     #----------------------------------------------------------------------------------
     def add_single(self, test_name):
         """ Add a single test to this suite """
         self.tests.append( TestSingle(test_name) )
         
+    #----------------------------------------------------------------------------------
+    def age(self):
+        """ Age the results (flag them as "old" ) """
+        for test in self.tests:
+            test.age()
+
     #----------------------------------------------------------------------------------
     def is_built(self):
         """Returns True if the test build for this suite was successful."""
@@ -410,6 +423,20 @@ class TestProject(object):
         self.num_run = 0
 
     #----------------------------------------------------------------------------------
+    def replace_contents(self, other):
+        """ Replace the contents of self with those of other (coming after running in
+        a separate thread """
+        if len(self.suites) != len(other.suites):
+            print "The number of suites in %s changed. You should refresh your view." % self.name
+            #TODO! handle better
+            self.suites = other.suites
+        else:
+            for i in xrange(len(self.suites)):
+                self.suites[i].replace_contents( other.suites[i] )
+        # Re do the stats and states
+        self.compile_states()
+
+    #----------------------------------------------------------------------------------
     def make(self):
         """Make the project using the saved command """
         # print "making test : %s" % self.make_command
@@ -425,6 +452,12 @@ class TestProject(object):
                 suite.build_succeeded = True
         
         
+    #----------------------------------------------------------------------------------
+    def age(self):
+        """ Age the results (flag them as "old" ) """
+        for suite in self.suites:
+            suite.age()
+            
     #----------------------------------------------------------------------------------
     def find_source_file(self, suite_name):
         """ Find the source file corresponding to the given suite in this project
@@ -485,7 +518,6 @@ class TestProject(object):
         
         # Get the bare XML file name
         (dir, file) = os.path.split(self.executable)
-        xml_file = "TEST-" + file + ".xml"        
         
         output = commands.getoutput(self.executable + " --help-tests")
         # The silly cxxtest makes an empty XML file
@@ -517,6 +549,9 @@ class TestProject(object):
                         # The class name goes KernelTest.DateAndTimeTest
                         classname = self.name + "." + suite_name
                         source_file = self.find_source_file(suite_name)
+                        # The xml file output goes (as of rev 8587, new cxxtestgen see ticket #2204 )
+                        xml_file = "TEST-" + classname + ".xml"        
+
                         # Create that suite
                         suite = TestSuite(suite_name, self.name, classname, 
                                           self.executable + " " + suite_name, xml_file, source_file)
@@ -603,6 +638,12 @@ class MultipleProjects(object):
         """ Set a flag to abort all further calculations. """
         print "... Attempting to abort ..."
         self.abort_run = True
+        
+    #----------------------------------------------------------------------------------
+    def age(self):
+        """ Age the results (flag them as "old" ) """
+        for pj in self.projects:
+            pj.age()
     
     #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
@@ -667,7 +708,7 @@ class MultipleProjects(object):
         Will look for a matching name"""
         for i in xrange(len(self.projects)):
             if self.projects[i].name == pj.name:
-                self.projects[i] = pj
+                self.projects[i].replace_contents(pj)
                 break
             
     #--------------------------------------------------------------------------        
@@ -680,7 +721,7 @@ class MultipleProjects(object):
         for i in xrange(len(pj.suites)):
             suite = pj.suites[i]
             if suite.name == st.name:
-                pj.suites[i] = st
+                pj.suites[i].replace_contents(st)
                 break
         
     #--------------------------------------------------------------------------        
@@ -729,6 +770,9 @@ class MultipleProjects(object):
         self.abort_run = False
         
         start = time.time()
+        
+        # Age all the old results
+        self.age()
         
         # How many thread in parallel?  one fewer threads than the # of cpus
         num_threads = multiprocessing.cpu_count()-1
@@ -804,6 +848,56 @@ def test_run_print_callback(obj):
         all_tests.replace_project( pj )
         print "Made project %s" % pj.name                
         
+
+
+
+
+
+
+
+
+   
+#==================================================================================
+#=================== Unit Tests ====================        
+#==================================================================================        
+def test_results_compiling():
+    r = TestSuiteResult()
+    assert r.value == TestSuiteResult.NOT_RUN
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.ALL_PASSED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.ALL_PASSED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+    r.add_single(TestResultState.BUILD_ERROR)
+    assert r.value == TestSuiteResult.BUILD_ERROR
+    
+    r = TestSuiteResult()
+    assert r.value == TestSuiteResult.NOT_RUN
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.ALL_FAILED
+    r.add_single(TestResultState.FAILED)
+    assert r.value == TestSuiteResult.ALL_FAILED
+    r.add_single(TestResultState.PASSED)
+    assert r.value == TestSuiteResult.SOME_FAILED
+
+def test_age():
+    a = TestSingle("my_test_test")
+    assert (a.state == TestResultState.NOT_RUN)
+    a.age()
+    assert (a.state == TestResultState.NOT_RUN)
+    a.state = TestResultState.PASSED
+    a.age()
+    assert (a.state == TestResultState.PASSED_OLD)
+    
+test_results_compiling()        
+test_age()
+        
+
         
         
 #==================================================================================================
@@ -819,6 +913,8 @@ if __name__ == '__main__':
         
 #    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
 #                          parallel=False, callback_func=test_run_print_callback)
+
+
 
 
 #==================================================================================================
