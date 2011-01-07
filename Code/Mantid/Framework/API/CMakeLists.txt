@@ -171,9 +171,6 @@ set ( GMOCK_TEST_FILES
                  test/ImplicitFunctionParameterParserFactoryTest.h
 )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_API )
-
 # Have to link to winsock library on Windows
 if ( WIN32 )
   set ( WINSOCK ws2_32 )
