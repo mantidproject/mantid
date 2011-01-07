@@ -944,14 +944,10 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             rebin_alg = 'use default'
         reducer.to_wavelen.execute(reducer, norm_ws, rebin_alg)
 
-        out_workspace = workspace
-        if reducer.to_Q.get_output_type() == '1D':
-            # At this point need to fork off workspace name to keep a workspace containing raw counts
-            reducer.to_Q.error_est_1D = 'to_delete_'+workspace+'_prenormed'
-            RenameWorkspace(workspace, reducer.to_Q.error_est_1D)
-            workspace = reducer.to_Q.error_est_1D
-
-        Divide(workspace, norm_ws, out_workspace)
+        # At this point need to fork off workspace name to keep a workspace containing raw counts
+        reducer.to_Q.error_est_1D = 'to_delete_'+workspace+'_prenormed'
+        RenameWorkspace(workspace, reducer.to_Q.error_est_1D)
+        Divide(reducer.to_Q.error_est_1D, norm_ws, workspace)
 
         mantid.deleteWorkspace(norm_ws)
 
@@ -1112,21 +1108,15 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         else:
             result = fittedtransws
     
-        try:
-            if use_full_range:
-                tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self.loader.can]
-                tmp_ws += '_' + reducer.to_wavelen.get_range()
-                Rebin(result, tmp_ws, Params = reducer.to_wavelen.get_rebin())
-                trans_ws = tmp_ws
-            else: 
-                trans_ws = result
-        except:
-            raise RuntimeError("Failed to Rebin the workspaces %s and %s to be the same."%(workspace, trans_ws))
-    
-        try:
-            Divide(workspace, trans_ws, workspace)
-        except:
-            raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
+        if use_full_range:
+            tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self.loader.can]
+            tmp_ws += '_' + reducer.to_wavelen.get_range()
+            CropWorkspace(result, tmp_ws, XMin = str(reducer.to_wavelen.wav_low), XMax = str(reducer.to_wavelen.wav_high))
+            trans_ws = tmp_ws
+        else: 
+            trans_ws = result
+
+        Divide(workspace, trans_ws, workspace)
 
 class ISISCorrections(sans_reduction_steps.CorrectToFileStep):
     DEFAULT_SCALING = 100.0
@@ -1471,7 +1461,7 @@ class GetOutputName(ReductionStep):
             Reads a SANS mask file
         """
         super(GetOutputName, self).__init__()
-        self.name_holder = ['problem_setting_name']
+        self.name_holder = []
 
     def execute(self, reducer, workspace=None):
         """
@@ -1488,7 +1478,7 @@ class GetOutputName(ReductionStep):
         name += reducer.instrument.cur_detector().name('short')
         name += '_' + reducer.to_Q.output_type
         name += '_' + reducer.to_wavelen.get_range()
-        self.name_holder[0] = name
+        self.name_holder.append(name)
 
 class ReplaceErrors(ReductionStep):
     def __init__(self):
