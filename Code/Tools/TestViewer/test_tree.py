@@ -34,10 +34,23 @@ def format_time(seconds):
 # =======================================================================================    
 class MyColors:
     """ Some custom colors I want """
+    veryLightGray = QColor(220, 220, 220)
     lightGreen = QColor( 128, 255, 128)
+    darkishGreen = QColor( 64, 128, 64)
     lightRed = QColor( 255, 200, 200)
     mediumRed = QColor( 255, 150, 150)
     
+def desaturate(color, amount):
+    """Desaturate a color by pct.
+    Parameters:
+        amount: fraction between 0.0 and 1.0. 1.0 = fully saturated; 0.0 = desaturated """
+    red = color.red() 
+    green = color.green() 
+    blue = color.blue() 
+    gray = 0.3 * red + 0.4 * green + 0.3 * blue
+    return QColor( gray * amount + red * (1 - amount),
+                   gray * amount + green * (1 - amount),
+                   gray * amount + blue * (1 - amount) )
     
 # =======================================================================================    
 def get_background_color(state):
@@ -49,24 +62,29 @@ def get_background_color(state):
     
     col = QColor(Qt.lightGray)
     if state == test_info.TestResult.NOT_RUN:
-        col = QColor(Qt.lightGray)
+        col = MyColors.veryLightGray
+        
     elif state == test_info.TestResult.ALL_PASSED:
         col = MyColors.lightGreen
-    elif state == test_info.TestResult.ALL_FAILED:
+        if state.old: col = MyColors.darkishGreen
+        
+    elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED):
         col = QColor(Qt.red)
+        if state.old: col = QColor( 200, 50, 50 )
+        
     elif state == test_info.TestResult.BUILD_ERROR:
         col = QColor(Qt.magenta)
-    elif state == test_info.TestResult.SOME_FAILED:
-        col = MyColors.lightRed
+        if state.old: col = desaturate(col, 0.5)
+        
+#    elif state == test_info.TestResult.SOME_FAILED:
+#        col = MyColors.lightRed
+#        if state.old: col = MyColors.lightRed
+        
     else:
         return QVariant()
     
-    if state.old and (state.value != test_info.TestResult.NOT_RUN): 
-        # Darken whatever color was selected 
-        col = QColor( col.red()/2, col.green()/2, col.blue()/2)
-    else:
-        # Copy constructor
-        col = QColor( col )
+    # Copy constructor
+    col = QColor( col )
         
     return col 
                     

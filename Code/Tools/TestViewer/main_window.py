@@ -5,10 +5,9 @@ import time
 
 from PyQt4 import QtGui, uic, QtCore
 import PyQt4.QtCore
-from PyQt4.QtCore import QModelIndex
+from PyQt4.QtCore import QModelIndex, QSettings, QVariant
 import PyQt4.QtGui
 from PyQt4.QtGui import QHeaderView
-
 
 import ui_main_window
 import test_info
@@ -80,6 +79,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 
     def __init__(self, parent=None, state=None, settings=None):      
         QtGui.QWidget.__init__(self, parent)
+        
+        # Save the settings object
+        self.settings = settings
+        
         # Populate all GUI elements
         self.setupUi(self)
              
@@ -106,7 +109,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.last_tree_update = time.time()
         
         self.setup_tree()
-
+        
+        self.readSettings()
+        
     #-----------------------------------------------------------------------------
     def setup_tree(self):
         """ Set up the QTreeWidget of the tree """
@@ -123,6 +128,28 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         #tree.header().setColumnWidth(1, 100)
         #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
         
+    #-----------------------------------------------------------------------------
+    def readSettings(self):
+        s = self.settings
+        self.checkInParallel.setChecked( s.value("checkInParallel", False).toBool() )
+        if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
+        self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
+                     s.value("TestViewerMainWindow.height", 900).toInt()[0] )    
+        
+    #-----------------------------------------------------------------------------
+    def saveSettings(self):
+        s = self.settings
+        s.setValue("checkInParallel", self.checkInParallel.isChecked() )
+        s.setValue("splitter", self.splitter.saveState())
+        s.setValue("TestViewerMainWindow.width", self.width())
+        s.setValue("TestViewerMainWindow.height", self.height())
+        
+    #-----------------------------------------------------------------------------
+    def closeEvent(self, event):
+        """Window is closing """
+        # Save all settings that haven't been saved before
+        self.saveSettings()
+
         
     #-----------------------------------------------------------------------------
     def expand_tree_to_projects(self):
@@ -161,6 +188,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         val = self.progTest.value()+1 
         self.progTest.setValue( val )
         self.progTest.setFormat("%p% : " + text)
+
         # Update the tree's data for the suite
         if not obj is None:
             if isinstance(obj, TestSuite):
@@ -241,17 +269,22 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
  
         
 def start(argv=[]):
+    
+    # Start the settings object.
+    # TODO: Change the company name here and in MantidPlot
+    settings = QSettings("ISIS", "MantidTestViewer"); 
+    
     # Initialize the projects ...
     test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     #test_info.all_tests.make_fake_results()
+
 
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")
     app.setOrganizationDomain("mantidproject.org")
     app.setApplicationName("Mantid Test Viewer")
     
-    main = TestViewerMainWindow()
-    main.resize(1500, 900)    
+    main = TestViewerMainWindow(settings=settings)
     main.show()
     
     app.exec_() 
