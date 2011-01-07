@@ -94,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\Framework\Kernel\Debug;..\..\..\Win32\Framework\Geometry\Debug;..\..\..\Win32\Framework\API\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\bin\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib;gmock_d.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>

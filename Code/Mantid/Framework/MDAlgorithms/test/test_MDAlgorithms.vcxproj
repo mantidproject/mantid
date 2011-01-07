@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\Framework\Kernel\Debug;..\..\..\Win32\Framework\Geometry\Debug;..\..\..\Win32\Framework\API\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\bin\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>MDAlgorithms.lib;MDDataObjects.lib;MantidGeometry.lib;MantidAPI.lib;MantidKernel.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>

@@ -64,10 +64,7 @@ namespace Mantid{
       /// obtains pointers to all dimensions defined in the geometry
       std::vector<boost::shared_ptr<IMDDimension> > getDimensions(void)const;
 
-      /// returns the number of expanded (non-integrated) dimensions
-      unsigned int getNExpandedDims(void)const{return n_expanded_dim;}
-
-	  /// function returns the number of cells, which an Image with this geometry would have;
+ 	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}
 
  
@@ -79,15 +76,15 @@ namespace Mantid{
       unsigned int getNumDims(void)const{return m_basis.getNumDims();}
       /// returns the number of reciprocal dimensions
       unsigned int getNumReciprocalDims(void)const{return m_basis.getNumReciprocalDims();};
-      ///
+      /// returns the identifiers of main geometry dimensions
       std::vector<std::string> getBasisTags(void)const;
-      ///
-      unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
 
-     /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
+      /// returns the number of expanded (non-integrated) dimensions;
+      unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
+      /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
       boost::shared_ptr<const IMDDimension>  get_constDimension(unsigned int i)const;
-      /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
+      /// functions return the pointer to the dimension requested by the dimension tag(ID). throws if such dimension is not present in the Geometry (or NULL if not throwing);
       boost::shared_ptr<const IMDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
 
 

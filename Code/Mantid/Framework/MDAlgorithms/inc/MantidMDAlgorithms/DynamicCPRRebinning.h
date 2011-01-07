@@ -45,7 +45,7 @@ public:
     virtual size_t preselect_cells(); 
     /** function returns the number of pixels which can contribute into a cut (Number of pixels in selected cells -- become valid after 
      *  preselection is done and precelected cells buffer is valid */
-    virtual size_t getNumPreselectedPixels()const{return n_preselected_pix;}
+    virtual unsigned long getNumPreselectedPixels()const{return n_preselected_pix;}
     //
     virtual bool rebin_data_chunk()=0;
     virtual bool rebin_data_chunk_keep_pixels()=0;
@@ -53,7 +53,7 @@ public:
      * and (in some implementations) the locations of the points in the final MDDatapoints array 
      *
      *   Returns the number of points (events, pixels) contributed into the image;    */
-    virtual size_t finalize_rebinning();
+    virtual unsigned long finalize_rebinning();
  
     /** the constructor takes source workspace and the rebinning request and initiate proper target workspace, obtained from the dataservice
        It also retains shared pointers to source and target workspaces to work with; Childs will mainly work with parts of these workspaces
@@ -72,11 +72,10 @@ protected:
     /** the description class, which describes final geometry and the cut. Necessary as 
      *  preselection works on the basis of this property and final geometry may not be initiated by constructor
      *  or can be entirely different */
-
     Geometry::MDGeometryDescription const * const pTargetDescr;
 
    /// Number of pixels which contributed into the target image
-    size_t n_preselected_pix;
+    unsigned long n_preselected_pix;
    /** The indexes of the sells of the source image that can contribute into the target image */
     //std::vector<const MDDataObjects::MD_image_point *const> preselected_cells;
     std::vector<size_t> preselected_cells;
@@ -88,7 +87,7 @@ protected:
    // pointer to the MD array of source image points
     MDDataObjects::MD_image_point const *const pSourceImgData; 
 
-      /// pointer to the reader of the initial data -> TODO: - replace it with dataGetter from DataPixels
+    /// pointer to the reader of the initial data -> TODO: - replace it with dataGetter from DataPixels
     MDDataObjects::IMD_FileFormat       *const pSourceDataReader;
     // pointer to the target geometry
     Geometry::MDGeometry                *      pTargetGeom;  

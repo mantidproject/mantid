@@ -36,11 +36,19 @@
 
 namespace Mantid{
 namespace MDDataObjects{
-
+// forward declaration for the class, which describes the pixels data
+class MDPointDescription;
 //
 class DLLExport MD_FileTestDataGenerator :    public IMD_FileFormat
 {  
 public:
+    /** test file generator takes its parameters from file name e.g:
+     data4x3_a0b50c50d50 defines 4 dimensional dataset with 3 reciprocal dimensions where 
+     the structure is as above and 
+     data, x, a, b, c, d [e etc] are the key-words defining the values;
+     e.g. here the first dimension is integrated and three others have 50 bins; 
+     TODO: not implemented -- implement; currently doung 4x3 
+    */
 	MD_FileTestDataGenerator(const char *file_name);
 
 	virtual bool is_open(void)const{return true;}
@@ -62,7 +70,7 @@ public:
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
 	// TODO: Implement;
-    virtual bool read_pix(MDDataPoints & sqw){return false;}
+    virtual bool read_pix(MDDataPoints & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
@@ -83,6 +91,12 @@ private:
 	size_t     mdImageSize;
 	/// number of data points (pixels) contributing into the MD image and present in the file;
 	unsigned long   nDataPoints;
+    /// number of bytes a pixel occupiesl
+    unsigned int  sizeof_pixel;
+
+    mutable MDPointDescription *pPointDescr;
+    float   *dat_sig_fields;
+    int     *ind_fields;
 
     void fill_image_data1D(unsigned int nBins);
     void fill_image();

@@ -61,12 +61,12 @@ public:
      *  further rebinning on basis of new MD workspace instead of the old one;
     */
     virtual bool rebin_data_chunk_keep_pixels()=0;
-    /** returns the estimate for number of data chunks may be used to rebin the datase.t Used by algorithms to 
+    /** returns the estimate for number of data chunks may be used to rebin the dataset Used by algorithms to 
         estimate the time to complete the rebinning*/
     virtual unsigned int getNumDataChunks()const=0;
     /** function returns the number of pixels which can contribute into a cut (Number of pixels in selected cells -- become valid after 
      *  preselection is done and precelected cells buffer is valid */
-    virtual size_t getNumPreselectedPixels()const=0;
+    virtual unsigned long getNumPreselectedPixels()const=0;
 
 
     /** Calculates signals and errors of the MD image, obtained as the result of one or more rebin_dataset operations
@@ -74,7 +74,7 @@ public:
 
        Returns the number of points (events, pixels) contributed into the image;
      */
-    virtual size_t finalize_rebinning()=0;
+    virtual unsigned long finalize_rebinning()=0;
     /// destructor
     virtual ~IDynamicRebinning(){};
 protected:

@@ -2,11 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_MDD", "test_MDD.vcxproj", "{35BD3896-7AB3-4781-A28A-279CBBE6AD68}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C} = {BB63CA4D-5656-433D-8FD5-75BFD0606C8C}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MDDataObjects", "..\MDDataObjects.vcxproj", "{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,14 +19,6 @@ Global
 		{35BD3896-7AB3-4781-A28A-279CBBE6AD68}.Release|Win32.Build.0 = Release|Win32
 		{35BD3896-7AB3-4781-A28A-279CBBE6AD68}.Release|x64.ActiveCfg = Release|x64
 		{35BD3896-7AB3-4781-A28A-279CBBE6AD68}.Release|x64.Build.0 = Release|x64
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|Win32.Build.0 = Debug|Win32
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|x64.ActiveCfg = Debug|x64
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|x64.Build.0 = Debug|x64
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|Win32.ActiveCfg = Release|Win32
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|Win32.Build.0 = Release|Win32
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|x64.ActiveCfg = Release|x64
-		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

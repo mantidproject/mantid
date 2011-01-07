@@ -291,7 +291,7 @@ DynamicCPRRebinning::preselect_cells()
 }
 
 //
-size_t 
+unsigned long 
 DynamicCPRRebinning::finalize_rebinning()
 {
   size_t i;
@@ -304,7 +304,7 @@ DynamicCPRRebinning::finalize_rebinning()
   pTargetImgData[0].chunk_location=0;
 
   // counter for the number of retatined pixels;
-  size_t nPix = pTargetImgData[0].npix;
+  unsigned long nPix = pTargetImgData[0].npix;
   for(i=1;i<n_target_cells;i++){
     pTargetImgData[i].chunk_location=pTargetImgData[i-1].chunk_location+pTargetImgData[i-1].npix; // the next cell starts from the the boundary of the previous one
     // plus the number of pixels in the previous cell

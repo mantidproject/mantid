@@ -1,5 +1,6 @@
 #ifndef MD_IMAGE_DATATYPES_H
 #define MD_IMAGE_DATATYPES_H
+#include <vector>
 /** The header contains the description of the datatypes, used by MDImage
  * There are currently three structures:
  <ul>
@@ -53,7 +54,7 @@ struct MD_image_point
 
 /// structure of the multidimension data array, which is the basis of MDData class and should be exposed to modyfying algorighms
 struct MD_img_data{
-    size_t data_size;              ///< size of the data points array expressed as 1D array;
+    size_t data_size;              ///< size of the data points array expressed as 1D array (number of data cells);
 	size_t data_array_size;        ///< size of allocated part of MD_Image_point *data block (may be bigger then data_size)
     MD_image_point *data;           ///< multidimensional array of image cells, represented as a single dimensional array;
     // descriptors for dimensions;

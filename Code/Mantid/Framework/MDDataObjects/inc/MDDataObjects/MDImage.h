@@ -88,8 +88,10 @@ public:
     /// get acces to the internal image dataset for further modifications; throws if dataset is undefinded;
     MD_image_point      * get_pData(void);
 	MD_image_point const* get_const_pData(void)const;
-    /// get acces to the whole MDga structure;
-    MD_img_data         * get_pMDImgData(void){return (&MD_IMG_array);}
+    /// get acces to the whole MD Image data structure;
+    MD_img_data         * get_pMDImgData(void){return &MD_IMG_array;}
+    MD_img_data  const  & get_MDImgData(void)const{return MD_IMG_array;}
+
 
    //Temporary fix to get 3-D image data.
    MD_image_point getPoint(int i,int j,int k)       const
