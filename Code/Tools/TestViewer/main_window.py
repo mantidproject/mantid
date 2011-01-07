@@ -5,9 +5,9 @@ import time
 
 from PyQt4 import QtGui, uic, QtCore
 import PyQt4.QtCore
-from PyQt4.QtCore import QModelIndex, QSettings, QVariant
+from PyQt4.QtCore import *
 import PyQt4.QtGui
-from PyQt4.QtGui import QHeaderView
+from PyQt4.QtGui import *
 
 import ui_main_window
 import test_info
@@ -128,6 +128,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         #tree.header().setColumnWidth(1, 100)
         #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
         
+        tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
+        
+
+        
     #-----------------------------------------------------------------------------
     def readSettings(self):
         s = self.settings
@@ -149,7 +153,15 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         """Window is closing """
         # Save all settings that haven't been saved before
         self.saveSettings()
-
+        
+    #-----------------------------------------------------------------------------
+    def quit(self):
+        """ Exit the program """
+        test_info.all_tests.abort()
+        print "Exiting TestViewer. Happy coding!"
+        self.close()
+        
+        
         
     #-----------------------------------------------------------------------------
     def expand_tree_to_projects(self):
@@ -179,6 +191,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def expand_tree_to_all(self):
         """ Expand all tree items """
         self.treeTests.expandAll()
+        
         
     #-----------------------------------------------------------------------------
     def update_label(self, text, obj):
@@ -231,13 +244,18 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.model().setupModelData()
         self.treeTests.update()
         
+
     #-----------------------------------------------------------------------------
-    def quit(self):
-        """ Exit the program """
-        test_info.all_tests.abort()
-        print "Exiting TestViewer. Happy coding!"
-        self.close()
+    def tree_clicked(self, index):
+        """ A row of the tree was clicked. 
+        Show the test results. """
+        print "Clicked index ", index
+        # Retrieve the item at that index
+        item = self.treeTests.model().data( index, Qt.UserRole)
+        print item
         
+                
+                
 
             
     #-----------------------------------------------------------------------------

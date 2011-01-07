@@ -89,17 +89,13 @@ def get_background_color(state):
     return col 
                     
 
+
 # =======================================================================================    
-class TreeItemProject(object):
-    '''
-    A python object used to return row/column data, and keep note of
-    it's parents and/or children.
-    
-    This one represents a TestProject
-    '''
-    def __init__(self, project, parentItem):
-        # The test suite for this tree item
-        self.project = project
+class TreeItemBase(object):
+    """ Base class for common tree items with a ".contents" member."""
+    def __init__(self, contents, parentItem):
+        # The contents: TestSingle, TestSuite, TestProject for this tree item
+        self.contents = contents
         # The parent TreeItem
         self.parentItem = parentItem
         self.childItems = []
@@ -113,32 +109,6 @@ class TreeItemProject(object):
     def childCount(self):
         return len(self.childItems)
 
-    def columnCount(self):
-        return 3
-
-    #-----------------------------------------------------------------------------------            
-    def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked][self.project.selected] 
-    
-    def set_checked(self, value):
-        self.project.selected = value
-
-    #-----------------------------------------------------------------------------------            
-    def data(self, column):
-        if self.project == None:
-            if column == 0:
-                return QtCore.QVariant(self.header)
-            if column >= 1:
-                return QtCore.QVariant("")                
-        else:
-            if column == 0:
-                return QtCore.QVariant(self.project.name)
-            if column == 1:
-                return QtCore.QVariant(self.project.get_state_str())
-            if column == 2:
-                return QtCore.QVariant( format_time( self.project.get_runtime() ))
-        return QtCore.QVariant()
-
     #-----------------------------------------------------------------------------------            
     def parent(self):
         return self.parentItem
@@ -150,12 +120,50 @@ class TreeItemProject(object):
     
     def background_color(self):
         """Return the background color for this item"""
-        return get_background_color(self.project.state)
+        return get_background_color(self.contents.state)
     
+
+# =======================================================================================    
+class TreeItemProject(TreeItemBase):
+    '''
+    A python object used to return row/column data, and keep note of
+    it's parents and/or children.
+    
+    This one represents a TestProject
+    '''
+    def __init__(self, project, parentItem):
+        TreeItemBase.__init__(self, project, parentItem)
+
+    def columnCount(self):
+        return 3
+
+    #-----------------------------------------------------------------------------------            
+    def is_checked(self):
+        return [Qt.Unchecked, Qt.Checked][self.contents.selected] 
+    
+    def set_checked(self, value):
+        self.contents.selected = value
+
+    #-----------------------------------------------------------------------------------            
+    def data(self, column):
+        if self.contents is None:
+            if column == 0:
+                return QtCore.QVariant(self.header)
+            if column >= 1:
+                return QtCore.QVariant("")                
+        else:
+            if column == 0:
+                return QtCore.QVariant(self.contents.name)
+            if column == 1:
+                return QtCore.QVariant(self.contents.get_state_str())
+            if column == 2:
+                return QtCore.QVariant( format_time( self.contents.get_runtime() ))
+        return QtCore.QVariant()
+
       
 
 # =======================================================================================    
-class TreeItemSuite(object):
+class TreeItemSuite(TreeItemBase):
     '''
     A python object used to return row/column data, and keep note of
     it's parents and/or children.
@@ -164,19 +172,7 @@ class TreeItemSuite(object):
     '''
     def __init__(self, suite, parentItem):
         # The test suite for this tree item
-        self.suite = suite
-        # The parent TreeItemProject
-        self.parentItem = parentItem
-        self.childItems = []
-
-    def appendChild(self, item):
-        self.childItems.append(item)
-
-    def child(self, row):
-        return self.childItems[row]
-
-    def childCount(self):
-        return len(self.childItems)
+        TreeItemBase.__init__(self, suite, parentItem)
 
     def columnCount(self):
         """Column count of the children?"""
@@ -184,43 +180,31 @@ class TreeItemSuite(object):
             
     #-----------------------------------------------------------------------------------            
     def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked][self.suite.get_selected()] 
+        return [Qt.Unchecked, Qt.Checked][self.contents.get_selected()] 
     
     def set_checked(self, value):
-        self.suite.set_selected( value )
+        self.contents.set_selected( value )
 
     #-----------------------------------------------------------------------------------            
     def data(self, column):
-        if self.suite == None:
+        if self.contents is None:
             if column == 0:
                 return QtCore.QVariant(self.header)
             if column >= 1:
                 return QtCore.QVariant("")                
         else:
             if column == 0:
-                return QtCore.QVariant(self.suite.name)
+                return QtCore.QVariant(self.contents.name)
             if column == 1:
-                return QtCore.QVariant(self.suite.get_state_str())
+                return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( format_time( self.suite.get_runtime() ))
+                return QtCore.QVariant( format_time( self.contents.get_runtime() ))
         return QtCore.QVariant()
-
-    def parent(self):
-        return self.parentItem
-    
-    def row(self):
-        if self.parentItem:
-            return self.parentItem.childItems.index(self)
-        return 0
-    
-    def background_color(self):
-        """Return the background color for this item"""
-        return get_background_color(self.suite.state)
 
 
 
 # =======================================================================================    
-class TreeItemSingle(object):
+class TreeItemSingle(TreeItemBase):
     '''
     A python object used to return row/column data, and keep note of
     it's parents and/or children.
@@ -229,27 +213,11 @@ class TreeItemSingle(object):
     '''
     def __init__(self, test, parentItem):
         # The test single for this tree item
-        self.test = test
-        # The parent TreeItemSuite
-        self.parentItem = parentItem
-        self.childItems = []
-
-    def appendChild(self, item):
-        self.childItems.append(item)
-
-    def child(self, row):
-        return self.childItems[row]
-
-    def childCount(self):
-        return len(self.childItems)
+        TreeItemBase.__init__(self, test, parentItem)
 
     def columnCount(self):
         return 3
     
-    def background_color(self):
-        """Return the background color for this single test result"""
-        return get_background_color(self.test.state)
-        
     def is_checked(self):
         """ Can't check at the single test level """
         return QVariant()
@@ -259,28 +227,24 @@ class TreeItemSingle(object):
         pass
     
     def data(self, column):
-        if self.test == None:
+        if self.contents is None:
             if column == 0:
                 return QtCore.QVariant(self.header)
             if column >= 1:
                 return QtCore.QVariant("")                
         else:
             if column == 0:
-                return QtCore.QVariant(self.test.name)
+                return QtCore.QVariant(self.contents.name)
             if column == 1:
-                return QtCore.QVariant(self.test.get_state_str())
+                return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( format_time( self.test.runtime ) )
+                return QtCore.QVariant( format_time( self.contents.runtime ) )
         return QtCore.QVariant()
 
-    def parent(self):
-        return self.parentItem
-    
-    def row(self):
-        if self.parentItem:
-            return self.parentItem.childItems.index(self)
-        return 0
-        
+
+
+
+
 
 # =======================================================================================    
 class TestTreeModel(QtCore.QAbstractItemModel):
@@ -340,7 +304,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         #Something else
         if role == QtCore.Qt.UserRole:
             if item:
-                return item.suite
+                return item.contents
 
         return QtCore.QVariant()
 
@@ -376,7 +340,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         """Return the QModelIndex, TreeItemProject of the project named."""
         for row in xrange(self.rootItem.childCount()):
             project_item = self.rootItem.child(row)
-            if project_item.project.name == project_name:
+            if project_item.contents.name == project_name:
                 # Matching the project - select all the stuff in it and update
                 project_indx = self.index(row, 0, QModelIndex())
                 return (project_indx, project_item)
@@ -405,7 +369,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         (project_indx, project_item) = self.get_project( suite.get_parent().name )
         num_suites = project_item.childCount()
         for i in xrange(num_suites):
-            if project_item.child(i).suite.name == suite.name:
+            if project_item.child(i).contents.name == suite.name:
                 # Matching suite name in the same project name
                 topLeft = self.index(i, 0, project_indx)
                 bottomRight = self.index( i, 2, project_indx)
@@ -548,14 +512,6 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
 if __name__ == "__main__":    
 
-    def row_clicked(index):
-        '''
-        when a row is clicked... show the name
-        '''
-        print "Clicked index ", index
-        #print tv.model().data(index, QtCore.Qt.UserRole)
-        
-        
     app = QtGui.QApplication([])
     
     test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
@@ -572,9 +528,6 @@ if __name__ == "__main__":
     tv.setAlternatingRowColors(True)
     layout.addWidget(tv)
     
-    QtCore.QObject.connect(tv, QtCore.SIGNAL("clicked (QModelIndex)"),
-        row_clicked)
-
     dialog.exec_()
 
     app.closeAllWindows()

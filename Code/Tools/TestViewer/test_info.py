@@ -159,7 +159,7 @@ class TestSingle(object):
         self.state.old = True
         
     def __repr__(self):
-        return "TestSingle(%s): state=%d, lastrun=%s, runtime=%s.\n%s" % (self.name, self.state, self.lastrun, self.runtime, self.stdout)
+        return "TestSingle(%s): state=%s, lastrun=%s, runtime=%s.\n%s" % (self.name, self.get_state_str(), self.lastrun, self.runtime, self.stdout)
         
 
 #==================================================================================================
