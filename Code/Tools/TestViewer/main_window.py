@@ -124,6 +124,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def setup_tree(self):
         """ Set up the QTreeWidget of the tree """
+        
+        # Re-discover all the projects
+        # TODO: Use arguments for the source paths
+        test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
+        
         tree = self.treeTests
         #@type tree QTreeWidget
         
@@ -362,7 +367,6 @@ def start(argv=[]):
     settings = QSettings("ISIS", "MantidTestViewer"); 
     
     # Initialize the projects ...
-    test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     #test_info.all_tests.make_fake_results()
 
 

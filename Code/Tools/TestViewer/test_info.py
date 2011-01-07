@@ -379,6 +379,8 @@ class TestSuite(object):
                     # Save the time
                     test.lastrun = this_rundate
                     test.load_results(case)
+                else:
+                    print "Test %s in suite %s was not found. It must be new!" % (test_name, classname)
             
     #----------------------------------------------------------------------------------
     def __repr__(self):
@@ -661,8 +663,8 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test") and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
-                make_command = "cd %s ; make %s -j4" % (os.path.join(path, ".."), fname)
+            if fname.endswith("Test"): #and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
+                make_command = "cd %s ; make %s -j" % (os.path.join(path, ".."), fname)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
                 pj.populate()
@@ -797,7 +799,8 @@ class MultipleProjects(object):
                 if pj.is_anything_selected() or (not selected_only):
                     pj_to_build.append(pj)
                     
-            if parallel:
+            # It's probably better not to make the tests in parallel.
+            if False: # parallel:
                 p = Pool(num_threads)
                 for pj in pj_to_build:
                     p.apply_async( make_test, (self, pj, ), callback=callback_func)
