@@ -179,13 +179,11 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/UnitFactoryTest.h
 		 test/UnitTest.h )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_KERNEL )
-
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel )
+set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
+                                          COMPILE_DEFINITIONS IN_MANTID_KERNEL )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "Framework" )
 

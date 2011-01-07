@@ -193,9 +193,6 @@ set ( TEST_FILES test/AcompTest.h
 		 test/TripleTest.h
 		 test/V3DTest.h )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_GEOMETRY )
-
 # Find 'local' dependencies
 find_package ( OpenGL REQUIRED )
 # FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
@@ -212,7 +209,8 @@ include_directories ( ${GSL_INCLUDE_DIR} )
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry )
+set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
+                                            COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "Framework" )
 

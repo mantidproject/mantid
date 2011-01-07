@@ -182,7 +182,8 @@ endif ()
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI )
+set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
+                                       COMPILE_DEFINITIONS IN_MANTID_API )
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "Framework" )
 

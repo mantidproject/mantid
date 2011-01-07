@@ -43,13 +43,11 @@ set ( TEST_FILES test/CompressedWorkspace2DTest.h
 		 test/WorkspaceSingleValueTest.h
 		 test/WorkspaceValidatorsTest.h )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_DATA_OBJECTS )
-
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects )
+set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
+                                               COMPILE_DEFINITIONS IN_MANTID_DATA_OBJECTS )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "Framework" )
 
