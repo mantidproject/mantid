@@ -124,7 +124,7 @@ def parseCommandline(args):
     # the cxxtest builder relies on this behaviour! don't remove
     if options.runner == 'none':
         options.runner = None
-
+        
     if options.xunit_printer or options.runner == "XUnitPrinter":
         options.xunit_printer=True
         options.runner="XUnitPrinter"
@@ -270,14 +270,26 @@ def writeMain( output ):
     if not (options.gui or options.runner):
        return
     output.write( 'int main( int argc, char *argv[] ) {\n' )
+    
+    # Build the filename to output, using the suitename if specified
+    output.write( '    std::string output_filename = "%s";  \n' % (options.xunit_file))
+    # output.write( '    std::cout << argc << " args\\n";  \n ' )
+    output.write( '    // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ' )
+    output.write( '    if (argc > 1) { \n ')
+    output.write( '        if (argv[1][0] != \'-\') { \n ')
+    output.write( '           output_filename = "TEST-%s." + std::string(argv[1]) + ".xml"; \n        } } \n' %  options.world)
+    
     if options.noStaticInit:
         output.write( ' CxxTest::initialize();\n' )
+        
     if options.gui:
         tester_t = "CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s> " % (options.gui, options.runner)
     else:
         tester_t = "CxxTest::%s" % (options.runner)
+        
     if options.xunit_printer:
-       output.write( '    std::ofstream ofstr("%s");\n' % options.xunit_file )
+       output.write( '    // Create the output XML file \n' )
+       output.write( '    std::ofstream ofstr( output_filename.c_str() );\n' )
        output.write( '    %s tmp(ofstr);\n' % tester_t )
        output.write( '    CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world )
     else:
