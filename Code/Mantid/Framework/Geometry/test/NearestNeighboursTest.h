@@ -26,7 +26,7 @@ using namespace Mantid::Geometry;
 * Everything must be in one test or the instrument/detector list goes AWOL.
 */
 
-class testNearestNeighbours : public CxxTest::TestSuite
+class NearestNeighboursTest : public CxxTest::TestSuite
 {
 public:
   void testNeighbourFinding()
