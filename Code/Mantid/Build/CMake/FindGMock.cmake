@@ -12,7 +12,12 @@ find_library ( GMOCK_LIB NAMES gmock
         ${PROJECT_SOURCE_DIR}/../TestingTools/lib
 )
 
-set ( GMOCK_LIBRARIES optimized ${GMOCK_LIB} debug ${GMOCK_LIB} )
+find_library ( GMOCK_LIB_DEBUG NAMES gmock_d gmock
+  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/lib
+        ${PROJECT_SOURCE_DIR}/../TestingTools/lib
+)
+
+set ( GMOCK_LIBRARIES optimized ${GMOCK_LIB} debug ${GMOCK_LIB_DEBUG} )
 
 # handle the QUIETLY and REQUIRED arguments and set GMOCK_FOUND to TRUE if 
 # all listed variables are TRUE
