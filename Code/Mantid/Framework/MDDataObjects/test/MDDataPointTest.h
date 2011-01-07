@@ -30,7 +30,7 @@ struct eventData4D
 
 
 
-class testMDDataPoints :    public CxxTest::TestSuite
+class MDDataPointTest :    public CxxTest::TestSuite
 {
   std::vector<std::string> fieldNames4D;
   std::vector<std::string> fieldNames5D;
@@ -451,7 +451,7 @@ public:
   }
 
 
-  testMDDataPoints()
+  MDDataPointTest()
   {
     const char *cfieldNames4D[]={"q1","q2","q3","En","S","Err","iRun","iPix","iEn"};
     const char *cfieldNames5D[]={"q1","q2","q3","En","T","S","Err","iRun","iPix","iEn","iT"};
@@ -463,7 +463,7 @@ public:
   }
 
 
-  ~testMDDataPoints()
+  ~MDDataPointTest()
   {
     delete pix4D;
     delete pix5D;

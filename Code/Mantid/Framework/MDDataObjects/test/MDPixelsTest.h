@@ -16,7 +16,7 @@
 
 using namespace Mantid::MDDataObjects;
 
-class testMultiDimensionalDataPoints :    public CxxTest::TestSuite
+class MDPixelsTest :    public CxxTest::TestSuite
 {
 
 private:

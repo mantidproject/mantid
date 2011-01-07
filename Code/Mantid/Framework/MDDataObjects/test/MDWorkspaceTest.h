@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 
-class tesMDWorkspace :    public CxxTest::TestSuite
+class MDWorkspaceTest :    public CxxTest::TestSuite
 {
 private:
 
