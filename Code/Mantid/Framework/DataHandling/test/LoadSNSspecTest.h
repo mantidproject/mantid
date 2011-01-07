@@ -6,7 +6,7 @@
 
 using namespace Mantid::API;
 
-class LoadSNSPECTest : public CxxTest::TestSuite
+class LoadSNSspecTest : public CxxTest::TestSuite
 {
 public:
   void testName()

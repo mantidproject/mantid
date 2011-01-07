@@ -320,7 +320,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/MergeRunsTest.h
 		 test/MinusTest.h
 		 test/MonteCarloAbsorptionTest.h
-		 test/MultipleScatteringAbsorption.h
+		 test/MultipleScatteringAbsorptionTest.h
 		 test/MultiplyRangeTest.h
 		 test/MultiplyTest.h
 		 test/MuonAlphaCalcTest.h

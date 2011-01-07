@@ -31,13 +31,9 @@ using namespace Mantid::NeXus;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-class LoadRSaveNLoadNTest : public CxxTest::TestSuite
+class LoadRSaveNLoadNcspTest : public CxxTest::TestSuite
 {
 public:
-
-  LoadRSaveNLoadNTest()
-  {
-  }
 
   void testInit()
   {

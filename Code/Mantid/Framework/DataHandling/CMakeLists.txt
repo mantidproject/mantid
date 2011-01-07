@@ -157,7 +157,7 @@ set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelp
 		 test/RawFileInfoTest.h
 		 test/SaveCanSAS1dTest.h
 		 test/SaveCSVTest.h
-		 test/saveDASCTest.h
+		 test/SaveDASCTest.h
 		 #test/SaveFocussedXYETest.h # TODO uses WorkspaceCreationHelper.hh
 		 test/SavePHXTest.h
 		 #test/SaveRKHTest.h # TODO uses WorkspaceCreationHelper.hh

@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid;
 
-class FindCenterOfMassPositionTest2 : public CxxTest::TestSuite
+class FindCenterOfMassPosition2Test : public CxxTest::TestSuite
 {
 public:
 
