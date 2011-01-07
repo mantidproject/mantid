@@ -29,9 +29,24 @@ set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/RenameParDialog.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
+                inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 
-file ( GLOB MOC_FILES inc/MantidQtMantidWidgets/*.h )
+set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
+                inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
+                inc/MantidQtMantidWidgets/ICatInvestigation.h
+                inc/MantidQtMantidWidgets/ICatMyDataSearch.h
+                inc/MantidQtMantidWidgets/ICatSearch.h
+                inc/MantidQtMantidWidgets/ICatUtils.h
+                inc/MantidQtMantidWidgets/InstrumentSelector.h
+                inc/MantidQtMantidWidgets/MWDiag.h
+                inc/MantidQtMantidWidgets/MWRunFiles.h
+                inc/MantidQtMantidWidgets/pythonCalc.h
+                inc/MantidQtMantidWidgets/RangeSelector.h
+                inc/MantidQtMantidWidgets/RenameParDialog.h
+                inc/MantidQtMantidWidgets/SaveWorkspaces.h
+                inc/MantidQtMantidWidgets/UserFunctionDialog.h
+)
 
 set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
                inc/MantidQtMantidWidgets/ICatInvestigation.ui

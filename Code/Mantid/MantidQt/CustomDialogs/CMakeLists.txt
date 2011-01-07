@@ -21,7 +21,16 @@ set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
 )
 
-file ( GLOB MOC_FILES inc/MantidQtCustomDialogs/*.h )
+set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
+                inc/MantidQtCustomDialogs/LoadAsciiDialog.h
+                inc/MantidQtCustomDialogs/LoadDAEDialog.h
+                inc/MantidQtCustomDialogs/LoadRawDialog.h
+                inc/MantidQtCustomDialogs/LoginDialog.h
+                inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
+                inc/MantidQtCustomDialogs/MantidGLWidget.h
+                inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
+                inc/MantidQtCustomDialogs/SampleShapeHelpers.h
+)
 
 set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/DiagScriptInputDialog.ui

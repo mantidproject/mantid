@@ -10,6 +10,7 @@ set ( SRC_FILES src/AlgorithmDialog.cpp
                 src/UserSubWindow.cpp
 )
 
+# Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtAPI/AlgorithmDialog.h
                 inc/MantidQtAPI/AlgorithmInputHistory.h
                 inc/MantidQtAPI/DllOption.h

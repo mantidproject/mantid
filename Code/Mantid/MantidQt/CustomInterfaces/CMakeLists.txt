@@ -27,7 +27,17 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
 )
 
-file ( GLOB MOC_FILES inc/MantidQtCustomInterfaces/*.h )
+set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
+                inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/Homer.h
+                inc/MantidQtCustomInterfaces/Indirect.h
+                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/SANSAddFiles.h
+                inc/MantidQtCustomInterfaces/SANSRunWindow.h
+                inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
+)
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
