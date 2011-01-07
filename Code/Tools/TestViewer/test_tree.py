@@ -40,21 +40,35 @@ class MyColors:
     
     
 # =======================================================================================    
-def get_suite_color(suite):
-    """Return the background color for this suite or project test result"""
-    state = suite.state
-    if state == test_info.TestSuiteResult.NOT_RUN:
-        return QColor(Qt.lightGray)
-    elif state == test_info.TestSuiteResult.ALL_PASSED:
-        return MyColors.lightGreen
-    elif state == test_info.TestSuiteResult.ALL_FAILED:
-        return QColor(Qt.red)
-    elif state == test_info.TestSuiteResult.BUILD_ERROR:
-        return QColor(Qt.magenta)
-    elif state == test_info.TestSuiteResult.SOME_FAILED:
-        return MyColors.lightRed
+def get_background_color(state):
+    """Return the background color for this test result.
+    Parameters
+        state :: TestResult """
+    if not isinstance(state, test_info.TestResult):
+        return QVariant()
+    
+    col = QColor(Qt.lightGray)
+    if state == test_info.TestResult.NOT_RUN:
+        col = QColor(Qt.lightGray)
+    elif state == test_info.TestResult.ALL_PASSED:
+        col = MyColors.lightGreen
+    elif state == test_info.TestResult.ALL_FAILED:
+        col = QColor(Qt.red)
+    elif state == test_info.TestResult.BUILD_ERROR:
+        col = QColor(Qt.magenta)
+    elif state == test_info.TestResult.SOME_FAILED:
+        col = MyColors.lightRed
     else:
         return QVariant()
+    
+    if state.old and (state.value != test_info.TestResult.NOT_RUN): 
+        # Darken whatever color was selected 
+        col = QColor( col.red()/2, col.green()/2, col.blue()/2)
+    else:
+        # Copy constructor
+        col = QColor( col )
+        
+    return col 
                     
 
 # =======================================================================================    
@@ -118,7 +132,7 @@ class TreeItemProject(object):
     
     def background_color(self):
         """Return the background color for this item"""
-        return get_suite_color(self.project)
+        return get_background_color(self.project.state)
     
       
 
@@ -183,7 +197,7 @@ class TreeItemSuite(object):
     
     def background_color(self):
         """Return the background color for this item"""
-        return get_suite_color(self.suite)
+        return get_background_color(self.suite.state)
 
 
 
@@ -216,23 +230,7 @@ class TreeItemSingle(object):
     
     def background_color(self):
         """Return the background color for this single test result"""
-        state = self.test.state
-        if state == test_info.TestResultState.NOT_RUN:
-            return QColor(Qt.lightGray)
-        elif state == test_info.TestResultState.PASSED:
-            return MyColors.lightGreen
-        elif state == test_info.TestResultState.FAILED:
-            return MyColors.mediumRed
-        elif state == test_info.TestResultState.BUILD_ERROR:
-            return QColor(Qt.magenta)
-        elif state == test_info.TestResultState.PASSED_OLD:
-            return QColor(Qt.darkGreen)
-        elif state == test_info.TestResultState.FAILED_OLD:
-            return QColor(Qt.darkRed)
-        elif state == test_info.TestResultState.BUILD_ERROR_OLD:
-            return QColor(Qt.darkGray)
-        else:
-            return QVariant()
+        return get_background_color(self.test.state)
         
     def is_checked(self):
         """ Can't check at the single test level """

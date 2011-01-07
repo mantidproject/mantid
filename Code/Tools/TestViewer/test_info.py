@@ -12,41 +12,10 @@ import multiprocessing
 from multiprocessing import Pool
 import random
 
-#==================================================================================================
-class TestResultState:
-    """Enumeration..."""
-    """ Test was not run since the program started """
-    NOT_RUN = 0
-    """ Test passed """
-    PASSED = 1
-    """ Test failed """
-    FAILED = 2
-    """ Build error ! """
-    BUILD_ERROR = 3
-    """ Passed the last time it was run, but is out of date now """
-    PASSED_OLD = 4
-    """ Failed the last time it was run, but is out of date now """
-    FAILED_OLD = 5
-    """ Compilation last time it was run """
-    BUILD_ERROR_OLD = 6
 
 #==================================================================================================
-"""Dictionary with strings to show the contents"""
-global test_result_state_string
-test_result_state_string = {
-    TestResultState.NOT_RUN: "Not Run",
-    TestResultState.PASSED:"Passed",
-    TestResultState.FAILED:"FAILED!",
-    TestResultState.BUILD_ERROR:"BUILD ERROR!",
-    TestResultState.PASSED_OLD:"Passed (old)",
-    TestResultState.FAILED_OLD:"FAILED (old)",
-    TestResultState.BUILD_ERROR_OLD:"BUILD ERROR (old)",
-    }
-
-
-#==================================================================================================
-class TestSuiteResult:
-    """Enumeration giving the state of a test suite or project"""
+class TestResult:
+    """Enumeration giving the state of a single test, suite, or project"""
     """ Test was not run since the program started """
     NOT_RUN = 0
     """ Test passed """
@@ -58,71 +27,64 @@ class TestSuiteResult:
     """ All tests failed """
     ALL_FAILED = 4
     
-    def __init__(self, value=0):
+    def __init__(self, value=0, old=False):
         self.value = value
+        self.old = old
         
     def __eq__(self, other):
-        if isinstance(other, TestSuiteResult):
-            return self.value == other.value
+        """ Equality comparison """
+        if isinstance(other, TestResult):
+            return ((self.value == other.value) and (self.old == other.old))
         else:
             return self.value == other
         
     def __neq__(self, other):
-        if isinstance(other, TestSuiteResult):
-            return self.value != other.value
+        if isinstance(other, TestResult):
+            return (self.value != other.value) or (self.old != other.old)
         else:
             return self.value != other
         
     def get_string(self):
         """Return a string summarizing the state. Used in GUI."""
-        if self.value == self.NOT_RUN: return "Not Run" 
-        if self.value == self.ALL_PASSED: return "All Passed" 
-        if self.value == self.SOME_FAILED: return "Some FAILED!" 
-        if self.value == self.BUILD_ERROR: return "BUILD ERROR!" 
-        if self.value == self.ALL_FAILED: return "ALL FAILED!"
-        return "Unknown" 
+        s = "Unknown"
+        if self.value == self.NOT_RUN: s = "Not Run" 
+        if self.value == self.ALL_PASSED: s = "All Passed" 
+        if self.value == self.SOME_FAILED: s = "Some FAILED!" 
+        if self.value == self.BUILD_ERROR: s = "BUILD ERROR!" 
+        if self.value == self.ALL_FAILED: s = "ALL FAILED!"
+        if self.old and (self.value != self.NOT_RUN):
+            s += " (old)"
+        return s 
         
-    def add_single(self, state):
-        """ Add the state from a single test result (TestResultState) to this suite result. """
-        if state == TestResultState.BUILD_ERROR:
+        
+    def add(self, other):
+        """ Add the state from a another test result or another suite. """
+        if other == self.BUILD_ERROR:
             self.value = self.BUILD_ERROR
             return
         
-        if state == TestResultState.PASSED:
+        if other == self.ALL_PASSED:
             if self.value == self.ALL_FAILED:
                 self.value = self.SOME_FAILED
             elif self.value == self.NOT_RUN:
                 self.value = self.ALL_PASSED
         
-        if state == TestResultState.FAILED:
+        if other == self.ALL_FAILED:
             if self.value == self.ALL_PASSED:
                 self.value = self.SOME_FAILED
             elif self.value == self.NOT_RUN:
                 self.value = self.ALL_FAILED
         
-    def add_suite(self, state):
-        """ Add the state from a suite aggregated test result (TestSuiteResult) to this suite/project result. """
-        if state == self.BUILD_ERROR:
-            self.value = self.BUILD_ERROR
-            return
-        
-        if state == self.ALL_PASSED:
-            if self.value == self.ALL_FAILED:
-                self.value = self.SOME_FAILED
-            elif self.value == self.NOT_RUN:
-                self.value = self.ALL_PASSED
-        
-        if state == self.ALL_FAILED:
-            if self.value == self.ALL_PASSED:
-                self.value = self.SOME_FAILED
-            elif self.value == self.NOT_RUN:
-                self.value = self.ALL_FAILED
-        
-        if state == self.SOME_FAILED:
+        if other == self.SOME_FAILED:
             if (self.value == self.ALL_PASSED) or (self.value == self.ALL_FAILED):
                 self.value = self.SOME_FAILED
             elif self.value == self.NOT_RUN:
                 self.value = self.SOME_FAILED
+                
+        # If anything is old, then this one is old too!
+        if isinstance(other, TestResult):
+            if other.old and other.value != self.NOT_RUN:
+                self.old = True
         
      
           
@@ -133,7 +95,7 @@ class TestSingle(object):
         self.name = name
         
         # Starting test state
-        self.state = TestResultState.NOT_RUN
+        self.state = TestResult()
         
         # Last date and time the test was run
         self.lastrun = None
@@ -169,12 +131,12 @@ class TestSingle(object):
         # Get the runtime
         self.runtime = float(case.getAttribute("time"))
         # Assumed passed
-        self.state = TestResultState.PASSED
+        self.state = TestResult(TestResult.ALL_PASSED, old=False)
         # Look for failures
         fails = case.getElementsByTagName("failure")
         
         if len(fails)>0:
-            self.state = TestResultState.FAILED
+            self.state = TestResult(TestResult.ALL_FAILED, old=False)
             # File and line of failure
             file = fails[0].getAttribute("file")
             self.failure_line = fails[0].getAttribute("line")
@@ -187,20 +149,14 @@ class TestSingle(object):
             # This is a node containing text (the firstchild) which is a Text node
             self.stdout = systemout[0].firstChild.data
             
+    #----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
-        global test_result_state_string
-        return test_result_state_string[self.state]
+        return self.state.get_string()
         
     def age(self):
         """ Age the results (flag them as "old" ) """
-        if self.state == TestResultState.FAILED:
-            self.state = TestResultState.FAILED_OLD
-        elif self.state == TestResultState.PASSED:
-            self.state = TestResultState.PASSED_OLD
-        elif self.state == TestResultState.BUILD_ERROR:
-            self.state = TestResultState.BUILD_ERROR_OLD
-        # print "Aging %s and it is now %s " % (self.name, self.get_state_str() )
+        self.state.old = True
         
     def __repr__(self):
         return "TestSingle(%s): state=%d, lastrun=%s, runtime=%s.\n%s" % (self.name, self.state, self.lastrun, self.runtime, self.stdout)
@@ -231,7 +187,7 @@ class TestSuite(object):
         # Was it made correctly?
         self.built_succeeded = True
         # The state of the overall suite
-        self.state = TestSuiteResult()
+        self.state = TestResult()
         self.passed = 0
         self.failed = 0
         self.num_run = 0
@@ -296,24 +252,24 @@ class TestSuite(object):
         """
         self.built_succeeded = False
         for test in self.tests:
-            test.state = TestResultState.BUILD_ERROR
+            test.state = TestResult(TestResult.BUILD_ERROR, old=False)
             test.failure = "Build failure"
             test.stdout = output
             
     #----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
-        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.state = TestResult(TestResult.NOT_RUN)
         self.passed = 0
         self.failed = 0
         self.num_run = 0
         for test in self.tests:
             state = test.state 
-            self.state.add_single( state )
-            if state==TestResultState.PASSED: 
+            self.state.add( state )
+            if state==TestResult.ALL_PASSED: 
                 self.passed += 1 
                 self.num_run += 1
-            if (state==TestResultState.FAILED) or (state==TestResultState.BUILD_ERROR): 
+            if (state==TestResult.ALL_FAILED) or (state==TestResult.BUILD_ERROR): 
                 self.failed += 1 
                 self.num_run += 1
             
@@ -438,7 +394,7 @@ class TestProject(object):
         self.selected = True
 
         # The state of the overall project
-        self.state = TestSuiteResult()
+        self.state = TestResult()
         self.passed = 0
         self.failed = 0
         self.num_run = 0
@@ -510,13 +466,13 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
-        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.state = TestResult(TestResult.NOT_RUN)
         self.passed = 0
         self.failed = 0
         self.num_run = 0
         for suite in self.suites:
             state = suite.state 
-            self.state.add_suite( state )
+            self.state.add( state )
             self.passed += suite.passed 
             self.num_run += suite.num_run
             self.failed += suite.failed
@@ -650,7 +606,7 @@ class MultipleProjects(object):
         self.abort_run = False
            
         # The state of the overall project
-        self.state = TestSuiteResult()
+        self.state = TestResult()
         self.passed = 0
         self.failed = 0
         self.num_run = 0
@@ -690,19 +646,20 @@ class MultipleProjects(object):
             for suite in pj.suites:
                 suite.state.value = random.randint(0,4)
                 for test in suite.tests:
-                    test.state = random.randint(0, 6)
+                    test.state = TestResult(random.randint(0, 4))
+                    test.state.old = (random.randint(0,10) > 5)
                     test.runtime = random.random()/1000
                    
     #----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """
-        self.state = TestSuiteResult(TestSuiteResult.NOT_RUN)
+        self.state = TestResult(TestResult.NOT_RUN)
         self.passed = 0
         self.failed = 0
         self.num_run = 0
         for pj in self.projects:
             state = pj.state 
-            self.state.add_suite( state )
+            self.state.add( state )
             self.passed += pj.passed 
             self.num_run += pj.num_run
             self.failed += pj.failed
@@ -886,38 +843,40 @@ def test_run_print_callback(obj):
 #=================== Unit Tests ====================        
 #==================================================================================        
 def test_results_compiling():
-    r = TestSuiteResult()
-    assert r.value == TestSuiteResult.NOT_RUN
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.ALL_PASSED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.ALL_PASSED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.SOME_FAILED
-    r.add_single(TestResultState.BUILD_ERROR)
-    assert r.value == TestSuiteResult.BUILD_ERROR
+    r = TestResult()
+    assert r.value == TestResult.NOT_RUN
+    r.add(TestResult.ALL_PASSED)
+    assert r.value == TestResult.ALL_PASSED
+    r.add(TestResult.ALL_PASSED)
+    assert r.value == TestResult.ALL_PASSED
+    r.add(TestResult.ALL_FAILED)
+    assert r.value == TestResult.SOME_FAILED
+    r.add(TestResult.ALL_FAILED)
+    assert r.value == TestResult.SOME_FAILED
+    r.add(TestResult.ALL_PASSED)
+    assert r.value == TestResult.SOME_FAILED
+    r.add(TestResult.BUILD_ERROR)
+    assert r.value == TestResult.BUILD_ERROR
     
-    r = TestSuiteResult()
-    assert r.value == TestSuiteResult.NOT_RUN
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.ALL_FAILED
-    r.add_single(TestResultState.FAILED)
-    assert r.value == TestSuiteResult.ALL_FAILED
-    r.add_single(TestResultState.PASSED)
-    assert r.value == TestSuiteResult.SOME_FAILED
+    r = TestResult()
+    assert r.value == TestResult.NOT_RUN
+    r.add(TestResult.ALL_FAILED)
+    assert r.value == TestResult.ALL_FAILED
+    r.add(TestResult.ALL_FAILED)
+    assert r.value == TestResult.ALL_FAILED
+    r.add(TestResult.ALL_PASSED)
+    assert r.value == TestResult.SOME_FAILED
 
 def test_age():
     a = TestSingle("my_test_test")
-    assert (a.state == TestResultState.NOT_RUN)
+    assert (a.state == TestResult.NOT_RUN)
     a.age()
-    assert (a.state == TestResultState.NOT_RUN)
-    a.state = TestResultState.PASSED
+    assert (a.state == TestResult.NOT_RUN)
+    assert (a.state.old)
+    a = TestSingle("my_test_test")
+    a.state = TestResult(TestResult.ALL_PASSED)
     a.age()
-    assert (a.state == TestResultState.PASSED_OLD)
+    assert (a.state.old)
     
 test_results_compiling()        
 test_age()
