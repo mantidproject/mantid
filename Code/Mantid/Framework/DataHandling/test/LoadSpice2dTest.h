@@ -20,10 +20,10 @@
  * Test HFIR SANS Spice loader
  * TODO: check that an exception is thrown when the geometry file doesn't define all monitors
  */
-class LoadSpice2DTest : public CxxTest::TestSuite
+class LoadSpice2dTest : public CxxTest::TestSuite
 {
 public:
-  LoadSpice2DTest()
+  LoadSpice2dTest()
   {
      inputFile = "BioSANS_exp61_scan0004_0001.xml";
   }
