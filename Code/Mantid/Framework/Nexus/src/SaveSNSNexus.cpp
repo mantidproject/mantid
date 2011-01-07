@@ -255,7 +255,7 @@ namespace NeXus
                 //Just copy that then.
                 if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
                 if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
-                if (NXmakedata (outId, name, dataType, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+                if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
                 if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
                 if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
                 if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
@@ -309,7 +309,7 @@ namespace NeXus
                   }
                 }
 
-                if (NXmakedata (outId, name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+                if (NXcompmakedata (outId, name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
                 if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
                 if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
 
@@ -321,7 +321,7 @@ namespace NeXus
 
                 // ----- Save the data_errors field -------
                 NXname errors_name = "data_errors";
-                if (NXmakedata (outId, errors_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+                if (NXcompmakedata (outId, errors_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
                 if (NXopendata (outId, errors_name) != NX_OK) return NX_ERROR;
                 if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
 
@@ -349,7 +349,7 @@ namespace NeXus
               for (size_t i=0; i < X.size(); i++)
                 tof_data[i] = X[i];
 
-              if (NXmakedata (outId, name, dataType, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+              if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
               if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
               if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
               if (NXputdata (outId, tof_data) != NX_OK) return NX_ERROR;
@@ -365,7 +365,7 @@ namespace NeXus
               if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
               if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
               if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
-              if (NXmakedata (outId, name, dataType, dataRank, dataDimensions) != NX_OK) return NX_ERROR;
+              if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
               if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
               if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
               if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
