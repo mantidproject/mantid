@@ -536,8 +536,8 @@ public:
     TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
     TS_ASSERT_DELTA( data1[1], 2.0, 1e-6);
 
-    int mem1, mem2;
-    mem1 = memory_usage();
+    int mem1 = memory_usage();
+    int mem2 = 0;
     int last = 100;
     //Read more; memory use should be the same?
 
@@ -611,9 +611,8 @@ public:
     //But the Y is still 2.0
     TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
 
-
-    int mem1, mem2;
-    mem1 = memory_usage();
+    int mem1 = memory_usage();
+    int mem2 = 0;
     int last = 100;
     //Read more; memory use should be the same?
     for (int i=last; i<last+100;i++)
