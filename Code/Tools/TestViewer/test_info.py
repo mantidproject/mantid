@@ -31,6 +31,9 @@ class TestResult:
         self.value = value
         self.old = old
         
+    def is_failed(self):
+        return self.value == self.SOME_FAILED or self.value == self.BUILD_ERROR or self.value == self.ALL_FAILED
+        
     def __eq__(self, other):
         """ Equality comparison """
         if isinstance(other, TestResult):
@@ -110,6 +113,15 @@ class TestSingle(object):
         
         # Stdout output for that failure 
         self.stdout = "" 
+        
+    #----------------------------------------------------------------------------------
+    def get_failed(self):
+        """Return 1 if the test failed"""
+        if self.state.is_failed():
+            return 1
+        else:
+            return 0
+    failed = property(get_failed) 
         
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
@@ -631,7 +643,7 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test") and (fname.startswith("API") or fname.startswith("Geometry")): #!TODO
+            if fname.endswith("Test") and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
                 make_command = "cd %s ; make %s" % (os.path.join(path, ".."), fname)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname

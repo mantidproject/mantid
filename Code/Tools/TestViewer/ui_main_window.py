@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Thu Jan  6 15:33:56 2011
+# Created: Fri Jan  7 16:02:55 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(951, 962)
+        MainWindow.resize(1312, 962)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -103,6 +103,9 @@ class Ui_MainWindow(object):
         self.buttonRefresh = QtGui.QPushButton(self.frameTreeFilter)
         self.buttonRefresh.setGeometry(QtCore.QRect(400, 10, 98, 27))
         self.buttonRefresh.setObjectName("buttonRefresh")
+        self.buttonTest = QtGui.QPushButton(self.frameTreeFilter)
+        self.buttonTest.setGeometry(QtCore.QRect(550, 40, 98, 27))
+        self.buttonTest.setObjectName("buttonTest")
         self.vlTree.addWidget(self.frameTreeFilter)
         self.treeTests = QtGui.QTreeView(self.verticalLayoutWidget_2)
         self.treeTests.setSortingEnabled(True)
@@ -310,7 +313,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 951, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1312, 25))
         self.menubar.setObjectName("menubar")
         self.menuTests = QtGui.QMenu(self.menubar)
         self.menuTests.setObjectName("menuTests")
@@ -356,6 +359,7 @@ class Ui_MainWindow(object):
         self.checkShowSelected.setText(QtGui.QApplication.translate("MainWindow", "Selected", None, QtGui.QApplication.UnicodeUTF8))
         self.checkShowFailedOnly.setText(QtGui.QApplication.translate("MainWindow", "Failed only", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonRefresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonTest.setText(QtGui.QApplication.translate("MainWindow", "test!", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))

@@ -14,7 +14,7 @@ import test_info
 from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 
 import test_tree
-from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject
+from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject, TreeFilterProxyModel
 
 
 #==================================================================================================
@@ -93,7 +93,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # --- Menu Commands ---
         self.connect(self.action_Quit, QtCore.SIGNAL("triggered()"), self.quit)
-        
+
+        # -- Checkboxes toggle  ----
+        self.connect(self.checkShowFailedOnly, QtCore.SIGNAL("stateChanged(int)"), self.checked_fail_only)
+
+
         # -- Button commands ----
         self.connect(self.buttonRunAll, QtCore.SIGNAL("clicked()"), self.run_all)
         self.connect(self.buttonRunSelected, QtCore.SIGNAL("clicked()"), self.run_selected)
@@ -102,6 +106,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonExpandProjects, QtCore.SIGNAL("clicked()"), self.expand_tree_to_projects)
         self.connect(self.buttonExpandSuites, QtCore.SIGNAL("clicked()"), self.expand_tree_to_suites)
         self.connect(self.buttonExpandAll, QtCore.SIGNAL("clicked()"), self.expand_tree_to_all)
+        self.connect(self.buttonTest, QtCore.SIGNAL("clicked()"), self.test)
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
@@ -119,8 +124,14 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         #@type tree QTreeWidget
         
         # Create the tree model and put it in there 
-        model = TestTreeModel()
-        tree.setModel(model)
+        # It is important to save the model in self otherwise I think it gets garbage collected without error!
+        self.model = TestTreeModel()
+        
+        self.proxy = TreeFilterProxyModel()
+        self.proxy.setSourceModel(self.model)
+        self.proxy.setFilterWildcard("*G*")
+        tree.setModel(self.proxy)
+        
         tree.setAlternatingRowColors(True)
         tree.header().setResizeMode(0,QHeaderView.Stretch)
         tree.setColumnWidth(1,230)
@@ -129,8 +140,32 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
         
         tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
-        
 
+    def test(self):
+        dialog = QtGui.QDialog()
+        dialog.setMinimumSize(700,750)
+        layout = QtGui.QVBoxLayout(dialog)
+        tv = QtGui.QTreeView(dialog)
+        tv.setAlternatingRowColors(True)
+        layout.addWidget(tv)
+        tv.setModel(self.proxy)
+        dialog.exec_()
+        print "Done!"
+
+#    #-----------------------------------------------------------------------------
+#    def filter_tree(self):
+#        """ Apply current filtering options to the tree, by hiding rows """
+#        failed_only = True
+#        
+#        mod = self.treeTests.model()
+#        tree = self.treeTests
+#        for i in xrange(mod.rootItem.childCount()):
+#            pj_index = mod.index(i, 0, QModelIndex() )
+#            pj_item = mod.rootItem.child(i)
+#            print "Hiding ", pj_index.row()
+#            tree.setRowHidden( 0, pj_index, True)
+#        
+#        
         
     #-----------------------------------------------------------------------------
     def readSettings(self):
@@ -139,12 +174,16 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
         self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
                      s.value("TestViewerMainWindow.height", 900).toInt()[0] )    
+        self.treeTests.setColumnWidth( 1, s.value("treeTests.columnWidth(1)", 230).toInt()[0] )
+        self.treeTests.setColumnWidth( 2, s.value("treeTests.columnWidth(2)", 100).toInt()[0] )
         
     #-----------------------------------------------------------------------------
     def saveSettings(self):
         s = self.settings
         s.setValue("checkInParallel", self.checkInParallel.isChecked() )
         s.setValue("splitter", self.splitter.saveState())
+        s.setValue("treeTests.columnWidth(1)", self.treeTests.columnWidth(1) )
+        s.setValue("treeTests.columnWidth(2)", self.treeTests.columnWidth(2) )
         s.setValue("TestViewerMainWindow.width", self.width())
         s.setValue("TestViewerMainWindow.height", self.height())
         
@@ -205,9 +244,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Update the tree's data for the suite
         if not obj is None:
             if isinstance(obj, TestSuite):
-                self.treeTests.model().update_suite(obj)
+                self.model.update_suite(obj)
             if isinstance(obj, TestProject):
-                self.treeTests.model().update_project(obj.name)
+                self.model.update_project(obj.name)
                 
 #        # Every second or so, update the tree too
 #        if (time.time() - self.last_tree_update) > 1.0:
@@ -241,7 +280,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def update_tree(self):
         """ Update the tree view with whatever the current results are """
-        self.treeTests.model().setupModelData()
+        print "update_tree"
+        self.model.setupModelData()
         self.treeTests.update()
         
 
@@ -256,7 +296,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
                 
                 
-
+    #-----------------------------------------------------------------------------
+    def checked_fail_only(self, state):
+        """ Toggle the filtering """
+        self.proxy.set_filter_failed_only(state > 0)
             
     #-----------------------------------------------------------------------------
     def run_all(self):

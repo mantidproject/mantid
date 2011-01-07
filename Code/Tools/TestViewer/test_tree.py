@@ -9,6 +9,7 @@ from PyQt4.QtGui import *
 
 import test_info
 from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
+import random
 
 HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)")
   
@@ -251,6 +252,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
     '''
     A tree model that displays a hierarchy of TestProject.TestSuite.TestSingle
     '''
+    #----------------------------------------------------------------------------------
     def __init__(self, parent=None):
         super(TestTreeModel, self).__init__(parent)
         # Make a root tree item
@@ -263,6 +265,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         
         # Now set up the checkability
         
+    #----------------------------------------------------------------------------------
     def flags(self, index):
         flag = Qt.ItemIsSelectable | Qt.ItemIsEnabled
         if index.column() == 0:
@@ -271,6 +274,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         return  flag
 
 
+    #----------------------------------------------------------------------------------
     def columnCount(self, parent=None):
         if parent and parent.isValid():
             return parent.internalPointer().columnCount()
@@ -285,7 +289,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
             return QtCore.QVariant()
 
         item = index.internalPointer()
-        # Return the data in the item
+        # Return the data to display in the item
         if role == QtCore.Qt.DisplayRole:
             return item.data(index.column())
         
@@ -300,9 +304,8 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         if role == Qt.BackgroundRole:
             return item.background_color();
             
-        
-        #Something else
-        if role == QtCore.Qt.UserRole:
+        #User role is used when directly querying the contents of the item
+        if role == Qt.UserRole:
             if item:
                 return item.contents
 
@@ -510,24 +513,69 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
 
 
+class TreeFilterProxyModel(QSortFilterProxyModel):
+    #----------------------------------------------------------------------------------
+    def __init__(self, parent=None):
+        super(TreeFilterProxyModel, self).__init__(parent)
+        self.failed_only = False
+        
+    #----------------------------------------------------------------------------------
+    def set_filter_failed_only(self, value):
+        """ Do we filter to show only the failed tests? """
+        self.failed_only = value
+        self.invalidateFilter()
+        
+    #----------------------------------------------------------------------------------
+    def filterAcceptsRow(self, source_row, parent_index):
+        """Return true if the row is accepted by the filter """
+
+        # If we're not filtering by anything, return True 
+        if not self.failed_only:
+            return True
+        
+        source = self.sourceModel()
+        # Get the index in the source model of this particular row
+        index = source.index(source_row, 0, parent_index)
+        # Return that particular item
+        item = source.data(index, Qt.UserRole)
+        if not item is None:
+            print item
+            
+            if self.failed_only:
+                return (item.failed > 0)
+            
+        return True
+        
+
 if __name__ == "__main__":    
 
     app = QtGui.QApplication([])
     
     test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     test_info.all_tests.make_fake_results()
-    
-    model = TestTreeModel()
+
     dialog = QtGui.QDialog()
 
     dialog.setMinimumSize(700,750)
     layout = QtGui.QVBoxLayout(dialog)
 
     tv = QtGui.QTreeView(dialog)
-    tv.setModel(model)
+
+
+    
     tv.setAlternatingRowColors(True)
     layout.addWidget(tv)
     
-    dialog.exec_()
+    model = TestTreeModel()
+    proxy = TreeFilterProxyModel()
+    proxy.setDynamicSortFilter(True)
+    proxy.setSourceModel(model)
+    proxy.set_filter_failed_only(True)
+    #proxy.setFilterWildcard("*G*")
+    tv.setModel(proxy)
+    
+    dialog.show()
+    app.exec_()
+    #dialog.exec_()
 
     app.closeAllWindows()
