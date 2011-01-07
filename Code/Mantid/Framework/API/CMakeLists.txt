@@ -151,8 +151,6 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/FrameworkManagerTest.h
 		 #test/FunctionTest.h  # TODO Implicit dependency on DataObjects - not OK
 		 test/IMDWorkspaceTest.h
-		 #test/ImplicitFunctionFactoryTest.h # TODO failed to build - gmock
-		 #test/ImplicitFunctionParameterParserFactoryTest.h # TODO failed to build - gmock
 		 test/ImplicitFunctionParserFactoryTest.h
 		 test/InstrumentDataServiceTest.h
 		 test/MatrixWorkspaceTest.h
@@ -167,6 +165,11 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/TextAxisTest.h
 		 test/WorkspaceFactoryTest.h
 		 test/WorkspacePropertyTest.h )
+
+set ( GMOCK_TEST_FILES
+                 test/ImplicitFunctionFactoryTest.h
+                 test/ImplicitFunctionParameterParserFactoryTest.h
+)
 
 # For Windows:
 add_definitions ( -DIN_MANTID_API )
@@ -186,7 +189,12 @@ set_property ( TARGET API PROPERTY FOLDER "Framework" )
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
 if ( CXXTEST_FOUND )
-  cxxtest_add_test ( APITest ${TEST_FILES} )
-  target_link_libraries( APITest API )
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
+    target_link_libraries( APITest API ${GMOCK_LIBRARIES} )
+  else ()
+    cxxtest_add_test ( APITest ${TEST_FILES} )
+    target_link_libraries( APITest API )
+  endif()
   add_dependencies ( FrameworkTests APITest )
 endif ()
