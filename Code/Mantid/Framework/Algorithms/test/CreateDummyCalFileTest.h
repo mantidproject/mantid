@@ -78,23 +78,42 @@ public:
     int i1,i2,i3,i4;
     double d1;
 
+    // Skip header
     for (int i=0; i<4; ++i)
     {
       std::getline (in,line);
     }
-    for (int i=0; i<145; ++i)
+    // Check the first line, middle and last lines
+    // First line
+    in >> i1 >> i2 >> d1 >> i3 >> i4;
+    TS_ASSERT_EQUALS(i1,0 );
+    TS_ASSERT_EQUALS(i2,145 );
+    TS_ASSERT_EQUALS(d1,0.000000 );
+    TS_ASSERT_EQUALS(i3,1 );
+    TS_ASSERT_EQUALS(i4,1 );    
+    
+    for (int i=0; i<72; ++i)
     {
       in >> i1 >> i2 >> d1 >> i3 >> i4;
     }
+    TS_ASSERT_EQUALS(i1, 72 );
+    TS_ASSERT_EQUALS(i2, 71 );
+    TS_ASSERT_EQUALS(d1,0.000000 );
+    TS_ASSERT_EQUALS(i3,1 );
+    TS_ASSERT_EQUALS(i4,1);    
 
-    in.close();
-
-    TS_ASSERT_EQUALS(i1,144 );
+    // Final line
+    for( int i=0; i<73; ++i )
+    {
+      in >> i1 >> i2 >> d1 >> i3 >> i4;
+    } 
+    TS_ASSERT_EQUALS(i1,145 );
     TS_ASSERT_EQUALS(i2,144 );
     TS_ASSERT_EQUALS(d1,0.000000 );
     TS_ASSERT_EQUALS(i3,1 );
     TS_ASSERT_EQUALS(i4,1 );
 
+    in.close();
 
     // remove file created by this algorithm
     Poco::File(outputFile).remove();
