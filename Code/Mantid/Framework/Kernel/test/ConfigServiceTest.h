@@ -142,8 +142,8 @@ public:
 
   void TestRelativeToAbsolute()
   {
-    std::string instrumentPath = ConfigService::Instance().getString("instrumentDefinition.directory");
-    TS_ASSERT( Poco::Path(instrumentPath).isAbsolute() );
+    std::string path = ConfigService::Instance().getString("defaultsave.directory");
+    TS_ASSERT( Poco::Path(path).isAbsolute() );
   } 
 
 	void TestAppendProperties()

@@ -92,8 +92,6 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
 public:
   void testSetup()
   {
-    ConfigService::Instance().updateConfig("MantidTest.properties");
-
     WorkspaceFactory::Instance().subscribe<Workspace1DTest>("Workspace1DTest");
     WorkspaceFactory::Instance().subscribe<Workspace2DTest>("Workspace2DTest");
     try
@@ -158,8 +156,6 @@ public:
 
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error );
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error );
-
-    ConfigService::Instance().updateConfig("Mantid.properties");
   }
 };
 
