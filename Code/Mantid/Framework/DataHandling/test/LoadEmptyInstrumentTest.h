@@ -776,7 +776,6 @@ void testCheckIfVariousInstrumentsLoad()
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", "SANS2D_Definition.xml");
-    inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParaSans2dTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
 
@@ -788,7 +787,6 @@ void testCheckIfVariousInstrumentsLoad()
     LoadEmptyInstrument loaderPolRef;
     loaderPolRef.initialize();
     loaderPolRef.setPropertyValue("Filename", "POLREF_Definition.xml");
-    inputFile = loaderPolRef.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamPOLREFTest";
     loaderPolRef.setPropertyValue("OutputWorkspace", wsName);
 
@@ -800,7 +798,6 @@ void testCheckIfVariousInstrumentsLoad()
     LoadEmptyInstrument loaderEMU;
     loaderEMU.initialize();
     loaderEMU.setPropertyValue("Filename", "EMU_Definition.xml");
-    inputFile = loaderEMU.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamEMUTest";
     loaderEMU.setPropertyValue("OutputWorkspace", wsName);
 
@@ -812,12 +809,22 @@ void testCheckIfVariousInstrumentsLoad()
     LoadEmptyInstrument loaderEMU2;
     loaderEMU2.initialize();
     loaderEMU2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
-    inputFile = loaderEMU2.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 
     TS_ASSERT_THROWS_NOTHING(loaderEMU2.execute());
     TS_ASSERT( loaderEMU2.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
+    LoadEmptyInstrument loaderINES;
+    loaderINES.initialize();
+    loaderINES.setPropertyValue("Filename", "INES_Definition.xml");
+    wsName = "LoadEmptyInstrumentINESTest";
+    loaderINES.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderINES.execute());
+    TS_ASSERT( loaderINES.isExecuted() );
 
     AnalysisDataService::Instance().remove(wsName);
 
