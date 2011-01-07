@@ -30,7 +30,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         // this should throw if file does not exist
         TSM_ASSERT_THROWS("This file should not exist",loader.setPropertyValue("inFilename","../Test/AutoTestData/test_horace_reader.sqw"),std::invalid_argument);
         // and so this
-        TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","../../../../Test/AutoTestData/test_horace_reader.sqw"));
+        TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","test_horace_reader.sqw"));
      }
      void testMDWSExec(){
          // does it add it to analysis data service? -- no
