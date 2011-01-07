@@ -117,7 +117,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 
     const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
     std::vector<std::string> dimID = pCurrentGeom->getBasisTags();
-    std::vector<std::vector<double>> dimPoints(this->nDims);
+    std::vector<std::vector<double> > dimPoints(this->nDims);
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
         const Geometry::IMDDimension *pDim = pCurrentGeom->get_constDimension(dimID[idim]).get();
@@ -134,7 +134,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     n_pix_in_buffer=0;
 
     // initate packer (should be more generic ways of doing this)
-    std::auto_ptr<MDDataPoint<float,uint16_t,float>> pPacker= std::auto_ptr<MDDataPoint<float,uint16_t,float>>
+    std::auto_ptr<MDDataPoint<float,uint16_t,float> > pPacker= std::auto_ptr<MDDataPoint<float,uint16_t,float> >
         (new MDDataPoint<float,uint16_t,float>(&pix_buf[0],*pPointDescr));
 
 
