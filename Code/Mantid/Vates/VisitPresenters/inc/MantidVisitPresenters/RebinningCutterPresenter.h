@@ -64,8 +64,8 @@ private:
   vtkDataSet* m_inputDataSet;
 
   /// initalised flag
-  bool m_initalized;
 
+  bool m_initalized;
 public:
 
 	/// Constructor
@@ -92,8 +92,6 @@ public:
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* applyReductionKnowledge();
 
-  //An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
-  static const std::string metaDataId;
 };
 
 //Non-member helper functions.

@@ -60,6 +60,8 @@ private:
 
 public:
 
+  RebinningXMLGenerator();
+
   /// Set the implicit function to use called.
   void setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction);
 

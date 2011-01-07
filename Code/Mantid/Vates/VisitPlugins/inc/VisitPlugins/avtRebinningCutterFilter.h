@@ -45,14 +45,13 @@
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkPlane.h>
-#include <vtkDataSet.h>
+#include <avtPluginDatasetToDatasetFilter.h>
 #include <avtPluginDataTreeIterator.h>
 #include <RebinningCutterAttributes.h>
 #include <vtkVisItClipper.h>
 
-#include <MantidAPI/ImplicitFunction.h>
 #include <MantidVisitPresenters/RebinningCutterPresenter.h>
-class vtkDataSet;
+#include <string.h>
 
 // ****************************************************************************
 //  Class: avtRebinningCutterFilter
@@ -65,8 +64,8 @@ class vtkDataSet;
 //
 // ****************************************************************************
 
-
-class avtRebinningCutterFilter: public avtPluginDataTreeIterator
+class vtkDataSet;
+class avtRebinningCutterFilter: public avtPluginDatasetToDatasetFilter
 {
 
 public:
@@ -86,10 +85,30 @@ public:
 
     virtual void SetAtts(const AttributeGroup*);
     virtual bool Equivalent(const AttributeGroup*);
+    virtual void UpdateDataObjectInfo(void);
 
 protected:
     RebinningCutterAttributes atts;
-    virtual vtkDataSet *ExecuteData(vtkDataSet*, int, std::string);
+    virtual void Execute();
+private:
+
+    //Flag indicating that this is the first execution of the operator
+    bool m_completeFirstExecute;
+
+    //Cached value for the geometry xml string. Used to determine changes to geometry in previous filters of the pipeline.
+    std::string m_cacheGeometryXML;
+
+    //Determines wheter the geometry has been changed in input filters from that used in the last execution.
+    bool isInputConsistent(const std::string& inputGeometryXML);
+
+    //Set up execution from input dataset values.
+    Mantid::VATES::Dimension_sptr getDimensionX(bool bgetFromControls) const;
+
+    Mantid::VATES::Dimension_sptr getDimensionY(bool bgetFromControls) const;
+
+    Mantid::VATES::Dimension_sptr getDimensionZ(bool bgetFromControls) const;
+
+    Mantid::VATES::Dimension_sptr getDimensiont(bool bgetFromControls) const;
 };
 
 #endif

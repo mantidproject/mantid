@@ -11,6 +11,10 @@ namespace Mantid
 namespace VATES
 {
 
+RebinningXMLGenerator::RebinningXMLGenerator() : m_wsName(""), m_wsLocation(""), m_geomXML(""), m_wsLocationXML(""), m_wsNameXML(""), m_spFunction()
+{
+}
+
 void RebinningXMLGenerator::setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction)
 {
   this->m_spFunction = spFunction;
@@ -60,7 +64,16 @@ std::string RebinningXMLGenerator::createXMLString() const
     throw std::runtime_error("No workspace name provided on workspace.");
   }
 
-  return std::string(XMLDefinitions::workspaceInstructionXMLTagStart  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + XMLDefinitions::workspaceInstructionXMLTagEnd);
+  //Check to see if a function has been provided.
+  if(NULL != m_spFunction.get())
+  {
+    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + XMLDefinitions::workspaceInstructionXMLTagEnd);
+  }
+  else
+  {
+    //Functions are optional, so don't provide them as part of the completed xml if not present.
+    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart  + m_wsNameXML + m_wsLocationXML + m_geomXML + XMLDefinitions::workspaceInstructionXMLTagEnd);
+  }
 }
 
 const std::string& RebinningXMLGenerator::getWorkspaceLocation() const

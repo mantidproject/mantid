@@ -55,7 +55,7 @@
 #include <Expression.h>
 
 #include <InvalidVariableException.h>
-
+#include "DebugStream.h"
 
 using     std::string;
 
@@ -71,7 +71,6 @@ using     std::string;
 avtMDFileReaderFileFormat::avtMDFileReaderFileFormat(const char *filename) : m_executor()
     , avtMTSDFileFormat(&filename, 1)
 {
-  //Run default rebinning against the input file.
   m_executor.execute(std::string(filename));
 }
 
@@ -131,6 +130,7 @@ void
 avtMDFileReaderFileFormat::PopulateDatabaseMetaData(avtDatabaseMetaData *md, int timeState)
 {
    
+
   avtMeshMetaData *mmd = new avtMeshMetaData;
   mmd->name = "sqw";
   mmd->spatialDimension=3;

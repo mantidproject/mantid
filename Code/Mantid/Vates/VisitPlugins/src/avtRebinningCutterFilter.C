@@ -46,7 +46,8 @@
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
-
+#include <vtkCellData.h>
+#include <avtExtents.h>
 
 using namespace Mantid::VATES;
 
@@ -58,7 +59,7 @@ using namespace Mantid::VATES;
 //
 // ****************************************************************************
 
-avtRebinningCutterFilter::avtRebinningCutterFilter()
+avtRebinningCutterFilter::avtRebinningCutterFilter(): m_completeFirstExecute(true), m_cacheGeometryXML("")
 {
 }
 
@@ -74,6 +75,7 @@ avtRebinningCutterFilter::avtRebinningCutterFilter()
 
 avtRebinningCutterFilter::~avtRebinningCutterFilter()
 {
+
 }
 
 // ****************************************************************************
@@ -133,44 +135,79 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
   return (atts == *(RebinningCutterAttributes*) a);
 }
 
-vtkDataSet* avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
+bool avtRebinningCutterFilter::isInputConsistent(const std::string& inputGeometryXML)
+{
+  return inputGeometryXML.compare(m_cacheGeometryXML) == 0;
+}
+
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionX(bool bgetFromControls) const
+{
+  using namespace Mantid::Geometry;
+  MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
+  pDimQx->setRange(-1.5, 5, 50);
+  return Mantid::VATES::Dimension_sptr(pDimQx);
+}
+
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionY(bool bgetFromControls) const
+{
+  using namespace Mantid::Geometry;
+  MDDimensionRes* pDimQy = new MDDimensionRes("qy", q2); //In reality these commands come from UI inputs.
+      pDimQy->setRange(-6.6, 6.6, 50);
+      return Mantid::VATES::Dimension_sptr(pDimQy);
+}
+
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionZ(bool bgetFromControls) const
+{
+  using namespace Mantid::Geometry;
+  MDDimensionRes* pDimQz = new MDDimensionRes("qz", q3); //In reality these commands come from UI inputs.
+     pDimQz->setRange(-6.6, 6.6, 50);
+     return Mantid::VATES::Dimension_sptr(pDimQz);
+}
+
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(bool bgetFromControls) const
+{
+  using namespace Mantid::Geometry;
+  MDDimension* pDimEn = new MDDimension("en");
+     pDimEn->setRange(3, 150, 50);
+     return Mantid::VATES::Dimension_sptr(pDimEn);
+}
+
+
+void avtRebinningCutterFilter::Execute()
 {
   using namespace Mantid::VATES;
   using namespace Mantid::Geometry;
   using Mantid::VATES::DimensionVec;
   using Mantid::VATES::Dimension_sptr;
-  RebinningCutterPresenter presenter(in_ds);
+
+  avtDataTree_p tree = GetInputDataTree();
+  vtkDataSet* in_ds = tree->GetSingleLeaf();
+
+  //TODO: check that the input provided is a dataset containing the required field data.
+
+  std::string inputGeometryXML; //TODO extract the input geometry from metadata.
+  bool inputConsistent = isInputConsistent(inputGeometryXML);
+
+  Dimension_sptr spDimX = getDimensionX(inputConsistent);
+  Dimension_sptr spDimY = getDimensionY(inputConsistent);
+  Dimension_sptr spDimZ = getDimensionZ(inputConsistent);
+  Dimension_sptr spDimt = getDimensiont(inputConsistent);
 
   DimensionVec vec;
-  MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
-  pDimQx->setRange(-1.5, 5, 5);
-  Dimension_sptr dimX = Dimension_sptr(pDimQx);
-
-  MDDimensionRes* pDimQy = new MDDimensionRes("qy", q2); //In reality these commands come from UI inputs.
-  pDimQy->setRange(-6.6, 6.6, 5);
-  Dimension_sptr dimY = Dimension_sptr(pDimQy);
-
-  MDDimensionRes* pDimQz = new MDDimensionRes("qz", q3); //In reality these commands come from UI inputs.
-  pDimQz->setRange(-6.6, 6.6, 5);
-  Dimension_sptr dimZ = Dimension_sptr(pDimQz);
-
-  MDDimension* pDimEn = new MDDimension("en");
-  pDimEn->setRange(0, 150, 5);
-  Dimension_sptr dimT = Dimension_sptr(pDimEn);
-
-  vec.push_back(dimX);
-  vec.push_back(dimY);
-  vec.push_back(dimZ);
-  vec.push_back(dimT);
+  vec.push_back(spDimX);
+  vec.push_back(spDimY);
+  vec.push_back(spDimZ);
+  vec.push_back(spDimt);
 
   doubleVector origin;
   origin.push_back(atts.GetOriginX());
   origin.push_back(atts.GetOriginY());
   origin.push_back(atts.GetOriginZ());
 
-  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, origin);
+  RebinningCutterPresenter presenter(in_ds);
+  presenter.constructReductionKnowledge(vec, spDimX, spDimY, spDimZ, spDimt, 1, 2, 3, origin);
 
-  vtkDataSet *ug = presenter.applyReductionKnowledge();
+  vtkDataSet *output_ds = presenter.applyReductionKnowledge();
 
   debug5
     << "-------------------------- Output ------------------------" << endl;
@@ -179,6 +216,31 @@ vtkDataSet* avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::s
   debug5
     << "-------------------------- End Output ------------------------" << endl;
 
-  in_ds->Delete();
-  return ug;
+
+  std::string var = "signal";
+  output_ds->GetCellData()->SetActiveScalars(var.c_str());
+  avtDataTree* newTree = new avtDataTree(output_ds, 0);
+  SetOutputDataTree(newTree);
+  double range[2] =
+  { FLT_MAX, -FLT_MAX };
+  GetDataRange(output_ds, range, var.c_str(), false);
+  avtDataAttributes &dataAtts = GetOutput()->GetInfo().GetAttributes();
+  dataAtts.GetThisProcsOriginalDataExtents(var.c_str())->Set(range);
+  dataAtts.GetThisProcsActualDataExtents(var.c_str())->Set(range);
+
+  m_completeFirstExecute = true;
 }
+
+void avtRebinningCutterFilter::UpdateDataObjectInfo(void)
+{
+  avtDataAttributes &dataAtts = GetOutput()->GetInfo().GetAttributes();
+  int dim = 3;
+  dataAtts.SetTopologicalDimension(dim);
+  dataAtts.SetSpatialDimension(dim);
+  dataAtts.GetThisProcsOriginalSpatialExtents()->Clear();
+  dataAtts.GetOriginalSpatialExtents()->Clear();
+}
+
+
+
+

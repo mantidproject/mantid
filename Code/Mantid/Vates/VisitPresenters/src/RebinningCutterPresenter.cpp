@@ -7,6 +7,8 @@
 #include <vtkStructuredGrid.h>
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
+#include <vtkCellData.h>
+
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
@@ -67,7 +69,6 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   WidthParameter widthParam = WidthParameter(width);
   HeightParameter heightParam = HeightParameter(height);
   DepthParameter depthParam = DepthParameter(depth);
-
   //Create the composite holder.
   Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
@@ -79,7 +80,7 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunc));
 
   //Add existing functions.
-  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, metaDataId.c_str());
+  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_inputDataSet, XMLDefinitions::metaDataId.c_str());
   if (existingFunctions != NULL)
   {
     compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
@@ -91,9 +92,9 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   //Apply the geometry.
   m_serializing.setGeometryXML( constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, height, width, depth, origin) );
   //Apply the workspace name after extraction from the input xml.
-  m_serializing.setWorkspaceName( findExistingWorkspaceNameFromXML(m_inputDataSet, metaDataId.c_str()));
+  m_serializing.setWorkspaceName( findExistingWorkspaceNameFromXML(m_inputDataSet, XMLDefinitions::metaDataId.c_str()));
   //Apply the workspace location after extraction from the input xml.
-  m_serializing.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(m_inputDataSet, metaDataId.c_str()));
+  m_serializing.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(m_inputDataSet, XMLDefinitions::metaDataId.c_str()));
 
   this->m_initalized = true;
 }
@@ -107,7 +108,7 @@ vtkDataSet* RebinningCutterPresenter::applyReductionKnowledge()
     vtkDataSet* visualImageData = generateVisualImage(m_serializing);
 
     //save the work performed as part of this filter instance into the pipeline.
-    persistReductionKnowledge(visualImageData, this->m_serializing, metaDataId.c_str());
+    persistReductionKnowledge(visualImageData, this->m_serializing, XMLDefinitions::metaDataId.c_str());
     return visualImageData;
   }
   else
@@ -226,8 +227,10 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
     Poco::XML::Document* pDoc = pParser.parseString(xmlString);
     Poco::XML::Element* pRootElem = pDoc->documentElement();
     Poco::XML::Element* functionElem = pRootElem->getChildElement(XMLDefinitions::functionElementName);
-
-    function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
+    if(NULL != functionElem)
+    {
+      function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
+    }
   }
   return function;
 }
@@ -318,14 +321,15 @@ vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
   vtkPoints *points = vtkPoints::New();
   points->Allocate(imageSize);
   vtkDoubleArray* scalars = vtkDoubleArray::New();
-  scalars->SetName("Signal");
-  scalars->Allocate(imageSize);
+  scalars->SetName("signal");
 
   const int sizeX = outputWs->getXDimension()->getNBins();
   const int sizeY = outputWs->getYDimension()->getNBins();
   const int sizeZ = outputWs->getZDimension()->getNBins();
+  scalars->Allocate((sizeX-1)*(sizeY-1)*(sizeZ-1));
 
   //Loop through dimensions
+  //TODO: compress into single loop.
   for (int i = 0; i < sizeX; i++)
   {
     for (int j = 0; j < sizeY; j++)
@@ -333,24 +337,34 @@ vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
       for (int k = 0; k < sizeZ; k++)
       {
         //Create an image from the point data.
-        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k);
-        scalars->InsertNextValue(point.s);
+        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k, 0);
         points->InsertNextPoint(i, j, k);
       }
     }
   }
 
+  for (int i = 0; i < sizeX-1; i++)
+  {
+    for (int j = 0; j < sizeY-1; j++)
+    {
+      for (int k = 0; k < sizeZ-1; k++)
+      {
+        //Create an image from the point data.
+        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k, 0);
+        scalars->InsertNextValue(point.s);
+      }
+    }
+  }
+
+
   //Attach points to dataset.
   visualDataSet->SetPoints(points);
-  visualDataSet->GetPointData()->AddArray(scalars);
+  visualDataSet->GetCellData()->AddArray(scalars);
   visualDataSet->SetDimensions(sizeX, sizeY, sizeZ);
   points->Delete();
   scalars->Delete();
   return visualDataSet;
 }
-
-const std::string RebinningCutterPresenter::metaDataId="1";
-
 
 }
 

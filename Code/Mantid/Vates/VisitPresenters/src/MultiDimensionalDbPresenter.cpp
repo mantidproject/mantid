@@ -1,4 +1,6 @@
 #include <MantidVisitPresenters/MultiDimensionalDbPresenter.h>
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
+#include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
@@ -83,7 +85,14 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   points->Delete();
 
   vtkFieldData* outputFD = vtkFieldData::New();
-  MultiDimensionalDbPresenter::metaDataToFieldData(outputFD, m_MDWorkspace->get_const_MDGeometry().toXMLString() ,"1");
+
+  RebinningXMLGenerator serializer;
+  serializer.setWorkspaceName(m_MDWorkspace->getName());
+  serializer.setWorkspaceLocation(m_MDWorkspace->getWSLocation());
+  serializer.setGeometryXML(m_MDWorkspace->get_const_MDGeometry().toXMLString());
+  std::string xmlString = serializer.createXMLString();
+
+  MultiDimensionalDbPresenter::metaDataToFieldData(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
   visualDataSet->SetFieldData(outputFD);
   return visualDataSet;
 }

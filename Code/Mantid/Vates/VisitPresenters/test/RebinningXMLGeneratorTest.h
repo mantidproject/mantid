@@ -189,6 +189,18 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
   TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
 
+void testCreateXMLWithoutFunction()
+{
+  RebinningXMLGenerator generator;
+  //Apply setters.
+  generator.setWorkspaceName("name");
+  generator.setWorkspaceLocation("location");
+  generator.setGeometryXML("<DimensionSet/>");
+
+  std::string xml = generator.createXMLString();
+  TSM_ASSERT_EQUALS("The xml has been created without a function incorrectly", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/></MDInstruction>", xml);
+}
+
 
 
 };
