@@ -356,17 +356,47 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 #                return QVariant()
 
     #----------------------------------------------------------------------------------
-    def update_project(self, project_name):
-        """ Updates the data displayed in a specific project"""
+    def get_project(self, project_name):
+        """Return the QModelIndex, TreeItemProject of the project named."""
         for row in xrange(self.rootItem.childCount()):
             project_item = self.rootItem.child(row)
             if project_item.project.name == project_name:
-                # Need to update the check status of all under it
+                # Matching the project - select all the stuff in it and update
                 project_indx = self.index(row, 0, QModelIndex())
-                topLeft = self.index(0, 0, project_indx)
-                bottomRight = self.index( project_item.childCount()-1, 0, project_indx)
-                self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+                return (project_indx, project_item)
+        return (QModelIndex(), None)
+            
+    #----------------------------------------------------------------------------------
+    def update_project(self, project_name):
+        """ Updates the data displayed in a specific project"""
+        # Matching the project - select all the stuff in it and update
+        (project_indx, project_item) = self.get_project(project_name)
+        topLeft = self.index(0, 0, project_indx)
+        bottomRight = self.index( project_item.childCount()-1, 0, project_indx)
+        self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+
+    #----------------------------------------------------------------------------------
+    def update_all(self):
+        """Updates all data in the tree (not for adding/removing tests """
+        topLeft = self.index(0, 0, QModelIndex())
+        bottomRight = self.index( self.rootItem.childCount()-1, 0, QModelIndex())
+        self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
              
+    #----------------------------------------------------------------------------------
+    def update_suite(self, suite):
+        """Updates the data for only the given suite. """
+        # Index of the project
+        (project_indx, project_item) = self.get_project( suite.get_parent().name )
+        num_suites = project_item.childCount()
+        for i in xrange(num_suites):
+            if project_item.child(i).suite.name == suite.name:
+                # Matching suite name in the same project name
+                topLeft = self.index(i, 0, project_indx)
+                bottomRight = self.index( i, 2, project_indx)
+                self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+                # Only update one place
+                return
+
 
     #----------------------------------------------------------------------------------
     def headerData(self, column, orientation, role):

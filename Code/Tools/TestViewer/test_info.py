@@ -780,7 +780,8 @@ class MultipleProjects(object):
                                 
 
     #--------------------------------------------------------------------------        
-    def run_tests_in_parallel(self, selected_only=True, make_tests=True, parallel=True, callback_func=None):
+    def run_tests_in_parallel(self, selected_only=True, make_tests=True, parallel=True, 
+                              callback_func=None):
         """Run tests in parallel using multiprocessing.
         Parameters:
             selected_only: run only the selected suites.

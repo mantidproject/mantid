@@ -60,14 +60,13 @@ class TestWorker(QtCore.QThread):
         else:
             text = str(obj)                
                     
-        self.mainWindow.emit( QtCore.SIGNAL("testRun"), text)
+        self.mainWindow.emit( QtCore.SIGNAL("testRun"), text, obj)
 
-        
     #-----------------------------------------------------------------------------
     def run(self):
         print "Test Run started..."
         test_info.all_tests.run_tests_in_parallel(self.selected_only, self.make_tests, 
-                          self.parallel, callback_func= self.test_run_callback)
+                          self.parallel, callback_func=self.test_run_callback)
         
         
         
@@ -103,6 +102,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
+        
+        self.last_tree_update = time.time()
         
         self.setup_tree()
 
@@ -153,11 +154,29 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.expandAll()
         
     #-----------------------------------------------------------------------------
-    def update_label(self, text):
-        """ Update the progress bar and label """
+    def update_label(self, text, obj):
+        """ Update the progress bar and label.
+        Parameters:
+            obj: either a TestSuite or a TestProject """
         val = self.progTest.value()+1 
         self.progTest.setValue( val )
         self.progTest.setFormat("%p% : " + text)
+        # Update the tree's data for the suite
+        if not obj is None:
+            if isinstance(obj, TestSuite):
+                self.treeTests.model().update_suite(obj)
+            if isinstance(obj, TestProject):
+                self.treeTests.model().update_project(obj.name)
+                
+#        # Every second or so, update the tree too
+#        if (time.time() - self.last_tree_update) > 1.0:
+#            self.quick_update_tree()
+#            self.last_tree_update = time.time()
+        
+    #-----------------------------------------------------------------------------
+    def quick_update_tree(self):
+        """ Update the tree view without resetting all the model data """
+        self.treeTests.model().update_all()
         
     #-----------------------------------------------------------------------------
     def complete_run(self):
