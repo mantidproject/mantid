@@ -149,7 +149,7 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/FileFinderTest.h
 		 test/FilePropertyTest.h
 		 test/FrameworkManagerTest.h
-		 #test/FunctionTest.h  # TODO Implicit dependency on DataObjects - not OK
+		 test/FunctionTest.h
 		 test/IMDWorkspaceTest.h
 		 test/ImplicitFunctionParserFactoryTest.h
 		 test/InstrumentDataServiceTest.h
@@ -159,8 +159,8 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/ParameterReferenceTest.h
 		 test/ParameterTieTest.h
 		 test/RunTest.h
-		 #test/SampleEnvironmentTest.h # TODO uses ComponentCreationHelpers.hh
-		 #test/SampleTest.h # TODO uses ComponentCreationHelpers.hh
+		 test/SampleEnvironmentTest.h
+		 test/SampleTest.h
 		 test/SpectraDetectorMapTest.h
 		 test/TextAxisTest.h
 		 test/WorkspaceFactoryTest.h
@@ -189,12 +189,13 @@ set_property ( TARGET API PROPERTY FOLDER "Framework" )
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
 if ( CXXTEST_FOUND )
+  include_directories ( ../TestHelpers/inc ../DataObjects/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} )
+    target_link_libraries( APITest API ${GMOCK_LIBRARIES} TestHelpers )
   else ()
     cxxtest_add_test ( APITest ${TEST_FILES} )
-    target_link_libraries( APITest API )
+    target_link_libraries( APITest API TestHelpers )
   endif()
   add_dependencies ( FrameworkTests APITest )
 endif ()

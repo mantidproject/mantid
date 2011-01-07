@@ -50,7 +50,7 @@ public:
 
 };
 
-class IFunctionTest : public CxxTest::TestSuite
+class FunctionTest : public CxxTest::TestSuite
 {
 public:
 
