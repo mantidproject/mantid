@@ -29,7 +29,7 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
 
 set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/EventListTest.h
-		 #test/EventWorkspaceTest.h # TODO uses ComponentCreationHelpers.hh
+		 test/EventWorkspaceTest.h
 		 test/Histogram1DTest.h
 		 #test/LibraryManagerTest.h # TODO fails because UserAlgorithms not built
 		 test/ManagedDataBlock2DTest.h
@@ -57,6 +57,7 @@ target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
-  target_link_libraries( DataObjectsTest DataObjects )
+  include_directories ( ../TestHelpers/inc )
+  target_link_libraries( DataObjectsTest DataObjects TestHelpers )
   add_dependencies ( FrameworkTests DataObjectsTest )
 endif ()
