@@ -130,7 +130,6 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
-    message (STATUS "CXXTEST_SINGLE_LOGFILE=${CXXTEST_SINGLE_LOGFILE}")
     if (CXXTEST_SINGLE_LOGFILE)
       # add the whole suite as a single test so the output xml doesn't overwrite itself
       add_test ( NAME ${_cxxtest_testname}
