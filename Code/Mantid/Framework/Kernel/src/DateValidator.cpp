@@ -33,6 +33,11 @@ IValidator<std::string> *DateValidator::clone()
 struct tm DateValidator::getTimevalue(const std::string& sDate, std::string & error) const
 {
   struct tm timeinfo;
+  // Zero it out
+  timeinfo.tm_sec = 0; timeinfo.tm_min = 0; timeinfo.tm_hour = 0;
+  timeinfo.tm_mday = 0; timeinfo.tm_mon = 0; timeinfo.tm_year = 0;
+  timeinfo.tm_isdst = -1;
+
   std::basic_string<char>::size_type index, off = 0;
   int day, month, year;
 
@@ -92,9 +97,6 @@ struct tm DateValidator::getTimevalue(const std::string& sDate, std::string & er
   }
 
   timeinfo.tm_year = year - 1900;
-  timeinfo.tm_min = 0;
-  timeinfo.tm_sec = 0;
-  timeinfo.tm_hour = 0;
 
   return timeinfo;
 
