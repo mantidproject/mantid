@@ -120,7 +120,7 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
 		inc/MantidDataHandling/SetScalingPSD.h
 		inc/MantidDataHandling/UpdateInstrumentFromRaw.h )
 
-set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelper.hh
+set ( TEST_FILES test/CreateSampleShapeTest.h
                  test/DefineGaugeVolumeTest.h
 		 test/FindDetectorsInShapeTest.h
 		 test/GetMaskedDetectorsTest.h
@@ -158,11 +158,11 @@ set ( TEST_FILES #test/CreateSampleShapeTest.h # TODO uses WorkspaceCreationHelp
 		 test/SaveCanSAS1dTest.h
 		 test/SaveCSVTest.h
 		 test/SaveDASCTest.h
-		 #test/SaveFocussedXYETest.h # TODO uses WorkspaceCreationHelper.hh
+		 test/SaveFocussedXYETest.h
 		 test/SavePHXTest.h
-		 #test/SaveRKHTest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/SaveSPETest.h # TODO uses WorkspaceCreationHelper.hh
-		 #test/SetScalingPSDtest.h  # TODO uses WorkspaceCreationHelper.hh
+		 test/SaveRKHTest.h
+		 test/SaveSPETest.h
+		 test/SetScalingPSDTest.h
 		 test/UpdateInstrumentFromRawTest.h
 		 test/XMLlogfileTest.h )
 
@@ -178,8 +178,8 @@ include_directories ( inc )
 target_link_libraries ( DataHandling ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../Nexus/inc )
+  include_directories ( ../Nexus/inc ../TestHelpers/inc )
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
-  target_link_libraries( DataHandlingTest DataHandling Nexus )
+  target_link_libraries( DataHandlingTest DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests DataHandlingTest )
 endif ()

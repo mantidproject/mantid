@@ -11,8 +11,12 @@
 #include <fstream>
 #include <cmath>
 
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using Mantid::DataHandling::SetScalingPSD;
 using Mantid::DataHandling::LoadEmptyInstrument;
+using Mantid::DataObjects::Workspace2D;
+using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Kernel::ConfigService;
 
 class SetScalingPSDTest : public CxxTest::TestSuite
@@ -35,11 +39,11 @@ public:
     dataStore.add(wsName, testWS);
 
     // Store the detector positions before the shifts so that we can compare
-    std::map<int, Geometry::V3D> originalPositions;
+    std::map<int, V3D> originalPositions;
     for( int i = 0; i < ndets; ++i )
     {
       IDetector_sptr det = testWS->getDetector(i);
-      originalPositions.insert(std::pair<int, Geometry::V3D>(i, det->getPos()));
+      originalPositions.insert(std::pair<int, V3D>(i, det->getPos()));
     }
 
     IAlgorithm_sptr scaler = createAlgorithm();

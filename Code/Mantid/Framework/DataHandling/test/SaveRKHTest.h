@@ -18,7 +18,9 @@ public:
   ~SaveRKHTest()
   {
     //Remove the file
-    Poco::File(outputFile).remove();
+    if (Poco::File(outputFile).exists()) {
+      Poco::File(outputFile).remove();
+    }
   }
 
   void testInit()

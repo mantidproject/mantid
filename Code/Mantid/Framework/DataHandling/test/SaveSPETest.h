@@ -18,6 +18,8 @@
 using namespace Mantid;
 using namespace API;
 using namespace DataHandling;
+using Mantid::Kernel::UnitFactory;
+using Mantid::Geometry::Instrument;
 
 static const double MASK_FLAG=-1e30;   // values here need to match what is in the SaveSPE.h file
 static const double MASK_ERROR=0.0;
