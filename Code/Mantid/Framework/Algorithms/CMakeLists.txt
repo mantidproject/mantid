@@ -254,14 +254,14 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
 		 test/AnyShapeAbsorptionTest.h
-		 test/ApplyTransmissionCorrectionTest.h
+		 test/ApplyTransmissionCorrectionTest.h # TODO loads data in the constructor
 		 test/BinaryOperationTest.h
 		 test/CalculateEfficiencyTest.h
 		 test/CalculateTransmissionBeamSpreaderTest.h
-		 test/CalculateTransmissionTest.h
+		 test/CalculateTransmissionTest.h # TODO loads data in the constructor
 		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
-		 test/CheckWorkspacesMatchTest.h
+		 test/CheckWorkspacesMatchTest.h # TODO loads data in the constructor
 		 test/CloneWorkspaceTest.h
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
@@ -302,7 +302,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/FindCenterOfMassPosition2Test.h
 		 test/FindDeadDetectorsTest.h
 		 test/FindDetectorsOutsideLimitsTest.h
-		 test/FindPeaksTest.h
+		 test/FindPeaksTest.h # TODO loads data in the constructor
 		 test/FlatBackgroundTest.h
 		 test/FlatPlateAbsorptionTest.h
 		 test/GetDetectorOffsetsTest.h
@@ -357,8 +357,8 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/StripPeaksTest.h
 		 test/StripVanadiumPeaksTest.h
 		 test/SumNeighboursTest.h
-		 test/SumRowColumnTest.h
-		 test/SumSpectraTest.h
+		 test/SumRowColumnTest.h # TODO loads data in the constructor
+		 test/SumSpectraTest.h # TODO loads data in the constructor
 		 test/TofCorrectionTest.h
 		 test/TransposeTest.h
 		 test/UnaryOperationTest.h
