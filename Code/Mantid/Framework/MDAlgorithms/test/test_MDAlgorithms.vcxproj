@@ -52,7 +52,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\Win32\bin\Debug;..\..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MDAlgorithms.lib;MDDataObjects.lib;MantidGeometry.lib;MantidAPI.lib;MantidKernel.lib</AdditionalDependencies>
+      <AdditionalDependencies>MantidMDAlgorithms.lib;MantidMDDataObjects.lib;MantidGeometry.lib;MantidAPI.lib;MantidKernel.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>

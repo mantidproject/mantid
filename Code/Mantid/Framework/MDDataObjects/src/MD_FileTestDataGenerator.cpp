@@ -110,6 +110,7 @@ MD_FileTestDataGenerator::read_pix(MDDataPoints & sqw)
 size_t 
 MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
 {
+// pixels data generated assiuming 50^nDim lattice;
     size_t ic(starting_cell),j;
     unsigned int idim;
     unsigned long max_data_size;
@@ -117,17 +118,26 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 
     const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
     std::vector<std::string> dimID = pCurrentGeom->getBasisTags();
-    std::vector<std::vector<double> > dimPoints(this->nDims);
+    // data points;
+    std::vector<std::vector<float> > dimPoints(this->nDims);
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
         const Geometry::IMDDimension *pDim = pCurrentGeom->get_constDimension(dimID[idim]).get();
-        pDim->getAxisPoints(dimPoints[idim]);
+        dimPoints[idim].resize(50);
+        double min = pDim->getMinimum();
+        double step = (pDim->getMaximum()-min)/50;
+        min+=0.5*step;
+        for(j=0;j<50;j++){
+            dimPoints[idim][j]=(float)(min+j*step);
+        }
     }
   
     // if data buffer is unsufficient even for one block of pixels, increase it (very inefficient)
-    if(pix_buf.size()<sizeof_pixel*(starting_cell+1)){
-        pix_buf.resize(sizeof_pixel*(starting_cell+1));
-        max_data_size = starting_cell+1;
+    // number of pixels in test data cell equal the cell number (+1 ?) 
+    size_t n_pix_in_block = selected_cells[starting_cell]+1;
+    if(pix_buf.size()<sizeof_pixel*n_pix_in_block){
+        pix_buf.resize(sizeof_pixel*n_pix_in_block);
+        max_data_size = n_pix_in_block;
     }else{
         max_data_size = pix_buf.size()/sizeof_pixel;
     }

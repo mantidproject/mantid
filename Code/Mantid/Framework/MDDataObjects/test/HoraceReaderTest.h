@@ -5,6 +5,7 @@
 #include "MDDataObjects/MD_FileFormatFactory.h"
 #include "Poco/Path.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "MDDataObjects/MD_FileHoraceReader.h"
 #include "MDDataObjects/MDImage.h"
@@ -73,6 +74,7 @@ class HoraceReaderTest :    public CxxTest::TestSuite
 {
 public:
 	void testConstructor(){
+        std::string instrumentPath = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 		std::string test_file;
 		std::string testFile = findTestFileLocation("../../../../Test/AutoTestData/test_horace_reader.sqw");
 
