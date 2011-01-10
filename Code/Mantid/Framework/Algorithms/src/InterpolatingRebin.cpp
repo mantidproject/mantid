@@ -196,9 +196,29 @@ namespace Mantid
       size_t oldIn1 =
         std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.front())
         - xCensOld.begin();
+      if ( oldIn1 == 0 )
+      {// the lowest interpolation value might be out of range but if it is almost on the boundary let it through
+        if ( std::abs( xCensOld.front()-xCensNew.front() ) < 1e-8*( xCensOld.back()-xCensOld.front() ) )
+        {
+          oldIn1 = 1;
+          //make what should be a very small correction
+          xCensNew.front() = xCensOld.front();
+        }
+      }
+
       size_t oldIn2 =
         std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.back())
         - xCensOld.begin();
+      if ( oldIn2 == size_old )
+      {//the highest point is nearly out of range of the input data but if it's very near the boundary let it through
+        if ( std::abs( xCensOld.back()-xCensNew.back() ) < 1e-8*( xCensOld.back()-xCensOld.front() ) )
+        {
+          oldIn2 = size_old-1;
+          //make what should be a very small correction
+          xCensNew.back() = xCensOld.back();
+        }
+      }
+
       
       //check that the intepolation points fit well enough within the data for reliable intepolation to be done
       bool goodRangeLow(false), goodRangeHigh(false), canInterpol(false);
@@ -216,6 +236,7 @@ namespace Mantid
           oldIn1 --;
         }
       }
+
       if ( oldIn2 < size_old-1 )
       {
         oldIn2 ++;
