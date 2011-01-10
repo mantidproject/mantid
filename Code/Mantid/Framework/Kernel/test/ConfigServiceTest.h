@@ -178,7 +178,12 @@ public:
 
   void testSaveConfigCleanFile()
   {
+    ConfigService::Instance().updateConfig("MantidTest.properties");
     const std::string filename("user.settings");
+  
+    // save any previous changed settings to make sure we're on a clean slate
+    ConfigService::Instance().saveConfig(filename);
+    
     Poco::File prop_file(filename);
     // Start with a clean state
     if( prop_file.exists() ) prop_file.remove();
