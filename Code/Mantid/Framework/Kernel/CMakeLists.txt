@@ -22,6 +22,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
                 src/LogFilter.cpp
 		src/Logger.cpp
 		src/LogParser.cpp
+    src/MagneticIon.cpp
                 src/MandatoryValidator.cpp
 		src/MaskedProperty.cpp
                 src/MersenneTwister.cpp
@@ -104,6 +105,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 		inc/MantidKernel/LogFilter.h
 		inc/MantidKernel/Logger.h
 		inc/MantidKernel/LogParser.h
+    inc/MantidKernel/MagneticIon.h
 		inc/MantidKernel/MandatoryValidator.h
 		inc/MantidKernel/MantidVersion.h
 		inc/MantidKernel/MaskedProperty.h
@@ -157,6 +159,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/ListValidatorTest.h
 		 test/LogFilterTest.h
 		 test/LogParserTest.h
+     test/MagneticIonTest.h
 		 test/MandatoryValidatorTest.h
 		 test/MaskedPropertyTest.h
 		 test/MersenneTwisterTest.h
