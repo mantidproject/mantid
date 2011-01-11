@@ -99,10 +99,9 @@ namespace Mantid
 
       // Keep track of a map of tubes to lists of indices
       std::map<Geometry::ComponentID, std::list<int> > tubeMap;
-      PARALLEL_FOR1(inputWorkspace)
+
       for( int i = 0; i < numSpectra; ++i )
       {
-	PARALLEL_START_INTERUPT_REGION
 
 	IDetector_sptr det;
 	try
@@ -134,9 +133,7 @@ namespace Mantid
 	  }
 	}
 
-	PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
 
       // Now process the tubes
       const int numTubes = tubeMap.size();
