@@ -29,6 +29,8 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
 
 set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/EventListTest.h
+                 test/TofEventTest.h
+                 test/WeightedEventTest.h
 		 test/EventWorkspaceTest.h
 		 test/Histogram1DTest.h
 		 #test/LibraryManagerTest.h # TODO fails because UserAlgorithms not built
