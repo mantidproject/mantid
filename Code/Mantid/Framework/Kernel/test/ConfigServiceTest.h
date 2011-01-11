@@ -21,11 +21,6 @@ class ConfigServiceTest : public CxxTest::TestSuite
 {
 public: 
 
-  ConfigServiceTest() : m_changeObserver(*this, &ConfigServiceTest::handleConfigChange)
-  {
-	  ConfigService::Instance().updateConfig("MantidTest.properties");
-  }
-
   void testLogging()
   {
 	  //attempt some logging
@@ -264,11 +259,12 @@ public:
   // Test that the ValueChanged notification is sent
   void testNotifications()
   {
+    Poco::NObserver<ConfigServiceTest, ConfigServiceImpl::ValueChanged> changeObserver(*this, &ConfigServiceTest::handleConfigChange);
     m_valueChangedSent = false;
 
     ConfigServiceImpl& settings = ConfigService::Instance();
 
-    TS_ASSERT_THROWS_NOTHING(settings.addObserver(m_changeObserver));
+    TS_ASSERT_THROWS_NOTHING(settings.addObserver(changeObserver));
 
     settings.setString("default.facility", "SNS");
 
@@ -284,7 +280,6 @@ public:
 
 protected:
   bool m_valueChangedSent;
-  Poco::NObserver<ConfigServiceTest, Mantid::Kernel::ConfigServiceImpl::ValueChanged> m_changeObserver;
   std::string m_key;
   std::string m_preValue;
   std::string m_curValue;
