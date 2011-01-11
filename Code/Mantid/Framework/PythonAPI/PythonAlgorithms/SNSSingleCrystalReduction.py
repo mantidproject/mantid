@@ -1,6 +1,7 @@
 from MantidFramework import *
 from mantidsimple import *
 import os
+import numpy
 
 class SNSSingleCrystalReduction(PythonAlgorithm):
     def category(self):
@@ -115,8 +116,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         #ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
-        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        Rebin(InputWorkspace=wksp, OutputWorkspace="tmp", Params=[self._TOFMin, self._delta, self._TOFMax])
+        RenameWorkspace("tmp",wksp)
+        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -151,9 +153,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         StripVanadiumPeaks(InputWorkspace=wksp, OutputWorkspace="temp", PeakWidthPercent=self._vanPeakWidthPercent)
         RenameWorkspace(InputWorkspace="temp", OutputWorkspace=str(wksp))
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
+        Rebin(InputWorkspace=wksp, OutputWorkspace="tmp", Params=[self._TOFMin, self._delta, self._TOFMax])
+        RenameWorkspace("tmp",wksp)
         SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._vanSmoothPoints)
-        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -230,29 +233,15 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             vanRun = None
 
         # the final bit of math
-        samH = samRun.getNumberHistograms()
-        samRunX = []
-        samRunY = []
-        samRunE = []
         if vanRun is not None:
-            for num in xrange(0,samH-1):
-                det = str(samRun.getDetector(num).getID())
-                for i in xrange(0,vanRun.getNumberHistograms()-1):
-                    vdet = str(vanRun.getDetector(i).getID())
-                    if vdet == det:
-                        vnum = i
-                samRunX.append(samRun.readX(num))
-                samRunY.append(samRun.readY(num)/vanRun.readY(vnum))
-                samRunE.append(samRun.readE(num))
+            DivideVanadium(samRun, vanRun, samRun)
             mtd.deleteWorkspace("%s_%d" % (self._instrument, van))
             normalized = True
         else:
             normalized = False
 
         # write out the files
-        unitX = samRun.getAxis(0).getUnit().name()
-        mtd.deleteWorkspace(samRun)
-        CreateWorkspace(samRun, samRunX, samRunY, samRunE, NSpec=samH, UnitX=unitX)
+        ReplaceSpecialValues(samRun, samRun, NaNValue="0.0", InfinityValue="0.0")
         self._save(samRun, normalized)
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())

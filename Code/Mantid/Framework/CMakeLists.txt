@@ -41,7 +41,7 @@ configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
 ###########################################################################
 
 # Might just as well link everything to Boost & Poco
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARIES} )
 
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
