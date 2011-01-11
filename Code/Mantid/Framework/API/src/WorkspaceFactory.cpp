@@ -102,34 +102,36 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   {
     // Only copy mask map if same size for now. Later will need to check continued validity.
     child->m_masks = parent->m_masks;
+  }
 
-    for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+  // deal with axis
+  for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+  {
+    const int newAxisLength = child->getAxis(i)->length();
+    const int oldAxisLength = parent->getAxis(i)->length();
+
+    if ( newAxisLength == oldAxisLength )
     {
       // Need to delete the existing axis created in init above
       delete child->m_axes[i];
       // Now set to a copy of the parent workspace's axis
       child->m_axes[i] = parent->m_axes[i]->clone(child.get());
     }
-  }
-  else
-  {
-    // Just copy the unit and title
-    for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+    else
     {
       if (! parent->getAxis(i)->isSpectra())
       {
-        int length = child->getAxis(i)->length();
         if (parent->getAxis(i)->isNumeric())
         {
-          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(length);
+          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(newAxisLength);
           child->replaceAxis(i, newAxis);
           child->getAxis(i)->unit() = parent->getAxis(i)->unit();
         }
         if (parent->getAxis(i)->isText())
         {
-          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(length);
+          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(newAxisLength);
           child->replaceAxis(i, newAxis);
-        }
+        }        
       }
       child->getAxis(i)->title() = parent->getAxis(i)->title();
     }
