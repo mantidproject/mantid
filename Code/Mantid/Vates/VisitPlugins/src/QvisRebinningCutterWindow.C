@@ -57,7 +57,7 @@
 #include <qcombobox.h>
 #include <stdio.h>
 #include <string>
-#include "DimensionPickerWidget.h"
+//#include "DimensionPickerWidget.h"
 #include "IntegratedDimensionWidget.h"
 
 using std::string;
@@ -127,7 +127,7 @@ QvisRebinningCutterWindow::~QvisRebinningCutterWindow()
 void
 QvisRebinningCutterWindow::CreateWindowContents()
 {
-    QGridLayout *mainLayout = new QGridLayout(0);
+    QGridLayout *mainLayout = new QGridLayout();
     topLayout->addLayout(mainLayout);
 
     originXLabel = new QLabel(tr("Origin X"), central);
@@ -201,6 +201,14 @@ QvisRebinningCutterWindow::CreateWindowContents()
             this, SLOT(dimensiontProcessText()));
     mainLayout->addWidget(dimensiont, 9,1);
 
+
+    unstructLabel = new QLabel(tr("Render as Unstructured Grid"), central);
+        mainLayout->addWidget(unstructLabel,10,0);
+        unstructCheckBox = new QCheckBox(central);
+        unstructCheckBox->setChecked(false); //By default use structured grids.
+        connect(unstructCheckBox, SIGNAL(stateChanged(int)),
+                this, SLOT(unstructuredChecked()));
+        mainLayout->addWidget(unstructCheckBox, 10,1);
 
 
     std::vector<std::string> dims;
@@ -285,6 +293,10 @@ QvisRebinningCutterWindow::UpdateWindow(bool doAll)
           case RebinningCutterAttributes::ID_dimensiont:
             dimensiont->setText(IntToQString(atts->GetDimensiont()));
             break;
+          case RebinningCutterAttributes::ID_UnstructuredGrid:
+            unstructCheckBox->setChecked(atts->GetUseUnStructuredGrid());
+            break;
+
         }
     }
 }
@@ -451,6 +463,10 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
             atts->SetDimensiont(atts->GetDimensiont());
         }
     }
+    if(which_widget == RebinningCutterAttributes::ID_UnstructuredGrid || doAll)
+    {
+           atts->SetUseUnStructuredGrid(unstructCheckBox->isChecked());
+    }
 
 }
 
@@ -539,4 +555,9 @@ QvisRebinningCutterWindow::dimensiontProcessText()
     Apply();
 }
 
+void QvisRebinningCutterWindow::unstructuredChecked()
+{
+  GetCurrentValues(RebinningCutterAttributes::ID_UnstructuredGrid);
+  Apply();
+}
 

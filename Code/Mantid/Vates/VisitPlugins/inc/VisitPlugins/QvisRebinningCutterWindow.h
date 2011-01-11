@@ -99,6 +99,7 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     void dimensionYProcessText();
     void dimensionZProcessText();
     void dimensiontProcessText();
+    void unstructuredChecked();
   private:
     QLineEdit *originX;
     QLineEdit *originY;
@@ -120,7 +121,9 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     QLabel *dimensionYLabel;
     QLabel *dimensionZLabel;
     QLabel *dimensiontLabel;
+    QLabel *unstructLabel;
 
+    QCheckBox *unstructCheckBox;
     QComboBox *dimensionXCombo;
     QComboBox *dimensionYCombo;
 

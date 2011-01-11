@@ -1,5 +1,6 @@
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
+#include <vtkHexahedron.h>
 #include <sstream>
 #include <exception>
 #include <boost/shared_ptr.hpp>
@@ -13,6 +14,7 @@
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
+#include "MantidVisitPresenters/GenerateStructuredGrid.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -32,12 +34,18 @@
 #include "Poco/Path.h"
 
 #include <boost/algorithm/string.hpp>
+
+#include "MDDataObjects/MDWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
+
 namespace Mantid
 {
 namespace VATES
 {
 
-RebinningCutterPresenter::RebinningCutterPresenter(vtkDataSet* inputDataSet) : m_initalized(false), m_inputDataSet(inputDataSet)
+RebinningCutterPresenter::RebinningCutterPresenter(vtkDataSet* inputDataSet, int timestep) : m_initalized(false), m_inputDataSet(inputDataSet), m_timestep(timestep)
 {
 }
 
@@ -52,9 +60,9 @@ void RebinningCutterPresenter::constructReductionKnowledge(
     Dimension_sptr dimensionY,
     Dimension_sptr dimensionZ,
     Dimension_sptr dimensiont,
-    double height,
-    double width,
-    double depth,
+    const double width,
+    const double height,
+    const double depth,
     std::vector<double>& origin)
 {
   using namespace Mantid::MDAlgorithms;
@@ -99,13 +107,13 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   this->m_initalized = true;
 }
 
-vtkDataSet* RebinningCutterPresenter::applyReductionKnowledge()
+vtkDataSet* RebinningCutterPresenter::applyReductionKnowledge(const std::string& scalarName, bool isUnstructured)
 {
 
   if (true == m_initalized)
   {
     //call the rebinning routines and generate a resulting image for visualisation.
-    vtkDataSet* visualImageData = generateVisualImage(m_serializing);
+    vtkDataSet* visualImageData = generateVisualImage(m_serializing, scalarName, isUnstructured, m_timestep);
 
     //save the work performed as part of this filter instance into the pipeline.
     persistReductionKnowledge(visualImageData, this->m_serializing, XMLDefinitions::metaDataId.c_str());
@@ -289,82 +297,232 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
  }
 
 
-vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility)
+vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility, const std::string& scalarName, bool isUnstructured, const int timestep)
 {
   using namespace Mantid::MDDataObjects;
   using namespace Mantid::API;
   //Get the input workspace location and name.
   std::string wsLocation = serializingUtility.getWorkspaceLocation();
   std::string wsName = serializingUtility.getWorkspaceName();
-  MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
-  AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
 
-  Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
-  xmlRebinAlg.setRethrows(true);
-  xmlRebinAlg.initialize();
-  xmlRebinAlg.setPropertyValue("OutputWorkspace", "RebinnedWS");
+//  MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
+//  AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
+//
+//  Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+//  xmlRebinAlg.setRethrows(true);
+//  xmlRebinAlg.initialize();
+//  const std::string outputWorkspace = "RebinnedWS";
+//  xmlRebinAlg.setPropertyValue("OutputWorkspace", outputWorkspace);
+//
+//  //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
+//  std::string xmlString = serializingUtility.createXMLString();
+//  xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+//  std::cout << "Effective xml" << std::endl; std::cout << xmlString << std::endl;
+//
+//  //Run the rebinning algorithm.
+//  xmlRebinAlg.execute();
+//
+//  //Use the generated workspace to access the underlying image, which may be rendered.
+//  MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
+//      AnalysisDataService::Instance().retrieve(outputWorkspace));
 
-  //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
-  std::string xmlString = serializingUtility.createXMLString();
-  xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
 
-  //Run the rebinning algorithm.
-  xmlRebinAlg.execute();
+  //----------- PART OF BUGFIX! --- Following code uses CPrebinning and Load Algorithms
 
-  //Use the generated workspace to access the underlying image, which may be rendered.
-  MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
-      AnalysisDataService::Instance().retrieve("RebinnedWS"));
+  using namespace Mantid::MDAlgorithms;
+  using namespace Kernel;
 
-  const int imageSize = outputWs->get_spMDImage()->getDataSize();
+  std::string dataFileName("/home/owen/mantid/Test/VATES/fe_demo_bin.sqw");
+  std::string InputWorkspaceName = "MyTestMDWorkspace";
 
-  vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
-  vtkPoints *points = vtkPoints::New();
-  points->Allocate(imageSize);
-  vtkDoubleArray* scalars = vtkDoubleArray::New();
-  scalars->SetName("signal");
+  Load_MDWorkspace loader;
+  loader.initialize();
+  loader.setPropertyValue("inFilename",dataFileName);
 
-  const int sizeX = outputWs->getXDimension()->getNBins();
-  const int sizeY = outputWs->getYDimension()->getNBins();
-  const int sizeZ = outputWs->getZDimension()->getNBins();
-  scalars->Allocate((sizeX-1)*(sizeY-1)*(sizeZ-1));
+  loader.setPropertyValue("MDWorkspace", InputWorkspaceName);
+  loader.execute();
 
-  //Loop through dimensions
-  //TODO: compress into single loop.
-  for (int i = 0; i < sizeX; i++)
+  Workspace_sptr result=AnalysisDataService::Instance().retrieve(InputWorkspaceName);
+  MDWorkspace*  pOrigin = dynamic_cast<MDWorkspace *>(result.get());
+
+
+  CenterpieceRebinning cpr;
+  cpr.initialize();
+
+  cpr.setPropertyValue("Input", InputWorkspaceName);
+  cpr.setPropertyValue("Result","OutWorkspace");
+  // set slicing property to the size and shape of the current workspace
+  cpr.init_slicing_property();
+
+  // retrieve slicing property for modifications
+  Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+
+//  double r0=0;
+//
+//  std::cout << "1: " <<pOrigin->getGeometry()->getXDimension()->getMinimum() << std::endl;
+//  std::cout << "2: " <<pOrigin->getGeometry()->getXDimension()->getMaximum() << std::endl;
+//  std::cout << "3: " <<pOrigin->getGeometry()->getYDimension()->getMinimum() << std::endl;
+//  std::cout << "4: " <<pOrigin->getGeometry()->getYDimension()->getMaximum() << std::endl;
+//  std::cout << "5: " <<pOrigin->getGeometry()->getZDimension()->getMinimum() << std::endl;
+//  std::cout << "6: " <<pOrigin->getGeometry()->getZDimension()->getMaximum() << std::endl;
+//  std::cout << "7: " <<pOrigin->getGeometry()->getTDimension()->getMinimum() << std::endl;
+//  std::cout << "8: " <<pOrigin->getGeometry()->getTDimension()->getMaximum() << std::endl;
+//
+//
+//
+  cpr.execute();
+
+  Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
+
+  MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
+
+
+  //---------------------------------------------------------------
+
+  vtkDataSet* visualDataSet;
+  if(isUnstructured)
   {
-    for (int j = 0; j < sizeY; j++)
+    visualDataSet = generateVTKUnstructuredImage(outputWs, scalarName, timestep);
+  }
+  else
+  {
+    visualDataSet = generateVTKStructuredImage(outputWs, scalarName, timestep);
+  }
+
+  return visualDataSet;
+}
+
+vtkDataSet* generateVTKUnstructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep)
+{
+  using namespace Mantid::MDDataObjects;
+  const int numberOfPoints = spWorkspace->get_spMDImage()->getDataSize();
+
+  vtkPoints * newPoints = vtkPoints::New();
+  newPoints->Allocate(numberOfPoints);
+
+  std::vector<std::vector<std::vector<vtkIdType> > > pointMap;
+  pointMap.reserve(numberOfPoints);
+
+  const int nbinsx = spWorkspace->getGeometry()->getXDimension()->getNBins();
+  const int nbinsy = spWorkspace->getGeometry()->getYDimension()->getNBins();
+  const int nbinsz = spWorkspace->getGeometry()->getZDimension()->getNBins();
+
+  double x[3];
+  vtkPoints * points = vtkPoints::New();
+  vtkDoubleArray * signal = vtkDoubleArray::New();
+  signal->SetName(scalarName.c_str());
+  signal->SetNumberOfComponents(1);
+  signal->Allocate(numberOfPoints);
+
+  for (double i=0; i<nbinsx; i++)
+  {
+    std::vector<std::vector<vtkIdType> > plane;
+    for(double j=0; j<nbinsy; j++)
     {
-      for (int k = 0; k < sizeZ; k++)
+      std::vector<vtkIdType> col;
+      for(double k=0; k<nbinsz; k++)
       {
-        //Create an image from the point data.
-        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k, 0);
-        points->InsertNextPoint(i, j, k);
+        x[0] = i;
+        x[1] = j;
+        x[2] = k;
+
+        MD_image_point point = spWorkspace->get_spMDImage()->getPoint(i, j, k, timestep);
+        vtkIdType pointId = newPoints->InsertNextPoint(i, j, k);
+        signal->InsertNextValue(point.s);
+
+        points->InsertPoint(pointId, x);
+        col.push_back(pointId);
+      }
+      plane.push_back(col);
+    }
+    pointMap.push_back(plane);
+  }
+
+  vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+  visualDataSet->Allocate();
+  visualDataSet->SetPoints(points);
+  visualDataSet->GetCellData()->SetScalars(signal);
+
+  for(int i = 0; i < nbinsx-1 ; i++)
+  {
+    for(int j = 0; j < nbinsy-1 ; j++)
+    {
+      for(int k=0; k < nbinsz-1; k++)
+      {
+        //Identify points for hexahedron
+        vtkIdType id_xyz = pointMap[i][j][k];
+        vtkIdType id_dxyz = pointMap[i+1][j][k];
+        vtkIdType id_dxdyz = pointMap[i+1][j+1][k];
+        vtkIdType id_xdyz = pointMap[i][j+1][k];
+
+        vtkIdType id_xydz = pointMap[i][j][k+1];
+        vtkIdType id_dxydz = pointMap[i+1][j][k+1];
+        vtkIdType id_dxdydz = pointMap[i+1][j+1][k+1];
+        vtkIdType id_xdydz = pointMap[i][j+1][k+1];
+
+        //create the hexahedron
+        vtkHexahedron *theHex = vtkHexahedron::New();
+        theHex->GetPointIds()->SetId(0, id_xyz);
+        theHex->GetPointIds()->SetId(1, id_dxyz);
+        theHex->GetPointIds()->SetId(2, id_dxdyz);
+        theHex->GetPointIds()->SetId(3, id_xdyz);
+        theHex->GetPointIds()->SetId(4, id_xydz);
+        theHex->GetPointIds()->SetId(5, id_dxydz);
+        theHex->GetPointIds()->SetId(6, id_dxdydz);
+        theHex->GetPointIds()->SetId(7, id_xdydz);
+
+        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
       }
     }
   }
 
-  for (int i = 0; i < sizeX-1; i++)
+  newPoints->Delete();
+  points->Delete();
+  signal->Delete();
+  return visualDataSet;
+
+}
+
+vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace,
+    const std::string& scalarName, const int timestep)
+{
+  using namespace MDDataObjects;
+  const int imageSize = spWorkspace->get_spMDImage()->getDataSize();
+
+  //Creates the visualisation mesh.
+  GenerateStructuredGrid meshGenerator(spWorkspace);
+  vtkDataSet* visualDataSet = meshGenerator.execute();
+
+  //Add scalar data to the mesh.
+  vtkDoubleArray* scalars = vtkDoubleArray::New();
+  scalars->Allocate(imageSize);
+  scalars->SetName(scalarName.c_str());
+
+  const int sizeX = spWorkspace->getXDimension()->getNBins();
+  const int sizeY = spWorkspace->getYDimension()->getNBins();
+  const int sizeZ = spWorkspace->getZDimension()->getNBins();
+
+  for (int i = 0; i < sizeX - 1; i++)
   {
-    for (int j = 0; j < sizeY-1; j++)
+    for (int j = 0; j < sizeY - 1; j++)
     {
-      for (int k = 0; k < sizeZ-1; k++)
+      for (int k = 0; k < sizeZ - 1; k++)
       {
-        //Create an image from the point data.
-        MD_image_point point = outputWs->get_spMDImage()->getPoint(i, j, k, 0);
+        // Create an image from the point data.
+        MD_image_point point = spWorkspace->get_spMDImage()->getPoint(i, j, k, timestep);
+        // Insert scalar data.
         scalars->InsertNextValue(point.s);
       }
     }
   }
-
-
+  scalars->Squeeze();
   //Attach points to dataset.
-  visualDataSet->SetPoints(points);
   visualDataSet->GetCellData()->AddArray(scalars);
-  visualDataSet->SetDimensions(sizeX, sizeY, sizeZ);
-  points->Delete();
+
   scalars->Delete();
   return visualDataSet;
 }
+
 
 const std::string RebinningCutterPresenter::metaDataId="1";
 }

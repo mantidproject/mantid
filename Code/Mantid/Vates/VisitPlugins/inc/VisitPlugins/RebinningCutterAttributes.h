@@ -96,6 +96,7 @@ public:
     void SetDimensionY(int dimensionY_);
     void SetDimensionZ(int dimensionZ_);
     void SetDimensiont(int dimensiont_);
+    void SetUseUnStructuredGrid(bool useUnstructedGrid);
 
     // Property getting methods
     double GetOriginX() const;
@@ -108,6 +109,7 @@ public:
     int    GetDimensionY() const;
     int    GetDimensionZ() const;
     int    GetDimensiont() const;
+    bool   GetUseUnStructuredGrid() const;
 
 
     // Keyframing methods
@@ -129,6 +131,7 @@ public:
         ID_dimensionY,
         ID_dimensionZ,
         ID_dimensiont,
+        ID_UnstructuredGrid,
         ID__LAST
     };
 
@@ -143,6 +146,7 @@ private:
     int    dimensionY;
     int    dimensionZ;
     int    dimensiont;
+    bool isUnstructured;
 
     // Static class format string for type map.
     static const char *TypeMapFormatString;

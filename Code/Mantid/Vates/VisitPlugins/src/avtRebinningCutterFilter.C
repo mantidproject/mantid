@@ -173,6 +173,13 @@ Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(bool bgetF
 }
 
 
+avtContract_p avtRebinningCutterFilter::ModifyContract(avtContract_p incontract)
+{
+  this->m_timestep = incontract->GetDataRequest()->GetTimestep();
+  return incontract;
+}
+
+
 void avtRebinningCutterFilter::Execute()
 {
   using namespace Mantid::VATES;
@@ -200,33 +207,24 @@ void avtRebinningCutterFilter::Execute()
   vec.push_back(spDimt);
 
   doubleVector origin;
-  origin.push_back(atts.GetOriginX());
-  origin.push_back(atts.GetOriginY());
-  origin.push_back(atts.GetOriginZ());
+  origin.push_back((spDimX->getMaximum() + spDimX->getMinimum())/2);
+  origin.push_back((spDimY->getMaximum() + spDimY->getMinimum())/2);
+  origin.push_back((spDimZ->getMaximum() + spDimZ->getMinimum())/2);
 
-  RebinningCutterPresenter presenter(in_ds);
-  presenter.constructReductionKnowledge(vec, spDimX, spDimY, spDimZ, spDimt, 1, 2, 3, origin);
+  RebinningCutterPresenter presenter(in_ds, m_timestep);
+  presenter.constructReductionKnowledge(vec, spDimX, spDimY, spDimZ, spDimt, 6, 15, 12, origin);
 
-  vtkDataSet *output_ds = presenter.applyReductionKnowledge();
+  std::string scalarName = "signal";
+  vtkDataSet *output_ds = presenter.applyReductionKnowledge(scalarName, false); //TODO: Hookup to attribute inputs
 
-  debug5
-    << "-------------------------- Output ------------------------" << endl;
-  debug5
-    << presenter.getFunction()->toXMLString() << endl;
-  debug5
-    << "-------------------------- End Output ------------------------" << endl;
-
-
-  std::string var = "signal";
-  output_ds->GetCellData()->SetActiveScalars(var.c_str());
+  output_ds->GetCellData()->SetActiveScalars(scalarName.c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);
   SetOutputDataTree(newTree);
-  double range[2] =
-  { FLT_MAX, -FLT_MAX };
-  GetDataRange(output_ds, range, var.c_str(), false);
+  double range[2] = { FLT_MAX, -FLT_MAX };
+  GetDataRange(output_ds, range, scalarName.c_str(), false);
   avtDataAttributes &dataAtts = GetOutput()->GetInfo().GetAttributes();
-  dataAtts.GetThisProcsOriginalDataExtents(var.c_str())->Set(range);
-  dataAtts.GetThisProcsActualDataExtents(var.c_str())->Set(range);
+  dataAtts.GetThisProcsOriginalDataExtents(scalarName.c_str())->Set(range);
+  dataAtts.GetThisProcsActualDataExtents(scalarName.c_str())->Set(range);
 
   m_completeFirstExecute = true;
 }

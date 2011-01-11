@@ -90,6 +90,7 @@ public:
 protected:
     RebinningCutterAttributes atts;
     virtual void Execute();
+    virtual avtContract_p ModifyContract(avtContract_p);
 private:
 
     //Flag indicating that this is the first execution of the operator
@@ -97,6 +98,9 @@ private:
 
     //Cached value for the geometry xml string. Used to determine changes to geometry in previous filters of the pipeline.
     std::string m_cacheGeometryXML;
+
+    //Timestep value from contract.
+    int m_timestep;
 
     //Determines wheter the geometry has been changed in input filters from that used in the last execution.
     bool isInputConsistent(const std::string& inputGeometryXML);

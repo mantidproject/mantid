@@ -4,20 +4,16 @@
 #include <qgridlayout.h>
 #include <qwidget.h>
 #include <memory>
-
+#include "boost/shared_ptr.hpp"
 //Foward decs
 class QLabel;
 class QComboBox;
-class IntegratedDimensionWidget;
-class DimensionPickerWidget;
 
 namespace Mantid
 {
- namespace MDAlgorithms
+ namespace MDGeometry
  {
- class DimensionParameterSet;
- class DimensionParameter;
- class DimensionParameterIntegration;
+ class IMDDimension;
  }
 }
 
@@ -26,18 +22,11 @@ class DimensionWidget: public QWidget
 {
 Q_OBJECT
 public:
-  DimensionWidget(Mantid::MDAlgorithms::DimensionParameterSet* set); //TODO, widget should have ref to Dimensionset
 
-  ~DimensionWidget()
-  {
-  }
+  DimensionWidget(boost::shared_ptr<Mantid::MDGeometry::IMDDimension> spDimensionToRender);
 
-private:
+  ~DimensionWidget();
 
-  void construct(std::auto_ptr<Mantid::MDAlgorithms::DimensionParameterSet> set);
-  std::auto_ptr<Mantid::MDAlgorithms::DimensionParameterSet> m_set;
-  QComboBox* m_DimensionPicker;
-  std::vector<std::string> m_dimensions;
 };
 
 #endif

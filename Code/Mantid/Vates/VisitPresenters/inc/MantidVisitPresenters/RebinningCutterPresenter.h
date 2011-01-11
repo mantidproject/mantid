@@ -64,12 +64,15 @@ private:
   vtkDataSet* m_inputDataSet;
 
   /// initalised flag
-
   bool m_initalized;
+
+  /// timestep
+  int m_timestep;
+
 public:
 
 	/// Constructor
-	RebinningCutterPresenter(vtkDataSet* inputDataSet);
+	RebinningCutterPresenter(vtkDataSet* inputDataSet, int timestep);
 
 	/// Destructor
 	~RebinningCutterPresenter();
@@ -84,13 +87,13 @@ public:
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont,
-      double height,
-      double width,
-      double depth,
+      const double width,
+      const double height,
+      const double depth,
       std::vector<double>& origin);
 
   /// Apply reduction knowledge to create a vtk dataset.
-  vtkDataSet* applyReductionKnowledge();
+  vtkDataSet* applyReductionKnowledge(const std::string& scalarName, bool isUnstructured);
 
   static const std::string metaDataId;
 };
@@ -98,7 +101,7 @@ public:
 //Non-member helper functions.
 
   /// Rebin and generate a a visualisation image.
-  vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility);
+  vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility, const std::string& scalarName, bool isUnstructured, const int timestep);
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkDataSet * out_ds,
@@ -132,6 +135,12 @@ public:
       double width,
       double depth,
       std::vector<double>& origin);
+
+  /// Create an unstructured vtk image, which is sparse and excludes empty signal values.
+  vtkDataSet* generateVTKUnstructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
+
+  /// Create a structured vtk image, which is essentially dense.
+  vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
 
 }
 }

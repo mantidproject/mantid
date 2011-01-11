@@ -67,8 +67,8 @@ public:
   /// Gets the vtk mesh;
   vtkDataSet* getMesh() const;
 
-  /// Gets the vtk scalar data for the mesh
-  vtkDataArray* getScalarData(int timeBin) const;
+  /// Gets the vtk scalar data for the mesh. Generated scalar data is provided with the specified name.
+  vtkDataArray* getScalarData(int timeBin, const char *scalarName) const;
 
   /// Gets the number of timesteps in the workspace.
   int getNumberOfTimesteps() const;

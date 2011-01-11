@@ -6,6 +6,7 @@ include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 project ( VisitPresenters )
 
 set ( SRC_FILES 
+src/GenerateStructuredGrid.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
@@ -13,6 +14,7 @@ src/RebinningXMLGenerator.cpp
 )
 
 set ( INC_FILES 
+inc/MantidVisitPresenters/GenerateStructuredGrid.h
 inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 

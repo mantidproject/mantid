@@ -20,7 +20,7 @@ void testConstruction()
   MultiDimensionalDbPresenter mdPresenter;
   mdPresenter.execute("fe_demo_bin.sqw");
 
-  vtkDataArray* data = mdPresenter.getScalarData(1);
+  vtkDataArray* data = mdPresenter.getScalarData(1, "signal");
   vtkDataSet* visData = mdPresenter.getMesh();
   TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 117649, data->GetSize());
   TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 125000, visData->GetNumberOfPoints());
@@ -33,7 +33,7 @@ void testGetScalarDataThrows()
 
   //No execution call. Test that type cannot be used improperly.
 
-  TSM_ASSERT_THROWS("Accessing scalar data without first calling execute should not be possible", mdPresenter.getScalarData(1), std::runtime_error);
+  TSM_ASSERT_THROWS("Accessing scalar data without first calling execute should not be possible", mdPresenter.getScalarData(1, "signal"), std::runtime_error);
 }
 
 void testGetMeshThrows()

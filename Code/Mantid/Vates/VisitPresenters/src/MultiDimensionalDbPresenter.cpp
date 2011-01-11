@@ -1,6 +1,7 @@
 #include <MantidVisitPresenters/MultiDimensionalDbPresenter.h>
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
+#include "MantidVisitPresenters/GenerateStructuredGrid.h"
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
@@ -57,41 +58,20 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  const int sizeX = m_MDWorkspace->getXDimension()->getNBins();
-  const int sizeY = m_MDWorkspace->getYDimension()->getNBins();
-  const int sizeZ = m_MDWorkspace->getZDimension()->getNBins();
-
-  const int imageSize = sizeX * sizeY * sizeZ;
-  vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
-  vtkPoints *points = vtkPoints::New();
-  points->Allocate(imageSize);
-
-  //Loop through dimensions
-  boost::shared_ptr<const Mantid::MDDataObjects::MDImage> spImage = m_MDWorkspace->get_spMDImage();
-  for (int i = 0; i < sizeX; i++)
-  {
-    for (int j = 0; j < sizeY; j++)
-    {
-      for (int k = 0; k < sizeZ; k++)
-      {
-        points->InsertNextPoint(i, j, k);
-      }
-    }
-  }
-
-  //Attach points to dataset.
-  visualDataSet->SetPoints(points);
-  visualDataSet->SetDimensions(sizeX, sizeY, sizeZ);
-  points->Delete();
+  //Create the mesh
+  GenerateStructuredGrid meshGenerator(m_MDWorkspace);
+  vtkDataSet* visualDataSet = meshGenerator.execute();
 
   vtkFieldData* outputFD = vtkFieldData::New();
 
+  //Serialize metadata
   RebinningXMLGenerator serializer;
   serializer.setWorkspaceName(m_MDWorkspace->getName());
   serializer.setWorkspaceLocation(m_MDWorkspace->getWSLocation());
   serializer.setGeometryXML(m_MDWorkspace->get_const_MDGeometry().toXMLString());
   std::string xmlString = serializer.createXMLString();
 
+  //Add metadata to dataset.
   MultiDimensionalDbPresenter::metaDataToFieldData(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
   visualDataSet->SetFieldData(outputFD);
   return visualDataSet;
@@ -124,7 +104,7 @@ int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
   return m_MDWorkspace->gettDimension()->getNBins();
 }
 
-vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin) const
+vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char* scalarName) const
 {
   using namespace Mantid::MDDataObjects;
 
@@ -140,7 +120,7 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin) const
   const int sizeZ = m_MDWorkspace->getZDimension()->getNBins();
 
   vtkDoubleArray* scalars = vtkDoubleArray::New();
-  scalars->SetName("signal");
+  scalars->SetName(scalarName);
   scalars->Allocate((sizeX-1) * (sizeY-1) * (sizeZ-1));
 
   //Loop through dimensions

@@ -195,7 +195,7 @@ avtMDFileReaderFileFormat::GetMesh(int timestate, const char *meshname)
 vtkDataArray *
 avtMDFileReaderFileFormat::GetVar(int timestate, const char *varname)
 {
-    return m_executor.getScalarData(timestate);
+    return m_executor.getScalarData(timestate, varname);
 }
 
 

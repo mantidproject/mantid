@@ -89,7 +89,7 @@ void RebinningCutterAttributes::Copy(const RebinningCutterAttributes &obj)
     dimensionY = obj.dimensionY;
     dimensionZ = obj.dimensionZ;
     dimensiont = obj.dimensiont;
-
+    isUnstructured = obj.isUnstructured;
     RebinningCutterAttributes::SelectAll();
 }
 
@@ -255,7 +255,9 @@ RebinningCutterAttributes::operator == (const RebinningCutterAttributes &obj) co
             (dimensionX == obj.dimensionX) &&
             (dimensionY == obj.dimensionY) &&
             (dimensionZ == obj.dimensionZ) &&
-            (dimensiont == obj.dimensiont));
+            (dimensiont == obj.dimensiont) &&
+            (isUnstructured == obj.isUnstructured)
+    );
 }
 
 // ****************************************************************************
@@ -433,6 +435,7 @@ RebinningCutterAttributes::SelectAll()
     Select(ID_dimensionY, (void *)&dimensionY);
     Select(ID_dimensionZ, (void *)&dimensionZ);
     Select(ID_dimensiont, (void *)&dimensiont);
+    Select(ID_UnstructuredGrid, (void*)&isUnstructured);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -509,6 +512,12 @@ RebinningCutterAttributes::SetDimensiont(int dimensiont_)
     Select(ID_dimensiont, (void *)&dimensiont);
 }
 
+void RebinningCutterAttributes::SetUseUnStructuredGrid(bool useUnstructuredGrid)
+{
+  isUnstructured = useUnstructuredGrid;
+  Select(ID_UnstructuredGrid, (void*)&isUnstructured);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Get property methods
 ///////////////////////////////////////////////////////////////////////////////
@@ -573,6 +582,12 @@ RebinningCutterAttributes::GetDimensiont() const
     return dimensiont;
 }
 
+bool   RebinningCutterAttributes::GetUseUnStructuredGrid() const
+{
+  return isUnstructured;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Keyframing methods
 ///////////////////////////////////////////////////////////////////////////////
@@ -607,6 +622,7 @@ RebinningCutterAttributes::GetFieldName(int index) const
     case ID_dimensionY: return "dimensionY";
     case ID_dimensionZ: return "dimensionZ";
     case ID_dimensiont: return "dimensiont";
+    case ID_UnstructuredGrid: return "isUnstructured";
     default:  return "invalid index";
     }
 }
@@ -641,6 +657,7 @@ RebinningCutterAttributes::GetFieldType(int index) const
     case ID_dimensionY: return FieldType_int;
     case ID_dimensionZ: return FieldType_int;
     case ID_dimensiont: return FieldType_int;
+    case ID_UnstructuredGrid: return FieldType_bool;
     default:  return FieldType_unknown;
     }
 }
@@ -675,6 +692,7 @@ RebinningCutterAttributes::GetFieldTypeName(int index) const
     case ID_dimensionY: return "int";
     case ID_dimensionZ: return "int";
     case ID_dimensiont: return "int";
+    case ID_UnstructuredGrid: return "bool";
     default:  return "invalid index";
     }
 }
@@ -750,6 +768,10 @@ RebinningCutterAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) co
         {  // new scope
         retval = (dimensiont == obj.dimensiont);
         }
+    case ID_UnstructuredGrid:
+    {
+      retval = (isUnstructured == obj.isUnstructured );
+    }
         break;
     default: retval = false;
     }

@@ -45,7 +45,7 @@ private:
       using namespace Mantid::Geometry;
       using Mantid::VATES::DimensionVec;
       using Mantid::VATES::Dimension_sptr;
-      RebinningCutterPresenter presenter(in_ds);
+      RebinningCutterPresenter presenter(in_ds, 1);
 
       DimensionVec vec;
       MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
@@ -71,7 +71,7 @@ private:
 
       presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin);
 
-      vtkDataSet *ug = presenter.applyReductionKnowledge();
+      vtkDataSet *ug = presenter.applyReductionKnowledge("signal", false);
 
       in_ds->Delete();
       return ug;
@@ -236,6 +236,8 @@ public:
 //Simple schenario testing end-to-end working of this presenter.
 void testExecution()
 {
+  std::string input;
+  std::cin >> input;
   //Create an input dataset with the field data.
     vtkDataSet* in_ds = constructInputDataSet();
 
@@ -346,7 +348,7 @@ void testNoExistingRebinningDefinitions()
 void testConstructionWithoutValidOriginThrows()
 {
   using namespace Mantid::Geometry;
-  RebinningCutterPresenter presenter(vtkUnstructuredGrid::New());
+  RebinningCutterPresenter presenter(vtkUnstructuredGrid::New(), 1);
   using Mantid::VATES::DimensionVec;
   using Mantid::VATES::Dimension_sptr;
 
@@ -372,9 +374,9 @@ void testApplyReductionThrows()
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
 
-    Mantid::VATES::RebinningCutterPresenter presenter(vtkUnstructuredGrid::New());
+    Mantid::VATES::RebinningCutterPresenter presenter(vtkUnstructuredGrid::New(), 1);
 
-    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.applyReductionKnowledge(), std::runtime_error);
+    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.applyReductionKnowledge("", false), std::runtime_error);
 }
 
 void testFindWorkspaceName()
@@ -399,10 +401,20 @@ void testFindWorkspaceLocation()
 
 void testFindWorkspaceNameThrows()
 {
+  vtkDataSet* dataset = vtkUnstructuredGrid::New();
+  std::string id =  RebinningCutterPresenter::metaDataId;
+  dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
+
+  TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceNameFromXML(dataset, id.c_str()), std::runtime_error);
 }
 
 void testFindWorkspaceLocationThrows()
 {
+  vtkDataSet* dataset = vtkUnstructuredGrid::New();
+  std::string id =  RebinningCutterPresenter::metaDataId;
+  dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
+
+  TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocationFromXML(dataset, id.c_str()), std::runtime_error);
 }
 
 

@@ -3,8 +3,6 @@
 #include <QLineEdit>
 #include <stdio.h>
 #include "IntegratedDimensionWidget.h"
-//Custom warning
-#warning "Custom Warning. Incomplete implementation. Does not use Mantid Dimension Domain types for construction!"
 
 IntegratedDimensionWidget::IntegratedDimensionWidget(std::string dimensionName, double min, double max) :
   QWidget() //TODO Const ptr to dimension should be passed in instead.
