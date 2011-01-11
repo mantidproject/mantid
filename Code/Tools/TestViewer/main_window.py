@@ -111,6 +111,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonSelectAll, QtCore.SIGNAL("clicked()"), self.select_all)
         self.connect(self.buttonSelectNone, QtCore.SIGNAL("clicked()"), self.select_none)
         self.connect(self.buttonSelectFailed, QtCore.SIGNAL("clicked()"), self.select_failed)
+        self.connect(self.buttonSelectSVN, QtCore.SIGNAL("clicked()"), self.select_svn)
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
@@ -135,31 +136,25 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Create the tree model and put it in there 
         # It is important to save the model in self otherwise I think it gets garbage collected without error!
         self.model = TestTreeModel()
-        
+        # It is probably smart to hold a ref. to the proxy object too
         self.proxy = TreeFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.proxy.setFilterWildcard("*G*")
+        
+        # Set the tree to use the SORTING/FILTERING proxy of the real model
         tree.setModel(self.proxy)
         
         tree.setAlternatingRowColors(True)
         tree.header().setResizeMode(0,QHeaderView.Stretch)
-        tree.setColumnWidth(1,230)
-        #tree.header().setResizeMode(1,QHeaderView.ResizeMode)
-        #tree.header().setColumnWidth(1, 100)
-        #tree.header().setResizeMode(2,QHeaderView.ResizeMode)
+        tree.header().setResizeMode(1,QHeaderView.Interactive)
+        tree.header().setResizeMode(2,QHeaderView.Interactive)
         
         tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
 
+    #-----------------------------------------------------------------------------
     def test(self):
-        dialog = QtGui.QDialog()
-        dialog.setMinimumSize(700,750)
-        layout = QtGui.QVBoxLayout(dialog)
-        tv = QtGui.QTreeView(dialog)
-        tv.setAlternatingRowColors(True)
-        layout.addWidget(tv)
-        tv.setModel(self.proxy)
-        dialog.exec_()
-        print "Done!"
+        pass
+            
 
 #    #-----------------------------------------------------------------------------
 #    def filter_tree(self):
@@ -182,17 +177,20 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.checkInParallel.setChecked( s.value("checkInParallel", False).toBool() )
         if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
         self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
-                     s.value("TestViewerMainWindow.height", 900).toInt()[0] )    
-        self.treeTests.setColumnWidth( 1, s.value("treeTests.columnWidth(1)", 230).toInt()[0] )
-        self.treeTests.setColumnWidth( 2, s.value("treeTests.columnWidth(2)", 100).toInt()[0] )
+                     s.value("TestViewerMainWindow.height", 900).toInt()[0] )
+        column_default_width = [200, 230, 100]
+        for i in [1,2]:    
+            self.treeTests.setColumnWidth( i, s.value("treeTests.columnWidth(%d)"%i, column_default_width[i]).toInt()[0] )
+            if self.treeTests.columnWidth(i) < 50:
+                self.treeTests.setColumnWidth( i, 50)
         
     #-----------------------------------------------------------------------------
     def saveSettings(self):
         s = self.settings
         s.setValue("checkInParallel", self.checkInParallel.isChecked() )
         s.setValue("splitter", self.splitter.saveState())
-        s.setValue("treeTests.columnWidth(1)", self.treeTests.columnWidth(1) )
-        s.setValue("treeTests.columnWidth(2)", self.treeTests.columnWidth(2) )
+        for i in [1,2]:    
+            s.setValue("treeTests.columnWidth(%d)"%i, self.treeTests.columnWidth(i) )
         s.setValue("TestViewerMainWindow.width", self.width())
         s.setValue("TestViewerMainWindow.height", self.height())
         
@@ -296,13 +294,32 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 
     #-----------------------------------------------------------------------------
     def tree_clicked(self, index):
-        """ A row of the tree was clicked. 
-        Show the test results. """
-        print "Clicked index ", index
+        """ A row of the tree was clicked. Show the test results.
+        @param index :: QAbstracItemModel index into the tree.
+        """
         # Retrieve the item at that index
-        item = self.treeTests.model().data( index, Qt.UserRole)
-        print item
-        
+        # (returns a QVariant that you have to bring back to a python object)
+        item = self.treeTests.model().data( index, Qt.UserRole).toPyObject()
+        self.show_results(item)
+
+    #-----------------------------------------------------------------------------
+    def show_results(self, res):
+        """ Show the test results.
+        @param res :: either TestProject, TestSuite, or TestSingle object containing the results to show."""
+        if isinstance(res, TestProject):
+            self.labelTestType.setText("Test Project Results:")
+            self.labelTestName.setText( res.get_fullname() ) 
+            self.textResults.setText(res.get_results_text() )
+        elif isinstance(res, TestSuite):
+            self.labelTestType.setText("Test Suite Results:") 
+            self.labelTestName.setText( res.get_fullname() ) 
+            self.textResults.setText(res.get_results_text() )
+        elif isinstance(res, TestSingle):
+            self.labelTestType.setText("Singe Test Results:") 
+            self.labelTestName.setText( res.get_fullname() ) 
+            self.textResults.setText(res.get_results_text() )
+        else:
+            raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
                 
                 
     #-----------------------------------------------------------------------------
@@ -355,6 +372,12 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def select_failed(self):
         """ Select all failing tests """
         test_info.all_tests.select_failed()
+        self.proxy.invalidateFilter()
+        self.treeTests.update()
+        
+    def select_svn(self):
+        """ Select all files modified by SVN st """
+        test_info.all_tests.select_svn()
         self.proxy.invalidateFilter()
         self.treeTests.update()
        

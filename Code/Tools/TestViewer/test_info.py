@@ -94,8 +94,12 @@ class TestResult:
 #==================================================================================================
 class TestSingle(object):
     """ A single test instance (one test inside one suite) """
-    def __init__(self, name):
+    def __init__(self, name, fullname=None):
         self.name = name
+        if fullname is None:
+            self.fullname = name
+        else:
+            self.fullname = fullname
         
         # Starting test state
         self.state = TestResult()
@@ -122,6 +126,16 @@ class TestSingle(object):
         else:
             return 0
     failed = property(get_failed) 
+    
+    #----------------------------------------------------------------------------------
+    def get_fullname(self):
+        """Return a full, uniquely identifying name for this """
+        return self.fullname
+    
+    #----------------------------------------------------------------------------------
+    def get_results_text(self):
+        """Returns HTML text describing these test results """
+        return self.failure + self.stdout
         
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
@@ -203,7 +217,17 @@ class TestSuite(object):
         self.passed = 0
         self.failed = 0
         self.num_run = 0
-        
+
+    #----------------------------------------------------------------------------------
+    def get_fullname(self):
+        """Return a full, uniquely identifying name for this """
+        return self.classname
+            
+    #----------------------------------------------------------------------------------
+    def get_results_text(self):
+        """Returns HTML text describing these test results """
+        return "TODO!"
+
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
         """ Replace the contents of self with those of other (coming after running in
@@ -220,9 +244,9 @@ class TestSuite(object):
         
         
     #----------------------------------------------------------------------------------
-    def add_single(self, test_name):
+    def add_single(self, test_name, fullname):
         """ Add a single test to this suite """
-        self.tests.append( TestSingle(test_name) )
+        self.tests.append( TestSingle(test_name, fullname) )
         
     #----------------------------------------------------------------------------------
     def get_parent(self):
@@ -414,6 +438,17 @@ class TestProject(object):
         self.failed = 0
         self.num_run = 0
 
+
+    #----------------------------------------------------------------------------------
+    def get_fullname(self):
+        """Return a full, uniquely identifying name for this """
+        return self.name
+            
+    #----------------------------------------------------------------------------------
+    def get_results_text(self):
+        """Returns HTML text describing these test results """
+        return "TODO!"
+    
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
         """ Replace the contents of self with those of other (coming after running in
@@ -553,7 +588,7 @@ class TestProject(object):
                         self.suites.append(suite)
                         
                     # Add a single test to whatever suite we are in
-                    suite.add_single(test_name)
+                    suite.add_single(test_name, classname+"."+test_name)
             else:
                 # Could not interpret line
                 pass
@@ -627,6 +662,9 @@ class MultipleProjects(object):
         self.failed = 0
         self.num_run = 0
         
+        # Head folder of the source files (Framework normally)
+        self.source_path = "."
+        
     #--------------------------------------------------------------------------        
     def abort(self):
         """ Set a flag to abort all further calculations. """
@@ -654,16 +692,25 @@ class MultipleProjects(object):
             pj.selected = (pj.failed > 0)
             for suite in pj.suites:
                 suite.selected = (suite.failed > 0)
+                
+    #----------------------------------------------------------------------------------
+    def select_svn(self):
+        """ Do a 'svn st' call and interpret the results to find which tests need to be run. """
+        # First, de-select it all
+        self.select_all(False)
+        commands.getoutput("svn info %s" % self.source_path )
+        raise NotImplementedError
             
     #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
         """Look for CXXTest projects in the given paths.
         Populates all the test in it."""
+        self.source_path = source_path
         self.projects = []
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test"): #and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
+            if fname.endswith("Test") and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
                 make_command = "cd %s ; make %s -j" % (os.path.join(path, ".."), fname)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname

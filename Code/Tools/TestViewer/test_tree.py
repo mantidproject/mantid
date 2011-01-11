@@ -306,7 +306,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
             
         #User role is used when directly querying the contents of the item
         if role == Qt.UserRole:
-            if item:
+            if not item is None:
                 return item.contents
 
         return QtCore.QVariant()
