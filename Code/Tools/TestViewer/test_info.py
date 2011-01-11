@@ -11,7 +11,7 @@ from xml.dom.minidom import parse, parseString
 import multiprocessing
 from multiprocessing import Pool
 import random
-
+import subprocess
 
 #==================================================================================================
 class TestResult:
@@ -251,7 +251,7 @@ class TestSuite(object):
         return self.classname
             
     #----------------------------------------------------------------------------------
-    def get_results_text(self):
+    def get_results_text(self, details=True):
         """Returns HTML text describing these test results """
         # Change the header color
         color = ['"green"', '"red"'][self.failed > 0]
@@ -262,7 +262,8 @@ class TestSuite(object):
             s += "</pre>"
         else:
             for test in self.tests:
-                s += test.get_results_text()
+                if details or test.failed:
+                    s += test.get_results_text()
         return s
 
     #----------------------------------------------------------------------------------
@@ -516,7 +517,7 @@ class TestProject(object):
             s += "</pre>"
         else:
             for suite in self.suites:
-                s += suite.get_results_text()
+                s += suite.get_results_text(details=False)
         return s
     
     #----------------------------------------------------------------------------------
@@ -547,17 +548,39 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def make(self):
         """Make the project using the saved command """
-        print "Making test", self.name,
-        (status, output) = commands.getstatusoutput(self.make_command)
+        print "Making test", self.name
+        
+        #(status, output) = commands.getstatusoutput(self.make_command)
+        
+        output = ""
+        p = subprocess.Popen(self.make_command, shell=True, bufsize=10000,
+                             cwd=".",
+                             stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             stdout=subprocess.PIPE, close_fds=True)
+        (put, get) = (p.stdin, p.stdout)
+        line=get.readline()
+        while line != "":
+            # Make one long output string
+            output += line
+            #Remove trailing /n
+            if len(line)>1: line = line[:-1]
+            print line
+            #Keep reading output.
+            line=get.readline()            
+            
+        # The return code or exit status
+        p.wait()
+        status = p.returncode
+        
         if (status != 0):
-            print ". BUILD FAILED!"
+            print "----> BUILD FAILED!"
             self.build_succeeded = False
             self.build_stdout = output
             # Build failure of some kind!
             for suite in self.suites:
                 suite.set_build_failed(output)
         else:
-            print ", succeeded."
+            print "----> Build succeeded."
             self.build_succeeded = True
             # Build was successful
             for suite in self.suites:
