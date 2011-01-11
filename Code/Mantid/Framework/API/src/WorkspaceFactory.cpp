@@ -110,7 +110,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
     const int newAxisLength = child->getAxis(i)->length();
     const int oldAxisLength = parent->getAxis(i)->length();
 
-    if ( newAxisLength == oldAxisLength )
+    if ( !differentSize || newAxisLength == oldAxisLength )
     {
       // Need to delete the existing axis created in init above
       delete child->m_axes[i];
