@@ -183,7 +183,13 @@ set ( TEST_FILES test/AcompTest.h
 		 test/RectangularDetectorTest.h
 		 test/RegexSupportTest.h
 		 test/RotCounterTest.h
-		 test/RulesTest.h
+		test/RulesBoolValueTest.h  
+		test/RulesIntersectionTest.h  
+		test/RulesUnionTest.h
+		test/RulesCompGrpTest.h    
+		test/RulesSurfPointTest.h
+		test/RulesCompObjTest.h    
+		test/RulesTest.h
 		 test/ShapeFactoryTest.h
 		 test/SphereTest.h
 		 test/SurfaceFactoryTest.h
