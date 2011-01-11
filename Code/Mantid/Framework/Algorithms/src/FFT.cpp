@@ -90,10 +90,6 @@ void FFT::exec()
   }
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,nOut,xSize,ySize);
-  // Set the spectrum number on all the output workspace histograms to the relevant input spectrum (the "Real" property)
-  // If a different spectrum is providing the imaginary part, then what value this should have is a moot point
-  const Axis& inAxis = *(inWS->getAxis(1));
-  for (int i = 0; i < nOut; ++i) outWS->getAxis(1)->setValue(i,inAxis(iReal));
 
   bool isEnergyMeV = false;
   if (inWS->getAxis(0)->unit() && 
