@@ -8,6 +8,8 @@
 #include "MantidAPI/Progress.h"
 #include <cmath>
 
+#include "MantidAPI/TextAxis.h"
+
 namespace Mantid
 {
 namespace Algorithms
@@ -90,15 +92,25 @@ void Integration::exec()
 
   bool is_distrib=outputWorkspace->isDistribution();
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
+
+  const bool axisIsText = localworkspace->getAxis(1)->isText();
+
   // Loop over spectra
   PARALLEL_FOR2(localworkspace,outputWorkspace)
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     const int j = i - m_MinSpec;
-    if (localworkspace->axes() > 1)
+    
+    // Copy Axis values from previous workspace
+    if ( axisIsText )
     {
-      outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
+      Mantid::API::TextAxis* newAxis = dynamic_cast<Mantid::API::TextAxis*>(outputWorkspace->getAxis(1));
+      newAxis->setLabel(j, localworkspace->getAxis(1)->label(i));
+    }
+    else
+    {
+      outputWorkspace->getAxis(1)->setValue(j, localworkspace->getAxis(1)->operator()(i));
     }
 
     // Retrieve the spectrum into a vector

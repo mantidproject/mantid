@@ -9,6 +9,9 @@
 #include "MantidKernel/ConfigService.h"
 //#include "MantidAPI/MDPropertyGeometry.h"
 
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
+
 
 namespace Mantid
 {
@@ -82,7 +85,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
 ///@param child the child workspace
 ///@param differentSize A flag to indicate if the two workspace will be different sizes
 void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr parent,
-                                                const MatrixWorkspace_sptr child, const bool differentSize) const
+  const MatrixWorkspace_sptr child, const bool differentSize) const
 {
   child->setTitle(parent->getTitle());
   child->setComment(parent->getComment());
@@ -99,7 +102,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   {
     // Only copy mask map if same size for now. Later will need to check continued validity.
     child->m_masks = parent->m_masks;
-    
+
     for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
     {
       // Need to delete the existing axis created in init above
@@ -113,9 +116,20 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
     // Just copy the unit and title
     for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
     {
-      if (parent->getAxis(i)->isNumeric())
+      if (! parent->getAxis(i)->isSpectra())
       {
-        child->getAxis(i)->unit() = parent->getAxis(i)->unit();
+        int length = child->getAxis(i)->length();
+        if (parent->getAxis(i)->isNumeric())
+        {
+          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(length);
+          child->replaceAxis(i, newAxis);
+          child->getAxis(i)->unit() = parent->getAxis(i)->unit();
+        }
+        if (parent->getAxis(i)->isText())
+        {
+          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(length);
+          child->replaceAxis(i, newAxis);
+        }
       }
       child->getAxis(i)->title() = parent->getAxis(i)->title();
     }
