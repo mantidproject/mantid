@@ -149,7 +149,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         tree.header().setResizeMode(1,QHeaderView.Interactive)
         tree.header().setResizeMode(2,QHeaderView.Interactive)
         
-        tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
+        #tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
+        #tree.connect( tree, QtCore.SIGNAL("entered (QModelIndex)"), self.tree_clicked)
+        tree.connect( tree, QtCore.SIGNAL("activated (QModelIndex)"), self.tree_clicked)
 
     #-----------------------------------------------------------------------------
     def test(self):

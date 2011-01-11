@@ -135,7 +135,18 @@ class TestSingle(object):
     #----------------------------------------------------------------------------------
     def get_results_text(self):
         """Returns HTML text describing these test results """
-        return self.failure + self.stdout
+        # Change the header color
+        color = ['"green"', '"red"'][self.failed]
+        s = "<font color=%s><b>%s</b></font><br />" % (color, self.name)
+#        if len(self.failure) > 0:
+#            s += self.failure + "<br>"
+        if len(self.stdout) > 0:
+            lines = self.stdout.split("\n")
+            s += lines[0] + "<br>"
+            for line in lines[1:]: 
+                s += "&nbsp;&nbsp;&nbsp;" + line + "<br>"
+            # s += "</ul>"
+        return s
         
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
@@ -226,7 +237,12 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def get_results_text(self):
         """Returns HTML text describing these test results """
-        return "TODO!"
+        # Change the header color
+        color = ['"green"', '"red"'][self.failed > 0]
+        s = "<font color=%s><h3>%s</h3></font>" % (color, self.name + ": " + self.get_state_str())
+        for test in self.tests:
+            s += test.get_results_text()
+        return s
 
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
@@ -447,7 +463,12 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def get_results_text(self):
         """Returns HTML text describing these test results """
-        return "TODO!"
+        # Change the header color
+        color = ['"green"', '"red"'][self.failed > 0]
+        s = "<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
+        for suite in self.suites:
+            s += suite.get_results_text()
+        return s
     
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
