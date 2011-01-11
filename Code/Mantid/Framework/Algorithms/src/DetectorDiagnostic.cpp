@@ -183,6 +183,30 @@ namespace Mantid
       return median;
     }
 
+    /** 
+     * Convert to a distribution
+     * @param workspace The input workspace to convert to a count rate
+     */
+    API::MatrixWorkspace_sptr DetectorDiagnostic::convertToRate(API::MatrixWorkspace_sptr workspace)
+    {
+      if( workspace->isDistribution() )
+      {
+	g_log.information() << "Workspace already contains a count rate, nothing to do.\n";
+	return workspace;
+      }
+
+      g_log.information("Calculating time averaged count rates");
+      // get percentage completed estimates for now, t0 and when we've finished t1
+      double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
+      IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertToDistribution", t0, t1);
+      childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace); 
+      // Now execute the sub-algorithm but allow any exception to bubble up
+      childAlg->execute();
+      return childAlg->getProperty("Workspace");
+    }
+
+
+
     /** Update the percentage complete estimate assuming that the algorithm 
      * has completed a task with the given estimated run time
      * @param toAdd the estimated additional run time passed since the last update, 

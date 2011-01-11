@@ -80,7 +80,7 @@ namespace Mantid
       //Adds the counts from all the bins and puts them in one total bin
       MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
 						     m_rangeLower, m_rangeUpper);
-      counts = getRate(counts); 
+      counts = convertToRate(counts); 
       MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
 
       //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
@@ -189,52 +189,6 @@ namespace Mantid
 	return empty;
       }
       return childAlg->getProperty("OutputWorkspace");
-    }
-
-    /** Divides number of counts by time using ConvertToDistribution as a sub-algorithm
-     *
-     * @param counts A histogram workspace with counts in time bins 
-     * @return A workspace of the counts per unit time in each bin
-     * @throw invalid_argument if the ConvertToDistribution validation on the input workspace fails (a workspace that is already a distribution is acceptable)
-     * @throw runtime_error if there is an during the execution of ConvertToDistribution
-     */
-    API::MatrixWorkspace_sptr MedianDetectorTest::getRate(API::MatrixWorkspace_sptr counts)
-    {
-      g_log.information("Calculating time averaged count rates");
-      // get percentage completed estimates for now, t0 and when we've finished t1
-      double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
-      IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertToDistribution", t0, t1);
-      try
-      {
-	childAlg->setProperty<MatrixWorkspace_sptr>( "Workspace", counts ); 
-      }
-      catch (std::invalid_argument &e)
-      {
-	std::string prob = e.what();
-	if ( prob.find("A workspace containing numbers of counts is required here")
-	     != std::string::npos)
-	{
-	  g_log.debug("Could not convert Workspace to a distribution as the workspace seems to be a distribution already, continuing");
-	  return counts;
-	}
-	throw;
-      }   
-      try
-      {
-	// Now execute the sub-algorithm. Catch and log any error
-	childAlg->execute();
-      }
-      catch (...)
-      {
-	g_log.error("Exception thrown while running ConvertToDistribution");
-	throw;
-      }
-      if ( ! childAlg->isExecuted() )
-      {
-	g_log.error("The ConvertToDistribution algorithm failed unexpectedly, aborting.");
-	throw std::runtime_error(name() + " failed to run ConvertToDistribution");
-      }
-      return childAlg->getProperty("Workspace");
     }
 
     /** 

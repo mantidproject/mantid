@@ -81,10 +81,6 @@ namespace Mantid
       void retrieveProperties();
       /// Calculates the sum of soild angles of detectors for each histogram
       API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
-      /// Calculates the sum counts in each histogram
-      API::MatrixWorkspace_sptr getTotalCounts(int firstSpec, int lastSpec);
-      /// Converts numbers of particle counts into count rates
-      API::MatrixWorkspace_sptr getRate(API::MatrixWorkspace_sptr counts);
       /// Do the tests and mask those that fail
       int doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace, 
 			  API::MatrixWorkspace_sptr maskWS,

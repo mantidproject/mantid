@@ -48,6 +48,8 @@ namespace Mantid
 
       /// Algorithm's category for identification
       virtual const std::string category() const { return "Diagnostics";}
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1;}
 
     protected:
       /// Get the total counts for each spectra
@@ -58,6 +60,8 @@ namespace Mantid
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts
       double calculateMedian(API::MatrixWorkspace_sptr workspace, std::set<int> & skippedIndices);
+      /// Convert to a distribution
+      API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
 
       /** @name Progress reporting */
       //@{
