@@ -105,6 +105,11 @@ public:
      return this->MD_IMG_array.data[nCell(i, j, k, t)];
    }
 
+  /// get signal as 1D array; Generally for debug purposes or in case of 1D image;
+  double  getSignal(size_t i)     const
+  {
+     return this->MD_IMG_array.data[i].s;
+  }
   /// build allocation table of sparce data points (pixels) -> will be moved into points;
     void identify_SP_points_locations();
 
@@ -121,14 +126,8 @@ public:
      size_t nCell(int i,int j,int k)        const{ return (i+j*nd2+k*nd3); }
      size_t nCell(int i,int j,int k, int n) const{ return (i+j*nd2+k*nd3+n*nd4);}
 
-	 // not used at the moment; if will, should be uncommented and pData pointer defined properly
-	 //MD_image_point thePoint(int i)                   const{   return MD_IMG_array.data[nCell(i)];}
-  //   MD_image_point thePoint(int i,int j)             const{   return pData[nCell(i,j)];}
-  //
-  //   MD_image_point thePoint(int i,int j,int k, int n)const{   return pData[nCell(i,j,k,n)];}
-
-      static Kernel::Logger& g_log;
-   /// the pointer for vector returning the image points for visualisation
+/// MD workspace logger
+     static Kernel::Logger& g_log;
 
 private:
   //*************************************************

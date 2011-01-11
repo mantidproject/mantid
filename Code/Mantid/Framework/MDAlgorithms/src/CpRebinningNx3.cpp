@@ -145,7 +145,7 @@ CpRebinningNx3::rebin_Nx3dataset()
   double s,err;
   size_t nDimX(strides[this->rec_dim_indexes[0]]),nDimY(strides[this->rec_dim_indexes[1]]),nDimZ(strides[this->rec_dim_indexes[2]]);
   // this one should coinside with the description, obtained from the MDDataPoints and readers;
-  MDDataObjects::MDDataPoint<float,uint16_t,float> unPacker(&pix_buf[0],nDimensions,2,3);
+  MDDataObjects::MDDataPoint<float,uint16_t,float> unPacker(&pix_buf[0],nDimensions);
   // min-max value initialization
 
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();

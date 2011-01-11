@@ -91,16 +91,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DynamicRebinFromXMLAlgorithmTest.cpp" />
     <ClCompile Include="Load_MDWorkspaceTest.cpp" />
     <ClCompile Include="testCPrebinning.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="DynamicRebinFromXMLAlgorithmTest.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for: %(FileName)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FileName).cpp</Outputs>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CPR_preselectCellsTest.h" />

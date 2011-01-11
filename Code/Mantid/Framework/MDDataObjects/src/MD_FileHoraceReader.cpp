@@ -395,12 +395,17 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
         Dim_sig[2] =(float)*((float *)(buffer+i*hbs+8));
         Dim_sig[3] =(float)*((float *)(buffer+i*hbs+12));
 
-        Dim_sig[4] =(float)*((float*)(buffer+i*hbs+16));
-        Dim_sig[5] =(float)*((float*)(buffer+i*hbs+20));
+        index[0]  =(int)*((uint32_t *)(buffer+i*hbs+16)); 
+        index[1]  =(int)*((uint32_t *)(buffer+i*hbs+20)); 
+        index[2]  =(int)*((uint32_t *)(buffer+i*hbs+24)); 
 
-        index[0]  =(int)*((uint32_t *)(buffer+i*hbs+24)); 
-        index[1]  =(int)*((uint32_t *)(buffer+i*hbs+28)); 
-        index[2]  =(int)*((uint32_t *)(buffer+i*hbs+32)); 
+        Dim_sig[4] =(float)*((float*)(buffer+i*hbs+28));
+        Dim_sig[5] =(float)*((float*)(buffer+i*hbs+32));
+        if(Dim_sig[4] == -1e+30){
+            Dim_sig[4] = std::numeric_limits<float>::quiet_NaN();
+            Dim_sig[5] = Dim_sig[4];
+        }
+
 
         defPoint.setData(i,Dim_sig,index);
     }

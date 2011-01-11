@@ -4,6 +4,7 @@
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
+#include "MDDataObjects/MD_FileTestDataGenerator.h"
 
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -41,8 +42,8 @@ IMD_FileFormat *
 MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
 {
 	if(rec == test_data){
-		f_log.error()<<"MD_FileFactory: test file format has not been implemented yet for file: "<<file_name<<std::endl;
-		throw(Exception::NotImplementedError("test file format has not been implemented yet"));
+		f_log.error()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
+        return (new MD_FileTestDataGenerator(file_name));
 	}
 
 // check if the file exist;

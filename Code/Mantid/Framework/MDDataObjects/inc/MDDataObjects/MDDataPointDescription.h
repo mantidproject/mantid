@@ -57,7 +57,7 @@ struct MDPointStructure{
   bool         DataFieldsPresent; //< data fields can be absent for event data; false here actually means an event data
   unsigned int NumPixCompressionBits; //< Run number and detector number corresponding to the reciprocal dimensions of TOF experiments can be placed in single 32 bit word;
                                    // 10 in NumPixCompression means that it is pissible to have 2^10-1 (1023) different experiments and 2^22 detectors (4M) coded by this field 
-                                  // 0 here should mean a class with even DimID fields -> not implemented;
+                                  // 0 here should mean a class with even DimID fields -> implemented;
                                  //TO DO: does this specialisation is practically usefull?  necessary?
   MDPointStructure():NumDimensions(4),NumRecDimensions(3),NumDataFields(2),NumDimIDs(3),
 	                       DimIDlength(2),DimLength(4),SignalLength(8),
@@ -94,6 +94,8 @@ std::string getColumnName(unsigned int nColumn)const{return dataIDs.at(nColumn);
  /// function returns the part of the colum-names which corresponds to the dimensions information;
  std::vector<std::string> getDimensionsID(void)const;
 
+ /// returns the size of the described MDDataPoint in bytes
+ unsigned int sizeofMDPoint(void)const;
 protected:
         MDPointStructure PixDescriptor;
   /** The names (tags) of every dimension column and every data column;

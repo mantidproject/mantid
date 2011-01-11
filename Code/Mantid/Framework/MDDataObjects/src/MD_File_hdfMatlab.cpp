@@ -362,7 +362,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     arr_dims_vector.clear();
 
 // this file-reader deals with 9 of 4 bit-fields only;
-    sqw.numFields()     = DATA_PIX_WIDTH;
+  //  sqw.numFields()     = DATA_PIX_WIDTH;
 
     // pixel array has to be allocated earlier when image data were read; It is possible then it was less than the pixel buffer. In this case this function has to fail as it is 
     // not possible to read all pixels into memory;
@@ -419,11 +419,12 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
           DimFields[1] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1)); // sqw.pix_array[i].qy 
           DimFields[2] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2)); // sqw.pix_array[i].qz
           DimFields[3] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3)); // sqw.pix_array[i].En
-          signalFields[0] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4)); // sqw.pix_array[i].s 
-          signalFields[1] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));  // sqw.pix_array[i].err
-          ind_fields[0]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));    // sqw.pix_array[i].irun 
-          ind_fields[1]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));   // sqw.pix_array[i].idet
-          ind_fields[2]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8)); // sqw.pix_array[i].ien
+          ind_fields[0]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));    // sqw.pix_array[i].irun 
+          ind_fields[1]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));   // sqw.pix_array[i].idet
+          ind_fields[2]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6)); // sqw.pix_array[i].ien
+          signalFields[0] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7)); // sqw.pix_array[i].s 
+          signalFields[1] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));  // sqw.pix_array[i].err
+
           nPixel++;
           packer.setData(i,DimFields,signalFields,ind_fields);
    }

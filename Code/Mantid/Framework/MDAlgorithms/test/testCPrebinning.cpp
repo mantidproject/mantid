@@ -32,19 +32,25 @@ public:
 
 static class TestDescription_testCPrebinning_testCPRExec : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testCPRExec() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 83, "testCPRExec" ) {}
+ TestDescription_testCPrebinning_testCPRExec() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 74, "testCPRExec" ) {}
  void runTest() { suite_testCPrebinning.testCPRExec(); }
 } testDescription_testCPrebinning_testCPRExec;
 
+static class TestDescription_testCPrebinning_testMDIMGCorrectness : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testCPrebinning_testMDIMGCorrectness() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 78, "testMDIMGCorrectness" ) {}
+ void runTest() { suite_testCPrebinning.testMDIMGCorrectness(); }
+} testDescription_testCPrebinning_testMDIMGCorrectness;
+
 static class TestDescription_testCPrebinning_testCPRExecAgain : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testCPRExecAgain() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 87, "testCPRExecAgain" ) {}
+ TestDescription_testCPrebinning_testCPRExecAgain() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 93, "testCPRExecAgain" ) {}
  void runTest() { suite_testCPrebinning.testCPRExecAgain(); }
 } testDescription_testCPrebinning_testCPRExecAgain;
 
 static class TestDescription_testCPrebinning_testRebinningResults : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testRebinningResults() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 95, "testRebinningResults" ) {}
+ TestDescription_testCPrebinning_testRebinningResults() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 111, "testRebinningResults" ) {}
  void runTest() { suite_testCPrebinning.testRebinningResults(); }
 } testDescription_testCPrebinning_testRebinningResults;
 

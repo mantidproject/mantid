@@ -9,9 +9,6 @@ using namespace Mantid::Kernel;
 
 // logger for MD workspaces  
 Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
-// default names for signal and error fields
-const char *DefaultSignalTags[]={"S","Err","iRun","iDet","iEn"};
-
 
 //------------------------------------------------------------------------------------------------
 /** Constructor
@@ -22,7 +19,7 @@ MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage,const MDData
   description(descr),
   memBased(false),
   n_data_points(0),
-  n_fields(9),
+
   data_buffer_size(0),
   data_buffer(NULL),
   m_spMDImage(spImage)
@@ -30,14 +27,12 @@ MDDataPoints::MDDataPoints(boost::shared_ptr<const MDImage> spImage,const MDData
   if(!m_spMDImage||!m_spMDImage->is_initialized())return;
 
   std::vector<std::string> dim_tags= m_spMDImage->getGeometry()->getBasisTags();
-  std::vector<std::string> signal_tags(DefaultSignalTags,DefaultSignalTags+4);
-  this->field_tag.reserve(n_fields);
-  this->field_tag.insert(field_tag.end(),dim_tags.begin(),dim_tags.end());
-  this->field_tag.insert(field_tag.end(),signal_tags.begin(),signal_tags.end());
-
+ 
   int nDims = m_spMDImage->getGeometry()->getNumDims();
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);
+
+  this->pixel_size = descr.sizeofMDPoint();
 }
 
 
@@ -58,20 +53,6 @@ size_t MDDataPoints::getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile)
   return n_data_points;
 }
 
-//------------------------------------------------------------------------------------------------
-/** */
-void MDDataPoints::set_field_length(const std::vector<unsigned int> &in_fields)
-{
-  this->n_fields=(unsigned int)in_fields.size();
-  this->field_length  = in_fields;
-
-  this->field_start.assign(n_fields+1,0);
-  for(unsigned int i=1;i<=n_fields;i++){
-    field_start[i]=field_start[i-1]+field_length[i-1];
-  }
-
-
-}
 //***************************************************************************************
 void MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
 {
@@ -92,13 +73,19 @@ void MDDataPoints::alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile)
   this->box_min.assign(nDims,FLT_MAX);
   this->box_max.assign(nDims,-FLT_MAX);
 
-  field_length.assign(n_fields,4);
-  this->set_field_length(field_length);
-  size_t nPix= this->getNumPixels(spFile);
-
+  // identify maximal number of pixels, possible to fit into buffer for current architecture;
+  size_t nPix(0);
+  size_t max_size = ~(nPix);
+  nPix            = this->getNumPixels(spFile);
+  size_t max_pix_num = max_size/this->pixel_size+1;
+   
+ 
   this->data_buffer_size = (nPix<PIX_BUFFER_SIZE)?nPix:PIX_BUFFER_SIZE;
+  if(data_buffer_size>max_pix_num){
+      data_buffer_size = max_pix_num;
+  }
 
-  data_buffer = new char[data_buffer_size*field_start[n_fields]];
+  data_buffer = new char[data_buffer_size*this->pixel_size];
 
 
 }
@@ -110,9 +97,7 @@ MDDataPoints::~MDDataPoints()
     data_buffer = NULL;
   }
   n_data_points=0;
-  n_fields     =0;
-  field_start.clear();
-  field_length.clear();
+
 
 }
 

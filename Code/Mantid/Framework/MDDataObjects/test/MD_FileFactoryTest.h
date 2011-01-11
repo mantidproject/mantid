@@ -12,6 +12,7 @@
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
+#include "MDDataObjects/MD_FileTestDataGenerator.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
@@ -20,8 +21,10 @@ class MD_FileFactoryTest :    public CxxTest::TestSuite
 
 public:
 	void testFormatNotImplemented(){
-		// not implemented at the moment
-		TS_ASSERT_THROWS(MD_FileFormatFactory::getFileReader("testFile",test_data),Kernel::Exception::NotImplementedError);
+		std::auto_ptr<IMD_FileFormat> testFormat;
+		TSM_ASSERT_THROWS_NOTHING("test data format should be initiated without throwing",testFormat=MD_FileFormatFactory::getFileReader("testFile",test_data));
+	
+		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader, should be test data ",dynamic_cast<MD_FileTestDataGenerator*>(testFormat.get())!=0);	
 	}
 	void testReturnsNewHDFV1format(){
 		std::auto_ptr<IMD_FileFormat> newFormat;

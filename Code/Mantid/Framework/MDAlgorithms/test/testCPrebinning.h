@@ -69,7 +69,33 @@ class testCPrebinning :    public CxxTest::TestSuite
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
-     // now modify it as we need;
+       
+    }
+    void testCPRExec(){
+        // rebin image into the same grid as an initial image
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
+    void testMDIMGCorrectness(){
+        // we did rebinning on the full image and initial image have to be equal to the target image
+	    MDWorkspace_sptr inputWS, outWS;
+        // Get the workspaces
+        inputWS = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(InputWorkspaceName));
+        outWS   = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("OutWorkspace"));
+         
+        const MDImage &OldIMG = inputWS->get_const_MDImage();
+        const MDImage &NewIMG = outWS->get_const_MDImage();
+
+        for(size_t i=0;i<OldIMG.getDataSize();i++){
+            TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
+        }
+    }
+
+    void testCPRExecAgain(){
+  // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+
+   // now modify it as we need;
         double r0=0;
         pSlicing->pDimDescription("qx")->cut_min = r0;
 		pSlicing->pDimDescription("qx")->cut_max = r0+1;
@@ -78,18 +104,8 @@ class testCPrebinning :    public CxxTest::TestSuite
 		pSlicing->pDimDescription("qz")->cut_min = r0;
 		pSlicing->pDimDescription("qz")->cut_max = r0+1;
 		pSlicing->pDimDescription("en")->cut_max = 50;
-        
-    }
-    void testCPRExec(){
-        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
-    }
-
-    void testCPRExecAgain(){
-  // retrieve slicing property for modifications
-      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
-
-        pSlicing->pDimDescription("qx")->cut_max = 0+2;
+  
+   
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
     void testRebinningResults(){

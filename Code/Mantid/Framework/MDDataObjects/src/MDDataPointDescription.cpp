@@ -12,7 +12,7 @@ PixDescriptor()
 {
   buildDefaultIDs(this->PixDescriptor);
 }
-
+//
 MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo,const std::vector<std::string> &IndataTags):
 dataIDs(IndataTags),PixDescriptor(pixInfo)
 {
@@ -21,6 +21,37 @@ dataIDs(IndataTags),PixDescriptor(pixInfo)
     throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
   }
 }
+//
+unsigned int 
+MDPointDescription::sizeofMDPoint(void)const
+{
+    unsigned int length(0);
+    if(this->PixDescriptor.DimFieldsPresent){
+     length= PixDescriptor.NumDimensions*PixDescriptor.DimLength;
+    }
+   if(this->PixDescriptor.DataFieldsPresent){
+     length += PixDescriptor.NumDataFields*PixDescriptor.SignalLength;
+   }
+
+   // calculate length of all dataID-s
+   // there could be 2 compressed fields-> more are not currently supported;
+   if(this->PixDescriptor.NumPixCompressionBits>0){
+     // account for compressed fields;
+         int num_dimID = this->PixDescriptor.NumDimIDs;
+         if(PixDescriptor.NumDimensions>=2){
+             num_dimID -=2;
+          }else{ // 1D MD points does not exist
+             throw(std::invalid_argument("the point description seems describes 1 or less dimension point; This is not supported"));
+          }
+        // two pixels ID are compressed into 4 bytes;
+       length += 4 + num_dimID*PixDescriptor.DimIDlength;
+   }else{ // all ID fields have equal length
+        length += PixDescriptor.NumDimIDs*PixDescriptor.DimIDlength;
+   }
+
+    return length;
+}
+//
 std::vector<std::string> 
 MDPointDescription::getDimensionsID(void)const
 {

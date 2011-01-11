@@ -46,7 +46,7 @@ MD_File_hdfMatlab4D::read_pix(MDDataPoints & sqw)
     H5Sget_simple_extent_dims(pixel_dataspace_h,pix_dims,pix_dims_max);    
 
 // this file-reader deals with 9 of 4 bit-fields only;
-    sqw.numFields()     = DATA_PIX_WIDTH;
+//    sqw.numFields()     = DATA_PIX_WIDTH;
 
     // pixel array has to be allocated earlier when image data were read; It is possible then it was less than the pixel buffer. In this case this function has to fail as it is 
     // not possible to read all pixels into memory;
@@ -117,21 +117,23 @@ MD_File_hdfMatlab4D::read_pix(MDDataPoints & sqw)
            pix_array[i].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
            pix_array[i].qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
            pix_array[i].En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-           pix_array[i].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-           pix_array[i].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-           pix_array[i].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-           pix_array[i].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-           pix_array[i].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
-         }else{
+           pix_array[i].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+           pix_array[i].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+           pix_array[i].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+           pix_array[i].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+           pix_array[i].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+
+        }else{
             pix_array[i].qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
             pix_array[i].qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
             pix_array[i].qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
             pix_array[i].En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-            pix_array[i].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-            pix_array[i].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-            pix_array[i].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-            pix_array[i].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-            pix_array[i].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+            pix_array[i].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+            pix_array[i].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+            pix_array[i].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+            pix_array[i].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+            pix_array[i].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+
         }
 
        nPixel++;

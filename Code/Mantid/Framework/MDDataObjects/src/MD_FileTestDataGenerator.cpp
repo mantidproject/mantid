@@ -114,7 +114,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     size_t ic(starting_cell),j;
     unsigned int idim;
     unsigned long max_data_size;
-
+    const unsigned int nBins = 50;
 
     const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
     std::vector<std::string> dimID = pCurrentGeom->getBasisTags();
@@ -123,11 +123,11 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
         const Geometry::IMDDimension *pDim = pCurrentGeom->get_constDimension(dimID[idim]).get();
-        dimPoints[idim].resize(50);
+        dimPoints[idim].resize(nBins);
         double min = pDim->getMinimum();
-        double step = (pDim->getMaximum()-min)/50;
+        double step = (pDim->getMaximum()-min)/nBins;
         min+=0.5*step;
-        for(j=0;j<50;j++){
+        for(j=0;j<nBins;j++){
             dimPoints[idim][j]=(float)(min+j*step);
         }
     }
