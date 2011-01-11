@@ -16,6 +16,9 @@ from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 import test_tree
 from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject, TreeFilterProxyModel
 
+import pygtk
+pygtk.require('2.0')
+import gtk
 
 #==================================================================================================
 #==================================================================================================
@@ -37,7 +40,6 @@ class TestWorker(QtCore.QThread):
         self.mainWindow = mainWindow
         return test_info.all_tests.run_tests_computation_steps(selected_only, make_tests)
         
-
     #-----------------------------------------------------------------------------
     def test_run_callback(self, obj):
         """ Simple callback for running tests. This is called into the MainProcess.
@@ -68,7 +70,49 @@ class TestWorker(QtCore.QThread):
                           self.parallel, callback_func=self.test_run_callback)
         
         
+
+
+
+#==================================================================================================
+#==================================================================================================
+class TestMonitorFilesWorker(QtCore.QThread):
+    """ Worker that runs in the background
+    and looks for modified files. """
+
+    def __init__(self, mainWindow, parent = None):
+        QtCore.QThread.__init__(self, parent)
+        self.mainWindow = mainWindow
+        self.exiting = False
+        self.monitor_tests = False
+        self.monitor_libraries = False
+        # Hoy many seconds to wait before checking again
+        self.delay = 1.0
+
+    def set_monitor_tests(self, state):
+        self.monitor_tests = state
+
+    def set_monitor_libraries(self, state):
+        self.monitor_libraries = state
         
+    #-----------------------------------------------------------------------------
+    def run(self):
+        print "Beginning to monitor files and/or libraries..."
+        
+        while not self.exiting:
+            if self.monitor_tests:
+                if test_info.all_tests.is_source_modified(selected_only=True):
+                    self.mainWindow.emit( QtCore.SIGNAL("testMonitorChanged()") )
+                pass
+            
+            if self.monitor_libraries:
+                pass
+            
+            time.sleep(self.delay)
+            
+        
+        
+        
+                
         
 #==================================================================================================
 #==================================================================================================
@@ -88,6 +132,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
              
         # Create the worker
         self.worker = TestWorker()
+        
+        # Now the file monitor
+        self.monitor_worker = TestMonitorFilesWorker(self)
+        self.monitor_worker.start()
+        
         self.connect(self.worker, QtCore.SIGNAL("finished()"), self.complete_run)
         self.connect(self.worker, QtCore.SIGNAL("terminated()"), self.complete_run)
         
@@ -97,6 +146,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # -- Checkboxes toggle  ----
         self.connect(self.checkShowFailedOnly, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_fail_only)
         self.connect(self.checkShowSelected, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_selected_only)
+        self.connect(self.checkMonitorLibraries, QtCore.SIGNAL("stateChanged(int)"), self.checked_monitor_libraries)
+        self.connect(self.checkMonitorTests, QtCore.SIGNAL("stateChanged(int)"), self.checked_monitor_tests)
 
 
         # -- Button commands ----
@@ -112,13 +163,19 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonSelectNone, QtCore.SIGNAL("clicked()"), self.select_none)
         self.connect(self.buttonSelectFailed, QtCore.SIGNAL("clicked()"), self.select_failed)
         self.connect(self.buttonSelectSVN, QtCore.SIGNAL("clicked()"), self.select_svn)
+        self.connect(self.buttonCopyFilename, QtCore.SIGNAL("clicked()"), self.copy_filename_to_clipboard)
         
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
+        # Signal called by the monitor thread
+        self.connect(self, QtCore.SIGNAL("testMonitorChanged()"), self.run_selected)
         
         self.last_tree_update = time.time()
         
         self.setup_tree()
+        
+        self.current_results = None
+        self.show_results()
         
         self.readSettings()
         
@@ -149,9 +206,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         tree.header().setResizeMode(1,QHeaderView.Interactive)
         tree.header().setResizeMode(2,QHeaderView.Interactive)
         
-        #tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
-        #tree.connect( tree, QtCore.SIGNAL("entered (QModelIndex)"), self.tree_clicked)
+        tree.connect( tree, QtCore.SIGNAL("clicked (QModelIndex)"), self.tree_clicked)
         tree.connect( tree, QtCore.SIGNAL("activated (QModelIndex)"), self.tree_clicked)
+        self.connect( tree.selectionModel(), QtCore.SIGNAL("currentChanged  (const QModelIndex &, const QModelIndex &)"), self.tree_selected)
 
     #-----------------------------------------------------------------------------
     def test(self):
@@ -177,6 +234,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def readSettings(self):
         s = self.settings
         self.checkInParallel.setChecked( s.value("checkInParallel", False).toBool() )
+        self.checkMonitorTests.setChecked( s.value("checkMonitorTests", False).toBool() )
+        self.checkMonitorLibraries.setChecked( s.value("checkMonitorLibraries", False).toBool() )
         if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
         self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
                      s.value("TestViewerMainWindow.height", 900).toInt()[0] )
@@ -190,6 +249,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def saveSettings(self):
         s = self.settings
         s.setValue("checkInParallel", self.checkInParallel.isChecked() )
+        s.setValue("checkMonitorTests", self.checkMonitorTests.isChecked() )
+        s.setValue("checkMonitorLibraries", self.checkMonitorLibraries.isChecked() )
         s.setValue("splitter", self.splitter.saveState())
         for i in [1,2]:    
             s.setValue("treeTests.columnWidth(%d)"%i, self.treeTests.columnWidth(i) )
@@ -252,10 +313,15 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 
         # Update the tree's data for the suite
         if not obj is None:
+            if isinstance(obj, TestSingle):
+                if obj == self.current_results: self.show_results()
             if isinstance(obj, TestSuite):
                 self.model.update_suite(obj)
+                if obj == self.current_results: self.show_results()
             if isinstance(obj, TestProject):
                 self.model.update_project(obj.name)
+                if obj == self.current_results: self.show_results()
+                
                 
 #        # Every second or so, update the tree too
 #        if (time.time() - self.last_tree_update) > 1.0:
@@ -289,9 +355,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def update_tree(self):
         """ Update the tree view with whatever the current results are """
-        print "update_tree"
         self.model.setupModelData()
         self.treeTests.update()
+        self.show_results()
         
 
     #-----------------------------------------------------------------------------
@@ -302,26 +368,52 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Retrieve the item at that index
         # (returns a QVariant that you have to bring back to a python object)
         item = self.treeTests.model().data( index, Qt.UserRole).toPyObject()
-        self.show_results(item)
+        self.current_results = item
+        self.show_results()
+        
+    #-----------------------------------------------------------------------------
+    def tree_selected(self, current_index, previous_index):
+        """ Selection in the tree changed from previous_index to current_index """
+        item = self.treeTests.model().data( current_index, Qt.UserRole).toPyObject()
+        self.current_results = item
+        self.show_results()
+        
 
     #-----------------------------------------------------------------------------
-    def show_results(self, res):
+    def show_results(self):
         """ Show the test results.
         @param res :: either TestProject, TestSuite, or TestSingle object containing the results to show."""
+        #print "show_results"
+        if self.current_results is None:
+            self.labelTestType.setText("Test Project Results:")
+            self.labelFilename.setText( "" ) 
+            self.labelTestName.setText( "" ) 
+            self.textResults.setText( "" )
+            return
+        res = self.current_results
         if isinstance(res, TestProject):
             self.labelTestType.setText("Test Project Results:")
-            self.labelTestName.setText( res.get_fullname() ) 
-            self.textResults.setText(res.get_results_text() )
+            self.labelFilename.setText( "" ) 
         elif isinstance(res, TestSuite):
             self.labelTestType.setText("Test Suite Results:") 
-            self.labelTestName.setText( res.get_fullname() ) 
-            self.textResults.setText(res.get_results_text() )
+            self.labelFilename.setText( res.source_file ) 
         elif isinstance(res, TestSingle):
-            self.labelTestType.setText("Singe Test Results:") 
-            self.labelTestName.setText( res.get_fullname() ) 
-            self.textResults.setText(res.get_results_text() )
+            self.labelTestType.setText("Single Test Results:") 
+            self.labelFilename.setText( res.parent.source_file ) 
         else:
             raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
+        self.labelTestName.setText( res.get_fullname() ) 
+        self.textResults.setText(res.get_results_text() )
+                
+    def copy_filename_to_clipboard(self):
+        """Copy the filename in labelFilename to clipboard"""
+        # get the clipboard
+        clipboard = gtk.clipboard_get()
+        # set the clipboard text data
+        clipboard.set_text(str(self.labelFilename.text()) )
+        # make our data available to other applications
+        clipboard.store()
+
                 
                 
     #-----------------------------------------------------------------------------
@@ -332,6 +424,12 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def checked_show_selected_only(self, state):
         """ Toggle the filtering """
         self.proxy.set_filter_selected_only(state > 0)
+        
+    def checked_monitor_libraries(self, state):
+        self.monitor_worker.set_monitor_libraries( state > 0 )
+        
+    def checked_monitor_tests(self, state):
+        self.monitor_worker.set_monitor_tests( state > 0 )
             
     #-----------------------------------------------------------------------------
     def run_all(self):

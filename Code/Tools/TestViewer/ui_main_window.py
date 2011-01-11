@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Tue Jan 11 11:35:16 2011
+# Created: Tue Jan 11 13:34:45 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -462,6 +462,20 @@ class Ui_MainWindow(object):
         self.labelTestName.setPalette(palette)
         self.labelTestName.setObjectName("labelTestName")
         self.vlResults.addWidget(self.labelTestName)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.labelFilename = QtGui.QLabel(self.verticalLayoutWidget)
+        self.labelFilename.setObjectName("labelFilename")
+        self.horizontalLayout_5.addWidget(self.labelFilename)
+        self.buttonCopyFilename = QtGui.QPushButton(self.verticalLayoutWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.buttonCopyFilename.sizePolicy().hasHeightForWidth())
+        self.buttonCopyFilename.setSizePolicy(sizePolicy)
+        self.buttonCopyFilename.setObjectName("buttonCopyFilename")
+        self.horizontalLayout_5.addWidget(self.buttonCopyFilename)
+        self.vlResults.addLayout(self.horizontalLayout_5)
         self.textResults = QtGui.QTextEdit(self.verticalLayoutWidget)
         self.textResults.setReadOnly(True)
         self.textResults.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
@@ -527,6 +541,8 @@ class Ui_MainWindow(object):
         self.labelResult.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestType.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestName.setText(QtGui.QApplication.translate("MainWindow", "(Name of test)", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelFilename.setText(QtGui.QApplication.translate("MainWindow", "(filename)", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCopyFilename.setText(QtGui.QApplication.translate("MainWindow", "Copy", None, QtGui.QApplication.UnicodeUTF8))
         self.textResults.setHtml(QtGui.QApplication.translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

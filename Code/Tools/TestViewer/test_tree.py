@@ -311,7 +311,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
         return QtCore.QVariant()
 
-   
+
     #----------------------------------------------------------------------------------
     def setData(self, index, value, role):
         """ Sets some data (from the user)?

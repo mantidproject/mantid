@@ -38,7 +38,7 @@ class TestResult:
         """ Equality comparison """
         if isinstance(other, TestResult):
             return ((self.value == other.value) and (self.old == other.old))
-        else:
+        else:            
             return self.value == other
         
     def __neq__(self, other):
@@ -94,12 +94,15 @@ class TestResult:
 #==================================================================================================
 class TestSingle(object):
     """ A single test instance (one test inside one suite) """
-    def __init__(self, name, fullname=None):
+    def __init__(self, name, parent, fullname=None):
         self.name = name
         if fullname is None:
             self.fullname = name
         else:
             self.fullname = fullname
+        
+        # Parent TestSuite object
+        self.parent = parent
         
         # Starting test state
         self.state = TestResult()
@@ -142,10 +145,16 @@ class TestSingle(object):
 #            s += self.failure + "<br>"
         if len(self.stdout) > 0:
             lines = self.stdout.split("\n")
+            # Remove any empty first line
+            if lines[0] == "" and len(lines)>1: lines = lines[1:]
+            # Show the first line without indent
+            s += "<pre>"
             s += lines[0] + "<br>"
+            # Print the rest
             for line in lines[1:]: 
-                s += "&nbsp;&nbsp;&nbsp;" + line + "<br>"
-            # s += "</ul>"
+                s += "" + line + "<br>"
+                # s += "&nbsp;&nbsp;&nbsp;" + line + "<br>"
+            s += "</pre>"
         return s
         
     #----------------------------------------------------------------------------------
@@ -215,14 +224,21 @@ class TestSuite(object):
         self.command = command
         # Name of the XML file produced when running (no path)
         self.xml_file = xml_file
+        
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
+        if not os.path.exists(self.source_file):
+            print "Warning! Source file not found - test suite '%s' should be renamed: %s" % (self.name, self.source_file)
+        # Last modified time of the source file
+        self.source_file_mtime = os.path.getmtime(self.source_file)
+        
         # A list of test singles inside this suite
         self.tests = []
         # Is it selected to run?
         self.selected = True
         # Was it made correctly?
-        self.built_succeeded = True
+        self.build_succeeded = True
+        self.build_stdout = ""
         # The state of the overall suite
         self.state = TestResult()
         self.passed = 0
@@ -240,8 +256,13 @@ class TestSuite(object):
         # Change the header color
         color = ['"green"', '"red"'][self.failed > 0]
         s = "<font color=%s><h3>%s</h3></font>" % (color, self.name + ": " + self.get_state_str())
-        for test in self.tests:
-            s += test.get_results_text()
+        if not self.build_succeeded:
+            s += "<pre>"
+            s += self.build_stdout
+            s += "</pre>"
+        else:
+            for test in self.tests:
+                s += test.get_results_text()
         return s
 
     #----------------------------------------------------------------------------------
@@ -262,12 +283,21 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def add_single(self, test_name, fullname):
         """ Add a single test to this suite """
-        self.tests.append( TestSingle(test_name, fullname) )
+        self.tests.append( TestSingle(test_name, self, fullname) )
         
     #----------------------------------------------------------------------------------
     def get_parent(self):
         """ Return the parent Project of this suite """
         return self.parent
+    
+    #----------------------------------------------------------------------------------
+    def get_modified(self):
+        """" Returns True if the required source file was modified. 
+        NOTE: This overwrites the previous cached modified time, AKA it will
+        only return True once per change."""
+        oldtime = self.source_file_mtime
+        self.source_file_mtime = os.path.getmtime(self.source_file)
+        return (self.source_file_mtime != oldtime)
     
     #----------------------------------------------------------------------------------
     def get_selected(self):
@@ -295,7 +325,7 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def is_built(self):
         """Returns True if the test build for this suite was successful."""
-        return self.built_succeeded
+        return self.build_succeeded
     
     #----------------------------------------------------------------------------------
     def set_build_failed(self, output):
@@ -303,11 +333,12 @@ class TestSuite(object):
         Parameters:
             output: stdout from the make command
         """
-        self.built_succeeded = False
+        self.build_succeeded = False
+        self.build_stdout = output
         for test in self.tests:
             test.state = TestResult(TestResult.BUILD_ERROR, old=False)
             test.failure = "Build failure"
-            test.stdout = output
+            test.stdout = ""
             
     #----------------------------------------------------------------------------------
     def compile_states(self):
@@ -407,7 +438,7 @@ class TestSuite(object):
         else:
             xmlSuite = suites[0]
         
-        # Get all the test cases
+        # Get all the test cases (aka TestSuite)
         xmlCases = xmlSuite.getElementsByTagName("testcase")
         for case in xmlCases:
             classname = case.getAttribute("classname")
@@ -415,12 +446,19 @@ class TestSuite(object):
                 # This is the single test name
                 test_name = case.getAttribute("name")
                 test = self.find_test(test_name)
+                # It is possible that the test was just added
+                if test is None:
+                    print "Test %s in suite %s was not found. Adding it." % (test_name, classname)
+                    self.add_single(test_name, self.classname+"."+fullname)
+                    # Look for it now
+                    test = self.find_test(test_name)
+
                 if not test is None:
                     # Save the time
                     test.lastrun = this_rundate
                     test.load_results(case)
                 else:
-                    print "Test %s in suite %s was not found. It must be new!" % (test_name, classname)
+                    print "Was unable to add test %s!" % test_name
             
     #----------------------------------------------------------------------------------
     def __repr__(self):
@@ -453,12 +491,18 @@ class TestProject(object):
         self.passed = 0
         self.failed = 0
         self.num_run = 0
+        self.build_succeeded = True
+        self.build_stdout = ""
 
 
     #----------------------------------------------------------------------------------
     def get_fullname(self):
         """Return a full, uniquely identifying name for this """
         return self.name
+    
+    #----------------------------------------------------------------------------------
+    def get_selected(self):
+        return self.selected
             
     #----------------------------------------------------------------------------------
     def get_results_text(self):
@@ -466,9 +510,25 @@ class TestProject(object):
         # Change the header color
         color = ['"green"', '"red"'][self.failed > 0]
         s = "<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
-        for suite in self.suites:
-            s += suite.get_results_text()
+        if not self.build_succeeded:
+            s += "<pre>"
+            s += self.build_stdout
+            s += "</pre>"
+        else:
+            for suite in self.suites:
+                s += suite.get_results_text()
         return s
+    
+    #----------------------------------------------------------------------------------
+    def is_source_modified(self, selected_only):
+        """Return true if any of the source files were modified 
+        @param selected_only :: True if you only check the selected ones."""
+        anymod = False
+        for suite in self.suites:
+            this_one_changed = suite.get_modified()
+            if not selected_only or suite.get_selected():
+                anymod = anymod or this_one_changed
+        return anymod
     
     #----------------------------------------------------------------------------------
     def replace_contents(self, other):
@@ -491,11 +551,14 @@ class TestProject(object):
         (status, output) = commands.getstatusoutput(self.make_command)
         if (status != 0):
             print ". BUILD FAILED!"
+            self.build_succeeded = False
+            self.build_stdout = output
             # Build failure of some kind!
             for suite in self.suites:
                 suite.set_build_failed(output)
         else:
             print ", succeeded."
+            self.build_succeeded = True
             # Build was successful
             for suite in self.suites:
                 suite.build_succeeded = True
@@ -772,6 +835,15 @@ class MultipleProjects(object):
         else:
             return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
 
+    #----------------------------------------------------------------------------------
+    def is_source_modified(self, selected_only):
+        """Return true if any of the source files were modified 
+        @param selected_only :: True if you only check the selected ones."""
+        anymod = False
+        for pj in self.projects:
+            if not selected_only or pj.get_selected():
+                anymod = anymod or pj.is_source_modified(selected_only)
+        return anymod
 
     #--------------------------------------------------------------------------        
     def get_project_named(self, name):
@@ -969,12 +1041,12 @@ def test_results_compiling():
     assert r.value == TestResult.SOME_FAILED
 
 def test_age():
-    a = TestSingle("my_test_test")
+    a = TestSingle("my_test_test", None)
     assert (a.state == TestResult.NOT_RUN)
     a.age()
     assert (a.state == TestResult.NOT_RUN)
     assert (a.state.old)
-    a = TestSingle("my_test_test")
+    a = TestSingle("my_test_test", None)
     a.state = TestResult(TestResult.ALL_PASSED)
     a.age()
     assert (a.state.old)
