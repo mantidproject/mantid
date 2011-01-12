@@ -32,7 +32,7 @@ void ConvertToMatrixWorkspace::exec()
   {
     g_log.information() << "Converting EventWorkspace to Workspace2D.\n";
     // Create the output workspace. This will copy many aspects fron the input one.
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
     // ...but not the data, so do that here.
     
