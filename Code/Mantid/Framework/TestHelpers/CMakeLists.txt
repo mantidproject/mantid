@@ -1,11 +1,9 @@
 set ( SRC_FILES src/WorkspaceCreationHelper.cpp 
-		src/ComponentCreationHelper.cpp 
-		src/TestChannel.cpp )
+		src/ComponentCreationHelper.cpp )
 
 set ( INC_FILES inc/MantidTestHelpers/DLLExport.h
 		inc/MantidTestHelpers/WorkspaceCreationHelper.h
-		inc/MantidTestHelpers/ComponentCreationHelper.h 
-		inc/MantidTestHelpers/TestChannel.h )
+		inc/MantidTestHelpers/ComponentCreationHelper.h )
 
 # Requires DataHandling for a load call
 include_directories (../DataHandling/inc)

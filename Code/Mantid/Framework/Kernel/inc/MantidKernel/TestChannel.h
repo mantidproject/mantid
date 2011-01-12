@@ -35,7 +35,7 @@
 #ifndef TESTCHANNEL_H_
 #define TESTCHANNEL_H_
 
-#include "MantidTestHelpers/DLLExport.h"
+#include "MantidKernel/DllExport.h"
 
 #include "Poco/Channel.h"
 #include "Poco/Message.h"
@@ -43,10 +43,9 @@
 
 namespace Mantid
 {
-  namespace TestHelpers
-  {
 
-    class DLL_TESTHELPERS TestChannel: public Poco::Channel
+//    class DLL_EXPORT TestChannel: public Poco::Channel
+    class TestChannel: public Poco::Channel
     {
     public:
       typedef std::list<Poco::Message> MsgList;
@@ -61,7 +60,6 @@ namespace Mantid
       MsgList _msgList;
     };
 
-  }
 }
 
 #endif // TESTCHANNEL_H_

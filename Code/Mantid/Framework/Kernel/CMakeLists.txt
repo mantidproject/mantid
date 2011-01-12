@@ -39,6 +39,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 		src/SupportBasic.cpp
                 src/SupportKernel.cpp
 		src/System.cpp
+                src/TestChannel.cpp
                 src/ThreadSafeLogStream.cpp
 		src/Timer.cpp
                 src/TimeSeriesProperty.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 		inc/MantidKernel/Support.h
 		inc/MantidKernel/SupportTempCode.h
 		inc/MantidKernel/System.h
+		inc/MantidKernel/TestChannel.h
 		inc/MantidKernel/ThreadSafeLogStream.h
 		inc/MantidKernel/Timer.h
 		inc/MantidKernel/TimeSeriesProperty.h
@@ -189,14 +191,16 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS IN_MANTID_KERNEL )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "Framework" )
+set_property ( TARGET Kernel PROPERTY PRIVATE_HEADER inc/MantidKernel/TestChannel.h )
 
 target_link_libraries ( Kernel ${MANTIDLIBS} )
 
 
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  include_directories ( ../TestHelpers/inc )
-  target_link_libraries( KernelTest Kernel TestHelpers)
+  include_directories ( inc test )
+  target_link_libraries( KernelTest Kernel)
+  add_dependencies ( KernelTest test/TestChannel.cpp )
   add_dependencies ( FrameworkTests KernelTest )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 

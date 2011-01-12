@@ -5,17 +5,17 @@
 
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TestChannel.h"
 #include "Poco/Channel.h"
 #include "Poco/Message.h"
 #include "Poco/LoggingFactory.h"
 #include "Poco/LoggingRegistry.h"
 #include "boost/shared_ptr.hpp"
-#include "MantidTestHelpers/TestChannel.h"
 #include <map>
 #include <string>
 
 using namespace Mantid::Kernel;
-using Mantid::TestHelpers::TestChannel;
+using Mantid::TestChannel;
 
 class FilterChannelTest : public CxxTest::TestSuite
 {

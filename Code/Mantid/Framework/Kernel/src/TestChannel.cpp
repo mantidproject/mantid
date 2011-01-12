@@ -1,13 +1,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/TestChannel.h"
+#include "MantidKernel/TestChannel.h"
 
 namespace Mantid
 {
-
-  namespace TestHelpers
-  {
 
     TestChannel::TestChannel()
     {
@@ -32,5 +29,4 @@ namespace Mantid
       _msgList.clear();
     }
 
-  }
 }
