@@ -351,9 +351,15 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                 self.model.update_project(obj.name)
                 if obj == self.current_results: self.show_results()
             elif isinstance(obj, basestring):
-                # Accumulated stdout
-                self.stdout += self.markup_console(obj)
-                self.textConsole.setText( self.stdout )
+                # String was returned
+                if obj == test_info.MSG_ALL_BUILDS_SUCCESSFUL:
+                    # Special message that all builds were good
+                    # Go back to the test results tab.
+                    self.tabWidgetRight.setCurrentIndex(0)
+                else:
+                    # Accumulated stdout
+                    self.stdout += self.markup_console(obj)
+                    self.textConsole.setText( self.stdout )
                 
                 
 #        # Every second or so, update the tree too
@@ -416,7 +422,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def show_results(self):
         """ Show the test results.
         @param res :: either TestProject, TestSuite, or TestSingle object containing the results to show."""
-        #print "show_results"
+        print "show_results"
         if self.current_results is None:
             self.labelTestType.setText("Test Project Results:")
             self.labelFilename.setText( "" ) 

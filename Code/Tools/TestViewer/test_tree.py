@@ -69,7 +69,8 @@ def get_background_color(state):
         col = MyColors.lightGreen
         if state.old: col = MyColors.darkishGreen
         
-    elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED):
+    elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED) \
+         or state == test_info.TestResult.SEGMENTATION_FAULT:
         col = QColor(Qt.red)
         if state.old: col = QColor( 200, 50, 50 )
         

@@ -13,6 +13,13 @@ from multiprocessing import Pool
 import random
 import subprocess
 
+
+#==================================================================================================
+# GLOBAL CONSTANTS
+global MSG_ALL_BUILDS_SUCCESSFUL
+MSG_ALL_BUILDS_SUCCESSFUL = "MSG(all_builds_successful)"
+
+
 #==================================================================================================
 class TestResult:
     """Enumeration giving the state of a single test, suite, or project"""
@@ -355,11 +362,11 @@ class TestSuite(object):
         for test in self.tests:
             state = test.state 
             self.state.add( state )
-            if state==TestResult.ALL_PASSED: 
-                self.passed += 1 
-                self.num_run += 1
-            if (state==TestResult.ALL_FAILED) or (state==TestResult.BUILD_ERROR): 
+            if self.state.is_failed():
                 self.failed += 1 
+                self.num_run += 1
+            else:
+                self.passed += 1 
                 self.num_run += 1
             
     #----------------------------------------------------------------------------------
@@ -988,7 +995,8 @@ class MultipleProjects(object):
             for pj in self.projects:
                 if pj.is_anything_selected() or (not selected_only):
                     pj_to_build.append(pj)
-                    
+            
+            all_builds_successful = True        
             for pj in pj_to_build:
                 # Abort when requested
                 if self.abort_run: break
@@ -997,6 +1005,14 @@ class MultipleProjects(object):
                 # Callback when completed a project
                 if not callback_func is None: 
                     callback_func(pj)
+                all_builds_successful = all_builds_successful and pj.build_succeeded
+
+            # Send a message that all builds were good!
+            if all_builds_successful and (not callback_func is None):
+                callback_func(MSG_ALL_BUILDS_SUCCESSFUL)
+                
+                    
+            
                     
         
         # Build a long list of all (selected and successfully built) suites
