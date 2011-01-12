@@ -19,9 +19,9 @@ HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)")
 def format_time(seconds):
     """Return a string for the # of seconds """
     if seconds < 1e-3:
-        return "<1 ms"
+        return "0.000"
     else:
-        return "%.3f s" % (seconds) 
+        return "%.3f" % (seconds) 
     
     if seconds < 1e-3:
         return "%d us" % (seconds*1000000) 
@@ -159,7 +159,7 @@ class TreeItemProject(TreeItemBase):
             if column == 1:
                 return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( format_time( self.contents.get_runtime() ))
+                return QtCore.QVariant( self.contents.get_runtime() )
         return QtCore.QVariant()
 
       
@@ -200,7 +200,7 @@ class TreeItemSuite(TreeItemBase):
             if column == 1:
                 return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( format_time( self.contents.get_runtime() ))
+                return QtCore.QVariant( self.contents.get_runtime() )
         return QtCore.QVariant()
 
 
@@ -240,7 +240,7 @@ class TreeItemSingle(TreeItemBase):
             if column == 1:
                 return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( format_time( self.contents.runtime ) )
+                return QtCore.QVariant( self.contents.runtime )
         return QtCore.QVariant()
 
 

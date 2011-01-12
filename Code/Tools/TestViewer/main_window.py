@@ -101,13 +101,14 @@ class TestMonitorFilesWorker(QtCore.QThread):
         print "Beginning to monitor files and/or libraries..."
         
         while not self.exiting:
-            if self.monitor_tests:
-                if test_info.all_tests.is_source_modified(selected_only=True):
-                    self.mainWindow.emit( QtCore.SIGNAL("testMonitorChanged()") )
-                pass
-            
-            if self.monitor_libraries:
-                pass
+            if not self.mainWindow.running:
+                # Don't monitor files while a test suite is building or running
+                if self.monitor_tests:
+                    if test_info.all_tests.is_source_modified(selected_only=True):
+                        self.mainWindow.emit( QtCore.SIGNAL("testMonitorChanged()") )
+                
+                if self.monitor_libraries:
+                    pass
             
             time.sleep(self.delay)
             
@@ -134,6 +135,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Populate all GUI elements
         self.setupUi(self)
         self.buttonTest.hide()
+        self.set_running(False)
              
         # Create the worker
         self.worker = TestWorker()
@@ -329,20 +331,24 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         Parameters:
             obj: either a TestSuite or a TestProject; 
             if it is a string, then it is the stdout of the make command"""
-        val = self.progTest.value()+1 
-        self.progTest.setValue( val )
-        self.progTest.setFormat("%p% : " + text)
 
         # Update the tree's data for the suite
         if not obj is None:
-            if isinstance(obj, TestSingle):
-                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
-            elif isinstance(obj, TestSuite):
+            
+            # For test results, increment the progress bar
+            if isinstance(obj, TestSingle) or isinstance(obj, TestSuite) or isinstance(obj, TestProject):
+                val = self.progTest.value()+1 
+                self.progTest.setValue( val )
+                self.progTest.setFormat("%p% : " + text)
+                # Try to update the current results shown
+                if not self.current_results is None:
+                    if obj.get_fullname() == self.current_results.get_fullname(): 
+                        self.show_results()
+            
+            if isinstance(obj, TestSuite):
                 self.model.update_suite(obj)
-                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
             elif isinstance(obj, TestProject):
                 self.model.update_project(obj.name)
-                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
             elif isinstance(obj, basestring):
                 # String was returned
                 if obj == test_info.MSG_ALL_BUILDS_SUCCESSFUL:
@@ -353,6 +359,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                     # Accumulated stdout
                     self.stdout += self.markup_console(obj)
                     self.textConsole.setText( self.stdout )
+                    sb = self.textConsole.verticalScrollBar();
+                    sb.setValue(sb.maximum());
                 
                 
 #        # Every second or so, update the tree too
@@ -366,11 +374,18 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.model().update_all()
         
     #-----------------------------------------------------------------------------
+    def set_running(self, running):
+        """ Sets whether a test suite is running. Adjusts the GUI as needed"""
+        self.running=running
+        self.buttonAbort.setEnabled(running)
+        self.buttonRunAll.setEnabled(not running)
+        self.buttonRunSelected.setEnabled(not running)
+                
+    #-----------------------------------------------------------------------------
     def complete_run(self):
         """ Event called when completing/aborting a test run """
-        self.buttonAbort.setEnabled(False)
-        self.buttonRunAll.setEnabled(True)
-        self.buttonRunSelected.setEnabled(True)
+        self.set_running(False)
+        
         self.progTest.setValue(0)
         self.progTest.setFormat("")
         self.update_tree()
@@ -479,12 +494,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if num_steps < 1: num_steps = 1 
         self.progTest.setValue(0)
         self.progTest.setMaximum( num_steps )
-        self.buttonAbort.setEnabled(True)
-        self.buttonRunAll.setEnabled(False)
-        self.buttonRunSelected.setEnabled(False)
+        self.set_running(True)
         self.stdout = ""
         self.textConsole.setText("")
-        # Select the console output tab (for the make output)
+        # Select the console output tab (for the make output)        self.running=True
+
         self.tabWidgetRight.setCurrentIndex(1)
         # Begin the thread in the background
         self.worker.start()

@@ -239,9 +239,11 @@ class TestSuite(object):
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
         if not os.path.exists(self.source_file):
-            print "Warning! Source file not found - test suite '%s' should be renamed: %s" % (self.name, self.source_file)
-        # Last modified time of the source file
-        self.source_file_mtime = os.path.getmtime(self.source_file)
+            print "Warning! Source file for test %s not found: %s" % (self.name, self.source_file)
+            self.source_file_mtime = time.time()
+        else:
+            # Last modified time of the source file
+            self.source_file_mtime = os.path.getmtime(self.source_file)
         
         # A list of test singles inside this suite
         self.tests = []
@@ -702,7 +704,7 @@ class TestProject(object):
             count += 1
         count += 1
         if count >= len(lines):
-            raise "Error interpreting CXX test output!"
+            print "Error interpreting CXX test output of %s" % (self.executable)
         
         lines = lines[count:]
         
@@ -838,8 +840,40 @@ class MultipleProjects(object):
         """ Do a 'svn st' call and interpret the results to find which tests need to be run. """
         # First, de-select it all
         self.select_all(False)
-        commands.getoutput("svn info %s" % self.source_path )
-        raise NotImplementedError
+        output = commands.getoutput("svn st %s" % self.source_path )
+        lines = output.split('\n')
+        for line in lines:
+            if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
+                 #Change to file or stuff.
+                 filename = line[8:].strip()
+                 foundit = None
+                 for pj in self.projects:
+                     for suite in pj.suites:
+                         # If the test file and the source file are the same,  
+                         if os.path.samefile( suite.source_file, filename):
+                             suite.selected = True
+                             pj.selected = True
+                             foundit = suite
+                             break
+                
+                 if foundit is None:
+                     # Ok, not directly a test name. Look for a similar test file
+                     # Get the bare filename, no .h or .cpp
+                     bare_file = os.path.splitext(os.path.basename(filename))[0]
+                     for pj in self.projects:
+                         for suite in pj.suites:
+                             # The words in the source file are inside the Test source file. Might be good.
+                             bare_source = os.path.basename(suite.source_file)
+                             if bare_file in bare_source:
+                                 suite.selected = True
+                                 pj.selected = True
+                                 foundit = suite
+                                 break
+                 if foundit is None:
+                     print "%s: No test found." % (filename)
+                 else:
+                     print "%s: Test found: '%s'" % ( filename, foundit.get_fullname() )
+                 
             
     #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
@@ -847,11 +881,16 @@ class MultipleProjects(object):
         Populates all the test in it."""
         self.source_path = source_path
         self.projects = []
+
+        # How many cores to use to make projects        
+        num_threads = multiprocessing.cpu_count()-1
+        if num_threads < 1: num_threads = 1
+        
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
             if fname.endswith("Test"): # and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
-                make_command = "cd %s ; make %s -j" % (os.path.join(path, ".."), fname)
+                make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
                 pj.populate()
@@ -1122,14 +1161,16 @@ test_age()
 #==================================================================================================
 if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
-    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
-                          parallel=True, callback_func=test_run_print_callback)
+    all_tests.select_svn()
     
-    for pj in all_tests.projects:
-        print pj.name, pj.get_state_str()
-        for suite in pj.suites:
-            print suite.classname, suite.get_state_str()
-        
+#    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
+#                          parallel=True, callback_func=test_run_print_callback)
+#    
+#    for pj in all_tests.projects:
+#        print pj.name, pj.get_state_str()
+#        for suite in pj.suites:
+#            print suite.classname, suite.get_state_str()
+#        
 #    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
 #                          parallel=False, callback_func=test_run_print_callback)
 
