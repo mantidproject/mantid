@@ -58,7 +58,7 @@ public:
     virtual ~Load_MDWorkspace(void);
 
   /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Load MD workspace";}
+      virtual const std::string name() const { return "LoadMDworkspace";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
