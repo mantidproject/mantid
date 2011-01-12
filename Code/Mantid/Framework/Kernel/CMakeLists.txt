@@ -220,6 +220,6 @@ endif ()
 
 set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
 
-configure_file ( ../Build/Tests/Mantid.properties.template
+configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
 )

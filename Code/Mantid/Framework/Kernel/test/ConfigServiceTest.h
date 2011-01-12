@@ -110,20 +110,20 @@ public:
   void TestCustomProperty()
   {
 	  //Mantid.legs is defined in the properties script as 6
-	  std::string legCountString = ConfigService::Instance().getString("mantid.legs");
-	  TS_ASSERT_EQUALS(legCountString, "6");
+	  std::string countString = ConfigService::Instance().getString("ManagedWorkspace.DataBlockSize");
+	  TS_ASSERT_EQUALS(countString, "4000");
   }
 
    void TestCustomPropertyAsValue()
   {
 	  //Mantid.legs is defined in the properties script as 6
 	  int value = 0;
-	  int retVal = ConfigService::Instance().getValue("mantid.legs",value);
+	  int retVal = ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",value);
 	  double dblValue = 0;
-	  retVal = ConfigService::Instance().getValue("mantid.legs",dblValue);
+	  retVal = ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",dblValue);
 
-	  TS_ASSERT_EQUALS(value, 6);
-	  TS_ASSERT_EQUALS(dblValue, 6.0);
+	  TS_ASSERT_EQUALS(value, 4000);
+	  TS_ASSERT_EQUALS(dblValue, 4000.0);
   }
 
   void TestMissingProperty()
