@@ -93,6 +93,7 @@ public:
     MatrixWorkspace_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
     MatrixWorkspace_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     MatrixWorkspace_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
+    MatrixWorkspace_sptr work_in7 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
     MatrixWorkspace_sptr work_event1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
     MatrixWorkspace_sptr work_event2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     CommutativeBinaryOpHelper helper;
@@ -101,10 +102,11 @@ public:
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in7));
+    TS_ASSERT(helper.checkSizeCompatibility(work_in7,work_in1));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event2));
   }
-
 
   void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
   {

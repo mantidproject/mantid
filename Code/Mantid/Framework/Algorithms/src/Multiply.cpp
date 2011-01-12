@@ -132,7 +132,7 @@ namespace Mantid
       {
         // either or both workspace are "other"
         // Use the default behaviour
-        BinaryOperation::checkRequirements();
+	CommutativeBinaryOperation::checkRequirements();
       }
     }
 
@@ -153,7 +153,7 @@ namespace Mantid
       if (!m_keepEventWorkspace)
       {
         // Fallback on the default checks
-        return BinaryOperation::checkSizeCompatibility(lhs, rhs);
+        return CommutativeBinaryOperation::checkSizeCompatibility(lhs, rhs);
       }
       else
       {

@@ -155,7 +155,7 @@ namespace Mantid
         return false;
 
       //Keep checking more generally.
-      return BinaryOperation::checkCompatibility(lhs,rhs);
+      return CommutativeBinaryOperation::checkCompatibility(lhs,rhs);
     }
 
 

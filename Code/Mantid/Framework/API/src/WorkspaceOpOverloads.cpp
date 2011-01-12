@@ -25,12 +25,14 @@ namespace OperatorOverloads
  *  @param lhsAsOutput If true, indicates that the lhs input is the same workspace as the output one
  *  @param child If true the algorithm is run as a child
  *  @param name If child is true and this is not an inplace operation then this name is used as output
+ *  @param A flag indicating whether to rethrow exceptions
  *  @returns The result in a workspace shared pointer
  */
-  MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput, bool child, const std::string &name)
+  MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput, bool child, const std::string &name, bool rethrow)
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(child);
+  alg->setRethrows(rethrow);
   alg->initialize();
 
   if( child )
@@ -78,7 +80,8 @@ namespace OperatorOverloads
   }
   else
   {
-    throw std::runtime_error("Error while executing operation algorithm: algorithmName");
+    std::string message = "Error while executing operation: " + algorithmName;
+    throw std::runtime_error(message);
   }
 
   throw Kernel::Exception::NotFoundError("Required output workspace property not found on sub algorithm" ,"OutputWorkspace");

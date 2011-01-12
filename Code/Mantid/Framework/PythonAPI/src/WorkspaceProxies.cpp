@@ -78,11 +78,11 @@ namespace Mantid
       {
 	if( reverse ) 
 	{
-	  result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name);
+	  result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name, true);
 	}
 	else
 	{
-	  result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name);
+	  result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name, true);
 	}
       }
       catch(std::runtime_error & exc)
