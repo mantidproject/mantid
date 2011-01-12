@@ -256,6 +256,29 @@ public:
     TS_ASSERT_EQUALS( lProp->operator()(), -9876543210987654LL );
   }
 
+  void testPlusEqualOperator()
+  {
+    std::vector<int> v;
+    v.push_back(1);
+    v.push_back(2);
+    v.push_back(3);
+    PropertyWithValue< std::vector<int> > * pv = new PropertyWithValue< std::vector<int> >("some_array", v);
+    PropertyWithValue< std::vector<int> > * pv2 = new PropertyWithValue< std::vector<int> >("some_array", v);
+    (*pv) += pv2;
+    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3")
+  }
+
+  void testPlusEqualOperatorOnYourself()
+  {
+    std::vector<int> v;
+    v.push_back(1);
+    v.push_back(2);
+    v.push_back(3);
+    PropertyWithValue< std::vector<int> > * pv = new PropertyWithValue< std::vector<int> >("some_array", v);
+    (*pv) += pv;
+    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3")
+  }
+
   void testOperatorNothing()
   {
     int i = *iProp;

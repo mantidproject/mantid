@@ -110,6 +110,19 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  // Ticket 2097: This caused an infinite loop
+  void testAdditionOperatorOnYourself()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+
+    (*log) += log;
+    // There is now a check and trying to do this does nothing.
+    TS_ASSERT_EQUALS( log->size(), 2);
+  }
+
+  //----------------------------------------------------------------------------
   void test_filterByTime_and_getTotalValue()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");

@@ -12,6 +12,8 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -28,7 +30,6 @@ public:
   PlusTest()
   {
   }
-
 
   void testInit()
   {
@@ -516,6 +517,56 @@ public:
     TS_ASSERT_EQUALS( in1->getNumberEvents(), numEvents1+numEvents2);
     TS_ASSERT_EQUALS( in1, out);
     TS_ASSERT_DIFFERS( in2, out);
+
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_addingInPlace_AllSameWorkspaces()
+  {
+    EventSetup();
+
+    std::string in1_name("ev1");
+    std::string in2_name("ev1");
+    std::string out_name("ev1");
+
+    EventWorkspace_sptr in1, in2, out;
+    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
+    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
+    int numEvents1 = in1->getNumberEvents();
+    int numEvents2 = in2->getNumberEvents();
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("some_log");
+    p->addValue( DateAndTime::get_current_time(), 123.5 );
+    in1->mutableRun().addLogData( p );
+
+    //Tests that the workspace is okay at first
+    TS_ASSERT_EQUALS( in1->blocksize(), 10);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i<in1->blocksize(); i++)
+        TS_ASSERT_EQUALS( in1->readY(wi)[i], 1);
+
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",in1_name);
+    alg.setPropertyValue("RHSWorkspace",in2_name);
+    alg.setPropertyValue("OutputWorkspace",out_name);
+    alg.execute();
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name));
+    int numEventsOut = out->getNumberEvents();
+
+    //Correct in output
+    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
+    //10 bins copied
+    TS_ASSERT_EQUALS( out->blocksize(), 10);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i<out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 2);
+
+    //But they were added in #1
+    TS_ASSERT_EQUALS( in1->getNumberEvents(), numEvents1+numEvents2);
+    TS_ASSERT_EQUALS( in1, out);
+    TS_ASSERT_EQUALS( in2, out);
 
     EventTeardown();
   }

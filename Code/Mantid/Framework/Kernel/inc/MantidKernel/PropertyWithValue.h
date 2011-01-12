@@ -180,7 +180,15 @@ template<typename T>
 inline void addingOperator(std::vector<T>& lhs, const std::vector<T>& rhs)
 {
   //This concatenates the two
-  lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+  if ( &lhs != &rhs)
+  {
+    lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+  }
+  else
+  {
+    std::vector<T> rhs_copy(rhs);
+    lhs.insert(lhs.end(), rhs_copy.begin(), rhs_copy.end());
+  }
 }
 
 template<>

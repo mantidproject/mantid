@@ -120,10 +120,19 @@ public:
 
     if (rhs)
     {
-      //Concatenate the maps!
-      m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
+      if (rhs != this)
+      {
+        //Concatenate the maps!
+        m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
+      }
+      else
+      {
+        // Do nothing if appending yourself to yourself. The net result would be the same anyway
+      }
+
       //Count the REAL size.
       m_size = m_propertySeries.size();
+
     }
     else
       g_log.warning() << "TimeSeriesProperty " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
