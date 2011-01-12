@@ -103,21 +103,18 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is None or self._beam_center_y is None:
             [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center()
             
-        old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
-        
-        #self._beam_center_x = float(ctr[0])/reducer.instrument.pixel_size_x*1000.0 + reducer.instrument.nx_pixels/2.0-0.5
-        #self._beam_center_y = float(ctr[1])/reducer.instrument.pixel_size_y*1000.0 + reducer.instrument.ny_pixels/2.0-0.5
         [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]))
 
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
         # Note: the position of the detector in Z is now part of the load
+        # Note: if the relative translation is correct, we shouldn't have to keep 
+        #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
         if workspace is not "beam_center":
+            old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                    #X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                    #Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0,
                                     X = old_ctr[0]-float(ctr[0]),
-                                    Y = old_ctr[1]-float(ctr[0]),
+                                    Y = old_ctr[1]-float(ctr[1]),
                                     RelativePosition="1")        
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
@@ -477,12 +474,14 @@ class LoadRun(ReductionStep):
         
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
-        if reducer.get_beam_center()[0] is not None and reducer.get_beam_center()[1] is not None:
-            #TODO: compute the difference to the current center position so that we don't mess it up if we apply it twice!
-            beam_ctr = reducer.instrument.get_coordinate_from_pixel(reducer.get_beam_center()[0], reducer.get_beam_center()[1])
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                    X = -beam_ctr[0],
-                                    Y = -beam_ctr[1],
+                                    X = default_x-beam_ctr_x,
+                                    Y = default_y-beam_ctr_y,
                                     RelativePosition="1")
         else:
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)

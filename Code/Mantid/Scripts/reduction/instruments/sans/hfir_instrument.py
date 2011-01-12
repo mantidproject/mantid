@@ -42,7 +42,7 @@ class HFIRSANS(Instrument):
             Returns the default beam center position, or the pixel location
             of real-space coordinates (0,0).
         """
-        return [self.nx_pixels/2.0, self.ny_pixels/2.0]
+        return self.get_pixel_from_coordinate(0, 0)
 
         
     def get_pixel_from_coordinate(self, x=0, y=0):
