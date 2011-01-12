@@ -37,7 +37,7 @@ void CropWorkspace::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace2D" );
 
-  declareProperty("XMin",0.0,
+  declareProperty("XMin", EMPTY_DBL(),
     "An X value that is within the first (lowest X value) bin that will be retained\n"
     "(default: workspace min)");
   declareProperty("XMax", EMPTY_DBL(),
@@ -186,12 +186,10 @@ void CropWorkspace::checkProperties()
  */
 int CropWorkspace::getXMin(const int wsIndex)
 {
-  Property *minX = getProperty("XMin");
-  const bool def = minX->isDefault();
-  int xIndex = -1;
-  if ( !def )
+  double minX_val = getProperty("XMin");
+  int xIndex = 0;
+  if ( ! isEmpty(minX_val) )
   {//A value has been passed to the algorithm, check it and maybe store it
-    double minX_val = getProperty("XMin");
     const MantidVec& X = m_inputWorkspace->readX(wsIndex);
     if ( m_commonBoundaries && minX_val > X.back() )
     {
