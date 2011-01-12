@@ -9,8 +9,8 @@ def find_file(run_number):
     if len(found) > 0:
         return found[0]
     else:
-        message = 'Cannot find file matching hint "%s" on current search paths\n'
-        'for instrument "%s"'
+        message = 'Cannot find file matching hint "%s" on current search paths ' + \
+                  'for instrument "%s"'
         raise ValueError( message % (file_hint, mtd.settings['default.instrument']))
 
 def create_resultname(run_number, prefix='', suffix=''):
