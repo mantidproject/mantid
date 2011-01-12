@@ -4,27 +4,26 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::DataObjects;
-using namespace Mantid::API;
+using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::DataObjects::EventWorkspace_sptr;
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
 {
 public:
-  CheckWorkspacesMatchTest() : loq("LOQ48127"), ws1(WorkspaceCreationHelper::Create2DWorkspace123(2,2))
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CheckWorkspacesMatchTest *createSuite() { return new CheckWorkspacesMatchTest(); }
+  static void destroySuite( CheckWorkspacesMatchTest *suite ) { delete suite; }
+
+  CheckWorkspacesMatchTest() : ws1(WorkspaceCreationHelper::Create2DWorkspace123(2,2))
   {
-    Mantid::DataHandling::LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "LOQ48127.raw");
-    loader.setPropertyValue("OutputWorkspace", loq);
-    loader.execute();
   }
   
   void testName()
@@ -50,11 +49,12 @@ public:
   
   void testMatches()
   {
-	 if ( !checker.isInitialized() ) checker.initialize();
+    if ( !checker.isInitialized() ) checker.initialize();
     
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(10,100);
     // A workspace had better match itself!
-    TS_ASSERT_THROWS_NOTHING( checker.setPropertyValue("Workspace1",loq) );
-    TS_ASSERT_THROWS_NOTHING( checker.setPropertyValue("Workspace2",loq) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws) );
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Success!" );
@@ -387,7 +387,6 @@ public:
 private:
   Mantid::Algorithms::CheckWorkspacesMatch checker;
   const Mantid::API::MatrixWorkspace_sptr ws1;
-  const std::string loq;
 };
 
 #endif /*CHECKWORKSPACESMATCHTEST_H_*/
