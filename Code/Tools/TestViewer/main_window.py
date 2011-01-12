@@ -166,11 +166,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonCopyFilename, QtCore.SIGNAL("clicked()"), self.copy_filename_to_clipboard)
         
         # Signal that will be called by the worker thread
-        self.connect(self, QtCore.SIGNAL("testRun"), self.update_label)
+        self.connect(self, QtCore.SIGNAL("testRun"), self.test_run_callback)
         # Signal called by the monitor thread
         self.connect(self, QtCore.SIGNAL("testMonitorChanged()"), self.run_selected)
         
         self.last_tree_update = time.time()
+        # The accumulated stdoutput from commands
+        self.stdout = ""
         
         self.setup_tree()
         
@@ -303,10 +305,36 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         
     #-----------------------------------------------------------------------------
-    def update_label(self, text, obj):
-        """ Update the progress bar and label.
+    def markup_console(self, in_line):
+        """Return a marked-up (with HTML) version of a line
+        from the consolue. """
+        line = in_line
+        if ("Error" in line) or ("error:" in line) \
+            or ("terminate called after throwing an instance" in line) \
+            or ("Segmentation fault" in line) \
+            or ("  what(): " in line) \
+            or ("Assertion" in line and " failed." in line) \
+            :
+            #An error line!
+            color = "red"
+        elif "warning:" in line or "Warning:" in line:
+            #Just a warning
+            color = "orange"
+        else:
+            #Print normally
+            color = ""
+        # Add the color tag
+        if color != "":
+            line = '<font color="%s">%s</font>' % (color, line)
+        # Add a new line 
+        return line + "<br>\n"
+        
+    #-----------------------------------------------------------------------------
+    def test_run_callback(self, text, obj):
+        """ Update the progress bar and label when a calculation is done (callback from test runner.
         Parameters:
-            obj: either a TestSuite or a TestProject """
+            obj: either a TestSuite or a TestProject; 
+            if it is a string, then it is the stdout of the make command"""
         val = self.progTest.value()+1 
         self.progTest.setValue( val )
         self.progTest.setFormat("%p% : " + text)
@@ -315,12 +343,16 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if not obj is None:
             if isinstance(obj, TestSingle):
                 if obj == self.current_results: self.show_results()
-            if isinstance(obj, TestSuite):
+            elif isinstance(obj, TestSuite):
                 self.model.update_suite(obj)
                 if obj == self.current_results: self.show_results()
-            if isinstance(obj, TestProject):
+            elif isinstance(obj, TestProject):
                 self.model.update_project(obj.name)
                 if obj == self.current_results: self.show_results()
+            elif isinstance(obj, basestring):
+                # Accumulated stdout
+                self.stdout += self.markup_console(obj)
+                self.textConsole.setText( self.stdout )
                 
                 
 #        # Every second or so, update the tree too
@@ -449,6 +481,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.buttonAbort.setEnabled(True)
         self.buttonRunAll.setEnabled(False)
         self.buttonRunSelected.setEnabled(False)
+        self.stdout = ""
+        self.textConsole.setText("")
+        # Select the console output tab (for the make output)
+        self.tabWidgetRight.setCurrentIndex(1)
         # Begin the thread in the background
         self.worker.start()
         

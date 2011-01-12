@@ -546,9 +546,14 @@ class TestProject(object):
         self.compile_states()
 
     #----------------------------------------------------------------------------------
-    def make(self):
-        """Make the project using the saved command """
-        print "Making test", self.name
+    def make(self, callback_func=None):
+        """Make the project using the saved command.
+        @param callback_func :: Callback function that will accept a 
+               string for each line of the make command's output. """
+               
+        msg = "-------- Making Test %s ---------" % self.name
+        print msg 
+        if not callback_func is None: callback_func("<hr><b>%s</b>" % msg)
         
         #(status, output) = commands.getstatusoutput(self.make_command)
         
@@ -565,6 +570,7 @@ class TestProject(object):
             #Remove trailing /n
             if len(line)>1: line = line[:-1]
             print line
+            if not callback_func is None: callback_func(line)
             #Keep reading output.
             line=get.readline()            
             
@@ -573,14 +579,18 @@ class TestProject(object):
         status = p.returncode
         
         if (status != 0):
-            print "----> BUILD FAILED!"
+            msg = "-------- BUILD FAILED! ---------" 
+            print msg 
+            if not callback_func is None: callback_func("<b>%s</b>" % msg)
             self.build_succeeded = False
             self.build_stdout = output
             # Build failure of some kind!
             for suite in self.suites:
                 suite.set_build_failed(output)
         else:
-            print "----> Build succeeded."
+            msg = "-------- Build Succeeded ---------" 
+            print msg 
+            if not callback_func is None: callback_func("<b>%s</b>" % msg)
             self.build_succeeded = True
             # Build was successful
             for suite in self.suites:
@@ -957,23 +967,20 @@ class MultipleProjects(object):
                     
         # Now let's run the make test command for each one
         if make_tests:
+            # This is a list of all projects that are needed (selected ones only)
             pj_to_build = []
             for pj in self.projects:
                 if pj.is_anything_selected() or (not selected_only):
                     pj_to_build.append(pj)
                     
-            # It's probably better not to make the tests in parallel.
-            if False: # parallel:
-                p = Pool(num_threads)
-                for pj in pj_to_build:
-                    p.apply_async( make_test, (self, pj, ), callback=callback_func)
-                p.close()
-                # This will block until completed
-                p.join()
-            else:
-                for pj in pj_to_build:
-                    result = make_test( self, pj )
-                    if not callback_func is None: callback_func(result)
+            for pj in pj_to_build:
+                # Abort when requested
+                if self.abort_run: break
+                # Run the make command
+                pj.make(callback_func)
+                # Callback when completed a project
+                if not callback_func is None: 
+                    callback_func(pj)
                     
         
         # Build a long list of all (selected and successfully built) suites
