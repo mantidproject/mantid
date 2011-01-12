@@ -3,11 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/Load.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
 class LoadTest : public CxxTest::TestSuite
@@ -56,7 +58,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_5");
     AnalysisDataService::Instance().remove("LoadTest_Output_6");
   }
-
+  //disabled because hdf4 can't be opened on windows 64-bit, I think
   void t1estNexus()
   {
     Load loader;
@@ -96,6 +98,18 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
+  void testEntryNumber()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","TEST00000008.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_entry2");
+    loader.setPropertyValue("EntryNumber","2");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    Workspace2D_sptr wsg = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("LoadTest_entry2"));
+    TS_ASSERT(wsg);
+    AnalysisDataService::Instance().remove("LoadTest_entry2");
+  }
   void testUnknownExt()
   {
     Load loader;

@@ -52,6 +52,8 @@ namespace Mantid
       declareProperty("SpectrumMin", 1, mustBePositive);
       declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
+      declareProperty("EntryNumber", 0, 
+        "Load a particular entry, if supported by the file format (default: Load all entries)");
     }
     /** checks this property exists in the list of algorithm properties.
     */
