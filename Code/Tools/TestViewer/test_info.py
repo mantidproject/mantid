@@ -312,22 +312,15 @@ class TestSuite(object):
         oldtime = self.source_file_mtime
         self.source_file_mtime = os.path.getmtime(self.source_file)
         return (self.source_file_mtime != oldtime)
+        
+    def get_selected(self):
+        return self.selected
     
     #----------------------------------------------------------------------------------
-    def get_selected(self):
-        """Return whether this is selected or not. NOTE:
-        if the parent project is not selected, this returns false."""
-        if not self.selected:
-            return False
-        else:
-            return self.parent.selected
-        
-    #----------------------------------------------------------------------------------
     def set_selected(self, value):
-        """Sets the selection state of this suite.
-        if the parent project is not selected, this DOES NOTHING!"""
-        if self.parent.selected:
-            self.selected = value
+        """Sets the selection state of this suite. """
+        self.selected = value
+        #if self.parent.selected:
         
     #----------------------------------------------------------------------------------
     def age(self):
@@ -527,7 +520,21 @@ class TestProject(object):
     
     #----------------------------------------------------------------------------------
     def get_selected(self):
-        return self.selected
+        """Return whether this is selected or not. NOTE:
+        Returns: 0: none are selected; 1: all are selected; 2: some are selected"""
+        num_sel = 0
+        num_not_sel = 0
+        for suite in self.suites:
+            if suite.selected: 
+                num_sel += 1
+            else:
+                num_not_sel += 1
+                
+        if num_sel > 0 and num_not_sel == 0:
+            return 1
+        if num_not_sel > 0 and num_sel == 0:
+            return 0
+        return 2
             
     #----------------------------------------------------------------------------------
     def get_results_text(self):

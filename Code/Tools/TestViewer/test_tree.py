@@ -141,10 +141,12 @@ class TreeItemProject(TreeItemBase):
 
     #-----------------------------------------------------------------------------------            
     def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked][self.contents.selected] 
+        return [Qt.Unchecked, Qt.Checked, Qt.PartiallyChecked][self.contents.get_selected()] 
     
     def set_checked(self, value):
         self.contents.selected = value
+        for suite in self.contents.suites:
+            suite.selected = value
 
     #-----------------------------------------------------------------------------------            
     def data(self, column):
@@ -182,7 +184,7 @@ class TreeItemSuite(TreeItemBase):
             
     #-----------------------------------------------------------------------------------            
     def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked][self.contents.get_selected()] 
+        return [Qt.Unchecked, Qt.Checked, Qt.PartiallyChecked][self.contents.get_selected()] 
     
     def set_checked(self, value):
         self.contents.set_selected( value )
@@ -268,7 +270,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         
     #----------------------------------------------------------------------------------
     def flags(self, index):
-        flag = Qt.ItemIsSelectable | Qt.ItemIsEnabled
+        flag = Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsTristate
         if index.column() == 0:
             flag |= Qt.ItemIsUserCheckable
         # Return the flags for the item: It is checkable, selectable and enabled.
@@ -328,8 +330,9 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         if role == QtCore.Qt.CheckStateRole:
             item.set_checked( value==Qt.Checked )
             if isinstance(item, TreeItemProject):
-                # self.modelReset()
-                self.update_project(item.project.name)
+                self.update_project(item.contents.name)
+            if isinstance(item, TreeItemSuite):
+                self.update_project(item.contents.parent.name)
                 
             return True
         

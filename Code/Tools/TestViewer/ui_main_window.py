@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed Jan 12 11:03:41 2011
+# Created: Wed Jan 12 14:07:24 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -101,7 +101,10 @@ class Ui_MainWindow(object):
         self.buttonRefresh.setGeometry(QtCore.QRect(400, 10, 98, 27))
         self.buttonRefresh.setObjectName("buttonRefresh")
         self.buttonTest = QtGui.QPushButton(self.frameTreeFilter)
-        self.buttonTest.setGeometry(QtCore.QRect(550, 40, 98, 27))
+        self.buttonTest.setEnabled(True)
+        self.buttonTest.setGeometry(QtCore.QRect(450, 40, 98, 27))
+        self.buttonTest.setDefault(False)
+        self.buttonTest.setFlat(False)
         self.buttonTest.setObjectName("buttonTest")
         self.horizontalLayoutWidget_5 = QtGui.QWidget(self.frameTreeFilter)
         self.horizontalLayoutWidget_5.setGeometry(QtCore.QRect(10, 70, 501, 41))
@@ -473,6 +476,20 @@ class Ui_MainWindow(object):
         self.labelTestName.setPalette(palette)
         self.labelTestName.setObjectName("labelTestName")
         self.verticalLayout_2.addWidget(self.labelTestName)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.labelFilename = QtGui.QLabel(self.tabResults)
+        self.labelFilename.setObjectName("labelFilename")
+        self.horizontalLayout_5.addWidget(self.labelFilename)
+        self.buttonCopyFilename = QtGui.QPushButton(self.tabResults)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.buttonCopyFilename.sizePolicy().hasHeightForWidth())
+        self.buttonCopyFilename.setSizePolicy(sizePolicy)
+        self.buttonCopyFilename.setObjectName("buttonCopyFilename")
+        self.horizontalLayout_5.addWidget(self.buttonCopyFilename)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.textResults = QtGui.QTextEdit(self.tabResults)
         self.textResults.setFrameShape(QtGui.QFrame.StyledPanel)
         self.textResults.setReadOnly(True)
@@ -490,20 +507,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.textConsole)
         self.tabWidgetRight.addTab(self.tabConsole, "")
         self.vlRightSide.addWidget(self.tabWidgetRight)
-        self.horizontalLayout_5 = QtGui.QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.labelFilename = QtGui.QLabel(self.verticalLayoutWidget)
-        self.labelFilename.setObjectName("labelFilename")
-        self.horizontalLayout_5.addWidget(self.labelFilename)
-        self.buttonCopyFilename = QtGui.QPushButton(self.verticalLayoutWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.buttonCopyFilename.sizePolicy().hasHeightForWidth())
-        self.buttonCopyFilename.setSizePolicy(sizePolicy)
-        self.buttonCopyFilename.setObjectName("buttonCopyFilename")
-        self.horizontalLayout_5.addWidget(self.buttonCopyFilename)
-        self.vlRightSide.addLayout(self.horizontalLayout_5)
         self.verticalLayout.addWidget(self.splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -565,6 +568,9 @@ class Ui_MainWindow(object):
         self.labelResult.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestType.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestName.setText(QtGui.QApplication.translate("MainWindow", "(Name of test)", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelFilename.setText(QtGui.QApplication.translate("MainWindow", "(filename)", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCopyFilename.setToolTip(QtGui.QApplication.translate("MainWindow", "Copy the source filename to the clipboard", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCopyFilename.setText(QtGui.QApplication.translate("MainWindow", "Copy", None, QtGui.QApplication.UnicodeUTF8))
         self.textResults.setHtml(QtGui.QApplication.translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -573,12 +579,10 @@ class Ui_MainWindow(object):
 "<tr>\n"
 "<td style=\"border: none;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></td></tr></table></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabResults), QtGui.QApplication.translate("MainWindow", "Test Results", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidgetRight.setTabText(self.tabWidgetRight.indexOf(self.tabConsole), QtGui.QApplication.translate("MainWindow", "Console output", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelFilename.setText(QtGui.QApplication.translate("MainWindow", "(filename)", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCopyFilename.setToolTip(QtGui.QApplication.translate("MainWindow", "Copy the source filename to the clipboard", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCopyFilename.setText(QtGui.QApplication.translate("MainWindow", "Copy", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTests.setTitle(QtGui.QApplication.translate("MainWindow", "&Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_File.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRun_All_Tests.setText(QtGui.QApplication.translate("MainWindow", "Run &All Tests", None, QtGui.QApplication.UnicodeUTF8))

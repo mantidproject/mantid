@@ -18,9 +18,6 @@ from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 import test_tree
 from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject, TreeFilterProxyModel
 
-import pygtk
-pygtk.require('2.0')
-import gtk
 
 #==================================================================================================
 #==================================================================================================
@@ -455,6 +452,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     #-----------------------------------------------------------------------------
     def copy_filename_to_clipboard(self):
         """Copy the filename in labelFilename to clipboard"""
+        import pygtk
+        pygtk.require('2.0')
+        import gtk
         # get the clipboard
         clipboard = gtk.clipboard_get()
         # set the clipboard text data
@@ -533,8 +533,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.update()
        
  
-      
-if __name__ == '__main__':
+def start():
     # Start the settings object.
     # TODO: Change the company name here and in MantidPlot
     settings = QSettings("ISIS", "MantidTestViewer");
@@ -586,4 +585,7 @@ if __name__ == '__main__':
     main.show()
     
     app.exec_() 
+        
+if __name__ == '__main__':
+    start()
         
