@@ -44,8 +44,8 @@ void FindCenterOfMassPosition2::init()
 
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(0);
-  declareProperty("BeamRadius", 20.0, positiveDouble,
-      "Radius of the beam area, in pixels, used the exclude the beam when calculating "
+  declareProperty("BeamRadius", 0.0155, positiveDouble,
+      "Radius of the beam area, in meters, used the exclude the beam when calculating "
       "the center of mass of the scattering pattern.");
 
 }

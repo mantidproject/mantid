@@ -24,7 +24,7 @@ namespace Algorithms
     <LI> Tolerance         - Tolerance on the center of mass position between each iteration [m]. Default: 0.00125</LI>
     <LI> DirectBeam        - If true, a direct beam calculation will be performed. Otherwise, the center of mass
                              of the scattering data will be computed by excluding the beam area. Default: true</LI>
-    <LI> BeamRadius        - Radius of the beam area, in pixels, used the exclude the beam when calculating
+    <LI> BeamRadius        - Radius of the beam area, in meters, used the exclude the beam when calculating
                              the center of mass of the scattering pattern. Default: 20 pixels</LI>
     </UL>
 
