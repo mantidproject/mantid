@@ -105,29 +105,29 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   std::string fullPath = path + m_filename;
 
   {
-  std::string fileToOpen = fullPath + "0";
+    std::string fileToOpen = fullPath; //+ "0";
 
-  // Create the temporary file
-  m_datafile[0] = new std::fstream(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+    // Create the temporary file
+    m_datafile[0] = new std::fstream(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
 
-  if ( ! *m_datafile[0] )
-  {
-    m_datafile[0]->clear();
-    // Try to open in current working directory instead
-    std::string file = m_filename + "0";
-    m_datafile[0]->open(file.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
-
-    // Throw an exception if it still doesn't work
     if ( ! *m_datafile[0] )
     {
-      g_log.error("Unable to open temporary data file");
-      throw std::runtime_error("ManagedWorkspace2D: Unable to open temporary data file");
+      m_datafile[0]->clear();
+      // Try to open in current working directory instead
+      std::string file = m_filename + "0";
+      m_datafile[0]->open(file.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+
+      // Throw an exception if it still doesn't work
+      if ( ! *m_datafile[0] )
+      {
+        g_log.error("Unable to open temporary data file");
+        throw std::runtime_error("ManagedWorkspace2D: Unable to open temporary data file");
+      }
     }
-  }
-  else
-  {
-    m_filename = fullPath;
-  }
+    else
+    {
+      m_filename = fullPath;
+    }
   } // block to restrict scope of fileToOpen
 
   // Set exception flags for fstream so that any problems from now on will throw
@@ -262,6 +262,11 @@ size_t ManagedWorkspace2D::getMemorySize() const
     return (size_t)(double(m_vectorSize)/1024)*m_bufferedData.size()*m_vectorsPerBlock;
 }
 
+/// Return the full path to the file used.
+std::string ManagedWorkspace2D::get_filename() const
+{
+  return this->m_filename;
+}
 
 } // namespace DataObjects
 } // namespace Mantid

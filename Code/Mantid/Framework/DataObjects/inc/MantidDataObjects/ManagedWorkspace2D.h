@@ -59,6 +59,8 @@ public:
   virtual size_t getMemorySize() const;
 	virtual bool threadSafe() const { return false; }
 
+	std::string get_filename() const;
+
 protected:
 
   /// Reads in a data block.

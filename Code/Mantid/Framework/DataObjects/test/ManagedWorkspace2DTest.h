@@ -60,8 +60,9 @@ public:
     }
 
     // Test all is as it should be with the temporary file
-    fstream file("WS2D3testInit.tmp0", ios::in | ios::binary);
-    TS_ASSERT(file);;
+    std::string filename = ws.get_filename();
+    fstream file(filename.c_str(), ios::in | ios::binary);
+    TSM_ASSERT(filename, file);;
     
     double temp;
     file.read((char *) &temp, sizeof(double));
