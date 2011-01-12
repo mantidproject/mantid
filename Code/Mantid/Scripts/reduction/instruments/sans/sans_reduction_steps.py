@@ -90,7 +90,7 @@ class BaseBeamFinder(ReductionStep):
         
         # We must convert the beam radius from pixels to meters
         if self._beam_radius is not None:
-            self._beam_radius *= reducer.instrument.pixel_size_x
+            self._beam_radius *= reducer.instrument.pixel_size_x/1000.0
         beam_center = FindCenterOfMassPosition(workspace+'_int',
                                                Output = None,
                                                DirectBeam = direct_beam,

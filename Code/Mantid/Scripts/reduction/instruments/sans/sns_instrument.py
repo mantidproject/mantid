@@ -20,6 +20,8 @@ class EQSANS(Instrument):
         self.pixel_size_y = 4.297
         ## Nominal sample-detector distance
         sample_detector_distance = 0.0
+        ## Detector name
+        self.detector_ID = "detector1"
 
     def get_default_beam_center(self):
         """
