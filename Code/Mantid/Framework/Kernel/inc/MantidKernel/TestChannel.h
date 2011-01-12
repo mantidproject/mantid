@@ -44,8 +44,7 @@
 namespace Mantid
 {
 
-//    class DLL_EXPORT TestChannel: public Poco::Channel
-    class TestChannel: public Poco::Channel
+    class DLLExport TestChannel: public Poco::Channel
     {
     public:
       typedef std::list<Poco::Message> MsgList;
