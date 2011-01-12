@@ -242,6 +242,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
         self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
                      s.value("TestViewerMainWindow.height", 900).toInt()[0] )
+        self.move( s.value("TestViewerMainWindow.x", 0).toInt()[0], 
+                   s.value("TestViewerMainWindow.y", 0).toInt()[0] )
         column_default_width = [200, 230, 100]
         for i in [1,2]:    
             self.treeTests.setColumnWidth( i, s.value("treeTests.columnWidth(%d)"%i, column_default_width[i]).toInt()[0] )
@@ -259,6 +261,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             s.setValue("treeTests.columnWidth(%d)"%i, self.treeTests.columnWidth(i) )
         s.setValue("TestViewerMainWindow.width", self.width())
         s.setValue("TestViewerMainWindow.height", self.height())
+        s.setValue("TestViewerMainWindow.x", self.x())
+        s.setValue("TestViewerMainWindow.y", self.y())
         
     #-----------------------------------------------------------------------------
     def closeEvent(self, event):
@@ -343,13 +347,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Update the tree's data for the suite
         if not obj is None:
             if isinstance(obj, TestSingle):
-                if obj == self.current_results: self.show_results()
+                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
             elif isinstance(obj, TestSuite):
                 self.model.update_suite(obj)
-                if obj == self.current_results: self.show_results()
+                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
             elif isinstance(obj, TestProject):
                 self.model.update_project(obj.name)
-                if obj == self.current_results: self.show_results()
+                if obj.get_fullname() == self.current_results.get_fullname(): self.show_results()
             elif isinstance(obj, basestring):
                 # String was returned
                 if obj == test_info.MSG_ALL_BUILDS_SUCCESSFUL:
@@ -443,7 +447,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
         self.labelTestName.setText( res.get_fullname() ) 
         self.textResults.setText(res.get_results_text() )
+
                 
+    #-----------------------------------------------------------------------------
     def copy_filename_to_clipboard(self):
         """Copy the filename in labelFilename to clipboard"""
         # get the clipboard
