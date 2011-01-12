@@ -89,7 +89,9 @@ namespace Mantid
   /// Structure to contain least squares data and used by GSL
   struct GSL_FitData {
     /// Constructor
-    GSL_FitData(API::IFitFunction* fun);
+    GSL_FitData(API::IFitFunction* fun,ICostFunction* cf);
+    /// Destructor
+    ~GSL_FitData();
     /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
     size_t n;
     /// number of (active) fit parameters
@@ -99,11 +101,11 @@ namespace Mantid
     /// the data to be fitted (ordinates)
     const double * Y;
     /// the standard deviations of the Y data points
-    double * sqrtWeightData;
-    /// pointer to instance of Fit
-    //Fit* fit;
+    const double * sqrtWeightData;
     /// Pointer to the function
     API::IFitFunction* function;
+    /// Initial function parameters
+    gsl_vector *initFuncParams;
     /// pointer to the cost function
     ICostFunction* costFunc;
     /// Jacobi matrix interface

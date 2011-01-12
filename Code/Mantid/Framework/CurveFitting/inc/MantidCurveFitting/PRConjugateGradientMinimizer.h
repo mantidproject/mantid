@@ -54,6 +54,7 @@ public:
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
   void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
     gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction);
+  void initialize(API::IFitFunction* function, const std::string& costFunction);
 
 private:
   /// name of this minimizer

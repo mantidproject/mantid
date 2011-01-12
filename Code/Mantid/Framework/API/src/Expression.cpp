@@ -205,13 +205,70 @@ void Expression::tokenize()
   bool inString = false;
   int skip = 0;
   bool canBeBinary = false;
+  bool isNumber = false; // if parser is inside a number (important case is 123.45e+67)
+  bool canDotBeAdded = false;
+  bool canEBeAdded = false;
+  bool canPlusBeAdded = false;
   Tokens tokens;
   for(size_t i=0;i<m_expr.size();i++)
   {
     char c = m_expr[i];
+
+
     if (!inString && skip == 0)
     {
-      if (lvl == 0 && is_op_symbol(c))// insert new token
+      if (isNumber)
+      {
+        if (c == '.')
+        {
+          if (canDotBeAdded)
+          {
+            canDotBeAdded = false;
+          }
+          else
+          {
+            isNumber = false;
+          }
+        }
+        else if (c == 'e' || c == 'E')
+        {
+          if (canEBeAdded)
+          {
+            canEBeAdded = false;
+            canDotBeAdded = false;
+            canPlusBeAdded = true;
+          }
+          else
+          {
+            isNumber = false;
+          }
+        }
+        else if (c == '+' || c == '-')
+        {
+          if (canPlusBeAdded)
+          {
+            canPlusBeAdded = false;
+            canEBeAdded = false;
+            canDotBeAdded = false;
+          }
+          else
+          {
+            isNumber = false;
+          }
+        }
+        else if (!isdigit(c))
+        {
+          isNumber = false;
+        }
+      }
+      else if (isdigit(c))
+      {
+        isNumber = true;
+        canDotBeAdded = true;
+        canEBeAdded = true;
+        canPlusBeAdded = false;
+      }
+      if (lvl == 0 && !isNumber && is_op_symbol(c))// insert new token
       {
         if (i == last) 
         {

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -115,7 +116,8 @@ public:
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);
 
-    alg2.setFunction(fnWithBk);    
+    //alg2.setFunction(fnWithBk);    
+    alg2.setPropertyValue("Function",*fnWithBk);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -135,12 +137,13 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
-
-    TS_ASSERT_DELTA( fn->height(), 100.6902 ,0.0001);
-    TS_ASSERT_DELTA( fn->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( fn->width(), 2.1986 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), -0.0071 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.0001);
+    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
+    TS_ASSERT_DELTA( pk->height(), 100.6960 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.1994 ,0.0001);
+    TS_ASSERT_DELTA( pk->width(), 2.1975 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), -0.0028 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0005 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
 
@@ -178,7 +181,8 @@ public:
     fn->addConstraint(bc);
 
     //void setFunction(API::IFunction* fun);
-    alg2.setFunction(fn);
+    //alg2.setFunction(fn);
+    alg2.setPropertyValue("Function",*fn);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -196,12 +200,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0782,0.01);
+    TS_ASSERT_DELTA( dummy, 0.08,0.01);
 
+    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
 
-    TS_ASSERT_DELTA( fn->height(), 100.6995 ,0.0001);
-    TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
+    TS_ASSERT_DELTA( pk->width(), 2.1999 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -251,7 +257,8 @@ public:
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);
 
-    alg2.setFunction(fnWithBk);
+    //alg2.setFunction(fnWithBk);
+    alg2.setPropertyValue("Function",*fnWithBk);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -269,14 +276,15 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0834,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.09,0.01);
 
-
-    TS_ASSERT_DELTA( fn->height(), 100.6996 ,0.0001);
-    TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1999 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0 ,0.01);
-    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01);
+    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
+    TS_ASSERT_DELTA( pk->width(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 
     AnalysisDataService::Instance().remove(wsName);
 

@@ -171,7 +171,8 @@ namespace Mantid
             // Fit the function
             API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
             fit->initialize();
-            fit->setProperty("InputWorkspace",data.ws);
+            //fit->setProperty("InputWorkspace",data.ws);
+            fit->setPropertyValue("InputWorkspace",data.ws->getName());
             fit->setProperty("WorkspaceIndex",j);
             fit->setPropertyValue("Function",fun);
             fit->setPropertyValue("StartX",getPropertyValue("StartX"));

@@ -11,6 +11,8 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -32,64 +34,70 @@ namespace API
   
   Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
 
-  /// Set the workspace
-  /// @param wsIDString A string identifying the data to be fitted. Format for IFunction:
-  ///  "WorkspaceName,WorkspaceIndex=int,StartX=double,EndX=double"
-  void IFunction::setWorkspace(const std::string& wsIDString)
+  /** Set the workspace
+    * @param ws A shared pointer to a workspace. Must be a MatrixWorkspace.
+    * @param slicing A string identifying the data to be fitted. Format for IFunction:
+    *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
+  */
+  void IFunction::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
   {
     try
     {
-      Expression expr;
-      expr.parse(wsIDString);
-      if (expr.name() != "," || expr.size() < 2 ) // TODO: Expression needs pattern matching
+      MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      if (!mws)
       {
-        throw std::invalid_argument("Syntax error in argument");
-      }
-      std::string wsName = expr[0].name();
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-      if (!ws)
-      {
-        throw std::invalid_argument("Workspace has wrong type (not a MatrixWorkspace)");
+        throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
       }
 
       int index = -1;
       int xMin = -1;
       int xMax = -1;
       double startX,endX;
-      for(int i = 1; i < expr.size(); ++i)
+      int n = int(mws->blocksize()); // length of each Y vector
+
+      Expression expr;
+      expr.parse(slicing);
+      if (expr.name() == ",")
       {
-        const Expression& e = expr[i];
-        if (e.size() == 2 && e.name() == "=")
+        for(int i = 0; i < expr.size(); ++i)
         {
-          if (e[0].name() == "WorkspaceIndex")
+          const Expression& e = expr[i];
+          if (e.size() == 2 && e.name() == "=")
           {
-            index = boost::lexical_cast<int>(e[1].name());
-          }
-          else if (e[0].name() == "StartX")
-          {
-            startX = boost::lexical_cast<double>(e[1].name());
-            xMin = 0;
-          }
-          else if (e[0].name() == "EndX")
-          {
-            endX = boost::lexical_cast<double>(e[1].name());
-            xMax = 0;
+            if (e[0].name() == "WorkspaceIndex")
+            {
+              index = boost::lexical_cast<int>(e[1].name());
+            }
+            else if (e[0].name() == "StartX")
+            {
+              startX = boost::lexical_cast<double>(e[1].name());
+              xMin = 0;
+            }
+            else if (e[0].name() == "EndX")
+            {
+              endX = boost::lexical_cast<double>(e[1].name());
+              xMax = 0;
+            }
           }
         }
+      }
+      else if (expr.size() == 2 && expr.name() == "=" && expr[0].name() == "WorkspaceIndex")
+      {
+        index = boost::lexical_cast<int>(expr[1].name());
       }
 
       if (index < 0)
       {
         g_log.warning("WorkspaceIndex not set, defaulting to 0");
       }
-      else if (index >= ws->getNumberHistograms())
+      else if (index >= mws->getNumberHistograms())
       {
         throw std::range_error("WorkspaceIndex outside range");
       }
-      const MantidVec& x = ws->readX(index);
-      const MantidVec& y = ws->readY(index);
-      const MantidVec& e = ws->readE(index);
-      int n = int(y.size());
+      const MantidVec& x = mws->readX(index);
+      const MantidVec& y = mws->readY(index);
+      const MantidVec& e = mws->readE(index);
+
       if (xMin < 0)
       {
         xMin = 0;
@@ -132,20 +140,29 @@ namespace API
       }
       m_dataSize = xMax - xMin;
       m_data = &y[xMin];
-      m_xValues = &x[xMin];
-      m_weights.resize(m_dataSize);
+      m_xValues.reset(new double[m_dataSize]);
+      m_weights.reset(new double[m_dataSize]);
+      bool isHist = x.size() > y.size();
 
       for (int i = 0; i < m_dataSize; ++i)
       {
+        if (isHist)
+        {
+          m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
+        }
+        else
+        {
+          m_xValues[i] = x[xMin + i];
+        }
         if (e[xMin + i] <= 0.0)
           m_weights[i] = 1.0;
         else
           m_weights[i] = 1./e[xMin + i];
       }
 
-      if (ws->hasMaskedBins(index))
+      if (mws->hasMaskedBins(index))
       {
-        const MatrixWorkspace::MaskList& mlist = ws->maskedBins(index);
+        const MatrixWorkspace::MaskList& mlist = mws->maskedBins(index);
         MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
         for(;it!=mlist.end();it++)
         {
@@ -153,7 +170,7 @@ namespace API
         }
       }
 
-      setMatrixWorkspace(ws,index,xMin,xMax);
+      setMatrixWorkspace(mws,index,xMin,xMax);
       
     }
     catch(std::exception& e)
@@ -190,8 +207,8 @@ namespace API
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   void IFunction::function(double* out)const
   {
-    if (m_weights.empty()) return;
-    function(out,m_xValues,m_dataSize);
+    if (m_dataSize == 0) return;
+    function(out,m_xValues.get(),m_dataSize);
     // Add penalty factor to function if any constraint is violated
 
     double penalty = 0.;
@@ -221,8 +238,13 @@ namespace API
   /// Derivatives of function with respect to active parameters
   void IFunction::functionDeriv(Jacobian* out)
   {
-    if (m_weights.empty()) return;
-    functionDeriv(out,m_xValues,m_dataSize);
+    if (out == NULL) 
+    {
+      functionDeriv(out,m_xValues.get(),0);
+      return;
+    }
+    if (m_dataSize == 0) return;
+    functionDeriv(out,m_xValues.get(),m_dataSize);
 
     if (m_dataSize <= 0) return;
 
@@ -480,33 +502,100 @@ void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, c
 }
 
 /// Called after setMatrixWorkspace if setWorkspace hadn't been called before
-void IFunction::setUpNewStuff()
+void IFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
 {
   m_dataSize = m_xMaxIndex - m_xMinIndex;
   m_data = &m_workspace->readY(m_workspaceIndex)[m_xMinIndex];
-  m_xValues = &m_workspace->readX(m_workspaceIndex)[m_xMinIndex];
-  m_weights.resize(m_dataSize);
-  const MantidVec& e = m_workspace->readE(m_workspaceIndex);
-
-  for (int i = 0; i < m_dataSize; ++i)
+  //m_xValues = &m_workspace->readX(m_workspaceIndex)[m_xMinIndex];
+  if (weights && xs)
   {
-    if (e[m_xMinIndex + i] <= 0.0)
-      m_weights[i] = 1.0;
-    else
-      m_weights[i] = 1./e[m_xMinIndex + i];
+    m_xValues = xs;
+    m_weights = weights;
   }
-
-  if (m_workspace->hasMaskedBins(m_workspaceIndex))
+  else
   {
-    const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(m_workspaceIndex);
-    MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-    for(;it!=mlist.end();it++)
+    m_xValues.reset(new double[m_dataSize]);
+    m_weights.reset(new double[m_dataSize]);
+    const MantidVec& x = m_workspace->readX(m_workspaceIndex);
+    const MantidVec& e = m_workspace->readE(m_workspaceIndex);
+    bool isHist = m_workspace->isHistogramData();
+
+    for (int i = 0; i < m_dataSize; ++i)
     {
-      m_weights[it->first - m_xMinIndex] = 0.;
+      if (isHist)
+      {
+        m_xValues[i] = 0.5*(x[m_xMinIndex + i] + x[m_xMinIndex + i + 1]);
+      }
+      else
+      {
+        m_xValues[i] = x[m_xMinIndex + i];
+      }
+      if (e[m_xMinIndex + i] <= 0.0)
+        m_weights[i] = 1.0;
+      else
+        m_weights[i] = 1./e[m_xMinIndex + i];
+    }
+
+    if (m_workspace->hasMaskedBins(m_workspaceIndex))
+    {
+      const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(m_workspaceIndex);
+      MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
+      for(;it!=mlist.end();it++)
+      {
+        m_weights[it->first - m_xMinIndex] = 0.;
+      }
     }
   }
 
 }
+
+boost::shared_ptr<API::MatrixWorkspace> IFunction::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const
+{
+      const MantidVec& inputX = inWS->readX(wi);
+      const MantidVec& inputY = inWS->readY(wi);
+      int nData = dataSize();
+
+      int histN = inWS->isHistogramData() ? 1 : 0;
+      API::MatrixWorkspace_sptr ws =
+        Mantid::API::WorkspaceFactory::Instance().create(
+            "Workspace2D",
+            3,
+            nData + histN,
+            nData);
+      ws->setTitle("");
+      ws->setYUnitLabel(inWS->YUnitLabel());
+      ws->setYUnit(inWS->YUnit());
+      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
+      API::TextAxis* tAxis = new API::TextAxis(3);
+      tAxis->setLabel(0,"Data");
+      tAxis->setLabel(1,"Calc");
+      tAxis->setLabel(2,"Diff");
+      ws->replaceAxis(1,tAxis);
+
+      for(int i=0;i<3;i++)
+      {
+        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+histN);
+      }
+
+      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex);
+
+      MantidVec& Ycal = ws->dataY(1);
+      MantidVec& E = ws->dataY(2);
+
+      double* lOut = new double[nData];  // to capture output from call to function()
+      function( lOut );
+
+      for(int i=0; i<nData; i++)
+      {
+        Ycal[i] = lOut[i]; 
+        E[i] = m_data[i] - Ycal[i];
+      }
+
+      delete [] lOut; 
+
+      return ws;
+}
+
 
 } // namespace API
 } // namespace Mantid

@@ -193,7 +193,8 @@ void tearDown()
     fit.initialize();
     fit.setPropertyValue("InputWorkspace","ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex","0");
-    fit.setFunction(conv);
+    //fit.setFunction(conv);
+    fit.setPropertyValue("Function",*conv);
     fit.execute();
 
   }

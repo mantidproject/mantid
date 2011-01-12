@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -81,7 +82,8 @@ public:
     ExpDecay* fn = new ExpDecay();
     fn->initialize();
 
-    alg2.setFunction(fn);    
+    //alg2.setFunction(fn);
+    alg2.setPropertyValue("Function",*fn);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -101,9 +103,9 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
-
-    TS_ASSERT_DELTA( fn->getParameter("Height"), 5 ,0.0001);
-    TS_ASSERT_DELTA( fn->getParameter("Lifetime"), 3 ,0.001);
+    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    TS_ASSERT_DELTA( out->getParameter("Height"), 5 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("Lifetime"), 3 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
 

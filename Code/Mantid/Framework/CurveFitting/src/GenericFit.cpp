@@ -23,10 +23,11 @@ namespace CurveFitting
 {
 
   // Register the class into the algorithm factory
-  //DECLARE_ALGORITHM(GenericFit)
+  DECLARE_ALGORITHM(GenericFit)
 
   using namespace Kernel;
   using API::WorkspaceProperty;
+  using API::Workspace;
   using API::Axis;
   using API::MatrixWorkspace;
   using API::Algorithm;
@@ -44,7 +45,8 @@ namespace CurveFitting
   */
   void GenericFit::init()
   {
-    declareProperty("Input","","Dataset identifier. Must be consistent with the Function type (see FitFunction::setWorkspace).");
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
+    declareProperty("Input","","Workspace slicing parameters. Must be consistent with the Function type (see FitFunction::setWorkspace).");
 
     declareProperty("Function","",Direction::InOut );
 
@@ -88,31 +90,23 @@ namespace CurveFitting
       throw std::runtime_error("Function was not set.");
     }
 
+    API::Workspace_sptr ws = getProperty("InputWorkspace");
     std::string input = getProperty("Input");
-
-    m_function->setWorkspace(input);
+    m_function->setWorkspace(ws,input);
 
     // force initial parameters to satisfy constraints of function
     m_function->setParametersToSatisfyConstraints();
 
     // check if derivative defined in derived class
     bool isDerivDefined = true;
-    //  const std::vector<double> inTest(nActive(),1.0);
-    //  std::vector<double> outTest(nActive());
-    //  const double xValuesTest = 0;
-    //  JacobianImpl1 J;
-    //  gsl_matrix* M( gsl_matrix_alloc(1,nActive()) );
-    //  J.setJ(M);
-    //  try
-    //  {
-    //  // note nData set to zero (last argument) hence this should avoid further memory problems
-    //  functionDeriv(NULL, &J, &xValuesTest, 0);
-    //}
-    //catch (Exception::NotImplementedError&)
-    //{
-    //  isDerivDefined = false;
-    //}
-    //gsl_matrix_free(M);
+    try
+    {
+      m_function->functionDeriv(NULL);
+    }
+    catch (Exception::NotImplementedError&)
+    {
+      isDerivDefined = false;
+    }
 
     // What minimizer to use
     std::string methodUsed = getProperty("Minimizer");
@@ -145,26 +139,11 @@ namespace CurveFitting
       throw std::runtime_error("Number of data points less than number of parameters to be GenericFitted.");
     }
 
-    double* X = new double[nData];
-    double* sqrtWeightData = new double[nData];
-
-
-    // set-up initial guess for GenericFit parameters
-    gsl_vector *initFuncArg;
-    initFuncArg = gsl_vector_alloc(nParam);
-
-    for (size_t i = 0; i < m_function->nActive(); i++)
-    {
-        gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
-    }
-
-
     // set-up minimizer
 
     std::string costFunction = getProperty("CostFunction");
     IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-    //minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-    //                 initFuncArg, this, costFunction);
+    minimizer->initialize(m_function, costFunction);
     
 
     // finally do the GenericFitting
@@ -197,8 +176,7 @@ namespace CurveFitting
             methodUsed = "Simplex";
             delete minimizer;
             minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-            //minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-            //                      initFuncArg, this, costFunction);
+            minimizer->initialize(m_function, costFunction);
             iter = 0;
           }
           break;
@@ -227,10 +205,8 @@ namespace CurveFitting
             g_log.information() << "Simplex step size reduced to 0.1\n";
             delete minimizer;
             SimplexMinimizer* sm = new SimplexMinimizer;
-            //sm->initialize(X, Y, sqrtWeightData, nData, nParam, 
-            //               initFuncArg, this, costFunction);
-            //sm->resetSize(X, Y, sqrtWeightData, nData, nParam, 
-            //               initFuncArg, 0.1, this, costFunction);
+            sm->initialize(m_function, costFunction);
+            sm->resetSize(0.1, m_function, costFunction);
             minimizer = sm;
             status = GSL_CONTINUE;
             continue;
@@ -345,11 +321,8 @@ namespace CurveFitting
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final GenericFit parameters" );
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simlated spectrum");
 
       setPropertyValue("OutputParameters",output+"_Parameters");
-      setPropertyValue("OutputWorkspace",output+"_Workspace");
 
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
@@ -372,6 +345,7 @@ namespace CurveFitting
 
       if ( methodUsed.compare("Simplex") != 0 ) 
         gsl_matrix_free(covar);
+    }
 
     // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
     declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
@@ -396,16 +370,10 @@ namespace CurveFitting
     setProperty("Parameters",params);
     setProperty("Errors",errors);
     setProperty("ParameterNames",parNames);
-    }
     
     // minimizer may have dynamically allocated memory hence make sure this memory is freed up
     delete minimizer;
 
-    // clean up dynamically allocated gsl stuff
-    delete [] X;
-    delete [] sqrtWeightData;
-    gsl_vector_free (initFuncArg);
-    
     return;
   }
 

@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
 #include "MantidNexus/LoadNeXus.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -59,7 +60,8 @@ public:
 
     quad->setParameter("A0",1.0);
 
-    alg2.setFunction(quad);
+    //alg2.setFunction(quad);
+    alg2.setPropertyValue("Function",*quad);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -78,9 +80,10 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
-    TS_ASSERT_DELTA( quad->getParameter("A0"),0.0, 0.01);
-    TS_ASSERT_DELTA( quad->getParameter("A1"),0.0, 0.01);
-    TS_ASSERT_DELTA( quad->getParameter("A2"),1.0, 0.0001);
+    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    TS_ASSERT_DELTA( out->getParameter("A0"),0.0, 0.01);
+    TS_ASSERT_DELTA( out->getParameter("A1"),0.0, 0.01);
+    TS_ASSERT_DELTA( out->getParameter("A2"),1.0, 0.0001);
 
 
   }

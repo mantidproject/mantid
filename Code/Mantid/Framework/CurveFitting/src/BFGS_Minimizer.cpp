@@ -21,15 +21,7 @@ void BFGS_Minimizer::initialize(double* X, const double* Y,
                                               const std::string& costFunction) 
 {
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function);  //,X, Y, sqrtWeight, nData, nParam);
-  m_data->p = nParam;
-  m_data->n = nData; 
-  m_data->X = X;
-  m_data->Y = Y;
-  m_data->sqrtWeightData = sqrtWeight;
-  m_data->holdCalculatedData = new double[nData];
-  m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
-  m_data->costFunc = CostFunctionFactory::Instance().createUnwrapped(costFunction);
+  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
 
@@ -53,13 +45,36 @@ void BFGS_Minimizer::initialize(double* X, const double* Y,
   m_gslLeastSquaresContainer.params = m_data;
 }
 
+void BFGS_Minimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
+{
+  // set-up GSL container to be used with GSL simplex algorithm
+  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+
+  const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
+
+  // setup GSL container
+  m_gslMultiminContainer.n = function->nActive();  
+  m_gslMultiminContainer.f = &gsl_costFunction;
+  m_gslMultiminContainer.df = &gsl_costFunction_df;
+  m_gslMultiminContainer.fdf = &gsl_costFunction_fdf;
+  m_gslMultiminContainer.params = m_data;
+
+  // setup minimizer
+  m_gslSolver = gsl_multimin_fdfminimizer_alloc(T, function->nActive());
+  gsl_multimin_fdfminimizer_set(m_gslSolver, &m_gslMultiminContainer, m_data->initFuncParams, 0.01, 0.01);
+
+  // for covariance matrix
+  m_gslLeastSquaresContainer.f = &gsl_f;
+  m_gslLeastSquaresContainer.df = &gsl_df;
+  m_gslLeastSquaresContainer.fdf = &gsl_fdf;
+  m_gslLeastSquaresContainer.n = function->dataSize();
+  m_gslLeastSquaresContainer.p = function->nActive();
+  m_gslLeastSquaresContainer.params = m_data;
+}
+
 BFGS_Minimizer::~BFGS_Minimizer()
 {
-  delete [] m_data->holdCalculatedData;
-  delete m_data->costFunc;
-  gsl_matrix_free (m_data->holdCalculatedJacobian);
   delete m_data;
-
   gsl_multimin_fdfminimizer_free(m_gslSolver);
 }
 

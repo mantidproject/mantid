@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
@@ -53,7 +54,7 @@ public:
 
     // load MAR dataset to test against
     std::string inputFile = "MAR11060.raw";
-    LoadRaw loader;
+    LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
     std::string outputSpace = "MAR_Dataset";

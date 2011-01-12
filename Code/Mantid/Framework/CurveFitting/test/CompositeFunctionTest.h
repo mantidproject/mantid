@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
@@ -35,7 +36,7 @@ public:
     declareParameter("s",1.);
   }
 
-  std::string name()const{return "Gauss";}
+  std::string name()const{return "CurveFittingGauss";}
 
   void functionLocal(double* out, const double* xValues, const int& nData)const
   {
@@ -112,7 +113,7 @@ public:
     declareParameter("b");
   }
 
-  std::string name()const{return "Linear";}
+  std::string name()const{return "CurveFittingLinear";}
 
   void function(double* out, const double* xValues, const int& nData)const
   {
@@ -161,6 +162,9 @@ public:
   }
 
 };
+
+DECLARE_FUNCTION(CurveFittingLinear);
+DECLARE_FUNCTION(CurveFittingGauss);
 
 class CompositeFunctionTest : public CxxTest::TestSuite
 {
@@ -216,7 +220,8 @@ public:
     alg.setPropertyValue("InputWorkspace","mfun");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
-    alg.setFunction(mfun);
+    //alg.setFunction(mfun);
+    alg.setPropertyValue("Function",*mfun);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");
@@ -232,29 +237,30 @@ public:
       TS_ASSERT_DIFFERS(R[i],0);
     }
 
-    TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
-    TS_ASSERT_DELTA(mfun->getParameter(0),1,0.1);
+    IFunction* out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    TS_ASSERT_EQUALS(out->parameterName(0),"f0.a");
+    TS_ASSERT_DELTA(out->getParameter(0),1,0.1);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
-    TS_ASSERT_DELTA(mfun->getParameter(1),0.1,0.1);
+    TS_ASSERT_EQUALS(out->parameterName(1),"f0.b");
+    TS_ASSERT_DELTA(out->getParameter(1),0.1,0.1);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(2),"f1.c");
-    TS_ASSERT_DELTA(mfun->getParameter(2),4,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(2),"f1.c");
+    TS_ASSERT_DELTA(out->getParameter(2),4,0.2);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(3),"f1.h");
-    TS_ASSERT_DELTA(mfun->getParameter(3),1,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(3),"f1.h");
+    TS_ASSERT_DELTA(out->getParameter(3),1,0.2);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(4),"f1.s");
-    TS_ASSERT_DELTA(mfun->getParameter(4),2.13,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(4),"f1.s");
+    TS_ASSERT_DELTA(out->getParameter(4),2.13,0.2);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(5),"f2.c");
-    TS_ASSERT_DELTA(mfun->getParameter(5),6,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(5),"f2.c");
+    TS_ASSERT_DELTA(out->getParameter(5),6,0.2);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(6),"f2.h");
-    TS_ASSERT_DELTA(mfun->getParameter(6),2,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(6),"f2.h");
+    TS_ASSERT_DELTA(out->getParameter(6),2,0.2);
 
-    TS_ASSERT_EQUALS(mfun->parameterName(7),"f2.s");
-    TS_ASSERT_DELTA(mfun->getParameter(7),3.0,0.2);
+    TS_ASSERT_EQUALS(out->parameterName(7),"f2.s");
+    TS_ASSERT_DELTA(out->getParameter(7),3.0,0.2);
 
 
     TWS_type outParams = getTWS("out_Parameters");

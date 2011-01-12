@@ -84,7 +84,7 @@ set ( TEST_FILES #test/BackToBackExponentialTest.h # TODO tests are commented ou
 		 test/FunctionFactoryTest.h
 		 test/FunctionTest.h
 		 test/Gaussian1DTest.h
-		 #test/GaussianTest.h # TODO tests are commented out
+		 test/GaussianTest.h # TODO tests are commented out
 		 #test/IkedaCarpenterPVTest.h # TODO tests are commented out
 		 test/LinearBackgroundTest.h
 		 test/LinearTest.h
@@ -96,7 +96,8 @@ set ( TEST_FILES #test/BackToBackExponentialTest.h # TODO tests are commented ou
 		 test/SpecialFunctionSupportTest.h
 		 test/SplineBackgroundTest.h
 		 test/UserFunction1DTest.h
-		 test/UserFunctionTest.h )
+		 test/UserFunctionTest.h
+ )
 
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})

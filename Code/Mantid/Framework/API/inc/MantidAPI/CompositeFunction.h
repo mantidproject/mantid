@@ -49,6 +49,7 @@ public:
 
               /* Overriden methods */
 
+  void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
   /// Set the workspace
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
   /// Returns the function's name
@@ -152,6 +153,8 @@ public:
   std::string parameterLocalName(int i)const;
   /// Check the function.
   void checkFunction();
+
+  void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),boost::shared_array<double> weights = boost::shared_array<double>());
 
 protected:
   /// Function initialization. Declare function parameters in this method.

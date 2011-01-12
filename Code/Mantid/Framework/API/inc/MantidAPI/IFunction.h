@@ -10,12 +10,19 @@
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "boost/shared_ptr.hpp"
+#include "boost/shared_array.hpp"
 #include "boost/variant.hpp"
 #include <string>
 #include <vector>
 
 namespace Mantid
 {
+
+namespace CurveFitting
+{
+  class Fit;
+}
+
 namespace API
 {
 #ifndef IGNORE_IFUNCTION_ARGUMENT
@@ -119,10 +126,7 @@ public:
 
   /* Overidden methods */
 
-  /// Set the workspace
-  /// @param wsIDString A string identifying the data to be fitted, e.g. workspace name and spectrum index separated by a comma
-  virtual void setWorkspace(const std::string& wsIDString);
-  /// Get the workspace
+  virtual void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)
@@ -154,7 +158,8 @@ public:
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
   /// To be used temporarily with the old Fit algorithm. 
-  void setUpNewStuff();
+  virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),
+                             boost::shared_array<double> weights = boost::shared_array<double>());
 
 protected:
 
@@ -162,6 +167,8 @@ protected:
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       int wsIndex);
+
+  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const;
 
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
@@ -176,12 +183,15 @@ protected:
   /// Pointer to the fitted data
   const double* m_data;
   /// Pointer to the fitting weights
-  std::vector<double> m_weights;
+  boost::shared_array<double> m_weights;
   /// Pointer to the x (function argument as in f(x)) data
-  const double* m_xValues;
+  boost::shared_array<double> m_xValues;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+
+  /// Making a friend
+  friend class CurveFitting::Fit;
 
 };
 

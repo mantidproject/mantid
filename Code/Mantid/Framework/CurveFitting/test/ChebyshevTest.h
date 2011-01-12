@@ -6,6 +6,8 @@
 #include "MantidCurveFitting/Chebyshev.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MAntidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -55,15 +57,17 @@ public:
     }
     //X.back() = 1.;
 
+    AnalysisDataService::Instance().add("ChebyshevTest_ws",ws);
+
     Fit fit;
     fit.initialize();
 
-    fit.setProperty("InputWorkspace",ws);
+    fit.setPropertyValue("InputWorkspace","ChebyshevTest_ws");
     fit.setPropertyValue("WorkspaceIndex","0");
 
     Chebyshev* cheb = new Chebyshev();
     cheb->setAttribute("n",IFunction::Attribute(3));
-    fit.setFunction(cheb);
+    fit.setPropertyValue("Function",*cheb);
 
     fit.execute();
     IFunction::Attribute StartX = cheb->getAttribute("StartX");
@@ -71,10 +75,13 @@ public:
     IFunction::Attribute EndX = cheb->getAttribute("EndX");
     TS_ASSERT_EQUALS(EndX.asDouble(),1);
     TS_ASSERT(fit.isExecuted());
-    TS_ASSERT_DELTA(cheb->getParameter("A0"),0,1e-12);
-    TS_ASSERT_DELTA(cheb->getParameter("A1"),0.75,1e-12);
-    TS_ASSERT_DELTA(cheb->getParameter("A2"),0,1e-12);
-    TS_ASSERT_DELTA(cheb->getParameter("A3"),0.25,1e-12);
+
+    IFunction *out = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function"));
+    TS_ASSERT_DELTA(out->getParameter("A0"),0,1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A1"),0.75,1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A2"),0,1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A3"),0.25,1e-12);
+
   }
 };
 

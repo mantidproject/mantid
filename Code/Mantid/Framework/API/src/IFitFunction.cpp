@@ -31,18 +31,16 @@ namespace API
   }
 
 /** Base class implementation of derivative IFitFunction throws error. This is to check if such a function is provided
-    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
+    by derivative class. In the derived classes this method must return the derivatives of the function
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-    algorithm is used.
- * @param out Derivatives
- * @param xValues X values for data points
- * @param nData Number of data points
+    algorithm is used or the derivatives are computed numerically.
+ * @param out Pointer to a Jacobian matrix. If it is NULL the method is called in order to check whether it's implemented or not.
+ *      If the derivatives are implemented the method must simply return, otherwise it must throw Kernel::Exception::NotImplementedError.
  */
 void IFitFunction::functionDeriv(Jacobian* out)
 {
   (void) out; //Avoid compiler warning
-  throw Kernel::Exception::NotImplementedError("No derivative IFitFunction provided");
+  throw ("No derivative IFitFunction provided");
 }
 
 

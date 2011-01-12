@@ -89,6 +89,88 @@ namespace CurveFitting
   */
   void Fit::exec()
   {
+    API::MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    std::string input = "WorkspaceIndex=" + getPropertyValue("WorkspaceIndex");
+    double startX = getProperty("StartX");
+    if (startX != EMPTY_DBL())
+    {
+      input += ",StartX=" + getPropertyValue("StartX");
+    }
+    double endX = getProperty("EndX");
+    if (endX != EMPTY_DBL())
+    {
+      input += ",EndX=" + getPropertyValue("EndX");
+    }
+
+    // Process the Function property and create the function using FunctionFactory
+    // fills in m_function_input
+    processParameters();
+
+    API::IAlgorithm_sptr fit = createSubAlgorithm("GenericFit");
+    fit->setChild(false);
+    fit->initialize();
+    fit->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::Workspace>(ws));
+    fit->setProperty("Input",input);
+    fit->setProperty("Function",m_function_input);
+    fit->setProperty("Output",getPropertyValue("Output"));
+    fit->setPropertyValue("MaxIterations",getPropertyValue("MaxIterations"));
+    fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
+    fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
+    fit->execute();
+
+    m_function_input = fit->getProperty("Function");
+    setProperty("Function",m_function_input);
+
+    // also output summary to properties
+    setProperty("Output Status", fit->getPropertyValue("Output Status"));
+    double finalCostFuncVal = fit->getProperty("Output Chi^2/DoF");
+    setProperty("Output Chi^2/DoF", finalCostFuncVal);
+    setProperty("Minimizer", fit->getPropertyValue("Minimizer"));
+
+    std::string output = getProperty("Output");
+
+    if (!output.empty())
+    {
+      // create output parameter table workspace to store final fit parameters 
+      // including error estimates if derivative of fitting function defined
+
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "Name of the output Workspace holding resulting simlated spectrum");
+
+      setPropertyValue("OutputWorkspace",output+"_Workspace");
+
+      // Save the fitted and simulated spectra in the output workspace
+      int iSpec = getProperty("WorkspaceIndex");
+      m_function = API::FunctionFactory::Instance().createInitialized(m_function_input);
+      m_function->setWorkspace(ws,input);
+      API::MatrixWorkspace_sptr outws = m_function->createCalculatedWorkspace(ws,iSpec);
+
+      setProperty("OutputWorkspace",outws);
+    }
+
+    if (fit->existsProperty("Parameters"))
+    {
+      // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
+      declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
+      std::vector<double> params = fit->getProperty("Parameters");
+      std::vector<double> errors = fit->getProperty("Errors");
+      std::vector<std::string> parNames = fit->getProperty("ParameterNames");
+
+      setProperty("Parameters",params);
+      setProperty("Errors",errors);
+      setProperty("ParameterNames",parNames);
+    }
+    
+  }
+
+/** Executes the algorithm the old way. Want to keep it for some time.
+  *
+  *  @throw runtime_error Thrown if algorithm cannot execute
+  */
+  void Fit::exec1()
+  {
     // Try to retrieve optional properties
     int histNumber = getProperty("WorkspaceIndex");
     const int maxInterations = getProperty("MaxIterations");
@@ -561,32 +643,6 @@ namespace CurveFitting
     m_function = fun;
   }
 
-/** Calculate the fitting function.
- *  @param in A pointer ot the input active function parameters
- *  @param out A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
- *        The fitting procedure will try to minimise Sum(out[i]^2)
- *  @param xValues The array of nData x-values.
- *  @param nData The size of the fitted data.
- */
-  //void Fit::function(const double* in, double* out, const double* xValues, const int& nData)
-  //{
-  //  m_function->function(out,xValues,nData);
-  //
-  //}
-
-  /** Calculate derivates of fitting function
-  *
-  * @param in Input fitting parameter values
-  * @param out Derivatives
-  * @param xValues X values for data points
-  * @param nData Number of data points
-  */
-  //void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
-  //{
-  //  if (in) m_function->updateActive(in);
-  //  m_function->functionDeriv(out,xValues,nData);
-  //}
-
   /**
    * Process input parameters and create the fitting function.
    */
@@ -597,33 +653,33 @@ namespace CurveFitting
     // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
     // "name" parameter must be set to a function name. E.g.
     // Function = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
-    std::string input = getProperty("Function");
-    if (input.empty()) return;
+    m_function_input = getProperty("Function");
+    if (m_function_input.empty()) return;
 
-    std::string::size_type i = input.find_last_not_of(" \t\n\r");
+    std::string::size_type i = m_function_input.find_last_not_of(" \t\n\r");
     if (i == std::string::npos) return;
-    if (input[i] == ';')
+    if (m_function_input[i] == ';')
     {
-      input.erase(i);
+      m_function_input.erase(i);
     }
 
     std::string inputConstraints = getProperty("Constraints");
     if (!inputConstraints.empty())
     {
-      if (input.find(';') != std::string::npos)
+      if (m_function_input.find(';') != std::string::npos)
       {
-        input += ";";
+        m_function_input += ";";
       }
       else
       {
-        input += ",";
+        m_function_input += ",";
       }
       std::string::size_type i = inputConstraints.find_last_not_of(" \t\n\r");
       if (inputConstraints[i] == ',')
       {
         inputConstraints.erase(i);
       }
-      input += "constraints=("+inputConstraints+")";
+      m_function_input += "constraints=("+inputConstraints+")";
     }
 
     // Ties property is a comma separated list of formulas of the form:
@@ -635,22 +691,22 @@ namespace CurveFitting
     std::string inputTies = getProperty("Ties");
     if (!inputTies.empty())
     {
-      if (input.find(';') != std::string::npos)
+      if (m_function_input.find(';') != std::string::npos)
       {
-        input += ";";
+        m_function_input += ";";
       }
       else
       {
-        input += ",";
+        m_function_input += ",";
       }
       std::string::size_type i = inputTies.find_last_not_of(" \t\n\r");
       if (inputTies[i] == ',')
       {
         inputTies.erase(i);
       }
-      input += "ties=("+inputTies+")";
+      m_function_input += "ties=("+inputTies+")";
     }
-    setFunction(API::FunctionFactory::Instance().createInitialized(input));
+    setFunction(API::FunctionFactory::Instance().createInitialized(m_function_input));
 
   }
 

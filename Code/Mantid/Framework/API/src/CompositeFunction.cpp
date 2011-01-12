@@ -711,7 +711,9 @@ void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWo
 {
   IFunction::setMatrixWorkspace(workspace,spec,xMin,xMax);
   for(int i=0;i<nFunctions();i++)
+  {
     getFunction(i)->setMatrixWorkspace(workspace,spec,xMin,xMax);
+  }
 }
 
 /**
@@ -897,6 +899,24 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
     }
   }
   return NULL;
+}
+
+void CompositeFunction::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+{
+  IFunction::setWorkspace(ws,slicing);
+  for(int iFun=0;iFun<nFunctions();iFun++)
+  {
+    getFunction(iFun)->setUpNewStuff(m_xValues,m_weights);
+  }
+}
+
+void CompositeFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
+{
+  IFunction::setUpNewStuff(xs,weights);
+  for(int iFun=0;iFun<nFunctions();iFun++)
+  {
+    getFunction(iFun)->setUpNewStuff(xs,weights);
+  }
 }
 
 } // namespace API

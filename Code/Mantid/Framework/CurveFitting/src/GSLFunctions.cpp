@@ -136,8 +136,23 @@ namespace CurveFitting
    * Constructor. Creates declared -> active index map
    * @param f Pointer to the Fit algorithm
    */
-  GSL_FitData::GSL_FitData(API::IFitFunction* fun):function(fun)
+  GSL_FitData::GSL_FitData(API::IFitFunction* fun,ICostFunction* cf):
+  function(fun),costFunc(cf)
   {
+    p = fun->nActive();
+    n = fun->dataSize(); 
+    Y = fun->getData();
+    sqrtWeightData = fun->getWeights();
+    holdCalculatedData = new double[n];
+    holdCalculatedJacobian =  gsl_matrix_alloc (n, p);
+    
+    initFuncParams = gsl_vector_alloc(p);
+
+    for (size_t i = 0; i < p; i++)
+    {
+        gsl_vector_set(initFuncParams, i, fun->activeParameter(i));
+    }
+
     int j = 0;
     for(int i=0;i<fun->nParams();++i)
     {
@@ -149,6 +164,14 @@ namespace CurveFitting
       else
         J.m_index.push_back(-1);
     }
+  }
+
+  GSL_FitData::~GSL_FitData()
+  {
+    delete[] holdCalculatedData;
+    gsl_matrix_free(holdCalculatedJacobian);
+    gsl_vector_free(initFuncParams);
+    delete costFunc;
   }
 
 } // namespace CurveFitting

@@ -27,15 +27,7 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   gsl_vector_set_all (m_simplexStepSize, m_size);  
 
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function);  //,X, Y, sqrtWeight, nData, nParam);
-  m_data->p = nParam;
-  m_data->n = nData; 
-  m_data->X = X;
-  m_data->Y = Y;
-  m_data->sqrtWeightData = sqrtWeight;
-  m_data->holdCalculatedData = new double[nData];
-  m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
-  m_data->costFunc = CostFunctionFactory::Instance().createUnwrapped(costFunction);
+  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   // setup simplex container
   gslContainer.n = nParam;  
@@ -45,6 +37,27 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   // setup minimizer
   m_gslSolver = gsl_multimin_fminimizer_alloc(T, nParam);
   gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, startGuess, m_simplexStepSize);
+}
+
+void SimplexMinimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
+{
+  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
+
+  // step size for simplex
+  m_simplexStepSize = gsl_vector_alloc(function->nActive());
+  gsl_vector_set_all (m_simplexStepSize, m_size);  
+
+  // set-up GSL container to be used with GSL simplex algorithm
+  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+
+  // setup simplex container
+  gslContainer.n = function->nActive();  
+  gslContainer.f = &gsl_costFunction;
+  gslContainer.params = m_data;
+
+  // setup minimizer
+  m_gslSolver = gsl_multimin_fminimizer_alloc(T, function->nActive());
+  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_data->initFuncParams, m_simplexStepSize);
 }
 
 ///resets the size
@@ -58,6 +71,14 @@ void SimplexMinimizer::resetSize(double* X, const double* Y, double *sqrtWeight,
   initialize(X, Y, sqrtWeight, nData, nParam, startGuess, function, costFunction);
 }
 
+///resets the size
+void SimplexMinimizer::resetSize(const double& size,API::IFitFunction* function, const std::string& costFunction) 
+{
+  m_size = size;
+  clearMemory();
+  initialize(function, costFunction);
+}
+
 SimplexMinimizer::~SimplexMinimizer()
 {
   clearMemory();
@@ -66,11 +87,7 @@ SimplexMinimizer::~SimplexMinimizer()
 /// clear memory
 void SimplexMinimizer::clearMemory()
 {
-  delete [] m_data->holdCalculatedData;
-  delete m_data->costFunc;
-  gsl_matrix_free (m_data->holdCalculatedJacobian);
   delete m_data;
-
   gsl_vector_free(m_simplexStepSize);
   gsl_multimin_fminimizer_free(m_gslSolver);
 }

@@ -224,8 +224,10 @@ public:
   /// The string operator
   virtual operator std::string()const{return asString();}
   /// Set the workspace
-  /// @param wsIDString A string identifying the data to be fitted, e.g. workspace name and spectrum index separated by a comma
-  virtual void setWorkspace(const std::string& wsIDString) = 0;
+  /// @param ws Shared pointer to a workspace
+  /// @param slicing A string identifying the data in the worspace to be fitted, e.g. spectrum index, starting and ending x values, etc
+  ///     Concrete form is defined by the derived functions.
+  virtual void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing) = 0;
   /// Get the workspace
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
   /// Iinialize the function

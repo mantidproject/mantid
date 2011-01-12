@@ -73,8 +73,6 @@ namespace Mantid
       /// Derivatives of function with respect to parameters you are trying to fit
       //virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const int& nData);
 
-      /// Set a function for fitting
-      void setFunction(API::IFunction* fun);
       /// Get the function for fitting
       API::IFunction* getFunction()const{return m_function;}
 
@@ -82,6 +80,10 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+      void exec1();
+
+      /// Set a function for fitting
+      void setFunction(API::IFunction* fun);
 
       /// Option for providing intelligent range starting value based e.g. on the user input parameter values
       virtual void modifyStartOfRange(double& startX)
@@ -119,6 +121,9 @@ namespace Mantid
 
       /// Pointer to the fitting function
       API::IFunction* m_function;
+
+      /// Function initialization string
+      std::string m_function_input;
 
       friend struct FitData1;
     };
