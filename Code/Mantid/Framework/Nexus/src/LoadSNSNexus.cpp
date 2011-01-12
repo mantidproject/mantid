@@ -1,7 +1,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadInstrumentFromSNSNexus.h"
 #include "MantidNexus/LoadSNSNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -231,16 +230,18 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
     ws->mutableRun().setProtonCharge(*proton_charge());
     std::cerr << "loadEntry11:" << std::endl;// REMOVE
 
-    //---- Now load the instrument using the LoadInstrumentFromSNSNexus algorithm ----
-    //Create the algorithm
-    LoadInstrumentFromSNSNexus ld;
-    ld.initialize();
-    //Same filename
-    ld.setPropertyValue("Filename", getPropertyValue("Filename"));
-    //Point to the local workspace
-    ld.setProperty("Workspace", boost::dynamic_pointer_cast<Workspace>(ws));
-    //Execute the instrument loading.
-    ld.execute();
+    // TODO: Load the instrument properly here!
+
+//    //---- Now load the instrument using the LoadInstrumentFromSNSNexus algorithm ----
+//    //Create the algorithm
+//    LoadInstrumentFromSNSNexus ld;
+//    ld.initialize();
+//    //Same filename
+//    ld.setPropertyValue("Filename", getPropertyValue("Filename"));
+//    //Point to the local workspace
+//    ld.setProperty("Workspace", boost::dynamic_pointer_cast<Workspace>(ws));
+//    //Execute the instrument loading.
+//    ld.execute();
 
     std::cerr << "loadEntry12:" << std::endl;// REMOVE
     return ws;
