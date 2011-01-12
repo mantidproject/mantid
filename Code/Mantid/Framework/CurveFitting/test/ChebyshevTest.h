@@ -7,7 +7,7 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MAntidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
