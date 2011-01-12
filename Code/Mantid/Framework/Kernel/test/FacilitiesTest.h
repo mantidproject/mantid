@@ -103,6 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       const FacilityInfo& fac = ConfigService::Instance().Facility()
     );
+    ConfigService::Instance().setString("default.facility","ISIS");
     const FacilityInfo& fac = ConfigService::Instance().Facility();
     TS_ASSERT_EQUALS(fac.name(),"ISIS");
 
