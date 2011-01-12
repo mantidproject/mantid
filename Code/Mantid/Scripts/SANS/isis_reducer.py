@@ -78,9 +78,6 @@ class ISISReducer(SANSReducer):
         self._reduction_steps.append(self.background_subtracter)
         self._reduction_steps.append(self._zero_errors)
         self._reduction_steps.append(self._rem_zeros)
-        
-        #if set to an integer only that period will be extracted from the run file and processed 
-        self._period_num = None
 
     def _init_steps(self):
         """
@@ -110,9 +107,6 @@ class ISISReducer(SANSReducer):
         self._geo_corr =       sans_reduction_steps.SampleGeomCor(self.geometry)
         self._zero_errors =    isis_reduction_steps.ReplaceErrors()
         self._rem_zeros =      sans_reduction_steps.StripEndZeros()
-        
-        #if set to an integer only that period will be extracted from the run file and processed 
-        self._period_num = None
 
     def pre_process(self): 
         """
@@ -141,8 +135,6 @@ class ISISReducer(SANSReducer):
         if not issubclass(self.data_loader.__class__, isis_reduction_steps.LoadSample):
             raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
         self.data_loader.set_options(reload, period)
-        if period > 0:
-            self._period_num = period
 
     def set_run_number(self, data_file, workspace=None):
         """
@@ -181,17 +173,19 @@ class ISISReducer(SANSReducer):
         self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method, override=True)
         self.transmission_calculator.enabled = True
         
-    def set_trans_sample(self, sample, direct, reload=True, period=-1):
+    def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
         if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.samp_trans_load = isis_reduction_steps.LoadTransmissions()
-        self.samp_trans_load.set_run(sample, direct, reload, period)
+            self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload)
+        self.samp_trans_load.set_trans(sample, period_t)
+        self.samp_trans_load.set_direc(direct, period_d)
         self.transmission_calculator.set_loader(self.samp_trans_load)
 
-    def set_trans_can(self, can, direct, reload = True, period = -1):
+    def set_trans_can(self, can, direct, reload = True, period_t = -1, period_d = -1):
         if not issubclass(self.can_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True)
-        self.can_trans_load.set_run(can, direct, reload, period)
-        
+            self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
+        self.can_trans_load.set_trans(can, period_t)
+        self.can_trans_load.set_direc(direct, period_d)
+
     def set_monitor_spectrum(self, specNum, interp=False, override=True):
         if override:
             self._monitor_set=True

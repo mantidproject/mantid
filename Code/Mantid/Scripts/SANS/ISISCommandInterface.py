@@ -137,15 +137,31 @@ def AssignCan(can_run, reload = True, period = -1):
     return ISIS_global().background_subtracter.assign_can(
                                                     ISIS_global())
 
-def TransmissionSample(sample, direct, reload = True, period = -1):
+def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
+    """
+        Specify the transmission and direct runs for the sample
+        @param sample: the transmission run
+        @param direct: direct run
+        @param reload: if to replace the workspace if it is already there
+        @param period_t: the entry number of the transmission run (default single entry file)  
+        @param period_d: the entry number of the direct run (default single entry file)
+    """  
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
-    ISIS_global().set_trans_sample(sample, direct, reload = True, period = -1)
+    ISIS_global().set_trans_sample(sample, direct, True, period_t, period_d)
     return ISIS_global().samp_trans_load.execute(
                                         ISIS_global(), None)
 
-def TransmissionCan(can, direct, reload = True, period = -1):
+def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
+    """
+        Specify the transmission and direct runs for the can
+        @param can: the transmission run
+        @param direct: direct run
+        @param reload: if to replace the workspace if it is already there
+        @param period_t: the entry number of the transmission run (default single entry file)  
+        @param period_d: the entry number of the direct run (default single entry file)
+    """
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    ISIS_global().set_trans_can(can, direct, reload = True, period = -1)
+    ISIS_global().set_trans_can(can, direct, True, period_t, period_d)
     return ISIS_global().can_trans_load.execute(
                                             ISIS_global(), None)
     
@@ -251,7 +267,7 @@ def displayUserFile():
     print '-- Mask file defaults --'
     print ISIS_global().to_wavlen
     print ISIS_global().Q_string()
-    print correction_files()
+#    print correction_files()
     print '    direct beam file rear:',
     print ISIS_global().instrument.detector_file('rear')
     print '    direct beam file front:',

@@ -6,6 +6,7 @@ using namespace MantidQt::API;
 
 ManageUserDirectories::ManageUserDirectories(QWidget *parent) : QDialog(parent)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
 	m_uiForm.setupUi(this);
   initLayout();
 }
@@ -176,4 +177,13 @@ void ManageUserDirectories::selectSaveDir()
     m_uiForm.leDefaultSave->setText(newDir);
   }
 
+}
+/** Opens a manage directories dialog and gives it focus
+*  @param the parent window, probably the window that called it
+*/
+void ManageUserDirectories::openUserDirsDialog(QWidget * parent)
+{
+  ManageUserDirectories *ad = new ManageUserDirectories(parent);
+  ad->show();
+  ad->setFocus();
 }

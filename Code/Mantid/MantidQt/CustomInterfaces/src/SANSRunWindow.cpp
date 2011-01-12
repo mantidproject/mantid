@@ -162,7 +162,7 @@ void SANSRunWindow::initLayout()
   {//sets up the AddFiles tab which must be deleted in the destructor
     m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
   }
-  //List for Workspace delete signals
+  //Listen for Workspace delete signals
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
   readSettings();
@@ -2852,6 +2852,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
   if( is_trans )
   {
     QString direct_run = m_run_no_boxes.value(key + 3)->text();
+    QString direct_per = QString::number(getPeriod(key + 3));
     if( QFileInfo(direct_run).completeSuffix().isEmpty() )
     {
       if( direct_run.endsWith(".") ) 
@@ -2870,7 +2871,8 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
       assign_fn = "i.TransmissionSample";
     }
     assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
-    assign_fn += ", period = " + QString::number(getPeriod(key))+")";
+    assign_fn += ", period_t = " + QString::number(getPeriod(key));
+    assign_fn += ", period_d = " + direct_per+")";
     //assign the workspace name to a Python variable and read back some details
     QString pythonC="t1, t2 = " + assign_fn + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
     QString ws_names = runReduceScriptFunction(pythonC);
@@ -3147,7 +3149,7 @@ void SANSRunWindow::setNumberPeriods(const int key, const int num)
 
   if (num > 0)
   {
-    label->setText("/ " + QString::number(num));
+    label->setText("/" + QString::number(num));
     if (userentry->text().isEmpty())
     {//default period to analysis is the first one
       userentry->setText("1");
@@ -3156,7 +3158,7 @@ void SANSRunWindow::setNumberPeriods(const int key, const int num)
   else
   {
     userentry->clear();
-    label->setText("/ ??");
+    label->setText("/??");
   }
 }
 /** Blank the periods information in a box

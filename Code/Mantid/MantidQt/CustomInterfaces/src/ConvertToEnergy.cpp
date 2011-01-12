@@ -376,7 +376,6 @@ void ConvertToEnergy::userSelectInstrument(const QString& prefix)
 void ConvertToEnergy::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
 }

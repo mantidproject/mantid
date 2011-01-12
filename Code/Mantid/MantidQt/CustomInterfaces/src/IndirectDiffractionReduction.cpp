@@ -120,7 +120,6 @@ void IndirectDiffractionReduction::reflectionSelected(int)
 void IndirectDiffractionReduction::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
 }

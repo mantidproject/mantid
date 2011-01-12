@@ -3,9 +3,9 @@
 
 #include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidKernel/ConfigService.h"
+#include "Poco/NObserver.h"
 #include <QString>
-
-#include <set>
 
 namespace MantidQt
 {
@@ -32,21 +32,30 @@ private:
   std::set<std::string> m_exts;
   //this is set to the extensions supported by LoadRaw
   std::set<std::string> m_rawExts;
-  //A reference to a logger
+  ///the directory to which files will be saved
+  QString m_outDir;
+  ///A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+  ///The text that goes into the beginning of the output directory message
+  static const QString OUT_MSG;
+
+  Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 
   void initLayout();
+  void setToolTips();
+  QListWidgetItem* insertListFront(const QString &text);
+  ///The directory where files are saved is defined by the config data service
+  void changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
+  void setOutDir(std::string dir);
   void readSettings();
   void saveSettings();
-  QListWidgetItem* insertListFront(const QString &text);
 
 private slots:
   ///insert another row into the files to sum table (tbRunsToAdd), in response to a click on the pbNewRow button
   void add2Runs2Add();
   ///run the Python that sums the files together in response to a pbSum button click
   void runPythonAddFiles();
-  ///this slot opens the output file path browser
-  void summedPathBrowse();
+  void outPathSel();
   ///this slot opens a browser to select a new file to add
   void new2AddBrowse();
   ///sets data associated with the cell

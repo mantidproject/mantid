@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,9 +25,11 @@ using namespace Mantid::API;
 
 // Initialize the logger
 Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
+const QString SANSAddFiles::OUT_MSG("Output Directory = ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
-  m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false)
+  m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
+  m_newOutDir(*this, &SANSAddFiles::changeOutputDir)
 {
   initLayout();
   
@@ -38,11 +41,21 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   alg = AlgorithmManager::Instance().create("LoadRaw");
   prop = alg->getProperty("Filename");
   m_rawExts = prop->allowedValues();
+
+  ConfigService::Instance().addObserver(m_newOutDir);
 }
 
 SANSAddFiles::~SANSAddFiles()
 {
-  saveSettings();
+  try
+  {
+    ConfigService::Instance().removeObserver(m_newOutDir);
+    saveSettings();
+  }
+  catch(...)
+  {
+    //we've cleaned up the best we can, move on
+  }
 }
 
 //Connect signals and setup widgets
@@ -63,12 +76,16 @@ void SANSAddFiles::initLayout()
   //buttons on the Add Runs tab
   connect(m_SANSForm->add_Btn, SIGNAL(clicked()), this, SLOT(add2Runs2Add()));
   connect(m_SANSForm->sum_Btn, SIGNAL(clicked()), this, SLOT(runPythonAddFiles()));
-  connect(m_SANSForm->summedPath_Btn, SIGNAL(clicked()), this, SLOT(summedPathBrowse()));
+  connect(m_SANSForm->summedPath_Btn, SIGNAL(clicked()), this, SLOT(outPathSel()));
   connect(m_SANSForm->browse_to_add_Btn, SIGNAL(clicked()), this, SLOT(new2AddBrowse()));
   connect(m_SANSForm->clear_Btn, SIGNAL(clicked()), this, SLOT(clearClicked()));
   connect(m_SANSForm->remove_Btn, SIGNAL(clicked()), this, SLOT(removeSelected()));
 
   readSettings();
+
+  setToolTips();
+
+  setOutDir(ConfigService::Instance().getString("defaultsave.directory"));
 }
 /**
  * Restore previous input
@@ -76,20 +93,10 @@ void SANSAddFiles::initLayout()
 void SANSAddFiles::readSettings()
 {
   QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/SANSRunWindow");
-  std::string defOut =
-    ConfigService::Instance().getString("defaultsave.directory");
+  value_store.beginGroup("CustomInterfaces/AddRuns");
   
-  QString qDefOut = QString::fromStdString(defOut);
-  //this string may be passed to python, so convert any '\' to '/' to make it compatible on all systems
-  Poco::Path defOutComp = Poco::Path(defOut);
-  if ( defOutComp.separator() == '\\' )
-  {
-    qDefOut.replace('\\', '/');
-  }
-  
-  m_SANSForm->summedPath_edit->setText(
-    value_store.value("AddRuns/OutPath", qDefOut).toString());
+  m_SANSForm->loadSeparateEntries->setChecked(
+    value_store.value("Minimise_memory", false).toBool());
 
   value_store.endGroup();
 }
@@ -99,8 +106,23 @@ void SANSAddFiles::readSettings()
 void SANSAddFiles::saveSettings()
 {
   QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/SANSRunWindow");
-  value_store.setValue("AddRuns/OutPath", m_SANSForm->summedPath_edit->text());
+  value_store.beginGroup("CustomInterfaces/AddRuns");
+  value_store.setValue(
+    "Minimise_memory", m_SANSForm->loadSeparateEntries->isChecked());
+}
+/** sets tool tip strings for the components on the form
+*/
+void SANSAddFiles::setToolTips()
+{
+  m_SANSForm->summedPath_lb->setToolTip("The output files from summing the workspaces\nwill be saved to this directory");
+  m_SANSForm->summedPath_Btn->setToolTip("Set the directories used both for loading and\nsaving run data");
+  m_SANSForm->loadSeparateEntries->setToolTip("Where possible load a minimum amount into\nmemory at any time");
+
+  m_SANSForm->add_Btn->setToolTip("Click here to do the sum");
+  m_SANSForm->clear_Btn->setToolTip("Clear the run files to sum box");
+  m_SANSForm->browse_to_add_Btn->setToolTip("Select a run to add to the sum");
+  m_SANSForm->new2Add_edit->setToolTip("Select a run to add to the sum");
+  m_SANSForm->add_Btn->setToolTip("Select a run to add to the sum");
 }
 /** Creates a QListWidgetItem with the given text and inserts it
 *  into the list box
@@ -113,6 +135,26 @@ QListWidgetItem* SANSAddFiles::insertListFront(const QString &text)
   newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
   m_SANSForm->toAdd_List->insertItem(0, newItem);
   return newItem;
+}
+/** Sets directory to which files will be saved and the label
+*  that users see
+*  @param dir full path of the output directory
+*/
+void SANSAddFiles::setOutDir(std::string dir)
+{
+  m_outDir = QString::fromStdString(dir);
+  m_SANSForm->summedPath_lb->setText(OUT_MSG+m_outDir);
+}
+/** Update the output directory edit box if the Mantid system output
+*  directory has changed
+*  @param pDirInfo a pointer to an object with the output directory name in it
+*/
+void SANSAddFiles::changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo)
+{
+  if ( pDirInfo->key() == "defaultsave.directory" )
+  {
+    setOutDir(pDirInfo->curValue());
+  }
 }
 /**Moves the entry in the line edit new2Add_edit to the
 *  listbox toAdd_List, expanding any run number lists
@@ -171,8 +213,7 @@ void SANSAddFiles::runPythonAddFiles()
   add2Runs2Add();
 
   QString code_torun = "import SANSadd2\n";
-  code_torun += "print SANSadd2.add_runs('";
-  code_torun += m_SANSForm->summedPath_edit->text()+"', (";
+  code_torun += "print SANSadd2.add_runs((";
   //there are multiple file list inputs that can be filled in loop through them
   for(int i = 0; i < m_SANSForm->toAdd_List->count(); ++i )
   {
@@ -203,6 +244,9 @@ void SANSAddFiles::runPythonAddFiles()
   //remove the comma that would remain at the end of the list
   code_torun.truncate(code_torun.length()-1);
   code_torun += ")";
+  
+  QString lowMem = m_SANSForm->loadSeparateEntries->isChecked()?"True":"False";
+  code_torun += ", lowMem="+lowMem;
 
   code_torun += ")\n";
 
@@ -227,21 +271,12 @@ void SANSAddFiles::runPythonAddFiles()
     QMessageBox::information(this, "Files summed", status);
   }
 }
-/** This slot opens a file browser allowing a user select a path, which
-* is copied into the summedPath_edit
+/** This slot opens a manage user directories dialog to allowing the default
+*  output directory to be changed
 */
-void SANSAddFiles::summedPathBrowse()
+void SANSAddFiles::outPathSel()
 {
-  QString dir = m_SANSForm->summedPath_edit->text();
-  
-  QString oPath = QFileDialog::getExistingDirectory(parForm, "Output path", dir);
-  if( ! oPath.trimmed().isEmpty() )
-  {
-    m_SANSForm->summedPath_edit->setText(oPath);
-    QSettings prevVals;
-    prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns");
-    prevVals.setValue("OutPath", oPath);
-  }
+  MantidQt::API::ManageUserDirectories::openUserDirsDialog(this);
 }
 /** This slot opens a file browser allowing a user select files, which is
 * copied into the new2Add_edit ready to be copied to the listbox (toAdd_List)

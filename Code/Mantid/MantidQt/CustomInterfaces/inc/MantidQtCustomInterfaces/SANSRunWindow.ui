@@ -1884,7 +1884,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="3" column="1" colspan="2" >
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="floodFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -3536,7 +3536,7 @@ p, li { white-space: pre-wrap; }
        <string>Add Runs</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_18" >
-       <item row="0" column="3" >
+       <item row="0" column="2" >
         <spacer name="verticalSpacer_9" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -3565,7 +3565,14 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="2" column="3" >
+       <item row="1" column="2" >
+        <widget class="QLabel" name="summedPath_lb" >
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2" >
         <spacer name="verticalSpacer_10" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -3578,76 +3585,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="3" column="6" >
-        <spacer name="horizontalSpacer_18" >
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType" >
-          <enum>QSizePolicy::Maximum</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="6" column="4" >
-        <spacer name="verticalSpacer_7" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="8" column="4" >
-        <spacer name="verticalSpacer_8" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1" colspan="2" >
-        <widget class="QLabel" name="label_40" >
-         <property name="toolTip" >
-          <string>The directory to created the summed run file in</string>
-         </property>
-         <property name="text" >
-          <string>Output File Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3" >
-        <widget class="QLineEdit" name="summedPath_edit" >
-         <property name="toolTip" >
-          <string>The directory to created the summed run file in</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4" >
-        <widget class="QPushButton" name="summedPath_Btn" >
-         <property name="toolTip" >
-          <string>The directory to created the summed run file in</string>
-         </property>
-         <property name="text" >
-          <string>Browse</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="2" >
+       <item row="4" column="0" colspan="2" >
         <widget class="QLabel" name="label_42" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -3669,14 +3607,14 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="3" column="2" colspan="2" >
+       <item row="4" column="2" >
         <widget class="QLineEdit" name="new2Add_edit" >
          <property name="toolTip" >
           <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
          </property>
         </widget>
        </item>
-       <item row="3" column="4" >
+       <item row="4" column="3" >
         <widget class="QPushButton" name="add_Btn" >
          <property name="toolTip" >
           <string>Adds entries to the big table, use before clicking "Sum".</string>
@@ -3686,7 +3624,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="3" column="5" >
+       <item row="4" column="4" >
         <widget class="QPushButton" name="browse_to_add_Btn" >
          <property name="toolTip" >
           <string>Find a file on your system</string>
@@ -3696,17 +3634,33 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="7" column="4" >
-        <widget class="QPushButton" name="sum_Btn" >
+       <item row="4" column="5" >
+        <spacer name="horizontalSpacer_18" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0" >
+        <widget class="QLabel" name="label_46" >
          <property name="toolTip" >
-          <string>Load the files in the table above and save them to one file</string>
+          <string>Files to be summed, click at the top of this box or use the "Add" button</string>
          </property>
          <property name="text" >
-          <string>Sum</string>
+          <string>Run files to sum</string>
          </property>
         </widget>
        </item>
-       <item rowspan="3" row="4" column="2" colspan="2" >
+       <item rowspan="3" row="5" column="1" colspan="2" >
         <widget class="QListWidget" name="toAdd_List" >
          <property name="toolTip" >
           <string>Files to be summed, click at the top of this box or use the "Add" button</string>
@@ -3728,7 +3682,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="4" column="4" >
+       <item row="5" column="3" >
         <widget class="QPushButton" name="clear_Btn" >
          <property name="toolTip" >
           <string>Clear the table</string>
@@ -3738,7 +3692,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="5" column="4" >
+       <item row="6" column="3" >
         <widget class="QPushButton" name="remove_Btn" >
          <property name="toolTip" >
           <string>Select rows by clicking on the table and remove then with this button</string>
@@ -3748,13 +3702,56 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2" >
-        <widget class="QLabel" name="label_46" >
+       <item row="7" column="3" >
+        <spacer name="verticalSpacer_7" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="8" column="3" >
+        <widget class="QPushButton" name="sum_Btn" >
          <property name="toolTip" >
-          <string>Files to be summed, click at the top of this box or use the "Add" button</string>
+          <string>Load the files in the table above and save them to one file</string>
          </property>
          <property name="text" >
-          <string>Run files to sum</string>
+          <string>Sum</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="3" >
+        <spacer name="verticalSpacer_8" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="4" >
+        <widget class="QPushButton" name="summedPath_Btn" >
+         <property name="toolTip" >
+          <string>The directory to created the summed run file in</string>
+         </property>
+         <property name="text" >
+          <string>Manage Directories</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" >
+        <widget class="QCheckBox" name="loadSeparateEntries" >
+         <property name="text" >
+          <string>Minimise memory usage</string>
          </property>
         </widget>
        </item>

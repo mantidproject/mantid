@@ -17,6 +17,8 @@ public:
 	ManageUserDirectories(QWidget *parent = 0);
 	~ManageUserDirectories();
 
+  static void openUserDirsDialog(QWidget * parent);
+
 private:
   virtual void initLayout();
   void loadProperties();
