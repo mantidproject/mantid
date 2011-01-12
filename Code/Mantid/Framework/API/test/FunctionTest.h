@@ -432,7 +432,7 @@ public:
     x.back() = 0.1 * y.size();
     AnalysisDataService::Instance().add("IFT_Test_WS",ws);
     IFT_Funct f;
-    TS_ASSERT_THROWS_NOTHING(f.setWorkspace("IFT_Test_WS,WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
     TS_ASSERT_EQUALS(f.dataSize(),7);
     TS_ASSERT_EQUALS(f.getData(),&y[2]);
     AnalysisDataService::Instance().remove("IFT_Test_WS");
