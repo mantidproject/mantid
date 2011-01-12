@@ -2,6 +2,8 @@
 
 import sys
 import time
+import argparse
+import os
 
 from PyQt4 import QtGui, uic, QtCore
 import PyQt4.QtCore
@@ -121,11 +123,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         The main GUI window of the test viewer.
     """
 
-    def __init__(self, parent=None, state=None, settings=None):      
+    def __init__(self, settings=None, bin_folder="", source_folder="", parent=None):      
         QtGui.QWidget.__init__(self, parent)
         
         # Save the settings object
         self.settings = settings
+        self.bin_folder = bin_folder
+        self.source_folder = source_folder
         
         # Populate all GUI elements
         self.setupUi(self)
@@ -188,7 +192,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # Re-discover all the projects
         # TODO: Use arguments for the source paths
-        test_info.all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
+        test_info.all_tests.discover_CXX_projects(self.bin_folder, self.source_folder)
         
         tree = self.treeTests
         #@type tree QTreeWidget
@@ -218,21 +222,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         pass
             
 
-#    #-----------------------------------------------------------------------------
-#    def filter_tree(self):
-#        """ Apply current filtering options to the tree, by hiding rows """
-#        failed_only = True
-#        
-#        mod = self.treeTests.model()
-#        tree = self.treeTests
-#        for i in xrange(mod.rootItem.childCount()):
-#            pj_index = mod.index(i, 0, QModelIndex() )
-#            pj_item = mod.rootItem.child(i)
-#            print "Hiding ", pj_index.row()
-#            tree.setRowHidden( 0, pj_index, True)
-#        
-#        
-        
     #-----------------------------------------------------------------------------
     def readSettings(self):
         s = self.settings
@@ -426,7 +415,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def show_results(self):
         """ Show the test results.
         @param res :: either TestProject, TestSuite, or TestSingle object containing the results to show."""
-        print "show_results"
         if self.current_results is None:
             self.labelTestType.setText("Test Project Results:")
             self.labelFilename.setText( "" ) 
@@ -531,28 +519,57 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.update()
        
  
-        
-def start(argv=[]):
-    
+      
+if __name__ == '__main__':
     # Start the settings object.
     # TODO: Change the company name here and in MantidPlot
-    settings = QSettings("ISIS", "MantidTestViewer"); 
+    settings = QSettings("ISIS", "MantidTestViewer");
+    settings_bin_folder = str(settings.value("bin_folder", "../../Mantid/bin").toString())
+    settings_source_folder = str(settings.value("source_folder", "../../Mantid/Framework").toString())
     
-    # Initialize the projects ...
-    #test_info.all_tests.make_fake_results()
+    parser = argparse.ArgumentParser(description='GUI to run and view Mantid tests.')
+    parser.add_argument('bin_folder', metavar='BINFOLDER', type=str, nargs='?',
+                        default="", 
+                        help='path to the bin/ folder that contains the test executables. Will use the last path used if not specified:\n%s' % settings_bin_folder)
+    parser.add_argument('source_folder', metavar='SOURCEFOLDER', type=str, nargs='?',
+                        default="", 
+                        help='path to the root of the framework source folder. Will use the last path used if not specified:\n%s' % settings_source_folder)
+    
+    args = parser.parse_args()
+    bin_folder = args.bin_folder
+    source_folder = args.source_folder
+    
+    # No command line arguments? Get them from the settings
+    if bin_folder == "":
+        bin_folder = settings_bin_folder
+        source_folder = settings_source_folder
+    else:
+        # Use whatever was given.
+        settings.setValue("bin_folder", bin_folder)
+        if source_folder == "":
+            # No source folder given? Use the old one
+            if settings.contains("source_folder"):
+                source_folder = str(settings.value("source_folder", "../../Mantid/Framework").toString())
+            else:
+               # Try a relative source folder if not specified
+               source_folder = os.path.join( bin_folder, "/../Framework" )
+        else:
+            # Use whatever was given
+            settings.setValue("source_folder", source_folder) 
 
+    print "Starting TestViewer ..."
+    print "... bin folder is", bin_folder
+    print "... source folder is", source_folder
+    print "."
+    
 
-    app = QtGui.QApplication(argv)
+    app = QtGui.QApplication([])
     app.setOrganizationName("Mantid")
     app.setOrganizationDomain("mantidproject.org")
     app.setApplicationName("Mantid Test Viewer")
     
-    main = TestViewerMainWindow(settings=settings)
+    main = TestViewerMainWindow(settings, bin_folder, source_folder)
     main.show()
     
     app.exec_() 
         
-        
-if __name__ == '__main__':
-    print "Starting TestViewer..."
-    start(argv=sys.argv)
