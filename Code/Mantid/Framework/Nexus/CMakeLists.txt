@@ -1,5 +1,4 @@
 set ( SRC_FILES src/LoadInstrumentFromNexus.cpp
-                src/LoadInstrumentFromSNSNexus.cpp
 		src/LoadISISNexus2.cpp
 		src/LoadISISNexus.cpp
 		src/LoadLogsFromSNSNexus.cpp
@@ -24,7 +23,6 @@ set ( SRC_FILES src/LoadInstrumentFromNexus.cpp
 		src/SaveSNSNexus.cpp )
 
 set ( INC_FILES inc/MantidNexus/LoadInstrumentFromNexus.h
-                inc/MantidNexus/LoadInstrumentFromSNSNexus.h
 		inc/MantidNexus/LoadISISNexus2.h
 		inc/MantidNexus/LoadISISNexus.h
 		inc/MantidNexus/LoadLogsFromSNSNexus.h
@@ -45,8 +43,7 @@ set ( INC_FILES inc/MantidNexus/LoadInstrumentFromNexus.h
 		inc/MantidNexus/SaveNXSPE.h
 		inc/MantidNexus/SaveSNSNexus.h )
 
-set ( TEST_FILES test/LoadInstrumentFromSNSNexusTest.h
-                 test/LoadISISNexusTest.h
+set ( TEST_FILES test/LoadISISNexusTest.h
 		 test/LoadLogsFromSNSNexusTest.h
 		 test/LoadMuonLogTest.h
 		 test/LoadMuonNexus2Test.h
