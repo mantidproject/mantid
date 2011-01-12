@@ -129,6 +129,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         
         # Populate all GUI elements
         self.setupUi(self)
+        self.buttonTest.hide()
              
         # Create the worker
         self.worker = TestWorker()

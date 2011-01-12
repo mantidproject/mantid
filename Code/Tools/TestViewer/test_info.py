@@ -26,13 +26,16 @@ class TestResult:
     BUILD_ERROR = 3
     """ All tests failed """
     ALL_FAILED = 4
+    """ Probably a segfault """ 
+    SEGMENTATION_FAULT = 5
     
     def __init__(self, value=0, old=False):
         self.value = value
         self.old = old
         
     def is_failed(self):
-        return self.value == self.SOME_FAILED or self.value == self.BUILD_ERROR or self.value == self.ALL_FAILED
+        return self.value == self.SOME_FAILED or self.value == self.BUILD_ERROR \
+               or self.value == self.ALL_FAILED or self.value == self.SEGMENTATION_FAULT
         
     def __eq__(self, other):
         """ Equality comparison """
@@ -55,6 +58,7 @@ class TestResult:
         if self.value == self.SOME_FAILED: s = "Some FAILED!" 
         if self.value == self.BUILD_ERROR: s = "BUILD ERROR!" 
         if self.value == self.ALL_FAILED: s = "ALL FAILED!"
+        if self.value == self.SEGMENTATION_FAULT: s = "SEGFAULT!"
         if self.old and (self.value != self.NOT_RUN):
             s += " (old)"
         return s 
@@ -72,7 +76,7 @@ class TestResult:
             elif self.value == self.NOT_RUN:
                 self.value = self.ALL_PASSED
         
-        if other == self.ALL_FAILED:
+        if other == self.ALL_FAILED or other == self.SEGMENTATION_FAULT:
             if self.value == self.ALL_PASSED:
                 self.value = self.SOME_FAILED
             elif self.value == self.NOT_RUN:
@@ -387,12 +391,23 @@ class TestSuite(object):
         tempdir = tempfile.mkdtemp()
         os.chdir(tempdir)
         
+        # In order to catch "segmentation fault" message, we call bash and get the output of that! 
+        full_command = "bash -c '%s'" % self.command
+        
         # Execute the test command; wait for it to return
-        output = commands.getoutput( self.command )
+        output = commands.getoutput( full_command )
         
         # Get the output XML filename
         xml_path = os.path.join(tempdir, self.xml_file)
-        self.parse_xml(xml_path) 
+        if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
+            # Yes, something was output
+            self.parse_xml(xml_path) 
+        else:
+            # No - you must have segfaulted!
+            for test in self.tests:
+                test.state.value = self.state.SEGMENTATION_FAULT
+                test.state.old = False
+                test.stdout = output
         
         # Go back to old directory and remove the temp one
         os.chdir(pwd)
@@ -558,7 +573,8 @@ class TestProject(object):
         #(status, output) = commands.getstatusoutput(self.make_command)
         
         output = ""
-        p = subprocess.Popen(self.make_command, shell=True, bufsize=10000,
+        full_command = self.make_command
+        p = subprocess.Popen(full_command, shell=True, bufsize=10000,
                              cwd=".",
                              stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
                              stdout=subprocess.PIPE, close_fds=True)
