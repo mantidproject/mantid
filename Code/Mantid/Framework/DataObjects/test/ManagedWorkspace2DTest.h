@@ -60,7 +60,7 @@ public:
     }
 
     // Test all is as it should be with the temporary file
-    std::string filename = ws.get_filename();
+    std::string filename = ws.get_filename() + "0";
     fstream file(filename.c_str(), ios::in | ios::binary);
     TSM_ASSERT(filename, file);;
     

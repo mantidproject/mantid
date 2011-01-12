@@ -105,7 +105,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   std::string fullPath = path + m_filename;
 
   {
-    std::string fileToOpen = fullPath; //+ "0";
+    std::string fileToOpen = fullPath + "0";
 
     // Create the temporary file
     m_datafile[0] = new std::fstream(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
