@@ -335,20 +335,20 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   if (outputWorkspace != inputWorkspace ) 
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
-  // ---- For event workspaces, the Divide operator will do the work. -----
-  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace))
-  {
-    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
-    {
-      outputWorkspace /= m_monitor;
-    }
-    else
-    {
-      //outputWorkspace = inputWorkspace / boost::dynamic_pointer_cast<const MatrixWorkspace>(m_monitor);
-      outputWorkspace = inputWorkspace / m_monitor;
-    }
-    return;
-  }
+//  // ---- For event workspaces, the Divide operator will do the work. -----
+//  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace))
+//  {
+//    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+//    {
+//      outputWorkspace /= m_monitor;
+//    }
+//    else
+//    {
+//      //outputWorkspace = inputWorkspace / boost::dynamic_pointer_cast<const MatrixWorkspace>(m_monitor);
+//      outputWorkspace = inputWorkspace / m_monitor;
+//    }
+//    return;
+//  }
 
   // Get hold of the monitor spectrum
   const MantidVec& monX = m_monitor->readX(0);
