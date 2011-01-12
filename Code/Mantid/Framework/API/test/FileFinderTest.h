@@ -21,6 +21,10 @@ public:
   FileFinderTest() :
     m_facFile("./FileFinderTest_Facilities.xml")
   {
+  }
+
+  void setUp()
+  {
     if (m_facFile.exists())
       m_facFile.remove();
 
@@ -66,10 +70,6 @@ public:
     fil << xmlStr;
     fil.close();
 
-  }
-
-  void setUp()
-  {
     ConfigService::Instance().updateFacilities(m_facFile.path());
   }
 
