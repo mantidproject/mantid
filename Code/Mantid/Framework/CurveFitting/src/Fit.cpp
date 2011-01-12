@@ -118,7 +118,7 @@ namespace CurveFitting
     fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
     fit->execute();
 
-    m_function_input = fit->getProperty("Function");
+    m_function_input = fit->getPropertyValue("Function");
     setProperty("Function",m_function_input);
 
     // also output summary to properties
@@ -653,7 +653,7 @@ namespace CurveFitting
     // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
     // "name" parameter must be set to a function name. E.g.
     // Function = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
-    m_function_input = getProperty("Function");
+    m_function_input = getPropertyValue("Function");
     if (m_function_input.empty()) return;
 
     std::string::size_type i = m_function_input.find_last_not_of(" \t\n\r");
