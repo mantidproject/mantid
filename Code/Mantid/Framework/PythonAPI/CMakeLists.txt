@@ -57,21 +57,14 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 set ( PYTHON_DEPS )
 
 # Now copy the required python files into the build destination
-add_custom_command ( TARGET PythonAPI POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/MantidFramework.py 
+set ( PYTHON_INSTALL_FILES MantidFramework.py __init__.py setup.py )
+foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
+  add_custom_command ( TARGET PythonAPI POST_BUILD 
+                       COMMAND ${CMAKE_COMMAND}
+                       ARGS -E copy_if_different 
+                               ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
-add_custom_command ( TARGET PythonAPI POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py 
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
-add_custom_command ( TARGET PythonAPI POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/setup.py 
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
