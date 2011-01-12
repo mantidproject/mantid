@@ -17,6 +17,11 @@ class BaseBeamFinder(ReductionStep):
         displacement under gravity
     """
     def __init__(self, beam_center_x=None, beam_center_y=None):
+        """
+            Initial beam center is given in pixel coordinates
+            @param beam_center_x: pixel position of the beam in x
+            @param beam_center_y: pixel position of the beam in y
+        """
         super(BaseBeamFinder, self).__init__()
         self._beam_center_x = beam_center_x
         self._beam_center_y = beam_center_y
@@ -94,15 +99,25 @@ class BaseBeamFinder(ReductionStep):
         ctr = ctr_str.split(',')
         mantid.sendLogMessage("Beam coordinate in real-space: %s" % str(ctr))  
         
-        self._beam_center_x = float(ctr[0])/reducer.instrument.pixel_size_x*1000.0 + reducer.instrument.nx_pixels/2.0-0.5
-        self._beam_center_y = float(ctr[1])/reducer.instrument.pixel_size_y*1000.0 + reducer.instrument.ny_pixels/2.0-0.5
+        # Compute the relative distance to the current beam center in pixels
+        if self._beam_center_x is None or self._beam_center_y is None:
+            [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center()
+            
+        old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
+        
+        #self._beam_center_x = float(ctr[0])/reducer.instrument.pixel_size_x*1000.0 + reducer.instrument.nx_pixels/2.0-0.5
+        #self._beam_center_y = float(ctr[1])/reducer.instrument.pixel_size_y*1000.0 + reducer.instrument.ny_pixels/2.0-0.5
+        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]))
+
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
         # Note: the position of the detector in Z is now part of the load
         if workspace is not "beam_center":
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                    X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                    Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                    #X = -(self._beam_center_x-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
+                                    #Y = -(self._beam_center_y-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0,
+                                    X = old_ctr[0]-float(ctr[0]),
+                                    Y = old_ctr[1]-float(ctr[0]),
                                     RelativePosition="1")        
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
@@ -464,9 +479,10 @@ class LoadRun(ReductionStep):
         # Note: the position of the detector in Z is now part of the load
         if reducer.get_beam_center()[0] is not None and reducer.get_beam_center()[1] is not None:
             #TODO: compute the difference to the current center position so that we don't mess it up if we apply it twice!
+            beam_ctr = reducer.instrument.get_coordinate_from_pixel(reducer.get_beam_center()[0], reducer.get_beam_center()[1])
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
-                                    X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
-                                    Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                    X = -beam_ctr[0],
+                                    Y = -beam_ctr[1],
                                     RelativePosition="1")
         else:
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)

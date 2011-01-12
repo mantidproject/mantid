@@ -27,7 +27,35 @@ class EQSANS(Instrument):
             of real-space coordinates (0,0).
         """
         return [self.nx_pixels/2.0, self.ny_pixels/2.0]
-        
+
+    def get_pixel_from_coordinate(self, x=0, y=0):
+        """
+            Returns the pixel coordinates corresponding to the
+            given real-space position.
+            
+            This assumes that the center of the detector is aligned 
+            with the beam. An additional offset may need to be applied
+            
+            @param x: real-space x coordinate [m]
+            @param y: real-space y coordinate [m]
+        """
+        return [x/self.pixel_size_x*1000.0 + self.nx_pixels/2.0-0.5,
+                y/self.pixel_size_y*1000.0 + self.ny_pixels/2.0-0.5]
+    
+    def get_coordinate_from_pixel(self, x=0, y=0):
+        """
+            Returns the real-space coordinates corresponding to the
+            given pixel coordinates [m].
+            
+            This assumes that the center of the detector is aligned 
+            with the beam. An additional offset may need to be applied
+            
+            @param x: pixel x coordinate
+            @param y: pixel y coordinate
+        """
+        return [(x-self.nx_pixels/2.0+0.5) * self.pixel_size_x/1000.0,
+                (y-self.ny_pixels/2.0+0.5) * self.pixel_size_y/1000.0]
+            
     def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
         """
             Generate a list of masked pixels.
