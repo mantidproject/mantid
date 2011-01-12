@@ -41,7 +41,6 @@ class MDImage;
 class MDPointDescription;
 class MDDataPoints;
 //
-class Mantid::Kernel::Logger;
 
 /** class describes the interface to file operations, which are supported by generic MD dataset
 */
