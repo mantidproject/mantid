@@ -13,6 +13,14 @@ class ManagedWorkspace2DTest : public CxxTest::TestSuite
 public:
   ManagedWorkspace2DTest()
   {
+    try
+    {
+    remove("WS2D3testInit.tmp");
+    }
+    catch (...)
+    {
+    }
+
     smallWorkspace.setTitle("smallWorkspace");
     smallWorkspace.initialize(2,4,3);
     for (int i = 0; i < 4; ++i)
