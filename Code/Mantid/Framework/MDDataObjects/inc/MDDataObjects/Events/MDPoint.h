@@ -17,6 +17,12 @@ namespace MDDataObjects
    */
   typedef double CoordType;
 
+  /** Macro TMDP to make declaring template functions
+   * faster. Put this macro before function declarations.
+   *
+   */
+  #define TMDP template <size_t nd, size_t nv, typename TE>
+
 
   /** Templated class holding data about a signal from neutron(s) at a given point
    * in N-dimensions (for example, Qx, Qy, Qz, E).

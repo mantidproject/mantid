@@ -16,7 +16,8 @@ namespace MDDataObjects
 
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
-   * A box is a container of MDEvents within a certain range of values
+   *
+   * A box is a container of MDPoint's within a certain range of values
    * within the nd dimensions. This range defines a n-dimensional "box"
    * or rectangular prism.
    *
@@ -34,6 +35,8 @@ namespace MDDataObjects
     MDBox();
 
     virtual void addPoint( const MDPoint<nd,nv,TE> & point);
+
+    virtual void clear();
 
     virtual MDDimensionStats getStats(const size_t dim) const;
 

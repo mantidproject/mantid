@@ -8,18 +8,26 @@ namespace MDDataObjects
 
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   MDBox<nd,nv,TE>::MDBox() :
     signal(0.0), errorSquared(0.0)
   {
   }
 
 
-
+  //-----------------------------------------------------------------------------------------------
+  /** Clear any points contained. */
+  TMDP
+  void MDBox<nd,nv,TE>::clear()
+  {
+    signal = 0.0;
+    errorSquared = 0.0;
+    data.clear();
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this box */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   size_t MDBox<nd,nv,TE>::getNumDims() const
   {
     return nd;
@@ -27,7 +35,7 @@ namespace MDDataObjects
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   size_t MDBox<nd,nv,TE>::getNPoints() const
   {
     return data.size();
@@ -36,7 +44,7 @@ namespace MDDataObjects
   //-----------------------------------------------------------------------------------------------
   /** Returns a reference to the points vector contained within.
    */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   std::vector< MDPoint<nd,nv,TE> > & MDBox<nd,nv,TE>::getPoints()
   {
     return data;
@@ -45,7 +53,7 @@ namespace MDDataObjects
   //-----------------------------------------------------------------------------------------------
   /** Returns the integrated signal from all points within.
    */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   double MDBox<nd,nv,TE>::getSignal() const
   {
     return signal;
@@ -54,7 +62,7 @@ namespace MDDataObjects
   //-----------------------------------------------------------------------------------------------
   /** Returns the integrated error squared from all points within.
    */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   double MDBox<nd,nv,TE>::getErrorSquared() const
   {
     return errorSquared;
@@ -67,7 +75,7 @@ namespace MDDataObjects
   /** Add a point MDPoint to the box.
    * @param point :: reference to a MDPoint to add.
    * */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   void MDBox<nd,nv,TE>::addPoint( const MDPoint<nd,nv,TE> & point)
   {
     this->data.push_back(point);
@@ -75,22 +83,6 @@ namespace MDDataObjects
     // Keep the running total of signal and error
     signal += point.getSignal();
     errorSquared += point.getErrorSquared();
-
-    // Adjust the stats object
-    size_t numPoints = data.size();
-    for (size_t i=0; i<nd; i++)
-    {
-      CoordType x = point.getCenter(i);
-      MDDimensionStats & stats = dimStats[i]; // Slight speed up by using the reference
-      // Check extents
-      if (x < stats.min) stats.min = x;
-      if (x > stats.max) stats.max = x;
-      // Adjust the total (to get the mean)
-      stats.total += x;
-      // Now adjust the variance (for std dev)
-      CoordType var = (x - stats.total / numPoints);
-      stats.approxVariance += var*var;
-    }
   }
 
 
@@ -98,7 +90,7 @@ namespace MDDataObjects
   /** Return the stats for the nth dimension.
    * @param dim :: index of the dimension.
    * */
-  template <size_t nd, size_t nv, typename TE>
+  TMDP
   MDDimensionStats MDBox<nd,nv,TE>::getStats(const size_t dim) const
   {
     if (dim >= nd) throw std::runtime_error("Invalid dimension index specified.");

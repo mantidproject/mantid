@@ -37,40 +37,21 @@ public:
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addPoint(ev);
+    TS_ASSERT_EQUALS( b.getNPoints(), 1)
   }
 
-
-  void testStats()
+  void testClear()
   {
     MDBox<2> b;
     MDPoint<2> ev(1.2, 3.4);
-    ev.setCenter(0, 2.0);
-    ev.setCenter(1, 3.0);
     b.addPoint(ev);
-
-    // Now check the stats
-    TS_ASSERT_EQUALS(b.getStats(0).min, 2.0);
-    TS_ASSERT_EQUALS(b.getStats(0).max, 2.0);
-    TS_ASSERT_EQUALS(b.getStats(0).total, 2.0);
-    TS_ASSERT_EQUALS(b.getStats(0).approxVariance, 0.0);
-
-    // Add another point.
-    ev.setCenter(0, 4.0);
-    ev.setCenter(1, -3.0);
     b.addPoint(ev);
-    TS_ASSERT_EQUALS(b.getStats(0).min, 2.0);
-    TS_ASSERT_EQUALS(b.getStats(0).max, 4.0);
-    TS_ASSERT_EQUALS(b.getStats(0).total, 6.0);
-    TS_ASSERT_EQUALS(b.getStats(0).approxVariance, 1.0);
-    // And the other dimension
-    TS_ASSERT_EQUALS(b.getStats(1).min, -3.0);
-    TS_ASSERT_EQUALS(b.getStats(1).max, 3.0);
-    TS_ASSERT_EQUALS(b.getStats(1).total, 0.0);
-    TS_ASSERT_EQUALS(b.getStats(1).approxVariance, 9.0);
-
-    // Signal and error get summed
-    TS_ASSERT_DELTA( b.getSignal(), 2.4, 1e-6);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 6.8, 1e-6);
+    TS_ASSERT_EQUALS( b.getNPoints(), 2)
+    TS_ASSERT_DELTA( b.getSignal(), 2.4, 1e-5)
+    b.clear();
+    TS_ASSERT_EQUALS( b.getNPoints(), 0)
+    TS_ASSERT_DELTA( b.getSignal(), 0.0, 1e-5)
+    TS_ASSERT_DELTA( b.getErrorSquared(), 0.0, 1e-5)
   }
 
   void test_getPoints()

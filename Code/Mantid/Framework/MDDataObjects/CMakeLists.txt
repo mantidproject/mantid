@@ -12,6 +12,7 @@ src/MDImage.cpp
 src/MDWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
 src/Events/MDEventWorkspace.cpp
+src/Events/MDBox.cpp
 )
 
 # Header files
@@ -41,7 +42,8 @@ set ( GMOCK_TEST_FILES
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
-test/MDPointTest.h   # does not works on win
+test/MDPointTest.h  
+test/MDBoxTest.h  
 test/MDWorkspaceTest.h
 )
 
