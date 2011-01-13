@@ -61,12 +61,7 @@ if $do_local; then
     ln -s `pwd`/../../../Images .
     ln -s `pwd`/../../../Instrument instrument
     cd Code
-    ln -s `pwd`/../../../Build .
-    ln -s `pwd`/../../../Framework .
-    ln -s `pwd`/../../../QtPropertyBrowser .
-    ln -s `pwd`/../../../MantidQt .
-    ln -s `pwd`/../../../MantidPlot .
-    ln -s `pwd`/../../../CMakeLists.txt .
+    ln -s `pwd`/../../../../../Mantid Mantid
     cd ../..
 else
     svn_version="$svn_rev"

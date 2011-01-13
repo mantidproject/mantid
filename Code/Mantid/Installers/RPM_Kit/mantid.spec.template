@@ -24,6 +24,7 @@ BuildRequires:  glibc-devel
 BuildRequires:  gsl-devel
 BuildRequires: 	poco-devel
 BuildRequires:  numpy
+BuildRequires: 	OpenCASCADE-devel
 #required for mantidplot
 BuildRequires:	qt4-devel >= 4.2 
 BuildRequires:	qwt-devel
@@ -33,8 +34,6 @@ BuildRequires:	PyQt4-devel >= 4.5
 BuildRequires: 	nexus
 BuildRequires: 	sip-devel >= 4.8
 BuildRequires: 	qscintilla-devel
-BuildRequires: 	OpenCASCADE-devel
-
 
 Requires: 	boost >= 1.34.1
 Requires: 	qt4 >= 4.2
@@ -45,7 +44,11 @@ Requires:	poco
 Requires:	gsl
 Requires:	glibc
 Requires:	qwtplot3d-qt4
-Requires:	OpenCASCADE
+Requires: 	OpenCASCADE-libs-modelling >= 6.3.0
+Requires:	OpenCASCADE-libs-foundation >= 6.3.0
+Requires: 	OpenCASCADE-libs-visualization >= 6.3.0
+Requires:	OpenCASCADE-libs-ocaf >= 6.3.0
+Requires:	OpenCASCADE-libs-ocaf-lite >= 6.3.0
 Requires:	muParser
 Requires:	numpy
 
