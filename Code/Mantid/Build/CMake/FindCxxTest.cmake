@@ -125,7 +125,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     endforeach (part ${ARGN})
 
     # define the test executable and exclude it from the all target
-    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files})
+    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${ARGN})
 
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
