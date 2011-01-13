@@ -25,7 +25,6 @@ using namespace Mantid::API;
 
 // Initialize the logger
 Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
-const QString SANSAddFiles::OUT_MSG("Output Directory = ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
@@ -114,7 +113,8 @@ void SANSAddFiles::saveSettings()
 */
 void SANSAddFiles::setToolTips()
 {
-  m_SANSForm->summedPath_lb->setToolTip("The output files from summing the workspaces\nwill be saved to this directory");
+  m_SANSForm->summedPath_edit->setToolTip("The output files from summing the workspaces\nwill be saved to this directory");
+  m_SANSForm->path_lb->setToolTip("The output files from summing the workspaces\nwill be saved to this directory");
   m_SANSForm->summedPath_Btn->setToolTip("Set the directories used both for loading and\nsaving run data");
   m_SANSForm->loadSeparateEntries->setToolTip("Where possible load a minimum amount into\nmemory at any time");
 
@@ -142,8 +142,7 @@ QListWidgetItem* SANSAddFiles::insertListFront(const QString &text)
 */
 void SANSAddFiles::setOutDir(std::string dir)
 {
-  m_outDir = QString::fromStdString(dir);
-  m_SANSForm->summedPath_lb->setText(OUT_MSG+m_outDir);
+  m_SANSForm->summedPath_edit->setText(QString::fromStdString(dir));
 }
 /** Update the output directory edit box if the Mantid system output
 *  directory has changed

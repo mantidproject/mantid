@@ -3549,26 +3549,37 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="1" column="0" >
-        <spacer name="horizontalSpacer_11" >
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
+       <item row="1" column="0" colspan="2" >
+        <widget class="QLabel" name="path_lb" >
+         <property name="text" >
+          <string>Output Directory</string>
          </property>
-         <property name="sizeType" >
-          <enum>QSizePolicy::Maximum</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+        </widget>
        </item>
        <item row="1" column="2" >
-        <widget class="QLabel" name="summedPath_lb" >
-         <property name="text" >
+        <widget class="QLineEdit" name="summedPath_edit" >
+         <property name="toolTip" >
           <string/>
+         </property>
+         <property name="readOnly" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4" >
+        <widget class="QPushButton" name="summedPath_Btn" >
+         <property name="toolTip" >
+          <string>The directory to created the summed run file in</string>
+         </property>
+         <property name="text" >
+          <string>Manage Directories</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" >
+        <widget class="QCheckBox" name="loadSeparateEntries" >
+         <property name="text" >
+          <string>Minimise memory usage</string>
          </property>
         </widget>
        </item>
@@ -3585,7 +3596,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="4" column="0" colspan="2" >
+       <item row="4" column="0" >
         <widget class="QLabel" name="label_42" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -3737,23 +3748,6 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="1" column="4" >
-        <widget class="QPushButton" name="summedPath_Btn" >
-         <property name="toolTip" >
-          <string>The directory to created the summed run file in</string>
-         </property>
-         <property name="text" >
-          <string>Manage Directories</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2" >
-        <widget class="QCheckBox" name="loadSeparateEntries" >
-         <property name="text" >
-          <string>Minimise memory usage</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
