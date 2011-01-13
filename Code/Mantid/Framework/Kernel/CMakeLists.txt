@@ -200,7 +200,7 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   include_directories ( inc test )
   target_link_libraries( KernelTest Kernel)
-  add_dependencies ( KernelTest test/TestChannel.cpp )
+  add_dependencies ( KernelTest src/TestChannel.cpp )
   add_dependencies ( FrameworkTests KernelTest )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
