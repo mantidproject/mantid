@@ -1,8 +1,12 @@
 # Make the default build type Release
-if ( NOT CMAKE_BUILD_TYPE )
-  message ( STATUS "No build type selected, default to Release (n/a for Visual Studio)." )
-  set ( CMAKE_BUILD_TYPE "Release" )
-endif ()
+if ( NOT CMAKE_CONFIGURATION_TYPES )
+  if ( NOT CMAKE_BUILD_TYPE )
+    message ( STATUS "No build type selected, default to Release." )
+    set ( CMAKE_BUILD_TYPE "Release" )
+  else ()
+    message ( STATUS "Build type is " ${CMAKE_BUILD_TYPE} )
+  endif ()
+endif()
 
 # We want shared libraries everywhere
 set ( BUILD_SHARED_LIBS On )
@@ -56,7 +60,10 @@ endif ()
 # Look for subversion. Used for version headers - faked if not found.
 ###########################################################################
 
-include( FindSubversion )
+set ( SVN_WORKING_COPY ON CACHE BOOL "Switch off if not building off a Subversion working copy")
+if ( SVN_WORKING_COPY )
+  include( FindSubversion )
+endif ()
 
 ###########################################################################
 # Set up the unit tests target

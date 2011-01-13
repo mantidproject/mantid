@@ -203,16 +203,12 @@ if ( CXXTEST_FOUND )
   add_dependencies ( FrameworkTests KernelTest )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND}
-                       ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
-  )
-  add_custom_command ( TARGET KernelTest POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND}
-                       ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.user.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.properties
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.user.properties
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
   )
 
 endif ()
@@ -221,8 +217,16 @@ endif ()
 # Manipulate the Mantid.properties file to work wherever you build to
 ###########################################################################
 
+# This needs to be done as a 2-step process for it to work for VS builds
+# First the part that turns relative into absolute paths in the properties file
 set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
-
 configure_file ( ../Properties/Mantid.properties.template
-                 ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+)
+
+# Then, at build time, copy into appropriate place
+add_custom_command ( TARGET Kernel POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )

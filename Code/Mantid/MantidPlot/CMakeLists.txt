@@ -99,24 +99,11 @@ if(WIN32)
 endif(WIN32)
 
 # Now copy the required python files into the build destination
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/qtiplotrc.py 
-                               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/qtiUtil.py 
-                               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot.py 
-                               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND}
-                     ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotrc.py 
-                               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-
+set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiplotrc.py qtiplotrc.py mantidplotrc.py )
+foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
+  add_custom_command ( TARGET MantidPlot POST_BUILD 
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+  )
+endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )

@@ -60,10 +60,10 @@ set ( PYTHON_DEPS )
 set ( PYTHON_INSTALL_FILES MantidFramework.py __init__.py setup.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   add_custom_command ( TARGET PythonAPI POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND}
-                       ARGS -E copy_if_different 
-                               ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+  )
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 if ( CXXTEST_FOUND )

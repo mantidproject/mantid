@@ -68,7 +68,7 @@ public:
   // checks that this is done ok
   void testParsing()
   {
-    IComponent* comp;
+    IComponent* comp(NULL);
     boost::shared_ptr<Interpolation> interpolation(new Interpolation);
     std::vector<std::string> constraint;
     std::string penaltyFactor;
