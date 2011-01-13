@@ -26,6 +26,16 @@ CreateWorkspace::~CreateWorkspace()
 /// Init function
 void CreateWorkspace::init()
 {
+  this->setOptionalMessage("Creates a new MatrixWorkspace using input values.\n"
+    "Please view the help page for description of syntax.");
+
+  std::vector<std::string> unitOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
+  unitOptions.push_back("SpectraNumber");
+  unitOptions.push_back("Text");
+
+  
+  declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
+    "Name to be given to the created workspace.");
   declareProperty(new Kernel::ArrayProperty<double>("DataX"),
     "X-axis data values for workspace.");
   declareProperty(new Kernel::ArrayProperty<double>("DataY"),
@@ -34,17 +44,18 @@ void CreateWorkspace::init()
     "Error values for workspace.");
   declareProperty(new Kernel::PropertyWithValue<int>("NSpec", 1),
     "Number of spectra to divide data into.");
-  std::vector<std::string> unitOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
-  unitOptions.push_back("");
-  declareProperty("UnitX","",new Mantid::Kernel::ListValidator(unitOptions),
-      "The unit to assign to the XAxis");
-  unitOptions.push_back("Text");
-  declareProperty("VerticalAxisUnit","",new Mantid::Kernel::ListValidator(unitOptions),
+  declareProperty("UnitX","", "The unit to assign to the XAxis");
+  
+  declareProperty("VerticalAxisUnit","SpectraNumber",new Mantid::Kernel::ListValidator(unitOptions),
       "The unit to assign to the second Axis (leave blank for default Spectra number)");
   declareProperty(new Kernel::ArrayProperty<std::string>("VerticalAxisValues"),
-    "Values for the VerticalAxis."); // This property taken as strings to allow for Text Axis.
-  declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
-    "Name to be given to the created workspace.");
+    "Values for the VerticalAxis.");
+
+  declareProperty(new Kernel::PropertyWithValue<bool>("Distribution", false),
+    "Whether OutputWorkspace should be marked as a distribution.");
+  declareProperty("YUnitLabel", "", "Label for Y Axis");
+
+  declareProperty("WorkspaceTitle", "", "Title for Workspace");
 }
 
 /// Exec function
@@ -58,7 +69,7 @@ void CreateWorkspace::exec()
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
-  if ( ( vUnit != "" ) && ( static_cast<int>(vAxis.size()) != nSpec ) )
+  if ( ( vUnit != "SpectraNumber" ) && ( static_cast<int>(vAxis.size()) != nSpec ) )
   {
     throw std::invalid_argument("Number of y-axis labels must match number of histograms.");
   }
@@ -72,16 +83,20 @@ void CreateWorkspace::exec()
   {
     throw std::invalid_argument("Length of DataY must be divisable by NSpec");
   }
-  int ySize = dataY.size() / nSpec;
-  int xSize = dataX.size() / nSpec;
-  if ( ySize != ( static_cast<int>(dataE.size()) / nSpec ) )
+  if ( dataY.size() != dataE.size() )
   {
     throw std::runtime_error("DataY and DataE must have the same dimensions");
   }
+
+  int ySize = dataY.size() / nSpec;
+  int xSize = dataX.size() / nSpec;
+
   if ( xSize < ySize || xSize > ySize + 1 )
   {
     throw std::runtime_error("DataX width must be as DataY or +1");
   }
+  
+  // Create the OutputWorkspace
   Mantid::API::MatrixWorkspace_sptr outputWS = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
 
   for ( int i = 0; i < nSpec; i++ )
@@ -103,13 +118,21 @@ void CreateWorkspace::exec()
     outputWS->dataE(i) = specE;
   }
 
-  if ( xUnit != "" )
+  // Set the Unit of the X Axis
+  try
   {
     outputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create(xUnit);
   }
+  catch ( Mantid::Kernel::Exception::NotFoundError & )
+  {
+    outputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Label");
+    Mantid::Kernel::Unit_sptr unit = outputWS->getAxis(0)->unit();
+    boost::shared_ptr<Mantid::Kernel::Units::Label> label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unit);
+    label->setLabel(xUnit, xUnit);
+  }
 
   // Populate the VerticalAxis
-  if ( vUnit != "" )
+  if ( vUnit != "SpectraNumber" )
   {
     if ( vUnit == "Text" )
     {
@@ -142,6 +165,17 @@ void CreateWorkspace::exec()
   {
     dynamic_cast<Mantid::API::SpectraAxis*>(outputWS->getAxis(1))->populateSimple(nSpec);
   }
+
+  // Set distribution flag
+  outputWS->isDistribution(getProperty("Distribution"));
+
+  // Set Y Unit label
+  outputWS->setYUnitLabel(getProperty("YUnitLabel"));
+
+  // Set Workspace Title
+  outputWS->setTitle(getProperty("WorkspaceTitle"));
+
+  // Set OutputWorkspace property
   setProperty("OutputWorkspace", outputWS);
 }
 
