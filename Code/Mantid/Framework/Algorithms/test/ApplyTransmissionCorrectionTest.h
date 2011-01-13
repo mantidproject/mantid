@@ -17,8 +17,21 @@ using Mantid::Kernel::UnitFactory;
 class ApplyTransmissionCorrectionTest : public CxxTest::TestSuite
 {
 public:
-  ApplyTransmissionCorrectionTest() : inputWS("input_data_ws")
+  void testBasics()
   {
+    Mantid::Algorithms::ApplyTransmissionCorrection correction;
+
+    TS_ASSERT_EQUALS( correction.name(), "ApplyTransmissionCorrection" );
+    TS_ASSERT_EQUALS( correction.version(), 1 );
+    TS_ASSERT_EQUALS( correction.category(), "SANS" );
+    TS_ASSERT_THROWS_NOTHING( correction.initialize() );
+    TS_ASSERT( correction.isInitialized() );
+  }
+
+  void testExec()
+  {
+    const std::string inputWS("input_data_ws");
+
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
     loader.setPropertyValue("Filename","BioSANS_test_data.xml");
@@ -41,45 +54,16 @@ public:
     solidcorr.setPropertyValue("InputWorkspace",inputWS);
     solidcorr.setPropertyValue("OutputWorkspace",inputWS);
     solidcorr.execute();
-  }
 
-  ~ApplyTransmissionCorrectionTest()
-  {
-    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
-  }
-
-  void testName()
-  {
-    TS_ASSERT_EQUALS( correction.name(), "ApplyTransmissionCorrection" )
-  }
-
-  void testVersion()
-  {
-    TS_ASSERT_EQUALS( correction.version(), 1 )
-  }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( correction.category(), "SANS" )
-  }
-
-  void testInit()
-  {
-    TS_ASSERT_THROWS_NOTHING( correction.initialize() )
-    TS_ASSERT( correction.isInitialized() )
-  }
-
-  void testExec()
-  {
     Mantid::Algorithms::ApplyTransmissionCorrection correction;
+    TS_ASSERT_THROWS_NOTHING( correction.initialize() );
+
     const std::string transWS("trans");
     Workspace2D_sptr trans_ws = WorkspaceCreationHelper::Create2DWorkspace154(1,1,1);
     trans_ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     trans_ws->dataY(0)[0] = 0.6;
     trans_ws->dataE(0)[0] = 0.02;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(transWS, trans_ws);
-
-    if (!correction.isInitialized()) correction.initialize();
 
     TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("TransmissionWorkspace",transWS) )
@@ -109,8 +93,10 @@ public:
 
   void testExecTransByHand()
   {
+    const std::string inputWS("input_data_ws");
+
     Mantid::Algorithms::ApplyTransmissionCorrection correction;
-    if (!correction.isInitialized()) correction.initialize();
+    TS_ASSERT_THROWS_NOTHING( correction.initialize() );
 
     TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( correction.setProperty("TransmissionValue",0.6) )
@@ -136,11 +122,9 @@ public:
     TS_ASSERT_DELTA( result->dataY(id)[0], correct_result, 0.001 )
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
-private:
-  Mantid::Algorithms::ApplyTransmissionCorrection correction;
-  std::string inputWS;
 };
 
 #endif /*APPLYTRANSMISSIONCORRECTIONTEST_H_*/

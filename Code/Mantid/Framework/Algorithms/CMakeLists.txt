@@ -258,7 +258,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
 		 test/AnyShapeAbsorptionTest.h
-		 test/ApplyTransmissionCorrectionTest.h # TODO loads data in the constructor
+		 test/ApplyTransmissionCorrectionTest.h
 		 test/BinaryOperationTest.h
 		 test/CalculateEfficiencyTest.h
 		 test/CalculateTransmissionBeamSpreaderTest.h
@@ -307,7 +307,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/FindCenterOfMassPosition2Test.h
 		 test/FindDeadDetectorsTest.h
 		 test/FindDetectorsOutsideLimitsTest.h
-		 test/FindPeaksTest.h # TODO loads data in the constructor
+		 test/FindPeaksTest.h
 		 test/FlatBackgroundTest.h
 		 test/FlatPlateAbsorptionTest.h
 		 test/GetDetectorOffsetsTest.h
