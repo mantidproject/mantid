@@ -434,7 +434,7 @@ class TestSuite(object):
             try:
                 shutil.rmtree(tempdir)
             except:
-                print "Error removing temporary directory ", pathtempdir
+                print "Error removing temporary directory ", tempdir
             
         # Finalize
         self.compile_states()  
