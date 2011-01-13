@@ -598,7 +598,7 @@ class SolidAngle(ReductionStep):
         ReductionStep class that performs the solid angle correction.
     """
     def execute(self, reducer, workspace):
-        SolidAngleCorrection(workspace, workspace)
+        SANSSolidAngleCorrection(workspace, workspace)
         
         return "Solid angle correction applied" 
             

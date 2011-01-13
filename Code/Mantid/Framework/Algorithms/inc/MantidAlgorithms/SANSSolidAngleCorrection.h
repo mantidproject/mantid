@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SOLIDANGLECORRECTION_H_
-#define MANTID_ALGORITHMS_SOLIDANGLECORRECTION_H_
+#ifndef MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_
+#define MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,15 +27,15 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SolidAngleCorrection : public API::Algorithm
+class DLLExport SANSSolidAngleCorrection : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  SolidAngleCorrection() : API::Algorithm() {}
+  SANSSolidAngleCorrection() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SolidAngleCorrection() {}
+  virtual ~SANSSolidAngleCorrection() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SolidAngleCorrection"; }
+  virtual const std::string name() const { return "SANSSolidAngleCorrection"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -51,4 +51,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_RADIALAVERAGE_H_*/
+#endif /*MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_*/

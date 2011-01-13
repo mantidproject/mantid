@@ -5,7 +5,7 @@
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidAlgorithms/SolidAngleCorrection.h"
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include <iostream>
 
 using namespace Mantid::API;
@@ -58,7 +58,7 @@ public:
     mover.execute();
 
     // Perform solid angle correction
-    Mantid::Algorithms::SolidAngleCorrection solidcorr;
+    Mantid::Algorithms::SANSSolidAngleCorrection solidcorr;
     solidcorr.initialize();
     solidcorr.setPropertyValue("InputWorkspace",inputWS);
     solidcorr.setPropertyValue("OutputWorkspace",inputWS);

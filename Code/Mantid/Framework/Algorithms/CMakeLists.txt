@@ -112,7 +112,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/SetUncertaintiesToZero.cpp
 		src/SmoothData.cpp
 		src/SofQW.cpp
-		src/SolidAngleCorrection.cpp
+		src/SANSSolidAngleCorrection.cpp
 		src/SolidAngle.cpp
 		src/Sort.cpp
 		src/SpatialGrouping.cpp
@@ -244,7 +244,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SetUncertaintiesToZero.h
 		inc/MantidAlgorithms/SmoothData.h
 		inc/MantidAlgorithms/SofQW.h
-		inc/MantidAlgorithms/SolidAngleCorrection.h
+		inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 		inc/MantidAlgorithms/SolidAngle.h
 		inc/MantidAlgorithms/Sort.h
 		inc/MantidAlgorithms/SpatialGrouping.h
@@ -356,7 +356,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/ScaleTest.h
 		 test/SmoothDataTest.h
 		 test/SofQWTest.h
-		 test/SolidAngleCorrectionTest.h
+		 test/SANSSolidAngleCorrectionTest.h
 		 test/SolidAngleTest.h
 		 test/SortTest.h
 		 test/StripPeaksTest.h

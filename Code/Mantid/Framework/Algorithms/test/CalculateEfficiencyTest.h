@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateEfficiency.h"
-#include "MantidAlgorithms/SolidAngleCorrection.h"
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -162,7 +162,7 @@ public:
     mover.execute();
 
     // Solid angle correction
-    Mantid::Algorithms::SolidAngleCorrection sa_corr;
+    Mantid::Algorithms::SANSSolidAngleCorrection sa_corr;
     const std::string sa_corrWS("sa_corrected");
     sa_corr.initialize();
     sa_corr.setPropertyValue("InputWorkspace", inputWS);

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SolidAngleCorrection.h"
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -19,14 +19,14 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SolidAngleCorrection)
+DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-void SolidAngleCorrection::init()
+void SANSSolidAngleCorrection::init()
 {
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
@@ -35,7 +35,7 @@ void SolidAngleCorrection::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 }
 
-void SolidAngleCorrection::exec()
+void SANSSolidAngleCorrection::exec()
 {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 

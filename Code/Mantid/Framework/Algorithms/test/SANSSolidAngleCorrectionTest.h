@@ -1,20 +1,20 @@
-#ifndef SOLIDANGLECORRECTIONTEST_H_
-#define SOLIDANGLECORRECTIONTEST_H_
+#ifndef SANSSOLIDANGLECORRECTIONTEST_H_
+#define SANSSOLIDANGLECORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SolidAngleCorrection.h"
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class SolidAngleCorrectionTest : public CxxTest::TestSuite
+class SANSSolidAngleCorrectionTest : public CxxTest::TestSuite
 {
 public:
   void testName()
   {
-    TS_ASSERT_EQUALS( correction.name(), "SolidAngleCorrection" )
+    TS_ASSERT_EQUALS( correction.name(), "SANSSolidAngleCorrection" )
   }
 
   void testVersion()
@@ -97,8 +97,8 @@ public:
   }
 
 private:
-  Mantid::Algorithms::SolidAngleCorrection correction;
+  Mantid::Algorithms::SANSSolidAngleCorrection correction;
   std::string inputWS;
 };
 
-#endif /*Q1DTEST_H_*/
+#endif /*SANSSOLIDANGLECORRECTIONTEST_H_*/
