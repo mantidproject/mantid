@@ -15,15 +15,14 @@ using namespace Mantid::API;
 
 class FileFinderTest: public CxxTest::TestSuite
 {
-
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor (& destructor) isn't called when running other tests
+  static FileFinderTest *createSuite() { return new FileFinderTest(); }
+  static void destroySuite( FileFinderTest *suite ) { delete suite; }
 
   FileFinderTest() :
     m_facFile("./FileFinderTest_Facilities.xml")
-  {
-  }
-
-  void setUp()
   {
     if (m_facFile.exists())
       m_facFile.remove();
