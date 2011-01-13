@@ -66,6 +66,9 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   )
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
+add_test ( NAME PythonAPITest_import
+           COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+                   ${PYTHON_EXECUTABLE} -c "from MantidFramework import mtd" ) 
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
