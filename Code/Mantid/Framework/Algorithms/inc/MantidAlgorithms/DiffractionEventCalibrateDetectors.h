@@ -55,6 +55,7 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
   /// Function to optimize
   double intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname);
+  void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, API::MatrixWorkspace_sptr inputW);
 
 private:
   // Overridden Algorithm methods
