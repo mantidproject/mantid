@@ -9,28 +9,18 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
 
-using namespace Mantid::API;
 using Mantid::Algorithms::FindPeaks;
 
 class FindPeaksTest : public CxxTest::TestSuite
 {
 public:
-  FindPeaksTest()
+  void testTheBasics()
   {
-    Mantid::NeXus::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","focussed.nxs");
-    loader.setProperty("OutputWorkspace","peaksWS");
-    loader.execute();
-  }
-
-	void testTheBasics()
-	{
-	  FindPeaks finder;
+    FindPeaks finder;
     TS_ASSERT_EQUALS( finder.name(), "FindPeaks" );
     TS_ASSERT_EQUALS( finder.version(), 1 );
     TS_ASSERT_EQUALS( finder.category(), "General" );
-	}
+  }
 
   void testInit()
   {
@@ -39,21 +29,27 @@ public:
     TS_ASSERT( finder.isInitialized() );
   }
 
-  void xtestExec()
+  void testExec()
   {
+    Mantid::NeXus::LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setProperty("Filename","focussed.nxs");
+    loader.setProperty("OutputWorkspace","FindPeaksTest_peaksWS");
+    loader.execute();
+
     FindPeaks finder;
     if ( !finder.isInitialized() ) finder.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","peaksWS") );
+    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","FindPeaksTest_peaksWS") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("WorkspaceIndex","4") );
 //    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","smoothed") );
-    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","foundpeaks") );
+    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","FindPeaksTest_foundpeaks") );
 
     TS_ASSERT_THROWS_NOTHING( finder.execute() );
     TS_ASSERT( finder.isExecuted() );
 
-    ITableWorkspace_sptr peaklist = boost::dynamic_pointer_cast<ITableWorkspace>
-                                     (AnalysisDataService::Instance().retrieve("foundpeaks"));
+    Mantid::API::ITableWorkspace_sptr peaklist = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
+                  (Mantid::API::AnalysisDataService::Instance().retrieve("FindPeaksTest_foundpeaks"));
     TS_ASSERT( peaklist );
     TS_ASSERT_EQUALS( peaklist->rowCount() , 8 );
     TS_ASSERT_DELTA( peaklist->Double(0,1), 0.59, 0.01 );
@@ -72,7 +68,7 @@ public:
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","PG3_733_focussed.nxs");
-    loader.setProperty("OutputWorkspace","vanadium");
+    loader.setProperty("OutputWorkspace","FindPeaksTest_vanadium");
     loader.execute();
   }
 
@@ -82,11 +78,11 @@ public:
 
     FindPeaks finder;
     if ( !finder.isInitialized() ) finder.initialize();
-    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","vanadium") );
+    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","FindPeaksTest_vanadium") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("WorkspaceIndex","0") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeakPositions", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401") );
 //    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","ignored_smoothed_data") );
-    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","foundpeaks") );
+    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","FindPeaksTest_foundpeaks2") );
 
     TS_ASSERT_THROWS_NOTHING( finder.execute() );
     TS_ASSERT( finder.isExecuted() );
