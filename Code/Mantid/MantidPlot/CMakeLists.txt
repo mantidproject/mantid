@@ -99,7 +99,7 @@ if(WIN32)
 endif(WIN32)
 
 # Now copy the required python files into the build destination
-set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiplotrc.py qtiplotrc.py mantidplotrc.py )
+set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplot.py mantidplotrc.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   add_custom_command ( TARGET MantidPlot POST_BUILD 
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
