@@ -241,6 +241,8 @@ class TestSuite(object):
         self.rundir = rundir
         # Marker for when the contained suites changed (some were added or removed)
         self.contents_changed = False
+        # Last date and time the test was run
+        self.lastrun = None
         
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
@@ -296,6 +298,10 @@ class TestSuite(object):
         else:
             for i in xrange(len(self.tests)):
                 self.tests[i].replace_contents( other.tests[i] )
+        # Copy local values
+        self.lastrun = other.lastrun
+        self.build_succeeded = other.build_succeeded
+        self.build_stdout = other.build_stdout
         # Re-compile the states from the individual tests
         self.compile_states()
         
@@ -377,6 +383,8 @@ class TestSuite(object):
         for test in self.tests:
             runtime += test.runtime
         return runtime
+    runtime = property(get_runtime) 
+    
         
     #----------------------------------------------------------------------------------
     def get_state_str(self):
@@ -456,7 +464,7 @@ class TestSuite(object):
         Parameters
             xml_path :: full path to the produced XML path"""
             
-        this_rundate = datetime.datetime.now()
+        self.lastrun = datetime.datetime.now()
            
         try:
             dom = parse(xml_path)
@@ -494,7 +502,7 @@ class TestSuite(object):
 
                 if not test is None:
                     # Save the time
-                    test.lastrun = this_rundate
+                    test.lastrun = self.lastrun
                     test.load_results(case)
                 else:
                     print "Was unable to parse results of test %s.%s!" % (classname, test_name)
@@ -503,7 +511,7 @@ class TestSuite(object):
         # Now we look for tests that are no longer in the suite, and remove them
         tests_copy = self.tests[:]
         for test in tests_copy:
-            if test.lastrun != this_rundate:
+            if test.lastrun != self.lastrun:
                 #print "Removing test %s" % test.get_fullname()
                 self.tests.remove(test)
                 # Mark that we need to update the tree in the GUI
@@ -543,6 +551,19 @@ class TestProject(object):
         self.build_succeeded = True
         self.build_stdout = ""
 
+    #----------------------------------------------------------------------------------
+    def get_lastrun(self):
+        """Return the last time any of the suites were run""" 
+        latest = datetime.datetime(2000,1,1)
+        for suite in self.suites:
+            if not suite.lastrun is None:
+                if suite.lastrun > latest:
+                    latest = suite.lastrun
+        if latest != datetime.datetime(2000,1,1):
+            return latest
+        else:
+            return None
+    lastrun = property(get_lastrun) 
 
     #----------------------------------------------------------------------------------
     def get_fullname(self):
@@ -621,6 +642,8 @@ class TestProject(object):
         
         output = ""
         full_command = self.make_command
+        if not callback_func is None: callback_func(full_command)
+            
         p = subprocess.Popen(full_command, shell=True, bufsize=10000,
                              cwd=".",
                              stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -688,7 +711,8 @@ class TestProject(object):
         for suite in self.suites:
             runtime += suite.get_runtime()
         return runtime
-                   
+    runtime = property(get_runtime) 
+                       
     #----------------------------------------------------------------------------------
     def compile_states(self):
         """ Add up the single test results into this suite """

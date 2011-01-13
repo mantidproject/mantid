@@ -10,8 +10,9 @@ from PyQt4.QtGui import *
 import test_info
 from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
 import random
+import datetime
 
-HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)")
+HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)", "Last Run")
   
   
   
@@ -23,14 +24,27 @@ def format_time(seconds):
     else:
         return "%.3f" % (seconds) 
     
-    if seconds < 1e-3:
-        return "%d us" % (seconds*1000000) 
-    elif seconds < 0.1:
-        return "%.1f ms" % (seconds*1000) 
-    elif seconds < 10:
-        return "%.2f s" % (seconds) 
+def format_time_elapsed(lastrun):
+    """Returns the time elapsed since the test was last run,
+    as a friendly string."""
+    
+    if lastrun is None:
+        return "-"
+    
+    td = datetime.datetime.now() - lastrun
+    # TIme elapsed in seconds (onl;y python 2.7 has .total_seconds()
+    seconds = (td.seconds + td.days * 24 * 3600)
+    min = seconds / 60
+    hour = seconds / 3600
+    
+    if seconds < 60:
+        return "%d s ago" % (seconds) 
+    elif min < 10:
+        return "%d:%02d m ago" % (min, seconds-min*60) 
+    elif min < 60:
+        return "%d m ago" % (min) 
     else:
-        return "%.1f s" % (seconds) 
+        return "%d:%02d h ago" % (hour, min-hour*60) 
     
 # =======================================================================================    
 class MyColors:
@@ -126,31 +140,7 @@ class TreeItemBase(object):
     def background_color(self):
         """Return the background color for this item"""
         return get_background_color(self.contents.state)
-    
-
-# =======================================================================================    
-class TreeItemProject(TreeItemBase):
-    '''
-    A python object used to return row/column data, and keep note of
-    it's parents and/or children.
-    
-    This one represents a TestProject
-    '''
-    def __init__(self, project, parentItem):
-        TreeItemBase.__init__(self, project, parentItem)
-
-    def columnCount(self):
-        return 3
-
-    #-----------------------------------------------------------------------------------            
-    def is_checked(self):
-        return [Qt.Unchecked, Qt.Checked, Qt.PartiallyChecked][self.contents.get_selected()] 
-    
-    def set_checked(self, value):
-        self.contents.selected = value
-        for suite in self.contents.suites:
-            suite.selected = value
-
+        
     #-----------------------------------------------------------------------------------            
     def data(self, column):
         if self.contents is None:
@@ -164,8 +154,34 @@ class TreeItemProject(TreeItemBase):
             if column == 1:
                 return QtCore.QVariant(self.contents.get_state_str())
             if column == 2:
-                return QtCore.QVariant( self.contents.get_runtime() )
+                return QtCore.QVariant( self.contents.runtime )
+            if column == 3: 
+                return QtCore.QVariant( format_time_elapsed(self.contents.lastrun) )
         return QtCore.QVariant()
+
+
+# =======================================================================================    
+class TreeItemProject(TreeItemBase):
+    '''
+    A python object used to return row/column data, and keep note of
+    it's parents and/or children.
+    
+    This one represents a TestProject
+    '''
+    def __init__(self, project, parentItem):
+        TreeItemBase.__init__(self, project, parentItem)
+
+    def columnCount(self):
+        return 4
+
+    #-----------------------------------------------------------------------------------            
+    def is_checked(self):
+        return [Qt.Unchecked, Qt.Checked, Qt.PartiallyChecked][self.contents.get_selected()] 
+    
+    def set_checked(self, value):
+        self.contents.selected = value
+        for suite in self.contents.suites:
+            suite.selected = value
 
       
 
@@ -183,7 +199,7 @@ class TreeItemSuite(TreeItemBase):
 
     def columnCount(self):
         """Column count of the children?"""
-        return 3
+        return 4
             
     #-----------------------------------------------------------------------------------            
     def is_checked(self):
@@ -191,22 +207,6 @@ class TreeItemSuite(TreeItemBase):
     
     def set_checked(self, value):
         self.contents.set_selected( value )
-
-    #-----------------------------------------------------------------------------------            
-    def data(self, column):
-        if self.contents is None:
-            if column == 0:
-                return QtCore.QVariant(self.header)
-            if column >= 1:
-                return QtCore.QVariant("")                
-        else:
-            if column == 0:
-                return QtCore.QVariant(self.contents.name)
-            if column == 1:
-                return QtCore.QVariant(self.contents.get_state_str())
-            if column == 2:
-                return QtCore.QVariant( self.contents.get_runtime() )
-        return QtCore.QVariant()
 
 
 
@@ -223,7 +223,7 @@ class TreeItemSingle(TreeItemBase):
         TreeItemBase.__init__(self, test, parentItem)
 
     def columnCount(self):
-        return 3
+        return 4
     
     def is_checked(self):
         """ Can't check at the single test level """
@@ -232,21 +232,6 @@ class TreeItemSingle(TreeItemBase):
     def set_checked(self, value):
         """ Can't check at the single test level """
         pass
-    
-    def data(self, column):
-        if self.contents is None:
-            if column == 0:
-                return QtCore.QVariant(self.header)
-            if column >= 1:
-                return QtCore.QVariant("")                
-        else:
-            if column == 0:
-                return QtCore.QVariant(self.contents.name)
-            if column == 1:
-                return QtCore.QVariant(self.contents.get_state_str())
-            if column == 2:
-                return QtCore.QVariant( self.contents.runtime )
-        return QtCore.QVariant()
 
 
 
