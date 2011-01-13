@@ -670,10 +670,7 @@ class TestProject(object):
         """ Find the source file corresponding to the given suite in this project
         Returns: the full path to the test file.
         """
-        source_base_dir = "/home/8oz/Code/Mantid/Code/Mantid/Framework/"
-        project_name = self.name.replace("Test", "")
-        source_dir = os.path.join(source_base_dir, project_name)
-        return os.path.join( source_dir, "test/" + suite_name + ".h")
+        return os.path.join( self.source_path, "test/" + suite_name + ".h")
     
     
     #----------------------------------------------------------------------------------
@@ -716,9 +713,12 @@ class TestProject(object):
             return self.state.get_string() + " (%d)" % (self.num_run) #, self.num_run)
        
     #----------------------------------------------------------------------------------
-    def populate(self):
-        """ Discover the suites and single tests in this test project. """
+    def populate(self, project_source_path):
+        """ Discover the suites and single tests in this test project. 
+        @param project_source_path :: root path to the project. e.g. Framework/Kernel
+        """
         self.suites = []
+        self.source_path = project_source_path
         
         # CXX test simply lists "TestSuite testName"
         last_suite_name = ""
@@ -932,7 +932,11 @@ class MultipleProjects(object):
                 make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
-                pj.populate()
+
+                project_name = fname.replace("Test", "")
+                project_source_path = os.path.join(source_path, project_name)
+
+                pj.populate(project_source_path)
                 self.projects.append(pj)
         
     #--------------------------------------------------------------------------        
