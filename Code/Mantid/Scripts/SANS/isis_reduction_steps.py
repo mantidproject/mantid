@@ -37,108 +37,124 @@ def _issueInfo(msg):
 
 
 class LoadRun(ReductionStep):
-    """
-        Load a data file, move its detector to the right position according
-        to the beam center and normalize the data.
-    """
     UNSET_PERIOD = -1
-    def __init__(self, data_file=None, spec_min=None, spec_max=None, entry=UNSET_PERIOD):
-        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
+    def __init__(self, run_spec=None, trans=False, reload=True, entry=UNSET_PERIOD):
+        """
+            Load a data file, move its detector to the right position according
+            to the beam center and normalize the data.
+            @param run_spec: the run number followed by dot and the extension
+            @param trans: set to true if the file is from a transmission run (default: False)
+            @param reload: if to reload the workspace if it is already present
+            @param entry: the entry number of the run, useful for multi-period files (default: load the entire file)
+    """
         super(LoadRun, self).__init__()
-        self._data_file = data_file
-        self._spec_min = spec_min
-        self._spec_max = spec_max
-        self.period = entry
+        self._data_file = run_spec
+        self._is_trans = trans
+        self._reload = reload
+        self._period = int(entry)
+
+        self._spec_min = None
+        self._spec_max = None
+        self.ext = ''
+        self.shortrun_no = -1
         
-    def execute(self, reducer, workspace):
-        # If we don't have a data file, look up the workspace handle
-        if self._data_file is None:
-            if workspace in reducer._data_files:
-                #self._data_file = reducer._data_files[workspace]
-                self._data_file = reducer._full_file_path(reducer._data_files[workspace])
-            else:
-                raise RuntimeError, "ISISReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+    def load(self):
+        workspace = self._get_workspace_name()
+
         
         if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
             #raw files have some different options
             alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
             LoadSampleDetailsFromRaw(workspace, self._data_file)
+            #if the user didn't specify a period use the first period
+            if self._period != self.UNSET_PERIOD:
+                workspace = self._leaveSinglePeriod(workspace)
+
         else:
             #this is the generic situation
-            if not self.period == self.UNSET_PERIOD:
+            if not self._period == self.UNSET_PERIOD:
                 alg = Load(self._data_file, workspace,
-                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self.period)
+                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self._period)
             else:
                 #no specific period was requested
                 alg = Load(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
        
-        #deal with selection and reporting of periods in multi-period files, this is complicated because different file formats have different ways of report numbers of periods
-        numPeriods = -1
-        pWorksp = mantid[workspace]
-        if pWorksp.isGroup() :
-            #get the number of periods in a group using the fact that each period has a different name
-            numPeriods = len(pWorksp.getNames())
-            #if the user didn't specify a period use the first period
-            if self.period == self.UNSET_PERIOD: self.period == 1
-            workspace = self._leaveSinglePeriod(pWorksp, self.period)
-        else :
-            if self.period == self.UNSET_PERIOD:
-                #they didn't specify a period but there is only one period, the original file must contain no more than one period 
-                numPeriods = 1
-        #the logs have the definitive information on the number of periods, if it is in the logs
-        try:
-            samp = pWorksp.getSampleDetails()
-            numPeriods = samp.getLogData('nperiods').value
-        except:
-            #it's OK for there not to be any logs
-            pass
-            
+        numPeriods  = self._find_workspace_num_periods(workspace)
+        #deal with the difficult situation of not reporting the period of single period files
+        if numPeriods > 1 and self._period == 1:
+            #workspace contains the period number only if it is greater than 1, this always contains the period number
+            period_definitely_inc = self._get_workspace_name(False)
+            RenameWorkspace(workspace, period_definitely_inc)
+            workspace = period_definitely_inc 
+        
         # Return the file path actually used to load the data
         fullpath = alg.getPropertyValue("Filename")
 
         return [ os.path.dirname(fullpath), workspace, numPeriods]        
 
+    def _get_workspace_name(self, optional_entry_no=True):
+        """
+            Creates a name for the workspace that will contain the raw
+            data. If the entry number == 1 it is omitted, unless
+            optional_entry_no = False
+            @param optional_entry_no: include the entry number even if it's 1, default: false
+        """  
+        run = self.shortrun_no
+        if self._period > self.UNSET_PERIOD:
+            if (int(self._period) != 1) or (not optional_entry_no):
+                run += 'p'+str(self._period)
+        
+        if self._is_trans:
+            return run + '_trans_' + self.ext.lower()
+        else:
+            return run + '_sans_' + self.ext.lower()
+
     # Helper function
-    def _assignHelper(self, reducer, run_string, is_trans, reload = True, period = -1):
-        if run_string == '' or run_string.startswith('.'):
+    def _assignHelper(self, reducer):
+        if self._data_file == '' or self._data_file.startswith('.'):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
 
-        wkspname, run_no, logname, data_file = extract_workspace_name(
-            run_string, is_trans, prefix=reducer.instrument.name(), 
-            run_number_width=reducer.instrument.run_number_width, period=period)
+        try:
+            run_no, logname, data_file = self._extract_run_details(
+                self._data_file, self._is_trans, prefix=reducer.instrument.name(), 
+                run_number_width=reducer.instrument.run_number_width, period=self._period)
+        except AttributeError:
+            raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
         if run_no == '':
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
 
-        if reload == False and mantid.workspaceExists(wkspname):
-            return SANSUtility.WorkspaceDetails(wkspname, run_no),False,'','', -1
+        workspace = self._get_workspace_name()
+        #this always contains the period number
+        period_definitely_inc = self._get_workspace_name(False)        
+        if self._reload == False and mantid.workspaceExists(workspace):
+            return SANSUtility.WorkspaceDetails(workspace, run_no),False,'','', -1
+        if self._reload == False and mantid.workspaceExists(period_definitely_inc):
+            return SANSUtility.WorkspaceDetails(period_definitely_inc, run_no),False,'','', -1
 
-        filename = os.path.join(reducer._data_path, data_file)
+        self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-        if not os.path.exists(filename):
-            filename = data_file
-        if period <= 0:
-            period = 1
-        if is_trans:
+        if not os.path.exists(self._data_file):
+            self._data_file = data_file
+        if self._period <= 0:
+            self._period = 1
+        if self._is_trans:
             try:
                 if reducer.instrument.name() == 'SANS2D' and int(run_no) < 568:
                     dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
-                    specmin = dimension*dimension*2
-                    specmax = specmin + 4
+                    self._spec_min = dimension*dimension*2
+                    self._spec_max = self._spec_min + 4
                 else:
-                    specmin = None
-                    specmax = 8
-
-                loader = LoadRun(filename, spec_min=specmin, spec_max=specmax, entry=period)
-                [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
+                    self._spec_min = None
+                    self._spec_max = 8
+                [filepath, wkspname, nPeriods] = self.load()
             except RuntimeError, err:
                 mantid.sendLogMessage("::SANS::Warning: "+str(err))
                 return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
         else:
             try:
-                loader = LoadRun(filename, spec_min=None, spec_max=None, entry=period)
-                [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
+                [filepath, wkspname, nPeriods] = self.load()
             except RuntimeError, details:
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
                 return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
@@ -147,23 +163,30 @@ class LoadRun(ReductionStep):
         
         return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
 
-    def _leaveSinglePeriod(self, groupW, period):
-        if (self.period > len(pWorksp.getNames())) or (self.period < 1):
-            raise ValueError('_loadRawData: Period number ' + str(self.period) + ' doesn\'t exist in workspace ' + pWorksp.getName())
+    def _leaveSinglePeriod(self, workspace):
+        groupW = mantid[workspace]
+        if groupW.isGroup():
+            num_periods = groupW.getNames()
+        else:
+            num_periods = 1
+
+        if (self._period > len(num_periods)) or (self._period < 1):
+            raise ValueError('_loadRawData: Period number ' + str(self._period) + ' doesn\'t exist in workspace ' + groupW.getName())
 
         #get the name of the individual workspace in the group
-        oldName = groupW.getName()+'_'+str(period)
+        oldName = groupW.getName()+'_'+str(self._period)
         #move this workspace out of the group (this doesn't delete it)
         groupW.remove(oldName)
     
         discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
         for i in range(0, len(discriptors) ):           #insert the period name after the run number
             if i == 0 :                                 #the run number is the first part of the name
-                newName = discriptors[0]+'p'+str(period)#so add the period number here
+                newName = discriptors[0]+'p'+str(self._period)#so add the period number here
             else :
                 newName += '_'+discriptors[i]
     
-        RenameWorkspace(oldName, newName)
+        if oldName != newName:
+            RenameWorkspace(oldName, newName)
     
         #remove the rest of the group
         mantid.deleteWorkspace(groupW.getName())
@@ -175,8 +198,54 @@ class LoadRun(ReductionStep):
                 inWS = inWS.getName()
             if mantid.workspaceExists(inWS) and (not inWS in others):
                 mantid.deleteWorkspace(inWS)
+                
 
-class LoadTransmissions(sans_reduction_steps.BaseTransmission, LoadRun):
+    def _extract_run_details(self, run_string, is_trans=False, prefix='', run_number_width=8, period=-1):
+        """
+            Takes a run number and file type and generates the filename, workspace name and log name
+            @param run_string a run number followed by a dot and then the file type, i.e. file extension
+            @param is_trans true for transmission files, false for sample files (default is false)
+        """
+        pieces = run_string.split('.')
+        if len(pieces) != 2 :
+             raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
+        else:
+            run_no = pieces[0]
+            self.ext = pieces[1]
+        
+        fullrun_no, logname, self.shortrun_no = _padRunNumber(run_no, run_number_width)
+        self.shortrun_no = str(self.shortrun_no)
+      
+        return run_no, logname, prefix+fullrun_no+'.'+self.ext
+    
+    def _find_workspace_num_periods(self, workspace): 
+        """
+            Deal with selection and reporting of periods in multi-period files,
+            this is complicated because different file formats have different ways
+            of report numbers of periods
+            @param workspace: the name of the workspace
+        """
+        numPeriods = -1
+        pWorksp = mantid[workspace]
+        if pWorksp.isGroup() :
+            #get the number of periods in a group using the fact that each period has a different name
+            numPeriods = len(pWorksp.getNames())
+        else :
+            if self._period == self.UNSET_PERIOD:
+                #they didn't specify a period but there is only one period, the original file must contain no more than one period 
+                numPeriods = 1
+        #the logs have the definitive information on the number of periods, if it is in the logs
+        try:
+            samp = pWorksp.getSampleDetails()
+            numPeriods = samp.getLogData('nperiods').value
+        except:
+            #it's OK for there not to be any logs
+            pass
+        
+        return numPeriods
+
+
+class LoadTransmissions(sans_reduction_steps.BaseTransmission):
     """
         Loads the file used to apply the transmission correction to the
         sample or can 
@@ -208,13 +277,15 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission, LoadRun):
 
     def execute(self, reducer, workspace):
         if self._trans_name not in [None, '']:
+            loader = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             trans_ws, dummy1, dummy2, dummy3, self.TRANS_SAMPLE_N_PERIODS = \
-                self._assignHelper(reducer, self._trans_name, True, self._reload, self._period_t)
+                loader._assignHelper(reducer)
             self.trans_name = trans_ws.getName()
         
         if self._direct_name not in [None, '']:
+            loader = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
             direct_sample_ws, dummy1, dummy2, dummy3, self.DIRECT_SAMPLE_N_PERIODS = \
-                self._assignHelper(reducer, self._direct_name, True, self._reload, self._period_d)
+                loader._assignHelper(reducer)
             self.direct_name = direct_sample_ws.getName()
 
         return self.trans_name, self.direct_name
@@ -235,26 +306,23 @@ class CanSubtraction(LoadRun):
             @param lambda_max: MaxWavelength parameter for CalculateTransmission
             @param fit_method: FitMethod parameter for CalculateTransmission (Linear or Log)
         """
-        super(CanSubtraction, self).__init__()
-        self._can_run = can_run
-        self._can_run_reload = reload
-        self._can_run_period = period
+        super(CanSubtraction, self).__init__(can_run, reload=reload, entry=period)
         self.SCATTER_CAN = None
 
-    def assign_can(self, reducer, reload = True, period = -1):
+    def assign_can(self, reducer, reload = True):
         #TODO: get rid of any reference to the instrument object as much as possible
         # Definitely get rid of the if-statements checking the instrument name.
         if not issubclass(reducer.instrument.__class__, isis_instrument.ISISInstrument):
             raise RuntimeError, "CanSubtraction.assign_can expects an argument of class ISISInstrument"
         
-        if( self._can_run.startswith('.') or self._can_run == '' or self._can_run == None):
-            self._can_run = None
+        if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
+            self._data_file = None
             return '', '()'
 
             return '', '()'
     
         self.SCATTER_CAN ,reset, logname,filepath, self._CAN_N_PERIODS = \
-            self._assignHelper(reducer, self._can_run, False, reload, self._can_run_period)
+            self._assignHelper(reducer)
         if self.SCATTER_CAN.getName() == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load sans can run, cannot continue.')
             return '','()'
@@ -270,7 +338,7 @@ class CanSubtraction(LoadRun):
         except AttributeError:
             if not reducer.instrument.name() == 'LOQ' : raise
     
-        self.PERIOD_NOS["SCATTER_CAN"] = period
+        self.PERIOD_NOS["SCATTER_CAN"] = self._period
     
         if (reducer.instrument.name() == 'LOQ'):
             return self.SCATTER_CAN.getName(), ""
@@ -310,12 +378,10 @@ class CanSubtraction(LoadRun):
         """
             Apply same corrections as for data then subtract from data
         """
-        if not self._can_run:
+        if not self._data_file:
             return
 
         beamcoords = reducer._beam_finder.get_beam_center()
-
-        final_ws = "can_temp_workspace"
 
         # Put the components in the correct positions
         currentDet = reducer.instrument.cur_detector().name() 
@@ -462,7 +528,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                     elif detname.upper() == 'REAR':
                         self.time_mask_r += ';' + bin_range
                     else:
-                        _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+                        _issueWarning('Detector \'' + detname + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
@@ -474,7 +540,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         elif detect.upper() == 'REAR':
             self.spec_mask_r += ',' + mask_string
         else:
-            _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+            _issueWarning('Detector \'' + detect + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
 
     def _ConvertToSpecList(self, maskstring, detector):
         '''
@@ -707,39 +773,32 @@ class LoadSample(LoadRun):
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
 
     def __init__(self, sample=None, reload=True, entry=-1):
-        super(LoadSample, self).__init__(entry)
+        super(LoadSample, self).__init__(sample, reload=reload, entry=entry)
         self.SCATTER_SAMPLE = None
         self._SAMPLE_SETUP = None
         self._SAMPLE_RUN = None
         self._SAMPLE_N_PERIODS = -1
-        # the run number followed by dot and the extension
-        self.sample_run = sample
-        self._reload = reload
         
         self.maskpt_rmin = None
         
         #This is set to the name of the workspace that was loaded, with some changes made to it 
         self.uncropped = None
     
-    def set_options(self, reload=True, period=-1):
-        self._reload = reload
-        self.period = period
-        
     def execute(self, reducer, workspace):
         # If we don't have a data file, look up the workspace handle
-        if self.sample_run is None:
-            self.sample_run = reducer.get_sample()
+        if self._data_file is None:
+            self._data_file = reducer.get_sample()
         # Code from AssignSample
         self._clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
         
-        if( self.sample_run.startswith('.') or self.sample_run == '' or self.sample_run == None):
+        if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
             self._SAMPLE_SETUP = None
             self._SAMPLE_RUN = ''
             self.SCATTER_SAMPLE = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
-        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer, self.sample_run, False, self._reload, self.period)
+        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer)
         if self.SCATTER_SAMPLE.getName() == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
         if reset == True:
@@ -755,7 +814,7 @@ class LoadSample(LoadRun):
             run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
         except RuntimeError:
             # if the run number is not stored in the workspace, take it from the filename
-            run_num = self.sample_run.split('.')[0].split('-')[0]
+            run_num = self._data_file.split('.')[0].split('-')[0]
         
         reducer.instrument.set_up_for_run(run_num)
 
@@ -768,7 +827,7 @@ class LoadSample(LoadRun):
         except AttributeError:
             if not reducer.instrument.name() == 'LOQ': raise
         
-        self.PERIOD_NOS["SCATTER_SAMPLE"] = self.period
+        self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
 
         reducer.wksp_name = self.uncropped
         
@@ -825,7 +884,6 @@ class CropDetBank(ReductionStep):
 
 class UnitsConvert(ReductionStep):
     def __init__(self, units):
-        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(UnitsConvert, self).__init__()
         self._units = units
         self.wav_low = None
@@ -868,7 +926,6 @@ class ConvertToQ(ReductionStep):
     _DEFAULT_GRAV = False
     
     def __init__(self, type = '1D'):
-        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(ConvertToQ, self).__init__()
         
         #this should be set to 1D or 2D
@@ -1216,7 +1273,7 @@ class UserFile(ReductionStep):
             if not os.path.isfile(user_file):
                 user_file = reducer._full_file_path(self.filename)
                 if not os.path.isfile(user_file):
-                    raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % filename
+                    raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % self.filename
             
         # Re-initializes default values
         self._initialize_mask(reducer)
@@ -1522,32 +1579,6 @@ class ReplaceErrors(ReductionStep):
 
     def execute(self, reducer, workspace):
         ReplaceSpecialValues(InputWorkspace = workspace,OutputWorkspace = workspace, NaNValue="0", InfinityValue="0")
-
-
-def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8, period=-1):
-    """
-        Takes a run number and file type and generates the filename, workspace name and log name
-        @param run_string a run number followed by a dot and then the file type, i.e. file extension
-        @param is_trans true for transmission files, false for sample files (default is false)
-    """
-    pieces = run_string.split('.')
-    if len(pieces) != 2 :
-         raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
-    else:
-        run_no = pieces[0]
-        ext = pieces[1]
-    
-    fullrun_no, logname, shortrun_no = _padRunNumber(run_no, run_number_width)
-    shortrun_no = str(shortrun_no)
-    
-    if period > -1:
-        shortrun_no += 'p'+str(period)
-    if is_trans:
-        wkspname =  shortrun_no + '_trans_' + ext.lower()
-    else:
-        wkspname =  shortrun_no + '_sans_' + ext.lower()
-    
-    return wkspname, run_no, logname, prefix+fullrun_no+'.'+ext
 
 def _padRunNumber(run_no, field_width):
     nchars = len(run_no)

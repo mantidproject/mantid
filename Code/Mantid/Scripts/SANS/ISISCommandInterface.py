@@ -15,7 +15,7 @@ DEL__FINDING_CENTRE_ = False
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
-except ImportError:
+except:
     #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
     pass
 
@@ -56,7 +56,7 @@ def SetVerboseMode(state):
 # Print a message and log it if the 
 def _printMessage(msg, log = True, no_console=False):
     if log == True and _VERBOSE_ == True:
-        mantid.sendLogMessage('::SANS::' + msg)
+        MantidFramework.mtd.sendLogMessage('::SANS::' + msg)
     if not no_console:
         print msg
     
@@ -169,8 +169,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
 
     ISIS_global().data_loader = isis_reduction_steps.LoadSample(
-                                           sample_run)
-    ISIS_global().load_set_options(reload, period)
+                                    sample_run, reload, period)
 
     sample_wksp, logs = ISIS_global().data_loader.execute(
                                             ISIS_global(), None)
@@ -183,9 +182,6 @@ def SetCentre(XVAL, YVAL):
     ISIS_global().set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
 
 
-def SetSampleOffset(value):
-    ISIS_global().instrument.set_sample_offset(value)
-    
 def GetMismatchedDetList():
     """
         Return the list of mismatched detector names
@@ -471,12 +467,12 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     script += '[COLETTE]  LIMIT/RADIUS ' + str(ISIS_global().mask.min_radius)
     script += ' ' + str(ISIS_global().mask.max_radius) + '\n'
     script += '[COLETTE]  LIMIT/WAVELENGTH ' + ISIS_global().to_wavelen.get_range() + '\n'
-    if DWAV <  0:
+    if ISIS_global().DWAV <  0:
         script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(ISIS_global().to_wavelen.w_step)[1:] + '\n'
     else:
         script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(ISIS_global().to_wavelen.w_step) + '\n'
     # For the moment treat the rebin string as min/max/step
-    qbins = q_REBEIN.split(",")
+    qbins = ISIS_global().Q_REBEIN.split(",")
     nbins = len(qbins)
     if ISIS_global().to_Q.output_type == '1D':
         script += '[COLETTE]  LIMIT/Q ' + str(qbins[0]) + ' ' + str(qbins[nbins-1]) + '\n'

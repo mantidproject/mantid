@@ -131,12 +131,7 @@ class ISISReducer(SANSReducer):
     
     user_file_path = property(get_user_path, set_user_path, None, None)
 
-    def load_set_options(self, reload=True, period=-1):
-        if not issubclass(self.data_loader.__class__, isis_reduction_steps.LoadSample):
-            raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
-        self.data_loader.set_options(reload, period)
-
-    def set_run_number(self, data_file, workspace=None):
+    def set_run_number(self, data_file, workspace):
         """
             The run number is a number followed by a . and then
             the extension of the run file to load
@@ -144,11 +139,6 @@ class ISISReducer(SANSReducer):
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
         """
-        wrkspc, _, _, filename = isis_reduction_steps.extract_workspace_name(
-                            data_file, False, self.instrument.name(), self.instrument.run_number_width)
-        if workspace is None:
-            workspace = wrkspc
-
         self._data_files.clear()
         self._data_files[workspace] = workspace
 
