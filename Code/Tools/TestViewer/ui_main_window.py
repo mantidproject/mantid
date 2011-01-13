@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed Jan 12 14:07:24 2011
+# Created: Thu Jan 13 14:21:18 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -527,9 +527,11 @@ class Ui_MainWindow(object):
         self.action_Quit = QtGui.QAction(MainWindow)
         self.action_Quit.setObjectName("action_Quit")
         self.action_Preferences = QtGui.QAction(MainWindow)
+        self.action_Preferences.setVisible(False)
         self.action_Preferences.setObjectName("action_Preferences")
         self.menuTests.addAction(self.actionRun_All_Tests)
         self.menuTests.addAction(self.actionRun_Selected_Tests)
+        self.menu_File.addSeparator()
         self.menu_File.addAction(self.action_Preferences)
         self.menu_File.addAction(self.action_Quit)
         self.menubar.addAction(self.menu_File.menuAction())
@@ -540,7 +542,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Mantid TestViewer", None, QtGui.QApplication.UnicodeUTF8))
         self.checkMonitorTests.setToolTip(QtGui.QApplication.translate("MainWindow", "Continuously monitor the test files for any changes, and rerun them when they change.", None, QtGui.QApplication.UnicodeUTF8))
         self.checkMonitorTests.setText(QtGui.QApplication.translate("MainWindow", "Monitor Test Files", None, QtGui.QApplication.UnicodeUTF8))
         self.checkMonitorLibraries.setToolTip(QtGui.QApplication.translate("MainWindow", "Continously monitor the libraries file for any changes and rerun the selected tests when changes are found.", None, QtGui.QApplication.UnicodeUTF8))
@@ -578,6 +580,7 @@ class Ui_MainWindow(object):
 "<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
 "<tr>\n"
 "<td style=\"border: none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></td></tr></table></body></html>", None, QtGui.QApplication.UnicodeUTF8))
