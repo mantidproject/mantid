@@ -58,19 +58,22 @@ namespace Mantid
       void exec();
 
       /// Process a tube
-      void performBleedTest(std::list<int> & tubeIndices, 
-			    API::MatrixWorkspace_sptr outputWS);
+      bool performBleedTest(const std::vector<int> & tubeIndices,
+			    API::MatrixWorkspace_const_sptr inputWS);
       /// Mask a tube with the given workspace indices
-      void maskTube(const std::list<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
+      void maskTube(const std::vector<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
+      /// Mark a tubes data values as passing the tests
+      void markAsPassed(const std::vector<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
+
       /// Run the CloneWorkspace algorithm
       API::MatrixWorkspace_sptr cloneWorkspace(API::MatrixWorkspace_sptr workspace);
  
-      /// Maximum allowed framerate
-      double m_maxFramerate;
+      /// Maximum allowed rate
+      double m_maxRate;
       /// Number of ignored pixels
       int m_numIgnoredPixels;
-      /// Number of good frames
-      int m_goodFrames;
+      /// Is the input a distribution or raw counts. If true then bin width division is necessary when calculating the rate
+      bool m_isRawCounts;
     };
 
   } // namespace Algorithms

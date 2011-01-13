@@ -34,8 +34,25 @@ public:
 
   void testGetDetectorIDs()
   {
-    TS_ASSERT_EQUALS( m_detGroup->getDetectorIDs().size(), 5 );
+    std::vector<int> detIDs = m_detGroup->getDetectorIDs();
+    TS_ASSERT_EQUALS( detIDs.size(), 5 );
+    for(int i = 0; i < detIDs.size(); ++i )
+    {
+      TS_ASSERT_EQUALS(detIDs[i], i + 1);
+    }
+    
   }
+
+  void testGetDetectors()
+  {
+    std::vector<IDetector_sptr> dets = m_detGroup->getDetectors();
+    TS_ASSERT_EQUALS( dets.size(), 5 );
+    for(int i = 0; i < dets.size(); ++i )
+    {
+      TS_ASSERT(dets[i]);
+    }
+  }
+
 
   void testGetID()
   {

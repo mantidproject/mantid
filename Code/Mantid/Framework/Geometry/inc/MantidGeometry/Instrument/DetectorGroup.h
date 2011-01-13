@@ -74,6 +74,8 @@ public:
 
   /// What detectors are contained in the group?
   std::vector<int> getDetectorIDs();
+  /// What detectors are contained in the group?
+  std::vector<IDetector_sptr> getDetectors() const;
 
   /** @name ParamaterMap access */
   //@{

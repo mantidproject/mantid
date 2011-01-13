@@ -132,6 +132,7 @@ namespace Mantid
     std::vector<int> DetectorGroup::getDetectorIDs()
     {
       std::vector<int> result;
+      result.reserve(m_detectors.size());
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
@@ -140,6 +141,21 @@ namespace Mantid
       return result;
     }
 
+    /**
+     * Return the list of detectors held within this group
+     * @returns A vector of IDetector pointers
+     */
+    std::vector<IDetector_sptr> DetectorGroup::getDetectors() const
+    {
+      std::vector<IDetector_sptr> result;
+      result.reserve(m_detectors.size());
+      DetCollection::const_iterator it;
+      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+      {
+        result.push_back( (*it).second );
+      }
+      return result;
+    }
 
     /** Gives the total solid angle subtended by a group of detectors by summing the
     *  contributions from the individual detectors.

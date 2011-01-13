@@ -6,7 +6,6 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -35,7 +34,6 @@ public:
     using Mantid::Geometry::IDetector_sptr;
 
     Workspace2D_sptr testWS = createTestWorkspace();
-    //IInstrument_sptr inst = testWS->getInstrument();
 
     if( !diagnostic.isInitialized() )
     {
@@ -47,12 +45,20 @@ public:
     diagnostic.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", testWS);
     const std::string outputName("PSDBleedMask-Test");
     diagnostic.setPropertyValue("OutputWorkspace", outputName);
-    diagnostic.setProperty("MaxTubeFramerate", 2.0);
+    // Based on test setup: Passing tubes should have a framerate 9.2 and the failing tube 19.0
+    diagnostic.setProperty("MaxTubeFramerate", 10.0);
     diagnostic.setProperty("NIgnoredCentralPixels", 4);
     
     diagnostic.setRethrows(true);
+
+    // First test that a workspace not containing the number of good frames fails
+    TS_ASSERT_THROWS(diagnostic.execute(), std::invalid_argument);
+
+    // Set the number of frames
+    testWS->mutableRun().addProperty("goodfrm", 10);
+
     TS_ASSERT_THROWS_NOTHING(diagnostic.execute());
-    
+   
     Mantid::API::AnalysisDataServiceImpl& dataStore = Mantid::API::AnalysisDataService::Instance();
     MatrixWorkspace_sptr outputWS = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(dataStore.retrieve(outputName));
@@ -65,6 +71,8 @@ public:
     const int numSpectra = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(numSpectra, testWS->getNumberHistograms());
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
+    const int numMasked = diagnostic.getProperty("NumberOfFailures");
+    TS_ASSERT_EQUALS(numMasked, 1);
 
     // Test masking
     int failedIndexStart(50), failedIndexEnd(99);
@@ -74,13 +82,11 @@ public:
       TS_ASSERT_EQUALS( det->isMasked(), true);
     }
 
-    // First tube unmasked
     for( int i = 0; i <= 49; ++i )
     {
       IDetector_sptr det = outputWS->getDetector(i);
       TS_ASSERT_EQUALS( det->isMasked(), false );
     }
-    
     
     dataStore.remove(outputName);
   }
@@ -98,14 +104,10 @@ private:
     testWS->setInstrument(createTestInstrument(nTubes, nPixelsPerTube));
     // Need spectra mapping
     testWS->mutableSpectraMap().populateSimple(0, nSpectra);
-
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate
     testWS->dataY(failedTube*nPixelsPerTube+1)[0] = 100.0;
-    // Need a number of good frames also
-    testWS->mutableRun().addProperty("goodfrm", 10);
-
     return testWS;
   }
 
