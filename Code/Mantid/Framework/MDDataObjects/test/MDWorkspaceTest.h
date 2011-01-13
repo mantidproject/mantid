@@ -2,7 +2,7 @@
 #define H_TEST_MDWORKSPACE
 
 #include <cxxtest/TestSuite.h>
-#include <cstdint>
+#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDDataPoints.h"

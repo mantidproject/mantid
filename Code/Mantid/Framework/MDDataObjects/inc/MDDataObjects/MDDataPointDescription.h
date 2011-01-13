@@ -1,7 +1,7 @@
 #ifndef MD_DATAPOINT_DESCRIPTION_H
 #define MD_DATAPOINT_DESCRIPTION_H
 
-#include <cstdint>
+#include "MantidKernel/System.h"
 #include <vector> 
 //#include <string>
 #include <cstring>

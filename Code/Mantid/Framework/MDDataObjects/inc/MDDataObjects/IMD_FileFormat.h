@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cstdint>
+#include "MantidKernel/System.h"
 #include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
