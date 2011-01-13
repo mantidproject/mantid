@@ -60,6 +60,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(diagnostic.execute());
    
     Mantid::API::AnalysisDataServiceImpl& dataStore = Mantid::API::AnalysisDataService::Instance();
+    bool ws_found = dataStore.doesExist(outputName);
+    TS_ASSERT( ws_found );
+    if (!ws_found) return;
     MatrixWorkspace_sptr outputWS = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(dataStore.retrieve(outputName));
     TS_ASSERT( outputWS );

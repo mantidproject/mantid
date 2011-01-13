@@ -232,8 +232,8 @@ namespace Mantid
 	  }
 	}
       }
-      assert(top == topEnd - 1);
-      assert(bot == numSpectra - 1);
+      if (top != topEnd - 1) throw std::runtime_error("top != topEnd - 1 in CreatePSDBleedMask::performBleedTest()");
+      if (bot == numSpectra - 1) throw std::runtime_error("bot == numSpectra - 1 in CreatePSDBleedMask::performBleedTest()");
       
       return false;
     }
