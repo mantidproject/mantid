@@ -150,7 +150,7 @@ namespace Algorithms
     }
 
     if (detList.size() == 0)
-      throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbors cannot operate on this instrument at this time.");
+      throw std::runtime_error("This instrument does not have any RectangularDetector's. DiffractionEventReadDetCal cannot operate on this instrument at this time.");
 
     while(std::getline(input, line)) 
     {
