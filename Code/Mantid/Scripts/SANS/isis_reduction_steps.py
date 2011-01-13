@@ -172,7 +172,9 @@ class LoadRun(ReductionStep):
 
         if (self._period > num_periods) or (self._period < 1):
             raise ValueError('_loadRawData: Period number ' + str(self._period) + ' doesn\'t exist in workspace ' + groupW.getName())
-
+        
+        if num_periods == 1:
+            return workspace
         #get the name of the individual workspace in the group
         oldName = groupW.getName()+'_'+str(self._period)
         #move this workspace out of the group (this doesn't delete it)
