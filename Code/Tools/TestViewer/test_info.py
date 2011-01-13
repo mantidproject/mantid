@@ -34,7 +34,7 @@ class TestResult:
     """ All tests failed """
     ALL_FAILED = 4
     """ Probably a segfault """ 
-    SEGMENTATION_FAULT = 5
+    ABORTED = 5
     
     def __init__(self, value=0, old=False):
         self.value = value
@@ -42,7 +42,7 @@ class TestResult:
         
     def is_failed(self):
         return self.value == self.SOME_FAILED or self.value == self.BUILD_ERROR \
-               or self.value == self.ALL_FAILED or self.value == self.SEGMENTATION_FAULT
+               or self.value == self.ALL_FAILED or self.value == self.ABORTED
         
     def __eq__(self, other):
         """ Equality comparison """
@@ -65,7 +65,7 @@ class TestResult:
         if self.value == self.SOME_FAILED: s = "Some FAILED!" 
         if self.value == self.BUILD_ERROR: s = "BUILD ERROR!" 
         if self.value == self.ALL_FAILED: s = "ALL FAILED!"
-        if self.value == self.SEGMENTATION_FAULT: s = "SEGFAULT!"
+        if self.value == self.ABORTED: s = "ABORTED!"
         if self.old and (self.value != self.NOT_RUN):
             s += " (old)"
         return s 
@@ -83,7 +83,7 @@ class TestResult:
             elif self.value == self.NOT_RUN:
                 self.value = self.ALL_PASSED
         
-        if other == self.ALL_FAILED or other == self.SEGMENTATION_FAULT:
+        if other == self.ALL_FAILED or other == self.ABORTED:
             if self.value == self.ALL_PASSED:
                 self.value = self.SOME_FAILED
             elif self.value == self.NOT_RUN:
@@ -205,6 +205,8 @@ class TestSingle(object):
         if len(systemout) > 0:
             # This is a node containing text (the firstchild) which is a Text node
             self.stdout = systemout[0].firstChild.data
+        else:
+            self.stdout = ""
             
     #----------------------------------------------------------------------------------
     def get_state_str(self):
@@ -223,7 +225,7 @@ class TestSingle(object):
 class TestSuite(object):
     """ A suite of tests """
 
-    def __init__(self, name, parent, classname, command, xml_file, source_file):
+    def __init__(self, name, parent, classname, command, rundir, xml_file, source_file):
         """ Constructor"""
         # Its own name, e.g. "UnitTest"
         self.name = name
@@ -235,6 +237,10 @@ class TestSuite(object):
         self.command = command
         # Name of the XML file produced when running (no path)
         self.xml_file = xml_file
+        # Run directory
+        self.rundir = rundir
+        # Marker for when the contained suites changed (some were added or removed)
+        self.contents_changed = False
         
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
@@ -375,6 +381,7 @@ class TestSuite(object):
     #----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
+        self.compile_states()
         if self.failed > 0:
             return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
         else:
@@ -386,12 +393,21 @@ class TestSuite(object):
         """ Runs this test suite, then loads the produced XML file
         and interprets its results.
         This method should be written so that it can be run in parallel. """
+        
+        self.contents_changed = False
+        
         # Present working directory
         pwd = os.getcwd()
         
-        # Create a temporary directory just for running this test suite
-        tempdir = tempfile.mkdtemp()
-        os.chdir(tempdir)
+        make_temp_dir = False
+        if make_temp_dir:
+            # Create a temporary directory just for running this test suite
+            tempdir = tempfile.mkdtemp()
+            rundir = tempdir
+        else:
+            rundir = self.rundir
+            
+        os.chdir(rundir)
         
         # In order to catch "segmentation fault" message, we call bash and get the output of that! 
         full_command = "bash -c '%s'" % self.command
@@ -400,23 +416,25 @@ class TestSuite(object):
         output = commands.getoutput( full_command )
         
         # Get the output XML filename
-        xml_path = os.path.join(tempdir, self.xml_file)
+        xml_path = os.path.join(rundir, self.xml_file)
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
             # Yes, something was output
             self.parse_xml(xml_path) 
         else:
-            # No - you must have segfaulted!
+            # No - you must have segfaulted or some other error!
             for test in self.tests:
-                test.state.value = self.state.SEGMENTATION_FAULT
+                test.state.value = self.state.ABORTED
                 test.state.old = False
                 test.stdout = output
         
         # Go back to old directory and remove the temp one
         os.chdir(pwd)
-        try:
-            shutil.rmtree(tempdir)
-        except:
-            print "Error removing temporary directory ", pathtempdir
+        
+        if make_temp_dir:
+            try:
+                shutil.rmtree(tempdir)
+            except:
+                print "Error removing temporary directory ", pathtempdir
             
         # Finalize
         self.compile_states()  
@@ -433,7 +451,8 @@ class TestSuite(object):
 
     #----------------------------------------------------------------------------------
     def parse_xml(self, xml_path):
-        """Interpret a jUnit-style XML file
+        """Interpret a jUnit-style XML file produced for this suite.
+        
         Parameters
             xml_path :: full path to the produced XML path"""
             
@@ -466,17 +485,29 @@ class TestSuite(object):
                 test = self.find_test(test_name)
                 # It is possible that the test was just added
                 if test is None:
-                    print "Test %s in suite %s was not found. Adding it." % (test_name, classname)
-                    self.add_single(test_name, self.classname+"."+fullname)
+                    #print "Test %s in suite %s was not found. Adding it." % (test_name, classname)
+                    self.add_single(test_name, self.classname+"."+test_name)
                     # Look for it now
                     test = self.find_test(test_name)
+                    # Mark that we need to update the tree in the GUI
+                    self.contents_changed = True
 
                 if not test is None:
                     # Save the time
                     test.lastrun = this_rundate
                     test.load_results(case)
                 else:
-                    print "Was unable to add test %s!" % test_name
+                    print "Was unable to parse results of test %s.%s!" % (classname, test_name)
+                
+                
+        # Now we look for tests that are no longer in the suite, and remove them
+        tests_copy = self.tests[:]
+        for test in tests_copy:
+            if test.lastrun != this_rundate:
+                #print "Removing test %s" % test.get_fullname()
+                self.tests.remove(test)
+                # Mark that we need to update the tree in the GUI
+                self.contents_changed = True
             
     #----------------------------------------------------------------------------------
     def __repr__(self):
@@ -609,16 +640,13 @@ class TestProject(object):
         # The return code or exit status
         p.wait()
         status = p.returncode
-        
+
         if (status != 0):
             msg = "-------- BUILD FAILED! ---------" 
             print msg 
             if not callback_func is None: callback_func("<b>%s</b>" % msg)
             self.build_succeeded = False
             self.build_stdout = output
-            # Build failure of some kind!
-            for suite in self.suites:
-                suite.set_build_failed(output)
         else:
             msg = "-------- Build Succeeded ---------" 
             print msg 
@@ -627,6 +655,7 @@ class TestProject(object):
             # Build was successful
             for suite in self.suites:
                 suite.build_succeeded = True
+        
         
         
     #----------------------------------------------------------------------------------
@@ -680,6 +709,7 @@ class TestProject(object):
     #----------------------------------------------------------------------------------
     def get_state_str(self):
         """Return a string summarizing the state. Used in GUI."""
+        self.compile_states()
         if self.failed > 0:
             return self.state.get_string() + " (%d of %d failed)" % (self.failed, self.num_run) #, self.num_run)
         else:
@@ -698,6 +728,7 @@ class TestProject(object):
         (dir, file) = os.path.split(self.executable)
         
         output = commands.getoutput(self.executable + " --help-tests")
+        xml_file = "TEST-%s.xml" % self.name
         # The silly cxxtest makes an empty XML file
         try:
             os.remove(xml_file)
@@ -732,7 +763,8 @@ class TestProject(object):
 
                         # Create that suite
                         suite = TestSuite(suite_name, self, classname, 
-                                          self.executable + " " + suite_name, xml_file, source_file)
+                                          self.executable + " " + suite_name,
+                                          dir, xml_file, source_file)
                         last_suite_name = suite_name
                         self.suites.append(suite)
                         
@@ -943,17 +975,28 @@ class MultipleProjects(object):
         @param selected_only :: True if you only check the selected ones."""
         anymod = False
         for pj in self.projects:
-            if not selected_only or pj.get_selected():
+            if not selected_only or pj.is_anything_selected():
                 anymod = anymod or pj.is_source_modified(selected_only)
         return anymod
 
     #--------------------------------------------------------------------------        
-    def get_project_named(self, name):
+    def find_project(self, name):
         """Return the TestProject named name; None if not found"""
         for pj in self.projects:
             if pj.name == name:
                 return pj
         return None
+    
+    #--------------------------------------------------------------------------        
+    def find_suite(self, classname):
+        """ Return the TestSuite with the given classname (e.g. KernelTest.UnitTest). 
+        Returns None if not found"""
+        for pj in self.projects:
+            for suite in pj.suites:
+                if suite.classname == classname:
+                    return suite
+        return None
+        
 
     #--------------------------------------------------------------------------        
     def replace_project(self, pj):
@@ -970,7 +1013,7 @@ class MultipleProjects(object):
         Will look for a matching name"""
         # Note: You have to re-look for the parent here because st may come from
         #    a different thread = points to the object in another thread
-        pj = self.get_project_named(st.get_parent().name)
+        pj = self.find_project(st.get_parent().name)
         if pj is None:
             return
         for i in xrange(len(pj.suites)):
@@ -1052,6 +1095,12 @@ class MultipleProjects(object):
                 if not callback_func is None: 
                     callback_func(pj)
                 all_builds_successful = all_builds_successful and pj.build_succeeded
+                # Set the build failure to all suites that are selected
+                if not pj.build_succeeded:
+                    for suite in pj.suites:
+                        if (not selected_only) or suite.selected:
+                            suite.set_build_failed(pj.build_stdout)
+
 
             # Send a message that all builds were good!
             if all_builds_successful and (not callback_func is None):
@@ -1169,9 +1218,11 @@ test_age()
 if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.select_svn()
-    
-#    all_tests.run_tests_in_parallel(selected_only=False, make_tests=True, 
-#                          parallel=True, callback_func=test_run_print_callback)
+    all_tests.select_all(False)
+    suite = all_tests.find_suite("GeometryTest.AcompTest")
+    suite.set_selected(True)
+    all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
+                          parallel=False, callback_func=test_run_print_callback)
 #    
 #    for pj in all_tests.projects:
 #        print pj.name, pj.get_state_str()

@@ -70,7 +70,7 @@ def get_background_color(state):
         if state.old: col = MyColors.darkishGreen
         
     elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED) \
-         or state == test_info.TestResult.SEGMENTATION_FAULT:
+         or state == test_info.TestResult.ABORTED:
         col = QColor(Qt.red)
         if state.old: col = QColor( 200, 50, 50 )
         
@@ -104,6 +104,9 @@ class TreeItemBase(object):
 
     def appendChild(self, item):
         self.childItems.append(item)
+        
+    def clearChildren(self):
+        self.childItems = []
 
     def child(self, row):
         return self.childItems[row]
@@ -373,16 +376,37 @@ class TestTreeModel(QtCore.QAbstractItemModel):
     def update_suite(self, suite):
         """Updates the data for only the given suite. """
         # Index of the project
-        (project_indx, project_item) = self.get_project( suite.get_parent().name )
+        (project_index, project_item) = self.get_project( suite.get_parent().name )
         num_suites = project_item.childCount()
-        for i in xrange(num_suites):
-            if project_item.child(i).contents.name == suite.name:
-                # Matching suite name in the same project name
-                topLeft = self.index(i, 0, project_indx)
-                bottomRight = self.index( i, 2, project_indx)
-                self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
-                # Only update one place
-                return
+        if suite.contents_changed:
+            for x in xrange(num_suites):
+                suite_index = self.index(0,0, project_index)
+                if self.data(suite_index, Qt.UserRole).get_fullname() == suite.get_fullname():
+                    suite_item = suite_index.internalPointer()
+                    # Something was modified in the number of suites
+                    #print "Changing the contents of ", suite.get_fullname()
+                    # Just remove everything. That is simplest
+                    self.beginRemoveRows(suite_index, 0, suite_item.childCount()-1)
+                    suite_item.clearChildren()
+                    self.endRemoveRows()
+                    # Now we add everything back.
+                    self.beginInsertRows(suite_index, 0, len(suite.tests)-1)
+                    for test in suite.tests:
+                        test_item = TreeItemSingle(test, suite_item)
+                        suite_item.appendChild(test_item)
+                    self.endInsertRows()
+                    break
+                
+        else:
+            # Just update the data
+            for i in xrange(num_suites):
+                if project_item.child(i).contents.name == suite.name:
+                    # Matching suite name in the same project name
+                    topLeft = self.index(i, 0, project_index)
+                    bottomRight = self.index( i, 2, project_index)
+                    self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+                    # Only update one place
+                    return
 
 
     #----------------------------------------------------------------------------------
@@ -479,42 +503,6 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                     test_indx = self.index(k, 0, suite_indx)
                     # Sets it as checked.
                     self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole);
-        
-                
-#        
-#    def searchModel(self, person):
-#        '''
-#        get the modelIndex for a given appointment
-#        '''
-#        def searchNode(node):
-#            '''
-#            a function called recursively, looking at all nodes beneath node
-#            '''
-#            for child in node.childItems:
-#                if person == child.person:
-#                    index = self.createIndex(child.row(), 0, child)
-#                    return index
-#                    
-#                if child.childCount() > 0:
-#                    result = searchNode(child)
-#                    if result:
-#                        return result
-#        
-#        retarg = searchNode(self.parents[0])
-#        print retarg
-#        return retarg
-#            
-#    def find_GivenName(self, fname):
-#        app = None
-#        for person in self.people:
-#            if person.fname == fname:
-#                app = person
-#                break
-#        if app != None:
-#            index = self.searchModel(app)
-#            return (True, index)            
-#        return (False, None)
-
 
 
 class TreeFilterProxyModel(QSortFilterProxyModel):

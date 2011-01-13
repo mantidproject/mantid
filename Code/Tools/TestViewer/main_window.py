@@ -345,7 +345,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             if isinstance(obj, TestSuite):
                 self.model.update_suite(obj)
             elif isinstance(obj, TestProject):
-                self.model.update_project(obj.name)
+                # Updating the project is now redundant since the test status string is made dynamically
+                pass
+                #self.model.update_project(obj.name)
             elif isinstance(obj, basestring):
                 # String was returned
                 if obj == test_info.MSG_ALL_BUILDS_SUCCESSFUL:
