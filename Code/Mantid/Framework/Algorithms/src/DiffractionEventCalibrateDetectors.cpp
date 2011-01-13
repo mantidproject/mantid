@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -224,7 +225,6 @@ namespace Algorithms
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
     const double peakHeight = *it;
     const double peakLoc = outputW->readX(0)[it - yValues.begin()];
-    std::cout << x <<" "<< y <<" "<< z <<" "<< rotx <<" "<< roty <<" "<< rotz <<" "<<peakHeight <<" "<<peakLoc<<"\n";
 
     IAlgorithm_sptr alg6 = createSubAlgorithm("MoveInstrumentComponent");
     alg6->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
@@ -307,10 +307,9 @@ namespace Algorithms
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );*/
 
-    declareProperty("DetectorName","","Detector to move");
 
     BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
-    declareProperty("MaxIterations", 500, mustBePositive,
+    declareProperty("MaxIterations", 10, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
 
     // Disable default gsl error handler (which is to call abort!)
@@ -340,101 +339,121 @@ namespace Algorithms
     if (!inst)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
+    //Build a list of Rectangular Detectors
+    std::vector<boost::shared_ptr<RectangularDetector> > detList;
+    for (int i=0; i < inst->nelements(); i++)
+    {
+      boost::shared_ptr<RectangularDetector> det;
+      boost::shared_ptr<ICompAssembly> assem;
+
+      det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+     if (det)
+        detList.push_back(det);
+      else
+      {
+        //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+        // We are not doing a full recursive search since that will be very long for lots of pixels.
+        assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
+        if (assem)
+        {
+          for (int j=0; j < assem->nelements(); j++)
+          {
+            det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
+            if (det) detList.push_back(det);
+          }
+        }
+      }
+    }
+
+
     // set-up minimizer
 
-    std::string par[4];
-    std::string detname = getProperty("DetectorName");
     std::string inname = getProperty("InputWorkspace");
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
     std::string instname = inst->getName();
-    par[0]=detname;
-    par[1]=inname;
-    par[2]=outname;
-    par[3]=instname;
-    const gsl_multimin_fminimizer_type *T =
+    PARALLEL_FOR1(matrixInWS)
+    for (int det=0; det < detList.size(); det++)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      std::string par[4];
+      par[0]=detList[det]->getName();
+      par[1]=inname;
+      par[2]=outname;
+      par[3]=instname;
+      const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = NULL;
-    gsl_vector *ss, *x;
-    gsl_multimin_function minex_func;
+      gsl_multimin_fminimizer *s = NULL;
+      gsl_vector *ss, *x;
+      gsl_multimin_function minex_func;
 
+      // finally do the fitting
 
-    // finally do the fitting
-
-    int nopt = 6;
-    int iter = 0;
-    int status = 0;
-    double size;
+      int nopt = 6;
+      int iter = 0;
+      int status = 0;
+      double size;
  
-    /* Starting point */
-    x = gsl_vector_alloc (nopt);
-    gsl_vector_set (x, 0, 0.0);
-    gsl_vector_set (x, 1, 0.0);
-    gsl_vector_set (x, 2, 0.0);
-    gsl_vector_set (x, 3, 0.0);
-    gsl_vector_set (x, 4, 0.0);
-    gsl_vector_set (x, 5, 0.0);
+      /* Starting point */
+      x = gsl_vector_alloc (nopt);
+      gsl_vector_set (x, 0, 0.0);
+      gsl_vector_set (x, 1, 0.0);
+      gsl_vector_set (x, 2, 0.0);
+      gsl_vector_set (x, 3, 0.0);
+      gsl_vector_set (x, 4, 0.0);
+      gsl_vector_set (x, 5, 0.0);
 
-    /* Set initial step sizes to 0.1 */
-    ss = gsl_vector_alloc (nopt);
-    gsl_vector_set_all (ss, 0.1);
+      /* Set initial step sizes to 0.1 */
+      ss = gsl_vector_alloc (nopt);
+      gsl_vector_set_all (ss, 0.1);
 
-    /* Initialize method and iterate */
-    minex_func.n = nopt;
-    minex_func.f = &Mantid::Algorithms::gsl_costFunction;
-    minex_func.params = &par;
+      /* Initialize method and iterate */
+      minex_func.n = nopt;
+      minex_func.f = &Mantid::Algorithms::gsl_costFunction;
+      minex_func.params = &par;
 
-    s = gsl_multimin_fminimizer_alloc (T, nopt);
-    gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
+      s = gsl_multimin_fminimizer_alloc (T, nopt);
+      gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
 
-    Progress prog(this,0.0,1.0,maxIterations);
-    do
-    {
-      iter++;
-      status = gsl_multimin_fminimizer_iterate(s);
-
-      if (status)
-         break;
-
-      size = gsl_multimin_fminimizer_size (s);
-      status = gsl_multimin_test_size (size, 1e-2);
-      prog.report();
-
-      if (status == GSL_SUCCESS)
+      //Progress prog(this,0.0,1.0,maxIterations);
+      do
       {
-           printf ("converged to minimum at\n");
+        iter++;
+        status = gsl_multimin_fminimizer_iterate(s);
+
+        if (status)
+          break;
+
+        size = gsl_multimin_fminimizer_size (s);
+        status = gsl_multimin_test_size (size, 1e-2);
+        //prog.report();
+
       }
+      while (status == GSL_CONTINUE && iter < maxIterations && s->fval != -0.000 );
 
-      printf ("%5d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e f() = %7.3f size = %.3f\n",
-              status,
-              gsl_vector_get (s->x, 0),
-              gsl_vector_get (s->x, 1),
-              gsl_vector_get (s->x, 2),
-              gsl_vector_get (s->x, 3),
-              gsl_vector_get (s->x, 4),
-              gsl_vector_get (s->x, 5),
-              s->fval, size);
+      // Output summary to log file
+
+      std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
+
+      g_log.information() << "Detector = " << det << "\n" <<
+        "Method used = " << "Simplex" << "\n" <<
+        "Iteration = " << iter << "\n" <<
+        "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n" <<
+        "Chi^2/DoF = " << s->fval << "\n";
+      g_log.information() << "Move (X)   = " << gsl_vector_get (s->x, 0) << "  \n";
+      g_log.information() << "Move (Y)   = " << gsl_vector_get (s->x, 1) << "  \n";
+      g_log.information() << "Move (Z)   = " << gsl_vector_get (s->x, 2) << "  \n";
+      g_log.information() << "Rotate (X) = " << gsl_vector_get (s->x, 3) << "  \n";
+      g_log.information() << "Rotate (Y) = " << gsl_vector_get (s->x, 4) << "  \n";
+      g_log.information() << "Rotate (Z) = " << gsl_vector_get (s->x, 5) << "  \n";
+
+
+      // clean up dynamically allocated gsl stuff
+      gsl_vector_free(x);
+      gsl_vector_free(ss);
+      gsl_multimin_fminimizer_free (s);
+      PARALLEL_END_INTERUPT_REGION
     }
-    while (status == GSL_CONTINUE && iter < maxIterations);
-
-    // Output summary to log file
-
-    std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
-
-    /*g_log.information() << "Method used = " << "Simplex" << "\n" <<
-      "Iteration = " << iter << "\n" <<
-      "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n" <<
-      "Chi^2/DoF = " << s->fval << "\n";
-    std::string parameterName[3] = {"X","Y","Z"};
-    for (int i = 0; i < nopt; i++)
-    {
-      g_log.information() << parameterName[i] << " = " << gsl_vector_get (s->x, i) << "  \n";
-    }*/
-
-
-    // clean up dynamically allocated gsl stuff
-    gsl_vector_free(x);
-    gsl_vector_free(ss);
-    gsl_multimin_fminimizer_free (s);
+    PARALLEL_CHECK_INTERUPT_REGION
 
     return;
   }

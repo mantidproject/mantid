@@ -316,7 +316,7 @@ void AlignDetectors::exec()
  */
 void AlignDetectors::execEvent()
 {
-  g_log.information("Processing event workspace");
+  //g_log.information("Processing event workspace");
 
   // the calibration information is already read in at this point
 

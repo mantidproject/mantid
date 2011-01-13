@@ -286,7 +286,7 @@ void DiffractionFocussing2::execEvent()
 
   //BUT! We want to use all groups, even if no pixels ever refer to them.
   nGroups = maxgroup_in_file+1;
-  g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
+  //g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   //Flag to determine whether the X for a group has been set
   std::vector<bool> flags(nGroups,true);
@@ -511,7 +511,7 @@ void DiffractionFocussing2::determineRebinParameters()
     step = (log(Xmax) - log(Xmin)) / nPoints;
     mess << "Found Group:" << ((*gpit).first) << "(Xmin,Xmax,log step):" << ((*gpit).second).first
         << "," << ((*gpit).second).second << "," << step;
-    g_log.information(mess.str());
+    //g_log.information(mess.str());
     mess.str("");
 
     //Build up the X vector.

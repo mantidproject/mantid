@@ -81,9 +81,9 @@ namespace Mantid
         if (eventOutW == eventW)
         {
           // This only sets the X axis. Actual rebinning will be done upon data access.
-          g_log.information() << "Setting new X bins in place in EventWorkspace " << eventW->getName() << ".\n";
+          //g_log.information() << "Setting new X bins in place in EventWorkspace " << eventW->getName() << ".\n";
           eventOutW->setAllX(XValues_new);
-          g_log.information("eventOutW->setAllX is complete.");
+          //g_log.information("eventOutW->setAllX is complete.");
         }
         else
         {
