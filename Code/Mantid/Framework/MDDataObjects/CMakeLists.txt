@@ -11,6 +11,7 @@ src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
 src/MDWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
+src/Events/MDEventWorkspace.cpp
 )
 
 # Header files
@@ -27,6 +28,7 @@ inc/MDDataObjects/MDImage.h
 inc/MDDataObjects/MDImageDatatypes.h
 inc/MDDataObjects/MDWorkspace.h
 inc/MDDataObjects/MD_FileTestDataGenerator.h
+inc/MDDataObjects/Events/MDPoint.h
 )
 
 # Test files. Other source files required.
@@ -39,7 +41,7 @@ set ( GMOCK_TEST_FILES
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
-# test/MDPointTest.h  does not works on win
+test/MDPointTest.h   # does not works on win
 test/MDWorkspaceTest.h
 )
 

@@ -32,7 +32,7 @@ public:
         f_names[1] = "tmp_data_1.sqw";
         // create temporary files
         for(size_t i=0;i<f_names.size();i++){
-            std::ofstream tmp_file(f_names[i]);
+            std::ofstream tmp_file(f_names[i].c_str());
             tmp_file.close();
         }
         // get the file name which is not among the above
