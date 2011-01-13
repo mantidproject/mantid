@@ -129,7 +129,7 @@ avtMDFileReaderFileFormat::FreeUpResources(void)
 void
 avtMDFileReaderFileFormat::PopulateDatabaseMetaData(avtDatabaseMetaData *md, int timeState)
 {
-   
+
 
   avtMeshMetaData *mmd = new avtMeshMetaData;
   mmd->name = "sqw";
@@ -137,6 +137,9 @@ avtMDFileReaderFileFormat::PopulateDatabaseMetaData(avtDatabaseMetaData *md, int
   mmd->topologicalDimension =3;
   mmd->meshType = AVT_CURVILINEAR_MESH;
   mmd->numBlocks = 1;
+  mmd->xLabel = m_executor.getXAxisName();
+  mmd->yLabel = m_executor.getYAxisName();
+  mmd->zLabel = m_executor.getZAxisName();
   md->Add(mmd);
 
   avtScalarMetaData *smd = new avtScalarMetaData;

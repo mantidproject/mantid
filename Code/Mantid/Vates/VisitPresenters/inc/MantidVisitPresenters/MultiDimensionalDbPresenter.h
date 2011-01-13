@@ -73,6 +73,15 @@ public:
   /// Gets the number of timesteps in the workspace.
   int getNumberOfTimesteps() const;
 
+  /// Get x axis name so that it may be applied to labels.
+  std::string getXAxisName() const;
+
+  /// Get y axis name so that it may be applied to labels.
+  std::string getYAxisName() const;
+
+  /// Get z axis name so that it may be applied to labels.
+  std::string getZAxisName() const;
+
   /// Destructor
   ~MultiDimensionalDbPresenter();
 

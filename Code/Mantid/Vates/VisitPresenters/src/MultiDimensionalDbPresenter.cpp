@@ -51,6 +51,30 @@ void MultiDimensionalDbPresenter::verifyExecution() const
   }
 }
 
+std::string MultiDimensionalDbPresenter::getXAxisName() const
+{
+  //Sanity check. Must run execution sucessfully first.
+  verifyExecution();
+
+  return m_MDWorkspace->getGeometry()->getXDimension()->getDimensionId();
+}
+
+std::string MultiDimensionalDbPresenter::getYAxisName() const
+{
+  //Sanity check. Must run execution sucessfully first.
+  verifyExecution();
+
+  return m_MDWorkspace->getGeometry()->getYDimension()->getName();
+}
+
+std::string MultiDimensionalDbPresenter::getZAxisName() const
+{
+  //Sanity check. Must run execution sucessfully first.
+  verifyExecution();
+
+  return m_MDWorkspace->getGeometry()->getZDimension()->getName();
+}
+
 vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
 {
   using namespace Mantid::MDDataObjects;

@@ -127,6 +127,7 @@ QvisRebinningCutterWindow::~QvisRebinningCutterWindow()
 void
 QvisRebinningCutterWindow::CreateWindowContents()
 {
+  std::cout << "create windo contents" << std::endl;
     QGridLayout *mainLayout = new QGridLayout();
     topLayout->addLayout(mainLayout);
 
@@ -250,7 +251,7 @@ QvisRebinningCutterWindow::CreateWindowContents()
 void
 QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 {
-
+  std::cout << "update window" << std::endl;
     for(int i = 0; i < atts->NumAttributes(); ++i)
     {
         if(!doAll)
@@ -465,6 +466,7 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
     }
     if(which_widget == RebinningCutterAttributes::ID_UnstructuredGrid || doAll)
     {
+      std::cout << "atts->SetUseUnStructuredGrid" << std::endl;
            atts->SetUseUnStructuredGrid(unstructCheckBox->isChecked());
     }
 

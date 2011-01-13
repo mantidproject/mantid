@@ -97,6 +97,8 @@ public:
     void SetDimensionZ(int dimensionZ_);
     void SetDimensiont(int dimensiont_);
     void SetUseUnStructuredGrid(bool useUnstructedGrid);
+    virtual bool CreateNode(DataNode *node, bool completeSave, bool forceAdd);
+    virtual void SetFromNode(DataNode *node);
 
     // Property getting methods
     double GetOriginX() const;

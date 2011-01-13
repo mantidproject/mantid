@@ -58,7 +58,6 @@
 
 void RebinningCutterAttributes::Init()
 {
-
     RebinningCutterAttributes::SelectAll();
 }
 
@@ -92,6 +91,16 @@ void RebinningCutterAttributes::Copy(const RebinningCutterAttributes &obj)
     isUnstructured = obj.isUnstructured;
     RebinningCutterAttributes::SelectAll();
 }
+
+bool RebinningCutterAttributes::CreateNode(DataNode *node, bool completeSave, bool forceAdd)
+{
+  return forceAdd;
+}
+
+void RebinningCutterAttributes::SetFromNode(DataNode *node)
+{
+}
+
 
 // Type map format string
 const char *RebinningCutterAttributes::TypeMapFormatString = REBINNINGCUTTERATTRIBUTES_TMFS;

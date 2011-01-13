@@ -15,8 +15,9 @@
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
 #include <vtkDataSet.h>
-#include <vtkDataSet.h>
+#include <vtkStructuredGrid.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -45,7 +46,8 @@ private:
       using namespace Mantid::Geometry;
       using Mantid::VATES::DimensionVec;
       using Mantid::VATES::Dimension_sptr;
-      RebinningCutterPresenter presenter(in_ds, 1);
+
+      RebinningCutterPresenter presenter;
 
       DimensionVec vec;
       MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
@@ -69,9 +71,9 @@ private:
       vec.push_back(dimZ);
       vec.push_back(dimT);
 
-      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin);
+      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin, in_ds);
 
-      vtkDataSet *ug = presenter.applyReductionKnowledge("signal", false);
+      vtkDataSet *ug = presenter.createVisualDataSet("signal", false, 1);
 
       in_ds->Delete();
       return ug;
@@ -226,7 +228,7 @@ vtkDataSet* constructInputDataSet()
 {
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
   dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
   return dataset;
 }
@@ -236,8 +238,6 @@ public:
 //Simple schenario testing end-to-end working of this presenter.
 void testExecution()
 {
-  std::string input;
-  std::cin >> input;
   //Create an input dataset with the field data.
     vtkDataSet* in_ds = constructInputDataSet();
 
@@ -266,14 +266,14 @@ void testExecutionInChainedSchenario()
 void testgetMetaDataID()
 {
 
-  TSM_ASSERT_EQUALS("The expected id for the slicing metadata was not found", "1", RebinningCutterPresenter::metaDataId);
+  TSM_ASSERT_EQUALS("The expected id for the slicing metadata was not found", "1", XMLDefinitions::metaDataId);
 }
 
 
 void testMetaDataToFieldData()
 {
   std::string testData = "<test data/>%s";
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
 
   vtkFieldData* fieldData = vtkFieldData::New();
   vtkCharArray* charArray = vtkCharArray::New();
@@ -293,7 +293,7 @@ void testMetaDataToFieldData()
 void testMetaDataToFieldDataWithEmptyFieldData()
 {
   std::string testData = "<test data/>%s";
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
 
   vtkFieldData* emptyFieldData = vtkFieldData::New();
   metaDataToFieldData(emptyFieldData, testData.c_str() , id.c_str() );
@@ -308,7 +308,7 @@ void testMetaDataToFieldDataWithEmptyFieldData()
 void testFieldDataToMetaData()
 {
   std::string testData = "test data";
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
 
   vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
 
@@ -321,7 +321,7 @@ void testFindExistingRebinningDefinitions()
 {
   using namespace Mantid::API;
   using namespace Mantid::MDAlgorithms;
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
   vtkDataSet* dataset = constructInputDataSet();
 
   ImplicitFunction* func = findExistingRebinningDefinitions(dataset, id.c_str());
@@ -338,17 +338,14 @@ void testNoExistingRebinningDefinitions()
   using namespace Mantid::API;
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-
-  ImplicitFunction* func = findExistingRebinningDefinitions(dataset, RebinningCutterPresenter::metaDataId.c_str());
-
-  TSM_ASSERT("There were no previous definitions carried through.", NULL == func);
+  TSM_ASSERT_THROWS("There were no previous definitions carried through. Should have thrown.", findExistingRebinningDefinitions(dataset, XMLDefinitions::metaDataId.c_str()), std::runtime_error);
 }
 
 
 void testConstructionWithoutValidOriginThrows()
 {
   using namespace Mantid::Geometry;
-  RebinningCutterPresenter presenter(vtkUnstructuredGrid::New(), 1);
+  RebinningCutterPresenter presenter;
   using Mantid::VATES::DimensionVec;
   using Mantid::VATES::Dimension_sptr;
 
@@ -366,22 +363,22 @@ void testConstructionWithoutValidOriginThrows()
   std::vector<double> badOrigin;
 
   TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
-      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, badOrigin), std::invalid_argument);
+      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, badOrigin, vtkStructuredGrid::New()), std::invalid_argument);
 }
 
-void testApplyReductionThrows()
+void testCreateVisualDataSetThrows()
 {
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
 
-    Mantid::VATES::RebinningCutterPresenter presenter(vtkUnstructuredGrid::New(), 1);
+    Mantid::VATES::RebinningCutterPresenter presenter;
 
-    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.applyReductionKnowledge("", false), std::runtime_error);
+    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.createVisualDataSet("", false,1), std::runtime_error);
 }
 
 void testFindWorkspaceName()
 {
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string name = findExistingWorkspaceNameFromXML(dataset, id.c_str());
@@ -391,7 +388,7 @@ void testFindWorkspaceName()
 
 void testFindWorkspaceLocation()
 {
-  std::string id = RebinningCutterPresenter::metaDataId;
+  std::string id = XMLDefinitions::metaDataId;
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string location = findExistingWorkspaceLocationFromXML(dataset, id.c_str());
@@ -402,7 +399,7 @@ void testFindWorkspaceLocation()
 void testFindWorkspaceNameThrows()
 {
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  RebinningCutterPresenter::metaDataId;
+  std::string id =  XMLDefinitions::metaDataId;
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceNameFromXML(dataset, id.c_str()), std::runtime_error);
@@ -411,10 +408,50 @@ void testFindWorkspaceNameThrows()
 void testFindWorkspaceLocationThrows()
 {
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  RebinningCutterPresenter::metaDataId;
+  std::string id =  XMLDefinitions::metaDataId;
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocationFromXML(dataset, id.c_str()), std::runtime_error);
+}
+
+void testGetXDimension()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+  Mantid::VATES::Dimension_sptr xDimension = presenter.getXDimensionFromXML(dataSet);
+  TSM_ASSERT_EQUALS("Wrong number of x dimension bins", 5, xDimension->getNBins());
+  TSM_ASSERT_EQUALS("Wrong minimum x obtained", 5, xDimension->getMaximum());
+  TSM_ASSERT_EQUALS("Wrong maximum x obtained", -1.5, xDimension->getMinimum());
+}
+
+void testGetYDimension()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+    vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+    Mantid::VATES::Dimension_sptr yDimension = presenter.getYDimensionFromXML(dataSet);
+    TSM_ASSERT_EQUALS("Wrong number of y dimension bins", 5, yDimension->getNBins());
+    TSM_ASSERT_EQUALS("Wrong minimum y obtained", 6.6, yDimension->getMaximum());
+    TSM_ASSERT_EQUALS("Wrong maximum y obtained", -6.6, yDimension->getMinimum());
+}
+
+void testGetZDimension()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+  Mantid::VATES::Dimension_sptr zDimension = presenter.getZDimensionFromXML(dataSet);
+  TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, zDimension->getNBins());
+  TSM_ASSERT_EQUALS("Wrong minimum z obtained", -6.6, zDimension->getMinimum());
+  TSM_ASSERT_EQUALS("Wrong maximum z obtained", 6.6, zDimension->getMaximum());
+}
+
+void testGettDimension()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+  Mantid::VATES::Dimension_sptr tDimension = presenter.getTDimensionFromXML(dataSet);
+  TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, tDimension->getNBins());
+  TSM_ASSERT_EQUALS("Wrong minimum t obtained", 0, tDimension->getMinimum());
+  TSM_ASSERT_EQUALS("Wrong maximum t obtained", 150, tDimension->getMaximum());
 }
 
 

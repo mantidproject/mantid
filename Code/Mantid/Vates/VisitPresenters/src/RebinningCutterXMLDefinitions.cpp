@@ -15,6 +15,7 @@ const std::string XMLDefinitions::workspaceInstructionXMLTagEnd = "</MDInstructi
 const std::string XMLDefinitions::workspaceNameElementName = "MDWorkspaceName";
 const std::string XMLDefinitions::functionElementName = "Function";
 const std::string XMLDefinitions::workspaceLocationElementName = "MDWorkspaceLocation";
+const std::string XMLDefinitions::workspaceGeometryElementName = "DimensionSet";
 
 //Not strictly an xml definition. Consider moving.
 const std::string XMLDefinitions::metaDataId="1";

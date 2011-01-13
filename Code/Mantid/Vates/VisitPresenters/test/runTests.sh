@@ -29,7 +29,7 @@ python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo "Compiling the test executable..."
 
 #TODO set path properly
-mantid_libpath=~/workspace/Mantid/bin
+mantid_libpath=~/workspace/MantidDebug/bin
 #TODO set path properly
 vtk_libpath=/usr/local/2.1.1/linux-x86_64/lib
 #TODO set path properly

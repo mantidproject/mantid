@@ -93,26 +93,38 @@ protected:
     virtual avtContract_p ModifyContract(avtContract_p);
 private:
 
-    //Flag indicating that this is the first execution of the operator
+    /// Flag indicating that this is the first execution of the operator
     bool m_completeFirstExecute;
 
-    //Cached value for the geometry xml string. Used to determine changes to geometry in previous filters of the pipeline.
+    /// Cached value for the geometry xml string. Used to determine changes to geometry in previous filters of the pipeline.
     std::string m_cacheGeometryXML;
 
-    //Timestep value from contract.
+    /// Timestep value from contract.
     int m_timestep;
 
-    //Determines wheter the geometry has been changed in input filters from that used in the last execution.
+    /// Determines wheter the geometry has been changed in input filters from that used in the last execution.
     bool isInputConsistent(const std::string& inputGeometryXML);
 
-    //Set up execution from input dataset values.
-    Mantid::VATES::Dimension_sptr getDimensionX(bool bgetFromControls) const;
+    /// Name to apply to the x axis
+    std::string xAxisName;
 
-    Mantid::VATES::Dimension_sptr getDimensionY(bool bgetFromControls) const;
+    /// Name to apply to the y axis
+    std::string yAxisName;
 
-    Mantid::VATES::Dimension_sptr getDimensionZ(bool bgetFromControls) const;
+    /// Name to apply to the z axis
+    std::string zAxisName;
 
-    Mantid::VATES::Dimension_sptr getDimensiont(bool bgetFromControls) const;
+    /// Set up execution from input dataset values.
+    Mantid::VATES::Dimension_sptr getDimensionX(bool bgetFromControls, vtkDataSet* in_ds) const;
+
+    Mantid::VATES::Dimension_sptr getDimensionY(bool bgetFromControls, vtkDataSet* in_ds) const;
+
+    Mantid::VATES::Dimension_sptr getDimensionZ(bool bgetFromControls, vtkDataSet* in_ds) const;
+
+    Mantid::VATES::Dimension_sptr getDimensiont(bool bgetFromControls, vtkDataSet* in_ds) const;
+
+    /// Executor peforms the logic associated with running rebinning operations.
+    Mantid::VATES::RebinningCutterPresenter m_presenter;
 };
 
 #endif

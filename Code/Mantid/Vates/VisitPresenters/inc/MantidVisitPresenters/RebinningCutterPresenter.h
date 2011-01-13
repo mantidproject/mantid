@@ -12,6 +12,14 @@
 #include <boost/shared_ptr.hpp>
 #include <MantidVisitPresenters/RebinningXMLGenerator.h>
 
+namespace Poco
+{
+namespace XML
+{
+class XMLElement;
+}
+}
+
 namespace Mantid
 {
 namespace VATES
@@ -58,21 +66,20 @@ private:
   /// Implicit function representing current and historical operations
   boost::shared_ptr<Mantid::API::ImplicitFunction> m_function;
 
-  /// Rebining xml generator for serialising the current and historical operations.
-  RebinningXMLGenerator m_serializing;
-
-  vtkDataSet* m_inputDataSet;
+  /// Pointer to the rebinned workspace.
+  Mantid::MDDataObjects::MDWorkspace_sptr m_rebinnedWs;
 
   /// initalised flag
   bool m_initalized;
 
-  /// timestep
-  int m_timestep;
+  /// Serializer to create and pass on rebinning metadata.
+  RebinningXMLGenerator m_serializer;
+
 
 public:
 
 	/// Constructor
-	RebinningCutterPresenter(vtkDataSet* inputDataSet, int timestep);
+	RebinningCutterPresenter();
 
 	/// Destructor
 	~RebinningCutterPresenter();
@@ -90,18 +97,21 @@ public:
       const double width,
       const double height,
       const double depth,
-      std::vector<double>& origin);
+      std::vector<double>& origin, vtkDataSet* inputDataSet);
 
   /// Apply reduction knowledge to create a vtk dataset.
-  vtkDataSet* applyReductionKnowledge(const std::string& scalarName, bool isUnstructured);
+  vtkDataSet* createVisualDataSet(const std::string& scalarName, bool isUnstructured, int timestep);
 
-  static const std::string metaDataId;
+  Dimension_sptr getXDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
+  Dimension_sptr getYDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
+  Dimension_sptr getZDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
+  Dimension_sptr getTDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
 };
 
 //Non-member helper functions.
 
-  /// Rebin and generate a a visualisation image.
-  vtkDataSet* generateVisualImage(RebinningXMLGenerator serializingUtility, const std::string& scalarName, bool isUnstructured, const int timestep);
+  /// Rebin
+  Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility);
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkDataSet * out_ds,
@@ -113,11 +123,17 @@ public:
   /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
   Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
-  //Get the workspace location from the xmlstring.
+  //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
   std::string findExistingWorkspaceNameFromXML(vtkDataSet *in_ds, const char* id);
 
-  //Get the workspace location from the xmlstring.
+  //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
   std::string findExistingWorkspaceLocationFromXML(vtkDataSet *in_ds, const char* id);
+
+  //Get the workspace geometry from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
+  Poco::XML::Element* findExistingGeometryInformationFromXML(vtkDataSet* inputDataSet, const char* id);
+
+  //Read xml and buid string from inner contents
+  std::string readNestedNode(Poco::XML::Node* root);
 
   /// Converts field data into metadata xml/string.
   void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
@@ -136,11 +152,19 @@ public:
       double depth,
       std::vector<double>& origin);
 
+  vtkDataSet* generateVisualImage(Mantid::MDDataObjects::MDWorkspace_sptr rebinnedWs, const std::string& scalarName, bool isUnstructured, const int timestep);
+
   /// Create an unstructured vtk image, which is sparse and excludes empty signal values.
   vtkDataSet* generateVTKUnstructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
 
   /// Create a structured vtk image, which is essentially dense.
   vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
+
+  /// Helper method to get dimensions from a geometry xml element.
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement);
+
+  /// helper method to get a dimension from a dimension xmlelement.
+  Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML);
 
 }
 }

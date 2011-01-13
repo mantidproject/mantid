@@ -53,6 +53,7 @@ public:
   static const std::string workspaceNameElementName;
   static const std::string functionElementName;
   static const std::string workspaceLocationElementName;
+  static const std::string workspaceGeometryElementName;
 
   //An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
   static const std::string metaDataId;
