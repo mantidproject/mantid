@@ -28,8 +28,6 @@ elif platform.system() == 'Linux':
    myenv.Append(CPPPATH=opencascade_path + '/inc')
    myenv.Append(MYLIBDIRLIST=opencascade_path + '/lib64')
    myenv.Append(MYLIBDIRLIST=opencascade_path + '/lib')
-   myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib64')
-   myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib')
 
    # MG: On Ubuntu the pre-packaged OpenCascade resides in the location below. Adding this to the path
    # shouldn't have a harmful effect if it isn't there. The libraries are in standard locations

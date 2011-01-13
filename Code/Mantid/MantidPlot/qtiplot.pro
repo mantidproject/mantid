@@ -156,8 +156,6 @@ macx {
 
   LIBS += -Wl,-rpath,/opt/Mantid/bin
   LIBS += -Wl,-rpath,/opt/Mantid/plugins
-  LIBS += -Wl,-rpath,/opt/OpenCASCADE/lib64
-  LIBS += -Wl,-rpath,/opt/OpenCASCADE/lib
 }
 
   LIBS += -lgsl -lgslcblas
