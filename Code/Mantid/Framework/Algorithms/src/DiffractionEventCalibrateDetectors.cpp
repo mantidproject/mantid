@@ -253,10 +253,6 @@ namespace Algorithms
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );
-  /*declareProperty(
-    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "The name of the workspace to be created as the output of the algorithm." );*/
-
 
     BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
     declareProperty("MaxIterations", 10, mustBePositive,
@@ -399,7 +395,7 @@ namespace Algorithms
         "Method used = " << "Simplex" << "\n" <<
         "Iteration = " << iter << "\n" <<
         "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n" <<
-        "Minimize -PeakHeigth = " << s->fval << "\n";
+        "Minimize -PeakHeight = " << s->fval << "\n";
       g_log.information() << "Move (X)   = " << gsl_vector_get (s->x, 0) << "  \n";
       g_log.information() << "Move (Y)   = " << gsl_vector_get (s->x, 1) << "  \n";
       g_log.information() << "Move (Z)   = " << gsl_vector_get (s->x, 2) << "  \n";
