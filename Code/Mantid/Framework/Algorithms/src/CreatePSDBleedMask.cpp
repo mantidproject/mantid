@@ -149,10 +149,10 @@ namespace Mantid
       outputWorkspace->isDistribution(false);
       outputWorkspace->setYUnitLabel("MaskValue");
 
-      PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+//      PARALLEL_FOR2(inputWorkspace, outputWorkspace)
       for(int i = 0; i < numTubes; ++i )
       {
-	PARALLEL_START_INTERUPT_REGION
+//	PARALLEL_START_INTERUPT_REGION
 
 	TubeIndex::iterator current = tubeMap.begin();
 	std::advance(current, i);
@@ -161,7 +161,7 @@ namespace Mantid
 	if( mask )
 	{
 	  maskTube(tubeIndices, outputWorkspace);
-	  PARALLEL_ATOMIC
+//	  PARALLEL_ATOMIC
 	  ++numMasked;
 	}
 	else
@@ -169,9 +169,9 @@ namespace Mantid
 	  markAsPassed(tubeIndices, outputWorkspace);
 	}
       
-	PARALLEL_END_INTERUPT_REGION
+//	PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+//      PARALLEL_CHECK_INTERUPT_REGION
 
       g_log.information() << numMasked << " tube(s) failed the bleed tests.";
       if( numMasked > 0 )
@@ -232,8 +232,17 @@ namespace Mantid
 	  }
 	}
       }
-      if (top != topEnd - 1) throw std::runtime_error("top != topEnd - 1 in CreatePSDBleedMask::performBleedTest()");
-      if (bot == numSpectra - 1) throw std::runtime_error("bot == numSpectra - 1 in CreatePSDBleedMask::performBleedTest()");
+
+      if (top != topEnd ) 
+      {
+	g_log.error() << "Error in tube processing, loop variable has an unexpected value.\n";
+	throw std::runtime_error("top != topEnd in CreatePSDBleedMask::performBleedTest()");
+      }
+      if (bot != numSpectra) 
+      {
+	g_log.error() << "Error in tube processing, loop variable has an unexpected value.\n";
+	throw std::runtime_error("bot != numSpectra  in CreatePSDBleedMask::performBleedTest()");
+      }
       
       return false;
     }
@@ -270,19 +279,6 @@ namespace Mantid
 	workspace->dataY(*citr)[0] = 1.0;
 	workspace->dataE(*citr)[0] = 1.0;
       }
-    }
-
-    /**
-     * Run the CloneWorkspace algorithm
-     * @param workspace The input workspace to clone
-     */
-    MatrixWorkspace_sptr CreatePSDBleedMask::cloneWorkspace(MatrixWorkspace_sptr workspace)
-    {
-      double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
-      API::IAlgorithm_sptr cloner = createSubAlgorithm("CloneWorkspace", t0, t1);
-      cloner->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
-      cloner->execute();
-      return cloner->getProperty("OutputWorkspace");
     }
 
   }

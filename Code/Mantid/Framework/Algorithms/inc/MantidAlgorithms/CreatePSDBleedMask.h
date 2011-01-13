@@ -65,9 +65,6 @@ namespace Mantid
       /// Mark a tubes data values as passing the tests
       void markAsPassed(const std::vector<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
 
-      /// Run the CloneWorkspace algorithm
-      API::MatrixWorkspace_sptr cloneWorkspace(API::MatrixWorkspace_sptr workspace);
- 
       /// Maximum allowed rate
       double m_maxRate;
       /// Number of ignored pixels
