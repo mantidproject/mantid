@@ -27,9 +27,9 @@ public:
   {
       Mantid::API::FrameworkManager::Instance();
       LoadLogsFromSNSNexus ld;
-      std::string outws_name = "topaz_instrument";
+      std::string outws_name = "CNCS_instrument";
       ld.initialize();
-      ld.setPropertyValue("Filename","TOPAZ_900.nxs");
+      ld.setPropertyValue("Filename","CNCS_7860.nxs");
 
       //Create an empty workspace with some fake size, to start from.
       DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
@@ -48,33 +48,25 @@ public:
         prop = run.getLogData("Speed3");
         TS_ASSERT(prop);
         //TS_ASSERT_EQUALS( prop->value(), "60");
-        TS_ASSERT_EQUALS( prop->units(), "Phase,H");
+        TS_ASSERT_EQUALS( prop->units(), "Hz");
 
         prop = run.getLogData("PhaseRequest1");
         dProp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
         TS_ASSERT(dProp);
         val = dProp->nthValue(0);
-        TS_ASSERT_DELTA( val, 10914.857421875, 1e-6);
-        TS_ASSERT_EQUALS(prop->units(), "Phase,uS");
-
-        //NXPositioner
-        prop = run.getLogData("chi");
-        dProp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
-        val = dProp->nthValue(0);
-        TS_ASSERT_DELTA( val, 45.0, 1e-6);
-        TS_ASSERT_EQUALS(prop->units(), "degree");
+        TS_ASSERT_DELTA( val, 8798.7236, 1e-2);
+        TS_ASSERT_EQUALS(prop->units(), "microsecond");
 
         TimeSeriesProperty<double> * tsp;
 
         prop = run.getLogData("Phase1");
         tsp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
         TS_ASSERT(tsp);
-        TS_ASSERT_EQUALS(tsp->units(), "Phase,uS");
-        TS_ASSERT_EQUALS(tsp->realSize(), 1770);
-        TS_ASSERT_DELTA( tsp->nthValue(1), 10915, 20);
+        TS_ASSERT_EQUALS(tsp->units(), "microsecond");
+        TS_ASSERT_DELTA( tsp->nthValue(1), 8798.99, 2);
 
-        //The time diff between the 0th and 1st entry is 2.172 seconds
-        TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 2.17, 0.01);
+        //The time diff between the 0th and 1st entry is 2.328 seconds
+        TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 2.328, 0.01);
 
         //Now the stats
 
