@@ -227,4 +227,6 @@ if ( CXXTEST_FOUND )
   include_directories( ../TestHelpers/inc ../DataObjects/inc ../API/inc )
   target_link_libraries( GeometryTest Geometry TestHelpers )
   add_dependencies ( FrameworkTests GeometryTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET GeometryTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

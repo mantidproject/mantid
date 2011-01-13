@@ -61,17 +61,17 @@ set ( TEST_FILES test/LoadISISNexusTest.h
 		 test/SaveNXSPETest.h
 		 )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_NEXUS -DIN_NEXUS_CPP_LIBRARY )
-
 # Add the dependency on the nexus library
 find_package ( Nexus REQUIRED )
 include_directories ( ${NEXUS_INCLUDE_DIR} )
 
+add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
+
 # Add the target for this directory
 add_library ( Nexus ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus )
+set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus 
+                                         COMPILE_DEFINITIONS IN_MANTID_NEXUS )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Nexus PROPERTY FOLDER "Framework" )
 
@@ -84,4 +84,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( NexusTest ${TEST_FILES} )
   target_link_libraries( NexusTest Nexus DataHandling TestHelpers)
   add_dependencies ( FrameworkTests NexusTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET NexusTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

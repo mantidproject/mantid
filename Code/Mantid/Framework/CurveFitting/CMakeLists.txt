@@ -115,4 +115,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES} )
   target_link_libraries( CurveFittingTest CurveFitting DataHandling Nexus )
   add_dependencies ( FrameworkTests CurveFittingTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET CurveFittingTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

@@ -74,4 +74,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
   target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects TestHelpers)
   add_dependencies ( FrameworkTests PythonAPITest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET PythonAPITest PROPERTY FOLDER "FrameworkTests" )
 endif ()

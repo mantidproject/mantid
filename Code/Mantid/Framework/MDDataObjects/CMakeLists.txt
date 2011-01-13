@@ -45,13 +45,11 @@ test/MDPointTest.h   # does not works on win
 test/MDWorkspaceTest.h
 )
 
-
-add_definitions ( -DIN_MANTID_MDDATAOBJECTS )
-
 # Add the target for this directory
 add_library ( MDDataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( MDDataObjects PROPERTIES OUTPUT_NAME MantidMDDataObjects )
+set_target_properties ( MDDataObjects PROPERTIES OUTPUT_NAME MantidMDDataObjects 
+                                                 COMPILE_DEFINITIONS IN_MANTID_MDDATAOBJECTS )
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDDataObjects PROPERTY FOLDER "Framework" )
 # Find hdf5 libraries
@@ -90,6 +88,9 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
     target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} ${HDF5_LIBRARIES} )
   endif ()
-
+  
+  add_dependencies ( FrameworkTests MDDataObjectsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "FrameworkTests" )
 endif ()
 

@@ -54,7 +54,7 @@ set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
 set_property ( TARGET DataObjects PROPERTY FOLDER "Framework" )
 
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
-	  
+
 target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
@@ -62,4 +62,6 @@ if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )
   target_link_libraries( DataObjectsTest DataObjects TestHelpers )
   add_dependencies ( FrameworkTests DataObjectsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET DataObjectsTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

@@ -262,10 +262,10 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/BinaryOperationTest.h
 		 test/CalculateEfficiencyTest.h
 		 test/CalculateTransmissionBeamSpreaderTest.h
-		 test/CalculateTransmissionTest.h # TODO loads data in the constructor
+		 test/CalculateTransmissionTest.h
 		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
-		 test/CheckWorkspacesMatchTest.h # TODO loads data in the constructor
+		 test/CheckWorkspacesMatchTest.h
 		 test/CloneWorkspaceTest.h
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
@@ -389,4 +389,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests AlgorithmsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

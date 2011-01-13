@@ -99,12 +99,11 @@ test/PlaneImplicitFunctionTest.h
 test/WidthParameterParserTest.h
 )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_MDALGORITHMS )
 # Add the target for this directory
 add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms )
+set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms 
+                                                COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS )
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "Framework" )
 
@@ -143,4 +142,6 @@ if ( CXXTEST_FOUND )
     target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET MDAlgorithmsTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

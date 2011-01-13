@@ -47,9 +47,6 @@ set ( TEST_FILES test/AdvancedSearchTest.h
 		 test/MyDataSearchTest.h
 		 test/SearchTest.h )
 
-# For Windows:
-add_definitions ( -DIN_MANTID_ICAT )
-
 # Add ssl dependency
 find_package ( OpenSSL REQUIRED )
 include_directories ( ${OPENSSL_INCLUDE_DIR} )
@@ -58,7 +55,8 @@ add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 # Add the target for this directory
 add_library ( ICat ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat )
+set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat 
+                                        COMPILE_DEFINITIONS IN_MANTID_ICAT )
 # Add to the 'Framework' group in VS
 set_property ( TARGET ICat PROPERTY FOLDER "Framework" )
 
@@ -70,4 +68,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
   target_link_libraries( ICatTest ICat )
   add_dependencies ( FrameworkTests ICatTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET ICatTest PROPERTY FOLDER "FrameworkTests" )
 endif ()

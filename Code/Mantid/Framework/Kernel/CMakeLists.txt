@@ -195,12 +195,13 @@ set_property ( TARGET Kernel PROPERTY PRIVATE_HEADER inc/MantidKernel/TestChanne
 
 target_link_libraries ( Kernel ${MANTIDLIBS} )
 
-
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   include_directories ( inc test )
   target_link_libraries( KernelTest Kernel)
   add_dependencies ( FrameworkTests KernelTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET KernelTest PROPERTY FOLDER "FrameworkTests" )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 

@@ -196,4 +196,6 @@ if ( CXXTEST_FOUND )
     target_link_libraries( APITest API TestHelpers )
   endif()
   add_dependencies ( FrameworkTests APITest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET APITest PROPERTY FOLDER "FrameworkTests" )
 endif ()

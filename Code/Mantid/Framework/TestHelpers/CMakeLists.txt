@@ -16,6 +16,8 @@ add_definitions ( -DIN_MANTID_TESTHELPERS )
 add_library ( TestHelpers EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( TestHelpers PROPERTIES OUTPUT_NAME MantidTestHelpers )
+# Add to the 'FrameworkTests' group in VS
+set_property ( TARGET TestHelpers PROPERTY FOLDER "FrameworkTests" )
 
 # Set library dependencies
 # Bring in DataHandling
