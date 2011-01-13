@@ -21,13 +21,13 @@ using namespace Mantid::Kernel;
 class LoadSNSNexusTest : public CxxTest::TestSuite
 {
 public:
-  void xtestTopaz()
+  void xtestCNCS()
   {
       Mantid::API::FrameworkManager::Instance();
       LoadSNSNexus ld;
-      std::string outws_name = "topaz_900";
+      std::string outws_name = "CNCS_7860";
       ld.initialize();
-      ld.setPropertyValue("Filename","../../../../Test/Nexus/SNS/TOPAZ_900.nxs");
+      ld.setPropertyValue("Filename","CNCS_7860.nxs");
       ld.setPropertyValue("OutputWorkspace",outws_name);
       TS_ASSERT_THROWS_NOTHING(ld.execute());
       TS_ASSERT(ld.isExecuted());
