@@ -15,7 +15,7 @@ CpRebinning4x3StructHR::CpRebinning4x3StructHR(const MDDataObjects::MDWorkspace_
                  const MDDataObjects::MDWorkspace_sptr  & targetWS):
 CpRebinningNx3(sourceWS,pTargetDescr,targetWS)
 {
-    if(dynamic_cast<MD_File_hdfMatlab4D *>(this->pSourceDataReader)==0){
+    if(boost::dynamic_pointer_cast<MD_File_hdfMatlab4D>(this->pSourceDataPoints->getFileReader())==0){
         this->bin_log.error()<<" CpRebinning4x3StructHR can not work with any reader except MD_File_hdfMatlab4D\n";
         throw(std::invalid_argument("Wrong data reader for this kind of rebinning"));
     }
@@ -28,15 +28,15 @@ bool
 CpRebinning4x3StructHR::rebin_data_chunk()
 {
 
-      n_starting_cell  = pSourceDataReader->read_pix_subset(*pSourceImg,preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
-      n_pixels_read   += n_pix_in_buffer;
+    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+    n_pixels_read   += n_pix_in_buffer;
       
-      n_pixels_selected+= rebin_4x3struct_dataset();
-      if(n_starting_cell==preselected_cells.size()){
-          return false; // no more data left to process
-      }
-      // more data are still availible
-      return true;
+    n_pixels_selected+= rebin_4x3struct_dataset();
+    if(n_starting_cell==preselected_cells.size()){
+         return false; // no more data left to process
+    }
+    // more data are still availible
+    return true;
 
 }
 //
@@ -73,7 +73,7 @@ CpRebinning4x3StructHR::rebin_4x3struct_dataset()
 
   size_t i,indl;
   int    indX,indY,indZ,indE;
-  double s,err;
+//  double s,err;
   size_t nDimX(strides[this->rec_dim_indexes[0]]),
          nDimY(strides[this->rec_dim_indexes[1]]),
          nDimZ(strides[this->rec_dim_indexes[2]]),

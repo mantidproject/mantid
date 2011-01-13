@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <stdint.h>
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
@@ -52,8 +53,9 @@ namespace Mantid
     {
     public:
       
-      /// Get the number of points associated with the workspace.
-      virtual unsigned long getNPoints() const = 0;
+      /// Get the number of points associated with the workspace; For MD workspace it is number of points contributing into the workspace
+        // TODO: -- what is its meaning for the matrix workspace, may be different or the same? different logic of the operations
+      virtual uint64_t getNPoints() const = 0;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;

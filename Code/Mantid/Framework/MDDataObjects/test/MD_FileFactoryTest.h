@@ -20,27 +20,41 @@ class MD_FileFactoryTest :    public CxxTest::TestSuite
 {
 
 public:
-	void testFormatNotImplemented(){
+	void testFormatImplemented(){
 		std::auto_ptr<IMD_FileFormat> testFormat;
 		TSM_ASSERT_THROWS_NOTHING("test data format should be initiated without throwing",testFormat=MD_FileFormatFactory::getFileReader("testFile",test_data));
 	
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader, should be test data ",dynamic_cast<MD_FileTestDataGenerator*>(testFormat.get())!=0);	
 	}
+    void testGetUniqueFileName(){
+        std::vector<std::string> f_names(2);
+        f_names[0] = "tmp_data_0.sqw";
+        f_names[1] = "tmp_data_1.sqw";
+        // create temporary files
+        for(size_t i=0;i<f_names.size();i++){
+            std::ofstream tmp_file(f_names[i]);
+            tmp_file.close();
+        }
+        // get the file name which is not among the above
+        std::string new_tmp_file = get_unique_tmp_fileName();
+
+        TSM_ASSERT_EQUALS("next temporary file has to be tmp_data_2.sqw but it is not it","tmp_data_2.sqw",new_tmp_file);
+       // delete temporary files (not to leave rubbish)
+        for(size_t i=0;i<f_names.size();i++){
+            std::remove(f_names[i].c_str());
+        }
+ 
+    }
 	void testReturnsNewHDFV1format(){
 		std::auto_ptr<IMD_FileFormat> newFormat;
-		// new file format has not been implemented so throws rubbish
-		try
-		{
-		  MD_FileFormatFactory::getFileReader("testFile");
-		  TSM_ASSERT("MD_FileFormatFactory::getFileReader() should have thrown.", false);
-		}
-		catch (...)
-		{
-		  //Some kind of exception thrown. good.
-		}
 
-		//TS_ASSERT_THROWS_NOTHING(newFormat=MD_FileFormatFactory::getFileReader("testFile"));
-		//TSM_ASSERT("FileFormat factory returned a pointer to a wrong file format ",dynamic_cast<MD_File_hdfV1*>(newFormat.get())!=0);
+        std::string new_sqw_file("newDataFile.sqw");
+
+        TS_ASSERT_THROWS_NOTHING(newFormat=MD_FileFormatFactory::getFileReader(best_fit,new_sqw_file.c_str()));
+		TSM_ASSERT("FileFormat factory should returned a pointer to new file format ",dynamic_cast<MD_File_hdfV1*>(newFormat.get())!=0);
+        // clear the pointer and deleted test file for future tests not to fail or work independently;
+        newFormat.reset();
+        std::remove(new_sqw_file.c_str());
 	}
 	void testReturnsMatlabReader(){
 		std::auto_ptr<IMD_FileFormat> oldFormat;

@@ -41,7 +41,7 @@ pTargetWS(TargetWS),
 pSourceImg(&(sourceWS->get_const_MDImage())),
 pSourceGeom(&(sourceWS->get_const_MDGeometry())),  
 pSourceImgData(pSourceImg->get_const_pData()),
-pSourceDataReader(&(sourceWS->get_const_FileReader())),
+pSourceDataPoints(&(sourceWS->get_const_MDDPoints())),
 pTargetDescr(pTargetDescr),
 n_preselected_pix(0)
 {

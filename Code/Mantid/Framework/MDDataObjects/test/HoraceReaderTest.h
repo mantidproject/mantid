@@ -116,7 +116,7 @@ public:
 		MDPointDescription defaultDescr;
 		boost::shared_ptr<MDImage const> emptyImg = boost::shared_ptr<MDImage const>(new MDImage());
 		MDDataPointsDescription pd(defaultDescr);
-		MDDataPoints points(emptyImg,pd);
+		MDDataPoints points(pd);
 		TSM_ASSERT_THROWS("You implemented the Horace all_pix reader, write test for it",pReader->read_pix(points),Kernel::Exception::NotImplementedError);
 	}
 	void testReadPixelsSelectionAll(){

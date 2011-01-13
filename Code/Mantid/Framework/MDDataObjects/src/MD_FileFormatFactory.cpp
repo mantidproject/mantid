@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <Poco/File.h>
 
 namespace Mantid
 {
@@ -38,11 +39,56 @@ MD_FileFormatFactory::getFileReader(const char *fileName,user_request rec)
 	return std::auto_ptr<IMD_FileFormat>(pFactory->select_file_reader(fileName,rec));
 }
 //
+std::auto_ptr<IMD_FileFormat> 
+MD_FileFormatFactory::getFileReader(user_request rec,const char *fileName)
+{
+    if(!pFactory)pFactory = new MD_FileFormatFactory();
+
+    // get test data;
+    if(rec == test_data){
+        if(fileName){
+           return std::auto_ptr<IMD_FileFormat>(pFactory->select_file_reader(fileName,rec));
+        }else{
+           return std::auto_ptr<IMD_FileFormat>(pFactory->select_file_reader("data4x3_50x50x50x50.sqw",rec));
+        }
+    }
+    // get actual file writer; if input file name exists, open exisgting and try to initiate file reader (writer);
+    if(fileName){
+          return getFileReader(fileName,rec);
+     }
+    // if there are no file name given, open a unique temporary file;
+
+    std::string unique_tmp_name = get_unique_tmp_fileName();
+
+    return getFileReader(fileName,rec);
+}
+// 
+std::string get_unique_tmp_fileName(void){
+
+    std::string defaultFileName("tmp_data_");
+    
+    int ic(0);
+    std::stringstream name_num;
+    name_num<<ic;
+    std::string file_name = defaultFileName+name_num.str()+".sqw";
+    Poco::File tmpFile(file_name);
+    while(tmpFile.exists()){
+        name_num.seekp(std::ios::beg);
+        ic++;
+        name_num<<ic;
+        file_name = defaultFileName+name_num.str()+".sqw";
+        tmpFile = file_name;
+    
+    } 
+    return  file_name;
+   
+}
+//
 IMD_FileFormat *
 MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
 {
 	if(rec == test_data){
-		f_log.error()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
+		f_log.information()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
         return (new MD_FileTestDataGenerator(file_name));
 	}
 
@@ -50,15 +96,14 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
     std::ifstream infile;
     infile.open(file_name);
     infile.close();
-    if (infile.fail()){
+    if (infile.fail()){  // new real file can be the new file format only;
 		std::ofstream outfile;
 		outfile.open(file_name);
 		if(outfile.fail()){
-			f_log.error()<<"MD_FileFactory: can not find or create file: "<<file_name<<std::endl;
+			f_log.error()<<"MD_FileFactory: can not open or create file: "<<file_name<<std::endl;
 			throw(Exception::FileError("MDData::select_file_reader: Error->can not found or open",file_name));
 		}else{
 			outfile.close();
-			std::remove(file_name);
 			return (new MD_File_hdfV1(file_name));
 		}
     }
@@ -69,8 +114,10 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
 			if(isHoraceFile(file_name)){
 				return (new HoraceReader::MD_FileHoraceReader(file_name));
 			}
-			f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
-            throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));
+            //HACK temporary return new file reader which will be hdf later
+            return (new MD_File_hdfV1(file_name));
+	/*		f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
+            throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));*/
         }else{
 			f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
             throw(Exception::FileError("MDData::select_file_reader: Error->unspecified hdf5 error ",file_name));

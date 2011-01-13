@@ -87,8 +87,8 @@ protected:
    // pointer to the MD array of source image points
     MDDataObjects::MD_image_point const *const pSourceImgData; 
 
-    /// pointer to the reader of the initial data -> TODO: - replace it with dataGetter from DataPixels
-    MDDataObjects::IMD_FileFormat       *const pSourceDataReader;
+    /// pointer to the class which provides MDDataPoints (DataPixels, events);
+    MDDataObjects::MDDataPoints        *const pSourceDataPoints;
     // pointer to the target geometry
     Geometry::MDGeometry                *      pTargetGeom;  
    // number of the cells in the target image 

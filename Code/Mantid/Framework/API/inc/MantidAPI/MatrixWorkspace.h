@@ -199,7 +199,7 @@ namespace Mantid
       const MaskList& maskedBins(const int& spectrumIndex) const;
 
       /// Gets the number of points available on the workspace.
-      virtual unsigned long getNPoints() const;
+      virtual uint64_t getNPoints() const;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;

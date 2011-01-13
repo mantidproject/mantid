@@ -34,15 +34,15 @@ bool
 CpRebinningNx3::rebin_data_chunk()
 {
 
-      n_starting_cell  = pSourceDataReader->read_pix_subset(*pSourceImg,preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
-      n_pixels_read   += n_pix_in_buffer;
+    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+    n_pixels_read   += n_pix_in_buffer;
       
-      n_pixels_selected+= rebin_Nx3dataset();
-      if(n_starting_cell==preselected_cells.size()){
+    n_pixels_selected+= rebin_Nx3dataset();
+    if(n_starting_cell==preselected_cells.size()){
           return false; // no more data left to process
-      }
+    }
       // more data are still availible
-      return true;
+    return true;
 
 }
 //

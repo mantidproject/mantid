@@ -214,8 +214,8 @@ public:
       Dim[1]=testData[i].q2;
       Dim[2]=testData[i].q3;
       Dim[3]=testData[i].En;
-      SE[0] =testData[i].S ;
-      SE[1] =testData[i].Err ;
+      SE[0] =(float)testData[i].S ;
+      SE[1] =(float)testData[i].Err ;
       Ind[0] =testData[i].iRun ;
       Ind[1] =testData[i].iPix ;
       Ind[2] =testData[i].iEn ;

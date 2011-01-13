@@ -23,7 +23,7 @@ namespace Mantid{
      boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData)
      {
 	   MDPointDescription descr;
-       return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(imageData,descr)); //TODO replace with some other factory call.
+       return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(descr)); //TODO replace with some other factory call.
      }
 
      //Seam method.
@@ -55,10 +55,11 @@ MDWorkspace::init(std::auto_ptr<IMD_FileFormat> pFile,
     // create new empty image form of its description and the basis
     this->m_spMDImage  = boost::shared_ptr<MDImage>(new MDImage(geomDescr,*m_spMDBasis));
     
-   	// temporary constructor for MD points--> have not been finished and ugly
-	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(m_spMDImage,pd));
+   	// constructor MD points-
+	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(pd));
+  
+    this->m_spDataPoints->initialize(m_spMDImage,m_spFile);
  
-
 }
 
 //
@@ -86,7 +87,9 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
    // MDDataPoints have to be constructed here and intiated later after the image is build and points need to be saved
    // fileManager has to be initated for writing workspace but this will happens only when saveWorkspace algorithm is 
    // called and new file name is known. Temporary file manager has to be created if and when datapoint writing is necessary;
-
+   MDDataPointsDescription pixDescr = SourceWorkspace->get_const_MDDPoints().getMDPointDescription();
+   this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(pixDescr));
+   //this->DDataPoints
 }
 
     /** Default constructor - does nothing */
@@ -95,18 +98,18 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     }
 
     //----------------------------------------------------------------------------------------------
-    void MDWorkspace::read_MDImg()
-    {
-      Geometry::MDGeometryDescription Description;
-	  this->m_spFile->read_MDGeomDescription(Description);
-	  //
-	  this->m_spMDImage->initialize(Description);
-      //  read image part of the data
-      this->m_spFile->read_MDImg_data(*this->m_spMDImage);
-      // alocate memory for pixels;
-      m_spDataPoints->alloc_pix_array(m_spFile);
-      m_spMDImage->identify_SP_points_locations();
-    }
+   // void MDWorkspace::read_MDImg()
+   // {
+   //   Geometry::MDGeometryDescription Description;
+	  //this->m_spFile->read_MDGeomDescription(Description);
+	  ////
+	  //this->m_spMDImage->initialize(Description);
+   //   //  read image part of the data
+   //   this->m_spFile->read_MDImg_data(*this->m_spMDImage);
+   //   // alocate memory for pixels;
+   //   m_spDataPoints->alloc_pix_array(m_spFile);
+   //   m_spMDImage->identify_SP_points_locations();
+   // }
     //
     void
     MDWorkspace::read_pix(void)
@@ -150,7 +153,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     }
 
 
-    unsigned long MDWorkspace::getNPoints() const
+    uint64_t MDWorkspace::getNPoints() const
     {// TODO: change implementation on request to MDDataPoints
         return this->m_spFile->getNPix();
     }

@@ -90,7 +90,7 @@ public:
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels(points) contributing into the dataset;
-    virtual unsigned long getNPix(void);
+    virtual uint64_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
     virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("write_mdd-Horace format function is not supported and should not be used"));}
     

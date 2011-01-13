@@ -177,7 +177,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 }
 
  /// get number of data pixels(points) contributing into the dataset;
-unsigned long 
+uint64_t 
 MD_FileTestDataGenerator::getNPix(void)
 {
     return this->nDataPoints;

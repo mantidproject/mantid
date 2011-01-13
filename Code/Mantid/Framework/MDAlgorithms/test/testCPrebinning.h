@@ -58,25 +58,31 @@ class testCPrebinning :    public CxxTest::TestSuite
    
       cpr.setPropertyValue("Input", InputWorkspaceName);      
       cpr.setPropertyValue("Result","OutWorkspace");
-      // set slicing property to the size and shape of the current workspace
+      // set slicing property for the target workspace to the size and shape of the current workspace
       cpr.init_slicing_property();
 
     }
-    void testInitSlicingProperty(){      
-
+    void testGetSlicingProperty(){      
 
     // retrieve slicing property for modifications
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
-
-       
+  
     }
     void testCPRExec(){
-        // rebin image into the same grid as an initial image
+        // rebin image into the same grid as an initial image, which should provide the same image as before
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
-    void testMDIMGCorrectness(){
-        // we did rebinning on the full image and initial image have to be equal to the target image
+    void testRebinnedWSExists(){
+        // now test if we can get the resulting workspace
+        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
+
+        MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
+        TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
+
+    }
+    void testEqRebinCorrectness(){
+        // we did rebinning on the full image and initial image have to be equal to the target image; Let's compare them
 	    MDWorkspace_sptr inputWS, outWS;
         // Get the workspaces
         inputWS = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(InputWorkspaceName));
@@ -90,12 +96,13 @@ class testCPrebinning :    public CxxTest::TestSuite
         }
     }
 
-    void testCPRExecAgain(){
+    void testCPRRebinAgainSmaller(){
+   // now rebin into slice
   // retrieve slicing property for modifications
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
-   // now modify it as we need;
+   // now modify it as we need/want;
         double r0=0;
         pSlicing->pDimDescription("qx")->cut_min = r0;
 		pSlicing->pDimDescription("qx")->cut_max = r0+1;
@@ -107,14 +114,6 @@ class testCPrebinning :    public CxxTest::TestSuite
   
    
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
-    }
-    void testRebinningResults(){
-        // now test if we have rebinned things properly
-        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
-
-        MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
-        TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
-
     }
 };
 

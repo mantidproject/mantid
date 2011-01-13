@@ -50,12 +50,13 @@ MD_File_hdfMatlab4D::read_pix(MDDataPoints & sqw)
 
     // pixel array has to be allocated earlier when image data were read; It is possible then it was less than the pixel buffer. In this case this function has to fail as it is 
     // not possible to read all pixels into memory;
-    sqw_pixel *pix_array = (sqw_pixel *)sqw.get_pBuffer();
-    if(!pix_array){
+    std::vector<char> databut = sqw.getBuffer();
+    sqw_pixel *pix_array = (sqw_pixel *)(&databut[0]);
+    if(!pix_array&&databut.size()==0){
       f_log.fatal()<<" pixel array has not been properly allocated\n";
 	  throw(std::runtime_error("pixels array has not been allocated properly"));
     }
-    size_t n_pix_inDataset  = this->getNPix();
+    uint64_t n_pix_inDataset  = this->getNPix();
    // let's verify if we indeed can read pixels into the buffer;
     size_t buf_size = sqw.get_pix_bufSize();
 

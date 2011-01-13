@@ -41,7 +41,7 @@ public:
     virtual bool read_pix(MDDataPoints &){return false; }
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer){
         return 0;}
-    virtual unsigned long getNPix(void){return 0;}
+    virtual uint64_t getNPix(void){return 0;}
  
     virtual void read_basis(Mantid::Geometry::MDGeometryBasis &GeomBasis){}
 

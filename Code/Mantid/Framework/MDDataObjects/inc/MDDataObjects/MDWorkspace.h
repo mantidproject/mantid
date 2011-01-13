@@ -111,17 +111,15 @@ namespace Mantid
       size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
 
       Mantid::Geometry::MDGeometry const * const getGeometry() const;
-	  /** the function resets MD image to a new state,e.g defines the arrengement and number of active and integrated dimensions
-	      It also allocates or reuses the memory neded to place MD image data into memory, preparing workspace for rebinning operations */
-	  void initialize_MDImage(const Mantid::Geometry::MDGeometryDescription &transf){m_spMDImage->initialize(transf);}
-      /// read MD image into memory TODO: do we still need this function?
-      void read_MDImg();
+      /// read MD image into memory TODO: do we still need this function? Let's try disable and see
+      // void read_MDImg();
       /// read the whole pixels dataset in the memory
       void read_pix(void);
       /// function writes the MDD data using current file reader; if the file is not opened, a default file reader is used. 
       void write_mdd();
       /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
       //    bool write_mdd(void);
+      /// get variois components of the workspace
 	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis.get());}
       Mantid::Geometry::MDGeometry      &   get_const_MDGeometry()const{return *(m_spMDImage->getGeometry());}
       Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage.get());}
@@ -138,7 +136,7 @@ namespace Mantid
         /// Gets the number of points(MDDataPoints, events) contributed to the workspace.
       ///TODO: resolve -- do we need number of points contributed to workspace or availible in it -- > different things if we 
       /// assume existence of DND objects
-      virtual unsigned long getNPoints() const;
+      virtual uint64_t getNPoints() const;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
@@ -180,7 +178,7 @@ namespace Mantid
       virtual std::string getGeometryXML() const;
 
     private:
-
+        // what is that?
       MDPointMap m_mdPointMap;
 
       static Kernel::Logger& g_log;

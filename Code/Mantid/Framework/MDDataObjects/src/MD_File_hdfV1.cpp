@@ -14,7 +14,7 @@ MD_File_hdfV1::read_pointDescriptions(void)const
 MD_File_hdfV1::MD_File_hdfV1(const char  *file_name):
 IMD_FileFormat(file_name)
 {
-	throw("this format is not written yet");
+	
 }
 
 

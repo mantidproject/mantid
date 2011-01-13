@@ -58,65 +58,85 @@ namespace MDDataObjects
   class DLLExport MDDataPoints
   {
   public:
-    MDDataPoints(boost::shared_ptr<const MDImage> pImageData,const MDDataPointsDescription &description);
+    MDDataPoints(const MDDataPointsDescription &description);
     ~MDDataPoints();
+/******************************************************************************************************
+    /** initialises MDDataPoints, allocates all necessary arrays and provides it with  valid data reader; 
+      * if the input dataReader is absent, the function initializes its own dataReader and sets output 
+      * temporary scrach file to accept pixels data 
+     */
+	virtual void initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_ptr<IMD_FileFormat> in_spFile);
+	virtual boost::shared_ptr<IMD_FileFormat> initialize(boost::shared_ptr<const MDImage> pImageData);
+    /// return file current file reader (should we let the factory to remember them and return on request?
+    virtual boost::shared_ptr<IMD_FileFormat> getFileReader(void)const{return this->spFileReader;}
+    /// check if the MDDataPoints class is initialized;
+    bool is_initialized(void)const;
 
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
-    /// function returns numnber of pixels (dataPoints) contributiong into the MD-data
-    size_t getNumPixels(boost::shared_ptr<IMD_FileFormat> spFile);
-
-    size_t getMemorySize()const{return data_buffer_size*1;}
-
-    // Accessors & Mutators used mainly for IO Operations on the dataset
-    /// function returns minimal value for dimension i
+    /// function returns numnber of pixels (dataPoints) contributiong into the MD-dataset  
+    uint64_t getNumPixels(void)const{return n_data_points;}
+    /// get the size of the allocated data buffer (may or may not have valid data in it); Identify main memory footprint;
+    size_t getMemorySize()const{return data_buffer_size*pixel_size;}
+     /// function returns minimal value for dimension i
     double &rPixMin(unsigned int i){return *(&box_min[0]+i);}
     /// function returns maximal value for dimension i
     double &rPixMax(unsigned int i){return *(&box_max[0]+i);}
-     /// returns the pointer to the location of the data buffer; the data has to be processed through MDDataPoint then
-    void * get_pBuffer(void){return data_buffer;}
-    /// return the size of the buffer allocated for pixels
-    size_t get_pix_bufSize(void)const{return data_buffer_size;} //TODO: refactor out.
-     // initiates memory for part of the pixels, which should be located in memory;
-    void alloc_pix_array(boost::shared_ptr<IMD_FileFormat> spFile);
-
+    /// get part of the dataset, specified by the vector of MDImage cell numbers. 
+    virtual size_t get_pix_subset(const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
+    /** return the size of the buffer allocated for pixels (the number of pixels possible to fit the buffer; 
+      * The actual will depend on pixel size */
+    size_t get_pix_bufSize(void)const{return data_buffer_size;} 
+    /// get the pixel MDDataPoint size (in bytes)
+    unsigned int sizeofMDDataPoint(void)const{return pixel_size;}
+   /// function returns the pointer to the buffer to keep data points; If the buffer has not been allocated it allocates it;
+   /// the buffer size is specified in pixels;
+    std::vector<char> &getBuffer(size_t buf_size=PIX_BUFFER_SIZE);
     /** function returns the part of the colum-names which corresponds to the dimensions information;
      * the order of the ID corresponds to the order of the data in the datatables */
-    std::vector<std::string> getDimensionsID(void)const{return description.getDimensionsID();}
+    std::vector<std::string> getDimensionsID(void)const{return pixDescription.getDimensionsID();}
+   //
+    MDDataPointsDescription const & getMDPointDescription(void)const{return pixDescription;}
   protected:
 
+  private:
     /** the parameter identify if the class data are file or memory based
-     * usually it is le based and memory used for small datasets, debugging
-     * or in a future when PC are big
-     */
+     * usually it is HD based and memory used for small datasets, debugging
+     * or in a future when PC-s are big     */
     bool memBased;
 
-  private:
-	  // The class which describes the structure of sinle data point (pixel)
-	 MDDataPointsDescription description;
+	 /// The class which describes the structure of sinle data point (pixel)
+	 MDDataPointsDescription pixDescription;
 
-    /// the data, describing the detector pixels
-    unsigned long  n_data_points;  //< number of data points contributing in dataset
-
-  
-    /// minimal values of ranges the data pixels are in; size is nDimensions
+    /// the data, describing the detector pixels(events, MDPoints etc.)
+    uint64_t  n_data_points;  //< number of data points contributing to dataset
+    /// the size of the pixel (DataPoint, event)(single point of data in reciprocal space) in bytes
+    unsigned int pixel_size; 
+     /// minimal values of ranges the data pixels are in; size is nDimensions
     std::vector<double> box_min;
     /// maximal values of ranges the data pixels are in; size is nDimensions
     std::vector<double> box_max;
-
-     //
-    unsigned int pixel_size;        //<the size of the pixel (DataPoint)(single point of data in reciprocal space) in bytes
-    size_t  data_buffer_size;       //< size the data buffer in pixels (data_points) rather then in char;
-    void *data_buffer;
+    //
+    size_t  data_buffer_size; //< size the data buffer in pixels (data_points) rather then in char;
+    std::vector<char> data_buffer;
 
     // private for the time being but may be needed in a future
     MDDataPoints(const MDDataPoints& p);
     MDDataPoints & operator = (const MDDataPoints & other);
-
-    boost::shared_ptr<const MDImage> m_spMDImage; //Allows access to current geometry owned by MDImage.
- 
+    //Shared pointer Allows access to current geometry owned by MDImage
+    boost::shared_ptr<const MDImage> spMDImage; 
+    /** Shared pointer to the file reader responsible for data exchange with the data file. For input forkspace it has to be
+     *  initated by the data reader from the MDWorkspace and for the output workspace it may be initated by the factory if
+     * the memory is not sufficient to keep incoming pixels; It also has to be initated when (if) save workpace algorithm is called;
+     */
+    boost::shared_ptr<IMD_FileFormat> spFileReader;
     /// Common logger for logging all MD Workspace operations;
     static Kernel::Logger& g_log;
+
+
+  // initiates memory for part of the pixels, which should be located in memory;
+    void alloc_pix_array(size_t data_buffer_size);
+
   };
 }
 }
