@@ -627,6 +627,10 @@ bool Homer::runScripts()
   unitsConv.createProcessingScript(m_uiForm.runFiles->getFilenames(), m_uiForm.whiteBeamFile->getFirstFilename(),
       absRunFiles, absWhiteFile, m_uiForm.leNameSPE->text());
 
+  
+  std::cout << unitsConv.python().toStdString() << "\n";
+
+
   pythonIsRunning(true);
   // we're back to processing the settings on the first page
   m_uiForm.tabWidget->setCurrentIndex(0);

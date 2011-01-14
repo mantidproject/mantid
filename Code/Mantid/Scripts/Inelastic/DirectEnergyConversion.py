@@ -456,7 +456,7 @@ class DirectEnergyConversion(object):
         has been run
         """
         averageY = self.calc_average(ei_workspace)
-        absnorm_factor = averageY * (self.van_rmm/self.van_mass) 
+        absnorm_factor = averageY * (float(self.van_rmm)/float(self.van_mass)) 
         #  Scale by vanadium cross-section which is energy dependent up to a point
         run = ei_workspace.getRun()
         try:
@@ -470,7 +470,7 @@ class DirectEnergyConversion(object):
         else:
             xsection = 400.0 + (ei_value/10.0)
         absnorm_factor /= xsection
-        return absnorm_factor * (self.sample_mass/self.sample_rmm)
+        return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
 
     
     def mask_detectors_outside_range(self, data_ws, min_value, max_value, median_lbound, 

@@ -155,6 +155,9 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
         pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(absMapFile);
     }
+    // Set the mono vanadium integration range
+    pyCode += QString("mono_sample.monovan_integr_range=[float(%1),float(%2)]\n");
+    pyCode = pyCode.arg(m_sets.leVanELow->text(), m_sets.leVanEHigh->text());
     // Set the sample mass and rmm
     pyCode += QString("mono_sample.sample_mass = %1\n").arg(m_sets.leSamMass->text());
     pyCode += QString("mono_sample.sample_rmm = %1\n").arg(m_sets.leRMMMass->text());
