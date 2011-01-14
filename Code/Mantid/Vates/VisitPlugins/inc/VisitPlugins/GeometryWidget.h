@@ -1,5 +1,5 @@
-#ifndef DIMENSION_WIDGET_H
-#define DIMENSION_WIDGET_H
+#ifndef GEOMETRY_WIDGET_H
+#define GEOMETRY_WIDGET_H
 
 /** This is the GUI implementation of the geometry layout for the Rebinning operations.
  *  Inpects input geometry to determine possibilities for shaping the geometry via the user interface.
@@ -34,18 +34,20 @@
 #include <qgridlayout.h>
 #include <qwidget.h>
 #include <memory>
+#include <boost/shared_ptr.hpp>
 
 //Foward decs
 class QLabel;
 class QComboBox;
 class IntegratedDimensionWidget;
-class DimensionPickerWidget;
+class DimensionWidget;
 
 namespace Mantid
 {
  namespace Geometry
  {
  class MDGeometry;
+ class IMDDimension;
  }
 }
 
@@ -56,10 +58,23 @@ Q_OBJECT
 public:
 
 GeometryWidget(Mantid::Geometry::MDGeometry const * const geometry);
+GeometryWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
+
+void constructWidget(Mantid::Geometry::MDGeometry const * const geometry);
+
+void childAppliedNewDimensionSelection(
+    const unsigned int oldDimensionIndex,
+    boost::shared_ptr<Mantid::Geometry::IMDDimension> newDimension,
+    DimensionWidget* pDimensionWidget);
 
 ~GeometryWidget();
 
 private:
+
+DimensionWidget* m_xDimensionWidget;
+DimensionWidget* m_yDimensionWidget;
+DimensionWidget* m_zDimensionWidget;
+DimensionWidget* m_tDimensionWidget;
 
 
 };

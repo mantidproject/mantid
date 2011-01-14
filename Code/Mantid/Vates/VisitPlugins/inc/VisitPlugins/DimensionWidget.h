@@ -5,13 +5,17 @@
 #include <qwidget.h>
 #include <memory>
 #include "boost/shared_ptr.hpp"
+#include <vector>
+
 //Foward decs
 class QLabel;
 class QComboBox;
+class QLineEdit;
+class GeometryWidget;
 
 namespace Mantid
 {
- namespace MDGeometry
+ namespace Geometry
  {
  class IMDDimension;
  }
@@ -23,10 +27,50 @@ class DimensionWidget: public QWidget
 Q_OBJECT
 public:
 
-  DimensionWidget(boost::shared_ptr<Mantid::MDGeometry::IMDDimension> spDimensionToRender);
+  DimensionWidget(GeometryWidget* geometryWidget, const std::string& name, const int dimensionIndex,
+      std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedDimensions );
 
   ~DimensionWidget();
 
+  double getMinimum() const;
+
+  double getMaximum() const;
+
+  boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension() const;
+
+  int getNBins() const;
+
+  int getSelectedIndex() const;
+
+  /// Populates gui controls. May be called more than once.
+  void populateWidget(const int dimensionIndex);
+
+private:
+  QGridLayout* m_layout;
+
+  QLineEdit* m_nBinsBox;
+
+  QLineEdit* m_minBox;
+
+  QLineEdit* m_maxBox;
+
+  QComboBox* m_dimensionCombo;
+
+  int m_currentDimensionIndex;
+
+  std::string m_name;
+
+  GeometryWidget* m_geometryWidget;
+
+  /// Creates gui layout and controls.
+  void constructWidget(const int dimensionIndex);
+
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
+
+  private slots:
+
+  /// Handles dimension change events.
+  void dimensionSelectedListener();
 };
 
 #endif
