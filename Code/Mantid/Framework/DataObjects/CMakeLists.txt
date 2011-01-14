@@ -1,5 +1,6 @@
 set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
                 src/CompressedWorkspace2D.cpp
+		src/Events.cpp
 		src/EventList.cpp
 		src/EventWorkspace.cpp
 		src/EventWorkspaceHelpers.cpp
@@ -14,6 +15,7 @@ set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
 
 set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
                 inc/MantidDataObjects/CompressedWorkspace2D.h
+		inc/MantidDataObjects/Events.h
 		inc/MantidDataObjects/EventList.h
 		inc/MantidDataObjects/EventWorkspace.h
 		inc/MantidDataObjects/EventWorkspaceHelpers.h
@@ -29,7 +31,7 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
 
 set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/EventListTest.h
-                 test/TofEventTest.h
+                 test/EventsTest.h
                  test/WeightedEventTest.h
 		 test/EventWorkspaceTest.h
 		 test/Histogram1DTest.h
