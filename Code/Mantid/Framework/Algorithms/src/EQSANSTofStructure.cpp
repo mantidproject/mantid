@@ -89,8 +89,10 @@ void EQSANSTofStructure::exec()
   g_log.information() << "Overlap: new = [" << (tof_bin_range-1) << ", " << (nTOF-2) << "]" << std::endl;
 
   // Loop through the spectra and apply correction
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int ispec = 0; ispec < numHists; ispec++)
   {
+    PARALLEL_START_INTERUPT_REGION
     // Keep a copy of the input data since we may end up overwriting it
     // if the input workspace is equal to the output workspace.
     // This is necessary since we are shuffling around the TOF bins.
@@ -135,7 +137,9 @@ void EQSANSTofStructure::exec()
     EOut[tof_bin_range-2-cutoff] = 0.0;
 
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool frame_skipping)
@@ -345,9 +349,16 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
     else frame_srcpulse_wl_1=0.0;
   }
   // Get source and detector locations
-  //TODO: get component name as parameter
+  // get the name of the mapping file as set in the parameter files
+  std::vector<std::string> temp = inputWS->getInstrument()->getStringParameter("detector-name");
+  std::string det_name = "detector1";
+  if (temp.empty())
+    g_log.information() << "The instrument parameter file does not contain the 'detector-name' parameter: trying 'detector1'";
+  else
+    det_name = temp[0];
+
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
-  double detector_z = inputWS->getInstrument()->getComponentByName("detector1")->getPos().Z();
+  double detector_z = inputWS->getInstrument()->getComponentByName(det_name)->getPos().Z();
 
   double source_to_detector = (detector_z - source_z)*1000.0;
   double frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;

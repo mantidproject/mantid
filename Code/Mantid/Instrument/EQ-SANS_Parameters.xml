@@ -6,6 +6,10 @@
         <parameter name="TS_mapping_file" type="string">
             <value val="EQSANS_TS_2009_07_20.dat"/>
         </parameter>
+        
+		<parameter name="detector-name" type="string">
+		  <value val="detector1"/>
+		</parameter>
 
     </component-link>
 </parameter-file>    
