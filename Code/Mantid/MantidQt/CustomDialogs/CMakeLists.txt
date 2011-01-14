@@ -2,7 +2,6 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
                 src/LoadRawDialog.cpp
-                src/LoginDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
@@ -14,7 +13,6 @@ set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
-                inc/MantidQtCustomDialogs/LoginDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
@@ -25,7 +23,6 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
-                inc/MantidQtCustomDialogs/LoginDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
@@ -34,7 +31,6 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
 
 set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/DiagScriptInputDialog.ui
-               inc/MantidQtCustomDialogs/LoginDialog.ui
                inc/MantidQtCustomDialogs/LOQScriptInputDialog.ui
                inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.ui
 )

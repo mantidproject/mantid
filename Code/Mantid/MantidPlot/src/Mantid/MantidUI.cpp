@@ -1175,7 +1175,7 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
 }
 bool MantidUI::executeICatLogout(int version)
 {
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("Logout", version);
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("CatalogLogout", version);
   if( !alg ) return false;
   Poco::ActiveResult<bool> result(alg->executeAsync());
   return result.failed();

@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/MaskedProperty.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -141,9 +142,20 @@ void GenericDialog::initLayout()
       //For everything else render a text box
       else 
       {
+        
+
         QLineEdit *textBox = new QLineEdit;
         nameLbl->setBuddy(textBox);
+        
+        //check this is a masked property
+        Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
+        if(maskedProp)
+        {
+          textBox->setEchoMode(QLineEdit::Password);
+        }
         m_editBoxes[textBox] = propName;
+
+        
 
         //Add the widgets to the grid
         m_inputGrid->addWidget(nameLbl, row, 0, 0);

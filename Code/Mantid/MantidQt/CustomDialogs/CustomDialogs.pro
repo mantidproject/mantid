@@ -32,8 +32,8 @@ SOURCES = $$SRCDIR/LoadRawDialog.cpp \
     $$SRCDIR/MantidGLWidget.cpp \
     $$SRCDIR/PlotAsymmetryByLogValueDialog.cpp \
     $$SRCDIR/LoadDAEDialog.cpp \
-    $$SRCDIR/LoadAsciiDialog.cpp \
-    $$SRCDIR/LoginDialog.cpp
+    $$SRCDIR/LoadAsciiDialog.cpp 
+    
     
 HEADERS = $$HEADERDIR/LoadRawDialog.h \
     $$HEADERDIR/LOQScriptInputDialog.h \
@@ -42,16 +42,14 @@ HEADERS = $$HEADERDIR/LoadRawDialog.h \
     $$HEADERDIR/MantidGLWidget.h \
     $$HEADERDIR/PlotAsymmetryByLogValueDialog.h \
     $$HEADERDIR/LoadDAEDialog.h \
-    $$HEADERDIR/LoadAsciiDialog.h \
-    $$HEADERDIR/LoginDialog.h
+    $$HEADERDIR/LoadAsciiDialog.h 
     
     
 UI_DIR = $$HEADERDIR
 
 FORMS = $$HEADERDIR/LOQScriptInputDialog.ui \
     $$HEADERDIR/CreateSampleShapeDialog.ui \
-    $$HEADERDIR/PlotAsymmetryByLogValueDialog.ui \
-    $$HEADERDIR/LoginDialog.ui
+    $$HEADERDIR/PlotAsymmetryByLogValueDialog.ui 
     
 UI_HEADERS_DIR = "$$HEADERDIR"
 
