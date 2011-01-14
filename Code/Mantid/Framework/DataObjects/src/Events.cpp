@@ -111,18 +111,6 @@ namespace DataObjects
     return (this->m_tof < rhs_tof);
   }
 
-  /// Return the time of flight, as a double, in nanoseconds.
-  double TofEvent::tof() const
-  {
-    return this->m_tof;
-  }
-
-  /// Return the frame id
-  DateAndTime TofEvent::pulseTime() const
-  {
-    return this->m_pulsetime;
-  }
-
   /** Output a string representation of the event to a stream
    * @param os Stream
    * @param event TofEvent to output to the stream
@@ -138,7 +126,7 @@ namespace DataObjects
 
 
   //==========================================================================
-  /// --------------------- WeightedEvent stuff ----------------------------------
+  /// --------------------- WeightedEvent stuff ------------------------------
   //==========================================================================
 
   /** Constructor, tof only:
@@ -221,31 +209,6 @@ namespace DataObjects
   }
 
 
-  /// Return the weight of the neutron, as a double (it is saved as a float).
-  double WeightedEvent::weight() const
-  {
-    return m_weight;
-  }
-
-  /** @return the error of the neutron, as a double (it is saved as a float).
-   * Note: this returns the actual error; the value is saved
-   * internally as the SQUARED error, so this function calculates sqrt().
-   * For more speed, use errorSquared().
-   *
-   */
-  double WeightedEvent::error() const
-  {
-    return std::sqrt( double(m_errorSquared) );
-  }
-
-  /** @return the square of the error for this event.
-   * This is how the error is saved internally, so this is faster than error()
-   */
-  double WeightedEvent::errorSquared() const
-  {
-    return m_errorSquared;
-  }
-
 
   /** Output a string representation of the event to a stream
    * @param os Stream
@@ -257,6 +220,99 @@ namespace DataObjects
     return os;
   }
 
+
+
+
+
+
+
+
+  //==========================================================================
+  /// --------------------- WeightedEventNoTime stuff ------------------------
+  //==========================================================================
+
+  /** Constructor, tof only:
+   * @param time_of_flight: tof in microseconds.
+   */
+  WeightedEventNoTime::WeightedEventNoTime(double time_of_flight)
+  : m_tof(time_of_flight), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
+
+  /** Constructor, full:
+   * @param tof: tof in microseconds.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+   */
+  WeightedEventNoTime::WeightedEventNoTime(double tof, float weight, float errorSquared)
+  : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared)
+  {
+  }
+
+  /** Constructor, copy from a TofEvent object but add weights
+   * @param rhs: TofEvent to copy into this.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+  */
+  WeightedEventNoTime::WeightedEventNoTime(const TofEvent& rhs, float weight, float errorSquared)
+  : m_tof(rhs.m_tof), m_weight(weight), m_errorSquared(errorSquared)
+  {
+  }
+
+  /** Constructor, copy from a WeightedEvent object
+   * @param rhs: source WeightedEvent
+   */
+  WeightedEventNoTime::WeightedEventNoTime(const WeightedEvent& rhs)
+  : m_tof(rhs.m_tof), m_weight(rhs.m_weight), m_errorSquared(rhs.m_errorSquared)
+  {
+  }
+
+  /** Constructor, copy from another WeightedEventNoTime object
+   * @param rhs: source WeightedEventNoTime
+   */
+  WeightedEventNoTime::WeightedEventNoTime(const WeightedEventNoTime& rhs)
+  : m_tof(rhs.m_tof), m_weight(rhs.m_weight), m_errorSquared(rhs.m_errorSquared)
+  {
+  }
+
+  /** Constructor, copy from another TofEvent object
+   * @param rhs: source TofEvent
+   */
+  WeightedEventNoTime::WeightedEventNoTime(const TofEvent& rhs)
+  : m_tof(rhs.m_tof), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
+
+  /// Empty constructor
+  WeightedEventNoTime::WeightedEventNoTime()
+  : m_tof(0.0), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
+
+  /// Destructor
+  WeightedEventNoTime::~WeightedEventNoTime()
+  {
+  }
+
+  /// Copy from another WeightedEventNoTime object
+  WeightedEventNoTime& WeightedEventNoTime::operator=(const WeightedEventNoTime & rhs)
+  {
+    this->m_tof = rhs.m_tof;
+    this->m_weight = rhs.m_weight;
+    this->m_errorSquared = rhs.m_errorSquared;
+    return *this;
+  }
+
+  /** Comparison operator.
+   * @param rhs event to which we are comparing.
+   * @return true if all elements of this event are identical
+   *  */
+  bool WeightedEventNoTime::operator==(const WeightedEventNoTime & rhs) const
+  {
+    return  (this->m_tof == rhs.m_tof) &&
+            (this->m_weight == rhs.m_weight) &&
+            (this->m_errorSquared == rhs.m_errorSquared);
+  }
 
 } // DataObjects
 } // Mantid

@@ -32,6 +32,7 @@ class DLLExport TofEvent {
   /// EventList has the right to mess with TofEvent.
   friend class EventList;
   friend class WeightedEvent;
+  friend class WeightedEventNoTime;
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
@@ -79,14 +80,37 @@ public:
   bool operator>(const TofEvent & rhs) const;
 
 
+  //------------------------------------------------------------------------
   /// Return the time of flight, as a double, in nanoseconds.
-  double tof() const;
+  double tof() const
+  {
+    return m_tof;
+  }
 
-  /// Return the frame id
-  Mantid::Kernel::DateAndTime pulseTime() const;
+  //------------------------------------------------------------------------
+  /// Return the pulse time
+  Mantid::Kernel::DateAndTime pulseTime() const
+  {
+    return m_pulsetime;
+  }
 
+  //------------------------------------------------------------------------
   /// Return the weight of the event - exactly 1.0 always
   double weight()
+  {
+    return 1.0;
+  }
+
+  //------------------------------------------------------------------------
+  /// Return the error of the event - exactly 1.0 always
+  double error()
+  {
+    return 1.0;
+  }
+
+  //------------------------------------------------------------------------
+  /// Return the errorSquared of the event - exactly 1.0 always
+  double errorSquared()
   {
     return 1.0;
   }
@@ -109,6 +133,7 @@ class DLLExport WeightedEvent : public TofEvent {
 
   /// EventList has the right to mess with WeightedEvent.
   friend class EventList;
+  friend class WeightedEventNoTime;
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
@@ -142,14 +167,33 @@ public:
 
   bool operator==(const WeightedEvent & other) const;
 
+  //------------------------------------------------------------------------
   /// Return the weight of the neutron, as a double (it is saved as a float).
-  double weight() const;
+  double weight() const
+  {
+    return m_weight;
+  }
 
-  /// Return the error of the neutron, as a double (it is saved as a float).
-  double error() const;
+  //------------------------------------------------------------------------
+  /** @return the error of the neutron, as a double (it is saved as a float).
+   * Note: this returns the actual error; the value is saved
+   * internally as the SQUARED error, so this function calculates sqrt().
+   * For more speed, use errorSquared().
+   *
+   */
+  double error() const
+  {
+    return std::sqrt( double(m_errorSquared) );
+  }
 
-  /// Return the squared error of the neutron, as a double
-  double errorSquared() const;
+  //------------------------------------------------------------------------
+  /** @return the square of the error for this event.
+   * This is how the error is saved internally, so this is faster than error()
+   */
+  double errorSquared() const
+  {
+    return m_errorSquared;
+  }
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const WeightedEvent &event);
@@ -215,18 +259,37 @@ public:
 
   bool operator==(const WeightedEventNoTime & other) const;
 
+  //----------------------------------------------------------------------------------------------
+  /// Return the time-of-flight of the neutron, as a double.
+  double tof() const
+  {
+    return m_tof;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the pulse time; this returns 0 since this
+   * type of Event has no time associated.
+   */
+  Mantid::Kernel::DateAndTime pulseTime() const
+  {
+    return 0;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /// Return the weight of the neutron, as a double (it is saved as a float).
   double weight() const
   {
     return m_weight;
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Return the error of the neutron, as a double (it is saved as a float).
   double error() const
   {
     return std::sqrt( double(m_errorSquared) );
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Return the squared error of the neutron, as a double
   double errorSquared() const
   {

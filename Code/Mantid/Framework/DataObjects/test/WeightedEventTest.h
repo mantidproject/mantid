@@ -2,8 +2,7 @@
 #define WEIGHTEDEVENTTEST_H_ 1
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
 #include <boost/math/special_functions/fpclassify.hpp>
