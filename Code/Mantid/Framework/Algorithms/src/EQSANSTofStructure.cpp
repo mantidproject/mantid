@@ -28,13 +28,13 @@ void EQSANSTofStructure::init()
       "Workspace to apply the TOF correction to");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace to store the corrected data in");
-  declareProperty("TOFOffset", 0.0, "TOF offset" );
+  declareProperty("FrameSkipping", false, "Frame skipping option" );
 }
 
 void EQSANSTofStructure::exec()
 {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const double frame_tof0 = getProperty("TOFOffset");
+  const bool frame_skipping = getProperty("FrameSkipping");
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -48,11 +48,13 @@ void EQSANSTofStructure::exec()
 
   Progress progress(this,0.0,1.0,numHists);
 
+  // Get TOF offset
+  double frame_tof0 = getTofOffset(inputWS, frame_skipping);
+
   // Calculate the frame width
   const double frequency = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("frequency"))->getStatistics().mean;
   double tof_frame_width = 1.0e6/frequency;
-  double tmp_frame_width = tof_frame_width;
-  //double tmp_frame_width=frame_skipping_option>=FRAME_SKIPPING_YES ? tof_frame_width * 2 : tof_frame_width;
+  double tmp_frame_width = frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
 
   double frame_offset=0.0;
   if (frame_tof0 >= tmp_frame_width) frame_offset = tmp_frame_width * ( (int)( frame_tof0/tmp_frame_width ) );
@@ -134,6 +136,228 @@ void EQSANSTofStructure::exec()
 
     progress.report();
   }
+}
+
+double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool frame_skipping)
+{
+  //# Storage for chopper information read from the logs
+  double chopper_set_phase[4] = {0,0,0,0};
+  double chopper_speed[4] = {0,0,0,0};
+  double chopper_actual_phase[4] = {0,0,0,0};
+  double chopper_wl_1[4] = {0,0,0,0};
+  double chopper_wl_2[4] = {0,0,0,0};
+  double frame_wl_1 = 0;
+  double frame_srcpulse_wl_1 = 0;
+  double frame_wl_2 = 0;
+  double chopper_srcpulse_wl_1[4] = {0,0,0,0};
+  double chopper_frameskip_wl_1[4] = {0,0,0,0};
+  double chopper_frameskip_wl_2[4] = {0,0,0,0};
+  double chopper_frameskip_srcpulse_wl_1[4] = {0,0,0,0};
+
+  double tof_frame_width = 1.0e6/REP_RATE;
+
+  double tmp_frame_width = tof_frame_width;
+  if (frame_skipping) tmp_frame_width *= 2.0;
+
+  // Choice of parameter set
+  int m_set = 0;
+  if (frame_skipping) m_set = 1;
+
+  bool first = true;
+  bool first_skip = true;
+  double frameskip_wl_1 = 0;
+  double frameskip_srcpulse_wl_1 = 0;
+  double frameskip_wl_2 = 0;
+
+
+  for( int i=0; i<4; i++)
+  {
+    // Read chopper information
+    std::ostringstream phase_str;
+    phase_str << "Phase" << i+1;
+    chopper_set_phase[i] = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData(phase_str.str()))->getStatistics().mean;
+    std::ostringstream speed_str;
+    speed_str << "Speed" << i+1;
+    chopper_speed[i] = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData(speed_str.str()))->getStatistics().mean;
+
+    // Only process choppers with non-zero speed
+    if (chopper_speed[i]<=0) continue;
+
+    chopper_actual_phase[i] = chopper_set_phase[i] - CHOPPER_PHASE_OFFSET[m_set][i];
+
+    while (chopper_actual_phase[i]<0) chopper_actual_phase[i] += tmp_frame_width;
+
+    double x1 = ( chopper_actual_phase[i]- ( tmp_frame_width * 0.5*CHOPPER_ANGLE[i]/360. ) ); // opening edge
+    double x2 = ( chopper_actual_phase[i]+ ( tmp_frame_width * 0.5*CHOPPER_ANGLE[i]/360. ) ); // closing edge
+    if (!frame_skipping) // not skipping
+    {
+      while (x1<0)
+      {
+        x1+=tmp_frame_width;
+        x2+=tmp_frame_width;
+      }
+    }
+
+    if (x1>0)
+    {
+        chopper_wl_1[i]= 3.9560346 * x1 / CHOPPER_LOCATION[i];
+        chopper_srcpulse_wl_1[i]= 3.9560346 * ( x1-chopper_wl_1[i]*PULSEWIDTH ) / CHOPPER_LOCATION[i];
+    }
+    else chopper_wl_1[i]=chopper_srcpulse_wl_1[i]=0.;
+
+    if (x2>0) chopper_wl_2[i]= 3.9560346 * x2 / CHOPPER_LOCATION[i];
+    else chopper_wl_2[i]=0.;
+
+    if (first)
+    {
+        frame_wl_1=chopper_wl_1[i];
+        frame_srcpulse_wl_1=chopper_srcpulse_wl_1[i];
+        frame_wl_2=chopper_wl_2[i];
+        first=false;
+    }
+    else
+    {
+        if (frame_skipping && i==2) // ignore chopper 1 and 2 forthe shortest wl.
+        {
+            frame_wl_1=chopper_wl_1[i];
+            frame_srcpulse_wl_1=chopper_srcpulse_wl_1[i];
+        }
+        if (frame_wl_1<chopper_wl_1[i]) frame_wl_1=chopper_wl_1[i];
+        if (frame_wl_2>chopper_wl_2[i]) frame_wl_2=chopper_wl_2[i];
+        if (frame_srcpulse_wl_1<chopper_srcpulse_wl_1[i]) frame_srcpulse_wl_1=chopper_srcpulse_wl_1[i];
+    }
+
+    if (frame_skipping)
+    {
+        if (x1>0)
+        {
+            x1 += tof_frame_width;    // skipped pulse
+            chopper_frameskip_wl_1[i]= 3.9560346 * x1 / CHOPPER_LOCATION[i];
+            chopper_frameskip_srcpulse_wl_1[i]= 3.9560346 * ( x1-chopper_wl_1[i]*PULSEWIDTH ) / CHOPPER_LOCATION[i];
+        }
+        else chopper_wl_1[i]=chopper_srcpulse_wl_1[i]=0.;
+
+        if (x2>0)
+        {
+            x2 += tof_frame_width;
+            chopper_frameskip_wl_2[i]= 3.9560346 * x2 / CHOPPER_LOCATION[i];
+        }
+        else chopper_wl_2[i]=0.;
+
+        if (i<2 && chopper_frameskip_wl_1[i] > chopper_frameskip_wl_2[i]) continue;
+
+        if (first_skip)
+        {
+            frameskip_wl_1=chopper_frameskip_wl_1[i];
+            frameskip_srcpulse_wl_1=chopper_frameskip_srcpulse_wl_1[i];
+            frameskip_wl_2=chopper_frameskip_wl_2[i];
+            first_skip=false;
+        }
+        else
+        {
+            if (i==2)   // ignore chopper 1 and 2 forthe longest wl.
+              frameskip_wl_2=chopper_frameskip_wl_2[i];
+
+            if (chopper_frameskip_wl_1[i] < chopper_frameskip_wl_2[i] && frameskip_wl_1<chopper_frameskip_wl_1[i])
+                frameskip_wl_1=chopper_frameskip_wl_1[i];
+
+            if (chopper_frameskip_wl_1[i] < chopper_frameskip_wl_2[i] && frameskip_srcpulse_wl_1<chopper_frameskip_srcpulse_wl_1[i])
+                frameskip_srcpulse_wl_1=chopper_frameskip_srcpulse_wl_1[i];
+
+            if (frameskip_wl_2>chopper_frameskip_wl_2[i]) frameskip_wl_2=chopper_frameskip_wl_2[i];
+        }
+    }
+  }
+
+  if (frame_wl_1>=frame_wl_2)    // too many frames later. So figure it out
+  {
+    double n_frame[4] = {0,0,0,0};
+    double c_wl_1[4] = {0,0,0,0};
+    double c_wl_2[4] = {0,0,0,0};
+    bool passed=false;
+
+    while (!passed && n_frame[0]<99)
+    {
+        frame_wl_1=c_wl_1[0] = chopper_wl_1[0] + 3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
+        frame_wl_2=c_wl_2[0] = chopper_wl_2[0] + 3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
+
+        for ( int i=0; i<4; i++ )
+        {
+            n_frame[i] = n_frame[i-1] - 1;
+            passed=false;
+
+            while (n_frame[i] - n_frame[i-1] < 10)
+            {
+                n_frame[i] += 1;
+                c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
+                c_wl_2[i] = chopper_wl_2[i] + 3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
+
+                if (frame_wl_1 < c_wl_2[i] and frame_wl_2> c_wl_1[i])
+                {
+                    passed=true;
+                    break;
+                }
+                if (frame_wl_2 < c_wl_1[i])
+                    break; // over shot
+            }
+
+            if (!passed)
+            {
+                n_frame[0] += 1;
+                break;
+            }
+            else
+            {
+                if (frame_wl_1<c_wl_1[i]) frame_wl_1=c_wl_1[i];
+                if (frame_wl_2>c_wl_2[i]) frame_wl_2=c_wl_2[i];
+            }
+        }
+    }
+
+    if (frame_wl_2 > frame_wl_1)
+    {
+        int n = 3;
+        if (c_wl_1[2] > c_wl_1[3]) n = 2;
+
+        frame_srcpulse_wl_1=c_wl_1[n] - 3.9560346 * c_wl_1[n] * PULSEWIDTH / CHOPPER_LOCATION[n];
+
+        for ( int i=0; i<4; i++ )
+        {
+            chopper_wl_1[i] = c_wl_1[i];
+            chopper_wl_2[i] = c_wl_2[i];
+            if (frame_skipping)
+            {
+                chopper_frameskip_wl_1[i] = c_wl_1[i] +  3.9560346 * 2.* tof_frame_width / CHOPPER_LOCATION[i];
+                chopper_frameskip_wl_2[i] = c_wl_2[i] +  3.9560346 * 2.* tof_frame_width / CHOPPER_LOCATION[i];
+                if (i==0)
+                {
+                    frameskip_wl_1 = chopper_frameskip_wl_1[i];
+                    frameskip_wl_2 = chopper_frameskip_wl_2[i];
+                }
+                else
+                {
+                    if (frameskip_wl_1<chopper_frameskip_wl_1[i]) frameskip_wl_1=chopper_frameskip_wl_1[i];
+                    if (frameskip_wl_2>chopper_frameskip_wl_2[i]) frameskip_wl_2=chopper_frameskip_wl_2[i];
+                }
+            }
+        }
+    }
+    else frame_srcpulse_wl_1=0.0;
+  }
+  // Get source and detector locations
+  //TODO: get component name as parameter
+  double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
+  double detector_z = inputWS->getInstrument()->getComponentByName("detector1")->getPos().Z();
+
+  double source_to_detector = (detector_z - source_z)*1000.0;
+  double frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
+
+  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds" << std::endl;
+  g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " " << frame_wl_2 << std::endl;
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2" << std::endl;
+  for ( int i=0; i<4; i++)
+      g_log.information() << i << "    " << chopper_actual_phase[i] << "  " << chopper_wl_1[i] << "  " << chopper_wl_2[i] << std::endl;
+  return frame_tof0;
 }
 
 } // namespace Algorithms

@@ -82,11 +82,9 @@ class LoadRun(ReductionStep):
         
         # Apply the TOF offset for this run
         mantid.sendLogMessage("Frame-skipping option: %s" % str(reducer.frame_skipping))
-        offset = EQSANSTofOffset(InputWorkspace=workspace, FrameSkipping=reducer.frame_skipping)
-        offset_calc = offset["Offset"].value
         
         # Modify TOF
-        EQSANSTofStructure(InputWorkspace=workspace, OutputWorkspace=workspace, TOFOffset=offset_calc)
+        EQSANSTofStructure(InputWorkspace=workspace, OutputWorkspace=workspace, FrameSkipping=reducer.frame_skipping)
 
         ConvertUnits(workspace, workspace, "Wavelength")
         

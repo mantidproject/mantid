@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -18,6 +19,17 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+// Source repetition rate (Hz)
+const double REP_RATE = 60.0;
+// Pulse widge (micro sec per angstrom)
+const double PULSEWIDTH = 20.0;
+// Chopper phase offset (micro sec)
+const double CHOPPER_PHASE_OFFSET[2][4]= {{9507.,9471.,9829.7,9584.3},{19024.,18820.,19714.,19360.}};
+// Chopper angles (degree)
+const double CHOPPER_ANGLE[4] = {129.605,179.989,230.010,230.007};
+// Chopper location (mm)
+const double CHOPPER_LOCATION[4] = {5700.,7800.,9497.,9507.};
+
 class DLLExport EQSANSTofStructure : public API::Algorithm
 {
 public:
@@ -37,6 +49,8 @@ private:
   void init();
   /// Execution code
   void exec();
+  /// Compute TOF offset
+  double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping);
 };
 
 } // namespace Algorithms
