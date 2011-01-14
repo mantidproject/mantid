@@ -14,12 +14,20 @@ namespace Mantid
 {
 namespace DataObjects
 {
-using Kernel::Exception::NotImplementedError;
-using Kernel::DateAndTime;
+  using Kernel::Exception::NotImplementedError;
+  using Kernel::DateAndTime;
 
-//==========================================================================
-/// --------------------- TofEvent stuff ----------------------------------
-//==========================================================================
+  //==========================================================================
+  /// --------------------- TofEvent stuff ----------------------------------
+  //==========================================================================
+  /** Constructor, specifying the time of flight only
+   * @param tof time of flight, in microseconds
+   */
+  TofEvent::TofEvent(const double tof) :
+              m_tof(tof), m_pulsetime(0)
+  {
+  }
+
   /** Constructor, specifying the time of flight and the frame id
    * @param tof time of flight, in microseconds
    * @param pulsetime absolute pulse time of the neutron.
@@ -132,6 +140,14 @@ using Kernel::DateAndTime;
   //==========================================================================
   /// --------------------- WeightedEvent stuff ----------------------------------
   //==========================================================================
+
+  /** Constructor, tof only:
+   * @param time_of_flight: tof in microseconds.
+   */
+  WeightedEvent::WeightedEvent(double time_of_flight)
+  : TofEvent(time_of_flight), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
 
   /** Constructor, full:
    * @param tof: tof in microseconds.

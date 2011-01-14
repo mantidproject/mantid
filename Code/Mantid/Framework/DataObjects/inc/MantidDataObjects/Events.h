@@ -54,6 +54,9 @@ protected:
   Mantid::Kernel::DateAndTime m_pulsetime;
 
 public:
+  /// Constructor, specifying only the time of flight
+  TofEvent(double tof);
+
   /// Constructor, specifying the time of flight and the frame id
   TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
 
@@ -81,6 +84,12 @@ public:
 
   /// Return the frame id
   Mantid::Kernel::DateAndTime pulseTime() const;
+
+  /// Return the weight of the event - exactly 1.0 always
+  double weight()
+  {
+    return 1.0;
+  }
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
@@ -112,6 +121,8 @@ private:
   float m_errorSquared;
 
 public:
+  /// Constructor, specifying only the time of flight
+  WeightedEvent(double time_of_flight);
 
   /// Constructor, full
   WeightedEvent(double time_of_flight, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared);

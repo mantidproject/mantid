@@ -17,13 +17,13 @@ using std::size_t;
 using std::vector;
 
 //==========================================================================================
-class TofEventTest : public CxxTest::TestSuite
+class EventsTest : public CxxTest::TestSuite
 {
 private:
   TofEvent e;
 
 public:
-  TofEventTest()
+  EventsTest()
   {
     e = TofEvent(123, 456);
   }

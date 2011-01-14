@@ -14,8 +14,8 @@ namespace Mantid
 {
 namespace DataObjects
 {
-using Kernel::Exception::NotImplementedError;
-using Kernel::DateAndTime;
+  using Kernel::Exception::NotImplementedError;
+  using Kernel::DateAndTime;
 
 
   //==========================================================================
@@ -25,7 +25,8 @@ using Kernel::DateAndTime;
    * @param e1 first event
    * @param e2 second event
    *  */
-  bool compareEventTof(const TofEvent & e1, const TofEvent& e2)
+  template< typename T>
+  bool compareEventTof(const T & e1, const T & e2)
   {
     return (e1.tof() < e2.tof());
   }
@@ -38,6 +39,58 @@ using Kernel::DateAndTime;
   {
     return (e1.pulseTime() < e2.pulseTime());
   }
+
+
+  //----------------------------------------------------------------------------------
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param minX minimum X bin to use in integrating.
+   * @param maxX maximum X bin to use in integrating.
+   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @return the integrated number of events.
+   */
+  template< typename T>
+  double integrateEvents(std::vector<T> & events, const double minX, const double maxX, const bool entireRange)
+  {
+    //Nothing in the list?
+    if (events.size() == 0)
+      return 0.0;
+
+    // Iterators for limits - whole range by default
+    typename std::vector<T>::iterator lowit, highit;
+    lowit=events.begin();
+    highit=events.end();
+
+    //But maybe we don't want the entire range?
+    if (!entireRange)
+    {
+      //If a silly range was given, return 0.
+      if (maxX < minX)
+        return 0.0;
+
+      // If the first element is lower that the xmin then search for new lowit
+      if (lowit->tof() < minX)
+        lowit = std::lower_bound(events.begin(),events.end(),minX);
+      // If the last element is higher that the xmax then search for new lowit
+      if ((highit-1)->tof() > maxX)
+      {
+        highit = std::upper_bound(lowit,events.end(), T(maxX), compareEventTof<T>);
+      }
+    }
+
+    // Sum up all the weights
+    double sum(0.0);
+    typename std::vector<T>::iterator it;
+    for (it = lowit; it != highit; it++)
+      sum += it->weight();
+
+    //Give it
+    return sum;
+  }
+
+
+
+
 
 //  /** Comparison operator by TOF for TofEvents) */
 //  bool operator<(const TofEvent & e1, const TofEvent& e2)
@@ -561,9 +614,9 @@ using Kernel::DateAndTime;
     }
     //Perform sort.
     if (has_weights)
-      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof);
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof<WeightedEvent>);
     else
-      std::sort(events.begin(), events.end(), compareEventTof);
+      std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
 
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
@@ -1280,76 +1333,81 @@ using Kernel::DateAndTime;
     }
 
     if (has_weights)
-    {
-      //Nothing in the list?
-      if (weightedEvents.size() == 0)
-        return 0.0;
-
-      // Iterators for limits - whole range by default
-      std::vector<WeightedEvent>::iterator lowit, highit;
-      lowit=weightedEvents.begin();
-      highit=weightedEvents.end();
-
-      //But maybe we don't want the entire range?
-      if (!entireRange)
-      {
-        //If a silly range was given, return 0.
-        if (maxX < minX)
-          return 0.0;
-
-        // If the first element is lower that the xmin then search for new lowit
-        if (lowit->tof() < minX)
-          lowit = std::lower_bound(weightedEvents.begin(),weightedEvents.end(),minX);
-        // If the last element is higher that the xmax then search for new lowit
-        if ((highit-1)->tof() > maxX)
-        {
-          highit = std::upper_bound(lowit,weightedEvents.end(), TofEvent(maxX, 0), compareEventTof);
-        }
-      }
-
-      // Sum up all the weights
-      double sum(0.0);
-      std::vector<WeightedEvent>::iterator it;
-      for (it = lowit; it != highit; it++)
-        sum += it->weight();
-
-      //Give it
-      return sum;
-    }
+      return integrateEvents(this->weightedEvents, minX, maxX, entireRange);
     else
-    {
-      //Nothing in the list?
-      if (events.size() == 0)
-        return 0.0;
+      return integrateEvents(this->events, minX, maxX, entireRange);
 
-      // Iterators for limits - whole range by default
-      std::vector<TofEvent>::iterator lowit, highit;
-      lowit=events.begin();
-      highit=events.end();
-
-      //But maybe we don't want the entire range?
-      if (!entireRange)
-      {
-        //If a silly range was given, return 0.
-        if (maxX < minX)
-          return 0.0;
-
-        // If the first element is lower that the xmin then search for new lowit
-        if (lowit->tof() < minX)
-          lowit = std::lower_bound(events.begin(),events.end(),minX);
-        // If the last element is higher that the xmax then search for new lowit
-        if ((highit-1)->tof() > maxX)
-        {
-          highit = std::upper_bound(lowit,events.end(), TofEvent(maxX, 0), compareEventTof);
-        }
-      }
-
-      // The distance between the two iterators (they are NOT inclusive) = the number of events
-      double sum = std::distance(lowit, highit);
-
-      //Give it
-      return sum;
-    }
+//    if (has_weights)
+//    {
+//      //Nothing in the list?
+//      if (weightedEvents.size() == 0)
+//        return 0.0;
+//
+//      // Iterators for limits - whole range by default
+//      std::vector<WeightedEvent>::iterator lowit, highit;
+//      lowit=weightedEvents.begin();
+//      highit=weightedEvents.end();
+//
+//      //But maybe we don't want the entire range?
+//      if (!entireRange)
+//      {
+//        //If a silly range was given, return 0.
+//        if (maxX < minX)
+//          return 0.0;
+//
+//        // If the first element is lower that the xmin then search for new lowit
+//        if (lowit->tof() < minX)
+//          lowit = std::lower_bound(weightedEvents.begin(),weightedEvents.end(),minX);
+//        // If the last element is higher that the xmax then search for new lowit
+//        if ((highit-1)->tof() > maxX)
+//        {
+//          highit = std::upper_bound(lowit,weightedEvents.end(), TofEvent(maxX, 0), compareEventTof);
+//        }
+//      }
+//
+//      // Sum up all the weights
+//      double sum(0.0);
+//      std::vector<WeightedEvent>::iterator it;
+//      for (it = lowit; it != highit; it++)
+//        sum += it->weight();
+//
+//      //Give it
+//      return sum;
+//    }
+//    else
+//    {
+//      //Nothing in the list?
+//      if (events.size() == 0)
+//        return 0.0;
+//
+//      // Iterators for limits - whole range by default
+//      std::vector<TofEvent>::iterator lowit, highit;
+//      lowit=events.begin();
+//      highit=events.end();
+//
+//      //But maybe we don't want the entire range?
+//      if (!entireRange)
+//      {
+//        //If a silly range was given, return 0.
+//        if (maxX < minX)
+//          return 0.0;
+//
+//        // If the first element is lower that the xmin then search for new lowit
+//        if (lowit->tof() < minX)
+//          lowit = std::lower_bound(events.begin(),events.end(),minX);
+//        // If the last element is higher that the xmax then search for new lowit
+//        if ((highit-1)->tof() > maxX)
+//        {
+//          highit = std::upper_bound(lowit,events.end(), TofEvent(maxX, 0), compareEventTof);
+//        }
+//      }
+//
+//      // The distance between the two iterators (they are NOT inclusive) = the number of events
+//      double sum = std::distance(lowit, highit);
+//
+//      //Give it
+//      return sum;
+//    }
 
   }
 
