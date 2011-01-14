@@ -221,6 +221,11 @@ endif ()
 # This needs to be done as a 2-step process for it to work for VS builds
 # First the part that turns relative into absolute paths in the properties file
 set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
+# This keeps things working for people building just the framework project
+if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
+  set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
+endif ()
+
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
