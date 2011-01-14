@@ -36,7 +36,7 @@
 </parameter>
 
 <component-link name="mica">
-<parameter name="EFixed"> <value val="0.8255" /> </parameter>
+<parameter name="Efixed"> <value val="0.8255" /> </parameter>
 </component-link>
 
 </component-link>
