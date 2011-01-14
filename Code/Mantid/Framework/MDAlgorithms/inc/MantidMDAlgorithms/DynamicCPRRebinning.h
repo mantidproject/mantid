@@ -80,20 +80,20 @@ protected:
     //std::vector<const MDDataObjects::MD_image_point *const> preselected_cells;
     std::vector<size_t> preselected_cells;
  
- // pointer to the source image data --> provides number of pixels which may contribute into the cut;
+ /// pointer to the source image data --> provides number of pixels which may contribute into the cut;
     MDDataObjects::MDImage        const *const pSourceImg;
-    // these are the parts of the source workspace
+    /// these are the parts of the source workspace
     Geometry::MDGeometry  const         *const pSourceGeom;  
-   // pointer to the MD array of source image points
+   /// pointer to the MD array of source image points
     MDDataObjects::MD_image_point const *const pSourceImgData; 
 
     /// pointer to the class which provides MDDataPoints (DataPixels, events);
     MDDataObjects::MDDataPoints        *const pSourceDataPoints;
-    // pointer to the target geometry
+    /// pointer to the target geometry
     Geometry::MDGeometry                *      pTargetGeom;  
-   // number of the cells in the target image 
+   /// number of the cells in the target image 
     size_t    n_target_cells;
-    // pointer to the MD array of target image points
+    /// pointer to the MD array of target image points
     MDDataObjects::MD_image_point        *     pTargetImgData;
 
   

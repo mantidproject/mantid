@@ -45,8 +45,7 @@ class IDynamicRebinning
 public:
     /** Function identifies the indexes of the sells of the source image that can contribute into the target image
      *  returns number of selected cells and the number of pixels (datapoints, events) contained in these cells which can contribute
-     * into the cut.
-     */
+     * into the cut.     */
     virtual size_t preselect_cells()=0; 
   /*! function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
      *  rebins these data (adds them) to MD image of the taget workspace;

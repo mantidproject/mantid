@@ -85,18 +85,24 @@ namespace MDDataObjects
     /// get part of the dataset, specified by the vector of MDImage cell numbers. 
     virtual size_t get_pix_subset(const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /** return the size of the buffer allocated for pixels (the number of pixels possible to fit the buffer; 
-      * The actual will depend on pixel size */
+      * The actual size in bytes will depend on pixel size  -- see get memory size*/
     size_t get_pix_bufSize(void)const{return data_buffer_size;} 
+    /// the function provides memory footprint of the class in the form commont to other MD classes
+    size_t sizeofPixelBuffer(void)const{ return getMemorySize();}
+
     /// get the pixel MDDataPoint size (in bytes)
     unsigned int sizeofMDDataPoint(void)const{return pixel_size;}
-   /// function returns the pointer to the buffer to keep data points; If the buffer has not been allocated it allocates it;
-   /// the buffer size is specified in pixels;
+   /** function returns the pointer to the buffer to keep data points; If the buffer has not been allocated it allocates it;
+       if it was, it reallocates buffer if the size requested is bigger than existing. The buffer size is specified in pixels; */
     std::vector<char> &getBuffer(size_t buf_size=PIX_BUFFER_SIZE);
     /** function returns the part of the colum-names which corresponds to the dimensions information;
      * the order of the ID corresponds to the order of the data in the datatables */
     std::vector<std::string> getDimensionsID(void)const{return pixDescription.getDimensionsID();}
    //
     MDDataPointsDescription const & getMDPointDescription(void)const{return pixDescription;}
+   /** function adds pixels,from the array of input pixels, selected by indexes in array of pix_selected to internal structure of data indexes 
+     which can be actually on HDD or in memory */
+    void store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels);
   protected:
 
   private:

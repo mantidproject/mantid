@@ -33,7 +33,7 @@ Load_MDWorkspace::init()
     declareProperty(new API::FileProperty("inFilename","", API::FileProperty::Load,ext), "The file containing initial MD dataset");
     declareProperty(new WorkspaceProperty<MDWorkspace>("MDWorkspace","",Direction::Output),"final MD workspace");
     // prospective property TODO: implement
-    declareProperty((new Kernel::PropertyWithValue<bool>("TryLoadPixels",false,Direction::InOut)),
+    declareProperty((new Kernel::PropertyWithValue<bool>("LoadPixels",false,Direction::InOut)),
         "This property specifies if user wants to try loading in memory"
         " all pixels(events) availible in the MD workspace; If there is enough memory system will try to do it but may fail");
 }
@@ -61,33 +61,30 @@ std::string workspaceFileName;
        workspaceFileName = Poco::Path(Poco::Path::current()).resolve(workspaceFileName).toString();
    }
 
-   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str());
-   if(!pFile.get()){
+   std::auto_ptr<IMD_FileFormat> pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str());
+   if(!pFileReader.get()){
          ldmdws_log.error()<<" can not obtain file reader for MD file";
          throw(Kernel::Exception::FileError("can not get proper file reader",workspaceFileName));
    }
    std::auto_ptr<MDGeometryBasis> pBasis = std::auto_ptr<MDGeometryBasis>(new Geometry::MDGeometryBasis());
    
-   pFile->read_basis(*pBasis);
+   pFileReader->read_basis(*pBasis);
 
    MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
 
 	// read the geometry description
-   pFile->read_MDGeomDescription(geomDescr);
+   pFileReader->read_MDGeomDescription(geomDescr);
 
 	// obtain the MDPoint description now (and MDPointsDescription in a future)
-	MDPointDescription pd = pFile->read_pointDescriptions();
+	MDPointDescription pd = pFileReader->read_pointDescriptions();
 
+    // workspace now takes control for the file reader; initial pointer becomes invalid
+    inputWS->init(pFileReader,pBasis,geomDescr,pd);
 
-    inputWS->init(pFile,pBasis,geomDescr,pd);
-   // currently is_initiated supported only for image;
-  //  if(!inputWS->is_initiated()){
-    // throw and end
-  //  }
+    // retrieve file reader back as it does not here any more
+    IMD_FileFormat *pFReader = inputWS->get_pFileReader();
 
-    IMD_FileFormat *pReader = inputWS->get_pFileReader();
-
-    pReader->read_MDImg_data(*inputWS->get_spMDImage());
+    pFReader->read_MDImg_data(*inputWS->get_spMDImage());
     //TODO: should be moved into datapoints;
     inputWS->get_spMDImage()->identify_SP_points_locations();
 

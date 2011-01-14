@@ -43,7 +43,7 @@ public:
 
   CpRebinningNx3(const MDDataObjects::MDWorkspace_const_sptr &pSourceWS, 
                  Geometry::MDGeometryDescription const * const pTargetDescr,
-                 const MDDataObjects::MDWorkspace_sptr  & TargetWS );
+                 const MDDataObjects::MDWorkspace_sptr  & TargetWS ,bool keep_pixels);
 
   /*! function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
      *  rebins these data (adds them) to MD image of the taget workspace;
@@ -52,9 +52,7 @@ public:
    virtual bool rebin_data_chunk();
   /** The same as just rebin_data_chunk above but the indexes returned as the last parameter specify the locations of the pixels
       * stored in the imput buffer;    */
-   virtual bool rebin_data_chunk_keep_pixels(){
-       throw(Kernel::Exception::NotImplementedError("Not implemented at the moment but will be implemented soon"));
-   };
+   virtual bool rebin_data_chunk_keep_pixels();
   /** returns the estimate for number of data chunks may be used to rebin the dataset Used by algorithms to indicate progress*/
     virtual unsigned int getNumDataChunks()const;
 
@@ -75,8 +73,18 @@ protected:
     std::vector<size_t>  strides;
     std::vector<unsigned int> rec_dim_indexes; // the indexes of the reciprocal dimensions in the array of the target dimensions
 
-    // working buffer to keep data pixels;
+    bool keep_pixels;
+
+    /// working buffer to keep input data pixels;
     std::vector<char  > pix_buf;
+
+ // these variables are initated if keep pixels option has been selected;
+    /// the buffer to keep the indexes of the outpit pixels within the target lattice
+    std::vector<size_t> retained_cell_indexes;
+    /// the buffer of boolean to mark input pixels which contribute into the ouptut data;
+    std::vector<bool>   pixel_valid;
+
+// working and auxiliary variables;
     /// build transformation matrix from the slicing data --> filled in all operation variables above
     virtual void build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target);
      /// first cell the rebinning process should begin
@@ -88,9 +96,10 @@ protected:
     /// number of pixels (datapoints, events) availible for rebinning
     size_t n_pix_in_buffer;
 private:
-  // the subroutine doing actual rebinning
+  /// the subroutine doing actual rebinning
     size_t rebin_Nx3dataset();
- 
+  /// pointer to target data points class
+   MDDataObjects::MDDataPoints        *const pTargetDataPoints;  
 };
 } // end namespaces
 }

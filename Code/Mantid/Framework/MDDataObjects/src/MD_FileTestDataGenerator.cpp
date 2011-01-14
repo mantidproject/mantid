@@ -17,6 +17,11 @@ pPointDescr(NULL)
 
     this->dat_sig_fields= new float[nDims+2];
     this->ind_fields    = new int[nDims];
+    this->nBins.resize(nDims,50);
+    this->nCells = 1;
+    for(size_t i=0;i<nBins.size();i++){
+        nCells *=nBins[i];
+    }
 }
 
 
@@ -58,7 +63,7 @@ MD_FileTestDataGenerator::read_MDGeomDescription(Mantid::Geometry::MDGeometryDes
         // hardcoded here as we read the dimensions ID (tags and Horace does not do it)
         dscrptn.pDimDescription(i)->Tag    = Horace_tags[i];
 
-        dscrptn.pDimDescription(i)->nBins = 50; // one sets this axis integrated
+        dscrptn.pDimDescription(i)->nBins = this->nBins[i]; // one sets this axis integrated
         dscrptn.pDimDescription(i)->cut_min = -1;
         dscrptn.pDimDescription(i)->cut_max =  1;
 
@@ -114,7 +119,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     size_t ic(starting_cell),j;
     unsigned int idim;
     unsigned long max_data_size;
-    const unsigned int nBins = 50;
+   
 
     const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
     std::vector<std::string> dimID = pCurrentGeom->getBasisTags();
@@ -123,11 +128,11 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
         const Geometry::IMDDimension *pDim = pCurrentGeom->get_constDimension(dimID[idim]).get();
-        dimPoints[idim].resize(nBins);
+        dimPoints[idim].resize(this->nBins[idim]);
         double min = pDim->getMinimum();
-        double step = (pDim->getMaximum()-min)/nBins;
+        double step = (pDim->getMaximum()-min)/this->nBins[idim];
         min+=0.5*step;
-        for(j=0;j<nBins;j++){
+        for(j=0;j<nBins[idim];j++){
             dimPoints[idim][j]=(float)(min+j*step);
         }
     }
@@ -180,6 +185,9 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 uint64_t 
 MD_FileTestDataGenerator::getNPix(void)
 {
+    if(this->nDataPoints == 0){
+        this->nDataPoints = nCells*(nCells+1)/2;
+    }
     return this->nDataPoints;
 }
 

@@ -70,13 +70,12 @@ CenterpieceRebinning::init()
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
 
       declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
-
-  // prospective property does nothing at the moment TODO: enable
-    declareProperty(new Kernel::PropertyWithValue<bool>("KeepPixels",false,Direction::Input),
+  
+      declareProperty(new Kernel::PropertyWithValue<bool>("KeepPixels",false,Direction::Input),
         " This property specifies if user wants to keep"
         " all pixels(events) contributing in the target MD workspace during rebinning operation; This is to accelerate work if the user sure that he wants"
         " to save the workspace after rebinning. If he does not specify this option, a rebinning which keeps contributing pixels will be performed"
-        " when user decides to save the final multidimensional workspace. DISABLED AT THE MOMENT" );	
+        " when user decides to save the final multidimensional workspace" );	
    
 }
 
@@ -130,9 +129,11 @@ CenterpieceRebinning::exec()
       bin_log.error()<<" input and output workspace have to be different do to rebinnning\n";
       throw(std::runtime_error("input and output workspaces have to be different"));
     }
+    bool keep_pixels(false);
+    keep_pixels = getProperty("KeepPixels");
 
    // here we should have the call to factory, providing best rebinning method for the job
-   std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinningNx3(inputWS,pSlicing,outputWS));
+   std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinningNx3(inputWS,pSlicing,outputWS,keep_pixels));
   //  std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinning4x3StructHR(inputWS,pSlicing,outputWS));
   
     bool selection_valid(false);
@@ -151,25 +152,24 @@ CenterpieceRebinning::exec()
 
     selection_valid = true;
 
-    // to the cut reporting the progress
+    // counter for the rebinning reporting the progress
     unsigned int ic(0);
     std::stringstream message_buf;
     while(selection_valid){
-        selection_valid=pRebin->rebin_data_chunk();
-
+        if(keep_pixels){
+            selection_valid=pRebin->rebin_data_chunk_keep_pixels();
+        }else{
+            selection_valid=pRebin->rebin_data_chunk();
+        }
         if(pProgress.get()){
             message_buf<<"Making cut; step "<<ic<<" out of: "<<nSteps<<std::endl;
             pProgress->report(ic,message_buf.str());
-            // check if canceled
-            //if(this->c
+            message_buf.seekp(std::ios::beg);
         }
         ic++;
     }
     // calculate necessary statistical properties of the cut
     pRebin->finalize_rebinning();
-
-
-
 
 
 }

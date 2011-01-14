@@ -11,8 +11,8 @@ src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
 src/MDWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
-#src/Events/MDEventWorkspace.cpp
-#src/Events/MDBox.cpp
+#src/Events/MDEventWorkspace.cpp # breaks the windows build
+#src/Events/MDBox.cpp               
 )
 
 # Header files

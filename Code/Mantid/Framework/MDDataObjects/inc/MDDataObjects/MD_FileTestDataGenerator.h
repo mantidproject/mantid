@@ -84,7 +84,8 @@ public:
 
 	// private, but protected for test purposes;
 private:
- 
+ // these values imitate the values that shoud be located in file 
+
 	unsigned int nDims; //< number of dimensions;
 	/// number of bins in every non-integrated dimension
 	std::vector<size_t> nBins;
@@ -94,6 +95,8 @@ private:
 	unsigned long   nDataPoints;
     /// number of bytes a pixel occupiesl
     unsigned int  sizeof_pixel;
+   /// number of cells in the MDImage;
+    size_t nCells;
 
     mutable MDPointDescription *pPointDescr;
     float   *dat_sig_fields;

@@ -11,6 +11,10 @@ using namespace Mantid::Kernel;
 Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
 
 //------------------------------------------------------------------------------------------------
+void 
+MDDataPoints::store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels)
+{
+}
 /** Constructor
  *
  * @param spImage: ???

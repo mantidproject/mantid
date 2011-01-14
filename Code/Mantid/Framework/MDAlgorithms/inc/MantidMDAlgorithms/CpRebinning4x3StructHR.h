@@ -41,7 +41,7 @@ public:
   /// the dataset expexted to work with specific data reader (hdfMatlab4D) and will throw if not provided with one
   CpRebinning4x3StructHR(const MDDataObjects::MDWorkspace_const_sptr &pSourceWS, 
                  Geometry::MDGeometryDescription const * const pTargetDescr,
-                 const MDDataObjects::MDWorkspace_sptr  & TargetWS );
+                 const MDDataObjects::MDWorkspace_sptr  & TargetWS,bool keep_pixels);
 /*! function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
      *  rebins these data (adds them) to MD image of the taget workspace;
      * Alternative (USA)vdescription: Identifies the locations of the datapoints in the multidimensional grid of the target workspace

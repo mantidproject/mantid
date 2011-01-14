@@ -15,19 +15,27 @@ namespace MDAlgorithms{
 
 CpRebinningNx3::CpRebinningNx3(const MDDataObjects::MDWorkspace_const_sptr &sourceWS, 
                  Geometry::MDGeometryDescription const * const pTargetDescr,
-                 const MDDataObjects::MDWorkspace_sptr  & targetWS):
+                 const MDDataObjects::MDWorkspace_sptr  & targetWS,bool in_keep_pixels):
 DynamicCPRRebinning(sourceWS,pTargetDescr,targetWS),
 nRecDims(3), // can not do anything else here
 n_starting_cell(0),
 n_pixels_read(0),
 n_pixels_selected(0),
-n_pix_in_buffer(0)
+n_pix_in_buffer(0),
+keep_pixels(in_keep_pixels),
+pTargetDataPoints(targetWS->get_spMDDPoints().get())
 {
 
      this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
  
-      //TODO: Give correct pixel size from the workspace method
-     pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
+     pix_buf = this->pSourceDataPoints->getBuffer();
+
+     if(keep_pixels){
+         // not necessary; will clear things out
+         //out_pix = this->pTargetDataPoints->getBuffer();
+         retained_cell_indexes.resize(pix_buf.size());
+         pixel_valid.resize(pix_buf.size(),false);
+     }
 
 }
 bool
@@ -45,12 +53,33 @@ CpRebinningNx3::rebin_data_chunk()
     return true;
 
 }
+bool
+CpRebinningNx3::rebin_data_chunk_keep_pixels()
+{
+    size_t  n_pixels_retained_now;
+
+    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+    n_pixels_read   += n_pix_in_buffer;
+
+    n_pixels_retained_now  =  rebin_Nx3dataset();
+    n_pixels_selected     += n_pixels_retained_now;
+    this->pTargetDataPoints->store_pixels(pix_buf,pixel_valid,retained_cell_indexes,n_pixels_retained_now);
+
+    if(n_starting_cell==preselected_cells.size()){
+          return false; // no more data left to process
+    }
+      // more data are still availible
+    return true;
+
+}
 //
 unsigned int 
 CpRebinningNx3::getNumDataChunks()const
 {
-    unsigned int n_data_chunks = this->n_preselected_pix/PIX_BUFFER_SIZE;
-    if(n_data_chunks*PIX_BUFFER_SIZE!=n_preselected_pix)n_data_chunks++;
+    size_t pix_buffer_size = this->pSourceDataPoints->get_pix_bufSize();
+    unsigned int n_data_chunks = this->n_preselected_pix/pix_buffer_size;
+
+    if(n_data_chunks*pix_buffer_size!=n_preselected_pix)n_data_chunks++;
     return n_data_chunks;
 }
 //
@@ -237,9 +266,6 @@ CpRebinningNx3::rebin_Nx3dataset()
       if(zt<cut_min[2]||zt>=cut_max[2]) {
         continue;
       }
-      nPixel_retained++;
-
-
 
       //     indx=indx(ok,:);    % get good indices (including integration axes and plot axes with only one bin)
       indX=(int)floor(xt-cut_min[0]);
@@ -248,6 +274,11 @@ CpRebinningNx3::rebin_Nx3dataset()
 
       //
       indl += indX*nDimX+indY*nDimY+indZ*nDimZ;
+      if(keep_pixels){
+          pixel_valid[i] = true;
+          retained_cell_indexes[nPixel_retained] = indl;
+      }
+      nPixel_retained++;
       // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
 //#pragma omp atomic
       pTargetImgData[indl].s   +=s;

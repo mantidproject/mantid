@@ -12,8 +12,8 @@ namespace MDAlgorithms{
 
 CpRebinning4x3StructHR::CpRebinning4x3StructHR(const MDDataObjects::MDWorkspace_const_sptr &sourceWS, 
                  Geometry::MDGeometryDescription const * const pTargetDescr,
-                 const MDDataObjects::MDWorkspace_sptr  & targetWS):
-CpRebinningNx3(sourceWS,pTargetDescr,targetWS)
+                 const MDDataObjects::MDWorkspace_sptr  & targetWS,bool keep_pixels):
+CpRebinningNx3(sourceWS,pTargetDescr,targetWS,keep_pixels)
 {
     if(boost::dynamic_pointer_cast<MD_File_hdfMatlab4D>(this->pSourceDataPoints->getFileReader())==0){
         this->bin_log.error()<<" CpRebinning4x3StructHR can not work with any reader except MD_File_hdfMatlab4D\n";
@@ -21,7 +21,8 @@ CpRebinningNx3(sourceWS,pTargetDescr,targetWS)
     }
 
    //Provide data buffer for input rebinning data
-     pix_buf.resize(PIX_BUFFER_SIZE*sizeof(sqw_pixel));
+    size_t pix_buf_size = this->pix_buf.size();
+    pix_buf.resize(pix_buf_size*sizeof(sqw_pixel));
 }
 //
 bool
