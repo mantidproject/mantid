@@ -1586,27 +1586,34 @@ void Indirect::sOfQwClicked()
         "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(filename, sqwInput)\n";
+        "LoadNexus(filename, sqwInput)\n"
+        "cleanup = True\n"; 
     }
     else
     {
       pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n"
+        "cleanup = False\n";
     }
+
+    // Create output name before rebinning
+    pyInput += "sqwOutput = sqwInput[:-3] + 'sqw'\n";
 
     if ( m_uiForm.sqw_ckRebinE->isChecked() )
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
-      pyInput += "Rebin(sqwInput, 'sqwInput_r', '" + eRebinString + "')\n"
+      pyInput += "Rebin(sqwInput, sqwInput+'_r', '" + eRebinString + "')\n"
         "if cleanup:\n"
         "    mantid.deleteWorkspace(sqwInput)\n"
-        "sqwInput = 'sqwInput_r'\n";
+        "sqwInput += '_r'\n"
+        "cleanup = True\n";
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
-      "rebin = '" + rebinString + "'\n"
-      "sqwOutput = sqwInput[:-3] + 'sqw'\n"
-      "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+      "rebin = '" + rebinString + "'\n"      
+      "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
+      "if cleanup:\n"
+      "    mantid.deleteWorkspace(sqwInput)\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
