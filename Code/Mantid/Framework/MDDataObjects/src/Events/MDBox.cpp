@@ -86,20 +86,6 @@ namespace MDDataObjects
   }
 
 
-  //-----------------------------------------------------------------------------------------------
-  /** Return the stats for the nth dimension.
-   * @param dim :: index of the dimension.
-   * */
-  TMDP
-  MDDimensionStats MDBox<nd,nv,TE>::getStats(const size_t dim) const
-  {
-    if (dim >= nd) throw std::runtime_error("Invalid dimension index specified.");
-    return this->dimStats[dim];
-  }
-
-
-
-
 
 
 

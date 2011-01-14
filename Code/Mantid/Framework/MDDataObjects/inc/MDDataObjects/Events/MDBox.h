@@ -3,15 +3,15 @@
 
 #include "MantidKernel/System.h"
 #include "MDDataObjects/Events/MDPoint.h"
-#include "MDDataObjects/Events/IMDEventWorkspace.h"
+#include "MDDataObjects/Events/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
 namespace MDDataObjects
 {
-  // Forward declaration
-  class MDDimensionStats;
+
+
 
 
   //===============================================================================================
@@ -20,6 +20,8 @@ namespace MDDataObjects
    * A box is a container of MDPoint's within a certain range of values
    * within the nd dimensions. This range defines a n-dimensional "box"
    * or rectangular prism.
+   *
+   * This class is a simple list of points with no more internal structure.
    *
    * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
    *                  an int > 0.
@@ -34,13 +36,11 @@ namespace MDDataObjects
   public:
     MDBox();
 
-    virtual void addPoint( const MDPoint<nd,nv,TE> & point);
+    void addPoint( const MDPoint<nd,nv,TE> & point);
 
-    virtual void clear();
+    void clear();
 
-    virtual MDDimensionStats getStats(const size_t dim) const;
-
-    virtual size_t getNPoints() const;
+    size_t getNPoints() const;
 
     size_t getNumDims() const;
 
@@ -55,10 +55,10 @@ namespace MDDataObjects
      * */
     std::vector< MDPoint<nd,nv,TE> > data;
 
-    /** Array of MDDimensionStats giving the extents and
-     * other stats on the box dimensions.
+    /** Array of MDDimensionExtents giving the extents and
+     * in each dimension.
      */
-    MDDimensionStats dimStats[nd];
+    MDDimensionExtents dims[nd];
 
     /** Total signal from all points within */
     double signal;
@@ -78,30 +78,6 @@ namespace MDDataObjects
 
 
 
-
-
-
-
-  //===============================================================================================
-  /** Simple class which holds the extents (min/max)
-   * of a given dimension in a MD workspace or MDBox
-   */
-  DLLExport class MDDimensionExtents
-  {
-  public:
-
-    /** Empty constructor - reset everything */
-    MDDimensionExtents() :
-      min( std::numeric_limits<CoordType>::max() ),
-      max( -std::numeric_limits<CoordType>::max() )
-    { }
-
-    // ---- Public members ----------
-    /// Extent: minimum value in that dimension
-    CoordType min;
-    /// Extent: maximum value in that dimension
-    CoordType max;
-  };
 
 
 

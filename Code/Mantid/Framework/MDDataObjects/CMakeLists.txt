@@ -11,8 +11,8 @@ src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
 src/MDWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
-src/Events/MDEventWorkspace.cpp
-src/Events/MDBox.cpp
+#src/Events/MDEventWorkspace.cpp
+#src/Events/MDBox.cpp
 )
 
 # Header files
@@ -29,7 +29,10 @@ inc/MDDataObjects/MDImage.h
 inc/MDDataObjects/MDImageDatatypes.h
 inc/MDDataObjects/MDWorkspace.h
 inc/MDDataObjects/MD_FileTestDataGenerator.h
-inc/MDDataObjects/Events/MDPoint.h
+#inc/MDDataObjects/Events/MDPoint.h
+#inc/MDDataObjects/Events/MDBox.h
+#inc/MDDataObjects/Events/IMDBox.h
+#inc/MDDataObjects/Events/MDDimensionExtents.h
 )
 
 # Test files. Other source files required.
@@ -42,9 +45,9 @@ set ( GMOCK_TEST_FILES
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
-test/MDPointTest.h  
-test/MDBoxTest.h  
 test/MDWorkspaceTest.h
+#test/MDPointTest.h  
+#test/MDBoxTest.h  
 )
 
 # Add the target for this directory
