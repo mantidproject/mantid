@@ -160,6 +160,88 @@ public:
 
 
 
+
+
+
+
+
+//==========================================================================================
+/** Info about a single neutron detection event, including a weight and error value,
+ * but excluding the pulsetime to save memory:
+ *
+ *  - the time of flight of the neutron (can be converted to other units)
+ *  - the absolute time of the pulse at which it was produced
+ *  - weight of the neutron (float, can be
+ */
+class DLLExport WeightedEventNoTime {
+
+  /// EventList has the right to mess with this
+  friend class EventList;
+  friend class tofGreaterOrEqual;
+  friend class tofGreater;
+
+private:
+
+  /// The time of flight of this neutron
+  float m_tof;
+
+  /// The weight of this neutron.
+  float m_weight;
+
+  /// The SQUARE of the error that this neutron contributes.
+  float m_errorSquared;
+
+public:
+  /// Constructor, specifying only the time of flight
+  WeightedEventNoTime(double time_of_flight);
+
+  /// Constructor, full
+  WeightedEventNoTime(double time_of_flight, float weight, float errorSquared);
+
+  WeightedEventNoTime(const TofEvent&, float weight, float errorSquared);
+
+  WeightedEventNoTime(const WeightedEventNoTime&);
+
+  WeightedEventNoTime(const WeightedEvent&);
+
+  WeightedEventNoTime(const TofEvent&);
+
+  WeightedEventNoTime();
+
+  ~WeightedEventNoTime();
+
+  /// Copy from another WeightedEventNoTime object
+  WeightedEventNoTime& operator=(const WeightedEventNoTime & rhs);
+
+  bool operator==(const WeightedEventNoTime & other) const;
+
+  /// Return the weight of the neutron, as a double (it is saved as a float).
+  double weight() const
+  {
+    return m_weight;
+  }
+
+  /// Return the error of the neutron, as a double (it is saved as a float).
+  double error() const
+  {
+    return std::sqrt( double(m_errorSquared) );
+  }
+
+  /// Return the squared error of the neutron, as a double
+  double errorSquared() const
+  {
+    return m_errorSquared;
+  }
+
+  /// Output a string representation of the event to a stream
+  friend std::ostream& operator<<(std::ostream &os, const WeightedEvent &event);
+
+
+};
+
+
+
+
 } // DataObjects
 } // Mantid
 #endif /// MANTID_DATAOBJECTS_EVENTS_H_
