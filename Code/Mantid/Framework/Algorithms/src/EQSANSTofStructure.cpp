@@ -292,7 +292,7 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
                 c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
                 c_wl_2[i] = chopper_wl_2[i] + 3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
 
-                if (frame_wl_1 < c_wl_2[i] and frame_wl_2> c_wl_1[i])
+                if (frame_wl_1 < c_wl_2[i] && frame_wl_2> c_wl_1[i])
                 {
                     passed=true;
                     break;
