@@ -73,30 +73,30 @@ set ( INC_FILES inc/MantidCurveFitting/BackgroundFunction.h
 		inc/MantidCurveFitting/UserFunction.h )
 	      
 set ( TEST_FILES #test/BackToBackExponentialTest.h # TODO tests are commented out
-                 test/BoundaryConstraintTest.h
-		 test/ChebyshevTest.h
-		 test/CompositeFunctionTest.h
-		 test/ConvolutionTest.h
-		 test/CostFunctionFactoryTest.h
-		 test/ExpDecayTest.h
-		 test/FitTest.h
-		 test/FuncMinimizerFactoryTest.h
+#                 test/BoundaryConstraintTest.h
+#		 test/ChebyshevTest.h
+#		 test/CompositeFunctionTest.h
+#		 test/ConvolutionTest.h
+#		 test/CostFunctionFactoryTest.h
+#		 test/ExpDecayTest.h
+#		 test/FitTest.h
+#		 test/FuncMinimizerFactoryTest.h
 		 test/FunctionFactoryTest.h
-		 test/FunctionTest.h
-		 test/Gaussian1DTest.h
-		 test/GaussianTest.h # TODO tests are commented out
-		 #test/IkedaCarpenterPVTest.h # TODO tests are commented out
-		 test/LinearBackgroundTest.h
-		 test/LinearTest.h
-		 test/Lorentzian1DTest.h
-		 test/LorentzianTest.h
-		 test/PlotPeakByLogValueTest.h
-		 test/QuadraticTest.h
-		 test/ResolutionTest.h
-		 test/SpecialFunctionSupportTest.h
-		 test/SplineBackgroundTest.h
-		 test/UserFunction1DTest.h
-		 test/UserFunctionTest.h
+#		 test/FunctionTest.h
+#		 test/Gaussian1DTest.h
+#		 test/GaussianTest.h # TODO tests are commented out
+#		 #test/IkedaCarpenterPVTest.h # TODO tests are commented out
+#		 test/LinearBackgroundTest.h
+#		 test/LinearTest.h
+#		 test/Lorentzian1DTest.h
+#		 test/LorentzianTest.h
+#		 test/PlotPeakByLogValueTest.h
+#		 test/QuadraticTest.h
+#		 test/ResolutionTest.h
+#		 test/SpecialFunctionSupportTest.h
+#		 test/SplineBackgroundTest.h
+#		 test/UserFunction1DTest.h
+#		 test/UserFunctionTest.h
  )
 
 # Add the target for this directory

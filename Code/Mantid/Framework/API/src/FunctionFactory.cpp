@@ -14,7 +14,7 @@ namespace Mantid
   namespace API
   {
 
-    FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFunction>(), g_log(Kernel::Logger::get("FunctionFactory"))
+    FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFitFunction>(), g_log(Kernel::Logger::get("FunctionFactory"))
     {
       // we need to make sure the library manager has been loaded before we 
       // are constructed so that it is destroyed after us and thus does
@@ -29,7 +29,11 @@ namespace Mantid
 
     IFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
     {
-      IFunction* fun = createUnwrapped(type);
+      IFunction* fun = dynamic_cast<IFunction*>(createUnwrapped(type));
+      if (!fun)
+      {
+        throw std::runtime_error("Function "+type+" cannot be cast to IFunction");
+      }
       fun->initialize();
       return fun;
     }
@@ -256,7 +260,7 @@ namespace Mantid
      *    expression such as "0 < Sigma < 1" or a list of constraint expressions separated by commas ','
      *    and enclosed in brackets "(...)" .
      */
-    void FunctionFactoryImpl::addConstraints(IFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addConstraints(IFitFunction* fun,const Expression& expr)const
     {
       if (expr.name() == ",")
       {
@@ -276,7 +280,7 @@ namespace Mantid
      * @param fun The function
      * @param expr The constraint expression.
      */
-    void FunctionFactoryImpl::addConstraint(IFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addConstraint(IFitFunction* fun,const Expression& expr)const
     {
       IConstraint* c = ConstraintFactory::Instance().createInitialized(fun,expr);
       fun->addConstraint(c);
@@ -287,7 +291,7 @@ namespace Mantid
      * @param expr The tie expression: either parName = TieString or a list
      *   of name = string pairs
      */
-    void FunctionFactoryImpl::addTies(IFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addTies(IFitFunction* fun,const Expression& expr)const
     {
       if (expr.name() == "=")
       {
@@ -306,7 +310,7 @@ namespace Mantid
      * @param fun The function
      * @param expr The tie expression: parName = TieString
      */
-    void FunctionFactoryImpl::addTie(IFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addTie(IFitFunction* fun,const Expression& expr)const
     {
       if (expr.size() > 1)
       {// if size > 2 it is interpreted as setting a tie (last expr.term) to multiple parameters, e.g 
@@ -317,6 +321,89 @@ namespace Mantid
           fun->tie(expr[i].name(),value);
         }
       }
+    }
+
+    /**
+      * Create a fitting function from a string.
+      * @param input The input string, has a form of a function call: funName(attr1=val,param1=val,...,ties=(param3=2*param1,...),constraints=(p2>0,...))
+      */
+    IFitFunction* FunctionFactoryImpl::createFitFunction(const std::string& input) const
+    {
+      Expression expr;
+      try
+      {
+        expr.parse(input);
+      }
+      catch(...)
+      {
+        inputError(input);
+      }
+      return createFitFunction(expr);
+    }
+
+    /**
+      * Create a fitting function from an expression.
+      * @param expr The input expression made by parsing the input string to createFitFunction(const std::string& input)
+      */
+    IFitFunction* FunctionFactoryImpl::createFitFunction(const Expression& expr) const
+    {
+      const Expression& e = expr.bracketsRemoved();
+
+      std::string fnName = e.name();
+
+      IFitFunction* fun = createUnwrapped(fnName);
+      if (!fun)
+      {
+        throw std::runtime_error("Cannot create function "+fnName);
+      }
+      fun->initialize();
+
+      const std::vector<Expression>& terms = e.terms();
+      std::vector<Expression>::const_iterator term = terms.begin();
+
+      for(;term!=terms.end();++term)
+      {// loop over function's parameters/attributes
+        if (term->name() == "=")
+        {
+          std::string parName = term->terms()[0].name();
+          std::string parValue = term->terms()[1].str();
+          if (fun->hasAttribute(parName))
+          {// set attribute
+            if (parValue.size() > 1 && parValue[0] == '"')
+            {// remove the double quotes
+              parValue = parValue.substr(1,parValue.size()-2);
+            }
+            IFunction::Attribute att = fun->getAttribute(parName);
+            att.fromString(parValue);
+            fun->setAttribute(parName,att);
+          }
+          else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
+          {// or it can be a list of constraints
+            addConstraints(fun,(*term)[1]);
+          }
+          else if (parName == "ties")
+          {
+            addTies(fun,(*term)[1]);
+          }
+          else
+          {// set initial parameter value
+            fun->setParameter(parName,atof(parValue.c_str()));
+          }
+        }
+        else // if the term isn't a name=value pair it could be a member function of a composite function
+        {
+          throw Kernel::Exception::NotImplementedError("Composite functions are not implemented yet for IFitFunction");
+          //CompositeFunction* cfun = dynamic_cast<CompositeFunction*>(fun);
+          //if (!cfun)
+          //{
+          //  throw std::runtime_error("Cannot add a function to a non-composite function "+fnName);
+          //}
+          //IFitFunction* mem = createFitFunction(*term);
+          //cfun->addFunction(mem);
+        }
+      }// for term
+
+      return fun;
     }
 
   } // namespace API

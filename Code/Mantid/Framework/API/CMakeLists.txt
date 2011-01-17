@@ -11,6 +11,7 @@ set ( SRC_FILES src/Algorithm.cpp
 		src/Column.cpp
 		src/ColumnFactory.cpp
 		src/CompositeFunction.cpp
+		#src/CompositeFunctionMW.cpp
 		src/ConstraintFactory.cpp
 		src/Expression.cpp
 		src/FileFinder.cpp
@@ -22,6 +23,8 @@ set ( SRC_FILES src/Algorithm.cpp
 		src/IEventWorkspace.cpp
 		src/IFitFunction.cpp
 		src/IFunction.cpp
+		src/IFunctionMW.cpp
+		src/IFunctionMD.cpp
 		src/IMDWorkspace.cpp
 		src/ImplicitFunctionParameterParserFactory.cpp
 		src/ImplicitFunctionParserFactory.cpp
@@ -40,6 +43,7 @@ set ( SRC_FILES src/Algorithm.cpp
 		src/PairedGroupAlgorithm.cpp
 		src/ParameterReference.cpp
 		src/ParameterTie.cpp
+		src/ParamFunction.cpp
 		src/Progress.cpp
 		src/RefAxis.cpp
 		src/Run.cpp
@@ -71,6 +75,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/ColumnFactory.h
 		inc/MantidAPI/Column.h
 		inc/MantidAPI/CompositeFunction.h
+		#inc/MantidAPI/CompositeFunctionMW.h
 		inc/MantidAPI/ConstraintFactory.h
 		inc/MantidAPI/DeclareUserAlg.h
 		inc/MantidAPI/DllExport.h
@@ -90,6 +95,8 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/IEventWorkspace.h
 		inc/MantidAPI/IFitFunction.h
 		inc/MantidAPI/IFunction.h
+		inc/MantidAPI/IFunctionMW.h
+		inc/MantidAPI/IFunctionMD.h
 		inc/MantidAPI/IFunctionWithLocation.h
 		inc/MantidAPI/ILocatedData.h
 		inc/MantidAPI/IMDWorkspace.h
@@ -116,6 +123,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/PairedGroupAlgorithm.h
 		inc/MantidAPI/ParameterReference.h
 		inc/MantidAPI/ParameterTie.h
+		inc/MantidAPI/ParamFunction.h
 		inc/MantidAPI/Point3D.h
 		inc/MantidAPI/Progress.h
 		inc/MantidAPI/RefAxis.h

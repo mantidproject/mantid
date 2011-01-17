@@ -746,6 +746,7 @@ void ConfigDialog::initCurveFittingTab()
 
   grid->addWidget(new QLabel(tr("FindPeaks Tolerance")),4,0);
   findPeaksTolerance = new QSpinBox();
+  findPeaksTolerance->setMaximum(1000000);
   grid->addWidget(findPeaksTolerance, 4,1);
 
   grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")),5,0);
@@ -769,7 +770,7 @@ void ConfigDialog::initCurveFittingTab()
   for( size_t i = 0; i < nfuncs; ++i )
   {
     std::string name = allfunctions[i];
-    Mantid::API::IFunction* function = function_creator.createUnwrapped(name);
+    Mantid::API::IFitFunction* function = function_creator.createFunction(name);
     if( dynamic_cast<Mantid::API::IBackgroundFunction*>(function) )
     {
       backgroundFunctions->addItem(QString::fromStdString(name));

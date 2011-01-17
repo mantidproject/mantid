@@ -284,8 +284,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   // Create new function
   if (fnName.find("=") == std::string::npos)
   {// either from name
-    f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
-    f->initialize();
+    f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
   }
   else
   {// of from full initialization expression
@@ -790,8 +789,7 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
     try
     {
       f = Mantid::API::FunctionFactory::Instance().
-        createUnwrapped(fnName.toStdString());
-      f->initialize();
+        createFunction(fnName.toStdString());
     }
     catch(std::exception& e)
     {

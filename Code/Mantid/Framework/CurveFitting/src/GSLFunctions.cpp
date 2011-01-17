@@ -26,6 +26,7 @@ namespace CurveFitting
 
     if (x->data) p->function->updateActive(x->data);
     p->function->function (f->data);
+    p->function->addPenalty(f->data);
 
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
@@ -51,6 +52,7 @@ namespace CurveFitting
 
     if (x->data) p->function->updateActive(x->data);
     p->function->functionDeriv (&p->J);
+    p->function->addPenaltyDeriv(&p->J);
 
     // functionDeriv() return derivatives of calculated data values. Need to convert this values into
     // derivatives of calculated-observed devided by error values used by GSL
@@ -93,6 +95,7 @@ namespace CurveFitting
     // calculate yCal and store in l_holdCalculatedData
     if (x->data) p->function->updateActive(x->data);
     p->function->function (l_holdCalculatedData);
+    p->function->addPenalty(l_holdCalculatedData);
 
     return p->costFunc->val(p->Y, p->sqrtWeightData, l_holdCalculatedData, p->n);
   }
@@ -111,8 +114,10 @@ namespace CurveFitting
 
     if (x->data) p->function->updateActive(x->data);
     p->function->function (l_holdCalculatedData);
+    p->function->addPenalty(l_holdCalculatedData);
     p->J.setJ(p->holdCalculatedJacobian);
     p->function->functionDeriv (&p->J);
+    p->function->addPenaltyDeriv(&p->J);
 
     p->costFunc->deriv(p->Y, p->sqrtWeightData, l_holdCalculatedData, 
                      p->holdCalculatedJacobian->data, df->data, p->p, p->n);

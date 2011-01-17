@@ -122,6 +122,56 @@ void IFitFunction::removeTie(const std::string& parName)
 }
 
 /**
+  * If any of the parameters do not satisfy a constraint penalty values will be added to the function output.
+  * This method is called by Fit algorithm after calling function(double*out)
+  * @param out The output form function(double* out) to which the penalty will be added.
+  */
+void IFitFunction::addPenalty(double *out)const
+{
+    double penalty = 0.;
+    for(int i=0;i<nParams();++i)
+    {
+      API::IConstraint* c = getConstraint(i);
+      if (c)
+      {
+        penalty += c->check();
+      }
+    }
+
+    int n = dataSize() - 1;
+    // add penalty to first and last point and every 10th point in between
+    if ( penalty != 0.0 )
+    {
+      out[0] += penalty;
+      out[n] += penalty;
+
+      for (int i = 9; i < n; i+=10)
+      {
+        out[i] += penalty;
+      }
+    }
+}
+
+/**
+  * If a penalty was added to the function output the derivatives are modified accordingly.
+  * This method is called by Fit algorithm after calling functionDeriv(Jacobian *out)
+  * @param out The Jacobian to be corrected
+  */
+void IFitFunction::addPenaltyDeriv(Jacobian *out)const
+{
+    for(int i=0;i<nParams();++i)
+    {  
+      API::IConstraint* c = getConstraint(i);
+      if (c)
+      {
+        double penalty = c->checkDeriv();
+        out->addNumberToColumn(penalty, activeIndex(i));
+      }
+    }
+
+}
+
+/**
  * Writes a string that can be used in Fit.IFitFunction to create a copy of this IFitFunction
  * @return string representation of the function
  */

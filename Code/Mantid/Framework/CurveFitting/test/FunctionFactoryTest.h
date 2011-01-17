@@ -523,6 +523,18 @@ public:
     delete fun1;
   }
 
+  void testCreateFitFunction_creates_old_IFunction()
+  {
+    IFitFunction *gauss = FunctionFactory::Instance().createFitFunction("Gaussian(PeakCentre=17.4e-2,Height=10,Sigma=0.33)");
+    TS_ASSERT(gauss);
+    TS_ASSERT(dynamic_cast<IFunction*>(gauss));
+
+    TS_ASSERT_EQUALS(gauss->name(),"Gaussian");
+    TS_ASSERT_EQUALS(gauss->getParameter("PeakCentre"),0.174);
+    TS_ASSERT_EQUALS(gauss->getParameter("Height"),10);
+    TS_ASSERT_EQUALS(gauss->getParameter("Sigma"),0.33);
+  }
+
 };
 
 #endif /*FUNCTIONFACTORYTEST_H_*/

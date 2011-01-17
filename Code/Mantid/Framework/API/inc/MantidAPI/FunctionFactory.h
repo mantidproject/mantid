@@ -27,6 +27,7 @@ namespace API
 // More forward declarations
 //----------------------------------------------------------------------
   class IFunction;
+  class IFitFunction;
   class CompositeFunction;
   class Expression;
 
@@ -60,7 +61,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class EXPORT_OPT_MANTID_API FunctionFactoryImpl : public Kernel::DynamicFactory<IFunction>
+  class EXPORT_OPT_MANTID_API FunctionFactoryImpl : public Kernel::DynamicFactory<IFitFunction>
   {
   public:
     /**Creates an instance of a function
@@ -71,6 +72,9 @@ namespace API
 
     ///Creates an instance of a function
     IFunction* createInitialized(const std::string& input) const;
+
+    ///Creates an instance of a function
+    IFitFunction* createFitFunction(const std::string& input) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;
@@ -84,20 +88,27 @@ namespace API
     ///Private Destructor
     virtual ~FunctionFactoryImpl();
 
+    /// These methods shouldn't be used to create functions
+    using Kernel::DynamicFactory<IFitFunction>::create;
+    using Kernel::DynamicFactory<IFitFunction>::createUnwrapped;
+
     /// Create a simple function
     IFunction* createSimple(const Expression& expr)const;
     /// Create a composite function
     CompositeFunction* createComposite(const Expression& expr)const;
+    ///Creates an instance of a function
+    IFitFunction* createFitFunction(const Expression& expr) const;
+
     /// Throw an exception
     void inputError(const std::string& str="")const;
     /// Add constraints to the created function
-    void addConstraints(IFunction* fun,const Expression& expr)const;
+    void addConstraints(IFitFunction* fun,const Expression& expr)const;
     /// Add a single constraint to the created function
-    void addConstraint(IFunction* fun,const Expression& expr)const;
+    void addConstraint(IFitFunction* fun,const Expression& expr)const;
     /// Add ties to the created function
-    void addTies(IFunction* fun,const Expression& expr)const;
+    void addTies(IFitFunction* fun,const Expression& expr)const;
     /// Add a tie to the created function
-    void addTie(IFunction* fun,const Expression& expr)const;
+    void addTie(IFitFunction* fun,const Expression& expr)const;
 
     ///static reference to the logger class
     Kernel::Logger& g_log;

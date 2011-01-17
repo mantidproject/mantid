@@ -99,8 +99,8 @@ m_decimals(-1)
   }
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not loaded
-  boost::shared_ptr<Mantid::API::IFunction> f = 
-    Mantid::API::FunctionFactory::Instance().create("Gaussian");
+  boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
+    Mantid::API::FunctionFactory::Instance().createFitFunction("Gaussian"));
   if (m_autoBgName.toLower() == "none")
   {
     m_autoBgName = "";
@@ -986,8 +986,8 @@ void FitPropertyBrowser::populateFunctionNames()
     std::string fnName = names[i];
     QString qfnName = QString::fromStdString(fnName);
     m_registeredFunctions << qfnName;
-    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().create(fnName);
-    f->initialize();
+    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
+      Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
     if (pf)
@@ -1936,8 +1936,8 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
     QStringList nameList = aName.split(' ');
     if (nameList.isEmpty()) return;
     QString name = nameList[0];
-    boost::shared_ptr<Mantid::API::IFunction> f = 
-      Mantid::API::FunctionFactory::Instance().create(name.toStdString());
+    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
+      Mantid::API::FunctionFactory::Instance().createFitFunction(name.toStdString()));
     m_auto_back = true;
     m_autoBgName = name;
     if (nameList.size() > 1)
@@ -2104,7 +2104,7 @@ void FitPropertyBrowser::findPeaks()
     {
       if (centre[i] < startX() || centre[i] > endX()) continue;
       Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(
-        Mantid::API::FunctionFactory::Instance().createUnwrapped(defaultPeakType())
+        Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType())
         );
       if (!f) break;
       f->initialize();

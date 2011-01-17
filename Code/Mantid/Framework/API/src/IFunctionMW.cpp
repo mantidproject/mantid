@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
@@ -32,14 +32,14 @@ namespace API
 {
   using namespace Geometry;
   
-  Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
+  Kernel::Logger& IFunctionMW::g_log = Kernel::Logger::get("IFunctionMW");
 
   /** Set the workspace
     * @param ws A shared pointer to a workspace. Must be a MatrixWorkspace.
-    * @param slicing A string identifying the data to be fitted. Format for IFunction:
+    * @param slicing A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */
-  void IFunction::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+  void IFunctionMW::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
   {
     try
     {
@@ -175,37 +175,37 @@ namespace API
     }
     catch(std::exception& e)
     {
-      g_log.error() << "IFunction::setWorkspace failed with error: " << e.what() << '\n';
+      g_log.error() << "IFunctionMW::setWorkspace failed with error: " << e.what() << '\n';
       throw;
     }
   }
 
   /// Get the workspace
-  boost::shared_ptr<const API::Workspace> IFunction::getWorkspace()const
+  boost::shared_ptr<const API::Workspace> IFunctionMW::getWorkspace()const
   {
     return m_workspace;
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  int IFunction::dataSize()const
+  int IFunctionMW::dataSize()const
   {
     return m_dataSize;
   }
 
   /// Returns a pointer to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  const double* IFunction::getData()const
+  const double* IFunctionMW::getData()const
   {
     return m_data;
   }
 
-  const double* IFunction::getWeights()const
+  const double* IFunctionMW::getWeights()const
   {
     return &m_weights[0];
   }
 
   /// Function you want to fit to. 
   /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  void IFunction::function(double* out)const
+  void IFunctionMW::function(double* out)const
   {
     if (m_dataSize == 0) return;
     function(out,m_xValues.get(),m_dataSize);
@@ -213,7 +213,7 @@ namespace API
   }
 
   /// Derivatives of function with respect to active parameters
-  void IFunction::functionDeriv(Jacobian* out)
+  void IFunctionMW::functionDeriv(Jacobian* out)
   {
     if (out == NULL) 
     {
@@ -232,7 +232,7 @@ namespace API
   }
 
 
-/** Base class implementation of derivative IFunction throws error. This is to check if such a function is provided
+/** Base class implementation of derivative IFunctionMW throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
@@ -241,10 +241,10 @@ namespace API
  * @param xValues X values for data points
  * @param nData Number of data points
  */
-void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
   (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-  throw Kernel::Exception::NotImplementedError("No derivative IFunction provided");
+  throw Kernel::Exception::NotImplementedError("No derivative IFunctionMW provided");
 }
 
 /** Initialize the function providing it the workspace
@@ -253,7 +253,7 @@ void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& n
  * @param xMin The lower bin index
  * @param xMax The upper bin index
  */
-void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
+void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
 {
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
@@ -409,7 +409,7 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
  *  @param wsIndex workspace index
  *  @return converted value
  */
-double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit, 
+double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
                                int wsIndex)
 {
@@ -458,18 +458,18 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
 }
 
 /**
- * Calculate the Jacobian with respect to parameters actually declared in the IFunction
+ * Calculate the Jacobian with respect to parameters actually declared in the IFunctionMW
  * @param out The output Jacobian
  * @param xValues The x-values
  * @param nData The number of data points (and x-values).
  */
-void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
+void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
   this->functionDeriv(out,xValues,nData);
 }
 
 /// Called after setMatrixWorkspace if setWorkspace hadn't been called before
-void IFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
+void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
 {
   m_dataSize = m_xMaxIndex - m_xMinIndex;
   m_data = &m_workspace->readY(m_workspaceIndex)[m_xMinIndex];
@@ -516,7 +516,7 @@ void IFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array
 
 }
 
-boost::shared_ptr<API::MatrixWorkspace> IFunction::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const
+boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const
 {
       const MantidVec& inputX = inWS->readX(wi);
       const MantidVec& inputY = inWS->readY(wi);

@@ -313,6 +313,10 @@ public:
   virtual IConstraint* getConstraint(int i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
+  /// Add a penalty to the output if some parameters do not satisfy constraints.
+  virtual void addPenalty(double *out)const;
+  /// Modify the derivatives to correct for a penalty
+  virtual void addPenaltyDeriv(Jacobian *out)const;
 
   /// Set the parameters of the function to satisfy the constraints of
   /// of the function. For example

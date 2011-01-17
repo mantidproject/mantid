@@ -7,7 +7,7 @@ void IFunctionWrapper::setFunction(const QString& name)
 {
   try
   {
-    m_function = Mantid::API::FunctionFactory::Instance().createUnwrapped(name.toStdString());
+    m_function = dynamic_cast<Mantid::API::CompositeFunction*>(Mantid::API::FunctionFactory::Instance().createFunction(name.toStdString()));
     m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunction*>(m_function);
     m_peakFunction = dynamic_cast<Mantid::API::IPeakFunction*>(m_function);
   }
