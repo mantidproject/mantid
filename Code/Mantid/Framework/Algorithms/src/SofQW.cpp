@@ -9,6 +9,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 namespace Mantid
 {
@@ -59,10 +60,6 @@ void SofQW::exec()
   std::vector<double> verticalAxis;
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace(inputWorkspace, verticalAxis);
 
-  // Get hold of the unit objects in the output workspace
-  const Unit_const_sptr wUnit = outputWorkspace->getAxis(0)->unit();
-  const Unit_const_sptr qUnit = outputWorkspace->getAxis(1)->unit();
-  
   // Retrieve the emode & efixed properties
   const std::string emodeStr = getProperty("EMode");
   // Convert back to an integer representation
@@ -77,18 +74,25 @@ void SofQW::exec()
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
+  V3D beamDir = sample->getPos() - source->getPos();
+  beamDir.normalize();
+
   double l1;
   try
   {
     l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
-  catch (Exception::NotFoundError e)
+  catch (Exception::NotFoundError &e)
   {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWorkspace->getTitle());
   }
-  
+
+  // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
+  const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 / 
+    (PhysicalConstants::h*PhysicalConstants::h);
+
   // Loop over input workspace bins, reassigning data to correct bin in output qw workspace
   const int numHists = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
@@ -96,52 +100,84 @@ void SofQW::exec()
   {
     try {
       // Now get the detector object for this histogram
-      IDetector_sptr det = inputWorkspace->getDetector(i);
-      // Get the sample-detector distance for this detector (in metres)
-      const double l2 = det->getDistance(*sample);
-      // The scattering angle for this detector (in radians).
-      const double twoTheta = inputWorkspace->detectorTwoTheta(det);
+      IDetector_sptr spectrumDet = inputWorkspace->getDetector(i);
+      if( spectrumDet->isMonitor() ) continue;
       // If an indirect instrument, try getting Efixed from the geometry
       double efixed = getProperty("EFixed");
       if (emode==2)
       {
         try {
-          Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+          Parameter_sptr par = pmap.get(spectrumDet->getComponent(),"Efixed");
           if (par) 
           {
             efixed = par->value<double>();
           }
-        } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+        } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
       }
-      // Get a copy of the X vector for the current histogram (although all X vectors are the same,
-      // they will be changed by the calls to the Unit methods so this must be done each time)
-      MantidVec currentX = inputWorkspace->readX(i);
-      MantidVec emptyVec;
-      // Now convert it to Q
-      wUnit->toTOF(currentX,emptyVec,l1,l2,twoTheta,emode,efixed,0.0);
-      qUnit->fromTOF(currentX,emptyVec,l1,l2,twoTheta,emode,efixed,0.0);
-    
-      // Now need to loop over unit-converted vector, looking up the Q value of each point and
-      // putting it in the right place in the q-w grid
+
+      // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
+      // be completely general wemust calculate the momentum transfer by calculating the incident and final
+      // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
+      DetectorGroup_sptr detGroup = boost::dynamic_pointer_cast<DetectorGroup>(spectrumDet);
+      std::vector<IDetector_sptr> detectors;
+      if( detGroup ) 
+      {
+	detectors = detGroup->getDetectors();
+      }
+      else
+      {
+	detectors.push_back(spectrumDet);
+      }
+      const int numDets = detectors.size();
       const MantidVec& Y = inputWorkspace->readY(i);
       const MantidVec& E = inputWorkspace->readE(i);
-      for (int j = 0; j < numBins; ++j)
+      const MantidVec& X = inputWorkspace->readX(i);
+
+      // Loop over the detectors and for each bin calculate Q
+      for( int idet = 0; idet < numDets; ++idet )
       {
-        // Calculate the Q value as the centre of the bin
-        const double q = 0.5 * (currentX[j] + currentX[j+1]);
-        // Test whether it's in range of the Q axis
-        if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
-        // Find which q bin this point lies in
-        const MantidVec::difference_type qIndex = std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
-        // And add the data and it's error to that bin
-        outputWorkspace->dataY(qIndex)[j] += Y[j];
-        outputWorkspace->dataE(qIndex)[j] = sqrt( pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2) );
+	IDetector_sptr det = detectors[idet];
+	// Calculate kf vector direction and then Q for each energy bin
+	V3D scatterDir = (det->getPos() - sample->getPos());
+ 	scatterDir.normalize();
+	for (int j = 0; j < numBins; ++j)
+	{
+ 	  const double deltaE = 0.5*(X[j] + X[j+1]);
+	  // Compute ki and kf wave vectors and therefore q = ki - kf
+	  double ei(0.0),ef(0.0);
+	  if( emode == 1 )
+	  {
+	    ei = efixed;
+	    ef = efixed - deltaE;
+	  }
+	  else
+	  {
+	    ei = efixed + deltaE;
+	    ef = efixed;
+	  }
+	  const V3D ki = beamDir*sqrt(energyToK*ei);
+	  const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
+	  const double q = (ki - kf).norm();
+
+	  // Test whether it's in range of the Q axis
+	  if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
+	  // Find which q bin this point lies in
+	  const MantidVec::difference_type qIndex =
+	    std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
+	  
+	  // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
+	  outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets;
+	  // Standard error on the average
+	  outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets );
+	}
       }
-    } catch (Exception::NotFoundError e) {
-       // Get to here if exception thrown when calculating distance to detector
-       // Presumably, if we get to here the spectrum will be all zeroes anyway (from conversion to E)
-       continue;
+
+    } catch (Exception::NotFoundError &e) {
+      // Get to here if exception thrown when calculating distance to detector
+      // Presumably, if we get to here the spectrum will be all zeroes anyway (from conversion to E)
+      continue;
     }
+    
   }
 
   // If the input workspace was a distribution, need to divide by q bin width
