@@ -344,6 +344,8 @@ private:
   static unsigned int g_execCount; ///< Counter to keep track of algorithm execution order
 
   std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
+
+  std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 };
 
 ///Typedef for a shared pointer to an Algorithm

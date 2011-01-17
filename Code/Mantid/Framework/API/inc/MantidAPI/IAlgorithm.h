@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
 #include <Poco/ActiveResult.h>
+#include <boost/weak_ptr.hpp>
 #include <string>
 
 namespace Poco
@@ -132,6 +133,7 @@ public:
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
 typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
+typedef boost::weak_ptr<IAlgorithm> IAlgorithm_wptr;
 
 } // namespace API
 } // namespace Mantid
