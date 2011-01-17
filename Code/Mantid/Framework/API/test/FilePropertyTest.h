@@ -17,7 +17,6 @@ public:
   
   void setUp()
   {
-    ConfigService::Instance().updateConfig("Mantid.properties");
         // Ensure we have the correct facility set up
         const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
@@ -188,7 +187,7 @@ public:
 
   void testDirectoryPasses()
   {
-    std::string TestDir("./MyTestFolder");
+    std::string TestDir(getDirectoryOfExecutable()+"MyTestFolder");
     Poco::File dir(TestDir);
     dir.createDirectory();
 
