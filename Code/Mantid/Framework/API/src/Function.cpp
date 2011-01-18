@@ -455,13 +455,16 @@ void Function::calNumericalDeriv(Jacobian* out, const double* xValues, const int
     int nParam = nParams();
 
     // allocate memory if not already done
-    if (!m_tmpFunctionOutputMinusStep && nData>0)
+    if ( m_tmpFunctionOutputMinusStep.size() < nData)
     {
-      m_tmpFunctionOutputMinusStep.reset(new double[nData]);
-      m_tmpFunctionOutputPlusStep.reset(new double[nData]);
+      m_tmpFunctionOutputMinusStep.resize(nData);
+    }
+    if ( m_tmpFunctionOutputPlusStep.size() < nData)
+    {
+      m_tmpFunctionOutputPlusStep.resize(nData);
     }
 
-    function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+    function(&m_tmpFunctionOutputMinusStep[0], xValues, nData);
 
     for (int iP = 0; iP < nParam; iP++)
     {
@@ -477,20 +480,14 @@ void Function::calNumericalDeriv(Jacobian* out, const double* xValues, const int
           step = val*stepPercentage;
         }
 
-        //double paramMstep = val - step;
-        //setParameter(iP, paramMstep);
-        //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
-
         double paramPstep = val + step;
         setParameter(iP, paramPstep);
-        function(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
+        function(&m_tmpFunctionOutputPlusStep[0], xValues, nData);
 
         step = paramPstep - val;
         setParameter(iP, val);
 
         for (int i = 0; i < nData; i++) {
-         // out->set(i,iP, 
-         //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
           out->set(i,iP, 
             (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
         }

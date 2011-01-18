@@ -87,6 +87,11 @@ namespace Mantid
       /// method for updating m_waveLength
       void calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const;
 
+      /// used for cal m_waveLengthFixed
+      void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+                               boost::shared_ptr<const API::MatrixWorkspace> ws,
+                               int wsIndex) const;
+
       /// convert voigt params to pseudo voigt params
       void convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
                                 double& H, double& eta) const;

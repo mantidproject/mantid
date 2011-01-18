@@ -159,9 +159,9 @@ private:
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
   /// Temporary data storage used in functionDeriv
-  mutable boost::shared_array<double> m_tmpFunctionOutputMinusStep;
+  mutable std::vector<double> m_tmpFunctionOutputMinusStep;
   /// Temporary data storage used in functionDeriv
-  mutable boost::shared_array<double> m_tmpFunctionOutputPlusStep;
+  mutable std::vector<double> m_tmpFunctionOutputPlusStep;
 };
 
 } // namespace API

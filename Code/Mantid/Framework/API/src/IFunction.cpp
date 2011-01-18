@@ -457,6 +457,61 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
   return retVal;
 }
 
+/** Convert values from unit defined in workspace (ws) to outUnit
+ *
+ *  @param values   As input: assumed to be in unit of workspace. 
+ *                  As output: in unit of outUnit
+ *  @param outUnit  unit to convert to
+ *  @param ws      workspace
+ *  @param wsIndex workspace index
+ */
+void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+                               boost::shared_ptr<const MatrixWorkspace> ws,
+                               int wsIndex)
+{
+  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
+
+  // if unit required by formula or look-up-table different from ws-unit then 
+  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  {
+    // first check if it is possible to do a quick convertion convert
+    double factor,power;
+    if (wsUnit->quickConversion(*outUnit,factor,power) )
+    {
+      for (unsigned int i = 0; i < values.size(); i++)
+        values[i] = factor * std::pow(values[i],power);
+    }
+    else
+    {
+      double l1,l2,twoTheta;
+
+      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+      IInstrument_const_sptr instrument = ws->getInstrument();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      l1 = instrument->getSource()->getDistance(*sample);
+      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if ( ! det->isMonitor() )
+      {
+        l2 = det->getDistance(*sample);
+        twoTheta = ws->detectorTwoTheta(det);
+      }
+      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+      {
+        l2 = det->getDistance(*(instrument->getSource()));
+        l2 = l2 - l1;
+        twoTheta = 0.0;
+      }
+
+      //std::vector<double> endPoint;
+      //endPoint.push_back(retVal);
+      std::vector<double> emptyVec;
+      wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+    }
+  }  
+}
+
+
 /**
  * Calculate the Jacobian with respect to parameters actually declared in the IFunction
  * @param out The output Jacobian

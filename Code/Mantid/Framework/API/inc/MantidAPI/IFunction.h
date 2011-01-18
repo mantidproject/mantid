@@ -161,12 +161,16 @@ public:
   virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),
                              boost::shared_array<double> weights = boost::shared_array<double>());
 
-protected:
-
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       int wsIndex);
+void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+                               boost::shared_ptr<const MatrixWorkspace> ws,
+                               int wsIndex);
+protected:
+
+
 
   boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const;
 
