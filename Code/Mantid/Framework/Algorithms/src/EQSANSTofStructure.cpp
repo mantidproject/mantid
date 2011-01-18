@@ -60,8 +60,7 @@ void EQSANSTofStructure::exec()
   if (frame_tof0 >= tmp_frame_width) frame_offset = tmp_frame_width * ( (int)( frame_tof0/tmp_frame_width ) );
 
   // Find the new binning first
-  //dataX = mantid.getMatrixWorkspace(input_ws).readX(0).copy()
-  const MantidVec& XIn = inputWS->readX(0);
+  const MantidVec XIn = inputWS->readX(0); // Copy here to avoid holding on to reference for too long (problem with managed workspaces)
   const int nTOF = XIn.size();
 
   // Loop through each bin
