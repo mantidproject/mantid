@@ -13,14 +13,14 @@ using namespace Mantid::Kernel;
 class TimeSeriesPropertyTest : public CxxTest::TestSuite
 {
 public:
-  TimeSeriesPropertyTest()
+  void setUp()
   {
     iProp = new TimeSeriesProperty<int>("intProp");
     dProp = new TimeSeriesProperty<double>("doubleProp");
     sProp = new TimeSeriesProperty<std::string>("stringProp");
   }
 
-  ~TimeSeriesPropertyTest()
+  void tearDown()
   {
     delete iProp;
     delete dProp;

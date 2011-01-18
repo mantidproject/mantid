@@ -10,14 +10,14 @@ using namespace Mantid::Kernel;
 class ArrayPropertyTest : public CxxTest::TestSuite
 {
 public:
-  ArrayPropertyTest()
+  void setUp()
   {
     iProp = new ArrayProperty<int>("intProp");
     dProp = new ArrayProperty<double>("doubleProp");
     sProp = new ArrayProperty<std::string>("stringProp");    
   }
   
-  ~ArrayPropertyTest()
+  void tearDown()
   {
     delete iProp;
     delete dProp;
