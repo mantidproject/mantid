@@ -243,16 +243,22 @@ MD_FileHoraceReader::read_MDImg_data(MDImage & mdd)
     this->fileStreamHolder.seekg(this->positions.s_start,std::ios::beg);
     this->fileStreamHolder.read(&buff[0],nCells*8);
 
+
     for(i=0;i<nCells;i++){
         pImg_data[i].s   = (double)*((float32*)(&buff[i*4]));
         pImg_data[i].err = (double)*((float32*)(&buff[(i+nCells)*4]));
+
     }
     // read npixels
     this->fileStreamHolder.seekg(this->positions.n_cell_pix_start,std::ios::beg);
     this->fileStreamHolder.read(&buff[0],buff.size());
 
-    for(i=0;i<nCells;i++){
-        pImg_data[i].npix = (size_t)*((uint64_t*)(&buff[i*8]));
+    hor_points_locations.resize(nCells);
+    pImg_data[0].npix = (size_t)*((uint64_t*)(&buff[0*8]));
+    hor_points_locations[0] = 0;
+    for(i=1;i<nCells;i++){
+        pImg_data[i].npix       = (size_t)*((uint64_t*)(&buff[i*8]));
+        hor_points_locations[i] = hor_points_locations[i-1]+pImg_data[i-1].npix;
     }
 
 
@@ -327,15 +333,15 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     while(true){
 
         cell_index      = selected_cells[ic];
-        pixels_start  =   this->positions.pix_start+hbs*pImgData[cell_index].chunk_location; 
+        pixels_start  =   this->positions.pix_start+hbs*hor_points_locations[cell_index];
 
         // optimisaion possible when cells are adjacent
         block_size    = hbs*pImgData[cell_index].npix;
 
         // if the next cell follows the current on HDD, we should read them together aggregating adjacent cells;
-        size_t next_block = pImgData[cell_index].chunk_location+pImgData[cell_index].npix;
+        uint64_t next_block = hor_points_locations[cell_index]+pImgData[cell_index].npix;
         size_t next_index = selected_cells[ic_next];
-        while(pImgData[next_index].chunk_location==next_block){
+        while(hor_points_locations[next_index]==next_block){
             // block size grows and all other is auxiliary
                 block_size    += hbs*pImgData[next_index].npix;
                 ic = ic_next;
@@ -343,7 +349,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
                 if(ic_next > iCellRead)break;
 
                 cell_index = selected_cells[ic];
-                next_block = pImgData[cell_index].chunk_location+pImgData[cell_index].npix;
+                next_block = hor_points_locations[cell_index]+pImgData[cell_index].npix;
                 next_index = selected_cells[ic_next];
             
         }

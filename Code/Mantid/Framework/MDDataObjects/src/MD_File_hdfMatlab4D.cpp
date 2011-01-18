@@ -231,10 +231,10 @@ MD_File_hdfMatlab4D::read_pix_subset(const MDImage &SQW,const std::vector<size_t
     cells_preselection_buf.resize(max_npix_selected);
     size_t ic(0);
     hsize_t max_npix_indataset = this->getNPix();
-    size_t pixel_num,block_location;
+    uint64_t pixel_num,block_location;
     for(i=starting_cell;i<=n_selected_cells;i++){
         npix_tt          =pData[selected_cells[i]].npix; 
-        block_location   =pData[selected_cells[i]].chunk_location;
+        block_location   =mp_points_locations[selected_cells[i]];
         for(j=0;j<npix_tt;j++){
             pixel_num=block_location+j;
             // this to go around the bug in hdf dataset creation. 

@@ -20,7 +20,7 @@ void
 MDDataPoints::init_pix_locations()
 {
     // and calculate cells location for pixels;
-    const MD_image_point const* pData = this->spMDImage->get_const_pData();
+    MD_image_point const * const pData = this->spMDImage->get_const_pData();
     size_t nCells = this->spMDImage->getDataSize();
     if(this->pix_location.size()!=nCells){
         this->pix_location.resize(nCells);
@@ -80,7 +80,11 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
         }
     }
     //this->alloc_pix_array();
-    this->n_data_points = this->spFileReader->getNPix();
+   this->n_data_points = this->spFileReader->getNPix();
+   
+   unsigned int nDims= this->spMDImage->getGeometry()->getNumDims();
+   this->box_min.assign(nDims,FLT_MAX);
+   this->box_max.assign(nDims,-FLT_MAX);
 }
 // 
 boost::shared_ptr<IMD_FileFormat> 
@@ -91,6 +95,10 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> pImageData)
     }
     this->n_data_points =0;
     //this->alloc_pix_array();
+   unsigned int nDims= this->spMDImage->getGeometry()->getNumDims();
+
+   this->box_min.assign(nDims,FLT_MAX);
+   this->box_max.assign(nDims,-FLT_MAX);
 
     return this->spFileReader;
 }
@@ -127,8 +135,6 @@ MDDataPoints::alloc_pix_array(size_t buf_size)
    }
    unsigned int nDims = this->spMDImage->getGeometry()->getNumDims();
 
-   this->box_min.assign(nDims,FLT_MAX);
-   this->box_max.assign(nDims,-FLT_MAX);
 
   // identify maximal number of pixels, possible to fit into buffer for current architecture;
   size_t nMemPix(0);

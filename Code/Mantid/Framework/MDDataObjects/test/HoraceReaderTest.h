@@ -108,9 +108,8 @@ public:
 
 		TSM_ASSERT_THROWS_NOTHING("MD image reader should not normaly throw",
 			this->pReader->read_MDImg_data(*pImg));
-		// temporary here and should move to constructor for MDDataPoints;
-		pImg->identify_SP_points_locations();
-		// check what has been read;
+
+        // check what has been read;
 	}
 	void testReadAllPixels(){
 		MDPointDescription defaultDescr;

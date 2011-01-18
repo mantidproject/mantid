@@ -134,7 +134,12 @@ protected:
 
    // function checks if pixel dataset is opened and if not opens it. true if it was already opened, false if did nothing
    bool check_or_open_pix_dataset(void);
- 
+  // the array specifying the locations of MD points wrt MD cells;
+    std::vector<uint64_t> mp_points_locations;
+private:
+
+  
+
 };
 
 // function used to understand Horace written Matlab dataset.

@@ -266,10 +266,16 @@ MD_File_hdfMatlab::read_MDImg_data(MDImage & dnd)
     }
     MD_image_point *pData = pMD_struct->data;
 // transform the data into the format specified 
-for(unsigned long i=0;i<pMD_struct->data_size;i++){
+mp_points_locations.resize(pMD_struct->data_size);
+pData[0].s   =buf[0];
+pData[0].err =buf[1];
+pData[0].npix=(size_t)buf[2];
+mp_points_locations[0] = 0;
+for(unsigned long i=1;i<pMD_struct->data_size;i++){
     pData[i].s   =buf[i*3+0];
     pData[i].err =buf[i*3+1];
     pData[i].npix=(size_t)buf[i*3+2];
+    mp_points_locations[i]=mp_points_locations[i-1]+pData[i-1].npix;
 }
 delete [] buf;
 H5Tclose(memtype);
@@ -521,10 +527,10 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     cells_preselection_buf.resize(max_npix_selected);
     size_t ic(0);
     uint64_t max_npix_indataset = this->getNPix();
-    size_t pixel_num,block_location;
+    uint64_t pixel_num,block_location;
     for(i=starting_cell;i<=n_selected_cells;i++){
         npix_tt          =pData[selected_cells[i]].npix; 
-        block_location   =pData[selected_cells[i]].chunk_location;
+        block_location   =mp_points_locations[selected_cells[i]];
         for(j=0;j<npix_tt;j++){
             pixel_num=block_location+j;
             // this to go around the bug in hdf dataset creation. 

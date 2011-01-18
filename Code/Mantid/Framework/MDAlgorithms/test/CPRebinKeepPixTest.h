@@ -46,8 +46,8 @@ MDWorkspace_sptr load_fake_workspace(std::string &wsName){
     IMD_FileFormat *pf = inputWS->get_pFileReader();
 
     pf->read_MDImg_data(*inputWS->get_spMDImage());
-    //TODO: should be moved into datapoints;
-    inputWS->get_spMDImage()->identify_SP_points_locations();
+
+    inputWS->get_spMDDPoints()->init_pix_locations();
 
 
     return inputWS;

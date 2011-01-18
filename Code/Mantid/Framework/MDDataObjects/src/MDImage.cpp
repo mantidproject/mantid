@@ -278,11 +278,6 @@ MDImage::~MDImage()
     this->clear_class();
 }
 //
-void
-MDImage::identify_SP_points_locations()
-{
-
-}
 
 //***************************************************************************************
 void
