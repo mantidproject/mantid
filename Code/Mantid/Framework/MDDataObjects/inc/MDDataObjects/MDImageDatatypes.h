@@ -48,7 +48,6 @@ struct MD_image_point
         double s;            // signal 
         double err;          // error
         unsigned long npix;  // numer of data points (pixels) contributed into this point;
-        size_t  chunk_location;
 		MD_image_point():s(0),err(0),npix(0){}
 };
 

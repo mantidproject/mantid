@@ -41,6 +41,13 @@ namespace Mantid
 namespace MDDataObjects
 {
 
+//* MDPixels
+/// the size of the buffer to read pixels (in bytes) while reading parts of datasets --should be optimized for performance and deleted
+#define PIX_BUFFER_SIZE 10000000
+/// the size of the data page (in bytes), providing optimal speed of data exchange with HDD -- should be calculated;
+#define PAGE_SIZE  4096
+
+
   class MDImage;
   class MDDataPointsDescription: public MDPointDescription
   {
@@ -66,6 +73,7 @@ namespace MDDataObjects
       * temporary scrach file to accept pixels data 
      */
 	virtual void initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_ptr<IMD_FileFormat> in_spFile);
+    //
 	virtual boost::shared_ptr<IMD_FileFormat> initialize(boost::shared_ptr<const MDImage> pImageData);
     /// return file current file reader (should we let the factory to remember them and return on request?
     virtual boost::shared_ptr<IMD_FileFormat> getFileReader(void)const{return this->spFileReader;}
@@ -103,6 +111,8 @@ namespace MDDataObjects
    /** function adds pixels,from the array of input pixels, selected by indexes in array of pix_selected to internal structure of data indexes 
      which can be actually on HDD or in memory */
     void store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels);
+  /// calculate the locations of the data points blocks with relation to the image cells
+    void init_pix_locations();
   protected:
 
   private:
@@ -110,7 +120,7 @@ namespace MDDataObjects
      * usually it is HD based and memory used for small datasets, debugging
      * or in a future when PC-s are big     */
     bool memBased;
-
+    std::vector<MDPointsLocations> pix_location;
 	 /// The class which describes the structure of sinle data point (pixel)
 	 MDDataPointsDescription pixDescription;
 

@@ -85,8 +85,8 @@ std::string workspaceFileName;
     IMD_FileFormat *pFReader = inputWS->get_pFileReader();
 
     pFReader->read_MDImg_data(*inputWS->get_spMDImage());
-    //TODO: should be moved into datapoints;
-    inputWS->get_spMDImage()->identify_SP_points_locations();
+   // init the structure, which specifies the location of data points in relation to cells
+    inputWS->get_spMDDPoints()->init_pix_locations();
 
 
     //TODO: if enough memory and we want to place pixels in memory -- read MDDatapoints

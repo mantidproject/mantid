@@ -77,7 +77,7 @@ public:
         throw std::runtime_error("Not implemented");
       }
 
-      virtual unsigned long getNPoints() const 
+      virtual uint64_t getNPoints() const 
       {
         return m_points;
       }

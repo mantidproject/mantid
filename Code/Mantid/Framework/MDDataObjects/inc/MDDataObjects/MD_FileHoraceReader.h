@@ -109,7 +109,7 @@ protected:
 	// size of the multidimensional image in the HDD file (in cells)
 	size_t     mdImageSize;
 	/// number of data points (pixels) contributing into the MD image and present in the file;
-	unsigned long     nDataPoints;
+	uint64_t     nDataPoints;
 
 ///**** auxilary functions dealing with different parts of Horace file;
 	/// skips main sqw header, calculates its size and reads the number of contributing files and sets the location of first contributed

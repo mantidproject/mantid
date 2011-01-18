@@ -92,7 +92,7 @@ private:
 	// size of the multidimensional image in the HDD file (in cells)
 	size_t     mdImageSize;
 	/// number of data points (pixels) contributing into the MD image and present in the file;
-	unsigned long   nDataPoints;
+	uint64_t   nDataPoints;
     /// number of bytes a pixel occupiesl
     unsigned int  sizeof_pixel;
    /// number of cells in the MDImage;
@@ -104,6 +104,8 @@ private:
 
     void fill_image_data1D(unsigned int nBins);
     void fill_image();
+    /// internal auxiliary function, which returns n-Dimensional cell index calculated from the cell number;
+    std::vector<size_t> cell_indexes(size_t cell_num,const std::vector<size_t> &dim_strides);
 };
 
 

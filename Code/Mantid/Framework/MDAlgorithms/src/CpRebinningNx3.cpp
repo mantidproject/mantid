@@ -33,8 +33,10 @@ pTargetDataPoints(targetWS->get_spMDDPoints().get())
      if(keep_pixels){
          // not necessary; will clear things out
          //out_pix = this->pTargetDataPoints->getBuffer();
-         retained_cell_indexes.resize(pix_buf.size());
-         pixel_valid.resize(pix_buf.size(),false);
+         // get number of pixels which fit the buffer
+         size_t n_pix = pix_buf.size()/this->pSourceDataPoints->sizeofMDDataPoint();
+         retained_cell_indexes.resize(n_pix);
+         pixel_valid.resize(n_pix,false);
      }
 
 }
@@ -77,7 +79,7 @@ unsigned int
 CpRebinningNx3::getNumDataChunks()const
 {
     size_t pix_buffer_size = this->pSourceDataPoints->get_pix_bufSize();
-    unsigned int n_data_chunks = this->n_preselected_pix/pix_buffer_size;
+    size_t n_data_chunks  = (size_t)this->n_preselected_pix/pix_buffer_size;
 
     if(n_data_chunks*pix_buffer_size!=n_preselected_pix)n_data_chunks++;
     return n_data_chunks;
@@ -148,8 +150,8 @@ CpRebinningNx3::rebin_Nx3dataset()
 
 
  
-  std::vector<double> boxMin(this->nDimensions,0);
-  std::vector<double> boxMax(this->nDimensions,0);
+  std::vector<double> boxMin(this->nDimensions,FLT_MAX);
+  std::vector<double> boxMax(this->nDimensions,-FLT_MAX);
   std::vector<double> rN(this->nDimensions,0);
   
   bool  ignore_something,ignote_all;
@@ -160,10 +162,6 @@ CpRebinningNx3::rebin_Nx3dataset()
     Inf=std::numeric_limits<double>::infinity();
   }
  
-  for(unsigned int ii=0;ii<this->nDimensions;ii++){
-    boxMin[ii]       =  FLT_MAX;
-    boxMax[ii]       = -FLT_MAX;
-  }
 
   //bool keep_pixels(false);
 
@@ -321,11 +319,11 @@ CpRebinningNx3::rebin_Nx3dataset()
       }
     }
   } // end parallel region
-  //TODO: enable this when MDDataPoints are in working order;
-  //for(unsigned int ii=0;ii<nDims;ii++){
-  //  TargetWorkspace.get_spMDDPoints()->rPixMin(ii) = boxMin[ii];
-  //  TargetWorkspace.get_spMDDPoints()->rPixMax(ii) = boxMax[ii];
-  //}
+ 
+  for(unsigned int ii=0;ii<nDimensions;ii++){
+    pTargetDataPoints->rPixMin(ii) = (pTargetDataPoints->rPixMin(ii)<boxMin[ii])?pTargetDataPoints->rPixMin(ii):boxMin[ii];
+    pTargetDataPoints->rPixMax(ii) = (pTargetDataPoints->rPixMax(ii)>boxMax[ii])?pTargetDataPoints->rPixMax(ii):boxMax[ii];
+  }
 
   return nPixel_retained;
 }

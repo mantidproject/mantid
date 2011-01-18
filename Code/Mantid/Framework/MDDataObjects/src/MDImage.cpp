@@ -281,16 +281,7 @@ MDImage::~MDImage()
 void
 MDImage::identify_SP_points_locations()
 {
-    // and calculate cells location for pixels;
-	MD_image_point *pData = MD_IMG_array.data;
-    pData[0].chunk_location=0;
 
-    // counter for the number of retatined pixels;
-    size_t nPix = pData[0].npix;
-    for(size_t i=1;i<this->MD_IMG_array.data_size;i++){
-// the next cell starts from the the boundary of the previous one plus the number of pixels in the previous cell
-        pData[i].chunk_location=pData[i-1].chunk_location+pData[i-1].npix;
-    }
 }
 
 //***************************************************************************************

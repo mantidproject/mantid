@@ -21,10 +21,10 @@ private:
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("qx", true, 1));
-    basisDimensions.insert(MDBasisDimension("qy", true, 2));
-    basisDimensions.insert(MDBasisDimension("qz", true, 4));
-    basisDimensions.insert(MDBasisDimension("p", false, 5));
+    basisDimensions.insert(MDBasisDimension("qx", true, 0));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1));
+    basisDimensions.insert(MDBasisDimension("qz", true, 2));
+    basisDimensions.insert(MDBasisDimension("p", false, 3));
 
     UnitCell cell;
     return new MDGeometryBasis(basisDimensions, cell);
@@ -41,6 +41,17 @@ public:
 
     UnitCell cell;
     TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions, cell), std::logic_error);
+  }
+  void testConstructWithWrongColumnNumbersThrows(){
+
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+    basisDimensions.insert(MDBasisDimension("qx", true, 1));
+    basisDimensions.insert(MDBasisDimension("qy", true, 2));
+
+    UnitCell cell;
+    TSM_ASSERT_THROWS("Number of any dimension has to be smaller then total number of dimensions. Should have thrown.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
+
   }
 
   void testGetReciprocalDimensions()

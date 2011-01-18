@@ -34,8 +34,8 @@ MDWorkspace_sptr load_fake_workspace(std::string &wsName){
 
    Geometry::MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
 
-  // read the geometry description
-   pFile->read_MDGeomDescription(geomDescr);
+   // read the geometry description
+    pFile->read_MDGeomDescription(geomDescr);
 
 	// obtain the MDPoint description now (and MDPointsDescription in a future)
 	MDPointDescription pd = pFile->read_pointDescriptions();
@@ -64,7 +64,7 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
  public:
     void testRebinInit(void){
 
-     InputWorkspaceName = "testRebinMDWorkspace";
+     InputWorkspaceName = "CPRebinKeepPixTestIn";
 
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
      TS_ASSERT( cpr.isInitialized() );
@@ -73,11 +73,34 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
 
    
       cpr.setPropertyValue("Input", InputWorkspaceName);      
-      cpr.setPropertyValue("Result","OutWorkspace");
+      cpr.setPropertyValue("Result","CPRebinKeepPixTestOut");
       cpr.setProperty("KeepPixels",true);
       // set slicing property for the target workspace to the size and shape of the current workspace
       cpr.init_slicing_property();
 
+    }
+
+ void testCPRebinKeepPixels(){
+   // now rebin into slice
+  // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+
+
+   // now modify it as we need/want;
+        double r0=0;
+  //      pSlicing->pDimDescription("qx")->cut_min = r0;
+		//pSlicing->pDimDescription("qx")->cut_max = r0+1;
+		//pSlicing->pDimDescription("qy")->cut_min = r0;
+		//pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		//pSlicing->pDimDescription("qz")->cut_min = r0;
+		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
+      // All data go from -1 to 49;
+      // take 10%
+		pSlicing->pDimDescription("ent")->cut_max = 4;
+        pSlicing->pDimDescription("ent")->nBins   = 5;
+    
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
 };
 

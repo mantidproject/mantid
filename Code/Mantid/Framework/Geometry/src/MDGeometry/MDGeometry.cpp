@@ -56,13 +56,29 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
 
 }
 std::vector<boost::shared_ptr<IMDDimension> > 
-MDGeometry::getDimensions(void)const
+MDGeometry::getDimensions(bool sort_by_bais)const
 {
-
+    unsigned int i;
 	std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
-	for(unsigned int i=0;i<this->getNumDims();i++){
-		dims[i] = theDimension[i];
-	}
+
+    if(sort_by_bais){ // sort by basis;
+       std::vector<std::string> dimID = this->getBasisTags();
+       std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
+
+	    for(i=0;i<this->getNumDims();i++){
+            it = dimensions_map.find(dimID[i]);
+            if(it == dimensions_map.end()){
+                 g_log.error()<<" MDGeometry::getDimensions: dimension with tag: "<<dimID[i]<<" does not exist in current geometry\n";
+                 throw(std::logic_error("Geometry::getDimension: wrong dimension tag"));
+            }
+      
+            dims[i] = it->second; 
+	    }
+    }else{ // sort by geometry
+	    for(i=0;i<this->getNumDims();i++){
+		    dims[i] = theDimension[i];
+	    }
+    }
 	return dims;
 
 }
@@ -130,7 +146,7 @@ MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
 }
 //
 void 
-  MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
+MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 {
   unsigned int n_new_dims=tags.size();
   unsigned int i;
@@ -228,7 +244,7 @@ void
   }
 
 }
-    //
+//
     boost::shared_ptr<IMDDimension>
       MDGeometry::getYDimension(void)const
     {
@@ -274,8 +290,8 @@ void
     }
 
 // now protected;
-    boost::shared_ptr<MDDimension>
-    MDGeometry::getDimension(unsigned int i)
+boost::shared_ptr<MDDimension>
+MDGeometry::getDimension(unsigned int i)
     {
 	  
       if(i>=m_basis.getNumDims()){
@@ -283,7 +299,7 @@ void
         throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
       }
       return theDimension[i];
-    }
+}
 //
 boost::shared_ptr<const IMDDimension>
 MDGeometry::get_constDimension(unsigned int i)const
@@ -315,7 +331,7 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
 
   return pDim;
 }
-//
+
 boost::shared_ptr<const IMDDimension>
 MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
 {
@@ -459,14 +475,16 @@ MDGeometry::~MDGeometry(void)
     this->dimensions_map.clear();
 }
 
-std::vector<std::string> MDGeometry::getBasisTags(void)const //TODO: consider removing this function.
+std::vector<std::string> 
+MDGeometry::getBasisTags(void)const 
 {
-  std::vector<std::string> tags; 
+  std::vector<std::string> tags(this->m_basis.getNumDims()); 
   std::set<MDBasisDimension> basisDimensions = this->m_basis.getBasisDimensions(); 
   std::set<MDBasisDimension>::const_iterator it = basisDimensions.begin();
   for(;it != basisDimensions.end(); ++it)
   {  
-    tags.push_back(it->getId());
+    int i=  it->getColumnNumber();
+    tags[i] = it->getId();
   }
   return tags;
 }

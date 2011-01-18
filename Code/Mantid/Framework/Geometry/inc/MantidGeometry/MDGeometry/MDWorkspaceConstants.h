@@ -42,9 +42,6 @@
 /// we are not going to rebin data on more than some number of bins. Lets set this constant as the limit for checks 
 /// (in case of wrong word padding or -int casted to unsigned int) 
 #define MAX_REASONABLE_BIN_NUMBER 1000000
-//* MDPixels
-/// the size of the buffer to read pixels while reading parts of datasets --should be optimized for performance and moved out of here;
-#define PIX_BUFFER_SIZE 10000000
 //***********************************************************************************************************************************
 
 

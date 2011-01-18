@@ -87,7 +87,7 @@ DynamicCPRRebinning::preselect_cells()
   unsigned int nr(0),no(0);
 
   // get the orthogonal and reciprocal dimensions separately
-  size_t grid_capasity(1);
+  size_t grid_capacity(1);
   for(i=0;i<pSourceGeom->getNumDims();i++){
     if(pAllDim[i]->isReciprocal()){
       pReciprocal[nr]=pAllDim[i];
@@ -96,7 +96,7 @@ DynamicCPRRebinning::preselect_cells()
       pOrthogonal[no]=pAllDim[i];
       no++;
     }
-    grid_capasity*= pAllDim[i]->getNBins();
+    grid_capacity*= pAllDim[i]->getNBins();
   }
 
   size_t ind,orthoSize=1;
@@ -278,7 +278,7 @@ DynamicCPRRebinning::preselect_cells()
         size_t prev_value=preselected_cells[0];
         for(size_t i=1;i<n_preselected_cells;i++){
             //HACK! TODO: fix this!;
-            if(preselected_cells[i]!=prev_value&&preselected_cells[i]<grid_capasity){
+            if(preselected_cells[i]!=prev_value&&preselected_cells[i]<grid_capacity){
                 prev_value           =preselected_cells[i];
                 preselected_cells[ic]=prev_value;
                 ic++;
@@ -300,18 +300,17 @@ DynamicCPRRebinning::finalize_rebinning()
     pTargetImgData[0].s   /= pTargetImgData[0].npix;
     pTargetImgData[0].err /=(pTargetImgData[0].npix*pTargetImgData[0].npix);
   }
-  // and calculate cells location for pixels;
-  pTargetImgData[0].chunk_location=0;
+
 
   // counter for the number of retatined pixels;
   unsigned long nPix = pTargetImgData[0].npix;
   for(i=1;i<n_target_cells;i++){
-    pTargetImgData[i].chunk_location=pTargetImgData[i-1].chunk_location+pTargetImgData[i-1].npix; // the next cell starts from the the boundary of the previous one
-    // plus the number of pixels in the previous cell
     if(pTargetImgData[i].npix>0){
       nPix        +=pTargetImgData[i].npix;
       pTargetImgData[i].s   /=pTargetImgData[i].npix;
       pTargetImgData[i].err /=(pTargetImgData[i].npix*pTargetImgData[i].npix);
+    }else{
+        pTargetImgData[i].s=0;
     }
   };
   return nPix;

@@ -65,7 +65,7 @@ public:
     virtual unsigned int getNumDataChunks()const=0;
     /** function returns the number of pixels which can contribute into a cut (Number of pixels in selected cells -- become valid after 
      *  preselection is done and precelected cells buffer is valid */
-    virtual unsigned long getNumPreselectedPixels()const=0;
+    virtual uint64_t getNumPreselectedPixels()const=0;
 
 
     /** Calculates signals and errors of the MD image, obtained as the result of one or more rebin_dataset operations

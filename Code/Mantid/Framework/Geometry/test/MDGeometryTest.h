@@ -36,9 +36,9 @@ class MDGeometryTest : public CxxTest::TestSuite
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("q1", true, 1));
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
-    basisDimensions.insert(MDBasisDimension("q3", true, 4));
+    basisDimensions.insert(MDBasisDimension("q3", true, 3));
     basisDimensions.insert(MDBasisDimension("p", false, 0));
-    basisDimensions.insert(MDBasisDimension("T", false, 5));
+    basisDimensions.insert(MDBasisDimension("T", false, 4));
     UnitCell cell;
     MDGeometryBasis basis(basisDimensions, cell);
 
@@ -69,10 +69,11 @@ public:
   MDGeometryTest()
   {
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("qx", true, 1));
-    basisDimensions.insert(MDBasisDimension("qy", true, 2));
-    basisDimensions.insert(MDBasisDimension("qz", true, 4));
-    basisDimensions.insert(MDBasisDimension("p", false, 0));
+    basisDimensions.insert(MDBasisDimension("qx", true, 0));
+    basisDimensions.insert(MDBasisDimension("p", false, 3));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1));
+    basisDimensions.insert(MDBasisDimension("qz", true, 2));
+
 
     UnitCell cell;
     TSM_ASSERT_THROWS_NOTHING("Valid MD geometry constructor should not throw",tDND_geometry= std::auto_ptr<testMDGeometry>(new testMDGeometry(MDGeometryBasis(basisDimensions, cell))));
@@ -80,6 +81,7 @@ public:
 	TSM_ASSERT_EQUALS("Empty geometry initiated by MDBasis only should be size 0",0,tDND_geometry->getGeometryExtend());
 
   }
+ 
 
   void testMDGeometryDimAccessors(void){
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->getXDimension());
@@ -178,6 +180,30 @@ public:
         TS_ASSERT_EQUALS(pDim->getStride(),0);
         TS_ASSERT_EQUALS(pDim->getIntegrated(),true);
   }
+ void testDimArrangementByBasis(){
+     // here we check if the dimension returned in a way, as they are arranged in basis and MDDataPoints
+     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions(true);
+     std::vector<std::string> dimID(4);
+     dimID[0]="qx";
+     dimID[1]="qy";
+     dimID[2]="qz";
+     dimID[3]="p";
+     for(unsigned int i=0; i<this->tDND_geometry->getNumDims();i++){
+         TSM_ASSERT_EQUALS("The dimension in the geometry is not located properly",dimID[i],psDims[i]->getDimensionId());
+     }
+  }
+ void testDimArrangementByGeometry(){
+     // here we check if the dimension returned in a way, as they are arranged in MDGeometry
+     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions();
+     std::vector<std::string> dimID(4);
+     dimID[0]="p";
+     dimID[1]="qx";
+     dimID[3]="qy";
+     dimID[2]="qz";
+     for(unsigned int i=0; i<this->tDND_geometry->getNumDims();i++){
+         TSM_ASSERT_EQUALS("The dimension in the geometry is not located properly",dimID[i],psDims[i]->getDimensionId());
+     }
+  }
   void testGeometryFromSlice1Size(){
 	  TSM_ASSERT_EQUALS("The size of the image, described by this geometry after resizing, differs from expected",tDND_geometry->getGeometryExtend(),100*200);
   }
@@ -248,5 +274,8 @@ public:
 
   }
 
+  ~MDGeometryTest()
+  {
+  }
 };
 #endif

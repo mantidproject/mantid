@@ -32,7 +32,11 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const
     std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
     for( ;it != mdBasisDimensions.end(); ++it){  
         checkInputBasisDimensions(*(it)); // Check that duplicate column numbers have not been used.
-
+        // check if column number is smaller then the number of dimensions
+        if(it->getColumnNumber()>=this->n_total_dim){
+            g_log.error()<<" the number of the dimension with id: "<<it->getId()<<" is "<<it->getColumnNumber() <<" and it is higher then the number of dimensions\n";
+            throw(std::invalid_argument(" the dimension number is higher then total number of dimensions"));
+        }
       if((*it).getIsReciprocal()){
           n_reciprocal_dimensions++;
         }
@@ -63,7 +67,7 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
     MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions)
     {
       if(nReciprocalDimensions<1||nReciprocalDimensions>3){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted"<<nReciprocalDimensions<<std::endl;
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted "<<nReciprocalDimensions<<std::endl;
         throw(std::invalid_argument("This constructor can not be used to buid low dimension datasets geometry"));
       }
       if(nDimensions>MAX_MD_DIMS_POSSIBLE||nDimensions<1){

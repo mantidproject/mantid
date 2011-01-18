@@ -110,11 +110,9 @@ public:
   {
      return this->MD_IMG_array.data[i].s;
   }
-  /// build allocation table of sparce data points (pixels) -> will be moved into points;
-    void identify_SP_points_locations();
-
+ 
  protected:
-    // dimensions strides in linear order; formulated in this way for faster access<- looks like obsolete;
+    // dimensions strides in linear order; formulated in this way for faster access;
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;
 
 //*************************************************

@@ -43,7 +43,12 @@ namespace MDDataObjects
 {
 //********************************************************************************************************************************************************************
 //********************************************************************************************************************************************************************
-
+struct MDPointsLocations
+{
+    size_t   n_data_pages;
+    uint64_t points_location;
+    MDPointsLocations():n_data_pages(0),points_location(0){};
+};
 
 
 //********************************************************************************************************************************************************************
@@ -112,7 +117,10 @@ namespace MDDataObjects
    }
    //************************************************************************************************************************
    //Mutators
-     
+   /// function sets pointer to new target buffer for this class
+     void setBuffer(char *newTargetBuf){
+         this->pDataBuffer = newTargetBuf;
+     }
   //------------------------------------------------------------------------------------------------
   /** function sets data from external source into MDDataPoint format 
    *
@@ -148,7 +156,7 @@ namespace MDDataObjects
                 n_indFields,  //< number of integer identifiers (indexes) for the dimensions values
                 n_signals;    // < number of signal fields
    // the location of the beginning of the data buffer
-   char *const  pDataBuffer;
+   char *  pDataBuffer;
  /// the size of one data point in bytes;
    unsigned int MDPointStride;
    unsigned int *field_loc;

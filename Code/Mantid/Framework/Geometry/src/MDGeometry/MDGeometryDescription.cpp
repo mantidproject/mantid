@@ -168,7 +168,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
-    std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions();
+    std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);
 	
     unsigned int i,nr(0);
 

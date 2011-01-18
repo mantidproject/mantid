@@ -14,6 +14,26 @@ Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
 void 
 MDDataPoints::store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels)
 {
+
+}
+void 
+MDDataPoints::init_pix_locations()
+{
+    // and calculate cells location for pixels;
+    const MD_image_point const* pData = this->spMDImage->get_const_pData();
+    size_t nCells = this->spMDImage->getDataSize();
+    if(this->pix_location.size()!=nCells){
+        this->pix_location.resize(nCells);
+    }
+
+    pix_location[0].points_location = 0;
+    // counter for the number of retatined pixels;
+    size_t nPix = pData[0].npix;
+    for(size_t i=1;i<nCells;i++){
+// the next cell starts from the the boundary of the previous one plus the number of pixels in the previous cell
+        pix_location[i].points_location=pix_location[i-1].points_location+pData[i-1].npix;
+    }
+
 }
 /** Constructor
  *
@@ -120,8 +140,10 @@ MDDataPoints::alloc_pix_array(size_t buf_size)
   if(data_buffer_size>max_pix_num){
       this->data_buffer_size = max_pix_num;
   }
-  
-  data_buffer.resize(data_buffer_size*this->pixel_size);
+  // remove fractional parts of pixel
+  size_t dbs = data_buffer_size/this->pixel_size;
+  dbs        *=this->pixel_size;
+  data_buffer.resize(dbs);
 
 
 }

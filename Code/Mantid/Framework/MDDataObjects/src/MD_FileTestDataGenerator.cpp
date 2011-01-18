@@ -1,6 +1,6 @@
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
+#include "MantidGeometry/MDGeometry/MDGeometry.h"
 
 
 namespace Mantid{
@@ -31,9 +31,9 @@ MD_FileTestDataGenerator::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeo
 {
    using namespace Mantid::Geometry;
     std::set<Geometry::MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("qtx", true, 0));
-    basisDimensions.insert(MDBasisDimension("qty", true, 1));
-    basisDimensions.insert(MDBasisDimension("qtz", true, 2));
+    basisDimensions.insert(MDBasisDimension("qxt", true, 0));
+    basisDimensions.insert(MDBasisDimension("qyt", true, 1));
+    basisDimensions.insert(MDBasisDimension("qzt", true, 2));
     basisDimensions.insert(MDBasisDimension("ent", false,3));
 
     UnitCell cell;
@@ -51,9 +51,9 @@ MD_FileTestDataGenerator::read_MDGeomDescription(Mantid::Geometry::MDGeometryDes
     // horace tags come from basis, but as they have not been transferred between classes, 
     // they should be written with image too. 
     std::vector<std::string> Horace_tags(4);
-    Horace_tags[0]="qtx";
-    Horace_tags[1]="qty";
-    Horace_tags[2]="qtz";
+    Horace_tags[0]="qxt";
+    Horace_tags[1]="qyt";
+    Horace_tags[2]="qzt";
     Horace_tags[3]="ent";
 
     for(i=0;i<this->nDims;i++){
@@ -65,7 +65,7 @@ MD_FileTestDataGenerator::read_MDGeomDescription(Mantid::Geometry::MDGeometryDes
 
         dscrptn.pDimDescription(i)->nBins = this->nBins[i]; // one sets this axis integrated
         dscrptn.pDimDescription(i)->cut_min = -1;
-        dscrptn.pDimDescription(i)->cut_max =  1;
+        dscrptn.pDimDescription(i)->cut_max = this->nBins[i]-1;
 
     }
 
@@ -83,20 +83,21 @@ MD_FileTestDataGenerator::read_MDImg_data(MDImage & mdd)
     // get access to the MD image array;
     MDDataObjects::MD_image_point *pImg_data =  mdd.get_pData();
     double step = double(this->nDims)/nCells;
- 
+    uint64_t  sanity_check(0);
     for(i=0;i<nCells;i++){
-        pImg_data[i].s   = 1+i*step;
-        pImg_data[i].err = 2/(i+1);
+        pImg_data[i].s   = i;
+        pImg_data[i].err = 2/double(i+1);
         pImg_data[i].npix= i+1;
+        sanity_check+=i+1;
     }
-    this->nDataPoints = nCells*(nCells+1)/2;
+    this->nDataPoints = ((uint64_t)(nCells))*(nCells+1)/2;
 
 }
    
 MDPointDescription 
 MD_FileTestDataGenerator::read_pointDescriptions(void)const
 {
-    const char *HoraceDataTags[]={"qtx","qty","qtz","ent","St","errt","iRunIDt","iDetIDt","iEnt"};
+    const char *HoraceDataTags[]={"qxt","qyt","qzt","ent","St","errt","iRunIDt","iDetIDt","iEnt"};
     MDPointStructure  aPointDescr;
     // let's make signals and errors float;
     aPointDescr.SignalLength = 4;
@@ -119,24 +120,33 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     size_t ic(starting_cell),j;
     unsigned int idim;
     unsigned long max_data_size;
+    std::vector<size_t> dim_strides(this->nDims);
    
 
     const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
-    std::vector<std::string> dimID = pCurrentGeom->getBasisTags();
+    
     // data points;
     std::vector<std::vector<float> > dimPoints(this->nDims);
+    // get dimensions in the order they are defined in the grid
+    std::vector<boost::shared_ptr<Geometry::IMDDimension> > spDims = pCurrentGeom->getDimensions();
+  
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
-        const Geometry::IMDDimension *pDim = pCurrentGeom->get_constDimension(dimID[idim]).get();
+
+        const Geometry::IMDDimension *pDim = spDims[idim].get();
         dimPoints[idim].resize(this->nBins[idim]);
-        double min = pDim->getMinimum();
+        double min  = pDim->getMinimum();
         double step = (pDim->getMaximum()-min)/this->nBins[idim];
-        min+=0.5*step;
+        //min+=0.5*step;<- we will step through dimensions in a look well below this
+        dim_strides[idim] = pDim->getStride();
+        if(min!=0){
+            min *= (1+FLT_EPSILON*min/fabs(min));
+        }
         for(j=0;j<nBins[idim];j++){
             dimPoints[idim][j]=(float)(min+j*step);
         }
     }
-  
+ 
     // if data buffer is unsufficient even for one block of pixels, increase it (very inefficient)
     // number of pixels in test data cell equal the cell number (+1 ?) 
     size_t n_pix_in_block = selected_cells[starting_cell]+1;
@@ -158,24 +168,38 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     //const MD_image_point *pData = dnd.get_const_pData();
     size_t nCells = dnd.get_MDImgData().data_size;
 
-    double step = double(this->nDims)/nCells;
-    // fill pixels according to the algorithm
+
+    std::vector<float> cell_step(this->nDims);
+    // fill pixels according to the algorithm when each cell has n-pixels in it equal to the number of cell+1
+    // pix coordinates 
     size_t nSeelectedCells = selected_cells.size();
     for(ic=starting_cell;ic<nSeelectedCells;ic++){
         //size_t n_pix = pData[selected_cells[ic]].npix;
-        size_t n_pix  = selected_cells[ic];
+        std::vector<size_t> cell_ind = this->cell_indexes(selected_cells[ic],dim_strides);
+        size_t n_pix  = selected_cells[ic]+1;
+  
+        for(idim=0;idim<this->nDims;idim++){
+            const Geometry::IMDDimension *pDim = spDims[idim].get();
+            double min  = pDim->getMinimum();
+            cell_step[idim] = (float)(pDim->getMaximum()-min)/this->nBins[idim]/n_pix;
+         }
+   
+
         // not enough memory for next data chunk;
         if(n_pix_in_buffer+n_pix>max_data_size)return ic;
-        // fill pixels
+        // fill pixels placing points along the biggest diagonal of the multidimensional cell;
         for(j=0;j<n_pix;j++){
             for(idim=0;idim<this->nDims;idim++){
-                dat_sig_fields[idim] = (float)(dimPoints[idim])[j];
+                dat_sig_fields[idim] = (float)(dimPoints[idim])[cell_ind[idim]]+ cell_step[idim]*j;
             }
-            dat_sig_fields[nDims]  =(float)(1+step*ic);
-            dat_sig_fields[nDims+1]=1;
+            // signal 
+            dat_sig_fields[nDims]  =(float)selected_cells[ic];
+            // error
+            dat_sig_fields[nDims+1]=2;
 
-            n_pix_in_buffer++;
+     
             pPacker->setData(n_pix_in_buffer,dat_sig_fields,ind_fields);
+            n_pix_in_buffer++;
         }
     }
     return nSeelectedCells;
@@ -191,8 +215,26 @@ MD_FileTestDataGenerator::getNPix(void)
     return this->nDataPoints;
 }
 
+std::vector<size_t> 
+MD_FileTestDataGenerator::cell_indexes(size_t cell_num,const std::vector<size_t> &dim_strides)
+{
+    size_t cur_index(cell_num);
+    size_t dim_index(0),i,ii;
+    size_t n_steps(dim_strides.size());
+    if(n_steps==0){
+        throw(std::invalid_argument("MD_FileTestDataGenerator::cell_indexes got zero size stride array"));
+    }
 
-
+    std::vector<size_t> rez(dim_strides.size(),0);
+    for(i=0;i<n_steps;i++){
+        ii = n_steps-1-i;
+        dim_index = cur_index/dim_strides[ii];
+        rez[ii] = dim_index;
+        cur_index -= dim_index*dim_strides[ii];
+    }
+    return rez;
+}
+//
 
 
 MD_FileTestDataGenerator::~MD_FileTestDataGenerator(void)

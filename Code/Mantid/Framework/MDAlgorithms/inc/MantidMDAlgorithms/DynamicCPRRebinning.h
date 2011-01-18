@@ -45,7 +45,7 @@ public:
     virtual size_t preselect_cells(); 
     /** function returns the number of pixels which can contribute into a cut (Number of pixels in selected cells -- become valid after 
      *  preselection is done and precelected cells buffer is valid */
-    virtual unsigned long getNumPreselectedPixels()const{return n_preselected_pix;}
+    virtual uint64_t getNumPreselectedPixels()const{return n_preselected_pix;}
     //
     virtual bool rebin_data_chunk()=0;
     virtual bool rebin_data_chunk_keep_pixels()=0;
@@ -75,7 +75,7 @@ protected:
     Geometry::MDGeometryDescription const * const pTargetDescr;
 
    /// Number of pixels which contributed into the target image
-    unsigned long n_preselected_pix;
+    uint64_t n_preselected_pix;
    /** The indexes of the sells of the source image that can contribute into the target image */
     //std::vector<const MDDataObjects::MD_image_point *const> preselected_cells;
     std::vector<size_t> preselected_cells;
@@ -114,10 +114,10 @@ protected:
  //     * contribiting pixels in the cells of the target image; 
  //     TODO: There are different possibilities to identify the contributing points themselves: 
  //     1) put them into source buffer corrupting input data (nightmare for parralesation)
- //     2) introduse an "valid" bit on input data 
+ //     2) introduce an "valid" bit on input data 
  //     3) Return an auxiliary boolean array specifying the valid pixels
  //     4) Rebin directly to target "pages" 
- //     All possibilities vary by complexety and efficiency so the best to identify soon
+ //     All possibilities vary by complexety and efficiency so the best to identify 
  //   */
  //   virtual size_t rebin_data(const char *source_pix_buf, size_t nPix, MDDataObjects::MDWorkspace &TargetWorkspace, 
  //                                   char * target_pix_buf, std::vector<size_t> &indexes)=0;
