@@ -51,12 +51,13 @@ namespace Algorithms
   static double gsl_costFunction(const gsl_vector *v, void *params)
   {
     double x, y, z, rotx, roty, rotz;
-    std::string detname, inname, outname, instname;
+    std::string detname, inname, outname, instname, rb_param;
     std::string *p = (std::string *)params;
     detname = p[0];
     inname = p[1];
     outname = p[2];
     instname = p[3];
+    rb_param = p[4];
     x = gsl_vector_get(v, 0);
     y = gsl_vector_get(v, 1);
     z = gsl_vector_get(v, 2);
@@ -65,7 +66,7 @@ namespace Algorithms
     rotz = gsl_vector_get(v, 5);
     Mantid::Algorithms::DiffractionEventCalibrateDetectors u;
     // To maximize intensity, minimize -intensity
-    return -u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, instname);
+    return -u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, instname, rb_param);
   }
 
 /**
@@ -165,7 +166,7 @@ namespace Algorithms
  * @param instname The instrument name
  */
 
-  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname)
+  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname, std::string rb_param)
   {
 
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
@@ -224,7 +225,7 @@ namespace Algorithms
     IAlgorithm_sptr alg5 = createSubAlgorithm("Rebin");
     alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
-    alg5->setPropertyValue("Params", ".2,0.0002,10.");
+    alg5->setPropertyValue("Params", rb_param);
     try
     {
       alg5->execute();
@@ -254,6 +255,12 @@ namespace Algorithms
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );
 
+    declareProperty("Params", "",
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "Use bin boundaries close to peak you wish to maximize.\n"
+        "Negative width values indicate logarithmic binning.");
+
     BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
     declareProperty("MaxIterations", 10, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
@@ -279,6 +286,9 @@ namespace Algorithms
     EventWorkspace_const_sptr inputW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInWS );
     if (!inputW)
       throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
+
+     // retrieve the properties
+    const std::string rb_params=getProperty("Params");
 
     //Get some stuff from the input workspace
     IInstrument_sptr inst = inputW->getInstrument();
@@ -321,11 +331,12 @@ namespace Algorithms
     for (int det=0; det < detList.size(); det++)
     {
       PARALLEL_START_INTERUPT_REGION
-      std::string par[4];
+      std::string par[5];
       par[0]=detList[det]->getName();
       par[1]=inname;
       par[2]=outname;
       par[3]=instname;
+      par[4]=rb_params;
       const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
       gsl_multimin_fminimizer *s = NULL;
