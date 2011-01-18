@@ -69,10 +69,7 @@ public:
     TimeSeriesProperty<int> otherProp("otherProp");
     TS_ASSERT( otherProp.addValue( static_cast<std::time_t>( 123 ), 1) );
     TS_ASSERT( otherProp.addValue( boost::posix_time::second_clock::local_time(), 1) );
-  }
 
-  void testValue()
-  {
     const std::string dString = dProp->value();
     TS_ASSERT_EQUALS( dString.substr(0,27), "2007-Nov-30 16:17:00  9.99\n" );
     const std::string iString = iProp->value();
