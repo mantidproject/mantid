@@ -70,7 +70,7 @@ public:
     dspaceFile = "./INES_dspace.dat";
     std::ofstream fout("./INES_dspace.dat", std::ios_base::out|std::ios_base::binary);
     double read = 3.1992498205034756E-6;
-    for (int i=0; i<144; i++)
+    for (int i=0; i<147; i++)
         fout.write( reinterpret_cast<char*>( &read ), sizeof read );
     fout.close();
     testerDSP.setPropertyValue("DspacemapFile", dspaceFile);
