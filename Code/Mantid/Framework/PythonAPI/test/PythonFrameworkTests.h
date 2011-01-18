@@ -13,7 +13,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "Poco/File.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/LibraryManager.h"
+#include <Poco/File.h>
 
 using namespace Mantid::PythonAPI;
 
@@ -26,16 +28,39 @@ private:
   Mantid::PythonAPI::FrameworkManagerProxy* mgr;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PythonFrameworkTests *createSuite() { return new PythonFrameworkTests(); }
+  static void destroySuite( PythonFrameworkTests *suite ) { delete suite; }
 
   PythonFrameworkTests()
   {
+    using namespace Mantid::Kernel;
+
     mgr = new Mantid::PythonAPI::FrameworkManagerProxy;
+
+    // Ugly hacking needed to get the correct configuration loaded
+    // Needed because for any executable with 'python' in the name, Mantid
+    // looks in the directory you're running from instead of the normal
+    // place of next to the executable!
+    // I've resisted the temptation to just rename the executable to PithonAPITest!
+
+    const std::string propFile(getDirectoryOfExecutable()+"Mantid.properties");
+    ConfigService::Instance().updateConfig(propFile);
+    LibraryManager::Instance().OpenAllLibraries(getDirectoryOfExecutable(), false);
+    ConfigService::Instance().updateFacilities();
+  }
+
+  ~PythonFrameworkTests()
+  {
+    delete mgr;
   }
 
   void testCreateAlgorithmMethod1()
   {
-    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("ConvertUnits");
-    TS_ASSERT_EQUALS(alg->name(), "ConvertUnits");
+    Mantid::API::IAlgorithm* alg(NULL);
+    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("ConvertUnits") );
+    if (alg) TS_ASSERT_EQUALS(alg->name(), "ConvertUnits");
   }
 
   void testCreateAlgorithmNotFoundThrows()
@@ -58,12 +83,16 @@ public:
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",ws);
 
-    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("ConvertUnits", "TestWorkspace1;TestWorkspace1;DeltaE;Direct;10.5;0");
+    Mantid::API::IAlgorithm* alg(NULL);
+    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("ConvertUnits", "TestWorkspace1;TestWorkspace1;DeltaE;Direct;10.5;0") );
 	  
-    TS_ASSERT( alg->isInitialized() );
-    TS_ASSERT( !alg->isExecuted() );
-    TS_ASSERT_EQUALS( alg->getPropertyValue("Target"), "DeltaE" );
-    TS_ASSERT_EQUALS( alg->getPropertyValue("EFixed"), "10.5" );
+    if (alg)
+    {
+      TS_ASSERT( alg->isInitialized() );
+      TS_ASSERT( !alg->isExecuted() );
+      TS_ASSERT_EQUALS( alg->getPropertyValue("Target"), "DeltaE" );
+      TS_ASSERT_EQUALS( alg->getPropertyValue("EFixed"), "10.5" );
+    }
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -85,7 +114,7 @@ public:
 	
   void testCreatePythonSimpleAPI()
   {
-    mgr->createPythonSimpleAPI(false);
+    TS_ASSERT_THROWS_NOTHING( mgr->createPythonSimpleAPI(false) );
     Poco::File apimodule(SimplePythonAPI::getModuleFilename());
     TS_ASSERT( apimodule.exists() );
     TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
