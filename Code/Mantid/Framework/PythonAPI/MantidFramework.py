@@ -722,6 +722,20 @@ class MantidPyFramework(FrameworkManager):
         """
         return self._proxyfactory.create(self._retrieveWorkspace(key))
 
+    def __iter__(self):
+        """Returns an iterator object that can loop through the workspaces.
+
+        Enables:
+
+            for w in mantid:
+                print w.getNumberHistograms()
+        """
+        # Implemented using the generator pattern
+        # http://docs.python.org/tutorial/classes.html#generators
+        ws_names = self.getWorkspaceNames()
+        for name in ws_names:
+            yield mtd[name]    
+
     ###########################################################################
     # Framework interface
     ###########################################################################
@@ -765,6 +779,23 @@ class MantidPyFramework(FrameworkManager):
             output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1] + '\n'
 
         print output_table
+
+    def keys(self):
+        """
+        Returns a list of the workspace names contained within Mantid, i.e.
+        workspaces = mtd.keys()
+
+            for i in workspaces:
+              w = mtd[i]  # Handle to workspace
+              ...
+
+        would allow looping over all of the available workspaces.
+        """
+        ws_names = self.getWorkspaceNames()
+        key_list = []
+        for name in ws_names:
+            key_list.append(name)
+        return key_list
 
     def registerPyAlgorithm(self, algorithm):
         """
