@@ -22,6 +22,9 @@ class LoadRun(ReductionStep):
                 
     def execute(self, reducer, workspace, force=False):      
         # If we don't have a data file, look up the workspace handle
+        # Only files that are used for computing data corrections have
+        # a path that is passed directly. Data files that are reduced
+        # are simply found in reducer._data_files 
         if self._data_file is None:
             if workspace in reducer._data_files:
                 data_file = reducer._data_files[workspace]
@@ -38,6 +41,7 @@ class LoadRun(ReductionStep):
         # Check whether that file was already loaded
         # The file also has to be pristine
         if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
+            mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
             return "Data %s is already loaded: delete it first if reloading is intended" % (workspace)
 
         # Find all the necessary files
@@ -73,8 +77,12 @@ class LoadRun(ReductionStep):
             LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
             LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
         
-        # Store the sample-detector distance
-        reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
+        # Store the sample-detector distance if this is the data file we are currently reducing.
+        # If self._data_file is set, it means we are dealing with an auxiliary file.
+        #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
+        # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
+        if self._data_file is None:
+            reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
         
         # Move the detector to its correct position
         MoveInstrumentComponent(workspace+'_evt', "detector1", Z=reducer.instrument.sample_detector_distance/1000.0, RelativePosition=0)

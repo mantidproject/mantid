@@ -455,23 +455,33 @@ class LoadRun(ReductionStep):
                         Wavelength=reducer.instrument.wavelength,
                         WavelengthSpread=reducer.instrument.wavelength_spread)
         
-        # Store the sample-detector distance
-        reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]
+        sdd = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]
         
         if self._sample_det_dist is not None:
-            original_distance = reducer.instrument.sample_detector_distance
-            reducer.instrument.sample_detector_distance = self._sample_det_dist
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
-                                    Z = (self._sample_det_dist-original_distance)/1000.0, 
+                                    Z = (self._sample_det_dist-sdd)/1000.0, 
                                     RelativePosition="1")
+            sdd = self._sample_det_dist            
         elif not self._sample_det_offset == 0:
-            reducer.instrument.sample_detector_distance += self._sample_det_offset
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
                                     Z = self._sample_det_offset/1000.0, 
                                     RelativePosition="1")
+            sdd += self._sample_det_offset
+
+        # Store the sample-detector distance if this is the data file we are currently reducing.
+        # If self._data_file is set, it means we are dealing with an auxiliary file.
+        #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
+        # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
+        if self._data_file is None:
+            reducer.instrument.sample_detector_distance = sdd
         
-        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
-        
+        if sdd == reducer.instrument.sample_detector_distance:
+            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %\
+                                  (workspace, reducer.instrument.sample_detector_distance))
+        else:
+            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [NOT EQUAL TO SAMPLE FILE SDD: %g" %\
+                                  (workspace, sdd, reducer.instrument.sample_detector_distance))
+    
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
