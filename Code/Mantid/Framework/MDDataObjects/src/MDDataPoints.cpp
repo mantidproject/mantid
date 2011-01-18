@@ -48,6 +48,11 @@ MDDataPoints::MDDataPoints(const MDDataPointsDescription &descr):
 {
  
   this->pixel_size = descr.sizeofMDPoint();
+
+  unsigned int nDims = pixDescription.PixInfo().NumDimensions;
+
+  this->box_min.assign(nDims,FLT_MAX);
+  this->box_max.assign(nDims,-FLT_MAX);
 }
 //
 bool 

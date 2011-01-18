@@ -43,12 +43,14 @@ bool load_existing_workspace(const std::string &workspace_name){
 class testCPrebinning :    public CxxTest::TestSuite
 {
        std::string InputWorkspaceName;
+       std::string OutWorkspaceName;
    // test centerpiece rebinning 
        CenterpieceRebinning cpr;
  public:
     void testRebinInit(void){
 
-     InputWorkspaceName = "MyTestMDWorkspace";
+     InputWorkspaceName = "testCPrebinningInMDWorkspace";
+     OutWorkspaceName   = "testCPrebinningOut";
 
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
      TS_ASSERT( cpr.isInitialized() );
@@ -57,7 +59,7 @@ class testCPrebinning :    public CxxTest::TestSuite
 
    
       cpr.setPropertyValue("Input", InputWorkspaceName);      
-      cpr.setPropertyValue("Result","OutWorkspace");
+      cpr.setPropertyValue("Result",OutWorkspaceName);
       cpr.setProperty("KeepPixels",false);
       // set slicing property for the target workspace to the size and shape of the current workspace
       cpr.init_slicing_property();
@@ -76,7 +78,7 @@ class testCPrebinning :    public CxxTest::TestSuite
     }
     void testRebinnedWSExists(){
         // now test if we can get the resulting workspace
-        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve("OutWorkspace");
+        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve(OutWorkspaceName);
 
         MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
         TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
@@ -87,7 +89,7 @@ class testCPrebinning :    public CxxTest::TestSuite
 	    MDWorkspace_sptr inputWS, outWS;
         // Get the workspaces
         inputWS = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(InputWorkspaceName));
-        outWS   = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("OutWorkspace"));
+        outWS   = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(OutWorkspaceName));
          
         const MDImage &OldIMG = inputWS->get_const_MDImage();
         const MDImage &NewIMG = outWS->get_const_MDImage();

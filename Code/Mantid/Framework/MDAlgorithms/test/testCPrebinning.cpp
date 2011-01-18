@@ -20,37 +20,37 @@ CxxTest::StaticSuiteDescription suiteDescription_testCPrebinning( "C:/Users/wkc2
 
 static class TestDescription_testCPrebinning_testRebinInit : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testRebinInit() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 49, "testRebinInit" ) {}
+ TestDescription_testCPrebinning_testRebinInit() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 50, "testRebinInit" ) {}
  void runTest() { suite_testCPrebinning.testRebinInit(); }
 } testDescription_testCPrebinning_testRebinInit;
 
 static class TestDescription_testCPrebinning_testGetSlicingProperty : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testGetSlicingProperty() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 66, "testGetSlicingProperty" ) {}
+ TestDescription_testCPrebinning_testGetSlicingProperty() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 68, "testGetSlicingProperty" ) {}
  void runTest() { suite_testCPrebinning.testGetSlicingProperty(); }
 } testDescription_testCPrebinning_testGetSlicingProperty;
 
 static class TestDescription_testCPrebinning_testCPRExec : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testCPRExec() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 73, "testCPRExec" ) {}
+ TestDescription_testCPrebinning_testCPRExec() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 75, "testCPRExec" ) {}
  void runTest() { suite_testCPrebinning.testCPRExec(); }
 } testDescription_testCPrebinning_testCPRExec;
 
 static class TestDescription_testCPrebinning_testRebinnedWSExists : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testRebinnedWSExists() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 77, "testRebinnedWSExists" ) {}
+ TestDescription_testCPrebinning_testRebinnedWSExists() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 79, "testRebinnedWSExists" ) {}
  void runTest() { suite_testCPrebinning.testRebinnedWSExists(); }
 } testDescription_testCPrebinning_testRebinnedWSExists;
 
 static class TestDescription_testCPrebinning_testEqRebinCorrectness : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testEqRebinCorrectness() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 85, "testEqRebinCorrectness" ) {}
+ TestDescription_testCPrebinning_testEqRebinCorrectness() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 87, "testEqRebinCorrectness" ) {}
  void runTest() { suite_testCPrebinning.testEqRebinCorrectness(); }
 } testDescription_testCPrebinning_testEqRebinCorrectness;
 
 static class TestDescription_testCPrebinning_testCPRRebinAgainSmaller : public CxxTest::RealTestDescription {
 public:
- TestDescription_testCPrebinning_testCPRRebinAgainSmaller() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 100, "testCPRRebinAgainSmaller" ) {}
+ TestDescription_testCPrebinning_testCPRRebinAgainSmaller() : CxxTest::RealTestDescription( Tests_testCPrebinning, suiteDescription_testCPrebinning, 102, "testCPRRebinAgainSmaller" ) {}
  void runTest() { suite_testCPrebinning.testCPRRebinAgainSmaller(); }
 } testDescription_testCPrebinning_testCPRRebinAgainSmaller;
 
