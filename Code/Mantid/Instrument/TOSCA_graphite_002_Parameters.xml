@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "TOSCA" date = "2010-07-15T00:00:00">
+<parameter-file instrument = "TOSCA" date = "2011-01-04T00:00:00">
 
 <component-link name = "TOSCA">
-
-<!-- [[62500 ,  65000] , [59000 ,  61500]] -->
 
 <parameter name="analysis-type" type="string">
   <value val="spectroscopy" />
@@ -36,8 +34,6 @@
 <parameter name="back-end">
 	<value val="0" />
 </parameter>
-
-
 
 </component-link>
 

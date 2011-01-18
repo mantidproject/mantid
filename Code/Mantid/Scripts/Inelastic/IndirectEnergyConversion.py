@@ -3,6 +3,67 @@ from mantidplot import *
 
 import re
 
+def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', 
+        reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, 
+        calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='',
+        saveFormats = [], Verbose = False):
+    output_workspace_names = []
+    runNos = []
+    workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
+    try:
+        inst = mtd[ws_name[0]].getInstrument()
+        area = inst.getNumberParameter('mon-area')[0]
+        thickness = inst.getNumberParameter('mon-thickness')[0]
+    except IndexError:
+        sys.exit('Monitor area and thickness (unt and zz) are not defined \
+                in the Instrument Parameter File.')
+    for ws in ws_name:
+        if ( analyser != "" and reflection != "" ):
+            applyParameterFile(ws, analyser, reflection)
+        if adjustTOF(ws):
+            TofCorrection(ws, ws)
+            for i in range(1,141):
+                detector = "Detector #" + str(i)
+                MoveInstrumentComponent(ws, detector, X=0, Y=0, Z=0,
+                    RelativePosition=False)
+            factor = 1e9
+        else:
+            factor = 1e6
+        runNo = mtd[ws].getRun().getLogData("run_number").value
+        runNos.append(runNo)
+        name = ws[:3].lower() + runNo + '_' + analyser + reflection + '_red'
+        MonitorWS_n = timeRegime(inWS = ws)
+        MonWS_n = monitorEfficiency('MonWS', area, thickness)
+        CropWorkspace(ws, 'Time', StartWorkspaceIndex=(first-1), 
+                EndWorkspaceIndex=(last-1))
+        mantid.deleteWorkspace(ws)
+        if ( bgremove != [0, 0] ):
+            backgroundRemoval(bgremove[0], bgremove[1])
+        if ( calib != '' ):
+            calibrated = useCalib(calib)
+        normalised = normToMon(Factor=factor)
+        cte = conToEnergy(outWS_n=name+'_intermediate')
+        if ( rebinParam != ''):
+            rebin = rebinData(rebinParam, inWS_n=cte)
+            if CleanUp:
+                mantid.deleteWorkspace(cte)
+        else:
+            if CleanUp:
+                RenameWorkspace(cte, 'Energy')
+            else:
+                CloneWorkspace(cte, 'Energy')
+        if ( tempK != -1 ):
+            db = detailedBalance(tempK)
+        if adjustTOF('Energy'):
+            group = groupTosca(name)
+        else:
+            group = groupData(mapfile, outWS_n=name)
+        output_workspace_names.append(group)
+    if ( saveFormats != [] ):
+        saveItems(output_workspace_names, runNos, saveFormats, instrument, 
+                savesuffix)
+    return output_workspace_names, runNos
+
 def loadData(rawfiles, outWS='RawFile', Sum=False):
     ( dir, file ) = os.path.split(rawfiles[0])
     ( name, ext ) = os.path.splitext(file)
@@ -41,7 +102,10 @@ def getFirstMonFirstDet(inWS):
     FirstDet = FirstMon = -1
     nhist = workspace.getNumberHistograms()
     for counter in range(0, nhist):
-        detector = workspace.getDetector(counter)
+        try:
+            detector = workspace.getDetector(counter)
+        except RuntimeError: # This causes problems when encountering some
+            pass             # incomplete instrument definition files (TOSCA)
         if detector.isMonitor():
             if (FirstMon == -1):
                 FirstMon = counter
@@ -109,21 +173,22 @@ def useCalib(path, inWS_n='Time', outWS_n='Time'):
         mantid.deleteWorkspace('calib')
     return outWS_n
 
-def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
-    ConvertUnits(inWS_n,outWS_n, 'Wavelength')
+def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS',
+        Factor=1e6):
+    ConvertUnits(inWS_n,outWS_n, 'Wavelength', EMode='Indirect')
     RebinToWorkspace(outWS_n,monWS_n,outWS_n)
+    CreateSingleValuedWorkspace('factor', Factor)
+    Divide(monWS_n, 'factor', monWS_n)
+    mantid.deleteWorkspace('factor')
     Divide(outWS_n,monWS_n,outWS_n)
     mantid.deleteWorkspace(monWS_n)
     if (inWS_n != outWS_n):
         mantid.deleteWorkspace(inWS_n)
     return outWS_n
 
-def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
-    if adjustTOF(inWS_n): # TRC interested in Energy rather than DeltaE
-        ConvertUnits(inWS_n, outWS_n, 'Energy', 'Indirect')
-    else:
-        ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
-        CorrectKiKf(outWS_n, outWS_n, 'Indirect', efixed)
+def conToEnergy(inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
+    ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect')
+    CorrectKiKf(outWS_n, outWS_n, 'Indirect')
     return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
@@ -139,6 +204,26 @@ def groupData(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
     mantid.deleteWorkspace(inWS_n)
     return outWS_n
 
+def groupTosca(wsname):
+    invalid = [0,1,13,27,28,41,55,69,70,83,97,111,125,127,139]
+    grp = range(0,70)
+    for i in invalid:
+        try:
+            grp.remove(i)
+        except ValueError:
+            pass
+    GroupDetectors('Energy', wsname, WorkspaceIndexList=grp)
+    grp = range(70,140)
+    for i in invalid:
+        try:
+            grp.remove(i)
+        except ValueError:
+            pass
+    GroupDetectors('Energy', 'front', WorkspaceIndexList=grp)
+    mantid.deleteWorkspace('Energy')
+    ConjoinWorkspaces(wsname, 'front')
+    return wsname
+    
 def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
     ConvertToDistribution(inWS_n)
     FlatBackground(inWS_n, outWS_n, tofStart, tofEnd, Mode = 'Mean')
@@ -146,91 +231,6 @@ def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
     if ( inWS_n != outWS_n ):
         ConvertFromDistribution(outWS_n)
     return outWS_n
-
-def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', 
-        reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, 
-        calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='',
-        saveFormats = [], Verbose = False):
-    output_workspace_names = []
-    runNos = []
-    if Verbose:
-        mtd.sendLogMessage(">> Loading RAW Files: "+", ".join(rawfiles))
-    workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
-    if Verbose:
-        mtd.sendLogMessage(">> Raw files loaded into workspaces: "+
-                ", ".join(ws_name))
-    try:
-        inst = mtd[ws_name[0]].getInstrument()
-        area = inst.getNumberParameter('mon-area')[0]
-        thickness = inst.getNumberParameter('mon-thickness')[0]
-    except IndexError:
-        sys.exit('Monitor area and thickness (unt and zz) are not defined \
-                in the Instrument Parameter File.')
-    for ws in ws_name:
-        if ( analyser != "" and reflection != "" ):
-            applyParameterFile(ws, analyser, reflection)
-        if adjustTOF(ws):
-            TofCorrection(ws, ws)
-        runNo = mtd[ws].getRun().getLogData("run_number").value
-        runNos.append(runNo)
-        name = ws[:3].lower() + runNo + '_' + analyser + reflection + '_red'
-        MonitorWS_n = timeRegime(inWS = ws)
-        MonWS_n = monitorEfficiency('MonWS', area, thickness)
-        if Verbose:
-            mtd.sendLogMessage(">> Monitor Workspace for "+ws+" is "+MonWS_n)
-        CropWorkspace(ws, 'Time', StartWorkspaceIndex=(first-1), 
-                EndWorkspaceIndex=(last-1))
-        mantid.deleteWorkspace(ws)
-        if ( bgremove != [0, 0] ):
-            backgroundRemoval(bgremove[0], bgremove[1])
-        if ( calib != '' ):
-            if Verbose:
-                mtd.sendLogMessage('>> Applying Calibration File: ' + calib)
-            calibrated = useCalib(calib)
-        normalised = normToMon()
-        if Verbose:
-            mtd.sendLogMessage('>> Converting workspace '+normalised+' to \
-                    units of deltaE.')
-        cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
-        if ( rebinParam != ''):
-            if Verbose:
-                mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with \
-                        parameters (' +rebinParam+ ')')
-            rebin = rebinData(rebinParam, inWS_n=cte)
-            if CleanUp:
-                if Verbose:
-                    mtd.sendLogMessage('>> Removing intermediate workspace: '
-                            + cte)
-                mantid.deleteWorkspace(cte)
-        else:
-            if CleanUp:
-                if Verbose:
-                    mtd.sendLogMessage('>> Removing intermediate workspace: '
-                            + cte)
-                RenameWorkspace(cte, 'Energy')
-            else:
-                CloneWorkspace(cte, 'Energy')
-        if ( tempK != -1 ):
-            if Verbose:
-                mtd.sendLogMessage('>> Adjusting for "detailed balance"  \
-                        at temperature: ' + str(tempK) + 'K')
-            db = detailedBalance(tempK)
-        group = groupData(mapfile, outWS_n=name)
-        output_workspace_names.append(group)
-    if ( saveFormats != [] ):
-        saveItems(output_workspace_names, runNos, saveFormats, instrument, 
-                savesuffix)
-        if Verbose:
-            mtd.sendLogMessage(">> Saved workspaces: " + 
-                    ", ".join(output_workspace_names) +" in formats: " + 
-                    ", ".join(saveFormats))
-    elif Verbose:
-        mtd.sendLogMessage(">> Workspaces were not saved.")
-    if Verbose:
-        mtd.sendLogMessage(">> Convert to Energy completed with the \
-                following output workspaces: " +
-                ", ".join(output_workspace_names))
-    return output_workspace_names, runNos
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, 
         savesuffix, saveFormats, CleanUp=False, Verbose=False):
@@ -438,7 +438,8 @@ def getReflectionDetails(inst, analyser, refl):
         result += str( int(inst.getNumberParameter('peak-start')[0]) ) + '\n'
         result += str( int(inst.getNumberParameter('peak-end')[0]) ) + '\n'
         result += str( int(inst.getNumberParameter('back-start')[0]) ) + '\n'
-        result += str( int(inst.getNumberParameter('back-end')[0]) )
+        result += str( int(inst.getNumberParameter('back-end')[0]) ) + '\n'
+        result += inst.getStringParameter('rebin-default')[0]
     except IndexError:
         pass
     mantid.deleteWorkspace('ins')

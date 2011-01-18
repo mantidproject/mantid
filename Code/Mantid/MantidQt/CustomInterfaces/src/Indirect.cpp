@@ -1159,7 +1159,7 @@ void Indirect::reflectionSelected(int index)
     m_sltDblMng->setValue(m_sltProp["SpecMin"], values[1].toDouble());
     m_sltDblMng->setValue(m_sltProp["SpecMax"], values[2].toDouble());
     
-    if ( values.count() == 8 )
+    if ( values.count() >= 8 )
     {
       m_uiForm.leEfixed->setText(values[3]);
       
@@ -1176,6 +1176,15 @@ void Indirect::reflectionSelected(int index)
     else
     {
       m_uiForm.leEfixed->clear();
+    }
+    // Default rebinning parameters
+    if ( values.count() == 9 )
+    {
+      QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
+      m_uiForm.rebin_ckDNR->setChecked(false);
+      m_uiForm.rebin_leELow->setText(rbp[0]);
+      m_uiForm.rebin_leEWidth->setText(rbp[1]);
+      m_uiForm.rebin_leEHigh->setText(rbp[2]);
     }
   }
 

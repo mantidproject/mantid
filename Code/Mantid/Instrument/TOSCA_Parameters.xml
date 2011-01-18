@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "TOSCA" date = "2010-05-05T00:00:00">
+<parameter-file instrument = "TOSCA" date = "2011-01-18T00:00:00">
 
 <component-link name = "TOSCA">
 
@@ -7,26 +7,38 @@
   <value val="indirect"/>
 </parameter>
 
+<!-- This parameter tells MANTID that the RAW files from this instrument must
+     be put through the TofCorrection algorithm. -->
 <parameter name="adjustTOF">
   <value val="1" />
 </parameter>
 
+<!-- These properties are neceessary for use in the Indirect CTE interface. -->
 <parameter name="analysers" type="string">
-  <value val="abc" />
+  <value val="graphite" />
+</parameter>
+<parameter name="refl-graphite" type="string">
+  <value val="002" />
 </parameter>
 
-<parameter name="refl-abc" type="string">
-  <value val="001" />
-</parameter>
-
-<!-- THESE VALUES COPIED FROM IRIS - NEED CHANGING? -->
+<!-- "mon-area" and "mon-thickness" are used in the ConvertToEnergy interface
+     as parameters to the OneMinusExponentialCor algorithm.
+     Values obtained from Dr Timmy Ramirez-Cuesta. -->
 <parameter name="mon-area" >
-  <value val="5.39e-5" />
+  <value val="5.391011e-5" />
 </parameter>
 <parameter name="mon-thickness" >
-  <value val="0.0013" />
+  <value val="0.013" />
 </parameter>
 
+<!-- This parameter will be taken as a default value for the rebinning of
+        the data in DeltaE. The existence of the parameter will make rebinning
+        the default, as opposed to not rebinning.
+        This is necessary so that the spectra can be grouped.
+-->
+<parameter name="rebin-default" type="string">
+  <value val="3,-0.005,1000" />
+</parameter>
 
 </component-link>
 
