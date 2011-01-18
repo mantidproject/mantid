@@ -9,7 +9,7 @@ import os
 class DriverGenerator:
     def __init__(self, directory, python=DEF_PYTHON,
                  xmlrunnerloc=DEF_XMLRUNNER, withXmlRunner=True):
-        self.__directory = directory
+        self.__directory = os.path.normpath(directory)
         self.__python=python
         self.__xmlrunnerloc = xmlrunnerloc
         self.__withxmlrunner = withXmlRunner
