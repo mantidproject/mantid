@@ -39,8 +39,8 @@
 #include <RebinningCutterAttributes.h>
 #include <DataNode.h>
 #include <PlaneAttributes.h>
+#include <BoxExtents.h>
 #include <DebugStream.h>
-
 // ****************************************************************************
 // Method: RebinningCutterAttributes::RebinningCutterAttributes
 //
@@ -58,6 +58,7 @@
 
 void RebinningCutterAttributes::Init()
 {
+    m_hasExecuted = false;
     RebinningCutterAttributes::SelectAll();
 }
 
@@ -84,23 +85,15 @@ void RebinningCutterAttributes::Copy(const RebinningCutterAttributes &obj)
     normalX = obj.normalX;
     normalY = obj.normalY;
     normalZ = obj.normalZ;
-    dimensionX = obj.dimensionX;
-    dimensionY = obj.dimensionY;
-    dimensionZ = obj.dimensionZ;
-    dimensiont = obj.dimensiont;
-    isUnstructured = obj.isUnstructured;
+    width = obj.width;
+    height = obj.height;
+    depth = obj.depth;
+    structured = obj.structured;
+    m_hasExecuted = obj.m_hasExecuted;
+    xDimension = obj.xDimension;
+
     RebinningCutterAttributes::SelectAll();
 }
-
-bool RebinningCutterAttributes::CreateNode(DataNode *node, bool completeSave, bool forceAdd)
-{
-  return forceAdd;
-}
-
-void RebinningCutterAttributes::SetFromNode(DataNode *node)
-{
-}
-
 
 // Type map format string
 const char *RebinningCutterAttributes::TypeMapFormatString = REBINNINGCUTTERATTRIBUTES_TMFS;
@@ -261,12 +254,12 @@ RebinningCutterAttributes::operator == (const RebinningCutterAttributes &obj) co
             (normalX == obj.normalX) &&
             (normalY == obj.normalY) &&
             (normalZ == obj.normalZ) &&
-            (dimensionX == obj.dimensionX) &&
-            (dimensionY == obj.dimensionY) &&
-            (dimensionZ == obj.dimensionZ) &&
-            (dimensiont == obj.dimensiont) &&
-            (isUnstructured == obj.isUnstructured)
-    );
+            (width == obj.width) &&
+            (height == obj.height) &&
+            (depth == obj.depth) &&
+            (xDimension == obj.xDimension)&&
+            (m_hasExecuted == obj.m_hasExecuted) &&
+            (structured == obj.structured));
 }
 
 // ****************************************************************************
@@ -328,7 +321,6 @@ RebinningCutterAttributes::TypeName() const
 
 bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
 {
-
   bool retval = false;
 
   if (TypeName() == atts->TypeName())
@@ -342,11 +334,12 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
   {
 
     const PlaneAttributes *tmp = (const PlaneAttributes *) atts;
-    debug5 << "origininfo " << tmp->GetOrigin()[0] << " " << tmp->GetOrigin()[1] << " "
-        << tmp->GetOrigin()[2] << endl;
-    debug5 << "normalinfo " << tmp->GetNormal()[0] << " " << tmp->GetNormal()[1] << " "
-        << tmp->GetNormal()[2] << endl;
-
+    debug5
+      << "origin info: " << tmp->GetOrigin()[0] << " " << tmp->GetOrigin()[1] << " "
+          << tmp->GetOrigin()[2] << endl;
+    debug5
+      << "normal info: " << tmp->GetNormal()[0] << " " << tmp->GetNormal()[1] << " "
+          << tmp->GetNormal()[2] << endl;
 
     SetOriginX(tmp->GetOrigin()[0]);
     SetOriginY(tmp->GetOrigin()[1]);
@@ -356,12 +349,36 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
     SetNormalZ(tmp->GetNormal()[2]);
 
     retval = true;
+  }
+  else if (atts->TypeName() == "BoxExtents")
+  {
+    const BoxExtents *tmp = (const BoxExtents *) atts;
+    const double *extents = tmp->GetExtents();
 
+    SetWidth(extents[1] - extents[0]);
+    SetHeight(extents[3] - extents[2]);
+    SetDepth(extents[5] - extents[4]);
+
+    SetOriginX((extents[1] + extents[0]) / 2);
+    SetOriginY((extents[3] + extents[2]) / 2);
+    SetOriginZ((extents[5] + extents[4]) / 2);
+
+    debug5
+      << "origin info: " << GetOriginX() << " " << GetOriginY() << " " << GetOriginZ() << endl;
+    debug5
+      << "normal info: " << GetNormalX() << " " << GetNormalY() << " " << GetNormalZ() << endl;
+    debug5
+      << "width: " << GetWidth() << endl;
+    debug5
+      << "height: " << GetHeight() << endl;
+    debug5
+      << "depth: " << GetDepth() << endl;
+
+    retval = true;
   }
 
   return retval;
 }
-
 
 // ****************************************************************************
 // Method: RebinningCutterAttributes::CreateCompatible
@@ -440,11 +457,10 @@ RebinningCutterAttributes::SelectAll()
     Select(ID_normalX,    (void *)&normalX);
     Select(ID_normalY,    (void *)&normalY);
     Select(ID_normalZ,    (void *)&normalZ);
-    Select(ID_dimensionX, (void *)&dimensionX);
-    Select(ID_dimensionY, (void *)&dimensionY);
-    Select(ID_dimensionZ, (void *)&dimensionZ);
-    Select(ID_dimensiont, (void *)&dimensiont);
-    Select(ID_UnstructuredGrid, (void*)&isUnstructured);
+    Select(ID_width,      (void *)&width);
+    Select(ID_height,     (void *)&height);
+    Select(ID_depth,      (void *)&depth);
+    Select(ID_structured, (void *)&structured);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -494,37 +510,31 @@ RebinningCutterAttributes::SetNormalZ(double normalZ_)
 }
 
 void
-RebinningCutterAttributes::SetDimensionX(int dimensionX_)
+RebinningCutterAttributes::SetWidth(double width_)
 {
-    dimensionX = dimensionX_;
-    Select(ID_dimensionX, (void *)&dimensionX);
+    width = width_;
+    Select(ID_width, (void *)&width);
 }
 
 void
-RebinningCutterAttributes::SetDimensionY(int dimensionY_)
+RebinningCutterAttributes::SetHeight(double height_)
 {
-    dimensionY = dimensionY_;
-    Select(ID_dimensionY, (void *)&dimensionY);
+    height = height_;
+    Select(ID_height, (void *)&height);
 }
 
 void
-RebinningCutterAttributes::SetDimensionZ(int dimensionZ_)
+RebinningCutterAttributes::SetDepth(double depth_)
 {
-    dimensionZ = dimensionZ_;
-    Select(ID_dimensionZ, (void *)&dimensionZ);
+    depth = depth_;
+    Select(ID_depth, (void *)&depth);
 }
 
 void
-RebinningCutterAttributes::SetDimensiont(int dimensiont_)
+RebinningCutterAttributes::SetStructured(bool structured_)
 {
-    dimensiont = dimensiont_;
-    Select(ID_dimensiont, (void *)&dimensiont);
-}
-
-void RebinningCutterAttributes::SetUseUnStructuredGrid(bool useUnstructuredGrid)
-{
-  isUnstructured = useUnstructuredGrid;
-  Select(ID_UnstructuredGrid, (void*)&isUnstructured);
+    structured = structured_;
+    Select(ID_structured, (void *)&structured);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -567,33 +577,44 @@ RebinningCutterAttributes::GetNormalZ() const
     return normalZ;
 }
 
-int
-RebinningCutterAttributes::GetDimensionX() const
+double
+RebinningCutterAttributes::GetWidth() const
 {
-    return dimensionX;
+    return width;
 }
 
-int
-RebinningCutterAttributes::GetDimensionY() const
+double
+RebinningCutterAttributes::GetHeight() const
 {
-    return dimensionY;
+    return height;
 }
 
-int
-RebinningCutterAttributes::GetDimensionZ() const
+double
+RebinningCutterAttributes::GetDepth() const
 {
-    return dimensionZ;
+    return depth;
 }
 
-int
-RebinningCutterAttributes::GetDimensiont() const
+bool
+RebinningCutterAttributes::GetStructured() const
 {
-    return dimensiont;
+    return structured;
 }
 
-bool   RebinningCutterAttributes::GetUseUnStructuredGrid() const
+
+const std::string& RebinningCutterAttributes::getXDimension() const
 {
-  return isUnstructured;
+  return xDimension;
+}
+
+bool RebinningCutterAttributes::getExecuted() const
+{
+  return m_hasExecuted;
+}
+
+void RebinningCutterAttributes::setExecuted(bool hasExecuted)
+{
+  this->m_hasExecuted = hasExecuted;
 }
 
 
@@ -627,11 +648,10 @@ RebinningCutterAttributes::GetFieldName(int index) const
     case ID_normalX:    return "normalX";
     case ID_normalY:    return "normalY";
     case ID_normalZ:    return "normalZ";
-    case ID_dimensionX: return "dimensionX";
-    case ID_dimensionY: return "dimensionY";
-    case ID_dimensionZ: return "dimensionZ";
-    case ID_dimensiont: return "dimensiont";
-    case ID_UnstructuredGrid: return "isUnstructured";
+    case ID_width:      return "width";
+    case ID_height:     return "height";
+    case ID_depth:      return "depth";
+    case ID_structured: return "structured";
     default:  return "invalid index";
     }
 }
@@ -662,11 +682,10 @@ RebinningCutterAttributes::GetFieldType(int index) const
     case ID_normalX:    return FieldType_double;
     case ID_normalY:    return FieldType_double;
     case ID_normalZ:    return FieldType_double;
-    case ID_dimensionX: return FieldType_int;
-    case ID_dimensionY: return FieldType_int;
-    case ID_dimensionZ: return FieldType_int;
-    case ID_dimensiont: return FieldType_int;
-    case ID_UnstructuredGrid: return FieldType_bool;
+    case ID_width:      return FieldType_double;
+    case ID_height:     return FieldType_double;
+    case ID_depth:      return FieldType_double;
+    case ID_structured: return FieldType_bool;
     default:  return FieldType_unknown;
     }
 }
@@ -697,11 +716,10 @@ RebinningCutterAttributes::GetFieldTypeName(int index) const
     case ID_normalX:    return "double";
     case ID_normalY:    return "double";
     case ID_normalZ:    return "double";
-    case ID_dimensionX: return "int";
-    case ID_dimensionY: return "int";
-    case ID_dimensionZ: return "int";
-    case ID_dimensiont: return "int";
-    case ID_UnstructuredGrid: return "bool";
+    case ID_width:      return "double";
+    case ID_height:     return "double";
+    case ID_depth:      return "double";
+    case ID_structured: return "bool";
     default:  return "invalid index";
     }
 }
@@ -758,34 +776,35 @@ RebinningCutterAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) co
         retval = (normalZ == obj.normalZ);
         }
         break;
-    case ID_dimensionX:
+    case ID_width:
         {  // new scope
-        retval = (dimensionX == obj.dimensionX);
+        retval = (width == obj.width);
         }
         break;
-    case ID_dimensionY:
+    case ID_height:
         {  // new scope
-        retval = (dimensionY == obj.dimensionY);
+        retval = (height == obj.height);
         }
         break;
-    case ID_dimensionZ:
+    case ID_depth:
         {  // new scope
-        retval = (dimensionZ == obj.dimensionZ);
+        retval = (depth == obj.depth);
         }
         break;
-    case ID_dimensiont:
+    case ID_structured:
         {  // new scope
-        retval = (dimensiont == obj.dimensiont);
+        retval = (structured == obj.structured);
         }
-    case ID_UnstructuredGrid:
-    {
-      retval = (isUnstructured == obj.isUnstructured );
-    }
         break;
     default: retval = false;
     }
 
     return retval;
+}
+
+void RebinningCutterAttributes::setXDimension(const std::string& dimensionX)
+{
+  this->xDimension = dimensionX;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,13 +13,13 @@
       </Field>
       <Field name="normalZ" label="Normal Z" type="double">
       </Field>
-      <Field name="dimensionX" label="Dimension X" type="int">
+      <Field name="width" label="Width" type="double">
       </Field>
-      <Field name="dimensionY" label="Dimension Y" type="int">
+      <Field name="height" label="Height" type="double">
       </Field>
-      <Field name="dimensionZ" label="Dimension Z" type="int">
+      <Field name="depth" label="Depth" type="double">
       </Field>
-      <Field name="dimensiont" label="Dimension t" type="int">
+      <Field name="structured" label="Is Structured Grid" type="bool">
       </Field>
     </Attribute>
   </Plugin>

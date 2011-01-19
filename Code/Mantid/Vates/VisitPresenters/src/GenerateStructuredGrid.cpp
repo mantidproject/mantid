@@ -33,7 +33,7 @@ vtkDataSet* GenerateStructuredGrid::execute()
   double incrementY = (maxY - minY) / nBinsY;
   double incrementZ = (maxZ - minZ) / nBinsZ;
 
-  const int imageSize = nBinsX * nBinsY * nBinsZ;
+  const int imageSize = (nBinsX + 1) * (nBinsY + 1) * (nBinsZ + 1);
   vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
   vtkPoints *points = vtkPoints::New();
   points->Allocate(imageSize);
@@ -42,11 +42,11 @@ vtkDataSet* GenerateStructuredGrid::execute()
   double posX, posY, posZ;
   //Loop through dimensions
   boost::shared_ptr<const Mantid::MDDataObjects::MDImage> spImage = m_workspace->get_spMDImage();
-  for (int i = 0; i < nBinsX; i++)
+  for (int i = 0; i < nBinsX+1; i++)
   {
-    for (int j = 0; j < nBinsY; j++)
+    for (int j = 0; j < nBinsY+1; j++)
     {
-      for (int k = 0; k < nBinsZ; k++)
+      for (int k = 0; k < nBinsZ+1; k++)
       {
         posX = minX + i*incrementX; //Calculate increment in x;
         posY = minY + j*incrementY; //Calculate increment in y;
@@ -58,7 +58,7 @@ vtkDataSet* GenerateStructuredGrid::execute()
 
   //Attach points to dataset.
   visualDataSet->SetPoints(points);
-  visualDataSet->SetDimensions(nBinsX, nBinsY, nBinsZ);
+  visualDataSet->SetDimensions(nBinsX+1, nBinsY+1, nBinsZ+1);
   points->Delete();
   return visualDataSet;
 }

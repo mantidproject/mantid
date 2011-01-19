@@ -85,6 +85,9 @@ public:
 
   /// Get the underlying workspace name.
   const std::string& getWorkspaceName() const;
+
+  /// Get the underlying workspace geometry.
+  const std::string& getWorkspaceGeometry() const;
 };
 
 

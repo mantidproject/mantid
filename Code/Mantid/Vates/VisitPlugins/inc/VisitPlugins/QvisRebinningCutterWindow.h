@@ -58,6 +58,7 @@ class QvisLineStyleWidget;
 class QvisLineWidthWidget;
 class QvisVariableButton;
 class QComboBox;
+class GeometryWidget;
 
 // ****************************************************************************
 // Class: QvisRebinningCutterWindow
@@ -95,41 +96,36 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     void normalXProcessText();
     void normalYProcessText();
     void normalZProcessText();
-    void dimensionXProcessText();
-    void dimensionYProcessText();
-    void dimensionZProcessText();
-    void dimensiontProcessText();
-    void unstructuredChecked();
+    void widthProcessText();
+    void heightProcessText();
+    void depthProcessText();
+    void structuredChanged(bool val);
   private:
+    /// If possible create the geometry widget from pipeline information.
+    void createGeometryWidget();
+    /// check wheter the current geometry information is consistent with that in the upper pipeline.
+    bool isInputConsistent(const std::string& inputGeometryXML);
+
     QLineEdit *originX;
     QLineEdit *originY;
     QLineEdit *originZ;
     QLineEdit *normalX;
     QLineEdit *normalY;
     QLineEdit *normalZ;
-    QLineEdit *dimensionX;
-    QLineEdit *dimensionY;
-    QLineEdit *dimensionZ;
-    QLineEdit *dimensiont;
-    QLabel *originXLabel;
-    QLabel *originYLabel;
-    QLabel *originZLabel;
-    QLabel *normalXLabel;
-    QLabel *normalYLabel;
-    QLabel *normalZLabel;
-    QLabel *dimensionXLabel;
-    QLabel *dimensionYLabel;
-    QLabel *dimensionZLabel;
-    QLabel *dimensiontLabel;
-    QLabel *unstructLabel;
-
-    QCheckBox *unstructCheckBox;
-    QComboBox *dimensionXCombo;
-    QComboBox *dimensionYCombo;
-
-
+    QLineEdit *width;
+    QLineEdit *height;
+    QLineEdit *depth;
+    QCheckBox *structured;
+    //QLabel *originXYZLabel;
+    //QLabel *normalXYZLabel;
+    QLabel *widthLabel;
+    QLabel *heightLabel;
+    QLabel *depthLabel;
+    QGridLayout *mainLayout;
 
     RebinningCutterAttributes *atts;
+    std::string m_cacheGeometryXML;
+    GeometryWidget* m_geomWidget;
 };
 
 

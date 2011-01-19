@@ -201,6 +201,17 @@ void testCreateXMLWithoutFunction()
   TSM_ASSERT_EQUALS("The xml has been created without a function incorrectly", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/></MDInstruction>", xml);
 }
 
+void testGetGeometryXML()
+{
+  RebinningXMLGenerator generator;
+  generator.setWorkspaceName("name");
+  generator.setWorkspaceLocation("location");
+  std::string dimensionXMLString = "<DimensionSet/>";
+  generator.setGeometryXML(dimensionXMLString);
+
+  std::string xml = generator.getWorkspaceGeometry();
+  TSM_ASSERT_EQUALS("The geometry xml fetched is not the same as that provided", dimensionXMLString, generator.getWorkspaceGeometry());
+}
 
 
 };

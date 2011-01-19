@@ -22,8 +22,8 @@ void testConstruction()
 
   vtkDataArray* data = mdPresenter.getScalarData(1, "signal");
   vtkDataSet* visData = mdPresenter.getMesh();
-  TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 117649, data->GetSize());
-  TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 125000, visData->GetNumberOfPoints());
+  TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 125000, data->GetSize());
+  TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 132651, visData->GetNumberOfPoints());
   TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 50, mdPresenter.getNumberOfTimesteps());
 }
 

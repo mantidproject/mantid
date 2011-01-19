@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vtkImplicitFunction.h>
 #include <vtkStructuredGrid.h>
+#include <vtkFloatArray.h>
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
 #include <vtkCellData.h>
@@ -114,9 +115,9 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   //Apply the geometry.
   m_serializer.setGeometryXML( constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, height, width, depth, origin) );
   //Apply the workspace name after extraction from the input xml.
-  m_serializer.setWorkspaceName( findExistingWorkspaceNameFromXML(inputDataSet, XMLDefinitions::metaDataId.c_str()));
+  m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId.c_str()));
   //Apply the workspace location after extraction from the input xml.
-  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocationFromXML(inputDataSet, XMLDefinitions::metaDataId.c_str()));
+  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId.c_str()));
 
   //Now actually perform rebinning operation and cache the rebinnned workspace.
   this->m_rebinnedWs = rebin(m_serializer);
@@ -124,29 +125,134 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   this->m_initalized = true;
 }
 
-vtkDataSet* RebinningCutterPresenter::createVisualDataSet(const std::string& scalarName, bool isUnstructured, int timestep)
+vtkDataSet* RebinningCutterPresenter::createVisualDataSet(const std::string& scalarName,
+    bool isUnstructured, int timestep)
 {
 
-  if (true == m_initalized)
-  {
-    //call the rebinning routines and generate a resulting image for visualisation.
-    vtkDataSet* visualImageData = generateVisualImage(m_rebinnedWs, scalarName, isUnstructured, timestep);
+  VerifyInitalization();
+  //call the rebinning routines and generate a resulting image for visualisation.
+  vtkDataSet* visualImageData = generateVisualImage(m_rebinnedWs, scalarName, isUnstructured, timestep);
 
-    //save the work performed as part of this filter instance into the pipeline.
-    persistReductionKnowledge(visualImageData, this->m_serializer, XMLDefinitions::metaDataId.c_str());
-    return visualImageData;
-  }
-  else
-  {
-    //To ensure that constructReductionKnowledge is always called first.
-    throw std::runtime_error("This instance has not been properly initialised via the construct method.");
-  }
-
+  //save the work performed as part of this filter instance into the pipeline.
+  persistReductionKnowledge(visualImageData, this->m_serializer, XMLDefinitions::metaDataId.c_str());
+  return visualImageData;
 }
 
 boost::shared_ptr<const Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFunction() const
 {
+  VerifyInitalization();
   return m_function;
+}
+
+Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const
+{
+  using namespace Mantid::Geometry;
+
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
+
+  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
+
+  //Find the requested xDimension alignment from the dimension id provided in the xml.
+  Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement("XDimension");
+  std::string xDimId = xDimensionElement->getChildElement("RefDimensionId")->innerText();
+  DimensionVecIterator xDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(xDimId));
+
+  if (xDimensionIt == dimensionVec.end())
+  {
+    throw std::invalid_argument("Cannot determine x-dimension mapping.");
+  }
+
+  return *xDimensionIt;
+}
+
+Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const
+{
+  using namespace Mantid::Geometry;
+
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+
+  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
+  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
+
+  //Find the requested xDimension alignment from the dimension id provided in the xml.
+  Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement("YDimension");
+  std::string yDimId = yDimensionElement->getChildElement("RefDimensionId")->innerText();
+  DimensionVecIterator yDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(yDimId));
+
+  if (yDimensionIt == dimensionVec.end())
+  {
+    throw std::invalid_argument("Cannot determine y-dimension mapping.");
+  }
+
+  return *yDimensionIt;
+}
+
+Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const
+{
+  using namespace Mantid::Geometry;
+
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+
+  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
+  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
+
+  //Find the requested xDimension alignment from the dimension id provided in the xml.
+  Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement("ZDimension");
+  std::string zDimId = zDimensionElement->getChildElement("RefDimensionId")->innerText();
+  DimensionVecIterator zDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(zDimId));
+
+  if (zDimensionIt == dimensionVec.end())
+  {
+    throw std::invalid_argument("Cannot determine z-dimension mapping.");
+  }
+
+  return *zDimensionIt;
+}
+
+Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const
+{
+  using namespace Mantid::Geometry;
+
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+
+  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
+  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
+
+  //Find the requested xDimension alignment from the dimension id provided in the xml.
+  Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement("TDimension");
+  std::string tDimId = tDimensionElement->getChildElement("RefDimensionId")->innerText();
+  DimensionVecIterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
+
+  if (tDimensionIt == dimensionVec.end())
+  {
+    throw std::invalid_argument("Cannot determine t-dimension mapping.");
+  }
+
+  return *tDimensionIt;
+}
+
+const std::string& RebinningCutterPresenter::getWorkspaceGeometry() const
+{
+  VerifyInitalization();
+  return m_serializer.getWorkspaceGeometry();
+}
+
+void RebinningCutterPresenter::VerifyInitalization() const
+{
+   if(!m_initalized)
+   {
+     //To ensure that constructReductionKnowledge is always called first.
+     throw std::runtime_error("This instance has not been properly initialised via the construct method.");
+   }
+}
+
+Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString)
+{
+  Poco::XML::DOMParser pParser;
+  Poco::XML::Document* pDoc = pParser.parseString(dimensionXMLString);
+  Poco::XML::Element* pDimensionElement = pDoc->documentElement();
+  return Mantid::VATES::Dimension_sptr(createDimension(pDimensionElement));
 }
 
 Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML)
@@ -208,12 +314,12 @@ Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML
     lowerBounds = lowerLimit;
   }
 
-  mdDimension->setRange(lowerBounds, upperBounds, nBins); //HACK- this method should be protected and used by geometry only, not a valid dimension
+  mdDimension->setRange(lowerBounds, upperBounds, nBins);
   return mdDimension;
 }
 
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
-    Poco::XML::Element* geometryXMLElement)
+    Poco::XML::Element* geometryXMLElement, bool nonIntegratedOnly)
 {
   using namespace Mantid::Geometry;
   Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
@@ -225,97 +331,21 @@ std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
   {
     Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*> (dimensionsXML->item(i));
     IMDDimension* dimension = createDimension(dimensionXML);
-    dimensionVec.push_back(boost::shared_ptr<IMDDimension>(dimension));
+    if (!nonIntegratedOnly || (dimension->getNBins() > 1))
+    {
+      dimensionVec.push_back(boost::shared_ptr<IMDDimension>(dimension));
+    }
   }
   return dimensionVec;
 }
 
-
-Dimension_sptr RebinningCutterPresenter::getXDimensionFromXML(vtkDataSet* vtkDataSetInput) const
+std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
+    const std::string& geometryXMLString, bool nonIntegratedOnly)
 {
-  using namespace Mantid::Geometry;
-
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformationFromXML(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
-
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement("XDimension");
-  std::string xDimId = xDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator xDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(xDimId));
-
-  if (xDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine x-dimension mapping.");
-  }
-
-  return *xDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getYDimensionFromXML(vtkDataSet* vtkDataSetInput) const
-{
-  using namespace Mantid::Geometry;
-
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformationFromXML(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
-
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement("YDimension");
-  std::string yDimId = yDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator yDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(yDimId));
-
-  if (yDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine y-dimension mapping.");
-  }
-
-  return *yDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getZDimensionFromXML(vtkDataSet* vtkDataSetInput) const
-{
-  using namespace Mantid::Geometry;
-
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformationFromXML(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
-
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement("ZDimension");
-  std::string zDimId = zDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator zDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(zDimId));
-
-  if (zDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine z-dimension mapping.");
-  }
-
-  return *zDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getTDimensionFromXML(vtkDataSet* vtkDataSetInput) const
-{
-  using namespace Mantid::Geometry;
-
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformationFromXML(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
-
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement("TDimension");
-  std::string tDimId = tDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
-
-  if (tDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine t-dimension mapping.");
-  }
-
-  return *tDimensionIt;
+  Poco::XML::DOMParser pParser;
+  Poco::XML::Document* pDoc = pParser.parseString(geometryXMLString);
+  Poco::XML::Element* pGeometryElem = pDoc->documentElement();
+  return getDimensions(pGeometryElem, nonIntegratedOnly);
 }
 
 // helper method to construct a near-complete geometry.
@@ -432,7 +462,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
 }
 
 //Get the workspace location from the xmlstring.
- std::string findExistingWorkspaceNameFromXML(vtkDataSet *inputDataSet, const char* id)
+ std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id)
 {
   std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
 
@@ -449,7 +479,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
 }
 
  //Get the workspace location from the xmlstring.
- std::string findExistingWorkspaceLocationFromXML(vtkDataSet *inputDataSet, const char* id)
+ std::string findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id)
  {
    std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
 
@@ -464,26 +494,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
    return wsLocationElem->innerText();
  }
 
-std::string readNestedNode(Poco::XML::Node* root)
-{
-  Poco::XML::NodeList* nodeList = root->childNodes();
-  std::string xmlString="";
-  for (int i = 0; i < nodeList->length(); i++)
-  {
-    Poco::XML::Node* node = nodeList->item(i);
-    if (node->hasChildNodes())
-    {
-      xmlString.append(readNestedNode(node));
-    }
-    else
-    {
-      xmlString.append(node->innerText());
-    }
-  }
-  return xmlString;
-}
-
-Poco::XML::Element* findExistingGeometryInformationFromXML(vtkDataSet* inputDataSet, const char* id)
+Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id)
 {
   std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
 
@@ -497,6 +508,7 @@ Poco::XML::Element* findExistingGeometryInformationFromXML(vtkDataSet* inputData
   }
   return geometryElem;
 }
+
 
  //NB: At present, the input workspace is required by the dynamicrebinningfromxml algorithm, but not by the
  //sub-algorithm running centerpiece rebinning.
@@ -666,19 +678,19 @@ vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr s
   vtkDataSet* visualDataSet = meshGenerator.execute();
 
   //Add scalar data to the mesh.
-  vtkDoubleArray* scalars = vtkDoubleArray::New();
-  scalars->Allocate(imageSize);
-  scalars->SetName(scalarName.c_str());
+  vtkFloatArray* scalars = vtkFloatArray::New();
 
   const int sizeX = spWorkspace->getXDimension()->getNBins();
   const int sizeY = spWorkspace->getYDimension()->getNBins();
   const int sizeZ = spWorkspace->getZDimension()->getNBins();
+  scalars->Allocate(sizeX * sizeY * sizeZ);
+  scalars->SetName(scalarName.c_str());
 
-  for (int i = 0; i < sizeX - 1; i++)
+  for (int i = 0; i < sizeX; i++)
   {
-    for (int j = 0; j < sizeY - 1; j++)
+    for (int j = 0; j < sizeY; j++)
     {
-      for (int k = 0; k < sizeZ - 1; k++)
+      for (int k = 0; k < sizeZ; k++)
       {
         // Create an image from the point data.
         MD_image_point point = spWorkspace->get_spMDImage()->getPoint(i, j, k, timestep);

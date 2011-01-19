@@ -38,6 +38,7 @@
 
 #ifndef REBINNINGCUTTERATTRIBUTES_H
 #define REBINNINGCUTTERATTRIBUTES_H
+
 #include <AttributeSubject.h>
 
 
@@ -92,13 +93,12 @@ public:
     void SetNormalX(double normalX_);
     void SetNormalY(double normalY_);
     void SetNormalZ(double normalZ_);
-    void SetDimensionX(int dimensionX_);
-    void SetDimensionY(int dimensionY_);
-    void SetDimensionZ(int dimensionZ_);
-    void SetDimensiont(int dimensiont_);
-    void SetUseUnStructuredGrid(bool useUnstructedGrid);
-    virtual bool CreateNode(DataNode *node, bool completeSave, bool forceAdd);
-    virtual void SetFromNode(DataNode *node);
+    void SetWidth(double width_);
+    void SetHeight(double height_);
+    void SetDepth(double depth_);
+    void SetStructured(bool structured_);
+    void setXDimension(const std::string& dimensionX);
+    void setExecuted(bool hasExecuted);
 
     // Property getting methods
     double GetOriginX() const;
@@ -107,11 +107,14 @@ public:
     double GetNormalX() const;
     double GetNormalY() const;
     double GetNormalZ() const;
-    int    GetDimensionX() const;
-    int    GetDimensionY() const;
-    int    GetDimensionZ() const;
-    int    GetDimensiont() const;
-    bool   GetUseUnStructuredGrid() const;
+    double GetWidth() const;
+    double GetHeight() const;
+    double GetDepth() const;
+    bool   GetStructured() const;
+    const std::string& getXDimension() const;
+    bool getExecuted() const;
+
+
 
 
     // Keyframing methods
@@ -129,11 +132,10 @@ public:
         ID_normalX,
         ID_normalY,
         ID_normalZ,
-        ID_dimensionX,
-        ID_dimensionY,
-        ID_dimensionZ,
-        ID_dimensiont,
-        ID_UnstructuredGrid,
+        ID_width,
+        ID_height,
+        ID_depth,
+        ID_structured,
         ID__LAST
     };
 
@@ -144,16 +146,17 @@ private:
     double normalX;
     double normalY;
     double normalZ;
-    int    dimensionX;
-    int    dimensionY;
-    int    dimensionZ;
-    int    dimensiont;
-    bool isUnstructured;
+    double width;
+    double height;
+    double depth;
+    bool   structured;
+    std::string xDimension;
+    bool m_hasExecuted;
 
     // Static class format string for type map.
     static const char *TypeMapFormatString;
     static const private_tmfs_t TmfsStruct;
 };
-#define REBINNINGCUTTERATTRIBUTES_TMFS "ddddddiiii"
+#define REBINNINGCUTTERATTRIBUTES_TMFS "dddddddddb"
 
 #endif

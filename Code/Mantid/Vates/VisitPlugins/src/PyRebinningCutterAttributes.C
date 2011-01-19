@@ -88,13 +88,16 @@ PyRebinningCutterAttributes_ToString(const RebinningCutterAttributes *atts, cons
     str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%snormalZ = %g\n", prefix, atts->GetNormalZ());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%sdimensionX = %d\n", prefix, atts->GetDimensionX());
+    SNPRINTF(tmpStr, 1000, "%swidth = %g\n", prefix, atts->GetWidth());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%sdimensionY = %d\n", prefix, atts->GetDimensionY());
+    SNPRINTF(tmpStr, 1000, "%sheight = %g\n", prefix, atts->GetHeight());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%sdimensionZ = %d\n", prefix, atts->GetDimensionZ());
+    SNPRINTF(tmpStr, 1000, "%sdepth = %g\n", prefix, atts->GetDepth());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%sdimensiont = %d\n", prefix, atts->GetDimensiont());
+    if(atts->GetStructured())
+        SNPRINTF(tmpStr, 1000, "%sstructured = 1\n", prefix);
+    else
+        SNPRINTF(tmpStr, 1000, "%sstructured = 0\n", prefix);
     str += tmpStr;
     return str;
 }
@@ -253,79 +256,79 @@ RebinningCutterAttributes_GetNormalZ(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetDimensionX(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetWidth(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
-    int ival;
-    if(!PyArg_ParseTuple(args, "i", &ival))
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    // Set the dimensionX in the object.
-    obj->data->SetDimensionX((int)ival);
+    // Set the width in the object.
+    obj->data->SetWidth(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetDimensionX(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetWidth(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionX()));
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetWidth());
     return retval;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetDimensionY(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetHeight(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
-    int ival;
-    if(!PyArg_ParseTuple(args, "i", &ival))
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    // Set the dimensionY in the object.
-    obj->data->SetDimensionY((int)ival);
+    // Set the height in the object.
+    obj->data->SetHeight(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetDimensionY(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetHeight(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionY()));
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetHeight());
     return retval;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetDimensionZ(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetDepth(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
-    int ival;
-    if(!PyArg_ParseTuple(args, "i", &ival))
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    // Set the dimensionZ in the object.
-    obj->data->SetDimensionZ((int)ival);
+    // Set the depth in the object.
+    obj->data->SetDepth(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetDimensionZ(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetDepth(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionZ()));
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetDepth());
     return retval;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetDimensiont(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetStructured(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
@@ -333,18 +336,18 @@ RebinningCutterAttributes_SetDimensiont(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &ival))
         return NULL;
 
-    // Set the dimensiont in the object.
-    obj->data->SetDimensiont((int)ival);
+    // Set the structured in the object.
+    obj->data->SetStructured(ival != 0);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetDimensiont(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetStructured(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensiont()));
+    PyObject *retval = PyInt_FromLong(obj->data->GetStructured()?1L:0L);
     return retval;
 }
 
@@ -364,14 +367,14 @@ PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH]
     {"GetNormalY", RebinningCutterAttributes_GetNormalY, METH_VARARGS},
     {"SetNormalZ", RebinningCutterAttributes_SetNormalZ, METH_VARARGS},
     {"GetNormalZ", RebinningCutterAttributes_GetNormalZ, METH_VARARGS},
-    {"SetDimensionX", RebinningCutterAttributes_SetDimensionX, METH_VARARGS},
-    {"GetDimensionX", RebinningCutterAttributes_GetDimensionX, METH_VARARGS},
-    {"SetDimensionY", RebinningCutterAttributes_SetDimensionY, METH_VARARGS},
-    {"GetDimensionY", RebinningCutterAttributes_GetDimensionY, METH_VARARGS},
-    {"SetDimensionZ", RebinningCutterAttributes_SetDimensionZ, METH_VARARGS},
-    {"GetDimensionZ", RebinningCutterAttributes_GetDimensionZ, METH_VARARGS},
-    {"SetDimensiont", RebinningCutterAttributes_SetDimensiont, METH_VARARGS},
-    {"GetDimensiont", RebinningCutterAttributes_GetDimensiont, METH_VARARGS},
+    {"SetWidth", RebinningCutterAttributes_SetWidth, METH_VARARGS},
+    {"GetWidth", RebinningCutterAttributes_GetWidth, METH_VARARGS},
+    {"SetHeight", RebinningCutterAttributes_SetHeight, METH_VARARGS},
+    {"GetHeight", RebinningCutterAttributes_GetHeight, METH_VARARGS},
+    {"SetDepth", RebinningCutterAttributes_SetDepth, METH_VARARGS},
+    {"GetDepth", RebinningCutterAttributes_GetDepth, METH_VARARGS},
+    {"SetStructured", RebinningCutterAttributes_SetStructured, METH_VARARGS},
+    {"GetStructured", RebinningCutterAttributes_GetStructured, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -412,14 +415,14 @@ PyRebinningCutterAttributes_getattr(PyObject *self, char *name)
         return RebinningCutterAttributes_GetNormalY(self, NULL);
     if(strcmp(name, "normalZ") == 0)
         return RebinningCutterAttributes_GetNormalZ(self, NULL);
-    if(strcmp(name, "dimensionX") == 0)
-        return RebinningCutterAttributes_GetDimensionX(self, NULL);
-    if(strcmp(name, "dimensionY") == 0)
-        return RebinningCutterAttributes_GetDimensionY(self, NULL);
-    if(strcmp(name, "dimensionZ") == 0)
-        return RebinningCutterAttributes_GetDimensionZ(self, NULL);
-    if(strcmp(name, "dimensiont") == 0)
-        return RebinningCutterAttributes_GetDimensiont(self, NULL);
+    if(strcmp(name, "width") == 0)
+        return RebinningCutterAttributes_GetWidth(self, NULL);
+    if(strcmp(name, "height") == 0)
+        return RebinningCutterAttributes_GetHeight(self, NULL);
+    if(strcmp(name, "depth") == 0)
+        return RebinningCutterAttributes_GetDepth(self, NULL);
+    if(strcmp(name, "structured") == 0)
+        return RebinningCutterAttributes_GetStructured(self, NULL);
 
     return Py_FindMethod(PyRebinningCutterAttributes_methods, self, name);
 }
@@ -446,14 +449,14 @@ PyRebinningCutterAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = RebinningCutterAttributes_SetNormalY(self, tuple);
     else if(strcmp(name, "normalZ") == 0)
         obj = RebinningCutterAttributes_SetNormalZ(self, tuple);
-    else if(strcmp(name, "dimensionX") == 0)
-        obj = RebinningCutterAttributes_SetDimensionX(self, tuple);
-    else if(strcmp(name, "dimensionY") == 0)
-        obj = RebinningCutterAttributes_SetDimensionY(self, tuple);
-    else if(strcmp(name, "dimensionZ") == 0)
-        obj = RebinningCutterAttributes_SetDimensionZ(self, tuple);
-    else if(strcmp(name, "dimensiont") == 0)
-        obj = RebinningCutterAttributes_SetDimensiont(self, tuple);
+    else if(strcmp(name, "width") == 0)
+        obj = RebinningCutterAttributes_SetWidth(self, tuple);
+    else if(strcmp(name, "height") == 0)
+        obj = RebinningCutterAttributes_SetHeight(self, tuple);
+    else if(strcmp(name, "depth") == 0)
+        obj = RebinningCutterAttributes_SetDepth(self, tuple);
+    else if(strcmp(name, "structured") == 0)
+        obj = RebinningCutterAttributes_SetStructured(self, tuple);
 
     if(obj != NULL)
         Py_DECREF(obj);

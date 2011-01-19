@@ -57,6 +57,9 @@ public:
 
   //An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
   static const std::string metaDataId;
+  static const std::string signalName;
+  static const std::string geometryNodeName;
+  static const std::string geometryOperatorInfo;
 };
 
 }

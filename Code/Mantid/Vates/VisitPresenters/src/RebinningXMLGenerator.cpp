@@ -86,5 +86,10 @@ const std::string& RebinningXMLGenerator::getWorkspaceName() const
   return this->m_wsName;
 }
 
+const std::string& RebinningXMLGenerator::getWorkspaceGeometry() const
+{
+  return this->m_geomXML;
+}
+
 }
 }

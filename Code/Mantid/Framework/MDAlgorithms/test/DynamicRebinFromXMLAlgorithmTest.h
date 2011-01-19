@@ -324,12 +324,12 @@ public:
     ImplicitFunction* impFunction = xmlRebinAlg.getImplicitFunction(MDInstructionXML());
     xmlRebinAlg.ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);
 
-	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -2, description->pDimDescription(0)->cut_min);
-    TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 0.75,  description->pDimDescription(0)->cut_max);
-    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -3, description->pDimDescription(1)->cut_min);
-    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 0.75,  description->pDimDescription(1)->cut_max);
+	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -0.75, description->pDimDescription(0)->cut_min);
+  TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 0.75,  description->pDimDescription(0)->cut_max);
+  TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -0.75, description->pDimDescription(1)->cut_min);
+  TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 0.75,  description->pDimDescription(1)->cut_max);
 	TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", -3, description->pDimDescription(2)->cut_min);
-    TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
+  TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
   }
 
   void testExecute()

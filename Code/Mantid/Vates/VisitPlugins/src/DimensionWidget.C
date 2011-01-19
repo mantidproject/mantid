@@ -57,18 +57,21 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   nBinsLabel->setText("Number of Bins");
   m_layout->addWidget(nBinsLabel, 1, 0, Qt::AlignLeft);
   m_nBinsBox = new QLineEdit();
+  connect(m_nBinsBox, SIGNAL(returnPressed()), this, SLOT(nBinsListener()));
   m_layout->addWidget(m_nBinsBox, 1, 1, Qt::AlignLeft);
 
   QLabel* maxLabel = new QLabel("Maximum");
   maxLabel->setText("Maximum");
   m_layout->addWidget(maxLabel, 2, 0, Qt::AlignLeft);
   m_maxBox = new QLineEdit();
+  connect(m_maxBox, SIGNAL(returnPressed()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 2, 1, Qt::AlignLeft);
 
   QLabel* minLabel = new QLabel();
   minLabel->setText("Minimum");
   m_layout->addWidget(minLabel, 3, 0, Qt::AlignLeft);
   m_minBox = new QLineEdit();
+  connect(m_minBox, SIGNAL(returnPressed()), this, SLOT(minBoxListener()));
   m_layout->addWidget(m_minBox, 3, 1, Qt::AlignLeft);
 
   this->setLayout(m_layout);
@@ -85,7 +88,6 @@ void DimensionWidget::populateWidget(const int dimensionIndex)
     m_currentDimensionIndex = dimensionIndex;
     m_dimensionCombo->setCurrentIndex(dimensionIndex);
 
-    std::cout << "n bins of new dim" << spDimensionToRender->getNBins() <<std::endl;
     std::string nBinsString = boost::str(boost::format("%i") % spDimensionToRender->getNBins());
     m_nBinsBox->setText(nBinsString.c_str());
 
@@ -117,6 +119,18 @@ int DimensionWidget::getSelectedIndex() const
   m_dimensionCombo->currentIndex();
 }
 
+void DimensionWidget::setMinimum(double minimum)
+{
+  std::string minValueString = boost::str(boost::format("%i") % minimum);
+  m_minBox->setText(minValueString.c_str());
+}
+
+void DimensionWidget::setMaximum(double maximum)
+{
+  std::string maxValueString = boost::str(boost::format("%i") % maximum);
+  m_maxBox->setText(maxValueString.c_str());
+}
+
 boost::shared_ptr<Mantid::Geometry::IMDDimension>  DimensionWidget::getDimension() const
 {
   return m_vecNonIntegratedDimensions[m_currentDimensionIndex];
@@ -126,8 +140,8 @@ void DimensionWidget::dimensionSelectedListener()
 {
   //Providing that the current item has not been reselected, populate/repopulate the widget with
   //Dimension information from the newly selected dimension.
-  //if (m_dimensionCombo->currentIndex() != m_currentDimensionIndex)
-  //{
+  if (m_dimensionCombo->currentIndex() != m_currentDimensionIndex)
+  {
     using namespace Mantid::Geometry;
 
     const int oldDimensionIndex = m_currentDimensionIndex;
@@ -137,9 +151,23 @@ void DimensionWidget::dimensionSelectedListener()
     int dimensionIndex = m_dimensionCombo->currentIndex();
     populateWidget(dimensionIndex);
     m_geometryWidget->childAppliedNewDimensionSelection(oldDimensionIndex, spNewDimension, this);
-  //}
+  }
 }
 
+void DimensionWidget::nBinsListener()
+{
+
+}
+
+void DimensionWidget::minBoxListener()
+{
+
+}
+
+void DimensionWidget::maxBoxListener()
+{
+
+}
 
 DimensionWidget::~DimensionWidget()
 {

@@ -102,10 +102,10 @@ SET(INSTALLTARGETS IRebinningCutterOperator)
 
 IF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
     ADD_LIBRARY(GRebinningCutterOperator ${LIBG_SOURCES})
-    TARGET_LINK_LIBRARIES(GRebinningCutterOperator visitcommon gui )
+    TARGET_LINK_LIBRARIES(GRebinningCutterOperator visitcommon gui  ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
 
     ADD_LIBRARY(VRebinningCutterOperator ${LIBV_SOURCES})
-    TARGET_LINK_LIBRARIES(VRebinningCutterOperator visitcommon viewer )
+    TARGET_LINK_LIBRARIES(VRebinningCutterOperator visitcommon viewer)
     SET(INSTALLTARGETS ${INSTALLTARGETS} GRebinningCutterOperator VRebinningCutterOperator)
 
     IF(VISIT_PYTHON_SCRIPTING)

@@ -17,7 +17,10 @@ const std::string XMLDefinitions::functionElementName = "Function";
 const std::string XMLDefinitions::workspaceLocationElementName = "MDWorkspaceLocation";
 const std::string XMLDefinitions::workspaceGeometryElementName = "DimensionSet";
 
-//Not strictly an xml definition. Consider moving.
+//Not strictly an xml definition. Consider moving. The actual values assigned to the following are not important other that that they are consistent.
 const std::string XMLDefinitions::metaDataId="1";
+const std::string XMLDefinitions::signalName="signal";
+const std::string XMLDefinitions::geometryNodeName="geometryNodeName";
+const std::string XMLDefinitions::geometryOperatorInfo="geometryOperatorInfo";
 }
 }

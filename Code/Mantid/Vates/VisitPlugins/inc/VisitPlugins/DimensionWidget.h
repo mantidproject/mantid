@@ -36,6 +36,10 @@ public:
 
   double getMaximum() const;
 
+  void setMinimum(double minimum);
+
+  void setMaximum(double maximum);
+
   boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension() const;
 
   int getNBins() const;
@@ -45,6 +49,10 @@ public:
   /// Populates gui controls. May be called more than once.
   void populateWidget(const int dimensionIndex);
 
+signals:
+      void maxSet();
+      void minSet();
+      void nBinsSet();
 private:
   QGridLayout* m_layout;
 
@@ -67,10 +75,16 @@ private:
 
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
 
-  private slots:
+private slots:
 
   /// Handles dimension change events.
   void dimensionSelectedListener();
+
+  void nBinsListener();
+
+  void maxBoxListener();
+
+  void minBoxListener();
 };
 
 #endif

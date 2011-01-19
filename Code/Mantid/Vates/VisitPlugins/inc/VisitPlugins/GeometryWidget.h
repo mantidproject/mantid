@@ -69,6 +69,8 @@ void childAppliedNewDimensionSelection(
 
 ~GeometryWidget();
 
+std::string getXDimension() const;
+
 private:
 
 DimensionWidget* m_xDimensionWidget;

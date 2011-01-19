@@ -242,9 +242,9 @@ namespace Mantid
       for(int i = 0; i < flattenedboxes.size(); i++)
       {
          box = flattenedboxes[i];
-         minX = minX < box->getLowerX() ? minX : box->getLowerX();
-         minY = minY < box->getLowerY() ? minY : box->getLowerY();
-         minZ = minZ < box->getLowerZ() ? minZ : box->getLowerZ();
+         minX = minX > box->getLowerX() ? minX : box->getLowerX();
+         minY = minY > box->getLowerY() ? minY : box->getLowerY();
+         minZ = minZ > box->getLowerZ() ? minZ : box->getLowerZ();
          maxX  = maxX < box->getUpperX() ? maxX : box->getUpperX();
          maxY  = maxY < box->getUpperY() ? maxY : box->getUpperY();
          maxZ  = maxZ < box->getUpperZ() ? maxZ : box->getUpperZ();

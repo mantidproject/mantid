@@ -64,7 +64,7 @@ std::string MultiDimensionalDbPresenter::getYAxisName() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  return m_MDWorkspace->getGeometry()->getYDimension()->getName();
+  return m_MDWorkspace->getGeometry()->getYDimension()->getDimensionId();
 }
 
 std::string MultiDimensionalDbPresenter::getZAxisName() const
@@ -72,7 +72,7 @@ std::string MultiDimensionalDbPresenter::getZAxisName() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  return m_MDWorkspace->getGeometry()->getZDimension()->getName();
+  return m_MDWorkspace->getGeometry()->getZDimension()->getDimensionId();
 }
 
 vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
@@ -145,14 +145,14 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char
 
   vtkDoubleArray* scalars = vtkDoubleArray::New();
   scalars->SetName(scalarName);
-  scalars->Allocate((sizeX-1) * (sizeY-1) * (sizeZ-1));
+  scalars->Allocate(sizeX * sizeY * sizeZ);
 
   //Loop through dimensions
-  for (int i = 0; i < sizeX-1; i++)
+  for (int i = 0; i < sizeX; i++)
   {
-    for (int j = 0; j < sizeY-1; j++)
+    for (int j = 0; j < sizeY; j++)
     {
-      for (int k = 0; k < sizeZ-1; k++)
+      for (int k = 0; k < sizeZ; k++)
       {
         MD_image_point point = spImage->getPoint(i, j, k, timeBin);
         scalars->InsertNextValue(point.s);

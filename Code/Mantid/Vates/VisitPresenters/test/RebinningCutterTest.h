@@ -246,7 +246,7 @@ void testExecution()
     vtkDataSet* out_ds = filter.Execute(in_ds);
 
     //NB 125 = 5 * 5 * 5 see pseudo filter execution method's number of bins above.
-    TSM_ASSERT_EQUALS("An empty visualisation data set has been generated.", out_ds->GetNumberOfPoints() , 125);
+    TSM_ASSERT_EQUALS("An empty visualisation data set has been generated.", out_ds->GetNumberOfPoints() , 216);
 
 }
 
@@ -381,7 +381,7 @@ void testFindWorkspaceName()
   std::string id = XMLDefinitions::metaDataId;
   vtkDataSet* dataset = constructInputDataSet();
 
-  std::string name = findExistingWorkspaceNameFromXML(dataset, id.c_str());
+  std::string name = findExistingWorkspaceName(dataset, id.c_str());
 
   TSM_ASSERT_EQUALS("The workspace name is different from the xml value.", "Input", name );
 }
@@ -391,7 +391,7 @@ void testFindWorkspaceLocation()
   std::string id = XMLDefinitions::metaDataId;
   vtkDataSet* dataset = constructInputDataSet();
 
-  std::string location = findExistingWorkspaceLocationFromXML(dataset, id.c_str());
+  std::string location = findExistingWorkspaceLocation(dataset, id.c_str());
 
   TSM_ASSERT_EQUALS("The workspace location is differrent from the xml value.", "fe_demo.sqw", location);
 }
@@ -402,7 +402,7 @@ void testFindWorkspaceNameThrows()
   std::string id =  XMLDefinitions::metaDataId;
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
-  TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceNameFromXML(dataset, id.c_str()), std::runtime_error);
+  TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceName(dataset, id.c_str()), std::runtime_error);
 }
 
 void testFindWorkspaceLocationThrows()
@@ -411,14 +411,14 @@ void testFindWorkspaceLocationThrows()
   std::string id =  XMLDefinitions::metaDataId;
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
-  TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocationFromXML(dataset, id.c_str()), std::runtime_error);
+  TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocation(dataset, id.c_str()), std::runtime_error);
 }
 
 void testGetXDimension()
 {
   Mantid::VATES::RebinningCutterPresenter presenter;
   vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr xDimension = presenter.getXDimensionFromXML(dataSet);
+  Mantid::VATES::Dimension_sptr xDimension = presenter.getXDimensionFromDS(dataSet);
   TSM_ASSERT_EQUALS("Wrong number of x dimension bins", 5, xDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum x obtained", 5, xDimension->getMaximum());
   TSM_ASSERT_EQUALS("Wrong maximum x obtained", -1.5, xDimension->getMinimum());
@@ -428,7 +428,7 @@ void testGetYDimension()
 {
   Mantid::VATES::RebinningCutterPresenter presenter;
     vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-    Mantid::VATES::Dimension_sptr yDimension = presenter.getYDimensionFromXML(dataSet);
+    Mantid::VATES::Dimension_sptr yDimension = presenter.getYDimensionFromDS(dataSet);
     TSM_ASSERT_EQUALS("Wrong number of y dimension bins", 5, yDimension->getNBins());
     TSM_ASSERT_EQUALS("Wrong minimum y obtained", 6.6, yDimension->getMaximum());
     TSM_ASSERT_EQUALS("Wrong maximum y obtained", -6.6, yDimension->getMinimum());
@@ -438,7 +438,7 @@ void testGetZDimension()
 {
   Mantid::VATES::RebinningCutterPresenter presenter;
   vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr zDimension = presenter.getZDimensionFromXML(dataSet);
+  Mantid::VATES::Dimension_sptr zDimension = presenter.getZDimensionFromDS(dataSet);
   TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, zDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum z obtained", -6.6, zDimension->getMinimum());
   TSM_ASSERT_EQUALS("Wrong maximum z obtained", 6.6, zDimension->getMaximum());
@@ -448,10 +448,16 @@ void testGettDimension()
 {
   Mantid::VATES::RebinningCutterPresenter presenter;
   vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr tDimension = presenter.getTDimensionFromXML(dataSet);
+  Mantid::VATES::Dimension_sptr tDimension = presenter.getTDimensionFromDS(dataSet);
   TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, tDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum t obtained", 0, tDimension->getMinimum());
   TSM_ASSERT_EQUALS("Wrong maximum t obtained", 150, tDimension->getMaximum());
+}
+
+void testGetWorkspaceGeometryThrows()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  TSM_ASSERT_THROWS("Not properly initalized. Getting workspace geometry should throw.", presenter.getWorkspaceGeometry(), std::runtime_error);
 }
 
 

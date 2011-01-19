@@ -5,6 +5,7 @@
 #include "boost/shared_ptr.hpp"
 #include <map>
 #include <functional>
+#include <algorithm>
 
 
 using Mantid::Geometry::IMDDimension;
@@ -83,6 +84,12 @@ void GeometryWidget::constructWidget(Mantid::Geometry::MDGeometry const * const 
   layout->addWidget(m_tDimensionWidget, 3, 0);
 
   this->setLayout(layout);
+}
+
+std::string GeometryWidget::getXDimension() const
+{
+  //Get the selected alignment for the xdimension.
+  return m_xDimensionWidget->getDimension()->toXMLString();
 }
 
 GeometryWidget::~GeometryWidget()

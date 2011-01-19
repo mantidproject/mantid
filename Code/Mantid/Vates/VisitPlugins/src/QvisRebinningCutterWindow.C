@@ -48,6 +48,7 @@
 #include <QSpinBox>
 #include <QButtonGroup>
 #include <QRadioButton>
+#include <qgridlayout.h>
 #include <QvisColorTableButton.h>
 #include <QvisOpacitySlider.h>
 #include <QvisColorButton.h>
@@ -57,11 +58,19 @@
 #include <qcombobox.h>
 #include <stdio.h>
 #include <string>
-//#include "DimensionPickerWidget.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "DimensionWidget.h"
+#include "GeometryWidget.h"
 #include "IntegratedDimensionWidget.h"
+#include "boost/shared_ptr.hpp"
+#include "PlotList.h"
+#include "Plot.h"
+#include "PlotInfoAttributes.h"
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
+#include "MantidVisitPresenters/RebinningCutterPresenter.h"
 
 using std::string;
-
 
 // ****************************************************************************
 // Method: QvisRebinningCutterWindow::QvisRebinningCutterWindow
@@ -83,7 +92,7 @@ QvisRebinningCutterWindow::QvisRebinningCutterWindow(const int type,
                          const QString &caption,
                          const QString &shortName,
                          QvisNotepadArea *notepad)
-    : QvisOperatorWindow(type,subj, caption, shortName, notepad)
+    : QvisOperatorWindow(type,subj, caption, shortName, notepad), m_geomWidget(NULL)
 {
     atts = subj;
 }
@@ -124,112 +133,109 @@ QvisRebinningCutterWindow::~QvisRebinningCutterWindow()
 //   
 // ****************************************************************************
 
-void
-QvisRebinningCutterWindow::CreateWindowContents()
+void QvisRebinningCutterWindow::CreateWindowContents()
 {
-  std::cout << "create windo contents" << std::endl;
-    QGridLayout *mainLayout = new QGridLayout();
-    topLayout->addLayout(mainLayout);
+  mainLayout = new QGridLayout();
+  topLayout->addLayout(mainLayout);
 
-    originXLabel = new QLabel(tr("Origin X"), central);
-    mainLayout->addWidget(originXLabel,0,0);
-    originX = new QLineEdit(central);
-    connect(originX, SIGNAL(returnPressed()),
-            this, SLOT(originXProcessText()));
-    mainLayout->addWidget(originX, 0,1);
+  QGridLayout* originLayout = new QGridLayout();
+  QLabel* originXYZLabel = new QLabel(tr("Origin xyz"), central);
+  originLayout->addWidget(originXYZLabel, 0, 0, 1, 3);
+  originX = new QLineEdit(central);
+  connect(originX, SIGNAL(returnPressed()), this, SLOT(originXProcessText()));
+  originLayout->addWidget(originX, 1, 1);
+  originY = new QLineEdit(central);
+  connect(originY, SIGNAL(returnPressed()), this, SLOT(originYProcessText()));
+  originLayout->addWidget(originY, 1, 2);
+  originZ = new QLineEdit(central);
+  connect(originZ, SIGNAL(returnPressed()), this, SLOT(originZProcessText()));
+  originLayout->addWidget(originZ, 1, 3);
+  mainLayout->addLayout(originLayout, 0, 0, 1, 2, Qt::AlignLeft);
 
-    originYLabel = new QLabel(tr("Origin Y"), central);
-    mainLayout->addWidget(originYLabel,1,0);
-    originY = new QLineEdit(central);
-    connect(originY, SIGNAL(returnPressed()),
-            this, SLOT(originYProcessText()));
-    mainLayout->addWidget(originY, 1,1);
+  QGridLayout* normalLayout = new QGridLayout();
+  QLabel* normalXYZLabel = new QLabel(tr("Normal xyz"), central);
+  normalLayout->addWidget(normalXYZLabel, 0, 0, 1, 3);
+  normalX = new QLineEdit(central);
+  connect(normalX, SIGNAL(returnPressed()), this, SLOT(normalXProcessText()));
+  normalLayout->addWidget(normalX, 1, 1);
+  normalY = new QLineEdit(central);
+  connect(normalY, SIGNAL(returnPressed()), this, SLOT(normalYProcessText()));
+  normalLayout->addWidget(normalY, 1, 2);
+  normalZ = new QLineEdit(central);
+  connect(normalZ, SIGNAL(returnPressed()), this, SLOT(normalZProcessText()));
+  normalLayout->addWidget(normalZ, 1, 3);
+  mainLayout->addLayout(normalLayout, 1, 0, 1, 2, Qt::AlignLeft);
 
-    originZLabel = new QLabel(tr("Origin Z"), central);
-    mainLayout->addWidget(originZLabel,2,0);
-    originZ = new QLineEdit(central);
-    connect(originZ, SIGNAL(returnPressed()),
-            this, SLOT(originZProcessText()));
-    mainLayout->addWidget(originZ, 2,1);
+  widthLabel = new QLabel(tr("Width"), central);
+  mainLayout->addWidget(widthLabel, 6, 0);
+  width = new QLineEdit(central);
+  connect(width, SIGNAL(returnPressed()), this, SLOT(widthProcessText()));
+  mainLayout->addWidget(width, 6, 1);
 
-    normalXLabel = new QLabel(tr("Normal X"), central);
-    mainLayout->addWidget(normalXLabel,3,0);
-    normalX = new QLineEdit(central);
-    connect(normalX, SIGNAL(returnPressed()),
-            this, SLOT(normalXProcessText()));
-    mainLayout->addWidget(normalX, 3,1);
+  heightLabel = new QLabel(tr("Height"), central);
+  mainLayout->addWidget(heightLabel, 7, 0);
+  height = new QLineEdit(central);
+  connect(height, SIGNAL(returnPressed()), this, SLOT(heightProcessText()));
+  mainLayout->addWidget(height, 7, 1);
 
-    normalYLabel = new QLabel(tr("Normal Y"), central);
-    mainLayout->addWidget(normalYLabel,4,0);
-    normalY = new QLineEdit(central);
-    connect(normalY, SIGNAL(returnPressed()),
-            this, SLOT(normalYProcessText()));
-    mainLayout->addWidget(normalY, 4,1);
+  depthLabel = new QLabel(tr("Depth"), central);
+  mainLayout->addWidget(depthLabel, 8, 0);
+  depth = new QLineEdit(central);
+  connect(depth, SIGNAL(returnPressed()), this, SLOT(depthProcessText()));
+  mainLayout->addWidget(depth, 8, 1);
 
-    normalZLabel = new QLabel(tr("Normal Z"), central);
-    mainLayout->addWidget(normalZLabel,5,0);
-    normalZ = new QLineEdit(central);
-    connect(normalZ, SIGNAL(returnPressed()),
-            this, SLOT(normalZProcessText()));
-    mainLayout->addWidget(normalZ, 5,1);
+  structured = new QCheckBox(tr("Is Unstructured Grid"), central);
+  connect(structured, SIGNAL(toggled(bool)), this, SLOT(structuredChanged(bool)));
+  mainLayout->addWidget(structured, 9, 0);
+}
 
-    dimensionXLabel = new QLabel(tr("Dimension X"), central);
-    mainLayout->addWidget(dimensionXLabel,6,0);
-    dimensionX = new QLineEdit(central);
+bool QvisRebinningCutterWindow::isInputConsistent(const std::string& inputGeometryXML)
+{
+  return inputGeometryXML.compare(m_cacheGeometryXML) == 0;
+}
 
-    connect(dimensionX, SIGNAL(returnPressed()),
-            this, SLOT(dimensionXProcessText()));
-    mainLayout->addWidget(dimensionX, 6,1);
+void QvisRebinningCutterWindow::createGeometryWidget()
+{
+  PlotList* plotList = GetViewerState()->GetPlotList();
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > dimensions;
 
-    dimensionYLabel = new QLabel(tr("Dimension Y"), central);
-    mainLayout->addWidget(dimensionYLabel,7,0);
-    dimensionY = new QLineEdit(central);
-    connect(dimensionY, SIGNAL(returnPressed()),
-            this, SLOT(dimensionYProcessText()));
-    mainLayout->addWidget(dimensionY, 7,1);
+  //Loop through available plots searching for plot information.
+  for (int plotIndex = 0; plotIndex < plotList->GetNumPlots(); plotIndex++)
+  {
+    const Plot& plot = plotList->GetPlots(plotIndex);
+    int type = plot.GetPlotType();
+    PlotInfoAttributes *info = GetViewerState()->GetPlotInformation(type);
 
-    dimensionZLabel = new QLabel(tr("Dimension Z"), central);
-    mainLayout->addWidget(dimensionZLabel,8,0);
-    dimensionZ = new QLineEdit(central);
-    connect(dimensionZ, SIGNAL(returnPressed()),
-            this, SLOT(dimensionZProcessText()));
-    mainLayout->addWidget(dimensionZ, 8,1);
+    if (info->GetData().HasEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo))
+    {
+      MapNode *hNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo);
+      if (hNode != 0)
+      {
+        MapNode &geometryXMLNode = *hNode;
+        const std::string& geometryXMLString =
+            geometryXMLNode[Mantid::VATES::XMLDefinitions::geometryNodeName].AsString();
+        if (!isInputConsistent(geometryXMLString))
+        {
+          //Only provide non-integrated dimensions. TODO: handle integrated dimensions.
+          dimensions = Mantid::VATES::getDimensions(geometryXMLString, false);
 
-    dimensiontLabel = new QLabel(tr("Dimension t"), central);
-    mainLayout->addWidget(dimensiontLabel,9,0);
-    dimensiont = new QLineEdit(central);
-    connect(dimensiont, SIGNAL(returnPressed()),
-            this, SLOT(dimensiontProcessText()));
-    mainLayout->addWidget(dimensiont, 9,1);
+          //Remove geometry widget if it already exists.
+          if (m_geomWidget != NULL)
+          {
+            mainLayout->remove(m_geomWidget);
+          }
 
+          m_geomWidget = new GeometryWidget(dimensions);
+          mainLayout->addWidget(m_geomWidget, 11, 0, 1, 2, Qt::AlignLeft);
 
-    unstructLabel = new QLabel(tr("Render as Unstructured Grid"), central);
-        mainLayout->addWidget(unstructLabel,10,0);
-        unstructCheckBox = new QCheckBox(central);
-        unstructCheckBox->setChecked(false); //By default use structured grids.
-        connect(unstructCheckBox, SIGNAL(stateChanged(int)),
-                this, SLOT(unstructuredChecked()));
-        mainLayout->addWidget(unstructCheckBox, 10,1);
+          //Persist new cached value.
+          m_cacheGeometryXML = geometryXMLString;
+          break;
+        }
+      }
 
-
-    std::vector<std::string> dims;
-    dims.push_back("Qx");
-    dims.push_back("Qy");
-    dims.push_back("Qz");
-//
-//    DimensionPickerWidget* pickerA = new DimensionPickerWidget("Dimension X", dims);
-//    mainLayout->addWidget(pickerA, 11,0, 1, 2, Qt::AlignLeft);
-//
-//    DimensionPickerWidget* pickerB = new DimensionPickerWidget("Dimension Y", dims);
-//        mainLayout->addWidget(pickerB, 12,0, 1, 2, Qt::AlignLeft);
-//
-//    IntegratedDimensionWidget* integratedA = new IntegratedDimensionWidget("Dimension P", 0, 2);
-//        mainLayout->addWidget(integratedA, 13,0, 1, 2, Qt::AlignLeft);
-//
-//    IntegratedDimensionWidget* integratedB = new IntegratedDimensionWidget("Dimension T", 0, 2);
-//                mainLayout->addWidget(integratedB, 14,0, 1, 2, Qt::AlignLeft);
-
-
+    }
+  }
 }
 
 
@@ -251,7 +257,8 @@ QvisRebinningCutterWindow::CreateWindowContents()
 void
 QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 {
-  std::cout << "update window" << std::endl;
+
+    createGeometryWidget();
     for(int i = 0; i < atts->NumAttributes(); ++i)
     {
         if(!doAll)
@@ -282,22 +289,20 @@ QvisRebinningCutterWindow::UpdateWindow(bool doAll)
           case RebinningCutterAttributes::ID_normalZ:
             normalZ->setText(DoubleToQString(atts->GetNormalZ()));
             break;
-          case RebinningCutterAttributes::ID_dimensionX:
-            dimensionX->setText(IntToQString(atts->GetDimensionX()));
+          case RebinningCutterAttributes::ID_width:
+            width->setText(DoubleToQString(atts->GetWidth()));
             break;
-          case RebinningCutterAttributes::ID_dimensionY:
-            dimensionY->setText(IntToQString(atts->GetDimensionY()));
+          case RebinningCutterAttributes::ID_height:
+            height->setText(DoubleToQString(atts->GetHeight()));
             break;
-          case RebinningCutterAttributes::ID_dimensionZ:
-            dimensionZ->setText(IntToQString(atts->GetDimensionZ()));
+          case RebinningCutterAttributes::ID_depth:
+            depth->setText(DoubleToQString(atts->GetDepth()));
             break;
-          case RebinningCutterAttributes::ID_dimensiont:
-            dimensiont->setText(IntToQString(atts->GetDimensiont()));
+          case RebinningCutterAttributes::ID_structured:
+            structured->blockSignals(true);
+            structured->setChecked(atts->GetStructured());
+            structured->blockSignals(false);
             break;
-          case RebinningCutterAttributes::ID_UnstructuredGrid:
-            unstructCheckBox->setChecked(atts->GetUseUnStructuredGrid());
-            break;
-
         }
     }
 }
@@ -407,69 +412,54 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
         }
     }
 
-    // Do dimensionX
-    if(which_widget == RebinningCutterAttributes::ID_dimensionX || doAll)
+    // Do width
+    if(which_widget == RebinningCutterAttributes::ID_width || doAll)
     {
-      // QVariant d = dimensionXCombo->itemData(dimensionXCombo->currentIndex());
-      // d.toString();
-        int val;
-        if(LineEditGetInt(dimensionX, val))
-            atts->SetDimensionX(val);
+        double val;
+        if(LineEditGetDouble(width, val))
+            atts->SetWidth(val);
         else
         {
-            ResettingError(tr("Dimension X"),
-                IntToQString(atts->GetDimensionX()));
-            atts->SetDimensionX(atts->GetDimensionX());
+            ResettingError(tr("Width"),
+                DoubleToQString(atts->GetWidth()));
+            atts->SetWidth(atts->GetWidth());
         }
     }
 
-    // Do dimensionY
-    if(which_widget == RebinningCutterAttributes::ID_dimensionY || doAll)
+    // Do height
+    if(which_widget == RebinningCutterAttributes::ID_height || doAll)
     {
-        int val;
-        if(LineEditGetInt(dimensionY, val))
-            atts->SetDimensionY(val);
+        double val;
+        if(LineEditGetDouble(height, val))
+            atts->SetHeight(val);
         else
         {
-            ResettingError(tr("Dimension Y"),
-                IntToQString(atts->GetDimensionY()));
-            atts->SetDimensionY(atts->GetDimensionY());
+            ResettingError(tr("Height"),
+                DoubleToQString(atts->GetHeight()));
+            atts->SetHeight(atts->GetHeight());
         }
     }
 
-    // Do dimensionZ
-    if(which_widget == RebinningCutterAttributes::ID_dimensionZ || doAll)
+    // Do depth
+    if(which_widget == RebinningCutterAttributes::ID_depth || doAll)
     {
-        int val;
-        if(LineEditGetInt(dimensionZ, val))
-            atts->SetDimensionZ(val);
+        double val;
+        if(LineEditGetDouble(depth, val))
+            atts->SetDepth(val);
         else
         {
-            ResettingError(tr("Dimension Z"),
-                IntToQString(atts->GetDimensionZ()));
-            atts->SetDimensionZ(atts->GetDimensionZ());
+            ResettingError(tr("Depth"),
+                DoubleToQString(atts->GetDepth()));
+            atts->SetDepth(atts->GetDepth());
         }
     }
 
-    // Do dimensiont
-    if(which_widget == RebinningCutterAttributes::ID_dimensiont || doAll)
-    {
-        int val;
-        if(LineEditGetInt(dimensiont, val))
-            atts->SetDimensiont(val);
-        else
-        {
-            ResettingError(tr("Dimension t"),
-                IntToQString(atts->GetDimensiont()));
-            atts->SetDimensiont(atts->GetDimensiont());
-        }
-    }
-    if(which_widget == RebinningCutterAttributes::ID_UnstructuredGrid || doAll)
-    {
-      std::cout << "atts->SetUseUnStructuredGrid" << std::endl;
-           atts->SetUseUnStructuredGrid(unstructCheckBox->isChecked());
-    }
-
+  //Do not apply this behaviour until the geometry has been setup (by running the operator)
+  if (m_geomWidget != NULL)
+  {
+    atts->setXDimension(m_geomWidget->getXDimension());
+    atts->setExecuted(true);
+  }
 }
 
 
@@ -527,39 +517,35 @@ QvisRebinningCutterWindow::normalZProcessText()
 
 
 void
-QvisRebinningCutterWindow::dimensionXProcessText()
+QvisRebinningCutterWindow::widthProcessText()
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_dimensionX);
+    GetCurrentValues(RebinningCutterAttributes::ID_width);
     Apply();
 }
 
 
 void
-QvisRebinningCutterWindow::dimensionYProcessText()
+QvisRebinningCutterWindow::heightProcessText()
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_dimensionY);
+    GetCurrentValues(RebinningCutterAttributes::ID_height);
     Apply();
 }
 
 
 void
-QvisRebinningCutterWindow::dimensionZProcessText()
+QvisRebinningCutterWindow::depthProcessText()
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_dimensionZ);
+    GetCurrentValues(RebinningCutterAttributes::ID_depth);
     Apply();
 }
 
 
 void
-QvisRebinningCutterWindow::dimensiontProcessText()
+QvisRebinningCutterWindow::structuredChanged(bool val)
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_dimensiont);
+    atts->SetStructured(val);
+    SetUpdate(false);
     Apply();
 }
 
-void QvisRebinningCutterWindow::unstructuredChecked()
-{
-  GetCurrentValues(RebinningCutterAttributes::ID_UnstructuredGrid);
-  Apply();
-}
 

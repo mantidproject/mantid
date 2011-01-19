@@ -102,10 +102,23 @@ public:
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(const std::string& scalarName, bool isUnstructured, int timestep);
 
-  Dimension_sptr getXDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
-  Dimension_sptr getYDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
-  Dimension_sptr getZDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
-  Dimension_sptr getTDimensionFromXML(vtkDataSet* vtkDataSetInput) const;
+  /// Get the x dimension from vtkDataSet field data.
+  Dimension_sptr getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
+
+  /// Get the y dimension from vtkDataSet field data.
+  Dimension_sptr getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
+
+  /// Get the z dimension from vtkDataSet field data.
+  Dimension_sptr getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
+
+  /// Get the t dimension from vtkDataSet field data.
+  Dimension_sptr getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
+
+  /// Get the workspace geometry as an xml string.
+  const std::string& getWorkspaceGeometry() const;
+
+  /// Verify that construct method has been called before anything else.
+  void VerifyInitalization() const;
 };
 
 //Non-member helper functions.
@@ -124,16 +137,13 @@ public:
   Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  std::string findExistingWorkspaceNameFromXML(vtkDataSet *in_ds, const char* id);
+  std::string findExistingWorkspaceName(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  std::string findExistingWorkspaceLocationFromXML(vtkDataSet *in_ds, const char* id);
+  std::string findExistingWorkspaceLocation(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace geometry from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  Poco::XML::Element* findExistingGeometryInformationFromXML(vtkDataSet* inputDataSet, const char* id);
-
-  //Read xml and buid string from inner contents
-  std::string readNestedNode(Poco::XML::Node* root);
+  Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id);
 
   /// Converts field data into metadata xml/string.
   void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
@@ -161,10 +171,16 @@ public:
   vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
 
   /// Helper method to get dimensions from a geometry xml element.
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement);
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);
+
+  /// Helper method to get dimensions from a geometry xml string.
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
 
   /// helper method to get a dimension from a dimension xmlelement.
   Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML);
+
+  /// helper method to get a dimension frm a dimension xmlelement.
+  Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString);
 
 }
 }

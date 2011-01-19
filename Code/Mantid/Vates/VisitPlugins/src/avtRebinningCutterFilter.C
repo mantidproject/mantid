@@ -48,7 +48,8 @@
 #include <vtkDataSet.h>
 #include <vtkCellData.h>
 #include <avtExtents.h>
-
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
+#include <avtDatasetVerifier.h>
 using namespace Mantid::VATES;
 
 // ****************************************************************************
@@ -59,7 +60,7 @@ using namespace Mantid::VATES;
 //
 // ****************************************************************************
 
-avtRebinningCutterFilter::avtRebinningCutterFilter(): m_completeFirstExecute(true), m_cacheGeometryXML(""), m_presenter()
+avtRebinningCutterFilter::avtRebinningCutterFilter(): m_presenter()
 {
 }
 
@@ -135,29 +136,34 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
   return (atts == *(RebinningCutterAttributes*) a);
 }
 
-bool avtRebinningCutterFilter::isInputConsistent(const std::string& inputGeometryXML)
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionX(vtkDataSet* in_ds) const
 {
-  return inputGeometryXML.compare(m_cacheGeometryXML) == 0;
+
+//  if (atts.GetOriginX() != 0)
+//  {
+//    return Mantid::VATES::createDimension(atts.getXDimension());
+//
+//  }
+//  else
+//  {
+    return m_presenter.getXDimensionFromDS(in_ds);
+ // }
+
 }
 
-Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionX(bool bgetFromControls, vtkDataSet* in_ds) const
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionY(vtkDataSet* in_ds) const
 {
-  return m_presenter.getXDimensionFromXML(in_ds);
+  return m_presenter.getYDimensionFromDS(in_ds);
 }
 
-Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionY(bool bgetFromControls, vtkDataSet* in_ds) const
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionZ(vtkDataSet* in_ds) const
 {
-  return m_presenter.getYDimensionFromXML(in_ds);
+  return m_presenter.getZDimensionFromDS(in_ds);
 }
 
-Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionZ(bool bgetFromControls, vtkDataSet* in_ds) const
+Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(vtkDataSet* in_ds) const
 {
-  return m_presenter.getZDimensionFromXML(in_ds);
-}
-
-Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(bool bgetFromControls, vtkDataSet* in_ds) const
-{
-  return m_presenter.getTDimensionFromXML(in_ds);
+  return m_presenter.getTDimensionFromDS(in_ds);
 }
 
 
@@ -179,48 +185,86 @@ void avtRebinningCutterFilter::Execute()
   vtkDataSet **leaves = tree->GetAllLeaves(nLeaves);
   vtkDataSet *in_ds = leaves[0];
 
-  //TODO: check that the input provided is a dataset containing the required field data.
-    bool fromControls = false; // TODO: determine where dimensions should be picked up from.
+  Dimension_sptr spDimX = getDimensionX(in_ds);
+  this->xAxisName = spDimX->getDimensionId();
 
-    Dimension_sptr spDimX = getDimensionX(fromControls, in_ds);
-    this->xAxisName = spDimX->getName();
+  Dimension_sptr spDimY = getDimensionY(in_ds);
+  this->yAxisName = spDimY->getDimensionId();
 
-    Dimension_sptr spDimY = getDimensionY(fromControls, in_ds);
-    this->yAxisName = spDimY->getDimensionId();
+  Dimension_sptr spDimZ = getDimensionZ(in_ds);
+  this->zAxisName = spDimZ->getDimensionId();
 
-    Dimension_sptr spDimZ = getDimensionZ(fromControls, in_ds);
-    this->zAxisName = spDimZ->getName();
+  Dimension_sptr spDimt = getDimensiont(in_ds);
 
-    Dimension_sptr spDimt = getDimensiont(fromControls, in_ds);
+  DimensionVec dimensionsVec;
+  dimensionsVec.push_back(spDimX);
+  dimensionsVec.push_back(spDimY);
+  dimensionsVec.push_back(spDimZ);
+  dimensionsVec.push_back(spDimt);
 
-    DimensionVec vec;
-    vec.push_back(spDimX);
-    vec.push_back(spDimY);
-    vec.push_back(spDimZ);
-    vec.push_back(spDimt);
+  doubleVector origin;
 
-    doubleVector origin;
+
+  bool hasExecuted = atts.GetWidth() != atts.GetHeight(); //Seam. Replace with better logic for determining execution.
+  if(hasExecuted)
+  {
+  atts.GetWidth();
+  atts.GetHeight();
+  atts.GetDepth();
+
+  origin.push_back(atts.GetOriginX());
+  origin.push_back(atts.GetOriginY());
+  origin.push_back(atts.GetOriginZ());
+
+  m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
+      atts.GetWidth(), //width
+      atts.GetHeight(), //height
+      atts.GetDepth(), //depth
+        origin, //origin
+        in_ds);
+  }
+  else
+  {
+
     origin.push_back((spDimX->getMaximum() + spDimX->getMinimum()) / 2);
     origin.push_back((spDimY->getMaximum() + spDimY->getMinimum()) / 2);
     origin.push_back((spDimZ->getMaximum() + spDimZ->getMinimum()) / 2);
 
-    //TODO: don't just reset inputs, get them from controls!
-    m_presenter.constructReductionKnowledge(vec, spDimX, spDimY, spDimZ, spDimt, spDimX->getMaximum() - spDimX->getMinimum(), spDimY->getMaximum() - spDimY->getMinimum(), spDimZ->getMaximum() - spDimZ->getMinimum(), origin, in_ds);
+  // Construct reduction knowledge.
+  m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
+      spDimX->getMaximum() - spDimX->getMinimum(), //width
+      spDimY->getMaximum() - spDimY->getMinimum(), //height
+      spDimZ->getMaximum() - spDimZ->getMinimum(), //depth
+      origin, //origin
+      in_ds);
+  }
 
-  std::string scalarName = "signal";
-  vtkDataSet *output_ds = m_presenter.createVisualDataSet(scalarName, false, m_timestep); //TODO: Hookup to attribute inputs
+  vtkDataSet *output_ds = m_presenter.createVisualDataSet(XMLDefinitions::signalName, false, m_timestep);
 
-  output_ds->GetCellData()->SetActiveScalars(scalarName.c_str());
+  output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName.c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);
   SetOutputDataTree(newTree);
-  double range[2] =
+  double newrange[2] =
   { FLT_MAX, -FLT_MAX };
-  GetDataRange(output_ds, range, scalarName.c_str(), false);
+  double oldrange[2] =
+  { FLT_MAX, -FLT_MAX };
+  GetDataRange(output_ds, newrange, XMLDefinitions::signalName.c_str(), false);
+  GetDataRange(in_ds, oldrange, XMLDefinitions::signalName.c_str(), false);
   avtDataAttributes &dataAtts = GetOutput()->GetInfo().GetAttributes();
-  dataAtts.GetThisProcsOriginalDataExtents(scalarName.c_str())->Set(range);
-  dataAtts.GetThisProcsActualDataExtents(scalarName.c_str())->Set(range);
+  dataAtts.GetThisProcsOriginalDataExtents(XMLDefinitions::signalName.c_str())->Set(oldrange);
+  dataAtts.GetThisProcsActualDataExtents(XMLDefinitions::signalName.c_str())->Set(newrange);
 
-  m_completeFirstExecute = true;
+  //Persist the execution output geometry so that it can be dermined later in VisIT gui.
+  MapNode geometryXMLNode;
+  geometryXMLNode[XMLDefinitions::geometryNodeName] =  m_presenter.getWorkspaceGeometry();
+  GetOutput()->GetInfo().GetAttributes().AddPlotInformation(XMLDefinitions::geometryOperatorInfo, geometryXMLNode);
+
+  avtDatasetVerifier v;
+  vector<int> domains;
+  domains.push_back(0);
+  v.VerifyDatasets(1, &output_ds, domains);
+
+
 }
 
 void avtRebinningCutterFilter::UpdateDataObjectInfo(void)
@@ -229,22 +273,20 @@ void avtRebinningCutterFilter::UpdateDataObjectInfo(void)
   int dim = 3;
   dataAtts.SetTopologicalDimension(dim);
   dataAtts.SetSpatialDimension(dim);
-  dataAtts.GetThisProcsOriginalSpatialExtents()->Clear();
-  dataAtts.GetOriginalSpatialExtents()->Clear();
 
   //Check that axis names have been provided first. UpdataDataObjectInfo is executed once before execute.
-  //if (!xAxisName.empty())
-  //{
+  if (!xAxisName.empty())
+  {
     dataAtts.SetXLabel(xAxisName);
- // }
- // if (!yAxisName.empty())
- // {
+  }
+  if (!yAxisName.empty())
+  {
     dataAtts.SetYLabel(yAxisName);
-  //}
-  //if (!zAxisName.empty())
-  //{
+  }
+  if (!zAxisName.empty())
+  {
     dataAtts.SetZLabel(zAxisName);
-  //}
+  }
 
 
 }
