@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="TOSCA" valid-from   ="1900-01-31 23:59:59"
                          valid-to     ="2100-01-31 23:59:59"
-		                 last-modified="2011-01-18 00:00:00"
+		                 last-modified="2011-01-19 00:00:00"
   >
 
 <defaults>

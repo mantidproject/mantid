@@ -206,6 +206,8 @@ def groupData(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
 
 def groupTosca(wsname):
     invalid = [0,1,13,27,28,41,55,69,70,83,97,111,125,127,139]
+    # Will want a way to generate that list in mantid
+    # rather than hardcoding it. that's the next step for TOSCA
     grp = range(0,70)
     for i in invalid:
         try:

@@ -1177,7 +1177,7 @@ void Indirect::reflectionSelected(int index)
     {
       m_uiForm.leEfixed->clear();
     }
-    // Default rebinning parameters
+    // Default rebinning parameters can be set in instrument parameter file
     if ( values.count() == 9 )
     {
       QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
