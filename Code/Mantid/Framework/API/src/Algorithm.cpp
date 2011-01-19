@@ -398,10 +398,14 @@ namespace Mantid
         m_endChildProgress = endProgress;
       }
 
-      //before we return the shared pointer, use it to create a weak pointer and keep that in a vector
-      //we will use this to pass on cancellation requests
+      // Before we return the shared pointer, use it to create a weak pointer and keep that in a vector.
+      // It will be used this to pass on cancellation requests
+      // It must be protected by a critical block so that sub algorithms can run in parallel safely.
       IAlgorithm_wptr weakPtr(alg);
-      m_ChildAlgorithms.push_back(weakPtr);
+      PARALLEL_CRITICAL(Algorithm_StoreWeakPtr)
+      {
+	m_ChildAlgorithms.push_back(weakPtr);
+      }
 
       return alg;
     }
