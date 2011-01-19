@@ -8,6 +8,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -274,15 +275,18 @@ ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString&
   QString pyInput =
     "from mantidsimple import *\n"
     "import sys\n"
-    "LoadEmptyInstrument(r'%1', 'instrument')\n"
-    "instrument = mtd['instrument'].getInstrument()\n"
+    "ws_name = '__empty_%2'\n"
+    "if mtd.workspaceExists(ws_name):\n"
+    "  instrument = mtd[ws_name]\n"
+    "else:\n"
+    "  LoadEmptyInstrument(r'%1', ws_name)\n"
+    "  instrument = mtd[ws_name].getInstrument()\n"
     "try:\n"
     "    print instrument.getStringParameter('deltaE-mode')[0]\n"
     "except IndexError, message:\n" // the above line will raise an IndexError in Python
-    "    print ''\n"				// if the instrument doesn't have this parameter.
-    "mtd.deleteWorkspace('instrument')";
+    "    print ''\n";				// if the instrument doesn't have this parameter.
 
-  pyInput = pyInput.arg(defFile);
+  pyInput = pyInput.arg(defFile,m_uiForm.cbInst->currentText());
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -361,6 +365,14 @@ void ConvertToEnergy::userSelectInstrument(const QString& prefix)
 {
   if ( prefix != m_curInterfaceSetup )
   {
+    // Remove the old empty instrument workspace if it is there
+    std::string ws_name = "__empty_" + m_curInterfaceSetup.toStdString();
+    Mantid::API::AnalysisDataServiceImpl& dataStore = Mantid::API::AnalysisDataService::Instance();
+    if( dataStore.doesExist(ws_name) )
+    {
+      dataStore.remove(ws_name);
+    }
+
     m_uiForm.pbRun->setEnabled(false);
     m_uiForm.cbInst->setEnabled(false);
     instrumentSelectChanged(prefix);

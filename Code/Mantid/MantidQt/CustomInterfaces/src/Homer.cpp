@@ -103,7 +103,6 @@ void Homer::pythonIsRunning(bool running)
 {// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
   m_uiForm.tabWidget->setEnabled( ! running );
   m_uiForm.pbRun->setEnabled( ! running );
-  m_diagPage->blockPython(running);
 }
 
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
@@ -813,6 +812,9 @@ void Homer::setIDFValues(const QString &)
   m_uiForm.leSamMass->setText("1");
   m_uiForm.leRMMMass->setText("1");
   readSettings();
+  
+  // Also diag interface
+  m_diagPage->loadSettings();
 }
 
 void Homer::saveFormatOptionClicked(QAbstractButton*)

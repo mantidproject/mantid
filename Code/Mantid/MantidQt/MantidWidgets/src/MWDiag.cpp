@@ -4,8 +4,11 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/IInstrument.h"
 
 #include <QSignalMapper>
 #include <QFileInfo>
@@ -22,91 +25,109 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
-
-// default parameters writen to in the GUI
-static const bool NO_SOLIDS = false;
-static const char HIGH_ABSOLUTE[5] = "1e10";
-static const char LOW_ABSOLUTE[2] = "0";
-static const char SIGNIFIC_TEST[4] = "3.3";
-static const char HIGH_MEDIAN[4] = "3.0";
-static const char LOW_MEDIAN[4] = "0.1";
-static const char VARIATION[4] = "1.1";
-static const bool CHECK_BACK = true;
-static const char BACK_CRITERIA[4] = "5.0";
-static const double START_WINDOW_TOF = 18000;
-static const double END_WINDOW_TOF = 19500;
-static const bool NO_ZERO_BG = true;
+using Mantid::Geometry::IInstrument_sptr;
 
 MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
   MantidWidget(parent),
-  m_dispDialog(NULL), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
+  m_dispDialog(NULL), m_instru(instru), 
   m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
 {
   // allows saving and loading the values the user entered on to the form
   m_prevSets.beginGroup(prevSettingsGr);
-  
+  // Layout the widgets
   m_designWidg.setupUi(this);
-  insertFileWidgs();
-  
-  loadDefaults();
+
+  loadSettings();
   setupToolTips();
   setUpValidators();
   connectSignals(parent);
 }
 
-void MWDiag::insertFileWidgs()
-{
-  m_WBV1 = new MWRunFiles(this);
-  m_designWidg.indivTestWhiteLay->addWidget(m_WBV1);
-  m_WBV1->setLabelText("White Beam Van 1");
-  m_WBV1->isOptional(false);
-  m_WBV1->allowMultipleFiles(false);
-
-  m_WBV2 = new MWRunFiles(this);
-  m_designWidg.effVarTestWhiteLay->addWidget(m_WBV2);
-  m_WBV2->setLabelText("White Beam Van 2");
-  m_WBV2->isOptional(true);
-  m_WBV2->allowMultipleFiles(false);
-
-  connect(m_designWidg.leIFile, SIGNAL(editingFinished()), this, SLOT(validateHardMaskFile()));
-  validateHardMaskFile();
-}
-
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
-void MWDiag::loadDefaults()
-{  
-  m_designWidg.leIFile->setText(
-    m_prevSets.value("input mask", "").toString());
-  m_designWidg.leOFile->setText(
-    m_prevSets.value("output file", "").toString());
-  m_designWidg.leSignificance->setText(
-    m_prevSets.value("significance", SIGNIFIC_TEST).toString());
-  m_designWidg.ckAngles->setChecked(
-    m_prevSets.value("no solid", NO_SOLIDS).toBool());
+void MWDiag::loadSettings()
+{
+  // Want the defaults from the instrument if nothing is saved in the config
+  IInstrument_sptr instrument = getInstrument(m_instru->currentText());
 
-  m_designWidg.leHighAbs->setText(
-    m_prevSets.value("high abs", HIGH_ABSOLUTE).toString());
-  m_designWidg.leLowAbs->setText(
-    m_prevSets.value("low abs", LOW_ABSOLUTE).toString());
-  m_designWidg.leHighMed->setText(
-    m_prevSets.value("high median", HIGH_MEDIAN).toString());
-  m_designWidg.leLowMed->setText(
-    m_prevSets.value("low median", LOW_MEDIAN).toString());
+  m_designWidg.leIFile->setText(getSetting("input mask"));
+  m_designWidg.leOFile->setText(getSetting("output file"));
+  m_designWidg.leSignificance->setText(getSetting("significance", instrument, "signif"));
+  m_designWidg.leHighAbs->setText(getSetting("high abs", instrument, "large"));
+  m_designWidg.leLowAbs->setText(getSetting("low abs", instrument, "tiny"));
+  m_designWidg.leHighMed->setText(getSetting("high median", instrument, "median_hi"));
+  m_designWidg.leLowMed->setText(getSetting("low median", instrument, "median_lo"));
+  m_designWidg.leVariation->setText(getSetting("variation", instrument, "variation"));
+  m_designWidg.leStartTime->setText(getSetting("TOF start", instrument, "bkgd-range-min"));
+  m_designWidg.leEndTime->setText(getSetting("TOF end", instrument, "bkgd-range-max"));
+  m_designWidg.leAcceptance->setText(getSetting("back criteria", instrument, "bkgd_threshold"));
+  m_designWidg.bleed_maxrate->setText(getSetting("bleed_max_framerate", instrument, "bleed_max_framerate"));
+  m_designWidg.ignored_pixels->setText(getSetting("bleed_ignored_pixels", instrument, "bleed_ignored_pixels"));
 
-  m_designWidg.leVariation->setText(
-    m_prevSets.value("variation", VARIATION).toString());
-
-  m_designWidg.ckDoBack->setChecked(
-    m_prevSets.value("test background", CHECK_BACK).toBool());
-  m_designWidg.leAcceptance->setText(
-    m_prevSets.value("back criteria", BACK_CRITERIA).toString());
-  m_designWidg.ckZeroCounts->setChecked(
-    m_prevSets.value("no zero background", NO_ZERO_BG).toBool());
-  m_designWidg.leStartTime->setText(
-    m_prevSets.value("TOF start", START_WINDOW_TOF).toString());
-  m_designWidg.leEndTime->setText(
-    m_prevSets.value("TOF end", END_WINDOW_TOF).toString());
+  // Boolean settings
+  // Background tests
+  QString value = getSetting("test background", instrument, "check_background");
+  bool checked = static_cast<bool>(value.toUInt());
+  m_designWidg.ckDoBack->setChecked(checked);
+  // Zero removal
+  value = getSetting("no zero background", instrument, "remove_zero");
+  checked = static_cast<bool>(value.toUInt());
+  m_designWidg.ckZeroCounts->setChecked(checked);
+  // Bleed test
+  value = getSetting("bleed_test", instrument, "bleed_test");
+  checked = static_cast<bool>(value.toUInt());
+  m_designWidg.bleed_group->setChecked(checked);
 }
+
+/**
+ * Get an instrument pointer for the name instrument
+ */
+IInstrument_sptr MWDiag::getInstrument(const QString & name)
+{
+  std::string ws_name = "__empty_" + name.toStdString();
+  
+  AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
+  if( !dataStore.doesExist(ws_name) )
+  {
+    QString pyInput =
+      "from DirectEnergyConversion import setup_reducer\n"
+      "setup_reducer('%1')";
+    pyInput = pyInput.arg(QString::fromStdString(ws_name));
+    runPythonCode(pyInput);
+    if( !dataStore.doesExist(ws_name) )
+    {
+      return IInstrument_sptr();
+    }
+  }
+  MatrixWorkspace_sptr inst_ws = 
+    boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(ws_name));
+  
+  return inst_ws->getInstrument();
+}
+
+QString MWDiag::getSetting(const QString & settingName, IInstrument_sptr instrument,
+			   const QString & idfName) const
+{
+  QString value;
+  if( m_prevSets.contains(settingName) )
+  {
+    value = m_prevSets.value(settingName).toString();
+  }
+  else if( instrument && !idfName.isEmpty() )
+  {
+    std::vector<double> params = instrument->getNumberParameter(idfName.toStdString());
+    if( params.size() == 1 )
+    {
+      value = QString::number(params.front());
+    }
+    else value = QString();
+  }
+  else
+  {
+    value = QString();
+  }
+  return value;
+}
+
 /// loads default values into each control using either the previous value used when 
 /// the form was run or the default value for that control
 void MWDiag::saveDefaults()
@@ -217,6 +238,7 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));  
   connect(signalMapper, SIGNAL(mapped(const QString &)),
          this, SLOT(browseClicked(const QString &)));
+  connect(m_designWidg.leIFile, SIGNAL(editingFinished()), this, SLOT(validateHardMaskFile()));
 
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
@@ -224,7 +246,7 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
 
     // controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
-      m_WBV1, SLOT(setFileText(const QString&)));
+      m_designWidg.white_file, SLOT(setFileText(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
@@ -246,6 +268,8 @@ void MWDiag::setUpValidators()
   m_designWidg.leAcceptance->setValidator(new QDoubleValidator(this));
   m_designWidg.leStartTime->setValidator(new QDoubleValidator(this));
   m_designWidg.leEndTime->setValidator(new QDoubleValidator(this));
+
+  validateHardMaskFile();
 }
 
 /**
@@ -263,8 +287,8 @@ bool MWDiag::isInputValid() const
     valid &= true;
   }
   
-  valid &= m_WBV1->isValid();
-  valid &= m_WBV2->isValid();
+  valid &= m_designWidg.white_file->isValid();
+  valid &= m_designWidg.white_file_2->isValid();
 
   if(m_designWidg.ckDoBack->isChecked() && m_monoFiles.isEmpty() )
   {
@@ -314,8 +338,8 @@ QString MWDiag::createDiagnosticScript() const
   // Be nice and explicit so that this is as easy as possible to read later
   // Pull out the for data first
   QString sampleRun = m_designWidg.ckDoBack->isChecked() ? ("r'" + m_monoFiles[0] + "'") : "";
-  QString whiteBeam = "r'" + m_WBV1->getFirstFilename() + "'";
-  QString whiteBeam2 = "r'" + m_WBV2->getFirstFilename() + "'";
+  QString whiteBeam = "r'" + m_designWidg.white_file->getFirstFilename() + "'";
+  QString whiteBeam2 = "r'" + m_designWidg.white_file_2->getFirstFilename() + "'";
   if( whiteBeam2 == "r''" ) whiteBeam2 = "None";
   QString removeZeroes = m_designWidg.ckZeroCounts->isChecked() ? "True" : "False";
   QString lowCounts = m_designWidg.leLowAbs->text();
@@ -328,6 +352,8 @@ QString MWDiag::createDiagnosticScript() const
   QString variation = m_designWidg.leVariation->text();
   QString hard_mask_file = "r'" + m_designWidg.leIFile->text() + "'";
   if( hard_mask_file == "r''" ) hard_mask_file = "None";
+  QString bleed_maxrate = m_designWidg.bleed_maxrate->text();
+  QString bleed_pixels = m_designWidg.ignored_pixels->text();
 
   QString diagCall = 
     "diag_total_mask = diagnostics.diagnose(";
@@ -362,6 +388,19 @@ QString MWDiag::createDiagnosticScript() const
       "median_hi=" + highMedian + ","
       "signif=" + significance + ","
       "hard_mask=" + hard_mask_file;
+  }
+  
+  // Bleed correction
+  if( m_designWidg.bleed_group->isChecked() )
+  {
+    diagCall += 
+      ",bleed_test=True,"
+      "bleed_maxrate=" + bleed_maxrate + ","
+      "bleed_pixels=" + bleed_pixels;
+  }
+  else
+  {
+    diagCall += ",bleed_test=False";
   }
 
   // Print results argument and Closing  argument bracket
@@ -475,10 +514,6 @@ QString MWDiag::run(const QString &, const bool)
   showTestResults(scriptResults);
   return "";
 
-}
-
-void MWDiag::blockPython(const bool)
-{
 }
 
 /** Called when the user identifies the background region in a different form, it copies the values over

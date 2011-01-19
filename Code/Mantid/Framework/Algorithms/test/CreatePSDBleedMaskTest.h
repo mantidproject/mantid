@@ -75,7 +75,7 @@ public:
     TS_ASSERT_EQUALS(numSpectra, testWS->getNumberHistograms());
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     const int numMasked = diagnostic.getProperty("NumberOfFailures");
-    TS_ASSERT_EQUALS(numMasked, 1);
+    TS_ASSERT_EQUALS(numMasked, 50);
 
     // Test masking
     int failedIndexStart(50), failedIndexEnd(99);

@@ -141,7 +141,7 @@ namespace Mantid
       // Now process the tubes in parallel
       const int numTubes = tubeMap.size();
       g_log.information() << "Found " << numTubes << " tubes.\n";
-      int numMasked(0);
+      int numSpectraMasked(0), numTubesMasked(0);
       // Create a mask workspace for output
       MatrixWorkspace_sptr outputWorkspace = 
 	API::WorkspaceFactory::Instance().create(inputWorkspace, numSpectra, 1, 1);
@@ -149,10 +149,10 @@ namespace Mantid
       outputWorkspace->isDistribution(false);
       outputWorkspace->setYUnitLabel("MaskValue");
 
-//      PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+      PARALLEL_FOR2(inputWorkspace, outputWorkspace)
       for(int i = 0; i < numTubes; ++i )
       {
-//	PARALLEL_START_INTERUPT_REGION
+	PARALLEL_START_INTERUPT_REGION
 
 	TubeIndex::iterator current = tubeMap.begin();
 	std::advance(current, i);
@@ -161,29 +161,31 @@ namespace Mantid
 	if( mask )
 	{
 	  maskTube(tubeIndices, outputWorkspace);
-//	  PARALLEL_ATOMIC
-	  ++numMasked;
+	  PARALLEL_ATOMIC
+	  numSpectraMasked += tubeIndices.size();
+	  PARALLEL_ATOMIC
+          numTubesMasked += 1;
 	}
 	else
 	{
 	  markAsPassed(tubeIndices, outputWorkspace);
 	}
       
-//	PARALLEL_END_INTERUPT_REGION
+	PARALLEL_END_INTERUPT_REGION
       }
-//      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
 
-      g_log.information() << numMasked << " tube(s) failed the bleed tests.";
-      if( numMasked > 0 )
+      g_log.information() << numTubesMasked << " tube(s) failed the bleed tests.";
+      if( numTubesMasked > 0 )
       {
-	g_log.information() << " Their spectra have been masked on the output workspace.\n";
+	g_log.information() << " The " << numSpectraMasked << " spectra have been masked on the output workspace.\n";
       }
       else
       {
 	g_log.information() << std::endl;
       }
       
-      setProperty("NumberOfFailures", numMasked);
+      setProperty("NumberOfFailures", numSpectraMasked);
       setProperty("OutputWorkspace", outputWorkspace);
     }
 

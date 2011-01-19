@@ -22,10 +22,10 @@ using namespace MantidQt::MantidWidgets;
 namespace
 {
   /// the total number of tests that results are reported for here
-  const int NUMTESTS = 3;
+  const int NUMTESTS = 4;
   /// the list of tests that we display results for
   const QString TESTS[NUMTESTS] =
-  { "First white beam test", "Second white beam test", "Background test" };
+  { "First white beam test", "Second white beam test", "Background test", "PSD Bleed test"};
 }
 
 //----------------------

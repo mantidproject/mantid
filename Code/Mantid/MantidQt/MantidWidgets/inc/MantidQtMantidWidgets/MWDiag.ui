@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>437</width>
-    <height>503</height>
+    <width>376</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -239,7 +239,14 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout" >
       <item>
-       <layout class="QHBoxLayout" name="indivTestWhiteLay" />
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file" >
+        <property name="label" stdset="0" >
+         <string>White Beam Van 1</string>
+        </property>
+        <property name="multipleFiles" stdset="0" >
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5" >
@@ -299,7 +306,17 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2" >
       <item>
-       <layout class="QHBoxLayout" name="effVarTestWhiteLay" />
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file_2" >
+        <property name="label" stdset="0" >
+         <string>White Beam Van 2</string>
+        </property>
+        <property name="multipleFiles" stdset="0" >
+         <bool>false</bool>
+        </property>
+        <property name="optional" stdset="0" >
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4" >
@@ -420,20 +437,73 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer" >
-     <property name="orientation" >
-      <enum>Qt::Vertical</enum>
+    <widget class="QGroupBox" name="bleed_group" >
+     <property name="title" >
+      <string>PSD Bleed</string>
      </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
+     <property name="checkable" >
+      <bool>true</bool>
      </property>
-    </spacer>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label" >
+        <property name="toolTip" >
+         <string>Set the maximum allowed rate per frame for a tube</string>
+        </property>
+        <property name="text" >
+         <string>Max framerate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLineEdit" name="bleed_maxrate" >
+        <property name="toolTip" >
+         <string>Set the maximum allowed rate per frame for a tube</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3" >
+       <widget class="QLabel" name="label_2" >
+        <property name="toolTip" >
+         <string>Set the number of central pixels to ignore within a tube</string>
+        </property>
+        <property name="text" >
+         <string>Ignored pixels</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4" >
+       <widget class="QLineEdit" name="ignored_pixels" >
+        <property name="toolTip" >
+         <string>Set the number of central pixels to ignore within a tube</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <spacer name="horizontalSpacer_3" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

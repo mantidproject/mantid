@@ -13,16 +13,17 @@ import CommonFunctions as common
 
 def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None, 
              tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-             bkgd_threshold=None, bkgd_range=None, variation=None, hard_mask=None,
-             print_results=False, inst_name=None):
+             bkgd_threshold=None, bkgd_range=None, variation=None,
+             bleed_test=False, bleed_maxrate=None, bleed_pixels=None,
+             hard_mask=None, print_results=False, inst_name=None):
     """
     Run diagnostics on the provided run and white beam files.
 
-    There are 3 possible tests, depending on the input given:
+    There are 4 possible tests, depending on the input given:
       White beam diagnosis
       Background tests
       Second white beam
-
+      Bleed test
     
     Required inputs:
     
@@ -43,6 +44,10 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
                    If not present then they are taken from the parameter file. (default = None)
       variation  - The number of medians the ratio of the first/second white beam can deviate from
                    the average by (default=1.1)
+      bleed_test - If true then the CreatePSDBleedMask algorithm is run
+      bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+      bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+                     bleed test diagnostic
       hard_mask  - A file specifying those spectra that should be masked without testing
       print_results - If True then the results are printed to std out
       inst_name  - The name of the instrument to perform the diagnosis.
@@ -64,7 +69,7 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
 
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
-    test_results = [ [None, None], [None, None], [None, None] ]
+    test_results = [ [None, None], [None, None], [None, None], [None, None]]
     ##
     ## White beam Test
     ##
@@ -109,8 +114,13 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
                                          bkgd_range, bkgd_threshold, remove_zero, signif,
                                          hard_mask_spectra)
         test_results[2] = [str(_bkgd_masks), num_failed]
-    #else:
-    #    raise RuntimeError('Invalid input for sample run "%s"' % str(sample_run))
+
+    ##
+    ## PSD Bleed Test
+    ##
+    if type(bleed_test) == bool and bleed_test == True:
+        _bleed_masks, num_failed = _do_bleed_test(sample_run, bleed_maxrate, bleed_pixels)
+        test_results[3] = [str(_bleed_masks), num_failed]
 
     ##
     ## Accumulate the masking
@@ -119,6 +129,9 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     # If we did the second white beam, add that too
     if test_results[1][0] is not None:
         diag_total_mask += _second_white_masks
+    # And the PSD bleed
+    if test_results[3][0] is not None:
+        diag_total_mask += _bleed_masks
 
     # Remove temporary workspaces
     mtd.deleteWorkspace(str(white_counts))
@@ -313,6 +326,37 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     num_failed = median_test['NumberOfFailures'].value
     return median_test.workspace(), num_failed
 
+def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
+    """Runs the CreatePSDBleedMask algorithm
+
+    Input:
+    sample_run  -  The run number of the sample
+    max_framerate - The maximum allowed framerate in a tube. If None, the instrument defaults are used.
+    ignored_pixels - The number of central pixels to ignore. If None, the instrument defaults are used.
+    """
+    mtd.sendLogMessage('Running PSD bleed test')
+    # Load the sample run
+    data_ws = common.load_run(sample_run, 'mono-sample')
+
+    if max_framerate is None:
+        max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])
+    if ignored_pixels is None:
+        ignored_pixels = int(data_ws.getInstrument().getNumberParameter('num-ignored-pixels')[0])
+    
+    # What shall we call the output
+    lhs_names = lhs_info('names')
+    if len(lhs_names) > 0:
+        ws_name = lhs_names[0]
+    else:
+        ws_name = '__do_bleed__test'
+
+    bleed_test = CreatePSDBleedMask(data_ws, ws_name, MaxTubeFramerate=max_framerate,\
+                                    NIgnoredCentralPixels=ignored_pixels)
+
+    num_failed = bleed_test['NumberOfFailures'].value
+    return bleed_test.workspace(), num_failed
+    
+
 def print_test_summary(test_results):
     """Print a summary of the failures per test run.
 
@@ -320,24 +364,31 @@ def print_test_summary(test_results):
     test_results - A list or tuple containing either the number of failed spectra or None
                    indicating that the test was not run
     """
-    if len(test_results) != 3:
-        raise ValueError("Invalid input for print_test_summary. A list of 3 numbers is expected.")
+    num_diags = 4
+    if len(test_results) != num_diags:
+        raise ValueError("Invalid input for print_test_summary. A list of %d numbers is expected." % num_diags)
 
-    if test_results[0] is None and test_results[1] and test_results[2]:
+    tests_run=False
+    for failures in test_results:
+        if failures is not None:
+            tests_run = True
+
+    if tests_run == False:
         print "No tests have been run!"
         return
 
     summary = (
         ['First white beam test:',test_results[0]], \
         ['Second white beam test:',test_results[1]], \
-        ['Background test:',test_results[2]] \
+        ['Background test:',test_results[2]], \
+        ['PSD Bleed test :',test_results[3]] \
         )
 
     print '==== Diagnostic Test Summary ===='
 
     max_name_length = -1
     max_ws_length = -1
-    for key in range(3):
+    for key in range(num_diags):
         result = summary[key]
         name_length = len(str(result[0]))
         ws_length = len(str(result[1][0]))

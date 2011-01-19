@@ -68,32 +68,68 @@
   <value val="50.9415"/>
 </parameter>
 
-<parameter name="abs-average-min">
+<!-- Diagnostic test defaults -->
+
+<parameter name="remove_zero">
+  <value val="1.0"/>
+</parameter>
+
+<parameter name="tiny">
   <value val="1e-10"/>
 </parameter>
 
-<parameter name="abs-average-max">
+<parameter name="large">
   <value val="1e10"/>
 </parameter>
 
-<parameter name="abs-median-lbound">
+<parameter name="median_lo">
+  <value val="0.1"/>
+</parameter>
+
+<parameter name="median_hi">
+  <value val="3.0"/>
+</parameter>
+
+<parameter name="signif">
+  <value val="3.3"/>
+</parameter>
+
+<parameter name="check_background">
+  <value val="1.0"/>
+</parameter>
+
+<parameter name="bkgd_threshold">
+  <value val="5.0"/>
+</parameter>
+
+<parameter name="variation">
+  <value val="1.1"/>
+</parameter>
+
+<!--  -->
+<!-- Absolute units conversion average -->
+
+<parameter name="monovan_lo_bound">
   <value val="0.01"/>
 </parameter>
 
-<parameter name="abs-median-ubound">
+<parameter name="monovan_hi_bound">
   <value val="100"/>
 </parameter>
 
-<parameter name="abs-median-lo-frac">
+<parameter name="monovan_lo_frac">
   <value val="0.8"/>
 </parameter>
 
-<parameter name="abs-median-hi-frac">
+<parameter name="monovan_hi_frac">
   <value val="1.2"/>
 </parameter>
 
-<parameter name="abs-median-signif">
-  <value val="3.3"/>
+<!--  -->
+<!-- PSD bleed test -->
+
+<parameter name="bleed_test">
+  <value val="0.0"/>
 </parameter>
 
 </component-link>

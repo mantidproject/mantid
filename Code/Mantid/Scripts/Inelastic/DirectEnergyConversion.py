@@ -55,17 +55,19 @@ class DirectEnergyConversion(object):
 
     def diagnose(self, white_run, sample_run=None, other_white=None, remove_zero=None, 
                  tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-                 bkgd_threshold=None, bkgd_range=None, variation=None, hard_mask=None,
-                 print_results=False):
+                 bkgd_threshold=None, bkgd_range=None, variation=None,
+                 bleed_test=False, bleed_maxrate=None, bleed_pixels=None,
+                 hard_mask=None, print_results=False):
         """
         A pass through method to the 'real' one in diagnostics.py
 
         Run diagnostics on the provided run and white beam files.
 
-        There are 3 possible tests, depending on the input given:
+        There are 4 possible tests, depending on the input given:
           White beam diagnosis
           Background tests
           Second white beam
+          PSD bleed test
             
         Required inputs:
         
@@ -86,6 +88,10 @@ class DirectEnergyConversion(object):
                        If not present then they are taken from the parameter file. (default = None)
           variation  - The number of medians the ratio of the first/second white beam can deviate from
                        the average by (default=1.1)
+          bleed_test - If true then the CreatePSDBleedMask algorithm is run
+          bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+          bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+                         bleed test diagnostic
           hard_mask  - A file specifying those spectra that should be masked without testing
           print_results - If True then the results are printed to std out
           inst_name  - The name of the instrument to perform the diagnosis.
@@ -94,8 +100,9 @@ class DirectEnergyConversion(object):
         self.spectra_masks = \
                            diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
                                                 tiny, large, median_lo, median_hi, signif,
-                                                bkgd_threshold, bkgd_range, variation, hard_mask,
-                                                print_results, self.instr_name)
+                                                bkgd_threshold, bkgd_range, variation,
+                                                bleed_test, bleed_maxrate, bleed_pixels,                                                
+                                                hard_mask, print_results, self.instr_name)
         return self.spectra_masks
     
     def do_white(self, white_run, spectra_masks, map_file): 
@@ -421,13 +428,13 @@ class DirectEnergyConversion(object):
             raise ValueError("Inconsistent mono-vanadium integration range defined!")
         Rebin(data_ws, data_ws, [e_low, 2.*(e_upp-e_low), e_upp])
         
-        min_value = self.abs_min_value
-        max_value = self.abs_max_value
-        median_lbound = self.abs_median_lbound
-        median_ubound = self.abs_median_ubound
-        median_frac_low = self.abs_median_frac_low
-        median_frac_hi = self.abs_median_frac_hi
-        median_sig = self.abs_median_sig
+        min_value = self.tiny
+        max_value = self.large
+        median_lbound = self.monovan_lo_bound
+        median_ubound = self.monovan_hi_bound
+        median_frac_low = self.monovan_lo_frac
+        median_frac_hi = self.monovan_hi_frac
+        median_sig = self.signif
 
         self.mask_detectors_outside_range(data_ws, min_value, max_value, median_lbound,
                                           median_ubound, median_frac_low, median_frac_hi, median_sig)
@@ -583,16 +590,15 @@ class DirectEnergyConversion(object):
         if workspace != None:
             self.instrument = workspace.getInstrument()
         else:
-            # Load an empty instrument
+            # Load an empty instrument if one isn't already there
             idf_dir = mtd.getConfigProperty('instrumentDefinition.directory')
             instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
             idf_files = glob.glob(instr_pattern)
             if len(idf_files) > 0:
-                tmp_ws_name = '_tmp_empty_instr'
-                LoadEmptyInstrument(idf_files[0],tmp_ws_name)
+                tmp_ws_name = '__empty_' + self.instr_name
+                if not mtd.workspaceExists(tmp_ws_name):
+                    LoadEmptyInstrument(idf_files[0],tmp_ws_name)
                 self.instrument = mtd[tmp_ws_name].getInstrument()
-                # Instrument is cached so this is fine
-                mtd.deleteWorkspace(tmp_ws_name)
             else:
                 self.instrument = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
@@ -657,13 +663,13 @@ class DirectEnergyConversion(object):
         self.van_mass = self.get_default_parameter("vanadium-mass")
         self.van_rmm = self.get_default_parameter("vanadium-rmm")
 
-        self.abs_min_value = self.get_default_parameter('abs-average-min')
-        self.abs_max_value = self.get_default_parameter('abs-average-max')
-        self.abs_median_lbound = self.get_default_parameter('abs-median-lbound')
-        self.abs_median_ubound = self.get_default_parameter('abs-median-ubound')
-        self.abs_median_frac_low = self.get_default_parameter('abs-median-lo-frac')
-        self.abs_median_frac_hi = self.get_default_parameter('abs-median-hi-frac')
-        self.abs_median_sig = self.get_default_parameter('abs-median-signif')
+        self.tiny = self.get_default_parameter('tiny')
+        self.large = self.get_default_parameter('large')
+        self.monovan_lo_bound = self.get_default_parameter('monovan_lo_bound')
+        self.monovan_hi_bound = self.get_default_parameter('monovan_hi_bound')
+        self.monovan_lo_frac = self.get_default_parameter('monovan_lo_frac')
+        self.monovan_hi_frac = self.get_default_parameter('monovan_hi_frac')
+        self.signif = self.get_default_parameter('signif')
 
         # Mark IDF files as read
         self._idf_values_read = True
