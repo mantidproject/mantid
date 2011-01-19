@@ -537,11 +537,11 @@ public:
     // get detector corresponding to workspace index 0
     IDetector_sptr det = ws->getDetector(69);  
 
-    TS_ASSERT_EQUALS( det->getID(), 78);
-    TS_ASSERT_EQUALS( det->getName(), "Detector #70");
+    TS_ASSERT_EQUALS( det->getID(), 77);
+    TS_ASSERT_EQUALS( det->getName(), "Detector #69");
 
     Parameter_sptr param = paramMap.get(&(*det), "Efixed");
-    TS_ASSERT_DELTA( param->value<double>(), 4.000, 0.0001);
+    TS_ASSERT_DELTA( param->value<double>(), 4.04389, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
 
@@ -564,11 +564,11 @@ public:
 
     det = ws->getDetector(69);  
 
-    TS_ASSERT_EQUALS( det->getID(), 78);
-    TS_ASSERT_EQUALS( det->getName(), "Detector #70");
+    TS_ASSERT_EQUALS( det->getID(), 77);
+    TS_ASSERT_EQUALS( det->getName(), "Detector #69");
 
     param = paramMap2.get(&(*det), "Efixed");
-    TS_ASSERT_DELTA( param->value<double>(), 4.000, 0.0001);
+    TS_ASSERT_DELTA( param->value<double>(), 4.04389, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
