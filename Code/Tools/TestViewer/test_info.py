@@ -19,6 +19,18 @@ import subprocess
 global MSG_ALL_BUILDS_SUCCESSFUL
 MSG_ALL_BUILDS_SUCCESSFUL = "MSG(all_builds_successful)"
 
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+    }
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
+
 
 #==================================================================================================
 class TestResult:
@@ -151,21 +163,19 @@ class TestSingle(object):
         """Returns HTML text describing these test results """
         # Change the header color
         color = ['"green"', '"red"'][self.failed]
-        s = "<font color=%s><b>%s</b></font><br />" % (color, self.name)
+        s = u"<font color=%s><b>%s</b></font><br />" % (color, self.name)
 #        if len(self.failure) > 0:
 #            s += self.failure + "<br>"
         if len(self.stdout) > 0:
             lines = self.stdout.split("\n")
             # Remove any empty first line
             if lines[0] == "" and len(lines)>1: lines = lines[1:]
-            # Show the first line without indent
-            s += "<pre>"
-            s += lines[0] + "<br>"
+            # Use the pre tag but wrap long lines.
+            s += u'<pre style="white-space: pre-wrap;">'
             # Print the rest
-            for line in lines[1:]: 
-                s += "" + line + "<br>"
-                # s += "&nbsp;&nbsp;&nbsp;" + line + "<br>"
-            s += "</pre>"
+            for line in lines: 
+                s += unicode( html_escape(line) + "\n")
+            s += u"</pre>"
         return s
         
     #----------------------------------------------------------------------------------
@@ -276,11 +286,11 @@ class TestSuite(object):
         """Returns HTML text describing these test results """
         # Change the header color
         color = ['"green"', '"red"'][self.failed > 0]
-        s = "<font color=%s><h3>%s</h3></font>" % (color, self.name + ": " + self.get_state_str())
+        s = u"<font color=%s><h3>%s</h3></font>" % (color, self.name + ": " + self.get_state_str())
         if not self.build_succeeded:
-            s += "<pre>"
-            s += self.build_stdout
-            s += "</pre>"
+            s += u'<pre style="white-space: pre-wrap;">'
+            s += unicode( html_escape( self.build_stdout) )
+            s += u"</pre>"
         else:
             for test in self.tests:
                 if details or test.failed:
@@ -594,11 +604,11 @@ class TestProject(object):
         """Returns HTML text describing these test results """
         # Change the header color
         color = ['"green"', '"red"'][self.failed > 0]
-        s = "<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
+        s = u"<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
         if not self.build_succeeded:
-            s += "<pre>"
-            s += self.build_stdout
-            s += "</pre>"
+            s += u'<pre style="white-space: pre-wrap;">'
+            s += html_escape( unicode(self.build_stdout) )
+            s += u"</pre>"
         else:
             for suite in self.suites:
                 s += suite.get_results_text(details=False)
@@ -637,7 +647,9 @@ class TestProject(object):
                
         msg = "-------- Making Test %s ---------" % self.name
         print msg 
-        if not callback_func is None: callback_func("<hr><b>%s</b>" % msg)
+        if not callback_func is None: callback_func("%s" % msg)
+        print self.make_command
+        if not callback_func is None: callback_func(self.make_command)
         
         #(status, output) = commands.getstatusoutput(self.make_command)
         
@@ -657,7 +669,7 @@ class TestProject(object):
             #Remove trailing /n
             if len(line)>1: line = line[:-1]
             print line
-            if not callback_func is None: callback_func(line)
+            if not callback_func is None: callback_func( line )
             #Keep reading output.
             line=get.readline()            
             
@@ -668,13 +680,13 @@ class TestProject(object):
         if (status != 0):
             msg = "-------- BUILD FAILED! ---------" 
             print msg 
-            if not callback_func is None: callback_func("<b>%s</b>" % msg)
+            if not callback_func is None: callback_func("%s" % msg)
             self.build_succeeded = False
             self.build_stdout = output
         else:
             msg = "-------- Build Succeeded ---------" 
             print msg 
-            if not callback_func is None: callback_func("<b>%s</b>" % msg)
+            if not callback_func is None: callback_func("%s" % msg)
             self.build_succeeded = True
             # Build was successful
             for suite in self.suites:
@@ -953,7 +965,7 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test"): #and (fname.startswith("DataHandling") ): #!TODO
+            if fname.endswith("Test") :#and (fname.startswith("DataHandling") ): #!TODO
                 make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname

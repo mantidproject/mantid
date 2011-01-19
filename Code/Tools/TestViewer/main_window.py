@@ -301,7 +301,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def markup_console(self, in_line):
         """Return a marked-up (with HTML) version of a line
         from the consolue. """
-        line = in_line
+        # Replace any < with HTML goodness
+        line = test_info.html_escape(in_line)
         if ("Error" in line) or ("error:" in line) \
             or ("terminate called after throwing an instance" in line) \
             or ("Segmentation fault" in line) \
@@ -317,6 +318,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         else:
             #Print normally
             color = ""
+            
+        # Bolden any lines with --- in them
+        if line.startswith("---"):
+            line = "<b>%s</b>" % line
         # Add the color tag
         if color != "":
             line = '<font color="%s">%s</font>' % (color, line)
@@ -357,8 +362,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                     self.tabWidgetRight.setCurrentIndex(0)
                 else:
                     # Accumulated stdout
-                    self.stdout += self.markup_console(obj)
-                    self.textConsole.setText( self.stdout )
+                    self.stdout += self.markup_console( unicode(obj) )
+                    self.textConsole.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
+                                              self.stdout )
                     sb = self.textConsole.verticalScrollBar();
                     sb.setValue(sb.maximum());
                 
@@ -449,7 +455,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         else:
             raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
         self.labelTestName.setText( res.get_fullname() ) 
-        self.textResults.setText(res.get_results_text() )
+        self.textResults.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' 
+                                  + res.get_results_text() )
 
                 
     #-----------------------------------------------------------------------------
@@ -499,7 +506,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.progTest.setMaximum( num_steps )
         self.set_running(True)
         self.stdout = ""
-        self.textConsole.setText("")
+        self.textConsole.setText(self.stdout)
         # Select the console output tab (for the make output)        self.running=True
 
         self.tabWidgetRight.setCurrentIndex(1)
