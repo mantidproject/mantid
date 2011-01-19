@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
 #include <functional>

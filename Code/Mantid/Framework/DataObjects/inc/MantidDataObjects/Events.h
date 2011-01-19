@@ -36,7 +36,8 @@ class DLLExport TofEvent {
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
-protected:
+public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
+
   /** The units of the time of flight index in nanoseconds. This is relative to the
    * start of the pulse (stored in pulse_time.
    * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1
@@ -147,7 +148,7 @@ class DLLExport WeightedEvent : public TofEvent {
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
-private:
+public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
 
   /// The weight of this neutron.
   float m_weight;
@@ -234,7 +235,7 @@ class DLLExport WeightedEventNoTime {
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
-private:
+public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
 
   /// The time of flight of this neutron
   float m_tof;
