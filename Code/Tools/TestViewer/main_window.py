@@ -307,6 +307,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             or ("Segmentation fault" in line) \
             or ("  what(): " in line) \
             or ("Assertion" in line and " failed." in line) \
+            or ("undefined reference" in line) \
             :
             #An error line!
             color = "red"

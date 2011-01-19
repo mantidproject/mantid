@@ -62,7 +62,7 @@ class TestResult:
         s = "Unknown"
         if self.value == self.NOT_RUN: s = "Not Run" 
         if self.value == self.ALL_PASSED: s = "All Passed" 
-        if self.value == self.SOME_FAILED: s = "Some FAILED!" 
+        if self.value == self.SOME_FAILED: s = "FAILED!" 
         if self.value == self.BUILD_ERROR: s = "BUILD ERROR!" 
         if self.value == self.ALL_FAILED: s = "ALL FAILED!"
         if self.value == self.ABORTED: s = "ABORTED!"
@@ -292,9 +292,11 @@ class TestSuite(object):
         """ Replace the contents of self with those of other (coming after running in
         a separate thread """
         if len(self.tests) != len(other.tests):
-            print "The number of tests in %s changed. You should refresh your view." % self.classname
-            #TODO! handle better
+            #print "The number of tests in %s changed. You should refresh your view." % self.classname
+            # We replace the entire list
             self.tests = other.tests
+            # And this tells the tree view that it needs to update itself entirely.
+            self.contents_changed = True
         else:
             for i in xrange(len(self.tests)):
                 self.tests[i].replace_contents( other.tests[i] )
@@ -367,9 +369,8 @@ class TestSuite(object):
         self.failed = 0
         self.num_run = 0
         for test in self.tests:
-            state = test.state 
-            self.state.add( state )
-            if self.state.is_failed():
+            self.state.add( test.state )
+            if test.state.is_failed():
                 self.failed += 1 
                 self.num_run += 1
             else:
@@ -952,7 +953,7 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test"): # and (fname.startswith("Kernel") or fname.startswith("Geometry")): #!TODO
+            if fname.endswith("Test") and (fname.startswith("DataHandling") ): #!TODO
                 make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
