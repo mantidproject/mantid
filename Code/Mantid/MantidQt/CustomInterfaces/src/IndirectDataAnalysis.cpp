@@ -43,8 +43,10 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis);
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), 
-  m_furyResFileType(true), m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
+  m_furyResFileType(true), 
+  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
   m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdTree(NULL), m_msdDblMng(NULL),
+  m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), m_furDblMng(NULL),
   m_ffDataCurve(NULL), m_ffFitCurve(NULL),
   m_cfDataCurve(NULL), m_cfCalcCurve(NULL),
   m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
@@ -84,6 +86,7 @@ void IndirectDataAnalysis::initLayout()
 
   setupElwin();
   setupMsd();
+  setupFury();
   setupFuryFit();
   setupConFit();
     
@@ -91,18 +94,8 @@ void IndirectDataAnalysis::initLayout()
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
-  // fury
-  connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyInputType(int)));
-  connect(m_uiForm.fury_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
-  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
   // absorption
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
-
-  // apply validators - fury
-  m_uiForm.fury_leELow->setValidator(m_valDbl);
-  m_uiForm.fury_leEWidth->setValidator(m_valDbl);
-  m_uiForm.fury_leEHigh->setValidator(m_valDbl);
   // apply validators - absorption
   m_uiForm.abs_leAttenuation->setValidator(m_valDbl);
   m_uiForm.abs_leScatter->setValidator(m_valDbl);
@@ -115,8 +108,7 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.abs_leRadius->setValidator(m_valDbl);
   m_uiForm.abs_leSlices->setValidator(m_valInt);
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
-  // apply validators - convolution fit
-  m_uiForm.confit_leSpecNo->setValidator(m_valInt);
+
 
   refreshWSlist();
 }
@@ -249,6 +241,45 @@ void IndirectDataAnalysis::setupMsd()
   connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(msdUpdateRS(QtProperty*, double)));
 
   connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
+}
+
+void IndirectDataAnalysis::setupFury()
+{
+  m_furTree = new QtTreePropertyBrowser();
+  m_uiForm.fury_TreeSpace->addWidget(m_furTree);
+
+  m_furDblMng = new QtDoublePropertyManager();
+
+  m_furPlot = new QwtPlot(this);
+  m_uiForm.fury_PlotSpace->addWidget(m_furPlot);
+  m_furPlot->setCanvasBackground(Qt::white);
+  m_furPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_furPlot->setAxisFont(QwtPlot::yLeft, this->font());
+
+  m_furProp["ELow"] = m_furDblMng->addProperty("ELow");
+  m_furDblMng->setDecimals(m_furProp["ELow"], m_nDec);
+  m_furProp["EWidth"] = m_furDblMng->addProperty("EWidth");
+  m_furDblMng->setDecimals(m_furProp["EWidth"], m_nDec);
+  m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
+  m_furDblMng->setDecimals(m_furProp["EHigh"], m_nDec);
+
+  m_furTree->addProperty(m_furProp["ELow"]);
+  m_furTree->addProperty(m_furProp["EWidth"]);
+  m_furTree->addProperty(m_furProp["EHigh"]);
+
+  m_furTree->setFactoryForManager(m_furDblMng, m_dblEdFac);
+
+  m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
+
+  // signals / slots & validators
+  connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(furyMinChanged(double)));
+  connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(furyMaxChanged(double)));
+  connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyUpdateRS(QtProperty*, double)));
+  
+  connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyInputType(int)));
+  connect(m_uiForm.fury_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
+  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
 }
 
 void IndirectDataAnalysis::setupFuryFit()
@@ -458,34 +489,6 @@ bool IndirectDataAnalysis::validateFury()
   if ( ! m_uiForm.fury_resFile->isValid()  )
   {
     valid = false;
-  }
-
-  if ( m_uiForm.fury_leELow->text() == "" )
-  {
-    m_uiForm.fury_valELow->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.fury_valELow->setText(" ");
-  }
-  if ( m_uiForm.fury_leEWidth->text() == "" )
-  {
-    m_uiForm.fury_valEWidth->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.fury_valEWidth->setText(" ");
-  }
-  if ( m_uiForm.fury_leEHigh->text() == "" )
-  {
-    m_uiForm.fury_valEHigh->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.fury_valEHigh->setText(" ");
   }
 
   return valid;
@@ -1116,7 +1119,8 @@ void IndirectDataAnalysis::furyRun()
     "from IndirectDataAnalysis import fury\n"
     "samples = [r'" + filenames + "']\n"
     "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
-    "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n";
+    // "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n"
+    "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
   if ( m_uiForm.fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
@@ -1156,14 +1160,61 @@ void IndirectDataAnalysis::furyResType(const QString& type)
 
 void IndirectDataAnalysis::furyPlotInput()
 {
-  if ( m_uiForm.fury_iconFile->isValid() )
+  std::string workspace;
+  if ( m_uiForm.fury_cbInputType->currentIndex() == 0 )
   {
-    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
-      "inputfiles = [r'" + m_uiForm.fury_iconFile->getFilenames().join("', r'") + "']\n"
-      "spec = [0]\n"
-      "plotInput(inputfiles, spectra=spec)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    if ( m_uiForm.fury_iconFile->isValid() )
+    {
+      QString filename = m_uiForm.fury_iconFile->getFirstFilename();
+      QFileInfo fi(filename);
+      QString wsname = fi.baseName();
+
+      QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
+      QString pyOutput = runPythonCode(pyInput);
+
+      workspace = wsname.toStdString();
+    }
+    else
+    {
+      showInformationBox("Selected input files are invalid.");
+      return;
+    }
   }
+  else if ( m_uiForm.fury_cbInputType->currentIndex() == 1 )
+  {
+    workspace = m_uiForm.fury_cbWorkspace->currentText().toStdString();
+    if ( workspace.empty() )
+    {
+      showInformationBox("No workspace selected.");
+      return;
+    }
+  }
+
+  m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);
+  int npnts = m_furCurve->data().size();
+  double lower = m_furCurve->data().x(0);
+  double upper = m_furCurve->data().x(npnts-1);
+
+  m_furRange->setRange(lower, upper);
+
+  m_furPlot->replot();
+
+}
+
+void IndirectDataAnalysis::furyMaxChanged(double val)
+{
+  m_furDblMng->setValue(m_furProp["EHigh"], val);
+}
+void IndirectDataAnalysis::furyMinChanged(double val)
+{
+  m_furDblMng->setValue(m_furProp["ELow"], val);
+}
+void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
+{
+  if ( prop == m_furProp["ELow"] )
+    m_furRange->setMinimum(val);
+  else if ( prop == m_furProp["EHigh"] )
+    m_furRange->setMaximum(val);
 }
 
 void IndirectDataAnalysis::furyfitRun()
