@@ -38,8 +38,8 @@ class DriverGenerator:
         # import the various tests
         handle.write("# define the unit tests\n")
         for test in self.__tests:
-            handle.write("from %s.%s import %s\n" % \
-                             (self.__test_package, test, test))
+            handle.write("from %s.%s import *\n" % \
+                             (self.__test_package, test))
         handle.write("\n")
 
         # write the main
