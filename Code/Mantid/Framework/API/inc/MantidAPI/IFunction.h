@@ -164,10 +164,12 @@ public:
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
-                      int wsIndex);
-void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+                      int wsIndex) const;
+
+  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
+  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex);
+                               int wsIndex) const;
 protected:
 
 

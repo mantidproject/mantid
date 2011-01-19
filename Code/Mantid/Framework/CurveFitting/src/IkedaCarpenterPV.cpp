@@ -12,7 +12,7 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-
+#include <limits>
 
 namespace Mantid
 {
@@ -105,113 +105,23 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
     // further we make the assumption that no need to recalculate this vector if
     // it already has the right size
 
-    /*
     if (static_cast<int>(m_waveLength.size()) != nData)
     {
-      // This peak shape requires the fit to be done in TOF units
-
-      if ( m_workspace->getAxis(0)->unit()->unitID().compare("TOF") != 0 )
-      {
-        g_log.information() << "IkedaCarpenterPV function is perhaps best used when working with x-axis unit = TOF\n";
-      }
-
       m_waveLength.resize(nData);
-
-      // Get the geometric information for this detector
-      
-      Geometry::IInstrument_const_sptr instrument = m_workspace->getInstrument();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      const double l1 = instrument->getSource()->getDistance(*sample);
-      Geometry::IDetector_sptr det = m_workspace->getDetector(m_workspaceIndex);  // i is the workspace index
-      const double l2 = det->getDistance(*sample);
-      const double twoTheta = m_workspace->detectorTwoTheta(det);
-     
-      Mantid::Kernel::Unit_const_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-      for (int i = 0; i < nData; i++)
-      {
-        m_waveLength[i] = xValues[i];
-      }
-      std::vector<double> y; // Create an empty vector, it's not used in fromTOF
-      wavelength->fromTOF(m_waveLength,y,l1,l2,twoTheta,0,0.0,0.0);
-    }*/
-
-    if (static_cast<int>(m_waveLength.size()) != nData)
-    {
-      // This peak shape requires the fit to be done in TOF units
-
-      if ( m_workspace->getAxis(0)->unit()->unitID().compare("TOF") != 0 )
-      {
-        g_log.information() << "IkedaCarpenterPV function is perhaps best used when working with x-axis unit = TOF\n";
-      }
-
-      m_waveLength.resize(nData);
-
 
       Mantid::Kernel::Unit_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
       for (int i = 0; i < nData; i++)
       {
-        m_waveLength[i] = xValues[i];
+        m_waveLength[i] = xValues[i]; 
       }
+
+      // note if a version of convertValue was added which allows a double* as first argument
+      // then could avoid copying above plus only have to resize m_wavelength when 
+      // its size smaller than nData
 	    convertValue(m_waveLength, wavelength, m_workspace, m_workspaceIndex);
+      std::cout << "wave " << m_waveLength[0] << "\n";
     }
   }
-}
-
-
-/** Convert values from unit defined in workspace (ws) to outUnit
- *
- *  @param values   As input: assumed to be in unit of workspace. 
- *                  As output: in unit of outUnit
- *  @param outUnit  unit to convert to
- *  @param ws      workspace
- *  @param wsIndex workspace index
- */
-void IkedaCarpenterPV::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
-                               boost::shared_ptr<const API::MatrixWorkspace> ws,
-                               int wsIndex) const
-{
-  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
-
-  // if unit required by formula or look-up-table different from ws-unit then 
-  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
-  {
-    // first check if it is possible to do a quick convertion convert
-    double factor,power;
-    if (wsUnit->quickConversion(*outUnit,factor,power) )
-    {
-      for (unsigned int i = 0; i < values.size(); i++)
-        values[i] = factor * std::pow(values[i],power);
-    }
-    else
-    {
-      double l1,l2,twoTheta;
-
-      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      Geometry::IInstrument_const_sptr instrument = ws->getInstrument();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      l1 = instrument->getSource()->getDistance(*sample);
-      Geometry::IDetector_sptr det = ws->getDetector(wsIndex);
-      if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
-      {
-        det = instrument->getDetector(det->getID());
-      }
-      if ( ! det->isMonitor() )
-      {
-        l2 = det->getDistance(*sample);
-        twoTheta = ws->detectorTwoTheta(det);
-      }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-      {
-        l2 = det->getDistance(*(instrument->getSource()));
-        l2 = l2 - l1;
-        twoTheta = 0.0;
-      }
-
-      std::vector<double> emptyVec;
-      wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-    }
-  }  
 }
 
 
@@ -234,6 +144,9 @@ void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const do
 
   H = pow(fwhmG4*fwhmG+2.69269*fwhmG4*fwhmL+2.42843*fwhmGsq*fwhmG*fwhmLsq
     +4.47163*fwhmGsq*fwhmLsq*fwhmL+0.07842*fwhmG*fwhmL4+fwhmL4*fwhmL, 0.2);
+
+  if (H == 0.0)
+    H = std::numeric_limits<double>::epsilon()*1000.0;
 
   double tmp = fwhmL/H;
 

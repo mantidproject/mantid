@@ -49,7 +49,10 @@
     <formula eq="2.067249" unit="TOF" result-unit="TOF"/>
     <fixed /> 
   </parameter>   
-  <parameter name="IkedaCarpenterPV:Kappa" type="fitting"> <value val="48.734158"/> <fixed /> </parameter>
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting"> 
+    <value val="48.734158"/> 
+    <fixed /> 
+  </parameter>
 
 
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
@@ -63,7 +66,7 @@
   <component type="bank1" idlist="bank1">
     <location  r="2.3735" t="0" p="0"> <facing val="none"/> </location> 
     <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="166.868*centre^2+98.757" unit="dSpacing"/>
+      <formula eq="166.868*centre^2+98.757" unit="dSpacing" result-unit="TOF^2"/>
     </parameter> 
     <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
       <formula eq="0.277*centre" unit="dSpacing" result-unit="TOF"/>

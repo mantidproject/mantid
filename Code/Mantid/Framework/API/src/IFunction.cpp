@@ -411,50 +411,15 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
  */
 double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex)
+                               int wsIndex) const
 {
   double retVal = value;
-  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
-  // if unit required by formula or look-up-table different from ws-unit then 
-  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
-  {
-    // first check if it is possible to do a quick convertion convert
-    double factor,power;
-    if (wsUnit->quickConversion(*outUnit,factor,power) )
-    {
-      retVal = factor * std::pow(retVal,power);
-    }
-    else
-    {
-      double l1,l2,twoTheta;
+  std::vector<double> endPoint;
+  endPoint.push_back(value);
+  convertValue(endPoint, outUnit, ws, wsIndex);
 
-      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      IInstrument_const_sptr instrument = ws->getInstrument();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      l1 = instrument->getSource()->getDistance(*sample);
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-      if ( ! det->isMonitor() )
-      {
-        l2 = det->getDistance(*sample);
-        twoTheta = ws->detectorTwoTheta(det);
-      }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-      {
-        l2 = det->getDistance(*(instrument->getSource()));
-        l2 = l2 - l1;
-        twoTheta = 0.0;
-      }
-
-      std::vector<double> endPoint;
-      endPoint.push_back(retVal);
-      std::vector<double> emptyVec;
-      wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      retVal = endPoint[0];
-    }
-  }  
-  return retVal;
+  return endPoint[0];
 }
 
 /** Convert values from unit defined in workspace (ws) to outUnit
@@ -467,7 +432,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
  */
 void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex)
+                               int wsIndex) const
 {
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
@@ -502,8 +467,6 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
         twoTheta = 0.0;
       }
 
-      //std::vector<double> endPoint;
-      //endPoint.push_back(retVal);
       std::vector<double> emptyVec;
       wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
       outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);

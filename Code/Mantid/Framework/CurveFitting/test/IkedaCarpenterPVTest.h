@@ -18,10 +18,6 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidAlgorithms/DiffractionFocussing2.h"
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/ConfigService.h"
@@ -32,7 +28,6 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
-using namespace Mantid::Algorithms;
 using namespace Mantid::NeXus;
 
 class IkedaCarpenterPVTest : public CxxTest::TestSuite
@@ -111,7 +106,7 @@ public:
     e[30] =      1.0112;
   }
 
-  void t1estAgainstMockData()
+  void testAgainstMockData()
   {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -182,148 +177,6 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-
-  // motivation for this test is to figure out way IC function goes absolutely
-  // nuts when a large data range are selection
-  void t1estAgainstGEM_dataLargeDataRange()
-  {
-    LoadNexus load;
-    load.initialize();
-    load.setPropertyValue("FileName", "../../../../Test/AutoTestData/focussedGEM38370_TOF.nxs");
-    std::string wsname = "GEM38370nexus";
-    load.setPropertyValue("OutputWorkspace", wsname);
-    TS_ASSERT_THROWS_NOTHING(load.execute());
-    TS_ASSERT( load.isExecuted() );
-
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(wsname));
-
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // Set general Fit parameters
-    alg2.setPropertyValue("InputWorkspace", wsname);
-    alg2.setPropertyValue("WorkspaceIndex","1");
-    alg2.setPropertyValue("StartX","5000");
-    alg2.setPropertyValue("EndX","10000");
-
-    // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
-
-    LinearBackground *bk = new LinearBackground();
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1", "0.0");
-
-    // set up fitting function and pass to Fit
-    IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
-    icpv->initialize();
-
-    icpv->setParameter("I",25094.45);
-    icpv->setParameter("X0",7316);
-    //icpv->setParameter("Gamma",1);
-    //icpv->tie("Gamma", "1");
-
-    icpv->setMatrixWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
-
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 6403 ,1);
-
-
-    std::vector<double> testing;
-    for (double d=5000; d<=10000; d+=1000)
-      testing.push_back(d);
-
-    std::vector<double> out=testing;
-
-    icpv->function(&out[0], &testing[0], testing.size());
-
-    TS_ASSERT_DELTA( out[0], 0.2694,0.001);
-
-    AnalysisDataService::Instance().remove(wsname);
-    // Append value of date-time tag inside the geometry file to the constructor handle 
-    // for change to LoadInstrument
-    InstrumentDataService::Instance().remove("GEM_Definition.xml16th Sep 2008");
-  }
-
-
-  void t1estAgainstGEM_data()
-  {
-    LoadNexus load;
-    load.initialize();
-    load.setPropertyValue("FileName", "../../../../Test/AutoTestData/focussedGEM38370_TOF.nxs");
-    std::string wsname = "GEM38370nexus";
-    load.setPropertyValue("OutputWorkspace", wsname);
-    TS_ASSERT_THROWS_NOTHING(load.execute());
-    TS_ASSERT( load.isExecuted() );
-
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(wsname));
-
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // Set general Fit parameters
-    alg2.setPropertyValue("InputWorkspace", wsname);
-    alg2.setPropertyValue("WorkspaceIndex","1");
-    alg2.setPropertyValue("StartX","6935.79");
-    alg2.setPropertyValue("EndX","7682.56");
-
-    // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
-
-    LinearBackground *bk = new LinearBackground();
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1", "0.0");
-
-    // set up fitting function and pass to Fit
-    IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
-    icpv->initialize();
-
-    icpv->setParameter("I",106860.45);
-    icpv->setParameter("X0",7326.34);
-    icpv->setParameter("Gamma",1);
-    icpv->tie("Gamma", "1");
-
-    icpv->setMatrixWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
-
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 6422 ,1);
-
-    fnWithBk->addFunction(icpv);
-    fnWithBk->addFunction(bk);
-
-    alg2.setFunction(fnWithBk);
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    // test the output from fit is what you expect
-    // note this test will never produce good fit because it assumes no background
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.831,0.01);
-
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 69562 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.1);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3567 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("X0"), 7301 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("Gamma"), 1 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 90.0 ,1);
-    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.000000001); 
-
-    AnalysisDataService::Instance().remove(wsname);
-  }
 
 };
 
