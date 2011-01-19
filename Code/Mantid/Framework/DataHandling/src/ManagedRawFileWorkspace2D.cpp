@@ -312,7 +312,7 @@ namespace Mantid
       std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
       if( path.empty() || !Poco::File(path).exists() || !Poco::File(path).canWrite() )
       {
-        path = Mantid::Kernel::ConfigService::Instance().getBaseDir();
+        path = Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir();
         g_log.debug() << "Temporary file written to " << path << std::endl;
       }
       if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )

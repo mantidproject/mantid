@@ -82,15 +82,8 @@ namespace Mantid
       std::string instshort=instname;
       std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
       instshort=instshort+"_Definition.xml";
-
       // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-      if ( directoryName.empty() )
-      {
-              // This is the assumed deployment directory for IDFs, where we need to be relative to the
-              // directory of the executable, not the current working directory.
-              directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
-      }
+      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;

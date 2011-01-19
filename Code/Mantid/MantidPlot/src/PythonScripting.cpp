@@ -70,7 +70,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
  #if defined(Q_OS_DARWIN)
   const std::string sipLocation = "/Applications/MantidPlot.app/Contents/MacOS";
  #else
-  const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getBaseDir();
+  const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
  #endif
   // MG: The documentation claims that if the third argument to setenv is non zero then it will update the
   // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have 
@@ -113,14 +113,14 @@ bool PythonScripting::start()
     Py_InitializeEx(0);
 
     // Add in Mantid paths.
-    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
     QString pycode =
         "import sys\n"
         "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
         "if not mantidbin in sys.path:\n"
         "\tsys.path.insert(0,mantidbin)\n";
 
-    QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+    QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()));
     if( mantidoutput != mantidbin )
     {
       pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("')\n");

@@ -370,15 +370,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
       Workspace2D_sptr workspace)
   {
     // Determine the search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Mantid::Kernel::ConfigService::Instance().getString(
-        "instrumentDefinition.directory");
-    if (directoryName.empty())
-    {
-      // This is the assumed deployment directory for IDFs, where we need to be relative to the
-      // directory of the executable, not the current working directory.
-      directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
-          "../Instrument").toString();
-    }
+    std::string directoryName = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
 
     // For Nexus Mantid processed, Instrument XML file name is read from nexus
     std::string instrumentID = inst_name;

@@ -142,10 +142,10 @@ namespace Mantid
       std::string getTempDir();
       //@}
 
-      /// Returns the directory where the framework libraries lie
-      std::string getBaseDir() const;
-      /// Returns a directory to use as a default output directory
-      std::string getOutputDir() const;
+      /// Returns the directory where the Mantid.properties file is found.
+      std::string getPropertiesDir() const;
+      /// Returns a directory to use to write out Mantid information. Needs to be writable
+      std::string getUserPropertiesDir() const;
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
       /// Get the list of user search paths

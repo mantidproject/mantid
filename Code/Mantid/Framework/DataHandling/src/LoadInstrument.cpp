@@ -1732,14 +1732,13 @@ namespace Mantid
     {
       g_log.debug("Loading the parameter definition...");
       // Determine the search directory for XML parameter definition files
-      std::string directoryName = Kernel::ConfigService::Instance().getString(
-        "parameterDefinition.directory");
+      Kernel::ConfigServiceImpl & configService = Kernel::ConfigService::Instance();
+      std::string directoryName = configService.getString("parameterDefinition.directory");
       if (directoryName.empty())
       {
         // This is the assumed deployment directory for parameter files, where we need to be 
         // relative to the directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
-          "../Instrument").toString();
+        directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../Instrument").toString();
       }
 
       // Remove the path from the filename

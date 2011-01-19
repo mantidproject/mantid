@@ -132,35 +132,16 @@ ConfigServiceImpl::ConfigServiceImpl() :
   Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel", new Poco::Instantiator<
       Poco::SignalChannel, Poco::Channel>);
 
-  // Define a directory that serves as the 'application directory'. This is where we expect to find the Mantid.properties file
-  // It cannot simply be the current directory since the application may be called from a different place, .i.e.
-  // on Linux where the bin directory is in the path and the app is run from a different location.
-  // We have two scenarios:
-  //  1) The framework is compiled into an executable and its directory is then considered as the base or,
-  //  2) The framework is in a stand-alone library and is created from within another executing application
-  //     e.g. Python or Matlab (only two at the moment). We can only use the current directory here as there
-  //     is no programmatic way of determing where the library that contains this class is.
-
-  // A MANTID environmental variable might solve all of this??
-
-  std::string callingApplication = Poco::Path(getPathToExecutable()).getFileName();
-  // the cases used in the names varies on different systems so we do this case insensitive
-  std::transform(callingApplication.begin(), callingApplication.end(), callingApplication.begin(),
-      tolower);
-
+  // Define the directory to search for the Mantid.properties file.
   if (Poco::Environment::has("MANTIDPATH"))
   {
     // Here we have to follow the convention of the rest of this code and add a trailing slash.
     // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
   }
-  else if (callingApplication.find("python") != std::string::npos || callingApplication.find("matlab")
-      != std::string::npos)
-  {
-    m_strBaseDir = Poco::Path::current();
-  }
   else
   {
+    // Use the path of the executable
     m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
   }
 
@@ -180,14 +161,14 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
 
   //attempt to load the default properties file that resides in the directory of the executable
-  updateConfig(getBaseDir() + m_properties_file_name, false, false);
+  updateConfig(getPropertiesDir() + m_properties_file_name, false, false);
   //and then append the user properties
   updateConfig(getUserFilename(), true, true);
 
   updateFacilities();
 
   g_log.debug() << "ConfigService created." << std::endl;
-  g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
+  g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir() << std::endl;
   g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
 }
 
@@ -231,7 +212,7 @@ void ConfigServiceImpl::loadConfig(const std::string& filename, const bool appen
     // check if we have failed to open the file
     if ((!good) || (temp == ""))
     {
-      if (filename == getOutputDir() + m_user_properties_file_name)
+      if (filename == getUserPropertiesDir() + m_user_properties_file_name)
       {
         //write out a fresh file
         createUserPropertiesFile();
@@ -300,9 +281,9 @@ void ConfigServiceImpl::configureLogging()
   {
     //Ensure that the logging directory exists
     Poco::Path logpath(getString("logging.channels.fileChannel.path"));
-    if (logpath.toString().empty() || getOutputDir() != getBaseDir())
+    if (logpath.toString().empty() || getUserPropertiesDir() != getPropertiesDir())
     {
-      std::string logfile = getOutputDir() + "mantid.log";
+      std::string logfile = getUserPropertiesDir() + "mantid.log";
       logpath.assign(logfile);
       m_pConf->setString("logging.channels.fileChannel.path", logfile);
     }
@@ -331,9 +312,7 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
   if (m_ConfigPaths.empty())
     return;
 
-  std::string execdir(getBaseDir());
   m_AbsolutePaths.clear();
-
   std::map<std::string, bool>::const_iterator send = m_ConfigPaths.end();
   for (std::map<std::string, bool>::const_iterator sitr = m_ConfigPaths.begin(); sitr != send; ++sitr)
   {
@@ -356,7 +335,7 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
 std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
 {
   std::string converted;
-  const std::string execdir(getBaseDir());
+  const std::string propFileDir(getPropertiesDir());
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
   {
@@ -399,7 +378,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   }
   if (is_relative)
   {
-    converted = Poco::Path(execdir).resolve(dir).toString();
+    converted = Poco::Path(propFileDir).resolve(dir).toString();
   }
   else
   {
@@ -513,7 +492,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const
 {
   try
   {
-    std::fstream filestr((getOutputDir() + m_user_properties_file_name).c_str(), std::fstream::out);
+    std::fstream filestr((getUserPropertiesDir() + m_user_properties_file_name).c_str(), std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this installation." << std::endl;
     filestr
@@ -534,7 +513,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const
     filestr.close();
   } catch (std::runtime_error& ex)
   {
-    g_log.warning() << "Unable to write out user.properties file to " << getOutputDir()
+    g_log.warning() << "Unable to write out user.properties file to " << getUserPropertiesDir()
         << m_user_properties_file_name << " error: " << ex.what() << std::endl;
   }
 
@@ -810,7 +789,7 @@ int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
  */
 std::string ConfigServiceImpl::getUserFilename() const
 {
-  return getOutputDir() + m_user_properties_file_name;
+  return getUserPropertiesDir() + m_user_properties_file_name;
 }
 
 /** Searches for the string within the environment variables and returns the
@@ -879,22 +858,23 @@ std::string ConfigServiceImpl::getTempDir()
 }
 
 /**
- * Gets the directory that we consider to be the bse directory. Basically, this is the
- * executable directory when running normally or the current directory on startup when
- * running through Python on the command line
+ * Gets the directory that we consider to be the directory containing the Mantid.properties file. 
+ * Basically, this is the either the directory pointed to by MANTIDPATH or the directory of the current
+ * executable if this is not set.
  * @returns The directory to consider as the base directory, including a trailing slash
  */
-std::string ConfigServiceImpl::getBaseDir() const
+std::string ConfigServiceImpl::getPropertiesDir() const
 {
   return m_strBaseDir;
 }
 
 /**
- * Return the directory that Mantid should use for writing files. A trailing slash is appended
+ * Return the directory that Mantid should use for writing any files it needs so that
+ * this is kept separated to user saved files. A trailing slash is appended
  * so that filenames can more easily be concatenated with this
  * @return the directory that Mantid should use for writing files
  */
-std::string ConfigServiceImpl::getOutputDir() const
+std::string ConfigServiceImpl::getUserPropertiesDir() const
 {
 #ifdef _WIN32 
   return m_strBaseDir;
@@ -938,7 +918,7 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
   {
     // This is the assumed deployment directory for IDFs, where we need to be relative to the
     // directory of the executable, not the current working directory.
-    directoryName = Poco::Path(getBaseDir()).resolve("../Instrument").toString();
+    directoryName = Poco::Path(getPropertiesDir()).resolve("../Instrument").toString();
   }
 
   if ( !Poco::File(directoryName).isDirectory() )

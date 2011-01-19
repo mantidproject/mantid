@@ -141,13 +141,8 @@ namespace NeXus
       std::transform(instrumentName.begin(), instrumentName.end(), instrumentName.begin(), toupper);
       std::string instrumentXml(instrumentName+"_Definition.xml");
       // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-      if ( directoryName.empty() )
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
-      }
+      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+
       Poco::File file(directoryName+"/"+instrumentXml);
       if(!file.exists())
         instrumentXml="NoXmlFileFound";

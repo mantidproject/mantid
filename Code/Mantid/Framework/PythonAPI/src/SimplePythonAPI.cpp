@@ -35,7 +35,8 @@ namespace Mantid
     */
     std::string SimplePythonAPI::getModuleFilename()
     {
-      return Poco::Path(Mantid::Kernel::ConfigService::Instance().getOutputDir()).append(Poco::Path(g_module_name)).toString(); 
+      Poco::Path userPropDir(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir());
+      return userPropDir.append(Poco::Path(g_module_name)).toString(); 
     }
 
     /**
