@@ -522,7 +522,8 @@ namespace DataObjects
       switchToWeightedEventsNoTime();
       break;
     }
-
+    // Make sure to free memory
+    this->clearUnused();
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -712,7 +713,31 @@ namespace DataObjects
   {
     this->events.clear();
     this->weightedEvents.clear();
+    this->weightedEventsNoTime.clear();
     this->detectorIDs.clear();
+  }
+
+  /** Clear any unused event lists (the ones that do not
+   * match the currently used type).
+   * Memory is freed.
+   * */
+  void EventList::clearUnused()
+  {
+    if (eventType != TOF)
+    {
+      this->events.clear();
+      std::vector<TofEvent>().swap(this->events); //STL Trick to release memory
+    }
+    if (eventType != WEIGHTED)
+    {
+      this->weightedEvents.clear();
+      std::vector<WeightedEvent>().swap(this->weightedEvents); //STL Trick to release memory
+    }
+    if (eventType != WEIGHTED_NOTIME)
+    {
+      this->weightedEventsNoTime.clear();
+      std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); //STL Trick to release memory
+    }
   }
 
   /** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT call
@@ -1268,7 +1293,7 @@ namespace DataObjects
     typename std::vector<T>::const_iterator it;
     for (it = events.begin(); it != events.end(); it++)
     {
-      if ((it->m_tof - lastTof) < tolerance)
+      if ((it->m_tof - lastTof) <= tolerance)
       {
         // Carry the error and weight
         weight += it->weight();
@@ -1308,36 +1333,43 @@ namespace DataObjects
    * The event list will be switched to WeightedEventNoTime.
    *
    * @param tolerance :: how close do two event's TOF have to be to be considered the same.
+   * @param destination :: EventList that will receive the compressed events. Can be == this.
    */
-  void EventList::compressEvents(double tolerance)
+  void EventList::compressEvents(double tolerance, EventList * destination)
   {
     // Must have a sorted list
     this->sortTof();
-
     switch (eventType)
     {
     case TOF:
-      compressEventsHelper(this->events, this->weightedEventsNoTime, tolerance);
-      this->events.clear();
+      compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
       break;
 
     case WEIGHTED:
-      compressEventsHelper(this->weightedEvents, this->weightedEventsNoTime, tolerance);
-      this->weightedEvents.clear();
+      compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
       break;
 
     case WEIGHTED_NOTIME:
-      // Put results in a temp output
-      std::vector<WeightedEventNoTime> out;
-      compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
-      // Put it back
-      this->weightedEventsNoTime.swap(out);
-      out.clear();
+      if (destination == this)
+      {
+        // Put results in a temp output
+        std::vector<WeightedEventNoTime> out;
+        compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+        // Put it back
+        this->weightedEventsNoTime.swap(out);
+      }
+      else
+      {
+        compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+      }
       break;
     }
     // In all cases, you end up WEIGHTED_NOTIME.
-    eventType = WEIGHTED_NOTIME;
+    destination->eventType = WEIGHTED_NOTIME;
     // The sort is still valid!
+    destination->order = TOF_SORT;
+    // Empty out storage for vectors that are now unused.
+    destination->clearUnused();
   }
 
 

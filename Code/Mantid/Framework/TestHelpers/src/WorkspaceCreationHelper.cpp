@@ -318,26 +318,26 @@ namespace WorkspaceCreationHelper
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numPixels,1,1);
-    
+
     //Make fake events
     if (eventPattern) // 0 == no events
     {
       for (int pix= start_at_pixelID+0; pix < start_at_pixelID+numPixels; pix++)
       {
-	for (int i=0; i<numEvents; i++)
-	{
-	  if (eventPattern == 1) // 0, 1 diagonal pattern
-	    retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, DateAndTime(i,0));
-	  else if (eventPattern == 2) // solid 2
-	  {
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
-	  }
-	  else if (eventPattern == 3) // solid 1
-	  {
-	    retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
-	  }
-	}
+        for (int i=0; i<numEvents; i++)
+        {
+          if (eventPattern == 1) // 0, 1 diagonal pattern
+            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, DateAndTime(i,0));
+          else if (eventPattern == 2) // solid 2
+          {
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+          }
+          else if (eventPattern == 3) // solid 1
+          {
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+          }
+        }
       }
     }
     retVal->doneLoadingData();

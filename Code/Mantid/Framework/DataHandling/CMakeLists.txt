@@ -1,5 +1,7 @@
-set ( SRC_FILES src/CreateSampleShape.cpp
-                src/DefineGaugeVolume.cpp
+set ( SRC_FILES 
+		src/CompressEvents.cpp
+		src/CreateSampleShape.cpp
+        src/DefineGaugeVolume.cpp
 		src/FindDetectorsInShape.cpp
 		src/GetMaskedDetectors.cpp
 		src/GroupDetectors2.cpp
@@ -66,8 +68,10 @@ set ( SRC_FILES src/CreateSampleShape.cpp
 		src/SetScalingPSD.cpp
 		src/UpdateInstrumentFromRaw.cpp )
 
-set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
-                inc/MantidDataHandling/DefineGaugeVolume.h
+set ( INC_FILES 
+		inc/MantidDataHandling/CompressEvents.h
+		inc/MantidDataHandling/CreateSampleShape.h
+        inc/MantidDataHandling/DefineGaugeVolume.h
 		inc/MantidDataHandling/FindDetectorsInShape.h
 		inc/MantidDataHandling/GetMaskedDetectors.h
 		inc/MantidDataHandling/GroupDetectors2.h
@@ -120,8 +124,10 @@ set ( INC_FILES inc/MantidDataHandling/CreateSampleShape.h
 		inc/MantidDataHandling/SetScalingPSD.h
 		inc/MantidDataHandling/UpdateInstrumentFromRaw.h )
 
-set ( TEST_FILES test/CreateSampleShapeTest.h
-                 test/DefineGaugeVolumeTest.h
+set ( TEST_FILES 
+		 test/CompressEventsTest.h
+		 test/CreateSampleShapeTest.h
+         test/DefineGaugeVolumeTest.h
 		 test/FindDetectorsInShapeTest.h
 		 test/GetMaskedDetectorsTest.h
 		 test/GroupDetectors2Test.h

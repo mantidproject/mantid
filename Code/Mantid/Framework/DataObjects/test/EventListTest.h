@@ -1428,10 +1428,12 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
-  void test_compressEvents()
+  void test_compressEvents_InPlace()
   {
     for (int this_type=0; this_type<3; this_type++)
     {
+      for (int inplace=0; inplace < 2; inplace++)
+      {
       el = EventList();
       el.addEventQuickly( TofEvent(1.0, 22) );
       el.addEventQuickly( TofEvent(1.2, 33) );
@@ -1450,32 +1452,39 @@ public:
         el *= mult;
       }
 
-      TS_ASSERT_THROWS_NOTHING( el.compressEvents(1.0); )
-
-      // Right number of events, of the type without times
-      TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED_NOTIME);
-      TS_ASSERT_EQUALS( el.getNumberEvents(), 3);
-      TS_ASSERT( el.isSortedByTof() );
-
-      if (el.getNumberEvents() == 3)
+      EventList * el_out = &el;
+      if (!inplace)
       {
-        TS_ASSERT_DELTA( el.getEvent(0).tof(), 1.1, 1e-5);
-        TS_ASSERT_DELTA( el.getEvent(0).weight(), 2*mult, 1e-5);
-        //Error squared is multiplied by mult (squared)
-        TS_ASSERT_DELTA( el.getEvent(0).errorSquared(), 2*mult*mult, 1e-5);
-
-        TS_ASSERT_DELTA( el.getEvent(1).tof(), 30.25, 1e-5);
-        TS_ASSERT_DELTA( el.getEvent(1).weight(), 3*mult, 1e-5);
-        TS_ASSERT_DELTA( el.getEvent(1).errorSquared(), 3*mult*mult, 1e-5);
-
-        TS_ASSERT_DELTA( el.getEvent(2).tof(), 34.0, 1e-5);
-        TS_ASSERT_DELTA( el.getEvent(2).weight(), 1*mult, 1e-5);
-        TS_ASSERT_DELTA( el.getEvent(2).errorSquared(), 1*mult*mult, 1e-5);
+        el_out = new EventList();
       }
 
+      TS_ASSERT_THROWS_NOTHING( el.compressEvents(1.0, el_out); )
+
+      // Right number of events, of the type without times
+      TS_ASSERT_EQUALS( el_out->getEventType(), WEIGHTED_NOTIME);
+      TS_ASSERT_EQUALS( el_out->getNumberEvents(), 3);
+      TS_ASSERT( el_out->isSortedByTof() );
+
+      if (el_out->getNumberEvents() == 3)
+      {
+        TS_ASSERT_DELTA( el_out->getEvent(0).tof(), 1.1, 1e-5);
+        TS_ASSERT_DELTA( el_out->getEvent(0).weight(), 2*mult, 1e-5);
+        //Error squared is multiplied by mult (squared)
+        TS_ASSERT_DELTA( el_out->getEvent(0).errorSquared(), 2*mult*mult, 1e-5);
+
+        TS_ASSERT_DELTA( el_out->getEvent(1).tof(), 30.25, 1e-5);
+        TS_ASSERT_DELTA( el_out->getEvent(1).weight(), 3*mult, 1e-5);
+        TS_ASSERT_DELTA( el_out->getEvent(1).errorSquared(), 3*mult*mult, 1e-5);
+
+        TS_ASSERT_DELTA( el_out->getEvent(2).tof(), 34.0, 1e-5);
+        TS_ASSERT_DELTA( el_out->getEvent(2).weight(), 1*mult, 1e-5);
+        TS_ASSERT_DELTA( el_out->getEvent(2).errorSquared(), 1*mult*mult, 1e-5);
+      }
+      }
 
     }
   }
+
 
 
   //==================================================================================
