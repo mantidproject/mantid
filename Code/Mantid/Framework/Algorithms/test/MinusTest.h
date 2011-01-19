@@ -433,7 +433,7 @@ public:
     if (eventOut)
     {
       TS_ASSERT_EQUALS( eventOut->getNumberEvents(), numBins * numPixels * 2 * 2 );
-      TS_ASSERT( eventOut->eventsHaveWeights() );
+      TS_ASSERT_EQUALS( eventOut->getEventType(), Mantid::API::WEIGHTED );
     }
 
     MatrixWorkspace_const_sptr work_in1_const;

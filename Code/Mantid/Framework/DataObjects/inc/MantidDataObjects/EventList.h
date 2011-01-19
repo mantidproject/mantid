@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
+#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
@@ -63,6 +64,56 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
 
 class DLLExport EventList
 {
+private:
+
+
+  //==========================================================================
+  /** Unary function for searching the event list.
+   * Returns true if the event's TOF is >= a value
+   * @param event the event being checked.
+   */
+  template <class T>
+  class tofGreaterOrEqual: std::unary_function<T, double>
+  {
+    /// Comparison variable
+    double m_value;
+  public:
+    /// Constructor: save the value
+    tofGreaterOrEqual(double value): m_value(value)
+    {  }
+    /// () operator: return true if event.tof >= value
+    bool operator()(T event)
+    {
+        return event.m_tof >= m_value;
+    }
+  };
+
+
+  //==========================================================================
+  /** Unary function for searching the event list.
+   * Returns true if the event's TOF is > a value
+   * @param event the event being checked.
+   */
+  template <class T>
+  class tofGreater: std::unary_function<T, double>
+  {
+    /// Comparison variable
+    double m_value;
+  public:
+    /// Constructor: save the value
+    tofGreater(double value): m_value(value)
+    {  }
+    /// () operator: return true if event.tof > value
+    bool operator()(T event)
+    {
+        return event.m_tof > m_value;
+    }
+  };
+
+
+
+
+
 public:
 
   EventList();
@@ -83,8 +134,12 @@ public:
 
   EventList& operator+=(const std::vector<WeightedEvent>& more_events);
 
+  EventList& operator+=(const std::vector<WeightedEventNoTime> & more_events);
+
   EventList& operator+=(const EventList& more_events);
 
+  template<class T1, class T2>
+  static void minusHelper(std::vector<T1> & events, const std::vector<T2> & more_events);
   EventList& operator-=(const EventList& more_events);
 
   bool operator==(const EventList& rhs) const;
@@ -94,16 +149,22 @@ public:
 
   void addEventQuickly(const WeightedEvent &event);
 
+  Mantid::API::EventType getEventType() const;
 
-  bool hasWeights() const;
+  void switchTo(Mantid::API::EventType newType);
 
-  void switchToWeightedEvents();
+//  bool hasWeights() const;
+
+  WeightedEvent getEvent(size_t event_number);
 
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
 
   std::vector<WeightedEvent>& getWeightedEvents();
   const std::vector<WeightedEvent>& getWeightedEvents() const;
+
+  std::vector<WeightedEventNoTime>& getWeightedEventsNoTime();
+  const std::vector<WeightedEventNoTime>& getWeightedEventsNoTime() const;
 
   void addDetectorID(const int detID);
 
@@ -147,31 +208,42 @@ public:
 
   virtual size_t histogram_size() const;
 
-  void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
+  template<class T>
+  static void compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
+  void compressEvents(double tolerance);
 
-  void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
+  template<class T>
+  static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
+  void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
-  void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
-
-  void generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
-
+  template<class T>
+  static double integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange);
   double integrate(const double minX, const double maxX, const bool entireRange) const;
 
+  template<class T>
+  void convertTofHelper(std::vector<T> & events, const double factor, const double offset);
   void convertTof(const double factor, const double offset=0.);
 
   void scaleTof(const double factor);
 
   void addTof(const double offset);
 
+  template<class T>
+  static void maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
   void maskTof(const double tofMin, const double tofMax);
 
-//  virtual MantidVec * getTofs() const;
+  template<class T>
+  static void getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs);
   void getTofs(std::vector<double>& tofs) const;
 
-  void setTofs(const MantidVec& T);
+  template<class T>
+  static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);
+  void setTofs(const MantidVec& tofs);
 
   void reverse();
 
+  template<class T>
+  static void filterByPulseTimeHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, std::vector<T> & output);
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
   template< class T >
@@ -182,14 +254,18 @@ public:
   void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
-  void multiply(const double value);
-  void multiply(const double value, const double error);
+  template< class T>
+  static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
+  void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
 
+  template<class T>
+  static void multiplyHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
   void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
 
-  void divide(const double value);
-  void divide(const double value, const double error);
+  template<class T>
+  static void divideHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
+  void divide(const double value, const double error=0.0);
   EventList& operator/=(const double value);
 
   void divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
@@ -201,8 +277,11 @@ private:
   ///List of WeightedEvent's
   mutable std::vector<WeightedEvent> weightedEvents;
 
-  ///Flag indicating whether the events have the weights (use weightedEvents) or not (use events)
-  bool has_weights;
+  ///List of WeightedEvent's
+  mutable std::vector<WeightedEventNoTime> weightedEventsNoTime;
+
+  /// What type of event is in our list.
+  Mantid::API::EventType eventType;
 
   /// Last sorting order
   mutable EventSortType order;
@@ -215,9 +294,20 @@ private:
 
   void convertTof_onList(const double factor, const double offset);
 
-  std::vector<WeightedEvent>::iterator findFirstWeightedEvent(const double seek_tof) const;
+  template<class T>
+  static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);
 
-  std::vector<TofEvent>::iterator findFirstEvent(const double seek_tof) const;
+  template<class T>
+  static typename std::vector<T>::iterator findFirstEvent(std::vector<T> & events, const double seek_tof);
+
+  void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
+
+  void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
+
+  void switchToWeightedEvents();
+  void switchToWeightedEventsNoTime();
+
+  //std::vector<TofEvent>::iterator findFirstEvent(const double seek_tof) const;
 
 };
 

@@ -56,15 +56,6 @@ namespace DataObjects
   {
   }
 
-  /** () operator: return the tof (X value) of the event.
-   * This is useful for std operations like comparisons
-   * and std::lower_bound
-   * @return :: double, the tof (X value) of the event.
-   */
-  double TofEvent::operator()() const
-  {
-    return this->m_tof;
-  }
 
 
   /** Copy from another TofEvent object
@@ -249,6 +240,17 @@ namespace DataObjects
   {
   }
 
+  /** Constructor that ignores a time:
+   * @param tof: tof in microseconds.
+   * @param pulsetime: an ignored pulse time.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+   */
+  WeightedEventNoTime::WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared)
+  : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared)
+  {
+  }
+
   /** Constructor, copy from a TofEvent object but add weights
    * @param rhs: TofEvent to copy into this.
    * @param weight: weight of this neutron event.
@@ -312,6 +314,23 @@ namespace DataObjects
     return  (this->m_tof == rhs.m_tof) &&
             (this->m_weight == rhs.m_weight) &&
             (this->m_errorSquared == rhs.m_errorSquared);
+  }
+
+  /** < comparison operator, using the TOF to do the comparison.
+   * @param rhs: the other WeightedEventNoTime to compare.
+   * @return true if this->m_tof < rhs.m_tof*/
+  bool WeightedEventNoTime::operator<(const WeightedEventNoTime & rhs) const
+  {
+    return (this->m_tof < rhs.m_tof);
+  }
+
+
+  /** < comparison operator, using the TOF to do the comparison.
+   * @param rhs_tof: the other time of flight to compare.
+   * @return true if this->m_tof < rhs.m_tof*/
+  bool WeightedEventNoTime::operator<(const double rhs_tof) const
+  {
+    return (this->m_tof < rhs_tof);
   }
 
 } // DataObjects

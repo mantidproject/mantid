@@ -210,19 +210,25 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
-  /** Do the events have weights anywhere?
+  /** Get the EventType of the most-specialized EventList in the workspace
    *
-   * @return true if any event list has weights.
+   * @return the EventType of the most-specialized EventList in the workspace
    */
-  bool EventWorkspace::eventsHaveWeights() const
+  Mantid::API::EventType EventWorkspace::getEventType() const
   {
+    Mantid::API::EventType out = Mantid::API::TOF;
     for (EventListVector::const_iterator it = this->data.begin();
         it != this->data.end(); it++)
     {
-      if ((*it)->hasWeights())
-        return true;
+      Mantid::API::EventType thisType = (*it)->getEventType();
+      if (static_cast<int>(out) < static_cast<int>(thisType))
+      {
+        out = thisType;
+        // This is the most-specialized it can get.
+        if (out == Mantid::API::WEIGHTED_NOTIME) return out;
+      }
     }
-    return false;
+    return out;
   }
 
 
@@ -775,7 +781,8 @@ namespace DataObjects
       //Create the MRU object
       data = new MantidVecWithMarker(index);
       //Set the Y data in it
-      this->data[index]->generateCountsHistogram( *this->data[index]->getRefX(), data->m_data);
+      MantidVec E_ignored;
+      this->data[index]->generateHistogram( *this->data[index]->getRefX(), data->m_data, E_ignored, true);
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData;

@@ -213,8 +213,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// The total number of events across all of the spectra.
   std::size_t getNumberEvents() const;
 
-  /// Do the events have weights?
-  bool eventsHaveWeights() const;
+  /// Type of the events
+  Mantid::API::EventType getEventType() const;
 
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   virtual bool isHistogramData() const;

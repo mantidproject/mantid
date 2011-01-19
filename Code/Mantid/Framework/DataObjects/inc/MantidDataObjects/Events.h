@@ -73,12 +73,22 @@ public:
   /// Copy from another TofEvent object
   TofEvent& operator=(const TofEvent&rhs);
 
-  double operator()() const;
+
   bool operator==(const TofEvent & rhs) const;
   bool operator<(const TofEvent & rhs) const;
   bool operator<(const double rhs_tof) const;
   bool operator>(const TofEvent & rhs) const;
 
+  //------------------------------------------------------------------------
+  /** () operator: return the tof (X value) of the event.
+   * This is useful for std operations like comparisons
+   * and std::lower_bound
+   * @return :: double, the tof (X value) of the event.
+   */
+  double operator()() const
+  {
+    return this->m_tof;
+  }
 
   //------------------------------------------------------------------------
   /// Return the time of flight, as a double, in nanoseconds.
@@ -96,21 +106,21 @@ public:
 
   //------------------------------------------------------------------------
   /// Return the weight of the event - exactly 1.0 always
-  double weight()
+  double weight() const
   {
     return 1.0;
   }
 
   //------------------------------------------------------------------------
   /// Return the error of the event - exactly 1.0 always
-  double error()
+  double error() const
   {
     return 1.0;
   }
 
   //------------------------------------------------------------------------
   /// Return the errorSquared of the event - exactly 1.0 always
-  double errorSquared()
+  double errorSquared() const
   {
     return 1.0;
   }
@@ -242,6 +252,8 @@ public:
   /// Constructor, full
   WeightedEventNoTime(double time_of_flight, float weight, float errorSquared);
 
+  WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared);
+
   WeightedEventNoTime(const TofEvent&, float weight, float errorSquared);
 
   WeightedEventNoTime(const WeightedEventNoTime&);
@@ -258,6 +270,19 @@ public:
   WeightedEventNoTime& operator=(const WeightedEventNoTime & rhs);
 
   bool operator==(const WeightedEventNoTime & other) const;
+  bool operator<(const WeightedEventNoTime & rhs) const;
+  bool operator<(const double rhs) const;
+
+  //------------------------------------------------------------------------
+  /** () operator: return the tof (X value) of the event.
+   * This is useful for std operations like comparisons
+   * and std::lower_bound
+   * @return :: double, the tof (X value) of the event.
+   */
+  double operator()() const
+  {
+    return this->m_tof;
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Return the time-of-flight of the neutron, as a double.

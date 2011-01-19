@@ -429,7 +429,15 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   if (eventWS)
   {
     std::string extra("");
-    if (eventWS->eventsHaveWeights()) extra = " (weighted)";
+    switch (eventWS->getEventType())
+    {
+    case Mantid::API::WEIGHTED:
+      extra = " (weighted)";
+      break;
+    case Mantid::API::WEIGHTED_NOTIME:
+      extra = " (weighted, no times)";
+      break;
+    }
     data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents()) + extra.c_str() ));
     data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(data_item);

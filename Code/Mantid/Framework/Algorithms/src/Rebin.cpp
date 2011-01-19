@@ -111,17 +111,8 @@ namespace Mantid
             //Get a const event list reference. eventW->dataY() doesn't work.
             const EventList& el = eventW->getEventList(i);
             MantidVec y_data, e_data;
-
-            if (el.hasWeights())
-            {
-              el.generateHistogramsForWeights(*XValues_new, y_data, e_data);
-            }
-            else
-            {
-              //Now use this const method to generate a histogram without changing the event list or requiring const casts
-              el.generateCountsHistogram(*XValues_new, y_data);
-              el.generateErrorsHistogram(y_data, e_data);
-            }
+            // The EventList takes care of histogramming.
+            el.generateHistogram(*XValues_new, y_data, e_data);
 
             //Copy the data over.
             outputW->dataY(i).assign(y_data.begin(), y_data.end());

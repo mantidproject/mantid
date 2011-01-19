@@ -16,6 +16,17 @@ namespace DataObjects
 {
   using Kernel::Exception::NotImplementedError;
   using Kernel::DateAndTime;
+  using namespace Mantid::API;
+
+//  /** Macro to simplify operations on event list.
+//   *
+//   * It evaluates to:
+//   *  this->events if eventType == TOF
+//   *  this->weightedEvents if eventType == WEIGHTED
+//   *  this->weightedEventsNoTime if eventType == something else (presumably WEIGHTED_NOTIME)
+//   */
+//  //#define THIS_EVENT_VECTOR ((this->eventType==TOF) ? (this->events) : ((this->eventType==WEIGHTED) ? (this->weightedEvents) : (this->weightedEventsNoTime) ) )
+//  // Apologies for how much the above looks (LISP anyone :-) )
 
 
   //==========================================================================
@@ -41,56 +52,6 @@ namespace DataObjects
   }
 
 
-  //----------------------------------------------------------------------------------
-  /** Integrate the events between a range of X values, or all events.
-   *
-   * @param minX minimum X bin to use in integrating.
-   * @param maxX maximum X bin to use in integrating.
-   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
-   * @return the integrated number of events.
-   */
-  template< typename T>
-  double integrateEvents(std::vector<T> & events, const double minX, const double maxX, const bool entireRange)
-  {
-    //Nothing in the list?
-    if (events.size() == 0)
-      return 0.0;
-
-    // Iterators for limits - whole range by default
-    typename std::vector<T>::iterator lowit, highit;
-    lowit=events.begin();
-    highit=events.end();
-
-    //But maybe we don't want the entire range?
-    if (!entireRange)
-    {
-      //If a silly range was given, return 0.
-      if (maxX < minX)
-        return 0.0;
-
-      // If the first element is lower that the xmin then search for new lowit
-      if (lowit->tof() < minX)
-        lowit = std::lower_bound(events.begin(),events.end(),minX);
-      // If the last element is higher that the xmax then search for new lowit
-      if ((highit-1)->tof() > maxX)
-      {
-        highit = std::upper_bound(lowit,events.end(), T(maxX), compareEventTof<T>);
-      }
-    }
-
-    // Sum up all the weights
-    double sum(0.0);
-    typename std::vector<T>::iterator it;
-    for (it = lowit; it != highit; it++)
-      sum += it->weight();
-
-    //Give it
-    return sum;
-  }
-
-
-
-
 
 //  /** Comparison operator by TOF for TofEvents) */
 //  bool operator<(const TofEvent & e1, const TofEvent& e2)
@@ -114,50 +75,6 @@ namespace DataObjects
 
 
 
-  //==========================================================================
-  /** Unary function for searching the event list.
-   * Returns true if the event's TOF is >= a value
-   * @param event the event being checked.
-   */
-  class tofGreaterOrEqual: std::unary_function<TofEvent, double>
-  {
-    /// Comparison variable
-    double m_value;
-  public:
-    /// Constructor: save the value
-    tofGreaterOrEqual(double value): m_value(value)
-    {  }
-    /// () operator: return true if event.tof >= value
-    bool operator()(TofEvent event)
-    {
-        return event.m_tof >= m_value;
-    }
-  };
-
-  //==========================================================================
-  /** Unary function for searching the event list.
-   * Returns true if the event's TOF is > a value
-   * @param event the event being checked.
-   */
-  class tofGreater: std::unary_function<TofEvent, double>
-  {
-    /// Comparison variable
-    double m_value;
-  public:
-    /// Constructor: save the value
-    tofGreater(double value): m_value(value)
-    {  }
-    /// () operator: return true if event.tof > value
-    bool operator()(TofEvent event)
-    {
-        return event.m_tof > m_value;
-    }
-  };
-
-
-
-
-
 
 
 
@@ -171,7 +88,7 @@ namespace DataObjects
 
   /// Constructor (empty)
   EventList::EventList() :
-    has_weights(false), order(UNSORTED), detectorIDs()
+    eventType(TOF), order(UNSORTED), detectorIDs()
   {
   }
 
@@ -188,7 +105,7 @@ namespace DataObjects
   EventList::EventList(const std::vector<TofEvent> &events)
   {
     this->events.assign(events.begin(), events.end());
-    this->has_weights = false;
+    this->eventType = TOF;
     this->order = UNSORTED;
   }
 
@@ -215,13 +132,15 @@ namespace DataObjects
     //Copy all data from the rhs.
     this->events.assign(rhs.events.begin(), rhs.events.end());
     this->weightedEvents.assign(rhs.weightedEvents.begin(), rhs.weightedEvents.end());
-    this->has_weights = rhs.has_weights;
+    this->weightedEventsNoTime.assign(rhs.weightedEventsNoTime.begin(), rhs.weightedEventsNoTime.end());
+    this->eventType = rhs.eventType;
     this->refX = rhs.refX;
     this->order = rhs.order;
     //Copy the detector ID set
     this->detectorIDs = rhs.detectorIDs;
     return *this;
   }
+
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram.
@@ -230,35 +149,61 @@ namespace DataObjects
    * */
   EventList& EventList::operator+=(const TofEvent &event)
   {
-    if (has_weights)
-      this->weightedEvents.push_back(WeightedEvent(event));
-    else
+
+    switch (this->eventType)
+    {
+    case TOF:
+      //Simply push the events
       this->events.push_back(event);
+      break;
+
+    case WEIGHTED:
+      this->weightedEvents.push_back(WeightedEvent(event));
+      break;
+
+    case WEIGHTED_NOTIME:
+      this->weightedEventsNoTime.push_back(WeightedEventNoTime(event));
+      break;
+    }
 
     this->order = UNSORTED;    
     return *this;
   }
 
+
   // --------------------------------------------------------------------------
   /** Append a list of events to the histogram.
+   * The internal event list will switch to the required type.
+   *
    * @param more_events A vector of events to append.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
   {
-    if (has_weights)
+    switch (this->eventType)
     {
-      //Add default weights to all the un-weighted incoming events from the list.
-      // and append to the list
-      std::vector<TofEvent>::const_iterator it;
-      for(it = more_events.begin(); it != more_events.end(); it++)
-        this->weightedEvents.push_back( WeightedEvent(*it) );
-    }
-    else
-    {
+    case TOF:
       //Simply push the events
       this->events.insert(this->events.end(), more_events.begin(), more_events.end());
+      break;
+
+    case WEIGHTED:
+      //Add default weights to all the un-weighted incoming events from the list.
+      // and append to the list
+      this->weightedEvents.reserve( this->weightedEvents.size() + more_events.size());
+      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+        this->weightedEvents.push_back( WeightedEvent(*it) );
+      break;
+
+    case WEIGHTED_NOTIME:
+      //Add default weights to all the un-weighted incoming events from the list.
+      // and append to the list
+      this->weightedEventsNoTime.reserve( this->weightedEventsNoTime.size() + more_events.size());
+      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+        this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
+      break;
     }
+
     this->order = UNSORTED;    
     return *this;
   }
@@ -274,8 +219,7 @@ namespace DataObjects
    * */
   EventList& EventList::operator+=(const WeightedEvent &event)
   {
-    if (!has_weights)
-      this->switchToWeightedEvents();
+    this->switchTo(WEIGHTED);
     this->weightedEvents.push_back(event);
     this->order = UNSORTED;
     return *this;
@@ -291,10 +235,56 @@ namespace DataObjects
    * */
   EventList& EventList::operator+=(const std::vector<WeightedEvent> & more_events)
   {
-    if (!has_weights)
-      this->switchToWeightedEvents();
-    //Simply push the events
-    this->weightedEvents.insert(weightedEvents.end(), more_events.begin(), more_events.end());
+    switch (this->eventType)
+    {
+    case TOF:
+      //Need to switch to weighted
+      this->switchTo(WEIGHTED);
+      // Fall through to the insertion!
+
+    case WEIGHTED:
+      // Append the two lists
+      this->weightedEvents.insert(weightedEvents.end(), more_events.begin(), more_events.end());
+      break;
+
+    case WEIGHTED_NOTIME:
+      //Add default weights to all the un-weighted incoming events from the list.
+      // and append to the list
+      this->weightedEventsNoTime.reserve( this->weightedEventsNoTime.size() + more_events.size());
+      for(std::vector<WeightedEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+        this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
+      break;
+    }
+
+    this->order = UNSORTED;
+    return *this;
+  }
+
+
+  // --------------------------------------------------------------------------
+  /** Append a list of events to the histogram.
+   * Note: The whole list will switch to weights (a possibly lengthy operation)
+   *  if it did not have weights before.
+   *
+   * @param more_events A vector of events to append.
+   * @return reference to this
+   * */
+  EventList& EventList::operator+=(const std::vector<WeightedEventNoTime> & more_events)
+  {
+    switch (this->eventType)
+    {
+    case TOF:
+    case WEIGHTED:
+      //Need to switch to weighted with no time
+      this->switchTo(WEIGHTED_NOTIME);
+      // Fall through to the insertion!
+
+    case WEIGHTED_NOTIME:
+      // Simple appending of the two lists
+      this->weightedEventsNoTime.insert(weightedEventsNoTime.end(), more_events.begin(), more_events.end());
+      break;
+    }
+
     this->order = UNSORTED;
     return *this;
   }
@@ -304,36 +294,27 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Append another EventList to this event list.
    * The event lists are concatenated, and a union of the sets of detector ID's is done.
+   * Switching of event types may occur if the two are different.
+   *
    * @param more_events Another EventList.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const EventList& more_events)
   {
-    if (more_events.hasWeights())
+    // We'll let the += operator for the given vector of event lists handle it
+    switch (more_events.getEventType())
     {
-      //We're adding something with weights
+    case TOF:
+      this->operator+=(more_events.events);
+      break;
 
-      //Make sure that THIS has weights too.
-      if (!has_weights)
-        this->switchToWeightedEvents();
+    case WEIGHTED:
+      this->operator+=(more_events.weightedEvents);
+      break;
 
-      //At this point, both have weights. Great!
-      const vector<WeightedEvent> & rel = more_events.getWeightedEvents();
-      this->weightedEvents.insert(this->weightedEvents.end(), rel.begin(), rel.end());
-    }
-
-    if (has_weights && !more_events.hasWeights())
-    {
-      //THIS has weights, but we're adding something that doesn't.
-      const vector<TofEvent> & rel = more_events.getEvents();
-      this->operator+=(rel);
-    }
-
-    else if (!has_weights && !more_events.hasWeights())
-    {
-      //Neither has weights. Keep the unweighted event lists.
-      const vector<TofEvent> & rel = more_events.getEvents();
-      this->events.insert(this->events.end(), rel.begin(), rel.end());
+    case WEIGHTED_NOTIME:
+      this->operator+=(more_events.weightedEventsNoTime);
+      break;
     }
 
     //No guaranteed order
@@ -353,43 +334,77 @@ namespace DataObjects
    * The event lists are concatenated, but the weights of the incoming
    *    list are multiplied by -1.0.
    *
+   * @tparam T1, T2 :: TofEvent, WeightedEvent or WeightedEventNoTime
+   * @param events The event vector being changed.
+   * @param more_events Another event vector being subtracted from this.
+   * @return reference to this
+   * */
+  template<class T1, class T2>
+  void EventList::minusHelper(std::vector<T1> & events, const std::vector<T2> & more_events)
+  {
+    // Make the end vector big enough in one go (avoids repeated re-allocations).
+    events.reserve( events.size() + more_events.size() );
+    typename std::vector<T2>::const_iterator itev;
+
+    for (itev = more_events.begin(); itev != more_events.end(); itev++ )
+    {
+      // We call the constructor for T1. In the case of WeightedEventNoTime, the pulse time will just be ignored.
+      events.push_back( T1(itev->tof(), itev->pulseTime(), itev->weight()*(-1.0), itev->errorSquared()) );
+    }
+  }
+
+
+  // --------------------------------------------------------------------------
+  /** SUBTRACT another EventList from this event list.
+   * The event lists are concatenated, but the weights of the incoming
+   *    list are multiplied by -1.0.
+   *
    * @param more_events Another EventList.
    * @return reference to this
    * */
   EventList& EventList::operator-=(const EventList& more_events)
   {
-    if (more_events.hasWeights())
+    // We'll let the -= operator for the given vector of event lists handle it
+    switch (this->getEventType())
     {
-      //We're adding something with weights
-      //Make sure that THIS has weights too.
-      this->switchToWeightedEvents();
+    case TOF:
+      this->switchTo(WEIGHTED);
+      // Fall through
 
-      //At this point, both have weights. Great!
-      const vector<WeightedEvent> & rel = more_events.getWeightedEvents();
-      std::vector<WeightedEvent>::const_iterator it;
-      for(it = rel.begin(); it != rel.end(); it++)
-        this->weightedEvents.push_back( WeightedEvent(it->m_tof, it->m_pulsetime, -it->m_weight, it->m_errorSquared) );
-    }
+    case WEIGHTED:
+      switch (more_events.getEventType())
+      {
+      case TOF:
+        minusHelper(this->weightedEvents, more_events.events);
+        break;
+      case WEIGHTED:
+        minusHelper(this->weightedEvents, more_events.weightedEvents);
+        break;
+      case WEIGHTED_NOTIME:
+        // TODO: Should this throw?
+        minusHelper(this->weightedEvents, more_events.weightedEventsNoTime);
+        break;
+      }
 
-    if (!more_events.hasWeights())
-    {
-      //We're adding a list without weights.
-
-      //Make sure that THIS has weights too.
-      this->switchToWeightedEvents();
-
-      //Loop through the unweighted input, convert them to -1.0 weight, and concatenate.
-      const vector<TofEvent> & rel = more_events.getEvents();
-      std::vector<TofEvent>::const_iterator it;
-      for(it = rel.begin(); it != rel.end(); it++)
-        this->weightedEvents.push_back( WeightedEvent(*it, -1.0, 1.0) );
+    case WEIGHTED_NOTIME:
+      switch (more_events.getEventType())
+      {
+      case TOF:
+        minusHelper(this->weightedEventsNoTime, more_events.events);
+        break;
+      case WEIGHTED:
+        minusHelper(this->weightedEventsNoTime, more_events.weightedEvents);
+        break;
+      case WEIGHTED_NOTIME:
+        minusHelper(this->weightedEventsNoTime, more_events.weightedEventsNoTime);
+        break;
+      }
     }
 
     //No guaranteed order
     this->order = UNSORTED;
 
-    //NOTE: What to do about detector ID's
-
+    //NOTE: What to do about detector ID's?
     return *this;
   }
 
@@ -403,12 +418,12 @@ namespace DataObjects
   {
     if (this->getNumberEvents() != rhs.getNumberEvents())
       return false;
-    if (this->has_weights != rhs.has_weights)
+    if (this->eventType != rhs.eventType)
       return false;
-    if (events != rhs.events)
-      return false;
-    if (weightedEvents != rhs.weightedEvents)
-      return false;
+    // Check all event lists; The empty ones will compare equal
+    if (events != rhs.events) return false;
+    if (weightedEvents != rhs.weightedEvents) return false;
+    if (weightedEventsNoTime != rhs.weightedEventsNoTime) return false;
     return true;
   }
 
@@ -424,19 +439,18 @@ namespace DataObjects
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * NOTE: Only call this on a un-weighted event list!
+   *
    * @param event TofEvent to add at the end of the list.
    * */
   void EventList::addEventQuickly(const TofEvent &event)
   {
-    if (has_weights)
-      this->weightedEvents.push_back(WeightedEvent(event));
-    else
-      this->events.push_back(event);
+    this->events.push_back(event);
   }
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
-   * @param event TofEvent to add at the end of the list.
+   * @param event WeightedEvent to add at the end of the list.
    * */
   void EventList::addEventQuickly(const WeightedEvent &event)
   {
@@ -479,10 +493,36 @@ namespace DataObjects
     return this->detectorIDs;
   }
 
-  /** Return true if the event list has weights */
-  bool EventList::hasWeights() const
+  // -----------------------------------------------------------------------------------------------
+  /** Return the type of Event vector contained within.
+   * @return :: a EventType value.
+   */
+  EventType EventList::getEventType() const
   {
-    return has_weights;
+    return eventType;
+  }
+
+  // -----------------------------------------------------------------------------------------------
+  /** Switch the EventList to use the given EventType (TOF, WEIGHTED, or WEIGHTED_NOTIME)
+   */
+  void EventList::switchTo(EventType newType)
+  {
+    switch(newType)
+    {
+    case TOF:
+      if (eventType != TOF)
+        throw std::runtime_error("EventList::switchTo() called on an EventList with weights to go down to TofEvent's. This would remove weight information and therefore is not possible.");
+      break;
+
+    case WEIGHTED:
+      switchToWeightedEvents();
+      break;
+
+    case WEIGHTED_NOTIME:
+      switchToWeightedEventsNoTime();
+      break;
+    }
+
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -491,22 +531,97 @@ namespace DataObjects
    */
   void EventList::switchToWeightedEvents()
   {
-    //Do nothing if already there
-    if (has_weights)
+    switch(eventType)
+    {
+    case WEIGHTED:
+      // Do nothing; it already is weighted
       return;
-    has_weights = true;
-    weightedEvents.clear();
 
-    //Convert and copy all TofEvents to the weightedEvents list.
-    std::vector<TofEvent>::const_iterator it;
-    for(it = events.begin(); it != events.end(); it++)
-      this->weightedEvents.push_back( WeightedEvent(*it) );
+    case WEIGHTED_NOTIME:
+      throw std::runtime_error("EventList::switchToWeightedEvents() called on an EventList with WeightedEventNoTime's. It has lost the pulse time information and can't go back to WeightedEvent's.");
+      break;
 
-    //Get rid of the old events
-    events.clear();
+    case TOF:
+      weightedEvents.clear();
+      weightedEventsNoTime.clear();
+      //Convert and copy all TofEvents to the weightedEvents list.
+      std::vector<TofEvent>::const_iterator it;
+      for(it = events.begin(); it != events.end(); it++)
+        this->weightedEvents.push_back( WeightedEvent(*it) );
+      //Get rid of the old events
+      events.clear();
+      eventType = WEIGHTED;
+      break;
+    }
+
   }
 
 
+
+  // -----------------------------------------------------------------------------------------------
+  /** Switch the EventList to use WeightedEventNoTime's instead
+   * of TofEvent.
+   */
+  void EventList::switchToWeightedEventsNoTime()
+  {
+    switch(eventType)
+    {
+    case WEIGHTED_NOTIME:
+      //Do nothing if already there
+      return;
+
+    case TOF:
+      {
+        //Convert and copy all TofEvents to the weightedEvents list.
+        weightedEventsNoTime.clear();
+        std::vector<TofEvent>::const_iterator it;
+        for(it = events.begin(); it != events.end(); it++)
+          this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
+        //Get rid of the old events
+        events.clear();
+        weightedEvents.clear();
+        eventType = WEIGHTED_NOTIME;
+      }
+      break;
+
+    case WEIGHTED:
+      {
+        //Convert and copy all TofEvents to the weightedEvents list.
+        weightedEventsNoTime.clear();
+        std::vector<WeightedEvent>::const_iterator it;
+        for(it = weightedEvents.begin(); it != weightedEvents.end(); it++)
+          this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
+        //Get rid of the old events
+        events.clear();
+        weightedEvents.clear();
+        eventType = WEIGHTED_NOTIME;
+      }
+      break;
+    }
+
+  }
+
+
+  // ==============================================================================================
+  // --- Testing functions (mostly) ---------------------------------------------------------------
+  // ==============================================================================================
+
+  /** Return the given event in the list.
+   * Handles the different types of events by converting to WeightedEvent (the most general type).
+   */
+  WeightedEvent EventList::getEvent(size_t event_number)
+  {
+    switch (eventType)
+    {
+    case TOF:
+      return WeightedEvent(events[event_number]);
+    case WEIGHTED:
+      return weightedEvents[event_number];
+    case WEIGHTED_NOTIME:
+      return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0, weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
+    }
+
+  }
 
 
   // ==============================================================================================
@@ -514,44 +629,81 @@ namespace DataObjects
   // ==============================================================================================
 
   /** Return the const list of TofEvents contained.
+   * NOTE! This should be used for testing purposes only, as much as possible. The EventList
+   * may contain weighted events, requiring use of getWeightedEvents() instead.
+   *
    * @return a const reference to the list of non-weighted events
    * */
   const std::vector<TofEvent> & EventList::getEvents() const
   {
-    if (has_weights)
-      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents().");
+    if (eventType != TOF)
+      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents() or getWeightedEventsNoTime().");
     return this->events;
   }
 
   /** Return the list of TofEvents contained.
+   * NOTE! This should be used for testing purposes only, as much as possible. The EventList
+   * may contain weighted events, requiring use of getWeightedEvents() instead.
+   *
    * @return a reference to the list of non-weighted events
    * */
   std::vector<TofEvent>& EventList::getEvents()
   {
-    if (has_weights)
-      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents().");
+    if (eventType != TOF)
+      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents() or getWeightedEventsNoTime().");
     return this->events;
   }
 
   /** Return the list of WeightedEvent contained.
+   * NOTE! This should be used for testing purposes only, as much as possible. The EventList
+   * may contain un-weighted events, requiring use of getEvents() instead.
+   *
    * @return a reference to the list of weighted events
    * */
   std::vector<WeightedEvent>& EventList::getWeightedEvents()
   {
-    if (!has_weights)
-      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList that does not have weights. Use getEvents().");
+    if (eventType != WEIGHTED)
+      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList not of type WeightedEvent. Use getEvents() or getWeightedEventsNoTime().");
     return this->weightedEvents;
   }
 
   /** Return the list of WeightedEvent contained.
+   * NOTE! This should be used for testing purposes only, as much as possible. The EventList
+   * may contain un-weighted events, requiring use of getEvents() instead.
+   *
    * @return a const reference to the list of weighted events
    * */
   const std::vector<WeightedEvent>& EventList::getWeightedEvents() const
   {
-    if (!has_weights)
-      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList that does not have weights. Use getEvents().");
+    if (eventType != WEIGHTED)
+      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList not of type WeightedEvent. Use getEvents() or getWeightedEventsNoTime().");
     return this->weightedEvents;
   }
+
+  /** Return the list of WeightedEvent contained.
+   * NOTE! This should be used for testing purposes only, as much as possible.
+   *
+   * @return a reference to the list of weighted events
+   * */
+  std::vector<WeightedEventNoTime>& EventList::getWeightedEventsNoTime()
+  {
+    if (eventType != WEIGHTED_NOTIME)
+      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList not of type WeightedEventNoTime. Use getEvents() or getWeightedEvents().");
+    return this->weightedEventsNoTime;
+  }
+
+  /** Return the list of WeightedEventNoTime contained.
+   * NOTE! This should be used for testing purposes only, as much as possible.
+   *
+   * @return a const reference to the list of weighted events
+   * */
+  const std::vector<WeightedEventNoTime>& EventList::getWeightedEventsNoTime() const
+  {
+    if (eventType != WEIGHTED_NOTIME)
+      throw std::runtime_error("EventList::getWeightedEventsNoTime() called for an EventList not of type WeightedEventNoTime. Use getEvents() or getWeightedEvents().");
+    return this->weightedEventsNoTime;
+  }
+
 
   /** Clear the list of events and any
    * associated detector ID's.
@@ -563,7 +715,7 @@ namespace DataObjects
     this->detectorIDs.clear();
   }
 
-  /** Resrve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT call
+  /** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT call
    * on weighted events!
    *
    * Calls std::vector<>::reserve() in order to pre-allocate the length of the event list vector.
@@ -612,12 +764,18 @@ namespace DataObjects
     {
       return; // nothing to do
     }
-    //Perform sort.
-    if (has_weights)
-      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof<WeightedEvent>);
-    else
+    switch (eventType)
+    {
+    case TOF:
       std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
-
+      break;
+    case WEIGHTED:
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof<WeightedEvent>);
+      break;
+    case WEIGHTED_NOTIME:
+      std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), compareEventTof<WeightedEventNoTime>);
+      break;
+    }
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
   }
@@ -832,17 +990,24 @@ namespace DataObjects
     {
       return; // nothing to do
     }
-    if (has_weights)
-      parallel_sort2(weightedEvents);
-    else
+    switch (eventType)
+    {
+    case TOF:
       parallel_sort2(events);
-
+      break;
+    case WEIGHTED:
+      parallel_sort2(weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      parallel_sort2(weightedEventsNoTime);
+      break;
+    }
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
   }
 
   // --------------------------------------------------------------------------
-  /** Sort events by TOF, using four threads.
+  /** Sort events by TOF, using two threads.
    *
    * Performance for 5e7 events:
    *  - 40.5 secs with sortTof() (one thread)
@@ -856,16 +1021,21 @@ namespace DataObjects
     {
       return; // nothing to do
     }
-
-    if (has_weights)
-      parallel_sort4(weightedEvents);
-    else
+    switch (eventType)
+    {
+    case TOF:
       parallel_sort4(events);
-
+      break;
+    case WEIGHTED:
+      parallel_sort4(weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      parallel_sort4(weightedEventsNoTime);
+      break;
+    }
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
   }
-
 
 
   // --------------------------------------------------------------------------
@@ -877,10 +1047,18 @@ namespace DataObjects
       return; // nothing to do
     }
     //Perform sort.
-    if (has_weights)
-      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
-    else
+    switch (eventType)
+    {
+    case TOF:
       std::sort(events.begin(), events.end(), compareEventPulseTime);
+      break;
+    case WEIGHTED:
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
+      break;
+    case WEIGHTED_NOTIME:
+      // Do nothing; there is no time to sort
+      break;
+    }
     //Save the order to avoid unnecessary re-sorting.
     this->order = PULSETIME_SORT;
   }
@@ -893,7 +1071,10 @@ namespace DataObjects
   }
 
   // --------------------------------------------------------------------------
-  /** Reverse the histogram boundaries and the associated events if they are sorted. */
+  /** Reverse the histogram boundaries and the associated events if they are sorted
+   * by time-of-flight.
+   * Does nothing if sorted otherwise or unsorted.
+   * */
   void EventList::reverse()
   {
     // reverse the histogram bin parameters
@@ -904,15 +1085,24 @@ namespace DataObjects
     // flip the events if they are tof sorted
     if (this->isSortedByTof())
     {
-      if (has_weights)
-        std::reverse(this->weightedEvents.begin(), this->weightedEvents.end());
-      else
+      switch (eventType)
+      {
+      case TOF:
         std::reverse(this->events.begin(), this->events.end());
+        break;
+      case WEIGHTED:
+        std::reverse(this->weightedEvents.begin(), this->weightedEvents.end());
+        break;
+      case WEIGHTED_NOTIME:
+        std::reverse(this->weightedEventsNoTime.begin(), this->weightedEventsNoTime.end());
+        break;
+      }
       //And we are still sorted! :)
     }
     else
       this->order = UNSORTED;
   }
+
 
   // --------------------------------------------------------------------------
   /** Return the number of events in the list.
@@ -923,10 +1113,15 @@ namespace DataObjects
    *  */
   size_t EventList::getNumberEvents() const
   {
-    if (has_weights)
-      return this->weightedEvents.size();
-    else
+    switch (eventType)
+    {
+    case TOF:
       return this->events.size();
+    case WEIGHTED:
+      return this->weightedEvents.size();
+    case WEIGHTED_NOTIME:
+      return this->weightedEventsNoTime.size();
+    }
   }
 
 
@@ -935,10 +1130,15 @@ namespace DataObjects
    * */
   size_t EventList::getMemorySize() const
   {
-    if (has_weights)
-      return this->weightedEvents.size() * sizeof(WeightedEvent) + sizeof(EventList);
-    else
+    switch (eventType)
+    {
+    case TOF:
       return this->events.size() * sizeof(TofEvent) + sizeof(EventList);
+    case WEIGHTED:
+      return this->weightedEvents.size() * sizeof(WeightedEvent) + sizeof(EventList);
+    case WEIGHTED_NOTIME:
+      return this->weightedEventsNoTime.size() * sizeof(WeightedEventNoTime) + sizeof(EventList);
+    }
   }
 
 
@@ -1020,7 +1220,9 @@ namespace DataObjects
   MantidVec * EventList::dataY() const
   {
     MantidVec * Y = new MantidVec();
-    generateCountsHistogram(*this->refX, *Y);
+    MantidVec E;
+    // Generate the Y histogram while skipping the E if possible.
+    generateHistogram(*this->refX, *Y, E, true);
     return Y;
   }
 
@@ -1032,47 +1234,132 @@ namespace DataObjects
    */
   MantidVec * EventList::dataE() const
   {
-    if (has_weights)
-    {
-      MantidVec Y;
-      MantidVec * E = new MantidVec();
-      generateHistogramsForWeights(*this->refX, Y, *E);
-      //Y is unused.
-      return E;
-    }
-    else
-    {
-      MantidVec Y;
-      generateCountsHistogram(*this->refX, Y);
-      MantidVec * E = new MantidVec();
-      generateErrorsHistogram(Y, *E);
-      return E;
-    }
+    MantidVec Y;
+    MantidVec * E = new MantidVec();
+    generateHistogram(*this->refX, Y, *E);
+    //Y is unused.
+    return E;
   }
 
 
+  // --------------------------------------------------------------------------
+  /** Compress the event list by grouping events with the same TOF.
+   *
+   * @param events :: input event list.
+   * @param out :: output WeightedEventNoTime vector.
+   * @param tolerance :: how close do two event's TOF have to be to be considered the same.
+   */
 
+  template<class T>
+  void EventList::compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance)
+  {
+    //Clear the output. We can't know ahead of time how much space to reserve :(
+    out.clear();
+
+    // The last TOF to which we are comparing.
+    double lastTof = -std::numeric_limits<double>::max();
+    // For getting an accurate average TOF
+    double totalTof = 0;
+    int num = 0;
+    // Carrying weight and error
+    double weight = 0;
+    double errorSquared = 0;
+
+    typename std::vector<T>::const_iterator it;
+    for (it = events.begin(); it != events.end(); it++)
+    {
+      if ((it->m_tof - lastTof) < tolerance)
+      {
+        // Carry the error and weight
+        weight += it->weight();
+        errorSquared += it->errorSquared();
+        // Track the average tof
+        num++;
+        totalTof += it->m_tof;
+      }
+      else
+      {
+        // We exceeded the tolerance
+        if (num > 0)
+        {
+          // Create a new event with the average TOF and summed weights and squared errors.
+          out.push_back( WeightedEventNoTime( totalTof/num, weight, errorSquared ) );
+        }
+        // Start a new combined object
+        num = 1;
+        totalTof = it->m_tof;
+        weight = it->weight();
+        errorSquared = it->errorSquared();
+        lastTof = it->m_tof;
+      }
+    }
+
+    // Put the last event in there too.
+    if (num > 0)
+    {
+      // Create a new event with the average TOF and summed weights and squared errors.
+      out.push_back( WeightedEventNoTime( totalTof/num, weight, errorSquared ) );
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  /** Compress the event list by grouping events with the same
+   * TOF (within a given tolerance). PulseTime is ignored.
+   * The event list will be switched to WeightedEventNoTime.
+   *
+   * @param tolerance :: how close do two event's TOF have to be to be considered the same.
+   */
+  void EventList::compressEvents(double tolerance)
+  {
+    // Must have a sorted list
+    this->sortTof();
+
+    switch (eventType)
+    {
+    case TOF:
+      compressEventsHelper(this->events, this->weightedEventsNoTime, tolerance);
+      this->events.clear();
+      break;
+
+    case WEIGHTED:
+      compressEventsHelper(this->weightedEvents, this->weightedEventsNoTime, tolerance);
+      this->weightedEvents.clear();
+      break;
+
+    case WEIGHTED_NOTIME:
+      // Put results in a temp output
+      std::vector<WeightedEventNoTime> out;
+      compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+      // Put it back
+      this->weightedEventsNoTime.swap(out);
+      out.clear();
+      break;
+    }
+    // In all cases, you end up WEIGHTED_NOTIME.
+    eventType = WEIGHTED_NOTIME;
+    // The sort is still valid!
+  }
 
 
   // --------------------------------------------------------------------------
   /** Utility function:
    * Returns the iterator into events of the first TofEvent with
    * tof() > seek_tof
-   * Will return this->events.end() if nothing is found!
+   * Will return events.end() if nothing is found!
    *
+   * @param events :: event vector in which to look.
    * @param seek_tof tof to find (typically the first bin X[0])
    * @return iterator where the first event matching it is.
    */
-  std::vector<TofEvent>::iterator EventList::findFirstEvent(const double seek_tof) const
+  template<class T>
+  typename std::vector<T>::const_iterator EventList::findFirstEvent(const std::vector<T> & events, const double seek_tof)
   {
-    std::vector<TofEvent>::iterator itev;
-    itev = this->events.begin();
+    typename std::vector<T>::const_iterator itev = events.begin();
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != this->events.end()) && (itev->tof() < seek_tof))
+    while ((itev != events.end()) && (itev->tof() < seek_tof))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
-
     return itev;
   }
 
@@ -1080,61 +1367,37 @@ namespace DataObjects
   /** Utility function:
    * Returns the iterator into events of the first TofEvent with
    * tof() > seek_tof
-   * Will return this->events.end() if nothing is found!
+   * Will return events.end() if nothing is found!
    *
+   * @param events :: event vector in which to look.
    * @param seek_tof tof to find (typically the first bin X[0])
    * @return iterator where the first event matching it is.
    */
-  std::vector<WeightedEvent>::iterator EventList::findFirstWeightedEvent(const double seek_tof) const
+  template<class T>
+  typename std::vector<T>::iterator EventList::findFirstEvent(std::vector<T> & events, const double seek_tof)
   {
-    std::vector<WeightedEvent>::iterator itev;
-    itev = this->weightedEvents.begin();
+    typename std::vector<T>::iterator itev = events.begin();
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != this->weightedEvents.end()) && (itev->tof() < seek_tof))
+    while ((itev != events.end()) && (itev->tof() < seek_tof))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
     return itev;
   }
-
-  // --------------------------------------------------------------------------
-  /** Generates both the Y and E (error) histograms
-   * for an EventList with or without WeightedEvents.
-   *
-   * @param X: x-bins supplied
-   * @param Y: counts returned
-   * @param E: errors returned
-   */
-  void EventList::generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E) const
-  {
-    if (has_weights)
-    {
-      // Make both, with weights
-      this->generateHistogramsForWeights(X, Y, E);
-    }
-    else
-    {
-      // Make the single ones
-      this->generateCountsHistogram(X, Y);
-      this->generateErrorsHistogram(Y, E);
-    }
-  }
-
 
   // --------------------------------------------------------------------------
   /** Generates both the Y and E (error) histograms
    * for an EventList with WeightedEvents.
    *
-   * @param X: x-bins supplied
+   * @param events: vector of events (with weights)
+   * @param X: X-bins supplied
    * @param Y: counts returned
    * @param E: errors returned
    * @throw runtime_error if the EventList does not have weighted events
    */
-  void EventList::generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const
+  template<class T>
+  void EventList::histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E)
   {
-    if (!has_weights)
-      throw std::runtime_error("EventList::generateHistogramsForWeights() called for a non-weighted EventList. Try generateCountsHistogram() instead.");
-
     //For slight speed=up.
     size_t x_size = X.size();
 
@@ -1145,8 +1408,6 @@ namespace DataObjects
       return;
     }
 
-    //Sort the events by tof
-    this->sortTof();
     //Clear the Y data, assign all to 0.
     Y.resize(x_size-1, 0.0);
     //Clear the Error data, assign all to 0.
@@ -1156,12 +1417,12 @@ namespace DataObjects
     //---------------------- Histogram without weights ---------------------------------
 
     //Do we even have any events to do?
-    if (this->weightedEvents.size() > 0)
+    if (events.size() > 0)
     {
       //Iterate through all events (sorted by tof)
-      std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+      typename std::vector<T>::const_iterator itev = findFirstEvent( events, X[0]);
       // The above can still take you to end() if no events above X[0], so check again.
-      if (itev == this->weightedEvents.end()) return;
+      if (itev == events.end()) return;
 
       //Find the first bin
       size_t bin=0;
@@ -1183,7 +1444,7 @@ namespace DataObjects
       ++itev;
 
       //Keep going through all the events
-      while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+      while ((itev != events.end()) && (bin < x_size-1))
       {
         tof = itev->tof();
         while (bin < x_size-1)
@@ -1206,9 +1467,43 @@ namespace DataObjects
     typedef double (*uf)(double);
     uf dblSqrt = std::sqrt;
     std::transform(E.begin(), E.end(), E.begin(), dblSqrt);
-
-
   }
+
+
+
+  // --------------------------------------------------------------------------
+  /** Generates both the Y and E (error) histograms
+   * for an EventList with or without WeightedEvents.
+   *
+   * @param X: x-bins supplied
+   * @param Y: counts returned
+   * @param E: errors returned
+   * @param skipError: skip calculating the error. This has no effect for weighted
+   *        events; just ignore the returned E vector.
+   */
+  void EventList::generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
+  {
+    // All types of weights need to be sorted by TOF
+    this->sortTof();
+
+    switch (eventType)
+    {
+    case TOF:
+      // Make the single ones
+      this->generateCountsHistogram(X, Y);
+      this->generateErrorsHistogram(Y, E);
+      break;
+
+    case WEIGHTED:
+      histogramForWeightsHelper(this->weightedEvents, X, Y, E);
+      break;
+
+    case WEIGHTED_NOTIME:
+      histogramForWeightsHelper(this->weightedEventsNoTime, X, Y, E);
+      break;
+    }
+  }
+
 
 
 
@@ -1220,13 +1515,6 @@ namespace DataObjects
    */
   void EventList::generateCountsHistogram(const MantidVec& X, MantidVec& Y) const
   {
-    //Call the weights function, if needed
-    if (has_weights)
-    {
-      MantidVec E;
-      this->generateHistogramsForWeights(X, Y, E);
-    }
-
     //For slight speed=up.
     size_t x_size = X.size();
 
@@ -1248,7 +1536,7 @@ namespace DataObjects
     if (this->events.size() > 0)
     {
       //Iterate through all events (sorted by tof)
-      std::vector<TofEvent>::iterator itev = this->findFirstEvent(X[0]);
+      std::vector<TofEvent>::const_iterator itev = findFirstEvent(this->events, X[0]);
       // The above can still take you to end() if no events above X[0], so check again.
       if (itev == this->events.end()) return;
 
@@ -1301,9 +1589,6 @@ namespace DataObjects
    */
   void EventList::generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const
   {
-    if (has_weights)
-      throw std::runtime_error("EventList::generateErrorsHistogram() called for a weighted EventList. Try generateHistogramsForWeights() instead.");
-
     // Fill the vector for the errors, containing sqrt(count)
     E.resize(Y.size(), 0);
 
@@ -1315,6 +1600,53 @@ namespace DataObjects
   }
 
 
+
+  //----------------------------------------------------------------------------------
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param minX minimum X bin to use in integrating.
+   * @param maxX maximum X bin to use in integrating.
+   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @return the integrated number of events.
+   */
+  template<class T>
+  double EventList::integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange)
+  {
+    //Nothing in the list?
+    if (events.size() == 0)
+      return 0.0;
+
+    // Iterators for limits - whole range by default
+    typename std::vector<T>::iterator lowit, highit;
+    lowit=events.begin();
+    highit=events.end();
+
+    //But maybe we don't want the entire range?
+    if (!entireRange)
+    {
+      //If a silly range was given, return 0.
+      if (maxX < minX)
+        return 0.0;
+
+      // If the first element is lower that the xmin then search for new lowit
+      if (lowit->tof() < minX)
+        lowit = std::lower_bound(events.begin(),events.end(),minX);
+      // If the last element is higher that the xmax then search for new lowit
+      if ((highit-1)->tof() > maxX)
+      {
+        highit = std::upper_bound(lowit,events.end(), T(maxX), compareEventTof<T>);
+      }
+    }
+
+    // Sum up all the weights
+    double sum(0.0);
+    typename std::vector<T>::iterator it;
+    for (it = lowit; it != highit; it++)
+      sum += it->weight();
+
+    //Give it
+    return sum;
+  }
 
   // --------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.
@@ -1332,82 +1664,16 @@ namespace DataObjects
       this->sortTof();
     }
 
-    if (has_weights)
-      return integrateEvents(this->weightedEvents, minX, maxX, entireRange);
-    else
-      return integrateEvents(this->events, minX, maxX, entireRange);
-
-//    if (has_weights)
-//    {
-//      //Nothing in the list?
-//      if (weightedEvents.size() == 0)
-//        return 0.0;
-//
-//      // Iterators for limits - whole range by default
-//      std::vector<WeightedEvent>::iterator lowit, highit;
-//      lowit=weightedEvents.begin();
-//      highit=weightedEvents.end();
-//
-//      //But maybe we don't want the entire range?
-//      if (!entireRange)
-//      {
-//        //If a silly range was given, return 0.
-//        if (maxX < minX)
-//          return 0.0;
-//
-//        // If the first element is lower that the xmin then search for new lowit
-//        if (lowit->tof() < minX)
-//          lowit = std::lower_bound(weightedEvents.begin(),weightedEvents.end(),minX);
-//        // If the last element is higher that the xmax then search for new lowit
-//        if ((highit-1)->tof() > maxX)
-//        {
-//          highit = std::upper_bound(lowit,weightedEvents.end(), TofEvent(maxX, 0), compareEventTof);
-//        }
-//      }
-//
-//      // Sum up all the weights
-//      double sum(0.0);
-//      std::vector<WeightedEvent>::iterator it;
-//      for (it = lowit; it != highit; it++)
-//        sum += it->weight();
-//
-//      //Give it
-//      return sum;
-//    }
-//    else
-//    {
-//      //Nothing in the list?
-//      if (events.size() == 0)
-//        return 0.0;
-//
-//      // Iterators for limits - whole range by default
-//      std::vector<TofEvent>::iterator lowit, highit;
-//      lowit=events.begin();
-//      highit=events.end();
-//
-//      //But maybe we don't want the entire range?
-//      if (!entireRange)
-//      {
-//        //If a silly range was given, return 0.
-//        if (maxX < minX)
-//          return 0.0;
-//
-//        // If the first element is lower that the xmin then search for new lowit
-//        if (lowit->tof() < minX)
-//          lowit = std::lower_bound(events.begin(),events.end(),minX);
-//        // If the last element is higher that the xmax then search for new lowit
-//        if ((highit-1)->tof() > maxX)
-//        {
-//          highit = std::upper_bound(lowit,events.end(), TofEvent(maxX, 0), compareEventTof);
-//        }
-//      }
-//
-//      // The distance between the two iterators (they are NOT inclusive) = the number of events
-//      double sum = std::distance(lowit, highit);
-//
-//      //Give it
-//      return sum;
-//    }
+    //Convert the list
+    switch (eventType)
+    {
+    case TOF:
+      return integrateHelper(this->events, minX, maxX, entireRange);
+    case WEIGHTED:
+      return integrateHelper(this->weightedEvents, minX, maxX, entireRange);
+    case WEIGHTED_NOTIME:
+      return integrateHelper(this->weightedEventsNoTime, minX, maxX, entireRange);
+    }
 
   }
 
@@ -1428,25 +1694,25 @@ namespace DataObjects
   {
     if (this->getNumberEvents() <= 0)  return;
 
-    if (factor == 1.)
-    {
-      this->addTof(offset);
-      return;
-    }
-    if (offset == 0.)
-    {
-      this->scaleTof(factor);
-      return;
-    }
-
     //Convert the list
-    this->convertTof_onList(factor, offset);
+    switch (eventType)
+    {
+    case TOF:
+      this->convertTofHelper(this->events, factor, offset);
+      break;
+    case WEIGHTED:
+      this->convertTofHelper(this->weightedEvents, factor, offset);
+      break;
+    case WEIGHTED_NOTIME:
+      this->convertTofHelper(this->weightedEventsNoTime, factor, offset);
+      break;
+    }
 
     // fix the histogram parameter
-    MantidVec x = this->refX.access();
+    MantidVec & x = this->refX.access();
     for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
       *iter = (*iter) * factor + offset;
-    this->refX.access() = x;
+    //this->refX.access() = x;
 
     if (factor < 0.)
       this->reverse();
@@ -1454,31 +1720,22 @@ namespace DataObjects
 
 
   // --------------------------------------------------------------------------
-  /** Private function to do the conversion factor work
+  /** Function to do the conversion factor work
    * on either the TofEvent list or the WeightedEvent list.
    * Does NOT reverse the event list if the factor < 0
    *
    * @param factor multiply by this
    * @param offset add this
    */
-  void EventList::convertTof_onList(const double factor, const double offset)
+  template<class T>
+  void EventList::convertTofHelper(std::vector<T> & events, const double factor, const double offset)
   {
-    if (has_weights)
-    {
-      // iterate through all events
-      for (std::vector<WeightedEvent>::iterator iter = this->weightedEvents.begin();
-           iter != this->weightedEvents.end(); iter++)
-        iter->m_tof = iter->m_tof * factor + offset;
-    }
-    else
-    {
-      // iterate through all events
-      for (std::vector<TofEvent>::iterator iter = this->events.begin();
-           iter != this->events.end(); iter++)
-        iter->m_tof = iter->m_tof * factor + offset;
-    }
-
+    // iterate through all events
+    for (typename std::vector<T>::iterator iter = events.begin();
+         iter != events.end(); iter++)
+      iter->m_tof = iter->m_tof * factor + offset;
   }
+
 
   // --------------------------------------------------------------------------
   /**
@@ -1488,20 +1745,7 @@ namespace DataObjects
    */
   void EventList::scaleTof(const double factor)
   {
-    //Do we even have any events to do?
-    if (this->getNumberEvents() <= 0)  return;
-
-    //Do the event list
-    convertTof_onList(factor, 0.0);
-
-    //Scale the X vector too
-    MantidVec x = this->refX.access();
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::multiplies<double>(), factor));
-
-    if (factor < 0.)
-      this->reverse();
-
+    this->convertTof(factor, 0.0);
   }
 
   // --------------------------------------------------------------------------
@@ -1511,18 +1755,40 @@ namespace DataObjects
    */
   void EventList::addTof(const double offset)
   {
-    if (this->getNumberEvents() <= 0)  return;
-
-    //Do the event list
-    convertTof_onList(1.0, offset);
-
-    // fix the histogram vector
-    MantidVec x = this->refX.access();
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::plus<double>(), offset));
-    this->refX.access() = x;
+    this->convertTof(1.0, offset);
   }
 
+
+
+
+
+  // --------------------------------------------------------------------------
+  /**
+   * Mask out events that have a tof between tofMin and tofMax (inclusively).
+   * Events are removed from the list.
+   * @param tofMin lower bound of TOF to filter out
+   * @param tofMax upper bound of TOF to filter out
+   */
+  template<class T>
+  void EventList::maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax)
+  {
+    typename EventList::tofGreaterOrEqual<T> comparator(tofMin);
+    //Find the index of the first tofMin
+    typename std::vector<T>::iterator it_first = std::find_if(events.begin(), events.end(), comparator);
+    if (it_first != events.end())
+    {
+      //Something was found
+      //Look for the first one > tofMax
+      typename EventList::tofGreater<T> comparator2(tofMax);
+      typename std::vector<T>::iterator it_last = std::find_if(it_first, events.end(), comparator2);
+
+      //it_last will either be at the end (if not found) or before it.
+      //Erase this range from the vector
+      events.erase(it_first, it_last);
+
+      //Done! Sorting is still valid, no need to redo.
+    }
+  }
 
 
   // --------------------------------------------------------------------------
@@ -1540,38 +1806,38 @@ namespace DataObjects
     //Start by sorting by tof
     this->sortTof();
 
-    if (has_weights)
+    //Convert the list
+    switch (eventType)
     {
-      //Find the index of the first tofMin
-      std::vector<WeightedEvent>::iterator it_first = std::find_if(this->weightedEvents.begin(), this->weightedEvents.end(), tofGreaterOrEqual(tofMin));
-      if (it_first != weightedEvents.end())
-      {
-        //Something was found
-        //Look for the first one > tofMax
-        std::vector<WeightedEvent>::iterator it_last = std::find_if(it_first, this->weightedEvents.end(), tofGreater(tofMax));
-        //it_last will either be at the end (if not found) or before it.
-        //Erase this range from the vector
-        weightedEvents.erase(it_first, it_last);
-        //Done! Sorting is still valid, no need to redo.
-      }
-    }
-    else
-    {
-      //Find the index of the first tofMin
-      std::vector<TofEvent>::iterator it_first = std::find_if(this->events.begin(), this->events.end(), tofGreaterOrEqual(tofMin));
-      if (it_first != events.end())
-      {
-        //Something was found
-        //Look for the first one > tofMax
-        std::vector<TofEvent>::iterator it_last = std::find_if(it_first, this->events.end(), tofGreater(tofMax));
-        //it_last will either be at the end (if not found) or before it.
-        //Erase this range from the vector
-        events.erase(it_first, it_last);
-        //Done! Sorting is still valid, no need to redo.
-      }
+    case TOF:
+      this->maskTofHelper(this->events, tofMin, tofMax);
+      break;
+    case WEIGHTED:
+      this->maskTofHelper(this->weightedEvents, tofMin, tofMax);
+      break;
+    case WEIGHTED_NOTIME:
+      this->maskTofHelper(this->weightedEventsNoTime, tofMin, tofMax);
+      break;
     }
 
   }
+
+
+
+  // --------------------------------------------------------------------------
+  /** Get the m_tof member of all events in a list
+   *
+   * @param events :: source vector of events
+   * @param tofs :: vector to fill
+   */
+  template<class T>
+  void EventList::getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs)
+  {
+    typename std::vector<T>::const_iterator iter;
+    for (iter = events.begin(); iter != events.end(); iter++)
+      tofs.push_back(iter->m_tof);
+  }
+
 
   /** Fill a vector with the list of TOFs
    *  @param tofs :: A reference to the vector to be filled
@@ -1581,46 +1847,62 @@ namespace DataObjects
     // Set the capacity of the vector to avoid multiple resizes
     tofs.reserve(this->getNumberEvents());
 
-    // iterate through all events
-    if (has_weights)
+    //Convert the list
+    switch (eventType)
     {
-      std::vector<WeightedEvent>::iterator iter;
-      for (iter = this->weightedEvents.begin(); iter != this->weightedEvents.end(); iter++)
-        tofs.push_back(iter->m_tof);
+    case TOF:
+      this->getTofsHelper(this->events, tofs);
+      break;
+    case WEIGHTED:
+      this->getTofsHelper(this->weightedEvents, tofs);
+      break;
+    case WEIGHTED_NOTIME:
+      this->getTofsHelper(this->weightedEventsNoTime, tofs);
+      break;
     }
-    else
-    {
-      std::vector<TofEvent>::iterator iter;
-      for (iter = this->events.begin(); iter != this->events.end(); iter++)
-        tofs.push_back(iter->m_tof);
-    }
-
   }
 
 
   // --------------------------------------------------------------------------
+  /* Set a list of TOFs to the current event list.
+   *
+   * @param events :: source vector of events
+   * @param tofs :: The vector of doubles to set the tofs to.
+   */
+  template<class T>
+  void EventList::setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs)
+  {
+    if (tofs.empty())
+      return;
+
+    size_t x_size = tofs.size();
+    if (events.size() != x_size)
+      return;
+
+    for (size_t i = 0; i < x_size; ++i)
+      events[i].m_tof = tofs[i];
+  }
+
+  // --------------------------------------------------------------------------
   /**
    * Set a list of TOFs to the current event list. Modify the units if necessary.
-   * NOTE: This function does not check if the list sizes are the same.
    *
-   * @param T The vector of doubles to set the tofs to.
+   * @param tofs :: The vector of doubles to set the tofs to.
    */
-  void EventList::setTofs(const MantidVec &T)
+  void EventList::setTofs(const MantidVec & tofs)
   {
-    if (T.empty())
+    //Convert the list
+    switch (eventType)
     {
-      return;
-    }
-    size_t x_size = T.size();
-    if (has_weights)
-    {
-      for (size_t i = 0; i < x_size; ++i)
-        weightedEvents[i].m_tof = T[i];
-    }
-    else
-    {
-      for (size_t i = 0; i < x_size; ++i)
-        events[i].m_tof = T[i];
+    case TOF:
+      this->setTofsHelper(this->events, tofs);
+      break;
+    case WEIGHTED:
+      this->setTofsHelper(this->weightedEvents, tofs);
+      break;
+    case WEIGHTED_NOTIME:
+      this->setTofsHelper(this->weightedEventsNoTime, tofs);
+      break;
     }
   }
 
@@ -1632,35 +1914,38 @@ namespace DataObjects
 
 
   //------------------------------------------------------------------------------------------------
-  /** Multiply the weights in this event list by an error-less scalar.
-   * Use multiply(value,error) if you wish to multiply by a real variable with an error!
+  /** Helper method for multiplying an event list by a scalar value with/without error
    *
-   * The event list switches to WeightedEvent's if needed.
-   * Note that if the multiplier is exactly 1.0, the list is NOT switched to WeightedEvents - nothing happens.
-   *
-   * Given A = the weight; the scalar = a.
-   *  - The weight is simply \f$ aA \f$
-   *  - The error \f$ \sigma_A \f$ becomes \f$ \sigma_{aA} = a \sigma_{A} \f$
-   *
+   * @param events: vector of events (with weights)
    * @param value: multiply all weights by this amount.
-   */
-  void EventList::multiply(const double value)
+   * @param error: error on 'value'. Can be 0.
+   * */
+  template<class T>
+  void EventList::multiplyHelper(std::vector<T> & events, const double value, const double error)
   {
-    // Do nothing if multiplying by exactly one
-    if (value == 1.0)
-      return;
-
-    //Switch to weights if needed.
-    this->switchToWeightedEvents();
-
     //Square of the value's error
-    double valSquared = value * value;
+    double errorSquared = error * error;
+    double valueSquared = value * value;
 
-    std::vector<WeightedEvent>::iterator itev;
-    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
+    if (error == 0)
     {
-      itev->m_errorSquared = (itev->m_errorSquared * valSquared);
-      itev->m_weight *= value;
+      // Error-less calculation
+      typename std::vector<T>::iterator itev;
+      for (itev = events.begin(); itev != events.end(); itev++)
+      {
+        itev->m_errorSquared = (itev->m_errorSquared * valueSquared);
+        itev->m_weight *= value;
+      }
+    }
+    else
+    {
+      // Carry the scalar error
+      typename std::vector<T>::iterator itev;
+      for (itev = events.begin(); itev != events.end(); itev++)
+      {
+        itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
+        itev->m_weight *= value;
+      }
     }
   }
 
@@ -1683,9 +1968,8 @@ namespace DataObjects
 
 
   //------------------------------------------------------------------------------------------------
-  /** Multiply the weights in this event list by a scalar variable with an error.
-   * If the error is exactly 0.0, multiply(value) is called instead, which
-   * uses the different error propagation formula for an error-less scalar.
+  /** Multiply the weights in this event list by a scalar variable with an error;
+   * though the error can be 0.0
    *
    * The event list switches to WeightedEvent's if needed.
    * Note that if the multiplier is exactly 1.0 and the error is exactly 0.0, the list is NOT switched to WeightedEvents - nothing happens.
@@ -1702,65 +1986,63 @@ namespace DataObjects
    * Therefore, this reduces to:
    * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
    *
+   * In the case of no error:
+   *  - The weight is simply \f$ aA \f$
+   *  - The error \f$ \sigma_A \f$ becomes \f$ \sigma_{aA} = a \sigma_{A} \f$
+   *
    * @param value: multiply all weights by this amount.
    * @param error: error on 'value'. Can be 0.
    */
   void EventList::multiply(const double value, const double error)
   {
-    if (error==0.0)
-    {
-      this->multiply(value);
+    // Do nothing if multiplying by exactly one and there is no error
+    if ((value == 1.0) && (error == 0.0))
       return;
-    }
 
-    //Switch to weights if needed.
-    this->switchToWeightedEvents();
-
-    //Square of the value's error
-    double errorSquared = error * error;
-    double valueSquared = value * value;
-
-    std::vector<WeightedEvent>::iterator itev;
-    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
+    switch (eventType)
     {
-      itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
-      itev->m_weight *= value;
+    case TOF:
+      //Switch to weights if needed.
+      this->switchTo(WEIGHTED);
+      // Fall through
+
+    case WEIGHTED:
+      multiplyHelper(this->weightedEvents, value, error);
+      break;
+
+    case WEIGHTED_NOTIME:
+      multiplyHelper(this->weightedEventsNoTime, value, error);
+      break;
     }
   }
 
 
+
+
+
+
   //------------------------------------------------------------------------------------------------
-  /** Multiply the weights in this event list by a histogram.
-   * The event list switches to WeightedEvent's if needed.
-   * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
+  /** Helper method for multiplying an event list by a histogram with error
    *
-   * The formula used for calculating the error on the neutron weight is:
-   * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
-   * ... where A is the weight, and B is the scalar multiplier for the histogram bin that A is in,
-   *  \f$\sigma_X \f$ is the variance of the given variable:
-   *
+   * @param events: vector of events (with weights)
    * @param X: bins of the multiplying histogram.
    * @param Y: value to multiply the weights.
    * @param E: error on the value to multiply.
    * @throw invalid_argument if the sizes of X, Y, E are not consistent.
-   */
-  void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
+   * */
+  template<class T>
+  void EventList::multiplyHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
     //Validate inputs
     if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
       throw std::invalid_argument("EventList::multiply() was given invalid size or inconsistent histogram arrays.");
 
-    //Switch to weights if needed.
-    this->switchToWeightedEvents();
-
-    //Sorting by tof is necessary for the algorithm
-    this->sortTof();
     size_t x_size = X.size();
 
     //Iterate through all events (sorted by tof)
-    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+    typename std::vector<T>::iterator itev = findFirstEvent(events, X[0]);
     // The above can still take you to end() if no events above X[0], so check again.
-    if (itev == this->weightedEvents.end()) return;
+    if (itev == events.end()) return;
 
     //Find the first bin
     size_t bin=0;
@@ -1788,7 +2070,7 @@ namespace DataObjects
     errorSquared = error*error;
 
     //Keep going through all the events
-    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+    while ((itev != events.end()) && (bin < x_size-1))
     {
       tof = itev->tof();
       while (bin < x_size-1)
@@ -1815,34 +2097,69 @@ namespace DataObjects
   }
 
 
+
   //------------------------------------------------------------------------------------------------
-  /** Divide the weights in this event list by a histogram.
+  /** Multiply the weights in this event list by a histogram.
    * The event list switches to WeightedEvent's if needed.
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
-   * This calls multiply(X,Y,E, divide=true) to do division there.
+   *
+   * The formula used for calculating the error on the neutron weight is:
+   * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
+   * ... where A is the weight, and B is the scalar multiplier for the histogram bin that A is in,
+   *  \f$\sigma_X \f$ is the variance of the given variable:
    *
    * @param X: bins of the multiplying histogram.
    * @param Y: value to multiply the weights.
    * @param E: error on the value to multiply.
    * @throw invalid_argument if the sizes of X, Y, E are not consistent.
    */
-  void EventList::divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
+  void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
+  {
+    switch (eventType)
+    {
+    case TOF:
+      //Switch to weights if needed.
+      this->switchTo(WEIGHTED);
+      // Fall through
+
+    case WEIGHTED:
+      //Sorting by tof is necessary for the algorithm
+      this->sortTof();
+      multiplyHistogramHelper(this->weightedEvents, X, Y, E);
+      break;
+
+    case WEIGHTED_NOTIME:
+      //Sorting by tof is necessary for the algorithm
+      this->sortTof();
+      multiplyHistogramHelper(this->weightedEventsNoTime, X, Y, E);
+      break;
+    }
+  }
+
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Helper method for dividing an event list by a histogram with error
+   *
+   * @param events: vector of events (with weights)
+   * @param X: bins of the dividing histogram.
+   * @param Y: value to dividing the weights.
+   * @param E: error on the value to dividing.
+   * @throw invalid_argument if the sizes of X, Y, E are not consistent.
+   * */
+  template<class T>
+  void EventList::divideHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
     //Validate inputs
     if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
       throw std::invalid_argument("EventList::divide() was given invalid size or inconsistent histogram arrays.");
 
-    //Switch to weights if needed.
-    this->switchToWeightedEvents();
-
-    //Sorting by tof is necessary for the algorithm
-    this->sortTof();
     size_t x_size = X.size();
 
     //Iterate through all events (sorted by tof)
-    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+    typename std::vector<T>::iterator itev = findFirstEvent( events, X[0]);
     // The above can still take you to end() if no events above X[0], so check again.
-    if (itev == this->weightedEvents.end()) return;
+    if (itev == events.end()) return;
 
     //Find the first bin
     size_t bin=0;
@@ -1879,7 +2196,7 @@ namespace DataObjects
 
 
     //Keep going through all the events
-    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+    while ((itev != events.end()) && (bin < x_size-1))
     {
       tof = itev->tof();
       while (bin < x_size-1)
@@ -1918,17 +2235,39 @@ namespace DataObjects
 
 
   //------------------------------------------------------------------------------------------------
-  /** Divide the weights in this event list by an error-less scalar
+  /** Divide the weights in this event list by a histogram.
    * The event list switches to WeightedEvent's if needed.
-   * This simply calls the equivalent function: multiply(1.0/value).
+   * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
+   * This calls multiply(X,Y,E, divide=true) to do division there.
    *
-   * @param value: divide all weights by this amount.
-   * @throw std::invalid_argument if value == 0; cannot divide by zero.
+   * @param X: bins of the multiplying histogram.
+   * @param Y: value to multiply the weights.
+   * @param E: error on the value to multiply.
+   * @throw invalid_argument if the sizes of X, Y, E are not consistent.
    */
-  void EventList::divide(const double value)
+  void EventList::divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
-    this->divide(value, 0.0);
+    switch (eventType)
+    {
+    case TOF:
+      //Switch to weights if needed.
+      this->switchTo(WEIGHTED);
+      // Fall through
+
+    case WEIGHTED:
+      //Sorting by tof is necessary for the algorithm
+      this->sortTof();
+      divideHistogramHelper(this->weightedEvents, X, Y, E);
+      break;
+
+    case WEIGHTED_NOTIME:
+      //Sorting by tof is necessary for the algorithm
+      this->sortTof();
+      divideHistogramHelper(this->weightedEventsNoTime, X, Y, E);
+      break;
+    }
   }
+
 
   //------------------------------------------------------------------------------------------------
   /** Operator to divide the weights in this EventList by an error-less scalar.
@@ -1941,12 +2280,14 @@ namespace DataObjects
    */
   EventList& EventList::operator/=(const double value)
   {
-    this->divide(value, 0.0);
+    if (value == 0.0)
+      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
+    this->multiply(1.0/value, 0.0);
     return *this;
   }
 
   //------------------------------------------------------------------------------------------------
-  /** Divide the weights in this event list by a scalar with an error.
+  /** Divide the weights in this event list by a scalar with an (optional) error.
    * The event list switches to WeightedEvent's if needed.
    * This simply calls the equivalent function: multiply(1.0/value, error/(value*value)).
    *
@@ -1962,19 +2303,12 @@ namespace DataObjects
     else if (value == 1.0 && error == 0.0)
       return;
 
-    //Switch to weights if needed.
-    this->switchToWeightedEvents();
+    // We'll multiply by 1/value
+    double invValue = 1.0/value;
+    // Relative error remains the same
+    double invError = (error/value) * invValue;
 
-    //Square of the value's error
-    double valError_over_value_Squared = error * error / (value * value);
-
-    std::vector<WeightedEvent>::iterator itev;
-    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
-    {
-      double newValue = itev->m_weight / value;
-      itev->m_errorSquared = newValue * newValue * ((itev->m_errorSquared / (itev->m_weight * itev->m_weight)) + valError_over_value_Squared);
-      itev->m_weight = newValue;
-    }
+    this->multiply(invValue, invError);
   }
 
 
@@ -1983,6 +2317,29 @@ namespace DataObjects
   // ==============================================================================================
   // ----------- SPLITTING AND FILTERING ---------------------------------------
   // ==============================================================================================
+  /** Filter a vector of events into another.
+   * TODO: Make this more efficient using STL-fu.
+   * @param events :: input events
+   * @param start start time (absolute)
+   * @param stop end time (absolute)
+   * @param output reference to an event list that will be output.
+   */
+  template<class T>
+  void EventList::filterByPulseTimeHelper(std::vector<T> & events, DateAndTime start, DateAndTime stop, std::vector<T> & output)
+  {
+    typename std::vector<T>::iterator itev = events.begin();
+    //Find the first event with m_pulsetime >= start
+    while ((itev != events.end()) && (itev->m_pulsetime < start))
+      itev++;
+
+    while ((itev != events.end()) && (itev->m_pulsetime < stop))
+    {
+      //Add the copy to the output
+      output.push_back(*itev);
+      ++itev;
+    }
+  }
+
 
   //------------------------------------------------------------------------------------------------
   /** Filter this EventList into an output EventList, using
@@ -1999,43 +2356,24 @@ namespace DataObjects
     this->sortPulseTime();
     //Clear the output
     output.clear();
+    //Has to match the given type
+    output.switchTo(eventType);
     //Copy the detector IDs
     output.detectorIDs = this->detectorIDs;
     output.refX = this->refX;
 
     //Iterate through all events (sorted by pulse time)
-
-    if (has_weights)
+    switch (eventType)
     {
-      //Make sure the output is also with weights
-      output.switchToWeightedEvents();
-      std::vector<WeightedEvent>::iterator itev = this->weightedEvents.begin();
-
-      //Find the first event with m_pulsetime >= start
-      while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < start))
-        itev++;
-
-      while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < stop))
-      {
-        //Add the copy to the output
-        output.addEventQuickly(*itev);
-        ++itev;
-      }
-    }
-    else
-    {
-      std::vector<TofEvent>::iterator itev = this->events.begin();
-
-      //Find the first event with m_pulsetime >= start
-      while ((itev != this->events.end()) && (itev->m_pulsetime < start))
-        itev++;
-
-      while ((itev != this->events.end()) && (itev->m_pulsetime < stop))
-      {
-        //Add the copy to the output
-        output.addEventQuickly(*itev);
-        ++itev;
-      }
+    case TOF:
+      filterByPulseTimeHelper(this->events, start, stop, output.events);
+      break;
+    case WEIGHTED:
+      filterByPulseTimeHelper(this->weightedEvents, start, stop, output.weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      throw std::runtime_error("EventList::filterByPulseTime() called on an EventList that no longer has time information.");
+      break;
     }
 
   }
@@ -2129,10 +2467,19 @@ namespace DataObjects
     //Start by sorting the event list by pulse time.
     this->sortPulseTime();
 
-    if (has_weights)
-      filterInPlaceHelper(splitter, this->weightedEvents);
-    else
+    //Iterate through all events (sorted by pulse time)
+    switch (eventType)
+    {
+    case TOF:
       filterInPlaceHelper(splitter, this->events);
+      break;
+    case WEIGHTED:
+      filterInPlaceHelper(splitter, this->weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      throw std::runtime_error("EventList::filterInPlace() called on an EventList that no longer has time information.");
+      break;
+    }
   }
 
 
@@ -2209,6 +2556,9 @@ namespace DataObjects
    */
   void EventList::splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const
   {
+    if (eventType == WEIGHTED_NOTIME)
+      throw std::runtime_error("EventList::splitByTime() called on an EventList that no longer has time information.");
+
     //Start by sorting the event list by pulse time.
     this->sortPulseTime();
 
@@ -2219,18 +2569,26 @@ namespace DataObjects
       outputs[i]->clear();
       outputs[i]->detectorIDs = this->detectorIDs;
       outputs[i]->refX = this->refX;
-      if (has_weights)
-        outputs[i]->switchToWeightedEvents();
+      // Match the output event type.
+      outputs[i]->switchTo(eventType);
     }
 
     //Do nothing if there are no entries
     if (splitter.size() <= 0)
       return;
 
-    if (has_weights)
-      splitByTimeHelper(splitter, outputs, this->weightedEvents);
-    else
+    switch (eventType)
+    {
+    case TOF:
       splitByTimeHelper(splitter, outputs, this->events);
+      break;
+    case WEIGHTED:
+      splitByTimeHelper(splitter, outputs, this->weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      break;
+    }
+
   }
 
 

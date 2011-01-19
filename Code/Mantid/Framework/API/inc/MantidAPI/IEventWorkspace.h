@@ -7,6 +7,11 @@ namespace Mantid
 {
 namespace API
 {
+
+  /// What kind of event list is being stored
+  enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME};
+
+
   /** This class provides an interface to an EventWorkspace.
 
     @author Martyn Gigg, Tessella plc
@@ -38,7 +43,7 @@ namespace API
     /// Return the workspace typeID
     virtual const std::string id() const { return "IEventWorkspace"; }
     virtual std::size_t getNumberEvents() const = 0;
-    virtual bool eventsHaveWeights() const = 0;
+    virtual EventType getEventType() const = 0;
   };
 
   ///shared pointer to the matrix workspace base class

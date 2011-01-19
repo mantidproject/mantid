@@ -198,9 +198,9 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void do_testEventWorkspace_SameOutputWorkspace(bool weighted)
+  void do_testEventWorkspace_SameOutputWorkspace(EventType eventType)
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, weighted);
+    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, eventType);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
 
     const EventList el(test_in->getEventList(1));
@@ -259,9 +259,9 @@ public:
   }
 
 
-  void dotestEventWorkspace_DifferentOutputWorkspace(bool weighted)
+  void dotestEventWorkspace_DifferentOutputWorkspace(EventType eventType)
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, weighted);
+    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, eventType);
     AnalysisDataService::Instance().add("test_inEvent2", test_in);
 
     const EventList el(test_in->getEventList(1));
@@ -319,29 +319,39 @@ public:
     
   void testEventWorkspace_SameOutputWorkspace()
   {
-    do_testEventWorkspace_SameOutputWorkspace(false);
+    do_testEventWorkspace_SameOutputWorkspace(TOF);
   }
 
   void testEventWorkspace_SameOutputWorkspace_weighted()
   {
-    do_testEventWorkspace_SameOutputWorkspace(true);
+    do_testEventWorkspace_SameOutputWorkspace(WEIGHTED);
+  }
+
+  void testEventWorkspace_SameOutputWorkspace_weightedNoTime()
+  {
+    do_testEventWorkspace_SameOutputWorkspace(WEIGHTED_NOTIME);
   }
 
   void testEventWorkspace_DifferentOutputWorkspace()
   {
-    dotestEventWorkspace_DifferentOutputWorkspace(false);
+    dotestEventWorkspace_DifferentOutputWorkspace(TOF);
   }
 
   void testEventWorkspace_Weighted_And_DifferentOutputWorkspace()
   {
-    dotestEventWorkspace_DifferentOutputWorkspace(true);
+    dotestEventWorkspace_DifferentOutputWorkspace(WEIGHTED);
+  }
+
+  void testEventWorkspace_WeightedNoTime_And_DifferentOutputWorkspace()
+  {
+    dotestEventWorkspace_DifferentOutputWorkspace(WEIGHTED_NOTIME);
   }
 
 
 
 private:
 
-  EventWorkspace_sptr CreateEventWorkspace(int numbins, int numpixels, bool weighted)
+  EventWorkspace_sptr CreateEventWorkspace(int numbins, int numpixels, EventType theType)
   {
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numpixels,numbins,numbins-1);
@@ -365,8 +375,7 @@ private:
         //Create a list of events in order, one per bin.
         events += TofEvent((ie*BIN_DELTA)+0.5, 1);
       }
-      if (weighted)
-        events.switchToWeightedEvents();
+      events.switchTo(theType);
    }
 
 
