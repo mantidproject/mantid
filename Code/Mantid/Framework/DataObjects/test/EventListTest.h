@@ -960,18 +960,18 @@ public:
     TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
   }
 
-  void test_histogram_static_function()
-  {
-    std::vector<WeightedEvent> events;
-    events.push_back(WeightedEvent(1.0, 0, 2.0, 16.0) );
-    MantidVec X, Y, E;
-    X.push_back(0.0);
-    X.push_back(10.0);
-    EventList::histogramForWeightsHelper(events, X, Y, E);
-    TS_ASSERT_EQUALS(Y.size(), 1 );
-    TS_ASSERT_DELTA(Y[0], 2.0, 1e-5 );
-    TS_ASSERT_DELTA(E[0], 4.0, 1e-5 );
-  }
+//  void test_histogram_static_function()
+//  {
+//    std::vector<WeightedEvent> events;
+//    events.push_back(WeightedEvent(1.0, 0, 2.0, 16.0) );
+//    MantidVec X, Y, E;
+//    X.push_back(0.0);
+//    X.push_back(10.0);
+//    EventList::histogramForWeightsHelper(events, X, Y, E);
+//    TS_ASSERT_EQUALS(Y.size(), 1 );
+//    TS_ASSERT_DELTA(Y[0], 2.0, 1e-5 );
+//    TS_ASSERT_DELTA(E[0], 4.0, 1e-5 );
+//  }
 
 
 
