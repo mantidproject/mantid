@@ -248,17 +248,12 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="inst_opt" >
-              <item>
-               <property name="text" >
-                <string>LOQ</string>
-               </property>
-              </item>
-              <item>
-               <property name="text" >
-                <string>SANS2D</string>
-               </property>
-              </item>
+             <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt" >
+              <property name="techniques" >
+               <stringlist>
+                <string>Small angle scattering</string>
+               </stringlist>
+              </property>
              </widget>
             </item>
             <item>
@@ -854,185 +849,6 @@
              </item>
             </layout>
            </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout_44" >
-             <item row="0" column="0" >
-              <widget class="QGroupBox" name="groupBox_4" >
-               <property name="title" >
-                <string>Options</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_20" >
-                <item row="0" column="1" >
-                 <widget class="QCheckBox" name="verbose_check" >
-                  <property name="text" >
-                   <string>Verbose</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2" >
-                 <widget class="QCheckBox" name="log_colette" >
-                  <property name="text" >
-                   <string>Log Colette cmds</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="0" >
-                 <widget class="QCheckBox" name="plot_check" >
-                  <property name="text" >
-                   <string>Plot result</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item row="1" column="0" >
-              <widget class="QGroupBox" name="groupBox_7" >
-               <property name="title" >
-                <string>Reduce</string>
-               </property>
-               <property name="flat" >
-                <bool>false</bool>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_19" >
-                <item row="0" column="0" >
-                 <widget class="QPushButton" name="load_dataBtn" >
-                  <property name="text" >
-                   <string>Load Data</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1" >
-                 <widget class="QPushButton" name="oneDBtn" >
-                  <property name="text" >
-                   <string>1D Reduce</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2" >
-                 <widget class="QPushButton" name="twoDBtn" >
-                  <property name="text" >
-                   <string>2D Reduce</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item rowspan="2" row="0" column="1" >
-              <widget class="QGroupBox" name="groupBox_5" >
-               <property name="title" >
-                <string>Save</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout" >
-                <item rowspan="2" row="0" column="4" >
-                 <widget class="QPushButton" name="saveFilename_btn" >
-                  <property name="minimumSize" >
-                   <size>
-                    <width>0</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="toolTip" >
-                   <string>Save the output workspace to this file</string>
-                  </property>
-                  <property name="text" >
-                   <string>Browse</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="4" >
-                 <widget class="QCheckBox" name="saveCSV_check" >
-                  <property name="toolTip" >
-                   <string>Select one or more file formats</string>
-                  </property>
-                  <property name="text" >
-                   <string>CSV</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="3" >
-                 <widget class="QCheckBox" name="saveRKH_check" >
-                  <property name="toolTip" >
-                   <string>Select one or more file formats</string>
-                  </property>
-                  <property name="text" >
-                   <string>RKH</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="2" >
-                 <widget class="QCheckBox" name="saveCan_check" >
-                  <property name="toolTip" >
-                   <string>Select one or more file formats</string>
-                  </property>
-                  <property name="text" >
-                   <string>CanSAS</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1" >
-                 <widget class="QCheckBox" name="saveNex_check" >
-                  <property name="toolTip" >
-                   <string>Select one or more file formats</string>
-                  </property>
-                  <property name="text" >
-                   <string>Nexus</string>
-                  </property>
-                 </widget>
-                </item>
-                <item rowspan="2" row="0" column="0" >
-                 <widget class="QLabel" name="label_58" >
-                  <property name="toolTip" >
-                   <string>Save the output workspace to this file</string>
-                  </property>
-                  <property name="text" >
-                   <string>Filename:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item rowspan="2" row="2" column="0" >
-                 <widget class="QLabel" name="label_64" >
-                  <property name="toolTip" >
-                   <string>Select one or more file formats</string>
-                  </property>
-                  <property name="text" >
-                   <string>Formats:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="1" colspan="2" >
-                 <widget class="QPushButton" name="saveDefault_btn" >
-                  <property name="toolTip" >
-                   <string>Save the workspace from a single run file reduction</string>
-                  </property>
-                  <property name="text" >
-                   <string>Save Result</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1" colspan="3" >
-                 <widget class="QLineEdit" name="outfile_edit" >
-                  <property name="toolTip" >
-                   <string>Save the output workspace to this file</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="3" colspan="2" >
-                 <widget class="QPushButton" name="saveSel_btn" >
-                  <property name="toolTip" >
-                   <string>Save multiple workspaces</string>
-                  </property>
-                  <property name="text" >
-                   <string>Save Other</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="page_6" >
@@ -1157,6 +973,185 @@
           </layout>
          </widget>
         </widget>
+       </item>
+       <item row="4" column="0" >
+        <layout class="QGridLayout" name="gridLayout_44" >
+         <item row="0" column="0" >
+          <widget class="QGroupBox" name="groupBox_4" >
+           <property name="title" >
+            <string>Options</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_20" >
+            <item row="0" column="1" >
+             <widget class="QCheckBox" name="verbose_check" >
+              <property name="text" >
+               <string>Verbose</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QCheckBox" name="log_colette" >
+              <property name="text" >
+               <string>Log Colette cmds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" >
+             <widget class="QCheckBox" name="plot_check" >
+              <property name="text" >
+               <string>Plot result</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QGroupBox" name="groupBox_7" >
+           <property name="title" >
+            <string>Reduce</string>
+           </property>
+           <property name="flat" >
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_19" >
+            <item row="0" column="0" >
+             <widget class="QPushButton" name="load_dataBtn" >
+              <property name="text" >
+               <string>Load Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QPushButton" name="oneDBtn" >
+              <property name="text" >
+               <string>1D Reduce</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QPushButton" name="twoDBtn" >
+              <property name="text" >
+               <string>2D Reduce</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item rowspan="2" row="0" column="1" >
+          <widget class="QGroupBox" name="groupBox_5" >
+           <property name="title" >
+            <string>Save</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout" >
+            <item rowspan="2" row="0" column="4" >
+             <widget class="QPushButton" name="saveFilename_btn" >
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip" >
+               <string>Save the output workspace to this file</string>
+              </property>
+              <property name="text" >
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4" >
+             <widget class="QCheckBox" name="saveCSV_check" >
+              <property name="toolTip" >
+               <string>Select one or more file formats</string>
+              </property>
+              <property name="text" >
+               <string>CSV</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3" >
+             <widget class="QCheckBox" name="saveRKH_check" >
+              <property name="toolTip" >
+               <string>Select one or more file formats</string>
+              </property>
+              <property name="text" >
+               <string>RKH</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2" >
+             <widget class="QCheckBox" name="saveCan_check" >
+              <property name="toolTip" >
+               <string>Select one or more file formats</string>
+              </property>
+              <property name="text" >
+               <string>CanSAS</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" >
+             <widget class="QCheckBox" name="saveNex_check" >
+              <property name="toolTip" >
+               <string>Select one or more file formats</string>
+              </property>
+              <property name="text" >
+               <string>Nexus</string>
+              </property>
+             </widget>
+            </item>
+            <item rowspan="2" row="0" column="0" >
+             <widget class="QLabel" name="label_58" >
+              <property name="toolTip" >
+               <string>Save the output workspace to this file</string>
+              </property>
+              <property name="text" >
+               <string>Filename:</string>
+              </property>
+             </widget>
+            </item>
+            <item rowspan="2" row="2" column="0" >
+             <widget class="QLabel" name="label_64" >
+              <property name="toolTip" >
+               <string>Select one or more file formats</string>
+              </property>
+              <property name="text" >
+               <string>Formats:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="2" >
+             <widget class="QPushButton" name="saveDefault_btn" >
+              <property name="toolTip" >
+               <string>Save the workspace from a single run file reduction</string>
+              </property>
+              <property name="text" >
+               <string>Save Result</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="3" >
+             <widget class="QLineEdit" name="outfile_edit" >
+              <property name="toolTip" >
+               <string>Save the output workspace to this file</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" colspan="2" >
+             <widget class="QPushButton" name="saveSel_btn" >
+              <property name="toolTip" >
+               <string>Save multiple workspaces</string>
+              </property>
+              <property name="text" >
+               <string>Save Other</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -1897,7 +1892,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="3" column="1" colspan="2" >
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="floodFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -3831,6 +3826,11 @@ p, li { white-space: pre-wrap; }
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

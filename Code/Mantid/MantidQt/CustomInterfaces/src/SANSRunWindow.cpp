@@ -150,10 +150,6 @@ void SANSRunWindow::initLayout()
 
   connectChangeSignals();
 
-  // Add Python set functions as underlying data 
-  m_uiForm.inst_opt->setItemData(0, "LOQ()");
-  m_uiForm.inst_opt->setItemData(1, "SANS2D()");
-
   //Add shortened forms of step types to step boxes
   m_uiForm.wav_dw_opt->setItemData(0, "LIN");
   m_uiForm.wav_dw_opt->setItemData(1, "LOG");
@@ -565,8 +561,8 @@ bool SANSRunWindow::oldLoadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
 
-  QString instFunc =
-    m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString().trimmed();
+  QString instFunc = m_uiForm.inst_opt->currentText().trimmed();
+  instFunc += "()";
   runReduceScriptFunction("SANSReduction."+instFunc);
 
   // Use python function to read the file and then extract the fields
@@ -2590,8 +2586,8 @@ void SANSRunWindow::handleShowMaskButtonClick()
 void SANSRunWindow::handleInstrumentChange(const int index)
 {
   //Inform the Python objects of the change
-  QString instClass =
-    m_uiForm.inst_opt->itemData(index).toString();
+  QString instClass = m_uiForm.inst_opt->currentText().trimmed();
+  instClass += "()";
   runReduceScriptFunction("i.ISIS_global().set_instrument(isis_instrument."+instClass+")");
 
   fillDetectNames(m_uiForm.detbank_sel);
@@ -2618,6 +2614,7 @@ void SANSRunWindow::handleInstrumentChange(const int index)
     m_uiForm.geom_stack->setCurrentIndex(1);
 
   }
+  // flag that the user settings file needs to be loaded for this instrument
   m_cfg_loaded = false;
 }
 /** Record if the user has changed the default filename, because then we don't
