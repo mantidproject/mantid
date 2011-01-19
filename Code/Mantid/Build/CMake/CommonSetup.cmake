@@ -89,6 +89,14 @@ else ()
   message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
 endif()
 
+find_package ( PyUnitTest )
+if ( PYUNITTEST_FOUND )
+  enable_testing ()
+  message (STATUS "Found pyunittest generator")
+else()
+  message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )
+endif()
+
 ###########################################################################
 # Set a flag to indicate that this script has been called
 ###########################################################################
