@@ -120,6 +120,29 @@ std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) co
 }
 
 /**
+ * Check whether a given name is an algorithm using a case-insensitive search
+ * @param testName The name to test
+ * @returns The algorithm name in the correct case or an empty string if there is no
+ * algorithm of this name.
+ */
+std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
+{
+  std::transform(testName.begin(), testName.end(), testName.begin(), tolower);
+  const std::vector<std::string> keys = API::AlgorithmFactory::Instance().getKeys();
+  const size_t numKeys = keys.size();
+  for(int i = 0; i < numKeys; ++i)
+  {
+    std::string key = keys[i];
+    const std::string name = key.substr(0, key.find_last_of('|'));
+    std::string lowered(name.size(), ' ');
+    std::transform(name.begin(), name.end(), lowered.begin(), tolower);
+    if( lowered == testName ) return name;
+  }
+
+  return "";
+}
+
+/**
  * Creates a specified algorithm.
  * \param algName :: The name of the algorithm to execute.
   * \return Pointer to algorithm.
@@ -127,40 +150,6 @@ std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) co
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
 {
   return API::FrameworkManager::Instance().createAlgorithm(algName);
-}
-
-/**
- * Creates a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param version :: The version of the algorithm to use.
- * \return Pointer to algorithm.
- **/
-API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int& version)
-{
-  return API::FrameworkManager::Instance().createAlgorithm(algName, version);
-}
-
-/**
- * Creates a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param propertiesArray :: A separated string containing the properties and their values.
-  * \return Pointer to algorithm.
- **/
-API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
-{
-  return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray);
-}
-
-/**
- * Creates a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param propertiesArray :: A separated string containing the properties and their values.
- * \param version :: The version of the algorithm to use.
- * \return Pointer to algorithm.
- **/
-API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version)
-{
-  return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray, version);
 }
 
 /**

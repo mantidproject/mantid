@@ -98,15 +98,6 @@ namespace PythonAPI
     PyObject* m_self;
   };
 
-
-  /**
-   *Some helpful function pointers typedefs
-   */
-  typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload1)(const std::string&);
-  typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload2)(const std::string&, const int&);
-  typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload3)(const std::string&, const std::string&);
-  typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload4)(const std::string&, const std::string&, const int&);
-
   /**
    * FileFinder singleton wrapper
    *

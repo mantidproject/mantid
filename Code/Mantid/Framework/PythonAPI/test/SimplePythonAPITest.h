@@ -69,7 +69,7 @@ public:
 
     TS_ASSERT_EQUALS(line, "def setWorkingDirectory(path):");
     getline(is, line);
-    TS_ASSERT_EQUALS(line, "\tos.chdir(path)");
+    TS_ASSERT_EQUALS(line, "  os.chdir(path)");
 
     //next non-blank line should be help()
     //eat blank lines
@@ -78,12 +78,6 @@ public:
     }
     
     TS_ASSERT_EQUALS(line, std::string("def numberRows(descr, fw):"))
-    while( getline(is, line) && !line.empty() ) 
-    {
-    }
-
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, std::string("def createParamTable(param_list, dialog):"))
     while( getline(is, line) && !line.empty() ) 
     {
     }

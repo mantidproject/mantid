@@ -76,17 +76,14 @@ class DLLExport SimplePythonAPI
     const PropertyVector & properties, bool async);
   /// Writes the GUI version of the Python function definition for the given algorithm
   static void writeGUIFunctionDef(std::ostream & module, const std::string & algName, const PropertyVector & properties);
-  /// Writes the global help command
-  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
-  /// Creates a help string for the given algorithm
-  static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
-  /// Writes the given help strings to the Python module
-  static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings, 
-				const std::map<std::string, std::set<std::string> >& categories);
-  /// Write string to run algorithm asynchronously
-  static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
   /// Write the python help string for the function version of an algorithm.
   static void writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties, const StringVector& names);
+  /// Writes the global help command
+  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
+  /// Write the mantidHelp command
+  static void writeMantidHelp(std::ostream & output);
+  /// Write string to run algorithm asynchronously
+  static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
   /// Convert EOL characters to their string representation
   static std::string convertEOLToString(const std::string & value);
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])

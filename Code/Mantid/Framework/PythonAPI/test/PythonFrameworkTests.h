@@ -77,26 +77,6 @@ public:
     TS_ASSERT(mgr->deleteWorkspace("TestWorkspace1"));
   }
 	
-  void testCreateAlgorithmMethod2()
-  {
-    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(10,22,1);
-    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",ws);
-
-    Mantid::API::IAlgorithm* alg(NULL);
-    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("ConvertUnits", "TestWorkspace1;TestWorkspace1;DeltaE;Direct;10.5;0") );
-	  
-    if (alg)
-    {
-      TS_ASSERT( alg->isInitialized() );
-      TS_ASSERT( !alg->isExecuted() );
-      TS_ASSERT_EQUALS( alg->getPropertyValue("Target"), "DeltaE" );
-      TS_ASSERT_EQUALS( alg->getPropertyValue("EFixed"), "10.5" );
-    }
-
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
-	
   void testgetWorkspaceNames()
   {
     std::set<std::string> temp = mgr->getWorkspaceNames();

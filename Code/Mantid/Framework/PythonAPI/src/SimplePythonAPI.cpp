@@ -61,7 +61,7 @@ namespace Mantid
       // A simple function to change the working directory
       module << "# A wrapper for changing the directory\n"
         << "def setWorkingDirectory(path):\n"
-        << "\tos.chdir(path)\n\n";
+        << "  os.chdir(path)\n\n";
 
       // A function to sort out whether the dialog parameters are disabled or not
       if( gui )
@@ -69,89 +69,32 @@ namespace Mantid
         module << "# A utility function for the dialog routines that decides if the parameter\n"
           << "# should be added to the final list of parameters that have their widgets enabled\n"
           << "def convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
-          << "\tif param_value == None:\n"
-          << "\t\tif not param_name in disabled_list:\n"
-          << "\t\t\treturn ('', param_name)\n"
-          << "\t\telse:\n"
-          << "\t\t\treturn ('', '')\n"
-          << "\telse:\n"
-          << "\t\tstrval = makeString(param_value)\n"
-          << "\t\tif param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):\n"
-          << "\t\t\treturn (param_name + '=' + strval.lstrip('?'), param_name)\n"
-          << "\t\telse:\n"
-          << "\t\t\treturn (param_name + '=' + strval, '')\n\n";
+          << "  if param_value == None:\n"
+          << "    if not param_name in disabled_list:\n"
+          << "      return ('', param_name)\n"
+          << "    else:\n"
+          << "      return ('', '')\n"
+          << "  else:\n"
+          << "    strval = makeString(param_value)\n"
+          << "    if param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):\n"
+          << "      return (param_name + '=' + strval.lstrip('?'), param_name)\n"
+          << "    else:\n"
+          << "      return (param_name + '=' + strval, '')\n\n";
       }
 
       // A couple of functions to aid in the formatting of help commands
       module << "def numberRows(descr, fw):\n"
-        << "\tdes_len = len(descr)\n"
-        << "\tif des_len == 0:\n"
-        << "\t\treturn (1, [''])\n"
-        << "\tnrows = 0\n"
-        << "\ti = 0\n"
-        << "\tdescr_split = []\n"
-        << "\twhile i < des_len:\n"
-        << "\t\tnrows += 1\n"
-        << "\t\tdescr_split.append(descr[i:i+fw])\n"
-        << "\t\ti += fw\n"
-        << "\treturn (nrows, descr_split)\n\n";
-
-      // A rather complicated function to format the help into a table
-      module << "def createParamTable(param_list, dialog):\n"
-        << "\tflw = 100\n"
-        << "\tcol_widths = [flw/5, 6, 8, 6, flw/3, flw/4]\n"
-        << "\ttopline = '|' + 'Param Name'.center(col_widths[0]) + '|' + 'In/Out'.center(col_widths[1]) + '|' + 'Type'.center(col_widths[2]) + '|' + 'Req\\'d?'.center(col_widths[3]) + '|' + 'Description'.center(col_widths[4])  + '|' + 'Allowed Values'.center(col_widths[5]) + '\\n'\n"
-        << "\trow_delim = '-' * len(topline) + '\\n'\n"
-        << "\thelpstr =  row_delim + topline + row_delim\n"
-        << "\tif dialog == True:\n"
-        << "\t\tparam_list.append(['Message','Input','string','','A message to display', ''])\n"
-        << "\t\tparam_list.append(['Enable','Input','string','','Comma-separated list of param names to keep enabled in the dialog', ''])\n"
-        << "\t\tparam_list.append(['Disable','Input','string','','Comma-separated list of param names to disable in the dialog', ''])\n"
-        << "\tfor pstr in param_list:\n"
-        << "\t\tndes, descr_split = numberRows(pstr[4], col_widths[4])\n"
-        << "\t\tnall, allow_split = numberRows(pstr[5], col_widths[5])\n"
-        << "\t\tif ndes  == 1 and nall == 1:\n"
-        << "\t\t\thelpstr += ''.join(['|' + pstr[s].center(col_widths[s]) for s in range(0, 6)]) + '\\n'\n"
-        << "\t\telse:\n"
-        << "\t\t\tmidline = 0\n"
-        << "\t\t\ttot_rows = max(ndes, nall)\n"
-        << "\t\t\tif bool(tot_rows % 2):\n"
-        << "\t\t\t\tmidline = (tot_rows + 1) / 2\n"
-        << "\t\t\telse:\n"
-        << "\t\t\t\tmidline = tot_rows / 2\n"
-        << "\t\t\tfor r in range(0, tot_rows):\n"
-        << "\t\t\t\tline = []\n"
-        << "\t\t\t\tif ndes == nall:\n"
-        << "\t\t\t\t\tif r != midline - 1:\n"
-        << "\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
-        << "\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n" 
-        << "\t\t\t\telif ndes > nall:\n"
-        << "\t\t\t\t\tif r < nall:\n"
-        << "\t\t\t\t\t\tif r != midline - 1:\n"
-        << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
-        << "\t\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n" 
-        << "\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\tif r != midline - 1:\n"
-        << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], '']\n"
-        << "\t\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], '']\n"
-        << "\t\t\t\telse:\n"
-        << "\t\t\t\t\tif r < ndes:\n"
-        << "\t\t\t\t\t\tif r != midline - 1:\n"
-        << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
-        << "\t\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n"
-        << "\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\tif r != midline - 1:\n"
-        << "\t\t\t\t\t\t\tline = ['','','','', '',allow_split[r]]\n"
-        << "\t\t\t\t\t\telse:\n"
-        << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2], pstr[3],'', allow_split[r]]\n"
-        << "\t\t\t\thelpstr += ''.join(['|' + line[s].center(col_widths[s]) for s in  range(0,6)]) + '\\n'\n"
-        << "\t\thelpstr += row_delim\n"
-        << "\treturn helpstr\n\n";
-
+        << "  des_len = len(descr)\n"
+        << "  if des_len == 0:\n"
+        << "    return (1, [''])\n"
+        << "  nrows = 0\n"
+        << "  i = 0\n"
+        << "  descr_split = []\n"
+        << "  while i < des_len:\n"
+        << "    nrows += 1\n"
+        << "    descr_split.append(descr[i:i+fw])\n"
+        << "    i += fw\n"
+        << "  return (nrows, descr_split)\n\n";
 
       //Algorithm keys
       using namespace Mantid::API;
@@ -162,7 +105,7 @@ namespace Mantid
       createVersionMap(vMap, algKeys);
       writeGlobalHelp(module, vMap, gui);
       //Function definitions for each algorithm
-      IndexVector helpStrings;
+      //IndexVector helpStrings;
       std::map<std::string, std::set<std::string> > categories;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
         ++vIter)
@@ -176,15 +119,6 @@ namespace Mantid
         if( gui ) 
         {
           writeGUIFunctionDef(module, name, orderedProperties);
-        }
-
-        // Help strings
-        std::transform(name.begin(), name.end(), name.begin(), tolower);
-        helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false)));
-        //The help for the dialog functions if necessary
-        if( gui )
-        {
-          helpStrings.push_back(make_pair(name + "dialog", createHelpString(vIter->first, orderedProperties, true)));
         }
 
         // Get the category and save it to our map
@@ -210,8 +144,7 @@ namespace Mantid
         }
       }
 
-      //Help strings
-      writeFunctionHelp(module, helpStrings, categories);
+      writeMantidHelp(module);
       module.close();
 
     }
@@ -255,14 +188,14 @@ namespace Mantid
     void SimplePythonAPI::writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties,
                                               const StringVector& names)
     {
-      os << "\t\"\"\"\n";
+      os << "  \"\"\"\n";
 
       size_t size = properties.size();
       Mantid::Kernel::Property *prop;
       for (size_t i = 0; i < size; ++i)
       {
         prop = properties[i];
-        os << "\t" << names[i] << "("
+        os << "  " << names[i] << "("
            << Mantid::Kernel::Direction::asText(prop->direction());
         if (!prop->isValid().empty())
           os << ":req";
@@ -270,7 +203,7 @@ namespace Mantid
         std::set<std::string> allowed = prop->allowedValues();
         if (!prop->documentation().empty() || !allowed.empty())
         {
-          os << "\t    " << prop->documentation();
+          os << "      " << prop->documentation();
           if (!allowed.empty())
           {
             os << " [";
@@ -286,7 +219,7 @@ namespace Mantid
           os << "\n";
         }
       }
-      os << "\t\"\"\"\n";
+      os << "  \"\"\"\n";
     }
 
     /**
@@ -324,7 +257,7 @@ namespace Mantid
 
       writeFunctionPyHelp(os, properties, sanitizedNames);
 
-      os << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n";
+      os << "  algm = mantid.createAlgorithm(\"" << algm << "\")\n";
 
       // Redo loop for setting values
       pIter = properties.begin();
@@ -334,31 +267,31 @@ namespace Mantid
         std::string pvalue = sanitizedNames[iarg];
         if( iarg < iMand )
         {
-          os << "\talgm.setPropertyValue(\"" << (*pIter)->name() 
+          os << "  algm.setPropertyValue(\"" << (*pIter)->name() 
             << "\", makeString(" << pvalue << ").lstrip('? '))\n";
         }
         else
         {
-          os << "\tif " << pvalue << " != None:\n"
-            << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" 
+          os << "  if " << pvalue << " != None:\n"
+            << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" 
             << pvalue << ").lstrip('? '))\n";
         }
       }
 
       if( async )
       {
-        writeAsyncFunctionCall(os, algm, "\t");
-        os << "\tif result == False:\n"
-          << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
+        writeAsyncFunctionCall(os, algm, "  ");
+        os << "  if result == False:\n"
+          << "    sys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
       }
       else
       {
-        os << "\talgm.setRethrows(True)\n";
-        os << "\talgm.execute()\n";
+        os << "  algm.setRethrows(True)\n";
+        os << "  algm.execute()\n";
       }
 
       // Return the IAlgorithm object
-      os << "\treturn mtd._createAlgProxy(algm)\n\n";
+      os << "  return mtd._createAlgProxy(algm)\n\n";
     }
 
     /**
@@ -386,32 +319,32 @@ namespace Mantid
       }
       //end of algorithm function parameters but add other arguments
       os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
-        << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n"
-        << "\tenabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
-        << "\tdisabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
-        << "\tvalues = '|'\n"
-        << "\tfinal_enabled = ''\n\n";
+        << "  algm = mantid.createAlgorithm(\"" << algm << "\")\n"
+        << "  enabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
+        << "  disabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
+        << "  values = '|'\n"
+        << "  final_enabled = ''\n\n";
 
       pIter = properties.begin();
       for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
       {
-        os << "\tvalpair = convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
+        os << "  valpair = convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
         << ", enabled_list, disabled_list)\n"
-          << "\tvalues += valpair[0] + '|'\n"
-          << "\tfinal_enabled += valpair[1] + ','\n\n";
+          << "  values += valpair[0] + '|'\n"
+          << "  final_enabled += valpair[1] + ','\n\n";
       }
 
-      os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
+      os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
         << "\" , values, Message, final_enabled)\n"
-        << "\tif dialog == True:\n";
+        << "  if dialog == True:\n";
 
-      writeAsyncFunctionCall(os, algm, "\t\t");
+      writeAsyncFunctionCall(os, algm, "    ");
 
-      os << "\telse:\n"
-        << "\t\tsys.exit('Information: Script execution cancelled')\n"
-        << "\tif result == False:\n"
-        << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
-        << "\treturn mtd._createAlgProxy(algm)\n\n";
+      os << "  else:\n"
+        << "    sys.exit('Information: Script execution cancelled')\n"
+        << "  if result == False:\n"
+        << "    sys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
+        << "  return mtd._createAlgProxy(algm)\n\n";
     }
 
     /**
@@ -424,166 +357,68 @@ namespace Mantid
     {
       os << "# The help command with no parameters\n";
       os << "def mtdGlobalHelp():\n";
-      os << "\thelpmsg =  \"The algorithms available are:\\n\"\n";
+      os << "  helpmsg =  \"The algorithms available are:\\n\"\n";
       VersionMap::const_iterator vIter = vMap.begin();
       for( ; vIter != vMap.end(); ++vIter )
       {
         if( vIter->second == 1 )
-          os << "\thelpmsg += \"\\t" << vIter->first << "\\n\"\n"; 
+          os << "  helpmsg += '   " << vIter->first << "\\n'\n"; 
         else {
-          os << "\thelpmsg += \"\\t" << vIter->first << " "; 
+          os << "  helpmsg += '   " << vIter->first << " "; 
           int i = 0;
           while( ++i <= vIter->second )
           {
             os << "v" << i << " ";
           }
-          os << "\\n\"\n";
+          os << "\\n'\n";
         }
       }
-      os << "\thelpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n";
+      os << "  helpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n";
       if( gui )
       {
-        os << "\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
+        os << "  helpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
           << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n";
       }
-      os << "\tprint helpmsg,\n"
+      os << "  print helpmsg,\n"
         << "\n";
     }
 
     /**
-    * Construct a  help command for a specific algorithm
-    * @param algm The name of the algorithm
-    * @param properties The list of properties
-    * @param dialog A boolean indicating whether this is a dialog function or not
-    * @return A help string for users
-    */
-    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
+     * Write the mantidHelp command
+     * @param os The stream to use to write the command
+     */
+    void SimplePythonAPI::writeMantidHelp(std::ostream & os)
     {
-      std::ostringstream os;
-      os << "\t\tparams_list = [";
-      std::string argument_list(algm);
-      if( dialog )
-      {
-        argument_list += "Dialog";
-      }
-      argument_list += "(";
+      os << "\n";
+      os << "def mantidHelp(cmd = None):\n"
+	 << "  if cmd == None or cmd == '':\n"
+	 << "    mtdGlobalHelp()\n"
+	 << "    return\n"
+	 << "  try:\n"
+	 << "    cmd = cmd.func_name\n"
+	 << "  except AttributeError:\n"
+	 << "    pass\n"
+	 << "  try:\n"
+	 << "    # Try exact case first as it will be quicker\n"
+	 << "    exec('help(%s)' % cmd)\n"
+	 << "    return\n"
+	 << "  except NameError:\n"
+	 << "    alg_name = mtd.isAlgorithmName(cmd)\n"
+	 << "  if alg_name == '':\n"
+	 << "    print 'mtdHelp(): \"%s\" not found in help list' % cmd\n"
+	 << "  else:\n"
+	 << "    exec('help(%s)' % alg_name)\n";
 
-      PropertyVector::const_iterator pIter = properties.begin();
-      PropertyVector::const_iterator pEnd = properties.end();
-      for( ; pIter != pEnd ; )
-      {
-        Mantid::Kernel::Property *prop = *pIter;
-        argument_list += removeCharacters((*pIter)->name(), "");
-        os << "['" << prop->name() << "','" << Mantid::Kernel::Direction::asText(prop->direction()) << "', '" 
-          << prop->type() << "','";
-        if( !prop->isValid().empty() )
-        {
-          os << "X";
-        }
-        os << "', '" << removeCharacters(prop->documentation(),"\n\r", true) << "','";
-        std::set<std::string> allowed = prop->allowedValues();
-        if( !allowed.empty() )
-        {
-          std::set<std::string>::const_iterator sIter = allowed.begin();
-          std::set<std::string>::const_iterator sEnd = allowed.end();
-          for( ; sIter != sEnd ; )
-          {
-            os << (*sIter);
-            if( ++sIter != sEnd ) os << ", ";
-          }
-        }
-        os << "']";
-        if( ++pIter != pEnd ) 
-        {
-          os << ",";
-          argument_list += ",";
-        }
-      }
-      if( dialog )
-      {
-        argument_list += ",Message,Enable,Disable";
-      }
-      argument_list += ")";
-
-      os << "]\n"
-        << "\t\thelpstring = '\\nUsage: ' + '" << argument_list << "\\n\\n'\n"
-        << "\t\thelpstring += createParamTable(params_list,";
-      if( dialog )
-      {
-        os << "True";
-      }
-      else
-      {
-        os << "False";
-      }
-      os << ")\n"
-        << "\t\tprint helpstring,\n";
-      return os.str();
-    }
-
-    /**
-    * Write the help function that takes a command as an argument
-    * @param os The stream to use for the output
-    * @param helpStrings A map of function names to help strings
-    * @param categories The list categories and their associated algorithms
-    */
-    void SimplePythonAPI::writeFunctionHelp(std::ostream & os, const IndexVector & helpStrings, 
-      const std::map<std::string, std::set<std::string> > & categories)
-    {
-      if ( helpStrings.empty() ) return;
-
-      os << "def mtdHelp(cmd = None):\n";
-
-      os << "\tif cmd == None or cmd == '':\n"
-        << "\t\tmtdGlobalHelp()\n"
-        << "\t\treturn\n";
-      os << "\n\ttry:\n"
-          << "\t\tcmd = cmd.func_name\n"
-          << "\texcept ValueError:\n"
-          << "\t\tpass\n";
-      os << "\n\tcmd = string.lower(cmd)\n";
-      //Functons help
-      SimplePythonAPI::IndexVector::const_iterator mIter = helpStrings.begin();
-      SimplePythonAPI::IndexVector::const_iterator mEnd = helpStrings.end();
-      os << "\tif cmd == '" << (*mIter).first << "':\n" 
-        << (*mIter).second;
-      while( ++mIter != mEnd )
-      {
-        os << "\telif cmd == '" << (*mIter).first << "':\n" 
-          << (*mIter).second;
-      }
-
-      //Categories
-      std::map<std::string, std::set<std::string> >::const_iterator cat_end = categories.end();
-      for( std::map<std::string, std::set<std::string> >::const_iterator cat_itr = categories.begin(); cat_itr != cat_end; ++cat_itr )
-      {
-        std::string topcategory = cat_itr->first;
-        std::string lowercase = topcategory;
-        std::transform(lowercase.begin(), lowercase.end(), lowercase.begin(), tolower);
-        os << std::string("\telif cmd == '") << lowercase << std::string("':\n\t\thelpstr = 'The algorithms in the ") 
-          << topcategory << std::string(" category are:\\n'\n");		
-        std::set<std::string>::const_iterator alg_end = cat_itr->second.end();
-        for( std::set<std::string>::const_iterator alg_itr = cat_itr->second.begin(); alg_itr != alg_end; ++alg_itr )
-        {
-          os << std::string("\t\thelpstr += '\t") << (*alg_itr) << "\\n'\n";
-        }
-        os << "\t\tprint helpstr,\n";
-      }
-
-
-
-      // Finally add a "default" clause if the name cannot be found
-      os << "\telse:\n"
-        << "\t\tprint 'mtdHelp() - ' + cmd + ' not found in help list'\n\n";
-
+      os << "\n";
       //Aliases
-      os << "# Help function aliases\n"
-        << "mtdhelp = mtdHelp\n"
-        << "Mtdhelp = mtdHelp\n"
-        << "MtdHelp = mtdHelp\n"
-        << "mantidhelp = mtdHelp\n"
-        << "mantidHelp = mtdHelp\n"
-        << "MantidHelp = mtdHelp\n";
+      os << "# Some case variations on the mantidHelp function\n"
+	 << "mantidhelp = mantidHelp\n"
+	 << "mantidHelp = mantidHelp\n"
+	 << "MantidHelp = mantidHelp\n"
+	 << "mtdhelp = mantidHelp\n"
+	 << "mtdHelp = mantidHelp\n"
+	 << "Mtdhelp = mantidHelp\n"
+	 << "MtdHelp = mantidHelp\n";
     }
 
     /**

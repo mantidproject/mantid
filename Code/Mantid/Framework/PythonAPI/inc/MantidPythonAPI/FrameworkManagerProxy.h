@@ -91,16 +91,12 @@ public:
   std::string getConfigProperty(const std::string & key) const;
   //@}
 
-  /** @name Algorithm control */
+  /** @name Algorithms */
   //@{
+  ///  * Check whether a given name is an algorithm using a case-insensitive search
+  std::string isAlgorithmName(std::string name) const;
   /// Creates and instance of an algorithm
   API::IAlgorithm* createAlgorithm(const std::string& algName);
-  /// Creates and instance of an algorithm of a specific version
-  API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version);
-  // Creates an instance of an algorithm and sets the properties provided
-  API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
-  // Creates an instance of an algorithm of a specific version and sets the properties provided
-  API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version);
   //@}
   
   /** @name Workspace related functions */ 
