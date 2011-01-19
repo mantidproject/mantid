@@ -378,13 +378,13 @@ class ISISInstrument(instrument.Instrument):
         
 class LOQ(ISISInstrument):
     
+    _NAME = 'LOQ'
     # Number of digits in standard file name
     run_number_width = 5
     WAV_RANGE_MIN = 2.2
     WAV_RANGE_MAX = 10.0
     
     def __init__(self, wrksp_name=None):
-        self._NAME = 'LOQ'
         super(LOQ, self).__init__(wrksp_name)
 
 
@@ -640,6 +640,46 @@ class SANS2D(ISISInstrument):
 
     def get_marked_dets(self):
         return self._marked_dets
+    
+    #TODO: remove load_detector_logs() once centre finding has been replaced
+    def load_detector_logs(self,log_name,file_path):
+        """
+            Needed until centre finding is replaced
+        """
+        self._marked_dets = []
+        log_name = log_name[0:6] + '0' + log_name[7:]
+        filename = os.path.join(file_path, log_name + '.log')
+
+        # Build a dictionary of log data 
+        logvalues = {}
+        logvalues['Rear_Det_X'] = '0.0'
+        logvalues['Rear_Det_Z'] = '0.0'
+        logvalues['Front_Det_X'] = '0.0'
+        logvalues['Front_Det_Z'] = '0.0'
+        logvalues['Front_Det_Rot'] = '0.0'
+        try:
+            file_handle = open(filename, 'r')
+        except IOError:
+            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + filename + "\" could not be loaded.")
+            return None
+        
+        for line in file_handle:
+            parts = line.split()
+            if len(parts) != 3:
+                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
+            component = parts[1]
+            if component in logvalues.keys():
+                logvalues[component] = parts[2]
+
+        file_handle.close()
+        
+        self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
+        self.FRONT_DET_X = float(logvalues['Front_Det_X'])
+        self.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
+        self.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
+        self.REAR_DET_X = float(logvalues['Rear_Det_X'])
+
+        return logvalues
 
 if __name__ == '__main__':
     pass
