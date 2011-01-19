@@ -46,6 +46,7 @@
 
   <instrument name="LOQ">
     <technique>Small angle scattering</technique>
+    <technique>Steve W key remove before Feb2011</technique>
   </instrument>
 
   <instrument name="MAPS" shortname="MAP">
@@ -118,6 +119,7 @@
 
   <instrument name="SANS2D" zeropadding="8">
     <technique>Small angle scattering</technique>
+    <technique>Steve W key remove before Feb2011</technique>
   </instrument>
   
   <instrument name="WISH" zeropadding="8">

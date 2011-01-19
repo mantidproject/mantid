@@ -251,7 +251,7 @@
              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt" >
               <property name="techniques" >
                <stringlist>
-                <string>Small angle scattering</string>
+                <string>Steve W key remove before Feb2011</string>
                </stringlist>
               </property>
              </widget>
