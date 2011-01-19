@@ -80,7 +80,7 @@ void ConvertUnits::exec()
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != NULL)
   {
-    g_log.information() << "Executing ConvertUnits for Eventworkspace" << std::endl;
+    //g_log.information() << "Executing ConvertUnits for Eventworkspace" << std::endl;
     this->execEvent();
     return;
   }
@@ -203,7 +203,7 @@ void ConvertUnits::exec()
  */
 void ConvertUnits::execEvent()
 {
-  g_log.information("Processing event workspace");
+  //g_log.information("Processing event workspace");
 
   const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
   EventWorkspace_const_sptr inputWS

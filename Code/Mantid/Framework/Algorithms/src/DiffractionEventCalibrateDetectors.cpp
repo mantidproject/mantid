@@ -189,11 +189,11 @@ namespace Algorithms
       throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
     }
 
-    IAlgorithm_sptr alg3 = createSubAlgorithm("AlignDetectors");
+    IAlgorithm_sptr alg3 = createSubAlgorithm("ConvertUnits");
     alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
     alg3->setPropertyValue("OutputWorkspace", outname);
-    alg3->setPropertyValue("CalibrationFile", outputFile);
-    //alg3->setPropertyValue("Target","dSpacing");
+    //alg3->setPropertyValue("CalibrationFile", outputFile);
+    alg3->setPropertyValue("Target","dSpacing");
     try
     {
       alg3->execute();
@@ -321,16 +321,29 @@ namespace Algorithms
       }
     }
 
-
     // set-up minimizer
 
     std::string inname = getProperty("InputWorkspace");
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
     std::string instname = inst->getName();
-    PARALLEL_FOR1(matrixInWS)
+
+    IAlgorithm_sptr algS = createSubAlgorithm("Sort");
+    algS->setPropertyValue("InputWorkspace",inname);
+    algS->setPropertyValue("SortBy", "Time of Flight");
+    try
+    {
+      algS->execute();
+    }
+    catch (std::runtime_error&)
+    {
+      g_log.information("Unable to successfully run Sort sub-algorithm");
+      throw std::runtime_error("Error while executing Sort as a sub algorithm.");
+    }
+    matrixInWS=algS->getProperty("InputWorkspace");
+
+    Progress prog(this,0.0,1.0,detList.size());
     for (int det=0; det < detList.size(); det++)
     {
-      PARALLEL_START_INTERUPT_REGION
       std::string par[5];
       par[0]=detList[det]->getName();
       par[1]=inname;
@@ -371,7 +384,6 @@ namespace Algorithms
       s = gsl_multimin_fminimizer_alloc (T, nopt);
       gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
 
-      //Progress prog(this,0.0,1.0,maxIterations);
       do
       {
         iter++;
@@ -382,7 +394,6 @@ namespace Algorithms
 
         size = gsl_multimin_fminimizer_size (s);
         status = gsl_multimin_test_size (size, 1e-2);
-        //prog.report();
 
       }
       while (status == GSL_CONTINUE && iter < maxIterations && s->fval != -0.000 );
@@ -419,9 +430,8 @@ namespace Algorithms
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
-      PARALLEL_END_INTERUPT_REGION
+      prog.report();
     }
-    PARALLEL_CHECK_INTERUPT_REGION
 
     return;
   }
