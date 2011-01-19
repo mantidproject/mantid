@@ -145,7 +145,7 @@ void SANSAddFiles::setOutDir(std::string dir)
   m_outDir = QString::fromStdString(dir);
   m_SANSForm->summedPath_lb->setText(OUT_MSG+m_outDir);
 }
-/** Update the output directory edit box if the Mantid system output
+/** Update the output directory label if the Mantid system output
 *  directory has changed
 *  @param pDirInfo a pointer to an object with the output directory name in it
 */
@@ -285,9 +285,9 @@ void SANSAddFiles::new2AddBrowse()
 {
   QSettings prevVals;
   prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns");
-  //get the previous data input directory or, if there wasn't one, use the directory entered on the main form
-  QString dir =
-    prevVals.value("InPath", m_SANSForm->datadir_edit->text()).toString();
+  //get the previous data input directory or, if there wasn't one, the first directory of on the default load path
+  std::string d0 = ConfigService::Instance().getDataSearchDirs()[0];
+  QString dir = prevVals.value("InPath",QString::fromStdString(d0)).toString();
   
 	QString fileFilter = "Files (";
 

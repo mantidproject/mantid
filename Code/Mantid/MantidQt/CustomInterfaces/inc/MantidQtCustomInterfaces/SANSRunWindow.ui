@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>724</width>
-    <height>450</height>
+    <width>719</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -73,90 +73,32 @@
       <attribute name="title" >
        <string>Run Numbers</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_21" >
-       <item row="0" column="0" colspan="2" >
-        <layout class="QHBoxLayout" name="horizontalLayout_12" >
-         <item>
-          <widget class="QLabel" name="label_7" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize" >
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text" >
-            <string>Data directory</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="datadir_edit" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize" >
-            <size>
-             <width>200</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="data_dirBtn" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text" >
-            <string>Browse</string>
-           </property>
-           <property name="autoDefault" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
+      <layout class="QGridLayout" name="gridLayout_47" >
+       <item row="0" column="0" >
+        <layout class="QGridLayout" name="gridLayout_46" >
+         <item row="0" column="0" >
           <widget class="QLabel" name="label_11" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-             <horstretch>0</horstretch>
+             <horstretch>39</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize" >
+            <size>
+             <width>39</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text" >
-            <string>User file</string>
+            <string>User file: </string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1" colspan="2" >
           <widget class="QLineEdit" name="userfile_edit" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -167,15 +109,12 @@
              <height>0</height>
             </size>
            </property>
-           <property name="alignment" >
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="3" >
           <widget class="QPushButton" name="userfileBtn" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -188,9 +127,76 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="outDirs_lb" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+             <horstretch>50</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize" >
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize" >
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text" >
+            <string>Data Directory:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLabel" name="saveDir_lb" >
+           <property name="text" >
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="plusDirs_lb" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+             <horstretch>55</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize" >
+            <size>
+             <width>55</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text" >
+            <string>+? others</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" >
+          <widget class="QPushButton" name="data_dirBtn" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text" >
+            <string>Manage Directories</string>
+           </property>
+           <property name="autoDefault" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
-       <item row="1" column="0" colspan="2" >
+       <item row="1" column="0" >
         <layout class="QHBoxLayout" name="horizontalLayout_8" >
          <item>
           <widget class="QRadioButton" name="single_mode_btn" >
@@ -270,78 +276,18 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="0" >
-        <widget class="QGroupBox" name="groupBox_4" >
-         <property name="title" >
-          <string>Options</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_20" >
-          <item row="0" column="1" >
-           <widget class="QCheckBox" name="verbose_check" >
-            <property name="text" >
-             <string>Verbose</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QCheckBox" name="log_colette" >
-            <property name="text" >
-             <string>Log Colette cmds</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" >
-           <widget class="QCheckBox" name="plot_check" >
-            <property name="text" >
-             <string>Plot result</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="5" column="0" >
-        <widget class="QGroupBox" name="groupBox_7" >
-         <property name="title" >
-          <string>Reduce</string>
-         </property>
-         <property name="flat" >
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_19" >
-          <item row="0" column="0" >
-           <widget class="QPushButton" name="load_dataBtn" >
-            <property name="text" >
-             <string>Load Data</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QPushButton" name="oneDBtn" >
-            <property name="text" >
-             <string>1D Reduce</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QPushButton" name="twoDBtn" >
-            <property name="text" >
-             <string>2D Reduce</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2" >
+       <item row="2" column="0" >
         <widget class="Line" name="line_2" >
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2" >
+       <item row="3" column="0" >
         <widget class="QStackedWidget" name="mode_stack" >
+         <property name="lineWidth" >
+          <number>0</number>
+         </property>
          <property name="currentIndex" >
           <number>0</number>
          </property>
@@ -908,6 +854,185 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout_44" >
+             <item row="0" column="0" >
+              <widget class="QGroupBox" name="groupBox_4" >
+               <property name="title" >
+                <string>Options</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_20" >
+                <item row="0" column="1" >
+                 <widget class="QCheckBox" name="verbose_check" >
+                  <property name="text" >
+                   <string>Verbose</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2" >
+                 <widget class="QCheckBox" name="log_colette" >
+                  <property name="text" >
+                   <string>Log Colette cmds</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0" >
+                 <widget class="QCheckBox" name="plot_check" >
+                  <property name="text" >
+                   <string>Plot result</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item row="1" column="0" >
+              <widget class="QGroupBox" name="groupBox_7" >
+               <property name="title" >
+                <string>Reduce</string>
+               </property>
+               <property name="flat" >
+                <bool>false</bool>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_19" >
+                <item row="0" column="0" >
+                 <widget class="QPushButton" name="load_dataBtn" >
+                  <property name="text" >
+                   <string>Load Data</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" >
+                 <widget class="QPushButton" name="oneDBtn" >
+                  <property name="text" >
+                   <string>1D Reduce</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2" >
+                 <widget class="QPushButton" name="twoDBtn" >
+                  <property name="text" >
+                   <string>2D Reduce</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item rowspan="2" row="0" column="1" >
+              <widget class="QGroupBox" name="groupBox_5" >
+               <property name="title" >
+                <string>Save</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout" >
+                <item rowspan="2" row="0" column="4" >
+                 <widget class="QPushButton" name="saveFilename_btn" >
+                  <property name="minimumSize" >
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="toolTip" >
+                   <string>Save the output workspace to this file</string>
+                  </property>
+                  <property name="text" >
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="4" >
+                 <widget class="QCheckBox" name="saveCSV_check" >
+                  <property name="toolTip" >
+                   <string>Select one or more file formats</string>
+                  </property>
+                  <property name="text" >
+                   <string>CSV</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="3" >
+                 <widget class="QCheckBox" name="saveRKH_check" >
+                  <property name="toolTip" >
+                   <string>Select one or more file formats</string>
+                  </property>
+                  <property name="text" >
+                   <string>RKH</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="2" >
+                 <widget class="QCheckBox" name="saveCan_check" >
+                  <property name="toolTip" >
+                   <string>Select one or more file formats</string>
+                  </property>
+                  <property name="text" >
+                   <string>CanSAS</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1" >
+                 <widget class="QCheckBox" name="saveNex_check" >
+                  <property name="toolTip" >
+                   <string>Select one or more file formats</string>
+                  </property>
+                  <property name="text" >
+                   <string>Nexus</string>
+                  </property>
+                 </widget>
+                </item>
+                <item rowspan="2" row="0" column="0" >
+                 <widget class="QLabel" name="label_58" >
+                  <property name="toolTip" >
+                   <string>Save the output workspace to this file</string>
+                  </property>
+                  <property name="text" >
+                   <string>Filename:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item rowspan="2" row="2" column="0" >
+                 <widget class="QLabel" name="label_64" >
+                  <property name="toolTip" >
+                   <string>Select one or more file formats</string>
+                  </property>
+                  <property name="text" >
+                   <string>Formats:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1" colspan="2" >
+                 <widget class="QPushButton" name="saveDefault_btn" >
+                  <property name="toolTip" >
+                   <string>Save the workspace from a single run file reduction</string>
+                  </property>
+                  <property name="text" >
+                   <string>Save Result</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1" colspan="3" >
+                 <widget class="QLineEdit" name="outfile_edit" >
+                  <property name="toolTip" >
+                   <string>Save the output workspace to this file</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="3" colspan="2" >
+                 <widget class="QPushButton" name="saveSel_btn" >
+                  <property name="toolTip" >
+                   <string>Save multiple workspaces</string>
+                  </property>
+                  <property name="text" >
+                   <string>Save Other</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="page_6" >
@@ -1033,118 +1158,6 @@
          </widget>
         </widget>
        </item>
-       <item rowspan="2" row="4" column="1" >
-        <widget class="QGroupBox" name="groupBox_5" >
-         <property name="title" >
-          <string>Save</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout" >
-          <item rowspan="2" row="0" column="4" >
-           <widget class="QPushButton" name="saveFilename_btn" >
-            <property name="minimumSize" >
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip" >
-             <string>Save the output workspace to this file</string>
-            </property>
-            <property name="text" >
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4" >
-           <widget class="QCheckBox" name="saveCSV_check" >
-            <property name="toolTip" >
-             <string>Select one or more file formats</string>
-            </property>
-            <property name="text" >
-             <string>CSV</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3" >
-           <widget class="QCheckBox" name="saveRKH_check" >
-            <property name="toolTip" >
-             <string>Select one or more file formats</string>
-            </property>
-            <property name="text" >
-             <string>RKH</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2" >
-           <widget class="QCheckBox" name="saveCan_check" >
-            <property name="toolTip" >
-             <string>Select one or more file formats</string>
-            </property>
-            <property name="text" >
-             <string>CanSAS</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" >
-           <widget class="QCheckBox" name="saveNex_check" >
-            <property name="toolTip" >
-             <string>Select one or more file formats</string>
-            </property>
-            <property name="text" >
-             <string>Nexus</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="0" column="0" >
-           <widget class="QLabel" name="label_58" >
-            <property name="toolTip" >
-             <string>Save the output workspace to this file</string>
-            </property>
-            <property name="text" >
-             <string>Filename:</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="2" column="0" >
-           <widget class="QLabel" name="label_64" >
-            <property name="toolTip" >
-             <string>Select one or more file formats</string>
-            </property>
-            <property name="text" >
-             <string>Formats:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" colspan="2" >
-           <widget class="QPushButton" name="saveDefault_btn" >
-            <property name="toolTip" >
-             <string>Save the workspace from a single run file reduction</string>
-            </property>
-            <property name="text" >
-             <string>Save Result</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" colspan="3" >
-           <widget class="QLineEdit" name="outfile_edit" >
-            <property name="toolTip" >
-             <string>Save the output workspace to this file</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3" colspan="2" >
-           <widget class="QPushButton" name="saveSel_btn" >
-            <property name="toolTip" >
-             <string>Save multiple workspaces</string>
-            </property>
-            <property name="text" >
-             <string>Save Other</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2" >
@@ -1152,7 +1165,7 @@
        <string>Analysis Details</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13" >
-       <item row="0" column="0" >
+       <item row="1" column="0" >
         <layout class="QHBoxLayout" name="horizontalLayout_4" >
          <item>
           <widget class="QGroupBox" name="limits_group" >
@@ -1641,7 +1654,7 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item row="0" column="1" >
+       <item row="1" column="1" >
         <layout class="QVBoxLayout" name="verticalLayout_8" >
          <item>
           <widget class="QGroupBox" name="groupBox_14" >
@@ -1825,7 +1838,7 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item rowspan="2" row="1" column="0" >
+       <item rowspan="2" row="3" column="0" >
         <widget class="QGroupBox" name="groupBox_6" >
          <property name="title" >
           <string>Efficiency correction</string>
@@ -1906,7 +1919,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="1" column="1" >
+       <item row="3" column="1" >
         <layout class="QHBoxLayout" name="horizontalLayout_6" >
          <item>
           <widget class="QGroupBox" name="groupBox_3" >
@@ -2027,7 +2040,7 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item row="2" column="1" >
+       <item row="4" column="1" >
         <spacer name="verticalSpacer_2" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -2036,6 +2049,58 @@ p, li { white-space: pre-wrap; }
           <size>
            <width>20</width>
            <height>69</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0" >
+        <spacer name="verticalSpacer_5" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="0" >
+        <spacer name="verticalSpacer_11" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="0" >
+        <spacer name="verticalSpacer_12" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="1" >
+        <spacer name="verticalSpacer_13" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
           </size>
          </property>
         </spacer>

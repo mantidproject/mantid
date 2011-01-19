@@ -131,11 +131,10 @@ class ISISReducer(SANSReducer):
     
     user_file_path = property(get_user_path, set_user_path, None, None)
 
-    def set_run_number(self, data_file, workspace):
+    def set_run_number(self, workspace):
         """
             The run number is a number followed by a . and then
             the extension of the run file to load
-            @param data_file: name of the file to be processed
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
         """

@@ -188,6 +188,8 @@ namespace Mantid
       std::string defaultConfig() const;
       /// Writes out a fresh user properties file
       void createUserPropertiesFile() const;
+      /// Adds the passed path to the end of the list of data search paths
+      void appendDataSearchDir(const std::string & path);
       /// Convert any relative paths to absolute ones and store them locally so that
       /// if the working directory is altered the paths will not be affected
       void convertRelativeToAbsolute();
@@ -197,6 +199,8 @@ namespace Mantid
       void cacheDataSearchPaths();
       /// Create the storage of the user search directories
       void cacheUserSearchPaths();
+      /// Returns true if the path is in the data search list
+      bool isADataSearchDir(const std::string & path) const;
 
       // Forward declaration of inner class
       template <class T>

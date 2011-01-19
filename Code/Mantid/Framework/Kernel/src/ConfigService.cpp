@@ -466,6 +466,46 @@ void ConfigServiceImpl::cacheUserSearchPaths()
 }
 
 /**
+ *  The path that is passed should be as returned by makeAbsolute() and
+ *  this function will return true if that path is in the list
+ *  @param path the absolute path name to search for
+ *  @return true if the path was found
+ */
+bool ConfigServiceImpl::isADataSearchDir(const std::string & path) const
+{
+  std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
+  for( ; it != m_DataSearchDirs.end(); ++it)
+  {
+    if ( path == *it )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ *  Adds the passed path to the end of the list of data search paths
+ *  the path name must be absolute
+ *  @param path the absolute path to add
+ */
+void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
+{
+  if ( ! isADataSearchDir(path) )
+  {
+    std::string newSearchString;
+    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
+    for( ; it != m_DataSearchDirs.end(); ++it)
+    {
+      newSearchString.append(*it);
+      newSearchString.append(";");
+    }
+    newSearchString.append(path);
+    setString("datasearch.directories", newSearchString);
+  }
+}
+
+/**
  * writes a basic placeholder user.properties file to disk
  * any errors are caught and logged, but not propagated
  */
@@ -726,10 +766,14 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   {
     cacheDataSearchPaths();
   }
-
-  if (key == "usersearch.directories")
+  else if (key == "usersearch.directories")
   {
     cacheUserSearchPaths();
+  }
+  else if (key == "defaultsave.directory")
+  {
+    //Some recursion here! As this call calls the current function
+    appendDataSearchDir(m_AbsolutePaths[key]);
   }
 
   // If this key exists within the loaded configuration then mark that its value will have

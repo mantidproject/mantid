@@ -173,7 +173,7 @@ def AssignSample(sample_run, reload = True, period = -1):
 
     sample_wksp, logs = ISIS_global().data_loader.execute(
                                             ISIS_global(), None)
-    ISIS_global().set_run_number(sample_run, sample_wksp)
+    ISIS_global().set_run_number(sample_wksp)
     return sample_wksp, logs
 
 def SetCentre(XVAL, YVAL):

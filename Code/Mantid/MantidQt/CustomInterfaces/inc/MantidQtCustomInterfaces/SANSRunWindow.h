@@ -15,6 +15,7 @@
 #include "Poco/NObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid
 {
@@ -79,6 +80,8 @@ signals:
 private:
   ///Mode enumeration
   enum RunMode { SingleMode = 0, BatchMode };
+
+
   /// Initialize the layout
   virtual void initLayout();
   /// Init Python environment
@@ -268,7 +271,9 @@ private:
   typedef QHash<const QCheckBox * const, QString>::const_iterator SavFormatsConstIt;
   /// A flag indicating there were warning messsages in the log
   bool m_log_warnings;
-  // An observer for a delete notification from Mantid
+  /// Get notified when the system input directories have changed
+  Poco::NObserver<SANSRunWindow, Mantid::Kernel::ConfigValChangeNotification> m_newInDir;
+  /// An observer for a delete notification from Mantid
   Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
   /// A map of S2D detector names to QLabel pointers
   QList<QHash<QString, QLabel*> > m_s2d_detlabels;
@@ -290,8 +295,10 @@ private:
   QAction *m_batch_paste;
   ///A clear action for the batch table
   QAction *m_batch_clear;
-
-  bool setDataDir();
+  
+  void upDateDataDir();
+  bool exportDataDir();
+  void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

@@ -431,18 +431,25 @@ class LOQ(ISISInstrument):
 
 
 class SANS2D(ISISInstrument): 
-
+    """
+        The SANS2D instrument has movable detectors whose locations have to
+        be read in from the workspace logs (Run object)
+    """ 
+    _NAME = 'SANS2D'
     # Number of digits in standard file name
     run_number_width = 8
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
     def __init__(self, wrksp_name=None):
-        self._NAME = 'SANS2D'
         super(SANS2D, self).__init__(wrksp_name)
         
         self._marked_dets = []
-    
+        # set to true once the detector positions have been moved to the locations given in the sample logs
+        self.corrections_applied = False
+        # a warning is issued if the can logs are not the same as the sample 
+        self._can_logs = {}
+
     def set_up_for_run(self, base_runno):
         """
             Handles changes required when a sample is loaded, both generic
@@ -506,12 +513,47 @@ class SANS2D(ISISInstrument):
             #does this reflect the detector being immovable?
             return [0.0,0.0], [xshift, yshift]
         
-    # Load the detector logs
-    def load_detector_logs(self,log_name,file_path):
-    # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
+    def get_detector_log(self, logs, period=-1):
+        """
+            Reads information about the state of the instrument on the current run
+            from the log files
+            @param logs: a workspace pointer for NeXus files or a .log file for raw files
+        """
         self._marked_dets = []
-        log_name = log_name[0:6] + '0' + log_name[7:]
-        filename = os.path.join(file_path, log_name + '.log')
+
+        try:
+            logvalues = self._get_sample_logs(logs, period)
+        except AttributeError:
+            #this happens if we were passed a filename, as raw files have .log files
+            logvalues = self._get_dot_log_file(logs)
+        
+        return logvalues
+
+    def _get_sample_logs(self, p_wksp, period):
+        """
+            Reads information about the state of the instrument on the information
+            stored in the sample
+            @param logs: a workspace pointer
+            @return the values that were read as a dictionary
+        """
+        samp = p_wksp.getSampleDetails()
+
+        logvalues = {}
+        logvalues['Front_Det_Z'] = self._get_log(samp, 'Front_Det_Z', period) 
+        logvalues['Front_Det_X'] = self._get_log(samp, 'Front_Det_X', period)
+        logvalues['Front_Det_Rot'] = self._get_log(samp, 'Front_Det_Rot', period)
+        logvalues['Rear_Det_Z'] = self._get_log(samp, 'Rear_Det_Z', period)
+        logvalues['Rear_Det_X'] = self._get_log(samp, 'Rear_Det_X', period)
+
+        return logvalues
+
+    def _get_log(self, log_data, log_name, period):
+        if period == -1:
+            return float(log_data.getLogData(log_name).value)
+        else:
+            return float(log_data.getLogData(log_name).value[period])
+        
+    def _get_dot_log_file(self, log_file):
 
         # Build a dictionary of log data 
         logvalues = {}
@@ -521,28 +563,77 @@ class SANS2D(ISISInstrument):
         logvalues['Front_Det_Z'] = '0.0'
         logvalues['Front_Det_Rot'] = '0.0'
         try:
-            file_handle = open(filename, 'r')
+            file_handle = open(log_file, 'r')
         except IOError:
-            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + filename + "\" could not be loaded.")
+            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + log_file + "\" could not be loaded.")
             return None
         
         for line in file_handle:
             parts = line.split()
             if len(parts) != 3:
-                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
+                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + log_file + '" for line \n"' + line + '"\nEntry skipped')
             component = parts[1]
             if component in logvalues.keys():
                 logvalues[component] = parts[2]
 
         file_handle.close()
-        
+
+        return logvalues
+    
+    def apply_detector_logs(self, logvalues):
+        #apply the corrections that came from the logs
         self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
         self.FRONT_DET_X = float(logvalues['Front_Det_X'])
         self.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
         self.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
         self.REAR_DET_X = float(logvalues['Rear_Det_X'])
+        self.corrections_applied = True
+        if len(self._can_logs) > 0:
+            self.check_can_logs(self._can_logs)
 
-        return logvalues
+    def check_can_logs(self, new_logs):
+        """
+            Tests if applying the corrections from the passed logvalues
+            would give the same result as the corrections that were
+            already made
+            @param new_logs: the new values to check are equivalent
+            @return: True if the are the same False if not
+        """
+        if not self.corrections_applied:
+            #the check needs to wait until there's something to compare against
+            self._can_logs = new_logs
+
+        if len(new_logs) == 0:
+            return False
+
+        existing_values = []
+        existing_values.append(self.FRONT_DET_Z)
+        existing_values.append(self.FRONT_DET_X)
+        existing_values.append(self.FRONT_DET_ROT)
+        existing_values.append(self.REAR_DET_Z)
+        existing_values.append(self.REAR_DET_X)
+
+        new_values = []
+        new_values.append(float(new_logs['Front_Det_Z']))
+        new_values.append(float(new_logs['Front_Det_X']))
+        new_values.append(float(new_logs['Front_Det_Rot']))
+        new_values.append(float(new_logs['Rear_Det_Z']))
+        new_values.append(float(new_logs['Rear_Det_X']))
+        
+        errors = 0
+        corr_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
+        for i in range(0, len(existing_values)):
+            if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
+                mantid.sendLogMessage('::SANS::Warning: values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
+                    ', can value is ' + str(new_values[i]))
+                errors += 1
+
+                self.append_marked(corr_names[i])
+        
+        #the check has been done clear up
+        self._can_logs = {}
+
+        return errors == 0
     
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)

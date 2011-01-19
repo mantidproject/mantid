@@ -44,7 +44,6 @@ private:
   void initLayout();
   void setToolTips();
   QListWidgetItem* insertListFront(const QString &text);
-  ///The directory where files are saved is defined by the config data service
   void changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
   void setOutDir(std::string dir);
   void readSettings();

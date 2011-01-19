@@ -58,7 +58,13 @@ class LoadRun(ReductionStep):
         self.ext = ''
         self.shortrun_no = -1
         
-    def load(self):
+    def _load(self, inst = None, is_can=False):
+        """
+            Load a workspace and read the logs into the passed instrument reference
+            @param inst: a reference to the current instrument
+            @param iscan: set this to True for can runs 
+            @return: name of the workspace, log values, number of periods in the workspace
+        """
         workspace = self._get_workspace_name()
 
         
@@ -70,15 +76,20 @@ class LoadRun(ReductionStep):
             if self._period != self.UNSET_PERIOD:
                 workspace = self._leaveSinglePeriod(workspace)
 
+            log_file = alg.getPropertyValue("Filename")
+
+            SANS2D_log_file = log_file.rpartition('.')[0]+'.log'
         else:
             #this is the generic situation
             if not self._period == self.UNSET_PERIOD:
-                alg = Load(self._data_file, workspace,
+                Load(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self._period)
             else:
                 #no specific period was requested
-                alg = Load(self._data_file, workspace,
+                Load(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+
+            SANS2D_log_file = mtd[workspace]
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
@@ -88,10 +99,20 @@ class LoadRun(ReductionStep):
             RenameWorkspace(workspace, period_definitely_inc)
             workspace = period_definitely_inc 
         
-        # Return the file path actually used to load the data
-        fullpath = alg.getPropertyValue("Filename")
+        log = None
+        if (not inst is None) and inst.name() == 'SANS2D':
+            #this instrument has logs to be loaded 
+            try:
+                if numPeriods > 1:
+                    log = inst.get_detector_log(SANS2D_log_file, self._period)
+                else:
+                    log = inst.get_detector_log(SANS2D_log_file)
+            except:
+                #transmission files, don't have logs 
+                if not self._is_trans:
+                    raise
 
-        return [ os.path.dirname(fullpath), workspace, numPeriods]        
+        return workspace, numPeriods, log        
 
     def _get_workspace_name(self, optional_entry_no=True):
         """
@@ -113,7 +134,7 @@ class LoadRun(ReductionStep):
     # Helper function
     def _assignHelper(self, reducer):
         if self._data_file == '' or self._data_file.startswith('.'):
-            return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
+            return '', '', -1
 
         try:
             run_no, logname, data_file = self._extract_run_details(
@@ -123,15 +144,15 @@ class LoadRun(ReductionStep):
             raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
         if run_no == '':
-            return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
+            return '', '', -1
 
         workspace = self._get_workspace_name()
         #this always contains the period number
         period_definitely_inc = self._get_workspace_name(False)        
         if self._reload == False and mantid.workspaceExists(workspace):
-            return SANSUtility.WorkspaceDetails(workspace, run_no),False,'','', -1
+            return workspace, '', -1
         if self._reload == False and mantid.workspaceExists(period_definitely_inc):
-            return SANSUtility.WorkspaceDetails(period_definitely_inc, run_no),False,'','', -1
+            return period_definitely_inc, '', -1
 
         self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
@@ -148,20 +169,18 @@ class LoadRun(ReductionStep):
                 else:
                     self._spec_min = None
                     self._spec_max = 8
-                [filepath, wkspname, nPeriods] = self.load()
+                wkspname, nPeriods, logs = self._load(reducer.instrument)
             except RuntimeError, err:
                 mantid.sendLogMessage("::SANS::Warning: "+str(err))
-                return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
+                return '', '', -1
         else:
             try:
-                [filepath, wkspname, nPeriods] = self.load()
+                wkspname, nPeriods, logs = self._load(reducer.instrument)
             except RuntimeError, details:
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
-                return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-
-        inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
+                return '', '', -1
         
-        return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
+        return wkspname, nPeriods, logs
 
     def _leaveSinglePeriod(self, workspace):
         groupW = mantid[workspace]
@@ -196,8 +215,6 @@ class LoadRun(ReductionStep):
     
     def _clearPrevious(self, inWS, others = []):
         if inWS != None:
-            if type(inWS) == SANSUtility.WorkspaceDetails:
-                inWS = inWS.getName()
             if mantid.workspaceExists(inWS) and (not inWS in others):
                 mantid.deleteWorkspace(inWS)
                 
@@ -279,16 +296,14 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
 
     def execute(self, reducer, workspace):
         if self._trans_name not in [None, '']:
-            loader = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
-            trans_ws, dummy1, dummy2, dummy3, self.TRANS_SAMPLE_N_PERIODS = \
-                loader._assignHelper(reducer)
-            self.trans_name = trans_ws.getName()
+            load = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
+            self.trans_name, self.TRANS_SAMPLE_N_PERIODS, dummy = \
+                                        load._assignHelper(reducer)
         
         if self._direct_name not in [None, '']:
-            loader = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
-            direct_sample_ws, dummy1, dummy2, dummy3, self.DIRECT_SAMPLE_N_PERIODS = \
-                loader._assignHelper(reducer)
-            self.direct_name = direct_sample_ws.getName()
+            load = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
+            self.direct_name, self.DIRECT_SAMPLE_N_PERIODS, dummy = \
+                                        load._assignHelper(reducer)
 
         return self.trans_name, self.direct_name
 
@@ -309,7 +324,7 @@ class CanSubtraction(LoadRun):
             @param fit_method: FitMethod parameter for CalculateTransmission (Linear or Log)
         """
         super(CanSubtraction, self).__init__(can_run, reload=reload, entry=period)
-        self.SCATTER_CAN = None
+        self._scatter_can = None
 
     def assign_can(self, reducer, reload = True):
         #TODO: get rid of any reference to the instrument object as much as possible
@@ -323,58 +338,24 @@ class CanSubtraction(LoadRun):
 
             return '', '()'
     
-        self.SCATTER_CAN ,reset, logname,filepath, self._CAN_N_PERIODS = \
-            self._assignHelper(reducer)
-        if self.SCATTER_CAN.getName() == '':
-            mantid.sendLogMessage('::SANS::Warning: Unable to load sans can run, cannot continue.')
+        self._scatter_can, self._CAN_N_PERIODS, logs = self._assignHelper(
+                                                                 reducer)
+        if self._scatter_can == '':
+            mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
             return '','()'
-        if reset == True:
-            self._CAN_SETUP  = None
 
-
-        try:
-            logvalues = reducer.instrument.load_detector_logs(logname,filepath)
-            if logvalues == None:
-                _issueWarning("Can logs could not be loaded, using sample values.")
-                return self.SCATTER_CAN.getName(), "()"
-        except AttributeError:
-            if not reducer.instrument.name() == 'LOQ' : raise
-    
         self.PERIOD_NOS["SCATTER_CAN"] = self._period
     
-        if (reducer.instrument.name() == 'LOQ'):
-            return self.SCATTER_CAN.getName(), ""
+        if reducer.instrument.name() == 'LOQ':
+            return self._scatter_can, ""
+
+        if reducer.instrument.name() == 'SANS2D':
+            if logs is None:
+                _issueWarning("Can logs could not be loaded, using sample values.")
+                return self._scatter_can, "()"
+            reducer.instrument.check_can_logs(logs)           
         
-        smp_values = []
-        front_det = reducer.instrument.getDetector('front')
-        smp_values.append(reducer.instrument.FRONT_DET_Z + front_det.z_corr)
-        smp_values.append(reducer.instrument.FRONT_DET_X + front_det.x_corr)
-        smp_values.append(reducer.instrument.FRONT_DET_ROT + front_det.rot_corr)
-        rear_det = reducer.instrument.getDetector('rear')
-        smp_values.append(reducer.instrument.REAR_DET_Z + rear_det.z_corr)
-        smp_values.append(reducer.instrument.REAR_DET_X + rear_det.x_corr)
-    
-        # Check against sample values and warn if they are not the same but still continue reduction
-        if len(logvalues) == 0:
-            return  self.SCATTER_CAN.getName(), logvalues
-        
-        can_values = []
-        can_values.append(float(logvalues['Front_Det_Z']) + front_det.z_corr)
-        can_values.append(float(logvalues['Front_Det_X']) + front_det.x_corr)
-        can_values.append(float(logvalues['Front_Det_Rot']) + front_det.rot_corr)
-        can_values.append(float(logvalues['Rear_Det_Z']) + rear_det.z_corr)
-        can_values.append(float(logvalues['Rear_Det_X']) + rear_det.x_corr)
-    
-    
-        det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
-        for i in range(0, 5):
-            if math.fabs(smp_values[i] - can_values[i]) > 5e-04:
-                mantid.sendLogMessage("::SANS::Warning: values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
-                                  ' , Can = ' + str(can_values[i]))
-                reducer.instrument.append_marked(det_names[i])
-        # End of AssignCan code
-        
-        return self.SCATTER_CAN.getName(), logvalues
+        return self._scatter_can, logs
 
     def execute(self, reducer, workspace):
         """
@@ -386,9 +367,8 @@ class CanSubtraction(LoadRun):
         beamcoords = reducer._beam_finder.get_beam_center()
 
         # Put the components in the correct positions
-        currentDet = reducer.instrument.cur_detector().name() 
         reducer.instrument.set_component_positions(
-                self.SCATTER_CAN.getName(), beamcoords[0], beamcoords[1])
+                self._scatter_can, beamcoords[0], beamcoords[1])
         mantid.sendLogMessage('::SANS:: Initialized can workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
 
         # Create a run details object
@@ -404,8 +384,7 @@ class CanSubtraction(LoadRun):
         
         tmp_smp = workspace+"_sam_tmp"
         RenameWorkspace(workspace, tmp_smp)
-        # Run correction function
-        # was  Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], finding_centre)
+
         tmp_can = workspace+"_can_tmp"
 
         # Can correction
@@ -421,11 +400,11 @@ class CanSubtraction(LoadRun):
 
         norm_step_ind = reduce_can.step_num(reduce_can.norm_mon)
         reduce_can.norm_mon = NormalizeToMonitor(
-                                        raw_ws = self.SCATTER_CAN.getName())
+                                        raw_ws = self._scatter_can)
         reduce_can._reduction_steps[norm_step_ind] = reduce_can.norm_mon
            
         #set the workspace that we've been setting up as the one to be processed 
-        reduce_can.set_process_single_workspace(self.SCATTER_CAN.getName())
+        reduce_can.set_process_single_workspace(self._scatter_can)
 
         #this will be the first command that is run in the new chain
         start = reduce_can.step_num(reduce_can.flood_file)
@@ -776,8 +755,7 @@ class LoadSample(LoadRun):
 
     def __init__(self, sample=None, reload=True, entry=-1):
         super(LoadSample, self).__init__(sample, reload=reload, entry=entry)
-        self.SCATTER_SAMPLE = None
-        self._SAMPLE_SETUP = None
+        self._scatter_sample = None
         self._SAMPLE_RUN = None
         self._SAMPLE_N_PERIODS = -1
         
@@ -791,22 +769,21 @@ class LoadSample(LoadRun):
         if self._data_file is None:
             self._data_file = reducer.get_sample()
         # Code from AssignSample
-        self._clearPrevious(self.SCATTER_SAMPLE)
+        self._clearPrevious(self._scatter_sample)
         self._SAMPLE_N_PERIODS = -1
         
         if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
-            self._SAMPLE_SETUP = None
             self._SAMPLE_RUN = ''
-            self.SCATTER_SAMPLE = None
+            self._scatter_sample = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
-        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer)
-        if self.SCATTER_SAMPLE.getName() == '':
-            raise RuntimeError('Unable to load SANS sample run, cannot continue.')
-        if reset == True:
-            self._SAMPLE_SETUP = None
+        self._scatter_sample, self._SAMPLE_N_PERIODS, logs =\
+            self._assignHelper(reducer)
 
-        self.uncropped  = self.SCATTER_SAMPLE.getName()
+        if self._scatter_sample == '':
+            raise RuntimeError('Unable to load SANS sample run, cannot continue.')
+
+        self.uncropped  = self._scatter_sample
         p_run_ws = mantid[self.uncropped]
         
         if p_run_ws.isGroup():
@@ -820,20 +797,17 @@ class LoadSample(LoadRun):
         
         reducer.instrument.set_up_for_run(run_num)
 
-        logvalues = None
-        try:
-            logvalues = reducer.instrument.load_detector_logs(logname,filepath)
-            if logvalues == None:
-                mantid.deleteWorkspace(self.SCATTER_SAMPLE.getName())
+        if reducer.instrument.name() == 'SANS2D':
+            if logs == None:
+                mantid.deleteWorkspace(self._scatter_sample)
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
-        except AttributeError:
-            if not reducer.instrument.name() == 'LOQ': raise
+            reducer.instrument.apply_detector_logs(logs)           
         
         self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
 
         reducer.wksp_name = self.uncropped
         
-        return reducer.wksp_name, logvalues
+        return reducer.wksp_name, logs
 
 class MoveComponents(ReductionStep):
     """
