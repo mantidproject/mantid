@@ -953,7 +953,7 @@ class MultipleProjects(object):
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test") and (fname.startswith("DataHandling") ): #!TODO
+            if fname.endswith("Test"): #and (fname.startswith("DataHandling") ): #!TODO
                 make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
                 pj = TestProject(fname, os.path.join(path, fname), make_command)
                 print "... Populating project %s ..." % fname
