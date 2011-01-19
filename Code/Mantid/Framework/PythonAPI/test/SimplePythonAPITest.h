@@ -23,20 +23,7 @@ public:
 
   SimplePythonAPITest()
   {
-    using namespace Mantid::Kernel;
-
     Mantid::API::FrameworkManager::Instance();
-
-    // Ugly hacking needed to get the correct configuration loaded
-    // Needed because for any executable with 'python' in the name, Mantid
-    // looks in the directory you're running from instead of the normal
-    // place of next to the executable!
-    // I've resisted the temptation to just rename the executable to PithonAPITest!
-
-    const std::string propFile(getDirectoryOfExecutable()+"Mantid.properties");
-    ConfigService::Instance().updateConfig(propFile);
-    LibraryManager::Instance().OpenAllLibraries(getDirectoryOfExecutable(), false);
-    ConfigService::Instance().updateFacilities();
   }
 
   void testCreateModule()
