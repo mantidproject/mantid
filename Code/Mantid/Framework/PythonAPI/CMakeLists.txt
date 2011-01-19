@@ -18,7 +18,8 @@ set ( INC_FILES inc/MantidPythonAPI/api_exports.h
 set ( TEST_FILES test/PythonFrameworkTests.h
                  test/SimplePythonAPITest.h )
 
-set ( TEST_PY_FILES test/ImportTest.py )
+set ( TEST_PY_FILES test/ImportTest.py
+                    test/NumpyTest.py )
 
 # Add local dependencies
 set ( Boost_USE_DEBUG_PYTHON TRUE )
