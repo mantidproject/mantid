@@ -1,5 +1,5 @@
 #ifndef MANTID_DATAHANDLING_COMPRESSEVENTS_H_
-#define MANTID_DATAHANDLING_GROUPDETECTORS_H_
+#define MANTID_DATAHANDLING_COMPRESSEVENTS_H_
 
 //----------------------------------------------------------------------
 // Includes
