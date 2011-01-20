@@ -95,9 +95,10 @@ add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (ICat)
 
-# Unit test helper package 
+# Unit test helper packages 
 if ( CXXTEST_FOUND )
   add_subdirectory (TestHelpers)
+  add_subdirectory (UserAlgorithms)
 endif ()
 
 if ( MAKE_VATES )

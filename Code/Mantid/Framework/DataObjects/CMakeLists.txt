@@ -36,7 +36,7 @@ set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/WeightedEventNoTimeTest.h
 		 test/EventWorkspaceTest.h
 		 test/Histogram1DTest.h
-		 #test/LibraryManagerTest.h # TODO fails because UserAlgorithms not built
+		 test/LibraryManagerTest.h
 		 test/ManagedDataBlock2DTest.h
 		 test/ManagedWorkspace2DTest.h
 		 test/RefAxisTest.h
@@ -63,7 +63,9 @@ target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
   include_directories ( ../TestHelpers/inc )
-  target_link_libraries( DataObjectsTest DataObjects TestHelpers )
+  target_link_libraries( DataObjectsTest 
+                         DataObjects TestHelpers UserAlgorithms 
+  )
   add_dependencies ( FrameworkTests DataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataObjectsTest PROPERTY FOLDER "FrameworkTests" )
