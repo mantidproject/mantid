@@ -63,7 +63,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
     // Find out the size of the parent
     XLength = parent->dataX(0).size();
     YLength = parent->blocksize();
-    NVectors = parent->size() / YLength;
+    NVectors = parent->getNumberHistograms();
   }
 
   // If the parent is an EventWorkspace, we want it to spawn a Workspace2D (or managed variant) as a child
