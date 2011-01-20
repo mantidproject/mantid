@@ -64,7 +64,7 @@ void Qxy::exec()
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
   
   // Set up the progress bar reporting object, and limit updates to 100 times or less
-  Progress prog(this, 0.05, 1.0, numSpec, numSpec/100);
+  Progress prog(this, 0.05, 1.0, numSpec, 10000/numSpec);
 
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)

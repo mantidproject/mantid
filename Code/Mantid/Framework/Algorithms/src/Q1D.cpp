@@ -84,8 +84,8 @@ void Q1D::exec()
   const Axis* const spectraAxis = inputWS->getAxis(1);
   int newSpectrumNo = -1;
 
-  // Set up the progress reporting object
-  Progress progress(this,0.0,1.0,numSpec);
+  // One progress update for every one percent increase in progress
+  Progress progress(this,0.0,1.0,numSpec, 10000/numSpec);
 
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
@@ -240,6 +240,8 @@ void Q1D::exec()
     const double fractional = errY[k] ? std::sqrt(errE[k])/errY[k] : 0.0;
     EOut[k] = fractional*YOut[k];
   }
+
+  outputWS->isDistribution(true);
 }
 
 } // namespace Algorithms

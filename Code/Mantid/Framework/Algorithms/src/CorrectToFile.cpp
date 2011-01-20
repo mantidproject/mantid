@@ -14,7 +14,8 @@ using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectToFile)
-const double CorrectToFile::LOAD_TIME = 0.75;
+// estimate that this algorithm will spend half it's time loading the file
+const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init()
 {
@@ -73,11 +74,10 @@ void CorrectToFile::exec()
     const bool divide = (operation == "Divide") ? true : false;
     double Yfactor,correctError;
 
-    const int nOutSpec = outputWS->size();
-    Progress prg(this,LOAD_TIME,1.0, nOutSpec);
-    const int prog_int = nOutSpec/100 > 0 ? nOutSpec/100 : 1;
-    int counter(0);
-
+    const int nOutSpec = outputWS->getNumberHistograms();
+    // want 1 notificaion for every 1 percent increase in progress
+    Progress prg(this,LOAD_TIME,1.0, nOutSpec, (1-LOAD_TIME)*10000/nOutSpec);
+    
     MatrixWorkspace::iterator outIt(*outputWS);
     for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
     {
@@ -137,12 +137,7 @@ void CorrectToFile::exec()
       outIt->X() = inIt->X();
       if (histogramData) outIt->X2() = inIt->X2();
       
-      if ( counter % prog_int == 0 )
-      {
-        prg.report("CorrectToFile: applying " + operation);
-      }
-      counter ++;
-
+      prg.report("CorrectToFile: applying " + operation);
     }
   }
 
