@@ -18,8 +18,8 @@ set ( INC_FILES inc/MantidPythonAPI/api_exports.h
 set ( TEST_FILES test/PythonFrameworkTests.h
                  test/SimplePythonAPITest.h )
 
-set ( TEST_PY_FILES test/ImportTest.py
-                    test/NumpyTest.py )
+set ( TEST_PY_FILES test/ImportUTest.py
+                    test/NumpyUTest.py )
 
 # Add local dependencies
 set ( Boost_USE_DEBUG_PYTHON TRUE )
@@ -73,6 +73,7 @@ if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
   target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects TestHelpers)
+  add_dependencies ( PythonAPITest Algorithms )
   add_dependencies ( FrameworkTests PythonAPITest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET PythonAPITest PROPERTY FOLDER "FrameworkTests" )
@@ -81,6 +82,6 @@ endif ()
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} )
-  add_dependencies ( VanillaPythonTest.py PythonAPI )
+  add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonTest.py )
 endif ()
