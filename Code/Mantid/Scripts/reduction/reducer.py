@@ -59,23 +59,23 @@ def validate_step(f):
         if isinstance(algorithm, types.FunctionType):
             # If the algorithm is a function, in which case
             # we expect it to produce an algorithm proxy
-            proxy = algorithm(*args, execute=False, **kwargs)
-            if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
-                raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
-                    self.algm = proxy
+                    self.algm = algorithm
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
-                    _algm = self.algm._getHeldObject()
+                    proxy = self.algm(*args, execute=False, **kwargs)
+                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
+                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
+                    _algm = proxy._getHeldObject()
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
-                    _argspec = self.algm.keys()                       
+                    _argspec = proxy.keys()                       
                     if "InputWorkspace" in _argspec:
+                        print "setting input"
                         _algm.setPropertyValue("InputWorkspace", inputworkspace)
                     if "OutputWorkspace" in _argspec:
                         _algm.setPropertyValue("OutputWorkspace", outputworkspace)
-                    
-                    mantidsimple.execute_algorithm(self.algm)
+                    mantidsimple.execute_algorithm(proxy)
                     
             return f(reducer, _AlgorithmStep())
         else:
