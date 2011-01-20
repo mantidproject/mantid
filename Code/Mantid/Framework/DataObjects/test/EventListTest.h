@@ -51,7 +51,7 @@ public:
   //--- Basics  ----
   //==================================================================================
 
-  void testInit()
+  void test_Init()
   {
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);
@@ -95,6 +95,66 @@ public:
     rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 19);
   }
+
+  template<class T>
+  void do_test_memory_handling(EventList & el2, typename std::vector<T> & events)
+  {
+    typename std::vector<T> mylist;
+    mylist.push_back(T(45));
+    mylist.push_back(T(89));
+    mylist.push_back(T(34));
+    el2 += mylist;
+    TS_ASSERT_EQUALS(events.size(), 3);
+    TS_ASSERT_EQUALS(events.capacity(), 3);
+    mylist.push_back(TofEvent(88,88));
+    el2 += mylist;
+    TS_ASSERT_EQUALS(events.size(), 7);
+    TS_ASSERT_EQUALS(events.capacity(), 7);
+    el2.clear();
+    TS_ASSERT_EQUALS(events.size(), 0);
+    TS_ASSERT_EQUALS(events.capacity(), 0);
+  }
+
+  void test_Clear_AndOthers_FreesUpMemory()
+  {
+    // We want to make sure that clearing really releases the vector memory.
+    EventList el2;
+    el2 = EventList();
+    do_test_memory_handling( el2, el2.getEvents() );
+
+    el2 = EventList();
+    el2.switchTo(WEIGHTED);
+    do_test_memory_handling( el2, el2.getWeightedEvents() );
+
+    el2 = EventList();
+    el2.switchTo(WEIGHTED_NOTIME);
+    do_test_memory_handling( el2, el2.getWeightedEventsNoTime() );
+  }
+
+//
+//  template<class T>
+//  void do_test_clearUnused(EventList & el2, typename std::vector<T> & events)
+//  {
+//    typename std::vector<T> mylist;
+//    mylist.push_back(T(45));
+//    mylist.push_back(T(89));
+//    mylist.push_back(T(34));
+//    el2 += mylist;
+//    TS_ASSERT_EQUALS(events.size(), 3);
+//    TS_ASSERT_EQUALS(events.capacity(), 3);
+//    mylist.push_back(TofEvent(88,88));
+//    el2 += mylist;
+//    TS_ASSERT_EQUALS(events.size(), 7);
+//    TS_ASSERT_EQUALS(events.capacity(), 7);
+//    el2.clear();
+//    TS_ASSERT_EQUALS(events.size(), 0);
+//    TS_ASSERT_EQUALS(events.capacity(), 0);
+//  }
+//
+//  void test_clearUnused()
+//  {
+//  }
+
 
   void test_PlusOperator2()
   {
@@ -666,7 +726,7 @@ public:
     }
   }
 
-  void testSortPulseTime_weights()
+  void test_SortPulseTime_weights()
   {
     this->fake_data();
     el.switchTo(WEIGHTED);
@@ -710,7 +770,7 @@ public:
   //--- Comparison Operators
   //==================================================================================
 
-  void testEqualityOperator()
+  void test_EqualityOperator()
   {
     EventList el1, el2;
     el1.addEventQuickly( TofEvent(1.5, 2.3) );
@@ -1428,61 +1488,63 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
-  void test_compressEvents_InPlace()
+  void test_compressEvents_InPlace_or_Not()
   {
     for (int this_type=0; this_type<3; this_type++)
     {
       for (int inplace=0; inplace < 2; inplace++)
       {
-      el = EventList();
-      el.addEventQuickly( TofEvent(1.0, 22) );
-      el.addEventQuickly( TofEvent(1.2, 33) );
-      el.addEventQuickly( TofEvent(30.3, 44) );
-      el.addEventQuickly( TofEvent(30.2, 55) );
-      el.addEventQuickly( TofEvent(30.25, 66) );
-      el.addEventQuickly( TofEvent(34.0, 55) );
+        el = EventList();
+        el.addEventQuickly( TofEvent(1.0, 22) );
+        el.addEventQuickly( TofEvent(1.2, 33) );
+        el.addEventQuickly( TofEvent(30.3, 44) );
+        el.addEventQuickly( TofEvent(30.2, 55) );
+        el.addEventQuickly( TofEvent(30.25, 66) );
+        el.addEventQuickly( TofEvent(34.0, 55) );
 
-      el.switchTo(static_cast<EventType>(this_type));
+        el.switchTo(static_cast<EventType>(this_type));
 
-      int num_old = el.getNumberEvents();
-      double mult = 1.0;
-      if (this_type > 0)
-      {
-        mult = 2.0;
-        el *= mult;
-      }
+        int num_old = el.getNumberEvents();
+        double mult = 1.0;
+        if (this_type > 0)
+        {
+          mult = 2.0;
+          el *= mult;
+        }
 
-      EventList * el_out = &el;
-      if (!inplace)
-      {
-        el_out = new EventList();
-      }
+        EventList * el_out = &el;
+        if (!inplace)
+        {
+          el_out = new EventList();
+        }
 
-      TS_ASSERT_THROWS_NOTHING( el.compressEvents(1.0, el_out); )
+        TS_ASSERT_THROWS_NOTHING( el.compressEvents(1.0, el_out); )
 
-      // Right number of events, of the type without times
-      TS_ASSERT_EQUALS( el_out->getEventType(), WEIGHTED_NOTIME);
-      TS_ASSERT_EQUALS( el_out->getNumberEvents(), 3);
-      TS_ASSERT( el_out->isSortedByTof() );
+        // Right number of events, of the type without times
+        TS_ASSERT_EQUALS( el_out->getEventType(), WEIGHTED_NOTIME);
+        TS_ASSERT_EQUALS( el_out->getNumberEvents(), 3);
+        TS_ASSERT( el_out->isSortedByTof() );
 
-      if (el_out->getNumberEvents() == 3)
-      {
-        TS_ASSERT_DELTA( el_out->getEvent(0).tof(), 1.1, 1e-5);
-        TS_ASSERT_DELTA( el_out->getEvent(0).weight(), 2*mult, 1e-5);
-        //Error squared is multiplied by mult (squared)
-        TS_ASSERT_DELTA( el_out->getEvent(0).errorSquared(), 2*mult*mult, 1e-5);
+        if (el_out->getNumberEvents() == 3)
+        {
+          TS_ASSERT_DELTA( el_out->getEvent(0).tof(), 1.1, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(0).weight(), 2*mult, 1e-5);
+          //Error squared is multiplied by mult (squared)
+          TS_ASSERT_DELTA( el_out->getEvent(0).errorSquared(), 2*mult*mult, 1e-5);
 
-        TS_ASSERT_DELTA( el_out->getEvent(1).tof(), 30.25, 1e-5);
-        TS_ASSERT_DELTA( el_out->getEvent(1).weight(), 3*mult, 1e-5);
-        TS_ASSERT_DELTA( el_out->getEvent(1).errorSquared(), 3*mult*mult, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(1).tof(), 30.25, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(1).weight(), 3*mult, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(1).errorSquared(), 3*mult*mult, 1e-5);
 
-        TS_ASSERT_DELTA( el_out->getEvent(2).tof(), 34.0, 1e-5);
-        TS_ASSERT_DELTA( el_out->getEvent(2).weight(), 1*mult, 1e-5);
-        TS_ASSERT_DELTA( el_out->getEvent(2).errorSquared(), 1*mult*mult, 1e-5);
-      }
-      }
+          TS_ASSERT_DELTA( el_out->getEvent(2).tof(), 34.0, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(2).weight(), 1*mult, 1e-5);
+          TS_ASSERT_DELTA( el_out->getEvent(2).errorSquared(), 1*mult*mult, 1e-5);
 
-    }
+          // Now the memory must be well used
+          TS_ASSERT_EQUALS( el_out->getWeightedEventsNoTime().capacity(), 3);
+        }
+      }// inplace
+    }// starting event type
   }
 
 

@@ -712,8 +712,11 @@ namespace DataObjects
   void EventList::clear()
   {
     this->events.clear();
+    std::vector<TofEvent>().swap(this->events); //STL Trick to release memory
     this->weightedEvents.clear();
+    std::vector<WeightedEvent>().swap(this->weightedEvents); //STL Trick to release memory
     this->weightedEventsNoTime.clear();
+    std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); //STL Trick to release memory
     this->detectorIDs.clear();
   }
 
@@ -1284,6 +1287,8 @@ namespace DataObjects
   {
     //Clear the output. We can't know ahead of time how much space to reserve :(
     out.clear();
+    // We will make a starting guess of 1/20th of the number of input events.
+    out.reserve( events.size() / 20 );
 
     // The last TOF to which we are comparing.
     double lastTof = -std::numeric_limits<double>::max();
@@ -1328,6 +1333,14 @@ namespace DataObjects
     {
       // Create a new event with the average TOF and summed weights and squared errors.
       out.push_back( WeightedEventNoTime( totalTof/num, weight, errorSquared ) );
+    }
+
+    // If you have over-allocated by more than 5%, reduce the size.
+    size_t excess_limit = out.size() / 20;
+    if ((out.capacity() - out.size()) > excess_limit)
+    {
+      // Note: This forces a copy!
+      std::vector<WeightedEventNoTime>(out).swap(out);
     }
   }
 
