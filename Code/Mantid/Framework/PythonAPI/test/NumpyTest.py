@@ -8,7 +8,6 @@ from mantidsimple import *
 # import Numpy to check that it's on the system
 import numpy
 
-TEST_DIR = "../../../Test/Data/"
 class NumpyTest(unittest.TestCase):
     """
         Simple test to check the numpy integration
@@ -19,8 +18,7 @@ class NumpyTest(unittest.TestCase):
         
     def test_array_output(self):
 
-        filepath = os.path.join(TEST_DIR, "LOQ_CANSAS1D.xml")
-        loader = LoadCanSAS1D(filepath, "test")
+        loader = LoadCanSAS1D("LOQ_CANSAS1D.xml", "test")
         
         # Get the Y array
         x = mtd["test"].dataY(0)
