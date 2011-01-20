@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Classes describing test projects,
 how they are run,
 and interpreting the results"""
@@ -25,6 +26,7 @@ html_escape_table = {
     "'": "&apos;",
     ">": "&gt;",
     "<": "&lt;",
+    '‘': "&apos;",
     }
 
 def html_escape(text):

@@ -326,6 +326,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if color != "":
             line = '<font color="%s">%s</font>' % (color, line)
         # Add a new line 
+        print "---" + line
         return line + "<br>\n"
         
     #-----------------------------------------------------------------------------
