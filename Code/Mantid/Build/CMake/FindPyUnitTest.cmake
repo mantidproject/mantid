@@ -13,12 +13,13 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   set ( _pyunit_testfiles "" )
   foreach (part ${ARGN})
     get_filename_component(_pyunit_file ${part} NAME)
+    message ( status " ${CMAKE_CURRENT_SOURCE_DIR}/${part} -> ${_pyunit_outputdir}/${_pyunit_file}" )
     add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_pyunit_file}
                      DEPENDS ${_pyunit_outputdir}/__init__.py
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
                          ${CMAKE_CURRENT_SOURCE_DIR}/${part}
                          ${_pyunit_outputdir}/${_pyunit_file} )
-    set ( _pyunit_testfiles ${_pyunittestfiles} ${_pyunit_outputdir}/${_pyunit_file} )
+    set ( _pyunit_testfiles ${_pyunit_testfiles} ${_pyunit_outputdir}/${_pyunit_file} )
   endforeach (part ${ARGN})
 
   # create the driver script
