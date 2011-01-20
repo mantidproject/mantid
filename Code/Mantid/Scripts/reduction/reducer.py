@@ -71,7 +71,6 @@ def validate_step(f):
                         outputworkspace = inputworkspace 
                     _argspec = proxy.keys()                       
                     if "InputWorkspace" in _argspec:
-                        print "setting input"
                         _algm.setPropertyValue("InputWorkspace", inputworkspace)
                     if "OutputWorkspace" in _argspec:
                         _algm.setPropertyValue("OutputWorkspace", outputworkspace)
