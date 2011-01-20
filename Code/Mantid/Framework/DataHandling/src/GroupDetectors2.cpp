@@ -81,6 +81,12 @@ void GroupDetectors2::init()
   declareProperty("KeepUngroupedSpectra",false,
     "If true ungrouped spectra will be copied to the output workspace\n"
     "and placed after the groups");
+
+  std::vector<std::string> groupTypes(2);
+  groupTypes[0] = "Sum";
+  groupTypes[1] = "Average";
+  declareProperty("Behaviour", "Sum", new Mantid::Kernel::ListValidator(groupTypes),
+    "Whether to sum or average the values when grouping detectors.");
 }
 
 void GroupDetectors2::exec()
@@ -616,6 +622,14 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
   // Get a reference to the spectra map on the output workspace
   API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
 
+  // get "Behaviour" string
+  const std::string behaviour = getProperty("Behaviour");
+  int bhv = 0;
+  if ( behaviour == "Average" ) bhv = 1;
+
+  std::vector<int> grpSize;
+  API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create("Workspace2D", m_GroupSpecInds.size(), 1, 1);
+
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
 
   // where we are copying spectra to, we start copying to the start of the output workspace
@@ -627,6 +641,13 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     const int firstSpecNum = inputSpecNums->spectraNo(it->second.front());
     // the spectrum number of new group will be the number of the spectrum number of first spectrum that was grouped
     outputWS->getAxis(1)->spectraNo(outIndex) = firstSpecNum;
+
+    if ( bhv == 1 )
+    {
+      beh->dataX(outIndex)[0] = 0.0;
+      beh->dataE(outIndex)[0] = 0.0;
+      beh->dataY(outIndex)[0] = it->second.size();
+    }
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra are assumed to be the same here
     outputWS->dataX(outIndex) = inputWS->readX(0);
@@ -663,6 +684,17 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     }
     outIndex ++;
   }
+
+  if ( bhv == 1 )
+  {
+    Mantid::API::IAlgorithm_sptr divide = createSubAlgorithm("Divide");
+    divide->initialize();
+    divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
+    divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);
+    divide->setProperty<API::MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    divide->execute();
+  }
+
   g_log.debug() << name() << " created " << outIndex << " new grouped spectra\n";
   return outIndex;
 }

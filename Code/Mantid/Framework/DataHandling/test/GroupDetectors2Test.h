@@ -363,6 +363,22 @@ public:
 #endif
   }
 
+  void testAverageBehaviour()
+  {
+    GroupDetectors2 gd2;
+    gd2.initialize();
+    gd2.setPropertyValue("InputWorkspace", inputWS);
+    gd2.setPropertyValue("OutputWorkspace", "GroupDetectors2_testAverageBehaviour_Output");
+    gd2.setPropertyValue("WorkspaceIndexList", "0-2");
+    gd2.setPropertyValue("Behaviour", "Average");
+    TS_ASSERT_THROWS_NOTHING(gd2.execute());
+
+    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("GroupDetectors2_testAverageBehaviour_Output"));
+
+    // Result should be 1 + 2 + 3 / 3 = 2
+    TS_ASSERT_EQUALS(output->readY(0)[1], 2.0);
+  }
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
@@ -370,7 +386,7 @@ public:
     void writeFileList()
     {
       std::ofstream file(inputFile.c_str());
-      file << " 2		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
+      file << " 2		#file format is in http://svn.mantidproject.org/mantid/trunk/Code/Mantid/Framework/DataHandling/inc/MantidDataHandling/GroupDetectors2.h \n"
         << "888 "            << std::endl
         << "2"              << std::endl
         << "1   3"          << std::endl
