@@ -211,7 +211,7 @@ private slots:
   /// Called when the show mask button has been clicked
   void handleShowMaskButtonClick();
   ///Handle the change in instrument 
-  void handleInstrumentChange(const int index);
+  void handleInstrumentChange();
   ///Record if that user has changed the default filename
   void setUserFname();
   /// Update the centre finding progress
@@ -299,6 +299,7 @@ private:
   void upDateDataDir();
   bool exportDataDir();
   void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
+  QString getInstrumentClass();
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

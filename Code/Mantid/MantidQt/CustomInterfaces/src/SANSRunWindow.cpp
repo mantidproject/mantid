@@ -193,7 +193,7 @@ void SANSRunWindow::initLocalPython()
   }
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
-  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
+  handleInstrumentChange();
 }
 /** Initialise some of the data and signal connections in the save box
 */
@@ -289,7 +289,7 @@ void SANSRunWindow::connectChangeSignals()
     SLOT(handleStepComboChange(int)));
 
   connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(handleInstrumentChange(const int)));
+    SLOT(handleInstrumentChange()));
 
   // Default transmission switch
   connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
@@ -397,7 +397,11 @@ void SANSRunWindow::readSettings()
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
   m_last_dir = value_store.value("last_dir", "").toString();
 
-  m_uiForm.inst_opt->setCurrentIndex(value_store.value("instrument", 0).toInt());
+  int index = m_uiForm.inst_opt->findText(
+                              value_store.value("instrum", "LOQ").toString());
+  // if the saved instrument no longer exists set index to zero
+  index = index < 0 ? 0 : index;
+  m_uiForm.inst_opt->setCurrentIndex(index);
   
   int mode_flag = value_store.value("runmode", 0).toInt();
   if( mode_flag == SANSRunWindow::SingleMode )
@@ -465,7 +469,7 @@ void SANSRunWindow::saveSettings()
 
   value_store.setValue("last_dir", m_last_dir);
 
-  value_store.setValue("instrument", m_uiForm.inst_opt->currentIndex());
+  value_store.setValue("instrum", m_uiForm.inst_opt->currentText());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
 
   value_store.setValue("enable_flood_correct", m_uiForm.enableFlood_ck->isChecked());
@@ -959,7 +963,7 @@ void SANSRunWindow::updateMaskTable()
 	}
 
   QString reardet_name("rear-detector"), frontdet_name("front-detector");
-  if( m_uiForm.inst_opt->currentIndex() == 0 )
+  if( m_uiForm.inst_opt->currentText() == "LOQ" )
   {
     reardet_name = "main-detector-bank";
     frontdet_name = "HAB";
@@ -1408,8 +1412,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     colour = "red";
   }
 
-  //LOQ
-  if( m_uiForm.inst_opt->currentIndex() == 0 )
+  if( m_uiForm.inst_opt->currentText() == "LOQ" )
   {
     if( colour == "red" )
     {
@@ -1434,7 +1437,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
       setLOQGeometry(can_workspace, 1);
     }
   }
-  else
+  else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
   {
     if( colour == "red" )
     {
@@ -1512,9 +1515,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
  * @param logs The log information
 */
 void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspace, const QString & logs, int wscode)
-{
-  if( m_uiForm.inst_opt->currentIndex() == 0 ) return;
-  
+{  
   double unitconv = 1000.;
 
   IInstrument_sptr instr = workspace->getInstrument();
@@ -1560,8 +1561,6 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
  */
 void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, int wscode)
 {
-  if( m_uiForm.inst_opt->currentIndex() == 1 ) return;
-
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample
   componentLOQDistances(workspace, dist_ms, dist_mdb, dist_hab);
@@ -1836,7 +1835,7 @@ bool SANSRunWindow::oldLoadButtonClick()
     if( key == 0 )
     {
       sample_logs = logs;
-      if( m_uiForm.inst_opt->currentIndex() == 1 && sample_logs.isEmpty() )
+      if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
       {
         is_loaded = false;
         showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
@@ -1846,7 +1845,7 @@ bool SANSRunWindow::oldLoadButtonClick()
     else if( key == 1 )
     {
       can_logs = logs;
-      if( m_uiForm.inst_opt->currentIndex() == 1 && can_logs.isEmpty() )
+      if( m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty() )
       {
         can_logs = sample_logs;
         showInformationBox("Warning: Cannot find log file for can run, using sample values.");
@@ -1972,7 +1971,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     if( key == 0 ) 
     { 
       sample_logs = logs;
-      if( m_uiForm.inst_opt->currentIndex() == 1 && sample_logs.isEmpty() )
+      if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
       {
         is_loaded = false;
         showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
@@ -1982,7 +1981,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     else if( key == 1 ) 
     { 
       can_logs = logs;
-      if( m_uiForm.inst_opt->currentIndex() == 1 && can_logs.isEmpty() )
+      if(m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty())
       {
         can_logs = sample_logs;
         showInformationBox("Warning: Cannot find log file for can run, using sample values.");
@@ -2340,8 +2339,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
   //create a new reducer object for another run
-  const int index = m_uiForm.inst_opt->currentIndex();
-  py_code = "i.ISIS_global().set_instrument(isis_instrument."+m_uiForm.inst_opt->itemData(index).toString()+")";
+  py_code = "i.ISIS_global().set_instrument(isis_instrument."+getInstrumentClass()+")";
   //restore the settings from the user file
   py_code += "\ni.ISIS_global().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
@@ -2373,7 +2371,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   }
   checkLogFlags();
 }
-
+/** Returns the Python instrument class name to create for the current instrument
+  @returns the Python class name corrosponding to the user selected instrument
+*/
+QString SANSRunWindow::getInstrumentClass()
+{
+  return m_uiForm.inst_opt->currentText() + "()";
+}
 /**
  * Plot button slot (deprecated)
  */
@@ -2415,11 +2419,11 @@ void SANSRunWindow::handleRunFindCentre()
 
   if( m_uiForm.beam_rmax->text().isEmpty() )
   {
-    if( m_uiForm.inst_opt->currentIndex() == 0 )
+    if( m_uiForm.inst_opt->currentText() == "LOQ" )
     {
       m_uiForm.beam_rmax->setText("200");
     }
-    else
+    else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
     {
       m_uiForm.beam_rmax->setText("280");
     }
@@ -2583,11 +2587,10 @@ void SANSRunWindow::handleShowMaskButtonClick()
  * A different instrument has been selected
  * @throw runtime_error if the instrument doesn't have exactly two detectors 
  */
-void SANSRunWindow::handleInstrumentChange(const int index)
+void SANSRunWindow::handleInstrumentChange()
 {
   //Inform the Python objects of the change
-  QString instClass = m_uiForm.inst_opt->currentText().trimmed();
-  instClass += "()";
+  QString instClass = getInstrumentClass();
   runReduceScriptFunction("i.ISIS_global().set_instrument(isis_instrument."+instClass+")");
 
   fillDetectNames(m_uiForm.detbank_sel);
