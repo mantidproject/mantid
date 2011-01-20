@@ -609,7 +609,7 @@ class TestProject(object):
         s = u"<font color=%s><h1>%s</h1></font>" % (color, self.name + ": " + self.get_state_str())
         if not self.build_succeeded:
             s += u'<pre style="white-space: pre-wrap;">'
-            s += html_escape( unicode(self.build_stdout) )
+            s += unicode( html_escape( self.build_stdout ) )
             s += u"</pre>"
         else:
             for suite in self.suites:
@@ -648,10 +648,7 @@ class TestProject(object):
                string for each line of the make command's output. """
                
         msg = "-------- Making Test %s ---------" % self.name
-        print msg 
         if not callback_func is None: callback_func("%s" % msg)
-        print self.make_command
-        if not callback_func is None: callback_func(self.make_command)
         
         #(status, output) = commands.getstatusoutput(self.make_command)
         
@@ -666,11 +663,16 @@ class TestProject(object):
         (put, get) = (p.stdin, p.stdout)
         line=get.readline()
         while line != "":
+            # Replace annoying character
+            line = line.replace('‘', '\'')
+            line = line.replace('’', '\'')
+            #line = line.replace('\xe2', '\'')
+            line = unicode(line)
             # Make one long output string
             output += line
             #Remove trailing /n
             if len(line)>1: line = line[:-1]
-            print line
+            #print line
             if not callback_func is None: callback_func( line )
             #Keep reading output.
             line=get.readline()            
@@ -681,13 +683,11 @@ class TestProject(object):
 
         if (status != 0):
             msg = "-------- BUILD FAILED! ---------" 
-            print msg 
             if not callback_func is None: callback_func("%s" % msg)
             self.build_succeeded = False
             self.build_stdout = output
         else:
             msg = "-------- Build Succeeded ---------" 
-            print msg 
             if not callback_func is None: callback_func("%s" % msg)
             self.build_succeeded = True
             # Build was successful

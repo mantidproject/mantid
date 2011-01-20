@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 import time
@@ -363,18 +364,13 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                     self.tabWidgetRight.setCurrentIndex(0)
                 else:
                     # Accumulated stdout
-                    self.stdout += self.markup_console( unicode(obj) )
+                    self.stdout +=  self.markup_console( unicode(obj) )
                     self.textConsole.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
                                               self.stdout )
                     sb = self.textConsole.verticalScrollBar();
                     sb.setValue(sb.maximum());
                 
                 
-#        # Every second or so, update the tree too
-#        if (time.time() - self.last_tree_update) > 1.0:
-#            self.quick_update_tree()
-#            self.last_tree_update = time.time()
-        
     #-----------------------------------------------------------------------------
     def quick_update_tree(self):
         """ Update the tree view without resetting all the model data """
