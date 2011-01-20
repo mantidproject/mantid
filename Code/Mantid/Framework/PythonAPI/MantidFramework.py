@@ -13,6 +13,9 @@ import __main__
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
     sys.path.append(os.getenv("MANTIDPATH"))
+else:
+    framework_file = os.path.abspath(__file__)
+    os.environ["MANTIDPATH"]=os.path.split(framework_file)[0] # use the directory
 
 # --- Import the Mantid API ---
 if os.name == 'nt':
