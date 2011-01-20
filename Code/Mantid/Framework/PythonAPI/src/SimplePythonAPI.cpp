@@ -145,6 +145,23 @@ namespace Mantid
         }
       }
 
+      // Utility method to run an algorithm
+      module << "def execute_algorithm(algm):\n"
+        << "  _algm = algm._getHeldObject()\n";
+
+      if( gui )
+      {
+        module << "  mtd._setGILRequired(True)\n"
+          << "  result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(_algm.name())\n"
+          << "  mtd._setGILRequired(False)\n"
+          << "  if result == False:\n"
+          << "    sys.exit('An error occurred while running AlignDetectors. See results log for details.')\n\n";
+      }
+      else
+      {
+        module << "  _algm.execute()\n\n";
+      }
+
       writeMantidHelp(module);
       module.close();
 
@@ -254,7 +271,8 @@ namespace Mantid
       }
 
       //end of function parameters
-      os << "):\n";
+      if( properties.size()>0 ) os << ", ";
+      os << "execute=True):\n";
 
       writeFunctionPyHelp(os, properties, sanitizedNames);
 
@@ -281,14 +299,16 @@ namespace Mantid
 
       if( async )
       {
-        writeAsyncFunctionCall(os, algm, "  ");
-        os << "  if result == False:\n"
-          << "    sys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
+        os << "  if execute:\n";
+        writeAsyncFunctionCall(os, algm, "    ");
+        os << "    if result == False:\n"
+          << "      sys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
       }
       else
       {
         os << "  algm.setRethrows(True)\n";
-        os << "  algm.execute()\n";
+        os << "  if execute:\n";
+        os << "    algm.execute()\n";
       }
 
       // Return the IAlgorithm object

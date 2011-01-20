@@ -19,12 +19,67 @@
 """
 import os
 import time
+import types
 from instrument import Instrument
 import MantidFramework
+import mantidsimple
 
 
 ## Version number
-__version__ = '0.0'
+__version__ = '1.0'
+      
+def validate_step(f):
+    """
+        Decorator for Reducer methods that need a ReductionStep
+        object as its first argument.
+        
+        Example:
+            @validate_step
+            def some_func(self, reduction_step):
+                [...]
+    """
+    
+    def validated_f(reducer, algorithm, *args, **kwargs):
+        """
+            Wrapper function around the function f.
+            The function ensures that the algorithm parameter
+            is a sub-class of ReductionStep
+        """
+            
+        if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
+            # If we have a ReductionStep object, just use it.
+            # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
+            return f(reducer, algorithm)
+        
+        if isinstance(algorithm, types.StringType):
+            # If we have a string, see if there exists a mantidsimple
+            # function that can be used
+            algorithm = eval(algorithm, mantidsimple.__dict__, mantidsimple.__dict__)
+            
+        if isinstance(algorithm, types.FunctionType):
+            # If the algorithm is a function, in which case
+            # we expect it to produce an algorithm proxy
+            proxy = algorithm(*args, execute=False, **kwargs)
+            if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
+                raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"
+            class _AlgorithmStep(ReductionStep):
+                def __init__(self):
+                    self.algm = proxy
+                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    _algm = self.algm._getHeldObject()
+                    if outputworkspace is None:
+                        outputworkspace = inputworkspace 
+                    if "InputWorkspace" in _algm.getProperties():
+                        _algm.setPropertyValue("InputWorkspace", inputworkspace)
+                    if "OutputWorkspace" in _algm.getProperties():
+                        _algm.setPropertyValue("OutputWorkspace", outputworkspace)
+                    
+                    mantidsimple.execute_algorithm(self.algm)
+                    
+            return f(reducer, _AlgorithmStep())
+        else:
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+    return validated_f
     
 class Reducer(object):
     """
@@ -110,6 +165,7 @@ class Reducer(object):
             # If not, raise an exception
             raise RuntimeError, 'Could not load file "%s"' % filename
         
+    @validate_step
     def append_step(self, reduction_step):
         """
             Append a reduction step
@@ -118,11 +174,7 @@ class Reducer(object):
         if reduction_step is None:
             return None
 
-        if issubclass(reduction_step.__class__, ReductionStep):
-            self._reduction_steps.append(reduction_step)
-        else:
-            reduction_step = AlgoReductionStep(reduction_step)
-            self._reduction_steps.append(reduction_step)
+        self._reduction_steps.append(reduction_step)
 
         return reduction_step
         
