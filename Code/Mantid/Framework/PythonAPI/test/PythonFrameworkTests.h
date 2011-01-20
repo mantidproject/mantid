@@ -46,8 +46,8 @@ public:
   void testCreateAlgorithmMethod1()
   {
     Mantid::API::IAlgorithm* alg(NULL);
-    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("ConvertUnits") );
-    if (alg) TS_ASSERT_EQUALS(alg->name(), "ConvertUnits");
+    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("HelloWorldAlgorithm") );
+    if (alg) TS_ASSERT_EQUALS(alg->name(), "HelloWorldAlgorithm");
   }
 
   void testCreateAlgorithmNotFoundThrows()

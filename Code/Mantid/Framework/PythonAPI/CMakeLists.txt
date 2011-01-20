@@ -72,8 +72,9 @@ endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI DataHandling DataObjects TestHelpers)
-  add_dependencies ( PythonAPITest Algorithms )
+  target_link_libraries( PythonAPITest PythonAPI 
+                                       TestHelpers UserAlgorithms
+  )
   add_dependencies ( FrameworkTests PythonAPITest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET PythonAPITest PROPERTY FOLDER "FrameworkTests" )
