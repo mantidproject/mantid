@@ -111,6 +111,7 @@ typedef std::vector<EventList*> EventListVector;
 
 class DLLExport EventWorkspace : public API::IEventWorkspace
 {
+
  public:
   /// Typedef for a Most-Recently-Used list of Data objects.
   typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;

@@ -80,11 +80,16 @@ void LoadSNSEventNexus::init()
 
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-      "Load the monitors from the file.");
-
+      "Load the monitors from the file (optional, default False).");
+//
 //  declareProperty(
-//      new PropertyWithValue<bool>("Precount", false, Direction::Input),
-//      "Pre-count the number of events in each pixel. This may reduce memory fragmentation and speed up loading.");
+//      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
+//      "Load the sample logs from the file (optional, default True).");
+
+  declareProperty(
+      new PropertyWithValue<bool>("Precount", false, Direction::Input),
+      "Pre-count the number of events in each pixel before allocating memory (optional, default False). \n"
+      "This reduces memory use and memory fragmentation; it may speed up loading.");
 }
 
 
@@ -99,7 +104,10 @@ void LoadSNSEventNexus::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-//  precount = getProperty("Precount");
+  precount = getProperty("Precount");
+
+  //loadlogs = getProperty("LoadLogs");
+  loadlogs = true;
 
   //Get the limits to the filter
   filter_tof_min = getProperty("FilterByTof_Min");
@@ -140,33 +148,38 @@ void LoadSNSEventNexus::exec()
   }
   Progress prog(this,0.0,0.3,  reports);
 
-  prog.report("Loading DAS logs");
 
-  // --------------------- Load DAS Logs -----------------
-  //The pulse times will be empty if not specified in the DAS logs.
-  pulseTimes.clear();
-  IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
-
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-  try
+  if (loadlogs)
   {
-    g_log.information() << "Loading logs from NeXus file..." << endl;
-    loadLogs->setPropertyValue("Filename", m_filename);
-    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
-    loadLogs->execute();
+    // --------------------- Load DAS Logs -----------------
+    prog.report("Loading DAS logs");
+    //The pulse times will be empty if not specified in the DAS logs.
+    pulseTimes.clear();
+    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
 
-    //If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-    std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
-    for (size_t i =0; i < temp.size(); i++)
-      pulseTimes.push_back( temp[i] );
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    try
+    {
+      g_log.information() << "Loading logs from NeXus file..." << endl;
+      loadLogs->setPropertyValue("Filename", m_filename);
+      loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
+      loadLogs->execute();
+
+      //If successful, we can try to load the pulse times
+      Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
+      std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+      for (size_t i =0; i < temp.size(); i++)
+        pulseTimes.push_back( temp[i] );
+    }
+    catch (...)
+    {
+      g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+    }
   }
-  catch (...)
+  else
   {
-    g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+    g_log.information() << "Skipping the loading of sample logs!" << endl;
   }
-
-
   prog.report("Loading instrument");
 
   //Load the instrument
@@ -221,8 +234,10 @@ void LoadSNSEventNexus::exec()
   }
   else
   {
+    Timer tim1;
     //Pad pixels; parallel flag is off because it is actually slower :(
     WS->padPixels( false );
+    //std::cout << tim1.elapsed() << "seconds to pad pixels.\n";
   }
 
 
@@ -479,34 +494,34 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
     return;
   }
 
-//  // ---- Pre-counting events per pixel ID ----
-//  if (precount)
-//  {
-//    std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
-//    std::vector<uint32_t>::const_iterator it;
-//    for (it = event_id.begin(); it != event_id.end(); it++)
-//    {
-//      std::map<uint32_t, size_t>::iterator map_found = counts.find(*it);
-//      if (map_found != counts.end())
-//      {
-//        map_found->second++;
-//      }
-//      else
-//      {
-//        counts[*it] = 1; // First entry
-//      }
-//    }
-//
-//    // Now we pre-allocate (reserve) the vectors of events in each pixel counted
-//    std::map<uint32_t, size_t>::iterator pixID;
-//    for (pixID = counts.begin(); pixID != counts.end(); pixID++)
-//    {
-//      //Find the the workspace index corresponding to that pixel ID
-//      int wi((*pixelID_to_wi_map)[ pixID->first ]);
-//      // Allocate it
-//      WS->getEventList(wi).reserve( pixID->second );
-//    }
-//  }
+  // ---- Pre-counting events per pixel ID ----
+  if (precount)
+  {
+    std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
+    std::vector<uint32_t>::const_iterator it;
+    for (it = event_id.begin(); it != event_id.end(); it++)
+    {
+      std::map<uint32_t, size_t>::iterator map_found = counts.find(*it);
+      if (map_found != counts.end())
+      {
+        map_found->second++;
+      }
+      else
+      {
+        counts[*it] = 1; // First entry
+      }
+    }
+
+    // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+    std::map<uint32_t, size_t>::iterator pixID;
+    for (pixID = counts.begin(); pixID != counts.end(); pixID++)
+    {
+      //Find the the workspace index corresponding to that pixel ID
+      int wi((*pixelID_to_wi_map)[ pixID->first ]);
+      // Allocate it
+      WS->getEventList(wi).reserve( pixID->second );
+    }
+  }
 
   //Default pulse time (if none are found)
   Mantid::Kernel::DateAndTime pulsetime;

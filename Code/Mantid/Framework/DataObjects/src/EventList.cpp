@@ -1151,18 +1151,22 @@ namespace DataObjects
 
 
   // --------------------------------------------------------------------------
-  /** @return :: the memory used by the EventList, in bytes.
+  /** Memory used by this event list. Note: It reports the CAPACITY of the
+   * vectors, rather than their size, since that is a more accurate
+   * representation of the size used.
+   *
+   * @return :: the memory used by the EventList, in bytes.
    * */
   size_t EventList::getMemorySize() const
   {
     switch (eventType)
     {
     case TOF:
-      return this->events.size() * sizeof(TofEvent) + sizeof(EventList);
+      return this->events.capacity() * sizeof(TofEvent) + sizeof(EventList);
     case WEIGHTED:
-      return this->weightedEvents.size() * sizeof(WeightedEvent) + sizeof(EventList);
+      return this->weightedEvents.capacity() * sizeof(WeightedEvent) + sizeof(EventList);
     case WEIGHTED_NOTIME:
-      return this->weightedEventsNoTime.size() * sizeof(WeightedEventNoTime) + sizeof(EventList);
+      return this->weightedEventsNoTime.capacity() * sizeof(WeightedEventNoTime) + sizeof(EventList);
     }
   }
 
