@@ -200,7 +200,7 @@ def detailedBalance(tempK, inWS_n = 'Energy', outWS_n = 'Energy'):
     return outWS_n
 
 def groupData(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
-    GroupDetectors(inWS_n, outWS_n, MapFile = mapfile)
+    GroupDetectors(inWS_n, outWS_n, MapFile = mapfile, Behaviour='Average')
     mantid.deleteWorkspace(inWS_n)
     return outWS_n
 
@@ -214,14 +214,16 @@ def groupTosca(wsname):
             grp.remove(i)
         except ValueError:
             pass
-    GroupDetectors('Energy', wsname, WorkspaceIndexList=grp)
+    GroupDetectors('Energy', wsname, WorkspaceIndexList=grp, 
+        Behaviour='Average')
     grp = range(70,140)
     for i in invalid:
         try:
             grp.remove(i)
         except ValueError:
             pass
-    GroupDetectors('Energy', 'front', WorkspaceIndexList=grp)
+    GroupDetectors('Energy', 'front', WorkspaceIndexList=grp, 
+        Behaviour='Average')
     mantid.deleteWorkspace('Energy')
     ConjoinWorkspaces(wsname, 'front')
     return wsname
