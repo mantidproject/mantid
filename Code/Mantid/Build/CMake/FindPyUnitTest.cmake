@@ -33,14 +33,18 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
                                PROPERTIES GENERATED true)
 
 
-  # add all of the individual tests
-  foreach (part ${ARGN})
-    get_filename_component(_suitename ${part} NAME_WE)
-    set (_pyunit_separate_name "${_pyunit_testname}_${_suitename}")
-    add_test ( NAME ${_pyunit_separate_name}
-               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-                   ${PYTHON_EXECUTABLE} ${_pyunit_testname_file} ${_suitename} )
-  endforeach (part ${ARGN})
+  add_test (NAME ${_pyunit_testname}_py
+            COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+                     ${PYTHON_EXECUTABLE} ${_pyunit_testname_file} )
+
+  # add all of the individual tests - this introduces a race condition
+  #foreach (part ${ARGN})
+  #  get_filename_component(_suitename ${part} NAME_WE)
+  #  set (_pyunit_separate_name "${_pyunit_testname}_${_suitename}")
+  #  add_test ( NAME ${_pyunit_separate_name}
+  #             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+  #                 ${PYTHON_EXECUTABLE} ${_pyunit_testname_file} ${_suitename} )
+  #endforeach (part ${ARGN})
 endmacro ( PYUNITTEST_ADD_TEST )
 
 #=============================================================
