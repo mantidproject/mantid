@@ -18,9 +18,6 @@ def FrameSkipping(value):
 def DarkCurrent(datafile):
     ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
 
-def Background(datafile):
-    ReductionSingleton().set_background(sns_reduction_steps.Transmission()) 
-    
 def MaskRectangle(x_min, x_max, y_min, y_max):
     ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
     

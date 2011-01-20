@@ -286,7 +286,8 @@ namespace Mantid
         std::string pvalue = sanitizedNames[iarg];
         if( iarg < iMand )
         {
-          os << "  algm.setPropertyValue(\"" << (*pIter)->name() 
+          os << "  if execute:\n";
+          os << "    algm.setPropertyValue(\"" << (*pIter)->name()
             << "\", makeString(" << pvalue << ").lstrip('? '))\n";
         }
         else

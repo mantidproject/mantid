@@ -69,9 +69,10 @@ def validate_step(f):
                     _algm = self.algm._getHeldObject()
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
-                    if "InputWorkspace" in _algm.getProperties():
+                    _argspec = self.algm.keys()                       
+                    if "InputWorkspace" in _argspec:
                         _algm.setPropertyValue("InputWorkspace", inputworkspace)
-                    if "OutputWorkspace" in _algm.getProperties():
+                    if "OutputWorkspace" in _argspec:
                         _algm.setPropertyValue("OutputWorkspace", outputworkspace)
                     
                     mantidsimple.execute_algorithm(self.algm)

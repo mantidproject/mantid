@@ -5,6 +5,7 @@
 """
 from reduction import Reducer
 from reduction import ReductionStep
+from reduction import validate_step
 import sans_reduction_steps
 from mantidsimple import *
 
@@ -183,6 +184,7 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_dark_current expects an object of class ReductionStep"
     
+    @validate_step
     def set_solid_angle_correcter(self, correcter):
         """
             Set the ReductionStep object that performs the solid angle correction.

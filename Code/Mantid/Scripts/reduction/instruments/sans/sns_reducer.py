@@ -1,6 +1,18 @@
 """
     Reducer class for EQSANS reduction
     
+    Implemented steps:
+        _beam_finder  
+        _normalizer
+        _dark_current_subtracter
+        _sensitivity_correcter
+        _solid_angle_correcter 
+        _azimuthal_averager
+        _transmission_calculator
+        _mask - needs more shapes, such as ellipse
+        _data_loader
+        _background_subtracter
+
     
     Notes: 
         - Default mask on EQ-SANS: read it from logs?
