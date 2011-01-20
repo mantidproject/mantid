@@ -63,9 +63,9 @@ target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
   include_directories ( ../TestHelpers/inc )
-  target_link_libraries( DataObjectsTest 
-                         DataObjects TestHelpers UserAlgorithms 
-  )
+  target_link_libraries( DataObjectsTest DataObjects TestHelpers )
+  # Specify implicit dependency, but don't link to it
+  add_dependencies ( DataObjectsTest UserAlgorithms )
   add_dependencies ( FrameworkTests DataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataObjectsTest PROPERTY FOLDER "FrameworkTests" )

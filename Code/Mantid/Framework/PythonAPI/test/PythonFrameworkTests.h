@@ -36,6 +36,8 @@ public:
   PythonFrameworkTests()
   {
     mgr = new Mantid::PythonAPI::FrameworkManagerProxy;
+    // @TODO This line can go once scons does
+    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries("../../Build/Plugins/",false);
   }
 
   ~PythonFrameworkTests()
