@@ -16,7 +16,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-using std::cout;
 using std::endl;
 using std::map;
 using std::string;
@@ -74,6 +73,10 @@ void LoadSNSEventNexus::init()
   declareProperty(
       new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run");
+
+  declareProperty(
+      new PropertyWithValue<string>("BankName", "", Direction::Input),
+    "Optional: To only include events from one bank.");
 
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
@@ -262,6 +265,14 @@ void LoadSNSEventNexus::exec()
 
   //This map will be used to find the workspace index
   IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
+
+  std::string onebank = getProperty("BankName");
+  onebank += "_events";
+  if(onebank != "_events")
+  {
+    bankNames.clear();
+    bankNames.push_back( onebank );
+  }
 
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
