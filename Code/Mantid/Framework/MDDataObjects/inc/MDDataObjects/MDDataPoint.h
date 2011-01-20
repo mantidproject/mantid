@@ -145,6 +145,24 @@ struct MDPointsLocations
 
 
    }
+ /** function sets data from external source into MDDataPoint format using the information that signal and dimension fields are equal
+   *
+   *  @param ind           - the location of the pixel in the MDDataPoints dataset
+   *  @param sdim_fields   - the values of the dimension coordinates (may be absent) and signals places in the same array
+   *  @param iFields       - array of dimension ID in some look-up table; 
+   */
+   void setData(size_t ind,T sdim_fields[],I iFields[]){
+     unsigned int i0;
+
+     char *const base = pDataBuffer+ind*MDPointStride;
+     // copy dimension values (axis values)
+     memcpy(base,sdim_fields,sizeof(T)*(n_dimensions+n_signals));
+     // this part is specialized for coding detectors from runID and dimID
+     i0=PixIndex;
+     memcpy(base+field_loc[i0],iFields,sizeof(I)*n_indFields);
+
+   }
+   //
    //
    ~MDDataPointEqual(){
      delete [] field_loc;
@@ -336,8 +354,10 @@ struct MDPointsLocations
      pWorkingBuf = new I[MDDataPointEqual<T,I,S>::n_indFields];
   
      // specialisation : two first fields are packed into one 32 bit field
-     this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals]  =2;
-     this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+1]=2;
+     if(MDDataPointEqual<T,I,S>::n_indFields>1){
+        this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals]  =2;
+        this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+1]=2;
+     }
 	 //
      unsigned int n_fields      = MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+MDDataPointEqual<T,I,S>::n_indFields;
 
@@ -353,6 +373,8 @@ struct MDPointsLocations
      MDDataPointEqual<T,I,S>::pPixIndex    = MDDataPointEqual<T,I,S>::field_loc[MDDataPointEqual<T,I,S>::PixIndex];
 
    // this defines PixID masks and RinID mask -- it is assumed that these data are present in all experiments and are packed into one 32bit word
+     if(MDDataPointEqual<T,I,S>::n_indFields<2) return;
+
      RunIDMask=0;
      for(i=0;i<pix_id_shift;i++){        RunIDMask=(RunIDMask<<1)|0x1;
      }

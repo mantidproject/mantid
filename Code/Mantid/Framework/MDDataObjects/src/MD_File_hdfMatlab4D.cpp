@@ -282,11 +282,13 @@ MD_File_hdfMatlab4D::read_pix_subset(const MDImage &SQW,const std::vector<size_t
            pix_buf[i].qy   =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+1));
            pix_buf[i].qz   =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+2));
            pix_buf[i].En   =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+3));
-           pix_buf[i].s    =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4));
-           pix_buf[i].err  =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));
-           pix_buf[i].irun =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+6));
-           pix_buf[i].idet =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+7));
-           pix_buf[i].ien  =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+8));
+           pix_buf[i].irun =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4));
+           pix_buf[i].idet =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));
+           pix_buf[i].ien  =  (int)   (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+6));
+
+           pix_buf[i].s    =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+7));
+           pix_buf[i].err  =  (double)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+8));
+ 
 
     }
     delete [] bin_pix_buf;

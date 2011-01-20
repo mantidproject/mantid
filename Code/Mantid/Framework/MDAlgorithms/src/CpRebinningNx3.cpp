@@ -172,7 +172,9 @@ CpRebinningNx3::rebin_Nx3dataset()
   double s,err;
   size_t nDimX(strides[this->rec_dim_indexes[0]]),nDimY(strides[this->rec_dim_indexes[1]]),nDimZ(strides[this->rec_dim_indexes[2]]);
   // this one should coinside with the description, obtained from the MDDataPoints and readers;
-  MDDataObjects::MDDataPoint<float,uint16_t,float> unPacker(&pix_buf[0],nDimensions);
+  float *MDDataPoint =(float *)(&pix_buf[0]);
+  unsigned int signal_shift = nDimensions;
+  unsigned int data_stride  = this->pSourceDataPoints->sizeofMDDataPoint()/sizeof(float);
   // min-max value initialization
 
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
@@ -203,9 +205,10 @@ CpRebinningNx3::rebin_Nx3dataset()
 
 //#pragma omp for schedule(static,1)
     for(i=0;i<n_pix_in_buffer;i++){
+      size_t base = i*data_stride;
 
-      s  = unPacker.getSignal(i);
-      err= unPacker.getError(i);
+      s  = *(MDDataPoint+base+signal_shift); //unPacker.getSignal(i);
+      err= *(MDDataPoint+base+signal_shift+1); // //unPacker.getError(i);
       // Check for the case when either data.s or data.e contain NaNs or Infs, but data.npix is not zero.
       // and handle according to options settings.
       if(ignore_something){
@@ -229,7 +232,7 @@ CpRebinningNx3::rebin_Nx3dataset()
       for(size_t j=nRecDims; j<nDimensions; j++)
       {
         // transform orthogonal dimensions
-        Et=(unPacker.getDataField(j,i)-shifts[j])*axis_step_inv[j];
+        Et=(*(MDDataPoint+base+j)-shifts[j])*axis_step_inv[j];
 
         if(Et<cut_min[j]||Et>=cut_max[j]){
           out = true;
@@ -245,9 +248,9 @@ CpRebinningNx3::rebin_Nx3dataset()
 
       // Transform the coordinates u1-u4 into the new projection axes, if necessary
       //    indx=[(v(1:3,:)'-repmat(trans_bott_left',[size(v,2),1]))*rot_ustep',v(4,:)'];  % nx4 matrix
-      xt1=unPacker.getDataField(0,i)   -shifts[0];
-      yt1=unPacker.getDataField(1,i)   -shifts[1];
-      zt1=unPacker.getDataField(2,i)   -shifts[2];
+      xt1=*(MDDataPoint+base+0)   -shifts[0]; // unPacker.getDataField(0,i)   -shifts[0];
+      yt1=*(MDDataPoint+base+1)   -shifts[1]; //unPacker.getDataField(1,i)   -shifts[1];
+      zt1=*(MDDataPoint+base+2)   -shifts[2]; //unPacker.getDataField(2,i)   -shifts[2];
 
 
       xt=xt1*rotations[0]+yt1*rotations[3]+zt1*rotations[6];

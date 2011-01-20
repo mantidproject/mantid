@@ -415,12 +415,12 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     size_t  nCellPic(0);
     size_t   nPixel(0);
     float    DimFields[4];
-    double   signalFields[2];
-    int      ind_fields[3];
+    float    signalFields[2];
+    uint32_t  ind_fields[3];
 
     MDPointStructure defaults;
     MDPointDescription  pix(defaults);
-    MDDataPoint<>  packer(pix_array,pix);
+    MDDataPointEqual<float,uint32_t,float>  packer(pix_array,pix);
    
     for(i=0;i<n_pix_inDataset;i++){
           DimFields[0] =  (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0)); //  sqw.pix_array[i].qx   
@@ -430,8 +430,8 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
           ind_fields[0]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));    // sqw.pix_array[i].irun 
           ind_fields[1]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));   // sqw.pix_array[i].idet
           ind_fields[2]  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6)); // sqw.pix_array[i].ien
-          signalFields[0] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7)); // sqw.pix_array[i].s 
-          signalFields[1] = (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));  // sqw.pix_array[i].err
+          signalFields[0] = (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7)); // sqw.pix_array[i].s 
+          signalFields[1] = (float)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));  // sqw.pix_array[i].err
 
           nPixel++;
           packer.setData(i,DimFields,signalFields,ind_fields);
@@ -469,7 +469,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
         pixel_dataspece_opened=true;
     }
     // define the format of the data point (pixel)
-    MDDataPoint<float,uint16_t,float>  packer(&pix_buf[0],4,2,3);
+    MDDataPointEqual<float,uint32_t,float>  packer(&pix_buf[0],4,2,3);
 // identify the cells to read and maximal buffer size necessary to do the preselection;
     size_t max_npix_in_buffer(0),max_npix_selected(0),npix_tt;
     size_t i,j,n_selected_cells,n_cells_processed(0);
@@ -570,9 +570,9 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     message<<" Dataset read  in: "<<difftime (end,start)<<" sec\n";
     f_log.debug(message.str());
 
-    float DimFields[4];
-    float signalFields[2];
-    int    ind_fields[3];
+    float    DimFields[4];
+    float    signalFields[2];
+    uint32_t ind_fields[3];
   
 
 
@@ -582,12 +582,13 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
           DimFields[1] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+1)); // sqw.pix_array[i].qy 
           DimFields[2] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+2)); // sqw.pix_array[i].qz
           DimFields[3] =  (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+3)); // sqw.pix_array[i].En
-          signalFields[0] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4)); // sqw.pix_array[i].s 
-          signalFields[1] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));  // sqw.pix_array[i].err
-          ind_fields[0]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+6));    // sqw.pix_array[i].irun 
-          ind_fields[1]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+7));   // sqw.pix_array[i].idet
-          ind_fields[2]  =  (int) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+8)); // sqw.pix_array[i].ien
-   
+          ind_fields[0]  =  (uint32_t) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+4));    // sqw.pix_array[i].irun 
+          ind_fields[1]  =  (uint32_t) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+5));   // sqw.pix_array[i].idet
+          ind_fields[2]  =  (uint32_t) (*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+6)); // sqw.pix_array[i].ien
+          signalFields[0] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+7)); // sqw.pix_array[i].s 
+          signalFields[1] = (float)(*((float *)bin_pix_buf+i*DATA_PIX_WIDTH+8));  // sqw.pix_array[i].err
+
+
           packer.setData(i,DimFields,signalFields,ind_fields);
  
     }

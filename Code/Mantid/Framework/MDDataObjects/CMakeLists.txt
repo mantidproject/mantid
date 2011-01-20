@@ -39,6 +39,7 @@ inc/MDDataObjects/MD_FileTestDataGenerator.h
 set (TEST_FILES 
 test/HoraceReaderTest.h
 test/MD_FileFactoryTest.h
+test/MDDataPointDescriptionTest.h
 )
 
 set ( GMOCK_TEST_FILES

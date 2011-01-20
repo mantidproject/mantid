@@ -16,14 +16,19 @@ PixDescriptor()
 MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo,const std::vector<std::string> &IndataTags):
 dataIDs(IndataTags),PixDescriptor(pixInfo)
 {
-  unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
-  if(dataIDs.size()!=nFields){
-    throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
-  }
+    if(pixInfo.NumRecDimensions>pixInfo.NumDimensions){
+            throw(std::invalid_argument("number of dimensions is lower then the number of reciprocal dimensions"));
+    }
+
+    unsigned int nFields = PixDescriptor.NumDimensions*PixDescriptor.DimFieldsPresent+PixDescriptor.NumDataFields*PixDescriptor.DataFieldsPresent+PixDescriptor.NumDimIDs;
+
+    if(dataIDs.size()!=nFields){
+      throw(std::invalid_argument("number of dimension names has to be equal to the number of data fields;"));
+    }
 }
 //
 unsigned int 
-MDPointDescription::sizeofMDPoint(void)const
+MDPointDescription::sizeofMDDPoint(void)const
 {
     unsigned int length(0);
     if(this->PixDescriptor.DimFieldsPresent){
@@ -38,13 +43,14 @@ MDPointDescription::sizeofMDPoint(void)const
    if(this->PixDescriptor.NumPixCompressionBits>0){
      // account for compressed fields;
          int num_dimID = this->PixDescriptor.NumDimIDs;
-         if(PixDescriptor.NumDimensions>=2){
-             num_dimID -=2;
-          }else{ // 1D MD points does not exist
-             throw(std::invalid_argument("the point description seems describes 1 or less dimension point; This is not supported"));
-          }
-        // two pixels ID are compressed into 4 bytes;
-       length += 4 + num_dimID*PixDescriptor.DimIDlength;
+         if(num_dimID>=2){
+              num_dimID -=2;
+            // two pixels ID are compressed into 4 bytes;
+              length += 4 + num_dimID*PixDescriptor.DimIDlength;
+         }else{
+              length +=  num_dimID*PixDescriptor.DimIDlength;
+         }
+
    }else{ // all ID fields have equal length
         length += PixDescriptor.NumDimIDs*PixDescriptor.DimIDlength;
    }
@@ -73,7 +79,7 @@ MDPointDescription::buildDefaultIDs(const MDPointStructure &pixInfo)
     buf.seekp(std::ios::beg);
   }
   i0=i1;
-  i1=pixInfo.NumDataFields;
+  i1=pixInfo.NumDimensions;
   for(i=i0;i<i1;i++){
     buf<<i;
     tags[i]="u"+buf.str();
@@ -99,7 +105,11 @@ MDPointDescription::buildDefaultIDs(const MDPointStructure &pixInfo)
 MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo):
 PixDescriptor(pixInfo)
 {
- 
+    if(pixInfo.NumRecDimensions>pixInfo.NumDimensions){
+            throw(std::invalid_argument("number of dimensions is lower then the number of reciprocal dimensions"));
+    }
+
+
   this->buildDefaultIDs(pixInfo);
 
 }

@@ -95,7 +95,7 @@ std::string getColumnName(unsigned int nColumn)const{return dataIDs.at(nColumn);
  std::vector<std::string> getDimensionsID(void)const;
 
  /// returns the size of the described MDDataPoint in bytes
- unsigned int sizeofMDPoint(void)const;
+ unsigned int sizeofMDDPoint(void)const;
 protected:
         MDPointStructure PixDescriptor;
   /** The names (tags) of every dimension column and every data column;

@@ -36,7 +36,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
      }
      void testMDWSExec(){
          // does it add it to analysis data service? -- no
-         targetWorkspaceName = "MyTestWorkspace";
+         targetWorkspaceName = "Load_MDWorkspaceTestWorkspace";
          loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
 
          TSM_ASSERT_THROWS_NOTHING("workspace loading should not throw",loader.execute());

@@ -41,7 +41,25 @@ class DynamicCPRRebinning: public IDynamicRebinning
 
     
 public:
-    /// instantiated and virtual methods for rebinning, implemented in this class;
+ /** preselect cells is the method to identify the cells, which refer to the points may contribute into the class
+  * 
+  *  the function works with class private variables, bit these variables are defined as follows:
+  *
+  *  function returns the list of the cell numbers which can contribute into the cut described by the output geometry description
+  *  Input arguments:
+     @param source           -- the geometry of the initial workspace
+     @param target           --  the geometry description of the final WS
+  *  Output arguments:
+     @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
+     @param n_preselected_pix-- number of pixels(DataPoints, events) contributed into the cells. 
+
+     As all rebinning classes currently use this function, it is here and not abstract at all; May change in a future as, say, sparce images 
+     would like to overload it.
+
+     virtual void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeometryDescription &target, std::vector<MDDataObjects::MD_image_point *> &cells_to_select,size_t &n_preselected_pix);
+   */
+
+
     virtual size_t preselect_cells(); 
     /** function returns the number of pixels which can contribute into a cut (Number of pixels in selected cells -- become valid after 
      *  preselection is done and precelected cells buffer is valid */
@@ -124,18 +142,6 @@ protected:
 
  //
  // 
- // /*! function returns the list of the cell numbers which can contribute into the cut described by the output geometry description
- // *  Input arguments:
- //    @param source           -- the geometry of the initial workspace
- //    @param target           -- 
- // *  Output arguments:
- //    @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
- //    @param n_preselected_pix-- number of pixels contributed into the cells. 
-
- //    As all rebinning classes currently use this function, it is here and not abstract at all; May change in a future as, say, sparce images 
- //    would like to overload it.
- //  */
- //   virtual void preselect_cells(const MDDataObjects::MDWorkspace &Source, const Geometry::MDGeometryDescription &target, std::vector<MDDataObjects::MD_image_point *> &cells_to_select,size_t &n_preselected_pix);
 
  
 }; // end DynamicCPRRebinning

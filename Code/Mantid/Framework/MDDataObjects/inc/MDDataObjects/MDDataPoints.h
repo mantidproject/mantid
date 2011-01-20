@@ -43,7 +43,7 @@ namespace MDDataObjects
 
 //* MDPixels
 /// the size of the buffer to read pixels (in bytes) while reading parts of datasets --should be optimized for performance and deleted
-#define PIX_BUFFER_SIZE 10000000
+#define PIX_BUFFER_SIZE 10000000*36
 /// the size of the data page (in bytes), providing optimal speed of data exchange with HDD -- should be calculated;
 #define PAGE_SIZE  4096
 

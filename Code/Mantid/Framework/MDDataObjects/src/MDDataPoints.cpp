@@ -47,7 +47,7 @@ MDDataPoints::MDDataPoints(const MDDataPointsDescription &descr):
   data_buffer(NULL)
 {
  
-  this->pixel_size = descr.sizeofMDPoint();
+  this->pixel_size = descr.sizeofMDDPoint();
 
   unsigned int nDims = pixDescription.PixInfo().NumDimensions;
 

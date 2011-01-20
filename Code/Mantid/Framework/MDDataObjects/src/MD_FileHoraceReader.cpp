@@ -368,11 +368,10 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     time(&end);     //***********************************************<<<<
     f_log.debug()<<" cells read in: "<<difftime (end,start)<<" sec\n";;
     //
-    time(&start);  //*******
-
+    //time(&start);  //*******
 	data_buffer_size = block_start; // latest block size has been already added
-	compact_hor_data(&pix_buf[0],data_buffer_size);
-    time(&end);   
+	compact_hor_data(&pix_buf[0],data_buffer_size);  
+    //time(&end);   
     f_log.debug()<<" cells transformed in: "<<difftime (end,start)<<" sec\n";;
     // returns next cell to read if any or size of the selection
     return ic;
@@ -380,6 +379,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 void 
 MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
 {
+ 
 
     size_t i;
     // data size should be in blocks of 9*4
@@ -389,10 +389,10 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
         throw(std::invalid_argument(" Block of Horace data does not arrived for compression in block of 9*4"));
     }
 
-    float Dim_sig[6];
-    int   index[3];
+    float      Dim_sig[6];
+    uint32_t   index[3];
 
- 	MDDataPoint<float,uint16_t,float> defPoint(buffer);
+ 	MDDataPointEqual<float,uint32_t,float> defPoint(buffer);
     // output buffer size now decreases;
     buf_size = data_size*defPoint.sizeofMDDataPoint();
     for(i=0;i<data_size;i++){
@@ -401,9 +401,9 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
         Dim_sig[2] =(float)*((float *)(buffer+i*hbs+8));
         Dim_sig[3] =(float)*((float *)(buffer+i*hbs+12));
 
-        index[0]  =(int)*((uint32_t *)(buffer+i*hbs+16)); 
-        index[1]  =(int)*((uint32_t *)(buffer+i*hbs+20)); 
-        index[2]  =(int)*((uint32_t *)(buffer+i*hbs+24)); 
+        index[0]  =(uint32_t)*((uint32_t *)(buffer+i*hbs+16)); 
+        index[1]  =(uint32_t)*((uint32_t *)(buffer+i*hbs+20)); 
+        index[2]  =(uint32_t)*((uint32_t *)(buffer+i*hbs+24)); 
 
         Dim_sig[4] =(float)*((float*)(buffer+i*hbs+28));
         Dim_sig[5] =(float)*((float*)(buffer+i*hbs+32));
