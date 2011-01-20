@@ -377,6 +377,8 @@ public:
 
     // Result should be 1 + 2 + 3 / 3 = 2
     TS_ASSERT_EQUALS(output->readY(0)[1], 2.0);
+
+    AnalysisDataService::Instance().remove("GroupDetectors2_testAverageBehaviour_Output");
   }
 
   private:
