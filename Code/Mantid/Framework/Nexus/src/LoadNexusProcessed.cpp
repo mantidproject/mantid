@@ -12,6 +12,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFileIO.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "Poco/Path.h"

@@ -149,6 +149,15 @@ public:
     TS_ASSERT_EQUALS( a.to_ISO8601_string(), "1990-01-02T03:04:05");
   }
 
+  void test_to_int64()
+  {
+    DateAndTime a;
+    a = DateAndTime("1990-01-02 00:01:02.345");
+    int64_t nanosec = a.total_nanoseconds();
+    //1day, 1 minute, 2 seconds, 0.345 seconds = 86462345000000 nanosec
+    TS_ASSERT_EQUALS( nanosec, int64_t(86462345000000LL) );
+   }
+
   void test_stream_operator()
   {
     DateAndTime a;

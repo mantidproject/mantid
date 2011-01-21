@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <climits>
 
 namespace Mantid
@@ -65,7 +66,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 	    /// sets non workspace properties for the algorithm
-	  void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+      void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
       /// The name and path of the input file
       std::string m_filename;
@@ -75,6 +76,8 @@ namespace Mantid
       std::string m_title;
       /// Pointer to the local workspace
       API::MatrixWorkspace_const_sptr m_inputWorkspace;
+      /// Pointer to the local workspace, cast to EventWorkspace
+      DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
       /// Flag set if list of spectra to save is specifed
       bool m_list;
       /// Flag set if interval of spectra to write is set

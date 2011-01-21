@@ -24,6 +24,7 @@ namespace NeXus
 
   using namespace Kernel;
   using namespace API;
+  using namespace DataObjects;
   using Geometry::IInstrument_const_sptr;
 
   // Register the algorithm into the algorithm factory
@@ -37,6 +38,7 @@ namespace NeXus
   {
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Initialisation method.
    *
    */
@@ -74,6 +76,8 @@ namespace NeXus
         "over written or appended");
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** Executes the algorithm.
    *
    *  @throw runtime_error Thrown if algorithm cannot execute
@@ -85,6 +89,7 @@ namespace NeXus
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
+    m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
     // If no title's been given, use the workspace title field
     if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
     // If we don't want to append then remove the file if it already exists
@@ -105,8 +110,9 @@ namespace NeXus
     if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
 
     const std::string workspaceID = m_inputWorkspace->id();
-    if (workspaceID.find("Workspace2D") == std::string::npos )
-      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
+    if ((workspaceID.find("Workspace2D") == std::string::npos) &&
+        !m_eventWorkspace)
+      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D or EventWorkspace.");
 
 
     NexusFileIO *nexusFile= new NexusFileIO();
@@ -209,7 +215,13 @@ namespace NeXus
       for(int i=m_spec_min;i<=m_spec_max;i++)
         spec.push_back(i);
     }
-    nexusFile->writeNexusProcessedData(m_inputWorkspace,uniformSpectra,spec);
+
+    // Write out the data (2D or event)
+    if (m_eventWorkspace)
+      nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
+    else
+      nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec);
+
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
     // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
     if ( m_inputWorkspace->getAxis(1)->isSpectra() )
@@ -224,6 +236,8 @@ namespace NeXus
     return;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** virtual method to set the non workspace properties for this algorithm
    *  @param alg pointer to the algorithm
    *  @param propertyName name of the property

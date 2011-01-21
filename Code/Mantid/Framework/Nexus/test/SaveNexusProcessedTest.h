@@ -28,6 +28,7 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -68,44 +69,6 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT( algToBeTested.isInitialized() );
-  }
-
-  void xtestExec_EventWorkspaces()
-  {
-
-//This test does not pass. In fact the algorithm does not work with event workspaces
-    //Load a CNCS file
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7860_neutron_event.dat" );
-    Mantid::DataHandling::LoadEventPreNeXus * eventLoader;
-    eventLoader = new Mantid::DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs_pad");
-    eventLoader->setProperty("PadEmptyPixels", true);
-    TS_ASSERT( eventLoader->execute() );
-    delete eventLoader;
-
-
-    SaveNexusProcessed alg;
-    alg.initialize();
-
-    // Now set it...
-    // specify name of file to save workspace to
-    alg.setPropertyValue("InputWorkspace", "cncs_pad");
-    outputFile = "testOfSaveNexusProcessed.nxs";
-    dataName = "spectra";
-    title = "A simple workspace saved in Processed Nexus format";
-
-    alg.setPropertyValue("Filename", outputFile);
-    outputFile = alg.getPropertyValue("Filename");
-    alg.setPropertyValue("Title", title);
-    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    if(clearfiles) Poco::File(outputFile).remove();
-
   }
 
 
@@ -317,6 +280,51 @@ void testExecOnMuonXml()
 
 #endif /*_WIN64*/
   }
+
+
+
+
+void testExec_EventWorkspaces()
+{
+  std::vector< std::vector<int> > groups(5);
+  groups[0].push_back(10);
+  groups[0].push_back(11);
+  groups[0].push_back(12);
+  groups[1].push_back(20);
+  groups[2].push_back(30);
+  groups[2].push_back(31);
+  groups[3].push_back(40);
+  groups[4].push_back(50);
+
+  EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
+  WS->getEventList(4).clear();
+
+  SaveNexusProcessed alg;
+  alg.initialize();
+
+  // Now set it...
+  alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(WS));
+
+  // specify name of file to save workspace to
+  outputFile = "SaveNexusProcessed_ExecEvent.nxs";
+  dataName = "spectra";
+  title = "A simple workspace saved in Processed Nexus format";
+
+  alg.setPropertyValue("Filename", outputFile);
+  outputFile = alg.getPropertyValue("Filename");
+  alg.setPropertyValue("Title", title);
+  // Clear the existing file, if any
+  if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+
+  alg.execute();
+  TS_ASSERT( alg.isExecuted() );
+
+  TS_ASSERT( Poco::File(outputFile).exists() );
+
+  if(clearfiles) Poco::File(outputFile).remove();
+
+}
+
 
 private:
   SaveNexusProcessed algToBeTested;

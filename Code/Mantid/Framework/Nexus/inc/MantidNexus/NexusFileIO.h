@@ -3,6 +3,7 @@
 #include <napi.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "boost/date_time/local_time_adjustor.hpp"
 #include "boost/date_time/c_local_time_adjustor.hpp"
@@ -62,8 +63,16 @@ namespace Mantid
       int writeNexusProcessedSample( const std::string& title, const API::Sample & sample,
 				     const Mantid::API::Run& runProperties) const;
       /// write the workspace data
-      int writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
+      int writeNexusProcessedData2D( const API::MatrixWorkspace_const_sptr& localworkspace,
 				   const bool& uniformSpectra, const std::vector<int>& spec) const;
+
+      int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace) const;
+      int writeEventList( const DataObjects::EventList & el, std::string group_name) const;
+
+      template<class T>
+      void writeEventListData( std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight, bool writeError) const;
+      void NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data) const;
+
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
 			    bool& uniformBounds, std::string& axesNames, std::string& yUnits ) const;

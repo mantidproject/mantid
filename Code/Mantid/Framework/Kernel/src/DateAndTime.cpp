@@ -577,6 +577,12 @@ int DateAndTime::nanoseconds() const
   return (_nanoseconds % 1000000000);
 }
 
+//------------------------------------------------------------------------------------------------
+/** Return the total # of nanoseconds since the epoch */
+int64_t DateAndTime::total_nanoseconds() const
+{
+  return this->_nanoseconds;
+}
 
 
 //------------------------------------------------------------------------------------------------
@@ -775,7 +781,6 @@ time_duration DateAndTime::operator-(const DateAndTime& rhs) const
 {
   return this->to_ptime() - rhs.to_ptime();
 }
-
 
 
 //------------------------------------------------------------------------------------------------

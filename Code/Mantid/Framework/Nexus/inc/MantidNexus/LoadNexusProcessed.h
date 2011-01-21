@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusFileIO.h"
+
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/IDataFileChecker.h"
 
