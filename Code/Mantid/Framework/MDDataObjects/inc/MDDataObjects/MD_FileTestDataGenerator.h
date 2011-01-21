@@ -1,4 +1,3 @@
-
 #ifndef FILE_TEST_DATA_GENERATOR_H
 #define FILE_TEST_DATA_GENERATOR_H
 //
@@ -93,12 +92,14 @@ private:
 	size_t     mdImageSize;
 	/// number of data points (pixels) contributing into the MD image and present in the file;
 	uint64_t   nDataPoints;
-    /// number of bytes a pixel occupiesl
-    unsigned int  sizeof_pixel;
    /// number of cells in the MDImage;
     size_t nCells;
 
+    /// pointer to MDDataPointDescription
     mutable MDPointDescription *pPointDescr;
+    /// number of bytes a pixel occupies
+    mutable unsigned int  sizeof_pixel;
+
     float   *dat_sig_fields;
     int     *ind_fields;
 

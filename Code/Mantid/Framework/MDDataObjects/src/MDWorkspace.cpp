@@ -39,6 +39,7 @@ namespace Mantid{
        this->m_spMDImage = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spMDImage); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
      }
+
 void
 MDWorkspace::init(std::auto_ptr<IMD_FileFormat> pFile,
                 std::auto_ptr<Geometry::MDGeometryBasis> pBasis,

@@ -99,11 +99,20 @@ MD_FileTestDataGenerator::read_pointDescriptions(void)const
 {
     const char *HoraceDataTags[]={"qxt","qyt","qzt","ent","St","errt","iRunIDt","iDetIDt","iEnt"};
     MDPointStructure  aPointDescr;
+
+    //TODO: This information has to correlate with what rebinning expects. Decorrelate!!!
     // let's make signals and errors float;
     aPointDescr.SignalLength = 4;
+    // and indexes incompressed;
+    aPointDescr.NumPixCompressionBits=0;
+    // and indexes int32
+    aPointDescr.DimIDlength  = 4;
+
     std::vector<std::string> dataID(HoraceDataTags,HoraceDataTags+9);
 
-    this->pPointDescr = new MDPointDescription(aPointDescr,dataID);
+    this->pPointDescr  = new MDPointDescription(aPointDescr,dataID);
+    this->sizeof_pixel = this->pPointDescr->sizeofMDDPoint();
+
     return *pPointDescr;
 }
  //read whole pixels information in memory; usually impossible, then returns false;

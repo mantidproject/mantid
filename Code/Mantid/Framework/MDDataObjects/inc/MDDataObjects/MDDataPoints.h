@@ -66,7 +66,7 @@ namespace MDDataObjects
   {
   public:
     MDDataPoints(const MDDataPointsDescription &description);
-    ~MDDataPoints();
+    virtual ~MDDataPoints();
 /******************************************************************************************************
     /** initialises MDDataPoints, allocates all necessary arrays and provides it with  valid data reader; 
       * if the input dataReader is absent, the function initializes its own dataReader and sets output 
@@ -112,7 +112,7 @@ namespace MDDataObjects
      which can be actually on HDD or in memory */
     void store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels);
   /// calculate the locations of the data points blocks with relation to the image cells
-    void init_pix_locations();
+    virtual void init_pix_locations();
   protected:
 
   private:

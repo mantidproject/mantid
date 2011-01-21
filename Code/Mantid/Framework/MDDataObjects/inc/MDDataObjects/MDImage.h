@@ -61,7 +61,7 @@ public:
 	/// the constructor which builds empty image from geometry the description (calling proper geometry constructor inside)
     MDImage(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis & pBasis);
     // destructor
-    ~MDImage();
+    virtual ~MDImage();
     /** function returns vector of points left after the selection has been applied to the multidimensinal image
 	*
     * @param selection -- vector of indexes, which specify which dimensions are selected and the location of the selected point
