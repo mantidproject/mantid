@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/ParameterTie.h"
 
 using namespace Mantid;
@@ -78,7 +79,7 @@ public:
 };
 
 
-class ParameterTieTest_Linear: public Function
+class ParameterTieTest_Linear: public ParamFunction, public IFunctionMW
 {
 public:
   ParameterTieTest_Linear()
@@ -107,7 +108,7 @@ public:
   }
 };
 
-class ParameterTieTest_Nothing: public Function
+class ParameterTieTest_Nothing: public ParamFunction, public IFunctionMW
 {
 public:
   ParameterTieTest_Nothing()
@@ -126,7 +127,7 @@ public:
 
   void testComposite()
   {
-    CompositeFunction mfun;
+    CompositeFunctionMW mfun;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk = new ParameterTieTest_Linear();
 
@@ -162,7 +163,7 @@ public:
 
   void testComposite1()
   {
-    CompositeFunction mfun;
+    CompositeFunctionMW mfun;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
 
@@ -186,9 +187,9 @@ public:
 
   void testComposite2()
   {
-    CompositeFunction mfun;
-    CompositeFunction* mf1 = new CompositeFunction;
-    CompositeFunction* mf2 = new CompositeFunction;
+    CompositeFunctionMW mfun;
+    CompositeFunctionMW* mf1 = new CompositeFunctionMW;
+    CompositeFunctionMW* mf2 = new CompositeFunctionMW;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
     ParameterTieTest_Nothing* nth = new ParameterTieTest_Nothing;
@@ -273,11 +274,11 @@ private:
   {
     ParameterTie tie(fun,"f10.sig");
   }
-  void mustThrow4(IFunction* fun)
+  void mustThrow4(IFitFunction* fun)
   {
     ParameterTie tie(fun,"f1.a");
   }
-  void mustThrow5(IFunction* fun)
+  void mustThrow5(IFitFunction* fun)
   {
     ParameterTie tie(fun,"cen");
   }

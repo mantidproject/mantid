@@ -158,6 +158,11 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
         return this->m_spFile->getNPix();
     }
 
+    int MDWorkspace::getNDimensions() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
+    }
+
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
     { 
       return m_spMDImage->getGeometry()->getXDimension(); 
@@ -181,6 +186,11 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
     { 
 		return m_spMDImage->getGeometry()->get_constDimension(id,true); 
+    }
+
+    const std::vector<std::string> MDWorkspace::getDimensionIDs() const
+    {
+      throw std::runtime_error("Not implemented"); //TODO
     }
 
     const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(int index) const

@@ -57,6 +57,9 @@ namespace Mantid
         // TODO: -- what is its meaning for the matrix workspace, may be different or the same? different logic of the operations
       virtual uint64_t getNPoints() const = 0;
 
+      /// Get the number of dimensions
+      virtual int getNDimensions() const = 0;
+
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;
 
@@ -71,6 +74,9 @@ namespace Mantid
 
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const = 0;
+
+      /// Get the dimension ids in their order
+      virtual const std::vector<std::string> getDimensionIDs() const = 0;
 
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const = 0;

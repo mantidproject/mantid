@@ -7,8 +7,8 @@ namespace Mantid
 {
   namespace API
   {
-    class IFunction;
-    class CompositeFunction;
+    class IFitFunction;
+    class CompositeFunctionMW;
     class IPeakFunction;
   }
 }
@@ -25,19 +25,19 @@ public:
   IFunctionWrapper():m_function(NULL),m_compositeFunction(NULL),m_peakFunction(NULL){}
 
   /// IFunction pointer
-  Mantid::API::IFunction* function(){return m_function;}
-  Mantid::API::CompositeFunction* compositeFunction(){return m_compositeFunction;}
+  Mantid::API::IFitFunction* function(){return m_function;}
+  Mantid::API::CompositeFunctionMW* compositeFunction(){return m_compositeFunction;}
   Mantid::API::IPeakFunction* peakFunction(){return m_peakFunction;}
 
   /// Set a new function from a string
   void setFunction(const QString& name);
   /// Set a new function from a pointer
-  void setFunction(Mantid::API::IFunction* function);
+  void setFunction(Mantid::API::IFitFunction* function);
 
 private:
   /// Pointer to the function
-  Mantid::API::IFunction* m_function;
-  Mantid::API::CompositeFunction* m_compositeFunction;
+  Mantid::API::IFitFunction* m_function;
+  Mantid::API::CompositeFunctionMW* m_compositeFunction;
   Mantid::API::IPeakFunction* m_peakFunction;
 };
 

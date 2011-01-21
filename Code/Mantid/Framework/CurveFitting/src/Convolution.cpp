@@ -80,7 +80,12 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
     xr[0] = -n2*dx;
     if (odd) xr[nData-1] = -xr[0];
 
-    getFunction(0)->function(m_resolution,xr,nData);
+    API::IFunctionMW* fun = dynamic_cast<API::IFunctionMW*>(getFunction(0));
+    if (!fun)
+    {
+      throw std::runtime_error("Convolution can work only with IFunctionMW");
+    }
+    fun->function(m_resolution,xr,nData);
 
     // rotate the data to produce the right transform
     if (odd)
@@ -117,10 +122,12 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
     return;
   }
 
+  API::IFunctionMW* resolution = dynamic_cast<API::IFunctionMW*>(getFunction(0));
+
   // check for delta functions
   std::vector<DeltaFunction*> dltFuns;
   double dltF = 0;
-  CompositeFunction* cf = dynamic_cast<CompositeFunction*>(getFunction(1));
+  CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(getFunction(1));
   if (cf)
   {
     for(int i = 0; i < cf->nFunctions(); ++i)
@@ -134,19 +141,20 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
     }
     if (static_cast<int>(dltFuns.size()) == cf->nFunctions())
     {// all delta functions - return scaled reslution
-      getFunction(0)->function(out,xValues,nData);
+      resolution->function(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
       return;
     }
   }
   else if (dynamic_cast<DeltaFunction*>(getFunction(1)))
   {// single delta function - return scaled reslution
-    getFunction(0)->function(out,xValues,nData);
+    resolution->function(out,xValues,nData);
     std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),getFunction(1)->getParameter("Height")));
     return;
   }
 
-  getFunction(1)->function(out,xValues,nData);
+  API::IFunctionMW* funct = dynamic_cast<API::IFunctionMW*>(getFunction(1));
+  funct->function(out,xValues,nData);
   gsl_fft_real_transform (out, 1, nData, wavetable, workspace);
   gsl_fft_real_wavetable_free (wavetable);
 
@@ -182,7 +190,7 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
   if (dltF != 0.)
   {
     double* tmp = new double[nData];
-    getFunction(0)->function(tmp,xValues,nData);
+    resolution->function(tmp,xValues,nData);
     std::transform(tmp,tmp+nData,tmp,std::bind2nd(std::multiplies<double>(),dltF));
     std::transform(out,out+nData,tmp,out,std::plus<double>());
     delete tmp;
@@ -237,7 +245,7 @@ void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int&
  * @param f A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
-int Convolution::addFunction(IFunction* f)
+int Convolution::addFunction(IFitFunction* f)
 {
   if (nFunctions() == 0)
   {
@@ -253,14 +261,14 @@ int Convolution::addFunction(IFunction* f)
   }
   else
   {
-    IFunction* f1 = getFunction(1);
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f1);
+    IFitFunction* f1 = getFunction(1);
+    CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(f1);
     if (cf == 0)
     {
-      cf = dynamic_cast<CompositeFunction*>(API::FunctionFactory::Instance().createFunction("CompositeFunction"));
+      cf = dynamic_cast<CompositeFunctionMW*>(API::FunctionFactory::Instance().createFunction("CompositeFunctionMW"));
       removeFunction(1,false);// remove but don't delete
       cf->addFunction(f1);
-      CompositeFunction::addFunction(cf);
+      CompositeFunctionMW::addFunction(cf);
     }
     cf->addFunction(f);
     checkFunction();
@@ -285,11 +293,11 @@ std::string Convolution::asString()const
     throw std::runtime_error("Convolution function is incomplete");
   }
   std::ostringstream ostr;
-  ostr<<"composite=Convolution;";
-  IFunction* res = getFunction(0);
-  IFunction* fun = getFunction(1);
-  bool isCompRes = dynamic_cast<CompositeFunction*>(res) != 0;
-  bool isCompFun = dynamic_cast<CompositeFunction*>(fun) != 0;
+  ostr<<"composite=ConvolutionMW;";
+  IFitFunction* res = getFunction(0);
+  IFitFunction* fun = getFunction(1);
+  bool isCompRes = dynamic_cast<CompositeFunctionMW*>(res) != 0;
+  bool isCompFun = dynamic_cast<CompositeFunctionMW*>(fun) != 0;
 
   if (isCompRes) ostr << '(';
   ostr << *res ;

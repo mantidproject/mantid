@@ -3,14 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Function.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/ParameterReference.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-class ParameterReferenceTest_Fun: public Function
+class ParameterReferenceTest_Fun: public ParamFunction, public IFunctionMW
 {
 public:
   ParameterReferenceTest_Fun()
@@ -45,14 +46,14 @@ public:
 
   void testComposite()
   {
-    CompositeFunction* cf = new CompositeFunction;
+    CompositeFunctionMW* cf = new CompositeFunctionMW;
     ParameterReferenceTest_Fun* f0 = new ParameterReferenceTest_Fun;
 
-    CompositeFunction* f1 = new CompositeFunction;
+    CompositeFunctionMW* f1 = new CompositeFunctionMW;
 
     ParameterReferenceTest_Fun* f1_0 = new ParameterReferenceTest_Fun;
     ParameterReferenceTest_Fun* f1_1 = new ParameterReferenceTest_Fun;
-    CompositeFunction* f1_2 = new CompositeFunction;
+    CompositeFunctionMW* f1_2 = new CompositeFunctionMW;
     ParameterReferenceTest_Fun* f1_2_0 = new ParameterReferenceTest_Fun;
     ParameterReferenceTest_Fun* f1_2_1 = new ParameterReferenceTest_Fun;
 

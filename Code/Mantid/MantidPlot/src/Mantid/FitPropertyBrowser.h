@@ -28,7 +28,7 @@ namespace Mantid
 {
   namespace API
   {
-    class IFunction;
+    class IFitFunction;
     class IPeakFunction;
     class CompositeFunction;
     class Workspace;
@@ -77,7 +77,7 @@ public:
   /// Set new current function
   void setCurrentFunction(PropertyHandler* h)const;
   /// Get the current function
-  const Mantid::API::IFunction* theFunction()const;
+  const Mantid::API::IFitFunction* theFunction()const;
   /// Update the function parameters
   void updateParameters();
 
@@ -157,7 +157,7 @@ public:
   void init();
 
   // send parameterChanged signal
-  void sendParameterChanged(const Mantid::API::IFunction* f){emit parameterChanged(f);}
+  void sendParameterChanged(const Mantid::API::IFitFunction* f){emit parameterChanged(f);}
 
   /// Creates and adds the autobackground
   void addAutoBackground();
@@ -188,7 +188,7 @@ signals:
   void functionChanged();
   void startXChanged(double);
   void endXChanged(double);
-  void parameterChanged(const Mantid::API::IFunction*);
+  void parameterChanged(const Mantid::API::IFitFunction*);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();
@@ -268,9 +268,9 @@ private:
   /// Check that the properties match the function
   void checkFunction();
   /// Sets the workspace to a function
-  void setWorkspace(Mantid::API::IFunction* f)const;
+  void setWorkspace(Mantid::API::IFitFunction* f)const;
 
-  void setCurrentFunction(const Mantid::API::IFunction* f)const;
+  void setCurrentFunction(const Mantid::API::IFitFunction* f)const;
 
   /// Does a parameter have a tie
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;

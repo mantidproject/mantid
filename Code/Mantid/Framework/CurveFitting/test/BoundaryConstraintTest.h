@@ -156,7 +156,7 @@ public:
     TS_ASSERT( !bc->hasLower() );
 
     gaus.addConstraint(bc);
-    IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);
@@ -187,7 +187,7 @@ public:
     bcHeight->initialize(&gaus,exprHeight);
     gaus.addConstraint(bcHeight);
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);

@@ -6,7 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
+//#include "MantidAPI/IFunction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <ostream>
@@ -134,7 +134,7 @@ namespace Mantid
         fit_alg = createSubAlgorithm("Fit",-1,-1,false);
       } catch (Exception::NotFoundError&)
       {
-        g_log.error("Can't locate Gaussian1D");
+        g_log.error("Can't locate Fit algorithm");
         throw ;
       }
       fit_alg->setProperty("InputWorkspace",inputW);
@@ -155,7 +155,7 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
+        g_log.error("Unable to successfully run Fit sub-algorithm");
         throw;
       }
 
@@ -165,13 +165,14 @@ namespace Mantid
         throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
       }
 
-      IFunction* fun = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
-      if (!fun)
-      {
-        throw std::runtime_error("FunctionFactory cannot create function returned from Fit algorithm");
-      }
-      const double offset = fun->getParameter("f1.PeakCentre");
-      delete fun;
+      //IFunction* fun = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
+      //if (!fun)
+      //{
+      //  throw std::runtime_error("FunctionFactory cannot create function returned from Fit algorithm");
+      //}
+      //const double offset = fun->getParameter("f1.PeakCentre");
+      const double offset = fit_alg->getProperty("f1.PeakCentre");
+      //delete fun;
       return (-offset*step/(dreference+offset*step));
     }
 

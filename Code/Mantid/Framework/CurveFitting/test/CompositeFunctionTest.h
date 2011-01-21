@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -104,7 +104,7 @@ public:
 };
 
 
-class CurveFittingLinear: public Function, public ITestFunction
+class CurveFittingLinear: public ParamFunction, public IFunctionMW, public ITestFunction
 {
 public:
   CurveFittingLinear()
@@ -143,7 +143,7 @@ public:
   }
 };
 
-class CompFunction : public CompositeFunction
+class CompFunction : public CompositeFunctionMW
 {
 public:
 
@@ -237,7 +237,7 @@ public:
       TS_ASSERT_DIFFERS(R[i],0);
     }
 
-    IFunction* out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction* out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT_EQUALS(out->parameterName(0),"f0.a");
     TS_ASSERT_DELTA(out->getParameter(0),1,0.1);
 

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
 
@@ -58,7 +58,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Fit() : API::Algorithm(),m_function(NULL) {};
+      Fit() : API::Algorithm() {};
       /// Destructor
       virtual ~Fit();
       /// Algorithm's name for identification overriding a virtual method
@@ -68,59 +68,13 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
-      /// Function you want to fit to.
-      //virtual void function(const double* in, double* out, const double* xValues, const int& nData);
-      /// Derivatives of function with respect to parameters you are trying to fit
-      //virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const int& nData);
-
-      /// Get the function for fitting
-      API::IFunction* getFunction()const{return m_function;}
-
     protected:
       // Overridden Algorithm methods
       void init();
       void exec();
-      void exec1();
-
-      /// Set a function for fitting
-      void setFunction(API::IFunction* fun);
-
-      /// Option for providing intelligent range starting value based e.g. on the user input parameter values
-      virtual void modifyStartOfRange(double& startX)
-      {
-        (void) startX;
-      }
-
-      /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
-      virtual void modifyEndOfRange(double& endX)
-      {
-        (void) endX;
-      }
-
-      /** Called after the data ranged has been determined but before the fitting starts.
-       *  For example may be used to create wavelength array for each TOF data-point.
-       *  Number of data point to fit over are m_maxX-m_minX.
-       * 
-       *  @param m_minX Start array index.
-       *  @param m_maxX End array index.
-       */
-      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX)
-      {
-        (void) m_minX;
-        (void) m_maxX;
-      };
 
       // Process input parameters and create the fitting function.
       void processParameters();
-
-      /// calculates the derivative of a declared parameter over active parameter i
-      double transformationDerivative(int i);
-
-      /// Number of parameters.
-      size_t nActive()const{return m_function->nActive();}
-
-      /// Pointer to the fitting function
-      API::IFunction* m_function;
 
       /// Function initialization string
       std::string m_function_input;

@@ -1,5 +1,5 @@
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
@@ -27,12 +27,12 @@ namespace Mantid
     {
     }
 
-    IFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
+    IFitFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
     {
-      IFunction* fun = dynamic_cast<IFunction*>(createUnwrapped(type));
+      IFitFunction* fun = dynamic_cast<IFitFunction*>(createUnwrapped(type));
       if (!fun)
       {
-        throw std::runtime_error("Function "+type+" cannot be cast to IFunction");
+        throw std::runtime_error("Function "+type+" cannot be cast to IFitFunction");
       }
       fun->initialize();
       return fun;
@@ -48,7 +48,7 @@ namespace Mantid
      * input = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
      * @return A pointer to the created function
      */
-    IFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
+    IFitFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
     {
       //std::vector<std::string> ops;
       //ops.push_back(";");
@@ -70,7 +70,7 @@ namespace Mantid
 
       if (e.name() == ";")
       {
-        IFunction* fun = createComposite(e);
+        IFitFunction* fun = createComposite(e);
         if (!fun) inputError();
         return fun;
       }
@@ -84,7 +84,7 @@ namespace Mantid
      * @param expr The input expression
      * @return A pointer to the created function
      */
-    IFunction* FunctionFactoryImpl::createSimple(const Expression& expr)const
+    IFitFunction* FunctionFactoryImpl::createSimple(const Expression& expr)const
     {
       if (expr.name() == "=" && expr.size() > 1)
       {
@@ -106,7 +106,7 @@ namespace Mantid
       }
       std::string fnName = term->terms()[1].name();
 
-      IFunction* fun = createFunction(fnName);
+      IFitFunction* fun = createFunction(fnName);
 
       for(++term;term!=terms.end();++term)
       {// loop over function's parameters/attributes
@@ -119,7 +119,7 @@ namespace Mantid
           {// remove the double quotes
             parValue = parValue.substr(1,parValue.size()-2);
           }
-          IFunction::Attribute att = fun->getAttribute(parName);
+          IFitFunction::Attribute att = fun->getAttribute(parName);
           att.fromString(parValue);
           fun->setAttribute(parName,att);
         }
@@ -170,7 +170,7 @@ namespace Mantid
         }
         else if (term.terms()[0].name() == "name")
         {
-          cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
+          cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
           if (!cfun) inputError(expr.str());
         }
         else
@@ -191,7 +191,7 @@ namespace Mantid
           }
           else if (firstTerm->terms()[0].name() == "name")
           {
-            cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
+            cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
             if (!cfun) inputError(expr.str());
           }
           else
@@ -202,7 +202,7 @@ namespace Mantid
       }
       else if (term.name() == ";")
       {
-        cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
+        cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
         if (!cfun) inputError(expr.str());
       }
       else
@@ -213,7 +213,7 @@ namespace Mantid
       for(;it!=terms.end();it++)
       {
         const Expression& term = it->bracketsRemoved();
-        IFunction* fun;
+        IFitFunction* fun;
         if (term.name() == ";")
         {
           fun = createComposite(term);
@@ -373,7 +373,7 @@ namespace Mantid
             {// remove the double quotes
               parValue = parValue.substr(1,parValue.size()-2);
             }
-            IFunction::Attribute att = fun->getAttribute(parName);
+            IFitFunction::Attribute att = fun->getAttribute(parName);
             att.fromString(parValue);
             fun->setAttribute(parName,att);
           }

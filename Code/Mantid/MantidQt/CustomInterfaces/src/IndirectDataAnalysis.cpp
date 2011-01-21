@@ -5,7 +5,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -623,9 +623,9 @@ bool IndirectDataAnalysis::validateAbsorption()
   return valid;
 }
 
-Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePropertyBrowser* propertyBrowser)
+Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::createFunction(QtTreePropertyBrowser* propertyBrowser)
 {
-  Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
+  Mantid::API::CompositeFunctionMW* result = new Mantid::API::CompositeFunctionMW();
 
   QList<QtBrowserItem*> items = propertyBrowser->topLevelItems();
   int funcIndex = 0;
@@ -637,7 +637,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
 
     if ( sub.size() > 0 )
     {
-      Mantid::API::IFunction* func;
+      Mantid::API::IFitFunction* func;
       std::string name = item->propertyName().toStdString();
       if ( name == "Stretched Exponential" )
       {
@@ -645,7 +645,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
         std::string formula = "Intensity*exp(-(x/Tau)^Beta)";
-        Mantid::API::IFunction::Attribute att(formula);
+        Mantid::API::IFitFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         // Constrain Beta value to be between 0 and 1
         std::string funcConstraint = "0 <= Beta <= 1";
@@ -660,7 +660,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
         std::string formula = "Intensity*exp(-(x/Tau))";
-        Mantid::API::IFunction::Attribute att(formula);
+        Mantid::API::IFitFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
       }
       else
@@ -679,11 +679,11 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePrope
   return result;
 }
 
-Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool tie)
+Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(bool tie)
 {
-  Mantid::API::CompositeFunction* conv = dynamic_cast<Mantid::API::CompositeFunction*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
-  Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
-  Mantid::API::CompositeFunction* comp = new Mantid::API::CompositeFunction();
+  Mantid::API::CompositeFunctionMW* conv = dynamic_cast<Mantid::API::CompositeFunctionMW*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
+  Mantid::API::CompositeFunctionMW* result = new Mantid::API::CompositeFunctionMW();
+  Mantid::API::CompositeFunctionMW* comp = new Mantid::API::CompositeFunctionMW();
   int index = 0;
 
   // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
@@ -698,7 +698,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool 
   // - - - - - - Lorentzian 1 (yes/no)
   // - - - - - - Lorentzian 2 (yes/no)
 
-  Mantid::API::IFunction* func;
+  Mantid::API::IFitFunction* func;
 
   // Background
   func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
@@ -726,7 +726,7 @@ Mantid::API::CompositeFunction* IndirectDataAnalysis::confitCreateFunction(bool 
   func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
   index = conv->addFunction(func);
   std::string resfilename = m_uiForm.confit_resInput->getFirstFilename().toStdString();
-  Mantid::API::IFunction::Attribute attr(resfilename);
+  Mantid::API::IFitFunction::Attribute attr(resfilename);
   func->setAttribute("FileName", attr);
 
   // Delta Function
@@ -820,7 +820,7 @@ QtProperty* IndirectDataAnalysis::createStretchedExp()
   return prop;
 }
 
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction* func, Mantid::API::IFunction* comp, QtProperty* group, int index, bool tie)
+void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Mantid::API::IFitFunction* comp, QtProperty* group, int index, bool tie)
 {
   // Get subproperties of group and apply them as parameters on the function object
   QList<QtProperty*> props = group->subProperties();
@@ -1220,7 +1220,7 @@ void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
 void IndirectDataAnalysis::furyfitRun()
 {
   // First create the function
-  Mantid::API::CompositeFunction* function = createFunction(m_ffTree);
+  Mantid::API::CompositeFunctionMW* function = createFunction(m_ffTree);
 
   // uncheck "plot guess"
   m_uiForm.furyfit_ckPlotGuess->setChecked(false);
@@ -1557,7 +1557,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
     return;
   }
 
-  Mantid::API::CompositeFunction* function = new Mantid::API::CompositeFunction();
+  Mantid::API::CompositeFunctionMW* function = new Mantid::API::CompositeFunctionMW();
   QList<QtProperty*> fitItems;
   int funcIndex = 1;
   bool singleF = true;
@@ -1586,7 +1586,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   }
 
   // Add in background
-  Mantid::API::IFunction* background = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+  Mantid::API::IFitFunction* background = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
   function->addFunction(background);
   function->tie("f0.A1", "0");
   function->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString());
@@ -1596,7 +1596,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
     QList<QtProperty*> fitProps = fitItems[i]->subProperties();
     if ( fitProps.size() > 0 )
     {
-      Mantid::API::IFunction* func;
+      Mantid::API::IFitFunction* func;
       // Both Exp and StrExp are Userfunctions
       func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
       std::string funcName = fitItems[i]->propertyName().toStdString();
@@ -1610,7 +1610,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
         formula = "Intensity*exp(-(x/Tau)^Beta)";
       }
       // Create subfunction object with specified formula
-      Mantid::API::IFunction::Attribute att(formula);
+      Mantid::API::IFitFunction::Attribute att(formula);
       func->setAttribute("Formula", att);
       function->addFunction(func);
       // Create ties
@@ -1886,7 +1886,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     return;
   }
 
-  Mantid::API::CompositeFunction* function = confitCreateFunction(true);
+  Mantid::API::CompositeFunctionMW* function = confitCreateFunction(true);
 
   if ( m_cfInputWS == NULL )
   {

@@ -5,7 +5,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -311,20 +311,20 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
   }
   if (str.isEmpty())
   {
-    m_compositeFunction = new Mantid::API::CompositeFunction();
+    m_compositeFunction = new Mantid::API::CompositeFunctionMW();
   }
   else
   {
-    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
+    Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
     if (!f)
     {
       createCompositeFunction();
       return;
     }
     Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-    if (!cf || cf->name() != "CompositeFunction")
+    if (!cf || cf->name() != "CompositeFunctionMW")
     {
-      m_compositeFunction = new Mantid::API::CompositeFunction();
+      m_compositeFunction = new Mantid::API::CompositeFunctionMW();
       m_compositeFunction->addFunction(f);
     }
     else
@@ -363,7 +363,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
 
   //if (!isFunction)
   //{
-  //  const Mantid::API::IFunction* h = getHandler()->findFunction(ci);
+  //  const Mantid::API::IFitFunction* h = getHandler()->findFunction(ci);
   //}
 
   PropertyHandler* h = getHandler()->findHandler(ci->property());
@@ -742,7 +742,7 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       PropertyHandler* h = getHandler()->findHandler(prop);
       if (!h) return;
       if (!h->parentHandler()) return;
-      Mantid::API::IFunction* f = h->changeType(prop);
+      Mantid::API::IFitFunction* f = h->changeType(prop);
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
@@ -1034,7 +1034,7 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler* h)const
 /** Set new current function
  * @param f New current function
  */
-void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction* f)const
+void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)const
 {
   setCurrentFunction(getHandler()->findHandler(f));
 }
@@ -1770,7 +1770,7 @@ QString FitPropertyBrowser::getStringPropertyValue(QtProperty* prop)const
     return QString("");
 }
 
-const Mantid::API::IFunction* FitPropertyBrowser::theFunction()const
+const Mantid::API::IFitFunction* FitPropertyBrowser::theFunction()const
 {
   return dynamic_cast<Mantid::API::CompositeFunction*>(m_compositeFunction);
 }
@@ -1836,7 +1836,7 @@ void FitPropertyBrowser::reset()
   createCompositeFunction(str);
 }
 
-void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
+void FitPropertyBrowser::setWorkspace(Mantid::API::IFitFunction* f)const
 {
   std::string wsName = workspaceName();
   if (!wsName.empty())
@@ -1847,20 +1847,22 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
       if (ws)
       {
-        int xMin=-1,xMax;
-        double sX = startX();
-        double eX = endX();
-        const Mantid::MantidVec& X = ws->readX(workspaceIndex());
-        for(xMax = 0;xMax < ws->blocksize(); ++xMax)
-        {
-          if (X[xMax] < sX) continue;
-          else if (xMin < 0)
-          {
-            xMin = xMax;
-          }
-          if (X[xMax] > eX) break;
-        }
-        f->setMatrixWorkspace(ws,workspaceIndex(),xMin,xMax);
+        //int xMin=-1,xMax;
+        //double sX = startX();
+        //double eX = endX();
+        //const Mantid::MantidVec& X = ws->readX(workspaceIndex());
+        //for(xMax = 0;xMax < ws->blocksize(); ++xMax)
+        //{
+        //  if (X[xMax] < sX) continue;
+        //  else if (xMin < 0)
+        //  {
+        //    xMin = xMax;
+        //  }
+        //  if (X[xMax] > eX) break;
+        //}
+        QString slice = "WorkspaceIndex="+QString::number(workspaceIndex())+
+          ",StartX="+QString::number(startX())+",EndX="+QString::number(endX());
+        f->setWorkspace(ws,slice.toStdString());
       }
     }
     catch(...){}

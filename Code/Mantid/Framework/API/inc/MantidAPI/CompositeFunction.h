@@ -4,12 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
+#include <boost/shared_array.hpp>
 
 namespace Mantid
 {
 namespace API
 {
+  class MatrixWorkspace;
 /** A composite function.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -35,7 +37,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompositeFunction : public IFunction
+class DLLExport CompositeFunction : public virtual IFitFunction
 {
 public:
   /// Default constructor
@@ -49,20 +51,11 @@ public:
 
               /* Overriden methods */
 
-  void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
-  /// Set the workspace
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
+  //void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
   /// Returns the function's name
-  std::string name()const{return "CompositeFunction";}
+  //std::string name()const{return "CompositeFunction";}
   /// Writes itself into a string
   std::string asString()const;
-
-  /// Function you want to fit to.
-  void function(double* out, const double* xValues, const int& nData)const;
-  /// Derivatives of function with respect to active parameters
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
-  /// Derivatives to be used in covariance matrix calculation. 
-  void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
   /// Set i-th parameter
   void setParameter(int, const double& value, bool explicitlySet = true);
@@ -121,7 +114,7 @@ public:
   /// Get the tie of i-th parameter
   ParameterTie* getTie(int i)const;
 
-  /// Overwrite IFunction methods
+  /// Overwrite IFitFunction methods
   void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(int i)const;
@@ -129,20 +122,21 @@ public:
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 
+
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
-  virtual int addFunction(IFunction* f);
+  virtual int addFunction(IFitFunction* f);
   /// Returns the pointer to i-th function
-  IFunction* getFunction(int i)const;
+  IFitFunction* getFunction(int i)const;
   /// Number of functions
   int nFunctions()const{return static_cast<int>(m_functions.size());}
   /// Remove a function
   void removeFunction(int i, bool del=true);
   /// Replace a function
-  void replaceFunction(int i,IFunction* f);
+  void replaceFunction(int i,IFitFunction* f);
   /// Replace a function
-  void replaceFunction(const IFunction* f_old,IFunction* f_new);
+  void replaceFunction(const IFitFunction* f_old,IFitFunction* f_new);
   /// Get the function index
   int functionIndex(int i)const;
   /// Get the function index
@@ -154,7 +148,18 @@ public:
   /// Check the function.
   void checkFunction();
 
-  void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),boost::shared_array<double> weights = boost::shared_array<double>());
+  /* MatrixWorkspace specific  */
+
+    /// Set the workspace
+  //void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
+  ///// Function you want to fit to.
+  //void function(double* out, const double* xValues, const int& nData)const;
+  ///// Derivatives of function with respect to active parameters
+  //void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
+  ///// Derivatives to be used in covariance matrix calculation. 
+  //void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
+
+  //void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),boost::shared_array<double> weights = boost::shared_array<double>());
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -164,13 +169,16 @@ protected:
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
 
+  int paramOffset(int i)const{return m_paramOffsets[i];}
+  int activeOffset(int i)const{return m_activeOffsets[i];}
+
 private:
 
   /// Extract function index and parameter name from a variable name
   static void parseName(const std::string& varName,int& index, std::string& name);
 
   /// Pointers to the included funtions
-  std::vector<IFunction*> m_functions;
+  std::vector<IFitFunction*> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
   std::vector<int> m_activeOffsets;
@@ -178,9 +186,9 @@ private:
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<int> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
-  std::vector<int> m_iFunction;
+  std::vector<int> m_IFitFunction;
   /// Keeps the function index for each active parameter (parameter active index)
-  std::vector<int> m_iFunctionActive;
+  std::vector<int> m_IFitFunctionActive;
   /// Number of active parameters
   int m_nActive;
   /// Total number of parameters

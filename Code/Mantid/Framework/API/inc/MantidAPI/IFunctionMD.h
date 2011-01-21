@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 #include "boost/variant.hpp"
@@ -109,7 +110,7 @@ class FunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFunctionMD: public IFitFunction
+class DLLExport IFunctionMD: public virtual IFitFunction
 {
 public:
 
@@ -135,12 +136,37 @@ public:
 
 protected:
 
+  /** Implements an iterator over an IMDWorkspace. Doesn't comply with STL iterator definitions.
+    * Increments are done by calling next() which returns false if the end of the workspace is reached.
+    * getValue(i) returns the value on the i-th dimension at the current point.
+    */
   class MDIterator
   {
   public:
+    MDIterator(boost::shared_ptr<const IMDWorkspace> ws);
+    MDIterator(const IFunctionMD* fun);
+    int getDataSize()const;
+    double getAxisValue(int i)const;
+    double getData(const double* data)const;
+    void setData(double* data,const double& value)const;
+    bool next();
+    int getPointer()const{return m_data_pointer;} ///< return the current data pointer (index)
   private:
-    std::vector<int> m_index;
+    //const IFunctionMD* m_fun;                  ///< The function
+    boost::shared_ptr<const IMDWorkspace> m_workspace; ///< The workspace
+    std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
+    std::vector<int> m_index;                  ///< Multidimensional index defining the current point.
+    int m_data_pointer;                        ///< index to current data and weight values (in arrays m_data and m_weights).
+    mutable int m_dataSize;                            ///< Total data size
   };
+
+  virtual void useDimension(const std::string& id);
+  virtual void useAllDimensions();
+  /// Does the function evaluation. Must be implemented in derived classes.
+  virtual double function(MDIterator& r) const = 0;
+
+
+  //    fields for implementing IFitFunction interface
 
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::IMDWorkspace> m_workspace;
@@ -150,6 +176,13 @@ protected:
   boost::shared_array<double> m_data;
   /// Pointer to the fitting weights
   boost::shared_array<double> m_weights;
+
+  //   fields supporting IMDWorkspace iteration
+
+  /// maps dimension id to its index in m_dimensions
+  std::map<std::string,int> m_dimensionIndexMap;
+  /// dimensions used in this function in the expected order
+  std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

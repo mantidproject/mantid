@@ -90,7 +90,7 @@ std::vector<std::string> Chebyshev::getAttributeNames()const
  * @param attName Attribute name. If it is not "n" exception is thrown.
  * @return a value of attribute attName
  */
-API::IFunction::Attribute Chebyshev::getAttribute(const std::string& attName)const
+API::IFitFunction::Attribute Chebyshev::getAttribute(const std::string& attName)const
 {
   if (attName == "n")
   {
@@ -111,7 +111,7 @@ API::IFunction::Attribute Chebyshev::getAttribute(const std::string& attName)con
  * @param attName The attribute name. If it is not "n" exception is thrown.
  * @param att An int attribute containing the new value. The value cannot be negative.
  */
-void Chebyshev::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+void Chebyshev::setAttribute(const std::string& attName,const API::IFitFunction::Attribute& att)
 {
   if (attName == "n")
   {// set the polynomial order

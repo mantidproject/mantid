@@ -82,6 +82,16 @@ public:
         return m_points;
       }
 
+      virtual int getNDimensions() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
+      const std::vector<std::string> getDimensionIDs() const
+      {
+        throw std::runtime_error("Not implemented");
+      }
+
       virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const       
       {
         throw std::runtime_error("Not implemented");

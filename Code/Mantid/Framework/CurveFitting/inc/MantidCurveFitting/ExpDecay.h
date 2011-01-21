@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Function.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 
 namespace Mantid
 {
@@ -36,7 +37,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ExpDecay : public API::Function
+    class DLLExport ExpDecay : public API::ParamFunction, public API::IFunctionMW
     {
     public:
       /// Constructor

@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/Function.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IConstraint.h"
 
@@ -15,7 +16,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class FunctionFactoryTest_FunctA: public Function
+class FunctionFactoryTest_FunctA: public ParamFunction, public IFunctionMW
 {
   int m_attr;
 public:
@@ -32,12 +33,12 @@ public:
     if (attName == "attr") return true;
     return false;
   }
-  IFunction::Attribute getAttribute(const std::string& attName)const
+  Attribute getAttribute(const std::string& attName)const
   {
-    if (attName == "attr") return IFunction::Attribute(m_attr);
-    return IFunction::getAttribute(attName);
+    if (attName == "attr") return Attribute(m_attr);
+    return getAttribute(attName);
   }
-  void setAttribute(const std::string& attName,const IFunction::Attribute& value)
+  void setAttribute(const std::string& attName,const Attribute& value)
   {
     if (attName == "attr")
     {
@@ -56,12 +57,12 @@ public:
     }
     else
     {
-      IFunction::setAttribute(attName,value);
+      setAttribute(attName,value);
     }
   }
 };
 
-class FunctionFactoryTest_FunctB: public Function
+class FunctionFactoryTest_FunctB: public ParamFunction, public IFunctionMW
 {
 public:
   FunctionFactoryTest_FunctB()
@@ -80,7 +81,7 @@ public:
   }
 };
 
-class FunctionFactoryTest_CompFunctA: public CompositeFunction
+class FunctionFactoryTest_CompFunctA: public CompositeFunctionMW
 {
   std::string m_attr;
 public:
@@ -95,18 +96,18 @@ public:
     if (attName == "attr") return true;
     return false;
   }
-  IFunction::Attribute getAttribute(const std::string& attName)const
+  Attribute getAttribute(const std::string& attName)const
   {
-    if (attName == "attr") return IFunction::Attribute(m_attr);
-    return IFunction::getAttribute(attName);
+    if (attName == "attr") return Attribute(m_attr);
+    return getAttribute(attName);
   }
-  void setAttribute(const std::string& attName,const IFunction::Attribute& value)
+  void setAttribute(const std::string& attName,const Attribute& value)
   {
     m_attr = value.asString();
   }
 };
 
-class FunctionFactoryTest_CompFunctB: public CompositeFunction
+class FunctionFactoryTest_CompFunctB: public CompositeFunctionMW
 {
 public:
   FunctionFactoryTest_CompFunctB(){}
@@ -136,13 +137,13 @@ public:
 
   void testCreateFunction()
   {
-    IFunction* funa = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctA");
+    IFitFunction* funa = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctA");
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
     TS_ASSERT_EQUALS(funa->nParams(),2);
 
-    IFunction* funb = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctB");
+    IFitFunction* funb = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctB");
     TS_ASSERT(funb);
     TS_ASSERT_EQUALS(funb->parameterName(0),"b0");
     TS_ASSERT_EQUALS(funb->parameterName(1),"b1");
@@ -154,7 +155,7 @@ public:
   void testCreateSimpleDefault()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -165,7 +166,7 @@ public:
   void testCreateSimple()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -178,7 +179,7 @@ public:
   void testCreateSimpleWithAttribute()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,attr=\"3\",at_0=0.1,at_1=1.1,at_2=2.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"at_0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"at_1");
@@ -194,7 +195,7 @@ public:
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
     TS_ASSERT(cf);
@@ -214,7 +215,7 @@ public:
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
     TS_ASSERT(cf);
@@ -235,7 +236,7 @@ public:
     std::string fnString = "composite=FunctionFactoryTest_CompFunctB;";
     fnString += "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     FunctionFactoryTest_CompFunctB* cf = dynamic_cast<FunctionFactoryTest_CompFunctB*>(fun);
     TS_ASSERT(cf);
@@ -257,7 +258,7 @@ public:
     std::string fnString = "composite=FunctionFactoryTest_CompFunctA,attr = \"hello\";";
     fnString += "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
     TS_ASSERT(cf);
@@ -283,7 +284,7 @@ public:
     fnString += "(composite=FunctionFactoryTest_CompFunctB;";
     fnString += "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;name=FunctionFactoryTest_FunctA)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
 
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
@@ -299,7 +300,7 @@ public:
   void testCreateWithConstraint1()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,constraint=0<a0<0.2";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -324,7 +325,7 @@ public:
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,"
       "constraints=(0<a0<0.2,a1>10)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -359,7 +360,7 @@ public:
       "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2,"
       "constraints=(b0<1,b1>1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
     TS_ASSERT(cf);
@@ -397,7 +398,7 @@ public:
       "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;"
       "constraints=(f0.a0<1,f1.b1>1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
     TS_ASSERT(cf);
@@ -432,7 +433,7 @@ public:
   void testCreateWithTies()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -449,7 +450,7 @@ public:
   void testCreateWithTies1()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -466,7 +467,7 @@ public:
   void testCreateWithTies2()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -486,7 +487,7 @@ public:
       "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
       "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->getParameter(0),0.);
     TS_ASSERT_EQUALS(fun->getParameter(1),0.);
@@ -500,7 +501,7 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
 
-    IFunction* fun1 = FunctionFactory::Instance().createInitialized(*fun);
+    IFitFunction* fun1 = FunctionFactory::Instance().createInitialized(*fun);
 
     fun1->setParameter(0,0.);
     fun1->setParameter(1,0.);
@@ -523,11 +524,11 @@ public:
     delete fun1;
   }
 
-  void testCreateFitFunction_creates_old_IFunction()
+  void testCreateFitFunction_creates_old_IFitFunction()
   {
     IFitFunction *gauss = FunctionFactory::Instance().createFitFunction("Gaussian(PeakCentre=17.4e-2,Height=10,Sigma=0.33)");
     TS_ASSERT(gauss);
-    TS_ASSERT(dynamic_cast<IFunction*>(gauss));
+    TS_ASSERT(dynamic_cast<IFitFunction*>(gauss));
 
     TS_ASSERT_EQUALS(gauss->name(),"Gaussian");
     TS_ASSERT_EQUALS(gauss->getParameter("PeakCentre"),0.174);

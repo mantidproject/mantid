@@ -35,7 +35,7 @@ namespace Mantid
 {
   namespace API
   {
-    class IFunction;
+    class IFitFunction;
   }
 }
 
@@ -47,7 +47,7 @@ public:
 
 	FunctionCurve(const FunctionType& t, const QString& name = QString());
 	FunctionCurve(const QString& name = QString());
-  FunctionCurve(const Mantid::API::IFunction* fun, 
+  FunctionCurve(const Mantid::API::IFitFunction* fun, 
     const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);
   ~FunctionCurve();

@@ -11,18 +11,18 @@ set ( SRC_FILES src/Algorithm.cpp
 		src/Column.cpp
 		src/ColumnFactory.cpp
 		src/CompositeFunction.cpp
-		#src/CompositeFunctionMW.cpp
+		src/CompositeFunctionMW.cpp
 		src/ConstraintFactory.cpp
 		src/Expression.cpp
 		src/FileFinder.cpp
 		src/FileProperty.cpp
 		src/FrameworkManager.cpp
-		src/Function.cpp
+		#src/Function.cpp
 		src/FunctionFactory.cpp
 		src/IDataFileChecker.cpp
 		src/IEventWorkspace.cpp
 		src/IFitFunction.cpp
-		src/IFunction.cpp
+		#src/IFunction.cpp
 		src/IFunctionMW.cpp
 		src/IFunctionMD.cpp
 		src/IMDWorkspace.cpp
@@ -75,7 +75,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/ColumnFactory.h
 		inc/MantidAPI/Column.h
 		inc/MantidAPI/CompositeFunction.h
-		#inc/MantidAPI/CompositeFunctionMW.h
+		inc/MantidAPI/CompositeFunctionMW.h
 		inc/MantidAPI/ConstraintFactory.h
 		inc/MantidAPI/DeclareUserAlg.h
 		inc/MantidAPI/DllExport.h
@@ -84,7 +84,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/FileProperty.h
 		inc/MantidAPI/FrameworkManager.h
 		inc/MantidAPI/FunctionFactory.h
-		inc/MantidAPI/Function.h
+		#inc/MantidAPI/Function.h
 		inc/MantidAPI/IAlgorithm.h
 		inc/MantidAPI/IArchiveSearch.h
 		inc/MantidAPI/IBackgroundFunction.h
@@ -94,7 +94,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/IDataItem.h
 		inc/MantidAPI/IEventWorkspace.h
 		inc/MantidAPI/IFitFunction.h
-		inc/MantidAPI/IFunction.h
+		#inc/MantidAPI/IFunction.h
 		inc/MantidAPI/IFunctionMW.h
 		inc/MantidAPI/IFunctionMD.h
 		inc/MantidAPI/IFunctionWithLocation.h
@@ -158,6 +158,7 @@ set ( TEST_FILES test/AlgorithmHistoryTest.h
 		 test/FilePropertyTest.h
 		 test/FrameworkManagerTest.h
 		 test/FunctionTest.h
+		 test/IFunctionMDTest.h
 		 test/IMDWorkspaceTest.h
 		 test/ImplicitFunctionParserFactoryTest.h
 		 test/InstrumentDataServiceTest.h

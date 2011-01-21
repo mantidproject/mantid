@@ -30,7 +30,7 @@
 #include "MyParser.h"
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/IFunction.h>
+#include <MantidAPI/IFunctionMW.h>
 
 #include <QMessageBox>
 
@@ -51,13 +51,13 @@ FunctionCurve::FunctionCurve(const FunctionType& t, const QString& name):
 }
 
 /**
- * This constractor creates a function curve from a Mantid IFunction and uses a workspace for x values
+ * This constractor creates a function curve from a Mantid IFitFunction and uses a workspace for x values
  * @param fun A pointer to a Mantid function
  * @param wsName A name of a workspace to provide x values and to be passed to the function
  * @param wsIndex An index in the workspace
  * @param name A name of the curve
  */
-FunctionCurve::FunctionCurve(const Mantid::API::IFunction* fun, 
+FunctionCurve::FunctionCurve(const Mantid::API::IFitFunction* fun, 
     const QString& wsName, int wsIndex, const QString& name):
 	PlotCurve(name),
 	d_function_type(FunctionCurve::Normal),
@@ -134,7 +134,7 @@ QString FunctionCurve::legend()
 void FunctionCurve::loadData(int points)
 {
   if (d_variable.isEmpty() && !d_formulas.isEmpty() && d_formulas[0].compare("Mantid") == 0)
-  {// Mantid::API::IFunction is used to calculate the data points
+  {// Mantid::API::IFitFunction is used to calculate the data points
     if (d_formulas.size() < 4) return;
 
     QString fnInput = d_formulas[1];
@@ -186,11 +186,12 @@ void FunctionCurve::loadData(int points)
       int nPoints = X.size();
       QVarLengthArray<double> Y(nPoints);
       // Create the function and initialize it using fnInput which was saved in d_formulas[1]
-      boost::shared_ptr<Mantid::API::IFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
-      if (!f) return;
-      f->setMatrixWorkspace(ws,wsIndex,-1,-1);
-      f->applyTies();
-      f->function(Y.data(),X.constData(),nPoints);
+      boost::shared_ptr<Mantid::API::IFitFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
+      boost::shared_ptr<Mantid::API::IFunctionMW> fMW = boost::dynamic_pointer_cast<Mantid::API::IFunctionMW>(f);
+      if (!fMW) return;
+      fMW->setMatrixWorkspace(ws,wsIndex,-1,-1);
+      fMW->applyTies();
+      fMW->function(Y.data(),X.constData(),nPoints);
 
       setData(X.data(), Y.data(), nPoints);
     }

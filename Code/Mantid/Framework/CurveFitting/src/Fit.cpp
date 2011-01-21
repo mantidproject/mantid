@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/GenericFit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -37,7 +38,6 @@ namespace CurveFitting
   ///Destructor
   Fit::~Fit()
   {
-    if (m_function) delete m_function;
   }
 
   /** Initialisation method
@@ -106,7 +106,7 @@ namespace CurveFitting
     // fills in m_function_input
     processParameters();
 
-    API::IAlgorithm_sptr fit = createSubAlgorithm("GenericFit");
+    boost::shared_ptr<GenericFit> fit = boost::dynamic_pointer_cast<GenericFit>(createSubAlgorithm("GenericFit"));
     fit->setChild(false);
     fit->initialize();
     fit->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::Workspace>(ws));
@@ -134,18 +134,21 @@ namespace CurveFitting
       // create output parameter table workspace to store final fit parameters 
       // including error estimates if derivative of fitting function defined
 
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simlated spectrum");
+      API::IFunctionMW* funmw = dynamic_cast<API::IFunctionMW*>(fit->getFunction());
+      if (funmw)
+      {
+        declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+          "Name of the output Workspace holding resulting simlated spectrum");
 
-      setPropertyValue("OutputWorkspace",output+"_Workspace");
+        setPropertyValue("OutputWorkspace",output+"_Workspace");
 
-      // Save the fitted and simulated spectra in the output workspace
-      int iSpec = getProperty("WorkspaceIndex");
-      m_function = API::FunctionFactory::Instance().createInitialized(m_function_input);
-      m_function->setWorkspace(ws,input);
-      API::MatrixWorkspace_sptr outws = m_function->createCalculatedWorkspace(ws,iSpec);
+        // Save the fitted and simulated spectra in the output workspace
+        int iSpec = getProperty("WorkspaceIndex");
+        funmw->setWorkspace(ws,input);
+        API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,iSpec);
 
-      setProperty("OutputWorkspace",outws);
+        setProperty("OutputWorkspace",outws);
+      }
     }
 
     if (fit->existsProperty("Parameters"))
@@ -163,484 +166,6 @@ namespace CurveFitting
       setProperty("ParameterNames",parNames);
     }
     
-  }
-
-/** Executes the algorithm the old way. Want to keep it for some time.
-  *
-  *  @throw runtime_error Thrown if algorithm cannot execute
-  */
-  void Fit::exec1()
-  {
-    // Try to retrieve optional properties
-    int histNumber = getProperty("WorkspaceIndex");
-    const int maxInterations = getProperty("MaxIterations");
-
-    // Get the input workspace
-    API::MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-
-    // number of histogram is equal to the number of spectra
-    const int numberOfSpectra = localworkspace->getNumberHistograms();
-    // Check that the index given is valid
-    if ( histNumber >= numberOfSpectra )
-    {
-      g_log.warning("Invalid Workspace index given, using first Workspace");
-      histNumber = 0;
-    }
-
-    // Retrieve the spectrum into a vector
-    const MantidVec& XValues = localworkspace->readX(histNumber);
-    const MantidVec& YValues = localworkspace->readY(histNumber);
-    const MantidVec& YErrors = localworkspace->readE(histNumber);
-
-    //Read in the fitting range data that we were sent
-    double startX = getProperty("StartX");
-    double endX = getProperty("EndX");
-    //check if the values had been set, otherwise use defaults
-    if ( isEmpty( startX ) )
-    {
-      startX = XValues.front();
-      modifyStartOfRange(startX); // does nothing by default but derived class may provide a more intelligent value
-    }
-    if ( isEmpty( endX ) )
-    {
-      endX = XValues.back();
-      modifyEndOfRange(endX); // does nothing by default but derived class may previde a more intelligent value
-    }
-
-    int m_minX;
-    int m_maxX;
-
-    // Check the validity of startX
-    if ( startX < XValues.front() )
-    {
-      g_log.warning("StartX out of range! Set to start of frame.");
-      startX = XValues.front();
-    }
-    // Get the corresponding bin boundary that comes before (or coincides with) this value
-    for (m_minX = 0; XValues[m_minX+1] < startX; ++m_minX) {}
-
-    // Check the validity of endX and get the bin boundary that come after (or coincides with) it
-    if ( endX >= XValues.back() || endX < startX )
-    {
-      g_log.warning("EndX out of range! Set to end of frame");
-      endX = XValues.back();
-      m_maxX = YValues.size();
-    }
-    else
-    {
-      for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {}
-    }
-
-    afterDataRangedDetermined(m_minX, m_maxX);
-
-    // Process the Function property and create the function using FunctionFactory
-    processParameters();
-
-    if (m_function == NULL)
-      throw std::runtime_error("Function was not set.");
-
-    m_function->setMatrixWorkspace(localworkspace,histNumber,m_minX, m_maxX);
-    m_function->setUpNewStuff();
-
-    // force initial parameters to satisfy constraints of function
-    m_function->setParametersToSatisfyConstraints();
-
-    // check if derivative defined in derived class
-    bool isDerivDefined = true;
-    const std::vector<double> inTest(nActive(),1.0);
-    std::vector<double> outTest(nActive());
-    const double xValuesTest = 0;
-    JacobianImpl1 J;
-    gsl_matrix* M( gsl_matrix_alloc(1,nActive()) );
-    J.setJ(M);
-    try
-    {
-      // note nData set to zero (last argument) hence this should avoid further memory problems
-      m_function->functionDeriv(&J, &xValuesTest, 0);
-    }
-    catch (Exception::NotImplementedError&)
-    {
-      isDerivDefined = false;
-    }
-    gsl_matrix_free(M);
-
-    // What minimizer to use
-    std::string methodUsed = getProperty("Minimizer");
-    if ( !isDerivDefined && methodUsed.compare("Simplex") != 0 )
-    {
-      methodUsed = "Simplex";
-      g_log.information() << "No derivatives available for this fitting function"
-                          << " therefore Simplex method used for fitting\n";
-    }
-
-    // create and populate data containers. Warn user if nData < nParam 
-    // since as a rule of thumb this is required as a minimum to obtained 'accurate'
-    // fitting parameter values.
-
-    const int nParam = m_function->nActive();
-    const int nData = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
-    if (nParam == 0)
-    {
-      g_log.error("There are no active parameters.");
-      throw std::runtime_error("There are no active parameters.");
-    }
-    if (nData == 0)
-    {
-      g_log.error("The data set is empty.");
-      throw std::runtime_error("The data set is empty.");
-    }
-    if (nData < nParam)
-    {
-      g_log.error("Number of data points less than number of parameters to be fitted.");
-      throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
-    }
-    double* X = new double[nData];
-    double* sqrtWeightData = new double[nData];
-
-
-    // check if histogram data in which case use mid points of histogram bins
-
-    const bool isHistogram = localworkspace->isHistogramData();
-    for (int i = 0; i < nData; ++i)
-    {
-      if (isHistogram)
-        X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
-      else
-        X[i] = XValues[m_minX+i];
-    }
-
-    const double* Y = &YValues[m_minX];
-
-
-    // check that no error is negative or zero
-
-    for (int i = 0; i < nData; ++i)
-    {
-      if (YErrors[m_minX+i] <= 0.0)
-        sqrtWeightData[i] = 1.0;
-      else
-        sqrtWeightData[i] = 1./YErrors[m_minX+i];
-    }
-
-    if (localworkspace->hasMaskedBins(histNumber))
-    {
-      const MatrixWorkspace::MaskList& mlist = localworkspace->maskedBins(histNumber);
-      MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-      for(;it!=mlist.end();it++)
-      {
-        sqrtWeightData[it->first-m_minX] = 0.;
-      }
-    }
-
-
-    // set-up initial guess for fit parameters
-
-    gsl_vector *initFuncArg;
-    initFuncArg = gsl_vector_alloc(nParam);
-
-    for (size_t i = 0; i < nActive(); i++)
-    {
-        gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
-    }
-
-
-    // set-up minimizer
-
-    std::string costFunction = getProperty("CostFunction");
-    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-    minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                     initFuncArg, m_function, costFunction);
-    
-
-    // finally do the fitting
-
-    int iter = 0;
-    int status = 0;
-    double finalCostFuncVal = 0.0;
-    double dof = nData - nParam;  // dof stands for degrees of freedom
-
-    // Standard least-squares used if derivative function defined otherwise simplex
-    Progress prog(this,0.0,1.0,maxInterations);
-    if ( methodUsed.compare("Simplex") != 0 )
-    {
-      status = GSL_CONTINUE;
-      while (status == GSL_CONTINUE && iter < maxInterations)
-      {
-        iter++;
-        status = minimizer->iterate();
-        if (status != GSL_SUCCESS)  
-        { 
-          // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get
-          // stock - even after having achieved a sensible fit. This seem in particular to be a
-          // problem on Linux. For now only fall back to Simplex if iter = 1 or 2, i.e.   
-          // gsl_multifit_fdfsolver_iterate has failed on the first or second hurdle
-          if (iter < 3)
-          {
-            g_log.warning() << "Fit algorithm using " << methodUsed << " failed "
-              << "reporting the following: " << gsl_strerror(status) << "\n"
-              << "Try using Simplex method instead\n";
-            methodUsed = "Simplex";
-            delete minimizer;
-            minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-            minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                                  initFuncArg, m_function, costFunction);
-            iter = 0;
-          }
-          break;
-        }
-
-        status = minimizer->hasConverged();
-        prog.report();
-      }
-
-      finalCostFuncVal = minimizer->costFunctionVal() / dof;
-    }
-
-    if ( methodUsed.compare("Simplex") == 0 )
-    {
-      status = GSL_CONTINUE;
-      while (status == GSL_CONTINUE && iter < maxInterations)
-      {
-        iter++;
-        status = minimizer->iterate();
-
-        if (status)  // break if error
-        {
-          // if failed at first iteration try reducing the initial step size
-          if (iter == 1)
-          { 
-            g_log.information() << "Simplex step size reduced to 0.1\n";
-            delete minimizer;
-            SimplexMinimizer* sm = new SimplexMinimizer;
-            sm->initialize(X, Y, sqrtWeightData, nData, nParam, 
-                           initFuncArg, m_function, costFunction);
-            sm->resetSize(X, Y, sqrtWeightData, nData, nParam, 
-                           initFuncArg, 0.1, m_function, costFunction);
-            minimizer = sm;
-            status = GSL_CONTINUE;
-            continue;
-          }
-          break;
-        }
-
-        status = minimizer->hasConverged();
-        prog.report();
-      }
-
-      finalCostFuncVal = minimizer->costFunctionVal() / dof;
-    }
-
-    // Output summary to log file
-
-    std::string reportOfFit = gsl_strerror(status);
-
-    g_log.information() << "Method used = " << methodUsed << "\n" <<
-      "Iteration = " << iter << "\n" <<
-      "Status = " << reportOfFit << "\n" <<
-      "Chi^2/DoF = " << finalCostFuncVal << "\n";
-    for (int i = 0; i < m_function->nParams(); i++)
-    {
-      g_log.information() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
-    }
-
-
-    // also output summary to properties
-
-    setProperty("Output Status", reportOfFit);
-    setProperty("Output Chi^2/DoF", finalCostFuncVal);
-    setProperty("Minimizer", methodUsed);
-    setPropertyValue("Function",*m_function);
-    
-
-    // if Output property is specified output additional workspaces
-
-    std::vector<double> standardDeviations;
-    std::string output = getProperty("Output");
-    gsl_matrix *covar(NULL);
-
-    // only if derivative is defined for fitting function create covariance matrix output workspace
-    if ( methodUsed.compare("Simplex") != 0 )    
-    {
-      // calculate covariance matrix
-      covar = gsl_matrix_alloc (nParam, nParam);
-      minimizer->calCovarianceMatrix( 0.0, covar);
-
-      // take standard deviations to be the square root of the diagonal elements of
-      // the covariance matrix
-      int iPNotFixed = 0;
-      for(int i=0; i < m_function->nParams(); i++)
-      {
-        standardDeviations.push_back(1.0);
-        if (m_function->isActive(i))
-        {
-          standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
-          if (m_function->activeParameter(iPNotFixed) != m_function->getParameter(m_function->indexOfActive(iPNotFixed)))
-          {// it means the active param is not the same as declared but transformed
-            standardDeviations[i] *= fabs(transformationDerivative(iPNotFixed));
-          }
-          iPNotFixed++;
-        }
-      }
-    }
-
-    if (!output.empty())
-    {
-      // only if derivative is defined for fitting function create covariance matrix output workspace
-      if ( methodUsed.compare("Simplex") != 0 )    
-      {
-        // Create covariance matrix output workspace
-        declareProperty(
-          new WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Direction::Output),
-          "The name of the TableWorkspace in which to store the final covariance matrix" );
-        setPropertyValue("OutputNormalisedCovarianceMatrix",output+"_NormalisedCovarianceMatrix");
-
-        Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-        m_covariance->addColumn("str","Name");
-        std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
-        for(int i=0; i < m_function->nParams(); i++) 
-        {
-          if (m_function->isActive(i)) 
-          {
-            m_covariance->addColumn("double",m_function->parameterName(i));
-            paramThatAreFitted.push_back(m_function->parameterName(i));
-          }
-        }
-
-        for(int i=0; i<nParam; i++)
-        {
-          Mantid::API::TableRow row = m_covariance->appendRow();
-          row << paramThatAreFitted[i];
-          for(int j=0; j<nParam; j++)
-          {
-            if (j == i)
-              row << 1.0;
-            else
-            {
-              row << 100.0*gsl_matrix_get(covar,i,j)/sqrt(gsl_matrix_get(covar,i,i)*gsl_matrix_get(covar,j,j));
-            }
-          }
-        }
-
-        setProperty("OutputNormalisedCovarianceMatrix",m_covariance);
-      }
-
-      // create output parameter table workspace to store final fit parameters 
-      // including error estimates if derivative of fitting function defined
-
-      declareProperty(
-        new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
-        "The name of the TableWorkspace in which to store the final fit parameters" );
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simlated spectrum");
-
-      setPropertyValue("OutputParameters",output+"_Parameters");
-      setPropertyValue("OutputWorkspace",output+"_Workspace");
-
-      Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      m_result->addColumn("str","Name");
-      m_result->addColumn("double","Value");
-      if ( methodUsed.compare("Simplex") != 0 ) 
-        m_result->addColumn("double","Error");
-
-      for(int i=0;i<m_function->nParams();i++)
-      {
-        Mantid::API::TableRow row = m_result->appendRow();
-        row << m_function->parameterName(i) << m_function->getParameter(i);
-        if ( methodUsed.compare("Simplex") != 0 && m_function->isActive(i)) 
-        {
-          row << standardDeviations[i];
-        }
-      }
-      setProperty("OutputParameters",m_result);
-
-      // Save the fitted and simulated spectra in the output workspace
-      API::MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-      int iSpec = getProperty("WorkspaceIndex");
-      const MantidVec& inputX = inputWorkspace->readX(iSpec);
-      const MantidVec& inputY = inputWorkspace->readY(iSpec);
-
-      int histN = isHistogram ? 1 : 0;
-      API::MatrixWorkspace_sptr ws =
-        Mantid::API::WorkspaceFactory::Instance().create(
-            "Workspace2D",
-            3,
-            nData + histN,
-            nData);
-      ws->setTitle("");
-      ws->setYUnitLabel(inputWorkspace->YUnitLabel());
-      ws->setYUnit(inputWorkspace->YUnit());
-      ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
-      API::TextAxis* tAxis = new API::TextAxis(3);
-      tAxis->setLabel(0,"Data");
-      tAxis->setLabel(1,"Calc");
-      tAxis->setLabel(2,"Diff");
-      ws->replaceAxis(1,tAxis);
-
-      for(int i=0;i<3;i++)
-        ws->dataX(i).assign(inputX.begin()+m_minX,inputX.begin()+m_maxX+histN);
-
-      ws->dataY(0).assign(inputY.begin()+m_minX,inputY.begin()+m_maxX);
-
-      MantidVec& Ycal = ws->dataY(1);
-      MantidVec& E = ws->dataY(2);
-
-
-      double* lOut = new double[nData];  // to capture output from call to function()
-      m_function->function( lOut, X, nData);
-
-      for(int i=0; i<nData; i++)
-      {
-        Ycal[i] = lOut[i]; 
-        E[i] = Y[i] - Ycal[i];
-      }
-
-      delete [] lOut; 
-
-      setProperty("OutputWorkspace",ws);
-
-      if ( methodUsed.compare("Simplex") != 0 ) 
-        gsl_matrix_free(covar);
-    }
-
-    // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
-    declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
-    declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
-    declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
-    std::vector<double> params,errors;
-    std::vector<std::string> parNames;
-
-    for(int i=0;i<m_function->nParams();i++)
-    {
-      parNames.push_back(m_function->parameterName(i));
-      params.push_back(m_function->getParameter(i));
-      if (!standardDeviations.empty())
-      {
-        errors.push_back(standardDeviations[i]);
-      }
-      else
-      {
-        errors.push_back(0.);
-      }
-    }
-    setProperty("Parameters",params);
-    setProperty("Errors",errors);
-    setProperty("ParameterNames",parNames);
-    
-    // minimizer may have dynamically allocated memory hence make sure this memory is freed up
-    delete minimizer;
-
-    // clean up dynamically allocated gsl stuff
-    delete [] X;
-    delete [] sqrtWeightData;
-    gsl_vector_free (initFuncArg);
-    
-    return;
-  }
-
-  /// Set a function for fitting
-  void Fit::setFunction(API::IFunction* fun)
-  {
-    m_function = fun;
   }
 
   /**
@@ -706,26 +231,7 @@ namespace CurveFitting
       }
       m_function_input += "ties=("+inputTies+")";
     }
-    setFunction(API::FunctionFactory::Instance().createInitialized(m_function_input));
 
-  }
-
-  /**
-   * If i-th parameter is transformed the derivative will be != 1.0.
-   * The derivative is calculated numerically.
-   * @param i The index of an active parameter
-   * @return The transformation derivative
-   */
-  double Fit::transformationDerivative(int i)
-  {
-    int j = m_function->indexOfActive(i);
-    double p0 = m_function->getParameter(j);
-    double ap0 = m_function->activeParameter(i);
-    double dap = ap0 != 0.0? ap0 * 0.001 : 0.001;
-    m_function->setActiveParameter(i,ap0 + dap);
-    double deriv = ( m_function->getParameter(j) - p0 ) / dap;
-    m_function->setParameter(j,p0,false);
-    return deriv;
   }
 
 } // namespace Algorithm

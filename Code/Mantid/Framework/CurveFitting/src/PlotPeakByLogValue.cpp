@@ -18,8 +18,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/TableRow.h"
 
 namespace Mantid
@@ -97,7 +97,7 @@ namespace Mantid
         result->addColumn("double",logName);
       }
       // Create an instance of the fitting function to obtain the names of fitting parameters
-      IFunction* ifun = FunctionFactory::Instance().createInitialized(fun);
+      IFitFunction* ifun = FunctionFactory::Instance().createInitialized(fun);
       if (!ifun)
       {
         throw std::invalid_argument("Fitting function failed to initialize");

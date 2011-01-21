@@ -3,7 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Function.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -11,7 +12,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class IFT_Funct: public Function
+class IFT_Funct: public ParamFunction, public IFunctionMW
 {
 public:
   IFT_Funct()

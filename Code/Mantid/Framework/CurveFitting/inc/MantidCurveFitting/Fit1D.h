@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 
 namespace Mantid
 {

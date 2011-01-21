@@ -411,7 +411,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
  */
 double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex)
+                               int wsIndex)const
 {
   double retVal = value;
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
@@ -455,6 +455,58 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
     }
   }  
   return retVal;
+}
+
+/** Convert values from unit defined in workspace (ws) to outUnit
+ *
+ *  @param values   As input: assumed to be in unit of workspace. 
+ *                  As output: in unit of outUnit
+ *  @param outUnit  unit to convert to
+ *  @param ws      workspace
+ *  @param wsIndex workspace index
+ */
+void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+                               boost::shared_ptr<const MatrixWorkspace> ws,
+                               int wsIndex) const
+{
+  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
+
+  // if unit required by formula or look-up-table different from ws-unit then 
+  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  {
+    // first check if it is possible to do a quick convertion convert
+    double factor,power;
+    if (wsUnit->quickConversion(*outUnit,factor,power) )
+    {
+      for (unsigned int i = 0; i < values.size(); i++)
+        values[i] = factor * std::pow(values[i],power);
+    }
+    else
+    {
+      double l1,l2,twoTheta;
+
+      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+      IInstrument_const_sptr instrument = ws->getInstrument();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      l1 = instrument->getSource()->getDistance(*sample);
+      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if ( ! det->isMonitor() )
+      {
+        l2 = det->getDistance(*sample);
+        twoTheta = ws->detectorTwoTheta(det);
+      }
+      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+      {
+        l2 = det->getDistance(*(instrument->getSource()));
+        l2 = l2 - l1;
+        twoTheta = 0.0;
+      }
+
+      std::vector<double> emptyVec;
+      wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+    }
+  }  
 }
 
 /**
@@ -561,6 +613,63 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       delete [] lOut; 
 
       return ws;
+}
+
+/** Calculate numerical derivatives.
+ * @param out Derivatives
+ * @param xValues X values for data points
+ * @param nData Number of data points
+ */
+void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData)
+{
+    double stepPercentage = 0.001; // step percentage
+    double step; // real step
+    double minDouble = std::numeric_limits<double>::min();
+    double cutoff = 100.0*minDouble/stepPercentage;
+    int nParam = nParams();
+
+    // allocate memory if not already done
+    if (!m_tmpFunctionOutputMinusStep && nData>0)
+    {
+      m_tmpFunctionOutputMinusStep.reset(new double[nData]);
+      m_tmpFunctionOutputPlusStep.reset(new double[nData]);
+    }
+
+    function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+
+    for (int iP = 0; iP < nParam; iP++)
+    {
+      if ( isActive(iP) )
+      {
+        const double& val = getParameter(iP);
+        if (val < cutoff)
+        {
+          step = cutoff;
+        }
+        else
+        {
+          step = val*stepPercentage;
+        }
+
+        //double paramMstep = val - step;
+        //setParameter(iP, paramMstep);
+        //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+
+        double paramPstep = val + step;
+        setParameter(iP, paramPstep);
+        function(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
+
+        step = paramPstep - val;
+        setParameter(iP, val);
+
+        for (int i = 0; i < nData; i++) {
+         // out->set(i,iP, 
+         //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
+          out->set(i,iP, 
+            (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
+        }
+      }
+    }
 }
 
 

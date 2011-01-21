@@ -110,7 +110,7 @@ public:
 };
 
 
-class FitTest_Linear: public Function
+class FitTest_Linear: public ParamFunction, public IFunctionMW
 {
 public:
   FitTest_Linear()

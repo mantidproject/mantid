@@ -35,7 +35,7 @@ public:
   void testIt()
   {
     UserFunction fun;
-    fun.setAttribute("Formula",IFunction::Attribute("h*sin(a*x-c)"));
+    fun.setAttribute("Formula",IFitFunction::Attribute("h*sin(a*x-c)"));
     fun.setParameter("h",2.2);
     fun.setParameter("a",2.0);
     fun.setParameter("c",1.2);

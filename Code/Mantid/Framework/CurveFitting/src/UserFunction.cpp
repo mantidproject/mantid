@@ -55,11 +55,11 @@ namespace Mantid
      * @param attName Attribute name, must be "Formula"
      * @param value The attribute value. For "Formula" it must be a mu::Parser expression string
      */
-    void UserFunction::setAttribute(const std::string& attName,const IFunction::Attribute& value)
+    void UserFunction::setAttribute(const std::string& attName,const Attribute& value)
     {
       if (attName != "Formula")
       {
-        IFunction::setAttribute(attName,value);
+        IFitFunction::setAttribute(attName,value);
         return;
       }
 

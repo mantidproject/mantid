@@ -18,8 +18,8 @@ namespace Mantid
   namespace API
   {
     class MatrixWorkspace;
-    class IFunction;
-    class CompositeFunction;
+    class IFitFunction;
+    class CompositeFunctionMW;
   }
 }
 namespace MantidQt
@@ -88,12 +88,12 @@ namespace MantidQt
       void confitRun();
       void absorptionRun();
 
-      Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
-      Mantid::API::CompositeFunction* confitCreateFunction(bool tie=false);
+      Mantid::API::CompositeFunctionMW* createFunction(QtTreePropertyBrowser* propertyBrowser);
+      Mantid::API::CompositeFunctionMW* confitCreateFunction(bool tie=false);
       QtProperty* createLorentzian(QString);
       QtProperty* createExponential();
       QtProperty* createStretchedExp();
-      void populateFunction(Mantid::API::IFunction*, Mantid::API::IFunction*, QtProperty*, int, bool tie=false);
+      void populateFunction(Mantid::API::IFitFunction*, Mantid::API::IFitFunction*, QtProperty*, int, bool tie=false);
       QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index);
       
       virtual void closeEvent(QCloseEvent*);

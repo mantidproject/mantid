@@ -17,7 +17,7 @@ namespace Mantid
 namespace API
 {
 
-DECLARE_FUNCTION(CompositeFunction)
+//DECLARE_FUNCTION(CompositeFunction)
 
 /// Copy contructor
 CompositeFunction::CompositeFunction(const CompositeFunction& f)
@@ -71,7 +71,7 @@ std::string CompositeFunction::asString()const
   std::ostringstream ostr;
   for(int i=0;i<nFunctions();i++)
   {
-    IFunction* fun = getFunction(i);
+    IFitFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
     if (isComp) ostr << '(';
     ostr << fun->asString();
@@ -87,7 +87,7 @@ std::string CompositeFunction::asString()const
     const ParameterTie* tie = getTie(i);
     if (tie)
     {
-      IFunction* fun = getFunction(functionIndex(i));
+      IFitFunction* fun = getFunction(functionIndex(i));
       std::string tmp = tie->asString(fun);
       if (tmp.empty())
       {
@@ -111,21 +111,21 @@ std::string CompositeFunction::asString()const
 }
 
 /// Function you want to fit to.
-void CompositeFunction::function(double* out, const double* xValues, const int& nData)const
-{
-  if (nData <= 0) return;
-  boost::shared_array<double> tmpOut(new double[nData]);
-  for(int i=0;i<nFunctions();i++)
-  {
-    if (i == 0)
-      m_functions[i]->function(out,xValues,nData);
-    else
-    {
-      m_functions[i]->function(tmpOut.get(),xValues,nData);
-      std::transform(out,out+nData,tmpOut.get(),out,std::plus<double>());
-    }
-  }
-}
+//void CompositeFunction::function(double* out, const double* xValues, const int& nData)const
+//{
+//  if (nData <= 0) return;
+//  boost::shared_array<double> tmpOut(new double[nData]);
+//  for(int i=0;i<nFunctions();i++)
+//  {
+//    if (i == 0)
+//      m_functions[i]->function(out,xValues,nData);
+//    else
+//    {
+//      m_functions[i]->function(tmpOut.get(),xValues,nData);
+//      std::transform(out,out+nData,tmpOut.get(),out,std::plus<double>());
+//    }
+//  }
+//}
 
 /** A Jacobian for individual functions
  */
@@ -163,25 +163,25 @@ public:
 };
 
 /// Derivatives of function with respect to active parameters
-void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
-{
-  for(int i=0;i<nFunctions();i++)
-  {
-    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
-    m_functions[i]->functionDeriv(&J,xValues,nData);
-  }
-}
-
-/// Derivatives to be used in covariance matrix calculation. 
-void CompositeFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
-{
-  if (nData <= 0) return;
-  for(int i=0;i<nFunctions();i++)
-  {
-    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
-    m_functions[i]->calJacobianForCovariance(&J,xValues,nData);
-  }
-}
+//void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+//{
+//  for(int i=0;i<nFunctions();i++)
+//  {
+//    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
+//    m_functions[i]->functionDeriv(&J,xValues,nData);
+//  }
+//}
+//
+///// Derivatives to be used in covariance matrix calculation. 
+//void CompositeFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
+//{
+//  if (nData <= 0) return;
+//  for(int i=0;i<nFunctions();i++)
+//  {
+//    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
+//    m_functions[i]->calJacobianForCovariance(&J,xValues,nData);
+//  }
+//}
 
 
 /** Sets a new value to the i-th parameter.
@@ -340,7 +340,7 @@ void CompositeFunction::removeActive(int i)
   if (!isActive(i)) return;
   int iFun = functionIndex(i);
   int ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
-  m_iFunctionActive.erase(m_iFunctionActive.begin()+ia);
+  m_IFitFunctionActive.erase(m_IFitFunctionActive.begin()+ia);
   m_functions[ iFun ]->removeActive(i - m_paramOffsets[iFun]);
 
   m_nActive--;
@@ -357,9 +357,9 @@ void CompositeFunction::restoreActive(int i)
   int ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
 
   std::vector<int>::iterator itFun = 
-    std::find_if(m_iFunctionActive.begin(),m_iFunctionActive.end(),std::bind2nd(std::greater<int>(),i));
+    std::find_if(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),std::bind2nd(std::greater<int>(),i));
 
-  m_iFunctionActive.insert(itFun,1,ia);
+  m_IFitFunctionActive.insert(itFun,1,ia);
   m_functions[ iFun ]->restoreActive(i - m_paramOffsets[iFun]);
 
   m_nActive++;
@@ -393,15 +393,15 @@ void CompositeFunction::checkFunction()
   m_nActive = 0;
   m_paramOffsets.clear();
   m_activeOffsets.clear();
-  m_iFunction.clear();
-  m_iFunctionActive.clear();
+  m_IFitFunction.clear();
+  m_IFitFunctionActive.clear();
 
-  std::vector<IFunction*> functions(m_functions.begin(),m_functions.end());
+  std::vector<IFitFunction*> functions(m_functions.begin(),m_functions.end());
   m_functions.clear();
 
-  for(std::vector<IFunction*>::size_type i=0;i<functions.size();i++)
+  for(std::vector<IFitFunction*>::size_type i=0;i<functions.size();i++)
   {
-    IFunction* f = functions[i];
+    IFitFunction* f = functions[i];
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f);
     if (cf) cf->checkFunction();
     addFunction(f);
@@ -412,10 +412,10 @@ void CompositeFunction::checkFunction()
  * @param f A pointer to the added function
  * @return The function index
  */
-int CompositeFunction::addFunction(IFunction* f)
+int CompositeFunction::addFunction(IFitFunction* f)
 {
-  m_iFunction.insert(m_iFunction.end(),f->nParams(),m_functions.size());
-  m_iFunctionActive.insert(m_iFunctionActive.end(),f->nActive(),m_functions.size());
+  m_IFitFunction.insert(m_IFitFunction.end(),f->nParams(),m_functions.size());
+  m_IFitFunctionActive.insert(m_IFitFunctionActive.end(),f->nActive(),m_functions.size());
   m_functions.push_back(f);
   //?f->init();
   if (m_paramOffsets.size() == 0)
@@ -444,7 +444,7 @@ void CompositeFunction::removeFunction(int i, bool del)
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
-  IFunction* fun = getFunction(i);
+  IFitFunction* fun = getFunction(i);
 
   int dna = fun->nActive();
   int dnp = fun->nParams();
@@ -463,12 +463,12 @@ void CompositeFunction::removeFunction(int i, bool del)
   }
 
   // Shift down the function indeces for parameters
-  for(std::vector<int>::iterator it=m_iFunction.begin();it!=m_iFunction.end();)
+  for(std::vector<int>::iterator it=m_IFitFunction.begin();it!=m_IFitFunction.end();)
   {
 
     if (*it == i)
     {
-      it = m_iFunction.erase(it);
+      it = m_IFitFunction.erase(it);
     }
     else
     {
@@ -481,11 +481,11 @@ void CompositeFunction::removeFunction(int i, bool del)
   }
 
   // Shift down the function indeces for active parameters
-  for(std::vector<int>::iterator it=m_iFunctionActive.begin();it!=m_iFunctionActive.end();)
+  for(std::vector<int>::iterator it=m_IFitFunctionActive.begin();it!=m_IFitFunctionActive.end();)
   {
     if (*it == i)
     {
-      it = m_iFunctionActive.erase(it);
+      it = m_IFitFunctionActive.erase(it);
     }
     else
     {
@@ -521,16 +521,17 @@ void CompositeFunction::removeFunction(int i, bool del)
 }
 
 /** Replace a function with a new one. The old function is deleted.
+ *  The new function must have already its workspace set.
  * @param f_old The pointer to the function to replace. If it's not
  *  a member of this composite function nothing happens
  * @param f_new A pointer to the new function
  */
-void CompositeFunction::replaceFunction(const IFunction* f_old,IFunction* f_new)
+void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* f_new)
 {
-  std::vector<IFunction*>::const_iterator it = 
+  std::vector<IFitFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
-  f_new->setMatrixWorkspace(f_old->getMatrixWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
+//  f_new->setMatrixWorkspace(f_old->getMatrixWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
   int iFun = it - m_functions.begin();
   replaceFunction(iFun,f_new);
 }
@@ -539,12 +540,12 @@ void CompositeFunction::replaceFunction(const IFunction* f_old,IFunction* f_new)
  * @param i The index of the function to replace
  * @param f A pointer to the new function
  */
-void CompositeFunction::replaceFunction(int i,IFunction* f)
+void CompositeFunction::replaceFunction(int i,IFitFunction* f)
 {
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
-  IFunction* fun = getFunction(i);
+  IFitFunction* fun = getFunction(i);
   int na_old = fun->nActive();
   int np_old = fun->nParams();
 
@@ -553,43 +554,43 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
 
   // Modify function indeces: The new function may have different number of parameters
   {
-    std::vector<int>::iterator itFun = std::find(m_iFunction.begin(),m_iFunction.end(),i);
-    if(itFun != m_iFunction.end()) // functions must have at least 1 parameter
+    std::vector<int>::iterator itFun = std::find(m_IFitFunction.begin(),m_IFitFunction.end(),i);
+    if(itFun != m_IFitFunction.end()) // functions must have at least 1 parameter
     {
       if (np_old > np_new)
       {
-        m_iFunction.erase(itFun,itFun + np_old - np_new);
+        m_IFitFunction.erase(itFun,itFun + np_old - np_new);
       }
       else if (np_old < np_new) 
       {
-        m_iFunction.insert(itFun,np_new - np_old,i);
+        m_IFitFunction.insert(itFun,np_new - np_old,i);
       }
     }
     else if (np_new > 0) // it could happen if the old function is an empty CompositeFunction
     {
-      itFun = std::find_if(m_iFunction.begin(),m_iFunction.end(),std::bind2nd(std::greater<int>(),i));
-      m_iFunction.insert(itFun,np_new,i);
+      itFun = std::find_if(m_IFitFunction.begin(),m_IFitFunction.end(),std::bind2nd(std::greater<int>(),i));
+      m_IFitFunction.insert(itFun,np_new,i);
     }
   }
 
   // Modify function indeces: The new function may have different number of active parameters
   {
-    std::vector<int>::iterator itFun = std::find(m_iFunctionActive.begin(),m_iFunctionActive.end(),i);
-    if (itFun != m_iFunctionActive.end())
+    std::vector<int>::iterator itFun = std::find(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),i);
+    if (itFun != m_IFitFunctionActive.end())
     {
       if (na_old > na_new)
       {
-        m_iFunctionActive.erase(itFun,itFun + na_old - na_new);
+        m_IFitFunctionActive.erase(itFun,itFun + na_old - na_new);
       }
       else if (na_old < na_new) 
       {
-        m_iFunctionActive.insert(itFun,na_new - na_old,i);
+        m_IFitFunctionActive.insert(itFun,na_new - na_old,i);
       }
     }
     else if (na_new > 0)
     {
-      itFun = std::find_if(m_iFunctionActive.begin(),m_iFunctionActive.end(),std::bind2nd(std::greater<int>(),i));
-      m_iFunctionActive.insert(itFun,na_new,i);
+      itFun = std::find_if(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),std::bind2nd(std::greater<int>(),i));
+      m_IFitFunctionActive.insert(itFun,na_new,i);
     }
   }
 
@@ -617,7 +618,7 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
  * @param i The index of the function
  * @return function at the requested index
  */
-IFunction* CompositeFunction::getFunction(int i)const
+IFitFunction* CompositeFunction::getFunction(int i)const
 {
   if ( i >= nFunctions()  || i < 0)
   {
@@ -637,7 +638,7 @@ int CompositeFunction::functionIndex(int i)const
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  return m_iFunction[i];
+  return m_IFitFunction[i];
 }
 
 /**
@@ -649,7 +650,7 @@ int CompositeFunction::functionIndexActive(int i)const
 {
   if (i >= nParams() || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
-  return m_iFunctionActive[i];
+  return m_IFitFunctionActive[i];
 }
 
 /**
@@ -707,14 +708,14 @@ std::string CompositeFunction::parameterLocalName(int i)const
  * @param xMin The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
-{
-  IFunction::setMatrixWorkspace(workspace,spec,xMin,xMax);
-  for(int i=0;i<nFunctions();i++)
-  {
-    getFunction(i)->setMatrixWorkspace(workspace,spec,xMin,xMax);
-  }
-}
+//void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
+//{
+//  IFitFunction::setMatrixWorkspace(workspace,spec,xMin,xMax);
+//  for(int i=0;i<nFunctions();i++)
+//  {
+//    getFunction(i)->setMatrixWorkspace(workspace,spec,xMin,xMax);
+//  }
+//}
 
 /**
  * Apply the ties.
@@ -871,7 +872,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
   }
   for(int iFun=0;iFun<nFunctions();iFun++)
   {
-    IFunction* fun = static_cast<IFunction*>(getFunction(iFun)->getContainingFunction(ref));
+    IFitFunction* fun = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(ref));
     if (fun)
     {
       return getFunction(iFun);
@@ -892,7 +893,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
   }
   for(int iFun=0;iFun<nFunctions();iFun++)
   {
-    IFunction* f = static_cast<IFunction*>(getFunction(iFun)->getContainingFunction(fun));
+    IFitFunction* f = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(fun));
     if (f)
     {
       return getFunction(iFun);
@@ -901,23 +902,23 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
   return NULL;
 }
 
-void CompositeFunction::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
-{
-  IFunction::setWorkspace(ws,slicing);
-  for(int iFun=0;iFun<nFunctions();iFun++)
-  {
-    getFunction(iFun)->setUpNewStuff(m_xValues,m_weights);
-  }
-}
+//void CompositeFunction::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+//{
+//  IFitFunction::setWorkspace(ws,slicing);
+//  for(int iFun=0;iFun<nFunctions();iFun++)
+//  {
+//    getFunction(iFun)->setUpNewStuff(m_xValues,m_weights);
+//  }
+//}
 
-void CompositeFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
-{
-  IFunction::setUpNewStuff(xs,weights);
-  for(int iFun=0;iFun<nFunctions();iFun++)
-  {
-    getFunction(iFun)->setUpNewStuff(xs,weights);
-  }
-}
+//void CompositeFunction::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
+//{
+//  IFitFunction::setUpNewStuff(xs,weights);
+//  for(int iFun=0;iFun<nFunctions();iFun++)
+//  {
+//    getFunction(iFun)->setUpNewStuff(xs,weights);
+//  }
+//}
 
 } // namespace API
 } // namespace Mantid

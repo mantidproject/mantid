@@ -76,7 +76,7 @@ std::vector<std::string> Resolution::getAttributeNames()const
  * @param attName The attribute name
  * @param value The new value
  */
-void Resolution::setAttribute(const std::string& attName,const IFunction::Attribute& value)
+void Resolution::setAttribute(const std::string& attName,const IFitFunction::Attribute& value)
 {
   if (attName == "FileName")
   {
@@ -96,7 +96,7 @@ void Resolution::setAttribute(const std::string& attName,const IFunction::Attrib
   }
   else
   {
-    IFunction::setAttribute(attName,value);
+    IFitFunction::setAttribute(attName,value);
   }
 }
 

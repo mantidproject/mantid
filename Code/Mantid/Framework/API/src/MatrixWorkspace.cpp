@@ -953,6 +953,11 @@ namespace Mantid
       return (uint64_t)(this->size());
     }
 
+    int MatrixWorkspace::getNDimensions() const
+    {
+      return 2;
+    }
+
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(int index) const
     {
       HistogramIndex histInd = m_indexCalculator.getHistogramIndex(index);
@@ -1066,6 +1071,14 @@ namespace Mantid
         throw std::overflow_error(message);
       }
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
+    }
+
+    const std::vector<std::string> MatrixWorkspace::getDimensionIDs() const
+    {
+      std::vector<std::string> keys;
+      keys.push_back( getDimensionIdFromAxis(this->getAxis(0)) );
+      keys.push_back( getDimensionIdFromAxis(this->getAxis(1)) );
+      return keys;
     }
 
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int dim1Increment) const

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/Function.h"
 
 namespace Mantid
 {

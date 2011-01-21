@@ -53,7 +53,7 @@ class IConstraint;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ParamFunction : public IFitFunction
+class DLLExport ParamFunction : public virtual IFitFunction
 {
 public:
   /// Default constructor
@@ -111,6 +111,7 @@ public:
   virtual void applyTies();
   /// Remove all ties
   virtual void clearTies();
+  virtual void removeTie(const std::string& parName){IFitFunction::removeTie(parName);}
   /// Removes i-th parameter's tie
   virtual bool removeTie(int i);
   /// Get the tie of i-th parameter
@@ -124,9 +125,6 @@ public:
   virtual void removeConstraint(const std::string& parName);
   /// Set parameters to satisfy constraints
   void setParametersToSatisfyConstraints();
-
-  /// Calculate numerical derivatives
-  //void calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData);
 
   //using IFunction::removeTie;
 

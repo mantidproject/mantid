@@ -166,9 +166,16 @@ protected:
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
-                      int wsIndex);
+                      int wsIndex)const;
+
+  void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+    boost::shared_ptr<const MatrixWorkspace> ws,
+    int wsIndex) const;
 
   boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const;
+
+  /// Calculate numerical derivatives
+  void calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData);
 
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
@@ -186,6 +193,9 @@ protected:
   boost::shared_array<double> m_weights;
   /// Pointer to the x (function argument as in f(x)) data
   boost::shared_array<double> m_xValues;
+
+  mutable boost::shared_array<double> m_tmpFunctionOutputMinusStep;
+  mutable boost::shared_array<double> m_tmpFunctionOutputPlusStep;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

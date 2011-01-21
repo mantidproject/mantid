@@ -153,7 +153,7 @@ public:
       //TS_ASSERT_DIFFERS(R[i],0);  ???
     }
 
-    IFunction *gout = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *gout = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT_EQUALS(gout->parameterName(0),"c");
     TS_ASSERT_DELTA(gout->getParameter(0),5,0.00001);
 
@@ -217,7 +217,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IFunction *gout = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *gout = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT_DELTA(gout->getParameter(0),5,0.0001);
     TS_ASSERT_DELTA(gout->getParameter(1),0.8944,0.0001);
     TS_ASSERT_DELTA(gout->getParameter(2),2,0.00001);

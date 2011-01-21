@@ -4,7 +4,6 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/ICostFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IFunction.h"
 
 
 namespace Mantid

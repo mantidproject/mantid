@@ -79,7 +79,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
 
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("A0"),0.0, 0.01);
     TS_ASSERT_DELTA( out->getParameter("A1"),1.0, 0.0003);
 

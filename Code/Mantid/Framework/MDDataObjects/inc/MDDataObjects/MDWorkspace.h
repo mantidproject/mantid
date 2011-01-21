@@ -138,6 +138,9 @@ namespace Mantid
       /// assume existence of DND objects
       virtual uint64_t getNPoints() const;
 
+      /// Get the number of dimensions
+      virtual int getNDimensions() const;
+
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
 
@@ -152,6 +155,9 @@ namespace Mantid
 
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+
+      /// Get the dimension ids in their order
+      virtual const std::vector<std::string> getDimensionIDs() const;
 
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const;

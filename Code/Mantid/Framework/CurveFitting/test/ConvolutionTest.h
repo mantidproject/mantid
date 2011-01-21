@@ -108,7 +108,7 @@ public:
 };
 
 
-class ConvolutionTest_Linear: public Function
+class ConvolutionTest_Linear: public ParamFunction, public IFunctionMW
 {
 public:
   ConvolutionTest_Linear()
@@ -209,7 +209,7 @@ public:
     TS_ASSERT_EQUALS(conv.parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10),"f2.s");
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(conv);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv);
     TS_ASSERT(fun);
 
     Convolution* conv1 = dynamic_cast<Convolution*>(fun);

@@ -13,6 +13,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+  #pragma warning( disable: 4250 )
+#endif
+
 namespace Mantid
 {
 namespace API

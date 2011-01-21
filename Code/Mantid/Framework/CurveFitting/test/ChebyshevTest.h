@@ -25,7 +25,7 @@ public:
       x[i] = i*0.1;
     }
     Chebyshev cheb;
-    cheb.setAttribute("n",IFunction::Attribute(10));
+    cheb.setAttribute("n",IFitFunction::Attribute(10));
     for(int n=0;n<=10;++n)
     {
       cheb.setParameter(n,1.);
@@ -66,17 +66,17 @@ public:
     fit.setPropertyValue("WorkspaceIndex","0");
 
     Chebyshev* cheb = new Chebyshev();
-    cheb->setAttribute("n",IFunction::Attribute(3));
+    cheb->setAttribute("n",IFitFunction::Attribute(3));
     fit.setPropertyValue("Function",*cheb);
 
     fit.execute();
-    IFunction::Attribute StartX = cheb->getAttribute("StartX");
+    IFitFunction::Attribute StartX = cheb->getAttribute("StartX");
     TS_ASSERT_EQUALS(StartX.asDouble(),-1);
-    IFunction::Attribute EndX = cheb->getAttribute("EndX");
+    IFitFunction::Attribute EndX = cheb->getAttribute("EndX");
     TS_ASSERT_EQUALS(EndX.asDouble(),1);
     TS_ASSERT(fit.isExecuted());
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function"));
     TS_ASSERT_DELTA(out->getParameter("A0"),0,1e-12);
     TS_ASSERT_DELTA(out->getParameter("A1"),0.75,1e-12);
     TS_ASSERT_DELTA(out->getParameter("A2"),0,1e-12);

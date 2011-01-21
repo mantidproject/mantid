@@ -125,7 +125,7 @@ void tearDown()
   void testIt()
   {
     Resolution res;
-    res.setAttribute("FileName",IFunction::Attribute(resFileName));
+    res.setAttribute("FileName",IFitFunction::Attribute(resFileName));
     const int n = 50;
     double x[n];
     double y[n];
@@ -178,7 +178,7 @@ void tearDown()
     AnalysisDataService::Instance().add("ResolutionTest_WS",ws);
 
     Resolution* res = new Resolution;
-    res->setAttribute("FileName",IFunction::Attribute(resFileName));
+    res->setAttribute("FileName",IFitFunction::Attribute(resFileName));
 
     ResolutionTest_Gauss* gauss = new ResolutionTest_Gauss;
     gauss->setParameter("c",5);

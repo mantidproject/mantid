@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Function.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include <cmath>
 
 namespace Mantid
@@ -37,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Resolution : public API::Function
+class DLLExport Resolution : public API::ParamFunction, public API::IFunctionMW
 {
 public:
   /// Constructor
@@ -59,9 +60,9 @@ public:
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName
-  IFunction::Attribute getAttribute(const std::string& attName)const{return IFunction::Attribute(m_fileName, true);}
+  IFitFunction::Attribute getAttribute(const std::string& attName)const{return IFitFunction::Attribute(m_fileName, true);}
   /// Set a value to attribute attName
-  void setAttribute(const std::string& attName,const IFunction::Attribute& value);
+  void setAttribute(const std::string& attName,const IFitFunction::Attribute& value);
   /// Check if attribute attName exists
   bool hasAttribute(const std::string& attName)const{return attName == "FileName";}
 

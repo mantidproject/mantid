@@ -4,8 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/Function.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -94,7 +93,7 @@ public:
 };
 
 
-class Linear: public Function, public CompositeFunctionTest_IFunction
+class Linear: public ParamFunction, public IFunctionMW, public CompositeFunctionTest_IFunction
 {
 public:
   Linear()
@@ -126,7 +125,7 @@ public:
 
 };
 
-class Cubic: public Function, public CompositeFunctionTest_IFunction
+class Cubic: public ParamFunction, public IFunctionMW, public CompositeFunctionTest_IFunction
 {
 public:
   Cubic()
@@ -170,7 +169,7 @@ class CompositeFunctionTest : public CxxTest::TestSuite
 public:
   void testAdd()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -267,7 +266,7 @@ public:
 
   void testTies()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -406,7 +405,7 @@ public:
 
   void testSetActive()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -473,7 +472,7 @@ public:
 
   void testRemoveActive()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -542,7 +541,7 @@ public:
 
   void testApplyTies()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -604,7 +603,7 @@ public:
 
   void testApplyTiesInWrongOrder()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -667,7 +666,7 @@ public:
   void testRemoveFunction()
   {
 
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -785,7 +784,7 @@ public:
   // replacing function has fewer parameters
   void testReplaceFunction()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -930,7 +929,7 @@ public:
   // replacing function has more parameters
   void testReplaceFunction1()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -1112,7 +1111,7 @@ public:
 
   void testAddFunctionsWithTies()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
@@ -1153,7 +1152,7 @@ public:
 
   void testRemoveFunctionWithTies()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
@@ -1193,9 +1192,9 @@ public:
 
   void testReplaceEmptyFunction()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
     Gauss *g = new Gauss();
-    CompositeFunction *cf = new CompositeFunction();
+    CompositeFunctionMW *cf = new CompositeFunctionMW();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
 

@@ -61,8 +61,8 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
                   this,SLOT(algorithmFinished(const QString&)));
   connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
   connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
-  connect(fitBrowser(),SIGNAL(parameterChanged(const Mantid::API::IFunction*)),
-                  this,SLOT(parameterChanged(const Mantid::API::IFunction*)));
+  connect(fitBrowser(),SIGNAL(parameterChanged(const Mantid::API::IFitFunction*)),
+                  this,SLOT(parameterChanged(const Mantid::API::IFitFunction*)));
   connect(fitBrowser(),SIGNAL(plotGuess()),this,SLOT(plotGuess()));
   connect(fitBrowser(),SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
   connect(fitBrowser(),SIGNAL(removeGuess()),this,SLOT(removeGuess()));
@@ -615,7 +615,7 @@ void PeakPickerTool::endXChanged(double eX)
  * Slot. Called in response to parameterChanged signal from FitBrowser
  * @param f The pointer to the function with the changed parameter
  */
-void PeakPickerTool::parameterChanged(const Mantid::API::IFunction* f)
+void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
 {
   PropertyHandler* theHandler = fitBrowser()->getHandler();
   PropertyHandler* h = theHandler->findHandler(f);

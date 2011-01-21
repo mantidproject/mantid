@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Function.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include <boost/shared_array.hpp>
 
 namespace mu
@@ -42,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport UserFunction : public API::Function
+    class DLLExport UserFunction : public API::ParamFunction, public API::IFunctionMW
     {
     public:
       /// Constructor
@@ -63,12 +64,12 @@ namespace Mantid
       /// Returns a list of attribute names
       std::vector<std::string> getAttributeNames()const{return std::vector<std::string>(1,"Formula");}
       /// Return a value of attribute attName
-      IFunction::Attribute getAttribute(const std::string& attName)const
+      Attribute getAttribute(const std::string& attName)const
       {
-        return attName == "Formula"?IFunction::Attribute(m_formula):IFunction::getAttribute(attName);
+        return attName == "Formula"?Attribute(m_formula):getAttribute(attName);
       }
       /// Set a value to attribute attName
-      void setAttribute(const std::string& attName,const IFunction::Attribute& value);
+      void setAttribute(const std::string& attName,const Attribute& value);
       /// Check if attribute attName exists
       bool hasAttribute(const std::string& attName)const{return attName == "Formula";}
 

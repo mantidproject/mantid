@@ -1,7 +1,7 @@
 #ifndef PROPERTY_HANDLER_H
 #define PROPERTY_HANDLER_H
 
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFitFunction.h"
 
 /* Forward declarations */
 namespace Mantid
@@ -33,7 +33,7 @@ class PropertyHandler:public QObject, public Mantid::API::FitFunctionHandler
   Q_OBJECT
 public:
   // Constructor
-  PropertyHandler(Mantid::API::IFunction* fun,
+  PropertyHandler(Mantid::API::IFitFunction* fun,
                   Mantid::API::CompositeFunction* parent,
                   FitPropertyBrowser* browser,
                   QtBrowserItem* item = NULL);
@@ -41,7 +41,7 @@ public:
   /// Destructor
   ~PropertyHandler();
 
-  /// overrides virtual init() which is called from IFunction::setHandler(...)
+  /// overrides virtual init() which is called from IFitFunction::setHandler(...)
   void init();
 
   void initAttributes();
@@ -79,11 +79,11 @@ public:
    * calls findFunction recursively with all its children or
    * zero
    */
-  const Mantid::API::IFunction* findFunction(QtBrowserItem* item)const;
+  const Mantid::API::IFitFunction* findFunction(QtBrowserItem* item)const;
 
   PropertyHandler* findHandler(QtProperty* prop);
 
-  PropertyHandler* findHandler(const Mantid::API::IFunction* fun);
+  PropertyHandler* findHandler(const Mantid::API::IFitFunction* fun);
 
   /**
    * Set function parameter value read from a QtProperty
@@ -133,7 +133,7 @@ public:
    * @param prop The "Type" property with new value
    * @param fnName New function name (type) or full initialization expression
    */
-  Mantid::API::IFunction* changeType(QtProperty* prop);
+  Mantid::API::IFitFunction* changeType(QtProperty* prop);
 
   void setHeight(const double& h);
   void setCentre(const double& c);
@@ -179,7 +179,7 @@ private:
   Mantid::API::CompositeFunction* m_cf;//< if the function is composite holds pointer to it
   Mantid::API::IPeakFunction* m_pf;//< if the function is peak holds pointer to it
   Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
-  Mantid::API::IFunction* m_if;//< pointer to IFunction
+  Mantid::API::IFitFunction* m_if;//< pointer to IFitFunction
   QtProperty* m_type;
   QtBrowserItem* m_item;//< the browser item
   QList<QtProperty*> m_attributes; //< function attribute properties

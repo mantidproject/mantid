@@ -26,7 +26,6 @@ namespace API
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-  class IFunction;
   class IFitFunction;
   class CompositeFunction;
   class Expression;
@@ -68,10 +67,10 @@ namespace API
      * @param type The function's type
      * @return A pointer to the created function
      */
-    IFunction* createFunction(const std::string& type) const;
+    IFitFunction* createFunction(const std::string& type) const;
 
     ///Creates an instance of a function
-    IFunction* createInitialized(const std::string& input) const;
+    IFitFunction* createInitialized(const std::string& input) const;
 
     ///Creates an instance of a function
     IFitFunction* createFitFunction(const std::string& input) const;
@@ -93,7 +92,7 @@ namespace API
     using Kernel::DynamicFactory<IFitFunction>::createUnwrapped;
 
     /// Create a simple function
-    IFunction* createSimple(const Expression& expr)const;
+    IFitFunction* createSimple(const Expression& expr)const;
     /// Create a composite function
     CompositeFunction* createComposite(const Expression& expr)const;
     ///Creates an instance of a function

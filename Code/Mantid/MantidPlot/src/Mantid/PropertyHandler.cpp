@@ -28,7 +28,7 @@
 #endif
 
 // Constructor
-PropertyHandler::PropertyHandler(Mantid::API::IFunction* fun,
+PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 Mantid::API::CompositeFunction* parent,
                 FitPropertyBrowser* browser,
                 QtBrowserItem* item)
@@ -49,7 +49,7 @@ PropertyHandler::~PropertyHandler()
 {
 }
 
-/// overrides virtual init() which is called from IFunction::setHandler(...)
+/// overrides virtual init() which is called from IFitFunction::setHandler(...)
 void PropertyHandler::init()
 {
   m_browser->m_changeSlotsEnabled = false;
@@ -126,7 +126,7 @@ void PropertyHandler::init()
   {
     for(int i=0;i<m_cf->nFunctions();i++)
     {
-      Mantid::API::IFunction* f = m_cf->getFunction(i);
+      Mantid::API::IFitFunction* f = m_cf->getFunction(i);
       PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
       f->setHandler(h);
     }
@@ -140,7 +140,7 @@ void PropertyHandler::init()
  * Attribute visitor to create a QtProperty. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class CreateAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty*>
+class CreateAttributeProperty: public Mantid::API::IFitFunction::ConstAttributeVisitor<QtProperty*>
 {
 public:
   CreateAttributeProperty(FitPropertyBrowser* browser,const QString& name)
@@ -184,7 +184,7 @@ void PropertyHandler::initAttributes()
   for(size_t i=0;i<attNames.size();i++)
   {
     QString aName = QString::fromStdString(attNames[i]);
-    Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
+    Mantid::API::IFitFunction::Attribute att = function()->getAttribute(attNames[i]);
     CreateAttributeProperty tmp(m_browser,aName);
     QtProperty* prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
@@ -280,7 +280,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 {
   if (!m_cf) return NULL;
   m_browser->disableUndo();
-  Mantid::API::IFunction* f = 0;
+  Mantid::API::IFitFunction* f = 0;
   // Create new function
   if (fnName.find("=") == std::string::npos)
   {// either from name
@@ -508,13 +508,13 @@ const Mantid::API::CompositeFunction* PropertyHandler::findCompositeFunction(QtB
 * calls findFunction recursively with all its children or
 * zero
 */
-const Mantid::API::IFunction* PropertyHandler::findFunction(QtBrowserItem* item)const
+const Mantid::API::IFitFunction* PropertyHandler::findFunction(QtBrowserItem* item)const
 {
-  if (item == m_item) return static_cast<const Mantid::API::IFunction*>(function());
+  if (item == m_item) return static_cast<const Mantid::API::IFitFunction*>(function());
   if (!m_cf) return 0;
   for(int i=0;i<m_cf->nFunctions();i++)
   {
-    const Mantid::API::IFunction* res = getHandler(i)->findFunction(item);
+    const Mantid::API::IFitFunction* res = getHandler(i)->findFunction(item);
     if (res != NULL) return res;
   }
   return 0;
@@ -544,7 +544,7 @@ PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
   return NULL;
 }
 
-PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFunction* fun)
+PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFitFunction* fun)
 {
   if (fun == function()) return this;
   if (m_cf)
@@ -588,7 +588,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
  * Visitor setting new attribute value. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class SetAttribute: public Mantid::API::IFunction::AttributeVisitor<>
+class SetAttribute: public Mantid::API::IFitFunction::AttributeVisitor<>
 {
 public:
   SetAttribute(FitPropertyBrowser* browser,QtProperty* prop)
@@ -619,7 +619,7 @@ private:
  * Visitor setting new attribute value. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class SetAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<>
+class SetAttributeProperty: public Mantid::API::IFitFunction::ConstAttributeVisitor<>
 {
 public:
   SetAttributeProperty(FitPropertyBrowser* browser,QtProperty* prop)
@@ -664,7 +664,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     QString attName = prop->propertyName();
     try
     {
-      Mantid::API::IFunction::Attribute att = 
+      Mantid::API::IFitFunction::Attribute att = 
         m_fun->getAttribute(attName.toStdString());
       SetAttribute tmp(m_browser,prop);
       att.apply(tmp);
@@ -703,7 +703,7 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
   {
     try
     {
-      m_fun->setAttribute(attName.toStdString(),Mantid::API::IFunction::Attribute(attValue));
+      m_fun->setAttribute(attName.toStdString(),Mantid::API::IFitFunction::Attribute(attValue));
       m_browser->compositeFunction()->checkFunction();
       foreach(QtProperty* prop,m_attributes)
       {
@@ -734,7 +734,7 @@ void PropertyHandler::setAttribute(const QString& attName, const QString& attVal
   const std::string name = attName.toStdString();
   if (m_fun->hasAttribute(name))
   {
-    Mantid::API::IFunction::Attribute att = m_fun->getAttribute(name);
+    Mantid::API::IFitFunction::Attribute att = m_fun->getAttribute(name);
     att.fromString(attValue.toStdString());
     m_fun->setAttribute(name,att);
     m_browser->compositeFunction()->checkFunction();
@@ -776,7 +776,7 @@ void PropertyHandler::updateParameters()
 * @param prop The "Type" property with new value
 * @param fnName New function name (type) or full initialization expression
 */
-Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
+Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 {
   if (prop == m_type)
   {
@@ -785,7 +785,7 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
     // Create new function
     int i = m_browser->m_enumManager->value(prop);
     const QString& fnName = m_browser->m_registeredFunctions[i];
-    Mantid::API::IFunction* f = NULL;
+    Mantid::API::IFitFunction* f = NULL;
     try
     {
       f = Mantid::API::FunctionFactory::Instance().
@@ -839,7 +839,7 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
 
     removePlot();
 
-    const Mantid::API::IFunction* f_old = static_cast<const Mantid::API::IFunction*>(function());
+    const Mantid::API::IFitFunction* f_old = static_cast<const Mantid::API::IFitFunction*>(function());
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
     if (this == m_browser->m_autoBackground)
     {
@@ -869,7 +869,7 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
   {
     for(int i=0;i<m_cf->nFunctions();i++)
     {
-      Mantid::API::IFunction* f = getHandler(i)->changeType(prop);
+      Mantid::API::IFitFunction* f = getHandler(i)->changeType(prop);
       if (f) return f;
     }
   }
@@ -1000,10 +1000,12 @@ void PropertyHandler::removeTie(const QString& parName)
 void PropertyHandler::calcBase()
 {
   if (!m_browser->m_autoBackground) return;
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_if->getMatrixWorkspace();
+  Mantid::API::IFunctionMW* fMW = dynamic_cast<Mantid::API::IFunctionMW*>(m_if);
+  if (!fMW) return;
+  Mantid::API::MatrixWorkspace_const_sptr ws = fMW->getMatrixWorkspace();
   if (ws)
   {
-    int wi = m_if->getWorkspaceIndex();
+    int wi = fMW->getWorkspaceIndex();
     const Mantid::MantidVec& X = ws->readX(wi);
     const Mantid::MantidVec& Y = ws->readY(wi);
     int n = Y.size() - 1;
@@ -1015,7 +1017,7 @@ void PropertyHandler::calcBase()
     {
       double x = X[m_ci];
       double y = 0;
-      static_cast<const Mantid::API::IFunction*>(m_browser->m_autoBackground->function())->function(&y,&x,1);
+      dynamic_cast<const Mantid::API::IFunctionMW*>(m_browser->m_autoBackground->function())->function(&y,&x,1);
       m_base = y;
     }
   }
@@ -1056,10 +1058,10 @@ void PropertyHandler::setCentre(const double& c)
   if (m_pf)
   {
     m_pf->setCentre(c);
-    Mantid::API::MatrixWorkspace_const_sptr ws = m_if->getMatrixWorkspace();
+    Mantid::API::MatrixWorkspace_const_sptr ws = m_pf->getMatrixWorkspace();
     if (ws)
     {
-      int wi = m_if->getWorkspaceIndex();
+      int wi = m_pf->getWorkspaceIndex();
       const Mantid::MantidVec& X = ws->readX(wi);
       int n = X.size() - 2;
       if (m_ci < 0) m_ci = 0;
@@ -1338,7 +1340,7 @@ void PropertyHandler::fit()
     alg->setPropertyValue("Function",*m_fun);
     alg->execute();
     std::string fitFun = alg->getPropertyValue("Function");
-    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);
+    Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);
     for(int i=0;i<f->nParams();++i)
     {
       m_fun->setParameter(i,f->getParameter(i));

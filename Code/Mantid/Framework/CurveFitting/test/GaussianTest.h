@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/Fit.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/UnitFactory.h"
@@ -129,7 +129,7 @@ public:
     alg.setPropertyValue("EndX","61805");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -167,7 +167,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 1.4,0.1);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 315.4 ,1);
     TS_ASSERT_DELTA( pk->centre(), 60980 ,10);
@@ -222,7 +222,7 @@ public:
     alg.setPropertyValue("EndX","2.52");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -260,7 +260,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 1.5,0.1);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 315.4 ,1);
     TS_ASSERT_DELTA( pk->centre(), 2.5 ,0.01);
@@ -311,7 +311,7 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -348,7 +348,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 5.3,0.1);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
@@ -394,7 +394,7 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -437,7 +437,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 5.3,0.1);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
@@ -473,7 +473,7 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -517,7 +517,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 249.3187 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 79430 ,0.1);
@@ -577,7 +577,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
@@ -635,7 +635,7 @@ public:
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
@@ -693,7 +693,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
@@ -751,7 +751,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.7995 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
@@ -810,7 +810,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.7857 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
@@ -868,7 +868,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8111 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
@@ -910,7 +910,7 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction *fnWithBk = new CompositeFunctionMW();
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -961,10 +961,10 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 5.1604,1);
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT(fun);
     
-    IFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("f1.Height"), 216.419 ,1);
     TS_ASSERT_DELTA( out->getParameter("f1.PeakCentre"), 79430.1 ,1);
     TS_ASSERT_DELTA( out->getParameter("f1.Sigma"), 27.08 ,0.1);
