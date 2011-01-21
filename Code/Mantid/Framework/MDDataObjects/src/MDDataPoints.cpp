@@ -64,6 +64,16 @@ MDDataPoints::is_initialized(void)const
         return false;
     }
 }
+//
+
+void 
+MDDataPoints::set_file_based()
+{
+    //TODO: should verify and if there are fresh data in buffer, damp it on HDD (or algorithm should take care about it)
+    this->data_buffer.clear();
+    this->memBased = false;
+}
+//
 void 
 MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_ptr<IMD_FileFormat> in_spFile)
 {
@@ -150,6 +160,9 @@ MDDataPoints::alloc_pix_array(size_t buf_size)
  
   if(data_buffer_size>max_pix_num){
       this->data_buffer_size = max_pix_num;
+      this->memBased = true;
+  }else{
+      this->memBased = false;
   }
   // remove fractional parts of pixel
   size_t dbs = data_buffer_size/this->pixel_size;

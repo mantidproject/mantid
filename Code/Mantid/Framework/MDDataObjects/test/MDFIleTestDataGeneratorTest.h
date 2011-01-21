@@ -1,6 +1,7 @@
 #ifndef MDFILE_TESTDATAGENERATOR_TEST_H
 #define MDFILE_TESTDATAGENERATOR_TEST_H
 #include <cxxtest/TestSuite.h>
+#include "MDDataObjects/MDTestWorkspace.h"
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 #include "MDDataObjects/MD_FileFormatFactory.h"
 #include "MDDataObjects/MDWorkspace.h"
@@ -18,35 +19,22 @@ class MDFileTestDataGeneratorTest : public CxxTest::TestSuite
   // workspace itself
     MDWorkspace_sptr spMDWs;
 
-    void createTestWorkspace(IMD_FileFormat *pReader){
-    // shared pointers are related to the objects, which are referenced within another objects, and auto-pointers -- to the single 
-        std::auto_ptr<Geometry::MDGeometryBasis> pBasis;
-
-        pBasis = std::auto_ptr<Geometry::MDGeometryBasis>(new Geometry::MDGeometryBasis());
-        pReader->read_basis(*pBasis);
-
-        Geometry::MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
-        pReader->read_MDGeomDescription(geomDescr);
-
-        MDPointDescription pd = pReader->read_pointDescriptions();
-
-        spMDWs = MDWorkspace_sptr(new MDWorkspace());
-        spMDWs->init(std::auto_ptr<IMD_FileFormat>(pReader),pBasis,geomDescr,pd);
-     
-    }
+ 
 public:
     void testMDFTDConstructor(){
-		TSM_ASSERT_THROWS_NOTHING("test data format should be initiated without throwing",pReader=new MD_FileTestDataGenerator("testFile"));
-    }
-    void testMDFTDReadBasis(){
-        // this clear pReader;
-        TSM_ASSERT_THROWS_NOTHING("Constructing test workspace should not throw",createTestWorkspace(pReader));
-     }
-    void testMDFTDReadData(){
-  
+        std::auto_ptr<MDTestWorkspace> pMDWS;
+		TSM_ASSERT_THROWS_NOTHING("Initiating test MD workspace should not throw",pMDWS=std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace()));
+
+        spMDWs                    = pMDWS->get_spWS();
+
         pReader                   = spMDWs->get_pFileReader();
         pMDImg                    = spMDWs->get_spMDImage().get();
         pMDDPoints                = spMDWs->get_spMDDPoints().get();
+
+ 
+    }
+    void testMDFTDReadData(){
+  
         // read data;
         TSM_ASSERT_THROWS_NOTHING("Read MD image should not throw",pReader->read_MDImg_data(*pMDImg));
         TSM_ASSERT_THROWS_NOTHING("Init pix loactions should not throw",pMDDPoints->init_pix_locations());

@@ -23,8 +23,6 @@ pPointDescr(NULL)
         nCells *=nBins[i];
     }
 }
-
-
 //
 void 
 MD_FileTestDataGenerator::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeometry)
@@ -119,6 +117,7 @@ MD_FileTestDataGenerator::read_pointDescriptions(void)const
 bool 
 MD_FileTestDataGenerator::read_pix(MDDataPoints & sqw)
 {
+    sqw.set_file_based();
 	return false;
 }
 //

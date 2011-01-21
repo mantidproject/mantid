@@ -37,7 +37,7 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CpRebinningNx3: public DynamicCPRRebinning
+class DLLExport CpRebinningNx3: public DynamicCPRRebinning
 {
 public:
 
@@ -53,7 +53,8 @@ public:
   /** The same as just rebin_data_chunk above but the indexes returned as the last parameter specify the locations of the pixels
       * stored in the imput buffer;    */
    virtual bool rebin_data_chunk_keep_pixels();
-  /** returns the estimate for number of data chunks may be used to rebin the dataset Used by algorithms to indicate progress*/
+  /** returns the estimate for number of data chunks may be used to rebin the selection within a dataset.
+     Used by algorithms to indicate progress*/
     virtual unsigned int getNumDataChunks()const;
 
 

@@ -198,8 +198,8 @@ namespace Mantid
 
       /// Pointer to a file reader/writer
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
-
-
+      /// no copy constructor; 
+      MDWorkspace(const MDWorkspace &){};
     };
 
 

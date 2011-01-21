@@ -113,6 +113,9 @@ namespace MDDataObjects
     void store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels);
   /// calculate the locations of the data points blocks with relation to the image cells
     virtual void init_pix_locations();
+
+  /// sets the datapoints based in file instead of memory; if memory was allocated for the data before, it should be freed and all data should be damped to HDD
+    virtual void set_file_based();
   protected:
 
   private:

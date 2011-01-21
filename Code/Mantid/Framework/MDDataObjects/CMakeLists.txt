@@ -29,6 +29,7 @@ inc/MDDataObjects/MDImage.h
 inc/MDDataObjects/MDImageDatatypes.h
 inc/MDDataObjects/MDWorkspace.h
 inc/MDDataObjects/MD_FileTestDataGenerator.h
+inc/MDDataObjects/MDTestWorkspace.h 
 #inc/MDDataObjects/Events/MDPoint.h
 #inc/MDDataObjects/Events/MDBox.h
 #inc/MDDataObjects/Events/IMDBox.h
