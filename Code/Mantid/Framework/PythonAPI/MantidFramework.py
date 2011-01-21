@@ -853,7 +853,11 @@ class MantidPyFramework(FrameworkManager):
             pyc_file = mod.__file__
             if pyc_file.endswith('.py'):
                 pyc_file += 'c'
-            os.remove(pyc_file)
+            try:
+                os.remove(pyc_file)
+            except OSError:
+                # Don't care if it's not there
+                pass
             mod = reload(sys.modules[simpleapi])
         else:
             mod = __import__(simpleapi)
