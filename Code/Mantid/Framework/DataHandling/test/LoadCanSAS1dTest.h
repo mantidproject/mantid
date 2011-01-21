@@ -15,6 +15,10 @@
 class LoadCanSAS1dTest : public CxxTest::TestSuite
 {
 public:
+
+  static LoadCanSAS1dTest *createSuite() { return new LoadCanSAS1dTest(); }
+  static void destroySuite(LoadCanSAS1dTest *suite) { delete suite; }
+
 	LoadCanSAS1dTest()
 	{
 		 inputFile = "LOQ_CANSAS1D.xml";

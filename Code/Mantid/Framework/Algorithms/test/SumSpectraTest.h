@@ -22,6 +22,9 @@ class SumSpectraTest : public CxxTest::TestSuite
 {
 public:
 
+  static SumSpectraTest *createSuite() { return new SumSpectraTest(); }
+  static void destroySuite(SumSpectraTest *suite) { delete suite; }
+
   SumSpectraTest()
   {
     outputSpace1 = "SumSpectraOut1";

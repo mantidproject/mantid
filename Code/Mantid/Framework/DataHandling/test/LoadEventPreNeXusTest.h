@@ -43,6 +43,9 @@ class LoadEventPreNeXusTest : public CxxTest::TestSuite
 public:
   LoadEventPreNeXus * eventLoader;
 
+  static LoadEventPreNeXusTest *createSuite() { return new LoadEventPreNeXusTest(); }
+  static void destroySuite(LoadEventPreNeXusTest *suite) { delete suite; }
+
   LoadEventPreNeXusTest()
   {
 

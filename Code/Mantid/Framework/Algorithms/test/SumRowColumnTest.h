@@ -11,6 +11,10 @@ using namespace Mantid::Kernel;
 class SumRowColumnTest : public CxxTest::TestSuite
 {
 public:
+
+  static SumRowColumnTest *createSuite() { return new SumRowColumnTest(); }
+  static void destroySuite(SumRowColumnTest *suite) { delete suite; }
+
   SumRowColumnTest() : summer(), inputWS("loq-front")
   {
     Mantid::DataHandling::LoadRaw3 loader;

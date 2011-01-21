@@ -12,6 +12,8 @@
 class LoadPreNeXusMonitorsTest: public CxxTest::TestSuite
 {
 public:
+  static LoadPreNeXusMonitorsTest *createSuite() { return new LoadPreNeXusMonitorsTest(); }
+  static void destroySuite(LoadPreNeXusMonitorsTest *suite) { delete suite; }
 
   LoadPreNeXusMonitorsTest()
   {

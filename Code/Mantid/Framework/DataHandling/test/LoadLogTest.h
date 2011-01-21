@@ -25,6 +25,10 @@ class LoadLogTest : public CxxTest::TestSuite
 {
 public: 
   
+
+    static LoadLogTest *createSuite() { return new LoadLogTest(); }
+  static void destroySuite(LoadLogTest *suite) { delete suite; }
+
   LoadLogTest()
   {	
 	  //initialise framework manager to allow logging

@@ -24,6 +24,9 @@ class LoadRawSpectrum0Test : public CxxTest::TestSuite
 {
 public:
 
+  static LoadRawSpectrum0Test *createSuite() { return new LoadRawSpectrum0Test(); }
+  static void destroySuite(LoadRawSpectrum0Test *suite) { delete suite; }
+
   LoadRawSpectrum0Test()
   {
     // Path to test input file assumes Test directory checked out from SVN

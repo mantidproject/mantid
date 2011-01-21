@@ -29,6 +29,10 @@ using namespace Mantid::NeXus;
 class GroupDetectors2Test : public CxxTest::TestSuite
 {
 public:
+
+  static GroupDetectors2Test *createSuite() { return new GroupDetectors2Test(); }
+  static void destroySuite(GroupDetectors2Test *suite) { delete suite; }
+  
   GroupDetectors2Test() :
       inputWS("groupdetectorstests_input_workspace"),
         outputBase("groupdetectorstests_output_basename"),

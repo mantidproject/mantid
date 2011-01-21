@@ -27,6 +27,9 @@ class FindDetectorsInShapeTest : public CxxTest::TestSuite
 {
 public:
 
+  static FindDetectorsInShapeTest *createSuite() { return new FindDetectorsInShapeTest(); }
+  static void destroySuite(FindDetectorsInShapeTest *suite) { delete suite; }
+
   FindDetectorsInShapeTest()
   {
 		loadTestWS();

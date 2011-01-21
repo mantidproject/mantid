@@ -24,6 +24,10 @@ using Mantid::MantidVecPtr;
 class MaskDetectorsTest : public CxxTest::TestSuite
 {
 public:
+
+  static MaskDetectorsTest *createSuite() { return new MaskDetectorsTest(); }
+  static void destroySuite(MaskDetectorsTest *suite) { delete suite; }
+
   MaskDetectorsTest()
   {
   }

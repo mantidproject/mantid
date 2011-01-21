@@ -23,6 +23,9 @@ class LoadRaw2Test : public CxxTest::TestSuite
 {
 public:
 
+  static LoadRaw2Test *createSuite() { return new LoadRaw2Test(); }
+  static void destroySuite(LoadRaw2Test *suite) { delete suite; }
+
   LoadRaw2Test()
   {
     // Path to test input file assumes Test directory checked out from SVN

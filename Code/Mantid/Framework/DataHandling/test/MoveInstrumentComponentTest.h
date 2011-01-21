@@ -26,6 +26,9 @@ class MoveInstrumentComponentTest : public CxxTest::TestSuite
 {
 public:
 
+  static MoveInstrumentComponentTest *createSuite() { return new MoveInstrumentComponentTest(); }
+  static void destroySuite(MoveInstrumentComponentTest *suite) { delete suite; }
+
   MoveInstrumentComponentTest()
   {
 	//initialise framework manager to allow logging

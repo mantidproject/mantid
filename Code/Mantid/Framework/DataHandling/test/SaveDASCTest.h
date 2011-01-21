@@ -21,6 +21,9 @@ using Mantid::MantidVecPtr;
 class SaveDASCTest : public CxxTest::TestSuite
 {
 public:
+    static SaveDASCTest *createSuite() { return new SaveDASCTest(); }
+  static void destroySuite(SaveDASCTest *suite) { delete suite; }
+
   std::string FILENAME;
   SaveDASCTest()
   {

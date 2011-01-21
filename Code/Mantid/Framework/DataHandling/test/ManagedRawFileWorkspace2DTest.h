@@ -18,6 +18,10 @@ using Mantid::MantidVec;
 class ManagedRawFileWorkspace2DTest : public CxxTest::TestSuite
 {
 public:
+
+  static ManagedRawFileWorkspace2DTest *createSuite() { return new ManagedRawFileWorkspace2DTest(); }
+  static void destroySuite(ManagedRawFileWorkspace2DTest *suite) { delete suite; }
+
   ManagedRawFileWorkspace2DTest()
   {
     file = FileFinder::Instance().getFullPath("HET15869.raw");

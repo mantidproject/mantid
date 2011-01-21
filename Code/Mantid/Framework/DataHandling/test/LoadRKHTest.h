@@ -15,6 +15,9 @@ class LoadRKHTest : public CxxTest::TestSuite
 {
 public:
 
+    static LoadRKHTest *createSuite() { return new LoadRKHTest(); }
+  static void destroySuite(LoadRKHTest *suite) { delete suite; }
+
   // A sample file is in the repository
   LoadRKHTest() : dataFile(""), tempFile("LoadRKH_test_file_2D")
   {    

@@ -27,7 +27,9 @@ using namespace Mantid::DataObjects;
 class MaskDetectorsInShapeTest : public CxxTest::TestSuite
 {
 public:
-
+  static MaskDetectorsInShapeTest *createSuite() { return new MaskDetectorsInShapeTest(); }
+  static void destroySuite(MaskDetectorsInShapeTest *suite) { delete suite; }
+  
   MaskDetectorsInShapeTest()
   {
 		loadTestWS();

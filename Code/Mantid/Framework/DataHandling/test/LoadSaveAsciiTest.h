@@ -15,6 +15,10 @@ class LoadSaveAsciiTest : public CxxTest::TestSuite
 {
 
 public:
+
+    static LoadSaveAsciiTest *createSuite() { return new LoadSaveAsciiTest(); }
+  static void destroySuite(LoadSaveAsciiTest *suite) { delete suite; }
+
   LoadSaveAsciiTest()
   {
      

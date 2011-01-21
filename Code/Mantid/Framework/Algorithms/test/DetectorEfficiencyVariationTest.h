@@ -31,6 +31,10 @@ using namespace Mantid::DataObjects;
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite
 {
 public:
+
+  static DetectorEfficiencyVariationTest *createSuite() { return new DetectorEfficiencyVariationTest(); }
+  static void destroySuite(DetectorEfficiencyVariationTest *suite) { delete suite; }
+
   bool runInit(DetectorEfficiencyVariation &alg)//this is run by both tests so I thought I'd take it out and split things up
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

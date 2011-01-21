@@ -22,6 +22,9 @@ class LoadRawTest : public CxxTest::TestSuite
 {
 public:
 
+    static LoadRawTest *createSuite() { return new LoadRawTest(); }
+  static void destroySuite(LoadRawTest *suite) { delete suite; }
+
   LoadRawTest()
   {
     // Path to test input file assumes Test/AutoTestData directory checked out from SVN

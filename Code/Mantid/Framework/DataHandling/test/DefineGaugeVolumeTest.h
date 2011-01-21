@@ -16,6 +16,11 @@ private:
   
 
 public:
+
+  static DefineGaugeVolumeTest *createSuite() { return new DefineGaugeVolumeTest(); }
+  static void destroySuite(DefineGaugeVolumeTest *suite) { delete suite; }
+  
+
   DefineGaugeVolumeTest() :
     sphere("<sphere id=\"some-sphere\"><centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /><radius val=\"1.0\" /></sphere>"),
     cylinder("<infinite-cylinder id=\"shape\"><centre x=\"0.0\" y=\"0.0\" z=\"0.0\" /><axis x=\"0.0\" y=\"0.0\" z=\"1\" /><radius val=\"0.1\" /></infinite-cylinder>")

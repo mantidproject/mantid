@@ -23,6 +23,9 @@ class SetScalingPSDTest : public CxxTest::TestSuite
 {
 public:
 
+    static SetScalingPSDTest *createSuite() { return new SetScalingPSDTest(); }
+  static void destroySuite(SetScalingPSDTest *suite) { delete suite; }
+
   SetScalingPSDTest() : m_y_offset(0.0005)
   {
   }

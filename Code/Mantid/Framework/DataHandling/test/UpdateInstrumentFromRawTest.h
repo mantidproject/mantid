@@ -28,6 +28,8 @@ using namespace Mantid::DataObjects;
 class UpdateInstrumentFromRawTest : public CxxTest::TestSuite
 {
 public:
+    static UpdateInstrumentFromRawTest *createSuite() { return new UpdateInstrumentFromRawTest(); }
+  static void destroySuite(UpdateInstrumentFromRawTest *suite) { delete suite; }
 
   UpdateInstrumentFromRawTest()
   {

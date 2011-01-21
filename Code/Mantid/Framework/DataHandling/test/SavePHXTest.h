@@ -10,6 +10,9 @@ class SavePHXTest: public CxxTest::TestSuite {
 private:
 	Mantid::API::IAlgorithm* phxSaver;
 public:
+    static SavePHXTest *createSuite() { return new SavePHXTest(); }
+  static void destroySuite(SavePHXTest *suite) { delete suite; }
+
 	SavePHXTest() {
 		phxSaver = Mantid::API::FrameworkManager::Instance().createAlgorithm(
 				"SavePHX");

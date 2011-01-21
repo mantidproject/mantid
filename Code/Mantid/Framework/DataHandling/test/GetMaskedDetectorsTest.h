@@ -21,6 +21,10 @@ using Mantid::MantidVecPtr;
 class GetMaskedDetectorsTest : public CxxTest::TestSuite
 {
 public:
+
+    static GetMaskedDetectorsTest *createSuite() { return new GetMaskedDetectorsTest(); }
+  static void destroySuite(GetMaskedDetectorsTest *suite) { delete suite; }
+
   GetMaskedDetectorsTest()
   {
     // Set up a small workspace for testing

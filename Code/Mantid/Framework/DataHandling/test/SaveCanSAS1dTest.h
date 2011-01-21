@@ -19,6 +19,9 @@ class SaveCanSAS1dTest : public CxxTest::TestSuite
 {
 public:
 
+  static SaveCanSAS1dTest *createSuite() { return new SaveCanSAS1dTest(); }
+  static void destroySuite(SaveCanSAS1dTest *suite) { delete suite; }
+
   //set up the workspace that will be loaded
   SaveCanSAS1dTest() : m_workspace1("SaveCanSAS1DTest_in1"),
     m_workspace2("SaveCanSAS1DTest_in2"),

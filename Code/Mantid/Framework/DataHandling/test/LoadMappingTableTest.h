@@ -22,6 +22,10 @@ using namespace Mantid::DataObjects;
 class LoadMappingTableTest : public CxxTest::TestSuite
 {
 public:
+
+  static LoadMappingTableTest *createSuite() { return new LoadMappingTableTest(); }
+  static void destroySuite(LoadMappingTableTest *suite) { delete suite; }
+
 	LoadMappingTableTest()
 	{
 	  //

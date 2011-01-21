@@ -15,6 +15,10 @@ using Mantid::Algorithms::StripPeaks;
 class StripPeaksTest : public CxxTest::TestSuite
 {
 public:
+
+  static StripPeaksTest *createSuite() { return new StripPeaksTest(); }
+  static void destroySuite(StripPeaksTest *suite) { delete suite; }
+
   StripPeaksTest()
   {
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,200,0.5,0.02);

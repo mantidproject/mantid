@@ -23,7 +23,8 @@ using namespace Mantid::DataObjects;
 class LoadRaw3Test : public CxxTest::TestSuite
 {
 public:
-
+    static LoadRaw3Test *createSuite() { return new LoadRaw3Test(); }
+  static void destroySuite(LoadRaw3Test *suite) { delete suite; }
   LoadRaw3Test()
   {
     // Path to test input file assumes Test directory checked out from SVN

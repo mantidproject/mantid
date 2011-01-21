@@ -25,6 +25,9 @@ class LoadInstrumentFromRawTest : public CxxTest::TestSuite
 {
 public:
 
+    static LoadInstrumentFromRawTest *createSuite() { return new LoadInstrumentFromRawTest(); }
+  static void destroySuite(LoadInstrumentFromRawTest *suite) { delete suite; }
+
   LoadInstrumentFromRawTest()
   {
 	//initialise framework manager to allow logging

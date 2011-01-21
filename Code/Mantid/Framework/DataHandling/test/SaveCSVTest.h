@@ -26,6 +26,9 @@ using namespace Mantid::DataObjects;
 class SaveCSVTest : public CxxTest::TestSuite
 {
 public: 
+
+  static SaveCSVTest *createSuite() { return new SaveCSVTest(); }
+  static void destroySuite(SaveCSVTest *suite) { delete suite; }
   
   SaveCSVTest()
   {

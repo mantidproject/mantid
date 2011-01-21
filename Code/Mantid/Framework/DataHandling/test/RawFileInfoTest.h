@@ -14,7 +14,8 @@ class RawFileInfoTest : public CxxTest::TestSuite
 {
   
 public:
-  
+  static RawFileInfoTest *createSuite() { return new RawFileInfoTest(); }
+  static void destroySuite(RawFileInfoTest *suite) { delete suite; }
   // Perform test with a GEM file
   RawFileInfoTest() : m_filetotest("LOQ48127.raw") 
   {

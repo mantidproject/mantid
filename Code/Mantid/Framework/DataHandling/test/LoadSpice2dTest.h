@@ -23,6 +23,9 @@
 class LoadSpice2dTest : public CxxTest::TestSuite
 {
 public:
+  static LoadSpice2dTest *createSuite() { return new LoadSpice2dTest(); }
+  static void destroySuite(LoadSpice2dTest *suite) { delete suite; }
+
   LoadSpice2dTest()
   {
      inputFile = "BioSANS_exp61_scan0004_0001.xml";

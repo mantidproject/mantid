@@ -54,6 +54,10 @@ private:
   }
 
 public:
+
+  static LoadDAETest *createSuite() { return new LoadDAETest(); }
+  static void destroySuite(LoadDAETest *suite) { delete suite; }
+
   LoadDAETest()
   {
     // Hostname of computer with DAE to connect to

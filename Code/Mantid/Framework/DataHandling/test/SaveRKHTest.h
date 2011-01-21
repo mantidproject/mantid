@@ -11,6 +11,9 @@
 class SaveRKHTest : public CxxTest::TestSuite
 {
 public:
+
+    static SaveRKHTest *createSuite() { return new SaveRKHTest(); }
+  static void destroySuite(SaveRKHTest *suite) { delete suite; }
   ///Constructor
   SaveRKHTest() : outputFile("SAVERKH.out")
   {} 

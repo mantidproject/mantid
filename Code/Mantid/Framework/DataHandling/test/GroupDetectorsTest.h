@@ -24,6 +24,9 @@ using namespace Mantid::DataObjects;
 class GroupDetectorsTest : public CxxTest::TestSuite
 {
 public:
+  static GroupDetectorsTest *createSuite() { return new GroupDetectorsTest(); }
+  static void destroySuite(GroupDetectorsTest *suite) { delete suite; }
+
   GroupDetectorsTest()
   {
     // Set up a small workspace for testing

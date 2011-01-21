@@ -31,6 +31,9 @@ static const int DEFAU_Y = 2;
 class SaveSPETest : public CxxTest::TestSuite
 {
 public:  
+    static SaveSPETest *createSuite() { return new SaveSPETest(); }
+  static void destroySuite(SaveSPETest *suite) { delete suite; }
+
   SaveSPETest()
   {// the functioning of SaveSPE is affected by a function call in the FrameworkManager's constructor, creating the algorithm in this way ensures that function is executed
     saver = FrameworkManager::Instance().createAlgorithm("SaveSPE");

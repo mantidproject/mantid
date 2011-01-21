@@ -23,6 +23,9 @@ class SolidAngleTest : public CxxTest::TestSuite
 {
 public:
 
+  static SolidAngleTest *createSuite() { return new SolidAngleTest(); }
+  static void destroySuite(SolidAngleTest *suite) { delete suite; }
+
   SolidAngleTest() : inputSpace(""), outputSpace("")
   {
     // Set up a small workspace for testing

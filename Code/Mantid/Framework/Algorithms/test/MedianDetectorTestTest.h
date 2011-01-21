@@ -32,6 +32,9 @@ class MedianDetectorTestTest : public CxxTest::TestSuite
 {
 public:
 
+  static MedianDetectorTestTest *createSuite() { return new MedianDetectorTestTest(); }
+  static void destroySuite(MedianDetectorTestTest *suite) { delete suite; }
+
   void testWorkspaceAndArray()
   {
     MedianDetectorTest alg;

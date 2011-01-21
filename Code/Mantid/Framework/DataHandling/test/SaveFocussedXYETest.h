@@ -22,6 +22,9 @@ class SaveFocussedXYETest : public CxxTest::TestSuite
 {
 public:
 
+    static SaveFocussedXYETest *createSuite() { return new SaveFocussedXYETest(); }
+  static void destroySuite(SaveFocussedXYETest *suite) { delete suite; }
+
   SaveFocussedXYETest() : m_tol(1e-08) {}
 
   //

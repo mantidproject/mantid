@@ -43,6 +43,9 @@ class LoadDetectorInfoTest : public CxxTest::TestSuite
 
 
 public:
+  static LoadDetectorInfoTest *createSuite() { return new LoadDetectorInfoTest(); }
+  static void destroySuite(LoadDetectorInfoTest *suite) { delete suite; }
+
   void testLoadDat()
   {// also tests changing X-values with   -same bins, different offsets
 
