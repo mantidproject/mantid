@@ -749,7 +749,7 @@ namespace Mantid
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      return 3*size()*sizeof(double)/1024 + m_run->getMemorySize();
+      return ( 3*size()*sizeof(double) + m_run->getMemorySize() )/1024;
     }
 
     /** Add parameters to the instrument parameter map that are defined in instrument
