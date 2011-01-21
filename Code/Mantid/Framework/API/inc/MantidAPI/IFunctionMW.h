@@ -168,7 +168,7 @@ protected:
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       int wsIndex)const;
 
-  void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
     int wsIndex) const;
 
