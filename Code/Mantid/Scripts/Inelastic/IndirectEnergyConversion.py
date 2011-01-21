@@ -83,6 +83,10 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
                 sys.exit('Rawfiles not suitable for summing.')
             mantid.deleteWorkspace(tmp_ws)
         workspace = mtd[name]
+        # Average summed values by dividing by number of runs
+        CreateSingleValuedWorkspace('_temp', len(rawfiles))
+        Divide(name, '_temp', name)
+        mantd.deleteWorkspace('_temp')
         return [workspace], [name]
     else:
         workspace_list = []
