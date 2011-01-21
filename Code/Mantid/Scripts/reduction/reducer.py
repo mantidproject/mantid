@@ -63,7 +63,8 @@ def validate_step(f):
                 def __init__(self):
                     self.algm = algorithm
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
-                    proxy = self.algm(*args, execute=False, **kwargs)
+                    kwargs['execute'] = False
+                    proxy = self.algm(*args, **kwargs)
                     if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
                     _algm = proxy._getHeldObject()
