@@ -293,7 +293,7 @@ std::string Convolution::asString()const
     throw std::runtime_error("Convolution function is incomplete");
   }
   std::ostringstream ostr;
-  ostr<<"composite=ConvolutionMW;";
+  ostr<<"composite=Convolution;";
   IFitFunction* res = getFunction(0);
   IFitFunction* fun = getFunction(1);
   bool isCompRes = dynamic_cast<CompositeFunctionMW*>(res) != 0;
