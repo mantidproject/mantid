@@ -168,7 +168,7 @@ public:
     TS_ASSERT( iProp->isDefault() )
     TS_ASSERT_EQUALS( iProp->setValue("1,2,3,4"), "" )
     TS_ASSERT_EQUALS( iProp->operator()().size(), 4 )
-    for ( int i=0; i < 4; ++i )
+    for ( std::size_t i=0; i < 4; ++i )
     {
       TS_ASSERT_EQUALS( iProp->operator()()[i], i+1 )
     }
@@ -238,7 +238,7 @@ public:
     std::vector<double> d(3,8.8);
     *dProp = d;
     std::vector<double> dd = *dProp;
-    for(int i = 0; i<3; ++i)
+    for(std::size_t i = 0; i<3; ++i)
     {
       TS_ASSERT_EQUALS( dProp->operator()()[i], 8.8 )
     }

@@ -187,7 +187,7 @@ public:
 
     std::vector< TimeSeriesProperty<TYPE> *> outputs_tsp;
     //Clear the outputs before you start
-    for (int i=0; i < numOutputs; i++)
+    for (std::size_t i=0; i < numOutputs; i++)
     {
       TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
@@ -263,7 +263,7 @@ public:
     } //Looping through entries in the splitter vector
 
     //Make sure all entries have the correct size recorded in m_size.
-    for (int i=0; i < numOutputs; i++)
+    for (std::size_t i=0; i < numOutputs; i++)
     {
       TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
@@ -614,8 +614,8 @@ public:
     m_propertySeries.clear();
     // Give a guess as to where it goes
     typename std::multimap<Kernel::DateAndTime, TYPE>::iterator iter = m_propertySeries.begin();
-    size_t num = new_values.size();
-    for (size_t i=0; i < num; i++)
+    std::size_t num = new_values.size();
+    for (std::size_t i=0; i < num; i++)
     {
       // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
       iter = m_propertySeries.insert(iter, typename timeMap::value_type(times[i], new_values[i]));
@@ -623,8 +623,8 @@ public:
 
 //    // Make a list of the pairs to insert
 //    std::vector<typename std::pair<Kernel::DateAndTime, TYPE> > list;
-//    size_t num = new_values.size();
-//    for (size_t i=0; i < num; i++)
+//    std::size_t num = new_values.size();
+//    for (std::size_t i=0; i < num; i++)
 //    {
 //      list.push_back( typename std::pair<Kernel::DateAndTime, TYPE>(times[i], new_values[i]) );
 //    }
@@ -676,7 +676,7 @@ public:
       throw std::runtime_error("TimeSeriesProperty is empty");
 
     typename timeMap::const_iterator it = m_propertySeries.begin();
-    for (int j = 0; it != m_propertySeries.end(); it++)
+    for (std::size_t j = 0; it != m_propertySeries.end(); it++)
     {
       if (m_propertySeries.count(it->first) > 1)
         continue;
@@ -713,7 +713,7 @@ public:
 
     typename timeMap::const_iterator it = m_propertySeries.begin();
     DateAndTime t = it->first;
-    for (int j = 0; it != m_propertySeries.end(); it++)
+    for (size_t j = 0; it != m_propertySeries.end(); it++)
     {
       if (m_propertySeries.count(it->first) > 1)
         continue;

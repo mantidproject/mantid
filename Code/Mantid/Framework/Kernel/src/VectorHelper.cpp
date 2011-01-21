@@ -10,6 +10,8 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 
+using std::size_t;
+
 namespace Mantid
 {
 namespace Kernel
@@ -175,7 +177,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
       /*
        * convert back to counts/unit time
        */
-      for (int i = 0; i < size_ynew; ++i)
+      for (size_t i = 0; i < size_ynew; ++i)
       {
         {
           width = xnew[i + 1] - xnew[i];
@@ -424,7 +426,7 @@ void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y
   int step(stepSize), index2(0);
   double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
 
-  for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
+  for (size_t i = 0; i < specSize - 1; ++i) // Last point has been calculated
   {
     if(step == stepSize) //Point numerically integrated, does not need interpolation
     {

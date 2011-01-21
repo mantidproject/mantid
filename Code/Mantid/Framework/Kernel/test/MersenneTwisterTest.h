@@ -46,7 +46,7 @@ public:
     {  0.203374452656,0.597970068222,0.120683325687,0.92372657801,0.734524340136,
        0.467380537419,0.0712658402044,0.204503614921,0.487210249063,0.885743656661 };
     // Check 10 numbers
-    for( int i = 0; i < 10; ++i )
+    for( std::size_t i = 0; i < 10; ++i )
     {
       TS_ASSERT_DELTA(randGen.next(), expectedValues[i], 1e-12);
     }
@@ -56,7 +56,7 @@ public:
   {
     MersenneTwister randGen;
     // Test 20 numbers
-    for( int i = 0; i < 20; ++i )
+    for( std::size_t i = 0; i < 20; ++i )
     {
       double r = randGen.next();
       TS_ASSERT( r >= 0.0 && r <= 1.0 );
@@ -70,7 +70,7 @@ public:
     randGen.setSeed(15423894);
     randGen.setRange(start,end);
     // Test 20 numbers
-    for( int i = 0; i < 20; ++i )
+    for( std::size_t i = 0; i < 20; ++i )
     {
       const double r = randGen.next();
       TS_ASSERT(r >= start && r <= end);

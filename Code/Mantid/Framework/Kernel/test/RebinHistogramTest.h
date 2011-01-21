@@ -37,17 +37,17 @@ class RebinHistogramTest : public CxxTest::TestSuite
   	xout.resize(size2);
   	yout.resize(size2-1);
   	eout.resize(size2-1);
-  	for (int i=0;i<size1-1;i++)
+  	for (std::size_t i=0;i<size1-1;i++)
   	{
   		xin[i]=(double)(i);
   		yin[i]=1.0;
   		ein[i]=1.0;
   	}
   	xin[size1-1]=size1-1;
-  	for (int i=0;i<size2;i++)
+  	for (std::size_t i=0;i<size2;i++)
   		xout[i]=0.5*i;
   	VectorHelper::rebinHistogram(xin,yin,ein,xout,yout,eout,false);
-  	for (int i=0;i<size2-1;i++)
+  	for (std::size_t i=0;i<size2-1;i++)
   	{
   		TS_ASSERT_DELTA(yout[i],0.5,1e-7);
   		TS_ASSERT_DELTA(eout[i],1.0/sqrt(2.0),1e-7);
@@ -55,7 +55,7 @@ class RebinHistogramTest : public CxxTest::TestSuite
   	std::vector<double> returnX(xin), returnY(size1-1), returnE(size1-1);
 
   	VectorHelper::rebinHistogram(xout,yout,eout,returnX,returnY,returnE,false);
-  	for (int i=0;i<size1-1;i++)
+  	for (std::size_t i=0;i<size1-1;i++)
   	{
   	  TS_ASSERT_DELTA(returnY[i],yin[i],1e-7);
   	  TS_ASSERT_DELTA(returnE[i],ein[i],1e-7);

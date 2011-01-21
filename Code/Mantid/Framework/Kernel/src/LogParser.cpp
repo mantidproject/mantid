@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <limits>
 
+using std::size_t;
+
 namespace Mantid
 {
   namespace Kernel
@@ -320,7 +322,8 @@ namespace Mantid
       double res = 0.;
       Kernel::time_duration total(0,0,0,0);
 
-      for(int i=0;i<dp->size();i++)
+      size_t dp_size = dp->size();
+      for(size_t i=0;i<dp_size;i++)
       {
         Kernel::TimeInterval t = dp->nthInterval(i);
         Kernel::time_duration dt = t.length();

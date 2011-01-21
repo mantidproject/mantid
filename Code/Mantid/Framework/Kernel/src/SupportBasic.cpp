@@ -7,6 +7,8 @@
 
 #include "MantidKernel/Support.h"
 
+using std::size_t;
+
 namespace Mantid
 {
 
@@ -106,7 +108,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
   const int nC(fullPhrase.length());
   if (nS>nC || nS<=0)    
     return 0;           
-  for(int i=0;i<nS;i++)
+  for(size_t i=0;i<nS;i++)
     if (S[i]!=fullPhrase[i])
       return 0;
   return 1;

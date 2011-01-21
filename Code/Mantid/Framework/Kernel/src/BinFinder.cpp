@@ -1,6 +1,8 @@
 #include "MantidKernel/BinFinder.h"
 #include "MantidKernel/Exception.h"
 
+using std::size_t;
+
 namespace Mantid
 {
 namespace Kernel
@@ -23,7 +25,7 @@ namespace Kernel
     if (n % 2 == 0)
       throw std::invalid_argument("BinFinder: the number of bin parameters should be odd.");
 
-    for (int i=0; i<n/2; i++)
+    for (size_t i=0; i<n/2; i++)
     {
       //The boundaries
       double min = binParams[i*2];

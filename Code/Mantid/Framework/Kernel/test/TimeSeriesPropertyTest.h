@@ -203,7 +203,7 @@ public:
     //Make the outputs
     //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
-    for (int i=0; i<5; i++)
+    for (std::size_t i=0; i<5; i++)
     {
       TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
       outputs.push_back(newlog);
@@ -265,7 +265,7 @@ public:
     //Make the outputs
     //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
-    for (int i=0; i<1; i++)
+    for (std::size_t i=0; i<1; i++)
     {
       TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
       outputs.push_back(newlog);
