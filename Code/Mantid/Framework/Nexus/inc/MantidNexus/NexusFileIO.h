@@ -71,7 +71,7 @@ namespace Mantid
 
       template<class T>
       void writeEventListData( std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight, bool writeError) const;
-      void NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data) const;
+      void NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data, bool compress = false) const;
 
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,

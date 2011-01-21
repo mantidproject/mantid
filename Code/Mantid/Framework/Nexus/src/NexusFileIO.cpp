@@ -656,14 +656,14 @@ using namespace API;
     NXstatus status;
 
     //write data entry
-    status=NXmakegroup(fileID,"eventWorkspace","NXdata");
+    status=NXmakegroup(fileID,"event_workspace","NXdata");
     if(status==NX_ERROR) return(2);
-    status=NXopengroup(fileID,"eventWorkspace","NXdata");
+    status=NXopengroup(fileID,"event_workspace","NXdata");
 
     for (size_t wi=0; wi < ws->getNumberHistograms(); wi++)
     {
       std::ostringstream group_name;
-      group_name << "EventList" << wi;
+      group_name << "event_list_" << wi;
       this->writeEventList( ws->getEventList(wi), group_name.str());
     }
 
@@ -692,16 +692,25 @@ using namespace API;
   }
 
   //-------------------------------------------------------------------------------------
-  /** Write out an array */
-  void NexusFileIO::NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data) const
+  /** Write out an array to the open file. */
+  void NexusFileIO::NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data, bool compress) const
   {
     NXstatus status;
-    status=NXmakedata(fileID, name, datatype, rank, dims_array);
+    if (compress)
+    {
+      // We'll use the same slab/buffer size as the size of the array
+      status=NXcompmakedata(fileID, name, datatype, rank, dims_array, m_nexuscompression, dims_array);
+    }
+    else
+    {
+      // Write uncompressed.
+      status=NXmakedata(fileID, name, datatype, rank, dims_array);
+    }
+
     status=NXopendata(fileID, name);
     status=NXputdata(fileID, data );
     status=NXclosedata(fileID);
   }
-
 
   //-------------------------------------------------------------------------------------
   /** Write out the event list data, no matter what the underlying event type is
@@ -736,14 +745,16 @@ using namespace API;
 
     // Write out all the required arrays.
     int dims_array[1] = { num };
+    // Don't compress if it is already small.
+    bool compress = (num > 100);
     if (writeTOF)
-      NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs));
+      NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
     if (writePulsetime)
-      NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes));
+      NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes), compress);
     if (writeWeight)
-      NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights));
+      NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights), compress);
     if (writeError)
-      NXwritedata("errorSquared", NX_FLOAT32, 1, dims_array, (void *)(errorSquareds));
+      NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, (void *)(errorSquareds), compress);
 
     // Free mem.
     delete [] tofs;
@@ -751,6 +762,7 @@ using namespace API;
     delete [] errorSquareds;
     delete [] pulsetimes;
   }
+
 
   //-------------------------------------------------------------------------------------
   /** Write out an event list into an already-opened group
@@ -774,10 +786,7 @@ using namespace API;
     // Write out the detector IDs
     if (dets.size() > 0)
     {
-      status=NXmakedata(fileID, "detectorIDs", NX_INT64, 1, dims_array);
-      status=NXopendata(fileID, "detectorIDs");
-      status=NXputdata(fileID, (void*)(detectorIDs) );
-      status=NXclosedata(fileID);
+      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), (dets.size() > 100) );
       delete [] detectorIDs;
     }
 
@@ -800,9 +809,9 @@ using namespace API;
     }
 
     // Save an attribute with the type of each event.
-    NXputattr (fileID, "eventType", (void*)eventType.c_str(), eventType.size(), NX_CHAR);
+    NXputattr (fileID, "event_type", (void*)eventType.c_str(), eventType.size(), NX_CHAR);
     // Save an attribute with the number of events
-    NXputattr (fileID, "numEvents", (void*)(&num), 1, NX_INT64);
+    NXputattr (fileID, "num_events", (void*)(&num), 1, NX_INT64);
 
     // Close it up!
     status=NXclosegroup(fileID);
