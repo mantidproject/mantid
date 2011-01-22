@@ -20,6 +20,7 @@
 import os
 import time
 import types
+import inspect
 from instrument import Instrument
 import MantidFramework
 import mantidsimple
@@ -37,6 +38,14 @@ def validate_step(f):
             @validate_step
             def some_func(self, reduction_step):
                 [...]
+                
+        Arguments to a Mantid algorithm function should be passed as arguments.
+        Example:
+            #Load("my_file.txt", "my_wksp") will become:
+            reducer.some_func(Load, "my_file.txt", "my_wksp")
+            
+        InputWorkspace and OutputWorkspace arguments can be left as None
+        if they are to be overwritten by the Reducer.
     """
     
     def validated_f(reducer, algorithm, *args, **kwargs):
@@ -44,6 +53,7 @@ def validate_step(f):
             Wrapper function around the function f.
             The function ensures that the algorithm parameter
             is a sub-class of ReductionStep
+            @param algorithm: algorithm name, ReductionStep object, or Mantid algorithm function
         """
             
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
@@ -63,18 +73,44 @@ def validate_step(f):
                 def __init__(self):
                     self.algm = algorithm
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    """
+                        Create a new instance of the requested algorithm object, 
+                        set the algorithm properties replacing the input and output
+                        workspaces.
+                        The execution will work for any combination of mandatory/optional
+                        properties. 
+                        @param reducer: Reducer object managing the reduction
+                        @param inputworkspace: input workspace name [optional]
+                        @param outputworkspace: output workspace name [optional]
+                    """
+                    if outputworkspace is None:
+                        outputworkspace = inputworkspace 
                     kwargs['execute'] = False
                     proxy = self.algm(*args, **kwargs)
                     if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
                     _algm = proxy._getHeldObject()
-                    if outputworkspace is None:
-                        outputworkspace = inputworkspace 
-                    _argspec = proxy.keys()                       
-                    if "InputWorkspace" in _argspec:
-                        _algm.setPropertyValue("InputWorkspace", inputworkspace)
-                    if "OutputWorkspace" in _argspec:
-                        _algm.setPropertyValue("OutputWorkspace", outputworkspace)
+                    argspec = inspect.getargspec(self.algm)                    
+                    
+                    # Go through provided arguments
+                    for i in range(len(args)):
+                        if argspec.args[i] == "InputWorkspace":
+                            _algm.setPropertyValue("InputWorkspace", inputworkspace)
+                        elif argspec.args[i] == "OutputWorkspace":
+                            _algm.setPropertyValue("OutputWorkspace", outputworkspace)                        
+                        else:
+                            _algm.setPropertyValue(argspec.args[i], args[i])
+                    
+                    # Go through keyword arguments
+                    for key in kwargs:
+                        if key not in proxy.keys():
+                            continue                        
+                        if key == "InputWorkspace":
+                            _algm.setPropertyValue("InputWorkspace", inputworkspace)
+                        elif key == "OutputWorkspace":
+                            _algm.setPropertyValue("OutputWorkspace", outputworkspace)                        
+                        else:
+                            _algm.setPropertyValue(key, kwargs[key])
                     mantidsimple.execute_algorithm(proxy)
                     
             return f(reducer, _AlgorithmStep())
@@ -240,54 +276,6 @@ class ReductionStep(object):
             @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
         """
         raise NotImplemented
-
-class AlgoReductionStep(ReductionStep):
-    """
-       Class that wraps an algorithm as a reducer
-    """
-    def __init__(self, algo):
-        super(AlgoReductionStep, self).__init__()
-        self._algo = algo
-        self.__init_args()
-
-    def __repr__(self):
-        return "AlgoReductionStep(%s)" % self._algo.__name__
-
-    def __init_args(self):
-        # determine what variables exist in the underlying algorithm
-        import inspect
-        self._argspec = inspect.getargspec(self._algo)
-
-        # set all of the values to none and make them accessible
-        args = self._argspec.args
-        for arg in args:
-            self.__dict__[arg] = None
-
-        # set the default values that the underlying algorithm uses
-        defaults = self._argspec.defaults
-        indices = [-1*(i+1) for i in range(len(defaults))]
-        for i in indices:
-            self.__dict__[args[i]] = defaults[i]
-
-    def execute(self, reducer=None, inputworkspace=None, outputworkspace=None):
-        """
-           Execute the wrapped algorithm
-        """
-        if outputworkspace is None:
-            outputworkspace = inputworkspace 
-
-        # construct the argument list
-        args = []
-        for arg in self._argspec.args:
-            if arg == "InputWorkspace" and inputworkspace is not None:
-                args.append(inputworkspace)
-            elif arg == "OutputWorkspace" and outputworkspace is not None:
-                args.append(outputworkspace)
-            else:
-                args.append(self.__dict__[arg])
-
-        # call the algorithm
-        self._algo(*args)
 
 
 def extract_workspace_name(filepath, suffix=''):
