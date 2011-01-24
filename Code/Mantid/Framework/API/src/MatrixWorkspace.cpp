@@ -15,6 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -1027,17 +1028,66 @@ namespace Mantid
       return axis->title(); //Seam. single point where we configure how an axis maps to a dimension id.
     }
 
+    class MWDimension: public Mantid::Geometry::IMDDimension
+    {
+    public:
+
+      MWDimension(const Axis* axis):
+          m_axis(*axis)
+      {
+      }
+      /// the name of the dimennlsion as can be displayed along the axis
+          virtual std::string getName() const {return m_axis.title();}
+      /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
+      /// various method exist to manipulate set of dimensions by their names. 
+      virtual std::string getDimensionId() const {return m_axis.title();}
+
+      /// if the dimension is integrated (e.g. have single bin)
+      virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
+      // it is sometimes convinient to shift image data by some number along specific dimension
+      virtual double getDataShift()const {return 0;}
+
+      virtual double getMaximum() const {return m_axis(m_axis.length()-1);}
+
+      virtual double getMinimum() const {return m_axis(0);}
+      /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
+      virtual unsigned int getNBins() const {return m_axis.length();}
+      /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one. 
+      virtual size_t      getStride()const {return 0;}
+      /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
+      virtual bool isReciprocal() const {return false;}
+      /// defines the dimension scale in physical units. 
+      virtual double getScale()const {return 0;}
+      ///  Get coordinate for index;
+      virtual double getX(unsigned int ind)const {return m_axis(ind);}
+      // Mess; TODO: clear
+      virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not implemented");}
+
+      /// the function returns the center points of the axis bins; There are nBins of such points 
+      /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
+      virtual void getAxisPoints(std::vector<double>  &)const{throw std::runtime_error("Not implemented");}
+
+
+      //Dimensions must be xml serializable.
+      virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}
+
+      virtual ~MWDimension(){};
+    private:
+      const Axis& m_axis;
+    };
+
+
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getXDimension() const
     { 
       Axis* xAxis = this->getAxis(0);
-      MDDimension* dimension = new Mantid::Geometry::MDDimension(xAxis->title());
+      MWDimension* dimension = new MWDimension(xAxis);
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
     }
 
     boost::shared_ptr< const Mantid::Geometry::IMDDimension> MatrixWorkspace::getYDimension() const
     { 
       Axis* yAxis = this->getAxis(1);
-      MDDimension* dimension = new Mantid::Geometry::MDDimension(yAxis->title());
+      MWDimension* dimension = new MWDimension(yAxis);
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
     }
 
@@ -1061,7 +1111,7 @@ namespace Mantid
         const std::string& title = getDimensionIdFromAxis(xAxis);
         if(title == id)
         {
-          dim = new Mantid::Geometry::MDDimension(id);
+          dim = new MWDimension(xAxis);
           break;
         }
       }

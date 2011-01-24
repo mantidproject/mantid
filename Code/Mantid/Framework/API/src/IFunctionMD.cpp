@@ -36,7 +36,52 @@ namespace API
       {
         throw std::invalid_argument("Workspace has a wrong type (not a IMDWorkspace)");
       }
-     
+
+      if (m_dimensionIndexMap.empty())
+      {
+        useAllDimensions();
+      }
+
+      m_dataSize = 1;
+      m_dimensions.resize(m_dimensionIndexMap.size());
+      std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
+      std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.end();
+      for(; it != end; ++it)
+      {
+        boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_workspace->getDimension(it->first);
+        if (!dim)
+        {
+          throw std::invalid_argument("Dimension "+it->first+" dos not exist in workspace "+ws->getName());
+        }
+        m_dimensions[it->second] = dim;
+        m_dataSize *= dim->getNBins();
+      }
+
+      if (m_dataSize == 0)
+      {
+        throw std::runtime_error("Fitting data is empty");
+      }
+
+      // fill in m_data and m_weights
+      m_data.reset(new double[m_dataSize]);
+      m_weights.reset(new double[m_dataSize]);
+
+      MDIterator from(m_workspace);
+      MDIterator to(this);
+      if (from.getDataSize() != to.getDataSize())
+      {
+        throw std::runtime_error("Function must be defined on all workspace");
+      }
+
+      do
+      {
+        const Mantid::Geometry::SignalAggregate& point = m_workspace->getPoint(from.getPointer());
+        double signal = point.getSignal();
+        double error  = point.getError();
+        if (error == 0) error = 1.;
+        to.setData(&m_data[0],signal);
+        to.setData(&m_weights[0],1./error);
+      }while(from.next() && to.next());
     }
     catch(std::exception& e)
     {
@@ -44,51 +89,6 @@ namespace API
       throw;
     }
 
-    if (m_dimensionIndexMap.empty())
-    {
-      useAllDimensions();
-    }
-
-    m_dataSize = 1;
-    m_dimensions.resize(m_dimensionIndexMap.size());
-    std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
-    std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.begin();
-    for(; it != end; ++it)
-    {
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_workspace->getDimension(it->first);
-      if (!dim)
-      {
-        throw std::invalid_argument("Dimension "+it->first+" dos not exist in workspace "+ws->getName());
-      }
-      m_dimensions[it->second] = dim;
-      m_dataSize *= dim->getNBins();
-    }
-
-    if (m_dataSize == 0)
-    {
-      throw std::runtime_error("Fitting data is empty");
-    }
-
-    // fill in m_data and m_weights
-    m_data.reset(new double[m_dataSize]);
-    m_weights.reset(new double[m_dataSize]);
-
-    MDIterator from(m_workspace);
-    MDIterator to(this);
-    if (from.getDataSize() != to.getDataSize())
-    {
-      throw std::runtime_error("Function must be defined on all workspace");
-    }
-
-    do
-    {
-      const Mantid::Geometry::SignalAggregate& point = m_workspace->getPoint(from.getPointer());
-      double signal = point.getSignal();
-      double error  = point.getError();
-      if (error == 0) error = 1.;
-      to.setData(&m_data[0],signal);
-      to.setData(&m_weights[0],1./error);
-    }while(from.next() && to.next());
   }
 
   /// Get the workspace
@@ -129,7 +129,62 @@ namespace API
   /// Derivatives of function with respect to active parameters
   void IFunctionMD::functionDeriv(Jacobian* out)
   {
+    // it is possible that out is NULL
+    if (!out) return;
+    // claculate numerically
+    double stepPercentage = DBL_EPSILON*1000; // step percentage
+    double step; // real step
+    double minDouble = std::numeric_limits<double>::min();
+    double cutoff = 100.0*minDouble/stepPercentage;
+    const int nParam = nParams();
+    const int nData  = dataSize();
 
+    // allocate memory if not already done
+    if (!m_tmpFunctionOutputMinusStep && nData>0)
+    {
+      m_tmpFunctionOutputMinusStep.reset(new double[nData]);
+      m_tmpFunctionOutputPlusStep.reset(new double[nData]);
+    }
+
+    function(m_tmpFunctionOutputMinusStep.get());
+
+    for (int iP = 0; iP < nParam; iP++)
+    {
+      if ( isActive(iP) )
+      {
+        const double& val = getParameter(iP);
+        if (val == 0.0)
+        {
+          step = stepPercentage;
+        }
+        else if (val < cutoff)
+        {
+          step = cutoff;
+        }
+        else
+        {
+          step = val*stepPercentage;
+        }
+
+        //double paramMstep = val - step;
+        //setParameter(iP, paramMstep);
+        //function(m_tmpFunctionOutputMinusStep.get());
+
+        double paramPstep = val + step;
+        setParameter(iP, paramPstep);
+        function(m_tmpFunctionOutputPlusStep.get());
+
+        step = paramPstep - val;
+        setParameter(iP, val);
+
+        for (int i = 0; i < nData; i++) {
+         // out->set(i,iP, 
+         //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
+          out->set(i,iP, 
+            (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
+        }
+      }
+    }
   }
 
   /**
@@ -282,8 +337,9 @@ namespace Mantid
     public:
       void init()
       {
+        if (!getWorkspace()) return;
         std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
-        std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.begin();
+        std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.end();
         for(; it != end; ++it)
         {
           declareParameter(it->first+"_centre",0.0);

@@ -25,6 +25,13 @@ public:
     const int ny = 10;
     Mantid::DataObjects::Workspace2D_sptr ws = Create2DWorkspace(nx,ny);
 
+    for(int i=0;i<nx;++i)
+    {
+      for(int j=0;j<ny;++j)
+      {
+      }
+    }
+
     std::cerr<<"\nn="<<ws->axes()<<"\n";
   }
 

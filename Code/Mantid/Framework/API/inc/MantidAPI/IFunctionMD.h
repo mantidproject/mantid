@@ -13,6 +13,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 #include "boost/variant.hpp"
+#include "boost/scoped_array.hpp"
 #include <string>
 #include <vector>
 
@@ -183,6 +184,11 @@ protected:
   std::map<std::string,int> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
   std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
+
+
+  /// temporary containers for calculating numeric derivatives
+  boost::scoped_array<double> m_tmpFunctionOutputMinusStep;
+  boost::scoped_array<double> m_tmpFunctionOutputPlusStep;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
