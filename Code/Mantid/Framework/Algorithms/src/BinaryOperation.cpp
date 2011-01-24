@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -793,11 +794,10 @@ namespace Mantid
      *
      * @param lhs :: matrix workspace in which the operation is being done.
      * @param rhs :: matrix workspace on the right hand side of the operand
-     * @param lhs_det_to_wi :: map from detector ID to workspace index for the LHS workspace.
+     * @param lhs_det_to_wi :: map from detector ID to workspace index for the RHS workspace.
      *        NULL if there is not a 1:1 mapping from detector ID to workspace index (e.g more than one detector per pixel).
      */
-    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
-        IndexToIndexMap * lhs_det_to_wi)
+    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs)
     {
         //An addition table is a list of pairs:
       //  First int = workspace index in the EW being added
@@ -811,94 +811,116 @@ namespace Mantid
       int rhs_nhist = rhs->getNumberHistograms();
       int lhs_nhist = lhs->getNumberHistograms();
 
+      // Initialize the table; filled with -1 meaning no match
+      table->resize(lhs_nhist, -1);
+
       // We'll need maps from WI to Spectrum Number.
+      Timer timer1;
       API::IndexToIndexMap * lhs_wi_to_spec = lhs->getWorkspaceIndexToSpectrumMap();
       API::IndexToIndexMap * rhs_wi_to_spec = rhs->getWorkspaceIndexToSpectrumMap();
+      //std::cout << timer1.elapsed() << " sec to getWorkspaceIndexToSpectrumMap\n";
 
-      //Loop through the input workspace indices
-      for (int rhsWI = 0; rhsWI < rhs_nhist; rhsWI++)
+      API::IndexToIndexMap * rhs_det_to_wi;
+      rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
+      //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
+
+      //PARALLEL_FOR_NO_WSP_CHECK()
+      for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
       {
-        //Get the set of detectors in the output
-        int rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
-        std::vector<int> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
-
+        int rhs_spec_no;
         bool done=false;
+
+        // Spectrum number for this lhs workspace index.
+        int lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
+        // List of detectors on lhs side
+        std::vector<int> lhsDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
+        // For proper includes, it needs to be sorted
+        std::sort(lhsDets.begin(), lhsDets.end());
+
 
         // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
         //First off, try to match the workspace indices. Most times, this will be ok right away.
-        int lhsWI = rhsWI;
-        int lhs_spec_no;
-        if (lhsWI < lhs_nhist) //don't go out of bounds
+        int rhsWI = lhsWI;
+        if (rhsWI < rhs_nhist) //don't go out of bounds
         {
           // Get the detector IDs at that workspace index.
-          lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
-          std::vector<int> outDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
+          rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
+          std::vector<int> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+          std::sort(rhsDets.begin(), rhsDets.end());
 
-          //Checks that rhsDets is a subset of outDets
-          if (std::includes(outDets.begin(), outDets.end(), rhsDets.begin(), rhsDets.end()))
+          //Checks that lhsDets is a subset of rhsDets
+          if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(), lhsDets.end()))
           {
             //We found the workspace index right away. No need to keep looking
-            table->push_back( std::pair<int,int>(rhsWI, lhsWI) );
+            (*table)[lhsWI] = rhsWI;
             done = true;
           }
         }
 
+
         // ----------------- Scrambled Detector IDs with one Detector per Spectrum --------------------------------------
-        if (!done && lhs_det_to_wi && (rhsDets.size() == 1))
+        if (!done && rhs_det_to_wi && (lhsDets.size() == 1))
         {
-          //Didn't find it. Try to use the LHS map.
+          //Didn't find it. Try to use the RHS map.
 
-          //First, we have to get the (single) detector ID of the RHS
-          std::vector<int>::const_iterator rhsDets_it = rhsDets.begin();
-          int rhs_detector_ID = *rhsDets_it;
+          //First, we have to get the (single) detector ID of the LHS
+          std::vector<int>::const_iterator lhsDets_it = lhsDets.begin();
+          int lhs_detector_ID = *lhsDets_it;
 
-          //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-          IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
-          if (map_it != lhs_det_to_wi->end())
+          //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
+          IndexToIndexMap::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
+          if (map_it != rhs_det_to_wi->end())
           {
-            lhsWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
+            rhsWI = map_it->second; //This is the workspace index in the RHS that matched lhs_detector_ID
           }
           else
           {
             //Did not find it!
-            lhsWI = -1; //Marker to mean its not in the LHS.
+            rhsWI = -1; //Marker to mean its not in the LHS.
+
+            std::ostringstream mess;
+            mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
+            throw std::runtime_error(mess.str());
           }
-          table->push_back( std::pair<int,int>(rhsWI, lhsWI) );
+          (*table)[lhsWI] = rhsWI;
           done = true; //Great, we did it.
         }
 
-        // ----------------- LHS detectors are subset of RHS --------------------------------------
+
+        // ----------------- LHS detectors are subset of RHS, which are Grouped --------------------------------------
         if (!done)
         {
+
           //Didn't find it? Now we need to iterate through the output workspace to
           //  match the detector ID.
           // NOTE: This can be SUPER SLOW!
-          for (lhsWI=0; lhsWI < lhs_nhist; lhsWI++)
+          for (rhsWI=0; rhsWI < rhs_nhist; rhsWI++)
           {
-            lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
-            std::vector<int> outDets2 = lhs_spec_det_map.getDetectors(lhs_spec_no);
-            //Another subset check
-            if (std::includes(outDets2.begin(), outDets2.end(), rhsDets.begin(), rhsDets.end()))
+            rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
+            std::vector<int> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+            std::sort(rhsDets.begin(), rhsDets.end());
+
+            //Checks that lhsDets is a subset of rhsDets
+            if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(), lhsDets.end()))
             {
               //This one is right. Now we can stop looking.
-              table->push_back( std::pair<int,int>(rhsWI, lhsWI) );
+              (*table)[lhsWI] = rhsWI;
               done = true;
               continue;
             }
           }
         }
 
+        // ------- Still nothing ! -----------
         if (!done)
         {
-          //If we reach here, not a single match was found for this set of rhsDets.
-
-          //TODO: should we check that none of the output ones are subsets of this one?
-
-          //So we need to add it as a new workspace index
-          table->push_back( std::pair<int,int>(rhsWI, -1) );
+          std::ostringstream mess;
+          mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
+          throw std::runtime_error(mess.str());
         }
 
       }
+      //std::cout << timer1.elapsed() << " sec to do the rest\n";
 
       return table;
     }

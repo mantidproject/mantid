@@ -9,10 +9,14 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceIterator.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::DataObjects::Workspace1D_sptr;
 using Mantid::Geometry::IDetector_sptr;
@@ -31,7 +35,7 @@ public:
   virtual int version() const { return 1; }
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Helper";}
-  
+
   bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2)
   {
     m_lhs = ws1;
@@ -39,14 +43,14 @@ public:
     BinaryOperation::checkRequirements();
     return BinaryOperation::checkSizeCompatibility(ws1,ws2);
   }
-  
+
 private:
   // Overridden BinaryOperation methods
   void performBinaryOperation(const Mantid::MantidVec&, const Mantid::MantidVec& , const Mantid::MantidVec& ,
-                              const Mantid::MantidVec&, const Mantid::MantidVec& , Mantid::MantidVec&, Mantid::MantidVec&)
+      const Mantid::MantidVec&, const Mantid::MantidVec& , Mantid::MantidVec&, Mantid::MantidVec&)
   {}
   void performBinaryOperation(const Mantid::MantidVec& , const Mantid::MantidVec&, const Mantid::MantidVec&,
-                              const double& , const double&, Mantid::MantidVec& , Mantid::MantidVec& )
+      const double& , const double&, Mantid::MantidVec& , Mantid::MantidVec& )
   {}
 };
 
@@ -96,7 +100,7 @@ public:
 
   void testcheckSizeCompatibility2D2D()
   {
-    
+
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
@@ -123,7 +127,7 @@ public:
     masking.insert(0);
     masking.insert(2);
     masking.insert(4);
-    
+
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey, 0, masking);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
@@ -136,35 +140,165 @@ public:
     helper.setRethrows(true);
     helper.execute();
 
-    
+
     TS_ASSERT(helper.isExecuted());
 
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(output);
-    
+
     for( int i = 0; i < sizey; ++i )
     {
       IDetector_sptr det;
       try
       {
-	det = output->getDetector(i);
+        det = output->getDetector(i);
       }
       catch(Mantid::Kernel::Exception::NotFoundError&)
       {
       }
-      
+
       TS_ASSERT(det);
       if( !det ) TS_FAIL("No detector found");
       if( masking.count(i) == 0 )
       {
-	TS_ASSERT_EQUALS(det->isMasked(), false);
+        TS_ASSERT_EQUALS(det->isMasked(), false);
       }
       else
       {
-	TS_ASSERT_EQUALS(det->isMasked(), true);
+        TS_ASSERT_EQUALS(det->isMasked(), true);
       }
     }
-    
+
+  }
+
+
+  BinaryOperation::BinaryOperationTable * do_test_buildBinaryOperationTable(std::vector< std::vector<int> > lhs, std::vector< std::vector<int> > rhs,
+      bool expect_throw = false)
+  {
+    EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
+    EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
+    BinaryOperation::BinaryOperationTable * table;
+    Mantid::Kernel::Timer timer1;
+    if (expect_throw)
+    {
+      TS_ASSERT_THROWS(table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS), std::runtime_error );
+    }
+    else
+    {
+      TS_ASSERT_THROWS_NOTHING(table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS) );
+      //std::cout << timer1.elapsed() << " sec to run buildBinaryOperationTable\n";
+      TS_ASSERT( table );
+      TS_ASSERT_EQUALS( table->size(), lhsWS->getNumberHistograms() );
+    }
+    return table;
+
+  }
+
+
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS()
+  {
+    std::vector< std::vector<int> > lhs(6), rhs(2);
+    for (int i=0; i<6; i++)
+    {
+      // one detector per pixel in lhs
+      lhs[i].push_back(i);
+      // 3 detectors in each on the rhs
+      rhs[i/3].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i=0; i<6; i++)
+    {
+      TS_ASSERT_EQUALS( (*table)[i], i/3);
+    }
+  }
+
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_mismatched_throws()
+  {
+    std::vector< std::vector<int> > lhs(6), rhs(2);
+    for (int i=0; i<6; i++)
+    {
+      // one detector per pixel in lhs, but they start at 3
+      lhs[i].push_back(i+3);
+      // 3 detectors in each on the rhs
+      rhs[i/3].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, true);
+
+//    TS_ASSERT_EQUALS( (*table)[0], 1);
+//    TS_ASSERT_EQUALS( (*table)[1], 1);
+//    TS_ASSERT_EQUALS( (*table)[2], 1);
+//    TS_ASSERT_EQUALS( (*table)[3], -1);
+//    TS_ASSERT_EQUALS( (*table)[4], -1);
+//    TS_ASSERT_EQUALS( (*table)[5], -1);
+  }
+
+
+  void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS()
+  {
+    std::vector< std::vector<int> > lhs(8), rhs(4);
+    for (int i=0; i<16; i++)
+    {
+      // two detectors per pixel in lhs
+      lhs[i/2].push_back(i);
+      // 4 detectors in each on the rhs
+      rhs[i/4].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i=0; i<8; i++)
+    {
+      TS_ASSERT_EQUALS( (*table)[i], i/2);
+    }
+  }
+
+  void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws()
+  {
+    std::vector< std::vector<int> > lhs(6), rhs(4);
+    for (int i=0; i<24; i++)
+    {
+      // 4 detectors per pixel in lhs
+      lhs[i/4].push_back(i);
+      // 6 detectors in each on the rhs
+      rhs[i/6].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, true);
+//    TS_ASSERT_EQUALS( (*table)[0], 0); //0-3 go into 0-5
+//    TS_ASSERT_EQUALS( (*table)[1], -1); //4-7 fails to go anywhere
+//    TS_ASSERT_EQUALS( (*table)[2], 1); //8-11 goes into 6-11
+  }
+
+
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_veryLarge()
+  {
+    std::vector< std::vector<int> > lhs(160000), rhs(16);
+    for (int i=0; i<160000; i++)
+    {
+      // 1 detector per pixel in lhs
+      lhs[i].push_back(i);
+      // 10000 detectors in each on the rhs
+      rhs[i/10000].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i=0; i<160000; i++)
+    {
+      TS_ASSERT_EQUALS( (*table)[i], i/10000);
+    }
+  }
+
+  void xtest_buildBinaryOperationTable_groupedLHS_by_groupedRHS_veryLarge()
+  {
+    std::vector< std::vector<int> > lhs(16000), rhs(16);
+    for (int i=0; i<160000; i++)
+    {
+      // 10 detectors per pixel in lhs
+      lhs[i/10].push_back(i);
+      // 10000 detectors in each on the rhs
+      rhs[i/10000].push_back(i);
+    }
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i=0; i<16000; i++)
+    {
+      TS_ASSERT_EQUALS( (*table)[i], i/1000);
+    }
   }
 
 };

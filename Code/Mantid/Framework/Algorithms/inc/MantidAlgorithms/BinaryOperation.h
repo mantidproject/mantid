@@ -75,11 +75,13 @@ namespace Mantid
       virtual const std::string category() const { return "Arithmetic";}
 
 
-      /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-      typedef std::vector< std::pair<int, int> >  BinaryOperationTable;
+      /** BinaryOperationTable: a list of ints.
+       * Index into vector: workspace index in the lhs;
+       * Value at that index: workspace index of the rhs to apply to the WI in the lhs. -1 if not found.
+       */
+      typedef std::vector< int >  BinaryOperationTable;
 
-      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_sptr lhs, API::MatrixWorkspace_sptr rhs,
-          API::IndexToIndexMap * lhs_det_to_wi);
+      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_sptr lhs, API::MatrixWorkspace_sptr rhs);
 
 
     //protected:
