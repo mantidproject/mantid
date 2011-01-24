@@ -12,6 +12,7 @@
 #include <vtkCellData.h>
 
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
+#include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
@@ -255,7 +256,20 @@ Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLStr
   return Mantid::VATES::Dimension_sptr(createDimension(pDimensionElement));
 }
 
-Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML)
+Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins)
+{
+  Poco::XML::DOMParser pParser;
+  Poco::XML::Document* pDoc = pParser.parseString(dimensionXMLString);
+  Poco::XML::Element* pDimensionElement = pDoc->documentElement();
+  Mantid::Geometry::MDDimension* dimension = createDimension(pDimensionElement);
+  double currentMin = dimension->getMinimum();
+  double currentMax = dimension->getMaximum();
+  //Set the number of bins to use for a given dimension.
+  dimension->setRange(currentMin, currentMax, nBins);
+  return Mantid::VATES::Dimension_sptr(dimension);
+}
+
+Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML)
 {
   using namespace Mantid::Geometry;
   Poco::XML::NamedNodeMap* attributes = dimensionXML->attributes();
@@ -346,6 +360,14 @@ std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
   Poco::XML::Document* pDoc = pParser.parseString(geometryXMLString);
   Poco::XML::Element* pGeometryElem = pDoc->documentElement();
   return getDimensions(pGeometryElem, nonIntegratedOnly);
+}
+
+std::vector<double> getBoundingBox(const std::string& functionXMLString)
+{
+  using namespace Mantid::API;
+  ImplicitFunction*  function =ImplicitFunctionFactory::Instance().createUnwrapped(functionXMLString);
+  Mantid::MDAlgorithms::BoxInterpreter box;
+  return box(function);
 }
 
 // helper method to construct a near-complete geometry.

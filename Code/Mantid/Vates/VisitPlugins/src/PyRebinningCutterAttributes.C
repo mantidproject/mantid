@@ -99,6 +99,35 @@ PyRebinningCutterAttributes_ToString(const RebinningCutterAttributes *atts, cons
     else
         SNPRINTF(tmpStr, 1000, "%sstructured = 0\n", prefix);
     str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sxDimensionXML = \"%s\"\n", prefix, atts->GetXDimensionXML().c_str());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%syDimensionXML = %d\n", prefix, atts->GetYDimensionXML());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%szDimensionXML = %d\n", prefix, atts->GetZDimensionXML());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%stDimensionXML = %d\n", prefix, atts->GetTDimensionXML());
+    str += tmpStr;
+    if(atts->GetIsSetUp())
+        SNPRINTF(tmpStr, 1000, "%sisSetUp = 1\n", prefix);
+    else
+        SNPRINTF(tmpStr, 1000, "%sisSetUp = 0\n", prefix);
+    str += tmpStr;
+    {   const stringVector &dimensionXML = atts->GetDimensionXML();
+        SNPRINTF(tmpStr, 1000, "%sdimensionXML = (", prefix);
+        str += tmpStr;
+        for(size_t i = 0; i < dimensionXML.size(); ++i)
+        {
+            SNPRINTF(tmpStr, 1000, "\"%s\"", dimensionXML[i].c_str());
+            str += tmpStr;
+            if(i < dimensionXML.size() - 1)
+            {
+                SNPRINTF(tmpStr, 1000, ", ");
+                str += tmpStr;
+            }
+        }
+        SNPRINTF(tmpStr, 1000, ")\n");
+        str += tmpStr;
+    }
     return str;
 }
 
@@ -351,6 +380,175 @@ RebinningCutterAttributes_GetStructured(PyObject *self, PyObject *args)
     return retval;
 }
 
+/*static*/ PyObject *
+RebinningCutterAttributes_SetXDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    // Set the xDimensionXML in the object.
+    obj->data->SetXDimensionXML(std::string(str));
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetXDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyString_FromString(obj->data->GetXDimensionXML().c_str());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetYDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the yDimensionXML in the object.
+    obj->data->SetYDimensionXML((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetYDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetYDimensionXML()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetZDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the zDimensionXML in the object.
+    obj->data->SetZDimensionXML((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetZDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetZDimensionXML()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetTDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the tDimensionXML in the object.
+    obj->data->SetTDimensionXML((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetTDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetTDimensionXML()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetIsSetUp(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the isSetUp in the object.
+    obj->data->SetIsSetUp(ival != 0);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetIsSetUp(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(obj->data->GetIsSetUp()?1L:0L);
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    stringVector  &vec = obj->data->GetDimensionXML();
+    PyObject     *tuple;
+    if(!PyArg_ParseTuple(args, "O", &tuple))
+        return NULL;
+
+    if(PyTuple_Check(tuple))
+    {
+        vec.resize(PyTuple_Size(tuple));
+        for(int i = 0; i < PyTuple_Size(tuple); ++i)
+        {
+            PyObject *item = PyTuple_GET_ITEM(tuple, i);
+            if(PyString_Check(item))
+                vec[i] = std::string(PyString_AS_STRING(item));
+            else
+                vec[i] = std::string("");
+        }
+    }
+    else if(PyString_Check(tuple))
+    {
+        vec.resize(1);
+        vec[0] = std::string(PyString_AS_STRING(tuple));
+    }
+    else
+        return NULL;
+
+    // Mark the dimensionXML in the object as modified.
+    obj->data->SelectDimensionXML();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetDimensionXML(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    // Allocate a tuple the with enough entries to hold the dimensionXML.
+    const stringVector &dimensionXML = obj->data->GetDimensionXML();
+    PyObject *retval = PyTuple_New(dimensionXML.size());
+    for(size_t i = 0; i < dimensionXML.size(); ++i)
+        PyTuple_SET_ITEM(retval, i, PyString_FromString(dimensionXML[i].c_str()));
+    return retval;
+}
+
 
 
 PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH] = {
@@ -375,6 +573,18 @@ PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH]
     {"GetDepth", RebinningCutterAttributes_GetDepth, METH_VARARGS},
     {"SetStructured", RebinningCutterAttributes_SetStructured, METH_VARARGS},
     {"GetStructured", RebinningCutterAttributes_GetStructured, METH_VARARGS},
+    {"SetXDimensionXML", RebinningCutterAttributes_SetXDimensionXML, METH_VARARGS},
+    {"GetXDimensionXML", RebinningCutterAttributes_GetXDimensionXML, METH_VARARGS},
+    {"SetYDimensionXML", RebinningCutterAttributes_SetYDimensionXML, METH_VARARGS},
+    {"GetYDimensionXML", RebinningCutterAttributes_GetYDimensionXML, METH_VARARGS},
+    {"SetZDimensionXML", RebinningCutterAttributes_SetZDimensionXML, METH_VARARGS},
+    {"GetZDimensionXML", RebinningCutterAttributes_GetZDimensionXML, METH_VARARGS},
+    {"SetTDimensionXML", RebinningCutterAttributes_SetTDimensionXML, METH_VARARGS},
+    {"GetTDimensionXML", RebinningCutterAttributes_GetTDimensionXML, METH_VARARGS},
+    {"SetIsSetUp", RebinningCutterAttributes_SetIsSetUp, METH_VARARGS},
+    {"GetIsSetUp", RebinningCutterAttributes_GetIsSetUp, METH_VARARGS},
+    {"SetDimensionXML", RebinningCutterAttributes_SetDimensionXML, METH_VARARGS},
+    {"GetDimensionXML", RebinningCutterAttributes_GetDimensionXML, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -423,6 +633,18 @@ PyRebinningCutterAttributes_getattr(PyObject *self, char *name)
         return RebinningCutterAttributes_GetDepth(self, NULL);
     if(strcmp(name, "structured") == 0)
         return RebinningCutterAttributes_GetStructured(self, NULL);
+    if(strcmp(name, "xDimensionXML") == 0)
+        return RebinningCutterAttributes_GetXDimensionXML(self, NULL);
+    if(strcmp(name, "yDimensionXML") == 0)
+        return RebinningCutterAttributes_GetYDimensionXML(self, NULL);
+    if(strcmp(name, "zDimensionXML") == 0)
+        return RebinningCutterAttributes_GetZDimensionXML(self, NULL);
+    if(strcmp(name, "tDimensionXML") == 0)
+        return RebinningCutterAttributes_GetTDimensionXML(self, NULL);
+    if(strcmp(name, "isSetUp") == 0)
+        return RebinningCutterAttributes_GetIsSetUp(self, NULL);
+    if(strcmp(name, "dimensionXML") == 0)
+        return RebinningCutterAttributes_GetDimensionXML(self, NULL);
 
     return Py_FindMethod(PyRebinningCutterAttributes_methods, self, name);
 }
@@ -457,6 +679,18 @@ PyRebinningCutterAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = RebinningCutterAttributes_SetDepth(self, tuple);
     else if(strcmp(name, "structured") == 0)
         obj = RebinningCutterAttributes_SetStructured(self, tuple);
+    else if(strcmp(name, "xDimensionXML") == 0)
+        obj = RebinningCutterAttributes_SetXDimensionXML(self, tuple);
+    else if(strcmp(name, "yDimensionXML") == 0)
+        obj = RebinningCutterAttributes_SetYDimensionXML(self, tuple);
+    else if(strcmp(name, "zDimensionXML") == 0)
+        obj = RebinningCutterAttributes_SetZDimensionXML(self, tuple);
+    else if(strcmp(name, "tDimensionXML") == 0)
+        obj = RebinningCutterAttributes_SetTDimensionXML(self, tuple);
+    else if(strcmp(name, "isSetUp") == 0)
+        obj = RebinningCutterAttributes_SetIsSetUp(self, tuple);
+    else if(strcmp(name, "dimensionXML") == 0)
+        obj = RebinningCutterAttributes_SetDimensionXML(self, tuple);
 
     if(obj != NULL)
         Py_DECREF(obj);

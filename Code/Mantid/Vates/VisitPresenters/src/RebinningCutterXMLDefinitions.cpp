@@ -21,6 +21,8 @@ const std::string XMLDefinitions::workspaceGeometryElementName = "DimensionSet";
 const std::string XMLDefinitions::metaDataId="1";
 const std::string XMLDefinitions::signalName="signal";
 const std::string XMLDefinitions::geometryNodeName="geometryNodeName";
+const std::string XMLDefinitions::functionNodeName="functionNodeName";
 const std::string XMLDefinitions::geometryOperatorInfo="geometryOperatorInfo";
+const std::string XMLDefinitions::functionOperatorInfo="functionOperatorInfo";
 }
 }

@@ -2,6 +2,7 @@
 set ( SRC_FILES src/BoxFunctionBuilder.cpp
 src/BoxImplicitFunction.cpp
 src/BoxImplicitFunctionParser.cpp
+src/BoxInterpreter.cpp
 src/CompositeFunctionBuilder.cpp
 src/CompositeImplicitFunction.cpp
 src/CompositeImplicitFunctionParser.cpp
@@ -33,6 +34,7 @@ src/WidthParameter.cpp
 set ( INC_FILES inc/MantidMDAlgorithms/BoxFunctionBuilder.h
 inc/MantidMDAlgorithms/BoxImplicitFunction.h
 inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
+inc/MantidMDAlgorithms/BoxInterpreter.h
 inc/MantidMDAlgorithms/CenterpieceRebinning.h
 inc/MantidMDAlgorithms/CpRebinningNx3.h
 inc/MantidMDAlgorithms/CpRebinning4x3StructHR.h
@@ -86,6 +88,7 @@ set ( GMOCK_TEST_FILES
 test/BoxBuilderTest.h
 test/BoxImplicitFunctionParserTest.h
 test/BoxImplicitFunctionTest.h
+test/BoxInterpreterTest.h
 test/CompositeBuilderTest.h
 test/CompositeImplicitFunctionParserTest.h
 test/CompositeImplicitFunctionTest.h

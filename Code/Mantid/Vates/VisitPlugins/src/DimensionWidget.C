@@ -13,6 +13,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
+#include "MantidVisitPresenters/RebinningCutterPresenter.h"
 
 DimensionWidget::DimensionWidget(
     GeometryWidget* geometryWidget,
@@ -64,6 +65,7 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   maxLabel->setText("Maximum");
   m_layout->addWidget(maxLabel, 2, 0, Qt::AlignLeft);
   m_maxBox = new QLineEdit();
+  m_maxBox->setEnabled(false);
   connect(m_maxBox, SIGNAL(returnPressed()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 2, 1, Qt::AlignLeft);
 
@@ -71,6 +73,7 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   minLabel->setText("Minimum");
   m_layout->addWidget(minLabel, 3, 0, Qt::AlignLeft);
   m_minBox = new QLineEdit();
+  m_minBox->setEnabled(false);
   connect(m_minBox, SIGNAL(returnPressed()), this, SLOT(minBoxListener()));
   m_layout->addWidget(m_minBox, 3, 1, Qt::AlignLeft);
 
@@ -133,7 +136,11 @@ void DimensionWidget::setMaximum(double maximum)
 
 boost::shared_ptr<Mantid::Geometry::IMDDimension>  DimensionWidget::getDimension() const
 {
-  return m_vecNonIntegratedDimensions[m_currentDimensionIndex];
+  boost::shared_ptr<Mantid::Geometry::IMDDimension> originalDimension = m_vecNonIntegratedDimensions[m_currentDimensionIndex];
+  //Remake the dimension with a new number of bins. Note: Would be much better to have the clone facility.
+
+
+  return Mantid::VATES::createDimension(originalDimension->toXMLString(), this->getNBins());
 }
 
 void DimensionWidget::dimensionSelectedListener()

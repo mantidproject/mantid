@@ -176,11 +176,17 @@ public:
   /// Helper method to get dimensions from a geometry xml string.
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
 
-  /// helper method to get a dimension from a dimension xmlelement.
-  Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML);
+  /// helper method to get a dimension from a dimension xml element.
+  Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML);
 
-  /// helper method to get a dimension frm a dimension xmlelement.
+  /// helper method to get a dimension from a dimension xml element string.
   Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString);
+
+  /// helper method to get a dimension from a dimension xml element string and set the number of bins for that dimension to a specified value.
+  Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins);
+
+  /// helper method to extract the bounding box.
+  std::vector<double> getBoundingBox(const std::string& functionXMLString);
 
 }
 }

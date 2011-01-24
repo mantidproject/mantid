@@ -38,7 +38,7 @@
 
 #ifndef REBINNINGCUTTERATTRIBUTES_H
 #define REBINNINGCUTTERATTRIBUTES_H
-
+#include <string>
 #include <AttributeSubject.h>
 
 
@@ -85,6 +85,8 @@ public:
 
     // Property selection methods
     virtual void SelectAll();
+    void SelectXDimensionXML();
+    void SelectDimensionXML();
 
     // Property setting methods
     void SetOriginX(double originX_);
@@ -97,24 +99,32 @@ public:
     void SetHeight(double height_);
     void SetDepth(double depth_);
     void SetStructured(bool structured_);
-    void setXDimension(const std::string& dimensionX);
-    void setExecuted(bool hasExecuted);
+    void SetXDimensionXML(const std::string &xDimensionXML_);
+    void SetYDimensionXML(int yDimensionXML_);
+    void SetZDimensionXML(int zDimensionXML_);
+    void SetTDimensionXML(int tDimensionXML_);
+    void SetIsSetUp(bool isSetUp_);
+    void SetDimensionXML(const stringVector &dimensionXML_);
 
     // Property getting methods
-    double GetOriginX() const;
-    double GetOriginY() const;
-    double GetOriginZ() const;
-    double GetNormalX() const;
-    double GetNormalY() const;
-    double GetNormalZ() const;
-    double GetWidth() const;
-    double GetHeight() const;
-    double GetDepth() const;
-    bool   GetStructured() const;
-    const std::string& getXDimension() const;
-    bool getExecuted() const;
-
-
+    double             GetOriginX() const;
+    double             GetOriginY() const;
+    double             GetOriginZ() const;
+    double             GetNormalX() const;
+    double             GetNormalY() const;
+    double             GetNormalZ() const;
+    double             GetWidth() const;
+    double             GetHeight() const;
+    double             GetDepth() const;
+    bool               GetStructured() const;
+    const std::string  &GetXDimensionXML() const;
+          std::string  &GetXDimensionXML();
+    int  GetYDimensionXML() const;
+    int                GetZDimensionXML() const;
+    int                GetTDimensionXML() const;
+    bool               GetIsSetUp() const;
+    const stringVector &GetDimensionXML() const;
+          stringVector &GetDimensionXML();
 
 
     // Keyframing methods
@@ -136,27 +146,37 @@ public:
         ID_height,
         ID_depth,
         ID_structured,
+        ID_xDimensionXML,
+        ID_yDimensionXML,
+        ID_zDimensionXML,
+        ID_tDimensionXML,
+        ID_isSetUp,
+        ID_dimensionXML,
         ID__LAST
     };
 
 private:
-    double originX;
-    double originY;
-    double originZ;
-    double normalX;
-    double normalY;
-    double normalZ;
-    double width;
-    double height;
-    double depth;
-    bool   structured;
-    std::string xDimension;
-    bool m_hasExecuted;
+    double       originX;
+    double       originY;
+    double       originZ;
+    double       normalX;
+    double       normalY;
+    double       normalZ;
+    double       width;
+    double       height;
+    double       depth;
+    bool         structured;
+    std::string  xDimensionXML;
+    int  yDimensionXML;
+    int          zDimensionXML;
+    int          tDimensionXML;
+    bool         isSetUp;
+    stringVector dimensionXML;
 
     // Static class format string for type map.
     static const char *TypeMapFormatString;
     static const private_tmfs_t TmfsStruct;
 };
-#define REBINNINGCUTTERATTRIBUTES_TMFS "dddddddddb"
+#define REBINNINGCUTTERATTRIBUTES_TMFS "dddddddddbsiiibs*"
 
 #endif

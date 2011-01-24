@@ -59,7 +59,9 @@ public:
   static const std::string metaDataId;
   static const std::string signalName;
   static const std::string geometryNodeName;
+  static const std::string functionNodeName;
   static const std::string geometryOperatorInfo;
+  static const std::string functionOperatorInfo;
 };
 
 }

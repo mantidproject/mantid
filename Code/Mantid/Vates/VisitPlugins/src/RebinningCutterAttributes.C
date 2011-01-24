@@ -58,7 +58,8 @@
 
 void RebinningCutterAttributes::Init()
 {
-    m_hasExecuted = false;
+
+    this->isSetUp = false;
     RebinningCutterAttributes::SelectAll();
 }
 
@@ -89,8 +90,12 @@ void RebinningCutterAttributes::Copy(const RebinningCutterAttributes &obj)
     height = obj.height;
     depth = obj.depth;
     structured = obj.structured;
-    m_hasExecuted = obj.m_hasExecuted;
-    xDimension = obj.xDimension;
+    xDimensionXML = obj.xDimensionXML;
+    yDimensionXML = obj.yDimensionXML;
+    zDimensionXML = obj.zDimensionXML;
+    tDimensionXML = obj.tDimensionXML;
+    isSetUp = obj.isSetUp;
+    dimensionXML = obj.dimensionXML;
 
     RebinningCutterAttributes::SelectAll();
 }
@@ -257,9 +262,13 @@ RebinningCutterAttributes::operator == (const RebinningCutterAttributes &obj) co
             (width == obj.width) &&
             (height == obj.height) &&
             (depth == obj.depth) &&
-            (xDimension == obj.xDimension)&&
-            (m_hasExecuted == obj.m_hasExecuted) &&
-            (structured == obj.structured));
+            (structured == obj.structured) &&
+            (xDimensionXML == obj.xDimensionXML) &&
+            (yDimensionXML == obj.yDimensionXML) &&
+            (zDimensionXML == obj.zDimensionXML) &&
+            (tDimensionXML == obj.tDimensionXML) &&
+            (isSetUp == obj.isSetUp) &&
+            (dimensionXML == obj.dimensionXML));
 }
 
 // ****************************************************************************
@@ -451,16 +460,22 @@ RebinningCutterAttributes::NewInstance(bool copy) const
 void
 RebinningCutterAttributes::SelectAll()
 {
-    Select(ID_originX,    (void *)&originX);
-    Select(ID_originY,    (void *)&originY);
-    Select(ID_originZ,    (void *)&originZ);
-    Select(ID_normalX,    (void *)&normalX);
-    Select(ID_normalY,    (void *)&normalY);
-    Select(ID_normalZ,    (void *)&normalZ);
-    Select(ID_width,      (void *)&width);
-    Select(ID_height,     (void *)&height);
-    Select(ID_depth,      (void *)&depth);
-    Select(ID_structured, (void *)&structured);
+    Select(ID_originX,       (void *)&originX);
+    Select(ID_originY,       (void *)&originY);
+    Select(ID_originZ,       (void *)&originZ);
+    Select(ID_normalX,       (void *)&normalX);
+    Select(ID_normalY,       (void *)&normalY);
+    Select(ID_normalZ,       (void *)&normalZ);
+    Select(ID_width,         (void *)&width);
+    Select(ID_height,        (void *)&height);
+    Select(ID_depth,         (void *)&depth);
+    Select(ID_structured,    (void *)&structured);
+    Select(ID_xDimensionXML, (void *)&xDimensionXML);
+    Select(ID_yDimensionXML, (void *)&yDimensionXML);
+    Select(ID_zDimensionXML, (void *)&zDimensionXML);
+    Select(ID_tDimensionXML, (void *)&tDimensionXML);
+    Select(ID_isSetUp,       (void *)&isSetUp);
+    Select(ID_dimensionXML,  (void *)&dimensionXML);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -537,6 +552,48 @@ RebinningCutterAttributes::SetStructured(bool structured_)
     Select(ID_structured, (void *)&structured);
 }
 
+void
+RebinningCutterAttributes::SetXDimensionXML(const std::string &xDimensionXML_)
+{
+    xDimensionXML = xDimensionXML_;
+    Select(ID_xDimensionXML, (void *)&xDimensionXML);
+}
+
+void
+RebinningCutterAttributes::SetYDimensionXML(const int yDimensionXML_)
+{
+    yDimensionXML = yDimensionXML_;
+    Select(ID_yDimensionXML, (void *)&yDimensionXML);
+}
+
+void
+RebinningCutterAttributes::SetZDimensionXML(int zDimensionXML_)
+{
+    zDimensionXML = zDimensionXML_;
+    Select(ID_zDimensionXML, (void *)&zDimensionXML);
+}
+
+void
+RebinningCutterAttributes::SetTDimensionXML(int tDimensionXML_)
+{
+    tDimensionXML = tDimensionXML_;
+    Select(ID_tDimensionXML, (void *)&tDimensionXML);
+}
+
+void
+RebinningCutterAttributes::SetIsSetUp(bool isSetUp_)
+{
+    isSetUp = isSetUp_;
+    Select(ID_isSetUp, (void *)&isSetUp);
+}
+
+void
+RebinningCutterAttributes::SetDimensionXML(const stringVector &dimensionXML_)
+{
+    dimensionXML = dimensionXML_;
+    Select(ID_dimensionXML, (void *)&dimensionXML);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Get property methods
 ///////////////////////////////////////////////////////////////////////////////
@@ -601,22 +658,69 @@ RebinningCutterAttributes::GetStructured() const
     return structured;
 }
 
-
-const std::string& RebinningCutterAttributes::getXDimension() const
+const std::string &
+RebinningCutterAttributes::GetXDimensionXML() const
 {
-  return xDimension;
+    return xDimensionXML;
 }
 
-bool RebinningCutterAttributes::getExecuted() const
+std::string &
+RebinningCutterAttributes::GetXDimensionXML()
 {
-  return m_hasExecuted;
+    return xDimensionXML;
 }
 
-void RebinningCutterAttributes::setExecuted(bool hasExecuted)
+int
+RebinningCutterAttributes::GetYDimensionXML() const
 {
-  this->m_hasExecuted = hasExecuted;
+    return yDimensionXML;
 }
 
+int
+RebinningCutterAttributes::GetZDimensionXML() const
+{
+    return zDimensionXML;
+}
+
+int
+RebinningCutterAttributes::GetTDimensionXML() const
+{
+    return tDimensionXML;
+}
+
+bool
+RebinningCutterAttributes::GetIsSetUp() const
+{
+    return isSetUp;
+}
+
+const stringVector &
+RebinningCutterAttributes::GetDimensionXML() const
+{
+    return dimensionXML;
+}
+
+stringVector &
+RebinningCutterAttributes::GetDimensionXML()
+{
+    return dimensionXML;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Select property methods
+///////////////////////////////////////////////////////////////////////////////
+
+void
+RebinningCutterAttributes::SelectXDimensionXML()
+{
+    Select(ID_xDimensionXML, (void *)&xDimensionXML);
+}
+
+void
+RebinningCutterAttributes::SelectDimensionXML()
+{
+    Select(ID_dimensionXML, (void *)&dimensionXML);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Keyframing methods
@@ -642,16 +746,22 @@ RebinningCutterAttributes::GetFieldName(int index) const
 {
     switch (index)
     {
-    case ID_originX:    return "originX";
-    case ID_originY:    return "originY";
-    case ID_originZ:    return "originZ";
-    case ID_normalX:    return "normalX";
-    case ID_normalY:    return "normalY";
-    case ID_normalZ:    return "normalZ";
-    case ID_width:      return "width";
-    case ID_height:     return "height";
-    case ID_depth:      return "depth";
-    case ID_structured: return "structured";
+    case ID_originX:       return "originX";
+    case ID_originY:       return "originY";
+    case ID_originZ:       return "originZ";
+    case ID_normalX:       return "normalX";
+    case ID_normalY:       return "normalY";
+    case ID_normalZ:       return "normalZ";
+    case ID_width:         return "width";
+    case ID_height:        return "height";
+    case ID_depth:         return "depth";
+    case ID_structured:    return "structured";
+    case ID_xDimensionXML: return "xDimensionXML";
+    case ID_yDimensionXML: return "yDimensionXML";
+    case ID_zDimensionXML: return "zDimensionXML";
+    case ID_tDimensionXML: return "tDimensionXML";
+    case ID_isSetUp:       return "isSetUp";
+    case ID_dimensionXML:  return "dimensionXML";
     default:  return "invalid index";
     }
 }
@@ -676,16 +786,22 @@ RebinningCutterAttributes::GetFieldType(int index) const
 {
     switch (index)
     {
-    case ID_originX:    return FieldType_double;
-    case ID_originY:    return FieldType_double;
-    case ID_originZ:    return FieldType_double;
-    case ID_normalX:    return FieldType_double;
-    case ID_normalY:    return FieldType_double;
-    case ID_normalZ:    return FieldType_double;
-    case ID_width:      return FieldType_double;
-    case ID_height:     return FieldType_double;
-    case ID_depth:      return FieldType_double;
-    case ID_structured: return FieldType_bool;
+    case ID_originX:       return FieldType_double;
+    case ID_originY:       return FieldType_double;
+    case ID_originZ:       return FieldType_double;
+    case ID_normalX:       return FieldType_double;
+    case ID_normalY:       return FieldType_double;
+    case ID_normalZ:       return FieldType_double;
+    case ID_width:         return FieldType_double;
+    case ID_height:        return FieldType_double;
+    case ID_depth:         return FieldType_double;
+    case ID_structured:    return FieldType_bool;
+    case ID_xDimensionXML: return FieldType_string;
+    case ID_yDimensionXML: return FieldType_int;
+    case ID_zDimensionXML: return FieldType_int;
+    case ID_tDimensionXML: return FieldType_int;
+    case ID_isSetUp:       return FieldType_bool;
+    case ID_dimensionXML:  return FieldType_stringVector;
     default:  return FieldType_unknown;
     }
 }
@@ -710,16 +826,22 @@ RebinningCutterAttributes::GetFieldTypeName(int index) const
 {
     switch (index)
     {
-    case ID_originX:    return "double";
-    case ID_originY:    return "double";
-    case ID_originZ:    return "double";
-    case ID_normalX:    return "double";
-    case ID_normalY:    return "double";
-    case ID_normalZ:    return "double";
-    case ID_width:      return "double";
-    case ID_height:     return "double";
-    case ID_depth:      return "double";
-    case ID_structured: return "bool";
+    case ID_originX:       return "double";
+    case ID_originY:       return "double";
+    case ID_originZ:       return "double";
+    case ID_normalX:       return "double";
+    case ID_normalY:       return "double";
+    case ID_normalZ:       return "double";
+    case ID_width:         return "double";
+    case ID_height:        return "double";
+    case ID_depth:         return "double";
+    case ID_structured:    return "bool";
+    case ID_xDimensionXML: return "string";
+    case ID_yDimensionXML: return "int";
+    case ID_zDimensionXML: return "int";
+    case ID_tDimensionXML: return "int";
+    case ID_isSetUp:       return "bool";
+    case ID_dimensionXML:  return "stringVector";
     default:  return "invalid index";
     }
 }
@@ -796,15 +918,40 @@ RebinningCutterAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) co
         retval = (structured == obj.structured);
         }
         break;
+    case ID_xDimensionXML:
+        {  // new scope
+        retval = (xDimensionXML == obj.xDimensionXML);
+        }
+        break;
+    case ID_yDimensionXML:
+        {  // new scope
+        retval = (yDimensionXML == obj.yDimensionXML);
+        }
+        break;
+    case ID_zDimensionXML:
+        {  // new scope
+        retval = (zDimensionXML == obj.zDimensionXML);
+        }
+        break;
+    case ID_tDimensionXML:
+        {  // new scope
+        retval = (tDimensionXML == obj.tDimensionXML);
+        }
+        break;
+    case ID_isSetUp:
+        {  // new scope
+        retval = (isSetUp == obj.isSetUp);
+        }
+        break;
+    case ID_dimensionXML:
+        {  // new scope
+        retval = (dimensionXML == obj.dimensionXML);
+        }
+        break;
     default: retval = false;
     }
 
     return retval;
-}
-
-void RebinningCutterAttributes::setXDimension(const std::string& dimensionX)
-{
-  this->xDimension = dimensionX;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

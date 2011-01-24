@@ -139,31 +139,51 @@ bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionX(vtkDataSet* in_ds) const
 {
 
-//  if (atts.GetOriginX() != 0)
-//  {
-//    return Mantid::VATES::createDimension(atts.getXDimension());
-//
-//  }
-//  else
-//  {
+  if (atts.GetIsSetUp())
+  {
+    return Mantid::VATES::createDimension(atts.GetDimensionXML()[0]);
+  }
+  else
+  {
     return m_presenter.getXDimensionFromDS(in_ds);
- // }
+  }
 
 }
 
 Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionY(vtkDataSet* in_ds) const
 {
-  return m_presenter.getYDimensionFromDS(in_ds);
+  if (atts.GetIsSetUp())
+  {
+    return Mantid::VATES::createDimension(atts.GetDimensionXML()[1]);
+  }
+  else
+  {
+    return m_presenter.getYDimensionFromDS(in_ds);
+  }
 }
 
 Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionZ(vtkDataSet* in_ds) const
 {
-  return m_presenter.getZDimensionFromDS(in_ds);
+  if (atts.GetIsSetUp())
+  {
+    return Mantid::VATES::createDimension(atts.GetDimensionXML()[2]);
+  }
+  else
+  {
+    return m_presenter.getZDimensionFromDS(in_ds);
+  }
 }
 
 Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(vtkDataSet* in_ds) const
 {
-  return m_presenter.getTDimensionFromDS(in_ds);
+  if (atts.GetIsSetUp())
+  {
+    return Mantid::VATES::createDimension(atts.GetDimensionXML()[3]);
+  }
+  else
+  {
+    return m_presenter.getTDimensionFromDS(in_ds);
+  }
 }
 
 
@@ -186,14 +206,8 @@ void avtRebinningCutterFilter::Execute()
   vtkDataSet *in_ds = leaves[0];
 
   Dimension_sptr spDimX = getDimensionX(in_ds);
-  this->xAxisName = spDimX->getDimensionId();
-
   Dimension_sptr spDimY = getDimensionY(in_ds);
-  this->yAxisName = spDimY->getDimensionId();
-
   Dimension_sptr spDimZ = getDimensionZ(in_ds);
-  this->zAxisName = spDimZ->getDimensionId();
-
   Dimension_sptr spDimt = getDimensiont(in_ds);
 
   DimensionVec dimensionsVec;
@@ -204,13 +218,9 @@ void avtRebinningCutterFilter::Execute()
 
   doubleVector origin;
 
-
-  bool hasExecuted = atts.GetWidth() != atts.GetHeight(); //Seam. Replace with better logic for determining execution.
-  if(hasExecuted)
+  //Setup is only relevant once the controls have been setup.
+  if(atts.GetIsSetUp())
   {
-  atts.GetWidth();
-  atts.GetHeight();
-  atts.GetDepth();
 
   origin.push_back(atts.GetOriginX());
   origin.push_back(atts.GetOriginY());
@@ -222,19 +232,27 @@ void avtRebinningCutterFilter::Execute()
       atts.GetDepth(), //depth
         origin, //origin
         in_ds);
+
   }
   else
   {
+    double originX = (spDimX->getMaximum() + spDimX->getMinimum()) / 2;
+    double originY = (spDimY->getMaximum() + spDimY->getMinimum()) / 2;
+    double originZ = (spDimZ->getMaximum() + spDimZ->getMinimum()) / 2;
+    double width = spDimX->getMaximum() - spDimX->getMinimum();
+    double height = spDimY->getMaximum() - spDimY->getMinimum();
+    double depth = spDimZ->getMaximum() - spDimZ->getMinimum();
 
-    origin.push_back((spDimX->getMaximum() + spDimX->getMinimum()) / 2);
-    origin.push_back((spDimY->getMaximum() + spDimY->getMinimum()) / 2);
-    origin.push_back((spDimZ->getMaximum() + spDimZ->getMinimum()) / 2);
+
+    origin.push_back(originX);
+    origin.push_back(originY);
+    origin.push_back(originZ);
 
   // Construct reduction knowledge.
   m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
-      spDimX->getMaximum() - spDimX->getMinimum(), //width
-      spDimY->getMaximum() - spDimY->getMinimum(), //height
-      spDimZ->getMaximum() - spDimZ->getMinimum(), //depth
+      width,
+      height,
+      depth,
       origin, //origin
       in_ds);
   }
@@ -257,7 +275,15 @@ void avtRebinningCutterFilter::Execute()
   //Persist the execution output geometry so that it can be dermined later in VisIT gui.
   MapNode geometryXMLNode;
   geometryXMLNode[XMLDefinitions::geometryNodeName] =  m_presenter.getWorkspaceGeometry();
-  GetOutput()->GetInfo().GetAttributes().AddPlotInformation(XMLDefinitions::geometryOperatorInfo, geometryXMLNode);
+  MapNode functionXMLNode;
+  functionXMLNode[XMLDefinitions::functionNodeName] = m_presenter.getFunction()->toXMLString();
+
+  dataAtts.AddPlotInformation(XMLDefinitions::geometryOperatorInfo, geometryXMLNode);
+  dataAtts.AddPlotInformation(XMLDefinitions::functionOperatorInfo, functionXMLNode);
+
+  dataAtts.SetXLabel(spDimX->getDimensionId());
+  dataAtts.SetYLabel(spDimY->getDimensionId());
+  dataAtts.SetZLabel(spDimZ->getDimensionId());
 
   avtDatasetVerifier v;
   vector<int> domains;
@@ -273,21 +299,6 @@ void avtRebinningCutterFilter::UpdateDataObjectInfo(void)
   int dim = 3;
   dataAtts.SetTopologicalDimension(dim);
   dataAtts.SetSpatialDimension(dim);
-
-  //Check that axis names have been provided first. UpdataDataObjectInfo is executed once before execute.
-  if (!xAxisName.empty())
-  {
-    dataAtts.SetXLabel(xAxisName);
-  }
-  if (!yAxisName.empty())
-  {
-    dataAtts.SetYLabel(yAxisName);
-  }
-  if (!zAxisName.empty())
-  {
-    dataAtts.SetZLabel(zAxisName);
-  }
-
 
 }
 

@@ -30,13 +30,13 @@ private:
   };
 
   //Helper class. Not all methods can be mocked.
+
   class MockIMDWorkspace: public Mantid::API::IMDWorkspace
   {
   public:
 
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD0(getNPoints,long unsigned int());
     MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(int index));
     MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment));
     MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment, int dim2Increment));
@@ -67,6 +67,18 @@ private:
       throw std::runtime_error("Not Implemented");
     }
     const Mantid::Geometry::SignalAggregate& getCell(...) const
+    {
+      throw std::runtime_error("Not Implemented");
+    }
+    virtual uint64_t getNPoints() const
+    {
+      throw std::runtime_error("Not Implemented");
+    }
+    virtual int getNDimensions() const
+    {
+      throw std::runtime_error("Not Implemented");
+    }
+    virtual const std::vector<std::string> getDimensionIDs() const
     {
       throw std::runtime_error("Not Implemented");
     }

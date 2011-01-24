@@ -41,7 +41,6 @@ package llnl.visit.operators;
 import llnl.visit.AttributeSubject;
 import llnl.visit.CommunicationBuffer;
 import llnl.visit.Plugin;
-import java.lang.Double;
 import java.util.Vector;
 
 // ****************************************************************************
@@ -61,22 +60,50 @@ import java.util.Vector;
 
 public class RebinningCutterAttributes extends AttributeSubject implements Plugin
 {
-    private static int RebinningCutterAttributes_numAdditionalAtts = 2;
+    private static int RebinningCutterAttributes_numAdditionalAtts = 16;
 
     public RebinningCutterAttributes()
     {
         super(RebinningCutterAttributes_numAdditionalAtts);
 
-        origin = new Vector();
-        normal = new Vector();
+        originX = 0;
+        originY = 0;
+        originZ = 0;
+        normalX = 0;
+        normalY = 0;
+        normalZ = 0;
+        width = 0;
+        height = 0;
+        depth = 8.82449e-317;
+        structured = false;
+        xDimensionXML = new String("");
+        yDimensionXML = 0;
+        zDimensionXML = 0;
+        tDimensionXML = 0;
+        isSetUp = false;
+        dimensionXML = new Vector();
     }
 
     public RebinningCutterAttributes(int nMoreFields)
     {
         super(RebinningCutterAttributes_numAdditionalAtts + nMoreFields);
 
-        origin = new Vector();
-        normal = new Vector();
+        originX = 0;
+        originY = 0;
+        originZ = 0;
+        normalX = 0;
+        normalY = 0;
+        normalZ = 0;
+        width = 0;
+        height = 0;
+        depth = 8.82449e-317;
+        structured = false;
+        xDimensionXML = new String("");
+        yDimensionXML = 0;
+        zDimensionXML = 0;
+        tDimensionXML = 0;
+        isSetUp = false;
+        dimensionXML = new Vector();
     }
 
     public RebinningCutterAttributes(RebinningCutterAttributes obj)
@@ -85,19 +112,24 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
 
         int i;
 
-        origin = new Vector(obj.origin.size());
-        for(i = 0; i < obj.origin.size(); ++i)
-        {
-            Double dv = (Double)obj.origin.elementAt(i);
-            origin.addElement(new Double(dv.doubleValue()));
-        }
-
-        normal = new Vector(obj.normal.size());
-        for(i = 0; i < obj.normal.size(); ++i)
-        {
-            Double dv = (Double)obj.normal.elementAt(i);
-            normal.addElement(new Double(dv.doubleValue()));
-        }
+        originX = obj.originX;
+        originY = obj.originY;
+        originZ = obj.originZ;
+        normalX = obj.normalX;
+        normalY = obj.normalY;
+        normalZ = obj.normalZ;
+        width = obj.width;
+        height = obj.height;
+        depth = obj.depth;
+        structured = obj.structured;
+        xDimensionXML = new String(obj.xDimensionXML);
+        yDimensionXML = obj.yDimensionXML;
+        zDimensionXML = obj.zDimensionXML;
+        tDimensionXML = obj.tDimensionXML;
+        isSetUp = obj.isSetUp;
+        dimensionXML = new Vector(obj.dimensionXML.size());
+        for(i = 0; i < obj.dimensionXML.size(); ++i)
+            dimensionXML.addElement(new String((String)obj.dimensionXML.elementAt(i)));
 
 
         SelectAll();
@@ -117,56 +149,187 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
     {
         int i;
 
-        // Compare the elements in the origin vector.
-        boolean origin_equal = (obj.origin.size() == origin.size());
-        for(i = 0; (i < origin.size()) && origin_equal; ++i)
+        // Compare the elements in the dimensionXML vector.
+        boolean dimensionXML_equal = (obj.dimensionXML.size() == dimensionXML.size());
+        for(i = 0; (i < dimensionXML.size()) && dimensionXML_equal; ++i)
         {
-            // Make references to Double from Object.
-            Double origin1 = (Double)origin.elementAt(i);
-            Double origin2 = (Double)obj.origin.elementAt(i);
-            origin_equal = origin1.equals(origin2);
-        }
-        // Compare the elements in the normal vector.
-        boolean normal_equal = (obj.normal.size() == normal.size());
-        for(i = 0; (i < normal.size()) && normal_equal; ++i)
-        {
-            // Make references to Double from Object.
-            Double normal1 = (Double)normal.elementAt(i);
-            Double normal2 = (Double)obj.normal.elementAt(i);
-            normal_equal = normal1.equals(normal2);
+            // Make references to String from Object.
+            String dimensionXML1 = (String)dimensionXML.elementAt(i);
+            String dimensionXML2 = (String)obj.dimensionXML.elementAt(i);
+            dimensionXML_equal = dimensionXML1.equals(dimensionXML2);
         }
         // Create the return value
-        return (origin_equal &&
-                normal_equal);
+        return ((originX == obj.originX) &&
+                (originY == obj.originY) &&
+                (originZ == obj.originZ) &&
+                (normalX == obj.normalX) &&
+                (normalY == obj.normalY) &&
+                (normalZ == obj.normalZ) &&
+                (width == obj.width) &&
+                (height == obj.height) &&
+                (depth == obj.depth) &&
+                (structured == obj.structured) &&
+                (xDimensionXML.equals(obj.xDimensionXML)) &&
+                (yDimensionXML == obj.yDimensionXML) &&
+                (zDimensionXML == obj.zDimensionXML) &&
+                (tDimensionXML == obj.tDimensionXML) &&
+                (isSetUp == obj.isSetUp) &&
+                dimensionXML_equal);
     }
 
     public String GetName() { return "RebinningCutter"; }
     public String GetVersion() { return "1.0"; }
 
     // Property setting methods
-    public void SetOrigin(Vector origin_)
+    public void SetOriginX(double originX_)
     {
-        origin = origin_;
+        originX = originX_;
         Select(0);
     }
 
-    public void SetNormal(Vector normal_)
+    public void SetOriginY(double originY_)
     {
-        normal = normal_;
+        originY = originY_;
         Select(1);
     }
 
+    public void SetOriginZ(double originZ_)
+    {
+        originZ = originZ_;
+        Select(2);
+    }
+
+    public void SetNormalX(double normalX_)
+    {
+        normalX = normalX_;
+        Select(3);
+    }
+
+    public void SetNormalY(double normalY_)
+    {
+        normalY = normalY_;
+        Select(4);
+    }
+
+    public void SetNormalZ(double normalZ_)
+    {
+        normalZ = normalZ_;
+        Select(5);
+    }
+
+    public void SetWidth(double width_)
+    {
+        width = width_;
+        Select(6);
+    }
+
+    public void SetHeight(double height_)
+    {
+        height = height_;
+        Select(7);
+    }
+
+    public void SetDepth(double depth_)
+    {
+        depth = depth_;
+        Select(8);
+    }
+
+    public void SetStructured(boolean structured_)
+    {
+        structured = structured_;
+        Select(9);
+    }
+
+    public void SetXDimensionXML(String xDimensionXML_)
+    {
+        xDimensionXML = xDimensionXML_;
+        Select(10);
+    }
+
+    public void SetYDimensionXML(int yDimensionXML_)
+    {
+        yDimensionXML = yDimensionXML_;
+        Select(11);
+    }
+
+    public void SetZDimensionXML(int zDimensionXML_)
+    {
+        zDimensionXML = zDimensionXML_;
+        Select(12);
+    }
+
+    public void SetTDimensionXML(int tDimensionXML_)
+    {
+        tDimensionXML = tDimensionXML_;
+        Select(13);
+    }
+
+    public void SetIsSetUp(boolean isSetUp_)
+    {
+        isSetUp = isSetUp_;
+        Select(14);
+    }
+
+    public void SetDimensionXML(Vector dimensionXML_)
+    {
+        dimensionXML = dimensionXML_;
+        Select(15);
+    }
+
     // Property getting methods
-    public Vector GetOrigin() { return origin; }
-    public Vector GetNormal() { return normal; }
+    public double  GetOriginX() { return originX; }
+    public double  GetOriginY() { return originY; }
+    public double  GetOriginZ() { return originZ; }
+    public double  GetNormalX() { return normalX; }
+    public double  GetNormalY() { return normalY; }
+    public double  GetNormalZ() { return normalZ; }
+    public double  GetWidth() { return width; }
+    public double  GetHeight() { return height; }
+    public double  GetDepth() { return depth; }
+    public boolean GetStructured() { return structured; }
+    public String  GetXDimensionXML() { return xDimensionXML; }
+    public int     GetYDimensionXML() { return yDimensionXML; }
+    public int     GetZDimensionXML() { return zDimensionXML; }
+    public int     GetTDimensionXML() { return tDimensionXML; }
+    public boolean GetIsSetUp() { return isSetUp; }
+    public Vector  GetDimensionXML() { return dimensionXML; }
 
     // Write and read methods.
     public void WriteAtts(CommunicationBuffer buf)
     {
         if(WriteSelect(0, buf))
-            buf.WriteDoubleVector(origin);
+            buf.WriteDouble(originX);
         if(WriteSelect(1, buf))
-            buf.WriteDoubleVector(normal);
+            buf.WriteDouble(originY);
+        if(WriteSelect(2, buf))
+            buf.WriteDouble(originZ);
+        if(WriteSelect(3, buf))
+            buf.WriteDouble(normalX);
+        if(WriteSelect(4, buf))
+            buf.WriteDouble(normalY);
+        if(WriteSelect(5, buf))
+            buf.WriteDouble(normalZ);
+        if(WriteSelect(6, buf))
+            buf.WriteDouble(width);
+        if(WriteSelect(7, buf))
+            buf.WriteDouble(height);
+        if(WriteSelect(8, buf))
+            buf.WriteDouble(depth);
+        if(WriteSelect(9, buf))
+            buf.WriteBool(structured);
+        if(WriteSelect(10, buf))
+            buf.WriteString(xDimensionXML);
+        if(WriteSelect(11, buf))
+            buf.WriteInt(yDimensionXML);
+        if(WriteSelect(12, buf))
+            buf.WriteInt(zDimensionXML);
+        if(WriteSelect(13, buf))
+            buf.WriteInt(tDimensionXML);
+        if(WriteSelect(14, buf))
+            buf.WriteBool(isSetUp);
+        if(WriteSelect(15, buf))
+            buf.WriteStringVector(dimensionXML);
     }
 
     public void ReadAtts(int index, CommunicationBuffer buf)
@@ -174,10 +337,52 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         switch(index)
         {
         case 0:
-            SetOrigin(buf.ReadDoubleVector());
+            SetOriginX(buf.ReadDouble());
             break;
         case 1:
-            SetNormal(buf.ReadDoubleVector());
+            SetOriginY(buf.ReadDouble());
+            break;
+        case 2:
+            SetOriginZ(buf.ReadDouble());
+            break;
+        case 3:
+            SetNormalX(buf.ReadDouble());
+            break;
+        case 4:
+            SetNormalY(buf.ReadDouble());
+            break;
+        case 5:
+            SetNormalZ(buf.ReadDouble());
+            break;
+        case 6:
+            SetWidth(buf.ReadDouble());
+            break;
+        case 7:
+            SetHeight(buf.ReadDouble());
+            break;
+        case 8:
+            SetDepth(buf.ReadDouble());
+            break;
+        case 9:
+            SetStructured(buf.ReadBool());
+            break;
+        case 10:
+            SetXDimensionXML(buf.ReadString());
+            break;
+        case 11:
+            SetYDimensionXML(buf.ReadInt());
+            break;
+        case 12:
+            SetZDimensionXML(buf.ReadInt());
+            break;
+        case 13:
+            SetTDimensionXML(buf.ReadInt());
+            break;
+        case 14:
+            SetIsSetUp(buf.ReadBool());
+            break;
+        case 15:
+            SetDimensionXML(buf.ReadStringVector());
             break;
         }
     }
@@ -185,14 +390,42 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
     public String toString(String indent)
     {
         String str = new String();
-        str = str + doubleVectorToString("origin", origin, indent) + "\n";
-        str = str + doubleVectorToString("normal", normal, indent) + "\n";
+        str = str + doubleToString("originX", originX, indent) + "\n";
+        str = str + doubleToString("originY", originY, indent) + "\n";
+        str = str + doubleToString("originZ", originZ, indent) + "\n";
+        str = str + doubleToString("normalX", normalX, indent) + "\n";
+        str = str + doubleToString("normalY", normalY, indent) + "\n";
+        str = str + doubleToString("normalZ", normalZ, indent) + "\n";
+        str = str + doubleToString("width", width, indent) + "\n";
+        str = str + doubleToString("height", height, indent) + "\n";
+        str = str + doubleToString("depth", depth, indent) + "\n";
+        str = str + boolToString("structured", structured, indent) + "\n";
+        str = str + stringToString("xDimensionXML", xDimensionXML, indent) + "\n";
+        str = str + intToString("yDimensionXML", yDimensionXML, indent) + "\n";
+        str = str + intToString("zDimensionXML", zDimensionXML, indent) + "\n";
+        str = str + intToString("tDimensionXML", tDimensionXML, indent) + "\n";
+        str = str + boolToString("isSetUp", isSetUp, indent) + "\n";
+        str = str + stringVectorToString("dimensionXML", dimensionXML, indent) + "\n";
         return str;
     }
 
 
     // Attributes
-    private Vector origin; // vector of Double objects
-    private Vector normal; // vector of Double objects
+    private double  originX;
+    private double  originY;
+    private double  originZ;
+    private double  normalX;
+    private double  normalY;
+    private double  normalZ;
+    private double  width;
+    private double  height;
+    private double  depth;
+    private boolean structured;
+    private String  xDimensionXML;
+    private int     yDimensionXML;
+    private int     zDimensionXML;
+    private int     tDimensionXML;
+    private boolean isSetUp;
+    private Vector  dimensionXML; // vector of String objects
 }
 

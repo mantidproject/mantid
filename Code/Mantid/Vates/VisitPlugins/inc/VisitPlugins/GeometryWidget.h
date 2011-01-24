@@ -57,27 +57,51 @@ class GeometryWidget: public QWidget
 Q_OBJECT
 public:
 
-GeometryWidget(Mantid::Geometry::MDGeometry const * const geometry);
-GeometryWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
-
-void constructWidget(Mantid::Geometry::MDGeometry const * const geometry);
+GeometryWidget();
+void constructWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
 
 void childAppliedNewDimensionSelection(
     const unsigned int oldDimensionIndex,
     boost::shared_ptr<Mantid::Geometry::IMDDimension> newDimension,
     DimensionWidget* pDimensionWidget);
 
+void dimensionWidgetChanged();
+
 ~GeometryWidget();
 
-std::string getXDimension() const;
+/// Gets the x dimension in a serialized form
+std::string getXDimensionXML() const;
+
+/// Gets the y dimension in a serialized form
+std::string getYDimensionXML() const;
+
+/// Gets the z dimension in a serialzed form
+std::string getZDimensionXML() const;
+
+/// Gets the t dimension in a serialized form
+std::string gettDimensionXML() const;
+
+
+bool isSetup() const
+{
+  return m_isConstructed;
+}
+
+/// Single signal gets raised if anything changes
+signals:
+        void valueChanged();
 
 private:
+
+/// Check that constructWidget has been called.
+void validateSetup() const;
 
 DimensionWidget* m_xDimensionWidget;
 DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
 DimensionWidget* m_tDimensionWidget;
-
+bool m_isConstructed;
+std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_nonIntegratedVector;
 
 };
 

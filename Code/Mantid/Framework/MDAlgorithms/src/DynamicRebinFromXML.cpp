@@ -12,6 +12,7 @@
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
@@ -199,56 +200,17 @@ namespace Mantid
       return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, *tDimensionIt);
     }
 
-    boxVec walkTree(CompositeImplicitFunction* compFunc)
-    {
-      using namespace Mantid::API;
-      boxVec flattenedboxes;
-      functionVec nestedFuncs = compFunc->getFunctions();
-      for(int i = 0; i < nestedFuncs.size(); i++)
-      {
-        ImplicitFunction* impFunc = nestedFuncs[i].get();
-        CompositeImplicitFunction* nestedFunc = dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*>(impFunc);
-        if(NULL != nestedFunc)
-        {
-          boxVec boxes = walkTree(nestedFunc); //recursive walk
-          flattenedboxes.insert(flattenedboxes.end(), boxes.begin(), boxes.end());
-        }
-        else if(BoxImplicitFunction* box = dynamic_cast<BoxImplicitFunction*>(impFunc))
-        {
-          flattenedboxes.push_back(boost::shared_ptr<BoxImplicitFunction>(box));
-        }
-      }
-      return flattenedboxes;
-    }
-
     void DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const
     {
-
-      Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*>(impFunction);
-      boxVec flattenedboxes;
-      if(compFunction != NULL)
-      {
-        //Flatten out box functions
-        flattenedboxes = walkTree(compFunction); 
-      }
-      
-      boost::shared_ptr<BoxImplicitFunction> box = flattenedboxes[0];
-      double minX = box->getLowerX();
-      double minY = box->getLowerY();
-      double minZ = box->getLowerZ();
-      double maxX = box->getUpperX();
-      double maxY = box->getUpperY();
-      double maxZ = box->getUpperZ();
-      for(int i = 0; i < flattenedboxes.size(); i++)
-      {
-         box = flattenedboxes[i];
-         minX = minX > box->getLowerX() ? minX : box->getLowerX();
-         minY = minY > box->getLowerY() ? minY : box->getLowerY();
-         minZ = minZ > box->getLowerZ() ? minZ : box->getLowerZ();
-         maxX  = maxX < box->getUpperX() ? maxX : box->getUpperX();
-         maxY  = maxY < box->getUpperY() ? maxY : box->getUpperY();
-         maxZ  = maxZ < box->getUpperZ() ? maxZ : box->getUpperZ();
-      }
+      //Attempt to intepret all applied implicit functions as a box by evaluating inner surfaces.
+      BoxInterpreter boxInterpreter;
+      std::vector<double> box = boxInterpreter(impFunction);
+      double minX = box[0];
+      double maxX = box[1];
+      double minY = box[2];
+      double maxY = box[3];
+      double minZ = box[4];
+      double maxZ = box[5];
       
       //Determine effective width, height, depth and origin for effective box.
       OriginParameter origin((maxX + minX)/2, (maxY + minY)/2, (maxZ + minZ)/2);

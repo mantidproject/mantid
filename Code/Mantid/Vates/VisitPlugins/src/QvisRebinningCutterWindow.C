@@ -56,6 +56,7 @@
 #include <QvisLineWidthWidget.h>
 #include <QvisVariableButton.h>
 #include <qcombobox.h>
+#include <qmessagebox.h>
 #include <stdio.h>
 #include <string>
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -132,7 +133,6 @@ QvisRebinningCutterWindow::~QvisRebinningCutterWindow()
 // Modifications:
 //   
 // ****************************************************************************
-
 void QvisRebinningCutterWindow::CreateWindowContents()
 {
   mainLayout = new QGridLayout();
@@ -167,26 +167,31 @@ void QvisRebinningCutterWindow::CreateWindowContents()
   mainLayout->addLayout(normalLayout, 1, 0, 1, 2, Qt::AlignLeft);
 
   widthLabel = new QLabel(tr("Width"), central);
-  mainLayout->addWidget(widthLabel, 6, 0);
+  mainLayout->addWidget(widthLabel, 2, 0);
   width = new QLineEdit(central);
   connect(width, SIGNAL(returnPressed()), this, SLOT(widthProcessText()));
-  mainLayout->addWidget(width, 6, 1);
+  mainLayout->addWidget(width, 2, 1);
 
   heightLabel = new QLabel(tr("Height"), central);
-  mainLayout->addWidget(heightLabel, 7, 0);
+  mainLayout->addWidget(heightLabel, 3, 0);
   height = new QLineEdit(central);
   connect(height, SIGNAL(returnPressed()), this, SLOT(heightProcessText()));
-  mainLayout->addWidget(height, 7, 1);
+  mainLayout->addWidget(height, 3, 1);
 
   depthLabel = new QLabel(tr("Depth"), central);
-  mainLayout->addWidget(depthLabel, 8, 0);
+  mainLayout->addWidget(depthLabel, 4, 0);
   depth = new QLineEdit(central);
   connect(depth, SIGNAL(returnPressed()), this, SLOT(depthProcessText()));
-  mainLayout->addWidget(depth, 8, 1);
+  mainLayout->addWidget(depth, 4, 1);
 
   structured = new QCheckBox(tr("Is Unstructured Grid"), central);
   connect(structured, SIGNAL(toggled(bool)), this, SLOT(structuredChanged(bool)));
-  mainLayout->addWidget(structured, 9, 0);
+  mainLayout->addWidget(structured, 5, 0);
+
+  m_geomWidget = new GeometryWidget();
+  connect(m_geomWidget, SIGNAL(valueChanged()), this, SLOT(geometryChangedlistener()));
+  mainLayout->addWidget(m_geomWidget, 6, 0, 1, 2, Qt::AlignLeft);
+
 }
 
 bool QvisRebinningCutterWindow::isInputConsistent(const std::string& inputGeometryXML)
@@ -194,50 +199,79 @@ bool QvisRebinningCutterWindow::isInputConsistent(const std::string& inputGeomet
   return inputGeometryXML.compare(m_cacheGeometryXML) == 0;
 }
 
-void QvisRebinningCutterWindow::createGeometryWidget()
+PlotInfoAttributes* QvisRebinningCutterWindow::findRebinningInfo() const
 {
+  PlotInfoAttributes* info = NULL;
   PlotList* plotList = GetViewerState()->GetPlotList();
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > dimensions;
 
   //Loop through available plots searching for plot information.
   for (int plotIndex = 0; plotIndex < plotList->GetNumPlots(); plotIndex++)
   {
     const Plot& plot = plotList->GetPlots(plotIndex);
     int type = plot.GetPlotType();
-    PlotInfoAttributes *info = GetViewerState()->GetPlotInformation(type);
+    PlotInfoAttributes* tempInfo = GetViewerState()->GetPlotInformation(type);
 
-    if (info->GetData().HasEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo))
+    if (tempInfo->GetData().HasEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo))
     {
-      MapNode *hNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo);
-      if (hNode != 0)
-      {
-        MapNode &geometryXMLNode = *hNode;
-        const std::string& geometryXMLString =
-            geometryXMLNode[Mantid::VATES::XMLDefinitions::geometryNodeName].AsString();
-        if (!isInputConsistent(geometryXMLString))
-        {
-          //Only provide non-integrated dimensions. TODO: handle integrated dimensions.
-          dimensions = Mantid::VATES::getDimensions(geometryXMLString, false);
-
-          //Remove geometry widget if it already exists.
-          if (m_geomWidget != NULL)
-          {
-            mainLayout->remove(m_geomWidget);
-          }
-
-          m_geomWidget = new GeometryWidget(dimensions);
-          mainLayout->addWidget(m_geomWidget, 11, 0, 1, 2, Qt::AlignLeft);
-
-          //Persist new cached value.
-          m_cacheGeometryXML = geometryXMLString;
-          break;
-        }
-      }
-
+      //Found plot information so break.
+      info = tempInfo;
+      break;
     }
   }
+  return info;
 }
 
+void QvisRebinningCutterWindow::createGeometryWidget()
+{
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > dimensions;
+  PlotInfoAttributes *info = findRebinningInfo();
+
+  if(info!= NULL && !atts->GetIsSetUp())
+  {
+    MapNode *geomNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo);
+    MapNode *funcNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::functionOperatorInfo);
+
+    MapNode &geometryXMLNode = *geomNode;
+    const std::string& geometryXMLString =
+        geometryXMLNode[Mantid::VATES::XMLDefinitions::geometryNodeName].AsString();
+
+    MapNode &functionXMLNode = *funcNode;
+    const std::string& functionXMLString =
+        functionXMLNode[Mantid::VATES::XMLDefinitions::functionNodeName].AsString();
+
+    //Only provide non-integrated dimensions. TODO: handle integrated dimensions.
+    dimensions = Mantid::VATES::getDimensions(geometryXMLString, false);
+    m_geomWidget->constructWidget(dimensions);
+
+    //Set dimensions for future reference.
+    stringVector dimensionXMLStrings;
+    dimensionXMLStrings.push_back(m_geomWidget->getXDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->getYDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->getZDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->gettDimensionXML());
+    atts->SetDimensionXML(dimensionXMLStrings);
+
+    //Get the bounding box and use it to configure box boundaries.
+    std::vector<double> box = Mantid::VATES::getBoundingBox(functionXMLString);
+
+    double originX = (box[1] + box[0]) / 2;
+    double originY = (box[3] + box[2]) / 2;
+    double originZ = (box[5] + box[4]) / 2;
+    double width = box[1] - box[0];
+    double height = box[3] - box[2];
+    double depth = box[5] - box[4];
+    atts->SetOriginX(originX);
+    atts->SetOriginY(originY);
+    atts->SetOriginZ(originZ);
+    atts->SetWidth(width);
+    atts->SetHeight(height);
+    atts->SetDepth(depth);
+
+    //Now all attributes are known to be setup from inputs.
+    atts->SetIsSetUp(true);
+  }
+
+}
 
 // ****************************************************************************
 // Method: QvisRebinningCutterWindow::UpdateWindow
@@ -257,8 +291,9 @@ void QvisRebinningCutterWindow::createGeometryWidget()
 void
 QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 {
-
     createGeometryWidget();
+
+
     for(int i = 0; i < atts->NumAttributes(); ++i)
     {
         if(!doAll)
@@ -302,6 +337,24 @@ QvisRebinningCutterWindow::UpdateWindow(bool doAll)
             structured->blockSignals(true);
             structured->setChecked(atts->GetStructured());
             structured->blockSignals(false);
+            break;
+          case RebinningCutterAttributes::ID_xDimensionXML:
+            //TODO: rebuild from xml.
+            break;
+          case RebinningCutterAttributes::ID_yDimensionXML:
+            //TODO: rebuild from xml.
+                        break;
+          case RebinningCutterAttributes::ID_zDimensionXML:
+            //TODO: rebuild from xml.
+                        break;
+          case RebinningCutterAttributes::ID_tDimensionXML:
+            //TODO: rebuild from xml.
+            break;
+          case RebinningCutterAttributes::ID_isSetUp:
+            //Do nothing.
+            break;
+          case RebinningCutterAttributes::ID_dimensionXML:
+        //writeSourceUpdate unknown for stringVector (variable dimensionXML)
             break;
         }
     }
@@ -454,11 +507,71 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
         }
     }
 
+    // Do xDimensionXML
+//    if(which_widget == RebinningCutterAttributes::ID_xDimensionXML || doAll)
+//    {
+//        QString temp = xDimensionXML->displayText();
+//        if(!temp.isEmpty())
+//            atts->SetXDimensionXML(temp.toStdString());
+//        else
+//        {
+//            ResettingError(tr("unnamed1"),
+//                QString(atts->GetXDimensionXML().c_str()));
+//            atts->SetXDimensionXML(atts->GetXDimensionXML());
+//        }
+//    }
+//
+//    // Do yDimensionXML
+//    if(which_widget == RebinningCutterAttributes::ID_yDimensionXML || doAll)
+//    {
+//        int val;
+//        if(LineEditGetInt(yDimensionXML, val))
+//            atts->SetYDimensionXML(val);
+//        else
+//        {
+//            ResettingError(tr("unnamed1"),
+//                IntToQString(atts->GetYDimensionXML()));
+//            atts->SetYDimensionXML(atts->GetYDimensionXML());
+//        }
+//    }
+//
+//    // Do zDimensionXML
+//    if(which_widget == RebinningCutterAttributes::ID_zDimensionXML || doAll)
+//    {
+//        int val;
+//        if(LineEditGetInt(zDimensionXML, val))
+//            atts->SetZDimensionXML(val);
+//        else
+//        {
+//            ResettingError(tr("unnamed2"),
+//                IntToQString(atts->GetZDimensionXML()));
+//            atts->SetZDimensionXML(atts->GetZDimensionXML());
+//        }
+//    }
+//
+//    // Do tDimensionXML
+//    if(which_widget == RebinningCutterAttributes::ID_tDimensionXML || doAll)
+//    {
+//        int val;
+//        if(LineEditGetInt(tDimensionXML, val))
+//            atts->SetTDimensionXML(val);
+//        else
+//        {
+//            ResettingError(tr("unnamed3"),
+//                IntToQString(atts->GetTDimensionXML()));
+//            atts->SetTDimensionXML(atts->GetTDimensionXML());
+//        }
+//    }
   //Do not apply this behaviour until the geometry has been setup (by running the operator)
-  if (m_geomWidget != NULL)
+  if (m_geomWidget->isSetup())
   {
-    atts->setXDimension(m_geomWidget->getXDimension());
-    atts->setExecuted(true);
+    atts->SetIsSetUp(true);
+    stringVector dimensionXMLStrings;
+    dimensionXMLStrings.push_back(m_geomWidget->getXDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->getYDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->getZDimensionXML());
+    dimensionXMLStrings.push_back(m_geomWidget->gettDimensionXML());
+    atts->SetDimensionXML(dimensionXMLStrings);
   }
 }
 
@@ -547,5 +660,47 @@ QvisRebinningCutterWindow::structuredChanged(bool val)
     SetUpdate(false);
     Apply();
 }
+
+
+void
+QvisRebinningCutterWindow::xDimensionXMLProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_xDimensionXML);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::yDimensionXMLProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_yDimensionXML);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::zDimensionXMLProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_zDimensionXML);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::tDimensionXMLProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_tDimensionXML);
+    Apply();
+}
+
+void QvisRebinningCutterWindow::geometryChangedlistener()
+{
+  GetCurrentValues(RebinningCutterAttributes::ID_dimensionXML);
+  Apply();
+}
+
+
+
+//writeSourceCallback unknown for stringVector (variable dimensionXML)
 
 

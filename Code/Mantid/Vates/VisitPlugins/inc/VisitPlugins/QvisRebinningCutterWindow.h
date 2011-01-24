@@ -45,6 +45,7 @@
 #include <qwidget.h>
 
 class RebinningCutterAttributes;
+class PlotInfoAttributes;
 class QLabel;
 class QCheckBox;
 class QLineEdit;
@@ -100,11 +101,19 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     void heightProcessText();
     void depthProcessText();
     void structuredChanged(bool val);
+    void xDimensionXMLProcessText();
+    void yDimensionXMLProcessText();
+    void zDimensionXMLProcessText();
+    void tDimensionXMLProcessText();
+    void geometryChangedlistener();
+    //writeHeaderCallback unknown for stringVector (variable dimensionXML)
   private:
     /// If possible create the geometry widget from pipeline information.
     void createGeometryWidget();
     /// check wheter the current geometry information is consistent with that in the upper pipeline.
     bool isInputConsistent(const std::string& inputGeometryXML);
+    /// helper method to determine wheter plot information is present. Returns Null if not present.
+    PlotInfoAttributes* findRebinningInfo() const;
 
     QLineEdit *originX;
     QLineEdit *originY;
@@ -116,16 +125,22 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     QLineEdit *height;
     QLineEdit *depth;
     QCheckBox *structured;
-    //QLabel *originXYZLabel;
-    //QLabel *normalXYZLabel;
+
+    //writeHeaderData unknown for stringVector (variable dimensionXML)
+    QLabel *originXLabel;
+    QLabel *originYLabel;
+    QLabel *originZLabel;
+    QLabel *normalXLabel;
+    QLabel *normalYLabel;
+    QLabel *normalZLabel;
     QLabel *widthLabel;
     QLabel *heightLabel;
     QLabel *depthLabel;
-    QGridLayout *mainLayout;
 
-    RebinningCutterAttributes *atts;
     std::string m_cacheGeometryXML;
+    RebinningCutterAttributes *atts;
     GeometryWidget* m_geomWidget;
+    QGridLayout* mainLayout;
 };
 
 

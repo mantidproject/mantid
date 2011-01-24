@@ -21,5 +21,17 @@
       </Field>
       <Field name="structured" label="Is Structured Grid" type="bool">
       </Field>
+      <Field name="xDimensionXML" label="unnamed1" type="string">
+      </Field>
+      <Field name="yDimensionXML" label="unnamed1" type="int">
+      </Field>
+      <Field name="zDimensionXML" label="unnamed2" type="int">
+      </Field>
+      <Field name="tDimensionXML" label="unnamed3" type="int">
+      </Field>
+      <Field name="isSetUp" label="unnamed4" type="bool">
+      </Field>
+      <Field name="dimensionXML" label="unnamed1" type="stringVector">
+      </Field>
     </Attribute>
   </Plugin>
