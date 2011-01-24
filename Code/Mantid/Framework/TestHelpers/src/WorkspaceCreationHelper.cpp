@@ -64,7 +64,7 @@ namespace WorkspaceCreationHelper
   }
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
   {
-    return Create2DWorkspaceBinned(xlen, ylen);
+    return Create2DWorkspaceBinned(ylen, xlen);
   }
 
   Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist, 

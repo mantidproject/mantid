@@ -186,9 +186,9 @@ public:
   // Equivalent of 2D over 2D, really
   void testExec_2D_Event()
   {
-    int sizex = 10,sizey=20;
+    int sizey = 10,sizex=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(sizey,sizex,100,0.0,1.0,2);
     performTest(work_in1,work_in2, false);
   }
 
@@ -217,9 +217,9 @@ public:
   void testExec_Event_2DSingleSpectrumBiggerSize()
   {
     //Unlike 2D workspaces, you can divide by a single spectrum with different X bins!
-    int sizex = 10,sizey=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1,sizey*2);
+    int sizey = 10,sizex=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizey,sizex,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(sizex*2,1);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
