@@ -434,7 +434,11 @@ class LoadRun(ReductionStep):
                 raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
         self._sample_det_offset = offset
         
-    def execute(self, reducer, workspace):      
+    def execute(self, reducer, inputworkspace, outputworkspace=None):
+        if outputworkspace is not None:
+            workspace = outputworkspace 
+        else:
+            workspace = inputworkspace
         # If we don't have a data file, look up the workspace handle
         if self._data_file is None:
             if workspace in reducer._data_files:
