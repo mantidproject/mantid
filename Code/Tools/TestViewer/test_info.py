@@ -26,12 +26,16 @@ html_escape_table = {
     "'": "&apos;",
     ">": "&gt;",
     "<": "&lt;",
-    '‘': "&apos;",
+    #'‘': "&apos;",
     }
 
 def html_escape(text):
     """Produce entities within text."""
-    return "".join(html_escape_table.get(c,c) for c in text)
+    out = text
+    for (key, val) in html_escape_table.items():
+        out = out.replace(key, val)
+    return out
+    #return "".join(html_escape_table.get(c,c) for c in text)
 
 
 #==================================================================================================
@@ -169,15 +173,19 @@ class TestSingle(object):
 #        if len(self.failure) > 0:
 #            s += self.failure + "<br>"
         if len(self.stdout) > 0:
-            lines = self.stdout.split("\n")
-            # Remove any empty first line
-            if lines[0] == "" and len(lines)>1: lines = lines[1:]
-            # Use the pre tag but wrap long lines.
             s += u'<pre style="white-space: pre-wrap;">'
-            # Print the rest
-            for line in lines: 
-                s += unicode( html_escape(line) + "\n")
+            s +=  unicode(self.stdout)
+            #s += html_escape( unicode(self.stdout) )
             s += u"</pre>"
+#            lines = self.stdout.split("\n")
+#            # Remove any empty first line
+#            if lines[0] == "" and len(lines)>1: lines = lines[1:]
+#            # Use the pre tag but wrap long lines.
+#            s += u'<pre style="white-space: pre-wrap;">'
+#            # Print the rest
+#            for line in lines: 
+#                s += unicode( html_escape(line) + "\n")
+#            s += u"</pre>"
         return s
         
     #----------------------------------------------------------------------------------
@@ -927,12 +935,13 @@ class MultipleProjects(object):
                  foundit = None
                  for pj in self.projects:
                      for suite in pj.suites:
-                         # If the test file and the source file are the same,  
-                         if os.path.samefile( suite.source_file, filename):
-                             suite.selected = True
-                             pj.selected = True
-                             foundit = suite
-                             break
+                         # If the test file and the source file are the same,
+                         if os.path.exists(suite.source_file):  
+                             if os.path.samefile( suite.source_file, filename):
+                                 suite.selected = True
+                                 pj.selected = True
+                                 foundit = suite
+                                 break
                 
                  if foundit is None:
                      # Ok, not directly a test name. Look for a similar test file
