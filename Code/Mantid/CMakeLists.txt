@@ -50,3 +50,10 @@ set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each packa
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
 endif ( MAKE_VATES )
+
+# python unit tests
+if (PYUNITTEST_FOUND)
+  add_subdirectory (Scripts)
+endif ()
+
+
