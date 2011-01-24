@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidNexus/NexusFileIO.h"
 #include <climits>
 
 namespace Mantid
@@ -65,6 +66,11 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+
+      template<class T>
+      static void appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes);
+
+      void execEvent(NexusFileIO * nexusFile);
 	    /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 

@@ -218,9 +218,14 @@ namespace NeXus
 
     // Write out the data (2D or event)
     if (m_eventWorkspace)
+    {
       nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
+      //this->execEvent(nexusFile);
+    }
     else
+    {
       nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec);
+    }
 
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
     // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
@@ -236,6 +241,147 @@ namespace NeXus
     return;
   }
 
+
+
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Append out each field of a vector of events to separate array.
+   *
+   * @param events :: vector of TofEvent or WeightedEvent, etc.
+   * @param offset :: where the first event goes in the array
+   * @param tofs, weights, errorSquareds, pulsetimes :: arrays to write to.
+   *        Must be initialized and big enough,
+   *        or NULL if they are not meant to be written to.
+   */
+  template<class T>
+  void SaveNexusProcessed::appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes)
+  {
+    // Do nothing if there are no events.
+    size_t num = events.size();
+    if (num <= 0)
+      return;
+
+    typename std::vector<T>::const_iterator it;
+    typename std::vector<T>::const_iterator it_end = events.end();
+    size_t i = offset;
+
+    // Fill the C-arrays with the fields from all the events, as requested.
+    for (it = events.begin(); it != it_end; it++)
+    {
+      if (tofs) tofs[i] = it->tof();
+      if (weights) weights[i] = it->weight();
+      if (errorSquareds) errorSquareds[i] = it->errorSquared();
+      if (pulsetimes) pulsetimes[i] = it->pulseTime().total_nanoseconds();
+      i++;
+    }
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Execute the saving of event data
+   * */
+  void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile)
+  {
+    // Make a super long list of tofs, weights, etc.
+    std::vector<size_t> indices;
+    indices.reserve( m_eventWorkspace->getNumberHistograms()+1 );
+    // First we need to index the events in each spectrum
+    size_t index = 0;
+    for (size_t wi =0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    {
+      indices.push_back(index);
+      // Track the total # of events
+      index += m_eventWorkspace->getEventList(wi).getNumberEvents();
+    }
+    indices.push_back(index);
+
+    // Initialize all the arrays
+    size_t num = index;
+    double * tofs = NULL;
+    float * weights = NULL;
+    float * errorSquareds = NULL;
+    int64_t * pulsetimes = NULL;
+
+    // overall event type.
+    std::string eventType;
+    EventType type = m_eventWorkspace->getEventType();
+    bool writeTOF = true;
+    bool writePulsetime = false;
+    bool writeWeight = false;
+    bool writeError = false;
+
+    switch (type)
+    {
+    case TOF:
+      eventType = "TOF";
+      writePulsetime = true;
+      break;
+    case WEIGHTED:
+      eventType = "WEIGHTED";
+      writePulsetime = true;
+      writeWeight = true;
+      writeError = true;
+      break;
+    case WEIGHTED_NOTIME:
+      eventType = "WEIGHTED_NOTIME";
+      writeWeight = true;
+      writeError = true;
+      break;
+    }
+
+    // --- Initialize the combined event arrays ----
+    if (writeTOF)
+      tofs = new double[num];
+    if (writeWeight)
+      weights = new float[num];
+    if (writeError)
+      errorSquareds = new float[num];
+    if (writePulsetime)
+      pulsetimes = new int64_t[num];
+
+    // --- Fill in the combined event arrays ----
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int wi=0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      const DataObjects::EventList & el = m_eventWorkspace->getEventList(wi);
+
+      // This is where it will land in the output array.
+      // It is okay to write in parallel since none should step on each other.
+      size_t offset = indices[wi];
+
+      switch (el.getEventType())
+      {
+      case TOF:
+        eventType = "TOF";
+        appendEventListData( el.getEvents(), offset, tofs, weights, errorSquareds, pulsetimes);
+        break;
+      case WEIGHTED:
+        eventType = "WEIGHTED";
+        appendEventListData( el.getWeightedEvents(), offset, tofs, weights, errorSquareds, pulsetimes);
+        break;
+      case WEIGHTED_NOTIME:
+        eventType = "WEIGHTED_NOTIME";
+        appendEventListData( el.getWeightedEventsNoTime(), offset, tofs, weights, errorSquareds, pulsetimes);
+        break;
+      }
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    // Write out to the NXS file
+    nexusFile->writeNexusProcessedDataEventCompressed(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes);
+
+    // Free mem.
+    delete [] tofs;
+    delete [] weights;
+    delete [] errorSquareds;
+    delete [] pulsetimes;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** virtual method to set the non workspace properties for this algorithm

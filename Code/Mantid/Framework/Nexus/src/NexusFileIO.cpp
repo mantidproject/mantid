@@ -648,6 +648,78 @@ using namespace API;
   }
 
 
+
+
+
+
+
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Generic method to convert an iterator to an array of type T.
+   * Data type is converted at the same type.
+   * @param begin :: iterator at the beginning of the data
+   * @param end :: iterator at the end of the data
+   * @return :: a pointer to an array of type T.
+   */
+  template< typename T, typename _ForwardIterator >
+  T * iteratorToArray(_ForwardIterator begin, _ForwardIterator end, int * dims_array)
+  {
+    // Create the output array
+    size_t num = std::distance(begin, end);
+    dims_array[0] = num;
+    T * out = new T[num];
+    std::copy(begin, end, out);
+    return out;
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  /** Write out a combined chunk of event data, and compress it.
+   *
+   * @param ws :: an EventWorkspace
+   *  */
+  int NexusFileIO::writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
+      std::vector<size_t> & indices,
+      double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const
+  {
+    NXstatus status;
+
+    //write data entry
+    status=NXmakegroup(fileID,"event_workspace_compressed","NXdata");
+    if(status==NX_ERROR) return(2);
+    status=NXopengroup(fileID,"event_workspace_compressed","NXdata");
+
+    // The array of indices for each event list #
+    int dims_array[1];
+    int64_t * indices_array = iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
+    if (indices.size() > 0)
+    {
+      NXwritedata("indices", NX_INT64, 1, dims_array, (void*)(indices_array), true );
+      delete [] indices_array;
+    }
+
+    // Write out each field
+    dims_array[0] = indices.back(); // This is the # of events
+    if (tofs)
+      NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), true);
+    if (pulsetimes)
+      NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes), true);
+    if (weights)
+      NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights), true);
+    if (errorSquareds)
+      NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, (void *)(errorSquareds), true);
+
+
+    // Close up the overall group
+    status=NXclosegroup(fileID);
+    return((status==NX_ERROR)?3:0);
+  }
+
+
+
+
   //-------------------------------------------------------------------------------------
   /** Write out all of the event lists in the given workspace
    * @param ws :: an EventWorkspace */
@@ -670,25 +742,6 @@ using namespace API;
     // Close up the overall group
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);
-  }
-
-
-  //-------------------------------------------------------------------------------------
-  /** Generic method to convert an iterator to an array of type T.
-   * Data type is converted at the same type.
-   * @param begin :: iterator at the beginning of the data
-   * @param end :: iterator at the end of the data
-   * @return :: a pointer to an array of type T.
-   */
-  template< typename T, typename _ForwardIterator >
-  T * iteratorToArray(_ForwardIterator begin, _ForwardIterator end, int * dims_array)
-  {
-    // Create the output array
-    size_t num = std::distance(begin, end);
-    dims_array[0] = num;
-    T * out = new T[num];
-    std::copy(begin, end, out);
-    return out;
   }
 
   //-------------------------------------------------------------------------------------
@@ -745,8 +798,8 @@ using namespace API;
 
     // Write out all the required arrays.
     int dims_array[1] = { num };
-    // Don't compress if it is already small.
-    bool compress = (num > 100);
+    // In this mode, compressing makes things extremely slow! Not to be used for managed event workspaces.
+    bool compress = false; //(num > 100);
     if (writeTOF)
       NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
     if (writePulsetime)
@@ -786,7 +839,7 @@ using namespace API;
     // Write out the detector IDs
     if (dets.size() > 0)
     {
-      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), (dets.size() > 100) );
+      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), false );
       delete [] detectorIDs;
     }
 

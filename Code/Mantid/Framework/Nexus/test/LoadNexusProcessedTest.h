@@ -8,10 +8,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "Poco/File.h"
 
 using namespace Mantid::NeXus;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class LoadNexusProcessedTest : public CxxTest::TestSuite
@@ -350,6 +352,35 @@ public:
      if( Poco::File(filename).exists() )
        Poco::File(filename).remove();
    }
+
+
+
+//
+//   void test_LoadAnEventFile()
+//  {
+//    LoadNexusProcessed alg;
+//
+//    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+//    TS_ASSERT( alg.isInitialized() );
+//    testFile="SaveNexusProcessed_ExecEvent_0.nxs";
+//    alg.setPropertyValue("Filename", testFile);
+//    alg.setPropertyValue("OutputWorkspace", output_ws);
+//
+//    TS_ASSERT_THROWS_NOTHING(alg.execute());
+//
+//    //Test some aspects of the file
+//    Workspace_sptr workspace;
+//    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+//    TS_ASSERT( workspace.get() );
+//
+//    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+//    TS_ASSERT( ws.get() );
+//
+//    //Testing the number of histograms
+//    TS_ASSERT_EQUALS(ws->getNumberHistograms(),3);
+//
+//
+//   }
 
 
 

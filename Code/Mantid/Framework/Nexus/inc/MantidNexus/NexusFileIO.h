@@ -67,6 +67,10 @@ namespace Mantid
 				   const bool& uniformSpectra, const std::vector<int>& spec) const;
 
       int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace) const;
+
+      int writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
+          std::vector<size_t> & indices, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const;
+
       int writeEventList( const DataObjects::EventList & el, std::string group_name) const;
 
       template<class T>

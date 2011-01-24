@@ -284,7 +284,7 @@ void testExecOnMuonXml()
 
 
 
-void testExec_EventWorkspaces()
+void do_testExec_EventWorkspaces(EventType type)
 {
   std::vector< std::vector<int> > groups(5);
   groups[0].push_back(10);
@@ -297,7 +297,10 @@ void testExec_EventWorkspaces()
   groups[4].push_back(50);
 
   EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
-  WS->getEventList(4).clear();
+  WS->getEventList(3).clear();
+  // Switch the event type
+  for (size_t wi=0; wi < WS->getNumberHistograms(); wi++)
+    WS->getEventList(wi).switchTo(type);
 
   SaveNexusProcessed alg;
   alg.initialize();
@@ -306,7 +309,9 @@ void testExec_EventWorkspaces()
   alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(WS));
 
   // specify name of file to save workspace to
-  outputFile = "SaveNexusProcessed_ExecEvent.nxs";
+  std::ostringstream mess;
+  mess << "SaveNexusProcessed_ExecEvent_" << static_cast<int>(type) << ".nxs";
+  outputFile = mess.str();
   dataName = "spectra";
   title = "A simple workspace saved in Processed Nexus format";
 
@@ -324,6 +329,23 @@ void testExec_EventWorkspaces()
   if(clearfiles) Poco::File(outputFile).remove();
 
 }
+
+
+void testExec_EventWorkspace_TofEvent()
+{
+  do_testExec_EventWorkspaces(TOF);
+}
+
+void testExec_EventWorkspace_WeightedEvent()
+{
+  do_testExec_EventWorkspaces(WEIGHTED);
+}
+
+void testExec_EventWorkspace_WeightedEventNoTime()
+{
+  do_testExec_EventWorkspaces(WEIGHTED_NOTIME);
+}
+
 
 
 private:
