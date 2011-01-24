@@ -1,6 +1,7 @@
 import unittest
 from reduction import Reducer, ReductionStep, validate_step
 from MantidFramework import *
+mtd.initialise()
 from mantidsimple import *
 
 class TestReductionStep(ReductionStep):
