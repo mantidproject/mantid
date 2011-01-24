@@ -344,7 +344,8 @@ class TestSuite(object):
         NOTE: This overwrites the previous cached modified time, AKA it will
         only return True once per change."""
         oldtime = self.source_file_mtime
-        self.source_file_mtime = os.path.getmtime(self.source_file)
+        if os.path.exists(self.source_file):
+            self.source_file_mtime = os.path.getmtime(self.source_file)
         return (self.source_file_mtime != oldtime)
         
     def get_selected(self):
