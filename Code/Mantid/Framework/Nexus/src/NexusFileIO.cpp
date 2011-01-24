@@ -32,6 +32,7 @@ namespace NeXus
 {
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
   Logger& NexusFileIO::g_log = Logger::get("NexusFileIO");
 
@@ -860,6 +861,22 @@ using namespace API;
       writeEventListData( el.getWeightedEventsNoTime(), true, false, true, true );
       break;
     }
+
+    // --- Save the type of sorting -----
+    std::string sortType;
+    switch (el.getSortType())
+    {
+    case TOF_SORT:
+      sortType = "TOF_SORT";
+      break;
+    case PULSETIME_SORT:
+      sortType = "PULSETIME_SORT";
+      break;
+    case UNSORTED:
+    default:
+      sortType = "UNSORTED";
+    }
+    NXputattr (fileID, "sort_type", (void*)(sortType.c_str()), sortType.size(), NX_CHAR);
 
     // Save an attribute with the type of each event.
     NXputattr (fileID, "event_type", (void*)eventType.c_str(), eventType.size(), NX_CHAR);

@@ -355,7 +355,7 @@ public:
 
 
 
-//
+
 //   void test_LoadAnEventFile()
 //  {
 //    LoadNexusProcessed alg;
@@ -374,10 +374,17 @@ public:
 //    TS_ASSERT( workspace.get() );
 //
 //    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-//    TS_ASSERT( ws.get() );
+//    TS_ASSERT( ws );
+//    if (!ws) return;
 //
 //    //Testing the number of histograms
-//    TS_ASSERT_EQUALS(ws->getNumberHistograms(),3);
+//    TS_ASSERT_EQUALS(ws->getNumberHistograms(),4);
+//
+//    for (size_t wi=0; wi < 4; wi++)
+//    {
+//      const EventList & el = ws->getEventList(wi);
+//      TS_ASSERT_EQUALS( el.getEventType(), 0 );
+//    }
 //
 //
 //   }

@@ -83,39 +83,39 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       /// Load a single entry
-      DataObjects::Workspace2D_sptr loadEntry(NXRoot & root, const std::string & entry_name,
+      API::MatrixWorkspace_sptr loadEntry(NXRoot & root, const std::string & entry_name,
                                               const double& progressStart, const double& progressRange);
       /// Read the data from the sample group
-      void readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      void readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
       /// Add a property to the sample object
       bool addSampleProperty(NXMainClass & sample_entry, const std::string & entryName, API::Sample& sampleDetails);
       /// Read the spectra 
-      void readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      void readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
       /// Read the algorithm history
-      void readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      void readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
       /// Splits a string of exactly three words into the separate words
       void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3);
       /// Splits a string of exactly four words into the separate words
       void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3, std::string & w4);
       ///Read the instrument parameter map
-      void readParameterMap(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      void readParameterMap(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
       ///Read the bin masking information
-      void readBinMasking(NXData & wksp_cls, DataObjects::Workspace2D_sptr local_workspace);
+      void readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_sptr local_workspace);
       /// Run LoadInstrument sub algorithm
-      void runLoadInstrument(const std::string & inst_name, DataObjects::Workspace2D_sptr local_workspace);
+      void runLoadInstrument(const std::string & inst_name, API::MatrixWorkspace_sptr local_workspace);
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
-		     int nchannels, int &hist, DataObjects::Workspace2D_sptr local_workspace);
+		     int nchannels, int &hist, API::MatrixWorkspace_sptr local_workspace);
 
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
-		     int nchannels, int &hist,int& wsIndex, DataObjects::Workspace2D_sptr local_workspace);
+		     int nchannels, int &hist,int& wsIndex, API::MatrixWorkspace_sptr local_workspace);
       /// Load a block of data into the workspace
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins, 
-		     int blocksize, int nchannels, int &hist,int& wsIndex, DataObjects::Workspace2D_sptr local_workspace);
+		     int blocksize, int nchannels, int &hist,int& wsIndex, API::MatrixWorkspace_sptr local_workspace);
 
       /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
-      void loadNonSpectraAxis(DataObjects::Workspace2D_sptr local_workspace, NXData & data);
+      void loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data);
 
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties(const int numberofspectra);

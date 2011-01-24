@@ -123,7 +123,7 @@ void LoadNexusProcessed::exec()
     if( entrynumber == 0 ) ++entrynumber;
     std::ostringstream os;
     os << entrynumber;
-    DataObjects::Workspace2D_sptr local_workspace = loadEntry(root, basename + os.str(), 0, 1);
+    API::MatrixWorkspace_sptr local_workspace = loadEntry(root, basename + os.str(), 0, 1);
     API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
     setProperty("OutputWorkspace", workspace);
   }
@@ -139,7 +139,7 @@ void LoadNexusProcessed::exec()
     {
       std::ostringstream os;
       os << p;
-      DataObjects::Workspace2D_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
+      API::MatrixWorkspace_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + os.str(), base_name + os.str(),
           Direction::Output));
       wksp_group->add(base_name + os.str());
@@ -161,7 +161,7 @@ void LoadNexusProcessed::exec()
  * @param progressRange The percentage range that the progress reporting should cover
  * @returns A 2D workspace containing the loaded data
  */
-DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
+API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
     const double& progressStart, const double& progressRange)
 {
   progress(progressStart,"Opening entry " + entry_name + "...");
@@ -208,7 +208,7 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
   int total_specs=calculateWorkspacesize(nspectra);
 
   //// Create the 2D workspace for the output
-  DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+  API::MatrixWorkspace_sptr local_workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>
   (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));
   try
   {
@@ -428,7 +428,7 @@ DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const
  * @param mtd_entry The node for the current workspace
  * @param local_workspace The workspace to attach the instrument
  */
-void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
   //Instrument information
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
@@ -541,7 +541,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, DataObjects::W
 * @param local_workspace pointer to workspace object
 * @param data reference to the NeXuS data for the axis
 */
-void LoadNexusProcessed::loadNonSpectraAxis(DataObjects::Workspace2D_sptr local_workspace, NXData & data)
+void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data)
 {
   Mantid::API::Axis* axis = local_workspace->getAxis(1);
 
@@ -579,7 +579,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(DataObjects::Workspace2D_sptr local_
  * @param mtd_entry The node for the current workspace
  * @param local_workspace The workspace to attach the instrument
  */
-void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
   NXMainClass sample = mtd_entry.openNXClass<NXMainClass>("sample");
   try
@@ -763,7 +763,7 @@ bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
  * @param local_workspace The workspace to attach the history to
  *  @throw out_of_range an algorithm history entry doesn't have the excepted number of entries
  */
-void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
   int exeCount=0;
   NXMainClass history = mtd_entry.openNXClass<NXMainClass>("process");
@@ -904,7 +904,7 @@ void LoadNexusProcessed::getWordsInString(const std::string & words4, std::strin
  * @param local_workspace The workspace to read into
  */
 void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
-    DataObjects::Workspace2D_sptr local_workspace)
+    API::MatrixWorkspace_sptr local_workspace)
 {
   NXNote pmap_node = mtd_entry.openNXNote("instrument_parameter_map");
   if( pmap_node.data().empty() ) return;
@@ -956,7 +956,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
  * @param wksp_cls The data group
  * @param local_workspace The workspace to read into
  */
-void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, DataObjects::Workspace2D_sptr local_workspace)
+void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_sptr local_workspace)
 {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR)
   {
@@ -988,7 +988,7 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, DataObjects::Workspac
  * @param localWorkspace The workspace to insert the instrument into
  */
 void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
-    DataObjects::Workspace2D_sptr localWorkspace)
+    API::MatrixWorkspace_sptr localWorkspace)
 {
 
   IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
@@ -1023,7 +1023,7 @@ void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
     int blocksize, int nchannels, int &hist,
-    DataObjects::Workspace2D_sptr local_workspace)
+    API::MatrixWorkspace_sptr local_workspace)
 {
   data.load(blocksize,hist);
   errors.load(blocksize,hist);
@@ -1059,7 +1059,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
     int blocksize, int nchannels, int &hist,int& wsIndex,
-    DataObjects::Workspace2D_sptr local_workspace)
+    API::MatrixWorkspace_sptr local_workspace)
 {
   data.load(blocksize,hist);
   errors.load(blocksize,hist);
@@ -1097,7 +1097,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
     int blocksize, int nchannels, int &hist, int& wsIndex,
-    DataObjects::Workspace2D_sptr local_workspace)
+    API::MatrixWorkspace_sptr local_workspace)
 {
   data.load(blocksize,hist);
   double *data_start = data();
