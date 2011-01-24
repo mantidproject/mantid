@@ -8,10 +8,10 @@ namespace Mantid
   namespace Geometry
   {
 
-  /** Constructor for a parametrized Component.
-   * @param base a Component that is the base (un-parametrized) component
-   * @param map a ParameterMap to parameterize the component
-   */
+    /** Constructor for a parametrized Component.
+    * @param base a Component that is the base (un-parametrized) component
+    * @param map a ParameterMap to parameterize the component
+    */
     Component::Component(const IComponent* base,  const ParameterMap * map)
       : m_base(base), m_map(map), m_isParametrized(true)
     {
@@ -21,47 +21,47 @@ namespace Mantid
     Component::Component(const Component& comp)
       :m_base(comp.m_base),m_map(comp.m_map),m_isParametrized(comp.m_isParametrized)
     {
-	  name=comp.name;
-	  parent=comp.parent;
-	  pos=comp.pos;
-	  rot=comp.rot;
+      name=comp.name;
+      parent=comp.parent;
+      pos=comp.pos;
+      rot=comp.rot;
     }
 
 
     /*! Empty constructor
-     *  Create a component with null parent
-     */
+    *  Create a component with null parent
+    */
     Component::Component()
       : m_map(NULL), m_isParametrized(false), name(), pos(), rot(), parent(NULL)
     {
     }
 
     /*! Constructor by value
-     *  @param name :: Component name
-     *  @param parent :: parent Component (optional)
-     */
+    *  @param name :: Component name
+    *  @param parent :: parent Component (optional)
+    */
     Component::Component(const std::string& name, IComponent* parent)
       : m_map(NULL), m_isParametrized(false), name(name), pos(), rot(), parent(parent)
     {
     }
 
     /*! Constructor by value
-     *  @param name :: Component name
-     *  @param position :: position
-     *  absolute or relative if the parent is defined
-     *  @param parent :: parent Component
-     */
+    *  @param name :: Component name
+    *  @param position :: position
+    *  absolute or relative if the parent is defined
+    *  @param parent :: parent Component
+    */
     Component::Component(const std::string& name, const V3D& position, IComponent* parent)
       : m_map(NULL), m_isParametrized(false), name(name), pos(position), rot(), parent(parent)
     {
     }
 
     /*! Constructor
-     *  @param name :: Component name
-     *  @param position :: position (relative to parent, if present)
-     *  @param rotation :: orientation quaternion (relative to parent, if present)
-     *  @param parent :: parent Component (optional)
-     */
+    *  @param name :: Component name
+    *  @param position :: position (relative to parent, if present)
+    *  @param rotation :: orientation quaternion (relative to parent, if present)
+    *  @param parent :: parent Component (optional)
+    */
     Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
       : m_map(NULL), m_isParametrized(false), name(name),pos(position),rot(rotation),parent(parent)
     {
@@ -76,8 +76,8 @@ namespace Mantid
 
     //------------------------------------------------------------------------------------------------
     /** Return true if the Component is, in fact, parametrized
-     *  (that is - it has a valid parameter map)
-     */
+    *  (that is - it has a valid parameter map)
+    */
     bool Component::isParametrized() const
     {
       return m_isParametrized;
@@ -130,9 +130,9 @@ namespace Mantid
 
     //--------------------------------------------------------------------------------------------
     /*! Returns an array of all ancestors of this component,
-     *  starting with the direct parent and moving up
-     *  @return An array of pointers to ancestor components
-     */
+    *  starting with the direct parent and moving up
+    *  @return An array of pointers to ancestor components
+    */
     std::vector<boost::shared_ptr<const IComponent> > Component::getAncestors() const
     {
       std::vector<boost::shared_ptr<const IComponent> > ancs;
@@ -146,16 +146,16 @@ namespace Mantid
           current = current->getParent();
         }
 
-//        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
-//        //TODO! Navigate properly
-//        std::vector<boost::shared_ptr<const IComponent> > ancs;
-//        boost::shared_ptr<const Component> current = boost::dynamic_pointer_cast<const Component>( dynamic_cast<const Component *>(m_base)->parent );
-//        while (current)
-//        {
-//          ancs.push_back( ParComponentFactory::create(current,m_map) );
+        //        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
+        //        //TODO! Navigate properly
+        //        std::vector<boost::shared_ptr<const IComponent> > ancs;
+        //        boost::shared_ptr<const Component> current = boost::dynamic_pointer_cast<const Component>( dynamic_cast<const Component *>(m_base)->parent );
+        //        while (current)
+        //        {
+        //          ancs.push_back( ParComponentFactory::create(current,m_map) );
         //          current = current->m_base->parent;
-//        }
-//        return ancs;
+        //        }
+        //        return ancs;
       }
       else
       {
@@ -325,24 +325,37 @@ namespace Mantid
       if (this->m_isParametrized)
       {
         V3D temp;
-//        // --- Look for a cached position ----
-//        if (!m_map->getCachedLocation(m_base,temp))
-//        {
-//          //Ooops, no cache. Let's make it instead.
-          boost::shared_ptr<const IComponent> parent = getParent();
-          if (!parent)
+
+        //avoid creating a parent instantiation unless we have to
+
+        //I'm not too happy here that I have to create the shared pointer - perhaps if I created a protected method to get access to the m_base->parent pointer
+        boost::shared_ptr<const IComponent> parent = m_base->getParent();
+        if (!parent)
+        {
+          return getRelativePos();
+        }
+        else
+        {
+          temp = getRelativePos();
+          //get the parent rotation, try to get it from the cache first to avoid instantiaing the class
+          Quat parentRot;
+          V3D parentPos;
+          bool rotCached = m_map->getCachedRotation(parent.get(),parentRot);
+          bool posCached = m_map->getCachedLocation(parent.get(),parentPos);
+          if (!(rotCached && posCached))
           {
-            return getRelativePos();
+            //couldn't get them from the cache, so I have to instantiate the class
+            boost::shared_ptr<const IComponent> parent_sptr = getParent();
+            if (parent)
+            {
+              parentRot = parent_sptr->getRotation();
+              parentPos = parent_sptr->getPos();
+            }
           }
-          else
-          {
-            temp = getRelativePos();
-            parent->getRotation().rotate(temp);
-            temp+=parent->getPos();
-          }
-//          //And we save it to the cache for next time
-//          m_map->setCachedLocation(m_base,temp);
-//        }
+          parentRot.rotate(temp);
+          temp+=parentPos;
+        }
+
         return temp;
       }
       else
@@ -447,11 +460,11 @@ namespace Mantid
     }
 
     /**
-     * Returns a boolean indicating if the component has the named parameter
-     * @param name The name of the parameter
-     * @param recursive If true the parent components will also be searched (Default: true)
-     * @returns A boolean indicating if the search was successful or not.
-     */
+    * Returns a boolean indicating if the component has the named parameter
+    * @param name The name of the parameter
+    * @param recursive If true the parent components will also be searched (Default: true)
+    * @returns A boolean indicating if the search was successful or not.
+    */
     bool Component::hasParameter(const std::string & name, bool recursive) const
     {
       if (!m_isParametrized) return false;
