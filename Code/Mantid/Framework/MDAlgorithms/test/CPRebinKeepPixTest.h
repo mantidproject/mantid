@@ -23,7 +23,7 @@ MDWorkspace_sptr load_fake_workspace(std::string &wsName){
     AnalysisDataService::Instance().addOrReplace(wsName, inputWS);
  
 
-
+	// get the file reader providing test data
   std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader(wsName.c_str(),test_data);
   if(!pFile.get()){
           throw(Kernel::Exception::FileError("can not get proper file reader",wsName));
@@ -40,9 +40,10 @@ MDWorkspace_sptr load_fake_workspace(std::string &wsName){
 	// obtain the MDPoint description now (and MDPointsDescription in a future)
 	MDPointDescription pd = pFile->read_pointDescriptions();
 
-    // clears pFile
+    // clears pFile giving responsibility for it to the workspace
     inputWS->init(pFile,pBasis,geomDescr,pd);
  
+	// get file reader for read operations
     IMD_FileFormat *pf = inputWS->get_pFileReader();
 
     pf->read_MDImg_data(*inputWS->get_spMDImage());

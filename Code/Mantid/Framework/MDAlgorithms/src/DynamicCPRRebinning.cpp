@@ -81,6 +81,7 @@ DynamicCPRRebinning::preselect_cells()
   unsigned int  nOrthogonal    = pSourceGeom->getNumDims() - nReciprocal;
 
   IMDDimension *pDim;
+ 
   std::vector<boost::shared_ptr<IMDDimension> > pAllDim  = pSourceGeom->getDimensions();
   std::vector<boost::shared_ptr<IMDDimension> > pOrthogonal(nOrthogonal);
   std::vector<boost::shared_ptr<IMDDimension> > pReciprocal(nReciprocal);
@@ -129,8 +130,8 @@ DynamicCPRRebinning::preselect_cells()
       // check if it can be in ranges
       Etp=pDim->getX(mp);
       Etm=pDim->getX(mm);
-
-      if(Etp<ort_cut_min[i]||Etm>ort_cut_max[i]) continue;
+	  // beware of ranges where >, >= or <= are applied
+      if(Etp<ort_cut_min[i]||Etm>=ort_cut_max[i]) continue;
       // remember the index of THIS axis
       enInd[i].push_back(mm*stride);
       // increase the counter of the cells, contributed into cut
@@ -237,20 +238,20 @@ DynamicCPRRebinning::preselect_cells()
         r[4]=xx[sh.nCell(i,j,kp)]; r[5]=xx[sh.nCell(ip,j ,kp)]; r[6]=xx[sh.nCell(i ,jp,kp)]; r[7]=xx[sh.nCell(ip,jp,kp)];
 
         minmax(rMin,rMax,r);
-        // unlike the cut over point, we select cells with points on the upper boundary; should we?
-        if(rMax<cut_min[0]||rMin>cut_max[0])continue;
+        // like the cut over point, we select cells with points on the upper boundary; should we? 
+        if(rMax<cut_min[0]||rMin>=cut_max[0])continue;
 
         r[0]=yy[sh.nCell(i ,j ,k )];  r[1]=yy[sh.nCell(ip,j ,k )];r[2]=yy[sh.nCell(i ,jp,k )];  r[3]=yy[sh.nCell(ip,jp,k )];
         r[4]=yy[sh.nCell(i ,j ,kp)];  r[5]=yy[sh.nCell(ip,j ,kp)];r[6]=yy[sh.nCell(i ,jp,kp)];  r[7]=yy[sh.nCell(ip,jp,kp)];
 
         minmax(rMin,rMax,r);
-        if(rMax<cut_min[1]||rMin>cut_max[1])continue;
+        if(rMax<cut_min[1]||rMin>=cut_max[1])continue;
 
         r[0]=zz[sh.nCell(i,j,k )];  r[1]=zz[sh.nCell(ip,j,k )];r[2]=zz[sh.nCell(i ,jp,k )];  r[3]=zz[sh.nCell(ip,jp,k )];
         r[4]=zz[sh.nCell(i,j,kp)];  r[5]=zz[sh.nCell(ip,j,kp)];r[6]=zz[sh.nCell(i ,jp,kp)];  r[7]=zz[sh.nCell(ip,jp,kp)];
 
         minmax(rMin,rMax,r);
-        if(rMax<cut_min[2]||rMin>cut_max[2])continue;
+        if(rMax<cut_min[2]||rMin>=cut_max[2])continue;
 
         ind3=i*rec_dim[0]->getStride()+j*rec_dim[1]->getStride()+k*rec_dim[2]->getStride();
         // multiply reciprocal indexes by orthogonal indexes and srore all indexes for selection
@@ -273,19 +274,20 @@ DynamicCPRRebinning::preselect_cells()
   if(n_preselected_cells>1){
       // sort in increasing order (should be N*ln(N))
         std::sort(preselected_cells.begin(),preselected_cells.end());
-        size_t ic(1);
-        // remove dublicated values
-        size_t prev_value=preselected_cells[0];
-        for(size_t i=1;i<n_preselected_cells;i++){
-            //HACK! TODO: fix this!;
-            if(preselected_cells[i]!=prev_value&&preselected_cells[i]<grid_capacity){
-                prev_value           =preselected_cells[i];
-                preselected_cells[ic]=prev_value;
-                ic++;
-            }
-        }
-        if(ic!=n_preselected_cells)preselected_cells.resize(ic);
-        n_preselected_cells = ic;
+       // remove dublicated values -> they should not exist if selection made properly
+        //    //HACK! TODO: fix this! -- it seems has been done;
+        // size_t ic(1);
+         //size_t prev_value=preselected_cells[0];
+        //for(size_t i=1;i<n_preselected_cells;i++){
+
+        //    if(preselected_cells[i]!=prev_value&&preselected_cells[i]<grid_capacity){
+        //        prev_value           =preselected_cells[i];
+        //        preselected_cells[ic]=prev_value;
+        //        ic++;
+        //    }
+        //}
+        // if(ic!=n_preselected_cells)preselected_cells.resize(ic);
+        // n_preselected_cells = ic;
   }
   return n_preselected_cells;
 }

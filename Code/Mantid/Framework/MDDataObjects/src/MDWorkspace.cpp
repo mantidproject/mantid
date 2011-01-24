@@ -39,7 +39,7 @@ namespace Mantid{
        this->m_spMDImage = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spMDImage); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
      }
-
+//
 void
 MDWorkspace::init(std::auto_ptr<IMD_FileFormat> pFile,
                 std::auto_ptr<Geometry::MDGeometryBasis> pBasis,
@@ -84,8 +84,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
    // free the pGeometry as it is now resides with MDImage and should not be deleted by auto_ptr;
    pGeometry.release();
 
-   //TODO: 
-   // MDDataPoints have to be constructed here and intiated later after the image is build and points need to be saved
+    // MDDataPoints have to be constructed here and intiated later after the image is build and points need to be saved
    // fileManager has to be initated for writing workspace but this will happens only when saveWorkspace algorithm is 
    // called and new file name is known. Temporary file manager has to be created if and when datapoint writing is necessary;
    MDDataPointsDescription pixDescr = SourceWorkspace->get_const_MDDPoints().getMDPointDescription();

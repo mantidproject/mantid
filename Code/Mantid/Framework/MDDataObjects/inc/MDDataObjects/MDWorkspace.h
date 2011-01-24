@@ -95,8 +95,8 @@ namespace Mantid
 	   save algorithm will have this file property and should create proper file manager.
 	   the workspace itself will allocate temporary file for its internal usage -- this file will be basis for final workspace file when saved;
 	   */
-
 	  void init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Geometry::MDGeometryDescription *const transf=NULL);
+
       /** Initialize on the basis of separate components */
 	  void init(std::auto_ptr<IMD_FileFormat> pFile,
                 std::auto_ptr<Geometry::MDGeometryBasis> pBasis,
@@ -198,7 +198,7 @@ namespace Mantid
 
       /// Pointer to a file reader/writer
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
-      /// no copy constructor; 
+      /// no copy constructor -- its meaning is unclear; 
       MDWorkspace(const MDWorkspace &){};
     };
 
