@@ -188,8 +188,8 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     showInformationBox("Please check the input highlighted in red.");
     return;
   }
-  QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
-  if ( groupFile == "" )
+  QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
+  if ( grouping == "" )
   {
     return;
   }
@@ -264,7 +264,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   else
     pyInput += "tempK = -1\n";
 
-  pyInput += "mapfile = r'"+groupFile+"'\n";
+  pyInput += "mapfile = r'"+grouping+"'\n";
 
   if (tryToSave)
   {
@@ -478,13 +478,11 @@ QString Indirect::createMapFile(const QString& groupType)
   }
   else if ( groupType == "All" )
   {
-    ngroup = "1";
-    nspec = ndet;
+    return "All";
   }
   else if ( groupType == "Individual" )
   {
-    ngroup = ndet;
-    nspec = "1";
+    return "Individual";
   }
 
   groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();

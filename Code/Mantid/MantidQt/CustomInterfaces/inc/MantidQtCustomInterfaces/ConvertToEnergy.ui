@@ -55,7 +55,7 @@
          </item>
          <item>
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" >
-           <property name="techniques" >
+           <property name="techniques" stdset="0" >
             <stringlist>
              <string>TOF Direct Geometry Spectroscopy</string>
              <string>TOF Indirect Geometry Spectroscopy</string>
@@ -171,7 +171,7 @@
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="runFiles" >
                   <property name="label" stdset="0" >
                    <string>Runs          </string>
                   </property>
@@ -187,7 +187,7 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="mapFile" >
                 <property name="findRunFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
@@ -206,7 +206,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="whiteBeamFile" >
                 <property name="label" stdset="0" >
                  <string>White beam</string>
                 </property>
@@ -227,7 +227,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_6" >
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="ind_runFiles" >
                     <property name="sizePolicy" >
                      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                       <horstretch>0</horstretch>
@@ -240,7 +240,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="ind_calibFile" >
                     <property name="enabled" >
                      <bool>false</bool>
                     </property>
@@ -262,7 +262,7 @@
                     <property name="optional" stdset="0" >
                      <bool>true</bool>
                     </property>
-                    <property name="fileExtensions" >
+                    <property name="fileExtensions" stdset="0" >
                      <stringlist>
                       <string>_calib.nxs</string>
                      </stringlist>
@@ -359,7 +359,7 @@
                   <widget class="QWidget" name="page_11" >
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
-                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
+                     <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="ind_mapFile" >
                       <property name="sizePolicy" >
                        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                         <horstretch>0</horstretch>
@@ -378,7 +378,7 @@
                       <property name="algorithmAndProperty" stdset="0" >
                        <string/>
                       </property>
-                      <property name="fileExtensions" >
+                      <property name="fileExtensions" stdset="0" >
                        <stringlist>
                         <string>.map</string>
                        </stringlist>
@@ -1171,7 +1171,7 @@
                    <string>Keep Intermediate Workspaces</string>
                   </property>
                   <property name="checked" >
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -1513,7 +1513,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_18" >
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="cal_leRunNo" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1529,7 +1529,7 @@ p, li { white-space: pre-wrap; }
               <property name="algorithmAndProperty" stdset="0" >
                <string/>
               </property>
-              <property name="fileExtensions" >
+              <property name="fileExtensions" stdset="0" >
                <stringlist>
                 <string>.raw</string>
                </stringlist>
@@ -1697,7 +1697,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_36" >
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="slice_inputFile" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1713,7 +1713,7 @@ p, li { white-space: pre-wrap; }
               <property name="multipleFiles" stdset="0" >
                <bool>true</bool>
               </property>
-              <property name="fileExtensions" >
+              <property name="fileExtensions" stdset="0" >
                <stringlist>
                 <string>.raw</string>
                </stringlist>
@@ -1739,7 +1739,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="slice_calibFile" >
               <property name="enabled" >
                <bool>false</bool>
               </property>
@@ -1761,7 +1761,7 @@ p, li { white-space: pre-wrap; }
               <property name="optional" stdset="0" >
                <bool>true</bool>
               </property>
-              <property name="fileExtensions" >
+              <property name="fileExtensions" stdset="0" >
                <stringlist>
                 <string>_calib.nxs</string>
                </stringlist>
@@ -1888,7 +1888,7 @@ p, li { white-space: pre-wrap; }
               <widget class="QWidget" name="page_13" >
                <layout class="QVBoxLayout" name="verticalLayout_21" >
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="sqw_inputFile" >
                   <property name="sizePolicy" >
                    <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
@@ -2283,14 +2283,14 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_31" >
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absRunFiles" >
             <property name="label" stdset="0" >
              <string>Mono Van</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absMapFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -2309,7 +2309,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absWhiteFile" >
             <property name="label" stdset="0" >
              <string>White Beam (Abs Units)</string>
             </property>

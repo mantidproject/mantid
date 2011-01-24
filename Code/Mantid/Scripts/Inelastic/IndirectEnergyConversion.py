@@ -20,7 +20,8 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
     for ws in ws_name:
         if ( analyser != "" and reflection != "" ):
             applyParameterFile(ws, analyser, reflection)
-        if adjustTOF(ws):
+        isTosca = adjustTOF(ws)
+        if isTosca:
             TofCorrection(ws, ws)
             for i in range(1,141):
                 detector = "Detector #" + str(i)
@@ -47,14 +48,13 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             rebin = rebinData(rebinParam, inWS_n=cte)
             if CleanUp:
                 mantid.deleteWorkspace(cte)
+        elif CleanUp:
+            RenameWorkspace(cte, 'Energy')
         else:
-            if CleanUp:
-                RenameWorkspace(cte, 'Energy')
-            else:
-                CloneWorkspace(cte, 'Energy')
+            CloneWorkspace(cte, 'Energy')
         if ( tempK != -1 ):
             db = detailedBalance(tempK)
-        if adjustTOF('Energy'):
+        if isTosca:
             group = groupTosca(name)
         else:
             group = groupData(mapfile, outWS_n=name)
@@ -203,9 +203,17 @@ def detailedBalance(tempK, inWS_n = 'Energy', outWS_n = 'Energy'):
     ExponentialCorrection(inWS_n, outWS_n, 1.0, ( 11.606 / ( 2 * tempK ) ) )
     return outWS_n
 
-def groupData(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
-    GroupDetectors(inWS_n, outWS_n, MapFile = mapfile, Behaviour='Average')
-    mantid.deleteWorkspace(inWS_n)
+def groupData(grouping, inWS_n = 'Energy', outWS_n = 'IconComplete'):
+    if (grouping == 'Individual'):
+        RenameWorkspace(inWS_n, outWS_n)
+    elif ( grouping == 'All' ):
+        nhist = mtd[inWS_n].getNumberHistograms()
+        GroupDetectors(inWS_n, outWS_n, WorkspaceIndexList=range(0,nhist),
+            Behaviour='Average')
+    else:
+        GroupDetectors(inWS_n, outWS_n, MapFile=grouping, Behaviour='Average')
+    if inWS_n != outWS_n:
+        mantid.deleteWorkspace(inWS_n)
     return outWS_n
 
 def groupTosca(wsname):
