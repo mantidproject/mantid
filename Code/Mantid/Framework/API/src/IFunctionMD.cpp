@@ -14,6 +14,7 @@
 #include <iostream> 
 #include <algorithm>
 #include <functional>
+#include <float.h>
 
 namespace Mantid
 {
