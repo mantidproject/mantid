@@ -74,6 +74,14 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Arithmetic";}
 
+
+      /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
+      typedef std::vector< std::pair<int, int> >  BinaryOperationTable;
+
+      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_sptr lhs, API::MatrixWorkspace_sptr rhs,
+          API::IndexToIndexMap * lhs_det_to_wi);
+
+
     //protected:
     private:
       // Overridden Algorithm methods

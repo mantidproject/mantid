@@ -574,6 +574,8 @@ namespace DataObjects
     }
   }
 
+
+
   //-----------------------------------------------------------------------------
   /** Generate the axes[1] (the mapping between workspace index and spectrum number)
    * as a stupid 1:1 map.

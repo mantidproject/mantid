@@ -103,6 +103,7 @@ void MergeRuns::exec()
 
 }
 
+
 /** Build up addition tables for merging eventlists together.
  * Throws an error if there is any incompatibility.
  */
@@ -131,90 +132,9 @@ void MergeRuns::buildAdditionTables()
   for (int workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
   {
     //Get the workspace
-    EventWorkspace_sptr ews = inEventWS[workspaceNum];
+    EventWorkspace_sptr rhs = inEventWS[workspaceNum];
 
-    //An addition table is a list of pairs:
-    //  First int = workspace index in the EW being added
-    //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-    AdditionTable * table = new AdditionTable();
-
-    //Loop through the input workspace indices
-    int nhist = ews->getNumberHistograms();
-    for (int inWI = 0; inWI < nhist; inWI++)
-    {
-      //Get the set of detectors in the output
-      std::set<int>& inDets = ews->getEventList(inWI).getDetectorIDs();
-
-      bool done=false;
-
-      //First off, try to match the workspace indices. Most times, this will be ok right away.
-      int outWI = inWI;
-      if (outWI < lhs_nhist) //don't go out of bounds
-      {
-        std::set<int>& outDets = lhs->getEventList(outWI).getDetectorIDs();
-
-        //Checks that inDets is a subset of outDets
-        if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
-        {
-          //We found the workspace index right away. No need to keep looking
-          table->push_back( std::pair<int,int>(inWI, outWI) );
-          done = true;
-        }
-      }
-
-      if (!done && lhs_det_to_wi && (inDets.size() == 1))
-      {
-        //Didn't find it. Try to use the LHS map.
-
-        //First, we have to get the (single) detector ID of the RHS
-        std::set<int>::iterator inDets_it = inDets.begin();
-        int rhs_detector_ID = *inDets_it;
-
-        //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-        IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
-        if (map_it != lhs_det_to_wi->end())
-        {
-          outWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
-        }
-        else
-        {
-          //Did not find it!
-          outWI = -1; //Marker to mean its not in the LHS.
-        }
-        table->push_back( std::pair<int,int>(inWI, outWI) );
-        done = true; //Great, we did it.
-      }
-
-      if (!done)
-      {
-        //Didn't find it? Now we need to iterate through the output workspace to
-        //  match the detector ID.
-        // NOTE: This can be SUPER SLOW!
-        for (outWI=0; outWI < lhs_nhist; outWI++)
-        {
-          std::set<int>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
-          //Another subset check
-          if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(), inDets.end()))
-          {
-            //This one is right. Now we can stop looking.
-            table->push_back( std::pair<int,int>(inWI, outWI) );
-            done = true;
-            continue;
-          }
-        }
-      }
-
-      if (!done)
-      {
-        //If we reach here, not a single match was found for this set of inDets.
-
-        //TODO: should we check that none of the output ones are subsets of this one?
-
-        //So we need to add it as a new workspace index
-        table->push_back( std::pair<int,int>(inWI, -1) );
-      }
-
-    }
+    BinaryOperation::BinaryOperationTable * table = BinaryOperation::buildBinaryOperationTable(lhs, rhs, lhs_det_to_wi);
 
     //Add this table to the list
     tables.push_back(table);
@@ -261,10 +181,10 @@ void MergeRuns::execEvent()
     //You are adding this one here
     EventWorkspace_sptr addee = inEventWS[workspaceNum];
 
-    AdditionTable * table = tables[workspaceNum-1];
+    BinaryOperation::BinaryOperationTable * table = tables[workspaceNum-1];
 
     //Add all the event lists together as the table says to do
-    AdditionTable::iterator it;
+    BinaryOperation::BinaryOperationTable::iterator it;
     for (it = table->begin(); it != table->end(); it++)
     {
       int inWI = it->first;

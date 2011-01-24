@@ -778,5 +778,133 @@ namespace Mantid
 
 
 
+
+
+
+
+
+
+
+    /** Build up an BinaryOperationTable for performing a binary operation
+     * e.g. lhs = (lhs + rhs)
+     * where the spectra in rhs are to go into lhs.
+     * This function looks to match the detector IDs in rhs to those in the lhs.
+     *
+     * @param lhs :: matrix workspace in which the operation is being done.
+     * @param rhs :: matrix workspace on the right hand side of the operand
+     * @param lhs_det_to_wi :: map from detector ID to workspace index for the LHS workspace.
+     */
+    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
+        IndexToIndexMap * lhs_det_to_wi)
+    {
+        //An addition table is a list of pairs:
+      //  First int = workspace index in the EW being added
+      //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
+      BinaryOperationTable * table = new BinaryOperationTable();
+
+      // Get the spectra detector maps
+      const SpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
+      const SpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
+
+      int nhist = rhs->getNumberHistograms();
+      int lhs_nhist = lhs->getNumberHistograms();
+
+      // We'll need maps from WI to Spectrum Number.
+      API::IndexToIndexMap * lhs_wi_to_spec = lhs->getWorkspaceIndexToSpectrumMap();
+      API::IndexToIndexMap * rhs_wi_to_spec = rhs->getWorkspaceIndexToSpectrumMap();
+
+      //Loop through the input workspace indices
+      for (int inWI = 0; inWI < nhist; inWI++)
+      {
+        //Get the set of detectors in the output
+        int rhs_spec_no = (*rhs_wi_to_spec)[inWI];
+        std::vector<int> inDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+
+        bool done=false;
+
+        // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
+        //First off, try to match the workspace indices. Most times, this will be ok right away.
+        int outWI = inWI;
+        int lhs_spec_no;
+        if (outWI < lhs_nhist) //don't go out of bounds
+        {
+          // Get the detector IDs at that workspace index.
+          lhs_spec_no = (*lhs_wi_to_spec)[outWI];
+          std::vector<int> outDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
+
+          //Checks that inDets is a subset of outDets
+          if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
+          {
+            //We found the workspace index right away. No need to keep looking
+            table->push_back( std::pair<int,int>(inWI, outWI) );
+            done = true;
+          }
+        }
+
+        // ----------------- Scrambled Detector IDs with one Detector per Spectrum --------------------------------------
+        if (!done && lhs_det_to_wi && (inDets.size() == 1))
+        {
+          //Didn't find it. Try to use the LHS map.
+
+          //First, we have to get the (single) detector ID of the RHS
+          std::vector<int>::const_iterator inDets_it = inDets.begin();
+          int rhs_detector_ID = *inDets_it;
+
+          //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
+          IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
+          if (map_it != lhs_det_to_wi->end())
+          {
+            outWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
+          }
+          else
+          {
+            //Did not find it!
+            outWI = -1; //Marker to mean its not in the LHS.
+          }
+          table->push_back( std::pair<int,int>(inWI, outWI) );
+          done = true; //Great, we did it.
+        }
+
+        // ----------------- LHS detectors are subset of RHS --------------------------------------
+        if (!done)
+        {
+          //Didn't find it? Now we need to iterate through the output workspace to
+          //  match the detector ID.
+          // NOTE: This can be SUPER SLOW!
+          for (outWI=0; outWI < lhs_nhist; outWI++)
+          {
+            lhs_spec_no = (*lhs_wi_to_spec)[outWI];
+            std::vector<int> outDets2 = lhs_spec_det_map.getDetectors(lhs_spec_no);
+            //Another subset check
+            if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(), inDets.end()))
+            {
+              //This one is right. Now we can stop looking.
+              table->push_back( std::pair<int,int>(inWI, outWI) );
+              done = true;
+              continue;
+            }
+          }
+        }
+
+        if (!done)
+        {
+          //If we reach here, not a single match was found for this set of inDets.
+
+          //TODO: should we check that none of the output ones are subsets of this one?
+
+          //So we need to add it as a new workspace index
+          table->push_back( std::pair<int,int>(inWI, -1) );
+        }
+
+      }
+
+      return table;
+    }
+
+
+
+
+
+
   } // namespace Algorithms
 } // namespace Mantid

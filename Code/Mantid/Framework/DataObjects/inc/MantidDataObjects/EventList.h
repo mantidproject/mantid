@@ -188,6 +188,8 @@ public:
 
   bool isSortedByTof() const;
 
+  EventSortType getSortType() const;
+
 
   void setX(const MantidVecPtr::ptr_type& X);
 

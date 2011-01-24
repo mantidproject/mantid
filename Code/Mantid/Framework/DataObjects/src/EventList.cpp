@@ -1099,6 +1099,14 @@ namespace DataObjects
   }
 
   // --------------------------------------------------------------------------
+  /** Return the type of sorting used in this event list */
+  EventSortType EventList::getSortType() const
+  {
+    return this->order;
+  }
+
+
+  // --------------------------------------------------------------------------
   /** Reverse the histogram boundaries and the associated events if they are sorted
    * by time-of-flight.
    * Does nothing if sorted otherwise or unsorted.
