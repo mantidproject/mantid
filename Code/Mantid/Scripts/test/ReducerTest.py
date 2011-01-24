@@ -26,7 +26,24 @@ class ReducerTest(unittest.TestCase):
             
         # Check that the workspace was created
         self.assertNotEqual(mtd["test2"], None)
-        
+        mtd.deleteWorkspace("test2")
+
+    def test_pars_variation(self):
+        """
+            Variations for parameter specification
+        """
+        r = Reducer()
+        # An algorithm with a mandatory property that is NOT InputWorkspace or OutputWorkspace
+        r.append_step(Load, Filename="/home/mantid/workspace/mantid/Test/AutoTestData/AsciiExample.txt", OutputWorkspace=None)
+        # Algorithm with InputWorkspace and OutputWorkspace
+        r.append_step(ConvertToHistogram, None, None)
+        for item in r._reduction_steps:
+            result = item.execute(r, "test2")
+            
+        # Check that the workspace was created
+        self.assertNotEqual(mtd["test2"], None)
+        mtd.deleteWorkspace("test2")
+                
     def test_output_wksp(self):
         """
             Similar to previous test, but we specify the output workspace
@@ -44,6 +61,8 @@ class ReducerTest(unittest.TestCase):
         # Check that the workspace was created
         self.assertNotEqual(mtd["test2"], None)
         self.assertNotEqual(mtd["test3"], None)
+        mtd.deleteWorkspace("test2")
+        mtd.deleteWorkspace("test3")
         
     def test_parameter_variation(self):
         """
@@ -56,6 +75,7 @@ class ReducerTest(unittest.TestCase):
             
         # Check that the workspace was created
         self.assertNotEqual(mtd["test2"], None)
+        mtd.deleteWorkspace("test2")
             
     def test_reduction_step(self):
         """
