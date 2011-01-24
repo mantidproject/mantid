@@ -354,7 +354,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
           {
           try
           {
-            Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+            Parameter_sptr par = pmap.getRecursive(det->getComponent(),"Efixed");
             if (par)
             {
               efixed = par->value<double>();
@@ -593,7 +593,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
           {
           try
           {
-            Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+            Parameter_sptr par = pmap.getRecursive(det->getComponent(),"Efixed");
             if (par) 
             {
               efixed = par->value<double>();
