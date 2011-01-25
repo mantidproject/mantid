@@ -6,6 +6,8 @@
 #include <boost/python/handle.hpp>
 #include <boost/python/extract.hpp>
 #include <fstream>
+#include <sstream>
+#include <vector>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -23,6 +25,10 @@ namespace Mantid
 {
 namespace PythonAPI
 {
+
+typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
+typedef std::vector<std::string> StringVector;
+
 
 // Initialize the logger
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
@@ -150,6 +156,64 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
 {
   return API::FrameworkManager::Instance().createAlgorithm(algName);
+}
+
+std::string FrameworkManagerProxy::createAlgorithmDocs(const API::IAlgorithm *algm)
+{
+  const std::string EOL="\n";
+
+  std::string temp;
+
+  // Put in the quick overview message
+  std::stringstream buffer;
+  temp = algm->getOptionalMessage();
+  if (temp.size() > 0)
+    buffer << temp << EOL << EOL;
+
+  // get a sorted copy of the properties
+  PropertyVector properties(algm->getProperties());
+  std::sort(properties.begin(), properties.end(), SimplePythonAPI::PropertyOrdering());
+
+  // generate the sanitized names
+  PropertyVector::const_iterator pIter = properties.begin();
+  PropertyVector::const_iterator pEnd = properties.end();
+  StringVector names(properties.size());
+  size_t numProps = properties.size();
+  for ( size_t i = 0; i < numProps; ++i) {
+    names[i] = SimplePythonAPI::removeCharacters(properties[i]->name(), "");
+  }
+
+  // write the actual properties
+  Mantid::Kernel::Property *prop;
+  for ( size_t i = 0; i < numProps; ++i) {
+    prop = properties[i];
+    buffer << "  " << names[i] << "("
+           << Mantid::Kernel::Direction::asText(prop->direction());
+    if (!prop->isValid().empty())
+      buffer << ":req";
+    buffer << ") *" << prop->type() << "* "<< "\n";
+    std::set<std::string> allowed = prop->allowedValues();
+    if (!prop->documentation().empty() || !allowed.empty())
+    {
+      buffer << "      " << prop->documentation();
+      if (!allowed.empty())
+      {
+        buffer << " [";
+        std::set<std::string>::const_iterator sIter = allowed.begin();
+        std::set<std::string>::const_iterator sEnd = allowed.end();
+        for( ; sIter != sEnd ; )
+        {
+          buffer << (*sIter);
+          if( ++sIter != sEnd )
+            buffer << ", ";
+        }
+        buffer << "]";
+      }
+      buffer << EOL;
+    }
+  }
+
+  return buffer.str();
 }
 
 /**

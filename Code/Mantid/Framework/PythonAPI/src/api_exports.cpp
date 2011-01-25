@@ -46,6 +46,7 @@ namespace PythonAPI
       .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
       .def("createAlgorithm", &FrameworkManagerProxy::createAlgorithm, return_value_policy< reference_existing_object >())
+      .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
       .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
