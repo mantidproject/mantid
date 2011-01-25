@@ -149,27 +149,34 @@ MDImage::is_initialized(void)const
 void
 MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
 {
-   unsigned int i;
 
    // all paxis in the transformation matrix have to be defined properly and in accordance with the transformation data.
    // also sets the the dimension limits and object limits as the limits from transf class
    this->pMDGeometry->initialize(transf);
+   this->set_imgArray_shape();
+ 
+ 
+}
+// 
+void 
+MDImage::set_imgArray_shape()
+{
+	unsigned int nDims = this->pMDGeometry->getNumDims();
+	size_t   i;
 
-   
-   this->MD_IMG_array.dimSize.assign(this->pMDGeometry->getNumDims(),0);
-   this->MD_IMG_array.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
+    this->MD_IMG_array.dimSize.assign(nDims,0);
+    this->MD_IMG_array.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
     const IMDDimension *pDim;
-    this->MD_IMG_array.dimStride[0] = 0;
     this->MD_IMG_array.data_size    = 1;
     size_t  stride(1);
     for(i=0;i<this->pMDGeometry->getNumDims();i++){
-        pDim                 = (this->pMDGeometry->get_constDimension(i)).get();
-        stride               = pDim->getStride();
+        pDim                             = (this->pMDGeometry->get_constDimension(i)).get();
+        stride                           = pDim->getStride();
         this->MD_IMG_array.dimSize[i]    =  pDim->getNBins();
         this->MD_IMG_array.data_size     *= this->MD_IMG_array.dimSize[i];
 
-        this->MD_IMG_array.dimStride[i+1] = this->MD_IMG_array.data_size;
+        this->MD_IMG_array.dimStride[i]  = stride;
 
     }
 	if(this->MD_IMG_array.data_size!=this->pMDGeometry->getGeometryExtend()){
@@ -187,8 +194,8 @@ MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
     this->nd9 =MD_IMG_array.dimStride[8];
     this->nd10=MD_IMG_array.dimStride[9];
     this->nd11=MD_IMG_array.dimStride[10];
-
 }
+//
 void
 MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *const pBasis)
 {
@@ -214,7 +221,9 @@ MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *c
    if(!this->MD_IMG_array.data || ImgSize>this->MD_IMG_array.data_array_size){
        this->clear_class();
 	// allocate main data array;
-	   this->alloc_image_data(this->pMDGeometry->getGeometryExtend(),this->pMDGeometry->getNumDims());
+	   this->alloc_image_data();
+   //
+	   this->set_imgArray_shape();
    }else{
 	    MD_image_point *pData = MD_IMG_array.data;
 		for(unsigned long j=0;j<MD_IMG_array.data_size;j++){
@@ -223,6 +232,8 @@ MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *c
 			pData[j].npix=0;
 		}
    }
+ 
+
 }
 
 //
@@ -249,27 +260,18 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
 }
 //
 void
-MDImage::alloc_image_data(size_t ImgSize,unsigned int nDims)
+MDImage::alloc_image_data()
 {
+	size_t ImgSize     = this->pMDGeometry->getGeometryExtend();
 	MD_IMG_array.data = new MD_image_point[ImgSize];
 	if (!MD_IMG_array.data){
 			throw(std::runtime_error("Can not allocate memory for Multidimensional dataset"));
-	 }
+	}
+    MD_image_point *pData        = MD_IMG_array.data;
 	MD_IMG_array.data_array_size = ImgSize;
 	MD_IMG_array.data_size       = ImgSize;
-	this->MD_IMG_array.dimSize.assign(nDims,0);
-	this->MD_IMG_array.dimSize[0] = ImgSize;
-	this->MD_IMG_array.dimStride.assign(nDims+1,0);
-	this->MD_IMG_array.dimStride[0] = ImgSize;
-	this->MD_IMG_array.min_value.assign(nDims, FLT_MAX);
-	this->MD_IMG_array.max_value.assign(nDims,-FLT_MAX);
 
-    MD_image_point *pData = MD_IMG_array.data;
-	for(unsigned long j=0;j<MD_IMG_array.data_size;j++){
-			pData[j].s   =0;
-			pData[j].err =0;
-			pData[j].npix=0;
-	}
+
 
 }
 //

@@ -62,7 +62,7 @@ class testCPrebinning :    public CxxTest::TestSuite
       cpr.setPropertyValue("Result",OutWorkspaceName);
       cpr.setProperty("KeepPixels",false);
       // set slicing property for the target workspace to the size and shape of the current workspace
-      cpr.init_slicing_property();
+      cpr.setTargetGeomDescrEqSource();
 
     }
     void testGetSlicingProperty(){      

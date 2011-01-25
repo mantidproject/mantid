@@ -99,8 +99,8 @@ private:
     /// number of bytes a pixel occupies
     mutable unsigned int  sizeof_pixel;
 
-    float   *dat_sig_fields;
-    int     *ind_fields;
+    float        *dat_sig_fields;
+    uint32_t     *ind_fields;
 
     void fill_image_data1D(unsigned int nBins);
     void fill_image();

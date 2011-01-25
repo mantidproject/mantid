@@ -143,11 +143,13 @@ private:
     /** function reshapes the geomerty of the array according to the pAxis array request; resets the data size in total MD_IMG_array  */
     void reshape_geometry(const Geometry::MDGeometryDescription &transf);
 
-/// Clear all allocated memory as in the destructor; user usually do not need to call this function unless wants to clear image manually and then initiat it again
+/// Clear all allocated memory as in the destructor; user usually do not need to call this function unless wants to clear image manually and then initiate it again
 ///	Otherwise it used internaly for reshaping the object for e.g. changing from defaults to something else. 
     void clear_class();
 	/// function allocates memory for the MD image and resets all necessary auxilary settings;
-	void alloc_image_data(size_t Imgsize,unsigned int nDims);
+	void alloc_image_data();
+	/// function sets the shape of existing MD array according to MDGeometry;
+	void set_imgArray_shape();
 };
 //
 }

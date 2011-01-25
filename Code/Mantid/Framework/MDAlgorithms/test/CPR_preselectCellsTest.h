@@ -42,7 +42,7 @@ class testCPcomponents :    public CxxTest::TestSuite
 
     std::auto_ptr<DynamicCPRRt>    pRebin;
 
-	// function verifys if preselection have dublicated cells
+	// function verifys if preselection has dublicated cells
 	bool check_cell_unique(const std::vector<size_t> &cell_nums)const{
 		for(size_t i=1;i<cell_nums.size();i++){
 			if(cell_nums[i-1]==cell_nums[i])return true;
@@ -65,10 +65,6 @@ class testCPcomponents :    public CxxTest::TestSuite
          TSM_ASSERT_THROWS_NOTHING("Target empty WS  should be constructed not throwing",pTarget = 
              boost::shared_ptr<MDDataObjects::MDWorkspace>(new MDDataObjects::MDWorkspace()));
 
-	
-
-		 // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
-		 pTargDescr->pDimDescription(2)->cut_max = 0.99;
 		 // init target workspace as we need
 		 TSM_ASSERT_THROWS_NOTHING("Target workspace initialisation should not throw",pTarget->init(pOrigin,pTargDescr.get()));
 	 }
@@ -78,9 +74,23 @@ class testCPcomponents :    public CxxTest::TestSuite
              std::auto_ptr<DynamicCPRRt>(new DynamicCPRRt(pOrigin,pTargDescr.get(),pTarget)));
 
      }
+     void testPreselectAllUnique(){
+		 size_t nCells;
+
+		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
+		 // check if the generic properties of the preselection are correct:
+		 TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*nDim2*nDim3 geometry",50*50*50*50,nCells);
+
+		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
+		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
+
+     }
      void testPreselect3DWorks(){
 		 size_t nCells;
 		 pTargDescr->pDimDescription(3)->cut_max = 0;  
+		 // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
+		 pTargDescr->pDimDescription(2)->cut_max = 0.99;
+
 
 		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
 		 // check if the generic properties of the preselection are correct:

@@ -63,7 +63,7 @@ public:
 
       /// set up slicing property as to the state of input workspace e.g. the rebinning would be
       /// done on the whole workspace and would provide a workspace, which is equivalent to the input workspace
-      void init_slicing_property();
+      void setTargetGeomDescrEqSource();
     
 private:
     // Overridden Pivate Algorithm methods

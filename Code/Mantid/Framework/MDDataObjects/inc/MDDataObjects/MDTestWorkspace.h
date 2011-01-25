@@ -74,7 +74,7 @@ class MDTestWorkspace
         // and initiate the positions of the datapoinst
          pMDDPoints->init_pix_locations();
 
-         // tries to read all MDPoints in memory; It is impossible here, so it sets the workspace loation not in memory;
+         // tries to read all MDPoints in memory; It is impossible here, so it sets the workspace location to not in memory;
          pReader->read_pix(*pMDDPoints);
      
     }
@@ -85,8 +85,7 @@ public:
     }
 
     ~MDTestWorkspace(){
-        pReader = NULL;
-    }
+     }
     MDWorkspace_sptr get_spWS(){return spMDWs;}
 };
 

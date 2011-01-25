@@ -179,6 +179,7 @@ CpRebinningNx3::rebin_Nx3dataset()
 
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
   pix_Xmax=pix_Ymax=pix_Zmax=pix_Emax=- std::numeric_limits<double>::max();
+  size_t nCells  = this->n_target_cells;
   //
   // work at least for MSV 2008
 // The following code does not work cross platform. Hence the undef.
@@ -280,6 +281,10 @@ CpRebinningNx3::rebin_Nx3dataset()
           retained_cell_indexes[nPixel_retained] = indl;
       }
       nPixel_retained++;
+	  // DEBUGGING:
+	  //if(indl>=nCells){
+		 // continue;
+	  //}
       // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
 //#pragma omp atomic
       pTargetImgData[indl].s   +=s;

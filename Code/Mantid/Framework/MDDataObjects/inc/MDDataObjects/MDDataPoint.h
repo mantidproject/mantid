@@ -188,9 +188,11 @@ struct MDPointsLocations
    {
      unsigned int i;
      // set the length of main fields as the function of the template initialisation parameters
-     this->PixInfo().DimLength   = sizeof(T);
-     this->PixInfo().DimIDlength = sizeof(I);
-	 this->PixInfo().SignalLength= sizeof(S);
+     if(this->PixInfo().DimLength  != sizeof(T)||
+        this->PixInfo().DimIDlength != sizeof(I)||
+	    this->PixInfo().SignalLength!= sizeof(S)){
+			throw(std::invalid_argument("MDDataPoint template initiated with parameters which different from the MDDataPointDescription"));
+	 }
 
      n_dimensions = this->PixInfo().NumDimensions;
      n_indFields  = this->PixInfo().NumDimIDs;
@@ -353,11 +355,15 @@ struct MDPointsLocations
 
      pWorkingBuf = new I[MDDataPointEqual<T,I,S>::n_indFields];
   
-     // specialisation : two first fields are packed into one 32 bit field
+     // specialisation : two first index fields are packed into one 32 bit field
      if(MDDataPointEqual<T,I,S>::n_indFields>1){
         this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals]  =2;
         this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+1]=2;
-     }
+     }else{
+	   if(sizeof(I)<4){
+			this->field_lengths[MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals]  =4;
+	   }
+	 }
 	 //
      unsigned int n_fields      = MDDataPointEqual<T,I,S>::n_dimensions+MDDataPointEqual<T,I,S>::n_signals+MDDataPointEqual<T,I,S>::n_indFields;
 

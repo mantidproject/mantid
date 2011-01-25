@@ -42,8 +42,8 @@ namespace MDDataObjects
 {
 
 //* MDPixels
-/// the size of the buffer to read pixels (in bytes) while reading parts of datasets --should be optimized for performance and deleted
-#define PIX_BUFFER_SIZE 10000000*36
+/// the size of the buffer to read pixels (in pixels) while reading parts of datasets --should be optimized for performance and deleted
+#define PIX_BUFFER_SIZE 10000000
 /// the size of the data page (in bytes), providing optimal speed of data exchange with HDD -- should be calculated;
 #define PAGE_SIZE  4096
 
@@ -80,42 +80,45 @@ namespace MDDataObjects
     /// check if the MDDataPoints class is initialized;
     bool is_initialized(void)const;
 
+	//*********>  MEMORY  <*************************************************************************
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
     /// function returns numnber of pixels (dataPoints) contributiong into the MD-dataset  
     uint64_t getNumPixels(void)const{return n_data_points;}
     /// get the size of the allocated data buffer (may or may not have valid data in it); Identify main memory footprint;
     size_t getMemorySize()const{return data_buffer_size*pixel_size;}
-     /// function returns minimal value for dimension i
+    /** returns the size of the buffer allocated for pixels (the number of pixels possible to fit the buffer; 
+      * The actual size in bytes will depend on pixel size  -- see get memory size*/
+    size_t get_pix_bufSize(void)const{return data_buffer_size;} 
+     /// the function provides memory footprint of the class in the form commont to other MD classes
+    size_t sizeofPixelBuffer(void)const{ return getMemorySize();}
+   /** function returns the reference to the buffer to keep data points; If the buffer has not been allocated it allocates it;
+       if it was, it reallocates buffer if the size requested is bigger than existing. The buffer size is specified in pixels; */
+    std::vector<char> &getBuffer(size_t buf_size=PIX_BUFFER_SIZE);
+    /// get the pixel MDDataPoint size (in bytes)
+    unsigned int sizeofMDDataPoint(void)const{return pixel_size;}
+   /// structure of an MDDataPoint
+    MDDataPointsDescription const & getMDPointDescription(void)const{return pixDescription;}
+
+  /// sets the datapoints based in file instead of memory; if memory was allocated for the data before, it should be freed and all data should be damped to HDD
+    virtual void set_file_based();
+	//**********************************************************************************************
+
+	/// function returns minimal value for dimension i
     double &rPixMin(unsigned int i){return *(&box_min[0]+i);}
     /// function returns maximal value for dimension i
     double &rPixMax(unsigned int i){return *(&box_max[0]+i);}
     /// get part of the dataset, specified by the vector of MDImage cell numbers. 
     virtual size_t get_pix_subset(const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
-    /** return the size of the buffer allocated for pixels (the number of pixels possible to fit the buffer; 
-      * The actual size in bytes will depend on pixel size  -- see get memory size*/
-    size_t get_pix_bufSize(void)const{return data_buffer_size;} 
-    /// the function provides memory footprint of the class in the form commont to other MD classes
-    size_t sizeofPixelBuffer(void)const{ return getMemorySize();}
 
-    /// get the pixel MDDataPoint size (in bytes)
-    unsigned int sizeofMDDataPoint(void)const{return pixel_size;}
-   /** function returns the pointer to the buffer to keep data points; If the buffer has not been allocated it allocates it;
-       if it was, it reallocates buffer if the size requested is bigger than existing. The buffer size is specified in pixels; */
-    std::vector<char> &getBuffer(size_t buf_size=PIX_BUFFER_SIZE);
     /** function returns the part of the colum-names which corresponds to the dimensions information;
      * the order of the ID corresponds to the order of the data in the datatables */
     std::vector<std::string> getDimensionsID(void)const{return pixDescription.getDimensionsID();}
-   //
-    MDDataPointsDescription const & getMDPointDescription(void)const{return pixDescription;}
    /** function adds pixels,from the array of input pixels, selected by indexes in array of pix_selected to internal structure of data indexes 
      which can be actually on HDD or in memory */
     void store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels);
   /// calculate the locations of the data points blocks with relation to the image cells
     virtual void init_pix_locations();
-
-  /// sets the datapoints based in file instead of memory; if memory was allocated for the data before, it should be freed and all data should be damped to HDD
-    virtual void set_file_based();
   protected:
 
   private:

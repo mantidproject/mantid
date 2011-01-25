@@ -16,7 +16,7 @@ pPointDescr(NULL)
     this->sizeof_pixel=4*(nDims+2+nDims);
 
     this->dat_sig_fields= new float[nDims+2];
-    this->ind_fields    = new int[nDims];
+    this->ind_fields    = new uint32_t[nDims];
     this->nBins.resize(nDims,50);
     this->nCells = 1;
     for(size_t i=0;i<nBins.size();i++){
@@ -167,8 +167,8 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     n_pix_in_buffer=0;
 
     // initate packer (should be more generic ways of doing this)
-    std::auto_ptr<MDDataPoint<float,uint16_t,float> > pPacker= std::auto_ptr<MDDataPoint<float,uint16_t,float> >
-        (new MDDataPoint<float,uint16_t,float>(&pix_buf[0],*pPointDescr));
+    std::auto_ptr<MDDataPointEqual<float,uint32_t,float> > pPacker= std::auto_ptr<MDDataPointEqual<float,uint32_t,float> >
+        (new MDDataPointEqual<float,uint32_t,float>(&pix_buf[0],*pPointDescr));
 
 
 
@@ -201,7 +201,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
                 dat_sig_fields[idim] = (float)(dimPoints[idim])[cell_ind[idim]]+ cell_step[idim]*j;
             }
             // signal 
-            dat_sig_fields[nDims]  =(float)selected_cells[ic];
+            dat_sig_fields[nDims]  =(float)selected_cells[ic]+1;
             // error
             dat_sig_fields[nDims+1]=2;
 

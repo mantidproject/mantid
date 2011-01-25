@@ -27,7 +27,7 @@ CenterpieceRebinning::~CenterpieceRebinning()
  
 }
 void 
-CenterpieceRebinning::init_slicing_property()
+CenterpieceRebinning::setTargetGeomDescrEqSource()
 {
     // input workspace has to exist and be loaded;
 	MDWorkspace_sptr inputWS;

@@ -67,6 +67,7 @@ inc/MantidMDAlgorithms/WidthParameter.h
 # Test files. Other source files required.
 set (TEST_FILES
 test/CPR_preselectCellsTest.h 
+test/CPRebinKeepPixTest.h
 test/DepthParameterTest.h
 test/DynamicRebinFromXMLAlgorithmTest.h
 test/HeightParameterTest.h

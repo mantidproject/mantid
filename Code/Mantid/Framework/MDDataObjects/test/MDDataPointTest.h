@@ -106,12 +106,22 @@ public:
     MDDataPoint<float,uint8_t>  *pPoints;
     char *dataBuf(NULL);
     // this constructor acutally owerwirtes default value for 8-bit fields as a TOF-kind of pixel is constructed which redefines 2 first fields as 32-bit field; MESS!
-    TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,4,1,2)));
+
+	// this does not work any more as signature have to be specified manually
+    //TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,4,1,2)));
+
+	MDPointStructure ps;
+	// modyfy non-default values for pixel information
+	ps.NumDimIDs     = 1;
+	ps.DimIDlength   = 1;
+	ps.NumDataFields = 1;
+	MDPointDescription pixSignature(ps);
+    TS_ASSERT_THROWS_NOTHING(pPoints = (new MDDataPoint<float,uint8_t>(dataBuf,pixSignature)));
 
     TS_ASSERT_EQUALS(pPoints->getColumnNames().size(),pPoints->getNumPointFields());
     TS_ASSERT_EQUALS(pPoints->getNumDimensions(),4);
     TS_ASSERT_EQUALS(pPoints->getNumSignals(),1);
-    TS_ASSERT_EQUALS(pPoints->getNumDimIndex(),2);
+    TS_ASSERT_EQUALS(pPoints->getNumDimIndex(),1);
     TS_ASSERT_EQUALS(pPoints->sizeofMDDataPoint(),4*sizeof(float)+1*sizeof(double)+sizeof(uint32_t));
 
     delete pPoints;
@@ -198,8 +208,9 @@ public:
     build4DTestdata(testData,nPix);
 	MDPointStructure horStruct;
 
-	horStruct.DimIDlength=8;
-	horStruct.DimLength  =8;
+	horStruct.DimIDlength   =4;
+	horStruct.DimLength     =4;
+	horStruct.SignalLength  =4;
 	horStruct.NumPixCompressionBits=0;
 
 	MDPointDescription HorDescription(horStruct,fieldNames4D);
@@ -249,7 +260,10 @@ public:
 
     build4DTestdata(testData,nPix);
 
-    MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,*pix4D);
+	MDPointDescription descr(*pix4D);
+	descr.PixInfo().DimIDlength = 4;
+
+    MDDataPoint<float,uint32_t>  PackUnpacker(testBuffer,descr);
 
     float  Dim[4];
     double SE[2];

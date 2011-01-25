@@ -51,7 +51,7 @@ typedef std::vector<boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction>
 
 typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > functionVector;
 
-class BoxInterpreter: public std::unary_function<Mantid::API::ImplicitFunction*, std::vector<double> >
+class DLLExport BoxInterpreter: public std::unary_function<Mantid::API::ImplicitFunction*, std::vector<double> >
 {
 private:
   /// Recursively walk the composite tree and extract flattened vector of BoxImplicit functions.

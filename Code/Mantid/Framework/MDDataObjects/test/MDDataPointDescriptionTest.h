@@ -42,7 +42,7 @@ public:
         info.NumRecDimensions = 1;
         info.NumDimIDs        = 1;
         TSM_ASSERT_THROWS_NOTHING("Nothing should be throwing in description",pDescr = std::auto_ptr<MDPointDescription>(new MDPointDescription(info)));
-
+	
         TSM_ASSERT_EQUALS("Default 1D pixel size has to be (1Dxfloat,2xdouble, 1x16-bit indexes )to be equal to 22 ",22,pDescr->sizeofMDDPoint());
 
         char buf[] = {'a','b','c'};
@@ -50,8 +50,8 @@ public:
 
         std::auto_ptr<mdp > pDP;
         TSM_ASSERT_THROWS_NOTHING("Default MDData Point should not throw with default descpr",pDP = std::auto_ptr<mdp >(new mdp(buf,*pDescr)));
-
-        TSM_ASSERT_EQUALS("Actual and described pixel length have to be the same",pDescr->sizeofMDDPoint(),pDP->sizeofMDDataPoint());
+	// but singleDimID is always casted to at least 32 bit integer (or bigger if specified)
+        TSM_ASSERT_EQUALS("Actual and described pixel length have to be the same",pDescr->sizeofMDDPoint()+2,pDP->sizeofMDDataPoint());
     }
    void testMDEqualPointDesct(){
         std::auto_ptr<MDPointDescription> pDescr;

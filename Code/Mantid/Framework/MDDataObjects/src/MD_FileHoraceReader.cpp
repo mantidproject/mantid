@@ -391,8 +391,11 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
 
     float      Dim_sig[6];
     uint32_t   index[3];
+	MDPointDescription pixInfo;
+	pixInfo.PixInfo().DimIDlength =4;
+	pixInfo.PixInfo().SignalLength=4;
 
- 	MDDataPointEqual<float,uint32_t,float> defPoint(buffer);
+ 	MDDataPointEqual<float,uint32_t,float> defPoint(buffer,pixInfo);
     // output buffer size now decreases;
     buf_size = data_size*defPoint.sizeofMDDataPoint();
     for(i=0;i<data_size;i++){

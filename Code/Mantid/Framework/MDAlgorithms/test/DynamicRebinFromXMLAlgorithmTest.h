@@ -40,10 +40,10 @@ private:
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("q1", true, 1));
-    basisDimensions.insert(MDBasisDimension("q2", true, 2));
-    basisDimensions.insert(MDBasisDimension("q3", true, 3));
-    basisDimensions.insert(MDBasisDimension("u1", false, 4));
+    basisDimensions.insert(MDBasisDimension("q1", true, 0));
+    basisDimensions.insert(MDBasisDimension("q2", true, 1));
+    basisDimensions.insert(MDBasisDimension("q3", true, 2));
+    basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
     UnitCell cell;
     return new MDGeometry(MDGeometryBasis(basisDimensions, cell));

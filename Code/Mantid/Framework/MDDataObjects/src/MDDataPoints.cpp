@@ -126,7 +126,7 @@ MDDataPoints::get_pix_subset(const std::vector<size_t> &selected_cells,size_t st
 std::vector<char> &
 MDDataPoints::getBuffer(size_t buf_size)
 {
-    if(this->data_buffer.size()<buf_size){
+	if(this->data_buffer.size()<buf_size*this->pixel_size){
         this->alloc_pix_array(buf_size);
     }
 
@@ -134,13 +134,13 @@ MDDataPoints::getBuffer(size_t buf_size)
 }
 //***************************************************************************************
 void 
-MDDataPoints::alloc_pix_array(size_t buf_size)
+MDDataPoints::alloc_pix_array(size_t buf_size_in_pix)
 {
     uint64_t nPix = this->n_data_points;
  
     if(this->data_buffer.size()>0){
   
-       uint64_t pix_buf_size = (nPix<buf_size)?nPix:buf_size;
+       uint64_t pix_buf_size = (nPix<buf_size_in_pix)?nPix:buf_size_in_pix;
        if(pix_buf_size<=this->data_buffer_size){
            return;
        }else{
@@ -148,7 +148,7 @@ MDDataPoints::alloc_pix_array(size_t buf_size)
            this->data_buffer_size=0;
        }
    }
-   unsigned int nDims = this->spMDImage->getGeometry()->getNumDims();
+   //unsigned int nDims = this->spMDImage->getGeometry()->getNumDims();
 
 
   // identify maximal number of pixels, possible to fit into buffer for current architecture;
@@ -156,18 +156,36 @@ MDDataPoints::alloc_pix_array(size_t buf_size)
   size_t max_size = ~(nMemPix);
   size_t max_pix_num = max_size/this->pixel_size;
  
-  this->data_buffer_size = buf_size;
+  this->data_buffer_size = buf_size_in_pix;
+  if(buf_size_in_pix>max_pix_num){
+	  this->data_buffer_size = max_pix_num;
+  }
  
-  if(data_buffer_size>max_pix_num){
-      this->data_buffer_size = max_pix_num;
+  if(data_buffer_size>nPix){
       this->memBased = true;
   }else{
       this->memBased = false;
   }
   // remove fractional parts of pixel
-  size_t dbs = data_buffer_size/this->pixel_size;
-  dbs        *=this->pixel_size;
-  data_buffer.resize(dbs);
+  size_t dbs = this->data_buffer_size*this->pixel_size;
+  try{
+	data_buffer.resize(dbs);
+  }catch(std::bad_alloc &){
+	  this->data_buffer_size /= 2;
+	  dbs                    /= 2;
+	  try{
+			data_buffer.resize(dbs);
+	  }catch(std::bad_alloc &){
+		  this->data_buffer_size /= 2;
+		  dbs                    /= 2;
+		  try{
+			  	data_buffer.resize(dbs);
+		  }catch(std::bad_alloc &err){
+			  g_log.error()<<" can not allocate memory to keep "<<this->data_buffer_size<<" MD data points\n";
+			  throw(err);
+		  }
+	  }
+  }
 
 
 }
