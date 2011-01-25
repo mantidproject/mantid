@@ -81,6 +81,7 @@ protected:
   virtual void calcUV(UnwrappedDetector& udet) = 0;
   virtual void calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R) = 0;
   virtual void drawSurface(GL3DWidget* widget,bool picking = false);
+  virtual double uPeriod()const{return 0.0;}
 
   void init();
   void calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
@@ -93,6 +94,7 @@ protected:
   QRect selectionRect()const;
   QRectF selectionRectUV()const;
   void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
+  void findAndCorrectUGap();
 
   const InstrumentActor* m_instrActor;
   const Mantid::Geometry::V3D m_pos;   ///< Origin (sample position)

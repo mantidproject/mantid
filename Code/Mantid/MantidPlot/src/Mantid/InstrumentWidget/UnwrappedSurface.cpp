@@ -13,6 +13,7 @@
 
 #include <cfloat>
 #include <limits>
+#include <cmath>
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
                      boost::shared_ptr<const Mantid::Geometry::IDetector> det
@@ -63,6 +64,25 @@ void UnwrappedSurface::init()
   // the actor calls this->callback for each detector
   m_instrActor->detectorCallback(this);
 
+  findAndCorrectUGap();
+
+  foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
+  {
+    boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
+    if (parent)
+    {
+      QRectF detRect;
+      detRect.setLeft(udet.u - udet.width);
+      detRect.setRight(udet.u + udet.width);
+      detRect.setBottom(udet.v - udet.height);
+      detRect.setTop(udet.v + udet.height);
+      Mantid::Geometry::ComponentID id = parent->getComponentID();
+      QRectF& r = m_assemblies[id];
+      r |= detRect;
+      calcAssemblies(parent,r);
+    }
+  }
+
   double dU = fabs(m_u_max - m_u_min);
   double dV = fabs(m_v_max - m_v_min);
   double du = dU * 0.05;
@@ -89,6 +109,7 @@ void UnwrappedSurface::init()
   m_v_max += dv;
   m_unwrappedView = QRectF(QPointF(m_u_min,m_v_max),
                            QPointF(m_u_max,m_v_min));
+
 }
 
 void UnwrappedSurface::clear()
@@ -122,7 +143,7 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
   if (det->isMonitor()) return;
   unsigned char color[3];
   data.color.getUB3(&color[0]);
-  // first detector defines the cylinder's x axis
+  // first detector defines the surface's x axis
   if (m_xaxis.nullVector())
   {
     Mantid::Geometry::V3D pos = det->getPos() - m_pos;
@@ -138,19 +159,6 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
   if (udet.v < m_v_min) m_v_min = udet.v;
   if (udet.v > m_v_max) m_v_max = udet.v;
   m_unwrappedDetectors.append(udet);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-  if (parent)
-  {
-    QRectF detRect;
-    detRect.setLeft(udet.u - udet.width);
-    detRect.setRight(udet.u + udet.width);
-    detRect.setBottom(udet.v - udet.height);
-    detRect.setTop(udet.v + udet.height);
-    Mantid::Geometry::ComponentID id = parent->getComponentID();
-    QRectF& r = m_assemblies[id];
-    r |= detRect;
-    calcAssemblies(parent,r);
-  }
 }
 
 /**
@@ -776,4 +784,65 @@ void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
 bool UnwrappedSurface::hasSelection()const
 {
   return ! m_selectRect.isNull();
+}
+
+void UnwrappedSurface::findAndCorrectUGap()
+{
+  double period = uPeriod();
+  if (period == 0.0) return;
+  const int nbins = 1000;
+  std::vector<bool> ubins(nbins);
+  double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
+
+  QList<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
+  for(;ud != m_unwrappedDetectors.end(); ++ud)
+  {
+    double u = ud->u;
+    int i = (u - m_u_min) / bin_width;
+    ubins[i] = true;
+  }
+
+  int iFrom = 0; // marks gap start
+  int iTo   = 0; // marks gap end
+  int i0 = 0;
+  bool inGap = false; 
+  for(int i = 0;i < ubins.size()-1;++i)
+  {
+    if (!ubins[i])
+    {
+      if (!inGap)
+      {
+        i0 = i;
+      }
+      inGap = true;
+    }
+    else
+    {
+      if (inGap && iTo - iFrom < i - i0)
+      {
+        iFrom = i0; // first bin in the gap
+        iTo   = i;  // first bin after the gap
+      }
+      inGap = false;
+    }
+  }
+
+  double uFrom = m_u_min + iFrom * bin_width;
+  double uTo   = m_u_min + iTo   * bin_width;
+  if (uTo - uFrom > period - (m_u_max - m_u_min))
+  {
+    double du = m_u_max - uTo;
+    m_u_max = uFrom + du;
+    QList<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
+    for(;ud != m_unwrappedDetectors.end(); ++ud)
+    {
+      double& u = ud->u;
+      u += du;
+      if (u > m_u_max)
+      {
+        u -= period;
+      }
+    }
+    //m_u_min += du;
+  }
 }

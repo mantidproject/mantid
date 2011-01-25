@@ -13,6 +13,7 @@ public:
 protected:
   void calcUV(UnwrappedDetector& udet);
   void calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R);
+  double uPeriod()const;
 };
 
 #endif // UNWRAPPEDCYLINDER_H

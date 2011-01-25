@@ -53,3 +53,8 @@ void UnwrappedCylinder::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat&
 
 }
 
+
+double UnwrappedCylinder::uPeriod()const
+{
+  return 2 * M_PI;
+}

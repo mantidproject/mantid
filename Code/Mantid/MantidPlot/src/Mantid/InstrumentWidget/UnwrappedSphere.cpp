@@ -1,5 +1,6 @@
 #include "UnwrappedSphere.h"
 #include "MantidGeometry/IDetector.h"
+#include <cmath>
 
 UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
@@ -55,3 +56,7 @@ void UnwrappedSphere::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R
 
 }
 
+double UnwrappedSphere::uPeriod()const
+{
+  return 2 * M_PI;
+}
