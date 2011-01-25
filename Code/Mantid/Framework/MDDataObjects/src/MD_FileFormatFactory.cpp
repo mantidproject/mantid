@@ -2,7 +2,6 @@
 // existing file formats
 #include "MDDataObjects/MD_File_hdfV1.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
-#include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 
@@ -124,11 +123,7 @@ MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
         }
     }else{
         // ***> to do:: identify internal hdf5 format; only MATLAB is supported at the moment;
-      if(rec == old_4DMatlabReader){
-          return (new MD_File_hdfMatlab4D(file_name));
-      }else{
-         return (new MD_File_hdfMatlab(file_name));
-      }
+          return (new MD_File_hdfMatlab(file_name));
     }
 }
 // 

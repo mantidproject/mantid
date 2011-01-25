@@ -8,7 +8,6 @@ src/CompositeImplicitFunction.cpp
 src/CompositeImplicitFunctionParser.cpp
 src/CenterpieceRebinning.cpp
 src/CpRebinningNx3.cpp
-src/CpRebinning4x3StructHR.cpp
 src/DynamicCPRRebinning.cpp
 src/IDynamicRebinning.cpp
 src/DepthParameter.cpp
@@ -37,7 +36,6 @@ inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
 inc/MantidMDAlgorithms/BoxInterpreter.h
 inc/MantidMDAlgorithms/CenterpieceRebinning.h
 inc/MantidMDAlgorithms/CpRebinningNx3.h
-inc/MantidMDAlgorithms/CpRebinning4x3StructHR.h
 inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h

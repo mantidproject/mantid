@@ -5,7 +5,6 @@ src/MDDataPointDescription.cpp
 src/MDDataPoints.cpp
 src/MD_FileFormatFactory.cpp
 src/MD_File_hdfMatlab.cpp
-src/MD_File_hdfMatlab4D.cpp
 src/MD_File_hdfV1.cpp
 src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
@@ -22,7 +21,6 @@ inc/MDDataObjects/MDDataPointDescription.h
 inc/MDDataObjects/MDDataPoints.h
 inc/MDDataObjects/MD_FileFormatFactory.h
 inc/MDDataObjects/MD_File_hdfMatlab.h
-inc/MDDataObjects/MD_File_hdfMatlab4D.h
 inc/MDDataObjects/MD_File_hdfV1.h
 inc/MDDataObjects/MD_FileHoraceReader.h
 inc/MDDataObjects/MDImage.h

@@ -50,8 +50,7 @@ namespace MDDataObjects
 	*/
 	enum user_request{
 		best_fit,  //< default file reader
-		test_data,  //< the reader, which does not reads the file, but returns fake data for rebinning;
-		old_4DMatlabReader //< compartibility function, will be probably deleted in a future;
+		test_data  //< the reader, which does not reads the file, but returns fake data for rebinning;
 	};
 
 class DLLExport MD_FileFormatFactory

@@ -14,7 +14,12 @@ Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
 void 
 MDDataPoints::store_pixels(const std::vector<char> &all_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels)
 {
-
+	try{
+		std::vector<char> data_buffer = this->getBuffer();
+		this->memBased = true;
+	}catch(std::bad_alloc &){
+		this->memBased = false;
+	}
 }
 void 
 MDDataPoints::init_pix_locations()

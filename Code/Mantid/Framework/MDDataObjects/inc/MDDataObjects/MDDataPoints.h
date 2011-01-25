@@ -42,7 +42,7 @@ namespace MDDataObjects
 {
 
 //* MDPixels
-/// the size of the buffer to read pixels (in pixels) while reading parts of datasets --should be optimized for performance and deleted
+/// the size of the buffer to read pixels (in pixels) while reading parts of datasets --should be optimized for performance and removed from here
 #define PIX_BUFFER_SIZE 10000000
 /// the size of the data page (in bytes), providing optimal speed of data exchange with HDD -- should be calculated;
 #define PAGE_SIZE  4096
@@ -100,7 +100,8 @@ namespace MDDataObjects
    /// structure of an MDDataPoint
     MDDataPointsDescription const & getMDPointDescription(void)const{return pixDescription;}
 
-  /// sets the datapoints based in file instead of memory; if memory was allocated for the data before, it should be freed and all data should be damped to HDD
+  /// sets the datapoints based in file instead of memory; if memory was allocated for the data before, it should be freed and all data should be damped to HDD 
+  // TODO: implement it
     virtual void set_file_based();
 	//**********************************************************************************************
 
