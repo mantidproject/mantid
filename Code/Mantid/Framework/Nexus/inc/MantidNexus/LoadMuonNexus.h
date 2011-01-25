@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IDataFileChecker.h"
+#include <napi.h>
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -119,6 +120,7 @@ namespace Mantid
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
+      void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
     };
 
   } // namespace NeXus

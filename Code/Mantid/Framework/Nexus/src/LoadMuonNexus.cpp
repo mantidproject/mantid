@@ -182,6 +182,7 @@ namespace Mantid
           period=m_entrynumber-1;
           if(period!=0)
           {
+            loadRunDetails(localWorkspace);
             runLoadInstrument(localWorkspace );
             runLoadMappingTable(localWorkspace );
           }
@@ -190,6 +191,7 @@ namespace Mantid
         if (period == 0)
         {
           // Only run the sub-algorithms once
+          loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
@@ -453,6 +455,23 @@ namespace Mantid
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
       localWorkspace->getAxis(1)->spectraNo(hist)= hist + 1;
+    }
+
+
+    /**  Log the run details from the file
+    * @param localWorkspace The workspace details to use
+    */
+    void LoadMuonNexus::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      API::Run & runDetails = localWorkspace->mutableRun();
+
+      runDetails.addProperty("run_title", localWorkspace->getTitle());
+
+      NXRoot root(m_filename);
+      std::string start_time = root.getString("run/start_time");
+      runDetails.addProperty("run_start", start_time);
+      std::string stop_time = root.getString("run/stop_time");
+      runDetails.addProperty("run_end", stop_time);
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
