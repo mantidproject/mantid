@@ -34,7 +34,7 @@ class ReducerTest(unittest.TestCase):
         """
         r = Reducer()
         # An algorithm with a mandatory property that is NOT InputWorkspace or OutputWorkspace
-        r.append_step(Load, Filename="/home/mantid/workspace/mantid/Test/AutoTestData/AsciiExample.txt", OutputWorkspace=None)
+        r.append_step(Load, Filename="AsciiExample.txt", OutputWorkspace=None)
         # Algorithm with InputWorkspace and OutputWorkspace
         r.append_step(ConvertToHistogram, None, None)
         for item in r._reduction_steps:
