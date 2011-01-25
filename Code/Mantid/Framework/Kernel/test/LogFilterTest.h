@@ -13,6 +13,9 @@ class LogFilterTest : public CxxTest::TestSuite
 {
     TimeSeriesProperty<double>* p;
 public:
+    static LogFilterTest *createSuite() { return new LogFilterTest(); }
+    static void destroySuite(LogFilterTest *suite) { delete suite; }
+
     LogFilterTest()
         :p(new TimeSeriesProperty<double>("test"))
     {
@@ -27,7 +30,7 @@ public:
     {
       delete p;
     }
-    
+
     void testnthValue()
     {
         TS_ASSERT_EQUALS( p->size(), 5 );

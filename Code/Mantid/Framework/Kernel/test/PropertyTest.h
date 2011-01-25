@@ -22,6 +22,9 @@ public:
 class PropertyTest : public CxxTest::TestSuite
 {
 public:
+  static PropertyTest *createSuite() { return new PropertyTest(); }
+  static void destroySuite(PropertyTest *suite) { delete suite; }
+
   PropertyTest()
   {
     p = new PropertyHelper;

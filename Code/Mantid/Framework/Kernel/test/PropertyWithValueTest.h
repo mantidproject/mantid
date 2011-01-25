@@ -13,6 +13,9 @@ using namespace Mantid::Kernel;
 class PropertyWithValueTest : public CxxTest::TestSuite
 {
 public:
+  static PropertyWithValueTest *createSuite() { return new PropertyWithValueTest(); }
+  static void destroySuite(PropertyWithValueTest *suite) { delete suite; }
+
   PropertyWithValueTest()
   {
     iProp = new PropertyWithValue<int>("intProp", 1);

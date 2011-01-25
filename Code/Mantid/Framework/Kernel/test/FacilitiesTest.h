@@ -6,28 +6,19 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
 
 #include <string>
 #include <fstream>
 
 using namespace Mantid::Kernel;
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 
 class FacilitiesTest : public CxxTest::TestSuite
 {
 public: 
-
-  FacilitiesTest()
-  {
-	  
-  }
-
   void testFacilities()
   {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -151,8 +142,8 @@ private:
 
   FacilityInfo* getFacility(const std::string& xmlStr)const
   {
-    DOMParser parser;
-    Document* pDoc = parser.parseString(xmlStr);
+    Poco::XML::DOMParser parser;
+    Poco::XML::Document* pDoc = parser.parseString(xmlStr);
     TS_ASSERT(pDoc);
 
     Poco::XML::Element* pRootElem = pDoc->documentElement();
@@ -161,7 +152,7 @@ private:
 
     TS_ASSERT(n > 0);
 
-    Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_facility->item(0));
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_facility->item(0));
     TS_ASSERT(elem);
 
     return new FacilityInfo(elem);

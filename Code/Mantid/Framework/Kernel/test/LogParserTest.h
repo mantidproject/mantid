@@ -9,13 +9,15 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 
 class LogParserTest : public CxxTest::TestSuite
 {
-public: 
+public:
+  static LogParserTest *createSuite() { return new LogParserTest(); }
+  static void destroySuite(LogParserTest *suite) { delete suite; }
   
   LogParserTest()
         :log_num_good("TST000000_good.txt"),

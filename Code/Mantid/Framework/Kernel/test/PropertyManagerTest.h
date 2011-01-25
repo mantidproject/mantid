@@ -22,12 +22,18 @@ public:
 class PropertyManagerTest : public CxxTest::TestSuite
 {
 public:
-  PropertyManagerTest()
+  void setUp()
   {
+    manager = new PropertyManagerHelper;
     Property *p = new PropertyWithValue<int>("aProp",1);
-    manager.declareProperty(p);
-    manager.declareProperty("anotherProp",1.11);
-    manager.declareProperty("yetAnotherProp","itsValue");
+    manager->declareProperty(p);
+    manager->declareProperty("anotherProp",1.11);
+    manager->declareProperty("yetAnotherProp","itsValue");
+  }
+
+  void tearDown()
+  {
+    delete manager;
   }
 
   void testConstructor()
@@ -133,35 +139,35 @@ public:
 
   void testSetPropertyValue()
   {
-    manager.setPropertyValue("APROP","10");
-    TS_ASSERT( ! manager.getPropertyValue("aProp").compare("10") );
-    manager.setPropertyValue("aProp","1");
-    TS_ASSERT_THROWS( manager.setPropertyValue("fhfjsdf","0"), Exception::NotFoundError );
+    manager->setPropertyValue("APROP","10");
+    TS_ASSERT( ! manager->getPropertyValue("aProp").compare("10") );
+    manager->setPropertyValue("aProp","1");
+    TS_ASSERT_THROWS( manager->setPropertyValue("fhfjsdf","0"), Exception::NotFoundError );
   }
 
   void testSetProperty()
   {
-    TS_ASSERT_THROWS_NOTHING( manager.setProperty("AProp",5) );
-    TS_ASSERT_THROWS( manager.setProperty("wefhui",5), Exception::NotFoundError );
-    TS_ASSERT_THROWS( manager.setProperty("APROP",5.55), std::invalid_argument );
-    TS_ASSERT_THROWS( manager.setProperty("APROP","value"), std::invalid_argument );
-    TS_ASSERT_THROWS_NOTHING( manager.setProperty("AProp",1) );
+    TS_ASSERT_THROWS_NOTHING( manager->setProperty("AProp",5) );
+    TS_ASSERT_THROWS( manager->setProperty("wefhui",5), Exception::NotFoundError );
+    TS_ASSERT_THROWS( manager->setProperty("APROP",5.55), std::invalid_argument );
+    TS_ASSERT_THROWS( manager->setProperty("APROP","value"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( manager->setProperty("AProp",1) );
   }
 
   void testExistsProperty()
   {
     Property *p = new PropertyWithValue<int>("sjfudh",0);
-    TS_ASSERT( ! manager.existsProperty(p->name()) );
+    TS_ASSERT( ! manager->existsProperty(p->name()) );
     Property *pp = new PropertyWithValue<double>("APROP",9.99);
     // Note that although the name of the property is the same, the type is different - yet it passes
-    TS_ASSERT( manager.existsProperty(pp->name()) );
+    TS_ASSERT( manager->existsProperty(pp->name()) );
     delete p;
     delete pp;
   }
 
   void testValidateProperties()
   {
-    TS_ASSERT( manager.validateProperties() );
+    TS_ASSERT( manager->validateProperties() );
     PropertyManagerHelper mgr;
     mgr.declareProperty("someProp","", new MandatoryValidator<std::string>);
     TS_ASSERT( ! mgr.validateProperties() );
@@ -169,34 +175,34 @@ public:
 
   void testGetPropertyValue()
   {
-    TS_ASSERT( ! manager.getPropertyValue("APROP").compare("1") );
-    TS_ASSERT_THROWS( manager.getPropertyValue("sdfshdu"), Exception::NotFoundError );
+    TS_ASSERT( ! manager->getPropertyValue("APROP").compare("1") );
+    TS_ASSERT_THROWS( manager->getPropertyValue("sdfshdu"), Exception::NotFoundError );
   }
 
   void testGetProperty()
   {
-    Property *p = manager.getProperty("APROP");
+    Property *p = manager->getProperty("APROP");
     TS_ASSERT( p );
     TS_ASSERT( ! p->name().compare("aProp") );
     TS_ASSERT( ! p->value().compare("1") );
     TS_ASSERT( ! p->documentation().compare("") );
     TS_ASSERT( typeid(int) == *p->type_info() );
 
-    TS_ASSERT_THROWS( p = manager.getProperty("werhui"), Exception::NotFoundError );
+    TS_ASSERT_THROWS( p = manager->getProperty("werhui"), Exception::NotFoundError );
 
     int i;
-    TS_ASSERT_THROWS_NOTHING( i = manager.getProperty("aprop") );
+    TS_ASSERT_THROWS_NOTHING( i = manager->getProperty("aprop") );
     TS_ASSERT_EQUALS( i, 1 );
     double dd;
-    TS_ASSERT_THROWS( dd= manager.getProperty("aprop"), std::runtime_error );
-    std::string s = manager.getProperty("aprop");
+    TS_ASSERT_THROWS( dd= manager->getProperty("aprop"), std::runtime_error );
+    std::string s = manager->getProperty("aprop");
     TS_ASSERT( ! s.compare("1") );
     double d;
-    TS_ASSERT_THROWS_NOTHING( d = manager.getProperty("anotherProp") );
+    TS_ASSERT_THROWS_NOTHING( d = manager->getProperty("anotherProp") );
     TS_ASSERT_EQUALS( d, 1.11 );
     int ii;
-    TS_ASSERT_THROWS( ii = manager.getProperty("anotherprop"), std::runtime_error );
-    std::string ss = manager.getProperty("anotherprop");
+    TS_ASSERT_THROWS( ii = manager->getProperty("anotherprop"), std::runtime_error );
+    std::string ss = manager->getProperty("anotherprop");
     // Note that some versions of boost::lexical_cast > 1.34 give a string such as
     // 9.9900000000000002 rather than 9.99. Converting back to a double however does
     // still give the correct 9.99.
@@ -205,13 +211,13 @@ public:
 
     // This works, but CANNOT at present declare the string on a separate line and then assign
     //               (as I did for the int & double above)
-    std::string sss = manager.getProperty("yetanotherprop");
+    std::string sss = manager->getProperty("yetanotherprop");
     TS_ASSERT( ! sss.compare("itsValue") );
   }
 
   void testGetProperties()
   {
-    std::vector<Property*> props = manager.getProperties();
+    std::vector<Property*> props = manager->getProperties();
     TS_ASSERT( props.size() == 3 );
     Property *p = props[0];
     TS_ASSERT( ! p->name().compare("aProp") );
@@ -281,7 +287,7 @@ public:
 
 
 private:
-  PropertyManagerHelper manager;
+  PropertyManagerHelper * manager;
 
 };
 

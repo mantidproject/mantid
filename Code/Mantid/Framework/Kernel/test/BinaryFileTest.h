@@ -7,7 +7,6 @@
 #include "MantidKernel/ConfigService.h"
 #include <sys/stat.h>
 
-using namespace Mantid;
 using namespace Mantid::Kernel;
 
 using std::runtime_error;
@@ -55,9 +54,13 @@ static void MakeDummyFile(std::string filename, size_t num_bytes)
 //==========================================================================================
 class BinaryFileTest: public CxxTest::TestSuite
 {
-public:
+private:
   BinaryFile<DasEvent> file;
   std::string dummy_file;
+
+public:
+  static BinaryFileTest *createSuite() { return new BinaryFileTest(); }
+  static void destroySuite(BinaryFileTest *suite) { delete suite; }
 
   BinaryFileTest()
   {
