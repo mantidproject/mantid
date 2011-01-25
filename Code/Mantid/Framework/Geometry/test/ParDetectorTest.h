@@ -13,7 +13,7 @@ class ParDetectorTest : public CxxTest::TestSuite
 public:
   void testNameConstructor()
   {
-    Detector det("det1",0);
+    Detector det("det1",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
@@ -28,7 +28,7 @@ public:
   void testNameParentConstructor()
   {
     Component parent("Parent");
-    Detector det("det1", &parent);
+    Detector det("det1", 0, &parent);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
@@ -43,22 +43,17 @@ public:
   void testId()
   {
     int id1=41;
-    int id2=-43;
-    Detector det("det1",0);
+    Detector det("det1",id1,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
 
-    TS_ASSERT_EQUALS(pdet.getID(),0);
-    det.setID(id1);
     TS_ASSERT_EQUALS(pdet.getID(),id1);
-    det.setID(id2);
-    TS_ASSERT_EQUALS(pdet.getID(),id2);
   }
 
   void testType()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
@@ -68,7 +63,7 @@ public:
 
   void testMasked()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
@@ -80,7 +75,7 @@ public:
 
   void testMonitor()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     Detector pdet(&det,pmap.get());
@@ -94,7 +89,7 @@ public:
 
   void testGetNumberParameter()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("double", &det, "testparam", 5.0);
@@ -108,7 +103,7 @@ public:
 
   void testGetPositionParameter()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("V3D", &det, "testparam", Mantid::Geometry::V3D(0.5, 1.0, 1.5));
@@ -126,7 +121,7 @@ public:
 
   void testGetRotationParameter()
   {
-    Detector det("det",0);
+    Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
     pmap->add("Quat", &det, "testparam", Mantid::Geometry::Quat(1.0, 0.25, 0.5, 0.75));

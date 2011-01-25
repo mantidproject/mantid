@@ -133,9 +133,8 @@ namespace WorkspaceCreationHelper
 
     for( int i = 0; i < nhist; ++i )
     {
-      Detector *det = new Detector("det",shape, NULL);
+      Detector *det = new Detector("det",i,shape, NULL);
       det->setPos(i,i+1,1);
-      det->setID(i);
       instrument->add(det);
       instrument->markAsDetector(det);
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
@@ -221,25 +220,22 @@ namespace WorkspaceCreationHelper
     {
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
-      Detector * physicalPixel = new Detector(lexer.str(), pixelShape, testInst.get());
+      Detector * physicalPixel = new Detector(lexer.str(), i, pixelShape, testInst.get());
       const double ypos = i*2.0*pixelRadius;
       physicalPixel->setPos(detXPos, ypos,0.0);
-      physicalPixel->setID(i);
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
     }
 
     if( includeMonitors )
     {
-      Detector *monitor1 = new Detector("mon1", Object_sptr(), testInst.get());
+      Detector *monitor1 = new Detector("mon1", ndets, Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
-      monitor1->setID(ndets);
       testInst->add(monitor1);
       testInst->markAsMonitor(monitor1);
 
-      Detector *monitor2 = new Detector("mon2", Object_sptr(), testInst.get());
+      Detector *monitor2 = new Detector("mon2", ndets+1, Object_sptr(), testInst.get());
       monitor2->setPos(-2.0,0.0,0.0);
-      monitor2->setID(ndets+1);
       testInst->add(monitor2);
       testInst->markAsMonitor(monitor2);
       

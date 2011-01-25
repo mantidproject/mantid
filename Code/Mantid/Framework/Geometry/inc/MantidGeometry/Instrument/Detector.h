@@ -22,7 +22,7 @@ namespace Geometry
   @author Laurent C Chapon, ISIS RAL
   @date 01/11/2007
 
-  Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 
@@ -46,46 +46,46 @@ class DLLExport Detector : public virtual IDetector, public ObjComponent
 {
 public:
   ///A string representation of the component type
-	virtual std::string type() const {return "DetectorComponent";}
+  virtual std::string type() const {return "DetectorComponent";}
 
-	/// Constructor for parametrized version
-	Detector(const IComponent* base, const ParameterMap * map);
-	Detector(const std::string& name, IComponent* parent);
-	Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent);
-	virtual ~Detector();
-	// functions inherited from IObjectComponent
-	virtual Component* clone() const {return new Detector(*this);}
-	void setID(int);
+  /// Constructor for parametrized version
+  Detector(const Detector* base, const ParameterMap * map);
+  Detector(const std::string& name, int id, IComponent* parent);
+  Detector(const std::string& name, int it, boost::shared_ptr<Object> shape, IComponent* parent);
+  virtual ~Detector();
+  // functions inherited from IObjectComponent
+  virtual Component* clone() const {return new Detector(*this);}
+  //void setID(int);
 
-
-	// IDetector methods
-	int getID() const;
-	double getDistance(const IComponent& comp) const;
-	double getTwoTheta(const V3D& observer, const V3D& axis) const;
-	double getPhi() const;
-	bool isMasked() const;
-	bool isMonitor() const;
+  // IDetector methods
+  int getID() const;
+  std::size_t nDets() const { return 1; } ///< A Detector object represents a single physical detector
+  double getDistance(const IComponent& comp) const;
+  double getTwoTheta(const V3D& observer, const V3D& axis) const;
+  double getPhi() const;
+  bool isMasked() const;
+  bool isMonitor() const;
   std::map<int, double> getNeighbours(double radius = 0.0);
-	/// Returns a reference to itself
-	IComponent* getComponent(){return static_cast<IComponent*>(this);}
-	// end IDetector methods
+  /// Returns a reference to itself
+  IComponent* getComponent(){return static_cast<IComponent*>(this);}
+  // end IDetector methods
 
-	void markAsMonitor(const bool flag = true);
+  void markAsMonitor(const bool flag = true);
 
 protected:
-	Detector(const Detector&);
+  Detector(const Detector&);
 
 private:
-	/// Private, unimplemented copy assignment operator
-	Detector& operator=(const Detector&);
+  /// Private, unimplemented copy assignment operator
+  Detector& operator=(const Detector&);
 
-	/// The detector id
-	int m_id;
-	/// Flags if this is a monitor
-	bool m_isMonitor;
+  /// The detector id
+  const int m_id;
+  /// Flags if this is a monitor
+  bool m_isMonitor;
 
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 } // namespace Geometry

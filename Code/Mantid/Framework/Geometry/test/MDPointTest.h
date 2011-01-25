@@ -18,7 +18,7 @@ private:
   class DummyDetector : public Mantid::Geometry::Detector
   {
   public:
-    DummyDetector(std::string name) : Mantid::Geometry::Detector(name, NULL) {}
+    DummyDetector(std::string name) : Mantid::Geometry::Detector(name, 0, NULL) {}
     ~DummyDetector() {}
   };
 

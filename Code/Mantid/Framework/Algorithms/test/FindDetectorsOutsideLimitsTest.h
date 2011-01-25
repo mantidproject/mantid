@@ -69,8 +69,7 @@ public:
         work_in->setData(i, yStrange, yTooDead);
       }
       work_in->getAxis(1)->spectraNo(i) = i;
-      Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",NULL);
-      det->setID(i);
+      Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",i,NULL);
       boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(work_in->getBaseInstrument());
       instr->add(det);
       instr->markAsDetector(det);

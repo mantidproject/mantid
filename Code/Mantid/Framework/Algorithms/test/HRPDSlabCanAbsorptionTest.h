@@ -60,19 +60,16 @@ public:
     testInst->markAsSamplePos(sample);
 
     // Add three detectors - one for each bank of HRPD
-    Detector * det1 = new Detector("2101",testInst.get());
+    Detector * det1 = new Detector("2101",0,testInst.get());
     det1->setPos(V3D(0.04528,0.04528,-0.887693));
-    det1->setID(0);
     testInst->add(det1);
     testInst->markAsDetector(det1);
-    Detector * det2 = new Detector("911000",testInst.get());
+    Detector * det2 = new Detector("911000",1,testInst.get());
     det2->setPos(V3D(-1.60016,0.770105,0.293987));
-    det2->setID(1);
     testInst->add(det2);
     testInst->markAsDetector(det2);
-    Detector * det3 = new Detector("10101",testInst.get());
+    Detector * det3 = new Detector("10101",2,testInst.get());
     det3->setPos(V3D(1.98194,0.0990971,3.19728));
-    det3->setID(2);
     testInst->add(det3);
     testInst->markAsDetector(det3);
 
@@ -91,15 +88,15 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.7418, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0)[1], 0.7238, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0).back(), 0.5957, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(1).front(), 0.7031, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(1)[5], 0.5937, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(1).back(), 0.5190, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(2).front(), 0.7336, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(2)[5], 0.6403, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(2).back(), 0.5740, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.7423, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0)[1], 0.7244, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.5964, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(1).front(), 0.7033, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(1)[5], 0.5939, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(1).back(), 0.5192, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(2).front(), 0.7337, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(2)[5], 0.6404, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(2).back(), 0.5741, 0.0001 );
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

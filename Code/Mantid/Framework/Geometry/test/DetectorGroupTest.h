@@ -83,8 +83,7 @@ public:
   void testAddDetector()
   {
     boost::shared_ptr<DetectorGroup> detg =  ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
-    boost::shared_ptr<Detector> d(new Detector("d",0));
-    d->setID(6);
+    boost::shared_ptr<Detector> d(new Detector("d",6,0));
     d->setPos(6.0, 3.0, 2.0);
     TS_ASSERT(!detg->isMasked());
     bool warn = true;

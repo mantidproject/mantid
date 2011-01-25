@@ -281,14 +281,17 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
 /// @param L2s A vector of the sample-detector distance for  each segment of the sample
 void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const
 {
-  // We need to make sure this is right for grouped detectors - should use average theta & phi
-  V3D detectorPos;
+  V3D detectorPos(detector->getPos());
+  if ( detector->nDets() > 1 )
+  {
+    // We need to make sure this is right for grouped detectors - should use average theta & phi
+    detectorPos.spherical(detectorPos.norm(),
+                          detector->getTwoTheta(V3D(),V3D(0,0,1))*180.0/M_PI,
+                          detector->getPhi()*180.0/M_PI);
+  }
   
   for (int i = 0; i < m_numVolumeElements; ++i)
   {
-    // We need to make sure this is right for grouped detectors - should use average theta & phi
-    detectorPos.spherical(detector->getDistance(Component("dummy",m_elementPositions[i])),
-      detector->getTwoTheta(m_elementPositions[i],m_beamDirection)*180.0/M_PI,detector->getPhi()*180.0/M_PI);
     // Create track for distance in cylinder between scattering point and detector
     V3D direction = detectorPos - m_elementPositions[i];
     direction.normalize();

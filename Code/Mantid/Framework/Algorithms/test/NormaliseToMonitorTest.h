@@ -41,13 +41,11 @@ public:
     input->getAxis(1)->spectraNo(0) = 0;
     input->getAxis(1)->spectraNo(1) = 1;
     input->getAxis(1)->spectraNo(2) = 2;
-    Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",NULL);
-    mon->setID(0);
+    Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",0,NULL);
     boost::shared_ptr<Instrument> instr = boost::dynamic_pointer_cast<Instrument>(input->getBaseInstrument());
     instr->add(mon);
     instr->markAsMonitor(mon);
-    Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",NULL);
-    det->setID(1);
+    Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",1,NULL);
     instr->add(det);
     instr->markAsDetector(det);
     input->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 3);

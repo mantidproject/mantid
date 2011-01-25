@@ -20,15 +20,12 @@ public:
     instrument.markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument.markAsSamplePos(sample);
-    det = boost::shared_ptr<Detector>(new Detector("det1",0));
-    det->setID(1);
+    det = boost::shared_ptr<Detector>(new Detector("det1",1,0));
     det->setPos(1.0,0.0,0.0);
     instrument.markAsDetector(det.get());
-    det2 = boost::shared_ptr<Detector>(new Detector("det2",0));
-    det2->setID(10);
+    det2 = boost::shared_ptr<Detector>(new Detector("det2",10,0));
     instrument.markAsDetector(det2.get());
-    det3 = boost::shared_ptr<Detector>(new Detector("det3",0));
-    det3->setID(11);
+    det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
     instrument.markAsDetector(det3.get());
   }
 
@@ -94,8 +91,7 @@ public:
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError );
     TS_ASSERT_EQUALS( instrument.getDetector(1), det );
     TS_ASSERT_THROWS( instrument.getDetector(2), Exception::NotFoundError );
-    Detector *d = new Detector("det",0);
-    d->setID(2);
+    Detector *d = new Detector("det",2,0);
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) );
     TS_ASSERT_EQUALS( instrument.getDetector(2).get(), d );
     delete d;
@@ -134,8 +130,7 @@ public:
     bank->setRot(q);
     i->add(bank);
 
-    Detector *det = new Detector("det1",0);
-    det->setID(1);
+    Detector *det = new Detector("det1",1,0);
     det->setPos(1.0,0.0,0.0);
     bank->add(det);
     i->markAsDetector(det);

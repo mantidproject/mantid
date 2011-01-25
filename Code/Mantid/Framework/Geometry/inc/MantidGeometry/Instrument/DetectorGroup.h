@@ -26,7 +26,7 @@ namespace Mantid
 	@author Russell Taylor, Tessella Support Services plc
 	@date 08/04/2008
 	
-	Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+	Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 	
 	This file is part of Mantid.
 	
@@ -56,6 +56,7 @@ namespace Mantid
 
       // IDetector methods
       int getID() const;
+      std::size_t nDets() const;
       V3D getPos() const;
       double getDistance(const IComponent& comp) const;
       double getTwoTheta(const V3D& observer, const V3D& axis) const;
@@ -77,7 +78,7 @@ namespace Mantid
       /// What detectors are contained in the group?
       std::vector<IDetector_sptr> getDetectors() const;
 
-      /** @name ParamaterMap access */
+      /** @name ParameterMap access */
       //@{
       // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
       // one for each type, luckily there won't be too many
@@ -141,11 +142,11 @@ namespace Mantid
       ComponentID getComponentID(void) const{ return NULL; }
       boost::shared_ptr<const IComponent> getParent() const
       {
-	return boost::shared_ptr<const IComponent>();
+        return boost::shared_ptr<const IComponent>();
       }
       std::vector<boost::shared_ptr<const IComponent> > getAncestors() const
       {
-	return std::vector<boost::shared_ptr<const IComponent> >();
+        return std::vector<boost::shared_ptr<const IComponent> >();
       }
       std::string getName() const{return "";}
       void setParent(IComponent*){}
@@ -176,12 +177,12 @@ namespace Mantid
       /// Returns the shape of the Object
       const boost::shared_ptr<const Object> shape() const
       {
-	return boost::shared_ptr<const Object>();
+        return boost::shared_ptr<const Object>();
       }
       /// Returns the material of the Object
       const boost::shared_ptr<const Material> material() const
       {
-	return boost::shared_ptr<const Material>();
+        return boost::shared_ptr<const Material>();
       }
 
       void setScaleFactor(double,double, double);

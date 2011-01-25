@@ -66,6 +66,11 @@ namespace Mantid
       return m_id;
     }
 
+    std::size_t DetectorGroup::nDets() const
+    {
+      return m_detectors.size();
+    }
+
     /** Returns the position of the DetectorGroup.
     *  In the absence of a full surface/solid angle implementation, this is a simple
     *  average of the component detectors (i.e. there's no weighting for size or if one

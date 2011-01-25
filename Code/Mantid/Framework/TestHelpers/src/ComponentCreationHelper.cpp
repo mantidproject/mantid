@@ -148,8 +148,7 @@ namespace ComponentCreationHelper
     {
       std::ostringstream os;
       os << "d" << i;
-      boost::shared_ptr<Detector> det(new Detector(os.str(), detShape, NULL));
-      det->setID(i+1);
+      boost::shared_ptr<Detector> det(new Detector(os.str(), i+1, detShape, NULL));
       det->setPos((double)(i+1), 2.0, 2.0);
       groupMembers[i] = det;
     }
@@ -170,8 +169,7 @@ namespace ComponentCreationHelper
     {
       std::ostringstream os;
       os << "m" << i;
-      boost::shared_ptr<Detector> det(new Detector(os.str(), NULL));
-      det->setID(i+1);
+      boost::shared_ptr<Detector> det(new Detector(os.str(), i+1, NULL));
       det->setPos((double)(i+1), 2.0, 2.0);
       det->markAsMonitor();
       groupMembers[i] = det;
@@ -213,11 +211,10 @@ namespace ComponentCreationHelper
         {
           std::ostringstream lexer;
           lexer << "pixel-(" << j << "," << i << ")";
-          Detector * physicalPixel = new Detector(lexer.str(), pixelShape, bank);
+          Detector * physicalPixel = new Detector(lexer.str(), pixelID, pixelShape, bank);
           const double xpos = j*cylRadius*2.0;
           const double ypos = i*cylHeight;
           physicalPixel->setPos(xpos, ypos,0.0);
-          physicalPixel->setID(pixelID);
           pixelID++;
           bank->add(physicalPixel);
           testInst->markAsDetector(physicalPixel);

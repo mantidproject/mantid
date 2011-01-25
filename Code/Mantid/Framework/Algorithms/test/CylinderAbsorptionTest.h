@@ -60,9 +60,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.7260, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0).back(), 0.2427, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0)[8], 0.2709, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.7210, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.2052, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0)[8], 0.2355, 0.0001 );
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -96,9 +96,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.4920, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0).back(), 0.2847, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0)[2], 0.4313, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.4796, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.2510, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0)[2], 0.4110, 0.0001 );
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

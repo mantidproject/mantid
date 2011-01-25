@@ -134,8 +134,7 @@ public:
     for( int i = 0; i < NVectors; ++i )
     {
       // Create a detector for each spectra
-      Detector * det = new Detector("pixel", inst.get());
-      det->setID(i);
+      Detector * det = new Detector("pixel", i, inst.get());
       inst->add(det);
       inst->markAsDetector(det);
     }

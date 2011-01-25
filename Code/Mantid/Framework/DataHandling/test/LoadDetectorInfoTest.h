@@ -292,23 +292,17 @@ public:
 
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
 
-    Detector *d = new Detector("det",0);
-    d->setID(0);
+    Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);
-    Detector *d1 = new Detector("det",0);
-    d1->setID(1);
+    Detector *d1 = new Detector("det",1,0);
     instr->markAsDetector(d1);
-    Detector *d2 = new Detector("det",0);
-    d2->setID(2);
+    Detector *d2 = new Detector("det",2,0);
     instr->markAsDetector(d2);
-    Detector *d3 = new Detector("det",0);
-    d3->setID(3);
+    Detector *d3 = new Detector("det",3,0);
     instr->markAsDetector(d3);
-    Detector *d4 = new Detector("det",0);
-    d4->setID(4);
+    Detector *d4 = new Detector("det",4,0);
     instr->markAsDetector(d4);
-    Detector *d5 = new Detector("det",0);
-    d5->setID(5);
+    Detector *d5 = new Detector("det",5,0);
     instr->markAsDetector(d5);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index

@@ -196,9 +196,8 @@ public:
     //Detector info
     for( int i = 0; i < nspecs; ++i)
     {
-      Detector *detector = new Detector("det",shape, NULL);
+      Detector *detector = new Detector("det",i+1,shape, NULL);
       detector->setPos(i*0.2,i*0.2,5);
-      detector->setID(i+1);
       pmap.add("double", detector, "3He(atm)", 10.0);
       pmap.add("double", detector, "wallT(m)", 0.0008);
       instrument->markAsDetector(detector);

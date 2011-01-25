@@ -15,18 +15,17 @@ Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-Detector::Detector(const IComponent* base, const ParameterMap * map)
-: ObjComponent(base,map), m_id(0), m_isMonitor(false)
+Detector::Detector(const Detector* base, const ParameterMap * map)
+: ObjComponent(base,map), m_id(base->m_id), m_isMonitor(false)
 {
-
 }
 
 /** Constructor
  *  @param name The name of the component
  *  @param parent The parent component
  */
-Detector::Detector(const std::string& name, IComponent* parent) :
-  IDetector(), ObjComponent(name,parent), m_id(0), m_isMonitor(false)
+Detector::Detector(const std::string& name, int id, IComponent* parent) :
+  IDetector(), ObjComponent(name,parent), m_id(id), m_isMonitor(false)
 {
 }
 
@@ -35,8 +34,8 @@ Detector::Detector(const std::string& name, IComponent* parent) :
  *  @param shape  A pointer to the object describing the shape of this component
  *  @param parent The parent component
  */
-Detector::Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent) :
-  IDetector(), ObjComponent(name,shape,parent), m_id(0), m_isMonitor(false)
+Detector::Detector(const std::string& name, int id, boost::shared_ptr<Object> shape, IComponent* parent) :
+  IDetector(), ObjComponent(name,shape,parent), m_id(id), m_isMonitor(false)
 {
 }
 
@@ -50,14 +49,6 @@ Detector::Detector(const Detector& rhs) :
 ///Destructor
 Detector::~Detector()
 {
-}
-
-/** Sets the detector id
- *  @param det_id the detector id
- */
-void Detector::setID(int det_id)
-{
-	m_id=det_id;
 }
 
 /** Gets the detector id

@@ -118,7 +118,7 @@ void LoadInstrumentFromRaw::exec()
   for (int i = 0; i < numDetector; ++i)
   {
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
-    Geometry::Detector *detector = new Geometry::Detector("det",samplepos);
+    Geometry::Detector *detector = new Geometry::Detector("det",detID[i],samplepos);
     Geometry::V3D pos;
 
     if(phiPresent)
@@ -128,12 +128,11 @@ void LoadInstrumentFromRaw::exec()
 
     detector->setPos(pos);
 
-    // set detector ID, add copy to instrument and mark it
-    detector->setID(detID[i]);
+    // add copy to instrument and mark it
     instrument->add(detector);
     instrument->markAsDetector(detector);
-	prog+=(0.5/numDetector); 
-	progress(prog);
+    prog+=(0.5/numDetector);
+    progress(prog);
   }  
    
 

@@ -22,15 +22,12 @@ public:
     instrument->markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument->markAsSamplePos(sample);
-    det = boost::shared_ptr<Detector>(new Detector("det1",0));
-    det->setID(1);
+    det = boost::shared_ptr<Detector>(new Detector("det1",1,0));
     det->setPos(1.0,0.0,0.0);
     instrument->markAsDetector(det.get());
-    det2 = boost::shared_ptr<Detector>(new Detector("det2",0));
-    det2->setID(10);
+    det2 = boost::shared_ptr<Detector>(new Detector("det2",10,0));
     instrument->markAsDetector(det2.get());
-    det3 = boost::shared_ptr<Detector>(new Detector("det3",0));
-    det3->setID(11);
+    det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
     instrument->markAsDetector(det3.get());
   }
 
@@ -46,8 +43,7 @@ public:
     TS_ASSERT_THROWS( pinstrument.getDetector(0), Exception::NotFoundError );
     TS_ASSERT_EQUALS( pinstrument.getDetector(1)->getID(), det->getID() );
     TS_ASSERT_THROWS( pinstrument.getDetector(2), Exception::NotFoundError );
-    Detector *d = new Detector("det",0);
-    d->setID(2);
+    Detector *d = new Detector("det",2,0);
     TS_ASSERT_THROWS_NOTHING( instrument->markAsDetector(d) );
     TS_ASSERT_EQUALS( pinstrument.getDetector(2)->getID(), d->getID() );
     delete d;

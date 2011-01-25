@@ -781,8 +781,6 @@ namespace Mantid
         //-------------- Create a Detector ------------------------------------------------
         std::string name = getNameOfLocationElement(pLocElem);
 
-        Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
-
         // before setting detector ID check that the IDF satisfy the following 
 
         if (idList.counted >=  static_cast<int>(idList.vec.size()) )
@@ -795,8 +793,9 @@ namespace Mantid
             "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", m_filename);
         }
 
-        // set detector ID and increment it. Finally add the detector to the parent
-        detector->setID(idList.vec[idList.counted]);
+        // Create detector and increment id. Finally add the detector to the parent
+        Geometry::Detector* detector =
+            new Geometry::Detector(name, idList.vec[idList.counted],mapTypeNameToShape[typeName], parent);
         idList.counted++;
         parent->add(detector);
 

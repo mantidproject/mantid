@@ -257,16 +257,15 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       std::ostringstream oss;
       oss << name << "(" << ix << "," << iy << ")";
 
-      //Create the detector from the given shape and with THIS as the parent.
-      Detector* detector = new Detector(oss.str(), shape, this);
-
       //Calculate its id and set it.
       int id;
       if (idfillbyfirst_y)
         id = idstart + ix * idstepbyrow + iy;
       else
         id = idstart + iy * idstepbyrow + ix;
-      detector->setID(id);
+
+      //Create the detector from the given id & shape and with THIS as the parent.
+      Detector* detector = new Detector(oss.str(), id, shape, this);
 
       //Calculate the x,y position
       double x = xstart + ix * xstep;

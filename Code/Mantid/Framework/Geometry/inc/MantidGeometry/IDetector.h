@@ -28,7 +28,7 @@ class Quat;
     @author Russell Taylor, Tessella Support Services plc
     @date 08/04/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -53,6 +53,9 @@ class DLLExport IDetector : public virtual IObjComponent
 public:
   /// Get the detector ID
   virtual int getID() const = 0;
+
+  /// Get the number of physical detectors this object represents
+  virtual std::size_t nDets() const = 0;
 
   /** Get the distance of this detector object from another Component
    *  @param comp The component to give the distance to
