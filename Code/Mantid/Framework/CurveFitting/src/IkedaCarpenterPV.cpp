@@ -119,7 +119,6 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       // then could avoid copying above plus only have to resize m_wavelength when 
       // its size smaller than nData
 	    convertValue(m_waveLength, wavelength, m_workspace, m_workspaceIndex);
-      std::cout << "wave " << m_waveLength[0] << "\n";
     }
   }
 }
