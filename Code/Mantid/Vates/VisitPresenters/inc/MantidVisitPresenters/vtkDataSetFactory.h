@@ -1,11 +1,19 @@
 
-#ifndef GENERATESTRUCTUREDGRID_H_
-#define GENERATESTRUCTUREDGRID_H_
 
-/** Creates a vtkStructuredGrid (mesh only) from a MDImage.
+#ifndef MANTID_VATES_VTKDATASETFACTORY_H_
+#define MANTID_VATES_VTKDATASETFACTORY_H_
+
+#include <vtkDataSet.h>
+
+namespace Mantid
+{
+namespace VATES
+{
+
+/** Abstract type to generate a vtk dataset on demand from a MDWorkspace.
 
  @author Owen Arnold, Tessella plc
- @date 11/01/2010
+ @date 24/01/2010
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -27,31 +35,30 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include <vtkStructuredGrid.h>
-#include "MantidVisitPresenters/vtkDataSetFactory.h"
-#include "MDDataObjects/MDWorkspace.h"
 
-namespace Mantid
+
+
+class vtkDataSetFactory
 {
-namespace VATES
-{
-class GenerateStructuredGrid : public vtkDataSetFactory
-{
+
 public:
 
-  GenerateStructuredGrid(Mantid::MDDataObjects::MDWorkspace_sptr workspace);
+  /// Constructor
+  vtkDataSetFactory();
 
-  ~GenerateStructuredGrid();
+  /// Destructor
+  virtual ~vtkDataSetFactory()=0;
 
-  //Generate a structured mesh from the workspace;
-  vtkStructuredGrid* create() const;
+  /// Factory Method.
+  virtual vtkDataSet* create() const=0;
 
 private:
-  Mantid::MDDataObjects::MDWorkspace_sptr m_workspace;
+
+
 };
+
 }
 }
 
 
-
-#endif /* GENERATESTRUCTUREDGRID_H_ */
+#endif

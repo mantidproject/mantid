@@ -1,5 +1,4 @@
 #include "MantidVisitPresenters/GenerateStructuredGrid.h"
-#include "vtkStructuredGrid.h"
 #include "vtkPoints.h"
 
 namespace Mantid
@@ -16,7 +15,7 @@ GenerateStructuredGrid::~GenerateStructuredGrid()
 {
 }
 
-vtkDataSet* GenerateStructuredGrid::execute()
+vtkStructuredGrid* GenerateStructuredGrid::create() const
 {
   const int nBinsX = m_workspace->getXDimension()->getNBins();
   const int nBinsY = m_workspace->getYDimension()->getNBins();
@@ -41,15 +40,21 @@ vtkDataSet* GenerateStructuredGrid::execute()
   //The following represent actual calculated positions.
   double posX, posY, posZ;
   //Loop through dimensions
+  double currentXIncrement, currentYIncrement;
   boost::shared_ptr<const Mantid::MDDataObjects::MDImage> spImage = m_workspace->get_spMDImage();
-  for (int i = 0; i < nBinsX+1; i++)
+  int nPointsX = nBinsX+1;
+  int nPointsY = nBinsY+1;
+  int nPointsZ = nBinsZ+1;
+  for (int i = 0; i < nPointsX; i++)
   {
-    for (int j = 0; j < nBinsY+1; j++)
+    currentXIncrement = i*incrementX;
+    for (int j = 0; j < nPointsY; j++)
     {
-      for (int k = 0; k < nBinsZ+1; k++)
+      currentYIncrement = j*incrementY;
+      for (int k = 0; k < nPointsZ; k++)
       {
-        posX = minX + i*incrementX; //Calculate increment in x;
-        posY = minY + j*incrementY; //Calculate increment in y;
+        posX = minX + currentXIncrement; //Calculate increment in x;
+        posY = minY + currentYIncrement; //Calculate increment in y;
         posZ = minZ + k*incrementZ; //Calculate increment in z;
         points->InsertNextPoint(posX, posY, posZ);
       }
@@ -58,7 +63,7 @@ vtkDataSet* GenerateStructuredGrid::execute()
 
   //Attach points to dataset.
   visualDataSet->SetPoints(points);
-  visualDataSet->SetDimensions(nBinsX+1, nBinsY+1, nBinsZ+1);
+  visualDataSet->SetDimensions(nPointsX, nPointsY, nPointsZ);
   points->Delete();
   return visualDataSet;
 }

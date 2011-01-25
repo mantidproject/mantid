@@ -48,8 +48,8 @@
 #include <vtkDataSet.h>
 #include <vtkCellData.h>
 #include <avtExtents.h>
-#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include <avtDatasetVerifier.h>
+#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 using namespace Mantid::VATES;
 
 // ****************************************************************************
@@ -257,7 +257,8 @@ void avtRebinningCutterFilter::Execute()
       in_ds);
   }
 
-  vtkDataSet *output_ds = m_presenter.createVisualDataSet(XMLDefinitions::signalName, false, m_timestep);
+
+  vtkDataSet *output_ds = m_presenter.createVisualDataSet(XMLDefinitions::signalName, atts.GetStructured(), m_timestep);
 
   output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName.c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);
@@ -289,7 +290,6 @@ void avtRebinningCutterFilter::Execute()
   vector<int> domains;
   domains.push_back(0);
   v.VerifyDatasets(1, &output_ds, domains);
-
 
 }
 

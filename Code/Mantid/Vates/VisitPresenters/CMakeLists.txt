@@ -11,6 +11,8 @@ src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningXMLGenerator.cpp
+src/vtkDataSetFactory.cpp
+src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
 set ( INC_FILES 
@@ -19,6 +21,8 @@ inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 
 inc/MantidVisitPresenters/RebinningXMLGenerator.h
+inc/MantidVisitPresenters/vtkDataSetFactory.h
+inc/MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h
 )
 
 set (TEST_FILES

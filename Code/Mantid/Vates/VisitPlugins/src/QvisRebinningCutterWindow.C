@@ -184,7 +184,7 @@ void QvisRebinningCutterWindow::CreateWindowContents()
   connect(depth, SIGNAL(returnPressed()), this, SLOT(depthProcessText()));
   mainLayout->addWidget(depth, 4, 1);
 
-  structured = new QCheckBox(tr("Is Unstructured Grid"), central);
+  structured = new QCheckBox(tr("Structured Grid"), central);
   connect(structured, SIGNAL(toggled(bool)), this, SLOT(structuredChanged(bool)));
   mainLayout->addWidget(structured, 5, 0);
 

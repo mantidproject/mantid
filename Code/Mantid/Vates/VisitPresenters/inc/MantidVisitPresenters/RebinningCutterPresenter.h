@@ -100,7 +100,7 @@ public:
       std::vector<double>& origin, vtkDataSet* inputDataSet);
 
   /// Apply reduction knowledge to create a vtk dataset.
-  vtkDataSet* createVisualDataSet(const std::string& scalarName, bool isUnstructured, int timestep);
+  vtkDataSet* createVisualDataSet(const std::string& scalarName, bool isStructured, int timestep);
 
   /// Get the x dimension from vtkDataSet field data.
   Dimension_sptr getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
@@ -162,13 +162,17 @@ public:
       double depth,
       std::vector<double>& origin);
 
-  vtkDataSet* generateVisualImage(Mantid::MDDataObjects::MDWorkspace_sptr rebinnedWs, const std::string& scalarName, bool isUnstructured, const int timestep);
+  vtkDataSet* generateVisualImage(Mantid::MDDataObjects::MDWorkspace_sptr rebinnedWs, const std::string& scalarName, bool isStructured, const int timestep);
 
   /// Create an unstructured vtk image, which is sparse and excludes empty signal values.
   vtkDataSet* generateVTKUnstructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
 
   /// Create a structured vtk image, which is essentially dense.
   vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace, const std::string& scalarName, const int timestep);
+
+  /// Create rectilinear vtk image which is essentially dense.
+  vtkDataSet* generateVTKRectilinearImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace,
+      const std::string& scalarName, const int timestep);
 
   /// Helper method to get dimensions from a geometry xml element.
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);

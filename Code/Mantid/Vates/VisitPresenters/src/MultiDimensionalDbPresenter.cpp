@@ -10,7 +10,7 @@
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <vtkDoubleArray.h>
+#include <vtkFloatArray.h>
 #include <vtkFieldData.h>
 #include <boost/shared_ptr.hpp>
 #include <vtkCharArray.h>
@@ -84,7 +84,7 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
 
   //Create the mesh
   GenerateStructuredGrid meshGenerator(m_MDWorkspace);
-  vtkDataSet* visualDataSet = meshGenerator.execute();
+  vtkDataSet* visualDataSet = meshGenerator.create();
 
   vtkFieldData* outputFD = vtkFieldData::New();
 
@@ -143,7 +143,7 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char
   const int sizeY = m_MDWorkspace->getYDimension()->getNBins();
   const int sizeZ = m_MDWorkspace->getZDimension()->getNBins();
 
-  vtkDoubleArray* scalars = vtkDoubleArray::New();
+  vtkFloatArray* scalars = vtkFloatArray::New();
   scalars->SetName(scalarName);
   scalars->Allocate(sizeX * sizeY * sizeZ);
 

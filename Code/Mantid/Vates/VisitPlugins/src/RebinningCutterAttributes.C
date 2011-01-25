@@ -58,8 +58,8 @@
 
 void RebinningCutterAttributes::Init()
 {
-
     this->isSetUp = false;
+    this->structured = true;
     RebinningCutterAttributes::SelectAll();
 }
 
