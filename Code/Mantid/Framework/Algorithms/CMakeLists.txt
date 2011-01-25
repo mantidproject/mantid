@@ -70,6 +70,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/GroupWorkspaces.cpp
 		src/He3TubeEfficiency.cpp
 		src/HRPDSlabCanAbsorption.cpp
+		src/IdentifyNoisyDetectors.cpp
 		src/InputWSDetectorInfo.cpp
 		src/Integration.cpp
 		src/InterpolatingRebin.cpp
@@ -203,6 +204,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/GSLFunctions.h
 		inc/MantidAlgorithms/He3TubeEfficiency.h
 		inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
+		inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 		inc/MantidAlgorithms/InputWSDetectorInfo.h
 		inc/MantidAlgorithms/Integration.h
 		inc/MantidAlgorithms/InterpolatingRebin.h
@@ -319,6 +321,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/GroupWorkspacesTest.h
 		 test/He3TubeEfficiencyTest.h
 		 test/HRPDSlabCanAbsorptionTest.h
+		 test/IdentifyNoisyDetectorsTest.h
 		 test/IntegrationTest.h
 		 test/InterpolatingRebinTest.h
 		 test/LogarithmTest.h
