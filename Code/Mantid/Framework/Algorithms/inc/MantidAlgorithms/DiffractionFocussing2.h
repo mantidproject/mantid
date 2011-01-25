@@ -113,7 +113,7 @@ private:
   API::MatrixWorkspace_sptr matrixInputW;
 
   /// Shared pointer to the event workspace
-  DataObjects::EventWorkspace_const_sptr eventW;
+  DataObjects::EventWorkspace_sptr eventW;
 
 
   // This map does not need to be ordered, just a lookup for udet

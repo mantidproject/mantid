@@ -103,7 +103,7 @@ void DiffractionFocussing2::exec()
   // It also initializes the groupAtWorkspaceIndex[] array.
   determineRebinParameters();
 
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInputW );
+  eventW = boost::dynamic_pointer_cast<EventWorkspace>( matrixInputW );
   if (eventW != NULL)
   {
     //Input workspace is an event workspace. Use the other exec method
@@ -284,6 +284,9 @@ void DiffractionFocussing2::execEvent()
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
 
+  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  g_log.information("Focussing EventWorkspace in-place.");
+
   //BUT! We want to use all groups, even if no pixels ever refer to them.
   nGroups = maxgroup_in_file+1;
   //g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
@@ -291,8 +294,20 @@ void DiffractionFocussing2::execEvent()
   //Flag to determine whether the X for a group has been set
   std::vector<bool> flags(nGroups,true);
 
-  //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
-  //std::vector< MantidVec > original_X_to_use(nGroups+1);
+  // ------------- Pre-allocate Event Lists ----------------------------
+  std::vector<size_t> size_required(nGroups,0);
+  for (int i=0;i<nHist;i++)
+  {
+    //i is the workspace index (of the input)
+    //Check whether this spectra is in a valid group
+    const int group = groupAtWorkspaceIndex[i];
+    if (group < 1) // Not in a group
+      continue;
+    size_required[group] += eventW->getEventList(i).getNumberEvents();
+  }
+  for (int group=1; group<nGroups; group++)
+    out->getOrAddEventList(group-1).reserve(size_required[group]);
+
 
   API::Progress progress(this,0.0,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
@@ -316,6 +331,10 @@ void DiffractionFocussing2::execEvent()
 
     //In workspace index group-1, put what was in the OLD workspace index i
     out->getOrAddEventList(group-1) += eventW->getEventList(i);
+
+    // When focussing in place, you can clear out old memory from the input one!
+    if (inPlace)
+      eventW->getEventList(i).clear();
   }
 
   //Now, we want to make sure that all groups are listed in the output workspace,
