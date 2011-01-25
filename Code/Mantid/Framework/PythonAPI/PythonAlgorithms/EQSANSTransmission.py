@@ -43,15 +43,15 @@ class EQSANSTransmission(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input)
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input, Description="Name the workspace to calculate the transmission from")
         # Output workspace to put the transmission histo into
-        self.declareProperty("OutputWorkspace", "")
+        self.declareProperty("OutputWorkspace", "", Description="Name of the workspace that will contain the transmission histogram")
         # X position of the beam center
-        self.declareProperty("XCenter", 96.0)
+        self.declareProperty("XCenter", 96.0, Description="Position of the beam center in X [pixel]. Default: 96")
         # Y position of the beam center
-        self.declareProperty("YCenter", 128.0)
+        self.declareProperty("YCenter", 128.0, Description="Position of the beam center in Y [pixel]. Default: 128")
         # Transmission will be normalized to 1 if True
-        self.declareProperty("NormalizeToUnity", False)
+        self.declareProperty("NormalizeToUnity", False, Description="If True, the transmission will be normalized to unity. Default: False")
 
 
     def PyExec(self):
