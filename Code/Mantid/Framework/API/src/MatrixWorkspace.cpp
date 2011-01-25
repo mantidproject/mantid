@@ -421,13 +421,15 @@ namespace Mantid
         g_log.debug() << "No instrument defined.\n";
         throw Kernel::Exception::NotFoundError("Instrument not found", "");
       }
-      if ( dets.size() == 1 ) 
+      const size_t ndets = dets.size();
+      if ( ndets == 1 ) 
       {
         // If only 1 detector for the spectrum number, just return it
         return localInstrument->getDetector(dets[0]);
       }
       // Else need to construct a DetectorGroup and return that
       std::vector<Geometry::IDetector_sptr> dets_ptr;
+      dets_ptr.reserve(ndets);
       std::vector<int>::const_iterator it;
       for ( it = dets.begin(); it != dets.end(); ++it )
       {

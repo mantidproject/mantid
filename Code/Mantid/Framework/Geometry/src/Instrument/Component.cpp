@@ -13,18 +13,24 @@ namespace Mantid
     * @param map a ParameterMap to parameterize the component
     */
     Component::Component(const IComponent* base,  const ParameterMap * map)
-      : m_base(base), m_map(map), m_isParametrized(true)
+      : m_base(dynamic_cast<const Component*>(base)), m_map(map), m_isParametrized(true)
     {
+      if( !m_base )
+      {
+	throw std::invalid_argument("Component::Component() - Cannot construct a "
+				    "parameterized component from an invalid base component.");
+      }
+
     }
 
     /// Copy constructor
     Component::Component(const Component& comp)
       :m_base(comp.m_base),m_map(comp.m_map),m_isParametrized(comp.m_isParametrized)
     {
-      name=comp.name;
-      parent=comp.parent;
-      pos=comp.pos;
-      rot=comp.rot;
+      m_name=comp.m_name;
+      m_parent=comp.m_parent;
+      m_pos=comp.m_pos;
+      m_rot=comp.m_rot;
     }
 
 
@@ -32,7 +38,7 @@ namespace Mantid
     *  Create a component with null parent
     */
     Component::Component()
-      : m_map(NULL), m_isParametrized(false), name(), pos(), rot(), parent(NULL)
+      : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(), m_pos(), m_rot(), m_parent(NULL)
     {
     }
 
@@ -41,7 +47,8 @@ namespace Mantid
     *  @param parent :: parent Component (optional)
     */
     Component::Component(const std::string& name, IComponent* parent)
-      : m_map(NULL), m_isParametrized(false), name(name), pos(), rot(), parent(parent)
+      : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot(), 
+	m_parent(parent)
     {
     }
 
@@ -52,7 +59,8 @@ namespace Mantid
     *  @param parent :: parent Component
     */
     Component::Component(const std::string& name, const V3D& position, IComponent* parent)
-      : m_map(NULL), m_isParametrized(false), name(name), pos(position), rot(), parent(parent)
+      : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position), 
+	m_rot(), m_parent(parent)
     {
     }
 
@@ -63,7 +71,8 @@ namespace Mantid
     *  @param parent :: parent Component (optional)
     */
     Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
-      : m_map(NULL), m_isParametrized(false), name(name),pos(position),rot(rotation),parent(parent)
+      : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position),
+	m_rot(rotation),m_parent(parent)
     {
     }
 
@@ -109,7 +118,7 @@ namespace Mantid
     */
     void Component::setParent(IComponent* comp)
     {
-      parent=comp;
+      m_parent = comp;
     }
 
 
@@ -125,7 +134,7 @@ namespace Mantid
         return ParComponentFactory::create(parent,m_map);
       }
       else
-        return boost::shared_ptr<const IComponent>(parent, NoDeleting());
+        return boost::shared_ptr<const IComponent>(m_parent, NoDeleting());
     }
 
     //--------------------------------------------------------------------------------------------
@@ -145,17 +154,6 @@ namespace Mantid
           ancs.push_back( current );
           current = current->getParent();
         }
-
-        //        throw std::runtime_error("Component::getAncestors() not implemented yet!!!");
-        //        //TODO! Navigate properly
-        //        std::vector<boost::shared_ptr<const IComponent> > ancs;
-        //        boost::shared_ptr<const Component> current = boost::dynamic_pointer_cast<const Component>( dynamic_cast<const Component *>(m_base)->parent );
-        //        while (current)
-        //        {
-        //          ancs.push_back( ParComponentFactory::create(current,m_map) );
-        //          current = current->m_base->parent;
-        //        }
-        //        return ancs;
       }
       else
       {
@@ -177,7 +175,7 @@ namespace Mantid
     void Component::setName(const std::string& s)
     {
       if (!m_isParametrized)
-        this->name = s;
+        this->m_name = s;
       else
         throw Kernel::Exception::NotImplementedError("Component::setName (for Parametrized Component)");
     }
@@ -191,7 +189,7 @@ namespace Mantid
       if (m_isParametrized)
         return m_base->getName();
       else
-        return name;
+        return m_name;
     }
 
     /*! Set the position of the Component
@@ -203,7 +201,7 @@ namespace Mantid
     void Component::setPos(double x, double y, double z)
     {
       if (!m_isParametrized)
-        pos(x,y,z);
+        m_pos = V3D(x,y,z);
       else
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
     }
@@ -215,7 +213,7 @@ namespace Mantid
     void Component::setPos(const V3D& v)
     {
       if (!m_isParametrized)
-        pos = v;
+        m_pos = v;
       else
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
     }
@@ -227,7 +225,7 @@ namespace Mantid
     void Component::setRot(const Quat& q)
     {
       if (!m_isParametrized)
-        rot = q;
+        m_rot = q;
       else
         throw Kernel::Exception::NotImplementedError("Component::setRot (for Parametrized Component)");
     }
@@ -242,9 +240,9 @@ namespace Mantid
     {
       if (!m_isParametrized)
       {
-        pos[0]+=x;
-        pos[1]+=y;
-        pos[2]+=z;
+        m_pos[0]+=x;
+        m_pos[1]+=y;
+        m_pos[2]+=z;
       }
       else
         throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
@@ -256,7 +254,7 @@ namespace Mantid
     void Component::translate(const V3D& v)
     {
       if (!m_isParametrized)
-        pos+=v;
+        m_pos+=v;
       else
         throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
     }
@@ -267,7 +265,7 @@ namespace Mantid
     void Component::rotate(const Quat& r)
     {
       if (!m_isParametrized)
-        rot=rot*r;
+        m_rot=m_rot*r;
       else
         throw Kernel::Exception::NotImplementedError("Component::rotate (for Parametrized Component)");
     }
@@ -289,7 +287,7 @@ namespace Mantid
     V3D Component::getRelativePos() const
     {
       if (!m_isParametrized)
-        return pos;
+        return m_pos;
       else
       {
         Parameter_sptr par = m_map->get(m_base,"pos");
@@ -324,52 +322,46 @@ namespace Mantid
     {
       if (this->m_isParametrized)
       {
-        V3D temp;
-
-        //avoid creating a parent instantiation unless we have to
-
-        //I'm not too happy here that I have to create the shared pointer - perhaps if I created a protected method to get access to the m_base->parent pointer
-        boost::shared_ptr<const IComponent> parent = m_base->getParent();
-        if (!parent)
+        // Avoid instantiation of the parent's parameterized object if possible
+	const IComponent * baseParent = m_base->m_parent;
+        if ( !baseParent )
         {
           return getRelativePos();
         }
         else
         {
-          temp = getRelativePos();
-          //get the parent rotation, try to get it from the cache first to avoid instantiaing the class
-          Quat parentRot;
-          V3D parentPos;
-          bool rotCached = m_map->getCachedRotation(parent.get(),parentRot);
-          bool posCached = m_map->getCachedLocation(parent.get(),parentPos);
-          if (!(rotCached && posCached))
-          {
-            //couldn't get them from the cache, so I have to instantiate the class
-            boost::shared_ptr<const IComponent> parent_sptr = getParent();
-            if (parent)
-            {
-              parentRot = parent_sptr->getRotation();
-              parentPos = parent_sptr->getPos();
-            }
-          }
-          parentRot.rotate(temp);
-          temp+=parentPos;
-        }
-
-        return temp;
+	  // Avoid instantiation of parent shared pointer if we can
+	  V3D absPos = getRelativePos();
+	  //get the parent rotation, try to get it from the cache first to avoid instantiaing the class
+	  Quat parentRot;
+	  V3D parentPos;
+	  if( !(m_map->getCachedLocation(baseParent, parentPos) && 
+		m_map->getCachedRotation(baseParent, parentRot)) )
+	  {
+	    // Couldn't get them from the cache, so I have to instantiate the class
+	    boost::shared_ptr<const IComponent> parParent = getParent();
+	    if( parParent )
+	    {
+	      parentRot = parParent->getRotation();
+	      parentPos = parParent->getPos();
+	    }
+	  }
+	  parentRot.rotate(absPos);
+	  absPos += parentPos;
+	  return absPos;
+	}
       }
       else
       {
-        if (!parent)
+        if (!m_parent)
         {
-          return pos;
+          return m_pos;
         }
         else
         {
-          V3D temp(pos);
-          parent->getRotation().rotate(temp);
-          temp+=parent->getPos();
-          return temp;
+          V3D absPos(m_pos);
+          m_parent->getRotation().rotate(absPos);
+          return absPos + m_parent->getPos();
         }
       }
     }
@@ -388,7 +380,7 @@ namespace Mantid
           return m_base->getRelativeRot();
       }
       else
-        return rot;
+        return m_rot;
     }
 
 
@@ -397,23 +389,36 @@ namespace Mantid
     */
     const Quat Component::getRotation() const
     {
-      //Note: This split into the two versions (parameter/no parameter) makes
-      // a significant speed difference in getPos() vs using getParent() and getRelativeRot()...
       if (m_isParametrized)
       {
-        boost::shared_ptr<const IComponent> parent = getParent();
-        if (!parent)
+        // Avoid instantiation of the parent's parameterized object if possible
+	const IComponent * baseParent = m_base->m_parent;
+        if ( !baseParent )
+        {
           return getRelativeRot();
+        }
         else
-          return parent->getRotation()*getRelativeRot();
+        {
+	  Quat parentRot;
+	  if( !m_map->getCachedRotation(baseParent, parentRot) )
+	  {
+	    // Get the parent's rotation
+	    boost::shared_ptr<const IComponent> parParent = getParent();
+	    if( parParent )
+	    {
+	      parentRot = parParent->getRotation();
+	    }
+	  }
+	  return parentRot*getRelativeRot();
+	}
       }
       else
       {
         // Not parametrized
-        if (!parent)
-          return rot;
+        if (!m_parent)
+          return m_rot;
         else
-          return parent->getRotation()*rot;
+          return m_parent->getRotation()*m_rot;
       }
     }
 

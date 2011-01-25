@@ -50,7 +50,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Component:public virtual IComponent
+    class DLLExport Component : public virtual IComponent
     {
     public:
       /// Constructor for parametrized component
@@ -80,7 +80,7 @@ namespace Mantid
       //! Assign a parent IComponent. Previous parent link is lost
       void setParent(IComponent*);
 
-      //! Return a pointer to the current parent.
+      //! Return a pointer to the current parent. as shared pointer
       boost::shared_ptr<const IComponent> getParent() const;
       //! Return an array of all ancestors
       std::vector<boost::shared_ptr<const IComponent> > getAncestors() const;
@@ -192,9 +192,9 @@ namespace Mantid
       virtual V3D getScaleFactorP() const;
 
     protected:
-
-      /// The base component - this is the unmodifed component (without the parameters)
-      const IComponent* m_base;
+      /// The base component - this is the unmodifed component (without the parameters). Stored
+      /// as a pointer to Component so that it's properties can be accessed without casting each time
+      const Component* m_base;
 
       /// A const pointer to a const ParameterMap containing the parameters
       const ParameterMap * const m_map;
@@ -203,18 +203,16 @@ namespace Mantid
       const bool m_isParametrized;
 
       //! Name of the component
-      std::string name;
+      std::string m_name;
 
       //! Position w
-      V3D pos;
+      V3D m_pos;
 
       //! Orientation
-      Quat rot;
+      Quat m_rot;
 
       /// Parent component in the tree
-      const IComponent* parent;
-
-
+      const IComponent* m_parent;
 
     private:
       /// Private, unimplemented copy assignment operator

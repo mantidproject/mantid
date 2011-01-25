@@ -143,13 +143,14 @@ namespace Mantid
      */
     std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {
+      const size_t ndets = ndet(spectrum_number);
       std::vector<int> detectors;
-
-      if ( ! ndet(spectrum_number) )
+      if ( ndets == 0 )
       {
         // Will just return an empty vector
         return detectors;
       }
+      detectors.reserve(ndets);
       std::pair<smap_it,smap_it> det_range=m_s2dmap.equal_range(spectrum_number);
       for (smap_it it=det_range.first; it!=det_range.second; ++it)
       {

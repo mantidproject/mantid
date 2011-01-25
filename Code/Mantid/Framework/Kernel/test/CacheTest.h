@@ -2,6 +2,10 @@
 #define CACHETEST_H_
 
 #include <cxxtest/TestSuite.h>
+
+// The test requires the hit/miss stats. Note that this only works because the Cache class 
+// is header only
+#define USE_CACHE_STATS
 #include "MantidKernel/Cache.h"
 
 using namespace Mantid::Kernel;
@@ -97,5 +101,8 @@ public:
   }
 
 };
+
+// Remove the define here
+#undef USE_CACHE_STATS
 
 #endif /*CACHETEST_H_*/

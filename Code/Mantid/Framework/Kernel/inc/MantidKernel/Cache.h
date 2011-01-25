@@ -8,6 +8,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <iostream>
+
 namespace Mantid
 {
   namespace Kernel
@@ -84,7 +86,8 @@ namespace Mantid
       ///Attempts to retreive a value from the cache
       bool getCache(const KEYTYPE& key, VALUETYPE& value) const
       {
-        bool found = getCacheNoStats(key,value);
+      #ifdef USE_CACHE_STATS
+	bool found = getCacheNoStats(key,value);
         if (found) 
         {
           PARALLEL_ATOMIC
@@ -96,6 +99,9 @@ namespace Mantid
           m_cacheMiss++;
         }
         return found;
+       #else
+	return getCacheNoStats(key,value);
+       #endif
       }
 
       ///removes the value associated with a key
