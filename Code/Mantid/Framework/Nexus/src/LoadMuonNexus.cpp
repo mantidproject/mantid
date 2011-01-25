@@ -466,12 +466,18 @@ namespace Mantid
       API::Run & runDetails = localWorkspace->mutableRun();
 
       runDetails.addProperty("run_title", localWorkspace->getTitle());
+ 
+      int numSpectra = localWorkspace->getNumberHistograms();
+      runDetails.addProperty("nspectra", numSpectra);
 
       NXRoot root(m_filename);
       std::string start_time = root.getString("run/start_time");
       runDetails.addProperty("run_start", start_time);
       std::string stop_time = root.getString("run/stop_time");
       runDetails.addProperty("run_end", stop_time);
+      std::string dur = root.getString("run/duration");
+      runDetails.addProperty("dur", dur);
+      runDetails.addProperty("durunits", 1);
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
