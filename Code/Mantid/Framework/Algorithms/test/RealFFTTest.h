@@ -15,6 +15,9 @@ using namespace Mantid::API;
 class RealFFTTest : public CxxTest::TestSuite
 {
 public:
+  static RealFFTTest *createSuite() { return new RealFFTTest(); }
+  static void destroySuite(RealFFTTest *suite) { delete suite; }
+
   RealFFTTest():N(116),dX(0.3),XX(N*dX)
     {
 

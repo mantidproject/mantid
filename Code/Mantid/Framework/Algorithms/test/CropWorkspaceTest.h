@@ -14,6 +14,9 @@ using namespace Mantid::DataObjects;
 class CropWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+  static CropWorkspaceTest *createSuite() { return new CropWorkspaceTest(); }
+  static void destroySuite(CropWorkspaceTest *suite) { delete suite; }
+
   CropWorkspaceTest()
   {
     // Set up a small workspace for testing

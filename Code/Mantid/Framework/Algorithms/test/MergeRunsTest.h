@@ -19,6 +19,8 @@ using Mantid::DataHandling::LoadEventPreNeXus;
 class MergeRunsTest : public CxxTest::TestSuite
 {
 public:
+  static MergeRunsTest *createSuite() { return new MergeRunsTest(); }
+  static void destroySuite(MergeRunsTest *suite) { delete suite; }
 
   EventWorkspace_sptr ev1, ev2, ev3, ev4, ev5,ev6,evg1, evg2, evg3;
 

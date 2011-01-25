@@ -18,6 +18,9 @@ static const int NUMSPECS = 4;
 class FlatBackgroundTest : public CxxTest::TestSuite
 {
 public:
+  static FlatBackgroundTest *createSuite() { return new FlatBackgroundTest(); }
+  static void destroySuite(FlatBackgroundTest *suite) { delete suite; }
+
   FlatBackgroundTest()
   {
     bg = 100.0;

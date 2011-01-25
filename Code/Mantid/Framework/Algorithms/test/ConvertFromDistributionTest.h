@@ -13,6 +13,9 @@ using Mantid::Algorithms::ConvertFromDistribution;
 class ConvertFromDistributionTest : public CxxTest::TestSuite
 {
 public:
+  static ConvertFromDistributionTest *createSuite() { return new ConvertFromDistributionTest(); }
+  static void destroySuite(ConvertFromDistributionTest *suite) { delete suite; }
+
   ConvertFromDistributionTest() : dist("dist")
   {
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,10,0,0.5);

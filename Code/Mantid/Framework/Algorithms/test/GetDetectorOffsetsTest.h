@@ -16,6 +16,9 @@ using Mantid::Algorithms::GetDetectorOffsets;
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
+  static GetDetectorOffsetsTest *createSuite() { return new GetDetectorOffsetsTest(); }
+  static void destroySuite(GetDetectorOffsetsTest *suite) { delete suite; }
+
   GetDetectorOffsetsTest()
   {
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,200,-100.5,1);

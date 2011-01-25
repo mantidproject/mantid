@@ -19,6 +19,8 @@ using Mantid::MantidVec;
 class IntegrationTest : public CxxTest::TestSuite
 {
 public:
+  static IntegrationTest *createSuite() { return new IntegrationTest(); }
+  static void destroySuite(IntegrationTest *suite) { delete suite; }
 
   IntegrationTest()
   {

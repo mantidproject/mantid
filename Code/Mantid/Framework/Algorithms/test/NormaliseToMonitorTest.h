@@ -18,6 +18,10 @@ private:
   NormaliseToMonitor norm;
 
 public:
+
+  static NormaliseToMonitorTest *createSuite() { return new NormaliseToMonitorTest(); }
+  static void destroySuite(NormaliseToMonitorTest *suite) { delete suite; }
+
   NormaliseToMonitorTest()
   {
     MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);

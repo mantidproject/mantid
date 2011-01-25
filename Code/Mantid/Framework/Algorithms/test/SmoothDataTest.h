@@ -11,6 +11,9 @@ using namespace Mantid::Algorithms;
 class SmoothDataTest : public CxxTest::TestSuite
 {
 public:
+  static SmoothDataTest *createSuite() { return new SmoothDataTest(); }
+  static void destroySuite(SmoothDataTest *suite) { delete suite; }
+  
   SmoothDataTest()
   {
     // Set up a small workspace for testing
