@@ -15,18 +15,18 @@ public:
     // Instantiating the object starts the timer
     Mantid::Kernel::Timer timer;
     #ifdef _WIN32
-      Sleep(40);
+      Sleep(200);
     #else
-      usleep(40000);
+      usleep(200000);
     #endif
-    TS_ASSERT_DELTA( timer.elapsed(), 0.04, 0.002 );
+    TS_ASSERT_DELTA( timer.elapsed(), 0.2, 0.02 );
     #ifdef _WIN32
-      Sleep(20);
+      Sleep(100);
     #else
-      usleep(20000);
+      usleep(100000);
     #endif
     // Calling elapsed above should reset the timer
-    TS_ASSERT_DELTA( timer.elapsed(), 0.02, 0.002 );
+    TS_ASSERT_DELTA( timer.elapsed(), 0.1, 0.02 );
   }
 };
 
