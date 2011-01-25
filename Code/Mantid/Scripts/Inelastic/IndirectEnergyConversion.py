@@ -18,10 +18,12 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         sys.exit('Monitor area and thickness (unt and zz) are not defined \
                 in the Instrument Parameter File.')
     for ws in ws_name:
+        invalid = []
         if ( analyser != "" and reflection != "" ):
             applyParameterFile(ws, analyser, reflection)
         isTosca = adjustTOF(ws)
         if isTosca:
+            invalid = getBadDetectorList(ws)
             TofCorrection(ws, ws)
             for i in range(1,141):
                 detector = "Detector #" + str(i)
@@ -55,7 +57,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         if ( tempK != -1 ):
             db = detailedBalance(tempK)
         if isTosca:
-            group = groupTosca(name)
+            group = groupTosca(name, invalid)
         else:
             group = groupData(mapfile, outWS_n=name)
         output_workspace_names.append(group)
@@ -216,10 +218,7 @@ def groupData(grouping, inWS_n = 'Energy', outWS_n = 'IconComplete'):
         mantid.deleteWorkspace(inWS_n)
     return outWS_n
 
-def groupTosca(wsname):
-    invalid = [0,1,13,27,28,41,55,69,70,83,97,111,125,127,139]
-    # Will want a way to generate that list in mantid
-    # rather than hardcoding it. that's the next step for TOSCA
+def groupTosca(wsname, invalid):
     grp = range(0,70)
     for i in invalid:
         try:
@@ -239,7 +238,17 @@ def groupTosca(wsname):
     mantid.deleteWorkspace('Energy')
     ConjoinWorkspaces(wsname, 'front')
     return wsname
-    
+def getBadDetectorList(workspace):
+    IdentifyNoisyDetectors(workspace, '_temp_tsc_noise')
+    ws = mtd['_temp_tsc_noise']
+    nhist = ws.getNumberHistograms()
+    invalid = []
+    for i in range(0, nhist):
+        if ( ws.readY(i)[0] == 0.0 ):
+            invalid.append(i)
+    mantid.deleteWorkspace('_temp_tsc_noise')
+    return invalid
+
 def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
     ConvertToDistribution(inWS_n)
     FlatBackground(inWS_n, outWS_n, tofStart, tofEnd, Mode = 'Mean')
