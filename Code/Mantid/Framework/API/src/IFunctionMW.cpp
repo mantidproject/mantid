@@ -66,16 +66,16 @@ namespace API
           {
             if (e[0].name() == "WorkspaceIndex")
             {
-              index = boost::lexical_cast<int>(e[1].name());
+              index = boost::lexical_cast<int>(e[1].str());
             }
             else if (e[0].name() == "StartX")
             {
-              startX = boost::lexical_cast<double>(e[1].name());
+              startX = boost::lexical_cast<double>(e[1].str());
               xMin = 0;
             }
             else if (e[0].name() == "EndX")
             {
-              endX = boost::lexical_cast<double>(e[1].name());
+              endX = boost::lexical_cast<double>(e[1].str());
               xMax = 0;
             }
           }
