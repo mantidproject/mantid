@@ -2472,8 +2472,8 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
         if (workspace->axes() > 1) t->setCell(j,0,(*workspace->getAxis(1))(j));
         else t->setCell(j,0,j);
       }
-      t->setCell(j,kY,dataY[i]);
-      if (errs) t->setCell(j,kErr,dataE[i]);
+      t->setCell(j,kY,dataY[bins[i]]);
+      if (errs) t->setCell(j,kErr,dataE[bins[i]]);
     }
   }
   return t;
