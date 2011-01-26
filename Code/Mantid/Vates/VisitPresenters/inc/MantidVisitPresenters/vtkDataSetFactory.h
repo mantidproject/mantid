@@ -3,6 +3,7 @@
 #ifndef MANTID_VATES_VTKDATASETFACTORY_H_
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
+#include "boost/shared_ptr.hpp"
 #include <vtkDataSet.h>
 
 namespace Mantid
@@ -56,6 +57,8 @@ private:
 
 
 };
+
+typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
 
 }
 }

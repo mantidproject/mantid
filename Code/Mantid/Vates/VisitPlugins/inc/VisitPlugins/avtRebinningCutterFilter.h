@@ -65,13 +65,15 @@
 // ****************************************************************************
 
 class vtkDataSet;
+class Mantid::VATES::vtkDataSetFactory;
+
 class avtRebinningCutterFilter: public avtPluginDatasetToDatasetFilter
 {
 
 public:
   avtRebinningCutterFilter();
   virtual ~avtRebinningCutterFilter();
-  void SetUp();
+
   static avtFilter *Create();
     const virtual char *GetType(void)
     {
@@ -113,6 +115,9 @@ private:
     Mantid::VATES::Dimension_sptr getDimensionZ(vtkDataSet* in_ds) const;
 
     Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
+
+    /// Helper method. Selects the dataset factory to use.
+    boost::shared_ptr<Mantid::VATES::vtkDataSetFactory> createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
 
     /// Executor peforms the logic associated with running rebinning operations.
     Mantid::VATES::RebinningCutterPresenter m_presenter;

@@ -6,26 +6,31 @@ include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 project ( VisitPresenters )
 
 set ( SRC_FILES 
-src/GenerateStructuredGrid.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningXMLGenerator.cpp
 src/vtkDataSetFactory.cpp
+src/vtkRectilinearGridFactory.cpp
+src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
 set ( INC_FILES 
-inc/MantidVisitPresenters/GenerateStructuredGrid.h
 inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 
 inc/MantidVisitPresenters/RebinningXMLGenerator.h
 inc/MantidVisitPresenters/vtkDataSetFactory.h
+inc/MantidVisitPresenters/vtkRectilinearGridFactory.h
+inc/MantidVisitPresenters/vtkStructuredGridFactory.h
 inc/MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h
 )
 
 set (TEST_FILES
+test/vtkRectilinearGridFactoryTest.h
+test/vtkStructuredGridFactoryTest.h
+test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/RebinningCutterTest.h
 test/RebinningXMLGeneratorTest.h

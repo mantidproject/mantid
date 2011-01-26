@@ -15,11 +15,12 @@
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
 #include <vtkDataSet.h>
-#include <vtkStructuredGrid.h>
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
+#include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::VATES;
 
@@ -71,9 +72,11 @@ private:
       vec.push_back(dimZ);
       vec.push_back(dimT);
 
-      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin, in_ds);
-
-      vtkDataSet *ug = presenter.createVisualDataSet("signal", false, 1);
+      using Mantid::MDDataObjects::MDImage;
+      using Mantid::MDDataObjects::MDWorkspace_sptr;
+      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin, in_ds);
+      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
+      vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
       in_ds->Delete();
       return ug;
@@ -92,7 +95,7 @@ std::string getComplexXMLInstructions()
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>fe_demo.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>/home/owen/mantid/Test/VATES/fe_demo_30.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
@@ -365,16 +368,16 @@ void testConstructionWithoutValidOriginThrows()
   TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
       presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, badOrigin, vtkStructuredGrid::New()), std::invalid_argument);
 }
-
-void testCreateVisualDataSetThrows()
-{
-    using namespace Mantid::API;
-    using namespace Mantid::MDAlgorithms;
-
-    Mantid::VATES::RebinningCutterPresenter presenter;
-
-    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.createVisualDataSet("", false,1), std::runtime_error);
-}
+//
+//void testCreateVisualDataSetThrows()
+//{
+//    using namespace Mantid::API;
+//    using namespace Mantid::MDAlgorithms;
+//
+//    Mantid::VATES::RebinningCutterPresenter presenter;
+//
+//    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.createVisualDataSet("", false,1), std::runtime_error);
+//}
 
 void testFindWorkspaceName()
 {
@@ -392,8 +395,9 @@ void testFindWorkspaceLocation()
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string location = findExistingWorkspaceLocation(dataset, id.c_str());
+  static const boost::regex match(".*(fe_demo_30.sqw)$");
 
-  TSM_ASSERT_EQUALS("The workspace location is differrent from the xml value.", "fe_demo.sqw", location);
+  TSM_ASSERT("The workspace location is differrent from the xml value.", regex_match(location, match));
 }
 
 void testFindWorkspaceNameThrows()

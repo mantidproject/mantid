@@ -17,7 +17,7 @@
 #include "MantidVisitPresenters/RebinningCutterPresenter.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
-#include "MantidVisitPresenters/GenerateStructuredGrid.h"
+#include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include "MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
@@ -71,7 +71,7 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 
 }
 
-void RebinningCutterPresenter::constructReductionKnowledge(
+Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReductionKnowledge(
     DimensionVec dimensions,
     Dimension_sptr dimensionX,
     Dimension_sptr dimensionY,
@@ -122,19 +122,19 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   //Apply the workspace location after extraction from the input xml.
   m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId.c_str()));
 
-  //Now actually perform rebinning operation and cache the rebinnned workspace.
-  this->m_rebinnedWs = rebin(m_serializer);
-
   this->m_initalized = true;
+
+  //Now actually perform rebinning operation and cache the rebinnned workspace.
+  return rebin(m_serializer);
 }
 
-vtkDataSet* RebinningCutterPresenter::createVisualDataSet(const std::string& scalarName,
-    bool isStructured, int timestep)
+vtkDataSet* RebinningCutterPresenter::createVisualDataSet(vtkDataSetFactory_sptr spvtkDataSetFactory)
 {
 
   VerifyInitalization();
-  //call the rebinning routines and generate a resulting image for visualisation.
-  vtkDataSet* visualImageData = generateVisualImage(m_rebinnedWs, scalarName, isStructured, timestep);
+
+  //Generate the visualisation dataset.
+  vtkDataSet* visualImageData = spvtkDataSetFactory->create();
 
   //save the work performed as part of this filter instance into the pipeline.
   persistReductionKnowledge(visualImageData, this->m_serializer, XMLDefinitions::metaDataId.c_str());
@@ -586,152 +586,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
      return outputWs;
  }
 
-vtkDataSet* generateVisualImage(Mantid::MDDataObjects::MDWorkspace_sptr rebinnedWs, const std::string& scalarName, bool isStructured, const int timestep)
-{
-  vtkDataSet* visualDataSet;
-  if(isStructured)
-  {
-    visualDataSet = generateVTKStructuredImage(rebinnedWs, scalarName, timestep);
-  }
-  else
-  {
-    visualDataSet = generateVTKUnstructuredImage(rebinnedWs, scalarName, timestep);
-  }
-  return visualDataSet;
 }
-
-vtkDataSet* generateVTKRectilinearImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace,
-    const std::string& scalarName, const int timestep)
-{
-
-  using namespace Mantid::MDDataObjects;
-
-  const int nBinsX = spWorkspace->getXDimension()->getNBins();
-  const int nBinsY = spWorkspace->getYDimension()->getNBins();
-  const int nBinsZ = spWorkspace->getZDimension()->getNBins();
-
-  const double maxX = spWorkspace-> getXDimension()->getMaximum();
-  const double minX = spWorkspace-> getXDimension()->getMinimum();
-  const double maxY = spWorkspace-> getYDimension()->getMaximum();
-  const double minY = spWorkspace-> getYDimension()->getMinimum();
-  const double maxZ = spWorkspace-> getZDimension()->getMaximum();
-  const double minZ = spWorkspace-> getZDimension()->getMinimum();
-
-  double incrementX = (maxX - minX) / nBinsX;
-  double incrementY = (maxY - minY) / nBinsY;
-  double incrementZ = (maxZ - minZ) / nBinsZ;
-
-  boost::shared_ptr<const Mantid::MDDataObjects::MDImage> spImage = spWorkspace->get_spMDImage();
-
-  const int nPointsX = nBinsX + 1;
-  const int nPointsY = nBinsY + 1;
-  const int nPointsZ = nBinsZ + 1;
-
-  vtkDoubleArray* xCoords = vtkDoubleArray::New();
-  xCoords->Allocate(nPointsX);
-  vtkDoubleArray* yCoords = vtkDoubleArray::New();
-  yCoords->SetNumberOfTuples(nPointsY);
-  yCoords->Allocate(nPointsY);
-  vtkDoubleArray* zCoords = vtkDoubleArray::New();
-  zCoords->SetNumberOfTuples(nPointsZ);
-  zCoords->Allocate(nPointsZ);
-
-  for (int i = 0; i < nPointsX; i++)
-  {
-    xCoords->InsertNextValue(minX + (incrementX * i));
-  }
-  for (int j = 0; j < nPointsY; j++)
-  {
-    yCoords->InsertNextValue(minY + (incrementY * j));
-  }
-  for (int k = 0; k < nPointsZ; k++)
-  {
-    zCoords->InsertNextValue(minZ + (incrementZ * k));
-  }
-  vtkRectilinearGrid* visualDataSet = vtkRectilinearGrid::New();
-  visualDataSet->SetDimensions(nPointsX, nPointsY, nPointsZ);
-  visualDataSet->SetXCoordinates(xCoords);
-  visualDataSet->SetYCoordinates(yCoords);
-  visualDataSet->SetZCoordinates(zCoords);
-  visualDataSet->SetExtent(0, nBinsX, 0, nBinsY, 0, nBinsZ);
-
-  vtkFloatArray* scalars = vtkFloatArray::New();
-
-  const int sizeX = spWorkspace->getXDimension()->getNBins();
-  const int sizeY = spWorkspace->getYDimension()->getNBins();
-  const int sizeZ = spWorkspace->getZDimension()->getNBins();
-  scalars->Allocate(sizeX * sizeY * sizeZ);
-  scalars->SetName(scalarName.c_str());
-
-  MD_image_point point;
-  for (int i = 0; i < sizeX; i++)
-  {
-    for (int j = 0; j < sizeY; j++)
-    {
-      for (int k = 0; k < sizeZ; k++)
-      {
-        // Create an image from the point data.
-        point = spWorkspace->get_spMDImage()->getPoint(i, j, k, timestep);
-        // Insert scalar data.
-        scalars->InsertNextValue(point.s);
-      }
-    }
-  }
-  scalars->Squeeze();
-  //Attach points to dataset.
-  visualDataSet->GetCellData()->AddArray(scalars);
-}
-
-vtkDataSet* generateVTKUnstructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace,
-    const std::string& scalarName, const int timestep)
-{
-  vtkThresholdingUnstructuredGridFactory factory(spWorkspace, scalarName, timestep);
-  return factory.create();
-}
-
-vtkDataSet* generateVTKStructuredImage(Mantid::MDDataObjects::MDWorkspace_sptr spWorkspace,
-    const std::string& scalarName, const int timestep)
-{
-  using namespace MDDataObjects;
-  const int imageSize = spWorkspace->get_spMDImage()->getDataSize();
-
-  //Creates the visualisation mesh.
-  GenerateStructuredGrid meshGenerator(spWorkspace);
-  vtkDataSet* visualDataSet = meshGenerator.create();
-
-  //Add scalar data to the mesh.
-  vtkFloatArray* scalars = vtkFloatArray::New();
-
-  const int sizeX = spWorkspace->getXDimension()->getNBins();
-  const int sizeY = spWorkspace->getYDimension()->getNBins();
-  const int sizeZ = spWorkspace->getZDimension()->getNBins();
-  scalars->Allocate(sizeX * sizeY * sizeZ);
-  scalars->SetName(scalarName.c_str());
-
-  MD_image_point point;
-  for (int i = 0; i < sizeX; i++)
-  {
-    for (int j = 0; j < sizeY; j++)
-    {
-      for (int k = 0; k < sizeZ; k++)
-      {
-        // Create an image from the point data.
-        point = spWorkspace->get_spMDImage()->getPoint(i, j, k, timestep);
-        // Insert scalar data.
-        scalars->InsertNextValue(point.s);
-      }
-    }
-  }
-  scalars->Squeeze();
-  //Attach points to dataset.
-  visualDataSet->GetCellData()->AddArray(scalars);
-
-  scalars->Delete();
-  return visualDataSet;
-}
-
-}
-
 }
 
 

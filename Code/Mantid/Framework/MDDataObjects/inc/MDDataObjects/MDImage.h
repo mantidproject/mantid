@@ -56,6 +56,9 @@ namespace Mantid{
 class DLLExport MDImage
 {
 public:
+    /// Embedded type information
+    typedef Mantid::Geometry::MDGeometry GeometryType;
+
     /// default constructor
     MDImage(Mantid::Geometry::MDGeometry* p_MDGeometry=NULL);
 	/// the constructor which builds empty image from geometry the description (calling proper geometry constructor inside)

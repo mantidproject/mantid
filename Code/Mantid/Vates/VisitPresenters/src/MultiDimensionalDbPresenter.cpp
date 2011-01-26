@@ -1,7 +1,7 @@
 #include <MantidVisitPresenters/MultiDimensionalDbPresenter.h>
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
-#include "MantidVisitPresenters/GenerateStructuredGrid.h"
+#include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
@@ -83,8 +83,8 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   verifyExecution();
 
   //Create the mesh
-  GenerateStructuredGrid meshGenerator(m_MDWorkspace);
-  vtkDataSet* visualDataSet = meshGenerator.create();
+  vtkStructuredGridFactory<MDImage> factory =  vtkStructuredGridFactory<MDImage>::constructAsMeshOnly(m_MDWorkspace->get_spMDImage());
+  vtkDataSet* visualDataSet = factory.createMeshOnly();
 
   vtkFieldData* outputFD = vtkFieldData::New();
 
@@ -138,29 +138,8 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char
     throw std::range_error("A timestep larger than the range of available timesteps has been requested.");
   }
 
-  boost::shared_ptr<const MDImage> spImage(m_MDWorkspace->get_spMDImage());
-  const int sizeX = m_MDWorkspace->getXDimension()->getNBins();
-  const int sizeY = m_MDWorkspace->getYDimension()->getNBins();
-  const int sizeZ = m_MDWorkspace->getZDimension()->getNBins();
-
-  vtkFloatArray* scalars = vtkFloatArray::New();
-  scalars->SetName(scalarName);
-  scalars->Allocate(sizeX * sizeY * sizeZ);
-
-  //Loop through dimensions
-  for (int i = 0; i < sizeX; i++)
-  {
-    for (int j = 0; j < sizeY; j++)
-    {
-      for (int k = 0; k < sizeZ; k++)
-      {
-        MD_image_point point = spImage->getPoint(i, j, k, timeBin);
-        scalars->InsertNextValue(point.s);
-      }
-    }
-  }
-
-  return scalars;
+  vtkStructuredGridFactory<MDImage> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), timeBin);
+  return scalarFactory.createScalarArray();
 }
 
 MultiDimensionalDbPresenter::~MultiDimensionalDbPresenter()
