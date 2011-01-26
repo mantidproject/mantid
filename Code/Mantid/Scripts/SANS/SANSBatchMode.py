@@ -64,7 +64,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, verbose = False, centreit = False):
+def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, verbose = False, centreit = False, reducer=None):
     if not format.startswith('.'):
         format = '.' + format
         
@@ -78,8 +78,10 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
     # End of file reading
     file_handle.close()
 
-    #first copy the user settings incase running the reductionsteps can change it 
-    settings = copy.deepcopy(ISIS_global().reference())
+    if reducer:
+       ReductionSingleton().replace(reducer)
+    #first copy the user settings incase running the reductionsteps can change it
+    settings = copy.deepcopy(ReductionSingleton().reference())
 
     # Now loop over run information and process
     for run in runinfo:
@@ -149,4 +151,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
             PlotResult(final_name)
 
         #the call to WaveRang... killed the reducer so copy back over the settings
-        reset_singleton(copy.deepcopy(settings))
+        ReductionSingleton().replace(copy.deepcopy(settings))
+
+
+#ReductionSingleton.clean(isis_reducer.ISISReducer)

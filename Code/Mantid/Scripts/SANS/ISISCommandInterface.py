@@ -2,13 +2,13 @@
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
 """
-import os
-
 import isis_instrument
+from reduction.command_interface import ReductionSingleton  
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
 import MantidFramework
+import copy
 
 #remove the following
 DEL__FINDING_CENTRE_ = False
@@ -28,26 +28,6 @@ except ImportError:
         return []
 
 _VERBOSE_ = False
-
-__ISIS_reducer_instance_ = isis_reducer.ISISReducer()
-
-def ISIS_global():
-    """
-        Returns an isis_reducer object that is shared by all
-        dictionaries, e.g. GUI and scripting
-    """
-    return __ISIS_reducer_instance_
-
-def reset_singleton(new=None):
-    """
-        Creates a new isis_reducer which is shared by all
-        dictionaries (GUI and scripting)
-    """
-    global __ISIS_reducer_instance_
-    if new is None:
-        __ISIS_reducer_instance_ = isis_reducer.ISISReducer()
-    else:
-        __ISIS_reducer_instance_ = new
 
 def SetVerboseMode(state):
 #TODO: this needs to be on the reducer
@@ -69,58 +49,58 @@ def issueWarning(msg):
                 
 def UserPath(path):
     _printMessage('UserPath("' + path + '") #Will look for mask file here')
-    ISIS_global().user_file_path = path
+    ReductionSingleton().user_file_path = path
 
 def DataPath(path):
-    ISIS_global().set_data_path(path)
+    ReductionSingleton().set_data_path(path)
 
 def SANS2D():
     _printMessage('SANS2D()')
     instrument = isis_instrument.SANS2D()
         
-    ISIS_global().set_instrument(instrument)
+    ReductionSingleton().set_instrument(instrument)
 
 def LOQ():
     _printMessage('LOQ()')
     instrument = isis_instrument.LOQ()
 
-    ISIS_global().set_instrument(instrument)
+    ReductionSingleton().set_instrument(instrument)
     
 def Detector(det_name):
     _printMessage('Detector("' + det_name + '")')
-    ISIS_global().instrument.setDetector(det_name)
+    ReductionSingleton().instrument.setDetector(det_name)
     
 def Mask(details):
     _printMessage('Mask("' + details + '")')
-    ISIS_global().mask.parse_instruction(details)
+    ReductionSingleton().mask.parse_instruction(details)
     
 def MaskFile(file_name):
     _printMessage('#Opening "'+file_name+'"')
-    ISIS_global().user_settings = isis_reduction_steps.UserFile(
+    ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
-    status = ISIS_global().user_settings.execute(
-        ISIS_global(), None)
+    status = ReductionSingleton().user_settings.execute(
+        ReductionSingleton(), None)
     _printMessage('#Success reading "'+file_name+'"'+' is '+str(status))
     return status
     
 def SetMonitorSpectrum(specNum, interp=False):
-    ISIS_global().set_monitor_spectrum(specNum, interp)
+    ReductionSingleton().set_monitor_spectrum(specNum, interp)
 
 def SuggestMonitorSpectrum(specNum, interp=False):  
-    ISIS_global().suggest_monitor_spectrum(specNum, interp)
+    ReductionSingleton().suggest_monitor_spectrum(specNum, interp)
     
 def SetTransSpectrum(specNum, interp=False):
-    ISIS_global().set_trans_spectrum(specNum, interp)
+    ReductionSingleton().set_trans_spectrum(specNum, interp)
       
 def SetPhiLimit(phimin,phimax, phimirror=True):
-    ISIS_global().set_phi_limit(phimin, phimax, phimirror)
+    ReductionSingleton().set_phi_limit(phimin, phimax, phimirror)
     
 def SetSampleOffset(value):
-    ISIS_global().instrument.set_sample_offset(value)
+    ReductionSingleton().instrument.set_sample_offset(value)
     
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
-    ISIS_global().to_Q.set_gravity(flag)
+    ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
     message = str(mode)
@@ -128,14 +108,14 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
     if lambdamax: message += str(lambdamax)
     _printMessage("TransFit(\"" + message + "\")")
 
-    ISIS_global().set_trans_fit(lambdamin, lambdamax, mode)
+    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
 
 def AssignCan(can_run, reload = True, period = -1):
     _printMessage('AssignCan("' + can_run + '")')
-    ISIS_global().set_background(can_run, reload = reload, period = period)
+    ReductionSingleton().set_background(can_run, reload = reload, period = period)
 
-    return ISIS_global().background_subtracter.assign_can(
-                                                    ISIS_global())
+    return ReductionSingleton().background_subtracter.assign_can(
+                                                    ReductionSingleton())
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -147,9 +127,9 @@ def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = 
         @param period_d: the entry number of the direct run (default single entry file)
     """  
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
-    ISIS_global().set_trans_sample(sample, direct, True, period_t, period_d)
-    return ISIS_global().samp_trans_load.execute(
-                                        ISIS_global(), None)
+    ReductionSingleton().set_trans_sample(sample, direct, True, period_t, period_d)
+    return ReductionSingleton().samp_trans_load.execute(
+                                        ReductionSingleton(), None)
 
 def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -161,34 +141,35 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
         @param period_d: the entry number of the direct run (default single entry file)
     """
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    ISIS_global().set_trans_can(can, direct, True, period_t, period_d)
-    return ISIS_global().can_trans_load.execute(
-                                            ISIS_global(), None)
+    ReductionSingleton().set_trans_can(can, direct, True, period_t, period_d)
+    return ReductionSingleton().can_trans_load.execute(
+                                            ReductionSingleton(), None)
     
 def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
 
-    ISIS_global().data_loader = isis_reduction_steps.LoadSample(
+    ReductionSingleton().data_loader = isis_reduction_steps.LoadSample(
                                     sample_run, reload, period)
 
-    sample_wksp, logs = ISIS_global().data_loader.execute(
-                                            ISIS_global(), None)
-    ISIS_global().set_run_number(sample_wksp)
+    sample_wksp, logs = ReductionSingleton().data_loader.execute(
+                                            ReductionSingleton(), None)
+    ReductionSingleton().set_run_number(sample_wksp)
     return sample_wksp, logs
 
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
 
-    ISIS_global().set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
+    ReductionSingleton().set_beam_finder(
+        sans_reduction_steps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
 
 
 def GetMismatchedDetList():
     """
         Return the list of mismatched detector names
     """
-    return ISIS_global().instrument.get_marked_dets()
+    return ReductionSingleton().instrument.get_marked_dets()
 
-def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, no_clean=False):
+def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
     """
         Run a reduction that has been set up and reset the old
         setup (unless clean = False)
@@ -200,10 +181,10 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, n
     _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
 
     if not full_trans_wav is None:
-        ISIS_global().full_trans_wav = full_trans_wav
+        ReductionSingleton().full_trans_wav = full_trans_wav
 
-    ISIS_global().to_wavelen.set_range(wav_start, wav_end)
-    _printMessage('Running reduction for ' + str(ISIS_global().to_wavelen))
+    ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
+    _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
 
 
 
@@ -213,73 +194,113 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, n
                 GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
                 return
 
+    return Reduce()
+
+def CompWavRanges(wavelens, plot=True):
+    settings = copy.deepcopy(ReductionSingleton().reference())
+    reductions = WavRanges(
+                           (wavelens[0], wavelens[len(wavelens)-1]))
+    ReductionSingleton().replace(settings)
+    
+    in_betweens = WavRanges(wavelens)
+    for i in in_betweens:
+        reductions.append(i) 
+
+    if plot:
+        graph_output = None
+        for i in reductions:
+            graph_output = PlotResult(i, graph_output)
+    
+    #return just the workspace name of the full range
+    return reductions[0]
+
+def WavRanges(wavelens):
+    """
+        Perform a reduction over a number of wavelength ranges. Useful as
+        a diagnostic
+        @param wav_lengths: a list (or tuple) of wave lengths, a reduction will take place between the first wave length and the second, the second to third, etc.
+    """
+    
+    _printMessage('WavRanges( %s )'%str(wavelens))
+        
+    if not ReductionSingleton().full_trans_wav:
+        issueWarning('Using full range for the transmission calculation, overrides setting')
+        ReductionSingleton().full_trans_wav = True 
+
+    #this only makes sense for 1D reductions
+    if ReductionSingleton().to_Q.output_type == '2D':
+        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
+        _printMessage('Set1D()')
+        ReductionSingleton().to_Q.output_type = '1D'
+    
+    if type(wavelens) != type([]) or len(wavelens) < 2:
+        if type(wavelens) != type((1,)):
+            raise RuntimeError('Error WavRanges() requires a list of wavelengths between which reductions will be performed.')
+    
+    calculated = []
     try:
-        #run the chain that must already have been setup
-        if ISIS_global().clean:
-            #the normal situation
-            result = ISIS_global()._reduce()
-        else:
-            #here the reduction chain has been run once before and only some parts need to be re-run
-            start_from = ISIS_global().step_num(ISIS_global().out_name)
-            #using this code you take a risk that some values will come over from previous reductions, the risk should be minimised 
-            result = ISIS_global().run_steps(start_ind=start_from)
+        for i in range(0, len(wavelens)-1):
+            settings = copy.deepcopy(ReductionSingleton().reference())
+            calculated.append(
+                WavRangeReduction(wavelens[i], wavelens[i+1], full_trans_wav=True))
+            ReductionSingleton().replace(settings)
     finally:
-        if not no_clean:
-            #normal behaviour, the chain has been used, at least a bit reset it
-            reset_singleton()
-        else:
-            #set the analysis to use the same run file again        
-            workspace = ISIS_global().data_loader.uncropped
-            ISIS_global()._data_files.clear()
-            ISIS_global()._data_files[workspace] = workspace
+        ReductionSingleton.clean(isis_reducer.ISISReducer)
+
+    return calculated
+
+def Reduce():
+    try:
+        result = ReductionSingleton()._reduce()
+    finally:
+        ReductionSingleton.clean(isis_reducer.ISISReducer)
 
     return result
-
-    
+            
 def _SetWavelengthRange(start, end):
-    ISIS_global().to_wavelen.set_range(start, end)
+    ReductionSingleton().to_wavelen.set_range(start, end)
 
 
 def Set1D():
     _printMessage('Set1D()')
-    ISIS_global().to_Q.output_type = '1D'
+    ReductionSingleton().to_Q.output_type = '1D'
 
 def Set2D():
     _printMessage('Set2D()')
-    ISIS_global().to_Q.output_type = '2D'
+    ReductionSingleton().to_Q.output_type = '2D'
 
 def SetRearEfficiencyFile(filename):
-    rear_det = ISIS_global().instrument.getDetector('rear')
+    rear_det = ReductionSingleton().instrument.getDetector('rear')
     rear_det.correction_file = filename
 
 def SetFrontEfficiencyFile(filename):
-    front_det = ISIS_global().instrument.getDetector('front')
+    front_det = ReductionSingleton().instrument.getDetector('front')
     front_det.correction_file = filename
 
 def SetDetectorFloodFile(filename):
-    ISIS_global().flood_file.set_filename(filename)
+    ReductionSingleton().flood_file.set_filename(filename)
 
 def displayUserFile():
     print '-- Mask file defaults --'
-    print ISIS_global().to_wavlen
-    print ISIS_global().Q_string()
+    print ReductionSingleton().to_wavlen
+    print ReductionSingleton().Q_string()
 #    print correction_files()
     print '    direct beam file rear:',
-    print ISIS_global().instrument.detector_file('rear')
+    print ReductionSingleton().instrument.detector_file('rear')
     print '    direct beam file front:',
-    print ISIS_global().instrument.detector_file('front')
-    print ISIS_global().mask
+    print ReductionSingleton().instrument.detector_file('front')
+    print ReductionSingleton().mask
 
 def displayMaskFile():
     displayUserFile()
 
 def displayGeometry():
-    [x, y] = ISIS_global()._beam_finder.get_beam_center()
+    [x, y] = ReductionSingleton()._beam_finder.get_beam_center()
     print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ISIS_global().geometry
+    print ReductionSingleton().geometry
 
 def SetPhiLimit(phimin,phimax, phimirror=True):
-    maskStep = ISIS_global().get_mask()
+    maskStep = ReductionSingleton().get_mask()
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     maskStep.set_phi_limit(phimin, phimax, phimirror)
     
@@ -288,46 +309,62 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
         !!DEPRECIATED by the function above, remove!!
         need to remove from SANSRunWindow.cpp
     '''
-    settings = ISIS_global().user_settings
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+
     if use_mirror :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
-        settings.readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax), ISIS_global())
+        settings.readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax), ReductionSingleton())
     else :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
-        settings.readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax), ISIS_global())
+        settings.readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax), ReductionSingleton())
 
 def LimitsR(rmin, rmax):
-    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', ISIS_global())
-    settings = ISIS_global().user_settings
-    settings.readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1', ISIS_global())
+    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', ReductionSingleton())
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+    
+    settings.readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1', ReductionSingleton())
 
-def LimitsWav(lmin, lmax, step, type):
-    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')')
-    settings = ISIS_global().user_settings
-    settings.readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type, ISIS_global())
+def LimitsWav(lmin, lmax, step, bin_type):
+    if ( bin_type.upper().strip() == 'LINEAR'): bin_type = 'LIN'
+    if ( bin_type.upper().strip() == 'LOGARITHMIC'): bin_type = 'LOG'
+    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + bin_type + ')')
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+    
+    settings.readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + bin_type, ReductionSingleton())
 
 def LimitsQ(*args):
-    settings = ISIS_global().user_settings
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+
     # If given one argument it must be a rebin string
     if len(args) == 1:
         val = args[0]
         if type(val) == str:
             _printMessage("LimitsQ(" + val + ")")
-            settings.readLimitValues("L/Q " + val, ISIS_global())
+            settings.readLimitValues("L/Q " + val, ReductionSingleton())
         else:
-            _issueWarning("LimitsQ can only be called with a single string or 4 values")
+            issueWarning("LimitsQ can only be called with a single string or 4 values")
     elif len(args) == 4:
         qmin,qmax,step,step_type = args
         _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(step_type) + ')')
-        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ISIS_global())
+        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
     else:
-        _issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
+        issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
-    settings = ISIS_global().user_settings
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
 
-    settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ISIS_global())
+    settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
 
 # These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
 # detector
@@ -344,11 +381,11 @@ def _create_quadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins
     # Mask out everything outside the quadrant of interest
     MaskDetectorsInShape(output,objxml)
     # Q1D ignores masked spectra/detectors. This is on the InputWorkspace, so we don't need masking of the InputForErrors workspace
-    Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=ISIS_global().to_Q.get_gravity())
+    Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=ReductionSingleton().to_Q.get_gravity())
 
     flag_value = -10.0
     ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
-    if ISIS_global().to_Q.output_type == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         SANSUtility.StripEndZeroes(output, flag_value)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
@@ -423,25 +460,41 @@ def CalculateResidue():
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
 
-def PlotResult(workspace):
+def PlotResult(workspace, canvas=None):
+    """
+        Draws a graph of the passed workspace. If the workspace is 2D (has many spectra
+        a contour plot is written
+        @param workspace: a workspace name or handle to plot
+        @param canvas: optional handle to an existing graph to write the plot to
+        @return: a handle to the graph that was written to
+    """ 
     try:
         numSpecs = workspace.getNumberHistograms()
     except AttributeError:
-        numSpecs = MantidFramework.mtd[workspace].getNumberHistograms()
+        #ensure that we are dealing with a workspace handle rather than its name
+        workspace = MantidFramework.mtd[workspace]
+        numSpecs = workspace.getNumberHistograms()
 
     try:
         if numSpecs == 1:
-            mantidplot.plotSpectrum(workspace,0)
+            graph = mantidplot.plotSpectrum(workspace,0)
         else:        
-            mantidplot.importMatrixWorkspace(workspace).plotGraph2D()
+            graph = mantidplot.importMatrixWorkspace(workspace).plotGraph2D()
 
     except NameError:
         issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+        
+    if not canvas is None:
+        #we were given a handle to an existing graph, use it
+        mantidplot.mergePlots(canvas, graph)
+        graph = canvas
+    
+    return graph
 
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
-    ISIS_global().ViewCurrentMask()
+    ReductionSingleton().ViewCurrentMask()
 
 # Print a test script for Colette if asked
 def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
@@ -464,17 +517,17 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     if centreit:
         script += '[COLETTE]  FIT/MIDDLE'
     # Parameters
-    script += '[COLETTE]  LIMIT/RADIUS ' + str(ISIS_global().mask.min_radius)
-    script += ' ' + str(ISIS_global().mask.max_radius) + '\n'
-    script += '[COLETTE]  LIMIT/WAVELENGTH ' + ISIS_global().to_wavelen.get_range() + '\n'
-    if ISIS_global().DWAV <  0:
-        script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(ISIS_global().to_wavelen.w_step)[1:] + '\n'
+    script += '[COLETTE]  LIMIT/RADIUS ' + str(ReductionSingleton().mask.min_radius)
+    script += ' ' + str(ReductionSingleton().mask.max_radius) + '\n'
+    script += '[COLETTE]  LIMIT/WAVELENGTH ' + ReductionSingleton().to_wavelen.get_range() + '\n'
+    if ReductionSingleton().DWAV <  0:
+        script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(ReductionSingleton().to_wavelen.w_step)[1:] + '\n'
     else:
-        script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(ISIS_global().to_wavelen.w_step) + '\n'
+        script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(ReductionSingleton().to_wavelen.w_step) + '\n'
     # For the moment treat the rebin string as min/max/step
-    qbins = ISIS_global().Q_REBEIN.split(",")
+    qbins = ReductionSingleton().Q_REBEIN.split(",")
     nbins = len(qbins)
-    if ISIS_global().to_Q.output_type == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         script += '[COLETTE]  LIMIT/Q ' + str(qbins[0]) + ' ' + str(qbins[nbins-1]) + '\n'
         dq = float(qbins[1])
         if dq <  0:
@@ -482,11 +535,11 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         else:
             script += '[COLETTE]  STEP/Q/LINEAR ' + str(dq) + '\n'
     else:
-        script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(ISIS_global().QXY2) + '\n'
-        if ISIS_global().DQXY <  0:
-            script += '[COLETTE]  STEP/QXY/LOGARITHMIC ' + str(ISIS_global().DQXY)[1:] + '\n'
+        script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(ReductionSingleton().QXY2) + '\n'
+        if ReductionSingleton().DQXY <  0:
+            script += '[COLETTE]  STEP/QXY/LOGARITHMIC ' + str(ReductionSingleton().DQXY)[1:] + '\n'
         else:
-            script += '[COLETTE]  STEP/QXY/LINEAR ' + str(ISIS_global().DQXY) + '\n'
+            script += '[COLETTE]  STEP/QXY/LINEAR ' + str(ReductionSingleton().DQXY) + '\n'
     
     # Correct
     script += '[COLETTE] CORRECT\n'
@@ -500,3 +553,5 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
 #this is like a #define I'd like to get rid of it because it means nothing here
 DefaultTrans = 'True'
 NewTrans = 'False'
+
+ReductionSingleton.clean(isis_reducer.ISISReducer)

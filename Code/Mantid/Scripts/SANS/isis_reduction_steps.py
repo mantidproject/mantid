@@ -1385,10 +1385,10 @@ class UserFile(ReductionStep):
                 if len(step_details) == 2:
                     step_size = step_details[0]
                     step_type = step_details[1]
-                    if step_type.upper() == 'LIN':
-                        step_type = ''
-                    else:
+                    if step_type.upper() == 'LOG':
                         step_type = '-'
+                    else:
+                        step_type = ''
                 else:
                     step_size = step_details[0]
                     step_type = ''

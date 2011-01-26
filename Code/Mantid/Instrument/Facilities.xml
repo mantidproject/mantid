@@ -45,8 +45,7 @@
   </instrument>
 
   <instrument name="LOQ">
-    <technique>Small angle scattering</technique>
-    <technique>Steve W key remove before Feb2011</technique>
+    <technique>Small Angle Scattering</technique>
   </instrument>
 
   <instrument name="MAPS" shortname="MAP">
@@ -81,7 +80,6 @@
   <instrument name="SANDALS" shortname="SLS">
     <technique>Neutron Diffraction</technique>
     <technique>Neutron Diffraction with isotopic substitution</technique>
-    <technique>Small angle scattering</technique>
   </instrument>
 
   <instrument name="SURF" shortname="SRF">
@@ -106,7 +104,6 @@
   <instrument name="NIMROD" zeropadding="8">
     <technique>Neutron Diffraction</technique>
     <technique>Neutron Diffraction with isotopic substitution</technique>
-    <technique>Small angle scattering</technique>
   </instrument>
 
   <instrument name="OFFSPEC" zeropadding="8">
@@ -118,8 +115,7 @@
   </instrument>
 
   <instrument name="SANS2D" zeropadding="8">
-    <technique>Small angle scattering</technique>
-    <technique>Steve W key remove before Feb2011</technique>
+    <technique>Small Angle Scattering</technique>
   </instrument>
   
   <instrument name="WISH" zeropadding="8">

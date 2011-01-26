@@ -84,8 +84,8 @@ void Q1D::exec()
   const Axis* const spectraAxis = inputWS->getAxis(1);
   int newSpectrumNo = -1;
 
-  // One progress update for every one percent increase in progress
-  Progress progress(this,0.0,1.0,numSpec, 10000/numSpec);
+  // Set the progress bar (1 update for every one percent increase in progress)
+  Progress progress(this, 0.0, 1.0, numSpec);
 
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 

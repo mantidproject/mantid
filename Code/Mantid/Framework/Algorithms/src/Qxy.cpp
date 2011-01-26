@@ -63,8 +63,8 @@ void Qxy::exec()
   // the samplePos is often not (0, 0, 0) because the instruments components are moved to account for the beam centre
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
   
-  // Set up the progress bar reporting object, and limit updates to 100 times or less
-  Progress prog(this, 0.05, 1.0, numSpec, 10000/numSpec);
+  // Set the progress bar (1 update for every one percent increase in progress)
+  Progress prog(this, 0.05, 1.0, numSpec);
 
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)

@@ -5,12 +5,11 @@
     understand what's happening and how best to fit it in the Reducer design. 
      
 """
-from reduction import ReductionStep
 from reduction.instruments.sans.sans_reducer import SANSReducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
-import SANSUtility
 from mantidsimple import *
+import os
 
 ## Version number
 __version__ = '0.0'

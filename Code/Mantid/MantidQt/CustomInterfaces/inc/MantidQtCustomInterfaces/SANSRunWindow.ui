@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>719</width>
-    <height>480</height>
+    <width>713</width>
+    <height>482</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -249,9 +249,9 @@
             </item>
             <item>
              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt" >
-              <property name="techniques" >
+              <property name="techniques" stdset="0" >
                <stringlist>
-                <string>Steve W key remove before Feb2011</string>
+                <string>Small Angle Scattering</string>
                </stringlist>
               </property>
              </widget>
@@ -1204,9 +1204,9 @@
              </widget>
             </item>
             <item row="5" column="0" >
-             <widget class="QLabel" name="label_21" >
+             <widget class="QLabel" name="qxy_lb" >
               <property name="text" >
-               <string>Qxy (Angstroms^-1)</string>
+               <string>Qxy (A^-1)</string>
               </property>
              </widget>
             </item>
@@ -1214,22 +1214,6 @@
              <widget class="QLineEdit" name="rad_min" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" >
-             <widget class="QLineEdit" name="wav_min" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -1278,22 +1262,6 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="2" column="2" >
-             <widget class="QLineEdit" name="wav_max" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
             <item row="5" column="2" >
              <widget class="QLineEdit" name="qy_max" >
               <property name="sizePolicy" >
@@ -1310,17 +1278,10 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="2" column="3" >
-             <widget class="QLabel" name="wav_step_lbl" >
-              <property name="text" >
-               <string>stepping</string>
-              </property>
-             </widget>
-            </item>
             <item row="5" column="3" >
              <widget class="QLabel" name="qy_step_lbl" >
               <property name="text" >
-               <string>stepping</string>
+               <string>step</string>
               </property>
              </widget>
             </item>
@@ -1337,6 +1298,9 @@ p, li { white-space: pre-wrap; }
                 <width>70</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip" >
+               <string>The bin width of the output from convert to wavelength</string>
               </property>
              </widget>
             </item>
@@ -1370,6 +1334,9 @@ p, li { white-space: pre-wrap; }
                 <height>0</height>
                </size>
               </property>
+              <property name="toolTip" >
+               <string>Use Plot Result (in first tab) to check overlapping</string>
+              </property>
               <item>
                <property name="text" >
                 <string>Linear</string>
@@ -1378,6 +1345,16 @@ p, li { white-space: pre-wrap; }
               <item>
                <property name="text" >
                 <string>Logarithmic</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Ranges Lin</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Ranges Log</string>
                </property>
               </item>
              </widget>
@@ -1428,23 +1405,6 @@ p, li { white-space: pre-wrap; }
              <widget class="QLabel" name="label_36" >
               <property name="text" >
                <string>Full wavelength range</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="2" colspan="2" >
-             <widget class="QLabel" name="label_23" >
-              <property name="text" >
-               <string>Account for gravity</string>
-              </property>
-              <property name="alignment" >
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="4" >
-             <widget class="QCheckBox" name="gravity_check" >
-              <property name="text" >
-               <string/>
               </property>
              </widget>
             </item>
@@ -1554,7 +1514,7 @@ p, li { white-space: pre-wrap; }
                    </size>
                   </property>
                   <property name="text" >
-                   <string>Qx (Angstroms^-1)</string>
+                   <string>Qx (Å^-1)</string>
                   </property>
                  </widget>
                 </item>
@@ -1606,16 +1566,19 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item row="6" column="0" >
-             <widget class="QLabel" name="label_38" >
+             <widget class="QLabel" name="transFit_lb" >
               <property name="text" >
-               <string>Trans Fit (Angstroms)</string>
+               <string>Trans Fit (A)</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0" >
-             <widget class="QLabel" name="label_16" >
+             <widget class="QLabel" name="wavlength_lb" >
+              <property name="toolTip" >
+               <string>Controls the output from convert to wavelength</string>
+              </property>
               <property name="text" >
-               <string>Wavelength (Angstroms)</string>
+               <string>Wavelength (A)</string>
               </property>
              </widget>
             </item>
@@ -1642,6 +1605,94 @@ p, li { white-space: pre-wrap; }
                 <string>Off</string>
                </property>
               </item>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2" >
+             <widget class="QStackedWidget" name="wav_stack" >
+              <property name="autoFillBackground" >
+               <bool>false</bool>
+              </property>
+              <property name="lineWidth" >
+               <number>1</number>
+              </property>
+              <property name="currentIndex" >
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="page_7" >
+               <layout class="QGridLayout" name="gridLayout_21" >
+                <property name="margin" >
+                 <number>0</number>
+                </property>
+                <item row="0" column="1" >
+                 <widget class="QLineEdit" name="wav_min" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize" >
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip" >
+                   <string>Start and end wavelengths used by convert to wavelengh</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2" >
+                 <widget class="QLineEdit" name="wav_max" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize" >
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="page_8" >
+               <layout class="QHBoxLayout" name="horizontalLayout_18" >
+                <property name="margin" >
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="wavRanges" >
+                  <property name="toolTip" >
+                   <string>Comma separated list of wavelength ranges. One reduction
+will always be done between the first and last ranges the
+intermediate ranges are there for comparison</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="wavRanVal_lb" >
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                  <property name="textFormat" >
+                   <enum>Qt::AutoText</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="2" column="3" >
+             <widget class="QLabel" name="wav_step_lbl" >
+              <property name="text" >
+               <string>step</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1833,7 +1884,7 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item rowspan="2" row="3" column="0" >
+       <item rowspan="2" row="2" column="0" >
         <widget class="QGroupBox" name="groupBox_6" >
          <property name="title" >
           <string>Efficiency correction</string>
@@ -1892,7 +1943,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="3" column="1" colspan="2" >
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="floodFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -1914,7 +1965,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="3" column="1" >
+       <item row="2" column="1" >
         <layout class="QHBoxLayout" name="horizontalLayout_6" >
          <item>
           <widget class="QGroupBox" name="groupBox_3" >
@@ -2035,7 +2086,7 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item row="4" column="1" >
+       <item row="3" column="1" >
         <spacer name="verticalSpacer_2" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -2048,7 +2099,7 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="5" column="0" >
+       <item row="4" column="0" >
         <spacer name="verticalSpacer_5" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -2062,43 +2113,38 @@ p, li { white-space: pre-wrap; }
         </spacer>
        </item>
        <item row="0" column="0" >
-        <spacer name="verticalSpacer_11" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="0" >
-        <spacer name="verticalSpacer_12" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="1" >
-        <spacer name="verticalSpacer_13" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <item>
+          <widget class="QLabel" name="label_23" >
+           <property name="text" >
+            <string>Account for gravity</string>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="gravity_check" >
+           <property name="text" >
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -3836,8 +3882,6 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>rad_min</tabstop>
   <tabstop>rad_max</tabstop>
-  <tabstop>wav_min</tabstop>
-  <tabstop>wav_max</tabstop>
   <tabstop>wav_dw</tabstop>
   <tabstop>wav_dw_opt</tabstop>
   <tabstop>qy_max</tabstop>
