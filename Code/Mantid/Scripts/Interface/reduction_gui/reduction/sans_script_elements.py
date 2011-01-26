@@ -68,7 +68,7 @@ class Mask(BaseScriptElement):
             xml += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
         xml += "  </Shapes>\n"
         
-        xml += "</Mask>"
+        xml += "</Mask>\n"
         return xml
     
     def from_xml(self, xml_str):
