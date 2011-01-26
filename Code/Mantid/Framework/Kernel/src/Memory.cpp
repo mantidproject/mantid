@@ -121,37 +121,6 @@ bool read_mem_info(size_t sys_avail, size_t & sys_total)
 }
 #endif
 
-#ifdef __APPLE__
-void process_mem_system_mac(size_t & sys_avail, size_t & sys_total)
-{
-  // Get the total RAM of the system
-  uint64_t totalmem;
-  size_t len = sizeof(totalmem);
-  // Gives system memory in bytes
-  int err = sysctlbyname("hw.memsize",&totalmem,&len,NULL,0);
-  //if (err) g_log.warning("Unable to obtain memory of system");
-  sys_total = totalmem / 1024;
-
-  mach_port_t port = mach_host_self();
-  // Need to find out the system page size for next part
-  vm_size_t pageSize;
-  host_page_size(port, &pageSize);
-
-  // Now get the amount of free memory (=free+inactive memory)
-  vm_statistics vmStats;
-  mach_msg_type_number_t count;
-  count = sizeof(vm_statistics) / sizeof(natural_t);
-  err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
-  //if (err) g_log.warning("Unable to obtain memory statistics");
-  sys_avail = pageSize * ( vmStats.free_count + vmStats.inactive_count ) / 1024;
-
-  // Now add in reserved but unused memory as reported by malloc
-  const size_t unusedReserved = mstats().bytes_free / 1024;
-  //g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
-  sys_avail += unusedReserved;
-}
-#endif
-
 void process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
   sys_avail = 0;
@@ -182,7 +151,31 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   //g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n"; // TODO uncomment
   sys_avail += unusedReserved;
 #elif __APPLE__
-  process_mem_system_apple(sys_avail, sys_total);
+  // Get the total RAM of the system
+  uint64_t totalmem;
+  size_t len = sizeof(totalmem);
+  // Gives system memory in bytes
+  int err = sysctlbyname("hw.memsize",&totalmem,&len,NULL,0);
+  //if (err) g_log.warning("Unable to obtain memory of system");
+  sys_total = totalmem / 1024;
+
+  mach_port_t port = mach_host_self();
+  // Need to find out the system page size for next part
+  vm_size_t pageSize;
+  host_page_size(port, &pageSize);
+
+  // Now get the amount of free memory (=free+inactive memory)
+  vm_statistics vmStats;
+  mach_msg_type_number_t count;
+  count = sizeof(vm_statistics) / sizeof(natural_t);
+  err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
+  //if (err) g_log.warning("Unable to obtain memory statistics");
+  sys_avail = pageSize * ( vmStats.free_count + vmStats.inactive_count ) / 1024;
+
+  // Now add in reserved but unused memory as reported by malloc
+  const size_t unusedReserved = mstats().bytes_free / 1024;
+  //g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+  sys_avail += unusedReserved;
 #endif
   // TODO needs windows stuff folded in
 }
