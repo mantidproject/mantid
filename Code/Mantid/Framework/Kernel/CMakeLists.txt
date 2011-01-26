@@ -25,6 +25,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
     src/MagneticIon.cpp
                 src/MandatoryValidator.cpp
 		src/MaskedProperty.cpp
+                src/Memory.cpp
                 src/MersenneTwister.cpp
 		src/NeutronAtom.cpp
                 src/Property.cpp
@@ -110,6 +111,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 		inc/MantidKernel/MandatoryValidator.h
 		inc/MantidKernel/MantidVersion.h
 		inc/MantidKernel/MaskedProperty.h
+		inc/MantidKernel/Memory.h
 		inc/MantidKernel/MersenneTwister.h
 		inc/MantidKernel/MRUList.h
 		inc/MantidKernel/MultiThreaded.h
