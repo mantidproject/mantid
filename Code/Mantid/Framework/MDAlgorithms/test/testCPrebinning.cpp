@@ -11,12 +11,12 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "C:/Users/wkc26243.NDLT369/Documents/work/MANTID/Code/Mantid/Framework/MDAlgorithms/test/testCPrebinning.h"
+#include "c:/Mantid/Code/Mantid/Framework/MDAlgorithms/test/testCPrebinning.h"
 
 static testCPrebinning suite_testCPrebinning;
 
 static CxxTest::List Tests_testCPrebinning = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testCPrebinning( "C:/Users/wkc26243.NDLT369/Documents/work/MANTID/Code/Mantid/Framework/MDAlgorithms/test/testCPrebinning.h", 43, "testCPrebinning", suite_testCPrebinning, Tests_testCPrebinning );
+CxxTest::StaticSuiteDescription suiteDescription_testCPrebinning( "c:/Mantid/Code/Mantid/Framework/MDAlgorithms/test/testCPrebinning.h", 43, "testCPrebinning", suite_testCPrebinning, Tests_testCPrebinning );
 
 static class TestDescription_testCPrebinning_testRebinInit : public CxxTest::RealTestDescription {
 public:

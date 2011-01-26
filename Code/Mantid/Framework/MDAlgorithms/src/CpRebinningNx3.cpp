@@ -43,11 +43,19 @@ pTargetDataPoints(targetWS->get_spMDDPoints().get())
 bool
 CpRebinningNx3::rebin_data_chunk()
 {
+   time_t start,end;
+   time(&start);  //*******
+   n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+   n_pixels_read   += n_pix_in_buffer;
 
-    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
-    n_pixels_read   += n_pix_in_buffer;
-      
+   time(&end);   
+   bin_log.debug()<<" data obtained in: "<<difftime (end,start)<<" sec\n";;
+   time(&start);  //*******
+  
     n_pixels_selected+= rebin_Nx3dataset();
+    time(&end);   
+    bin_log.debug()<<" cells rebinned in: "<<difftime (end,start)<<" sec\n";;
+
     if(n_starting_cell==preselected_cells.size()){
           return false; // no more data left to process
     }
@@ -59,13 +67,22 @@ bool
 CpRebinningNx3::rebin_data_chunk_keep_pixels()
 {
     size_t  n_pixels_retained_now;
-
+    time_t start,end;
+    time(&start);  //*******
+ 
     n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
     n_pixels_read   += n_pix_in_buffer;
+    time(&end);   
+    bin_log.debug()<<" data obtained in: "<<difftime (end,start)<<" sec\n";;
+    time(&start);  //*******
+
 
     n_pixels_retained_now  =  rebin_Nx3dataset();
     n_pixels_selected     += n_pixels_retained_now;
     this->pTargetDataPoints->store_pixels(pix_buf,pixel_valid,retained_cell_indexes,n_pixels_retained_now);
+    time(&end);   
+    bin_log.debug()<<" pixels and cells rebinned in: "<<difftime (end,start)<<" sec\n";;
+
 
     if(n_starting_cell==preselected_cells.size()){
           return false; // no more data left to process

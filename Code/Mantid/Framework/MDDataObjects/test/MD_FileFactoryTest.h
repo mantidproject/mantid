@@ -10,7 +10,6 @@
 // existing file formats
 #include "MDDataObjects/MD_File_hdfV1.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
-#include "MDDataObjects/MD_File_hdfMatlab4D.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 
@@ -63,13 +62,13 @@ public:
 
 		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab*>(oldFormat.get())!=0);
 	}
-	void testReturnsOldMatlabReader(){
-		std::auto_ptr<IMD_FileFormat> oldFormat;
-		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw","fe_demo.sqw");
-		TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str(),old_4DMatlabReader));
+	//void t__tReturnsOldMatlabReader(){
+	//	std::auto_ptr<IMD_FileFormat> oldFormat;
+	//	std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw","fe_demo.sqw");
+	//	TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str(),old_4DMatlabReader));
 
-		TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab4D*>(oldFormat.get())!=0);
-	}
+	//	TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab4D*>(oldFormat.get())!=0);
+	//}
 	void testHoraceFileFound(){
 		std::auto_ptr<IMD_FileFormat> horaceFormat;
 		std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo_bin.sqw","fe_demo_bin.sqw");

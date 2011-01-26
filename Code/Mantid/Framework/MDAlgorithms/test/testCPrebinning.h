@@ -23,7 +23,7 @@ bool load_existing_workspace(const std::string &workspace_name){
 //    std::string dataFileName("../../../../../Test/VATES/fe_demo.sqw");
 //    std::string dataFileName("../../../../../Test/VATES/fe_demo_bin.sqw");
     std::string dataFileName("test_horace_reader.sqw");
-
+//        std::string dataFileName("fe_E800_8K.sqw");
     Load_MDWorkspace loader;
     loader.initialize();
     loader.setPropertyValue("inFilename",dataFileName);
@@ -49,7 +49,7 @@ class testCPrebinning :    public CxxTest::TestSuite
  public:
     void testRebinInit(void){
 
-     InputWorkspaceName = "testCPrebinningInMDWorkspace";
+     InputWorkspaceName = "testCPrebinningIn";
      OutWorkspaceName   = "testCPrebinningOut";
 
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
@@ -106,7 +106,7 @@ class testCPrebinning :    public CxxTest::TestSuite
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
    // now modify it as we need/want;
-        double r0=0;
+        double r0=-1;
         pSlicing->pDimDescription("qx")->cut_min = r0;
 		pSlicing->pDimDescription("qx")->cut_max = r0+1;
 		pSlicing->pDimDescription("qy")->cut_min = r0;

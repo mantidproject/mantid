@@ -368,10 +368,10 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     time(&end);     //***********************************************<<<<
     f_log.debug()<<" cells read in: "<<difftime (end,start)<<" sec\n";;
     //
-    //time(&start);  //*******
+    time(&start);  //*******
 	data_buffer_size = block_start; // latest block size has been already added
 	compact_hor_data(&pix_buf[0],data_buffer_size);  
-    //time(&end);   
+    time(&end);   
     f_log.debug()<<" cells transformed in: "<<difftime (end,start)<<" sec\n";;
     // returns next cell to read if any or size of the selection
     return ic;

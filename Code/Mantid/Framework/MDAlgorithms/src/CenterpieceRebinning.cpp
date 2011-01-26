@@ -2,7 +2,6 @@
 #include <sstream>
 // Availble rebinning methods: Eventually will go to factory
 #include "MantidMDAlgorithms/CpRebinningNx3.h"
-#include "MantidMDAlgorithms/CpRebinning4x3StructHR.h"
 
 namespace Mantid{
     namespace MDAlgorithms{
