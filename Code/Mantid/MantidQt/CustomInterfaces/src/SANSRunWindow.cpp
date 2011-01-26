@@ -2600,7 +2600,7 @@ void SANSRunWindow::handleDefSaveClick()
  */
 void SANSRunWindow::handleWavComboChange(int new_index)
 {
-  QString userSel = m_uiForm.wav_dw_opt->text(new_index);
+  QString userSel = m_uiForm.wav_dw_opt->itemText(new_index);
 
   if ( userSel.toUpper().contains("LOG") )
   {
@@ -2903,7 +2903,7 @@ void SANSRunWindow::checkList()
   // may be a need to generalise this
   QLineEdit *toValdate = m_uiForm.wavRanges;
   QLabel *validator = m_uiForm.wavRanVal_lb;
-  const std::string input(toValdate->text().stripWhiteSpace().toStdString());
+  const std::string input(toValdate->text().trimmed().toStdString());
 
   bool valid(false);
   Poco::StringTokenizer in(input, ",");
@@ -2911,7 +2911,7 @@ void SANSRunWindow::checkList()
   {
     for(Poco::StringTokenizer::Iterator i=in.begin(), end=in.end(); i!=end; ++i)
     {// try a lexical cast, we don't need its result only if there was an error
-      double dummy = boost::lexical_cast<double>(*i);
+      boost::lexical_cast<double>(*i);
     }
     // there were no errors
     if ( ! input.empty() )
