@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Timer.h"
@@ -531,6 +532,8 @@ namespace Mantid
      */
     void BinaryOperation::do2D( bool mismatchedSpectra)
     {
+      API::MemoryManager::Instance().releaseFreeMemory();
+      API::MemoryManager::Instance().releaseFreeMemory();
 
       BinaryOperationTable * table = NULL;
       if (mismatchedSpectra)

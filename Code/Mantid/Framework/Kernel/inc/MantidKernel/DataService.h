@@ -18,6 +18,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/MemoryManager.h"
 
 namespace Mantid
 {
@@ -208,7 +209,7 @@ public:
     notificationCenter.postNotification(new DeleteNotification(name,it->second));
     g_log.information("Data Object '"+ name +"' deleted from data service.");
     datamap.erase(it);
-
+    API::MemoryManager::Instance().releaseFreeMemory();
     return;
   }
 

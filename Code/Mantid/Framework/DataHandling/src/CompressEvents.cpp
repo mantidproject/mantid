@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <set>
@@ -47,6 +48,8 @@ void CompressEvents::init()
 
 void CompressEvents::exec()
 {
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
   // Get the input workspace
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");

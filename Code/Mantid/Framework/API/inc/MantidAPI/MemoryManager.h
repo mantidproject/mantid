@@ -56,6 +56,8 @@ namespace Mantid
       /// Returns true if there is not sufficient memory for a full Workspace2D.
       bool goForManagedWorkspace(int NVectors,int XLength,int YLength, bool* isCompressedOK = NULL);
 
+      void releaseFreeMemory();
+
     private:
       /// Platform-dependent initialisation method called by constructor
       void init();

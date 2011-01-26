@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/MemoryManager.h"
 
 #include <fstream>
 #include <sstream>
@@ -100,6 +101,7 @@ void LoadSNSEventNexus::init()
  */
 void LoadSNSEventNexus::exec()
 {
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");

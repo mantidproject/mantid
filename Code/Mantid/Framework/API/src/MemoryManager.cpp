@@ -3,6 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Memory.h"
+
+//#include "/home/8oz/Code/google-perftools/src/google/malloc_extension.h"
 
 // Get the 'meat' of this class from the appropriate file for the platform
 #ifdef __linux__
@@ -130,6 +133,25 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
   g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
 
   return goManaged;
+}
+
+
+/** Release any free memory back to the system.
+ * Calling this could help the system avoid going into swap.
+ * NOTE: This only works if you linked against tcmalloc.
+ */
+void MemoryManagerImpl::releaseFreeMemory()
+{
+
+//    Kernel::MemoryStats mem;
+//    mem.update();
+//    std::cout << "Before releasing: \n" << mem << "\n";
+//
+//    // Make TCMALLOC release memory to the system
+//    MallocExtension::instance()->ReleaseFreeMemory();
+//
+//    mem.update();
+//    std::cout << "After releasing: \n" << mem << "\n";
 }
 
 } // namespace API
