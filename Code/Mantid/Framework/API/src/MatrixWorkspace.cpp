@@ -317,7 +317,7 @@ namespace Mantid
         const Mantid::MantidVec& x=this->readX(wksp_index);
         const Mantid::MantidVec& y=this->readY(wksp_index);
         // If it is a 1D workspace, no need to integrate
-        if (x.size()==2)
+        if ((x.size()<=2) && (y.size() >= 1))
         {
           out[wksp_index] = y[0];
         }
