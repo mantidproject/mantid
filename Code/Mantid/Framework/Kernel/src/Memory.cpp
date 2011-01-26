@@ -129,7 +129,7 @@ void process_mem_system_mac(size_t & sys_avail, size_t & sys_total)
   size_t len = sizeof(totalmem);
   // Gives system memory in bytes
   int err = sysctlbyname("hw.memsize",&totalmem,&len,NULL,0);
-  if (err) g_log.warning("Unable to obtain memory of system");
+  //if (err) g_log.warning("Unable to obtain memory of system");
   sys_total = totalmem / 1024;
 
   mach_port_t port = mach_host_self();
