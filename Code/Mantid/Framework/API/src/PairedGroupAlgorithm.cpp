@@ -244,11 +244,11 @@ namespace Mantid
         {
           try
           {
-          alg->setPropertyValue((*propItr)->name(),(*propItr)->name());
+            alg->setPropertyValue((*propItr)->name(),(*propItr)->value());
           }
           catch(std::invalid_argument& )
           {
-            throw std::runtime_error("Workspace named \"" + (*propItr)->name()+ "\"can not be found");
+            throw std::runtime_error("Error setting the property named \"" + (*propItr)->name()+ "\" to the value " + (*propItr)->value());
           }
         }
       }//end of for loop for property vector

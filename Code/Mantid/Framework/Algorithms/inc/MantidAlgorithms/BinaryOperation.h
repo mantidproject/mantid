@@ -81,7 +81,7 @@ namespace Mantid
        */
       typedef std::vector< int >  BinaryOperationTable;
 
-      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_sptr lhs, API::MatrixWorkspace_sptr rhs);
+      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_const_sptr lhs, API::MatrixWorkspace_const_sptr rhs);
 
 
     //protected:
@@ -227,6 +227,8 @@ namespace Mantid
       /// Output EventWorkspace
       DataObjects::EventWorkspace_sptr m_eout;
 
+      /// The property value
+      bool m_AllowDifferentNumberSpectra;
 
       //------ Requirements -----------
 
@@ -239,12 +241,17 @@ namespace Mantid
       /// Variable set to true if the operation allows the output to stay as an EventWorkspace. If this returns false, any EventWorkspace will be converted to Workspace2D. This is ignored if the lhs operand is not an EventWorkspace.
       bool m_keepEventWorkspace;
 
+      /** Are we going to use the histogram representation of the RHS event list when performing the operation?
+       * e.g. divide and multiply? Plus and Minus will set this to false (default).
+       */
+      bool m_useHistogramForRhsEventWorkspace;
+
     private:
 
       void doSingleValue();
       void doSingleSpectrum();
       void doSingleColumn();
-      void do2D();
+      void do2D(bool mismatchedSpectra);
 
       void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out);
       /// Apply masking requested by propagateSpectraMasks.

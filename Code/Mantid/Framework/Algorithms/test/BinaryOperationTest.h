@@ -222,14 +222,13 @@ public:
       // 3 detectors in each on the rhs
       rhs[i/3].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, true);
-
-//    TS_ASSERT_EQUALS( (*table)[0], 1);
-//    TS_ASSERT_EQUALS( (*table)[1], 1);
-//    TS_ASSERT_EQUALS( (*table)[2], 1);
-//    TS_ASSERT_EQUALS( (*table)[3], -1);
-//    TS_ASSERT_EQUALS( (*table)[4], -1);
-//    TS_ASSERT_EQUALS( (*table)[5], -1);
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    TS_ASSERT_EQUALS( (*table)[0], 1);
+    TS_ASSERT_EQUALS( (*table)[1], 1);
+    TS_ASSERT_EQUALS( (*table)[2], 1);
+    TS_ASSERT_EQUALS( (*table)[3], -1);
+    TS_ASSERT_EQUALS( (*table)[4], -1);
+    TS_ASSERT_EQUALS( (*table)[5], -1);
   }
 
 
@@ -260,10 +259,10 @@ public:
       // 6 detectors in each on the rhs
       rhs[i/6].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, true);
-//    TS_ASSERT_EQUALS( (*table)[0], 0); //0-3 go into 0-5
-//    TS_ASSERT_EQUALS( (*table)[1], -1); //4-7 fails to go anywhere
-//    TS_ASSERT_EQUALS( (*table)[2], 1); //8-11 goes into 6-11
+    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    TS_ASSERT_EQUALS( (*table)[0], 0); //0-3 go into 0-5
+    TS_ASSERT_EQUALS( (*table)[1], -1); //4-7 fails to go anywhere
+    TS_ASSERT_EQUALS( (*table)[2], 1); //8-11 goes into 6-11
   }
 
 

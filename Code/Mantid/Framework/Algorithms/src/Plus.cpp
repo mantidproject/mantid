@@ -106,6 +106,7 @@ namespace Mantid
         m_matchXSize = false;
         //If adding in place to the right-hand-side: flip it so you add in-place to the lhs.
         m_flipSides = (m_eout == m_erhs);
+        m_useHistogramForRhsEventWorkspace = false;
       }
       else
       {

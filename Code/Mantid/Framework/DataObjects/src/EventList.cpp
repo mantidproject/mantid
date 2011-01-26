@@ -104,6 +104,7 @@ namespace DataObjects
    * @param events Vector of TofEvent's */
   EventList::EventList(const std::vector<TofEvent> &events)
   {
+
     this->events.assign(events.begin(), events.end());
     this->eventType = TOF;
     this->order = UNSORTED;
@@ -115,6 +116,7 @@ namespace DataObjects
     // Note: These two lines do not seem to have an effect on releasing memory
     //  at least on Linux. (Memory usage seems to increase event after deleting EventWorkspaces.
     //  Therefore, for performance, they are kept commented:
+    clear();
 
     //this->events.clear();
     //std::vector<TofEvent>().swap(events); //Trick to release the vector memory.

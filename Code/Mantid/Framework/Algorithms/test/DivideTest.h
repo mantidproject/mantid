@@ -203,6 +203,69 @@ public:
       performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
   }
 
+  void testExec_Event_EventGrouped()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
+
+    std::vector< std::vector<int> > rhs(5);
+    for (int i=0; i<10; i++)
+    {
+      // 2 detectors in each on the rhs
+      rhs[i/2].push_back(i);
+    }
+    // Grouped workspace will have 2 events in each bin (also).
+    EventWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
+
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 1.0, sqrt(0.75), true);
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
+  }
+
+  void testExec_2D_EventGrouped()
+  {
+    int sizex = 10,sizey=10;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
+
+    std::vector< std::vector<int> > rhs(5);
+    for (int i=0; i<10; i++)
+    {
+      // 2 detectors in each on the rhs
+      rhs[i/2].push_back(i);
+    }
+    // Grouped workspace will have 2 events in each bin (also).
+    EventWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, sizex+1, 1.0);
+
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false, 1.0, 1.0, true);
+    else
+      performTest(work_in1,work_in2, false, 4.0, sqrt(4.0));
+  }
+
+  void testExec_EventGrouped_EventGrouped()
+  {
+    std::vector< std::vector<int> > lhs(10), rhs(5);
+    for (int i=0; i<20; i++)
+    {
+      // 2 detectors in each on the lhs
+      lhs[i/2].push_back(i);
+      // 4 detectors in each on the lhs
+      rhs[i/4].push_back(i);
+    }
+    // Grouped workspace will have 2 events in each bin (also).
+    EventWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
+    // Grouped workspace will have 4 events in each bin (also).
+    EventWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
+
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true, 0.5, 0.3952, true);
+    else
+      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0));
+  }
+
+
+
   void testExec_Event_2DSingleSpectrum()
   {
     int sizex = 10,sizey=10;
@@ -281,7 +344,8 @@ private:
    * If expectedValue and expectedError are specified, look for all data items to be those values.
    */
   MatrixWorkspace_sptr performTest(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2
-      , bool outputIsEvent = false, double expectedValue=-1.0, double expectedError=-1.0)
+      , bool outputIsEvent = false, double expectedValue=-1.0, double expectedError=-1.0,
+      bool allowMismatchedSpectra = false)
   {
 
     IAlgorithm * alg;
@@ -299,6 +363,7 @@ private:
     alg->setPropertyValue("LHSWorkspace",wsName1);
     alg->setPropertyValue("RHSWorkspace",wsName2);
     alg->setPropertyValue("OutputWorkspace",wsNameOut);
+    alg->setProperty("AllowDifferentNumberSpectra", allowMismatchedSpectra);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT( alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;

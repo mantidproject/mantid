@@ -39,6 +39,7 @@ namespace OperatorOverloads
   {
     alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
     alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
+    alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
     // Have to set a text name for the output workspace if the algorithm is a child even 
     // though it will not be used.
     alg->setPropertyValue("OutputWorkspace","��NotApplicable");
@@ -52,6 +53,7 @@ namespace OperatorOverloads
   {
     alg->setPropertyValue("LHSWorkspace",lhs->getName());
     alg->setPropertyValue("RHSWorkspace",rhs->getName());
+    alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
     if( lhsAsOutput )
     {
       alg->setPropertyValue("OutputWorkspace",lhs->getName());    

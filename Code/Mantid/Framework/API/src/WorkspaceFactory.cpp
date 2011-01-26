@@ -79,11 +79,14 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   return ws;
 }
 
-///Initialise a workspace from its parent
-///This sets values such as title, insstrument, units, sample, spectramap
-///@param parent the parent workspace
-///@param child the child workspace
-///@param differentSize A flag to indicate if the two workspace will be different sizes
+/** Initialise a workspace from its parent
+ * This sets values such as title, instrument, units, sample, spectramap.
+ * This does NOT copy any data.
+ *
+ * @param parent :: the parent workspace
+ * @param child :: the child workspace
+ * @param differentSize :: A flag to indicate if the two workspace will be different sizes
+ */
 void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr parent,
   const MatrixWorkspace_sptr child, const bool differentSize) const
 {

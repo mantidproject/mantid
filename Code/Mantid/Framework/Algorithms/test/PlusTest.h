@@ -328,6 +328,19 @@ public:
     checkData(work_in1, work_in2, work_out1);
   }
 
+
+  void testExec2D2D_byOperatorOverload_MoreComplexCase()
+  {
+    int sizex = 10,sizey=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    work_in1->dataY(3)[3] = 100;
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+    MatrixWorkspace_sptr work_out1 = work_in2 + work_in1;
+
+    checkData(work_in1, work_in2, work_out1);
+  }
+
   void testExec1DSingleValue()
   {
     int sizex = 10;

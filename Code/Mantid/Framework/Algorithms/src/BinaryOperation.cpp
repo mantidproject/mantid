@@ -18,7 +18,9 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_indicesToMask(), m_progress(NULL) {}
+    BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_indicesToMask(), m_progress(NULL),
+      m_useHistogramForRhsEventWorkspace(false)
+    {}
     
     BinaryOperation::~BinaryOperation()
     {
@@ -34,6 +36,9 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName1(),"",Direction::Input));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
+      declareProperty(new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false, Direction::Input),
+          "Allow workspaces to have different number of spectra and perform\n"
+          "operation on LHS spectra using matching detector IDs in RHS.\n");
     }
 
 
@@ -47,6 +52,7 @@ namespace Mantid
       // get input workspace, dynamic cast not needed
       m_lhs = getProperty(inputPropName1());
       m_rhs = getProperty(inputPropName2());
+      m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
 
       // Cast to EventWorkspace pointers
       m_elhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_lhs);
@@ -154,7 +160,9 @@ namespace Mantid
       else // The two are both 2D and should be the same size
       {
         m_indicesToMask.reserve(m_out->getNumberHistograms());
-        do2D();
+
+        bool mismatchedSpectra =(m_AllowDifferentNumberSpectra && (m_rhs->getNumberHistograms() != m_lhs->getNumberHistograms()));
+        do2D(mismatchedSpectra);
       }
 
       applyMaskingToOutput(m_out);
@@ -218,7 +226,11 @@ namespace Mantid
       if (!checkSizeCompatibility(lhs,rhs))
       {
         std::ostringstream ostr;
-        ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
+        ostr<<"The sizes of the two workspaces " <<
+            "(" << lhs->getName() << ": " << lhs->getNumberHistograms() << " spectra, blocksize " << lhs->blocksize() << ")"
+            << " and " <<
+            "(" << rhs->getName() << ": " << rhs->getNumberHistograms() << " spectra, blocksize " << rhs->blocksize() << ")"
+            << " are not compatible for algorithm "<<this->name();
         g_log.error() << ostr.str() << std::endl;
         throw std::invalid_argument( ostr.str() );
       }
@@ -270,6 +282,7 @@ namespace Mantid
       if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
       
       const int rhsSpec = rhs->getNumberHistograms();
+
       return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
     }
 
@@ -511,10 +524,18 @@ namespace Mantid
 
     //--------------------------------------------------------------------------------------------
     /** Called when the two workspaces are the same size. 
-     *  Loops over the workspaces extracting the appropriate spectra and calling the abstract binary operation function. 
+     *  Loops over the workspaces extracting the appropriate spectra and calling the abstract binary operation function.
+     *
+     *  @param mismatchedSpectra :: allow the # of spectra to not be the same. Will use the
+     *      detector IDs to find the corresponding spectrum on RHS
      */
-    void BinaryOperation::do2D()
+    void BinaryOperation::do2D( bool mismatchedSpectra)
     {
+
+      BinaryOperationTable * table = NULL;
+      if (mismatchedSpectra)
+        table = BinaryOperation::buildBinaryOperationTable(m_lhs, m_rhs);
+
 
       // Propagate any masking first or it could mess up the numbers
       //TODO: Check if this works for event workspaces...
@@ -525,28 +546,40 @@ namespace Mantid
       {
         // ----------- The output is an EventWorkspace -------------
 
-        if (m_erhs)
+        if (m_erhs && !m_useHistogramForRhsEventWorkspace)
         {
-          // -------- The rhs is ALSO an EventWorkspace --------
+           // ------------ The rhs is ALSO an EventWorkspace ---------------
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-            if( propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
-            {
-              //Perform the operation on the event list on the output (== lhs)
-              performEventBinaryOperation(m_eout->getEventList(i),  m_erhs->getEventList(i));
-            }
             m_progress->report();
+
+            int rhs_wi = i;
+            if (mismatchedSpectra && table)
+            {
+              rhs_wi = (*table)[i];
+              if (rhs_wi < 0)
+                continue;
+            }
+            else
+            {
+              // Check for masking except when mismatched sizes
+              if(!propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
+                continue;
+            }
+            //Reach here? Do the division
+            //Perform the operation on the event list on the output (== lhs)
+            performEventBinaryOperation(m_eout->getEventList(i),  m_erhs->getEventList(rhs_wi));
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
         }
         else
         {
-          // -------- The rhs is a histogram ---------
+          // -------- The rhs is a histogram, or we want to use the histogram representation of it ---------
 
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
@@ -554,12 +587,22 @@ namespace Mantid
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-            if( propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
-            {
-              performEventBinaryOperation(m_eout->getEventList(i),  m_rhs->readX(i), m_rhs->readY(i), m_rhs->readE(i));
-            }
-
             m_progress->report();
+            int rhs_wi = i;
+            if (mismatchedSpectra && table)
+            {
+              rhs_wi = (*table)[i];
+              if (rhs_wi < 0)
+                continue;
+            }
+            else
+            {
+              // Check for masking except when mismatched sizes
+              if(!propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
+                continue;
+            }
+            //Reach here? Do the division
+            performEventBinaryOperation(m_eout->getEventList(i),  m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi));
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -578,17 +621,31 @@ namespace Mantid
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
-          m_out->setX(i,m_lhs->refX(i));
-          if( propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
-          {
-            performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),m_rhs->readY(i),m_rhs->readE(i),m_out->dataY(i),m_out->dataE(i));
-          }
           m_progress->report();
+          m_out->setX(i,m_lhs->refX(i));
+          int rhs_wi = i;
+          if (mismatchedSpectra && table)
+          {
+            rhs_wi = (*table)[i];
+            if (rhs_wi < 0)
+              continue;
+          }
+          else
+          {
+            // Check for masking except when mismatched sizes
+            if(!propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
+              continue;
+          }
+          //Reach here? Do the division
+          performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),m_rhs->readY(rhs_wi),m_rhs->readE(rhs_wi),m_out->dataY(i),m_out->dataE(i));
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
     }
+
+
+
 
 
 //
@@ -775,6 +832,9 @@ namespace Mantid
 
       //And in general, EventWorkspaces get turned to Workspace2D
       m_keepEventWorkspace = false;
+
+      // This will be set to true for Divide/Multiply
+      m_useHistogramForRhsEventWorkspace = false;
     }
 
 
@@ -797,7 +857,7 @@ namespace Mantid
      * @param lhs_det_to_wi :: map from detector ID to workspace index for the RHS workspace.
      *        NULL if there is not a 1:1 mapping from detector ID to workspace index (e.g more than one detector per pixel).
      */
-    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs)
+    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_const_sptr lhs, MatrixWorkspace_const_sptr rhs)
     {
         //An addition table is a list of pairs:
       //  First int = workspace index in the EW being added
@@ -878,9 +938,9 @@ namespace Mantid
             //Did not find it!
             rhsWI = -1; //Marker to mean its not in the LHS.
 
-            std::ostringstream mess;
-            mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
-            throw std::runtime_error(mess.str());
+//            std::ostringstream mess;
+//            mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
+//            throw std::runtime_error(mess.str());
           }
           (*table)[lhsWI] = rhsWI;
           done = true; //Great, we did it.
@@ -914,9 +974,11 @@ namespace Mantid
         // ------- Still nothing ! -----------
         if (!done)
         {
-          std::ostringstream mess;
-          mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
-          throw std::runtime_error(mess.str());
+          (*table)[lhsWI] = -1;
+
+//          std::ostringstream mess;
+//          mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
+//          throw std::runtime_error(mess.str());
         }
 
       }

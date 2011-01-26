@@ -114,7 +114,7 @@ public:
     alg.setPropertyValue("LHSWorkspace", "test_in");
     alg.setPropertyValue("RHSWorkspace", "test_in_1");
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT(alg.isExecuted());
 
     WorkspaceGroup_sptr work_out;
@@ -132,6 +132,8 @@ public:
     MatrixWorkspace_sptr work_out4;
     TS_ASSERT_THROWS_NOTHING(work_out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("test_out_4")));
+
+    if (!work_out1) return;
 
     checkData(work_in1, work_in1, work_out1);
     checkData(work_in2, work_in1, work_out2);
@@ -347,7 +349,7 @@ public:
       alg.setPropertyValue("LHSWorkspace","testlhs_in");
       alg.setPropertyValue("RHSWorkspace","testrhs_in");
       alg.setPropertyValue("OutputWorkspace","test_out");
-      alg.execute();
+      TS_ASSERT_THROWS_NOTHING( alg.execute() );
       TS_ASSERT( alg.isExecuted() );
 
       WorkspaceGroup_sptr work_out;
@@ -360,6 +362,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(work_out3= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_3")));
       MatrixWorkspace_sptr work_out4;
       TS_ASSERT_THROWS_NOTHING(work_out4= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_4")));
+      if (!work_out4) return;
 
       checkData(worklhs_in1, workrhs_in1, work_out1);
       checkData(worklhs_in2, workrhs_in2, work_out2);
@@ -430,7 +433,7 @@ public:
       alg.setPropertyValue("LHSWorkspace","testlhs_in1");
       alg.setPropertyValue("RHSWorkspace","testrhs_in");
       alg.setPropertyValue("OutputWorkspace","test_out");
-      alg.execute();
+      TS_ASSERT_THROWS_NOTHING( alg.execute() );
       TS_ASSERT( alg.isExecuted() );
 
       WorkspaceGroup_sptr work_out;
@@ -505,7 +508,7 @@ public:
       alg.setPropertyValue("LHSWorkspace","testlhs_in");
       alg.setPropertyValue("RHSWorkspace","testlhs_in");
       alg.setPropertyValue("OutputWorkspace","test_out");
-      alg.execute();
+      TS_ASSERT_THROWS_NOTHING( alg.execute() );
       TS_ASSERT( alg.isExecuted() );
 
       WorkspaceGroup_sptr work_out;
