@@ -280,7 +280,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         # the final bit of math
         if vanRun is not None:
-            Divide(samRun, vanRun, samRun) 
+            Divide(samRun, vanRun, samRun, AllowDifferentNumberSpectra=True) 
             #DivideVanadium(samRun, vanRun, samRun)
             #mtd.deleteWorkspace(vanRun)
             normalized = True
