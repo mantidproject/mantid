@@ -12,8 +12,7 @@
 # Modified for Mantid on 9/23/2010
 
 from __future__ import division
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4 import QtGui, uic, QtCore
 import sys
 try:
     import numpy
@@ -21,9 +20,13 @@ try:
     HAS_MPL = True
 except:
     HAS_MPL = False
+    
+from reduction_gui.reduction.sans_script_elements import Mask    
+from base_widget import BaseWidget
+import ui.ui_mask
+import util
 
-
-class MaskWidget(QWidget):
+class MaskWidget(QtGui.QWidget):
 
     # Flag to set the spin boxes on the frame (may hide image)
     INSIDE_FRAME = 0
@@ -40,45 +43,45 @@ class MaskWidget(QWidget):
         self._background_data = None
 
         # Top mask
-        self.topSpinBox = QSpinBox(self)
-        self.topSpinBox.setFixedSize(QSize(70,25))
+        self.topSpinBox = QtGui.QSpinBox(self)
+        self.topSpinBox.setFixedSize(QtCore.QSize(70,25))
         self.topSpinBox.setRange(0, maxFlow)
         self.topSpinBox.setValue(leftFlow)
         self.topSpinBox.setSuffix(" px")
-        self.topSpinBox.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-        self.connect(self.topSpinBox, SIGNAL("valueChanged(int)"),
+        self.topSpinBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.connect(self.topSpinBox, QtCore.SIGNAL("valueChanged(int)"),
                      self.valueChanged)
 
         # Bottom mask
-        self.bottomSpinBox = QSpinBox(self)
-        self.bottomSpinBox.setFixedSize(QSize(70,25))
+        self.bottomSpinBox = QtGui.QSpinBox(self)
+        self.bottomSpinBox.setFixedSize(QtCore.QSize(70,25))
         self.bottomSpinBox.setRange(0, maxFlow)
         self.bottomSpinBox.setValue(leftFlow)
         self.bottomSpinBox.setSuffix(" px")
-        self.bottomSpinBox.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-        self.connect(self.bottomSpinBox, SIGNAL("valueChanged(int)"),
+        self.bottomSpinBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.connect(self.bottomSpinBox, QtCore.SIGNAL("valueChanged(int)"),
                      self.valueChanged)
 
-        self.leftSpinBox = QSpinBox(self)
-        self.leftSpinBox.setFixedSize(QSize(70,25))
+        self.leftSpinBox = QtGui.QSpinBox(self)
+        self.leftSpinBox.setFixedSize(QtCore.QSize(70,25))
         self.leftSpinBox.setRange(0, maxFlow)
         self.leftSpinBox.setValue(leftFlow)
         self.leftSpinBox.setSuffix(" px")
-        self.leftSpinBox.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-        self.connect(self.leftSpinBox, SIGNAL("valueChanged(int)"),
+        self.leftSpinBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.connect(self.leftSpinBox, QtCore.SIGNAL("valueChanged(int)"),
                      self.valueChanged)
 
-        self.rightSpinBox = QSpinBox(self)
-        self.rightSpinBox.setFixedSize(QSize(70,25))
+        self.rightSpinBox = QtGui.QSpinBox(self)
+        self.rightSpinBox.setFixedSize(QtCore.QSize(70,25))
         self.rightSpinBox.setRange(0, maxFlow)
         self.rightSpinBox.setValue(rightFlow)
         self.rightSpinBox.setSuffix(" px")
-        self.rightSpinBox.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-        self.connect(self.rightSpinBox, SIGNAL("valueChanged(int)"),
+        self.rightSpinBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.connect(self.rightSpinBox, QtCore.SIGNAL("valueChanged(int)"),
                      self.valueChanged)
 
-        self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,
-                                       QSizePolicy.Expanding))
+        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
+                                       QtGui.QSizePolicy.Expanding))
         self.setMinimumSize(self.minimumSizeHint())
         self.valueChanged()
 
@@ -86,7 +89,7 @@ class MaskWidget(QWidget):
     def valueChanged(self):
         a = self.leftSpinBox.value()
         b = self.rightSpinBox.value()
-        self.emit(SIGNAL("valueChanged"), a, b)
+        self.emit(QtCore.SIGNAL("valueChanged"), a, b)
         self.update()
 
 
@@ -94,7 +97,7 @@ class MaskWidget(QWidget):
         return self.leftSpinBox.value(), self.rightSpinBox.value()
 
     def minimumSizeHint(self):
-        return QSize(200,200)
+        return QtCore.QSize(200,200)
 
 
     def resizeEvent(self, event=None):
@@ -162,7 +165,7 @@ class MaskWidget(QWidget):
     def paintEvent(self, event=None):
         LogicalSize = 100.0
  
-        painter = QPainter(self)
+        painter = QtGui.QPainter(self)
         #painter.setRenderHint(QPainter.Antialiasing)
         
         side = self.get_side()
@@ -178,29 +181,29 @@ class MaskWidget(QWidget):
         cx, cy = LogicalSize, LogicalSize
         dx, dy = 0, LogicalSize
         
-        painter.setBrush(QBrush(QColor(255,255,255,255)))
+        painter.setBrush(QtGui.QBrush(QtGui.QColor(255,255,255,255)))
         painter.drawPolygon(
-                    QPolygon([ax, ay, bx, by, cx, cy, dx, dy]))
+                    QtGui.QPolygon([ax, ay, bx, by, cx, cy, dx, dy]))
 
         # Image
         if HAS_MPL:
             if self._background_data is not None:
                 try:
                     matplotlib.pyplot.imsave(fname="data_image.png", arr=self._background_data, cmap="jet")
-                    target = QRect(0,0,100, 100)
-                    image = QImage("data_image.png")
-                    image.scaled(side, side, Qt.KeepAspectRatio)
+                    target = QtCore.QRect(0,0,100, 100)
+                    image = QtGui.QImage("data_image.png")
+                    image.scaled(side, side, QtCore.Qt.KeepAspectRatio)
                     painter.drawImage(target, image)
                 except:
                     raise RuntimeError, "Could not process 2D image\n  %s" % sys.exc_value
         elif self._background_file is not None:
             try:
-                target = QRect(0,0,100, 100)
+                target = QtCore.QRect(0,0,100, 100)
                 # left, top, right, bottom
                 # Assume standard HFIR image
-                source = QRect(48,29,298,299)
-                image = QImage(self._background_file)
-                image.scaled(side, side, Qt.KeepAspectRatio)
+                source = QtCore.QRect(48,29,298,299)
+                image = QtGui.QImage(self._background_file)
+                image.scaled(side, side, QtCore.Qt.KeepAspectRatio)
                 painter.drawImage(target, image, source)
             except:            
                 raise RuntimeError, "Could not process image file %s\n  %s" % (str(self._background_file), sys.exc_value)
@@ -216,26 +219,140 @@ class MaskWidget(QWidget):
         left_pos = left/self.n_pixels*100.0
         right_pos = LogicalSize-right/self.n_pixels*100.0
         
-        painter.setBrush(QBrush(QColor(200,200,200,255)))
+        painter.setBrush(QtGui.QBrush(QtGui.QColor(200,200,200,255)))
         # Top band
         painter.drawPolygon(
-                    QPolygon([0, 0, LogicalSize, 0, LogicalSize, top_pos, 0, top_pos]))
+                    QtGui.QPolygon([0, 0, LogicalSize, 0, LogicalSize, top_pos, 0, top_pos]))
         # Bottom band
         painter.drawPolygon(
-                    QPolygon([0, LogicalSize, 0, bottom_pos, LogicalSize, bottom_pos, LogicalSize, LogicalSize]))
+                    QtGui.QPolygon([0, LogicalSize, 0, bottom_pos, LogicalSize, bottom_pos, LogicalSize, LogicalSize]))
         # Right
         painter.drawPolygon(
-                    QPolygon([right_pos, 0, LogicalSize, 0, LogicalSize, LogicalSize, right_pos, LogicalSize]))
+                    QtGui.QPolygon([right_pos, 0, LogicalSize, 0, LogicalSize, LogicalSize, right_pos, LogicalSize]))
         # Left
         painter.drawPolygon(
-                    QPolygon([0, 0, left_pos, 0, left_pos, LogicalSize, 0, LogicalSize]))
+                    QtGui.QPolygon([0, 0, left_pos, 0, left_pos, LogicalSize, 0, LogicalSize]))
         
+class MaskTabWidget(BaseWidget):
+    """
+        Widget for setting up the detector mask
+    """
+
+    ## Widget name
+    name = "Mask"      
+    
+    def __init__(self, parent=None, state=None, settings=None):
+        QtGui.QWidget.__init__(self, parent)
+        
+        self._layout = QtGui.QHBoxLayout()
+        self._content = QtGui.QGroupBox(self)
+        self._layout.addWidget(self._content)
+
+        self.setLayout(self._layout)
+        
+        # General GUI settings
+        if settings is None:
+            settings = GeneralSettings()
+        self._settings = settings  
+              
+        class MaskFrame(QtGui.QFrame, ui.ui_mask.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = MaskFrame(self)
+        self.initialize_content()
+        
+        if state is not None:
+            self.set_state(state)
+        else:
+            self.set_state(Mask())      
+  
+    def initialize_content(self):
+        """
+            Declare the validators and event connections for the 
+            widgets loaded through the .ui file.
+        """
+        # Validators
+        self._content.x_min_edit.setValidator(QtGui.QIntValidator(self._content.x_min_edit))
+        self._content.x_max_edit.setValidator(QtGui.QIntValidator(self._content.x_max_edit))
+        self._content.y_min_edit.setValidator(QtGui.QIntValidator(self._content.y_min_edit))
+        self._content.y_max_edit.setValidator(QtGui.QIntValidator(self._content.y_max_edit))
+        
+        self._content.top_edit.setValidator(QtGui.QIntValidator(self._content.top_edit))
+        self._content.bottom_edit.setValidator(QtGui.QIntValidator(self._content.bottom_edit))
+        self._content.left_edit.setValidator(QtGui.QIntValidator(self._content.left_edit))
+        self._content.right_edit.setValidator(QtGui.QIntValidator(self._content.right_edit))
+        
+        # Connections
+        self.connect(self._content.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
+        self.connect(self._content.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
+
+    def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state.
+            @param state: Transmission object
+        """
+        self._content.top_edit.setText(QtCore.QString(str(state.top)))
+        self._content.bottom_edit.setText(QtCore.QString(str(state.bottom)))
+        self._content.left_edit.setText(QtCore.QString(str(state.left)))
+        self._content.right_edit.setText(QtCore.QString(str(state.right)))
+            
+        self._content.listWidget.clear()
+        for item in state.shapes:
+            self._append_rectangle(item)
+
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        m = Mask()
+        
+        # Edges
+        m.top = util._check_and_get_int_line_edit(self._content.top_edit)
+        m.bottom = util._check_and_get_int_line_edit(self._content.bottom_edit)
+        m.left = util._check_and_get_int_line_edit(self._content.left_edit)
+        m.right = util._check_and_get_int_line_edit(self._content.right_edit)
+        
+        # Rectangles
+        for i in range(self._content.listWidget.count()):
+            m.shapes.append(self._content.listWidget.item(i).value)
+        
+        return m
+    
+    def _add_rectangle(self):
+        # Read in the parameters
+        x_min = util._check_and_get_int_line_edit(self._content.x_min_edit)
+        x_max = util._check_and_get_int_line_edit(self._content.x_max_edit)
+        y_min = util._check_and_get_int_line_edit(self._content.y_min_edit)
+        y_max = util._check_and_get_int_line_edit(self._content.y_max_edit)
+        
+        # Check that a rectangle was defined. We don't care whether 
+        # the min/max values were inverted
+        if (self._content.x_min_edit.hasAcceptableInput() and
+            self._content.x_max_edit.hasAcceptableInput() and
+            self._content.y_min_edit.hasAcceptableInput() and
+            self._content.y_max_edit.hasAcceptableInput()):
+            rect = Mask.RectangleMask(x_min, x_max, y_min, y_max)
+            self._append_rectangle(rect)
+    
+    def _remove_rectangle(self):
+        selected = self._content.listWidget.selectedItems()
+        for item in selected:
+            self._content.listWidget.takeItem( self._content.listWidget.row(item) )
+    
+    def _append_rectangle(self, rect):
+        class _ItemWrapper(QtGui.QListWidgetItem):
+            def __init__(self, value):
+                QtGui.QListWidgetItem.__init__(self, value)
+                self.value = rect
+        self._content.listWidget.addItem(_ItemWrapper("Rect: %g < x < %g; %g < y < %g" % (rect.x_min, rect.x_max, rect.y_min, rect.y_max)))    
         
     
 if __name__ == "__main__":
     import sys
 
-    app = QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     form = MaskWidget()
     form.setWindowTitle("Mask")
     form.move(0, 0)

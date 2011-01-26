@@ -1,7 +1,7 @@
 import sys, os
 from PyQt4 import QtGui, QtCore, uic
 
-from reduction_gui.instruments.instrument_factory import instrument_factory
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_LIST
 from reduction_gui.settings.application_settings import GeneralSettings
 import reduction_gui.settings.qrc_resources
 import ui.ui_reduction_main
@@ -188,6 +188,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             def __init__(self):
                 QtGui.QDialog.__init__(self)
                 self.setupUi(self)
+                self.instr_combo.clear()
+                for item in INSTRUMENT_LIST:
+                    self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 
         dialog = InstrDialog()
         dialog.exec_()

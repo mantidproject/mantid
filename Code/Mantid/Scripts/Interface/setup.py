@@ -15,6 +15,9 @@ try:
     os.system("pyuic4 -o ui/ui_trans_direct_beam.py ui/trans_direct_beam.ui")
     os.system("pyuic4 -o ui/ui_trans_spreader.py ui/trans_spreader.ui")
     os.system("pyuic4 -o ui/ui_instrument_dialog.py ui/instrument_dialog.ui")
+    
+    os.system("pyuic4 -o ui/ui_sns_data_summary.py ui/sns_data_summary.ui")
+    os.system("pyuic4 -o ui/ui_mask.py ui/mask.ui")
 except:
     print "Could not compile resource file"
     

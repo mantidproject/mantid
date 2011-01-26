@@ -51,7 +51,7 @@ class BackgroundWidget(BaseWidget):
     ## Widget name
     name = "Background"      
     
-    def __init__(self, parent=None, state=None, settings=None):
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
 
         class BckFrame(QtGui.QFrame, ui.ui_hfir_background.Ui_Frame): 
@@ -60,6 +60,10 @@ class BackgroundWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = BckFrame(self)
+        
+        # Flag to show transmission options or not
+        self.show_transmission = show_transmission
+
         self.initialize_content()
         
         if state is not None:
@@ -89,6 +93,16 @@ class BackgroundWidget(BaseWidget):
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
         
+        # Process transmission option
+        if not self.show_transmission:
+            self._content.calculate_trans_chk.hide()
+            self._content.bck_trans_label.hide()
+            self._content.bck_trans_err_label.hide()
+            self._content.transmission_edit.hide()
+            self._content.dtransmission_edit.hide()
+            self._content.calculate_trans_chk.hide()
+            self._content.trans_direct_chk.hide()
+            self._content.trans_spreader_chk.hide()
 
     def set_state(self, state):
         """
@@ -133,7 +147,8 @@ class BackgroundWidget(BaseWidget):
         m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
         m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
         
-        m.trans_calculation_method=self._method_box.get_state()   
+        if self._method_box is not None:
+            m.trans_calculation_method=self._method_box.get_state()   
         return m
         
     def _direct_beam(self, state=None):
@@ -141,14 +156,16 @@ class BackgroundWidget(BaseWidget):
             state = self._last_direct_state
         if isinstance(self._method_box, BckBeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
-        self._replace_method(BckDirectBeam(self, state=state, settings=self._settings))
+        if self.show_transmission:
+            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings))
         
     def _beam_spreader(self, state=None):
         if state is None:
             state = self._last_spreader_state
         if isinstance(self._method_box, BckDirectBeam):
             self._last_direct_state = self._method_box.get_state()
-        self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings))
+        if self.show_transmission:
+            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings))
         
     def _replace_method(self, widget):
         if self._method_box is not None:
