@@ -20,7 +20,8 @@ namespace Mantid
   namespace Algorithms
   {
     BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_indicesToMask(), m_progress(NULL),
-      m_useHistogramForRhsEventWorkspace(false)
+      m_useHistogramForRhsEventWorkspace(false),
+      m_ClearRHSWorkspace(false)
     {}
     
     BinaryOperation::~BinaryOperation()
@@ -40,6 +41,11 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false, Direction::Input),
           "Allow workspaces to have different number of spectra and perform\n"
           "operation on LHS spectra using matching detector IDs in RHS.\n");
+
+      declareProperty(new PropertyWithValue<bool>("ClearRHSWorkspace", false, Direction::Input),
+          "Clear the RHS workspace as the operation is performed.\n"
+          "This can help prevent maxing out available memory for large workspaces.\n"
+          "This is ignored unless the RHS workspace is an EventWorkpsace.\n");
     }
 
 
@@ -58,6 +64,21 @@ namespace Mantid
       // Cast to EventWorkspace pointers
       m_elhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_lhs);
       m_erhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_rhs);
+
+      // We can clear the RHS workspace if it is an event,
+      //  and we are not doing mismatched spectra (in which case you might clear it too soon!)
+      //  and lhs is not rhs.
+      //  and out is not rhs.
+      m_ClearRHSWorkspace = getProperty("ClearRHSWorkspace");
+      if (m_ClearRHSWorkspace)
+      {
+        if (m_AllowDifferentNumberSpectra || (!m_erhs) || (m_rhs == m_lhs) || (m_out == m_rhs))
+        {
+          //std::cout << "m_ClearRHSWorkspace = false\n";
+          m_ClearRHSWorkspace = false;
+        }
+      }
+
 
       //Get the output workspace
       m_out = getProperty(outputPropName());
@@ -129,6 +150,9 @@ namespace Mantid
         if ( (m_out != m_lhs && m_out != m_rhs) ||
             ( m_out == m_lhs && ( m_flipSides ) )  )
         {
+          // Make sure to delete anything that might be in the output name.
+          if (AnalysisDataService::Instance().doesExist(getPropertyValue(outputPropName() )))
+            AnalysisDataService::Instance().remove(getPropertyValue(outputPropName() ));
           m_out = WorkspaceFactory::Instance().create(m_lhs);
         }
       }
@@ -533,7 +557,6 @@ namespace Mantid
     void BinaryOperation::do2D( bool mismatchedSpectra)
     {
       API::MemoryManager::Instance().releaseFreeMemory();
-      API::MemoryManager::Instance().releaseFreeMemory();
 
       BinaryOperationTable * table = NULL;
       if (mismatchedSpectra)
@@ -576,6 +599,10 @@ namespace Mantid
             //Reach here? Do the division
             //Perform the operation on the event list on the output (== lhs)
             performEventBinaryOperation(m_eout->getEventList(i),  m_erhs->getEventList(rhs_wi));
+
+            //Free up memory on the RHS if that is possible
+            if (m_ClearRHSWorkspace)
+              const_cast<EventList&>(m_erhs->getEventList(rhs_wi)).clear();
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -606,6 +633,11 @@ namespace Mantid
             }
             //Reach here? Do the division
             performEventBinaryOperation(m_eout->getEventList(i),  m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi));
+
+            //Free up memory on the RHS if that is possible
+            if (m_ClearRHSWorkspace)
+              const_cast<EventList&>(m_erhs->getEventList(rhs_wi)).clear();
+
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -641,10 +673,18 @@ namespace Mantid
           }
           //Reach here? Do the division
           performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),m_rhs->readY(rhs_wi),m_rhs->readE(rhs_wi),m_out->dataY(i),m_out->dataE(i));
+
+          //Free up memory on the RHS if that is possible
+          if (m_ClearRHSWorkspace)
+            const_cast<EventList&>(m_erhs->getEventList(rhs_wi)).clear();
+
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
+      // Make sure we don't use outdated MRU
+      if (m_ClearRHSWorkspace)
+        m_erhs->clearMRU();
     }
 
 

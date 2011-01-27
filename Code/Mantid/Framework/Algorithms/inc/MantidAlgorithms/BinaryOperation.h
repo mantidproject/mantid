@@ -229,6 +229,7 @@ namespace Mantid
 
       /// The property value
       bool m_AllowDifferentNumberSpectra;
+      bool m_ClearRHSWorkspace;
 
       //------ Requirements -----------
 

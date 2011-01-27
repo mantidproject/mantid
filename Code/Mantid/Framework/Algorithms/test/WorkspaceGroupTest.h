@@ -33,6 +33,11 @@ private:
   void checkData(MatrixWorkspace_sptr work_in1, MatrixWorkspace_sptr work_in2,
       MatrixWorkspace_sptr work_out1, int loopOrientation)
   {
+    if (!work_in1 || !work_in2 || !work_out1)
+    {
+      TSM_ASSERT( "One or more empty workspace pointers.", 0);
+      return;
+    }
     int ws2LoopCount;
     if (work_in2->size() > 0)
     {
@@ -370,6 +375,7 @@ public:
       checkData(worklhs_in4, workrhs_in4, work_out4);
 
       work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+      if (!work_out) return;
       work_out->removeAll();
 
       AnalysisDataService::Instance().remove("testlhs_in");
@@ -452,7 +458,8 @@ public:
       checkData(worklhs_in1, workrhs_in3, work_out3);
       checkData(worklhs_in1, workrhs_in4, work_out4);
 
-      work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+      TS_ASSERT_THROWS_NOTHING( work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out")); )
+      if (!work_out) return;
       work_out->removeAll();
 
       AnalysisDataService::Instance().remove("testlhs_in1");
@@ -527,7 +534,8 @@ public:
       checkData(worklhs_in3, worklhs_in3, work_out3);
       checkData(worklhs_in4, worklhs_in4, work_out4);
 
-      work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+      TS_ASSERT_THROWS_NOTHING( work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out")); )
+      if (!work_out) return;
       work_out->removeAll();
 
       AnalysisDataService::Instance().remove("testlhs_in");

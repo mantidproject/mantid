@@ -23,15 +23,13 @@ class MinusTest : public CxxTest::TestSuite
 {
 public:
 
-  void xtestInit()
+  MinusTest()
   {
-    Minus alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("LHSWorkspace","test_in21") );
-    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("RHSWorkspace","test_in22") );
-    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("OutputWorkspace","test_out2") );
+    numBins = 10;
+    numPixels = 6;
+    wsNameOut = "MinusTest_outputWorkspace";
   }
+
 
   void testExec1D1D()
   {
@@ -300,161 +298,206 @@ public:
   Workspace2D_sptr work_in2;
 
 
-  void EventSetup()
+//  void EventSetup()
+//  {
+//    numBins = 100;
+//    numPixels = 500;
+//    //Workspace with 2 events per bin; 100 bins from 0 to 100
+//    work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+//
+//    //2D workspace with 0.5 in each bin.
+//    work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(numPixels, numBins, 0.0, 1.0);
+//    for (int pix=0; pix < numPixels; pix++)
+//    {
+//      work_in2->dataY(pix).assign(numBins, 0.5);
+//      work_in2->dataE(pix).assign(numBins, sqrt(0.5));
+//    }
+//
+//    //Put the stuff in the data service
+//    wsName_EW = "test_inA";
+//    wsName_2D = "test_inB";
+//    wsNameOut = "test_out";
+//    AnalysisDataService::Instance().add(wsName_EW, work_in1);
+//    AnalysisDataService::Instance().add(wsName_2D, work_in2);
+//  }
+//
+//  void EventTeardown()
+//  {
+//    AnalysisDataService::Instance().remove(wsName_EW);
+//    AnalysisDataService::Instance().remove(wsName_2D);
+//    AnalysisDataService::Instance().remove(wsNameOut);
+//  }
+//
+//
+//
+//
+  // Perform the test for given types
+  void doTest(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
+      bool clearRHS, bool expectEventOutput,
+      size_t expectedOutputNumberEventsInOutput,
+      bool rhsShouldBeCleared,
+      int outputWorkspaceWillBe = 0
+      )
   {
-    numBins = 100;
-    numPixels = 500;
-    //Workspace with 2 events per bin; 100 bins from 0 to 100
-    work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
-
-    //2D workspace with 0.5 in each bin.
-    work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(numPixels, numBins, 0.0, 1.0);
-    for (int pix=0; pix < numPixels; pix++)
+    lhs->setName("MinusTest_lhs");
+    rhs->setName("MinusTest_rhs");
+    switch (outputWorkspaceWillBe)
     {
-      work_in2->dataY(pix).assign(numBins, 0.5);
-      work_in2->dataE(pix).assign(numBins, sqrt(0.5));
+    case 0:
+      wsNameOut = "MinusTest_output";
+      if (AnalysisDataService::Instance().doesExist(wsNameOut))
+        AnalysisDataService::Instance().remove(wsNameOut);
+      break;
+    case 1:      wsNameOut = "MinusTest_lhs"; break;
+    case 2:      wsNameOut = "MinusTest_rhs"; break;
     }
 
-    //Put the stuff in the data service
-    wsName_EW = "test_inA";
-    wsName_2D = "test_inB";
-    wsNameOut = "test_out";
-    AnalysisDataService::Instance().add(wsName_EW, work_in1);
-    AnalysisDataService::Instance().add(wsName_2D, work_in2);
-  }
-
-  void EventTeardown()
-  {
-    AnalysisDataService::Instance().remove(wsName_EW);
-    AnalysisDataService::Instance().remove(wsName_2D);
-    AnalysisDataService::Instance().remove(wsNameOut);
-  }
-
-
-  void test_EventWorkspace_minus_Workspace2D()
-  {
-    EventSetup();
+    TS_ASSERT_DELTA(  rhs->readY(0)[0], 2.00, 1e-5);
+    TS_ASSERT_DELTA(  rhs->readE(0)[0], sqrt(2.00), 1e-5);
 
     //Do the minus
     Minus alg;
     alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName_EW);
-    alg.setPropertyValue("RHSWorkspace",wsName_2D);
+    alg.setProperty("LHSWorkspace",lhs);
+    alg.setProperty("RHSWorkspace",rhs);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    alg.setProperty("ClearRHSWorkspace", clearRHS);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
     //The output!
     MatrixWorkspace_const_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-    // The output is NOT an EventWorkspace
+    TS_ASSERT(work_out1);
+    if (!work_out1)
+      return;
+
+    // The output is an EventWorkspace ?
     EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
-    TS_ASSERT(!eventOut);
-    MatrixWorkspace_const_sptr work_in1_const;
-    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
+    if (expectEventOutput)
+    {
+      TS_ASSERT(eventOut);
+      if (!eventOut) return;
+      TS_ASSERT_EQUALS( eventOut->getNumberEvents(), expectedOutputNumberEventsInOutput);
+    }
+    else
+    {
+      TS_ASSERT(!eventOut);
+    }
 
     //Compare
-    for (int pix=0; pix < numPixels; pix+=499)
+    for (int pix=0; pix < numPixels; pix+=1)
       for (int i=0; i < numBins; i++)
       {
         //Output should be 1.5 everywhere
-        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 1.50, 1e-5);
+        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 0.00, 1e-5);
         //And the error is the sum of the square of the incoming errors
-        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(2.50), 1e-5);
+        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
+
         //Incoming event workspace should still have 2.0 for values
-        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
-        //And error
-        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA(  lhs->readY(pix)[i], 2.00, 1e-5);
+        TS_ASSERT_DELTA(  lhs->readE(pix)[i], sqrt(2.0), 1e-5);
+
+        if (!rhsShouldBeCleared)
+        {
+          //Incoming event workspace should still have 2.0 for values
+          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 2.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->readE(pix)[i], sqrt(2.0), 1e-5);
+        }
+        else
+        {
+          // If you cleared it, should be 0
+          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->readE(pix)[i], 0.00, 1e-5);
+        }
       }
 
-    EventTeardown();
   }
-
-  void test_Workspace2D_minus_EventWorkspace()
-  {
-    EventSetup();
-
-    //Do the minus
-    Minus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName_2D);
-    alg.setPropertyValue("RHSWorkspace",wsName_EW);
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-
-    //The output!
-    MatrixWorkspace_const_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-    // The output is NOT an EventWorkspace
-    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
-    TS_ASSERT(!eventOut);
-    MatrixWorkspace_const_sptr work_in1_const;
-    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
-
-    //Compare
-    for (int pix=0; pix < numPixels; pix+=499)
-      for (int i=0; i < numBins; i++)
-      {
-        //0.5-2 = -1.5
-        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], -1.50, 1e-5);
-        //And the error is the sum of the square of the incoming errors
-        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(2.50), 1e-5);
-        //Incoming event workspace should still have 2.0 for values
-        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
-        //And error
-        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
-      }
-
-    EventTeardown();
-  }
-
 
 
   void test_EventWorkspace_minus_EventWorkspace()
   {
-    EventSetup();
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
 
-    //Do the minus
-    Minus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",wsName_EW);
-    alg.setPropertyValue("RHSWorkspace",wsName_EW);
-    alg.setPropertyValue("OutputWorkspace",wsNameOut);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted() );
+  void test_EventWorkspace_minus_EventWorkspace_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, true, true, lhs->getNumberEvents() + rhs->getNumberEvents(), true);
+  }
 
-    //The output!
-    MatrixWorkspace_const_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-    //And it is still an EventWorkspace?
-    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
-    TS_ASSERT(eventOut);
-    if (eventOut)
-    {
-      TS_ASSERT_EQUALS( eventOut->getNumberEvents(), numBins * numPixels * 2 * 2 );
-      TS_ASSERT_EQUALS( eventOut->getEventType(), Mantid::API::WEIGHTED );
-    }
+  void test_Workspace2D_minus_EventWorkspace()
+  {
+    MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numBins, numPixels);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, false, false, 0, false);
+  }
 
-    MatrixWorkspace_const_sptr work_in1_const;
-    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName_EW)));
+  void test_Workspace2D_minus_EventWorkspace_clearRHS()
+  {
+    MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numBins, numPixels);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, true, false, 0, true);
+  }
 
-    //Compare
-    for (int pix=0; pix < numPixels; pix+=49)
-      for (int i=0; i < numBins; i+=7)
-      {
-        //Output should be 1.5 everywhere
-        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 0.0, 1e-5);
-        //And the error is the sum of the square of the incoming errors
-        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.0), 1e-5);
+  void test_EventWorkspace_minus_Workspace2D()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numBins, numPixels);
+    doTest(lhs,rhs, false, false, 0, false);
+  }
 
-        //Incoming event workspace should still have 2.0 for values
-        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
-        //And error
-        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
-      }
+  void test_EventWorkspace_minus_Workspace2D_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numBins, numPixels);
+    doTest(lhs,rhs, true, false, 0, false);
+  }
 
-    EventTeardown();
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_lhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_AND_lhs_is_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs_with_clearRHS_set_doesnt_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs_with_clearRHS_set_doesnt_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    doTest(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
   }
 
 
