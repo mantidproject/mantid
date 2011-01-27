@@ -4,6 +4,7 @@
 #include <qwt_scale_div.h>
 #include <qwt_scale_engine.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_compat.h>
 
 #include <QFontMetrics>
 #include <QMouseEvent>
