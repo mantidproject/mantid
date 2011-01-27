@@ -5,9 +5,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include <boost/timer.hpp>
-#include <ostream>
-#include <string>
+#ifdef _WIN32
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
 
 namespace Mantid
 {
@@ -43,16 +45,18 @@ class DLLExport Timer
 public:
   Timer();
   virtual ~Timer();
-  void restart();
-  void resets(const bool);
-  double elapsed();
-  std::string str() const;
+  
+  float elapsed();
+  
 private:
-  boost::timer m_timer;
-  bool m_resets;
+  // The type of this variable is different depending on the platform
+#ifdef _WIN32
+  clock_t
+#else
+  timeval
+#endif
+  m_start;   ///< The starting time (implementation dependent format)
 };
-
-DLLExport std::ostream& operator<<(std::ostream&, const Timer);
 
 } // namespace Kernel
 } // namespace Mantid
