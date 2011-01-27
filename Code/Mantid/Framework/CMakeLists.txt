@@ -44,8 +44,8 @@ configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
 set ( USE_TCMALLOC ON CACHE BOOL "Flag for replacing regular malloc with tcmalloc" )
 # Note that this is not mandatory, so no REQUIRED
 find_package ( Tcmalloc )
-# If not found, just carry on without it
-if ( TCMALLOC_FOUND )
+# If not found, or not wanted, just carry on without it
+if ( USE_TCMALLOC AND TCMALLOC_FOUND )
   set ( TCMALLOC_LIBRARY ${TCMALLOC_LIBRARIES} )
 endif ()
 
