@@ -1480,7 +1480,7 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item row="0" column="1" >
-                 <widget class="QLabel" name="label_19" >
+                 <widget class="QLabel" name="qxy_lb_2" >
                   <property name="sizePolicy" >
                    <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
@@ -1494,7 +1494,7 @@ p, li { white-space: pre-wrap; }
                    </size>
                   </property>
                   <property name="text" >
-                   <string>Qx (Angstroms^-1)</string>
+                   <string>Qx (A^-1)</string>
                   </property>
                  </widget>
                 </item>

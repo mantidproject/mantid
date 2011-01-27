@@ -206,10 +206,7 @@ def CompWavRanges(wavelens, plot=True):
     for i in in_betweens:
         reductions.append(i) 
 
-    if plot:
-        graph_output = None
-        for i in reductions:
-            graph_output = PlotResult(i, graph_output)
+    mantidplot.plotSpectrum(reductions, 0)
     
     #return just the workspace name of the full range
     return reductions[0]

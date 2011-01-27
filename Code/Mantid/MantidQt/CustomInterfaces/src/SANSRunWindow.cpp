@@ -183,6 +183,7 @@ void SANSRunWindow::initAnalysDetTab()
   //the unicode code for the angstrom symbol is 197, doing the below keeps this file ASCII compatible
   static const QChar ANGSROM_SYM(197);
   m_uiForm.wavlength_lb->setText(QString("Wavelength (%1)").arg(ANGSROM_SYM));
+  m_uiForm.qxy_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.transFit_lb->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
 
