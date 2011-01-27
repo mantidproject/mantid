@@ -37,11 +37,20 @@ configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
 )
 
 ###########################################################################
-# Look for dependencies - bail out if any not found
+# Look for dependencies - bail out if any necessary oned not found
 ###########################################################################
 
-# Might just as well link everything to Boost & Poco
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARIES} )
+# Look for tcmalloc. Make it optional, for now at least, but on by default
+set ( USE_TCMALLOC ON CACHE BOOL "Flag for replacing regular malloc with tcmalloc" )
+# Note that this is not mandatory, so no REQUIRED
+find_package ( Tcmalloc )
+# If not found, just carry on without it
+if ( TCMALLOC_FOUND )
+  set ( TCMALLOC_LIBRARY ${TCMALLOC_LIBRARIES} )
+endif ()
+
+# Might just as well link everything to Boost & Poco (found in CommonSetup)
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
 
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
