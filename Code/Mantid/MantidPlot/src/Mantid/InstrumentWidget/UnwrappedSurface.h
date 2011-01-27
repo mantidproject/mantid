@@ -75,6 +75,7 @@ public:
 
   void componentSelected(Mantid::Geometry::ComponentID);
   void getPickedDetector(QSet<int>& dets);
+  int getDetectorID(int x, int y);
   bool hasSelection()const;
 
 protected:

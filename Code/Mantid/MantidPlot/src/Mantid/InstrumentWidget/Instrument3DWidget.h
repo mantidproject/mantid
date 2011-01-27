@@ -70,6 +70,10 @@ public:
     void setDet(const int detID);                                 ///< set up the object to contain data for only one detector
     void setEndRange(const int detID);                            ///< for a detector with at least one detector set the detector for the end of the range
     QString display() const;                                      ///< Creates a string with the object's data in a human readable form
+    Mantid::API::MatrixWorkspace_const_sptr getWorkspace()const{return m_workspace;}
+    int getDetID()const{return m_firstDet;}
+    int getWorkspaceIndex()const;
+    int getIndexOf(const int someDetID) const;                    ///< Gets the index number of the spectrum for the given detector
   private:
     static const int NO_INDEX = -1;                               ///< Value used to indicate missing data, detectors, spectra, etc...
     static const int ERROR_FLAG = -2;                             ///< flags missing values but indicates an inconsistency in the data state
@@ -79,7 +83,6 @@ public:
     int m_firstDet;                                               ///< id number of the detector that was selected first
     int m_lastDet;                                                ///< if more than one detector is selected this is the id number of the one selected last otherwise the NO_DATA value
 
-    int getIndexOf(const int someDetID) const;                    ///< Gets the index number of the spectrum for the given detector
     void printSpectrum(const int index, std::ostringstream & output) const;///< Retrieves information about the spectrum whose index was passed
     void printLocation(std::ostringstream & output) const;///< Writes the location of the detectors
     void printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const;///< Writes a position vector in a nice way
@@ -123,6 +126,7 @@ public:
 public slots:
   void fireDetectorsPicked(const std::set<QRgb>& );
   void fireDetectorHighligted(QRgb);
+  void fireDetectorHighligted(int detID);
   void detectorsHighligted(QRgb);
   void setTimeBin(int value);
   void setColorMapMinValue(double minValue);

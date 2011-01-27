@@ -1,4 +1,5 @@
 #include "InstrumentWindow.h"
+#include "OneCurvePlot.h"
 #include "../MantidUI.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -27,6 +28,8 @@
 #include "qwt_scale_div.h"
 #include "qwt_scale_engine.h"
 
+#include <numeric>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
@@ -46,109 +49,23 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mControlsTab = new QTabWidget(0,0);
   controlPanelLayout->addWidget(mControlsTab);
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-  QFrame* renderControls=new QFrame(mControlsTab);
-  QFrame* instrumentTree=new QFrame(mControlsTab);
-  mControlsTab->addTab( renderControls, QString("Render Controls"));
-  mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
+
+  // Create the display widget
   mInstrumentDisplay = new Instrument3DWidget();
   controlPanelLayout->addWidget(mInstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
-  QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
-  QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
-  //Tree Controls
-  mInstrumentTree = new InstrumentTreeWidget(0);
-  instrumentTreeLayout->addWidget(mInstrumentTree);
-  connect(mInstrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-          mInstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
+
   //Render Controls
-  mSelectButton = new QPushButton(tr("Pick"));
-  mSelectColormap = new QPushButton(tr("Select ColorMap"));
-  QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
-  mBinDialog = new BinDialog(this);
-  mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
-  //Save control
-  mSaveImage = new QPushButton(tr("Save image"));
-  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
-  // Lighting is needed for testing
-//  QPushButton* setLight = new QPushButton(tr("Set lighting"));
-//  setLight->setCheckable(true);
-
-  mMinValueBox = new QLineEdit();
-  mMaxValueBox = new QLineEdit();
-  mMinValueBox->setMinimumWidth(40);
-  mMaxValueBox->setMinimumWidth(40);
-  mMinValueBox->setMaximumWidth(60);
-  mMaxValueBox->setMaximumWidth(60);
-  mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
-  mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
-  //Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
-  mMinValueBox->setText("");
-  mMaxValueBox->setText("");
-
-  QFrame * axisViewFrame = setupAxisFrame();
-
-  //Colormap Frame widget
-  QFrame* lColormapFrame = new QFrame();
-
-  QVBoxLayout* lColormapLayout = new QVBoxLayout;
-  lColormapLayout->addWidget(mMaxValueBox);
-  lColormapLayout->addWidget(mColorMapWidget);
-  lColormapLayout->addWidget(mMinValueBox);
-  mColorMapWidget->setColorBarEnabled(true);
-  mColorMapWidget->setColorBarWidth(20);
-  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
-  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
-
-  mScaleOptions = new QComboBox;
-  mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
-  mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
-  connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
-
-  QVBoxLayout* options_layout = new QVBoxLayout;
-  options_layout->addStretch();
-  options_layout->addWidget(mScaleOptions);
-
-  QHBoxLayout *colourmap_layout = new QHBoxLayout;
-  colourmap_layout->addLayout(lColormapLayout);
-  colourmap_layout->addLayout(options_layout);
-  lColormapFrame->setLayout(colourmap_layout);
-
-
-  //Pick background color
-  QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
-
-  //Check box to toggle orientation axes
-  m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
-  m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
-  m3DAxesToggle->setCheckState(Qt::Checked);
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
-
-  //Check box to toggle polygon mode
-  QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
-  poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
-  poligonMOdeToggle->setCheckState(Qt::Unchecked);
-  connect(poligonMOdeToggle, SIGNAL(clicked(bool)), mInstrumentDisplay, SLOT(setWireframe(bool)));
+  QFrame* renderControls = createRenderTab(mControlsTab);
+  mControlsTab->addTab( renderControls, QString("Render"));
   
-  QComboBox* renderMode = new QComboBox(this);
-  renderMode->setToolTip("Set render mode");
-  QStringList modeList;
-  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
-  renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),mInstrumentDisplay,SLOT(setRenderMode(int)));
+  // Pick controls
+  QFrame* pickControls = createPickTab(mControlsTab);
+  mControlsTab->addTab( pickControls, QString("Pick"));
 
-  renderControlsLayout->addWidget(renderMode);
-  renderControlsLayout->addWidget(mSelectButton);
-  renderControlsLayout->addWidget(mSelectBin);
-  renderControlsLayout->addWidget(mSelectColormap);
-  renderControlsLayout->addWidget(mSaveImage);
-//  renderControlsLayout->addWidget(setLight);
-  renderControlsLayout->addWidget(axisViewFrame);
-  renderControlsLayout->addWidget(btnBackgroundColor);
-  renderControlsLayout->addWidget(lColormapFrame);
-  renderControlsLayout->addWidget(m3DAxesToggle);
-  renderControlsLayout->addWidget(poligonMOdeToggle);
+  // Instrument tree controls
+  QFrame* instrumentTree=createInstrumentTreeTab(mControlsTab);
+  mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
 
   //Set the main frame to the window
   frame->setLayout(mainLayout);
@@ -158,21 +75,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mInteractionInfo = new QLabel();
   mainLayout->addWidget(mInteractionInfo);
   updateInteractionInfoText();  
-  connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
-  connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
-  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
-//  connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
-  connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
-  connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
-
   connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
   connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
-
-  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double,bool)));
-  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
-  connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
 
   // Init actions
   mInfoAction = new QAction(tr("&Details"), this);
@@ -206,21 +111,18 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 }
 
 /**
- * Mode select button slot.
- */
-void InstrumentWindow::modeSelectButtonClicked()
+  * Connected to QTabWidget::currentChanged signal
+  */
+void InstrumentWindow::tabChanged(int i)
 {
-	if(mSelectButton->text()=="Pick")
-	{
-		mSelectButton->setText("Normal");
-		mInstrumentDisplay->setInteractionModePick();
-	}
-	else
-	{
-		mSelectButton->setText("Pick");
-		mInstrumentDisplay->setInteractionModeNormal();
-	}
-  updateInteractionInfoText();
+  if (i == 1) 
+  {
+    mInstrumentDisplay->setInteractionModePick();
+  }
+  else
+  {
+    mInstrumentDisplay->setInteractionModeNormal();
+  }
 }
 
 void InstrumentWindow::selectBinButtonClicked()
@@ -291,6 +193,7 @@ void InstrumentWindow::showPickOptions()
 void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos)
 {
   mInteractionInfo->setText(cursorPos.display());
+  updatePlot(cursorPos);
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
@@ -773,7 +676,7 @@ void InstrumentWindow::scaleTypeChanged(int index)
 void InstrumentWindow::updateInteractionInfoText()
 {
   QString text;  
-	if(mSelectButton->text()=="Pick")
+  if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
 	{
     text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
     if( m3DAxesToggle->isChecked() )
@@ -901,4 +804,308 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 	s+="</instrumentwindow>\n";
 	return s;
 
+}
+
+
+QFrame * InstrumentWindow::createRenderTab(QTabWidget* ControlsTab)
+{
+  QFrame* renderControls=new QFrame(ControlsTab);
+  QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
+  mSelectColormap = new QPushButton(tr("Select ColorMap"));
+  QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
+  mBinDialog = new BinDialog(this);
+  mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
+  // Lighting is needed for testing
+//  QPushButton* setLight = new QPushButton(tr("Set lighting"));
+//  setLight->setCheckable(true);
+  //Save control
+  mSaveImage = new QPushButton(tr("Save image"));
+  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+
+  mMinValueBox = new QLineEdit();
+  mMaxValueBox = new QLineEdit();
+  mMinValueBox->setMinimumWidth(40);
+  mMaxValueBox->setMinimumWidth(40);
+  mMinValueBox->setMaximumWidth(60);
+  mMaxValueBox->setMaximumWidth(60);
+  mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
+  mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
+  //Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
+  mMinValueBox->setText("");
+  mMaxValueBox->setText("");
+
+  QFrame * axisViewFrame = setupAxisFrame();
+
+  //Colormap Frame widget
+  QFrame* lColormapFrame = new QFrame();
+
+  QVBoxLayout* lColormapLayout = new QVBoxLayout;
+  lColormapLayout->addWidget(mMaxValueBox);
+  lColormapLayout->addWidget(mColorMapWidget);
+  lColormapLayout->addWidget(mMinValueBox);
+  mColorMapWidget->setColorBarEnabled(true);
+  mColorMapWidget->setColorBarWidth(20);
+  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
+  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+
+  mScaleOptions = new QComboBox;
+  mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
+  mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
+  connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
+
+  QVBoxLayout* options_layout = new QVBoxLayout;
+  options_layout->addStretch();
+  options_layout->addWidget(mScaleOptions);
+
+  QHBoxLayout *colourmap_layout = new QHBoxLayout;
+  colourmap_layout->addLayout(lColormapLayout);
+  colourmap_layout->addLayout(options_layout);
+  lColormapFrame->setLayout(colourmap_layout);
+
+
+  //Pick background color
+  QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
+
+  //Check box to toggle orientation axes
+  m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
+  m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
+  m3DAxesToggle->setCheckState(Qt::Checked);
+  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
+  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
+
+  //Check box to toggle polygon mode
+  QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
+  poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
+  poligonMOdeToggle->setCheckState(Qt::Unchecked);
+  connect(poligonMOdeToggle, SIGNAL(clicked(bool)), mInstrumentDisplay, SLOT(setWireframe(bool)));
+  
+  QComboBox* renderMode = new QComboBox(this);
+  renderMode->setToolTip("Set render mode");
+  QStringList modeList;
+  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
+  renderMode->insertItems(0,modeList);
+  connect(renderMode,SIGNAL(currentIndexChanged(int)),mInstrumentDisplay,SLOT(setRenderMode(int)));
+
+  renderControlsLayout->addWidget(renderMode);
+  renderControlsLayout->addWidget(mSelectBin);
+  renderControlsLayout->addWidget(mSelectColormap);
+  renderControlsLayout->addWidget(mSaveImage);
+//  renderControlsLayout->addWidget(setLight);
+  renderControlsLayout->addWidget(axisViewFrame);
+  renderControlsLayout->addWidget(btnBackgroundColor);
+  renderControlsLayout->addWidget(lColormapFrame);
+  renderControlsLayout->addWidget(m3DAxesToggle);
+  renderControlsLayout->addWidget(poligonMOdeToggle);
+
+
+  connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
+  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
+//  connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
+  connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
+
+  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
+  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double,bool)));
+  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
+  connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
+
+  return renderControls;
+}
+
+QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
+{
+  QFrame* instrumentTree=new QFrame(ControlsTab);
+  QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
+  //Tree Controls
+  mInstrumentTree = new InstrumentTreeWidget(0);
+  instrumentTreeLayout->addWidget(mInstrumentTree);
+  connect(mInstrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
+          mInstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
+  return instrumentTree;
+}
+
+QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
+{
+  m_plotSum = true;
+
+  QFrame* tab = new QFrame(ControlsTab);
+  QVBoxLayout* layout=new QVBoxLayout(tab);
+
+  m_plotCaption = new QLabel(this);
+  // set up the plot widget
+  m_plot = new OneCurvePlot(ControlsTab);
+  m_plot->enableAxis(QwtPlot::yLeft,false);
+  m_plot->setXScale(0,1);
+  m_plot->setYScale(-1.2,1.2);
+  connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
+  m_sumDetectors = new QAction("Sum",this);
+  m_integrateTimeBins = new QAction("Integrate",this);
+  connect(m_sumDetectors,SIGNAL(triggered()),this,SLOT(sumDetectors()));
+  connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
+
+  m_one = new QPushButton("One");
+  m_one->setCheckable(true);
+  m_one->setAutoExclusive(true);
+  m_one->setChecked(true);
+  m_many = new QPushButton("Many");
+  m_many->setCheckable(true);
+  m_many->setAutoExclusive(true);
+  QHBoxLayout* toolBox = new QHBoxLayout();
+  toolBox->addWidget(m_one);
+  toolBox->addWidget(m_many);
+  connect(m_one,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
+  connect(m_many,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
+
+  layout->addLayout(toolBox);
+  //layout->addWidget(new QPushButton("Pick"));
+  layout->addStretch();
+  layout->addWidget(m_plotCaption);
+  layout->addWidget(m_plot);
+
+  connect(ControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
+
+  setPlotCaption();
+  return tab;
+}
+
+void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
+  int wi = cursorPos.getWorkspaceIndex();
+  if (cursorPos.getDetID() >= 0 && wi >= 0)
+  {
+    if (m_one->isChecked())
+    {// plot spectrum of a single detector
+      const Mantid::MantidVec& x = ws->readX(wi);
+      const Mantid::MantidVec& y = ws->readY(wi);
+      m_plot->setXScale(x.front(),x.back());
+      Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
+      Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+      m_plot->setYScale(*min_it,*max_it);
+      m_plot->setData(&x[0],&y[0],y.size());
+    }
+    else
+    {// plot integrals
+      Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
+      boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+      Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+      if (parent && ass)
+      {
+        const int n = ass->nelements();
+        if (m_plotSum) // plot sums over detectors vs time bins
+        {
+          const Mantid::MantidVec& x = ws->readX(wi);
+          m_plot->setXScale(x.front(),x.back());
+          std::vector<double> y(ws->blocksize());
+          //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
+          for(int i = 0; i < n; ++i)
+          {
+            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+            if (idet)
+            {
+              int index = cursorPos.getIndexOf(idet->getID());
+              if (index >= 0)
+              {
+                const Mantid::MantidVec& Y = ws->readY(index);
+                std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
+              }
+            }
+          }
+          Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
+          Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+          m_plot->setYScale(*min_it,*max_it);
+          m_plot->setData(&x[0],&y[0],y.size());
+        }
+        else // plot detector integrals vs detID
+        {
+          std::vector<double> x;
+          x.reserve(n);
+          std::map<double,double> ymap;
+          for(int i = 0; i < n; ++i)
+          {
+            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+            if (idet)
+            {
+              const int id = idet->getID();
+              int index = cursorPos.getIndexOf(id);
+              if (index >= 0)
+              {
+                x.push_back(id);
+                const Mantid::MantidVec& Y = ws->readY(index);
+                double sum = std::accumulate(Y.begin(),Y.end(),0);
+                ymap[id] = sum;
+              }
+            }
+          }
+          if (!x.empty())
+          {
+            std::sort(x.begin(),x.end());
+            std::vector<double> y(x.size());
+            double ymin =  DBL_MAX;
+            double ymax = -DBL_MAX;
+            for(int i = 0; i < x.size(); ++i)
+            {
+              const double val = ymap[x[i]];
+              y[i] = val;
+              if (val < ymin) ymin = val;
+              if (val > ymax) ymax = val;
+            }
+            m_plot->setXScale(x.front(),x.back());
+            m_plot->setYScale(ymin,ymax);
+            m_plot->setData(&x[0],&y[0],y.size());
+          }
+        }
+      }
+      else
+      {
+        m_plot->clearCurve();
+      }
+    }
+  }
+  else
+  {
+    m_plot->clearCurve();
+  }
+  m_plot->recalcAxisDivs();
+  m_plot->replot();
+}
+
+void InstrumentWindow::plotContextMenu()
+{
+  QMenu context(this);
+  
+  context.addAction(m_sumDetectors);
+  context.addAction(m_integrateTimeBins);
+
+  context.exec(QCursor::pos());
+}
+
+void InstrumentWindow::setPlotCaption()
+{
+  QString caption;
+  if (m_one->isChecked())
+  {
+    caption = "Plotting detector spectra";
+  }
+  else if (m_plotSum)
+  {
+    caption = "Plotting sum";
+  }
+  else
+  {
+    caption = "Plotting integral";
+  }
+  m_plotCaption->setText(caption);
+}
+
+void InstrumentWindow::sumDetectors()
+{
+  m_plotSum = true;
+  setPlotCaption();
+}
+
+void InstrumentWindow::integrateTimeBins()
+{
+  m_plotSum = false;
+  setPlotCaption();
 }

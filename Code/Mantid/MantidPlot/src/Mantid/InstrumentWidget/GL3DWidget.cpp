@@ -79,6 +79,8 @@ void GL3DWidget::setInteractionModePick()
 {
   iInteractionMode = GL3DWidget::PickMode;// Pick mode
   setMouseTracking(true);
+  mPickingDraw = true;
+  update();
 }
 
 void GL3DWidget::setInteractionModeNormal()
@@ -497,6 +499,11 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
     {
       m_unwrappedSurface->moveSelection(event->x(),event->y());
       update();
+    }
+    else
+    {
+      int detId = m_unwrappedSurface->getDetectorID(event->x(),event->y());
+      emit actorHighlighted(detId);
     }
     OpenGLError::check("GL3DWidget::mouseMoveEvent");
     return;

@@ -158,6 +158,7 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
+  connect(this, SIGNAL(actorHighlighted(int)),this,SLOT(fireDetectorHighligted(int)));
   connect(this, SIGNAL(increaseSelection(QRgb)),this,SLOT(detectorsHighligted(QRgb)));
 
   m_ExtractDetsToWorkspaceAction = new QAction("Extract to new workspace",this);
@@ -241,6 +242,12 @@ void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
   //retrieve information about the selected detector
   m_detInfo.setEndRange(iDetId);
   //send this detector information off
+  emit actionDetectorHighlighted(m_detInfo);
+}
+
+void Instrument3DWidget::fireDetectorHighligted(int detID)
+{
+  m_detInfo.setDet(detID);
   emit actionDetectorHighlighted(m_detInfo);
 }
 //------------------------------------------------------------------------------------------------
@@ -972,6 +979,12 @@ QString Instrument3DWidget::DetInfo::display() const
 
   return QString::fromStdString(out.str());
 }
+
+int Instrument3DWidget::DetInfo::getWorkspaceIndex()const
+{
+  return is_good(m_firstDet) ? getIndexOf(m_firstDet) : -1;
+}
+
 /** Writes the information about the spectrum whose index is passed to it
 *  in a human readble form to the stream provide, or nothing on error
 *  @param[in] index the index number of the spectrum to display

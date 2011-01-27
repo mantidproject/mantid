@@ -194,6 +194,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
+                   src/Mantid/InstrumentWidget/OneCurvePlot.cpp
 )
 
 ###########################################################################
@@ -394,6 +395,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/OneCurvePlot.h
 )
 
 ###########################################################################
@@ -600,6 +602,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
+                       src/Mantid/InstrumentWidget/OneCurvePlot.h
 )
 
 set ( UI_FILES src/Mantid/UserFitFunctionDialog.ui

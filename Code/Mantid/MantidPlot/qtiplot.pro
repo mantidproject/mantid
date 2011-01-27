@@ -514,6 +514,7 @@ HEADERS  += src/ApplicationWindow.h \
                 src/Mantid/InstrumentWidget/UnwrappedSurface.h \
                 src/Mantid/InstrumentWidget/UnwrappedCylinder.h \
                 src/Mantid/InstrumentWidget/UnwrappedSphere.h \
+                src/Mantid/InstrumentWidget/OneCurvePlot.h \
                 src/Mantid/ManageCustomMenus.h
 
 ###################### FORMS ##############################################
@@ -702,6 +703,7 @@ SOURCES  += src/ApplicationWindow.cpp \
                 src/Mantid/InstrumentWidget/UnwrappedSurface.cpp \
                 src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp \
                 src/Mantid/InstrumentWidget/UnwrappedSphere.cpp \
+                src/Mantid/InstrumentWidget/OneCurvePlot.cpp \
                 src/Mantid/ManageCustomMenus.cpp \
 		src/pixmaps.cpp
 

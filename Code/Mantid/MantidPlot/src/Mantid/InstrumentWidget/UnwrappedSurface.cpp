@@ -781,6 +781,16 @@ void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
   }
 }
 
+/**
+  * Return detector id at image coordinats x,y if in pick mode. -1 otherwise
+  */
+int UnwrappedSurface::getDetectorID(int x, int y)
+{
+  if (!m_pickImage) return -7;
+  QRgb pixel = m_pickImage->pixel(x,y);
+  return getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+}
+
 bool UnwrappedSurface::hasSelection()const
 {
   return ! m_selectRect.isNull();

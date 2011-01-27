@@ -37,6 +37,7 @@ class QLineEdit;
 class QLabel;
 class QCheckBox;
 class QComboBox;
+class OneCurvePlot;
 
 /*!
   \class  InstrumentWindow
@@ -88,7 +89,7 @@ public:
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
 
 public slots:
-  void modeSelectButtonClicked();
+  void tabChanged(int i);
   void selectBinButtonClicked();
   void detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos);
   void showPickOptions();
@@ -116,6 +117,9 @@ private slots:
 
 private:
 
+  QFrame * createRenderTab(QTabWidget* ControlsTab);
+  QFrame * createPickTab(QTabWidget* ControlsTab);
+  QFrame * createInstrumentTreeTab(QTabWidget* ControlsTab);
   QFrame * setupAxisFrame();
 
   void loadSettings();
@@ -129,7 +133,6 @@ private:
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
 
-  QPushButton* mSelectButton; ///< Select the mode Pick/Normal
   QPushButton* mSelectColormap; ///< Select colormap button
   QPushButton* mSaveImage; ///< Save the currently displayed image
   Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
@@ -153,6 +156,23 @@ private:
 
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
 
+  /* Pick tab controls */
+  OneCurvePlot* m_plot;
+  QPushButton *m_one; ///< Button switching on single detector selection mode
+  QPushButton *m_many; ///< Botton switching on detector's parent selection mode
+  bool m_plotSum; 
+  // Actions to set integration option for the detector's parent selection mode
+  QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
+  QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
+  QLabel* m_plotCaption;
+  void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
+  private slots:
+    void plotContextMenu();
+    void sumDetectors();
+    void integrateTimeBins();
+    void setPlotCaption();
+
+private:
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void clearADSHandle();
