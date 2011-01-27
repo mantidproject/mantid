@@ -416,10 +416,12 @@ def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
         graph = plotBin(outWSlist, 0)
 
 def getInstrumentDetails(instrument):
-    idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-    idf = idf_dir + instrument + '_Definition.xml'
-    LoadEmptyInstrument(idf, 'ins')
-    workspace = mtd['ins']
+    workspace = mtd['__empty_' + instrument]
+    if ( workspace == None ):
+        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+        idf = idf_dir + instrument + '_Definition.xml'
+        LoadEmptyInstrument(idf, '__empty_'+instrument)
+        workspace = mtd['__empty_'+instrument]
     instrument = workspace.getInstrument()
     ana_list_split = instrument.getStringParameter('analysers')[0].split(',')
     reflections = []
@@ -444,16 +446,17 @@ def getInstrumentDetails(instrument):
         result += message
         if ( i < ( len(reflections) - 1) ):
             result += '\n'
-    mtd.deleteWorkspace('ins')
     return result
 
 def getReflectionDetails(inst, analyser, refl):
     idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-    idf = idf_dir + inst + '_Definition.xml'
+    ws = '__empty_' + inst
+    if (mtd[ws] == None):
+        idf = idf_dir + inst + '_Definition.xml'
+        LoadEmptyInstrument(idf, ws)    
     ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
-    LoadEmptyInstrument(idf, 'ins')
-    LoadParameterFile('ins', ipf)
-    inst = mtd['ins'].getInstrument()
+    LoadParameterFile(ws, ipf)
+    inst = mtd[ws].getInstrument()
     result = ''
     try:
         result += str( inst.getStringParameter('analysis-type')[0] ) + '\n'
@@ -467,7 +470,7 @@ def getReflectionDetails(inst, analyser, refl):
         result += inst.getStringParameter('rebin-default')[0]
     except IndexError:
         pass
-    mantid.deleteWorkspace('ins')
+    # mantid.deleteWorkspace('ins')
     return result
 
 def adjustTOF(ws='', inst=''):
