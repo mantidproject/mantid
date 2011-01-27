@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Timer.h"
+#include <sstream>
 
 namespace Mantid
 {
@@ -11,34 +12,47 @@ namespace Kernel
 /** Constructor.
  *  Instantiating the object starts the timer.
  */
-Timer::Timer()
+Timer::Timer(): m_resets(true)
 {
-#ifdef _WIN32
-  m_start = clock();
-#else /* linux & mac */
-  gettimeofday(&m_start,0);
-#endif
+  this->m_timer = boost::timer();
 }
 
 /// Destructor
 Timer::~Timer()
 {}
 
-/// Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
-float Timer::elapsed()
+/// Manually reset the timer.
+void Timer::restart()
 {
-#ifdef _WIN32
-  clock_t now = clock();
-  const float retval = float(now - m_start)/CLOCKS_PER_SEC;
-  m_start = now;
-#else /* linux & mac */
-  timeval now;
-  gettimeofday(&now,0);
-  const float retval = float(now.tv_sec - m_start.tv_sec) + float((now.tv_usec - m_start.tv_usec)/1E6);
-  m_start = now;
-#endif
-  
-  return retval;
+  this->m_timer.restart();
+}
+
+/// Turns off the timer being reset.
+void Timer::resets(const bool resets)
+{
+  this->m_resets = resets;
+}
+
+/// Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
+double Timer::elapsed()
+{
+  double result = this->m_timer.elapsed();
+  if (this->m_resets)
+    this->m_timer.restart();
+  return result;
+}
+
+std::string Timer::str() const
+{
+  std::stringstream buffer;
+  buffer << this->m_timer.elapsed() << "s";
+  return buffer.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const Timer obj)
+{
+  out << obj.str();
+  return out;
 }
 
 } // namespace Kernel
