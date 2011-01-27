@@ -197,6 +197,12 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
     return Reduce()
 
 def CompWavRanges(wavelens, plot=True):
+    """
+        Compares the momentum transfer results calculated from different wavelength ranges. Given
+        the list of wave ranges [a, b, c] it reduces for wavelengths a-b, b-c and a-c.
+        @param wavelens: the list of wavelength ranges
+        @param plot: set this to true to plot the result (must be run in Mantid), default is true
+    """ 
     settings = copy.deepcopy(ReductionSingleton().reference())
     reductions = WavRanges(
                            (wavelens[0], wavelens[len(wavelens)-1]))

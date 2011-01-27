@@ -999,7 +999,7 @@
             <item row="0" column="0" >
              <widget class="QCheckBox" name="plot_check" >
               <property name="text" >
-               <string>Plot result</string>
+               <string>Plot Result</string>
               </property>
              </widget>
             </item>
@@ -1480,7 +1480,7 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item row="0" column="1" >
-                 <widget class="QLabel" name="qxy_lb_2" >
+                 <widget class="QLabel" name="qx_lb" >
                   <property name="sizePolicy" >
                    <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
@@ -1616,7 +1616,7 @@ p, li { white-space: pre-wrap; }
                <number>1</number>
               </property>
               <property name="currentIndex" >
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="page_7" >
                <layout class="QGridLayout" name="gridLayout_21" >
