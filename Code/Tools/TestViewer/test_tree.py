@@ -364,12 +364,13 @@ class TestTreeModel(QtCore.QAbstractItemModel):
         (project_index, project_item) = self.get_project( suite.get_parent().name )
         num_suites = project_item.childCount()
         if suite.contents_changed:
+            print "Changing the contents of ", suite.get_fullname()
             for x in xrange(num_suites):
-                suite_index = self.index(0,0, project_index)
+                suite_index = self.index(x,0, project_index)
                 if self.data(suite_index, Qt.UserRole).get_fullname() == suite.get_fullname():
                     suite_item = suite_index.internalPointer()
                     # Something was modified in the number of suites
-                    #print "Changing the contents of ", suite.get_fullname()
+                    print "2.Changing the contents of ", suite.get_fullname()
                     # Just remove everything. That is simplest
                     self.beginRemoveRows(suite_index, 0, suite_item.childCount()-1)
                     suite_item.clearChildren()

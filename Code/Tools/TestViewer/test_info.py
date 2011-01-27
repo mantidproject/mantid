@@ -312,13 +312,15 @@ class TestSuite(object):
         """ Replace the contents of self with those of other (coming after running in
         a separate thread """
         if len(self.tests) != len(other.tests):
-            #print "The number of tests in %s changed. You should refresh your view." % self.classname
+            print "The number of tests in %s changed." % self.classname
             # We replace the entire list
             self.tests = other.tests
             # And this tells the tree view that it needs to update itself entirely.
             self.contents_changed = True
         else:
             for i in xrange(len(self.tests)):
+                if (self.tests[i].name != other.tests[i].name):
+                    self.contents_changed = True
                 self.tests[i].replace_contents( other.tests[i] )
         # Copy local values
         self.lastrun = other.lastrun
