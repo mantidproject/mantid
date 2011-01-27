@@ -90,7 +90,7 @@ public:
     *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
     */
     template <typename T>
-    void setProperty(const std::string &name, const T & value)
+    IPropertyManager* setProperty(const std::string &name, const T & value)
     {
         PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
         if (prop)
@@ -101,12 +101,14 @@ public:
         {
           throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
         }
+        return this;
     }
 
     /// Specialised version of setProperty template method
-    void setProperty(const std::string &name, const char* value)
+    IPropertyManager* setProperty(const std::string &name, const char* value)
     {
         this->setPropertyValue(name, std::string(value));
+        return this;
     }
 
 protected:
