@@ -104,6 +104,12 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
     gElem->appendChild(alphaElem);
   } 
 
+  // save default
+
+  Element* gElem = mDoc->createElement("default");
+  gElem->setAttribute("name", m_uiForm.frontGroupGroupPairComboBox->currentText().toStdString());
+  rootElem->appendChild(gElem);
+
   writer.writeNode(outFile, mDoc);
 }
 
@@ -273,21 +279,41 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
     m_uiForm.groupDescription->setText("");
   }
 
-  // at some point put in some code which reads default choice 
+  // reads default choice 
 
-  /*
-  Element* element = pGroupElem->getChildElement("default");
+  Element* element = pRootElem->getChildElement("default");
   if (element)
   {
     if ( element->hasAttribute("name") )
     {
-          m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(element->getAttribute("val").c_str()));
-        }
-      }
-*/
+      setGroupGroupPair(m_uiForm, element->getAttribute("name"));
+    }
+  }
+
 
   pDoc->release();
 }
+
+
+/**
+ * Set Group / Group Pair name
+ *
+ * @param name Name you want to set the front Group / Group Pair name to
+ */
+void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
+{
+  QString qsname(name.c_str());
+  for (int i = 0; i < m_uiForm.frontGroupGroupPairComboBox->count(); i++)
+  {
+    if ( m_uiForm.frontGroupGroupPairComboBox->itemText(i) == qsname )
+    {
+      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(i);
+      return;
+    }
+  }
+}
+
+
 
 /**
  * create 'map' relating group number to row number in group table

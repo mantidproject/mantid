@@ -32,7 +32,7 @@ public:
 
 private slots:
   /// Exit the interface
-  void exitClicked();
+  //void exitClicked();
 
   /// Guess Alpha clicked
   void guessAlphaClicked();
@@ -182,9 +182,6 @@ private:
 
   /// used to test that a new filename has been entered 
   QString m_previousFilename;
-
-  /// convert int to string
-  std::string iToString(int i);
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;

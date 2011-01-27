@@ -14,6 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
@@ -82,7 +83,7 @@ void MuonAnalysis::initLayout()
 
 
   // connect exit button
-  connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
+  //connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
 
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
@@ -393,7 +394,7 @@ void MuonAnalysis::runLoadCurrent()
 
   std::stringstream str;
   str << "Description: ";
-  int nDet = matrix_workspace->getInstrument()->getDetectors().size();
+  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size());
   str << nDet;
   str << " detector spectrometer, main field ";
   str << "unknown"; 
@@ -544,7 +545,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
         { 
           itemNdet->setText(detNumRead.str().c_str());
         }
-        checkIf_ID_dublicatesInTable(row);
+        //checkIf_ID_dublicatesInTable(row);
       }
       else
       {
@@ -609,10 +610,7 @@ void MuonAnalysis::pairTableChanged(int row, int column)
   {
     QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
 
-    if ( itemAlpha->text().toStdString().empty() )
-    {
-    }
-    else
+    if ( !itemAlpha->text().toStdString().empty() )
     {
       try
       {
@@ -658,6 +656,26 @@ void MuonAnalysis::pairTableChanged(int row, int column)
 
     whichPairToWhichRow(m_uiForm, m_pairToRow);
     updateFrontAndCombo();
+
+    // check to see if alpha is specified (if name!="") and if not
+    // assign a default of 1.0
+    if ( itemName->text() != "" )
+    {
+      QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
+
+      if (itemAlpha)
+      {
+        if ( itemAlpha->text().toStdString().empty() )
+        {
+          itemAlpha->setText("1.0");
+        }
+      }
+      else
+      {
+        m_uiForm.pairTable->setItem(row,3, new QTableWidgetItem("1.0"));
+      }
+    }
+    
   }  
 
 }
@@ -784,16 +802,20 @@ void MuonAnalysis::inputFileChanged()
     return;
   }
 
-
-  // Load nexus file with no grouping
-  AnalysisDataService::Instance().remove(m_workspace_name);
-  QString pyString = "alg = LoadMuonNexus('";
-  pyString.append(m_previousFilename);
-  pyString.append("','");
-  pyString.append(m_workspace_name.c_str());
-  pyString.append("', AutoGroup=\"0\")\n");
-  pyString.append("print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')");
+  QString pyString =      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "  alg = LoadMuonNexus('" + m_previousFilename+"','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
+      "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
+      "except SystemExit, message:\n"
+      "  print ''";
   QString outputParams = runPythonCode( pyString ).trimmed();
+
+  if ( outputParams.isEmpty() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
+    return;
+  }
 
   nowDataAvailable();
 
@@ -836,7 +858,7 @@ void MuonAnalysis::inputFileChanged()
 
   std::stringstream str;
   str << "Description: ";
-  int nDet = matrix_workspace->getInstrument()->getDetectors().size();
+  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size());
   str << nDet;
   str << " detector spectrometer, main field ";
   str << QString(mainFieldDirection.c_str()).toLower().toStdString(); 
@@ -844,16 +866,25 @@ void MuonAnalysis::inputFileChanged()
   m_uiForm.instrumentDescription->setText(str.str().c_str());
 
   m_uiForm.timeZeroFront->setText((boost::lexical_cast<std::string>(static_cast<int>(timeZero))).c_str());
-  m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(static_cast<int>(firstGoodData))).c_str());
+  m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(static_cast<int>(firstGoodData-timeZero))).c_str());
 
 
   // Populate run information text field
 
-  std::string infoStr = "Number of spectra in data = ";
-  infoStr += boost::lexical_cast<std::string>(matrix_workspace->getNumberHistograms()) + "\n"; 
-  infoStr += "Title: "; 
+  std::string infoStr = "Title = ";
   infoStr += matrix_workspace->getTitle() + "\n" + "Comment: "
-    + matrix_workspace->getComment();
+    + matrix_workspace->getComment() + "\n";
+  const Run& runDetails = matrix_workspace->run();
+  infoStr += "Start: ";
+  if ( runDetails.hasProperty("run_start") )
+  {
+    infoStr += runDetails.getProperty("run_start")->value();
+  }
+  infoStr += "\nEnd: ";
+  if ( runDetails.hasProperty("run_end") )
+  {
+    infoStr += runDetails.getProperty("run_end")->value();
+  }
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
 
@@ -893,6 +924,7 @@ void MuonAnalysis::inputFileChanged()
 /**
  * Exit the interface (slot)
  */
+/*
 void MuonAnalysis::exitClicked()
 {
   close();
@@ -903,7 +935,7 @@ void MuonAnalysis::exitClicked()
   {
     widget->close();
   }
-}
+}*/
 
 /**
  * Guess Alpha (slot). It cal
@@ -1100,18 +1132,6 @@ void MuonAnalysis::clearTablesAndCombo()
   }
 }
 
-/**
- * convert int to string
- *
- * return string representation of integer
- */
-std::string MuonAnalysis::iToString(int i)
-{
-  std::stringstream str;
-  str << i;
-  return str.str();
-}
-
 
 /**
  * Create WS contained the data for a plot
@@ -1153,8 +1173,6 @@ void MuonAnalysis::createPlotWS(const std::string& wsname)
   cropStr += wsname.c_str();
   cropStr += "\"," + firstGoodBin() + ");";
   runPythonCode( cropStr ).trimmed();
-
-
 }
 
 
@@ -1173,19 +1191,20 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     Poco::File l_path( m_previousFilename.toStdString() );
     std::string filenamePart = Poco::Path(l_path.path()).getFileName();
 
-    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Group='"
-      + groupName + "'";
+    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Group="
+      + groupName + "";
 
     // create workspace which starts at first-good-bin 
     QString cropWS = "MuonAnalysis_" + title;
     createPlotWS(cropWS.toStdString());
 
     // create plotting Python string
-    QString gNum = QString(iToString(groupNum).c_str());
+    QString gNum = QString::number(groupNum);
 
     QString pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n"
       "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + title + "\")\n";
+      "l.setCurveTitle(0, \"" + title + "\")\n"
+      "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
 
     QString pyString;
     if (plotType.compare("Counts") == 0)
@@ -1195,13 +1214,15 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     else if (plotType.compare("Asymmetry") == 0)
     {
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + cropWS + "\"," + gNum + ")\n" + pyS;
+        + cropWS + "\"," + gNum + ")\n" + pyS
+        + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
     }
     else if (plotType.compare("Logorithm") == 0)
     {
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
         + cropWS + "\","
-        + gNum + ")\n" + pyS;
+        + gNum + ")\n" + pyS
+        + "l.setAxisTitle(Layer.Left, \"Logorithm\")\n";
     }
     else
     {
@@ -1229,8 +1250,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     Poco::File l_path( m_previousFilename.toStdString() );
     std::string filenamePart = Poco::Path(l_path.path()).getFileName();
 
-    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Pair='"
-      + pairName + "'";
+    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Pair="
+      + pairName + "";
 
 
     // create workspace which starts at first-good-bin 
@@ -1242,7 +1263,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     QString pyS = "gs = plotSpectrum(\"" + cropWS + "\",0)\n"
       "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + title + "\")\n";
+      "l.setCurveTitle(0, \"" + title + "\")\n"
+      "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
 
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
@@ -1259,9 +1281,10 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
       pyString = "AsymmetryCalc(\"" + cropWS + "\",\"" 
         + cropWS + "\","
-        + iToString(qw1->currentIndex()).c_str() + "," 
-        + iToString(qw2->currentIndex()).c_str() + "," 
-        + item->text() + ")\n" + pyS;
+        + QString::number(qw1->currentIndex()) + "," 
+        + QString::number(qw2->currentIndex()) + "," 
+        + item->text() + ")\n" + pyS
+        + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
     }
     else
     {
@@ -1684,11 +1707,11 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 QString MuonAnalysis::timeZero()
 {
   std::stringstream str(m_uiForm.timeZeroFront->text().toStdString()); 
-  double fgb;
-  str >> fgb;
-  fgb /= 1000.0;  // convert from ns to ms
+  double tz;
+  str >> tz;
+  tz /= 1000.0;  // convert from ns to ms
 
-  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+  return QString((boost::lexical_cast<std::string>(tz)).c_str());
 }
 
  /**
@@ -1702,17 +1725,10 @@ QString MuonAnalysis::firstGoodBin()
   str >> fgb;
   fgb /= 1000.0;  // convert from ns to ms
 
-  std::stringstream str2(m_uiForm.timeZeroFront->text().toStdString()); 
-  double tz;
-  str2 >> tz;
-  tz /= 1000.0;  // convert from ns to ms
+ // if (fgb < 0)
+ //   fgb = 0.0;
 
-  double retVal = fgb - tz;
-  if (retVal < 0)
-    retVal = 0.0;
-
-
-  return QString((boost::lexical_cast<std::string>(retVal)).c_str());
+  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
 }
 
 
@@ -1786,7 +1802,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
 
 
 /**
-* Boevs
+* Check if dublicate ID between different rows
 */
 void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
 {

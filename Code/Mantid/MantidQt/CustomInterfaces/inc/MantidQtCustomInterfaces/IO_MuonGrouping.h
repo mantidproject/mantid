@@ -35,6 +35,9 @@ namespace Muon
 
   /// create 'map' relating pair number to row number in pair table
   void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow);
+
+  /// Set Group / Group Pair name
+  void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name);
 }
 }
 }
