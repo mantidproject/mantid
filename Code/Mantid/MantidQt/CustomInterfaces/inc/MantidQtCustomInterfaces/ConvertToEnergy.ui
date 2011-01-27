@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Convert To Energy</string>
+   <string>Convert To Energy Transfer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_20" >
    <property name="topMargin" >
