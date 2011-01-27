@@ -10,6 +10,8 @@
 #else
 #include <sys/time.h>
 #endif
+#include <ostream>
+#include <string>
 
 namespace Mantid
 {
@@ -47,8 +49,11 @@ public:
   virtual ~Timer();
   
   float elapsed();
+  std::string str() const;
   
 private:
+  float elapsed_no_reset() const;
+  void reset();
   // The type of this variable is different depending on the platform
 #ifdef _WIN32
   clock_t
@@ -57,6 +62,8 @@ private:
 #endif
   m_start;   ///< The starting time (implementation dependent format)
 };
+
+std::ostream& operator<<(std::ostream&, const Timer&);
 
 } // namespace Kernel
 } // namespace Mantid
