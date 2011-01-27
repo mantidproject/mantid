@@ -344,6 +344,31 @@ public:
   }
 
 
+  void test_MinusOperator_inPlace_3cases()
+  {
+    EventList lhs, rhs;
+    for (int i=0; i<3; i++)
+    {
+      this->fake_uniform_data();
+      // Copy and switch
+      lhs = el;
+      lhs.switchTo(static_cast<EventType>(i));
+
+      // Do the minus!
+      std::ostringstream mess;
+      mess << "Minus operation of type " << i << ".";
+      TSM_ASSERT_THROWS_NOTHING(mess.str(), lhs -= lhs );
+
+      TSM_ASSERT_EQUALS(mess.str(), lhs.getNumberEvents(), 2*el.getNumberEvents() );
+
+      //Put a single big bin with all events
+      lhs.setX(one_big_bin() );
+      //But the total neutrons is 0.0! They've been cancelled out :)
+      TS_ASSERT_DELTA( (*lhs.dataY())[0], 0.0, 1e-6);
+      TS_ASSERT_DELTA( (*lhs.dataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
+    }
+  }
+
 
   //==================================================================================
   //--- Multiplying  ----

@@ -347,8 +347,15 @@ namespace DataObjects
     // Make the end vector big enough in one go (avoids repeated re-allocations).
     events.reserve( events.size() + more_events.size() );
     typename std::vector<T2>::const_iterator itev;
+    /* In the event of subtracting in place, calling the end() vector would make it point
+     * at the wrong place
+     * Using it caused a segault, Ticket #2306.
+     * So we cache the end (this speeds up too).
+     */
+    typename std::vector<T2>::const_iterator more_begin = more_events.begin();
+    typename std::vector<T2>::const_iterator more_end = more_events.end();
 
-    for (itev = more_events.begin(); itev != more_events.end(); itev++ )
+    for (itev = more_begin; itev != more_end; itev++ )
     {
       // We call the constructor for T1. In the case of WeightedEventNoTime, the pulse time will just be ignored.
       events.push_back( T1(itev->tof(), itev->pulseTime(), itev->weight()*(-1.0), itev->errorSquared()) );
@@ -366,6 +373,7 @@ namespace DataObjects
    * */
   EventList& EventList::operator-=(const EventList& more_events)
   {
+
     // We'll let the -= operator for the given vector of event lists handle it
     switch (this->getEventType())
     {
@@ -549,7 +557,8 @@ namespace DataObjects
       weightedEventsNoTime.clear();
       //Convert and copy all TofEvents to the weightedEvents list.
       std::vector<TofEvent>::const_iterator it;
-      for(it = events.begin(); it != events.end(); it++)
+      std::vector<TofEvent>::const_iterator it_end = events.end(); // Cache for speed
+      for(it = events.begin(); it != it_end; it++)
         this->weightedEvents.push_back( WeightedEvent(*it) );
       //Get rid of the old events
       events.clear();
@@ -578,7 +587,8 @@ namespace DataObjects
         //Convert and copy all TofEvents to the weightedEvents list.
         weightedEventsNoTime.clear();
         std::vector<TofEvent>::const_iterator it;
-        for(it = events.begin(); it != events.end(); it++)
+        std::vector<TofEvent>::const_iterator it_end = events.end(); // Cache for speed
+        for(it = events.begin(); it != it_end; it++)
           this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
         //Get rid of the old events
         events.clear();
@@ -592,7 +602,8 @@ namespace DataObjects
         //Convert and copy all TofEvents to the weightedEvents list.
         weightedEventsNoTime.clear();
         std::vector<WeightedEvent>::const_iterator it;
-        for(it = weightedEvents.begin(); it != weightedEvents.end(); it++)
+        std::vector<WeightedEvent>::const_iterator it_end = weightedEvents.end(); // Cache for speed
+        for(it = weightedEvents.begin(); it != it_end; it++)
           this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
         //Get rid of the old events
         events.clear();
@@ -1310,7 +1321,8 @@ namespace DataObjects
     double errorSquared = 0;
 
     typename std::vector<T>::const_iterator it;
-    for (it = events.begin(); it != events.end(); it++)
+    typename std::vector<T>::const_iterator it_end = events.end(); //cache for speed
+    for (it = events.begin(); it != it_end; it++)
     {
       if ((it->m_tof - lastTof) <= tolerance)
       {
@@ -1414,9 +1426,10 @@ namespace DataObjects
   typename std::vector<T>::const_iterator EventList::findFirstEvent(const std::vector<T> & events, const double seek_tof)
   {
     typename std::vector<T>::const_iterator itev = events.begin();
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != events.end()) && (itev->tof() < seek_tof))
+    while ((itev != itev_end) && (itev->tof() < seek_tof))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
     return itev;
@@ -1436,9 +1449,10 @@ namespace DataObjects
   typename std::vector<T>::iterator EventList::findFirstEvent(std::vector<T> & events, const double seek_tof)
   {
     typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end(); //cache for speed
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != events.end()) && (itev->tof() < seek_tof))
+    while ((itev != itev_end) && (itev->tof() < seek_tof))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
     return itev;
@@ -1480,8 +1494,9 @@ namespace DataObjects
     {
       //Iterate through all events (sorted by tof)
       typename std::vector<T>::const_iterator itev = findFirstEvent( events, X[0]);
+      typename std::vector<T>::const_iterator itev_end = events.end();
       // The above can still take you to end() if no events above X[0], so check again.
-      if (itev == events.end()) return;
+      if (itev == itev_end) return;
 
       //Find the first bin
       size_t bin=0;
@@ -1503,7 +1518,7 @@ namespace DataObjects
       ++itev;
 
       //Keep going through all the events
-      while ((itev != events.end()) && (bin < x_size-1))
+      while ((itev != itev_end) && (bin < x_size-1))
       {
         tof = itev->tof();
         while (bin < x_size-1)
@@ -1596,8 +1611,9 @@ namespace DataObjects
     {
       //Iterate through all events (sorted by tof)
       std::vector<TofEvent>::const_iterator itev = findFirstEvent(this->events, X[0]);
+      std::vector<TofEvent>::const_iterator itev_end = events.end(); //cache for speed
       // The above can still take you to end() if no events above X[0], so check again.
-      if (itev == this->events.end()) return;
+      if (itev == itev_end) return;
 
       //Find the first bin
       size_t bin=0;
@@ -1618,7 +1634,7 @@ namespace DataObjects
       ++itev;
 
       //Keep going through all the events
-      while ((itev != this->events.end()) && (bin < x_size-1))
+      while ((itev != itev_end) && (bin < x_size-1))
       {
         tof = itev->tof();
         while (bin < x_size-1)
@@ -1790,9 +1806,10 @@ namespace DataObjects
   void EventList::convertTofHelper(std::vector<T> & events, const double factor, const double offset)
   {
     // iterate through all events
-    for (typename std::vector<T>::iterator iter = events.begin();
-         iter != events.end(); iter++)
-      iter->m_tof = iter->m_tof * factor + offset;
+    typename std::vector<T>::iterator itev;
+    typename std::vector<T>::iterator itev_end = events.end(); //cache for speed
+    for (itev = events.begin(); itev != itev_end; itev++)
+      itev->m_tof = itev->m_tof * factor + offset;
   }
 
 
@@ -1892,9 +1909,10 @@ namespace DataObjects
   template<class T>
   void EventList::getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs)
   {
-    typename std::vector<T>::const_iterator iter;
-    for (iter = events.begin(); iter != events.end(); iter++)
-      tofs.push_back(iter->m_tof);
+    typename std::vector<T>::const_iterator itev;
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+    for (itev = events.begin(); itev != itev_end; itev++)
+      tofs.push_back(itev->m_tof);
   }
 
 
@@ -1986,11 +2004,13 @@ namespace DataObjects
     double errorSquared = error * error;
     double valueSquared = value * value;
 
+    typename std::vector<T>::iterator itev;
+    typename std::vector<T>::iterator itev_end = events.end();
+
     if (error == 0)
     {
       // Error-less calculation
-      typename std::vector<T>::iterator itev;
-      for (itev = events.begin(); itev != events.end(); itev++)
+      for (itev = events.begin(); itev != itev_end; itev++)
       {
         itev->m_errorSquared = (itev->m_errorSquared * valueSquared);
         itev->m_weight *= value;
@@ -1999,8 +2019,7 @@ namespace DataObjects
     else
     {
       // Carry the scalar error
-      typename std::vector<T>::iterator itev;
-      for (itev = events.begin(); itev != events.end(); itev++)
+      for (itev = events.begin(); itev != itev_end; itev++)
       {
         itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
         itev->m_weight *= value;
@@ -2100,8 +2119,9 @@ namespace DataObjects
 
     //Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = findFirstEvent(events, X[0]);
+    typename std::vector<T>::iterator itev_end = events.end();
     // The above can still take you to end() if no events above X[0], so check again.
-    if (itev == events.end()) return;
+    if (itev == itev_end) return;
 
     //Find the first bin
     size_t bin=0;
@@ -2129,7 +2149,7 @@ namespace DataObjects
     errorSquared = error*error;
 
     //Keep going through all the events
-    while ((itev != events.end()) && (bin < x_size-1))
+    while ((itev != itev_end) && (bin < x_size-1))
     {
       tof = itev->tof();
       while (bin < x_size-1)
@@ -2217,8 +2237,9 @@ namespace DataObjects
 
     //Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = findFirstEvent( events, X[0]);
+    typename std::vector<T>::iterator itev_end = events.end();
     // The above can still take you to end() if no events above X[0], so check again.
-    if (itev == events.end()) return;
+    if (itev == itev_end) return;
 
     //Find the first bin
     size_t bin=0;
@@ -2387,11 +2408,12 @@ namespace DataObjects
   void EventList::filterByPulseTimeHelper(std::vector<T> & events, DateAndTime start, DateAndTime stop, std::vector<T> & output)
   {
     typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
     //Find the first event with m_pulsetime >= start
-    while ((itev != events.end()) && (itev->m_pulsetime < start))
+    while ((itev != itev_end) && (itev->m_pulsetime < start))
       itev++;
 
-    while ((itev != events.end()) && (itev->m_pulsetime < stop))
+    while ((itev != itev_end) && (itev->m_pulsetime < stop))
     {
       //Add the copy to the output
       output.push_back(*itev);
@@ -2450,17 +2472,19 @@ namespace DataObjects
   {
     //Iterate through the splitter at the same time
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+    Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     DateAndTime start, stop;
     int index;
 
     // Iterate for the input
     typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
 
     // Iterator for the outputted list; will follow the input except when events are dropped.
     typename std::vector<T>::iterator itOut = events.begin();
 
     //This is the time of the first section. Anything before is thrown out.
-    while (itspl != splitter.end())
+    while (itspl != itspl_end)
     {
       //Get the splitting interval times and destination
       start = itspl->start();
@@ -2468,14 +2492,14 @@ namespace DataObjects
       index = itspl->index();
 
       //Skip the events before the start of the time
-      while ((itev != events.end()) && (itev->m_pulsetime < start))
+      while ((itev != itev_end) && (itev->m_pulsetime < start))
         itev++;
 
       // Are we aligned in the input vs output?
       bool copyingInPlace = (itOut == itev);
       if (copyingInPlace)
       {
-        while ((itev != events.end()) && (itev->m_pulsetime < stop))
+        while ((itev != itev_end) && (itev->m_pulsetime < stop))
           ++itev;
         // Make sure the iterators still match
         itOut = itev;
@@ -2483,7 +2507,7 @@ namespace DataObjects
       else
       {
         //Go through all the events that are in the interval (if any)
-        while ((itev != events.end()) && (itev->m_pulsetime < stop))
+        while ((itev != itev_end) && (itev->m_pulsetime < stop))
         {
           if (index >= 0)
           {
@@ -2501,11 +2525,11 @@ namespace DataObjects
       //Go to the next interval
       itspl++;
       //But if we reached the end, then we are done.
-      if (itspl==splitter.end())
+      if (itspl==itspl_end)
         break;
 
       //No need to keep looping through the filter if we are out of events
-      if (itev == events.end())
+      if (itev == itev_end)
         break;
 
     } //Looping through entries in the splitter vector
@@ -2560,14 +2584,16 @@ namespace DataObjects
 
     //Iterate through the splitter at the same time
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+    Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     DateAndTime start, stop;
     int index;
 
     //Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
 
     //This is the time of the first section. Anything before is thrown out.
-    while (itspl != splitter.end())
+    while (itspl != itspl_end)
     {
       //Get the splitting interval times and destination
       start = itspl->start();
@@ -2575,11 +2601,11 @@ namespace DataObjects
       index = itspl->index();
 
       //Skip the events before the start of the time
-      while ((itev != events.end()) && (itev->m_pulsetime < start))
+      while ((itev != itev_end) && (itev->m_pulsetime < start))
         itev++;
 
       //Go through all the events that are in the interval (if any)
-      while ((itev != events.end()) && (itev->m_pulsetime < stop))
+      while ((itev != itev_end) && (itev->m_pulsetime < stop))
       {
         //Copy the event into another
         const T eventCopy(*itev);
@@ -2595,11 +2621,11 @@ namespace DataObjects
       //Go to the next interval
       itspl++;
       //But if we reached the end, then we are done.
-      if (itspl==splitter.end())
+      if (itspl==itspl_end)
         break;
 
       //No need to keep looping through the filter if we are out of events
-      if (itev == events.end())
+      if (itev == itev_end)
         break;
     }
     //Done!
