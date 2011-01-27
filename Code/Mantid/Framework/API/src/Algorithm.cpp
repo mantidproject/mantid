@@ -90,6 +90,9 @@ namespace Mantid
     */
     bool Algorithm::execute()
     {
+      // Start by freeing up any memory available.
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
       m_notificationCenter.postNotification(new StartedNotification(this));
       Mantid::Kernel::DateAndTime start_time;
       // Return a failure if the algorithm hasn't been initialized
