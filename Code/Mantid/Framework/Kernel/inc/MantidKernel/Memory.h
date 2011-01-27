@@ -25,11 +25,11 @@ public:
   std::size_t availMem() const;
   double getFreeRatio() const;
 private:
-  MemoryStatsIgnore ignore; /// What fields to ignore.
-  std::size_t vm_usage; /// Virtual memory usage by process in kiB.
-  std::size_t res_usage; /// Resident memory usage by process in kiB.
-  std::size_t total_memory; /// Total physical memory of system in kiB.
-  std::size_t avail_memory; /// Available memory of system in kiB.
+  MemoryStatsIgnore ignore; ///< What fields to ignore.
+  std::size_t vm_usage; ///< Virtual memory usage by process in kiB.
+  std::size_t res_usage; ///< Resident memory usage by process in kiB.
+  std::size_t total_memory; ///< Total physical memory of system in kiB.
+  std::size_t avail_memory; ///< Available memory of system in kiB.
   friend DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
 };
 
