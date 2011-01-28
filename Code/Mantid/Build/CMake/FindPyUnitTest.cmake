@@ -24,7 +24,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   # create the driver script
   add_custom_target ( ${_pyunit_testname_file}
                       DEPENDS ${_pyunit_outputdir}/__init__.py ${_pyunit_testfiles}
-                      COMMAND  ${PYUNITTEST_GEN_EXEC}
+                      COMMAND  ${PYTHON_EXECUTABLE} ${PYUNITTEST_GEN_EXEC}
                                -o ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                                -d ${_pyunit_outputdir}
                                --xmlrunner=${PYUNITTEST_XMLRUNNER}
@@ -35,7 +35,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
 
   add_test (NAME ${_pyunit_testname}_py
             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-                     ${PYTHON_EXECUTABLE} ${_pyunit_testname_file} )
+              ${PYTHON_EXECUTABLE} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
 
   # add all of the individual tests - this introduces a race condition
   #foreach (part ${ARGN})
