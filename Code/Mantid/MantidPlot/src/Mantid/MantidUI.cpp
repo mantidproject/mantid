@@ -1403,7 +1403,7 @@ void MantidUI::showMantidInstrument(const QString& wsName)
     QMessageBox::critical(appWindow(),"MantidPlot - Error","Instrument view cannot be opened");
     return;
   }
-  insWin->showWindow();
+  insWin->show();
 }
 
 void MantidUI::showMantidInstrument()

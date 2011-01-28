@@ -329,20 +329,6 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
   mWorkspaceName = wsName;
 }
 
-void InstrumentWindow::showWindow()
-{
-    try
-    {
-        updateWindow();
-        show();
-    }
-    catch(std::exception& e)
-    {
-        QMessageBox::critical(this,"MantidPlot - Error","Instrument Window failed to initialize due to the error:\n\n"+
-            QString::fromStdString(e.what()));
-    }
-}
-
 void InstrumentWindow::updateWindow()
 {
   if( mWorkspaceName.empty() ) return;
@@ -805,6 +791,16 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 	return s;
 
 }
+
+/** 
+ * Called just before a show event
+ * @param A pointer to the QShowEvent object
+ */
+void InstrumentWindow::showEvent(QShowEvent* event)
+{
+  updateWindow();
+}
+
 
 
 QFrame * InstrumentWindow::createRenderTab(QTabWidget* ControlsTab)

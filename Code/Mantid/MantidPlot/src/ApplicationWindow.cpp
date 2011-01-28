@@ -10534,7 +10534,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
   QString wsName=qlist[1];
   InstrumentWindow *insWin = mantidUI->getInstrumentView(wsName);
   if(!insWin) return;
-  insWin->showWindow();
+  insWin->show();
   QStringList::const_iterator line = list.begin();
   for (line++; line!=list.end(); line++)
   {	QStringList fields = (*line).split("\t");

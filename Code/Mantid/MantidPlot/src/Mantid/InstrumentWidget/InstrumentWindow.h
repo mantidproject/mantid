@@ -1,4 +1,3 @@
-
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
@@ -38,6 +37,7 @@ class QLabel;
 class QCheckBox;
 class QComboBox;
 class OneCurvePlot;
+class QShowEvent;
 
 /*!
   \class  InstrumentWindow
@@ -76,7 +76,6 @@ public:
   ~InstrumentWindow();
   void setWorkspaceName(std::string wsName);
   void updateWindow();
-  void showWindow();
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -87,6 +86,10 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
+
+protected:
+  /// Called just before a show event
+  virtual void showEvent(QShowEvent* event);
 
 public slots:
   void tabChanged(int i);
