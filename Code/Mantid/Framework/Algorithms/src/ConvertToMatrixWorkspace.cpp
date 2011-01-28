@@ -14,6 +14,7 @@ DECLARE_ALGORITHM(ConvertToMatrixWorkspace)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 void ConvertToMatrixWorkspace::init()
 {
@@ -31,14 +32,17 @@ void ConvertToMatrixWorkspace::exec()
   if( eventW )
   {
     g_log.information() << "Converting EventWorkspace to Workspace2D.\n";
+
+    const int numHists = inputWorkspace->getNumberHistograms();
+    Progress prog(this,0.0,1.0,numHists*2);
+
+    // Sort the input workspace in-place by TOF. This can be faster if there are few event lists.
+    eventW->sortAll(TOF_SORT, &prog);
+
     // Create the output workspace. This will copy many aspects fron the input one.
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
     // ...but not the data, so do that here.
-    
-    const int numHists = inputWorkspace->getNumberHistograms();
-    Progress prog(this,0.0,1.0,numHists);
-    
     PARALLEL_FOR2(inputWorkspace,outputWorkspace)
     for (int i = 0; i < numHists; ++i)
     {
@@ -48,7 +52,7 @@ void ConvertToMatrixWorkspace::exec()
       outputWorkspace->dataY(i) = inputWorkspace->readY(i);
       outputWorkspace->dataE(i) = inputWorkspace->readE(i);
       
-      prog.report();
+      prog.report("Binning");
 
       PARALLEL_END_INTERUPT_REGION
     }

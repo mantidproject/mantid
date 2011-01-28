@@ -56,7 +56,10 @@ void CompressEvents::exec()
   // Some starting things
   bool inplace = (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"));
   size_t noSpectra = inputWS->getNumberHistograms();
-  Progress prog(this,0.0,1.0, noSpectra);
+  Progress prog(this,0.0,1.0, noSpectra*2);
+
+  // Sort the input workspace in-place by TOF. This can be faster if there are few event lists.
+  inputWS->sortAll(TOF_SORT, &prog);
 
   // Are we making a copy of the input workspace?
   if (!inplace)
@@ -83,7 +86,7 @@ void CompressEvents::exec()
       // The EventList method does the work.
       input_el.compressEvents(tolerance, &output_el);
 
-      prog.report();
+      prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -105,7 +108,7 @@ void CompressEvents::exec()
         // The EventList method does the work.
         output_el->compressEvents(tolerance, output_el);
       }
-      prog.report();
+      prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION

@@ -949,14 +949,14 @@ namespace DataObjects
               PARALLEL_SECTION
               {
                 this->data[i]->sortTof2();
-                if (prog) prog->report(1);
+                if (prog) prog->report("Sorting");
               }
               PARALLEL_SECTION
               {
                 if (i+1 < m_noVectors)
                 {
                   this->data[i+1]->sortTof2();
-                  if (prog) prog->report(1);
+                  if (prog) prog->report("Sorting");
                 }
               }
             }
@@ -971,7 +971,7 @@ namespace DataObjects
             // Sort this event list using 2 cores
             this->data[i]->sortTof2();
             //Report progress
-            if (prog) prog->report(1);
+            if (prog) prog->report("Sorting");
           }
         }
 
@@ -992,7 +992,7 @@ namespace DataObjects
         this->data[i]->sort(sortType);
 
         //Report progress
-        if (prog) prog->report();
+        if (prog) prog->report("Sorting");
       }
     }
   }
