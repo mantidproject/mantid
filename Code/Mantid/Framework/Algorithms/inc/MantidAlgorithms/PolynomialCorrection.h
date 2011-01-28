@@ -12,7 +12,7 @@ namespace Mantid
   {
     /** 
     Corrects the data and error values on a workspace by the value of a polynomial function
-    which is evaluated at the X value of each data point. The data and error values are multiplied
+    which is evaluated at the X value of each data point. The data and error values are multiplied or divided
     by the value of this function.
 
     Required Properties:
@@ -20,6 +20,7 @@ namespace Mantid
     <LI> InputWorkspace  - The name of the workspace to correct</LI>
     <LI> OutputWorkspace - The name of the corrected workspace (can be the same as the input one)</LI>
     <LI> Coefficients    - The coefficients of the polynomial correction function in ascending powers of X</LI>
+    <LI> Operatiopn      - Multiply/Divide The operation with which the correction is applied to the data</LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
@@ -64,7 +65,7 @@ namespace Mantid
 
       std::vector<double> m_coeffs;              ///< Holds the coefficients for the polynomial correction function
       std::vector<double>::size_type m_polySize; ///< The order of the polynomial
-      
+      bool m_isOperationMultiply;                ///< True is the operation is multiply, false  means divide
     };
 
   } // namespace Algorithms
