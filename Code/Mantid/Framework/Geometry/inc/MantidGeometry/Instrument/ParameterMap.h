@@ -92,10 +92,32 @@ namespace Geometry
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
 	     const std::string& value);
-    /// Method for adding a parameter providing its value of a particular type
+    /**
+     * Method for adding a parameter providing its value of a particular type
+     * @tparam T The concrete type
+     * @param type A string denoting the type, e.g. double, string, fitting
+     * @param comp A pointer to the component that this parameter is attached to
+     * @param name The name of the parameter
+     * @param value The parameter's value
+     */
     template<class T>
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
-	     const T& value);
+	     const T& value)
+    {
+      bool created(false);
+      boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
+      ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
+      if (!paramT)
+      {
+	reportError("Error in adding parameter: incompatible types");
+	throw std::runtime_error("Error in adding parameter: incompatible types");
+      }
+      paramT->setValue(value);
+      if( created )
+      {
+	m_map.insert(std::make_pair(comp->getComponentID(),param));
+      }
+    }
     /** @name Helper methods for adding and updating paramter types  */
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
