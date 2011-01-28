@@ -62,7 +62,8 @@ public:
   void initialize(boost::shared_ptr<Object> shape,
       int xpixels, double xstart, double xstep,
       int ypixels, double ystart, double ystep,
-      int idstart, bool idfillbyfirst_y, int idstepbyrow
+      int idstart, bool idfillbyfirst_y, int idstepbyrow,
+      int idstep=1
       );
 
 //  //! Copy constructor

@@ -224,12 +224,15 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
  * @param idstepbyrow amount to increase the ID number on each row. e.g, if you fill by Y first,
  *            and set  idstepbyrow = 100, and have 50 Y pixels, you would get:
  *            (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100; (1,1)=101; etc.
+ * @param idstep amount to increase each individual ID number with a row. e.g, if you fill by Y first,
+ *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
 void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
     int xpixels, double xstart, double xstep,
     int ypixels, double ystart, double ystep,
-    int idstart, bool idfillbyfirst_y, int idstepbyrow
+    int idstart, bool idfillbyfirst_y, int idstepbyrow,
+    int idstep
     )
 {
   if (m_isParametrized)
@@ -260,9 +263,9 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       //Calculate its id and set it.
       int id;
       if (idfillbyfirst_y)
-        id = idstart + ix * idstepbyrow + iy;
+        id = idstart + ix * idstepbyrow + iy * idstep;
       else
-        id = idstart + iy * idstepbyrow + ix;
+        id = idstart + iy * idstepbyrow + ix * idstep;
 
       //Create the detector from the given id & shape and with THIS as the parent.
       Detector* detector = new Detector(oss.str(), id, shape, this);

@@ -725,6 +725,7 @@ namespace Mantid
         int xpixels=0; double xstart=0.; double xstep=0.;
         int ypixels=0; double ystart=0.; double ystep=0.;
         int idstart=0; bool idfillbyfirst_y=true; int idstepbyrow=0;
+        int idstep=1;
 
         //The shape!
         // Given that this leaf component is actually an assembly, its constituent component detector shapes comes from its type attribute.
@@ -743,16 +744,18 @@ namespace Mantid
         if ( pCompElem->hasAttribute("idstart") ) idstart = atoi((pCompElem->getAttribute("idstart")).c_str());
         if ( pCompElem->hasAttribute("idfillbyfirst") )
           idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
-        //Default ID step size
+        //Default ID row step size
         if (idfillbyfirst_y) idstepbyrow = ypixels;
           else idstepbyrow = xpixels;
         if ( pCompElem->hasAttribute("idstepbyrow") ) idstepbyrow = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+        //Default ID row step size
+        if ( pCompElem->hasAttribute("idstep") ) idstep = atoi((pCompElem->getAttribute("idstep")).c_str());
 
         if (VERBOSE) std::cout << "AppendLeaf: Initializing RectangularDetector with parameters : " <<
             "shape " << typeName << ", " << xpixels << ", " << xstart << ", " << xstep << ", " << ypixels << ", " << ystart << ", " << ystep << ", " << idstart << ", " << idfillbyfirst_y << ", " << idstepbyrow << ".\n";
 
         // Now, initialize all the pixels in the bank
-        bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow );
+        bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow, idstep);
 
         //Loop through all detectors in the newly created bank and mark those in the instrument.
         try
