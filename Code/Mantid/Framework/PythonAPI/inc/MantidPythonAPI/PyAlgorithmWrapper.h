@@ -66,6 +66,16 @@ public:
   }
 
   /**
+   * Expose createSubAlgorithm to python so that a python algorithm can
+   * create a sub-algorithm that will not log itself.
+   * @param algo_name Name of the algorithm to create
+   */
+  boost::shared_ptr<API::IAlgorithm>  _createSubAlgorithm(const std::string algo_name)
+  {
+    return this->Algorithm::createSubAlgorithm(algo_name);
+  }
+
+  /**
    * Declare a property, templated on the value along with a validator
    * @param prop_name The name of the property
    * @param default_value The default value

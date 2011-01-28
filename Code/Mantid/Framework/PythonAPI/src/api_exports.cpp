@@ -74,6 +74,7 @@ namespace PythonAPI
   {
     
     register_ptr_to_python<API::IAlgorithm*>();
+    register_ptr_to_python<boost::shared_ptr<API::IAlgorithm> >();
 
     class_< API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
       .def("name", &API::IAlgorithm::name)
@@ -120,6 +121,7 @@ namespace PythonAPI
       .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::MatrixWorkspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
       .def("log", &PyAlgorithmBase::getLogger, return_internal_reference<>())
+      .def("_createSubAlgorithm", &PyAlgorithmBase::_createSubAlgorithm, return_value_policy< return_by_value >())
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)
       EXPORT_DECLAREPROPERTY(std::string, str)
