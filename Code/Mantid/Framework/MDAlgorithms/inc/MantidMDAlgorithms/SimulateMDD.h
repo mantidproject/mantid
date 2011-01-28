@@ -8,6 +8,11 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
+#include "MantidKernel/RandomNumberGenerator.h"
+
+#include "MantidGeometry/Tolerance.h"
+#include "MantidGeometry/Math/mathSupport.h"
+#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {
@@ -52,16 +57,20 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      SimulateMDD() : API::Algorithm() {};
+      SimulateMDD();
       /// Destructor
-      virtual ~SimulateMDD() {};
+      ~SimulateMDD();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SimulateMDD";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       // Method to actually evaluate the bg model with the given parameters
-      void SimBackground(std::string bgmodel,const double bgpara_p1,
-             const double bgpara_p2, const double bgpara_p3);
+      void SimBackground(std::vector<double>& cellBg, std::string bgmodel,const double bgpara_p1,const double bgpara_p2, const double bgpara_p3,
+          const double bgpara_p4, const double bgpara_p5, const double bgpara_p6,
+          const double bgpara_p7, const double bgpara_p8);
+	  // Simple test method to actually evaluate the fg model with the given parameters
+      //void SimForeground(std::string,const double,
+      //       const double, const double);
 
     private:
       /// Initialisation code
@@ -69,9 +78,10 @@ namespace Mantid
       ///Execution code
       void exec();
       /// Pointter to the cut data
-      boost::shared_ptr<Mantid::API::IMDWorkspace> myCut;
-    };
+      boost::shared_ptr<Mantid::API::IMDWorkspace> imdwCut;
+      //
 
+    };
   } // namespace MDAlgorithm
 } // namespace Mantid
 

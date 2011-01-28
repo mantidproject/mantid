@@ -1,5 +1,5 @@
-#ifndef SIMULATEMDDATATEST_H_
-#define SIMULATEMDDATATEST_H_
+#ifndef TOBYFITSIMULATETEST_H_
+#define TOBYFITSIMULATETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
@@ -11,7 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidMDAlgorithms/SimulateMDD.h"
+#include "MantidMDAlgorithms/TobyFitSimulate.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -157,7 +157,7 @@ public:
    ~TestCut() {};
 };
 
-class SimulateMDDataTest : public CxxTest::TestSuite
+class TobyFitSimulateTest : public CxxTest::TestSuite
 {
 private:
   boost::shared_ptr<TestCut> myCut;
@@ -226,12 +226,12 @@ private:
 
 public:
 
-  SimulateMDDataTest() {};
+  TobyFitSimulateTest() {};
 
   // create a test data set of 3 pixels contributing to 2 points to 1 cut
   void testInit()
   {
-    FakeWSname = "testFakeMDWSSim";
+    FakeWSname = "test_FakeMDWS";
 
     pContribCells.push_back(constructMDCell(1));
     pContribCells.push_back(constructMDCell(2));
@@ -264,46 +264,29 @@ public:
 
   }
 
+  class TestableTobyFitSimulate : public Mantid::MDAlgorithms::TobyFitSimulate
+  {
+  public:
+    TestableTobyFitSimulate() : TobyFitSimulate() {}
+    ~TestableTobyFitSimulate() {}
+
+    double TestableTobyFitSimulate::wrapBose(double eps,double temp) { return TobyFitSimulate::bose(eps,temp) ;};
+
+  };
+
   void testExecSimulate()
   {
     using namespace Mantid::MDAlgorithms;
 
-    SimulateMDD alg;
+    // testing basic functions
+    TestableTobyFitSimulate tfSim;
+    double temp=100.,eps=1.;
+    TSM_ASSERT_DELTA("Bose(100,1) incorrect ",9.127015,tfSim.wrapBose(eps,temp),1.e-4);
+    temp=100.; eps=-1;
+    TSM_ASSERT_DELTA("Bose(100,1) incorrect ",8.127015,tfSim.wrapBose(eps,temp),1.e-4);
+    temp=100.; eps=0.;
+    TSM_ASSERT_DELTA("Bose(100,1) incorrect ",8.617347,tfSim.wrapBose(eps,temp),1.e-4);
 
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InputMDWorkspace",FakeWSname);
-      alg.setPropertyValue("OutputMDWorkspace","test_out1");
-      alg.setPropertyValue("BackgroundModel","QuadEnTrans");
-      alg.setPropertyValue("BackgroundModel_p1", "1.0" );
-      alg.setPropertyValue("BackgroundModel_p2", "0.1" );
-      alg.setPropertyValue("BackgroundModel_p3", "0.01" );
-      alg.setPropertyValue("ForegroundModel","Simple cubic Heisenberg FM spin waves, DSHO, uniform damping");
-    )
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    TS_ASSERT_THROWS_NOTHING( outCut = 
-      boost::dynamic_pointer_cast<TestCut>(AnalysisDataService::Instance().retrieve(FakeWSname)) );
-    TS_ASSERT_EQUALS( outCut->getNPoints(),0);
-
-    // Test output of quadratic in energy transfer model
-    double expected_residual = 42.4907;
-    double residual = alg.getProperty("Residual");
-
-    TS_ASSERT_DELTA(residual, expected_residual, 1e-03);
-
-    // test bg Exponential model in energy transfer with same data
-    alg.setPropertyValue("BackgroundModel","ExpEnTrans");
-    alg.setPropertyValue("BackgroundModel_p1", "1.0" );
-    alg.setPropertyValue("BackgroundModel_p2", "1.0" );
-    alg.setPropertyValue("BackgroundModel_p3", "-0.5" );
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    // Test output of model
-    expected_residual = 12.3237;
-    residual = alg.getProperty("Residual");
-
-    TS_ASSERT_DELTA(residual, expected_residual, 1e-03);
   }
   void testTidyUp()
   {
@@ -311,4 +294,4 @@ public:
 
 };
 
-#endif /*SIMULATEMDDATATEST_H_*/
+#endif /*TOBYFITSIMULATETEST_H_*/

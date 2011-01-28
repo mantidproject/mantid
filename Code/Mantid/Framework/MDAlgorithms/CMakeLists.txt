@@ -27,6 +27,7 @@ src/PlaneImplicitFunction.cpp
 src/PlaneImplicitFunctionParser.cpp
 src/SimulateMDD.cpp
 src/SingleValueParameterParser.cpp
+src/TobyFitSimulate.cpp
 src/WidthParameter.cpp 
 )
 
@@ -57,6 +58,7 @@ inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
 inc/MantidMDAlgorithms/SimulateMDD.h
 inc/MantidMDAlgorithms/SingleValueParameterParser.h
+inc/MantidMDAlgorithms/TobyFitSimulate.h
 inc/MantidMDAlgorithms/Topology.h
 inc/MantidMDAlgorithms/VectorMathematics.h
 inc/MantidMDAlgorithms/WidthParameter.h 
@@ -79,6 +81,7 @@ test/SimulateMDDataTest.h
 #test/SingleValueParameterBaseTest.h TODO: Not a CxxTest? Sure looks like one.
 #test/testCPComponents.h TODO: Is this test really necessary?
 test/testCPrebinning.h
+test/TobyFitSimulateTest.h
 test/VectorMathematicsTest.h
 test/WidthParameterTest.h
 )
