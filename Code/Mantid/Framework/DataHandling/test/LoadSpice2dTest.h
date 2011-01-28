@@ -122,7 +122,9 @@ public:
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 14.0);
 
     // Check that we can modify a parameter
-    sample_aperture_size->set(15.0);
+    Mantid::Geometry::ParameterMap & pmap_nonconst = ws2d->instrumentParameters();
+    pmap_nonconst.addDouble(sample_aperture.get(), "Size", 15.0);
+    sample_aperture_size = m_paraMap->get(sample_aperture.get(), "Size");
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 15.0);
 
     boost::shared_ptr<Mantid::Geometry::Parameter> d = m_paraMap->get(i.get(), "sample-detector-distance");

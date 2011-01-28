@@ -5,40 +5,32 @@
 
 namespace Mantid
 {
-namespace Geometry
-{
-
-  /// @cond
-  template<>
-  void ParameterV3D::fromString(const std::string &value)
+  namespace Geometry
   {
-    std::istringstream istr(value);
-    m_value.readPrinted(istr);
-  }
-  /// @endcond
+  
+    // Initialize the static map
+    ParameterFactory::FactoryMap ParameterFactory::s_map;
 
-  ParameterFactory::FactoryMap ParameterFactory::s_map;
+    /**  Creates an instance of a parameter
+     *   @param className The parameter registered type name
+     *   @param name The parameter name
+     *   @return A pointer to the created parameter
+     *   @throw runtime_error if the type has not been registered
+     */
+    boost::shared_ptr<Parameter> ParameterFactory::create(const std::string& className, const std::string& name)
+    {
+      boost::shared_ptr<Parameter> p;
+      FactoryMap::const_iterator it = s_map.find(className);
+      if (it != s_map.end())
+	p = it->second->createInstance();
+      else
+	throw std::runtime_error("ParameterFactory:"+ className + " is not registered.\n");
+      p->m_name = name;
+      p->m_type = className;
+      return p;
+    }
 
-  /**  Creates an instance of a parameter
-   *   @param className The parameter registered type name
-   *   @param name The parameter name
-   *   @return A pointer to the created parameter
-   *   @throw runtime_error if the type has not been registered
-   */
-  boost::shared_ptr<Parameter> ParameterFactory::create(const std::string& className, const std::string& name)
-  {
-    boost::shared_ptr<Parameter> p;
-    FactoryMap::const_iterator it = s_map.find(className);
-    if (it != s_map.end())
-      p = it->second->createInstance();
-    else
-      throw std::runtime_error("ParameterFactory:"+ className + " is not registered.\n");
-    p->m_name = name;
-    p->m_type = className;
-    return p;
-  }
-
-} // Namespace Geometry
+  } // Namespace Geometry
 } // Namespace Mantid
 
 DECLARE_PARAMETER(int,int)

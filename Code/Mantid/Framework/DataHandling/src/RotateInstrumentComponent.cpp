@@ -107,12 +107,8 @@ void RotateInstrumentComponent::exec()
 
   //Need to get the address to the base instrument component
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
-
-  // Set "pos" instrument parameter. 
-  Parameter_sptr par = pmap.get(comp.get(),"rot");
-  if (par) par->set(Rot);
-  else
-      pmap.addQuat(comp.get(),"rot",Rot);
+  // Add a parameter for the new rotation
+  pmap.addQuat(comp.get(), "rot", Rot);
 
   return;
 }

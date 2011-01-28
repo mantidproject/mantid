@@ -214,11 +214,8 @@ namespace Algorithms
         //Need to get the address to the base instrument component
         Geometry::ParameterMap& pmap = inputW->instrumentParameters();
 
-        // Set "pos" instrument parameter.
-        Parameter_sptr par = pmap.get(comp.get(),"rot");
-        if (par) par->set(Rot);
-        else
-            pmap.addQuat(comp.get(),"rot",Rot);
+        // Set or overwrite "rot" instrument parameter.
+	pmap.addQuat(comp.get(),"rot",Rot);
 
       } 
     } 

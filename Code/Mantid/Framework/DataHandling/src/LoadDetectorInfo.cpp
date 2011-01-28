@@ -398,26 +398,10 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
 
   Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
   IComponent* comp = det->getComponent();
-  // set the detectors pressure, first check if it already has a setting, if not add it
-  Parameter_sptr setting = pmap.get(comp, "3He(atm)");
-  if (setting)
-  {
-    setting->set(params.pressure);
-  }
-  else
-  {
-    pmap.add("double", comp, "3He(atm)", params.pressure);
-  }
-
-  setting = pmap.get(comp, "wallT(m)");
-  if (setting)
-  {
-    setting->set(params.wallThick);
-  }
-  else
-  {
-    pmap.add("double", comp, "wallT(m)", params.wallThick);
-  }
+  // Set the detectors pressure.
+  pmap.addDouble(comp, "3He(atm)", params.pressure);
+  // Set the wall thickness
+  pmap.addDouble(comp, "wallT(m)", params.wallThick);
 
   // this operation has been successful if we are here, the following infomation is usefull for logging
   change = params;

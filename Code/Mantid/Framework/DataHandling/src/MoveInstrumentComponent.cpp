@@ -102,24 +102,9 @@ void MoveInstrumentComponent::exec()
       rot.rotate(Pos);
   }
 
-  //Need to get the address to the base instrument component
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
-  Component* pcomp = dynamic_cast<Component*>(comp.get());
-  const IComponent* baseComp;
-  if (pcomp->isParametrized())
-  {
-      baseComp = pcomp->base();
-  }
-  else
-  {
-      baseComp = comp.get();
-  }
-
-  // Set "pos" instrument parameter. 
-  Parameter_sptr par = pmap.get(baseComp,"pos");
-  if (par) par->set(Pos);
-  else
-      pmap.addV3D(baseComp,"pos",Pos);
+  // Add a parameter for the new position
+  pmap.addV3D(comp.get(), "pos", Pos);
 
   return;
 }
