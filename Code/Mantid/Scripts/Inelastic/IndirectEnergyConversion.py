@@ -1,5 +1,9 @@
 from mantidsimple import *
-from mantidplot import *
+
+try: # mantidplot can only be imported within mantidplot
+    from mantidplot import * # we want to be able to run from mantid script
+except ImportError:
+    pass
 
 import re
 
@@ -37,7 +41,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         sys.exit("Indirect CTE: Error loading data files.")
     for i in range(0, len(ws_names)):
         ws = ws_names[i]
-        ws_mon = mon_wsl[i]        
+        ws_mon = mon_wsl[i]
         invalid = []
         if ( analyser != "" and reflection != "" ):
             applyParameterFile(ws, analyser, reflection)
