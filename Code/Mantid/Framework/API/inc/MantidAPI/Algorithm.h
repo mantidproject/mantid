@@ -205,6 +205,8 @@ public:
 
   /// Asynchronous execution.
   Poco::ActiveResult<bool> executeAsync();
+  /// Execute as a sub-algorithm
+  void executeAsSubAlg();
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;

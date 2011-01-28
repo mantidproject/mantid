@@ -342,6 +342,27 @@ namespace Mantid
       return isExecuted();
     }
 
+    /// Execute as a sub-algorithm
+    void Algorithm::executeAsSubAlg()
+    {
+      bool executed = false;
+      try
+      {
+        executed = execute();
+      }
+      catch (std::runtime_error&)
+      {
+        g_log.error() << "Unable to successfully run " << this->name() << std::endl;
+        throw;
+      }
+
+      if ( ! executed )
+      {
+        g_log.error() << "Unable to successfully run " << this->name() << std::endl;
+        throw std::runtime_error("Unable to successfully run " + this->name());
+      }
+    }
+
     /// Has the Algorithm already been initialized
     bool Algorithm::isInitialized() const
     {

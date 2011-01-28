@@ -76,6 +76,12 @@ bool AlgorithmProxy::execute()
   return m_isExecuted;
 }
 
+/// Execute as a sub-algorithm. Should never be called from an AlgorithmProxy
+void AlgorithmProxy::executeAsSubAlg()
+{
+  throw std::runtime_error("executeAsSubAlg() should not be called from an AlgorithmProxy: use execute() instead.");
+}
+
 /// Asynchronous execution of the algorithm.
 Poco::ActiveResult<bool> AlgorithmProxy::executeAsync()
 {

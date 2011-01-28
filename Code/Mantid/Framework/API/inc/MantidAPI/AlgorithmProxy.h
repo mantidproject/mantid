@@ -120,6 +120,7 @@ namespace Mantid
       Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy> _executeAsync;
       /// Execute asynchronous implementation
       bool executeAsyncImpl(const Poco::Void & dummy);
+      void executeAsSubAlg();
 
       const std::string m_name;     ///< name of the real algorithm
       const std::string m_category; ///< category of the real algorithm
