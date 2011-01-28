@@ -262,7 +262,7 @@ const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, 
   Property* join = getProperty("JoinWavelength");
   if (join->isDefault())
   {
-    g_log.information() << "Joining wavelength: " << tempX_L.front() << "Angstrom\n";
+    g_log.information() << "Joining wavelength: " << tempX_L.front() << " Angstrom\n";
     setProperty("JoinWavelength",tempX_L.front());
   }
 
@@ -282,6 +282,14 @@ std::pair<int,int> Unwrap::handleFrameOverlapped(const MantidVec& xdata, const d
   // This gives us new minimum & maximum tof values
   const double minT = m_Tmin + Dt;
   const double maxT = m_Tmax - Dt;
+  // Can have situation where Ld is so much larger than Lref that everything would be excluded.
+  // This is an invalid input - warn and leave spectrum unwrapped
+  if ( minT > maxT )
+  {
+    g_log.warning() << "Invalid input, Ld (" << Ld << ") >> Lref (" << m_LRef << "). Current spectrum will not be unwrapped.\n";
+    return std::make_pair(0,xdata.size()-1);
+  }
+
   int min = 0, max = xdata.size();
   for (unsigned int j = 0; j < m_XSize; ++j)
   {
