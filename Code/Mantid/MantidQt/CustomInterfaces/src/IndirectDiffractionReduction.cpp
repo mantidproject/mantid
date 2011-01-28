@@ -34,7 +34,9 @@ void IndirectDiffractionReduction::demonRun()
     QString pyInput = "from IndirectDataAnalysis import demon\n"
       "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
       "first = " +m_uiForm.set_leSpecMin->text()+"\n"
-      "last = " +m_uiForm.set_leSpecMax->text()+"\n";
+      "last = " +m_uiForm.set_leSpecMax->text()+"\n"
+      "instrument = '" + m_uiForm.set_cbInst->currentText() + "'\n"
+      "grouping = '" + m_uiForm.dem_cbGrouping->currentText() + "'\n";
 
     pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
 
@@ -44,7 +46,7 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
     
-    pyInput += "ws, rn = demon(files, first, last, Verbose=verbose, Plot=plot, Save=save)\n";
+    pyInput += "ws = demon(files, first, last, instrument, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }

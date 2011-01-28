@@ -207,6 +207,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
   pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
   pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
+  pyInput += "iname = '" + m_uiForm.cbInst->currentText()+"'\n";
 
   QStringList runFiles_list = m_uiForm.ind_runFiles->getFilenames();
   QString runFiles = runFiles_list.join("', r'");
@@ -245,8 +246,6 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "calib = ''\n";
   }
 
-  pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
-
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
   { 
     QString rebinParam = m_uiForm.rebin_leELow->text() + ","
@@ -272,10 +271,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   }
   else
   {
-    pyInput +=
-      "fileFormats = []\n"
-      "ins = ''\n"
-      "suffix = ''\n";
+    pyInput += "fileFormats = []\n";
   }
 
   if ( m_uiForm.ckCleanUp->isChecked() )
@@ -290,14 +286,14 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   if ( isDirty() )
   {
     pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, "
-      "first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
-      "rebinParam = rebinParam, instrument = ins, savesuffix = suffix, saveFormats = fileFormats,"
-      "analyser = ana, reflection = ref, CleanUp=clean, Verbose=verbose)\n";
+      "first, last, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
+      "rebinParam = rebinParam, saveFormats = fileFormats,"
+      "analyser = ana, reflection = ref, CleanUp=clean, Verbose=verbose, instrument=iname)\n";
   }
   else if ( isDirtyRebin() )
   {
     pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
-      "fileFormats, CleanUp = clean, Verbose=verbose)\n";
+      "fileFormats, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
   {
@@ -306,12 +302,10 @@ void Indirect::runConvertToEnergy(bool tryToSave)
       "wslist = mantid.getWorkspaceNames()\n"
       "save_ws = re.compile(r'_'+ana+ref+'_red')\n"
       "ws_list = []\n"
-      "runNos = []\n"
       "for workspace in wslist:\n"
       "   if save_ws.search(workspace):\n"
       "      ws_list.append(workspace)\n"
-      "      runNos.append(mtd[workspace].getRun().getLogData('run_number').value())\n"
-      "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix, Verbose=verbose)\n";
+      "ind.saveItems(ws_list, fileFormats, Verbose=verbose)\n";
   }
 
   // Plot Output Handling
@@ -508,11 +502,6 @@ QString Indirect::createMapFile(const QString& groupType)
 */
 QString Indirect::savePyCode()
 {
-  QString analyser = m_uiForm.cbAnalyser->currentText();
-
-  QString ins = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-  QString suffix = analyser + m_uiForm.cbReflection->currentText() + "_red";
-
   QStringList fileFormats;
   QString fileFormatList;
 
@@ -530,8 +519,6 @@ QString Indirect::savePyCode()
 
   QString pyInput =
     "# Save File Parameters\n"
-    "ins = '" + ins + "'\n"
-    "suffix = '" + suffix + "'\n"
     "fileFormats = " + fileFormatList + "\n";
 
   return pyInput;
@@ -543,11 +530,13 @@ QString Indirect::savePyCode()
 void Indirect::createRESfile(const QString& file)
 {
   QString pyInput =
-    "import IndirectEnergyConversion as ind\n"
+    "from IndirectEnergyConversion import resolution\n"
     "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
-    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+
-    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
-    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n";
+    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+"}\n"
+
+    "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+    "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
+    "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n";
 
   if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
   else { pyInput += "plot = False\n"; }
@@ -555,13 +544,14 @@ void Indirect::createRESfile(const QString& file)
   QString rebinParam = QString::number(m_calDblMng->value(m_calResProp["ELow"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EWidth"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EHigh"]));
+
   QString background = "[ " +QString::number(m_calDblMng->value(m_calResProp["Start"]))+ ", " +QString::number(m_calDblMng->value(m_calResProp["End"]))+"]";
 
   pyInput +=
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
-    "file = r'" + file + "'\n"
-    "outWS = ind.res(file, iconOpt, rebinParam, background, suffix, plotOpt = plot)\n";
+    "file = " + file + "\n"
+    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1184,6 +1174,13 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.rebin_leEWidth->setText(rbp[1]);
       m_uiForm.rebin_leEHigh->setText(rbp[2]);
     }
+    else
+    {
+      m_uiForm.rebin_ckDNR->setChecked(true);
+      m_uiForm.rebin_leELow->setText("");
+      m_uiForm.rebin_leEWidth->setText("");
+      m_uiForm.rebin_leEHigh->setText("");
+    }
   }
 
   // clear validation markers
@@ -1377,7 +1374,10 @@ void Indirect::calibCreate()
   }
   else
   {
-    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib";
+
+    QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
+
     QString pyInput =
       "from IndirectEnergyConversion import createCalibFile\n"
       "plot = ";
@@ -1388,7 +1388,7 @@ void Indirect::calibCreate()
       pyInput += "False\n";
 
     pyInput +=
-      "file = createCalibFile(r'"+file+"', '"+suffix+"', %1, %2, %3, %4, %5, %6, PlotOpt=plot)\n"
+      "file = createCalibFile("+filenames+", '"+suffix+"', %1, %2, %3, %4, %5, %6, PlotOpt=plot)\n"
       "print file\n";
 
     pyInput = pyInput.arg(QString::number(m_calDblMng->value(m_calCalProp["PeakMin"])));
@@ -1408,7 +1408,7 @@ void Indirect::calibCreate()
     {
       if ( m_uiForm.cal_ckRES->isChecked() )
       {
-        createRESfile(file);
+        createRESfile(filenames);
       }
       m_uiForm.ind_calibFile->setFileText(pyOutput);
       m_uiForm.ckUseCalib->setChecked(true);
@@ -1496,15 +1496,16 @@ void Indirect::calPlotEnergy()
     showInformationBox("Run number not valid.");
     return;
   }
-  QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+  QString files = "[r'" + m_uiForm.cal_leRunNo->getFilenames().join("', r'") + "']";
   QString pyInput =
-    "from IndirectEnergyConversion import res\n"
+    "from IndirectEnergyConversion import resolution\n"
     "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
-    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+
-    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
-    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n"
-    "file = r'" + file + "'\n"
-    "outWS = res(file, iconOpt, '', '', suffix, Res=False)\n"
+    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+ "}\n"
+    "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+    "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
+    "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
+    "files = " + files + "\n"
+    "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
     "print outWS\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
   

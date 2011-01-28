@@ -626,6 +626,11 @@
                </item>
                <item>
                 <property name="text" >
+                 <string>Intensity</string>
+                </property>
+               </item>
+               <item>
+                <property name="text" >
                  <string>Tau</string>
                 </property>
                </item>

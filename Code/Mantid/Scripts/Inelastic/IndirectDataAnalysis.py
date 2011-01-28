@@ -1,6 +1,6 @@
 from mantidsimple import *
 from mantidplot import *
-from IndirectEnergyConversion import *
+import IndirectEnergyConversion as IEC
 
 import math
 import re
@@ -125,38 +125,46 @@ def confitSeq(inputWS, func, startX, endX, save, plot):
     if plot != 'None':
         confitPlotSeq(wsname, plot)
 
-def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
-        Verbose=False, Plot='None', Save=True):
-    ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
-    runNos = []
-    workspaces = []
-    (direct, filename) = os.path.split(rawFiles[0])
-    (root, ext) = os.path.splitext(filename)
+def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
+        grouping='Individual',
+        CleanUp=True, Verbose=False, Plot='None', Save=True):
+    # Get instrument workspace for gathering parameters and such
+    wsInst = mtd['__empty_' + instrument]
+    if wsInst is None:
+        IEC.loadInst(instrument)
+        wsInst = mtd['__empty_' + instrument]
+    # short name of instrument for saving etc
+    isn = ConfigService().facility().instrument(instrument).shortName().lower()
+    fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
+    # parameters to do with monitor
     try:
-        inst = mtd[ws_names[0]].getInstrument()
+        inst = wsInst.getInstrument()
         area = inst.getNumberParameter('mon-area')[0]
         thickness = inst.getNumberParameter('mon-thickness')[0]
-    except IndexError:
-        sys.exit('Monitor area and thickness (unt and zz) are not defined \
-                in the Instrument Parameter File.')
-    for i in range(0, len(ws_names)):
+    except IndexError, message:
+        print message
+        sys.exit(message)    
+    ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, 
+        SpecMin=first, SpecMax=last)
+    ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
+        SpecMin=fmon+1, SpecMax=fmon+1)
+    workspaces = []
+    for i in range(0, len(ws_det_l)):
+        det_ws = ws_det_l[i]
+        mon_ws = ws_mon_l[i]
         # Get Monitor WS
-        MonitorWS = timeRegime(inWS=ws_names[i], Smooth=Smooth)
-        monitorEfficiency(MonitorWS, area, thickness)
-        # Get Run no, crop file
-        runNo = ws_list[i].getRun().getLogData("run_number").value
-        runNos.append(runNo)
-        savefile = root[:3].lower() + runNo + '_diff'
-        CropWorkspace(ws_names[i], ws_names[i], StartWorkspaceIndex=(first-1),
-                EndWorkspaceIndex = (last-1) )
+        IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
+        IEC.monitorEfficiency(mon_ws, area, thickness)        
+        # Get Run No
+        runNo = mtd[det_ws].getRun().getLogData("run_number").value
+        savefile = isn + runNo + '_diff'
         # Normalise to Monitor
-        normalised = normToMon(inWS_n=ws_names[i], outWS_n=ws_names[i],
-            monWS_n=MonitorWS)
+        IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
+        # Remove monitor workspace
+        DeleteWorkspace(mon_ws)
         # Convert to dSpacing
-        ConvertUnits(ws_names[i], savefile, 'dSpacing')
-        workspaces.append(savefile)
-        if CleanUp:
-            mantid.deleteWorkspace(ws_names[i])
+        ConvertUnits(det_ws, det_ws, 'dSpacing')
+        IEC.groupData(grouping, savefile, detectors=det_ws)
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
     if ( Plot != 'None' ):
@@ -166,7 +174,7 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
             else:
                 nspec = mtd[demon].getNumberHistograms()
                 plotSpectrum(demon, range(0, nspec))
-    return workspaces, runNos
+    return workspaces
 
 def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
     eq1 = [] # output workspaces with units in Q
@@ -284,7 +292,8 @@ def furyfitParsToWS(Table, Data):
     xAxis = cName[0]
     for spec in range(0,nSpec):
         yAxis = cName[(spec*2)+1]
-        if re.search('Tau$', yAxis) or re.search('Beta$', yAxis):
+        if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis)
+            or re.search('Beta$', yAxis) ):
             xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
@@ -306,6 +315,8 @@ def furyfitPlotSeq(inputWS, plot):
         plotSpectrum(inputWS, range(0, nHist))
         return
     plotSpecs = []
+    if ( plot == 'Intensity' ):
+        res = 'Intensity$'
     if ( plot == 'Tau' ):
         res = 'Tau$'
     elif ( plot == 'Beta' ):
@@ -354,7 +365,7 @@ def mut(inWS_n, deltaW, filename, efixed):
     sigs = 5.0 # sigs ?
     siga = 1.0 # siga ?
     we = math.sqrt(81.787/efixed) # 81.787 ?
-    tempWS = '_tmp_indirect_mut_file_'
+    tempWS = '__tmp_indirect_mut_file'
     ConvertUnits(inWS_n, tempWS, 'Wavelength', 'Indirect', efixed)
     xValues = mtd[tempWS].readX(0)
     nbins = len(xValues)
@@ -389,20 +400,6 @@ def plotInput(inputfiles,spectra=[]):
         if not OneSpectra:
             GroupDetectors(root, root,
                 DetectorList=range(spectra[0],spectra[1]+1) )
-        workspaces.append(root)
-    if len(workspaces) > 0:
-        graph = plotSpectrum(workspaces,0)
-        layer = graph.activeLayer().setTitle(", ".join(workspaces))
-
-def plotRaw(inputfiles,spectra=[]):
-    if len(spectra) != 2:
-        sys.exit(1)
-    workspaces = []
-    for file in inputfiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        LoadRaw(file, root, SpectrumMin=spectra[0], SpectrumMax = spectra[1])
-        GroupDetectors(root,root,DetectorList=range(spectra[0],spectra[1]+1))
         workspaces.append(root)
     if len(workspaces) > 0:
         graph = plotSpectrum(workspaces,0)

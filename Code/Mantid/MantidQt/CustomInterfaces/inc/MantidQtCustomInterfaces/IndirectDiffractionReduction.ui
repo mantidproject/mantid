@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
-    <height>228</height>
+    <width>444</width>
+    <height>258</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -60,20 +60,31 @@
         </layout>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Run Number</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>true</bool>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Run Number</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="dem_ckSumFiles" >
+           <property name="text" >
+            <string>Sum Files</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_11" >
@@ -96,6 +107,43 @@
          </item>
          <item>
           <widget class="QLineEdit" name="set_leSpecMax" />
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+         <item>
+          <widget class="QLabel" name="label_3" >
+           <property name="text" >
+            <string>Grouping Policy</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="dem_cbGrouping" />
+         </item>
+         <item>
+          <widget class="QLabel" name="dem_lbNumGroups" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>Number of Groups</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="dem_leNumGroups" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

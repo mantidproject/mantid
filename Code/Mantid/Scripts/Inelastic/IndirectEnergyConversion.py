@@ -3,25 +3,44 @@ from mantidplot import *
 
 import re
 
-def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', 
-        reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, 
-        calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='',
-        saveFormats = [], Verbose = False):
-    output_workspace_names = []
-    runNos = []
-    workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
-    try:
-        inst = mtd[ws_name[0]].getInstrument()
+def convert_to_energy(rawfiles, grouping, first, last, 
+        instrument='', analyser = '', reflection = '', 
+        SumFiles=False, bgremove = [0, 0], tempK=-1, 
+        calib='', rebinParam='', saveFormats = [], 
+        CleanUp = True, Verbose = False):        
+    # Get hold of base empty instrument workspace
+    wsInst = mtd['__empty_' + instrument]
+    if wsInst is None:
+        loadInst(instrument)
+        wsInst = mtd['__empty_' + instrument]
+    fmon, fdet = getFirstMonFirstDet('__empty_'+instrument)
+    try: # Get monitor parameters
+        inst = wsInst.getInstrument()
         area = inst.getNumberParameter('mon-area')[0]
         thickness = inst.getNumberParameter('mon-thickness')[0]
-    except IndexError:
-        sys.exit('Monitor area and thickness (unt and zz) are not defined \
-                in the Instrument Parameter File.')
-    for ws in ws_name:
+    except IndexError, message:
+        print message
+        sys.exit(message)
+    isTosca = adjustTOF('__empty_'+instrument)    
+    # Get short name of instrument from the config service
+    isn = ConfigService().facility().instrument(instrument).shortName().lower()
+    if ( calib != '' ): # Only load Calibration file once
+        LoadNexusProcessed(calib, '__calibration')    
+    # Holds output parameters
+    output_workspace_names = []
+    runNos = []
+    mon_wsl = loadData(rawfiles, Sum=SumFiles, SpecMin=fmon+1, SpecMax=fmon+1,
+        Suffix='_mon')
+    ws_names = loadData(rawfiles, Sum=SumFiles, SpecMin=first, SpecMax=last)    
+    if ( len(mon_wsl) != len(ws_names) ):
+        print "Indirect CTE: Error loading data files."
+        sys.exit("Indirect CTE: Error loading data files.")
+    for i in range(0, len(ws_names)):
+        ws = ws_names[i]
+        ws_mon = mon_wsl[i]        
         invalid = []
         if ( analyser != "" and reflection != "" ):
             applyParameterFile(ws, analyser, reflection)
-        isTosca = adjustTOF(ws)
         if isTosca:
             invalid = getBadDetectorList(ws)
             TofCorrection(ws, ws)
@@ -34,74 +53,61 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             factor = 1e6
         runNo = mtd[ws].getRun().getLogData("run_number").value
         runNos.append(runNo)
-        name = ws[:3].lower() + runNo + '_' + analyser + reflection + '_red'
-        MonitorWS_n = timeRegime(inWS = ws)
-        MonWS_n = monitorEfficiency('MonWS', area, thickness)
-        CropWorkspace(ws, 'Time', StartWorkspaceIndex=(first-1), 
-                EndWorkspaceIndex=(last-1))
-        mantid.deleteWorkspace(ws)
+        name = isn + runNo + '_' + analyser + reflection + '_red'
+        timeRegime(monitor=ws_mon, detectors=ws)
+        monitorEfficiency(ws_mon, area, thickness)
+        ## start dealing with detector data here
         if ( bgremove != [0, 0] ):
-            backgroundRemoval(bgremove[0], bgremove[1])
+            backgroundRemoval(bgremove[0], bgremove[1], detectors=ws)
         if ( calib != '' ):
-            calibrated = useCalib(calib)
-        normalised = normToMon(Factor=factor)
-        cte = conToEnergy(outWS_n=name+'_intermediate')
-        if ( rebinParam != ''):
-            rebin = rebinData(rebinParam, inWS_n=cte)
-            if CleanUp:
-                mantid.deleteWorkspace(cte)
-        elif CleanUp:
-            RenameWorkspace(cte, 'Energy')
+            calibrated = useCalib(detectors=ws)
+        normToMon(Factor=factor, monitor=ws_mon, detectors=ws)
+        # Remove monitor workspace
+        DeleteWorkspace(ws_mon)
+        conToEnergy(detectors=ws)
+        if not CleanUp:
+            CloneWorkspace(ws, name+'_intermediate')
+        if ( rebinParam != ''): # Rebin data
+            rebinData(rebinParam, detectors=ws)
+        if ( tempK != -1 ): # "Detailed Balance" correction
+            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )            
+        # Final stage, grouping of detectors - apply name
+        if isTosca: # TOSCA's grouping is pre-determined and fixed
+            groupTosca(name, invalid, detectors=ws)
         else:
-            CloneWorkspace(cte, 'Energy')
-        if ( tempK != -1 ):
-            db = detailedBalance(tempK)
-        if isTosca:
-            group = groupTosca(name, invalid)
-        else:
-            group = groupData(mapfile, outWS_n=name)
-        output_workspace_names.append(group)
-    if ( saveFormats != [] ):
-        saveItems(output_workspace_names, runNos, saveFormats, instrument, 
-                savesuffix)
+            groupData(grouping, name, detectors=ws)
+        output_workspace_names.append(name)
+    if ( saveFormats != [] ): # Save data in selected formats
+        saveItems(output_workspace_names, saveFormats)
+    if ( calib != '' ): # Remove calibration workspace
+        DeleteWorkspace('__calibration')
     return output_workspace_names, runNos
-
-def loadData(rawfiles, outWS='RawFile', Sum=False):
-    ( dir, file ) = os.path.split(rawfiles[0])
-    ( name, ext ) = os.path.splitext(file)
-    try:
-        LoadRaw(rawfiles[0], name)
-    except ValueError, message:
-        print message
-        sys.exit(message)
-    if ( len(rawfiles) > 1 and Sum ):
-        for i in range(1, len(rawfiles)):
-            tmp_ws = outWS + str(i)
-            LoadRaw(rawfiles[i], tmp_ws)
-            try:
-                Plus(name, tmp_ws, name)
-            except:
-                print 'Rawfiles do not match, not suitable for summing.'
-                sys.exit('Rawfiles not suitable for summing.')
-            mantid.deleteWorkspace(tmp_ws)
-        workspace = mtd[name]
-        # Average summed values by dividing by number of runs
-        CreateSingleValuedWorkspace('_temp', len(rawfiles))
-        Divide(name, '_temp', name)
-        mantd.deleteWorkspace('_temp')
-        return [workspace], [name]
+        
+def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
+        Suffix=''):
+    workspaces = []
+    for file in rawfiles:
+        ( dir, filename ) = os.path.split(file)
+        ( name, ext ) = os.path.splitext(filename)
+        try:
+            if ( SpecMin == -1 ) and ( SpecMax == -1 ):
+                LoadRaw(file, name+Suffix)
+            else:
+                LoadRaw(file, name+Suffix, SpectrumMin=SpecMin, 
+                    SpectrumMax=SpecMax)
+            workspaces.append(name+Suffix)
+        except ValueError, message:
+            print message
+            sys.exit(message)
+    if Sum and ( len(workspaces) > 1 ):
+        MergeRuns(','.join(workspaces), outWS+Suffix)
+        factor = 1.0 / len(workspaces)
+        Scale(outWS+Suffix, outWS+Suffix, factor)
+        for ws in workspaces:
+            DeleteWorkspace(ws)
+        return [outWS+Suffix]
     else:
-        workspace_list = []
-        ws_name_list = [name]
-        if ( len(rawfiles) > 1 ):
-            for i in range(1, len(rawfiles)):
-                ( dir, file ) = os.path.split(rawfiles[i])
-                ( name, ext ) = os.path.splitext(file)
-                LoadRaw(rawfiles[i], name)
-                ws_name_list.append(name)
-        for ws in ws_name_list:
-            workspace_list.append(mtd[ws])
-        return workspace_list, ws_name_list
+        return workspaces
 
 def getFirstMonFirstDet(inWS):
     workspace = mtd[inWS]
@@ -122,25 +128,20 @@ def getFirstMonFirstDet(inWS):
             break
     return FirstMon, FirstDet
 
-def timeRegime(inWS='Rawfile', outWS_n='MonWS', Smooth=True):
-    workspace = mtd[inWS]
-    FirstMon, FirstDet = getFirstMonFirstDet(inWS)
-    SpecMon = workspace.readX(FirstMon)[0]
-    SpecDet = workspace.readX(FirstDet)[0]
-    CropWorkspace(inWS, 'MonIn', StartWorkspaceIndex = FirstMon,
-             EndWorkspaceIndex = FirstMon)
+def timeRegime(Smooth=True, monitor='', detectors=''):
+    SpecMon = mtd[monitor].readX(0)[0]
+    SpecDet = mtd[detectors].readX(0)[0]
     if ( SpecMon == SpecDet ):
-        LRef = getReferenceLength(inWS, FirstDet)
-        alg = Unwrap('MonIn', outWS_n, LRef = LRef)
+        LRef = getReferenceLength(detectors, 0)
+        alg = Unwrap(monitor, monitor, LRef = LRef)
         join = float(alg.getPropertyValue('JoinWavelength'))
-        RemoveBins(outWS_n, outWS_n, join-0.001, join+0.001, 
+        RemoveBins(monitor, monitor, join-0.001, join+0.001, 
                 Interpolation='Linear')
         if Smooth:
-            FFTSmooth(outWS_n, outWS_n, 0)
+            FFTSmooth(monitor, monitor, 0)
     else:
-        ConvertUnits('MonIn', outWS_n, 'Wavelength')
-    mantid.deleteWorkspace('MonIn')
-    return outWS_n
+        ConvertUnits(monitor, monitor, 'Wavelength')
+    return monitor
 
 def monitorEfficiency(inWS, area, thickness):
     OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
@@ -158,74 +159,58 @@ def getReferenceLength(inWS, fdi):
     LRef = x + r
     return LRef
 
-def useCalib(path, inWS_n='Time', outWS_n='Time'):
-    try:
-        LoadNexusProcessed(path, 'calib')
-    except ValueError, message:
-       print message
-       sys.exit(message)
-    tmp = mtd[inWS_n]
+def useCalib(detectors=''):
+    tmp = mtd[detectors]
     shist = tmp.getNumberHistograms()
-    tmp = mtd['calib']
+    tmp = mtd['__calibration']
     chist = tmp.getNumberHistograms()
     if chist != shist:
         msg = 'Number of spectra in calibration file does not match number \
                 that exist in the data file.'
         print msg
-        mantid.deleteWorkspace('calib')
         sys.exit(msg)
     else:
-        Divide(inWS_n,'calib',outWS_n)
-        mantid.deleteWorkspace('calib')
-    return outWS_n
+        Divide(detectors,'__calibration',detectors)
+    return detectors
 
-def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS',
-        Factor=1e6):
-    ConvertUnits(inWS_n,outWS_n, 'Wavelength', EMode='Indirect')
-    RebinToWorkspace(outWS_n,monWS_n,outWS_n)
-    CreateSingleValuedWorkspace('factor', Factor)
-    Divide(monWS_n, 'factor', monWS_n)
-    mantid.deleteWorkspace('factor')
-    Divide(outWS_n,monWS_n,outWS_n)
-    mantid.deleteWorkspace(monWS_n)
-    if (inWS_n != outWS_n):
-        mantid.deleteWorkspace(inWS_n)
-    return outWS_n
+def normToMon(Factor=1e6, monitor='', detectors=''):
+    ConvertUnits(detectors,detectors, 'Wavelength', EMode='Indirect')
+    RebinToWorkspace(detectors,monitor,detectors)
+    Divide(detectors,monitor,detectors)
+    Scale(detectors, detectors, Factor)
+    return detectors
 
-def conToEnergy(inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
-    ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect')
-    CorrectKiKf(outWS_n, outWS_n, 'Indirect')
-    return outWS_n
+def conToEnergy(detectors=''):
+    ConvertUnits(detectors, detectors, 'DeltaE', 'Indirect')
+    CorrectKiKf(detectors, detectors, 'Indirect')
+    return detectors
 
-def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
-    Rebin(inWS_n, outWS_n, rebinParam)
-    return outWS_n
+def rebinData(rebinParam, detectors=''):
+    Rebin(detectors, detectors, rebinParam)
+    return detectors
 
-def detailedBalance(tempK, inWS_n = 'Energy', outWS_n = 'Energy'):
-    ExponentialCorrection(inWS_n, outWS_n, 1.0, ( 11.606 / ( 2 * tempK ) ) )
-    return outWS_n
-
-def groupData(grouping, inWS_n = 'Energy', outWS_n = 'IconComplete'):
+def groupData(grouping, name, detectors=''):
     if (grouping == 'Individual'):
-        RenameWorkspace(inWS_n, outWS_n)
+        RenameWorkspace(detectors, name)
+        return name
     elif ( grouping == 'All' ):
-        nhist = mtd[inWS_n].getNumberHistograms()
-        GroupDetectors(inWS_n, outWS_n, WorkspaceIndexList=range(0,nhist),
+        nhist = mtd[detectors].getNumberHistograms()
+        GroupDetectors(detectors, name, WorkspaceIndexList=range(0,nhist),
             Behaviour='Average')
     else:
-        GroupDetectors(inWS_n, outWS_n, MapFile=grouping, Behaviour='Average')
-    if inWS_n != outWS_n:
-        mantid.deleteWorkspace(inWS_n)
-    return outWS_n
+        GroupDetectors(detectors, name, MapFile=grouping, Behaviour='Average')
+    if detectors != name:
+        DeleteWorkspace(detectors)
+    return name
 
-def groupTosca(wsname, invalid):
+def groupTosca(wsname, invalid, detectors=''):
     grp = range(0,70)
     for i in invalid:
         try:
             grp.remove(i)
         except ValueError:
             pass
-    GroupDetectors('Energy', wsname, WorkspaceIndexList=grp, 
+    GroupDetectors(detectors, wsname, WorkspaceIndexList=grp, 
         Behaviour='Average')
     grp = range(70,140)
     for i in invalid:
@@ -233,29 +218,28 @@ def groupTosca(wsname, invalid):
             grp.remove(i)
         except ValueError:
             pass
-    GroupDetectors('Energy', 'front', WorkspaceIndexList=grp, 
+    GroupDetectors(detectors, '__front', WorkspaceIndexList=grp, 
         Behaviour='Average')
-    mantid.deleteWorkspace('Energy')
-    ConjoinWorkspaces(wsname, 'front')
+    DeleteWorkspace(detectors)
+    ConjoinWorkspaces(wsname, '__front')
     return wsname
+
 def getBadDetectorList(workspace):
-    IdentifyNoisyDetectors(workspace, '_temp_tsc_noise')
-    ws = mtd['_temp_tsc_noise']
+    IdentifyNoisyDetectors(workspace, '__temp_tsc_noise')
+    ws = mtd['__temp_tsc_noise']
     nhist = ws.getNumberHistograms()
     invalid = []
     for i in range(0, nhist):
         if ( ws.readY(i)[0] == 0.0 ):
             invalid.append(i)
-    mantid.deleteWorkspace('_temp_tsc_noise')
+    DeleteWorkspace('__temp_tsc_noise')
     return invalid
 
-def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
-    ConvertToDistribution(inWS_n)
-    FlatBackground(inWS_n, outWS_n, tofStart, tofEnd, Mode = 'Mean')
-    ConvertFromDistribution(inWS_n)
-    if ( inWS_n != outWS_n ):
-        ConvertFromDistribution(outWS_n)
-    return outWS_n
+def backgroundRemoval(tofStart, tofEnd, detectors=''):
+    ConvertToDistribution(detectors)
+    FlatBackground(detectors, detectors, tofStart, tofEnd, Mode = 'Mean')
+    ConvertFromDistribution(detectors)
+    return detectors
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, 
         savesuffix, saveFormats, CleanUp=False, Verbose=False):
@@ -289,8 +273,7 @@ def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument,
         scale = scaleAndGroup(mapfile, outWS_n=cte[:-13])
         output_workspace_names.append(scale)
     if ( saveFormats != [] ):
-        saveItems(output_workspace_names, runNos, saveFormats, instrument, 
-                savesuffix)
+        saveItems(output_workspace_names, saveFormats)
 
 def createMappingFile(groupFile, ngroup, nspec, first):
     filename = mtd.getConfigProperty('defaultsave.directory')
@@ -308,77 +291,79 @@ def createMappingFile(groupFile, ngroup, nspec, first):
     handle.close()
     return filename
 
-def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, 
-        specMin, specMax, outWS_n = 'Calibration', PlotOpt=False):
+def createCalibFile(rawfiles, suffix, peakMin, peakMax, backMin, backMax, 
+        specMin, specMax, PlotOpt=False):
     savepath = mantid.getConfigProperty('defaultsave.directory')
-    (direct, filename) = os.path.split(rawfile)
-    (root, ext) = os.path.splitext(filename)
-    try:
-        LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
-    except:
-        sys.exit('Calib: Could not load raw file.')
-    tmp = mtd['Raw']
+    runs = []
+    for file in rawfiles:
+        (direct, filename) = os.path.split(file)
+        (root, ext) = os.path.splitext(filename)
+        try:
+            LoadRaw(file, root, SpectrumMin=specMin, SpectrumMax=specMax)
+            runs.append(root)
+        except:
+            sys.exit('Indirect-Could not load raw file: ' + file)
+    cwsn = '__calibration'
+    if ( len(runs) > 1 ):
+        MergeRuns(",".join(runs), cwsn)
+        factor = 1.0 / len(runs)
+        Scale(cwsn, cwsn, factor)
+    else:
+        cwsn = runs[0]
+    tmp = mtd[cwsn]
     nhist = tmp.getNumberHistograms()
-    FlatBackground('Raw', 'Raw', StartX=backMin, EndX=backMax, Mode='Mean')
-    Integration('Raw', outWS_n, peakMin, peakMax)
-    mantid.deleteWorkspace('Raw')
-    cal_ws = mtd[outWS_n]
+    FlatBackground(cwsn, cwsn, StartX=backMin, EndX=backMax, Mode='Mean')
+    Integration(cwsn, cwsn, peakMin, peakMax)
+    cal_ws = mtd[cwsn]
     sum = 0
     for i in range(0, nhist):
         sum += cal_ws.readY(i)[0]
     value = sum / nhist
-    CreateSingleValuedWorkspace('avg', value)
-    Divide(outWS_n, 'avg', outWS_n)
-    mantid.deleteWorkspace('avg')
-    runNo = mtd[outWS_n].getRun().getLogData("run_number").value
-    savesuffix = root[:3] + runNo + suffix
-    savefile = os.path.join(savepath, savesuffix)
+    CreateSingleValuedWorkspace('__cal_avg', value)
+    runNo = mtd[cwsn].getRun().getLogData("run_number").value
+    outWS_n = runs[0][:3] + runNo + suffix
+    Divide(cwsn, '__cal_avg', outWS_n)
+    DeleteWorkspace('__cal_avg')
+    savefile = os.path.join(savepath, outWS_n+'.nxs')
     SaveNexusProcessed(outWS_n, savefile, 'Calibration')
     if PlotOpt:
         graph = plotTimeBin(outWS_n, 0)
-    else:
-        mantid.deleteWorkspace(outWS_n)
+    ## Tidyup
+    DeleteWorkspace(cwsn)
     return savefile
 
-def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True,
-        analyser='', reflection=''):
-    (direct, filename) = os.path.split(file)
-    (root, ext) = os.path.splitext(filename)
-    nspec = iconOpt['last'] - iconOpt['first'] + 1
-    mapping = createMappingFile('res.map', 1, nspec, iconOpt['first'])
-    rawfiles = [file]
-    workspace_list, runNos = convert_to_energy(rawfiles, mapping, 
-            iconOpt['first'], iconOpt['last'], iconOpt['efixed'],
-            analyser=analyser, reflection=reflection)
+def resolution(files, iconOpt, rebinParam, bground, 
+        instrument, analyser, reflection,
+        plotOpt=False, Res=True):
+    workspace_list, runNos = convert_to_energy(files, 'All', 
+        iconOpt['first'], iconOpt['last'], SumFiles=True, 
+        instrument=instrument, analyser=analyser, reflection=reflection)
     iconWS = workspace_list[0]
     if Res:
-        run = mtd[workspace_list[0]].getRun().getLogData("run_number").value
-        name = root[:3].lower() + run + '_' + suffix + '_res'
+        run = mtd[iconWS].getRun().getLogData("run_number").value
+        name = iconWS[:3].lower() + run + '_' + analyser + reflection + '_res'
         Rebin(iconWS, iconWS, rebinParam)
         FFTSmooth(iconWS,iconWS,0)
         FlatBackground(iconWS, name, bground[0], bground[1], Mode='Mean')
-        mantid.deleteWorkspace(iconWS)
+        DeleteWorkspace(iconWS)
         SaveNexusProcessed(name, name+'.nxs')
         if plotOpt:
             graph = plotSpectrum(name, 0)
-        else:
-            mantid.deleteWorkspace(name)
         return name
     else:
         if plotOpt:
             graph = plotSpectrum(iconWS, 0)
         return iconWS
 
-def saveItems(workspaces, runNos, fileFormats, ins, suffix, Verbose=False):
-    for i in range(0, len(workspaces)):
-        filename = ins + runNos[i] + '_' + suffix
+def saveItems(workspaces, fileFormats, Verbose=False):
+    for workspace in workspaces:
         for j in fileFormats:
             if j == 'spe':
-                SaveSPE(workspaces[i], filename + '.spe')
+                SaveSPE(workspace, workspace+'.spe')
             elif j == 'nxs':
-                SaveNexusProcessed(workspaces[i], filename + '.nxs')
+                SaveNexusProcessed(workspace, workspace+'.nxs')
             elif j == 'nxspe':
-                SaveNXSPE(workspaces[i], filename+'.nxspe')
+                SaveNXSPE(workspace, workspace+'.nxspe')
             else:
                 print 'Save: unknown file type.'
                 system.exit('Save: unknown file type.')
@@ -453,7 +438,7 @@ def getReflectionDetails(inst, analyser, refl):
     ws = '__empty_' + inst
     if (mtd[ws] == None):
         idf = idf_dir + inst + '_Definition.xml'
-        LoadEmptyInstrument(idf, ws)    
+        LoadEmptyInstrument(idf, ws)
     ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
     LoadParameterFile(ws, ipf)
     inst = mtd[ws].getInstrument()
@@ -470,8 +455,14 @@ def getReflectionDetails(inst, analyser, refl):
         result += inst.getStringParameter('rebin-default')[0]
     except IndexError:
         pass
-    # mantid.deleteWorkspace('ins')
     return result
+
+def loadInst(instrument):    
+    ws = '__empty_' + instrument
+    if (mtd[ws] == None):
+        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+        idf = idf_dir + instrument + '_Definition.xml'
+        LoadEmptyInstrument(idf, ws)
 
 def adjustTOF(ws='', inst=''):
     if ( ws != '' ):
