@@ -934,7 +934,7 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   m_plotCaption = new QLabel(this);
   // set up the plot widget
   m_plot = new OneCurvePlot(ControlsTab);
-  m_plot->enableAxis(QwtPlot::yLeft,false);
+  m_plot->setYAxisLabelRotation(-90);
   m_plot->setXScale(0,1);
   m_plot->setYScale(-1.2,1.2);
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
@@ -957,7 +957,6 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   connect(m_many,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
 
   layout->addLayout(toolBox);
-  //layout->addWidget(new QPushButton("Pick"));
   layout->addStretch();
   layout->addWidget(m_plotCaption);
   layout->addWidget(m_plot);

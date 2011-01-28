@@ -16,6 +16,7 @@ class OneCurvePlot: public QwtPlot
 public:
   OneCurvePlot(QWidget* parent);
   void setData(const double* x,const double* y,int dataSize);
+  void setYAxisLabelRotation(double degrees);
 public slots:
   void setXScale(double from, double to);
   void setYScale(double from, double to);

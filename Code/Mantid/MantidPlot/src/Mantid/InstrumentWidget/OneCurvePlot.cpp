@@ -3,6 +3,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_scale_div.h>
 #include <qwt_scale_engine.h>
+#include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_compat.h>
 
@@ -103,13 +104,7 @@ void OneCurvePlot::mousePressEvent(QMouseEvent* e)
   }
 }
 
-//void OneCurvePlot::mouseMoveEvent(QMouseEvent* e)
-//{
-//}
-
-//bool OneCurvePlot::event(QEvent *e)
-//{
-//  static int i = 0;
-//  std::cerr << "event " << i++ << "\n" ;
-//  return QwtPlot::event(e);
-//}
+void OneCurvePlot::setYAxisLabelRotation(double degrees)
+{
+  axisScaleDraw(yLeft)->setLabelRotation(degrees);
+}
