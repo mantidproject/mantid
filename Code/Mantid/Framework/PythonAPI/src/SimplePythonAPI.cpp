@@ -197,50 +197,6 @@ namespace Mantid
     }
 
     /**
-     * Write the help text for the function definitions that look more pythonic.
-     * @param os The stream to use to write the help
-     * @param properties This list of properties
-     * @param names The names associated with the properties
-     *
-     */
-    void SimplePythonAPI::writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties,
-                                              const StringVector& names)
-    {
-      os << "  \"\"\"\n";
-
-      size_t size = properties.size();
-      Mantid::Kernel::Property *prop;
-      for (size_t i = 0; i < size; ++i)
-      {
-        prop = properties[i];
-        os << "  " << names[i] << "("
-           << Mantid::Kernel::Direction::asText(prop->direction());
-        if (!prop->isValid().empty())
-          os << ":req";
-        os << ") *" << prop->type() << "* "<< "\n";
-        std::set<std::string> allowed = prop->allowedValues();
-        if (!prop->documentation().empty() || !allowed.empty())
-        {
-          os << "      " << prop->documentation();
-          if (!allowed.empty())
-          {
-            os << " [";
-            std::set<std::string>::const_iterator sIter = allowed.begin();
-            std::set<std::string>::const_iterator sEnd = allowed.end();
-            for( ; sIter != sEnd ; )
-            {
-              os << (*sIter);
-              if( ++sIter != sEnd ) os << ", ";
-            }
-            os << "]";
-          }
-          os << "\n";
-        }
-      }
-      os << "  \"\"\"\n";
-    }
-
-    /**
     * Write a Python function defintion
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
@@ -273,8 +229,6 @@ namespace Mantid
       //end of function parameters
       if( properties.size()>0 ) os << ", ";
       os << "execute=True):\n";
-
-      writeFunctionPyHelp(os, properties, sanitizedNames);
 
       os << "  algm = mantid.createAlgorithm(\"" << algm << "\")\n";
 
@@ -313,7 +267,10 @@ namespace Mantid
       }
 
       // Return the IAlgorithm object
-      os << "  return mtd._createAlgProxy(algm)\n\n";
+      os << "  return mtd._createAlgProxy(algm)\n";
+
+      // add the help information as a static thing
+      os << algm << ".__doc__ = mtd.createAlgorithmDocs(\"" << algm << "\")\n\n";
     }
 
     /**

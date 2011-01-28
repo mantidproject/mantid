@@ -98,7 +98,7 @@ public:
   /// Creates and instance of an algorithm
   API::IAlgorithm* createAlgorithm(const std::string& algName);
   /// Create the doc string for the supplied algorithm.
-  std::string createAlgorithmDocs(const API::IAlgorithm *);
+  std::string createAlgorithmDocs(const std::string& algName);
   //@}
   
   /** @name Workspace related functions */ 

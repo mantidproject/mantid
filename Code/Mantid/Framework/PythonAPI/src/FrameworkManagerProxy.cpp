@@ -158,9 +158,10 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
   return API::FrameworkManager::Instance().createAlgorithm(algName);
 }
 
-std::string FrameworkManagerProxy::createAlgorithmDocs(const API::IAlgorithm *algm)
+std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName)
 {
   const std::string EOL="\n";
+  API::IAlgorithm* algm = createAlgorithm(algName);
 
   std::string temp;
 
@@ -209,7 +210,7 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const API::IAlgorithm *al
         }
         buffer << "]";
       }
-      buffer << EOL;
+//      buffer << EOL; // TODO REMOVE
     }
   }
 
