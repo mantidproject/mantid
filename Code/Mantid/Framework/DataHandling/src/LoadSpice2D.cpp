@@ -278,7 +278,7 @@ namespace Mantid
       boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
 
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
-      pmap.add("double", i.get(), "sample-detector-distance", distance);
+      pmap.addDouble(i.get(), "sample-detector-distance", distance);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
