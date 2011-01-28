@@ -41,8 +41,7 @@ public:
     loaderCAL.isInitialized();
     loaderCAL.setPropertyValue("Filename", ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/INES_Definition.xml");
-    inputFile = loaderCAL.getPropertyValue("Filename");
-    wsName = "LoadEmptyInstrumentTestCAL";
+    const std::string wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
     loaderCAL.execute();
     loaderCAL.isExecuted();
@@ -53,7 +52,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
     testerCAL.setPropertyValue("InstrumentName", "INES");
     std::string outputFile;
-    outputFile = "./INES_test.cal";
+    outputFile = "./INES_CreateCalFileByNamesTest.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);
     outputFile = testerCAL.getPropertyValue("GroupingFileName");
     testerCAL.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
@@ -61,72 +60,66 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());
 
-
-    MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    
-    // has the algorithm written a file to disk?
-
-    TS_ASSERT( Poco::File(outputFile).exists() );
-
-
-    // Do a few tests to see if the content of outputFile is what you
-    // expect.
-
-    std::ifstream in(outputFile.c_str());
-
-    std::string line;
-    int i1,i2,i3,i4;
-    double d1;
-
-    // Skip header
-    for (int i=0; i<4; ++i)
-    {
-      std::getline (in,line);
-    }
-    // Check the first line, middle and last lines
-    // First line
-    in >> i1 >> i2 >> d1 >> i3 >> i4;
-    TS_ASSERT_EQUALS(i1,0 );
-    TS_ASSERT_EQUALS(i2,145 );
-    TS_ASSERT_EQUALS(d1,0.000000 );
-    TS_ASSERT_EQUALS(i3,1 );
-    TS_ASSERT_EQUALS(i4,0 );    
-    
-    for (int i=0; i<72; ++i)
-    {
-      in >> i1 >> i2 >> d1 >> i3 >> i4;
-    }
-    TS_ASSERT_EQUALS(i1, 72 );
-    TS_ASSERT_EQUALS(i2, 71 );
-    TS_ASSERT_EQUALS(d1,0.000000 );
-    TS_ASSERT_EQUALS(i3,1 );
-    TS_ASSERT_EQUALS(i4,5 );    
-
-    // Final line
-    for( int i=0; i<73; ++i )
-    {
-      in >> i1 >> i2 >> d1 >> i3 >> i4;
-    } 
-    TS_ASSERT_EQUALS(i1,145 );
-    TS_ASSERT_EQUALS(i2,144 );
-    TS_ASSERT_EQUALS(d1,0.000000 );
-    TS_ASSERT_EQUALS(i3,1 );
-    TS_ASSERT_EQUALS(i4,9 );
-
-    in.close();
-    
-    // remove file created by this algorithm
-    Poco::File(outputFile).remove();
     // Remove workspace
     AnalysisDataService::Instance().remove(wsName);
+    
+    // has the algorithm written a file to disk?
+    bool fileExists;
+    TS_ASSERT( fileExists = Poco::File(outputFile).exists() );
 
+    if ( fileExists )
+    {
+      // Do a few tests to see if the content of outputFile is what you
+      // expect.
+
+      std::ifstream in(outputFile.c_str());
+
+      std::string line;
+      int i1,i2,i3,i4;
+      double d1;
+
+      // Skip header
+      for (int i=0; i<4; ++i)
+      {
+        std::getline (in,line);
+      }
+      // Check the first line, middle and last lines
+      // First line
+      in >> i1 >> i2 >> d1 >> i3 >> i4;
+      TS_ASSERT_EQUALS(i1,0 );
+      TS_ASSERT_EQUALS(i2,145 );
+      TS_ASSERT_EQUALS(d1,0.000000 );
+      TS_ASSERT_EQUALS(i3,1 );
+      TS_ASSERT_EQUALS(i4,0 );
+
+      for (int i=0; i<72; ++i)
+      {
+        in >> i1 >> i2 >> d1 >> i3 >> i4;
+      }
+      TS_ASSERT_EQUALS(i1, 72 );
+      TS_ASSERT_EQUALS(i2, 71 );
+      TS_ASSERT_EQUALS(d1,0.000000 );
+      TS_ASSERT_EQUALS(i3,1 );
+      TS_ASSERT_EQUALS(i4,5 );
+
+      // Final line
+      for( int i=0; i<73; ++i )
+      {
+        in >> i1 >> i2 >> d1 >> i3 >> i4;
+      }
+      TS_ASSERT_EQUALS(i1,145 );
+      TS_ASSERT_EQUALS(i2,144 );
+      TS_ASSERT_EQUALS(d1,0.000000 );
+      TS_ASSERT_EQUALS(i3,1 );
+      TS_ASSERT_EQUALS(i4,9 );
+
+      in.close();
+
+      // remove file created by this algorithm
+      Poco::File(outputFile).remove();
+    }
+    
   }
-
-
-private:
-  std::string inputFile;
-  std::string wsName;
 
 };
 
