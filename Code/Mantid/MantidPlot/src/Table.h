@@ -217,7 +217,7 @@ public slots:
 	bool muParserCalculate(int col, int startRow, int endRow, bool notifyChanges = true);
 	//! Compute selected cells from column formulae; use current cell if there's no selection.
 	bool calculate();
-	//! Recalculates values in all columns with formulas containing @param columnName:: 
+	//! Recalculates values in all columns with formulas containing @param columnName
 	void updateValues(Table*, const QString& columnName);
 
 	//! \name Row Operations
