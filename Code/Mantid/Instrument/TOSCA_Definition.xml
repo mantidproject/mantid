@@ -705,8 +705,9 @@
   </idlist>
 
   <idlist idname="diffraction">
-	<id start="170" end="172" />
-    <id val="15" />
+	<id start="170" end="173" />
+    <!-- Having this value as 15 causes problems in the ConvertToEnergy scripts
+    <id val="15" /> -->
     <id start="177" end="180" />
   </idlist>  
   
