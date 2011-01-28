@@ -15,6 +15,8 @@ set ( INC_FILES inc/MantidPythonAPI/api_exports.h
       inc/MantidPythonAPI/stl_proxies.h
       inc/MantidPythonAPI/WorkspaceProxies.h )
 
+set ( PY_FILES MantidFramework.py __init__.py setup.py )
+
 set ( TEST_FILES test/PythonFrameworkTests.h
                  test/SimplePythonAPITest.h )
 
@@ -31,8 +33,20 @@ include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 
 include_directories ( inc )
 
+# Now copy the required python files into the build destination
+set ( PYTHON_INSTALL_FILES "")
+foreach ( PYFILE ${PY_FILES} )
+  add_custom_command ( OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE}
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+  )
+  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE})
+endforeach ( PYFILE )
+
 # Add the target for this directory
-add_library ( PythonAPI ${SRC_FILES} ${INC_FILES})
+add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 # Set the name of the generated library
 set_target_properties ( PythonAPI PROPERTIES OUTPUT_NAME MantidPythonAPI )
 # Add to the 'Framework' group in VS
@@ -59,15 +73,6 @@ endif ()
 target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 set ( PYTHON_DEPS )
 
-# Now copy the required python files into the build destination
-set ( PYTHON_INSTALL_FILES MantidFramework.py __init__.py setup.py )
-foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
-  add_custom_command ( TARGET PythonAPI POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
-  )
-endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
