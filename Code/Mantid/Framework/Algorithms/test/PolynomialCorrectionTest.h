@@ -36,7 +36,7 @@ public:
     TS_ASSERT( poly2.isInitialized() )
 
     const std::vector<Property*> props = poly2.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 3 )
+    TS_ASSERT_EQUALS( props.size(), 4 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" )
     TS_ASSERT( props[0]->isDefault() )
@@ -118,8 +118,8 @@ public:
       {
         double factor = 3.0 + j*2.0 + j*j*1.0;
         TS_ASSERT_EQUALS( result->dataX(i)[j-1], inputWS->dataX(i)[j-1] )
-        TS_ASSERT_EQUALS( result->dataY(i)[j-1], factor/inputWS->dataY(i)[j-1] )
-        TS_ASSERT_EQUALS( result->dataE(i)[j-1], factor/inputWS->dataE(i)[j-1] )
+        TS_ASSERT_EQUALS( result->dataY(i)[j-1], inputWS->dataY(i)[j-1]/factor )
+        TS_ASSERT_EQUALS( result->dataE(i)[j-1], inputWS->dataE(i)[j-1]/factor )
       }
     }
     
