@@ -354,7 +354,8 @@ namespace WorkspaceCreationHelper
   }
 
 
-  /** Create event workspace
+  /** Create event workspace, with several detector IDs
+   * in one event list.
    */
   EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
 						  int numBins, double binDelta)

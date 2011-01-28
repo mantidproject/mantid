@@ -48,8 +48,6 @@ void CompressEvents::init()
 
 void CompressEvents::exec()
 {
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-
   // Get the input workspace
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");

@@ -19,10 +19,10 @@ namespace Mantid
     {
       // Don't allow this for EventWorkspaces. See for instance Multiply::checkSizeCompatability
       if( boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) || 
-	  boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(rhs) )
+          boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(rhs) )
       {
-	//call the base routine
-	return BinaryOperation::checkSizeCompatibility(lhs,rhs);
+        //call the base routine
+        return BinaryOperation::checkSizeCompatibility(lhs,rhs);
       }
 
       //get the largest workspace

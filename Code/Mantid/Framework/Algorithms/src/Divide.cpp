@@ -145,17 +145,17 @@ namespace Mantid
         m_keepEventWorkspace = true;
         //Histogram sizes need not match
         m_matchXSize = false;
-        // Division is not commutative = you can't flip sides.
-        m_flipSides = false;
-        // The RHS operand will be histogrammed first.
-        m_useHistogramForRhsEventWorkspace = true;
       }
       else
       {
-        // lhs is "other"
-        // Use the default behaviour
-        BinaryOperation::checkRequirements();
+        m_keepEventWorkspace = false;
+        m_matchXSize = true;
       }
+
+      // Division is not commutative = you can't flip sides.
+      m_flipSides = false;
+      // The RHS operand will be histogrammed first.
+      m_useHistogramForRhsEventWorkspace = true;
     }
 
 
@@ -174,13 +174,9 @@ namespace Mantid
       // --- Check for event workspaces - different than workspaces 2D! ---
 
       // A SingleValueWorkspace on the right matches anything
-      //WorkspaceSingleValue_const_sptr rhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(rhs);
-      //if (rhs_single) return true;
       if (rhs->size()==1) return true;
 
       // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
-      //WorkspaceSingleValue_const_sptr lhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(lhs);
-      //if (lhs_single) return false;
       if (lhs->size()==1) return false;
 
       // RHS only has one value (1D vertical), so the number of histograms needs to match.

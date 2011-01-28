@@ -103,6 +103,9 @@ namespace Mantid
         MatrixWorkspace_const_sptr temp = m_lhs;
         m_lhs = m_rhs;
         m_rhs = temp;
+        EventWorkspace_const_sptr etemp = m_elhs;
+        m_elhs = m_erhs;
+        m_erhs = etemp;
       }
 
       //Is the output going to be an EventWorkspace?
@@ -556,8 +559,6 @@ namespace Mantid
      */
     void BinaryOperation::do2D( bool mismatchedSpectra)
     {
-      API::MemoryManager::Instance().releaseFreeMemory();
-
       BinaryOperationTable * table = NULL;
       if (mismatchedSpectra)
         table = BinaryOperation::buildBinaryOperationTable(m_lhs, m_rhs);
@@ -652,7 +653,7 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+//        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -870,8 +871,8 @@ namespace Mantid
       //  (only for some EventWorkspace cases does it NOT matter...)
       m_matchXSize = true;
 
-      //We want the biggest workspace on the lhs
-      m_flipSides = (m_rhs->size() > m_lhs->size());
+      //Operations are not always commutative! Don't flip sides.
+      m_flipSides = false;
 
       //And in general, EventWorkspaces get turned to Workspace2D
       m_keepEventWorkspace = false;

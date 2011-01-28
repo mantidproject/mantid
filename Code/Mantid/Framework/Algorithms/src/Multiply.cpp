@@ -1,5 +1,5 @@
-//----------------------------------------------------------------------
 // Includes
+//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -117,23 +117,26 @@ namespace Mantid
      */
     void Multiply::checkRequirements()
     {
-      if (m_elhs)
+      // Can commute workspaces?
+      m_flipSides = (m_rhs->size() > m_lhs->size());
+      // The RHS operand will be histogrammed first.
+      m_useHistogramForRhsEventWorkspace = true;
+
+      if ((m_elhs && !m_flipSides) || (m_flipSides && (m_erhs)))
       {
-        // The lhs workspace is an EventWorkspace. It can be multiplied while keeping event-ishness
-        //Output will be EW
+        // The lhs (or RHS if it will get flipped) workspace
+        //  is an EventWorkspace. It can be divided while keeping event-ishness
+        // Output will be EW
         m_keepEventWorkspace = true;
         //Histogram sizes need not match
         m_matchXSize = false;
-        //For now, only the lhs can be event workspace. So don't flip
-        //TODO: HANDLE
-        m_flipSides = false;
       }
       else
       {
-        // either or both workspace are "other"
-        // Use the default behaviour
-	CommutativeBinaryOperation::checkRequirements();
+        m_keepEventWorkspace = false;
+        m_matchXSize = true;
       }
+
     }
 
 
@@ -150,36 +153,71 @@ namespace Mantid
      */
     bool Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      if (!m_keepEventWorkspace)
+      if (!m_keepEventWorkspace && !m_AllowDifferentNumberSpectra)
       {
         // Fallback on the default checks
         return CommutativeBinaryOperation::checkSizeCompatibility(lhs, rhs);
       }
       else
       {
-        // --- Check for event workspaces - different than workspaces 2D! ---
 
         // A SingleValueWorkspace on the right matches anything
-        WorkspaceSingleValue_const_sptr rhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(rhs);
-        if (rhs_single) return true;
+        if (rhs->size()==1) return true;
 
         // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
-        WorkspaceSingleValue_const_sptr lhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(lhs);
-        if (lhs_single) return false;
+        if (lhs->size()==1) return false;
 
         // RHS only has one value (1D vertical), so the number of histograms needs to match.
         // Each lhs spectrum will be divided by that scalar
         if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
 
-        // We don't need to check for matching bins. Yay events!
-
+        // We don't need to check for matching bins for events. Yay events!
         const int rhsSpec = rhs->getNumberHistograms();
 
         // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
         if (rhsSpec == 1) return true;
 
+        // Are we allowing the division by different # of spectra, using detector IDs to match up?
+        if (m_AllowDifferentNumberSpectra)
+        {
+          return true;
+        }
+
         // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
         return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+
+//
+//
+//        // --- Check for event workspaces - different than workspaces 2D! ---
+//
+//        // A SingleValueWorkspace on the right matches anything
+//        WorkspaceSingleValue_const_sptr rhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(rhs);
+//        if (rhs_single) return true;
+//
+//        // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
+//        WorkspaceSingleValue_const_sptr lhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(lhs);
+//        if (lhs_single) return false;
+//
+//        // RHS only has one value (1D vertical), so the number of histograms needs to match.
+//        // Each lhs spectrum will be divided by that scalar
+//        if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+//
+//        // We don't need to check for matching bins. Yay events!
+//
+//        const int rhsSpec = rhs->getNumberHistograms();
+//
+//        // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
+//        if (rhsSpec == 1) return true;
+//
+//
+//        // Are we allowing the division by different # of spectra, using detector IDs to match up?
+//        if (m_AllowDifferentNumberSpectra)
+//        {
+//          return true;
+//        }
+//
+//        // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
+//        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
       }
     }
 
