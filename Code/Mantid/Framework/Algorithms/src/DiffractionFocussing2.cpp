@@ -35,7 +35,7 @@ using DataObjects::EventWorkspace_const_sptr;
 
 /// Constructor
 DiffractionFocussing2::DiffractionFocussing2() : 
-  API::Algorithm(), inputW(), udet2group(), groupAtWorkspaceIndex(), group2xvector(),
+  API::Algorithm(), udet2group(), groupAtWorkspaceIndex(), group2xvector(),
   group2wgtvector(), nGroups(0), nHist(0), nPoints(0)
 {}
 
@@ -64,6 +64,7 @@ void DiffractionFocussing2::init()
 
   declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
 		  "The name of the CalFile with grouping data" );
+  declareProperty("MatrixWorkspaceOut", false, "Force the output workspace to be a Matrix workspace");
 }
 
 
@@ -104,7 +105,7 @@ void DiffractionFocussing2::exec()
   determineRebinParameters();
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( matrixInputW );
-  if (eventW != NULL)
+  if ((!getProperty("MatrixWorkspaceOut")) && (eventW != NULL))
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -112,15 +113,8 @@ void DiffractionFocussing2::exec()
     return;
   }
 
-  // Get the input workspace
-  inputW = boost::dynamic_pointer_cast<const Workspace2D>( matrixInputW );
-  if (inputW == NULL)
-  {
-    throw std::runtime_error("Input workspace is not of type EventWorkspace nor Workspace2D.");
-  }
-
   //No problem? Then it is a normal Workspace2D
-  API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints+1,nPoints);
+  API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(matrixInputW,nGroups,nPoints+1,nPoints);
 
   // The spectaDetectorMap will have been copied from the input, but we don't want it
   out->mutableSpectraMap().clear();
@@ -129,8 +123,8 @@ void DiffractionFocussing2::exec()
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
 
-  const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
-  const API::Axis* const inSpecAxis = inputW->getAxis(1);
+  const API::SpectraDetectorMap& inSpecMap = matrixInputW->spectraMap();
+  const API::Axis* const inSpecAxis = matrixInputW->getAxis(1);
   
   API::Progress progress(this,0.0,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
@@ -142,9 +136,9 @@ void DiffractionFocussing2::exec()
     if (group==-1) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
-    const MantidVec& Xin=inputW->readX(i);
-    const MantidVec& Yin=inputW->readY(i);
-    const MantidVec& Ein=inputW->readE(i);
+    const MantidVec& Xin=matrixInputW->readX(i);
+    const MantidVec& Yin=matrixInputW->readY(i);
+    const MantidVec& Ein=matrixInputW->readE(i);
     // Get the group
     group2vectormap::iterator it=group2xvector.find(group);
     group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
@@ -178,12 +172,12 @@ void DiffractionFocussing2::exec()
     // Get a reference to the summed weights vector for this group
     MantidVec& groupWgt = *group2wgtvector[group];
     // Check for masked bins in this spectrum
-    if ( inputW->hasMaskedBins(i) )
+    if ( matrixInputW->hasMaskedBins(i) )
     {
       MantidVec weight_bins,weights;
       weight_bins.push_back(Xin.front());
       // If there are masked bins, get a reference to the list of them
-      const API::MatrixWorkspace::MaskList& mask = inputW->maskedBins(i);
+      const API::MatrixWorkspace::MaskList& mask = matrixInputW->maskedBins(i);
       // Now iterate over the list, adjusting the weights for the affected bins
       for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
       {
@@ -275,17 +269,16 @@ void DiffractionFocussing2::exec()
  */
 void DiffractionFocussing2::execEvent()
 {
-  inputW = eventW;
-
   //Create a new outputworkspace with not much in it
   DataObjects::EventWorkspace_sptr out;
   out = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
   //Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
+  API::WorkspaceFactory::Instance().initializeFromParent(matrixInputW, out, true);
 
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
-  g_log.information("Focussing EventWorkspace in-place.");
+  if (inPlace)
+    g_log.information("Focussing EventWorkspace in-place.");
 
   //BUT! We want to use all groups, even if no pixels ever refer to them.
   nGroups = maxgroup_in_file+1;

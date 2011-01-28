@@ -107,8 +107,6 @@ private:
   void determineRebinParameters();
   int validateSpectrumInGroup(int spectrum_number);
   
-  /// Shared pointer to the input workspace
-  API::MatrixWorkspace_const_sptr inputW;
   /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;
 
