@@ -30,7 +30,7 @@ string memToString(const TYPE mem_in_kiB)
   std::stringstream buffer;
   if (mem_in_kiB < static_cast<TYPE>(1024))
     buffer << mem_in_kiB << "kiB";
-  else if (mem_in_kiB < static_cast<TYPE>(1024 * 1024))
+  else if (mem_in_kiB < static_cast<TYPE>(100 * 1024 * 1024))
     buffer << (mem_in_kiB/static_cast<TYPE>(1024)) << "MiB";
   else
     buffer << (mem_in_kiB/static_cast<TYPE>(1024*1024)) << "GiB";

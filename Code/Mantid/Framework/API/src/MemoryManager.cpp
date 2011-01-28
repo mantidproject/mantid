@@ -5,7 +5,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 
-//#include "/home/8oz/Code/google-perftools/src/google/malloc_extension.h"
+#ifdef USE_TCMALLOC
+#include "google/malloc_extension.h"
+#endif
 
 // Get the 'meat' of this class from the appropriate file for the platform
 #ifdef __linux__
@@ -143,15 +145,17 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
 void MemoryManagerImpl::releaseFreeMemory()
 {
 
-//    Kernel::MemoryStats mem;
-//    mem.update();
-//    std::cout << "Before releasing: \n" << mem << "\n";
-//
-//    // Make TCMALLOC release memory to the system
-//    MallocExtension::instance()->ReleaseFreeMemory();
-//
-//    mem.update();
-//    std::cout << "After releasing: \n" << mem << "\n";
+#ifdef USE_TCMALLOC
+    Kernel::MemoryStats mem;
+    mem.update();
+    std::cout << "Before releasing: " << mem << "\n";
+
+    // Make TCMALLOC release memory to the system
+    MallocExtension::instance()->ReleaseFreeMemory();
+
+    mem.update();
+    std::cout << "After releasing:  " << mem << "\n";
+#endif
 }
 
 } // namespace API
