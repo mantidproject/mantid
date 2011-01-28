@@ -12,7 +12,7 @@ Mantid::Kernel::Logger& OpenGLError::s_log(Mantid::Kernel::Logger::get("OpenGL")
 
 /**
   * Check for a GL error and throw OpenGLError if found
-  * @param funName Name of the function where checkGLError is called.
+  * @param funName :: Name of the function where checkGLError is called.
   *   The message returned be what() method of the exception has the form:
   *   "OpenGL error detected in " + funName + ": " + error_description
   */

@@ -24,7 +24,7 @@ template<typename InputIter>
 DLLExport int solveCubic(InputIter,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 
-/*!
+/**
   \brief Holds functors to do numerical operations
   \version 1.0
   \author S. Ansell
@@ -36,7 +36,7 @@ DLLExport int solveCubic(InputIter,std::complex<double>&,
 namespace mathSupport
 {
 
-/*!
+/**
   \class PIndex
   \author S. Ansell
   \date Aug 2005
@@ -61,7 +61,7 @@ public:
 
 };
 
-/*!
+/**
   \class PSep
   \author S. Ansell
   \date Aug 2005

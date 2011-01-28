@@ -308,8 +308,8 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
 //-------------------------------------------------------------------------------------------------
 /**
  * Convert the given set of bin boundaries into bin centre values
- * @param bin_edges A vector of values specifying bin boundaries
- * @param bin_centres An output vector of bin centre values.
+ * @param bin_edges :: A vector of values specifying bin boundaries
+ * @param bin_centres :: An output vector of bin centre values.
 */
 void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres)
 {
@@ -368,7 +368,7 @@ bool isConstantValue(const std::vector<double> &arra, double &val)
 //-------------------------------------------------------------------------------------------------
 /** Take a string of comma or space-separated values, and splits it into
  * a vector of doubles.
- * @param listString a string like "0.0 1.2" or "2.4, 5.67, 88"
+ * @param listString :: a string like "0.0 1.2" or "2.4, 5.67, 88"
  * @return a vector of doubles
  * @throw an error if there was a string that could not convert to a double.
  */
@@ -414,9 +414,9 @@ int getBinIndex(std::vector<double>& bins, const double X )
 //-------------------------------------------------------------------------------------------------
 /**
  * Linearly interpolates between Y points separated by the given step size.
- * @param x The X array
- * @param y The Y array with end points and values at stepSize intervals calculated
- * @param stepSize The distance between each pre-calculated point
+ * @param x :: The X array
+ * @param y :: The Y array with end points and values at stepSize intervals calculated
+ * @param stepSize :: The distance between each pre-calculated point
  */
 void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize)
 {

@@ -380,7 +380,7 @@ namespace CurveFitting
   /**
    * If i-th parameter is transformed the derivative will be != 1.0.
    * The derivative is calculated numerically.
-   * @param i The index of an active parameter
+   * @param i :: The index of an active parameter
    * @return The transformation derivative
    */
   double GenericFit::transformationDerivative(int i)

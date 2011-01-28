@@ -485,7 +485,7 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
 
 /**raises the window containing the results summary, run the Python scripts that
 *  have been created and, optionally on success, save the values on the form 
-*  @param saveSettings if the Python executes successfully and this parameter is true the settings are saved
+*  @param saveSettings :: if the Python executes successfully and this parameter is true the settings are saved
 *  @return this method catches most exceptions and this return is main way that errors are reported
 */
 QString MWDiag::run(const QString &, const bool)
@@ -517,8 +517,8 @@ QString MWDiag::run(const QString &, const bool)
 }
 
 /** Called when the user identifies the background region in a different form, it copies the values over
-*  @param start the TOF value of the start of the background region
-*  @param end the TOF value of the end of the background region
+*  @param start :: the TOF value of the start of the background region
+*  @param end :: the TOF value of the end of the background region
 */
 void MWDiag::updateTOFs(const double &start, const double &end)
 {// if the user added their own value don't change it
@@ -532,7 +532,7 @@ void MWDiag::updateTOFs(const double &start, const double &end)
 }
 /** This slot sets m_monoFiles based on the array that is
 *  passed to it
-*  @param runFileNames names of the files that will be used in the background test
+*  @param runFileNames :: names of the files that will be used in the background test
 */
 void MWDiag::specifyRuns(const QStringList & runFileNames)
 {

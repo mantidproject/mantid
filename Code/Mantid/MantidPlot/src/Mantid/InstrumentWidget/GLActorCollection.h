@@ -13,7 +13,7 @@
 
 
 
-/*!
+/**
   \class  GLActorCollection
   \brief  An actor class collection
   \author Chapon Laurent & Srikanth Nagella

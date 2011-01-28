@@ -81,17 +81,17 @@ private:
    *  method will change the values in the y_val array to correct for
    *  multiple scattering absorption.
    *
-   *  @param total_path  The total flight path in meters
-   *  @param angle_deg   The scattering angle (two theta) in degrees
-   *  @param radius      The sample rod radius in cm
-   *  @param coeff1      The absorption cross section / 1.81
-   *  @param coeff2      The density
-   *  @param coeff3      The total scattering cross section
-   *  @param tof         Array of times-of-flight at bin boundaries
+   *  @param total_path ::  The total flight path in meters
+   *  @param angle_deg ::   The scattering angle (two theta) in degrees
+   *  @param radius ::      The sample rod radius in cm
+   *  @param coeff1 ::      The absorption cross section / 1.81
+   *  @param coeff2 ::      The density
+   *  @param coeff3 ::      The total scattering cross section
+   *  @param tof ::         Array of times-of-flight at bin boundaries
    *                     (or bin centers) for the spectrum, in microseconds
-   *  @param n_tofs      The number of values the tof array
-   *  @param y_val       The spectrum values
-   *  @param n_ys        The number of spectrum values in the y_val array
+   *  @param n_tofs ::      The number of values the tof array
+   *  @param y_val ::       The spectrum values
+   *  @param n_ys ::        The number of spectrum values in the y_val array
    */
   void apply_msa_correction( double total_path,
                              double angle_deg,

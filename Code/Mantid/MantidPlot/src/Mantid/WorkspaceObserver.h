@@ -132,8 +132,8 @@ public:
 protected:
     /** Handler of the delete notifications. Could be overriden in inherited classes.
         The default handler is provided (doing nothing).
-        @param wsName The name of the deleted workspace.
-        @param ws The shared pointer to the workspace to be deleted.
+        @param wsName :: The name of the deleted workspace.
+        @param ws :: The shared pointer to the workspace to be deleted.
     */
   virtual void deleteHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
                             const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
@@ -141,8 +141,8 @@ protected:
   }
     /** Handler of the AfterReplace notifications. Could be overriden in inherited classes.
         The default handler is provided (doing nothing).
-        @param wsName The name of the deleted workspace.
-        @param ws The shared pointer to the workspace to be deleted.
+        @param wsName :: The name of the deleted workspace.
+        @param ws :: The shared pointer to the workspace to be deleted.
     */
   virtual void afterReplaceHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
                                   const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
@@ -158,7 +158,7 @@ protected:
 
 protected:
   /** Poco notification handler for DataService::DeleteNotification.
-  @param pNf The pointer to the notification.
+  @param pNf :: The pointer to the notification.
   */
   void _deleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
   {
@@ -168,7 +168,7 @@ protected:
   Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
   /** Poco notification handler for DataService::AfterReplaceNotification.
-  @param pNf The pointer to the notification.
+  @param pNf :: The pointer to the notification.
   */
   void _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
   {

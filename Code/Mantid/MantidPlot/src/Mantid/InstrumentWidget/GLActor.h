@@ -1,4 +1,4 @@
-/*!________________________________________________
+/**________________________________________________
 * Library        : NTK
 * Name           : GLActor.h
 * Author         : L.C.Chapon
@@ -50,7 +50,7 @@ public:
   virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
 };
 
-/*!
+/**
   \class  GLActor
   \brief  An actor class that holds geometry objects with its position.
   \author Chapon Laurent & Srikanth Nagella

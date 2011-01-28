@@ -170,14 +170,14 @@ namespace Mantid
       int type()const{return m_info.type;}
       /**  Load the data from the file. Calling this method with all default arguments
       *   makes it to read in all the data.
-      *   @param blocksize The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
-      *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
+      *   @param blocksize :: The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
+      *   @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
       *            of the chunk. The rank of the data must be >= 1
-      *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. 
+      *   @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. 
       *            The rank of the data must be >= 2
-      *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indices. 
+      *   @param k :: Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indices. 
       *            The rank of the data must be >= 3
-      *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indices. 
+      *   @param l :: Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indices. 
       *            The rank of the data must be 4
       */
       virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,int l = -1) 
@@ -199,8 +199,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
-      *   @param name The name of the dataset relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the dataset.
+      *   @param name :: The name of the dataset relative to its parent
       */
       NXDataSetTyped(const NXClass& parent,const std::string& name):NXDataSet(parent,name),m_n(0){}
       /** Returns a pointer to the internal data buffer.
@@ -213,7 +213,7 @@ namespace Mantid
         return m_data.get();
       }
       /** Returns the i-th value in the internal buffer
-      *  @param i The linear index of the data element
+      *  @param i :: The linear index of the data element
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the index is greater than the buffer size.
       *  @return A reference to the value
@@ -225,8 +225,8 @@ namespace Mantid
         return m_data[i];
       }
       /** Returns a value assuming the data is a two-dimensional array
-      *  @param i The index along dim0()
-      *  @param j The index along dim1()
+      *  @param i :: The index along dim0()
+      *  @param j :: The index along dim1()
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the indeces point outside the buffer.
       *  @return A reference to the value
@@ -236,9 +236,9 @@ namespace Mantid
         return this->operator [](i*dim1()+j);
       }
       /** Returns a value assuming the data is a tree-dimensional array
-      *  @param i The index along dim0()
-      *  @param j The index along dim1()
-      *  @param k The index along dim2()
+      *  @param i :: The index along dim0()
+      *  @param j :: The index along dim1()
+      *  @param k :: The index along dim2()
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the indeces point outside the buffer.
       *  @return A reference to the value
@@ -254,14 +254,14 @@ namespace Mantid
       /**  Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. 
       *   If the data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded
       *   data is equal or less than the rank of the dataset (returned by rank() method).
-      *   @param blocksize The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
-      *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
+      *   @param blocksize :: The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
+      *   @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
       *            of the chunk. The rank of the data must be >= 1
-      *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 
+      *   @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 
       *            The rank of the data must be >= 2
-      *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indeces. 
+      *   @param k :: Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indeces. 
       *            The rank of the data must be >= 3
-      *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
+      *   @param l :: Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
       *            The rank of the data must be 4
       */
       void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l=-1)
@@ -398,7 +398,7 @@ namespace Mantid
       }
     protected:
       /** Allocates memory for the data buffer
-      *  @param n The number of elements to allocate.
+      *  @param n :: The number of elements to allocate.
       */
       void alloc(int n)
       {
@@ -449,8 +449,8 @@ namespace Mantid
       friend class NXRoot;
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXClass(const NXClass& parent,const std::string& name);
       /// The NX class identifier
@@ -464,12 +464,12 @@ namespace Mantid
       void reset();
       /**
       * Check if a path exists relative to the current class path
-      * @param path A string representing the path to test
+      * @param path :: A string representing the path to test
       * @return True if it is valid
       */
       bool isValid(const std::string & path) const;
       /**  Templated method for creating derived NX classes. It also opens the created class.
-      *   @param name The name of the class
+      *   @param name :: The name of the class
       *   @tparam NX Concrete Nexus class
       *   @return The new object
       */
@@ -482,13 +482,13 @@ namespace Mantid
       }
 
       /**  Creates and opens an arbitrary (non-standard) class (group).
-      *   @param name The name of the class.
+      *   @param name :: The name of the class.
       *   @return The opened NXClass
       */
       NXClass openNXGroup(const std::string& name)const{return openNXClass<NXClass>(name);}
 
       /**  Templated method for creating datasets. It also opens the created set.
-      *   @param name The name of the dataset
+      *   @param name :: The name of the dataset
       *   @tparam T The type of the data (int, double, ...).
       *   @return The new object
       */
@@ -501,42 +501,42 @@ namespace Mantid
       }
 
       /**  Creates and opens an integer dataset
-      *   @param name The name of the dataset
+      *   @param name :: The name of the dataset
       *   @return The int
       */
       NXInt openNXInt(const std::string& name)const{return openNXDataSet<int>(name);}
       /**  Creates and opens a float dataset
-      *   @param name The name of the dataset
+      *   @param name :: The name of the dataset
       *   @return The float
       */
       NXFloat openNXFloat(const std::string& name)const{return openNXDataSet<float>(name);}
       /**  Creates and opens a double dataset
-      *   @param name The name of the dataset
+      *   @param name :: The name of the dataset
       *   @return The double
       */
       NXDouble openNXDouble(const std::string& name)const{return openNXDataSet<double>(name);}
       /**  Creates and opens a char dataset
-      *   @param name The name of the dataset
+      *   @param name :: The name of the dataset
       *   @return The char
       */
       NXChar openNXChar(const std::string& name)const{return openNXDataSet<char>(name);}
       /**  Returns a string 
-      *   @param name The name of the NXChar dataset
+      *   @param name :: The name of the NXChar dataset
       *   @return The string
       */
       std::string getString(const std::string& name)const;
       /**  Returns a double 
-      *   @param name The name of the NXDouble dataset
+      *   @param name :: The name of the NXDouble dataset
       *   @return The double
       */
       double getDouble(const std::string& name)const;
       /**  Returns a float 
-      *   @param name The name of the NXFloat dataset
+      *   @param name :: The name of the NXFloat dataset
       *   @return The float
       */
       float getFloat(const std::string& name)const;
       /**  Returns a int 
-      *   @param name The name of the NXInt dataset
+      *   @param name :: The name of the NXInt dataset
       *   @return The int
       */
       int getInt(const std::string& name)const;
@@ -548,7 +548,7 @@ namespace Mantid
       /// Returns a list of all datasets in this NXClass
       std::vector<NXInfo>& datasets()const{return *m_datasets.get();}
       /** Returns NXInfo for a dataset
-      *  @param name The name of the dataset
+      *  @param name :: The name of the dataset
       *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
       */
       NXInfo getDataSetInfo(const std::string& name)const;
@@ -581,8 +581,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXLog(const NXClass& parent,const std::string& name):NXClass(parent,name){}
       /// Nexus class id
@@ -660,10 +660,10 @@ namespace Mantid
       }
 
       ///Loads the values in the log into the workspace
-      ///@param logName the name of the log
-      ///@param value the value
-      ///@param start_t the start time
-      ///@param times the array of time offsets
+      ///@param logName :: the name of the log
+      ///@param value :: the value
+      ///@param start_t :: the start time
+      ///@param times :: the array of time offsets
       ///@returns a property pointer
       template<class NX_TYPE,class TIME_TYPE>
       Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, Kernel::DateAndTime start_t,TIME_TYPE times)
@@ -692,8 +692,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXNote(const NXClass& parent,const std::string& name):NXClass(parent,name),m_author_ok(),m_data_ok(),m_description_ok(){}
       /// Nexus class id
@@ -719,8 +719,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXBinary(const NXClass& parent,const std::string& name):NXNote(parent,name){}
       /// Return the binary data associated with the note
@@ -737,17 +737,17 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXMainClass(const NXClass& parent,const std::string& name):NXClass(parent,name){}
       /**  Opens a NXLog class
-      *   @param name The name of the NXLog
+      *   @param name :: The name of the NXLog
       *   @return The log
       */
       NXLog openNXLog(const std::string& name){return openNXClass<NXLog>(name);}
       /**  Opens a NXNote class
-      *   @param name The name of the NXNote
+      *   @param name :: The name of the NXNote
       *   @return The note
       */
       NXNote openNXNote(const std::string& name){return openNXClass<NXNote>(name);}
@@ -761,8 +761,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXData(const NXClass& parent,const std::string& name);
       /// Nexus class id
@@ -802,8 +802,8 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXDetector(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
       /// Nexus class id
@@ -822,14 +822,14 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXInstrument(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
       /// Nexus class id
       std::string NX_class()const{return "NXinstrument";}
       /**  Opens a NXDetector
-      *   @param name The name of the class
+      *   @param name :: The name of the class
       *   @return The detector
       */
       NXDetector openNXDetector(const std::string& name){return openNXClass<NXDetector>(name);}
@@ -841,19 +841,19 @@ namespace Mantid
     {
     public:
       /**  Constructor.
-      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
-      *   @param name The name of the NXClass relative to its parent
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
       */
       NXEntry(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
       /// Nexus class id
       std::string NX_class()const{return "NXentry";}
       /**  Opens a NXData
-      *   @param name The name of the class
+      *   @param name :: The name of the class
       *   @return the nxdata entry
       */
       NXData openNXData(const std::string& name){return openNXClass<NXData>(name);}
       /**  Opens a NXInstrument
-      *   @param name The name of the class
+      *   @param name :: The name of the class
       *   @return the instrument
       */
       NXInstrument openNXInstrument(const std::string& name){return openNXClass<NXInstrument>(name);}
@@ -875,7 +875,7 @@ namespace Mantid
       /// True if complies with our understanding of the www.nexusformat.org definition.
       bool isStandard()const;
       /**  Opens an entry -- a topmost Nexus class
-      *   @param name The name of the entry
+      *   @param name :: The name of the entry
       *   @return the entry
       */
       NXEntry openEntry(const std::string& name){return openNXClass<NXEntry>(name);}

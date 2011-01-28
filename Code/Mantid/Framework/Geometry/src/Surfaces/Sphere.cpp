@@ -19,7 +19,7 @@ namespace Mantid
 
     Sphere::Sphere() : Quadratic(),
       Centre(0,0,0),Radius(0.0)
-      /*!
+      /**
       Default constructor 
       make sphere at the origin radius zero 
       */
@@ -29,17 +29,17 @@ namespace Mantid
 
     Sphere::Sphere(const Sphere &A) : 
     Quadratic(A),Centre(A.Centre),Radius(A.Radius)
-      /*!
+      /**
       Default Copy constructor 
-      \param A :: Sphere to copy
+      @param A :: Sphere to copy
       */
     { }
 
     Sphere*
       Sphere::clone() const
-      /*!
+      /**
       Makes a clone (implicit virtual copy constructor) 
-      \return new (*this)
+      @return new (*this)
       */
     {
       return new Sphere(*this);
@@ -47,10 +47,10 @@ namespace Mantid
 
     Sphere&
       Sphere::operator=(const Sphere &A) 
-      /*!
+      /**
       Default Assignment operator
-      \param A :: Sphere to copy
-      \return *this
+      @param A :: Sphere to copy
+      @return *this
       */
     {
       if (this!=&A)
@@ -63,21 +63,21 @@ namespace Mantid
     }
 
     Sphere::~Sphere()
-      /*!
+      /**
       Destructor
       */
     {}
 
     int
       Sphere::setSurface(const std::string& Pstr)
-      /*! 
+      /** 
       Processes a standard MCNPX cone string    
       Recall that cones can only be specified on an axis
       Valid input is: 
       - so radius 
       - s cen_x cen_y cen_z radius
       - sx - cen_x radius
-      \return : 0 on success, neg of failure 
+      @return : 0 on success, neg of failure 
       */
     {
       std::string Line=Pstr;
@@ -121,13 +121,13 @@ namespace Mantid
 
     int
       Sphere::side(const Geometry::V3D& Pt) const
-      /*!
+      /**
       Calculate where the point Pt is relative to the 
       sphere.
-      \param Pt :: Point to test
-      \retval -1 :: Pt within sphere
-      \retval 0 :: point on the surface (within CTolerance)
-      \retval 1 :: Pt outside the sphere 
+      @param Pt :: Point to test
+      @retval -1 :: Pt within sphere
+      @retval 0 :: point on the surface (within CTolerance)
+      @retval 1 :: Pt outside the sphere 
       */
     {
       const double displace = centreToPoint(Pt) - Radius;
@@ -142,11 +142,11 @@ namespace Mantid
 
     int
       Sphere::onSurface(const Geometry::V3D& Pt) const
-      /*!
+      /**
       Calculate if the point Pt on the surface of the sphere
       (within tolerance CTolerance)
-      \param Pt :: Point to check
-      \return 1 :: on the surfacae or 0 if not.
+      @param Pt :: Point to check
+      @return 1 :: on the surfacae or 0 if not.
       */
     {
       if( distance(Pt) > Tolerance )
@@ -158,11 +158,11 @@ namespace Mantid
 
     double
       Sphere::distance(const Geometry::V3D& Pt) const
-      /*! 
+      /** 
       Determine the shortest distance from the Surface 
       to the Point. 
-      \param Pt :: Point to calculate distance from
-      \return distance (Positive only)
+      @param Pt :: Point to calculate distance from
+      @return distance (Positive only)
       */
     {
       const Geometry::V3D disp_vec = Pt - Centre;
@@ -172,9 +172,9 @@ namespace Mantid
 
     void
       Sphere::displace(const Geometry::V3D& Pt) 
-      /*!
+      /**
       Apply a shift of the centre
-      \param Pt :: distance to add to the centre
+      @param Pt :: distance to add to the centre
       */
     {
       Centre+=Pt;
@@ -184,9 +184,9 @@ namespace Mantid
 
     void
       Sphere::rotate(const Geometry::Matrix<double>& MA) 
-      /*!
+      /**
       Apply a Rotation matrix
-      \param MA :: matrix to rotate by
+      @param MA :: matrix to rotate by
       */
     {
       Centre.rotate(MA);
@@ -196,9 +196,9 @@ namespace Mantid
 
     double Sphere::centreToPoint(const V3D & pt) const
     {
-      /*!
+      /**
       Compute the distance between the given point and the centre of the sphere
-      \param pt :: The chosen point 
+      @param pt :: The chosen point 
       */
       const Geometry::V3D displace_vec = pt - Centre;
       return displace_vec.norm();
@@ -206,9 +206,9 @@ namespace Mantid
 
     void 
       Sphere::setCentre(const Geometry::V3D& A)
-      /*!
+      /**
       Set the centre point
-      \param A :: New Centre Point
+      @param A :: New Centre Point
       */
     {
       Centre=A;
@@ -218,7 +218,7 @@ namespace Mantid
 
     void 
       Sphere::setBaseEqn()
-      /*!
+      /**
       Sets an equation of type (general sphere)
       \f[ x^2+y^2+z^2+Gx+Hy+Jz+K=0 \f]
       */
@@ -239,9 +239,9 @@ namespace Mantid
 
     void 
       Sphere::write(std::ostream& OX) const
-      /*! 
+      /** 
       Object of write is to output a MCNPX plane info 
-      \param OX :: Output stream (required for multiple std::endl)  
+      @param OX :: Output stream (required for multiple std::endl)  
       \todo (Needs precision) 
       */
     {

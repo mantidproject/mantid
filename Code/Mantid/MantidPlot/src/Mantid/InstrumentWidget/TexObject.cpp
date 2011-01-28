@@ -83,8 +83,8 @@ void TexObject::define()
 
 /**
   * Set colour to a detector.
-  * @param i Index of the detector in ObjCompAssembly
-  * @param c The colour
+  * @param i :: Index of the detector in ObjCompAssembly
+  * @param c :: The colour
   */
 void TexObject::setDetectorColor(int i,GLColor c)
 {

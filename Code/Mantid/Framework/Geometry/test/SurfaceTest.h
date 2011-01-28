@@ -28,7 +28,7 @@ public:
 
 
   void testConeDistance()
-    /*!
+    /**
       Test the distance of a point from the cone
     */
   {

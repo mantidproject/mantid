@@ -55,8 +55,8 @@ public:
   }
 
   /** Constructor
-   * @param lowerBound The lower bounding value
-   * @param upperBound The upper bounding value
+   * @param lowerBound :: The lower bounding value
+   * @param upperBound :: The upper bounding value
    */
   BoundedValidator(const TYPE lowerBound, const TYPE upperBound) :
     m_hasLowerBound( true), 
@@ -117,7 +117,7 @@ private:
 
   /** Checks that the value is within any upper and lower limits
    * 
-   *  @param value The value to test
+   *  @param value :: The value to test
    *  @returns An error message to display to users or an empty string on no error
    */
   std::string checkValidity(const TYPE &value) const

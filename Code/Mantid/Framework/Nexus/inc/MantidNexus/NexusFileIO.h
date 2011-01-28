@@ -148,7 +148,7 @@ namespace Mantid
       /// convert posix time to time_t
       std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
       {
-            /*!
+            /**
             Take the input Posix time, subtract the unix epoch, and return the seconds
             as a std::time_t value.
             @param t :: time of interest as ptime
@@ -169,7 +169,7 @@ namespace Mantid
 
       /** Writes a numeric log to the Nexus file
        *  @tparam T A numeric type (double, int, bool)
-       *  @param timeSeries A pointer to the log property
+       *  @param timeSeries :: A pointer to the log property
        */
       template<class T>
       void writeNexusTimeLog(const Kernel::TimeSeriesProperty<T> *timeSeries) const;
@@ -182,11 +182,11 @@ namespace Mantid
     
     /**
      * Write a single valued entry to the Nexus file
-     * @param name The name of the entry
-     * @param value The value of the entry
-     * @param nxType The nxType of the entry
-     * @param attributes A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
-     * @param avalues A list of attribute values in the same order as the <code>attributes</code> argument
+     * @param name :: The name of the entry
+     * @param value :: The value of the entry
+     * @param nxType :: The nxType of the entry
+     * @param attributes :: A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
+     * @param avalues :: A list of attribute values in the same order as the <code>attributes</code> argument
      * @returns A boolean indicating success or failure
      */
     template<class TYPE>
@@ -208,11 +208,11 @@ namespace Mantid
 
     /**
      * Write a single valued entry to the Nexus file (specialization for a string)
-     * @param name The name of the entry
-     * @param value The value of the entry
-     * @param nxType The nxType of the entry
-     * @param attributes A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
-     * @param avalues A list of attribute values in the same order as the <code>attributes</code> argument
+     * @param name :: The name of the entry
+     * @param value :: The value of the entry
+     * @param nxType :: The nxType of the entry
+     * @param attributes :: A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
+     * @param avalues :: A list of attribute values in the same order as the <code>attributes</code> argument
      * @returns A boolean indicating success or failure
      */
     template<>
@@ -238,11 +238,11 @@ namespace Mantid
     
     /**
      * Write a single valued NXLog entry to the Nexus file
-     * @param name The name of the entry
-     * @param value The value of the entry
-     * @param nxType The nxType of the entry
-     * @param attributes A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
-     * @param avalues A list of attribute values in the same order as the <code>attributes</code> argument
+     * @param name :: The name of the entry
+     * @param value :: The value of the entry
+     * @param nxType :: The nxType of the entry
+     * @param attributes :: A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
+     * @param avalues :: A list of attribute values in the same order as the <code>attributes</code> argument
      * @returns A boolean indicating success or failure
      */
     template<class TYPE>
@@ -267,11 +267,11 @@ namespace Mantid
 
     /**
      * Write a single valued NXLog entry to the Nexus file (specialization for a string)
-     * @param name The name of the entry
-     * @param value The value of the entry
-     * @param nxType The nxType of the entry
-     * @param attributes A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
-     * @param avalues A list of attribute values in the same order as the <code>attributes</code> argument
+     * @param name :: The name of the entry
+     * @param value :: The value of the entry
+     * @param nxType :: The nxType of the entry
+     * @param attributes :: A list of attributes 1:1 mapped to their values in the <code>avalues</code> argument
+     * @param avalues :: A list of attribute values in the same order as the <code>attributes</code> argument
      * @returns A boolean indicating success or failure
      */
     template<>
@@ -302,7 +302,7 @@ namespace Mantid
 
     /** Writes a numeric log to the Nexus file
      *  @tparam T A numeric type (double, int, bool)
-     *  @param timeSeries A pointer to the log property
+     *  @param timeSeries :: A pointer to the log property
      */
     template<class T>
     void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSeriesProperty<T> *timeSeries) const

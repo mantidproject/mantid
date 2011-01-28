@@ -58,10 +58,10 @@ void SaveCanSAS1D::init()
 }
 /** Is called when the input workspace was actually a group, it sets the
  *  for all group members after the first so that the whole group is saved
- *  @param alg pointer to the algorithm
- *  @param propertyName name of the property
- *  @param propertyValue value  of the property
- *  @param perioidNum period number
+ *  @param alg :: pointer to the algorithm
+ *  @param propertyName :: name of the property
+ *  @param propertyValue :: value  of the property
+ *  @param perioidNum :: period number
  */
 void SaveCanSAS1D::setOtherProperties(API::IAlgorithm* alg, const std::string & propertyName,const std::string& propertyValue, int perioidNum)
 {	
@@ -195,7 +195,7 @@ void SaveCanSAS1D::prepareFileToWriteEntry()
 }
 /** opens the named file if possible or returns false
  *  @param filename
- *  @return true if the file was opened successfully and isn't empty
+::  *  @return true if the file was opened successfully and isn't empty
  */
 bool SaveCanSAS1D::openForAppending(const std::string & filename)
 {
@@ -273,7 +273,7 @@ void SaveCanSAS1D::findEndofLastEntry()
 }
 /** Write xml header tags including the root element and starting the SASentry
  *  element
- *  @param fileName the name of the file to write to
+ *  @param fileName :: the name of the file to write to
  *  @throw FileError if the file can't be opened or writen to
  */
 void SaveCanSAS1D::writeHeader(const std::string & fileName)
@@ -295,7 +295,7 @@ void SaveCanSAS1D::writeHeader(const std::string & fileName)
 }
 /** This method search for xml special characters in the input string
  * and  replaces this with xml entity reference
- *@param input -input string
+ *@param input :: -input string
  */
 void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input)
 {
@@ -326,8 +326,8 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input)
 
 /** This method retrieves the character at index and if it's a xml
  *  special character replaces with XML entity reference.
- *  @param input -input string
- *  @param index  position of the special character in the input string
+ *  @param input :: -input string
+ *  @param index ::  position of the special character in the input string
  */
 void SaveCanSAS1D::replacewithEntityReference(std::string& input, const std::string::size_type& index)
 {
@@ -354,7 +354,7 @@ void SaveCanSAS1D::replacewithEntityReference(std::string& input, const std::str
 
 
 /** This method creates an XML element named "SASroot"
- *  @param rootElem  xml root element string
+ *  @param rootElem ::  xml root element string
  */
 void SaveCanSAS1D::createSASRootElement(std::string& rootElem)
 {
@@ -365,7 +365,7 @@ void SaveCanSAS1D::createSASRootElement(std::string& rootElem)
 }
 
 /** This method creates an XML element named "Title"
- *  @param sasTitle string for title element in the xml
+ *  @param sasTitle :: string for title element in the xml
  */
 void SaveCanSAS1D::createSASTitleElement(std::string& sasTitle)
 {
@@ -378,7 +378,7 @@ void SaveCanSAS1D::createSASTitleElement(std::string& sasTitle)
 }
 
 /** This method creates an XML element named "Run"
- *  @param sasRun string for run element in the xml
+ *  @param sasRun :: string for run element in the xml
  */
 void SaveCanSAS1D::createSASRunElement(std::string& sasRun)
 {
@@ -402,7 +402,7 @@ void SaveCanSAS1D::createSASRunElement(std::string& sasRun)
 }
 
 /** This method creates an XML element named "SASdata"
- *  @param sasData string for sasdata element in the xml
+ *  @param sasData :: string for sasdata element in the xml
  */
 void SaveCanSAS1D::createSASDataElement(std::string& sasData)
 {
@@ -464,7 +464,7 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
 }
 
 /** This method creates an XML element named "SASsample"
- *  @param sasSample string for sassample element in the xml
+ *  @param sasSample :: string for sassample element in the xml
  */
 void SaveCanSAS1D::createSASSampleElement(std::string &sasSample)
 {
@@ -482,7 +482,7 @@ void SaveCanSAS1D::createSASSampleElement(std::string &sasSample)
 }
 
 /** This method creates an XML element named "SASsource"
- *  @param sasSource string for sassource element in the xml
+ *  @param sasSource :: string for sassource element in the xml
  */
 void SaveCanSAS1D::createSASSourceElement(std::string& sasSource )
 {
@@ -499,7 +499,7 @@ void SaveCanSAS1D::createSASSourceElement(std::string& sasSource )
 
 }
 /** This method creates an XML element named "SASdetector"
- *  @param sasDet string for sasdetector element in the xml
+ *  @param sasDet :: string for sasdetector element in the xml
  */
 void SaveCanSAS1D::createSASDetectorElement(std::string& sasDet)
 {
@@ -556,7 +556,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string& sasDet)
 }
 
 /** This method creates an XML element named "SASprocess"
- *  @param sasProcess string for sasprocess element in the xml
+ *  @param sasProcess :: string for sasprocess element in the xml
  */
 void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
 {

@@ -360,8 +360,8 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
 }
 
   /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
-   * @param inst_name The name written in the Nexus file
-   * @param workspace The workspace to insert the instrument into
+   * @param inst_name :: The name written in the Nexus file
+   * @param workspace :: The workspace to insert the instrument into
    */
   void SANSInstrumentCreationHelper::runLoadInstrument(const std::string & inst_name,
       Workspace2D_sptr workspace)

@@ -174,7 +174,7 @@ public:
 
 	//! Checks weather the folder item is a grandchild of the source folder
 	/**
-	 * \param src source folder item
+	 * @param src :: source folder item
 	 */
 	bool isChildOf(FolderListItem *src);
 

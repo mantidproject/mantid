@@ -43,7 +43,7 @@ namespace Mantid
 
 		/**
 		* Renders Object surface given as OpenCascade topology shape
-		* @param ObjSurf object's surface stored in topology shape
+		* @param ObjSurf :: object's surface stored in topology shape
 		*/
 		void OCGeometryRenderer::Render(TopoDS_Shape* ObjSurf)
 		{
@@ -53,7 +53,7 @@ namespace Mantid
 
 		/**
 		* Render ObjComponent
-		* @param ObjComp input to render
+		* @param ObjComp :: input to render
 		*/
 		void OCGeometryRenderer::Render(IObjComponent *ObjComp)
 		{
@@ -73,7 +73,7 @@ namespace Mantid
 
 		/**
 		* Initialze the object surface for rendering
-		* @param ObjSurf input to create display list
+		* @param ObjSurf :: input to create display list
 		*/
 		void OCGeometryRenderer::Initialize(TopoDS_Shape* ObjSurf)
 		{
@@ -93,7 +93,7 @@ namespace Mantid
 
 		/**
 		* Initializes creates a display for the input ObjComponent
-		* @param ObjComp input object component for creating display
+		* @param ObjComp :: input object component for creating display
 		*/
 		void OCGeometryRenderer::Initialize(IObjComponent *ObjComp)
 		{

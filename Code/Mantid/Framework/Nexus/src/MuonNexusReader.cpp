@@ -29,7 +29,7 @@ MuonNexusReader::~MuonNexusReader()
 //         Data: "counts"  (2D integer array)
 //         Data: "corrected time" (1D float array)
 //
-// @param filename  name of existing NeXus Muon file to read
+// @param filename ::  name of existing NeXus Muon file to read
 int MuonNexusReader::readFromFile(const std::string& filename)
 {
    NXhandle fileID;
@@ -178,7 +178,7 @@ std::string MuonNexusReader::getInstrumentName()
 //            <time> is 32bit float time wrt start_time and <value> either 32bit float
 //            or sting.
 //
-// @param filename  name of existing NeXus Muon file to read
+// @param filename ::  name of existing NeXus Muon file to read
 int MuonNexusReader::readLogData(const std::string& filename)
 {
    NXhandle fileID;

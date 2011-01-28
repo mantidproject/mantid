@@ -12,7 +12,7 @@ namespace Mantid
 		class Object;
 		class Surface;
 
-		/*!
+		/**
 		\class Rule
 		\brief Object generation rule tree
 		\author S.Ansell
@@ -105,7 +105,7 @@ namespace Mantid
 			virtual void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin) =0; 
 		};
 
-		/*!
+		/**
 		\class Intersection
 		\brief Combines two Rule objects in an intersection
 		\author S. Ansell
@@ -155,7 +155,7 @@ namespace Mantid
 		};
 
 
-		/*!
+		/**
 		\class Union
 		\brief Combines two Rule objects in an union
 		\author S. Ansell
@@ -206,7 +206,7 @@ namespace Mantid
 			void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 		};
 
-		/*!
+		/**
 		\class SurfPoint
 		\brief Surface leaf node
 		\author S.Ansell
@@ -259,7 +259,7 @@ namespace Mantid
 			void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 		};
 
-		/*!
+		/**
 		\class CompObj
 		\brief Compemented Object
 		\author S.Ansell
@@ -312,7 +312,7 @@ namespace Mantid
 
 		};
 
-		/*!
+		/**
 		\class CompGrp
 		\brief Compemented Grup 
 		\author S.Ansell
@@ -360,7 +360,7 @@ namespace Mantid
 			void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 		};
 
-		/*!
+		/**
 		\class BoolValue 
 		\brief Rule Status class
 		\author S.Ansell

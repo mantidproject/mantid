@@ -9,7 +9,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-/*!
+/**
   \class cow_ptr
   \brief Implements a copy on write data template
   \version 1.0
@@ -76,7 +76,7 @@ class cow_ptr
 
 };
 
-/*!
+/**
   Constructor : creates new data() object
 */
 template<typename DataType>
@@ -85,20 +85,20 @@ cow_ptr<DataType>::cow_ptr() :
 { }
 
 
-/*!
+/**
   Copy constructor : double references the data object
-  \param A :: object to copy
+  @param A :: object to copy
 */
 template<typename DataType>
 cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType>& A) :
   Data(A.Data)
 { }
 
-/*!
+/**
   Assignment operator : double references the data object
   maybe drops the old reference.
-  \param A :: object to copy
-  \return *this
+  @param A :: object to copy
+  @return *this
 */
 template<typename DataType>
 cow_ptr<DataType>& cow_ptr<DataType>::operator=(const cow_ptr<DataType>& A)
@@ -110,11 +110,11 @@ cow_ptr<DataType>& cow_ptr<DataType>::operator=(const cow_ptr<DataType>& A)
   return *this;
 }
 
-/*!
+/**
   Assignment operator : double references the data object
   maybe drops the old reference.
-  \param A :: object to copy
-  \return *this
+  @param A :: object to copy
+  @return *this
 */
 template<typename DataType>
 cow_ptr<DataType>& cow_ptr<DataType>::operator=(const ptr_type& A)
@@ -127,7 +127,7 @@ cow_ptr<DataType>& cow_ptr<DataType>::operator=(const ptr_type& A)
 }
 
 
-/*!
+/**
   Destructor : No work is required since Data is
   a shared_ptr.
 */
@@ -135,11 +135,11 @@ template<typename DataType>
 cow_ptr<DataType>::~cow_ptr()
 {}
 
-/*!
+/**
   Access function.
   If data is shared, creates a copy of Data so that it can be modified.
 
-  \return new copy of *this, if required
+  @return new copy of *this, if required
 */
 template<typename DataType>
 DataType& cow_ptr<DataType>::access()

@@ -34,7 +34,7 @@ namespace API
     by derivative class. In the derived classes this method must return the derivatives of the function
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used or the derivatives are computed numerically.
- * @param out Pointer to a Jacobian matrix. If it is NULL the method is called in order to check whether it's implemented or not.
+ * @param out :: Pointer to a Jacobian matrix. If it is NULL the method is called in order to check whether it's implemented or not.
  *      If the derivatives are implemented the method must simply return, otherwise it must throw Kernel::Exception::NotImplementedError.
  */
 void IFitFunction::functionDeriv(Jacobian* out)
@@ -46,7 +46,7 @@ void IFitFunction::functionDeriv(Jacobian* out)
 
 
 /** Update active parameters. Ties are applied.
- *  @param in Pointer to an array with active parameters values. Must be at least nActive() doubles long.
+ *  @param in :: Pointer to an array with active parameters values. Must be at least nActive() doubles long.
  */
 void IFitFunction::updateActive(const double* in)
 {
@@ -60,8 +60,8 @@ void IFitFunction::updateActive(const double* in)
 
 /**
  * Sets active parameter i to value. Ties are not applied.
- * @param i The index of active parameter to set
- * @param value The new value for the parameter
+ * @param i :: The index of active parameter to set
+ * @param value :: The new value for the parameter
  */
 void IFitFunction::setActiveParameter(int i,double value)
 {
@@ -76,7 +76,7 @@ double IFitFunction::activeParameter(int i)const
 }
 
 /** Create a new tie. IFitFunctions can have their own types of ties.
- * @param parName The parameter name for this tie
+ * @param parName :: The parameter name for this tie
  * @return a new parameter tie
  */
 ParameterTie* IFitFunction::createTie(const std::string& parName)
@@ -86,8 +86,8 @@ ParameterTie* IFitFunction::createTie(const std::string& parName)
 
 /**
  * Ties a parameter to other parameters
- * @param parName The name of the parameter to tie.
- * @param expr    A math expression 
+ * @param parName :: The name of the parameter to tie.
+ * @param expr ::    A math expression 
  * @return newly ties parameters
  */
 ParameterTie* IFitFunction::tie(const std::string& parName,const std::string& expr)
@@ -113,7 +113,7 @@ ParameterTie* IFitFunction::tie(const std::string& parName,const std::string& ex
 
 /** Removes the tie off a parameter. The parameter becomes active
  * This method can be used when constructing and editing the IFitFunction in a GUI
- * @param parName The name of the parameter which ties will be removed.
+ * @param parName :: The name of the parameter which ties will be removed.
  */
 void IFitFunction::removeTie(const std::string& parName)
 {
@@ -124,7 +124,7 @@ void IFitFunction::removeTie(const std::string& parName)
 /**
   * If any of the parameters do not satisfy a constraint penalty values will be added to the function output.
   * This method is called by Fit algorithm after calling function(double*out)
-  * @param out The output form function(double* out) to which the penalty will be added.
+  * @param out :: The output form function(double* out) to which the penalty will be added.
   */
 void IFitFunction::addPenalty(double *out)const
 {
@@ -155,7 +155,7 @@ void IFitFunction::addPenalty(double *out)const
 /**
   * If a penalty was added to the function output the derivatives are modified accordingly.
   * This method is called by Fit algorithm after calling functionDeriv(Jacobian *out)
-  * @param out The Jacobian to be corrected
+  * @param out :: The Jacobian to be corrected
   */
 void IFitFunction::addPenaltyDeriv(Jacobian *out)const
 {
@@ -240,7 +240,7 @@ std::string IFitFunction::asString()const
 }
 
 /** Set a function handler
- * @param handler A new handler
+ * @param handler :: A new handler
  */
 void IFitFunction::setHandler(FitFunctionHandler* handler)
 {
@@ -254,8 +254,8 @@ void IFitFunction::setHandler(FitFunctionHandler* handler)
 
 /**
  * Operator <<
- * @param ostr The output stream
- * @param f The IFitFunction
+ * @param ostr :: The output stream
+ * @param f :: The IFitFunction
  */
 std::ostream& operator<<(std::ostream& ostr,const IFitFunction& f)
 {
@@ -400,7 +400,7 @@ double IFitFunction::Attribute::asDouble()const
 
 /** Sets new value if attribute is a string. If the type is wrong 
  * throws an exception
- * @param str The new value
+ * @param str :: The new value
  */
 void IFitFunction::Attribute::setString(const std::string& str)
 {
@@ -417,7 +417,7 @@ void IFitFunction::Attribute::setString(const std::string& str)
 
 /** Sets new value if attribute is a double. If the type is wrong 
  * throws an exception
- * @param d The new value
+ * @param d :: The new value
  */
 void IFitFunction::Attribute::setDouble(const double& d)
 {
@@ -434,7 +434,7 @@ void IFitFunction::Attribute::setDouble(const double& d)
 
 /** Sets new value if attribute is an int. If the type is wrong 
  * throws an exception
- * @param i The new value
+ * @param i :: The new value
  */
 void IFitFunction::Attribute::setInt(const int& i)
 {
@@ -457,7 +457,7 @@ class SetValue: public IFitFunction::AttributeVisitor<>
 public:
   /**
    * Constructor
-   * @param value The value to set
+   * @param value :: The value to set
    */
   SetValue(const std::string& value):m_value(value){}
 protected:
@@ -484,7 +484,7 @@ private:
 };
 
 /** Set value from a string. Throws exception if the string has wrong format
- * @param str String representation of the new value
+ * @param str :: String representation of the new value
  */
 void IFitFunction::Attribute::fromString(const std::string& str)
 {

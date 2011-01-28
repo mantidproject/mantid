@@ -63,7 +63,7 @@ DiagResults::DiagResults(QWidget *parent): MantidDialog(parent),
 
 /**
  * Update the results on the dialog
- * @param testSummary A string containing the test results
+ * @param testSummary :: A string containing the test results
  */
 void DiagResults::updateResults(const QString & testSummary)
 {
@@ -91,7 +91,7 @@ void DiagResults::updateResults(const QString & testSummary)
 }
 
 /** Enable or disable the buttons used to run Python scripts
-*  @param show the buttons are enabled if this is set to true and disabled otherwise
+*  @param show :: the buttons are enabled if this is set to true and disabled otherwise
 */
 void DiagResults::showButtons(bool show)
 {
@@ -127,8 +127,8 @@ int DiagResults::addRow(QString firstColumn, QString secondColumn)
 }
 
 /** Displays a summary of the results of tests in to text labels
-*  @param row the row where the data will be displayed
-*  @param text the text that should be displayed in the first column
+*  @param row :: the row where the data will be displayed
+*  @param text :: the text that should be displayed in the first column
 */
 void DiagResults::updateRow(int row, QString text)
 {
@@ -172,8 +172,8 @@ void DiagResults::addButtons(int row)
 
 /** Enable the controls on the row and conect the buttons to the slots
 *  from which their Python script is executed
-*  @param row the index number of the row to enable
-*  @param test the name of the test that row corrosponds to
+*  @param row :: the index number of the row to enable
+*  @param test :: the name of the test that row corrosponds to
 */
 void DiagResults::setupButtons(int row, QString test)
 {

@@ -211,7 +211,7 @@ namespace Mantid
     }
 
     /** Get a workspace identified by an InputData structure. 
-      * @param data InputData with name and either spec or i fields defined. 
+      * @param data :: InputData with name and either spec or i fields defined. 
       * @return InputData structure with the ws field set if everything was OK.
       */
     PlotPeakByLogValue::InputData PlotPeakByLogValue::getWorkspace(const InputData& data)

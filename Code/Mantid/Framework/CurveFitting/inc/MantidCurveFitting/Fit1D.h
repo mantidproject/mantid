@@ -102,8 +102,8 @@ namespace Mantid
        *  For example may be used to create wavelength array for each TOF data-point.
        *  Number of data point to fit over are m_maxX-m_minX.
        * 
-       *  @param m_minX Start array index.
-       *  @param m_maxX End array index.
+       *  @param m_minX :: Start array index.
+       *  @param m_maxX :: End array index.
        */
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX)
       {

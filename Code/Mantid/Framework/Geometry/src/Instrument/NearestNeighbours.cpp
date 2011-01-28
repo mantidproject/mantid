@@ -8,7 +8,7 @@
 using namespace Mantid::Geometry;
 
 /**
-* @param instrument shared pointer to IInstrument object
+* @param instrument :: shared pointer to IInstrument object
 */
 NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Mantid::Geometry::IInstrument> instrument) : m_instrument(instrument), m_noNeighbours(8), m_isPopulated(false), m_scale(NULL)
 {
@@ -44,9 +44,9 @@ void NearestNeighbours::build()
 /**
 * Returns a map of the DetectorID's to the nearest detectors and their
 * distance from the detector specified in the argument.
-* @param detID detector identifier for subject of query
+* @param detID :: detector identifier for subject of query
 * @return map of detID to distance
-* @throws NotFoundError if detector ID is not recognised
+* @throw NotFoundError if detector ID is not recognised
 */
 std::map<int, double> NearestNeighbours::neighbours(const int detID) const
 {  
@@ -78,10 +78,10 @@ std::map<int, double> NearestNeighbours::neighbours(const int detID) const
 * Returns a map of the DetectorID's to the nearest detectors within a specified
 * distance. Uses neighbours(detID) function. Will pass on up a NotFoundError exception
 * if detID is invalid.
-* @param detID detector identifier for subject of query
-* @param radius cut-off distance for detector list to returns
+* @param detID :: detector identifier for subject of query
+* @param radius :: cut-off distance for detector list to returns
 * @return map of detID to distance
-* @throws NotFoundError if detID is not recognised
+* @throw NotFoundError if detID is not recognised
 */
 std::map<int, double> NearestNeighbours::neighbours(const int detID, const double radius) const
 {
@@ -102,10 +102,10 @@ std::map<int, double> NearestNeighbours::neighbours(const int detID, const doubl
 * Returns a map of the DetectorID's to the nearest detectors within a specified
 * distance. Uses neighbours(detID) function. Will pass on up a NotFoundError exception
 * if detID is invalid.
-* @param component IComponent pointer to Detector object
-* @param radius cut-off distance for detector list to returns
+* @param component :: IComponent pointer to Detector object
+* @param radius :: cut-off distance for detector list to returns
 * @return map of Detector ID's to distance
-* @throws NotFoundError if component is not recognised as a detector
+* @throw NotFoundError if component is not recognised as a detector
 */
 std::map<int, double> NearestNeighbours::neighbours(const IComponent *component, const double radius) const
 {

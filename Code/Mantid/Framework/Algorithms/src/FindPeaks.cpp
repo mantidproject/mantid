@@ -324,7 +324,7 @@ void FindPeaks::findPeaksUsingMariscotti()
 /** Calculates the second difference of the data (Y values) in a workspace.
  *  Done according to equation (3) in Mariscotti: \f$ S_i = N_{i+1} - 2N_i + N_{i+1} \f$.
  *  In the output workspace, the 2nd difference is in Y, X is unchanged and E is zero.
- *  @param input The workspace to calculate the second difference of
+ *  @param input :: The workspace to calculate the second difference of
  *  @return A workspace containing the second difference
  */
 API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input)
@@ -356,8 +356,8 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
 
 //=================================================================================================
 /** Calls the SmoothData algorithm as a sub-algorithm on a workspace
- *  @param WS The workspace containing the data to be smoothed. The smoothed result will be stored in this pointer.
- *  @param w  The number of data points which should contribute to each smoothed point
+ *  @param WS :: The workspace containing the data to be smoothed. The smoothed result will be stored in this pointer.
+ *  @param w ::  The number of data points which should contribute to each smoothed point
  */
 void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
 {
@@ -386,9 +386,9 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
 //=================================================================================================
 /** Calculates the statistical error on the smoothed data.
  *  Uses Mariscotti equation (11), amended to use errors of input data rather than sqrt(Y).
- *  @param input    The input data to the algorithm
- *  @param smoothed The smoothed data
- *  @param w        The value of w (the size of the smoothing 'window')
+ *  @param input ::    The input data to the algorithm
+ *  @param smoothed :: The smoothed data
+ *  @param w ::        The value of w (the size of the smoothing 'window')
  *  @throw std::invalid_argument if w is greater than 19
  */
 void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w)
@@ -467,11 +467,11 @@ long long FindPeaks::computePhi(const int& w) const
 //=================================================================================================
 /** Attempts to fit a candidate peak
  * 
- *  @param input    The input workspace
- *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
- *  @param i0       Channel number of peak candidate i0 - the higher side of the peak (right side)
- *  @param i2       Channel number of peak candidate i2 - the lower side of the peak (left side)
- *  @param i4       Channel number of peak candidate i4 - the center of the peak
+ *  @param input ::    The input workspace
+ *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
+ *  @param i0 ::       Channel number of peak candidate i0 - the higher side of the peak (right side)
+ *  @param i2 ::       Channel number of peak candidate i2 - the lower side of the peak (left side)
+ *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
  */
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
 {
@@ -568,8 +568,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 //=================================================================================================
 /** Attempts to fit a candidate peak given a center and width guess.
  *
- *  @param input    The input workspace
- *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
+ *  @param input ::    The input workspace
+ *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
  *  @param center_guess: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
  *  @param FWHM_guess: A guess of the full-width-half-max of the peak, in # of bins.
 */

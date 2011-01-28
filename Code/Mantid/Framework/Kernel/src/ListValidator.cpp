@@ -14,7 +14,7 @@ ListValidator::ListValidator() : IValidator<std::string>(), m_allowedValues()
 {}
 	
 /** Constructor
- *  @param values A vector of strings containing the valid values 
+ *  @param values :: A vector of strings containing the valid values 
  */
 ListValidator::ListValidator(const std::vector<std::string>& values) : 
   IValidator<std::string>(),
@@ -22,7 +22,7 @@ ListValidator::ListValidator(const std::vector<std::string>& values) :
 {}
   
 /** Constructor
- *  @param values A set of strings containing the valid values 
+ *  @param values :: A set of strings containing the valid values 
  */
 ListValidator::ListValidator(const std::set<std::string>& values) : 
   IValidator<std::string>(),
@@ -47,7 +47,7 @@ void ListValidator::addAllowedValue(const std::string &value)
 IValidator<std::string>* ListValidator::clone() { return new ListValidator(*this); }
   
 /** Checks if the string passed is in the list
- *  @param value The value to test
+ *  @param value :: The value to test
  *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
  */
 std::string ListValidator::checkValidity(const std::string &value) const

@@ -20,7 +20,7 @@ FitParameterTie::~FitParameterTie()
 
 /** Set the tying expression. The function names (f0,f1,f2,...) are changed to
  * placeholders (#0,#1,#2) to make it easier to edit afterwards.
- * @param estr The tying expression , e.g. "f1.Sigma = 2*f0.Sigma + 1"
+ * @param estr :: The tying expression , e.g. "f1.Sigma = 2*f0.Sigma + 1"
  */
 void FitParameterTie::set(const QString& estr)
 {
@@ -126,7 +126,7 @@ QString FitParameterTie::exprRHS()const
 /**
  * When a new function is added the function indeces in the tying expression must
  * be changed.
- * @param i The index at wich the function is inserted. All old indeces starting
+ * @param i :: The index at wich the function is inserted. All old indeces starting
  *   from i (inclusive) must be incremented.
  */
 void FitParameterTie::functionInserted(int i)
@@ -144,7 +144,7 @@ void FitParameterTie::functionInserted(int i)
 /**
  * When a function is deleted the function indeces in the tying expression must
  * be changed or the tie may become invalid if the deleted function is used in the tie.
- * @param i The index of the deleted function. All old indeces starting
+ * @param i :: The index of the deleted function. All old indeces starting
  *   from i+1 must be decremented.
  * @return true if the tie remains valid and false otherwise.
  */

@@ -53,7 +53,7 @@ namespace CurveFitting
   {
   public:
     /**Creates an instance of a function
-     * @param type The function's type
+     * @param type :: The function's type
      * @return A pointer to the created function
      */
     ICostFunction* createFunction(const std::string& type) const;

@@ -1977,7 +1977,7 @@ void ConfigDialog::chooseTranslationsFolder()
 
 	QFileInfo tfi(app->d_translations_folder);
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the MantidPlot translations folder!"),
-			tfi.dir().absolutePath(), 0/*!QFileDialog::ShowDirsOnly*/);
+			tfi.dir().absolutePath(), 0/**QFileDialog::ShowDirsOnly*/);
 
 	if (!dir.isEmpty()){
 		app->d_translations_folder = dir;
@@ -2023,7 +2023,7 @@ void ConfigDialog::chooseHelpFolder()
 void ConfigDialog::addPythonScriptsDirs()
 {
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python scripts directory"),
-			"", 0/*!QFileDialog::ShowDirsOnly*/);
+			"", 0/**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty())
   {
     QString dirs = lePythonScriptsDirs->text();
@@ -2039,7 +2039,7 @@ void ConfigDialog::addPythonScriptsDirs()
 void ConfigDialog::addPythonAlgorithmsDirs()
 {
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python algorithms directory"),
-			"", 0/*!QFileDialog::ShowDirsOnly*/);
+			"", 0/**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty())
   {
     QString dirs = lePythonAlgorithmsDirs->text();

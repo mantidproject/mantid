@@ -9,7 +9,7 @@
 
 using namespace Mantid::StrFunc;
 
-/*!
+/**
   \class testSupport 
   \brief test of Support components
   \version 1.0
@@ -24,11 +24,11 @@ class SupportTest : public CxxTest::TestSuite
 public: 
 
 	void testExtractWord()
-	  /*!
+	  /**
 		Applies a test to the extractWord
 		The object is to find a suitable lenght
 		of a string in a group of words
-		\retval -1 :: failed find word in string
+		@retval -1 :: failed find word in string
 		when the pattern exists.
 	  */
 	{
@@ -38,7 +38,7 @@ public:
 	}
 
 	void testConvert()
-	  /*!
+	  /**
 		Applies a test to convert
 	  */
 	{
@@ -63,7 +63,7 @@ public:
 	}
 
 	void testSection()
-	  /*!
+	  /**
 		Applies a test to section
 	  */
 	{
@@ -75,7 +75,7 @@ public:
 	}
 
 	void testSectPartNum()
-	  /*!
+	  /**
 		Applies a test to sectPartNum
 	  */
 	{

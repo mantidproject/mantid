@@ -8,7 +8,7 @@
 class QLineEdit;
 class QRadioButton;
 
-/*!
+/**
   \class  BinDialog
   \brief  class to display Bin selection dialog
   \author Srikanth Nagella

@@ -277,8 +277,8 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-/// @param detector The detector we are working on
-/// @param L2s A vector of the sample-detector distance for  each segment of the sample
+/// @param detector :: The detector we are working on
+/// @param L2s :: A vector of the sample-detector distance for  each segment of the sample
 void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const
 {
   V3D detectorPos(detector->getPos());

@@ -102,10 +102,10 @@ void LoadLOQDistancesFromRaw::exec()
 
 /**
  * Run the MoveInstrumentComponent algorithm as a child algorithm
- * @param comp_name The component name
- * @param zshift The shift along the Z-axis
- * @param start_progress The starting percentage for progress reporting
- * @param end_progress The end percentage for progress reporting
+ * @param comp_name :: The component name
+ * @param zshift :: The shift along the Z-axis
+ * @param start_progress :: The starting percentage for progress reporting
+ * @param end_progress :: The end percentage for progress reporting
  */
 void LoadLOQDistancesFromRaw::performMoveComponent(const std::string & comp_name, double zshift, 
 						   double start_progress, double end_progress)

@@ -106,10 +106,10 @@ void LoadSNSNexus::exec()
 }
 
 /** Loads one entry from an SNS Nexus file
- *  @param entry The entry to read the data from
- *  @param period The period of the data
- *  @param progress_start The starting progress
- *  @param progress_end The ending progress
+ *  @param entry :: The entry to read the data from
+ *  @param period :: The period of the data
+ *  @param progress_start :: The starting progress
+ *  @param progress_end :: The ending progress
  *  @return A shared pointer to the created workspace
  */
 API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double progress_start, double progress_end)
@@ -315,8 +315,8 @@ double LoadSNSNexus::dblSqrt(double in)
 
 /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
-    *  @param nread - no.of bytes read
-    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @param nread :: no.of bytes read
+    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
     bool LoadSNSNexus::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -341,7 +341,7 @@ double LoadSNSNexus::dblSqrt(double in)
 
     }
     /**checks the file by opening it and reading few lines 
-    *  @param filePath name of the file inluding its path
+    *  @param filePath :: name of the file inluding its path
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadSNSNexus::fileCheck(const std::string& filePath)

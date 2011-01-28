@@ -48,7 +48,7 @@ public:
 private:
   /** Checks if the string is empty
    *
-   *  @param value the string to test
+   *  @param value :: the string to test
    *  @return "A value must be entered for this parameter" if empty or ""
    */
   std::string checkValidity(const TYPE& value) const

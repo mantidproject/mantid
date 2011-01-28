@@ -13,10 +13,10 @@ using Kernel::Property;
 using Kernel::DateAndTime;
 
 /** Constructor
- *  @param alg      A pointer to the algorithm for which the history should be constructed
- *  @param start    The start time of the algorithm execution (optional)
- *  @param duration The time (in seconds) that it took to run this algorithm (optional)
- *  @param uexeccount an  unsigned int for algorithm execution order
+ *  @param alg ::      A pointer to the algorithm for which the history should be constructed
+ *  @param start ::    The start time of the algorithm execution (optional)
+ *  @param duration :: The time (in seconds) that it took to run this algorithm (optional)
+ *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
@@ -34,13 +34,13 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const DateAndTime
 AlgorithmHistory::~AlgorithmHistory()
 {}
 
-/*!
+/**
     Construct AlgorithmHistory by name. Can be used for rstoring the history from saved records.
-    \param name The algorithm name.
-    \param vers The algorithm version.
-    \param start The start time of the algorithm execution (optional).
-    \param duration The time (in seconds) that it took to run this algorithm (optional).
-	 \param uexeccount  an  unsigned int for algorithm execution order
+    @param name :: The algorithm name.
+    @param vers :: The algorithm version.
+    @param start :: The start time of the algorithm execution (optional).
+    @param duration :: The time (in seconds) that it took to run this algorithm (optional).
+	 @param uexeccount ::  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
@@ -48,9 +48,9 @@ AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Date
 {
 }
 
-/*!
+/**
     Standard Copy Constructor
-    \param A :: AlgorithmHistory Item to copy
+    @param A :: AlgorithmHistory Item to copy
  */
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
   m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
@@ -59,8 +59,8 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
 }
 
 /** Add details of an algorithm's execution to an existing history object
- *  @param start    The start time of the algorithm execution
- *  @param duration The time (in seconds) that it took to run this algorithm
+ *  @param start ::    The start time of the algorithm execution
+ *  @param duration :: The time (in seconds) that it took to run this algorithm
  */
 void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& duration)
 {
@@ -69,10 +69,10 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
 }
 
 /** Add a property to the history.
-    @param name The name of the property
-    @param value The value of the property
-    @param isdefault True if the property is default
-    @param direction The direction of the property
+    @param name :: The name of the property
+    @param value :: The value of the property
+    @param isdefault :: True if the property is default
+    @param direction :: The direction of the property
  */
   void AlgorithmHistory::addProperty(const std::string& name,const std::string& value, bool isdefault, 
 				     const unsigned int& direction)
@@ -81,8 +81,8 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
 }
 
 /** Prints a text representation of itself
- *  @param os The ouput stream to write to
- *  @param indent an indentation value to make pretty printing of object and sub-objects
+ *  @param os :: The ouput stream to write to
+ *  @param indent :: an indentation value to make pretty printing of object and sub-objects
  */
 void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
@@ -102,9 +102,9 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
   }
 }
 
-/*!
+/**
     Standard Assignment operator
-    \param A :: AlgorithmHistory Item to assign to 'this'
+    @param A :: AlgorithmHistory Item to assign to 'this'
  */
 AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
 {
@@ -120,8 +120,8 @@ AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
 }
 
 /** Prints a text representation
- * @param os The ouput stream to write to
- * @param AH The AlgorithmHistory to output
+ * @param os :: The ouput stream to write to
+ * @param AH :: The AlgorithmHistory to output
  * @returns The ouput stream
  */
 std::ostream& operator<<(std::ostream& os, const AlgorithmHistory& AH)

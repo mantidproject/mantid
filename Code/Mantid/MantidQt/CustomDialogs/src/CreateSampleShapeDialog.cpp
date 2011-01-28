@@ -221,7 +221,7 @@ void CreateSampleShapeDialog::update3DView()
 
 /**
  * This slot is called when a context menu is requested inside the tree widget
- * @param pos The position of the mouse pointer when the menu was requested
+ * @param pos :: The position of the mouse pointer when the menu was requested
  */
 void CreateSampleShapeDialog::handleTreeContextMenuRequest(const QPoint & pos)
 {
@@ -328,7 +328,7 @@ BinaryTreeWidgetItem* CreateSampleShapeDialog::getSelectedItem()
 
 /**
  * Add a new child shape
- * @param shape The action that emitted the signal
+ * @param shape :: The action that emitted the signal
  */
 void CreateSampleShapeDialog::addShape(QAction *shape)
 {
@@ -489,7 +489,7 @@ void CreateSampleShapeDialog::setupDetailsBox()
 
 /**
  * Create the correct type of details box for the shape
- * @param shapename The name of the shape for which to create a widget 
+ * @param shapename :: The name of the shape for which to create a widget 
  * @return A pointer to the details object
  */
 ShapeDetails* CreateSampleShapeDialog::createDetailsWidget(const QString & shapename) const
@@ -578,7 +578,7 @@ QString CreateSampleShapeDialog::constructShapeXML() const
 //------------------------------------------------
 /**
  * Default constructor
- * @param type The type of the item
+ * @param type :: The type of the item
  */
 BinaryTreeWidgetItem::BinaryTreeWidgetItem(int type) 
   : QTreeWidgetItem(type), m_left_index(0), m_right_index(1)
@@ -587,8 +587,8 @@ BinaryTreeWidgetItem::BinaryTreeWidgetItem(int type)
 
 /**
  * Construct an item with a string list of column texts to add
- * @param A list of strings to appear as the column texts
- * @param type Qt or User defined 
+ * @param A :: list of strings to appear as the column texts
+ * @param type :: Qt or User defined 
  */
 BinaryTreeWidgetItem::BinaryTreeWidgetItem(const QStringList & strings, int type) 
   : QTreeWidgetItem(strings, type), m_left_index(0), m_right_index(1)
@@ -646,8 +646,8 @@ BinaryTreeWidgetItem* BinaryTreeWidget::root() const
 
 /**
  * A recursive function that builds an expression from the binary tree by traversing it in a post order fashion
- * @param node The parent node
- * @param expression The expression list to build
+ * @param node :: The parent node
+ * @param expression :: The expression list to build
  */
 void BinaryTreeWidget::traverseInPostOrder(BinaryTreeWidgetItem* node, QList<BinaryTreeWidgetItem*> & expression)
 {
@@ -678,7 +678,7 @@ ComboBoxDelegate::ComboBoxDelegate(QWidget *parent) : QItemDelegate(parent)
 
 /**
  * Create an editor for a tree item
- * @param parent The parent widget
+ * @param parent :: The parent widget
  */
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &,
 					  const QModelIndex &) const
@@ -693,8 +693,8 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
 /**
  * Set the data for the editor when it has been created
- * @param editor The editor in question
- * @param index The model item in question
+ * @param editor :: The editor in question
+ * @param index :: The model item in question
  */
 void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
@@ -706,9 +706,9 @@ void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 
 /**
  * Set the data for the model when editing is finished
- * @param editor The editor in question
- * @param model The model in question
- * @param index The index for the model given
+ * @param editor :: The editor in question
+ * @param model :: The model in question
+ * @param index :: The index for the model given
  */
 
 void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
@@ -724,8 +724,8 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 
 /**
  * Set the appropriate geometry for the widget
- * @param editor The editor in question
- * @param option The style option
+ * @param editor :: The editor in question
+ * @param option :: The style option
  */
 void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, 
 					   const QModelIndex &) const

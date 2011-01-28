@@ -140,7 +140,7 @@ namespace Mantid
 
 		/**
 		* Render ObjComponent
-		* @param ObjComp input to render
+		* @param ObjComp :: input to render
 		*/
 		void GluGeometryRenderer::Render(IObjComponent *ObjComp) const
 		{
@@ -157,8 +157,8 @@ namespace Mantid
 
 		/**
 		 * Creates a GLU Sphere
-		 * @param center center of the sphere
-		 * @param radius radius of the sphere
+		 * @param center :: center of the sphere
+		 * @param radius :: radius of the sphere
 		 */
 		void GluGeometryRenderer::CreateSphere(const V3D& center,double radius)
 		{
@@ -175,10 +175,10 @@ namespace Mantid
 
 		/**
 		 * Creates a Cube
-		 * @param Point1 first point of the cube
-		 * @param Point2 second point of the cube
-		 * @param Point3 thrid point of the cube
-		 * @param Point4 fourth point of the cube
+		 * @param Point1 :: first point of the cube
+		 * @param Point2 :: second point of the cube
+		 * @param Point3 :: thrid point of the cube
+		 * @param Point4 :: fourth point of the cube
 		 */
 		void GluGeometryRenderer::CreateCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4)
 		{
@@ -231,10 +231,10 @@ namespace Mantid
 
 		/**
 		 * Creates a Cone
-		 * @param center center of the cone
-		 * @param axis   axis of the cone
-		 * @param radius radius of the cone
-		 * @param height height of the cone
+		 * @param center :: center of the cone
+		 * @param axis ::   axis of the cone
+		 * @param radius :: radius of the cone
+		 * @param height :: height of the cone
 		 */
 		void GluGeometryRenderer::CreateCone(const V3D& center,const V3D& axis,double radius,double height)
 		{
@@ -256,10 +256,10 @@ namespace Mantid
 
 		/**
 		 * Create a Cylinder
-		 * @param center center of the cylinder
-		 * @param axis  axis of the cylinder
-		 * @param radius radius of the cylinder
-		 * @param height height of the cylinder
+		 * @param center :: center of the cylinder
+		 * @param axis ::  axis of the cylinder
+		 * @param radius :: radius of the cylinder
+		 * @param height :: height of the cylinder
 		 */
 		void GluGeometryRenderer::CreateCylinder(const V3D& center,const V3D& axis,double radius,double height)
 		{

@@ -48,8 +48,8 @@ class CustomActionDialog : public QDialog
 public:
 	//! Constructor
 	/**
-	 * \param parent parent widget (must be the application window!=
-	 * \param fl window flags
+	 * @param parent :: parent widget (must be the application window!=
+	 * @param fl :: window flags
 	 */
     CustomActionDialog( QWidget* parent, Qt::WFlags fl = 0 );
 

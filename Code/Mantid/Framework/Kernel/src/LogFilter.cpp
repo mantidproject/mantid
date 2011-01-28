@@ -9,7 +9,7 @@ namespace Kernel
 
 //-------------------------------------------------------------------------------------------------
 /** Constructor
-    @param tsp Pointer to property to be filtered. Its actual type must be TimeSeriesProperty<double>
+    @param tsp :: Pointer to property to be filtered. Its actual type must be TimeSeriesProperty<double>
  */
 LogFilter::LogFilter(const Property* tsp)
 {
@@ -48,7 +48,7 @@ LogFilter::LogFilter(const Property* tsp)
 
 //-------------------------------------------------------------------------------------------------
 /**  Filter using a TimeSeriesProperty<bool>. True values mark the allowed time intervals.
-     @param filter Filtering mask
+     @param filter :: Filtering mask
  */
 void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
 {

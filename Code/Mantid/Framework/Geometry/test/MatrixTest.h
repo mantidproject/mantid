@@ -32,7 +32,7 @@ public:
     return;
   }
 
-  /*!
+  /**
   Test that a matrix can be inverted
   */
   void testInvert()
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(Ident,A);
   }
 
-  /*!
+  /**
   Check that we can swap rows and columns
   */
   void testSwapRows()
@@ -120,7 +120,7 @@ public:
 
   }
 
-  /*!
+  /**
   Tests the diagonalisation  on a symmetric 2x2 matrix
   */
   void testDiagonalise()

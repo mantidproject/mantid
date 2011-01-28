@@ -324,7 +324,7 @@ private:
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   /** executeAsync() implementation.
-      @param i Unused argument
+      @param i :: Unused argument
    */
   bool executeAsyncImpl(const Poco::Void & i);
 

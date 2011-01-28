@@ -57,7 +57,7 @@ Kernel::Unit_sptr& Axis::unit()
 }
 /**
 * Sets the Unit that is in use on this axis.
-* @param unit name of the unit as known to the UnitFactory
+* @param unit :: name of the unit as known to the UnitFactory
 */
 void Axis::setUnit(const std::string & unit)
 {

@@ -298,13 +298,13 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
     if (lhs2D)
       work_in1 = EventWorkspaceHelpers::convertEventTo2D(work_in1);
-    TS_ASSERT_DELTA( work_in1->readE(0)[0], sqrt( lhs_grouping ), 1e-5);
+    TS_ASSERT_DELTA( work_in1->readE(0)[0], sqrt( double(lhs_grouping*1.0) ), 1e-5);
 
     // Grouped workspace will have rhs_grouping events in each bin (also).
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
     if (rhs2D)
       work_in2 = EventWorkspaceHelpers::convertEventTo2D(work_in2);
-    TS_ASSERT_DELTA( work_in2->readE(0)[0], sqrt( rhs_grouping ), 1e-5);
+    TS_ASSERT_DELTA( work_in2->readE(0)[0], sqrt( double(rhs_grouping*1.0) ), 1e-5);
 
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, !lhs2D, divideValue, divideError, true);

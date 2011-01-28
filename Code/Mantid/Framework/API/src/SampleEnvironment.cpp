@@ -22,7 +22,7 @@ namespace Mantid
     
     /**
      * Constructor specifying a name for the environment
-     * @param name A name for the environment kit
+     * @param name :: A name for the environment kit
      */
     SampleEnvironment::SampleEnvironment(const std::string & name) : 
       CompAssembly(name, NULL)
@@ -31,7 +31,7 @@ namespace Mantid
 
     /**
      * Copy constructor
-     * @param original The object whose state is to be copied.
+     * @param original :: The object whose state is to be copied.
      */
     SampleEnvironment::SampleEnvironment(const SampleEnvironment & original) : 
       CompAssembly(original)
@@ -50,7 +50,7 @@ namespace Mantid
     /**
      * Override the add method so that we can only add physical components that
      * have a defined shape, i.e. an ObjComponent with a valid shape
-     * @param comp A pointer to the phyiscal component. This object will take 
+     * @param comp :: A pointer to the phyiscal component. This object will take 
      * ownership of the pointer
      * @returns The number of items within the assembly, after this component has 
      * been added
@@ -77,7 +77,7 @@ namespace Mantid
     
     /**
      * Is the point given a valid point within the environment
-     * @param point Is the point valid within the environment
+     * @param point :: Is the point valid within the environment
      * @returns True if the point is within the environment
      */
     bool SampleEnvironment::isValid(const V3D & point) const

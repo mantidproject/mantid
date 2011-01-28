@@ -130,9 +130,9 @@ using namespace Mantid::Kernel;
 
 /**
   * Unroll a  cell from an array
-  * @param prhs The right-hand side of function call in Matlab
-  * @param new_prhs The new right-hand side after the function is complete
-  * @param new_nrhs The number of parameters on the right-hand side afterwrads
+  * @param prhs :: The right-hand side of function call in Matlab
+  * @param new_prhs :: The new right-hand side after the function is complete
+  * @param new_nrhs :: The number of parameters on the right-hand side afterwrads
   */
 static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
 {
@@ -152,10 +152,10 @@ static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_
 
 /**
   * The main entry point that is called by Matlab when an external module's function is called
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters on the right-hand side of the equals 
-  * @param prhs The data on the right-hand side of the equals
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters on the right-hand side of the equals 
+  * @param prhs :: The data on the right-hand side of the equals
   */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
@@ -257,7 +257,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Create object of given class 
-  * @param class_name The name of the class
+  * @param class_name :: The name of the class
   * @returns An array containing the created object
   */
 mxArray* ixbcreateclassobject(const char* class_name)
@@ -275,8 +275,8 @@ mxArray* ixbcreateclassobject(const char* class_name)
 
 /**
  * Create array of n objects of given class 
- * @param class_name The name of the class
- * @param n The number of objects to create
+ * @param class_name :: The name of the class
+ * @param n :: The number of objects to create
  * @returns An array of the created objects
  */
 mxArray* ixbcreateclassarray(const char* class_name, int* n)
@@ -297,10 +297,10 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
 
 /**
   * Create a Framework manager object
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -323,10 +323,10 @@ int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* p
 
 /**
   * Get a workspace
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
    * @returns An integer indicating success/failure
    */
 int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -352,10 +352,10 @@ int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Delete a workspace
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -379,10 +379,10 @@ int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Create an algorithm
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
    * @returns An integer indicating success/failure
    */
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -407,10 +407,10 @@ int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Execute an algorithm
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
  * @returns An integer indicating success/failure
    */
 int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -436,10 +436,10 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Execute an algorithm with a property list
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -492,10 +492,10 @@ int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 /**
   * Set a workspace field
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -505,9 +505,9 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 
 /**
   *  A helper function to retrieve a values from a workspace
-  * @param wksptr A pointer to a Mantid MatrixWorkspace
-  * @param field A character indicating the field to return, i.e. x, y or e
-  * @param ispec The spectrum number of the field to return
+  * @param wksptr :: A pointer to a Mantid MatrixWorkspace
+  * @param field :: A character indicating the field to return, i.e. x, y or e
+  * @param ispec :: The spectrum number of the field to return
  * @returns  An array containing the data
   */
 static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field, int ispec)
@@ -568,10 +568,10 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
 
 /**
   * Get all  workspace fields
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -596,10 +596,10 @@ int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* pr
 
 /**
   * Get a workspace field
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -646,7 +646,7 @@ namespace
   /**
      * Take a property value as a string and if only special characters are present, i.e.
      * EOL characters then replace them with their string represenations
-     * @param value The property value
+     * @param value :: The property value
      * @returns A string containing the sanitized property value
      */
   std::string santizePropertyValue(const std::string & value)
@@ -660,8 +660,8 @@ namespace
 
 /**
   * A helper function to create the simple API
-  * @param algName A string giving the name of the algorithm
-  * @param path The path to the .m file that we should create
+  * @param algName :: A string giving the name of the algorithm
+  * @param path :: The path to the .m file that we should create
   */
 void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
 {
@@ -746,8 +746,8 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
 
 /**
   * Create the simple API
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
@@ -816,10 +816,10 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
 
 /**
   * List the available workspaces
-  * @param nlhs The number of parameters on the left-hand side of the equals 
-  * @param plhs The data on the left-hand side of the equals
-  * @param nrhs The number of parameters in the Matlab function call
-  * @param prhs The data from the Matlab function call
+  * @param nlhs :: The number of parameters on the left-hand side of the equals 
+  * @param plhs :: The data on the left-hand side of the equals
+  * @param nrhs :: The number of parameters in the Matlab function call
+  * @param prhs :: The data from the Matlab function call
   * @returns An integer indicating success/failure
   */
 int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])

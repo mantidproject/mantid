@@ -37,7 +37,7 @@ namespace Mantid
 
 		/**
 		* Render ObjComponent
-		* @param ObjComp input to render
+		* @param ObjComp :: input to render
 		*/
 		void CacheGeometryRenderer::Render(IObjComponent *ObjComp) const
 		{

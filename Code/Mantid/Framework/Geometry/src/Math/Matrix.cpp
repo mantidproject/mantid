@@ -23,11 +23,11 @@ namespace Geometry
 template<typename T>
 std::ostream& 
 operator<<(std::ostream& of,const Matrix<T>& A)
-  /*!
+  /**
     External Friend :: outputs point to a stream 
-    \param of :: output stream
-    \param A :: Matrix to write out
-    \returns The output stream (of)
+    @param of :: output stream
+    @param A :: Matrix to write out
+    @return The output stream (of)
   */
 {
   of<<std::endl;
@@ -38,10 +38,10 @@ operator<<(std::ostream& of,const Matrix<T>& A)
 template<typename T>
 Matrix<T>::Matrix(const int nrow,const int ncol)
   : nx(0),ny(0),V(0)
-  /*!
+  /**
     Constructor with pre-set sizes. Matrix is zeroed
-    \param nrow :: number of rows
-    \param ncol :: number of columns
+    @param nrow :: number of rows
+    @param ncol :: number of columns
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -52,12 +52,12 @@ Matrix<T>::Matrix(const int nrow,const int ncol)
 template<typename T>
 Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
   : nx(0),ny(0),V(0)
-  /*!
+  /**
     Constructor to take two vectors and multiply them to 
     construct a matrix. (assuming that we have columns x row
     vector.
-    \param A :: Column vector to multiply
-    \param B :: Row vector to multiply
+    @param A :: Column vector to multiply
+    @param B :: Row vector to multiply
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -71,9 +71,9 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
 template<typename T>
 Matrix<T>::Matrix(const Matrix<T>& A)
   : nx(0),ny(0),V(0)
-  /*! 
+  /** 
     Simple copy constructor
-    \param A :: Object to copy
+    @param A :: Object to copy
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -90,10 +90,10 @@ Matrix<T>::Matrix(const Matrix<T>& A)
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator=(const Matrix<T>& A)
-  /*! 
+  /** 
     Simple assignment operator 
-    \param A :: Object to copy
-    \return the copied object
+    @param A :: Object to copy
+    @return the copied object
   */
 {
   if (&A!=this)
@@ -109,7 +109,7 @@ Matrix<T>::operator=(const Matrix<T>& A)
 
 template<typename T>
 Matrix<T>::~Matrix()
-  /*!
+  /**
     Delete operator :: removes memory for 
     matrix
   */
@@ -121,12 +121,12 @@ Matrix<T>::~Matrix()
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator+=(const Matrix<T>& A)
-   /*! 
+   /** 
      Matrix addition THIS + A  
      If the size is different then 0 is added where appropiate
      Matrix A is not expanded.
-     \param A :: Matrix to add
-     \returns Matrix(this + A)
+     @param A :: Matrix to add
+     @return Matrix(this + A)
    */
 {
   const int Xpt((nx>A.nx) ? A.nx : nx);
@@ -141,12 +141,12 @@ Matrix<T>::operator+=(const Matrix<T>& A)
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator-=(const Matrix<T>& A)
-   /*! 
+   /** 
      Matrix subtractoin THIS - A  
      If the size is different then 0 is added where appropiate
      Matrix A is not expanded.
-     \param A :: Matrix to add
-     \returns Ma
+     @param A :: Matrix to add
+     @return Ma
    */
 {
   const int Xpt((nx>A.nx) ? A.nx : nx);
@@ -161,12 +161,12 @@ Matrix<T>::operator-=(const Matrix<T>& A)
 template<typename T>
 Matrix<T>
 Matrix<T>::operator+(const Matrix<T>& A)
-   /*! 
+   /** 
      Matrix addition THIS + A  
      If the size is different then 0 is added where appropiate
      Matrix A is not expanded.
-     \param A :: Matrix to add
-     \returns Matrix(this + A)
+     @param A :: Matrix to add
+     @return Matrix(this + A)
    */
 {
   Matrix<T> X(*this);
@@ -176,12 +176,12 @@ Matrix<T>::operator+(const Matrix<T>& A)
 template<typename T>
 Matrix<T>
 Matrix<T>::operator-(const Matrix<T>& A)
-   /*! 
+   /** 
      Matrix subtraction THIS - A  
      If the size is different then 0 is subtracted where 
      appropiate. This matrix determines the size 
-     \param A :: Matrix to add
-     \returns Matrix(this + A)
+     @param A :: Matrix to add
+     @return Matrix(this + A)
    */
 {
   Matrix<T> X(*this);
@@ -192,11 +192,11 @@ Matrix<T>::operator-(const Matrix<T>& A)
 template<typename T>
 Matrix<T>
 Matrix<T>::operator*(const Matrix<T>& A) const
-  /*! 
+  /** 
     Matrix multiplication THIS * A  
-    \param A :: Matrix to multiply by  (this->row must == A->columns)
-    \throw MisMatch<int> if there is a size mismatch.
-    \return Matrix(This * A) 
+    @param A :: Matrix to multiply by  (this->row must == A->columns)
+    @throw MisMatch<int> if there is a size mismatch.
+    @return Matrix(This * A) 
  */
 {
   if (ny!=A.nx)
@@ -212,11 +212,11 @@ Matrix<T>::operator*(const Matrix<T>& A) const
 template<typename T>
 std::vector<T>
 Matrix<T>::operator*(const std::vector<T>& Vec) const
-  /*! 
+  /** 
     Matrix multiplication THIS * Vec to produce a vec  
-    \param Vec :: size of vector > this->nrows
-    \throw MisMatch<int> if there is a size mismatch.
-    \return Matrix(This * Vec)
+    @param Vec :: size of vector > this->nrows
+    @throw MisMatch<int> if there is a size mismatch.
+    @return Matrix(This * Vec)
   */
 {
   std::vector<T> Out;
@@ -236,11 +236,11 @@ Matrix<T>::operator*(const std::vector<T>& Vec) const
 template<typename T>
 V3D 
 Matrix<T>::operator*(const V3D& Vx) const
-  /*! 
+  /** 
     Matrix multiplication THIS * V
-    \param Vx :: Colunm vector to multiply by
-    \throw MisMatch<int> if there is a size mismatch.
-    \return Matrix(This * A) 
+    @param Vx :: Colunm vector to multiply by
+    @throw MisMatch<int> if there is a size mismatch.
+    @return Matrix(This * A) 
  */
 {
   if (ny!=3)
@@ -255,10 +255,10 @@ Matrix<T>::operator*(const V3D& Vx) const
 template<typename T>
 Matrix<T>
 Matrix<T>::operator*(const T& Value) const
-   /*! 
+   /** 
      Matrix multiplication THIS * Value  
-     \param Value :: Scalar to multiply by
-     \return V * (this)
+     @param Value :: Scalar to multiply by
+     @return V * (this)
    */
 {
   Matrix<T> X(*this);
@@ -271,12 +271,12 @@ Matrix<T>::operator*(const T& Value) const
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator*=(const Matrix<T>& A)
-   /*! 
+   /** 
      Matrix multiplication THIS *= A  
      Note that we call operator* to avoid the problem
      of changing matrix size.
-    \param A :: Matrix to multiply by  (this->row must == A->columns)
-    \return This *= A 
+    @param A :: Matrix to multiply by  (this->row must == A->columns)
+    @return This *= A 
    */
 {
   if (ny!=A.nx)
@@ -289,10 +289,10 @@ Matrix<T>::operator*=(const Matrix<T>& A)
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator*=(const T& Value)
-   /*! 
+   /** 
      Matrix multiplication THIS * Value  
-     \param Value :: Scalar to multiply matrix by
-     \return *this
+     @param Value :: Scalar to multiply matrix by
+     @return *this
    */
 {
   for(int i=0;i<nx;i++)
@@ -304,10 +304,10 @@ Matrix<T>::operator*=(const T& Value)
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator/=(const T& Value)
-   /*! 
+   /** 
      Matrix divishio THIS / Value  
-     \param Value :: Scalar to multiply matrix by
-     \return *this
+     @param Value :: Scalar to multiply matrix by
+     @return *this
    */
 {
   for(int i=0;i<nx;i++)
@@ -319,11 +319,11 @@ Matrix<T>::operator/=(const T& Value)
 template<typename T>
 bool
 Matrix<T>::operator!=(const Matrix<T>& A) const
-/*!
+/**
 Element by Element comparison
-\param A :: Matrix to check
-\return true :: on succees
-\return false :: failure
+@param A :: Matrix to check
+@return true :: on succees
+@return false :: failure
 */
 {
   return (this->operator==(A));
@@ -332,14 +332,14 @@ Element by Element comparison
 template<typename T>
 bool
 Matrix<T>::operator==(const Matrix<T>& A) const
-/*! 
+/** 
 Element by element comparison within tolerance.
 Tolerance means that the value must be > tolerance
 and less than (diff/max)>tolerance 
 
 Always returns 0 if the Matrix have different sizes
-\param A :: matrix to check.
-\return true on success 
+@param A :: matrix to check.
+@return true on success 
 */
 {
   const double Tolerance(1e-8);
@@ -372,7 +372,7 @@ Always returns 0 if the Matrix have different sizes
 template<typename T>
 void
 Matrix<T>::deleteMem()
-  /*!
+  /**
     Deletes the memory held in matrix 
   */
 {
@@ -390,10 +390,10 @@ Matrix<T>::deleteMem()
 template<typename T>
 void
 Matrix<T>::setMem(const int a,const int b)
-  /*! 
+  /** 
     Sets the memory held in matrix 
-    \param a :: number of rows
-    \param b :: number of columns
+    @param a :: number of rows
+    @param b :: number of columns
   */
 {
   if (a==nx && b==ny) 
@@ -418,10 +418,10 @@ Matrix<T>::setMem(const int a,const int b)
 template<typename T> 
 void
 Matrix<T>::swapRows(const int RowI,const int RowJ)
-  /*! 
+  /** 
     Swap rows I and J
-    \param RowI :: row I to swap
-    \param RowJ :: row J to swap
+    @param RowI :: row I to swap
+    @param RowJ :: row J to swap
   */
 {
   if (nx*ny && RowI<nx && RowJ<nx &&
@@ -440,10 +440,10 @@ Matrix<T>::swapRows(const int RowI,const int RowJ)
 template<typename T> 
 void
 Matrix<T>::swapCols(const int colI,const int colJ)
-  /*! 
+  /** 
     Swap columns I and J 
-    \param colI :: col I to swap
-    \param colJ :: col J to swap
+    @param colI :: col I to swap
+    @param colJ :: col J to swap
   */
 {
   if (nx*ny && colI<ny && colJ<ny &&
@@ -462,7 +462,7 @@ Matrix<T>::swapCols(const int colI,const int colJ)
 template<typename T> 
 void
 Matrix<T>::zeroMatrix()
-  /*! 
+  /** 
     Zeros all elements of the matrix 
   */
 {
@@ -476,7 +476,7 @@ Matrix<T>::zeroMatrix()
 template<typename T> 
 void
 Matrix<T>::identityMatrix()
-  /*!
+  /**
     Makes the matrix an idenity matrix.
     Zeros all the terms outside of the square
   */
@@ -492,16 +492,16 @@ template<typename T>
 void
 Matrix<T>::rotate(const double tau,const double s,const int i,const int j,
 		  const int k,const int m)
-  /*!
+  /**
     Applies a rotation to a particular point of tan(theta)=tau.
     Note that you need both sin(theta) and tan(theta) because of 
     sign preservation. 
-    \param tau :: tan(theta) 
-    \param s :: sin(theta)
-    \param i ::  first index (xpos) 
-    \param j ::  first index (ypos) 
-    \param k ::  second index (xpos) 
-    \param m ::  second index (ypos) 
+    @param tau :: tan(theta) 
+    @param s :: sin(theta)
+    @param i ::  first index (xpos) 
+    @param j ::  first index (ypos) 
+    @param k ::  second index (xpos) 
+    @param m ::  second index (ypos) 
    */
 {
   const T gg=V[i][j];
@@ -514,12 +514,12 @@ Matrix<T>::rotate(const double tau,const double s,const int i,const int j,
 template<typename T>
 Matrix<T>
 Matrix<T>::fDiagonal(const std::vector<T>& Dvec) const
-  /*!
+  /**
     Calculate the forward diagonal product.
     Construct a matrix based on  Dvec * This, 
     where Dvec is made into a diagonal matrix.
-    \param Dvec :: diagonal matrix (just centre points)
-    \return D*this
+    @param Dvec :: diagonal matrix (just centre points)
+    @return D*this
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -539,13 +539,13 @@ Matrix<T>::fDiagonal(const std::vector<T>& Dvec) const
 template<typename T>
 Matrix<T>
 Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
-  /*!
+  /**
     Calculate the backward diagonal product.
     Construct a matrix based on 
     This * Dvec, where Dvec is made into a diagonal 
     matrix.
-    \param Dvec :: diagonal matrix (just centre points)
-    \return this*D
+    @param Dvec :: diagonal matrix (just centre points)
+    @return this*D
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -567,10 +567,10 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
 template<typename T>
 Matrix<T>
 Matrix<T>::Tprime() const
-  /*! 
+  /** 
     Transpose the matrix : 
     Has transpose for a square matrix case.
-    \return M^T
+    @return M^T
   */
 {
   if (!nx*ny)
@@ -595,10 +595,10 @@ Matrix<T>::Tprime() const
 template<typename T>
 Matrix<T>&
 Matrix<T>::Transpose()
-  /*! 
+  /** 
     Transpose the matrix : 
     Has a inplace transpose for a square matrix case.
-    \return this^T
+    @return this^T
   */
 {
   if (!nx*ny)
@@ -639,9 +639,9 @@ Matrix<T>::Transpose()
 template<>
 int
 Matrix<int>::GaussJordan(Geometry::Matrix<int>&)
-  /*!
+  /**
     Not valid for Integer
-    \return zero
+    @return zero
   */
 {
   return 0;
@@ -650,12 +650,12 @@ Matrix<int>::GaussJordan(Geometry::Matrix<int>&)
 template<typename T>
 int
 Matrix<T>::GaussJordan(Matrix<T>& B)
-  /*!
+  /**
     Invert this Matrix and solve the 
     form such that if A.x=B then  solve to generate x.  
     This requires that B is B[A.nx][Any]
     The result is placed back in B
-    \return the calculation result
+    @return the calculation result
    */
 {
   // check for input errors
@@ -738,15 +738,15 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
 template<typename T>
 std::vector<T>
 Matrix<T>::Faddeev(Matrix<T>& InvOut)
-  /*!
+  /**
     Return the polynominal for the matrix
     and the inverse. 
     The polynomial is such that
     \f[
       det(sI-A)=s^n+a_{n-1}s^{n-1} \dots +a_0
     \f]
-    \param InvOut ::: output 
-    \return Matrix self Polynomial (low->high coefficient order)
+    @param InvOut ::: output 
+    @return Matrix self Polynomial (low->high coefficient order)
   */
 {
   if (nx!=ny)
@@ -782,10 +782,10 @@ Matrix<T>::Faddeev(Matrix<T>& InvOut)
 template<typename T>
 T
 Matrix<T>::Invert()
-  /*!
+  /**
     If the Matrix is square then invert the matrix
     using LU decomposition
-    \returns Determinate (0 if the matrix is singular)
+    @return Determinate (0 if the matrix is singular)
   */
 {
   if (nx!=ny && nx<1)
@@ -820,9 +820,9 @@ Matrix<T>::Invert()
 template<typename T>
 T
 Matrix<T>::determinant() const
-  /*!
+  /**
     Calculate the derminant of the matrix
-    \return Determinant of matrix.
+    @return Determinant of matrix.
   */
 {
   if (nx!=ny)
@@ -837,11 +837,11 @@ Matrix<T>::determinant() const
 template<typename T>
 T
 Matrix<T>::factor()
-  /*! 
+  /** 
      Gauss jordan diagonal factorisation 
      The diagonal is left as the values, 
      the lower part is zero.
-     \return the factored matrix
+     @return the factored matrix
   */
 {
   if (nx!=ny || nx<1)
@@ -890,7 +890,7 @@ Matrix<T>::factor()
 template<typename T>
 void 
 Matrix<T>::normVert()
-  /*!
+  /**
     Normalise EigenVectors
     Assumes that they have already been calculated
   */
@@ -910,9 +910,9 @@ Matrix<T>::normVert()
 template<typename T>
 T
 Matrix<T>::compSum() const
-  /*!
+  /**
     Add up each component sums for the matrix
-    \return \f$ \sum_i \sum_j V_{ij}^2 \f$
+    @return \f$ \sum_i \sum_j V_{ij}^2 \f$
    */
 {
   T sum(0);
@@ -925,11 +925,11 @@ Matrix<T>::compSum() const
 template<typename T>
 void 
 Matrix<T>::lubcmp(int* rowperm,int& interchange)
-  /*!
+  /**
     Find biggest pivot and move to top row. Then
     divide by pivot.
-    \param interchange :: odd/even nterchange (+/-1)
-    \param rowperm :: row permuations [nx values]
+    @param interchange :: odd/even nterchange (+/-1)
+    @param rowperm :: row permuations [nx values]
   */
 {
   int imax(0),j,k;
@@ -1010,7 +1010,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
 template<typename T>
 void 
 Matrix<T>::lubksb(const int* rowperm,double* b)
-  /*!
+  /**
     Impliments a separation of the Matrix
     into a triangluar matrix
   */
@@ -1043,7 +1043,7 @@ Matrix<T>::lubksb(const int* rowperm,double* b)
 template<typename T>
 void
 Matrix<T>::averSymmetric()
-  /*!
+  /**
     Simple function to create an average symmetric matrix
     out of the Matrix
   */
@@ -1061,9 +1061,9 @@ Matrix<T>::averSymmetric()
 template<typename T> 
 std::vector<T>
 Matrix<T>::Diagonal() const
-  /*!
+  /**
     Returns the diagonal form as a vector
-    \returns Diagonal elements
+    @return Diagonal elements
   */
 {
   const int Msize=(ny>nx) ? nx : ny;
@@ -1076,9 +1076,9 @@ Matrix<T>::Diagonal() const
 template<typename T> 
 T
 Matrix<T>::Trace() const
-  /*!
+  /**
     Calculates the trace of the matrix
-    \returns Trace of matrix 
+    @return Trace of matrix 
   */
 {
   const int Msize=(ny>nx) ? nx : ny;
@@ -1091,10 +1091,10 @@ Matrix<T>::Trace() const
 template<typename T> 
 void
 Matrix<T>::sortEigen(Matrix<T>& DiagMatrix) 
-  /*!
+  /**
     Sorts the eigenvalues into increasing
     size. Moves the EigenVectors correspondingly
-    \param DiagMatrix :: matrix of the EigenValues
+    @param DiagMatrix :: matrix of the EigenValues
   */
 {
   if (ny!=nx || nx!=DiagMatrix.nx || nx!=DiagMatrix.ny)
@@ -1118,11 +1118,11 @@ Matrix<T>::sortEigen(Matrix<T>& DiagMatrix)
 template<typename T>
 int 
 Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
-  /*!
+  /**
     Attempt to diagonalise the matrix IF symmetric
-    \param EigenVec :: (output) the Eigenvectors matrix 
-    \param DiagMatrix  :: the diagonal matrix of eigenvalues 
-    \returns :: 1  on success 0 on failure
+    @param EigenVec :: (output) the Eigenvectors matrix 
+    @param DiagMatrix :: the diagonal matrix of eigenvalues 
+    @return :: 1  on success 0 on failure
   */
 {
   double theta,tresh,tanAngle,cosAngle,sinAngle;
@@ -1239,7 +1239,7 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 template<typename T>
 void
 Matrix<T>::print() const
-  /*! 
+  /** 
     Simple print out routine 
    */
 {
@@ -1250,10 +1250,10 @@ Matrix<T>::print() const
 template<typename T>
 void
 Matrix<T>::write(std::ostream& Fh,const int blockCnt) const
-  /*!
+  /**
     Write out function for blocks of 10 Columns 
-    \param Fh :: file stream for output
-    \param blockCnt :: number of columns per line (0 == full)
+    @param Fh :: file stream for output
+    @param blockCnt :: number of columns per line (0 == full)
   */
 {
 
@@ -1286,9 +1286,9 @@ Matrix<T>::write(std::ostream& Fh,const int blockCnt) const
 template<typename T>
 std::string
 Matrix<T>::str() const
-  /*!
+  /**
     Convert the matrix into a simple linear string expression 
-    \returns String value of output
+    @return String value of output
   */
 {
   std::ostringstream cx;

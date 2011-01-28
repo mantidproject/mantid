@@ -6,7 +6,7 @@
 #include <GL/gl.h>
 #include <string>
 
-/*!
+/**
   \class  GLObject
   \brief  Interface for OpenGL object stored in a display list
   \author Chapon Laurent & Srikanth Nagella

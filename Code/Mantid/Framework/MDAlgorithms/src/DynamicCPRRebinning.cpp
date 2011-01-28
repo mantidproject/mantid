@@ -19,7 +19,7 @@ public:
 };
 
 //
-/*! function calculates min and max values of the array of nPoints points (vertices of hypercube)
+/** function calculates min and max values of the array of nPoints points (vertices of hypercube)
  *
  */
 void minmax(double &rMin,double &rMax,const std::vector<double> &box)

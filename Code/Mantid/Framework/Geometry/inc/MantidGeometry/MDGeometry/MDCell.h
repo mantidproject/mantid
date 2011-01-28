@@ -1,7 +1,7 @@
 #ifndef MDCell_H_
 #define MDCell_H_
 
-/*! Abstract type to represent a group of multidimensional pixel/points. 
+/** Abstract type to represent a group of multidimensional pixel/points. 
 *   This type may not be a suitable pure virtual type in future iterations. Future implementations should be non-abstract.
 
     @author Owen Arnold, RAL ISIS

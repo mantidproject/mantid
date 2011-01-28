@@ -1,7 +1,7 @@
 #ifndef MANTIDOBJECT_H_
 #define MANTIDOBJECT_H_
 #include "GLObject.h"
-/*!
+/**
   \class  MantidObject
   \brief  Mantid Objent wrapper class for rendering in OpenGL
   \author Srikanth Nagella

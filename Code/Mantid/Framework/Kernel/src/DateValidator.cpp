@@ -26,8 +26,8 @@ IValidator<std::string> *DateValidator::clone()
 }
 
 /** Checks the validity of date string ,expected format is "DD/MM/YYYY"
- *  @param sDate expected date format
- *  @param error  string which describes the error
+ *  @param sDate :: expected date format
+ *  @param error ::  string which describes the error
  *  @return  tm structure with the date information filled in
  */
 struct tm DateValidator::getTimevalue(const std::string& sDate, std::string & error) const
@@ -103,7 +103,7 @@ struct tm DateValidator::getTimevalue(const std::string& sDate, std::string & er
 }
 
 /** Checks the given value is a valid date
- *  @param value input date property to validate
+ *  @param value :: input date property to validate
  *  @return a string which describes the error else ""
  */
 std::string DateValidator::checkValidity(const std::string& value) const

@@ -67,9 +67,9 @@ public:
 
   //------------------------------------------------------------------------------------
   /** Open a file and keep a handle to the file
-   * @param filename full path to open
-   * @throws runtime_error if the file size is not an even multiple of the type size
-   * @throws invalid_argument if the file does not exist
+   * @param filename :: full path to open
+   * @throw runtime_error if the file size is not an even multiple of the type size
+   * @throw invalid_argument if the file does not exist
    * */
   void open(std::string filename)
   {
@@ -150,7 +150,7 @@ public:
   //-----------------------------------------------------------------------------
   /** Get a buffer size for loading blocks of data.
    * @param num_items
-   * @return the buffer size
+::    * @return the buffer size
    */
   size_t getBufferSize(const size_t num_items)
   {
@@ -205,7 +205,7 @@ public:
   /**
    * Loads the entire contents of the file into a std::vector.
    * The file is closed once done.
-   * @param data The contents to load into the file
+   * @param data :: The contents to load into the file
    */
   void loadAllInto(std::vector<T> &data)
   {

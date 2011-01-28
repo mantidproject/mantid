@@ -12,10 +12,10 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 
   /// Calculate value of cost function from observed and calculated values
   /// note yCal modified for computational efficiency
-  /// @param yData Array of yData
-  /// @param inverseError Array of inverse error values
-  /// @param yCal Calculated y
-  /// @param n The number of points 
+  /// @param yData :: Array of yData
+  /// @param inverseError :: Array of inverse error values
+  /// @param yCal :: Calculated y
+  /// @param n :: The number of points 
   /// @return The calculated cost value
   double CostFuncLeastSquares::val(const double* yData, const double* inverseError, double* yCal, const int& n)
   {

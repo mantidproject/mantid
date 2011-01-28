@@ -41,7 +41,7 @@ namespace Mantid
 
     /**
      * Copy constructor
-     * @param A The object to initialise this copy from
+     * @param A :: The object to initialise this copy from
      */
     Object::Object(const Object& A) :
       ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
@@ -193,7 +193,7 @@ namespace Mantid
     /*
      * Calcluate if there are any complementary components in
      * the object. That is lines with #(....)
-     * @throws ColErr::ExBase :: Error with processing
+     * @throw ColErr::ExBase :: Error with processing
      * @param Ln :: Input string must:  ID Mat {Density}  {rules}
      * @param Cnum :: Number for cell since we don't have one
      * @retval 0 on no work to do
@@ -372,7 +372,7 @@ namespace Mantid
 
     /**
     * Takes a Rule item and makes it a complementary group
-    * @param RItem to encapsulate
+    * @param RItem :: to encapsulate
     * @returns the complementary group
     */
     CompGrp* Object::procComp(Rule* RItem) const
@@ -485,7 +485,7 @@ namespace Mantid
     /**
     * Uses the topRule* to create a surface list
     * by iterating throught the tree
-    * @param outFlag Sends output to standard error if true
+    * @param outFlag :: Sends output to standard error if true
     * @return 1 (should be number of surfaces)
     */
     int Object::createSurfaceList(const int outFlag)
@@ -1250,11 +1250,11 @@ namespace Mantid
 
     /**
     * Calculate the solid angle for a cylinder using triangulation.
-    * @param observer The observer's point
-    * @param centre The centre vector
-    * @param axis The axis vector
-    * @param radius The radius
-    * @param height The height
+    * @param observer :: The observer's point
+    * @param centre :: The centre vector
+    * @param axis :: The axis vector
+    * @param radius :: The radius
+    * @param height :: The height
     * @returns The solid angle value
     */
     double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre,
@@ -1397,11 +1397,11 @@ namespace Mantid
 
     /**
     * Calculate the solid angle for a cone using triangulation.
-    * @param observer The observer's point
-    * @param centre The centre vector
-    * @param axis The axis vector
-    * @param radius The radius
-    * @param height The height
+    * @param observer :: The observer's point
+    * @param centre :: The centre vector
+    * @param axis :: The axis vector
+    * @param radius :: The radius
+    * @param height :: The height
     * @returns The solid angle value
     */
     double Object::ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre,
@@ -1629,7 +1629,7 @@ namespace Mantid
       zmin = AABBzMin;
     }
 
-    /*!
+    /**
     * Takes input axis aligned bounding box max and min points and stores these as the
     * bounding box for the object. Can be used when getBoundingBox fails and bounds are
     * known.
@@ -1664,10 +1664,10 @@ namespace Mantid
       m_boundingBox = BoundingBox();
     }
 
-    /*!
+    /**
     Try to find a point that lies within (or on) the object
-    \param point :: on exit set to the point value, if found
-    \return 1 if point found, 0 otherwise
+    @param point :: on exit set to the point value, if found
+    @return 1 if point found, 0 otherwise
     */
     int Object::getPointInObject(Geometry::V3D& point) const
     {

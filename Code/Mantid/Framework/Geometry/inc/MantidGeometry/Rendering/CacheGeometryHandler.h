@@ -10,7 +10,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class CacheGeometryHandler
 		\brief Place holder for geometry triangulation and rendering with caching triangles.
 		\author Srikanth Nagella

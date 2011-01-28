@@ -132,7 +132,7 @@ public:
     QSet<QtProperty *> m_properties;
 };
 
-/*!
+/**
     \class QtProperty
 
     \brief The QtProperty class encapsulates an instance of a property.
@@ -176,7 +176,7 @@ public:
     \sa QtAbstractPropertyManager, QtBrowserItem
 */
 
-/*!
+/**
     Creates a property with the given \a manager.
 
     This constructor is only useful when creating a custom QtProperty
@@ -192,7 +192,7 @@ QtProperty::QtProperty(QtAbstractPropertyManager *manager)
     d_ptr->q_ptr = this;
 }
 
-/*!
+/**
     Destroys this property.
 
     Note that subproperties are detached but not destroyed, i.e. they
@@ -225,7 +225,7 @@ QtProperty::~QtProperty()
     delete d_ptr;
 }
 
-/*!
+/**
     Returns the set of subproperties.
 
     Note that subproperties are not owned by \e this property, but by
@@ -238,7 +238,7 @@ QList<QtProperty *> QtProperty::subProperties() const
     return d_ptr->m_subItems;
 }
 
-/*!
+/**
     Returns a pointer to the manager that owns this property.
 */
 QtAbstractPropertyManager *QtProperty::propertyManager() const
@@ -246,7 +246,7 @@ QtAbstractPropertyManager *QtProperty::propertyManager() const
     return d_ptr->m_manager;
 }
 
-/*!
+/**
     Returns the property's  tool tip.
 
     \sa setToolTip()
@@ -256,7 +256,7 @@ QString QtProperty::toolTip() const
     return d_ptr->m_toolTip;
 }
 
-/*!
+/**
     Returns the property's status tip.
 
     \sa setStatusTip()
@@ -266,7 +266,7 @@ QString QtProperty::statusTip() const
     return d_ptr->m_statusTip;
 }
 
-/*!
+/**
     Returns the property's "What's This" help text.
 
     \sa setWhatsThis()
@@ -276,7 +276,7 @@ QString QtProperty::whatsThis() const
     return d_ptr->m_whatsThis;
 }
 
-/*!
+/**
     Returns the property's name.
 
     \sa setPropertyName()
@@ -286,7 +286,7 @@ QString QtProperty::propertyName() const
     return d_ptr->m_name;
 }
 
-/*!
+/**
     Returns whether the property is enabled.
 
     \sa setEnabled()
@@ -296,7 +296,7 @@ bool QtProperty::isEnabled() const
     return d_ptr->m_enabled;
 }
 
-/*!
+/**
     Returns whether the property is modified.
 
     \sa setModified()
@@ -306,7 +306,7 @@ bool QtProperty::isModified() const
     return d_ptr->m_modified;
 }
 
-/*!
+/**
     Returns whether the property has a value.
 
     \sa QtAbstractPropertyManager::hasValue()
@@ -316,7 +316,7 @@ bool QtProperty::hasValue() const
     return d_ptr->m_manager->hasValue(this);
 }
 
-/*!
+/**
     Returns an icon representing the current state of this property.
 
     If the given property type can not generate such an icon, this
@@ -329,7 +329,7 @@ QIcon QtProperty::valueIcon() const
     return d_ptr->m_manager->valueIcon(this);
 }
 
-/*!
+/**
     Returns a string representing the current state of this property.
 
     If the given property type can not generate such a string, this
@@ -342,7 +342,7 @@ QString QtProperty::valueText() const
     return d_ptr->m_manager->valueText(this);
 }
 
-/*!
+/**
     Sets the property's tool tip to the given \a text.
 
     \sa toolTip()
@@ -356,7 +356,7 @@ void QtProperty::setToolTip(const QString &text)
     propertyChanged();
 }
 
-/*!
+/**
     Sets the property's status tip to the given \a text.
 
     \sa statusTip()
@@ -370,7 +370,7 @@ void QtProperty::setStatusTip(const QString &text)
     propertyChanged();
 }
 
-/*!
+/**
     Sets the property's "What's This" help text to the given \a text.
 
     \sa whatsThis()
@@ -384,7 +384,7 @@ void QtProperty::setWhatsThis(const QString &text)
     propertyChanged();
 }
 
-/*!
+/**
     \fn void QtProperty::setPropertyName(const QString &name)
 
     Sets the property's  name to the given \a name.
@@ -400,7 +400,7 @@ void QtProperty::setPropertyName(const QString &text)
     propertyChanged();
 }
 
-/*!
+/**
     Enables or disables the property according to the passed \a enable value.
 
     \sa isEnabled()
@@ -414,7 +414,7 @@ void QtProperty::setEnabled(bool enable)
     propertyChanged();
 }
 
-/*!
+/**
     Sets the property's modified state according to the passed \a modified value.
 
     \sa isModified()
@@ -428,7 +428,7 @@ void QtProperty::setModified(bool modified)
     propertyChanged();
 }
 
-/*!
+/**
     Appends the given \a property to this property's subproperties.
 
     If the given \a property already is added, this function does
@@ -444,7 +444,7 @@ void QtProperty::addSubProperty(QtProperty *property)
     insertSubProperty(property, after);
 }
 
-/*!
+/**
     \fn void QtProperty::insertSubProperty(QtProperty *property, QtProperty *precedingProperty)
 
     Inserts the given \a property after the specified \a
@@ -501,7 +501,7 @@ void QtProperty::insertSubProperty(QtProperty *property,
     d_ptr->m_manager->d_ptr->propertyInserted(property, this, properAfterProperty);
 }
 
-/*!
+/**
     Removes the given \a property from the list of subproperties
     without deleting it.
 
@@ -527,7 +527,7 @@ void QtProperty::removeSubProperty(QtProperty *property)
     }
 }
 
-/*!
+/**
     \internal
 */
 void QtProperty::propertyChanged()
@@ -563,7 +563,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     emit q_ptr->propertyInserted(property, parentProperty, afterProperty);
 }
 
-/*!
+/**
     \class QtAbstractPropertyManager
 
     \brief The QtAbstractPropertyManager provides an interface for
@@ -614,7 +614,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa QtAbstractEditorFactoryBase, QtAbstractPropertyBrowser, QtProperty
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyManager::propertyInserted(QtProperty *newProperty,
                 QtProperty *parentProperty, QtProperty *precedingProperty)
 
@@ -631,7 +631,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa QtAbstractPropertyBrowser::itemInserted()
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyManager::propertyChanged(QtProperty *property)
 
     This signal is emitted whenever a property's data changes, passing
@@ -643,7 +643,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa QtAbstractPropertyBrowser::itemChanged()
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyManager::propertyRemoved(QtProperty *property, QtProperty *parent)
 
     This signal is emitted when a subproperty is removed, passing
@@ -656,7 +656,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa QtAbstractPropertyBrowser::itemRemoved()
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyManager::propertyDestroyed(QtProperty *property)
 
     This signal is emitted when the specified \a property is about to
@@ -668,7 +668,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa clear(), uninitializeProperty()
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyBrowser::currentItemChanged(QtBrowserItem *current)
 
     This signal is emitted when the current item changes. The current item is specified by \a current.
@@ -676,7 +676,7 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     \sa QtAbstractPropertyBrowser::setCurrentItem()
 */
 
-/*!
+/**
     Creates an abstract property manager with the given \a parent.
 */
 QtAbstractPropertyManager::QtAbstractPropertyManager(QObject *parent)
@@ -687,7 +687,7 @@ QtAbstractPropertyManager::QtAbstractPropertyManager(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys the manager. All properties created by the manager are
     destroyed.
 */
@@ -697,7 +697,7 @@ QtAbstractPropertyManager::~QtAbstractPropertyManager()
     delete d_ptr;
 }
 
-/*!
+/**
     Destroys all the properties that this manager has created.
 
     \sa propertyDestroyed(), uninitializeProperty()
@@ -711,7 +711,7 @@ void QtAbstractPropertyManager::clear() const
     }
 }
 
-/*!
+/**
     Returns the set of properties created by this manager.
 
     \sa addProperty()
@@ -721,7 +721,7 @@ QSet<QtProperty *> QtAbstractPropertyManager::properties() const
     return d_ptr->m_properties;
 }
 
-/*!
+/**
     Returns whether the given \a property has a value.
 
     The default implementation of this function returns true.
@@ -734,7 +734,7 @@ bool QtAbstractPropertyManager::hasValue(const QtProperty *property) const
     return true;
 }
 
-/*!
+/**
     Returns an icon representing the current state of the given \a
     property.
 
@@ -749,7 +749,7 @@ QIcon QtAbstractPropertyManager::valueIcon(const QtProperty *property) const
     return QIcon();
 }
 
-/*!
+/**
     Returns a string representing the current state of the given \a
     property.
 
@@ -764,7 +764,7 @@ QString QtAbstractPropertyManager::valueText(const QtProperty *property) const
     return QString();
 }
 
-/*!
+/**
     Creates a property with the given \a name which then is owned by this manager.
 
     Internally, this function calls the createProperty() and
@@ -783,7 +783,7 @@ QtProperty *QtAbstractPropertyManager::addProperty(const QString &name)
     return property;
 }
 
-/*!
+/**
     Creates a property.
 
     The base implementation produce QtProperty instances; Reimplement
@@ -797,7 +797,7 @@ QtProperty *QtAbstractPropertyManager::createProperty()
     return new QtProperty(this);
 }
 
-/*!
+/**
     \fn void QtAbstractPropertyManager::initializeProperty(QtProperty *property) = 0
 
     This function is called whenever a new valid property pointer has
@@ -816,7 +816,7 @@ QtProperty *QtAbstractPropertyManager::createProperty()
     \sa addProperty(), createProperty()
 */
 
-/*!
+/**
     This function is called just before the specified \a property is destroyed.
 
     The purpose is to let the property manager know that the \a
@@ -832,7 +832,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
 
 ////////////////////////////////////
 
-/*!
+/**
     \class QtAbstractEditorFactoryBase
 
     \brief The QtAbstractEditorFactoryBase provides an interface for
@@ -873,7 +873,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa QtAbstractPropertyManager, QtAbstractPropertyBrowser
 */
 
-/*!
+/**
     \fn virtual QWidget *QtAbstractEditorFactoryBase::createEditor(QtProperty *property,
         QWidget *parent) = 0
 
@@ -887,13 +887,13 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa  QtAbstractEditorFactory::createEditor()
 */
 
-/*!
+/**
     \fn QtAbstractEditorFactoryBase::QtAbstractEditorFactoryBase(QObject *parent = 0)
 
     Creates an abstract editor factory with the given \a parent.
 */
 
-/*!
+/**
     \fn virtual void QtAbstractEditorFactoryBase::breakConnection(QtAbstractPropertyManager *manager) = 0
 
     \internal
@@ -904,7 +904,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     QtAbstractEditorFactory::disconnectPropertyManager() which gives you access to particular manager subclass.
 */
 
-/*!
+/**
     \fn virtual void QtAbstractEditorFactoryBase::managerDestroyed(QObject *manager) = 0
 
     \internal
@@ -915,7 +915,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     QtAbstractEditorFactory template subclass.
 */
 
-/*!
+/**
     \class QtAbstractEditorFactory
 
     \brief The QtAbstractEditorFactory is the base template class for editor
@@ -982,7 +982,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa QtAbstractEditorFactoryBase, QtAbstractPropertyManager
 */
 
-/*!
+/**
     \fn QtAbstractEditorFactory::QtAbstractEditorFactory(QObject *parent = 0)
 
     Creates an editor factory with the given \a parent.
@@ -990,14 +990,14 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa addPropertyManager()
 */
 
-/*!
+/**
     \fn QWidget *QtAbstractEditorFactory::createEditor(QtProperty *property, QWidget *parent)
 
     Creates an editing widget (with the given \a parent) for the given
     \a property.
 */
 
-/*!
+/**
     \fn void QtAbstractEditorFactory::addPropertyManager(PropertyManager *manager)
 
     Adds the given \a manager to this factory's set of managers,
@@ -1010,7 +1010,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa propertyManagers(), removePropertyManager()
 */
 
-/*!
+/**
     \fn void QtAbstractEditorFactory::removePropertyManager(PropertyManager *manager)
 
     Removes the given \a manager from this factory's set of
@@ -1020,7 +1020,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa propertyManagers(), addPropertyManager()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractEditorFactory::connectPropertyManager(PropertyManager *manager) = 0
 
     Connects this factory to the given \a manager's signals.  The
@@ -1037,7 +1037,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa propertyManagers(), disconnectPropertyManager()
 */
 
-/*!
+/**
     \fn virtual QWidget *QtAbstractEditorFactory::createEditor(PropertyManager *manager, QtProperty *property,
                 QWidget *parent) = 0
 
@@ -1057,7 +1057,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa connectPropertyManager()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractEditorFactory::disconnectPropertyManager(PropertyManager *manager) = 0
 
     Disconnects this factory from the given \a manager's signals. The
@@ -1069,7 +1069,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa propertyManagers(), connectPropertyManager()
 */
 
-/*!
+/**
     \fn QSet<PropertyManager *> QtAbstractEditorFactory::propertyManagers() const
 
     Returns the factory's set of associated managers.  The
@@ -1079,7 +1079,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa addPropertyManager(), removePropertyManager()
 */
 
-/*!
+/**
     \fn PropertyManager *QtAbstractEditorFactory::propertyManager(QtProperty *property) const
 
     Returns the property manager for the given \a property, or 0 if
@@ -1092,7 +1092,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \sa propertyManagers()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractEditorFactory::managerDestroyed(QObject *manager)
 
     \internal
@@ -1133,7 +1133,7 @@ void QtBrowserItemPrivate::removeChild(QtBrowserItem *index)
 }
 
 
-/*!
+/**
     \class QtBrowserItem
 
     \brief The QtBrowserItem class represents a property in
@@ -1153,7 +1153,7 @@ void QtBrowserItemPrivate::removeChild(QtBrowserItem *index)
     \sa QtAbstractPropertyBrowser, QtProperty
 */
 
-/*!
+/**
     Returns the property which is accosiated with this item. Note that
     several items can be associated with the same property instance in
     the same property browser.
@@ -1166,7 +1166,7 @@ QtProperty *QtBrowserItem::property() const
     return d_ptr->m_property;
 }
 
-/*!
+/**
     Returns the parent item of \e this item. Returns 0 if \e this item
     is associated with top-level property in item's property browser.
 
@@ -1178,7 +1178,7 @@ QtBrowserItem *QtBrowserItem::parent() const
     return d_ptr->m_parent;
 }
 
-/*!
+/**
     Returns the children items of \e this item. The properties
     reproduced from children items are always the same as
     reproduced from associated property' children, for example:
@@ -1198,7 +1198,7 @@ QList<QtBrowserItem *> QtBrowserItem::children() const
     return d_ptr->m_children;
 }
 
-/*!
+/**
     Returns the property browser which owns \e this item.
 */
 
@@ -1512,7 +1512,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     //q_ptr->propertyChanged(property);
 }
 
-/*!
+/**
     \class QtAbstractPropertyBrowser
 
     \brief QtAbstractPropertyBrowser provides a base class for
@@ -1606,7 +1606,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \sa QtAbstractPropertyManager, QtAbstractEditorFactoryBase
 */
 
-/*!
+/**
     \fn void QtAbstractPropertyBrowser::setFactoryForManager(PropertyManager *manager,
                     QtAbstractEditorFactory<PropertyManager> *factory)
 
@@ -1650,7 +1650,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \sa unsetFactoryForManager()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractPropertyBrowser::itemInserted(QtBrowserItem *insertedItem,
         QtBrowserItem *precedingItem) = 0
 
@@ -1671,7 +1671,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \sa insertProperty(), addProperty()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractPropertyBrowser::itemRemoved(QtBrowserItem *item) = 0
 
     This function is called to update the widget whenever a property
@@ -1689,7 +1689,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \sa removeProperty()
 */
 
-/*!
+/**
     \fn virtual void QtAbstractPropertyBrowser::itemChanged(QtBrowserItem *item) = 0
 
     This function is called whenever a property's data changes,
@@ -1707,7 +1707,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \sa QtProperty, items()
 */
 
-/*!
+/**
     Creates an abstract property browser with the given \a parent.
 */
 QtAbstractPropertyBrowser::QtAbstractPropertyBrowser(QWidget *parent)
@@ -1718,7 +1718,7 @@ QtAbstractPropertyBrowser::QtAbstractPropertyBrowser(QWidget *parent)
 
 }
 
-/*!
+/**
     Destroys the property browser, and destroys all the items that were
     created by this property browser.
 
@@ -1739,7 +1739,7 @@ QtAbstractPropertyBrowser::~QtAbstractPropertyBrowser()
     delete d_ptr;
 }
 
-/*!
+/**
     Returns the property browser's list of top level properties.
 
     To traverse the subproperties, use the QtProperty::subProperties()
@@ -1752,7 +1752,7 @@ QList<QtProperty *> QtAbstractPropertyBrowser::properties() const
     return d_ptr->m_subItems;
 }
 
-/*!
+/**
     Returns the property browser's list of all items associated
     with the given \a property.
 
@@ -1766,7 +1766,7 @@ QList<QtBrowserItem *> QtAbstractPropertyBrowser::items(QtProperty *property) co
     return d_ptr->m_propertyToIndexes.value(property);
 }
 
-/*!
+/**
     Returns the top-level items associated with the given \a property.
 
     Returns 0 if \a property wasn't inserted into this property
@@ -1780,7 +1780,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::topLevelItem(QtProperty *property) con
     return d_ptr->m_topLevelPropertyToIndex.value(property);
 }
 
-/*!
+/**
     Returns the list of top-level items.
 
     \sa topLevelItem()
@@ -1791,7 +1791,7 @@ QList<QtBrowserItem *> QtAbstractPropertyBrowser::topLevelItems() const
     return d_ptr->m_topLevelIndexes;
 }
 
-/*!
+/**
     Removes all the properties from the editor, but does not delete
     them since they can still be used in other editors.
 
@@ -1808,7 +1808,7 @@ void QtAbstractPropertyBrowser::clear()
     }
 }
 
-/*!
+/**
     Appends the given \a property (and its subproperties) to the
     property browser's list of top level properties. Returns the item
     created by property browser which is associated with the \a property.
@@ -1828,7 +1828,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::addProperty(QtProperty *property)
     return insertProperty(property, afterProperty);
 }
 
-/*!
+/**
     \fn QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
             QtProperty *afterProperty)
 
@@ -1875,7 +1875,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     return topLevelItem(property);
 }
 
-/*!
+/**
     Removes the specified \a property (and its subproperties) from the
     property browser's list of top level properties. All items
     that were associated with the given \a property and its children
@@ -1910,7 +1910,7 @@ void QtAbstractPropertyBrowser::removeProperty(QtProperty *property)
     }
 }
 
-/*!
+/**
     Creates an editing widget (with the given \a parent) for the given
     \a property according to the previously established associations
     between property managers and editor factories.
@@ -1967,7 +1967,7 @@ bool QtAbstractPropertyBrowser::addFactory(QtAbstractPropertyManager *abstractMa
     return connectNeeded;
 }
 
-/*!
+/**
     Removes the association between the given \a manager and the
     factory bound to it, automatically calling the
     QtAbstractEditorFactory::removePropertyManager() function if necessary.
@@ -1998,7 +1998,7 @@ void QtAbstractPropertyBrowser::unsetFactoryForManager(QtAbstractPropertyManager
     }
 }
 
-/*!
+/**
     Returns the current item in the property browser.
 
     \sa setCurrentItem()
@@ -2008,7 +2008,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::currentItem() const
     return d_ptr->m_currentItem;
 }
 
-/*!
+/**
     Sets the current item in the property browser to \a item.
 
     \sa currentItem(), currentItemChanged()

@@ -61,10 +61,10 @@ namespace Mantid
     public:
       /** Constructor.
       *  Sets the property and workspace names but initialises the workspace pointer to null.
-      *  @param name The name to assign to the property
-      *  @param wsName The name of the workspace
-      *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
-      *  @param validator The (optional) validator to use for this property
+      *  @param name :: The name to assign to the property
+      *  @param wsName :: The name of the workspace
+      *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+      *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
@@ -76,10 +76,10 @@ namespace Mantid
 
       /** Constructor.
       *  Sets the property and workspace names but initialises the workspace pointer to null.
-      *  @param name The name to assign to the property
-      *  @param wsName The name of the workspace
-      *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
-      *  @param optional A boolean indicating whether the property is mandatory or not. Only matters 
+      *  @param name :: The name to assign to the property
+      *  @param wsName :: The name of the workspace
+      *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+      *  @param optional :: A boolean indicating whether the property is mandatory or not. Only matters 
       * for input properties
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
@@ -108,7 +108,7 @@ namespace Mantid
       }
 
       /** Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
-       * @param value The value to set to
+       * @param value :: The value to set to
        * @return assigned PropertyWithValue
        */
       virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
@@ -150,7 +150,7 @@ namespace Mantid
 
       /** Set the name of the workspace.
       *  Also tries to retrieve it from the AnalysisDataService.
-      *  @param value The new name for the workspace
+      *  @param value :: The new name for the workspace
       *  @return 
       */
       virtual std::string setValue( const std::string& value )

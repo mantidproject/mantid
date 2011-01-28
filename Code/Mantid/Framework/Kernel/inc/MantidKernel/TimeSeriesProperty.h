@@ -90,7 +90,7 @@ private:
 
 public:
   /** Constructor
-   *  @param name The name to assign to the property
+   *  @param name :: The name to assign to the property
    */
   explicit TimeSeriesProperty(const std::string &name) :
     Property(name, typeid(timeMap)), m_propertySeries(), m_size()
@@ -146,8 +146,8 @@ public:
    * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
    *  absolute time range.
    *
-   * @param start Absolute start time. Any log entries at times >= to this time are kept.
-   * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+   * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
+   * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
    */
   void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
@@ -176,8 +176,8 @@ public:
    * NOTE: If the input TSP has a single value, it is assumed to be a constant
    *  and so is not split, but simply copied to all outputs.
    *
-   * @param splitter a TimeSplitterType object containing the list of intervals and destinations.
-   * @param outputs A vector of output TimeSeriesProperty pointers of the same type.
+   * @param splitter :: a TimeSplitterType object containing the list of intervals and destinations.
+   * @param outputs :: A vector of output TimeSeriesProperty pointers of the same type.
    */
   void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
   {
@@ -400,8 +400,8 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
-   *  @param time The time as a boost::posix_time::ptime value
-   *  @param value The associated value
+   *  @param time :: The time as a boost::posix_time::ptime value
+   *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
   bool addValue(const Kernel::DateAndTime &time, const TYPE value)
@@ -412,8 +412,8 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
-   *  @param time The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
-   *  @param value The associated value
+   *  @param time :: The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
+   *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
   bool addValue(const std::string &time, const TYPE value)
@@ -423,8 +423,8 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
-   *  @param time The time as a time_t value
-   *  @param value The associated value
+   *  @param time :: The time as a time_t value
+   *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
   bool addValue(const std::time_t &time, const TYPE value)
@@ -584,7 +584,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Not implemented in this class
-   *  @throws Exception::NotImplementedError Not yet implemented
+   *  @throw Exception::NotImplementedError Not yet implemented
    * @return Nothing in this case
    */
   std::string setValue(const std::string&)
@@ -596,9 +596,9 @@ public:
   //-----------------------------------------------------------------------------------------------
   /** Clears and creates a TimeSeriesProperty from these parameters:
    *
-   *  @param start_time The reference time as a boost::posix_time::ptime value
-   *  @param time_sec A vector of time offset (from start_time) in seconds.
-   *  @param new_values A vector of values, each corresponding to the time offset in time_sec.
+   *  @param start_time :: The reference time as a boost::posix_time::ptime value
+   *  @param time_sec :: A vector of time offset (from start_time) in seconds.
+   *  @param new_values :: A vector of values, each corresponding to the time offset in time_sec.
    *    Vector sizes must match.
    */
   void create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec, const std::vector<TYPE> & new_values)
@@ -636,7 +636,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the value at a particular time
-   *  @param t time
+   *  @param t :: time
    *  @return Value at time \a t
    */
   TYPE getSingleValue(const DateAndTime& t) const
@@ -667,7 +667,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th value in an incredibly inefficient way.
-   *  @param n index
+   *  @param n :: index
    *  @return Value 
    */
   TYPE nthValue(int n) const
@@ -703,7 +703,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th valid time interval, in a very inefficient way.
-   *  @param n index
+   *  @param n :: index
    *  @return n-th time interval
    */
   TimeInterval nthInterval(int n) const
@@ -753,7 +753,7 @@ public:
   /** Divide the property into  allowed and disallowed time intervals according to \a filter.
    Repeated time-value pairs (two same time and value entries) mark the start of a gap in the values. 
    The gap ends and an allowed time interval starts when a single time-value is met.
-   @param filter The filter mask to apply
+   @param filter :: The filter mask to apply
    */
   void filterWith(const TimeSeriesProperty<bool>* filter)
   {
@@ -894,7 +894,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /**  Check if str has the right time format 
-   *   @param str The string to check
+   *   @param str :: The string to check
    *   @return True if the format is correct, false otherwise.
    */
   static bool isTimeString(const std::string &str)
@@ -927,7 +927,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /* Not implemented in this class
-   * @throws Exception::NotImplementedError Not yet implemented
+   * @throw Exception::NotImplementedError Not yet implemented
    */
   std::string getDefault() const
   {

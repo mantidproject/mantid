@@ -10,8 +10,8 @@ namespace API
 {
 
 /** Constructor
- *  @param length The length of this axis
- *  @param parentWorkspace A pointer to the workspace that holds this axis
+ *  @param length :: The length of this axis
+ *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
 RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace) : 
   NumericAxis(length),  m_parentWS(parentWorkspace)
@@ -22,8 +22,8 @@ RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace
 /** Private, specialised copy constructor. Needed because it's necessary to pass in
  *  a pointer to the parent of the new workspace, rather than having the copy point
  *  to the parent of the copied axis.
- *  @param right The axis to copy
- *  @param parentWorkspace A pointer to the parent workspace of the new axis
+ *  @param right :: The axis to copy
+ *  @param parentWorkspace :: A pointer to the parent workspace of the new axis
  */
 RefAxis::RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace) :
 NumericAxis(right), m_parentWS(parentWorkspace), m_size(right.m_size)
@@ -33,7 +33,7 @@ RefAxis::~RefAxis()
 {}
 
 /** Virtual constructor
- *  @param parentWorkspace A pointer to the workspace that will hold the new axis
+ *  @param parentWorkspace :: A pointer to the workspace that will hold the new axis
  *  @return A pointer to a copy of the Axis on which the method is called
  */
 Axis* RefAxis::clone(const MatrixWorkspace* const parentWorkspace)
@@ -67,7 +67,7 @@ void RefAxis::setValue(const int& index, const double& value)
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
- *  @param axis2 Reference to the axis to compare to
+ *  @param axis2 :: Reference to the axis to compare to
  *  @return true is self and second axis are equal
  */
 bool RefAxis::operator==(const Axis& axis2) const

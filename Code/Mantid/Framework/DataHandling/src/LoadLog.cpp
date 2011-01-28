@@ -405,8 +405,8 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
 }
 
 /** This method reads the.log file and creates timeseries property and sets that to the run object
- * @param logfile three column log(.log) file name.
- * @param run The run information object
+ * @param logfile :: three column log(.log) file name.
+ * @param run :: The run information object
  * @returns list of logfiles which exists as blockname in the .log file
  */
 std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Run& run)
@@ -529,7 +529,7 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
 }
 
 /** this method looks for file with second column(block column) name exists in the raw file directory
- * @param fileName -name of the file
+ * @param fileName :: -name of the file
  * @return True if the file exists
  */
 bool LoadLog::blockcolumnFileExists(const std::string& fileName)
@@ -539,8 +539,8 @@ bool LoadLog::blockcolumnFileExists(const std::string& fileName)
 }
 
 /** Takes as input a string and try to determine what type it is.
- *  @param s The input string
- *  @param s  string to be classified
+ *  @param s :: The input string
+ *  @param s ::  string to be classified
  *  @return A enum kind which tells what type the string is
  */
 LoadLog::kind LoadLog::classify(const std::string& s) const
@@ -566,7 +566,7 @@ LoadLog::kind LoadLog::classify(const std::string& s) const
 }
 
 /** change each element of the string to lower case
- * @param strToConvert The input string
+ * @param strToConvert :: The input string
  * @returns The string but with all characters in lower case
  */
 std::string LoadLog::stringToLower(std::string strToConvert)
@@ -576,7 +576,7 @@ std::string LoadLog::stringToLower(std::string strToConvert)
 }
 
 /** Checks whether filename is a simple text file
- * @param filename The filename to inspect
+ * @param filename :: The filename to inspect
  * @returns true if the filename has the .txt extension
  */
 bool LoadLog::isAscii(const std::string& filename)
@@ -603,7 +603,7 @@ bool LoadLog::isAscii(const std::string& filename)
 }
 
 /** check if first 19 characters of a string is date-time string according to yyyy-mm-ddThh:mm:ss
- * @param str The string to test
+ * @param str :: The string to test
  * @returns true if the strings format matched the expected date format
  */
 bool LoadLog::isDateTimeString(const std::string& str) const

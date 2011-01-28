@@ -75,7 +75,7 @@ namespace Mantid
 		}
 				
 		/**This method gets the input properties for the algorithm.
-		  * @param params - reference to inputs object
+		  * @param params :: reference to inputs object
 		 */
 		void CSearch::getInputProperties(CSearchParam& params)
 		{

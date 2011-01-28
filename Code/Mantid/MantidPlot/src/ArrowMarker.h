@@ -31,7 +31,7 @@
 
 #include "PlotEnrichement.h"
 
-/*!\brief Draws lines and arrows on a QwtPlot.
+/**\brief Draws lines and arrows on a QwtPlot.
  *
  * \section design Design Ideas
  * Move all the code for editing the end points from CanvasPicker here, so that we have it all in one place.
@@ -158,7 +158,7 @@ private:
 	//! What editing operation is in progress.
 	Operation d_op;
 
-	/*!\brief Difference between mouse position where a MoveBoth operation started and startPoint().
+	/**\brief Difference between mouse position where a MoveBoth operation started and startPoint().
 	 * When only one point is being moved, we can simply setStartPoint() or setEndPoint() to the
 	 * current mouse position, but when the editing starts in the middle of the line, we
 	 * need to remember this bit.

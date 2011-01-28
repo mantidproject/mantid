@@ -431,12 +431,12 @@ namespace Mantid
     }
 
     /** Load in a single spectrum taken from a NeXus file
-    *  @param tcbs     The vector containing the time bin boundaries
-    *  @param hist     The workspace index
-    *  @param i        The spectrum number
-    *  @param nxload   A reference to the MuonNeXusReader object
-    *  @param lengthIn The number of elements in a spectrum
-    *  @param localWorkspace A pointer to the workspace in which the data will be stored
+    *  @param tcbs ::     The vector containing the time bin boundaries
+    *  @param hist ::     The workspace index
+    *  @param i ::        The spectrum number
+    *  @param nxload ::   A reference to the MuonNeXusReader object
+    *  @param lengthIn :: The number of elements in a spectrum
+    *  @param localWorkspace :: A pointer to the workspace in which the data will be stored
     */
     void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& i,
       MuonNexusReader& nxload, const int lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
@@ -459,7 +459,7 @@ namespace Mantid
 
 
     /**  Log the run details from the file
-    * @param localWorkspace The workspace details to use
+    * @param localWorkspace :: The workspace details to use
     */
     void LoadMuonNexus::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
     {
@@ -631,8 +631,8 @@ namespace Mantid
 
       /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
-    *  @param nread - no.of bytes read
-    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @param nread :: no.of bytes read
+    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
     bool LoadMuonNexus::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -657,7 +657,7 @@ namespace Mantid
      
     }
     /**checks the file by opening it and reading few lines 
-    *  @param filePath name of the file inluding its path
+    *  @param filePath :: name of the file inluding its path
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadMuonNexus::fileCheck(const std::string& filePath)

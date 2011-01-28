@@ -382,7 +382,7 @@ void DiffractionFocussing2::execEvent()
 
 //=============================================================================
 /** Verify that all the contributing detectors to a spectrum belongs to the same group
- *  @param spectrum_number The spectrum number in the workspace
+ *  @param spectrum_number :: The spectrum number in the workspace
  *  @return Group number if successful otherwise return -1
  */
 int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
@@ -417,7 +417,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
 
 //=============================================================================
 /// Reads in the file with the grouping information
-/// @param groupingFileName The file that contains the group information
+/// @param groupingFileName :: The file that contains the group information
 ///
 void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName)
 {

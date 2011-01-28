@@ -13,7 +13,7 @@ namespace Mantid
     //---------------------------------------------------------
     /**
     * Query whether the given point is inside the bounding box within a tolerance defined by Mantid::Geometry::Tolerance.
-    * @param point The point to query
+    * @param point :: The point to query
     * @returns True if the point is within the bounding box, false otherwise
     */
     bool BoundingBox::isPointInside(const V3D & point) const
@@ -32,7 +32,7 @@ namespace Mantid
 
     /** 
     * Does a defined track intersect the bounding box
-    * @param track A test track It is assumed that this is outside the bounding box.
+    * @param track :: A test track It is assumed that this is outside the bounding box.
     * @returns True if the track intersects this bounding box, false otherwise.
     */
     bool BoundingBox::doesLineIntersect(const Track & track) const
@@ -42,8 +42,8 @@ namespace Mantid
 
     /** 
     * Does a line intersect the bounding box
-    * @param startPoint The starting point for the line. It is assumed that this is outside the bounding box.
-    * @param lineDir The direction of the line
+    * @param startPoint :: The starting point for the line. It is assumed that this is outside the bounding box.
+    * @param lineDir :: The direction of the line
     * @returns True if the line intersects this bounding box, false otherwise.
     */
     bool BoundingBox::doesLineIntersect(const V3D & startPoint, const V3D & lineDir) const
@@ -118,7 +118,7 @@ namespace Mantid
     /**
      * Find maximum angular half width of the bounding box from the observer, that is
      * the greatest angle between the centre point and any corner point
-     * @param observer Viewing point
+     * @param observer :: Viewing point
      * @returns The value of the angular half-width
     */
     double BoundingBox::angularWidth(const Geometry::V3D& observer) const
@@ -148,7 +148,7 @@ namespace Mantid
 
     /**
      * Enlarges this bounding box so that it encompasses that given.
-     * @param other The bounding box that should be encompassed
+     * @param other :: The bounding box that should be encompassed
      */
     void BoundingBox::grow(const BoundingBox & other)
     {
@@ -188,8 +188,8 @@ namespace Mantid
 
     /**
      * Print out the bounding box values to a stream.
-     * @param os The output stream
-     * @param box A reference to the bounding box to print out.
+     * @param os :: The output stream
+     * @param box :: A reference to the bounding box to print out.
      * @return the stream representation of the bounding box
      */
     std::ostream& operator<<(std::ostream& os, const BoundingBox& box)

@@ -107,8 +107,8 @@ void IdentifyNoisyDetectors::exec()
 /**
 * Main work portion of algorithm. Calculates mean of standard deviation, ignoring
 * the detectors marked as "bad", then determines if any of the detectors are "bad".
-* @param valid eventual output workspace, holding 0 for bad and 1 for good
-* @param values stddeviations of each spectra (I think)
+* @param valid :: eventual output workspace, holding 0 for bad and 1 for good
+* @param values :: stddeviations of each spectra (I think)
 */
 void IdentifyNoisyDetectors::getStdDev(MatrixWorkspace_sptr valid, MatrixWorkspace_sptr values)
 {

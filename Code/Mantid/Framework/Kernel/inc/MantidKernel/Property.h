@@ -100,7 +100,7 @@ public:
   virtual bool remember() const;
 
   /**Sets the user level description of the property
-   *  @param documentation The string that the user will see
+   *  @param documentation :: The string that the user will see
    */
   void setDocumentation(const std::string& documentation);
 

@@ -8,7 +8,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class GluGeometryRenderer
 		\brief rendering geometry using opengl utility library glu.
 		\author Srikanth Nagella

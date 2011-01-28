@@ -24,8 +24,8 @@ ICatUtils::ICatUtils():m_calendarWidget(NULL),m_applicationWindow(NULL)
 }
 
 /**This method updates the search result to search tree
- *@param ws_sptr workspace shared pointer
- *@param tablewidget pointer to table widget
+ *@param ws_sptr :: workspace shared pointer
+ *@param tablewidget :: pointer to table widget
 */ 
 void ICatUtils::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr,QTableWidget* tablewidget )
 {
@@ -127,7 +127,7 @@ void ICatUtils::clearSearch(QTableWidget* tablewidget,const std::string & wsName
 
 }
 /**This method is called when an investigation is selected  from investigations list
- *@param item  table widget item
+ *@param item ::  table widget item
  */
 void ICatUtils::investigationSelected(QTableWidget* tablewidget,QTableWidgetItem* item,
 									   QWidget* parent,Mantid::API::ITableWorkspace_sptr ws_sptr )

@@ -113,7 +113,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 //------------------------------------------------
 /**
  * Constructor
- * @param parent The parent widget (can be NULL)
+ * @param parent :: The parent widget (can be NULL)
  */
 ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
@@ -273,7 +273,7 @@ QSize ScriptEditor::sizeHint() const
 
 /**
  * Save the text to the given filename
- * @param filename The filename to use
+ * @param filename :: The filename to use
  */
 bool ScriptEditor::saveScript(const QString & filename)
 {
@@ -303,9 +303,9 @@ bool ScriptEditor::saveScript(const QString & filename)
 /**
  * Set the text on the given line, something I feel is missing from the QScintilla API. Note
  * that like QScintilla line numbers start from 0
- * @param lineno A zero-based index representing the linenumber, 
- * @param text The text to insert at the given line
- * @param index The position of text in a line number,default value is zero
+ * @param lineno :: A zero-based index representing the linenumber, 
+ * @param text :: The text to insert at the given line
+ * @param index :: The position of text in a line number,default value is zero
  */
 void ScriptEditor::setText(int lineno, const QString& txt,int index)
 {
@@ -455,7 +455,7 @@ bool ScriptEditor::isMultiLineStatement()
 
 /**
  *if it's end end of multi line
- *@param lineNum - number of the line to check
+ *@param lineNum :: number of the line to check
  *@returns true if it's end of multi line
  */
 bool ScriptEditor::isEndOfMultiLine(int lineNum)
@@ -472,8 +472,8 @@ bool ScriptEditor::isEndOfMultiLine(int lineNum)
 }
 /**
  * checks the shortcut key for copy pressed
- * @param prevKey -code corresponding to the previous key 
- * @param curKey -code corresponding to the current key 
+ * @param prevKey :: -code corresponding to the previous key 
+ * @param curKey :: -code corresponding to the current key 
  * @returns bool returns true if the keys pressed are Ctrl+C
  */
 bool ScriptEditor::isCtrlCPressed(const int prevKey,const int curKey)
@@ -483,8 +483,8 @@ bool ScriptEditor::isCtrlCPressed(const int prevKey,const int curKey)
 
 /**
  * checks the shortcut key for cut pressed
- * @param prevKey -code corresponding to the previous key 
- * @param curKey -code corresponding to the current key 
+ * @param prevKey :: -code corresponding to the previous key 
+ * @param curKey :: -code corresponding to the current key 
  * @returns bool returns true if the keys pressed are Ctrl+X
  */
 bool ScriptEditor::isCtrlXPressed(const int prevKey,const int curKey)
@@ -577,7 +577,7 @@ void ScriptEditor::update()
 
 /**
  * Set the marker state
- * @param enable If true then the progress arrow is enabled
+ * @param enable :: If true then the progress arrow is enabled
  */
 void ScriptEditor::setMarkerState(bool enabled)
 {
@@ -594,8 +594,8 @@ void ScriptEditor::setMarkerState(bool enabled)
 
 /**
  * Update the arrow marker to point to the correct line and colour it depending on the error state
- * @param lineno The line to place the marker at. A negative number will clear all markers
- * @param success If false, the marker will turn red
+ * @param lineno :: The line to place the marker at. A negative number will clear all markers
+ * @param success :: If false, the marker will turn red
  */
 void ScriptEditor::updateMarker(int lineno, bool success)
 {
@@ -651,8 +651,8 @@ void ScriptEditor::print()
 
 /**
  * Display the output from a script that has been run in interpeter mode
- * @param msg The output string
- * @param error If this is an error
+ * @param msg :: The output string
+ * @param error :: If this is an error
  */
 void ScriptEditor::displayOutput(const QString& msg, bool error)
 {
@@ -716,7 +716,7 @@ void ScriptEditor::paste()
 //------------------------------------------------
 /**
 * Execute a line of code
-* @param lineno The line number of the code to execute
+* @param lineno :: The line number of the code to execute
 */
 void ScriptEditor::executeCodeAtLine(int lineno)
 {
@@ -736,8 +736,8 @@ void ScriptEditor::executeCodeAtLine(int lineno)
 
 /**
   *compiles multi line code and if end of multi line executes the code
-  *@param line - number of line
-  *@param multiCmd - text to inpterpret
+  *@param line :: number of line
+  *@param multiCmd :: text to inpterpret
 */
 void ScriptEditor::interpretMultiLineCode(const int line,const QString & multiCmd)
 {   

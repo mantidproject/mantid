@@ -1,7 +1,7 @@
 #ifndef MDPoint_H_
 #define MDPoint_H_
 
-/*! Abstract type to represent a multidimensional pixel/point. 
+/** Abstract type to represent a multidimensional pixel/point. 
 *   This type may not be a suitable pure virtual type in future iterations. Future implementations should be non-abstract.
 
     @author Owen Arnold, RAL ISIS

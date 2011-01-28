@@ -136,7 +136,7 @@ public:
 	FolderListView *lv, *folders;
 	QDockWidget *logWindow;
 
-	/*! Generates a new unique name starting with string /param name.
+	/** Generates a new unique name starting with string /param name.
 	You can force the output to be a name different from /param name,
 	even if 'name' is not used in the project, by setting /param increment = true (the default)
 	*/
@@ -193,7 +193,7 @@ public slots:
 	/**
 	 * \brief Create a new project from a data file.
 	 *
-	 * \param fn is read as a data file with the default column separator (as set by the user)
+	 * @param fn :: is read as a data file with the default column separator (as set by the user)
 	 * and inserted as a table into a new, empty project.
 	 * This table is then plotted with the Graph::LineSymbols style.
 	 */
@@ -202,15 +202,15 @@ public slots:
 	/**
 	 * \brief Create a new project from a script file.
 	 *
-	 * \param fn is read as a Python script file and loaded in the command script window.
-	 * \param execute specifies if the script should be executed after opening.
-	 * \param quit If true then the application will quit after execution of the script
+	 * @param fn :: is read as a Python script file and loaded in the command script window.
+	 * @param execute :: specifies if the script should be executed after opening.
+	 * @param quit :: If true then the application will quit after execution of the script
 	 */
          ApplicationWindow * loadScript(const QString& fn, bool execute = false, bool quit = false);
 
 	QList<MdiSubWindow *> windowsList();
 	void updateWindowLists(MdiSubWindow *w);
-	/*!
+	/**
     Arranges all the visible project windows in a cascade pattern.
     */
 	void cascade();
@@ -379,11 +379,11 @@ public slots:
 	/**
 	 * \brief Create a Table which is initially hidden; used to return the result of an analysis operation.
 	 *
-	 * \param name window name (compare MdiSubWindow::MdiSubWindow)
-	 * \param label window label (compare MdiSubWindow::MdiSubWindow)
-	 * \param r number of rows
-	 * \param c number of columns
-     * \param text tab/newline - seperated initial content; may be empty
+	 * @param name :: window name (compare MdiSubWindow::MdiSubWindow)
+	 * @param label :: window label (compare MdiSubWindow::MdiSubWindow)
+	 * @param r :: number of rows
+	 * @param c :: number of columns
+     * @param text :: tab/newline - seperated initial content; may be empty
 	 */
 	Table* newHiddenTable(const QString& name, const QString& label, int r, int c, const QString& text=QString());
 	Table* table(const QString& name);
@@ -887,9 +887,9 @@ public slots:
 
 	//!  creates and opens the context menu of a folder list view item
 	/**
-	 * \param it list view item
-	 * \param p mouse global position
-	 * \param fromFolders: true means that the user clicked right mouse buttom on an item from QListView "folders"
+	 * @param it :: list view item
+	 * @param p :: mouse global position
+	 * @param fromFolders: true means that the user clicked right mouse buttom on an item from QListView "folders"
 	 *					   false means that the user clicked right mouse buttom on an item from QListView "lv"
 	 */
 	void showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p, bool fromFolders);
@@ -956,14 +956,14 @@ public slots:
 
 	//!  moves a folder item to another
 	/**
-	 * \param src source folder item
-	 * \param dest destination folder item
+	 * @param src :: source folder item
+	 * @param dest :: destination folder item
 	 */
 	void moveFolder(FolderListItem *src, FolderListItem *dest);
 	//!  copies a folder to another
 	/**
-	 * \param src source folder
-	 * \param dest destination folder
+	 * @param src :: source folder
+	 * @param dest :: destination folder
      */
 	bool copyFolder(Folder *src, Folder *dest);
 

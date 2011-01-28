@@ -107,7 +107,7 @@ void LoadDetectorInfo::exec()
 
 /** Reads detector information from a .dat file, the file contains one line per detector
 *  and its format is documented in "DETECTOR.DAT format" (more details in LoadDetectorInfo.h)
-*  @param fName name and path of the data file to read
+*  @param fName :: name and path of the data file to read
 *  @throw invalid_argument if the detection delay time is different for different monitors
 *  @throw FileError if there was a problem opening the file or its format
 *  @throw MisMatch<int> if not very spectra is associated with exaltly one detector
@@ -254,7 +254,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
 
 /** Reads data about the detectors from the header section of a RAW file it
 * relies on the user table being in the correct format
-* @param fName path to the RAW file to read
+* @param fName :: path to the RAW file to read
 * @throw FileError if there is a problem opening the file or the header is in the wrong format
 * @throw invalid_argument if the detection delay time is different for different monitors
 * @throw MisMatch<int> if not very spectra is associated with exaltly one detector
@@ -380,8 +380,8 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 }
 /** Creates or modifies the parameter map for the specified detector adding
 *  pressure and wall thickness information
-*  @param params these will be written to the detector paraments 3He(atm)=pressure) and wallT(m)=wall thickness
-*  @param change if the parameters are successfully changed they are stored here
+*  @param params :: these will be written to the detector paraments 3He(atm)=pressure) and wallT(m)=wall thickness
+*  @param change :: if the parameters are successfully changed they are stored here
 *  @throw NotFoundError if a pointer to the specified detector couldn't be retrieved
 */
 void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change)
@@ -409,10 +409,10 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
 
 /** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropiate
 *  function. It is possible for this function to set all detectors spectra X-values when they shouldn't
-*  @param lastOffset the delay time of the last detector is only used if differentDelays is false or if detectID and delays are leave empty e.g. when we use common bins
-*  @param differentDelays if the number of adjustments is greater than or equal to the number of spectra and this is false then common bins will be used
-*  @param detectIDs the list of detector IDs needs to corrospond to the next argument, list of delays
-*  @param delays ommitting or passing an empty list of delay times forces common bins to be used, any delays need to be in the same order as detectIDs
+*  @param lastOffset :: the delay time of the last detector is only used if differentDelays is false or if detectID and delays are leave empty e.g. when we use common bins
+*  @param differentDelays :: if the number of adjustments is greater than or equal to the number of spectra and this is false then common bins will be used
+*  @param detectIDs :: the list of detector IDs needs to corrospond to the next argument, list of delays
+*  @param delays :: ommitting or passing an empty list of delay times forces common bins to be used, any delays need to be in the same order as detectIDs
 */
 void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int> &detectIDs, const std::vector<float> &delays)
 {
@@ -434,11 +434,11 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 }
 /** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropiate
 *  function. It is possible for this function to set all detectors spectra X-values when they shouldn't
-*  @param lastOffset the delay time of the last detector is only used if differentDelays is false, e.g. we use common bins
-*  @param differentDelays if the number of adjustments is greater than or equal to the number of spectra and this is false then common bins will be used
-*  @param detectIDs the list of detector IDs is required regardless of how differentDelays is needs to be in the same order as delays
-*  @param delays required regardless of if differentDelays is true or false and needs to be in the same order as detectIDs
-*  @param numDetectors the size of the arrays pointed to by delays and detectIDs
+*  @param lastOffset :: the delay time of the last detector is only used if differentDelays is false, e.g. we use common bins
+*  @param differentDelays :: if the number of adjustments is greater than or equal to the number of spectra and this is false then common bins will be used
+*  @param detectIDs :: the list of detector IDs is required regardless of how differentDelays is needs to be in the same order as delays
+*  @param delays :: required regardless of if differentDelays is true or false and needs to be in the same order as detectIDs
+*  @param numDetectors :: the size of the arrays pointed to by delays and detectIDs
 */void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, int numDetectors)
 {
   // a spectra wont be adjusted if their detector wasn't included in the RAW file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace 
@@ -457,8 +457,8 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 /** This function finds the spectra associated with each detector passed ID and subtracts
 *  the corrosponding value in the offsets array from all bin boundaries in that spectrum. If
 *  all the X-values share the same storage array then some sharing is maintained
-*  @param detIDs ID list of IDs numbers of all the detectors with offsets
-*  @param offsets an array of values to change the bin boundaries by, these must be listed in the same order as detIDs
+*  @param detIDs :: ID list of IDs numbers of all the detectors with offsets
+*  @param offsets :: an array of values to change the bin boundaries by, these must be listed in the same order as detIDs
 *  @throw MisMatch<int> if not every spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw runtime_error if the SpectraDetectorMap had not been filled
@@ -506,7 +506,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
 }
 /** Substracts the given off value from all the bin boundaries in all the spectra. If the arrays
 *  containing the X-values are all shared then they remain shared 
-*  @param detectorOffset the value to remove from the bin boundaries
+*  @param detectorOffset :: the value to remove from the bin boundaries
 *  @throw  IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace 
 */
 void LoadDetectorInfo::adjustXs(const double detectorOffset)
@@ -585,10 +585,10 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
 }
 /** A memory efficient function that adjusts the X-value bin boundaries that only creates a new
 *  cow_ptr array when the offset has changed
-* @param offsets an array of times to adjust all the bins in each workspace histogram by
-* @param spectraList a list of spectra numbers in the same order as the offsets
-* @param specs2index a map that allows finding a spectra indexes from spectra numbers
-* @param missingDetectors this will be filled with the array indices of the detector offsets that we can't find spectra indices for
+* @param offsets :: an array of times to adjust all the bins in each workspace histogram by
+* @param spectraList :: a list of spectra numbers in the same order as the offsets
+* @param specs2index :: a map that allows finding a spectra indexes from spectra numbers
+* @param missingDetectors :: this will be filled with the array indices of the detector offsets that we can't find spectra indices for
 */
 void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors)
 {
@@ -642,10 +642,10 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
 }
 /** Adjusts the X-value bin boundaries given offsets and makes no assumptions about
 * that the histograms have shared bins or the time offsets are the same
-* @param offsets an array of times to adjust all the bins in each workspace histogram by
-* @param spectraList a list of spectra numbers in the same order as the offsets
-* @param specs2index a map that allows finding a spectra indexes from spectra numbers
-* @param missingDetectors this will be filled with the array indices of the detector offsets that we can't find spectra indices for
+* @param offsets :: an array of times to adjust all the bins in each workspace histogram by
+* @param spectraList :: a list of spectra numbers in the same order as the offsets
+* @param specs2index :: a map that allows finding a spectra indexes from spectra numbers
+* @param missingDetectors :: this will be filled with the array indices of the detector offsets that we can't find spectra indices for
 */
 void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors)
 {// the monitors can't have diferent offsets so I can cache the bin boundaries for all the monitors
@@ -693,9 +693,9 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
 }
 /**Changes the TOF (X values) by the offset time monitors but it chacks that first that
 *  the monitor offset is non-zero. Throws if not all MonitorOffsets are the same
-*  @param offSet the next offset time for a detector that was read in
-*  @param detID the the monitor's detector ID number
-*  @throws invalid_argument if it finds a monitor that has a different offset from the rest
+*  @param offSet :: the next offset time for a detector that was read in
+*  @param detID :: the the monitor's detector ID number
+*  @throw invalid_argument if it finds a monitor that has a different offset from the rest
 */
 void LoadDetectorInfo::noteMonitorOffset(const float offSet, const int detID)
 {
@@ -712,9 +712,9 @@ void LoadDetectorInfo::noteMonitorOffset(const float offSet, const int detID)
 
 /** Modify X-values from the workspace and store them in the shared array
 * containted within the cow pointer
-* @param theXValuesArray this will contain the new values in it's array
-* @param specInd index number of histogram from with to take the original X-values 
-* @param offset _subtract_ this number from all the X-values
+* @param theXValuesArray :: this will contain the new values in it's array
+* @param specInd :: index number of histogram from with to take the original X-values 
+* @param offset :: _subtract_ this number from all the X-values
 */
 void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, int specInd, double offset)
 {
@@ -727,7 +727,7 @@ void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, int specInd, d
   m_workspace->setX(specInd, theXValuesArray);
 }
 /** Reports information on detectors that we couldn't get a pointer to, if any of these errors occured
-*  @param missingDetectors detector IDs of detectors that we couldn't get a pointer to
+*  @param missingDetectors :: detector IDs of detectors that we couldn't get a pointer to
 */
 void LoadDetectorInfo::logErrorsFromRead(const std::vector<int> &missingDetectors)
 {
@@ -745,8 +745,8 @@ void LoadDetectorInfo::logErrorsFromRead(const std::vector<int> &missingDetector
 }
 /** write the parameters that were passed to the log. To make it easier to reduce the amount
 *  of logging this function will set the last parameter to false
-*  @param params constains the data to log
-*  @param needToLog only log if this is set to true, the variable is then set to false
+*  @param params :: constains the data to log
+*  @param needToLog :: only log if this is set to true, the variable is then set to false
 */
 void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &needToLog)
 {

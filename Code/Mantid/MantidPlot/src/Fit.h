@@ -169,7 +169,7 @@ class Fit : public Filter
 		//! Initial guesses for the fit parameters
 		gsl_vector *d_param_init;
 
-		/*! \brief Tells whether the fitter uses non-linear/simplex fitting
+		/** \brief Tells whether the fitter uses non-linear/simplex fitting
 		 * with an initial parameters set, that must be freed in the destructor.
 		 */
 		bool is_non_linear;

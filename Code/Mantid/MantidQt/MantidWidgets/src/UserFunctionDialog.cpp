@@ -106,7 +106,7 @@ void UserFunctionDialog::updateCategories()
 
 /**
  * Make a category current
- * @param cat The category to select
+ * @param cat :: The category to select
  */
 void UserFunctionDialog::selectCategory(const QString& cat)
 {
@@ -134,7 +134,7 @@ void UserFunctionDialog::selectCategory(const QString& cat)
 
 /**
  * Make a function current
- * @param fun The function to select
+ * @param fun :: The function to select
  */
 void UserFunctionDialog::selectFunction(const QString& fun)
 {
@@ -184,7 +184,7 @@ void UserFunctionDialog::addExpression()
 
 /**
  * Check an expression for name clashes with user function
- * @param expr An expression prepared to be added to the user function.
+ * @param expr :: An expression prepared to be added to the user function.
  */
 void UserFunctionDialog::checkParameters(QString& expr)
 {
@@ -284,7 +284,7 @@ void UserFunctionDialog::updateFunction()
 /**
  * Returns function names: If the input cat parameter is empty the returned set
  * contains funtion categories, otherwise it returns function names in category cat.
- * @param cat The category for which functions will be returned.
+ * @param cat :: The category for which functions will be returned.
  * @return A set of funtion names.
  */
 QSet<QString> UserFunctionDialog::names(const QString& cat)const
@@ -431,8 +431,8 @@ bool UserFunctionDialog::eventFilter(QObject *obj, QEvent *ev)
 /**
  * Get the expression for saved function in category cat with name fun. If any of the
  * arguments are empty string or function does not exist return empty string.
- * @param cat The category
- * @param fun The name of the function
+ * @param cat :: The category
+ * @param fun :: The name of the function
  * @return An expression that can be used as mu::Parser formula
  */
 QString UserFunctionDialog::getFunction(const QString& cat,const QString& fun)const
@@ -446,8 +446,8 @@ QString UserFunctionDialog::getFunction(const QString& cat,const QString& fun)co
 /**
  * Get the comment for saved function in category cat with name fun. If any of the
  * arguments are empty string or function does not exist return empty string.
- * @param cat The category
- * @param fun The name of the function
+ * @param cat :: The category
+ * @param fun :: The name of the function
  */
 QString UserFunctionDialog::getComment(const QString& cat,const QString& fun)const
 {
@@ -460,10 +460,10 @@ QString UserFunctionDialog::getComment(const QString& cat,const QString& fun)con
 /**
  * Set an expression to a new function in category cat and with name fun. If any of the
  * arguments are empty string does nothing.
- * @param cat The category
- * @param fun The name of the function
- * @param expr The expression
- * @param comment The comment
+ * @param cat :: The category
+ * @param fun :: The name of the function
+ * @param expr :: The expression
+ * @param comment :: The comment
  */
 void UserFunctionDialog::setFunction(const QString& cat,const QString& fun,const QString& expr,const QString& comment)
 {
@@ -496,7 +496,7 @@ bool UserFunctionDialog::isBuiltin(const QString& cat)const
 
 /**
  * Constructor
- * @param category The initial suggestion for the category 
+ * @param category :: The initial suggestion for the category 
  */
 InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,const QString& category)
 :QDialog(parent)
@@ -535,8 +535,8 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,const QString& 
 
 /**
  * Return the entered category and function name and comment
- * @param category A string to recieve the category
- * @param name A string to recieve the function name
+ * @param category :: A string to recieve the category
+ * @param name :: A string to recieve the function name
  */
 void InputFunctionNameDialog::getFunctionName(QString& category,QString& name,QString& comment)
 {

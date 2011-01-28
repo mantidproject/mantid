@@ -97,7 +97,7 @@ void Homer::closeEvent(QCloseEvent *event)
 
 /** Disables the form when passed the information that Python is running
 *  and enables it when instructed that Pythons scripts have stopped
-*  @param running if set to false only controls disabled by a previous call to this function will be re-enabled
+*  @param running :: if set to false only controls disabled by a previous call to this function will be re-enabled
 */
 void Homer::pythonIsRunning(bool running)
 {// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
@@ -392,8 +392,8 @@ QString Homer::getInstrumentSettingsGroup() const
 
 /**
  * Open a file dialog with extensions
- * @param save If true, then the dialog is a save dialog
- * @param exts A list of file extensions for the file filter
+ * @param save :: If true, then the dialog is a save dialog
+ * @param exts :: A list of file extensions for the file filter
  */
 QString Homer::openFileDia(const bool save, const QStringList &exts)
 {
@@ -451,7 +451,7 @@ void Homer::syncBackgroundSettings()
 
 /**
  * Validate the run file Ei on page 1
- * @param text The Ei value as a string
+ * @param text :: The Ei value as a string
  */
 void Homer::validateRunEi(const QString & text)
 {
@@ -467,7 +467,7 @@ void Homer::validateRunEi(const QString & text)
 
 /**
  * Validate the abs run file Ei on page 3
- * @param text The Ei value as a string
+ * @param text :: The Ei value as a string
  */
 void Homer::validateAbsEi(const QString & text)
 {
@@ -483,7 +483,7 @@ void Homer::validateAbsEi(const QString & text)
 
 /**
  * Check the Ei input
- * @param text The text to validate as an ei guess
+ * @param text :: The text to validate as an ei guess
  */
 bool Homer::checkEi(const QString & text) const
 {
@@ -583,7 +583,7 @@ void Homer::runClicked()
 /** Runnings everything, depending on what was entered on to the form
 *  @throw out_of_range if there was an error reading user input but no validator could be displayed
 *  @throw invalid_argument if some of the user entries are invalid
-*  @throws runtime_error if there was a problem during execution of a Python script
+*  @throw runtime_error if there was a problem during execution of a Python script
 */
 bool Homer::runScripts()
 {
@@ -830,7 +830,7 @@ void Homer::saveFormatOptionClicked(QAbstractButton*)
 
 /**
  * If the user has not touched the absolute Ei entry they update it with the run value
- * @param text The Ei value
+ * @param text :: The Ei value
  */
 void Homer::updateAbsEi(const QString & text)
 {
@@ -841,7 +841,7 @@ void Homer::updateAbsEi(const QString & text)
 }
 /**
  * Mark the absolute Ei flag as dirty
- * @param dirty Boolean indicating the user has changed the field not the program
+ * @param dirty :: Boolean indicating the user has changed the field not the program
 */
 void Homer::markAbsEiDirty(bool dirty)
 {

@@ -37,7 +37,7 @@ void GLActorCollection::define()
 
 /**
  * This method addes a new actor to the collection.
- * @param a input actor to be added to the list
+ * @param a :: input actor to be added to the list
  */
 void GLActorCollection::addActor(GLActor* a)
 {
@@ -56,7 +56,7 @@ void GLActorCollection::addActor(GLActor* a)
 
 /**
  * Remove the input actor from the collection
- * @param a input actor to be removed from the list
+ * @param a :: input actor to be removed from the list
  */
 void GLActorCollection::removeActor(GLActor*)
 {
@@ -74,7 +74,7 @@ int  GLActorCollection::getNumberOfActors()
 
 /**
  * This method returns the actor at the given index
- * @param index is the index in actor collection to be returned
+ * @param index :: is the index in actor collection to be returned
  * @return a pointer to the actor at a given index
  */
 GLActor* GLActorCollection::getActor(int index)
@@ -85,7 +85,7 @@ GLActor* GLActorCollection::getActor(int index)
 
 /**
  * This method is to find the matching input color id in the collection of actors color and mark the matched actor as picked.
- * @param color input color
+ * @param color :: input color
  */
 GLActor* GLActorCollection::findColorID(unsigned char color[3])
 {

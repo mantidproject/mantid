@@ -39,9 +39,9 @@ CompAssemblyActor::CompAssemblyActor(bool withDisplayList):
 
 /**
  * This is a constructor for CompAssembly Actor
- * @param objs            :: list of objects that are used by IObjCompenent actors and will be filled with the new objects
- * @param id              :: ComponentID of this object of CompAssembly
- * @param ins             :: Instrument
+ * @param objs :: list of objects that are used by IObjCompenent actors and will be filled with the new objects
+ * @param id :: ComponentID of this object of CompAssembly
+ * @param ins :: Instrument
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
  */
 CompAssemblyActor::CompAssemblyActor(
@@ -218,7 +218,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
 /**
  * This method checks the list of Objects in mObjects for obj, if found returns the MantidObject. if the obj is not found
  * then creates a new MantidObject for obj and adds to the list of mObjects and returns the newly created MantidObject.
- * @param obj             :: Object input for which MantidObject needed
+ * @param obj :: Object input for which MantidObject needed
  * @param withDisplayList :: whether the new MantidObject if needed uses the display list attribute
  * @return  the MantidObject corresponding to the obj.
  */

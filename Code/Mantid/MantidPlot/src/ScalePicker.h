@@ -33,7 +33,7 @@ class QPoint;
 class QwtPlot;
 class QwtScaleWidget;
 
-/*!\brief Handles user interaction with a QwtScaleWidget.
+/**\brief Handles user interaction with a QwtScaleWidget.
  *
  * This class is used by Graph to catch events for the scales on its Plot.
  * ScalePicker doesn't take any actions beyond emitting signals, which are then processed by Graph.
@@ -53,7 +53,7 @@ public:
 	//! Returns the bounding rectangle of a scale's title.
 	QRect titleRect(const QwtScaleWidget *scale) const;
 
-	/*! Install myself as event filter for all axes of my parent.
+	/** Install myself as event filter for all axes of my parent.
 	 * For every axis of plot(), add myself to the corresponding QwtScaleWidget.
 	 * \sa QwtPlot::axisWidget()
 	 */
@@ -70,7 +70,7 @@ public:
 	bool labelsSelected(){return d_labels_selected;};
 	void selectLabels(QwtScaleWidget *scale, bool select = true);
 	
-	/*! Returns a pointer to the selected axis in the plot layer. 
+	/** Returns a pointer to the selected axis in the plot layer. 
 	 * The selected axis has selected title or selected tick labels (blue frame around texts).
 	 */
 	QwtScaleWidget* selectedAxis(){return d_selected_axis;};
@@ -81,19 +81,19 @@ signals:
 	//! Emitted when the user clicks on one of the monitored axes.
 	void clicked();
 
-	/*! Emitted when the user right-clicks on an axis (but not its title).
+	/** Emitted when the user right-clicks on an axis (but not its title).
 	 * The argument specifies the axis' QwtScaleDraw::Alignment.
 	 */
 	void axisRightClicked(int);
 	//! Emitted when the user right-clicks on the title of an axis.
 	void axisTitleRightClicked();
 
-	/*! Emitted when the user double-clicks on an axis (but not its title).
+	/** Emitted when the user double-clicks on an axis (but not its title).
 	 * The argument specifies the axis' QwtScaleDraw::Alignment.
 	 */
 	void axisDblClicked(int);
 
-	/*! Emitted when the user double-clicks on an the axis title.
+	/** Emitted when the user double-clicks on an the axis title.
 	 */
 	void axisTitleDblClicked();
 	

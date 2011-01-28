@@ -22,11 +22,11 @@ namespace Mantid
 
     std::ostream& 
       operator<<(std::ostream& OX,const PolyVar<1>& A)
-      /*!
+      /**
       External Friend :: outputs point to a stream 
-      \param OX :: output stream
-      \param A :: PolyFunction to write
-      \returns The output stream (OX)
+      @param OX :: output stream
+      @param A :: PolyFunction to write
+      @return The output stream (OX)
       */
     {
       if (!A.write(OX))
@@ -38,9 +38,9 @@ namespace Mantid
     PolyFunction(),
       iDegree((iD>0) ? iD : 0),
       PCoeff(iDegree+1)
-      /*!
+      /**
       Constructor 
-      \param iD :: degree
+      @param iD :: degree
       */
     {
       fill(PCoeff.begin(),PCoeff.end(),0.0);
@@ -50,10 +50,10 @@ namespace Mantid
     PolyFunction(E),
       iDegree((iD>0) ? iD : 0),
       PCoeff(iDegree+1)
-      /*!
+      /**
       Constructor 
-      \param iD :: degree
-      \param E :: Accuracy
+      @param iD :: degree
+      @param E :: Accuracy
       */
     {
       fill(PCoeff.begin(),PCoeff.end(),0.0);
@@ -61,18 +61,18 @@ namespace Mantid
 
     PolyVar<1>::PolyVar(const PolyVar<1>& A)  :
     PolyFunction(A),iDegree(A.iDegree),PCoeff(A.PCoeff)
-      /*! 
+      /** 
       Copy Constructor
-      \param A :: PolyBase to copy
+      @param A :: PolyBase to copy
       */
     { }
 
     PolyVar<1>& 
       PolyVar<1>::operator=(const PolyVar<1>& A)
-      /*! 
+      /** 
       Assignment operator
-      \param A :: PolyBase to copy
-      \return *this
+      @param A :: PolyBase to copy
+      @return *this
       */
     {
       if (this!=&A)
@@ -86,10 +86,10 @@ namespace Mantid
 
     PolyVar<1>& 
       PolyVar<1>::operator=(const double& V)
-      /*! 
+      /** 
       Assignment operator
-      \param V :: Double value to set
-      \return *this
+      @param V :: Double value to set
+      @return *this
       */
     {
       iDegree = 0;
@@ -104,9 +104,9 @@ namespace Mantid
 
     void 
       PolyVar<1>::setDegree(const int iD)
-      /*!
+      /**
       Set the degree value
-      \param iD :: degree
+      @param iD :: degree
       */
     {
       iDegree = (iD>0) ? iD : 0;
@@ -115,7 +115,7 @@ namespace Mantid
 
     void
       PolyVar<1>::zeroPoly()
-      /*!
+      /**
       Zeros each polynominal coefficient
       */
     {
@@ -126,27 +126,27 @@ namespace Mantid
 
     int 
       PolyVar<1>::getDegree() const 
-      /*!
+      /**
       Accessor to degree size
-      \return size 
+      @return size 
       */
     {
       return iDegree;
     }
 
     PolyVar<1>::operator const std::vector<double>& () const
-      /*!
+      /**
       Accessor to a vector component
-      \return vector
+      @return vector
       */
     {
       return PCoeff;
     }
 
     PolyVar<1>::operator std::vector<double>& ()
-      /*!
+      /**
       Accessor to a vector component
-      \return vector
+      @return vector
       */
     {
       return PCoeff;
@@ -155,10 +155,10 @@ namespace Mantid
 
     double
       PolyVar<1>::operator[](const int i) const
-      /*!
+      /**
       Accessor to component
-      \param i :: index 
-      \return Coeficient c_i
+      @param i :: index 
+      @return Coeficient c_i
       */
     {
       if (i>iDegree || i<0)
@@ -168,10 +168,10 @@ namespace Mantid
 
     double& 
       PolyVar<1>::operator[](const int i)
-      /*!
+      /**
       Accessor to component
-      \param i :: index 
-      \return Coeficient c_i
+      @param i :: index 
+      @return Coeficient c_i
       */
     {
       if (i>iDegree || i<0)
@@ -181,10 +181,10 @@ namespace Mantid
 
     double 
       PolyVar<1>::operator()(const double X) const
-      /*!
+      /**
       Calculate polynomial at x
-      \param X :: Value to calculate poly
-      \return polyvalue(x)
+      @param X :: Value to calculate poly
+      @return polyvalue(x)
       */
     {
       double Result = PCoeff[iDegree];              
@@ -196,10 +196,10 @@ namespace Mantid
       return Result;
     }
 
-      /*!
+      /**
       Calculate the value of the polynomial at a point
-      \param DArray :: Values [x,y,z]
-      \return the value at that point
+      @param DArray :: Values [x,y,z]
+      @return the value at that point
       */
     double PolyVar<1>::operator()(const double* DArray) const
     {
@@ -216,10 +216,10 @@ namespace Mantid
 
     double 
       PolyVar<1>::operator()(const std::vector<double>& DArray) const
-      /*!
+      /**
       Calculate the value of the polynomial at a point
-      \param DArray :: Values [x,y,z]
-      \return results
+      @param DArray :: Values [x,y,z]
+      @return results
       */
     {
       if (DArray.empty())
@@ -237,10 +237,10 @@ namespace Mantid
 
     PolyVar<1>& 
       PolyVar<1>::operator+=(const PolyVar<1>& A)
-      /*!
+      /**
       Self addition value
-      \param A :: PolyBase to add 
-      \return *this+=A;
+      @param A :: PolyBase to add 
+      @return *this+=A;
       */
     {
       iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -252,10 +252,10 @@ namespace Mantid
 
     PolyVar<1>& 
       PolyVar<1>::operator-=(const PolyVar<1>& A)
-      /*!
+      /**
       Self addition value
-      \param A :: PolyBase to add 
-      \return *this+=A;
+      @param A :: PolyBase to add 
+      @return *this+=A;
       */
     {
       iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -267,10 +267,10 @@ namespace Mantid
 
     PolyVar<1>& 
       PolyVar<1>::operator*=(const PolyVar<1>& A)
-      /*!
+      /**
       Self multiplication value
-      \param A :: PolyBase to add 
-      \return *this*=A;
+      @param A :: PolyBase to add 
+      @return *this*=A;
       */
     {
       const int iD=iDegree+A.iDegree;
@@ -287,10 +287,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator+(const PolyVar<1>& A) const
-      /*!
+      /**
       PolyBase addition
-      \param A :: PolyBase addition
-      \return (*this+A);
+      @param A :: PolyBase addition
+      @return (*this+A);
       */
     {
       PolyVar<1> kSum(*this);
@@ -299,10 +299,10 @@ namespace Mantid
 
     PolyVar<1>
       PolyVar<1>::operator-(const PolyVar<1>& A) const
-      /*!
+      /**
       PolyBase subtraction
-      \param A :: PolyBase addition
-      \return (*this-A);
+      @param A :: PolyBase addition
+      @return (*this-A);
       */
     {
       PolyVar<1> kSum(*this);
@@ -311,10 +311,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator*(const PolyVar<1>& A) const
-      /*!
+      /**
       PolyBase multiplication
-      \param A :: PolyBase multiplication
-      \return (*this*A);
+      @param A :: PolyBase multiplication
+      @return (*this*A);
       */
     {
       PolyVar<1> kSum(*this);
@@ -323,10 +323,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator+(const double V) const
-      /*!
+      /**
       PolyBase multiplication
-      \param V :: PolyBase 
-      \return (*this+V);
+      @param V :: PolyBase 
+      @return (*this+V);
       */
     {
       PolyVar<1> kSum(*this);
@@ -335,10 +335,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator-(const double V) const
-      /*!
+      /**
       PolyVar<1> substractr
-      \param V :: PolyBase substract
-      \return (*this-V);
+      @param V :: PolyBase substract
+      @return (*this-V);
       */
     {
       PolyVar<1> kSum(*this);
@@ -347,10 +347,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator*(const double V) const
-      /*!
+      /**
       PolyBase multiplication
-      \param V :: PolyBase multiplication
-      \return (*this*V);
+      @param V :: PolyBase multiplication
+      @return (*this*V);
       */
     {
       PolyVar<1> kSum(*this);
@@ -359,10 +359,10 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator/(const double V) const
-      /*!
+      /**
       PolyBase division
-      \param V :: PolyBase Division
-      \return (*this/V);
+      @param V :: PolyBase Division
+      @return (*this/V);
       */
     {
       PolyVar<1> kSum(*this);
@@ -373,10 +373,10 @@ namespace Mantid
 
     PolyVar<1>&
       PolyVar<1>::operator+=(const double V) 
-      /*!
+      /**
       PolyBase addition
-      \param V :: Value to add
-      \return (*this+V);
+      @param V :: Value to add
+      @return (*this+V);
       */
     {
       PCoeff[0]+=V;  // There is always zero component
@@ -385,10 +385,10 @@ namespace Mantid
 
     PolyVar<1>&
       PolyVar<1>::operator-=(const double V) 
-      /*!
+      /**
       PolyBase subtraction
-      \param V :: Value to subtract
-      \return (*this+V);
+      @param V :: Value to subtract
+      @return (*this+V);
       */
     {
       PCoeff[0]-=V;  // There is always zero component
@@ -397,10 +397,10 @@ namespace Mantid
 
     PolyVar<1>&
       PolyVar<1>::operator*=(const double V) 
-      /*!
+      /**
       PolyBase multiplication
-      \param V :: Value to multipication
-      \return (*this*V);
+      @param V :: Value to multipication
+      @return (*this*V);
       */
     {
       transform(PCoeff.begin(),PCoeff.end(),PCoeff.begin(),
@@ -410,10 +410,10 @@ namespace Mantid
 
     PolyVar<1>&
       PolyVar<1>::operator/=(const double V) 
-      /*!
+      /**
       PolyBase division scalar
-      \param V :: Value to divide
-      \return (*this/V);
+      @param V :: Value to divide
+      @return (*this/V);
       */
     {
       transform(PCoeff.begin(),PCoeff.end(),PCoeff.begin(),
@@ -423,9 +423,9 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::operator-() const
-      /*!
+      /**
       PolyBase negation operator
-      \return -(*this);
+      @return -(*this);
       */
     {
       PolyVar<1> KOut(*this);
@@ -435,10 +435,10 @@ namespace Mantid
 
     int
       PolyVar<1>::operator==(const PolyVar<1>& A) const
-      /*!
+      /**
       Determine if two polynomials are equal
-      \param A :: Other polynomial to use
-      \return 1 :: true 0 on false
+      @param A :: Other polynomial to use
+      @return 1 :: true 0 on false
       */
     {
       int i;
@@ -462,10 +462,10 @@ namespace Mantid
 
     int
       PolyVar<1>::operator!=(const PolyVar<1>& A) const
-      /*!
+      /**
       Determine if two polynomials are different
-      \param A :: Other polynomial to use
-      \return 1 is polynomial differ:  0 on false
+      @param A :: Other polynomial to use
+      @return 1 is polynomial differ:  0 on false
       */
     {
       return (this->operator==(A)) ? 0 : 1;
@@ -473,10 +473,10 @@ namespace Mantid
 
     int
       PolyVar<1>::operator==(const double& V) const
-      /*!
+      /**
       Determine if a polynomial and a value are equal
-      \param V :: Single value to use
-      \return 1 equal:  0 on false
+      @param V :: Single value to use
+      @return 1 equal:  0 on false
       */
     {
       if (fabs(PCoeff[0]-V)>this->Eaccuracy)
@@ -490,10 +490,10 @@ namespace Mantid
 
     int
       PolyVar<1>::operator!=(const double& V) const
-      /*!
+      /**
       Determine if a value and polynomial are different
-      \param V :: Single value to use
-      \return 1 is polynomial differs:  0 on false
+      @param V :: Single value to use
+      @return 1 is polynomial differs:  0 on false
       */
     {
       return (this->operator==(V)) ? 0 : 1;
@@ -502,9 +502,9 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::getDerivative() const
-      /*!
+      /**
       Take derivative
-      \return dP / dx
+      @return dP / dx
       */
     {
       PolyVar<1> KOut(*this);
@@ -513,9 +513,9 @@ namespace Mantid
 
     PolyVar<1>&
       PolyVar<1>::derivative()
-      /*!
+      /**
       Take derivative of this polynomial
-      \return dP / dx
+      @return dP / dx
       */
     {
       if (iDegree<1)
@@ -533,9 +533,9 @@ namespace Mantid
 
     PolyVar<1> 
       PolyVar<1>::GetInversion() const
-      /*!
+      /**
       Inversion of the coefficients
-      \return (Poly)^-1
+      @return (Poly)^-1
       */
     {
       PolyVar<1> InvPoly(iDegree);
@@ -546,11 +546,11 @@ namespace Mantid
 
     void 
       PolyVar<1>::compress(const double epsilon)
-      /*!
+      /**
       Two part process remove coefficients of zero or near zero: 
       Reduce degree by eliminating all (nearly) zero leading coefficients
       and by making the leading coefficient one.  
-      \param epsilon :: coeficient to use to decide if a values is zero
+      @param epsilon :: coeficient to use to decide if a values is zero
       */
     {
       const double eps((epsilon>0.0) ? epsilon : this->Eaccuracy);
@@ -573,7 +573,7 @@ namespace Mantid
     void 
       PolyVar<1>::divide(const PolyVar<1>& pD,PolyVar<1>& pQ, 
       PolyVar<1>& pR,const double epsilon) const
-      /*!
+      /**
       Carry out polynomial division of this / pD  (Euclidean algorithm)
       If 'this' is P(t) and the divisor is D(t) with degree(P) >= degree(D),
       then P(t) = Q(t)*D(t)+R(t) where Q(t) is the quotient with
@@ -583,10 +583,10 @@ namespace Mantid
       of epsilon is used as a threshold on the coefficients of the remainder
       polynomial.  If smaller, the coefficient is assumed to be zero.
 
-      \param pD :: Polynominal to divide
-      \param pQ :: Quotant
-      \param pR :: Remainder
-      \param epsilon :: Tolerance  [-ve to use master tolerance]
+      @param pD :: Polynominal to divide
+      @param pQ :: Quotant
+      @param pR :: Remainder
+      @param epsilon :: Tolerance  [-ve to use master tolerance]
       */
     {
       const int iQuotDegree = iDegree - pD.iDegree;
@@ -619,10 +619,10 @@ namespace Mantid
 
     std::vector<double> 
       PolyVar<1>::realRoots(const double epsilon)
-      /*!
+      /**
       Get just the real roots
-      \param epsilon :: tolerance factor (-ve to use default)
-      \return vector of the real roots (if any)
+      @param epsilon :: tolerance factor (-ve to use default)
+      @return vector of the real roots (if any)
       */
     {
       const double eps((epsilon>0.0) ? epsilon : Eaccuracy);
@@ -639,7 +639,7 @@ namespace Mantid
 
     std::vector<std::complex<double> >
       PolyVar<1>::calcRoots(const double epsilon)
-      /*!
+      /**
       Calculate all the roots of the polynominal.
       Uses the GSL which uses a Hessian reduction of the 
       characteristic compainion matrix.
@@ -647,8 +647,8 @@ namespace Mantid
       where the matrix component below A is the Indenty.
       However, GSL requires that the input coefficient is a_m == 1,
       hence the call to this->compress().
-      \param epsilon :: tolerance factor (-ve to use default)
-      \return roots (not sorted/uniqued)
+      @param epsilon :: tolerance factor (-ve to use default)
+      @return roots (not sorted/uniqued)
       */
     {
       compress(epsilon);
@@ -693,12 +693,12 @@ namespace Mantid
     int
       PolyVar<1>::solveQuadratic(std::complex<double>& AnsA,
       std::complex<double>& AnsB) const
-      /*!
+      /**
       Solves Complex Quadratic component.
       compress MUST have been called.
-      \param AnsA :: complex roots of the equation 
-      \param AnsB :: complex roots of the equation 
-      \return number of unique solutions 
+      @param AnsA :: complex roots of the equation 
+      @param AnsB :: complex roots of the equation 
+      @return number of unique solutions 
       */
     {
       const double b=PCoeff[1];
@@ -729,12 +729,12 @@ namespace Mantid
     int
       PolyVar<1>::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
       std::complex<double>& AnsC) const
-      /*!
+      /**
       Solves Cubic equation
-      \param AnsA :: complex roots of the equation 
-      \param AnsB :: complex roots of the equation 
-      \param AnsC :: complex roots of the equation 
-      \return number of unique solutions 
+      @param AnsA :: complex roots of the equation 
+      @param AnsB :: complex roots of the equation 
+      @param AnsC :: complex roots of the equation 
+      @return number of unique solutions 
       */
 
     {
@@ -794,10 +794,10 @@ namespace Mantid
       return 2;
     }
 
-          /*!
+          /**
       Get the count
-      \param eps :: Value to used
-      \return The count
+      @param eps :: Value to used
+      @return The count
       */
     int PolyVar<1>::getCount(const double eps) const
     {
@@ -808,10 +808,10 @@ namespace Mantid
       return cnt++;
     }
 
-          /*!
+          /**
       Determine if is zero
-      \param eps :: Value to used
-      \return 0 if the value is 0, otherwise 1
+      @param eps :: Value to used
+      @return 0 if the value is 0, otherwise 1
       */
     int PolyVar<1>::isZero(const double eps) const
     {
@@ -823,13 +823,13 @@ namespace Mantid
 
     int 
       PolyVar<1>::isUnit(const double eps) const
-      /*!
+      /**
       Determine if is zero
-      \param eps :: Value to used
-      \retval 2 :: x unit set 
-      \retval 1 :: +ve unit 
-      \retval 0 :: Not unit
-      \retval -1 :: -ve unit 
+      @param eps :: Value to used
+      @retval 2 :: x unit set 
+      @retval 1 :: +ve unit 
+      @retval 0 :: Not unit
+      @retval -1 :: -ve unit 
       */
     {
       int i;
@@ -844,13 +844,13 @@ namespace Mantid
 
     int 
       PolyVar<1>::isUnitary(const double eps) const
-      /*!
+      /**
       Determine if is zero
-      \param eps :: Value to used
-      \retval 2 :: x unit set 
-      \retval 1 :: +ve unit 
-      \retval 0 :: Not unit
-      \retval -1 :: -ve unit 
+      @param eps :: Value to used
+      @retval 2 :: x unit set 
+      @retval 1 :: +ve unit 
+      @retval 0 :: Not unit
+      @retval -1 :: -ve unit 
       */
     {
       int item(0);
@@ -874,12 +874,12 @@ namespace Mantid
 
     int
       PolyVar<1>::read(const std::string& Line)
-      /*!
+      /**
       Given a line of type 
       x^2+4.0x+3.0x 
       convert into a function:
-      \return 0 :: success
-      \return -1 :: failure
+      @return 0 :: success
+      @return -1 :: failure
       */
     {
       const char Variable('x');
@@ -939,11 +939,11 @@ namespace Mantid
 
     int
       PolyVar<1>::write(std::ostream& OX,const int prePlus) const
-      /*!
+      /**
       Basic write command
-      \param OX :: output stream
-      \param prePlus :: prePlus
-      \return 0 :: value ==0.0
+      @param OX :: output stream
+      @param prePlus :: prePlus
+      @return 0 :: value ==0.0
       */
     {
       int nowrite(0);

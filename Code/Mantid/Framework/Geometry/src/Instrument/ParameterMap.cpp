@@ -24,10 +24,10 @@ namespace Mantid
 
     /**
      * Add a value into the map
-     * @param type A string denoting the type, e.g. double, string, fitting
-     * @param comp A pointer to the component that this parameter is attached to
-     * @param name The name of the parameter
-     * @param value The parameter's value
+     * @param type :: A string denoting the type, e.g. double, string, fitting
+     * @param comp :: A pointer to the component that this parameter is attached to
+     * @param name :: The name of the parameter
+     * @param value :: The parameter's value
      */
     void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
 			   const std::string& value)
@@ -44,9 +44,9 @@ namespace Mantid
     /** Create or adjust "pos" parameter for a component
      * Assumed that name either equals "x", "y" or "z" otherwise this 
      * method will not add or modify "pos" parameter
-     * @param comp Component
-     * @param name name of the parameter
-     * @param value value
+     * @param comp :: Component
+     * @param name :: name of the parameter
+     * @param value :: value
      */
     void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name, 
 					     const double value)
@@ -90,9 +90,9 @@ namespace Mantid
     /** Create or adjust "rot" parameter for a component
      * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this 
      * method will not add/modify "rot" parameter
-     * @param comp Component
-     * @param name Parameter name
-     * @param deg Parameter value in degrees
+     * @param comp :: Component
+     * @param name :: Parameter name
+     * @param deg :: Parameter value in degrees
     */
     void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
     {
@@ -167,9 +167,9 @@ namespace Mantid
 
     /**  
      * Adds a double value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a string
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a string
     */
     void ParameterMap::addDouble(const IComponent* comp,const std::string& name, const std::string& value)
     {
@@ -178,9 +178,9 @@ namespace Mantid
 
     /**
      * Adds a double value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a double
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a double
     */
     void ParameterMap::addDouble(const IComponent* comp,const std::string& name, double value)
     {
@@ -189,9 +189,9 @@ namespace Mantid
 
     /**  
      * Adds an int value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a string
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a string
      */
     void ParameterMap::addInt(const IComponent* comp,const std::string& name, const std::string& value)
     {
@@ -200,9 +200,9 @@ namespace Mantid
 
     /**
      * Adds an int value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as an int
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as an int
      */
     void ParameterMap::addInt(const IComponent* comp,const std::string& name, int value)
     {
@@ -211,9 +211,9 @@ namespace Mantid
 
     /**  
      * Adds a bool value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a string
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a string
      */
     void ParameterMap::addBool(const IComponent* comp,const std::string& name, const std::string& value)
     {
@@ -221,9 +221,9 @@ namespace Mantid
     }
     /**
      * Adds a bool value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a bool
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a bool
      */
     void ParameterMap::addBool(const IComponent* comp,const std::string& name, bool value)
     {
@@ -232,9 +232,9 @@ namespace Mantid
 
     /**  
      * Adds a std::string value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value
     */
     void ParameterMap::addString(const IComponent* comp,const std::string& name, const std::string& value)
     {
@@ -243,9 +243,9 @@ namespace Mantid
 
     /**  
      * Adds a V3D value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a string
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a string
      */
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const std::string& value)
     {
@@ -255,9 +255,9 @@ namespace Mantid
 
     /**
      * Adds a V3D value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a V3D
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a V3D
     */
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const V3D& value)
     {
@@ -267,9 +267,9 @@ namespace Mantid
 
     /**  
      * Adds a Quat value to the parameter map.
-     * @param comp Component to which the new parameter is related
-     * @param name Name for the new parameter
-     * @param value Parameter value as a Quat
+     * @param comp :: Component to which the new parameter is related
+     * @param name :: Name for the new parameter
+     * @param value :: Parameter value as a Quat
     */
     void ParameterMap::addQuat(const IComponent* comp,const std::string& name, const Quat& value)
     {
@@ -281,8 +281,8 @@ namespace Mantid
      * FASTER LOOKUPin multithreaded loops . Does the named parameter exist for the given component. 
      * In a multi-threaded loop this yields much better performance than the counterpart
      * using std::string as it does not dynamically allocate any memory
-     * @param comp The component to be searched
-     * @param name The name of the parameter
+     * @param comp :: The component to be searched
+     * @param name :: The name of the parameter
      * @returns A boolean indicating if the map contains the named parameter. If the type is given then
      * this must also match
      */
@@ -304,9 +304,9 @@ namespace Mantid
     /**
      * SLOWER VERSION in multithreaded loops. Does the named parameter exist for the given component
      * and given type
-     * @param comp The component to be searched
-     * @param name The name of the parameter
-     * @param type The type of the component as a string
+     * @param comp :: The component to be searched
+     * @param name :: The name of the parameter
+     * @param type :: The type of the component as a string
      * @returns A boolean indicating if the map contains the named parameter. If the type is given then
      * this must also match
      */
@@ -329,8 +329,8 @@ namespace Mantid
     }
 
     /** FASTER LOOKUP in multithreaded loops. Return a named parameter
-     * @param comp Component to which parameter is related
-     * @param name Parameter name
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
      * @returns The named parameter if it exists or a NULL shared pointer if not
      */
     Parameter_sptr ParameterMap::get(const IComponent* comp, const char* name) const
@@ -357,9 +357,9 @@ namespace Mantid
 
 
     /** SLOWER LOOKUP in multithreaded loops. Return a named parameter of a given type
-     * @param comp Component to which parameter is related
-     * @param name Parameter name
-     * @param type An optional type string
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string
      * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
      */
     Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
@@ -390,9 +390,9 @@ namespace Mantid
     /** 
      * FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up 
      * the component tree to higher parents.
-     * @param comp The component to start the search with
-     * @param name Parameter name
-     * @param type An optional type string
+     * @param comp :: The component to start the search with
+     * @param name :: Parameter name
+     * @param type :: An optional type string
      * @returns the first matching parameter.
      */
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char * name) const
@@ -414,9 +414,9 @@ namespace Mantid
     /** 
      * Find a parameter by name, recursively going up the component tree
      * to higher parents.
-     * @param comp The component to start the search with
-     * @param name Parameter name
-     * @param type An optional type string
+     * @param comp :: The component to start the search with
+     * @param name :: Parameter name
+     * @param type :: An optional type string
      * @returns the first matching parameter.
      */
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
@@ -439,8 +439,8 @@ namespace Mantid
 
     /**  
      * Return the value of a parameter as a string
-     * @param comp Component to which parameter is related
-     * @param name Parameter name
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
      * @return string representation of the parameter
      */
     std::string ParameterMap::getString(const IComponent* comp, const std::string& name)
@@ -452,7 +452,7 @@ namespace Mantid
 
     /** 
      * Returns a set with all the parameter names for the given component
-     * @param comp A pointer to the component of interest
+     * @param comp :: A pointer to the component of interest
      * @returns A set of names of parameters for the given component
      */
     std::set<std::string> ParameterMap::names(const IComponent* comp)const
@@ -521,8 +521,8 @@ namespace Mantid
     }
  
     ///Sets a cached location on the location cache
-    /// @param comp The Component to set the location of
-    /// @param location The location 
+    /// @param comp :: The Component to set the location of
+    /// @param location :: The location 
     void ParameterMap::setCachedLocation(const IComponent* comp, const V3D& location) const
     {
       // Call to setCachedLocation is a write so not thread-safe
@@ -533,8 +533,8 @@ namespace Mantid
     }
 
     ///Attempts to retreive a location from the location cache
-    /// @param comp The Component to find the location of
-    /// @param location If the location is found it's value will be set here
+    /// @param comp :: The Component to find the location of
+    /// @param location :: If the location is found it's value will be set here
     /// @returns true if the location is in the map, otherwise false
     bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) const
     {
@@ -542,8 +542,8 @@ namespace Mantid
     }
 
     ///Sets a cached rotation on the rotation cache
-    /// @param comp The Component to set the rotation of
-    /// @param rotation The rotation as a quaternion 
+    /// @param comp :: The Component to set the rotation of
+    /// @param rotation :: The rotation as a quaternion 
     void ParameterMap::setCachedRotation(const IComponent* comp, const Quat& rotation) const
     {
       // Call to setCachedRotation is a write so not thread-safe
@@ -554,8 +554,8 @@ namespace Mantid
     }
 
     ///Attempts to retreive a rotation from the rotation cache
-    /// @param comp The Component to find the rotation of
-    /// @param rotation If the rotation is found it's value will be set here
+    /// @param comp :: The Component to find the rotation of
+    /// @param rotation :: If the rotation is found it's value will be set here
     /// @returns true if the rotation is in the map, otherwise false
     bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
     {
@@ -563,8 +563,8 @@ namespace Mantid
     }
 
     ///Sets a cached bounding box
-    /// @param comp The Component to set the rotation of
-    /// @param box A reference to the bounding box
+    /// @param comp :: The Component to set the rotation of
+    /// @param box :: A reference to the bounding box
     void ParameterMap::setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const
     {
       // Call to setCachedRotation is a write so not thread-safe
@@ -575,8 +575,8 @@ namespace Mantid
     }
 
     ///Attempts to retreive a bounding box from the cache
-    /// @param comp The Component to find the bounding box of
-    /// @param box If the bounding box is found it's value will be set here
+    /// @param comp :: The Component to find the bounding box of
+    /// @param box :: If the bounding box is found it's value will be set here
     /// @returns true if the bounding is in the map, otherwise false
     bool ParameterMap::getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const
     {
@@ -587,7 +587,7 @@ namespace Mantid
     /**
      * Handles the building of the NearestNeighbours object, if it has not already been 
      * populated for this parameter map.
-     * @param comp Object used for determining the Instrument
+     * @param comp :: Object used for determining the Instrument
      */
     void ParameterMap::buildNearestNeighbours(const IComponent *comp) const
     {
@@ -615,8 +615,8 @@ namespace Mantid
     
     /**
      * Queries the NearestNeighbours object for the selected detector.
-     * @param comp pointer to the querying detector
-     * @param radius distance from detector on which to filter results
+     * @param comp :: pointer to the querying detector
+     * @param radius :: distance from detector on which to filter results
      * @return map of DetectorID to distance for the nearest neighbours
      */
     std::map<int, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
@@ -634,9 +634,9 @@ namespace Mantid
     /**
      *  Retrieve a parameter by either creating a new one of getting an existing one
      * @param[out] created Set to true if the named parameter was newly created, false otherwise
-     * @param type A string denoting the type, e.g. double, string, fitting
-     * @param comp A pointer to the component that this parameter is attached to
-     * @param name The name of the parameter
+     * @param type :: A string denoting the type, e.g. double, string, fitting
+     * @param comp :: A pointer to the component that this parameter is attached to
+     * @param name :: The name of the parameter
      */
     Parameter_sptr ParameterMap::retrieveParameter(bool & created, const std::string & type, 
 						   const IComponent* comp, const std::string & name)
@@ -662,7 +662,7 @@ namespace Mantid
     }
     
     /**  Logs an error
-	@param str The error message
+	@param str :: The error message
      */
     void ParameterMap::reportError(const std::string& str)
     {

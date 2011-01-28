@@ -8,7 +8,7 @@ namespace Mantid
 
   namespace Geometry
   {
-    /*!
+    /**
     \class CacheGeometryRenderer
     \brief rendering geometry using opengl from the geometry cache.
     \author Srikanth Nagella

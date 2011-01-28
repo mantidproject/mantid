@@ -136,25 +136,25 @@ class PartialJacobian: public Jacobian
   int m_iaP0;      ///< offset in the active Jacobian for a particular function
 public:
   /** Constructor
-   * @param J A pointer to the overall Jacobian
-   * @param iP0 The parameter index (declared) offset for a particular function
-   * @param iap0 The active parameter index (declared) offset for a particular function
+   * @param J :: A pointer to the overall Jacobian
+   * @param iP0 :: The parameter index (declared) offset for a particular function
+   * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
   PartialJacobian(Jacobian* J,int iP0, int iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
   {}
   /**
    * Overridden Jacobian::set(...).
-   * @param iY The index of the data point
-   * @param iP The parameter index of an individual function.
-   * @param value The derivative value
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   * @param value :: The derivative value
    */
   void set(int iY, int iP, double value)
   {
       m_J->set(iY,m_iP0 + iP,value);
   }
  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value Value to add
-  *   @param iActiveP The index of an active parameter.
+  *   @param value :: Value to add
+  *   @param iActiveP :: The index of an active parameter.
   */
   virtual void addNumberToColumn(const double& value, const int& iActiveP) 
   {
@@ -185,9 +185,9 @@ public:
 
 
 /** Sets a new value to the i-th parameter.
- *  @param i The parameter index
- *  @param value The new value
- *  @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ *  @param i :: The parameter index
+ *  @param value :: The new value
+ *  @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
 void CompositeFunction::setParameter(int i, const double& value, bool explicitlySet)
 {
@@ -196,7 +196,7 @@ void CompositeFunction::setParameter(int i, const double& value, bool explicitly
 }
 
 /** Get the i-th parameter.
- *  @param i The parameter index
+ *  @param i :: The parameter index
  *  @return value of the requested parameter
  */
 double CompositeFunction::getParameter(int i)const
@@ -207,9 +207,9 @@ double CompositeFunction::getParameter(int i)const
 
 /**
  * Sets a new value to a parameter by name.
- * @param name The name of the parameter.
- * @param value The new value
- * @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ * @param name :: The name of the parameter.
+ * @param value :: The new value
+ * @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
 void CompositeFunction::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
@@ -226,7 +226,7 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
 
 /**
  * Parameters by name.
- * @param name The name of the parameter.
+ * @param name :: The name of the parameter.
  * @return value of the requested named parameter
  */
 double CompositeFunction::getParameter(const std::string& name)const
@@ -250,7 +250,7 @@ int CompositeFunction::nParams()const
 
 /**
  * 
- * @param name The name of a parameter
+ * @param name :: The name of a parameter
  * @return index of the requested named parameter
  */
 int CompositeFunction::parameterIndex(const std::string& name)const
@@ -265,7 +265,7 @@ int CompositeFunction::parameterIndex(const std::string& name)const
 }
 
 /// Returns the name of parameter
-/// @param i The index
+/// @param i :: The index
 /// @return The name of the parameter
 std::string CompositeFunction::parameterName(int i)const
 {
@@ -323,7 +323,7 @@ std::string CompositeFunction::nameOfActive(int i)const
 
 /**
  * query to see in the function is active
- * @param i The index of a declared parameter
+ * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
 bool CompositeFunction::isActive(int i)const
@@ -333,7 +333,7 @@ bool CompositeFunction::isActive(int i)const
 }
 
 /**
- * @param i A declared parameter index to be removed from active
+ * @param i :: A declared parameter index to be removed from active
  */
 void CompositeFunction::removeActive(int i)
 {
@@ -349,7 +349,7 @@ void CompositeFunction::removeActive(int i)
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
- * @param i A declared parameter index to be restored to active
+ * @param i :: A declared parameter index to be restored to active
  */
 void CompositeFunction::restoreActive(int i)
 {
@@ -368,7 +368,7 @@ void CompositeFunction::restoreActive(int i)
 }
 
 /**
- * @param i The index of a declared parameter
+ * @param i :: The index of a declared parameter
  * @return The index of declared parameter i in the list of active parameters or -1
  *         if the parameter is tied.
  */
@@ -409,7 +409,7 @@ void CompositeFunction::checkFunction()
 }
 
 /** Add a function
- * @param f A pointer to the added function
+ * @param f :: A pointer to the added function
  * @return The function index
  */
 int CompositeFunction::addFunction(IFitFunction* f)
@@ -436,8 +436,8 @@ int CompositeFunction::addFunction(IFitFunction* f)
 }
 
 /** Remove a function
- * @param i The index of the function to remove
- * @param del The deletion flag. If true the function will be deleted otherwise - simply detached
+ * @param i :: The index of the function to remove
+ * @param del :: The deletion flag. If true the function will be deleted otherwise - simply detached
  */
 void CompositeFunction::removeFunction(int i, bool del)
 {
@@ -522,9 +522,9 @@ void CompositeFunction::removeFunction(int i, bool del)
 
 /** Replace a function with a new one. The old function is deleted.
  *  The new function must have already its workspace set.
- * @param f_old The pointer to the function to replace. If it's not
+ * @param f_old :: The pointer to the function to replace. If it's not
  *  a member of this composite function nothing happens
- * @param f_new A pointer to the new function
+ * @param f_new :: A pointer to the new function
  */
 void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* f_new)
 {
@@ -537,8 +537,8 @@ void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* 
 }
 
 /** Replace a function with a new one. The old function is deleted.
- * @param i The index of the function to replace
- * @param f A pointer to the new function
+ * @param i :: The index of the function to replace
+ * @param f :: A pointer to the new function
  */
 void CompositeFunction::replaceFunction(int i,IFitFunction* f)
 {
@@ -615,7 +615,7 @@ void CompositeFunction::replaceFunction(int i,IFitFunction* f)
 }
 
 /**
- * @param i The index of the function
+ * @param i :: The index of the function
  * @return function at the requested index
  */
 IFitFunction* CompositeFunction::getFunction(int i)const
@@ -629,7 +629,7 @@ IFitFunction* CompositeFunction::getFunction(int i)const
 
 /**
  * Get the index of the function to which parameter i belongs
- * @param i The parameter index
+ * @param i :: The parameter index
  * @return function index of the requested parameter
  */
 int CompositeFunction::functionIndex(int i)const
@@ -643,7 +643,7 @@ int CompositeFunction::functionIndex(int i)const
 
 /**
  * Get the index of the function to which parameter i belongs
- * @param i The active parameter index
+ * @param i :: The active parameter index
  * @return active function index of the requested parameter
  */
 int CompositeFunction::functionIndexActive(int i)const
@@ -654,9 +654,9 @@ int CompositeFunction::functionIndexActive(int i)const
 }
 
 /**
-* @param varName The variable name which may contain function index ( [f<index.>]name )
-* @param index Receives function index or -1 
-* @param name Receives the parameter name
+* @param varName :: The variable name which may contain function index ( [f<index.>]name )
+* @param index :: Receives function index or -1 
+* @param name :: Receives the parameter name
 */
 void CompositeFunction::parseName(const std::string& varName,int& index, std::string& name)
 {
@@ -683,7 +683,7 @@ void CompositeFunction::parseName(const std::string& varName,int& index, std::st
 }
 
 /** Returns the index of parameter i as it declared in its function
- * @param i The parameter index
+ * @param i :: The parameter index
  * @return The local index of the parameter
  */
 int CompositeFunction::parameterLocalIndex(int i)const
@@ -693,7 +693,7 @@ int CompositeFunction::parameterLocalIndex(int i)const
 }
 
 /** Returns the name of parameter i as it declared in its function
- * @param i The parameter index
+ * @param i :: The parameter index
  * @return The pure parameter name (without the function identifier f#.)
  */
 std::string CompositeFunction::parameterLocalName(int i)const
@@ -703,10 +703,10 @@ std::string CompositeFunction::parameterLocalName(int i)const
 }
 
 /** Initialize the function providing it the workspace
- * @param workspace The shared pointer to a workspace to which the function will be fitted
- * @param spec The number of a spectrum for fitting
- * @param xMin The minimum bin index of spectrum spec that will be used in fitting
- * @param xMax The maximum bin index of spectrum spec that will be used in fitting
+ * @param workspace :: The shared pointer to a workspace to which the function will be fitted
+ * @param spec :: The number of a spectrum for fitting
+ * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
+ * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
  */
 //void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 //{
@@ -740,7 +740,7 @@ void CompositeFunction::clearTies()
 }
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
- * @param i The index of the tied parameter.
+ * @param i :: The index of the tied parameter.
  * @return True if successfull
  */
 bool CompositeFunction::removeTie(int i)
@@ -755,7 +755,7 @@ bool CompositeFunction::removeTie(int i)
 }
 
 /** Get the tie of i-th parameter
- * @param i The parameter index
+ * @param i :: The parameter index
  * @return A pointer to the tie.
  */
 ParameterTie* CompositeFunction::getTie(int i)const
@@ -766,7 +766,7 @@ ParameterTie* CompositeFunction::getTie(int i)const
 
 /**
  * Attaches a tie to this function. The attached tie is owned by the function.
- * @param tie A pointer to a new tie
+ * @param tie :: A pointer to a new tie
  */
 void CompositeFunction::addTie(ParameterTie* tie)
 {
@@ -781,8 +781,8 @@ void CompositeFunction::addTie(ParameterTie* tie)
 
 /**
  * Declare a new parameter. To used in the implementation'c constructor.
- * @param name The parameter name.
- * @param initValue The initial value for the parameter
+ * @param name :: The parameter name.
+ * @param initValue :: The initial value for the parameter
  */
 void CompositeFunction::declareParameter(const std::string& name,double initValue )
 {
@@ -792,7 +792,7 @@ void CompositeFunction::declareParameter(const std::string& name,double initValu
 }
 
 /** Add a constraint
- *  @param ic Pointer to a constraint.
+ *  @param ic :: Pointer to a constraint.
  */
 void CompositeFunction::addConstraint(IConstraint* ic)
 {
@@ -810,7 +810,7 @@ void CompositeFunction::setParametersToSatisfyConstraints()
 }
 
 /// Get constraint
-/// @param i the index
+/// @param i :: the index
 /// @return A pointer to the constraint
 IConstraint* CompositeFunction::getConstraint(int i)const
 {
@@ -819,7 +819,7 @@ IConstraint* CompositeFunction::getConstraint(int i)const
 }
 
 /** Remove a constraint
- * @param parName The name of a parameter which constarint to remove.
+ * @param parName :: The name of a parameter which constarint to remove.
  */
 void CompositeFunction::removeConstraint(const std::string& parName)
 {
@@ -829,7 +829,7 @@ void CompositeFunction::removeConstraint(const std::string& parName)
 }
 
 /** Checks if a constraint has been explicitly set
- *  @param i The parameter index
+ *  @param i :: The parameter index
  *  @return true if the function is explicitly set
  */
 bool CompositeFunction::isExplicitlySet(int i)const
@@ -840,7 +840,7 @@ bool CompositeFunction::isExplicitlySet(int i)const
 
 /**
  * Returns the index of parameter if the ref points to one of the member function or -1
- * @param ref A reference to a parameter
+ * @param ref :: A reference to a parameter
  * @return Parameter index or -1
  */
 int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
@@ -861,7 +861,7 @@ int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
 }
 
 /**
- * @param ref The reference
+ * @param ref :: The reference
  * @return A function containing parameter pointed to by ref
  */
 IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
@@ -882,7 +882,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
 }
 
 /**
- * @param fun The searched function
+ * @param fun :: The searched function
  * @return A function containing the argument function fun
  */
 IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)

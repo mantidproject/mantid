@@ -123,7 +123,7 @@ void AlgorithmProxy::cancel()const
  *  the observer is added directly. If the algorithm is not running yet
  *  the observer's address is added to a buffer to be used later when execute/executeAsync
  *  method is called.
- *  @param observer Observer
+ *  @param observer :: Observer
  */
 void AlgorithmProxy::addObserver(const Poco::AbstractObserver& observer)const
 {
@@ -139,7 +139,7 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver& observer)const
 }
 
 /** Remove an observer.
- *  @param observer Observer
+ *  @param observer :: Observer
  */
 void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 {
@@ -191,7 +191,7 @@ void AlgorithmProxy::addObservers()
 }
 
 /** executeAsync() implementation. Calls execute and when it has finished  deletes the real algorithm.
- *  @param dummy A dummy variable
+ *  @param dummy :: A dummy variable
  */
 bool AlgorithmProxy::executeAsyncImpl(const Poco::Void & dummy)
 {

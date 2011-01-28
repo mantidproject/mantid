@@ -9,7 +9,7 @@ namespace Mantid
 
 namespace Geometry 
 {
-/*!
+/**
   \class Cone
   \brief Holds a cone in vector form
   \author S. Ansell

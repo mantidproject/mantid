@@ -38,7 +38,7 @@ class QwtPlotCurve;
 class QPoint;
 class QEvent;
 
-/*! Plot tool for selecting ranges on curves.
+/** Plot tool for selecting ranges on curves.
  *
  * As detailed in the documentation of PlotToolInterface, this one is different
  * from most other plot tools in that other tools depend on it.
@@ -78,7 +78,7 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
         void setEnabled(bool on = true);
 
 	signals:
-		/*! Emitted whenever a new message should be presented to the user.
+		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
 		 */

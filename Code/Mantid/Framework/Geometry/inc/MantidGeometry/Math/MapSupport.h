@@ -1,7 +1,7 @@
 #ifndef MapSupport_h
 #define MapSupport_h
 
-/*!
+/**
   \namespace MapSupport
   \brief Holds stuff for manipulating maps
   \author S. Ansell
@@ -35,7 +35,7 @@
 
 namespace MapSupport
 {
-  /*!
+  /**
     \class PFirst
     \author S. Ansell
     \date Aug 2005
@@ -57,7 +57,7 @@ namespace MapSupport
       
     };
 
-  /*!
+  /**
     \class PSecond
     \author S. Ansell
     \date June 2006
@@ -77,7 +77,7 @@ namespace MapSupport
     };
   
 
-  /*!
+  /**
     \class valEqual
     \brief Functor using second value as equal
     \author S. Ansell
@@ -108,7 +108,7 @@ namespace MapSupport
 	  return A.second==value;
 	}
     };
-  /*!
+  /**
     \class mapClone
     \brief Functor for coping map elements with clone functions
     \author S. Ansell
@@ -135,7 +135,7 @@ namespace MapSupport
 	  }
     };
 
-  /*!
+  /**
     \class mapDelete
     \brief Functor for deleting the second component of a map
     \author S. Ansell
@@ -160,7 +160,7 @@ namespace MapSupport
 	  }
     };
 
-  /*!
+  /**
     \class mapSwap
     \brief Functor for reversing a map
     \author S. Ansell
@@ -185,7 +185,7 @@ namespace MapSupport
 	}
     };
 
-  /*!
+  /**
     \class mapWrite
     \brief Functor quick write out of a map
     \author S. Ansell
@@ -208,7 +208,7 @@ namespace MapSupport
 	  }
     };
 
-  /*!
+  /**
     \class sndValue
     \brief Functor to get second point in a map
     \author S. Ansell

@@ -160,9 +160,9 @@ double Unwrap::getPrimaryFlightpath() const
 
 /** Calculates the total flightpath for the given detector.
  *  This is L1+L2 normally, but is the source-detector distance for a monitor.
- *  @param spectrum  The workspace index
- *  @param L1        The primary flightpath
- *  @param isMonitor Output: true is this detector is a monitor
+ *  @param spectrum ::  The workspace index
+ *  @param L1 ::        The primary flightpath
+ *  @param isMonitor :: Output: true is this detector is a monitor
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained
  */
@@ -197,9 +197,9 @@ double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, bool& 
 }
 
 /** Unwraps an X array, converting the units to wavelength along the way.
- *  @param tempWS   A pointer to the temporary workspace in which the results are being stored
- *  @param spectrum The workspace index
- *  @param Ld       The flightpath for the detector related to this spectrum
+ *  @param tempWS ::   A pointer to the temporary workspace in which the results are being stored
+ *  @param spectrum :: The workspace index
+ *  @param Ld ::       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower ranges start & end
  */
 const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld)
@@ -310,9 +310,9 @@ std::pair<int,int> Unwrap::handleFrameOverlapped(const MantidVec& xdata, const d
 }
 
 /** Unwraps the Y & E vectors of a spectrum according to the ranges found in unwrapX.
- *  @param tempWS      A pointer to the temporary workspace in which the results are being stored
- *  @param spectrum    The workspace index
- *  @param rangeBounds The upper and lower ranges for the unwrapping
+ *  @param tempWS ::      A pointer to the temporary workspace in which the results are being stored
+ *  @param spectrum ::    The workspace index
+ *  @param rangeBounds :: The upper and lower ranges for the unwrapping
  */
 void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds)
 {
@@ -368,10 +368,10 @@ void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spe
 }
 
 /** Rebins the data into common bins of wavelength.
- *  @param workspace The input workspace to the rebinning
- *  @param min       The lower limit in X for the rebinning
- *  @param max       The upper limit in X for the rebinning
- *  @param numBins   The number of bins into which to rebin
+ *  @param workspace :: The input workspace to the rebinning
+ *  @param min ::       The lower limit in X for the rebinning
+ *  @param max ::       The upper limit in X for the rebinning
+ *  @param numBins ::   The number of bins into which to rebin
  *  @return A pointer to the workspace containing the rebinned data
  *  @throw std::runtime_error If the Rebin child algorithm fails
  */

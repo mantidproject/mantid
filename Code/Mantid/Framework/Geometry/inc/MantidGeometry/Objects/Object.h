@@ -34,7 +34,7 @@ namespace Mantid
     class vtkGeometryCacheReader;
     class vtkGeometryCacheWriter;
 
-    /*!
+    /**
     \class Object
     \brief Global object for object
     \version 1.0

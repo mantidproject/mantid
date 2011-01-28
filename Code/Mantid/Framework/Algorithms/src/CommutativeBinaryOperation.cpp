@@ -10,8 +10,8 @@ namespace Mantid
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
      * In order to be size compatible then the larger workspace
      * must divide be the size of the smaller workspace leaving no remainder
-     * @param lhs the workspace treated as the lhs to compare
-     * @param rhs the workspace treated as the rhs to compare
+     * @param lhs :: the workspace treated as the lhs to compare
+     * @param rhs :: the workspace treated as the rhs to compare
      * @retval true The two workspaces are size compatible
      * @retval false The two workspaces are NOT size compatible
      */

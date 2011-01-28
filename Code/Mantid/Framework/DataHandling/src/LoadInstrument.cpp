@@ -447,7 +447,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Reads the contents of the \<defaults\> element to set member variables,
     *  requires m_instrument to be already set
-    *  @param defaults points to the data read from the \<defaults\> element
+    *  @param defaults :: points to the data read from the \<defaults\> element
     */
     void LoadInstrument::readDefaults(Poco::XML::Element* defaults)
     {
@@ -492,10 +492,10 @@ namespace Mantid
     %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
     %  itself, i.e. it may act recursively.
     *
-    *  @param parent CompAssembly to append new component to
-    *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
-    *  @param idList The current IDList
-    *  @param excludeList The exclude List
+    *  @param parent :: CompAssembly to append new component to
+    *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
+    *  @param idList :: The current IDList
+    *  @param excludeList :: The exclude List
     */
     void LoadInstrument::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
       const std::vector<std::string> excludeList)
@@ -634,10 +634,10 @@ namespace Mantid
     %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
     %  itself, i.e. it may act recursively.
     *
-    *  @param parent CompAssembly to append new component to
-    *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
-    *  @param idList The current IDList
-    *  @param excludeList The exclude List
+    *  @param parent :: CompAssembly to append new component to
+    *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
+    *  @param idList :: The current IDList
+    *  @param excludeList :: The exclude List
     */
     void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
       const std::vector<std::string> excludeList)
@@ -651,9 +651,9 @@ namespace Mantid
     *  representing a component element) that contains no sub-components. This component is appended
     %  to the parent (1st argument).
     *
-    *  @param parent CompAssembly to append component to
-    *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add
-    *  @param idList The current IDList
+    *  @param parent :: CompAssembly to append component to
+    *  @param pLocElem ::  Poco::XML element that points to the element in the XML doc we want to add
+    *  @param idList :: The current IDList
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
@@ -865,9 +865,9 @@ namespace Mantid
     *  representing a component element) that contains no sub-components. This component is appended
     %  to the parent (1st argument).
     *
-    *  @param parent pointer to the CompAssembly to append component to
-    *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add
-    *  @param idList The current IDList
+    *  @param parent :: pointer to the CompAssembly to append component to
+    *  @param pLocElem ::  Poco::XML element that points to the element in the XML doc we want to add
+    *  @param idList :: The current IDList
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
@@ -880,8 +880,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Calculate the position of comp relative to its parent from info provided by \<location\> element.
     *
-    *  @param comp To set position/location off
-    *  @param pElem  Poco::XML element that points a location element in the XML doc
+    *  @param comp :: To set position/location off
+    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
     *
     *  @return  Thrown if second argument is not a pointer to a 'location' XML element
     */
@@ -968,8 +968,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Set location (position) of comp as specified in XML location element.
     *
-    *  @param comp To set position/location off
-    *  @param pElem  Poco::XML element that points a location element in the XML doc
+    *  @param comp :: To set position/location off
+    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
     *
     *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
     */
@@ -1082,7 +1082,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Get parent component element of location element.
     *
-    *  @param pLocElem  Poco::XML element that points a location element in the XML doc
+    *  @param pLocElem ::  Poco::XML element that points a location element in the XML doc
     *  @return Parent XML element to a location XML element
     *
     *  @throw logic_error Thrown if argument is not a child of component element
@@ -1122,8 +1122,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Method for populating IdList.
     *
-    *  @param pE  Poco::XML element that points to an \<idlist\>
-    *  @param idList The structure to populate with detector ID numbers
+    *  @param pE ::  Poco::XML element that points to an \<idlist\>
+    *  @param idList :: The structure to populate with detector ID numbers
     *
     *  @throw logic_error Thrown if argument is not a child of component element
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -1221,7 +1221,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Returns True if the (string) type given is an assembly.
      *
-     *  @param type  name of the type of a component in XML instrument definition
+     *  @param type ::  name of the type of a component in XML instrument definition
      *  @return True if the type is an assembly
      *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
     */
@@ -1245,8 +1245,8 @@ namespace Mantid
     *  by rotating the z-axis of the component passed in 1st argument so that it points in the
     *  direction: from the component as specified 2nd argument to the component as specified in 1st argument.
     *
-    *  @param in  Component to be rotated
-    *  @param facing Object to face
+    *  @param in ::  Component to be rotated
+    *  @param facing :: Object to face
     */
     void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing)
     {
@@ -1262,8 +1262,8 @@ namespace Mantid
     *  by rotating the z-axis of the component passed in 1st argument so that it points in the
     *  direction: from the position (as specified 2nd argument) to the component (1st argument).
     *
-    *  @param in  Component to be rotated
-    *  @param facingPoint position to face
+    *  @param in ::  Component to be rotated
+    *  @param facingPoint :: position to face
     */
     void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::V3D& facingPoint)
     {
@@ -1303,7 +1303,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Parse position of facing element to V3D
     *
-    *  @param pElem  Facing type element to parse
+    *  @param pElem ::  Facing type element to parse
     *  @return Return parsed position as a V3D
     */
     Geometry::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
@@ -1345,8 +1345,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Set facing of comp as specified in XML facing element (which must be sub-element of a location element).
     *
-    *  @param comp To set facing of
-    *  @param pElem  Poco::XML element that points a location element in the XML doc
+    *  @param comp :: To set facing of
+    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
     *
     *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
     */
@@ -1394,9 +1394,9 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Set parameter/logfile info (if any) associated with component
     *
-    *  @param comp Some component
-    *  @param pElem  Associated Poco::XML element to component that may hold a \<parameter\> element
-    *  @param logfileCache Cache to add information about parameter to
+    *  @param comp :: Some component
+    *  @param pElem ::  Associated Poco::XML element to component that may hold a \<parameter\> element
+    *  @param logfileCache :: Cache to add information about parameter to
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
@@ -1681,8 +1681,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Apply parameters specified in \<component-link\> XML elements.
     *
-    *  @param instrument Instrument
-    *  @param pRootElem  Associated Poco::XML element to component that may hold a \<parameter\> element
+    *  @param instrument :: Instrument
+    *  @param pRootElem ::  Associated Poco::XML element to component that may hold a \<parameter\> element
     */
     void LoadInstrument::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
     {
@@ -1779,7 +1779,7 @@ namespace Mantid
     /** get name of location element. Will be the name attribute, or the
      * parent's name attribute, or the parent's type, if all else fails.
     *
-    *  @param pElem  Poco::XML element that points to a location element
+    *  @param pElem ::  Poco::XML element that points to a location element
     *  @return name of location element
     */
     std::string LoadInstrument::getNameOfLocationElement(Poco::XML::Element* pElem)

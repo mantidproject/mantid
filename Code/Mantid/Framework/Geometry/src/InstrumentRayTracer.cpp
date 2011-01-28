@@ -24,7 +24,7 @@ namespace Mantid
     /**
      * Constructor specifying the instrument involved in the tracing. The instrument must have defined a source
      * component.
-     * @param instrument The instrument to perform the ray tracings on. It must have a defined source.
+     * @param instrument :: The instrument to perform the ray tracings on. It must have a defined source.
      */
     InstrumentRayTracer::InstrumentRayTracer(IInstrument_sptr instrument) : m_instrument(instrument)
     {
@@ -46,7 +46,7 @@ namespace Mantid
     /**
      * Trace a given track from the instrument source in the given direction. For performance reasons the 
      * results are accumulated within the object and can be returned using getResults.
-     * @param dir A directional vector. The starting point is defined by the instrument source.
+     * @param dir :: A directional vector. The starting point is defined by the instrument source.
      */
     void InstrumentRayTracer::trace(const V3D & dir) const
     {
@@ -74,7 +74,7 @@ namespace Mantid
     /**
      * Fire the test ray at the instrument and perform a bread-first search of the 
      * object tree to find the objects that were intersected.
-     * @param testRay An input/output parameter that defines the track and accumulates the
+     * @param testRay :: An input/output parameter that defines the track and accumulates the
      * intersection results
      */
     void InstrumentRayTracer::fireRay(Track & testRay) const
@@ -110,9 +110,9 @@ namespace Mantid
 
     /**
     * Test the intersection of the ray with the children of the component assembly
-    * @param testRay Track under test. The results are stored here.
-    * @param assembly The children of this assembly will be tested
-    * @param searchQueue If a child is a sub-assembly then it is appended for later searching
+    * @param testRay :: Track under test. The results are stored here.
+    * @param assembly :: The children of this assembly will be tested
+    * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching
     */
     void InstrumentRayTracer::testIntersectionWithChildren(Track & testRay, 
       ICompAssembly_sptr assembly, std::deque<IComponent_sptr> & searchQueue) const
@@ -138,7 +138,7 @@ namespace Mantid
 
     ///** 
     // * Perform a quick check as to whether the ray passes through the component
-    // * @param component The test component
+    // * @param component :: The test component
     // */
     // bool InstrumentRayTracer::quickIntersectCheck(boost::shared_ptr<IComponent> component, const Track & testRay) const
     // {
@@ -147,7 +147,7 @@ namespace Mantid
     // 
     // /**
     //  * Perform a proper intersection test of the physical object and accumulate the results if necessary
-    //  * @param testRay An input/output parameter that defines the track and accumulates the
+    //  * @param testRay :: An input/output parameter that defines the track and accumulates the
     //  * intersection results
     //  */
     // void slowIntersectCheck(boost::shared_ptr<IComponent> component, Track & testRay) const;     

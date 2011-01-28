@@ -25,11 +25,11 @@ Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::g
 //----------------------------------
 /**
  * Return a specialized dialog for the given algorithm. If none exists then the default is returned
- * @param alg A pointer to the algorithm
- * @param parent An optional parent widget
- * @param forScript A boolean indicating if this dialog is to be use for from a script or not
- * @param msg An optional message string to be placed at the top of the dialog
- * @param suggestions An optional set of suggested values
+ * @param alg :: A pointer to the algorithm
+ * @param parent :: An optional parent widget
+ * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not
+ * @param msg :: An optional message string to be placed at the top of the dialog
+ * @param suggestions :: An optional set of suggested values
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
@@ -77,8 +77,8 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
 
 /**
  * Create a new instance of the correct type of UserSubWindow
- * @param interface_name The registered name of the interface
- * @param parent The parent widget
+ * @param interface_name :: The registered name of the interface
+ * @param parent :: The parent widget
  */
 UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_name, QWidget* parent)
 {

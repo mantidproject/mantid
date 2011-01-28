@@ -17,8 +17,8 @@ using namespace Kernel;
 using namespace API;
 
 /** Static callback function used by MuParser to initialize variables implicitly
- *  @param varName The name of a new variable
- *  @param palg Pointer to the algorithm
+ *  @param varName :: The name of a new variable
+ *  @param palg :: Pointer to the algorithm
  *  @return A pointer to the initialized variable
  */
 double* UserFunction1D::AddVariable(const char *varName, void *palg)
@@ -99,11 +99,11 @@ void UserFunction1D::prepare()
 }*/
 
 /** Calculate the fitting function.
- *  @param in A pointer ot the input function parameters
- *  @param out A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
+ *  @param in :: A pointer ot the input function parameters
+ *  @param out :: A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
  *        The fitting procedure will try to minimise Sum(out[i]^2)
- *  @param xValues The array of nData x-values.
- *  @param nData The size of the fitted data.
+ *  @param xValues :: The array of nData x-values.
+ *  @param nData :: The size of the fitted data.
  */
 void UserFunction1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
@@ -117,10 +117,10 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
 }
 
 /** 
-* @param in Input fitting parameter values
-* @param out Derivatives
-* @param xValues X values for data points
-* @param nData Number of data points
+* @param in :: Input fitting parameter values
+* @param out :: Derivatives
+* @param xValues :: X values for data points
+* @param nData :: Number of data points
  */
 void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {

@@ -40,8 +40,8 @@ void LinearBackground::functionDeriv(Jacobian* out, const double* xValues, const
 
 /**
  * Do linear fit to the data in X and Y
- * @param X Vector with x-values
- * @param Y Vector with y-values
+ * @param X :: Vector with x-values
+ * @param Y :: Vector with y-values
  */
 void LinearBackground::fit(const std::vector<double>& X,const std::vector<double>& Y)
 {

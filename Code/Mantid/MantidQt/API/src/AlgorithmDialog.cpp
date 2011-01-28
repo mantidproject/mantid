@@ -112,7 +112,7 @@ Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
 
 /**
  * Get a named property for this algorithm
- * @param propName The name of the property
+ * @param propName :: The name of the property
  */
 Mantid::Kernel::Property* AlgorithmDialog::getAlgorithmProperty(const QString & propName) const
 {
@@ -169,7 +169,7 @@ bool AlgorithmDialog::isMessageAvailable() const
 
 /**
  * Check if the control should be enabled for this property
- * @param propName The name of the property
+ * @param propName :: The name of the property
  */
 bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
 {
@@ -195,9 +195,9 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
 
 /**
  * Tie together an input widget and a property
- * @param widget The widget that will collect the input
- * @param property The name of the property to tie the given widget to
- * @param An optional pointer to a QLayout class that is reponsible for managing the passed widget.
+ * @param widget :: The widget that will collect the input
+ * @param property :: The name of the property to tie the given widget to
+ * @param An :: optional pointer to a QLayout class that is reponsible for managing the passed widget.
  * If given, a validator label will be added for the given input widget
  * @returns A NULL pointer if a valid label was successfully add to a passed parent_layout otherwise it
  * returns a pointer to the QLabel instance marking the validity
@@ -241,7 +241,7 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
 /**
  * Open a file selection box. The type of dialog, i.e. load/save will depend on the
  * property type
- * @param The property name that this is associated with. 
+ * @param The :: property name that this is associated with. 
  */
 QString AlgorithmDialog::openFileDialog(const QString & propName)
 {
@@ -334,8 +334,8 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
  * Takes a combobox and adds the allowed values of the given property to its list. 
  * It also sets the displayed value to the correct one based on either the history
  * or a script input value
- * @param propName The name of the property
- * @param optionsBox A pointer to a QComoboBox object
+ * @param propName :: The name of the property
+ * @param optionsBox :: A pointer to a QComoboBox object
  * @returns A newed QComboBox
  */
 void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* optionsBox) const
@@ -373,7 +373,7 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
 /**
  * Takes the given property and QCheckBox pointer and sets the state based on either
  * the history or property value
- * @param propName The name of the property
+ * @param propName :: The name of the property
  * @param 
  * @returns A newed QCheckBox
  */
@@ -406,8 +406,8 @@ void AlgorithmDialog::setCheckBoxState(const QString & propName, QCheckBox* chec
 
 /**
  * Set the input for a text box based on either the history or a script value
- * @param propName The name of the property
- * @param field The QLineEdit field
+ * @param propName :: The name of the property
+ * @param field :: The QLineEdit field
  */
 void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textField)
 {
@@ -462,8 +462,8 @@ QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
 /**
  * Create a button that when clicked will put the name of the input workspace into the
  * output box.
- * @param inputBox The input combo box that contains the input workspace names
- * @param outputEdit The output text box that should contain the output name
+ * @param inputBox :: The input combo box that contains the input workspace names
+ * @param outputEdit :: The output text box that should contain the output name
  * @returns A new QPushButton linked to the appropriate widgets.
  */
 QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
@@ -482,7 +482,7 @@ QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
 
 /** 
  * Flag an input workspace widget
- * @param inputWidget A widget used to enter the input workspace
+ * @param inputWidget :: A widget used to enter the input workspace
  */
 void AlgorithmDialog::flagInputWS(QWidget *inputWidget)
 {
@@ -526,7 +526,7 @@ void AlgorithmDialog::helpClicked()
 
 /**
  * A slot to handle the replace workspace button click
- * @param outputEdit The line edit that is associated, via the signalmapper, with this click
+ * @param outputEdit :: The line edit that is associated, via the signalmapper, with this click
  */
 void AlgorithmDialog::replaceWSClicked(QWidget *outputEdit)
 {
@@ -575,7 +575,7 @@ void AlgorithmDialog::replaceWSClicked(QWidget *outputEdit)
 //------------------------------------------------------
 /**
  * Set the algorithm pointer
- * @param alg A pointer to the algorithm
+ * @param alg :: A pointer to the algorithm
  */
 void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
 {
@@ -689,7 +689,7 @@ void AlgorithmDialog::saveInput()
 
 /**
   * Set a list of values for the properties
-  * @param presetValues A string containing a list of "name=value" pairs with each separated by an '|' character
+  * @param presetValues :: A string containing a list of "name=value" pairs with each separated by an '|' character
   */
 void AlgorithmDialog::setPresetValues(const QString & presetValues)
 {
@@ -711,7 +711,7 @@ void AlgorithmDialog::setPresetValues(const QString & presetValues)
 
 /** 
  * Set comma-separated list of enabled parameter names
- * @param enabledNames A comma-separated list of parameter names to keep enabled
+ * @param enabledNames :: A comma-separated list of parameter names to keep enabled
  */
 void AlgorithmDialog::setEnabledNames(const QString & enabledNames)
 {
@@ -727,7 +727,7 @@ bool AlgorithmDialog::isInEnabledList(const QString& propName) const
 
 /**
  * Set if we are for a script or not
- * @param forScript A boolean inidcating whether we are being called from a script
+ * @param forScript :: A boolean inidcating whether we are being called from a script
  */
 void AlgorithmDialog::isForScript(bool forScript)
 {
@@ -736,7 +736,7 @@ void AlgorithmDialog::isForScript(bool forScript)
 
 /**
  * Set an optional message to be displayed at the top of the widget
- * @param message The message string
+ * @param message :: The message string
  */
 void AlgorithmDialog::setOptionalMessage(const QString & message)
 {
@@ -765,7 +765,7 @@ void AlgorithmDialog::createValidatorLabels()
 /**
  * Get a value from a widget. The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit and QCheckBox
- * @param widget A pointer to the widget
+ * @param widget :: A pointer to the widget
  */
 QString AlgorithmDialog::getValue(QWidget *widget)
 {
@@ -800,8 +800,8 @@ QString AlgorithmDialog::getValue(QWidget *widget)
 /**
  * Set a value for a widget. The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit and QCheckBox
- * @param widget A pointer to the widget
- * @param property The property name
+ * @param widget :: A pointer to the widget
+ * @param property :: The property name
  */
 void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
 {

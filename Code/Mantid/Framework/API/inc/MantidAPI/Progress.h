@@ -42,11 +42,11 @@ class DLLExport Progress
 {
 public:
   /** Creates a Progress instance
-      @param alg   Algorithm reporting its progress
-      @param start Starting progress
-      @param end   Ending progress
-      @param n     Number of times report(...) method will be called. 
-      @param step  The frequency in % with which report(...) actually sends the notification.
+      @param alg ::   Algorithm reporting its progress
+      @param start :: Starting progress
+      @param end ::   Ending progress
+      @param n ::     Number of times report(...) method will be called. 
+      @param step ::  The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int n, int step=1)
     :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(static_cast<int>(double(n)*step/100/(end-start))),
@@ -54,12 +54,12 @@ public:
   {if (m_step <= 0) m_step = 1;}
   
   /** Creates a Progress instance
-      @param alg    Algorithm reporting its progress
-      @param start  Starting progress
-      @param end    Ending progress
-      @param ifirst Initial value of the loop counter
-      @param n      Upper bound for the loop counter
-      @param step   The frequency in % with which report(...) actually sends the notification.
+      @param alg ::    Algorithm reporting its progress
+      @param start ::  Starting progress
+      @param end ::    Ending progress
+      @param ifirst :: Initial value of the loop counter
+      @param n ::      Upper bound for the loop counter
+      @param step ::   The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
     :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step(static_cast<int>(double(n-ifirst)*step/100/(end-start))),

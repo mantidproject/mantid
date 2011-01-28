@@ -45,8 +45,8 @@ class PlotWizard : public QDialog
 public:
 	//! Constructor
 	/**
-	 * \param parent parent widget
-	 * \param fl Qt window flags
+	 * @param parent :: parent widget
+	 * @param fl :: Qt window flags
 	 */
     PlotWizard( QWidget* parent = 0, Qt::WFlags fl = 0 );
 

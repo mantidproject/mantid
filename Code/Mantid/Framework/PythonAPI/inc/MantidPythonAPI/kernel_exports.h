@@ -28,7 +28,7 @@ namespace Mantid
 
       /**
       * Retrieve a setting from the ConfigService
-      * @param name The name of the property
+      * @param name :: The name of the property
       * @returns The current value of the property
       */
       std::string getProperty(const std::string & name) const
@@ -38,8 +38,8 @@ namespace Mantid
 
       /**
       * Update a setting in the ConfigService
-      * @param name The name of the property
-      * @param value The new value of the property
+      * @param name :: The name of the property
+      * @param value :: The new value of the property
       */
       void setProperty(const std::string & name, const std::string & value)
       {
@@ -48,7 +48,7 @@ namespace Mantid
 
       /**
        * Access the facilities information
-       * @param name The name of a facility. If empty the default facility is returned. (default = "")
+       * @param name :: The name of a facility. If empty the default facility is returned. (default = "")
        * @return the facility information object
        */
       Kernel::FacilityInfo facility(const std::string & name = "")

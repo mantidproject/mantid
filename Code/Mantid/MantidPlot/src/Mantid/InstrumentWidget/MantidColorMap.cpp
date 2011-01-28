@@ -27,7 +27,7 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 /**
  * Constructor with filename and type
  * @param 
- * @param type The scale type, currently Linear or Log10 
+ * @param type :: The scale type, currently Linear or Log10 
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
   QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0)
@@ -59,7 +59,7 @@ QwtColorMap* MantidColorMap::copy() const
 
 /**
  * Change the scale type
- * @param type The new scale type
+ * @param type :: The new scale type
  */
 void MantidColorMap::changeScaleType(GraphOptions::ScaleType type)
 {
@@ -68,7 +68,7 @@ void MantidColorMap::changeScaleType(GraphOptions::ScaleType type)
 
 /**
  * Load a color map from a file
- * @param filename The full path to the color map file
+ * @param filename :: The full path to the color map file
  */
 bool MantidColorMap::loadMap(const QString & filename)
 {
@@ -162,8 +162,8 @@ void MantidColorMap::setupDefaultMap()
 
 /**
  * Normalize the value to the range[0,1]
- * @param interval The data range
- * @param value The data value
+ * @param interval :: The data range
+ * @param value :: The data value
  * @returns The fraction along the given interval using the current scale type
  */
 double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value) const
@@ -204,8 +204,8 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
 
 /**
  * Compute an rgb value for the given data value and interval
- * @param interval The data range
- * @param value Compute an RGB color for this data value
+ * @param interval :: The data range
+ * @param value :: Compute an RGB color for this data value
  */
 QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 {
@@ -218,8 +218,8 @@ QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 
 /**
  * Compute a color index
- * @param interval The data range
- * @param value The data value
+ * @param interval :: The data range
+ * @param value :: The data value
  * @returns A color index as an unsigned character
  */
 
@@ -243,7 +243,7 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
 
 /**
  * Compute a lookup table
- * @param interval The interval for the table to cover
+ * @param interval :: The interval for the table to cover
  */
 QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) const
 {
@@ -269,7 +269,7 @@ QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) con
 
 /**
  * Returns a pointer to the GLColor object for the given id in the range 0 <= index < ncolors
- * @param An index within this color map's range.
+ * @param An :: index within this color map's range.
  *
  */
 boost::shared_ptr<GLColor> MantidColorMap::getColor(unsigned char index) const

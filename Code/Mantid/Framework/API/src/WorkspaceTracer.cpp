@@ -54,7 +54,7 @@ void WorkspaceTracerImpl::AlgorithmChain::executeChain()
 //-----------------------------------
 /**
  * A handler for a Poco notification of a workspace replacement
- * @param pNf A pointer to the notification object
+ * @param pNf :: A pointer to the notification object
  */
 void WorkspaceTracerImpl::handleAfterReplaceNotification(Mantid::API::WorkspaceAfterReplaceNotification_ptr  pNf)
 {
@@ -106,7 +106,7 @@ WorkspaceTracerImpl::~WorkspaceTracerImpl()
 
 /**
  * Executes in a separate thread
- * @param wsname The name of the replaced workspace
+ * @param wsname :: The name of the replaced workspace
  * @return nothing
  */
 Poco::Void WorkspaceTracerImpl::executeTraceImpl(const std::string & wsname)
@@ -176,9 +176,9 @@ void WorkspaceTracerImpl::createAlgorithmList()
 /**
  * Examine the history of the given workspace and determine whether the property value specified
  * exists in any of the algorithms present with the specified direction can also be specifed
- * @param wsName The workspace to test
- * @param pvalue The property value to search for
- * @param dir Whether it should be an input or output property
+ * @param wsName :: The workspace to test
+ * @param pvalue :: The property value to search for
+ * @param dir :: Whether it should be an input or output property
  * @returns bool Indicating whether a match was found
  */
 bool WorkspaceTracerImpl::propertyExists(const std::string & wsName, const std::string & pvalue, 
@@ -197,9 +197,9 @@ bool WorkspaceTracerImpl::propertyExists(const std::string & wsName, const std::
 /**
  * Examine the given algorithm history and find whether the given property value exists and whether it has the correct
  * direction
- * @param algHist The AlorithmHistory object to be tested
- * @param pvalue The property value to test
- * @param dir Whether it should be an input or output property
+ * @param algHist :: The AlorithmHistory object to be tested
+ * @param pvalue :: The property value to test
+ * @param dir :: Whether it should be an input or output property
  * @returns bool Indicating whether a match was found
  */
 bool WorkspaceTracerImpl::propertyExists(const AlgorithmHistory & algHist, const std::string & pvalue, 
@@ -222,7 +222,7 @@ bool WorkspaceTracerImpl::propertyExists(const AlgorithmHistory & algHist, const
 /**
  * Retrieve the algorithm history for the workspace named in getBaseWorkspace but with
  * checks for things such as workspaces replacing themselves and do not have them in the list
- * @param baseChain A reference for a vector of AlgorithmHistory objects 
+ * @param baseChain :: A reference for a vector of AlgorithmHistory objects 
  */
 void WorkspaceTracerImpl::getBaseAlgorithmChain(std::vector<Mantid::API::AlgorithmHistory> & baseChain)
 {
@@ -237,7 +237,7 @@ void WorkspaceTracerImpl::getBaseAlgorithmChain(std::vector<Mantid::API::Algorit
 
 /**
  * Examine the given algorithm history and find whether it takes a workspace for input
- * @param algHist The AlorithmHistory object to be tested
+ * @param algHist :: The AlorithmHistory object to be tested
  * @returns bool Indicating whether there is at least one workspace as input
  */
 bool WorkspaceTracerImpl::hasWorkspaceInput(const AlgorithmHistory & algHist)
@@ -259,7 +259,7 @@ bool WorkspaceTracerImpl::hasWorkspaceInput(const AlgorithmHistory & algHist)
 /**
  * Get or create an algorithm based upon the given AlgorithmHistory object. It checks whether
  * the parameter values now make sense given that the input is different
- * @param algHist The algorithm history to base the algorithm on
+ * @param algHist :: The algorithm history to base the algorithm on
  * @returns An algorithm pointer with its properties set correctly
  */
 Algorithm* WorkspaceTracerImpl::getAlgorithm(const AlgorithmHistory & algHist)
@@ -294,7 +294,7 @@ Algorithm* WorkspaceTracerImpl::getAlgorithm(const AlgorithmHistory & algHist)
 
 /**
  * Test whether the given PropertyHistory object relates to a workspace
- * @param prop The PropertyHistory object to test
+ * @param prop :: The PropertyHistory object to test
  * @returns True if this PropertyHistory relates to a workspace, false otherwise
  */
 bool WorkspaceTracerImpl::isWorkspaceProperty(const PropertyHistory & prop)
@@ -307,7 +307,7 @@ bool WorkspaceTracerImpl::isWorkspaceProperty(const PropertyHistory & prop)
 
 /**
  * Remake a workspace that has been deleted from the service
- * @param wsName The workspace to remake
+ * @param wsName :: The workspace to remake
  * @returns A pointer to the Algorithm object that created this workspace
  */
 Algorithm* WorkspaceTracerImpl::remakeWorkspace(const std::string & wsName)

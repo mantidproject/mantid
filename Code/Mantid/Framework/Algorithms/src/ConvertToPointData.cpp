@@ -61,8 +61,8 @@ namespace Mantid
 
     /**
      * Calculate the X point values
-     * @param inputX A const reference to the input data
-     * @param outputX A reference to the output data
+     * @param inputX :: A const reference to the input data
+     * @param outputX :: A reference to the output data
      */
     void ConvertToPointData::calculateXPoints(const MantidVec & inputX, MantidVec &outputX) const
     {
@@ -129,9 +129,9 @@ namespace Mantid
 
     // /**
     //  * Set the X data on given spectra
-    //  * @param outputWS The destination workspace
-    //  * @param inputWS The input workspace
-    //  * @param index The index
+    //  * @param outputWS :: The destination workspace
+    //  * @param inputWS :: The input workspace
+    //  * @param index :: The index
     //  */
     // void ConvertToPointData::setXData(API::MatrixWorkspace_sptr outputWS, 
     // 				      const API::MatrixWorkspace_sptr inputWS,

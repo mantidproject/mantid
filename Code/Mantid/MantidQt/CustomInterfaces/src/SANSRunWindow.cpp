@@ -193,10 +193,10 @@ void SANSRunWindow::initAnalysDetTab()
                                     this, SLOT(checkList()));
 }
 /** Formats a Qlabel to be a validator and adds it to the list
-*  @param newValid a QLabel to use as a validator
-*  @param control the control whose entry the validator is validates
-*  @param tab the tab that contains this widgets
-*  @param errorMsg the tooltip message that the validator should have
+*  @param newValid :: a QLabel to use as a validator
+*  @param control :: the control whose entry the validator is validates
+*  @param tab :: the tab that contains this widgets
+*  @param errorMsg :: the tooltip message that the validator should have
 */
 void SANSRunWindow::makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg)
 {
@@ -482,7 +482,7 @@ void SANSRunWindow::readSettings()
 }
 /** Sets the states of the checkboxes in the save box using those
 * in the passed QSettings object
-*  @param valueStore where the settings will be stored
+*  @param valueStore :: where the settings will be stored
 */
 void SANSRunWindow::readSaveSettings(QSettings & valueStore)
 {
@@ -534,7 +534,7 @@ void SANSRunWindow::saveSettings()
 }
 /** Stores the state of the checkboxes in the save box with the
 * passed QSettings object
-*  @param valueStore where the settings will be stored
+*  @param valueStore :: where the settings will be stored
 */
 void SANSRunWindow::saveSaveSettings(QSettings & valueStore)
 {
@@ -546,7 +546,7 @@ void SANSRunWindow::saveSaveSettings(QSettings & valueStore)
 }
 /**
  * Run a function from the SANS reduction script, ensuring that the first call imports the module
- * @param pycode The code to execute
+ * @param pycode :: The code to execute
  * @returns A trimmed string containing the output of the code execution
  */
 QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
@@ -970,10 +970,10 @@ bool SANSRunWindow::loadCSVFile()
 
 /**
  * Set a pair of an QLineEdit field and type QComboBox using the parameter given
- * @param pname The name of the parameter
- * @param param A string representing a value that maybe prefixed with a minus to indicate a different step type
- * @param step_value The field to store the actual value
- * @param step_type The combo box with the type options
+ * @param pname :: The name of the parameter
+ * @param param :: A string representing a value that maybe prefixed with a minus to indicate a different step type
+ * @param step_value :: The field to store the actual value
+ * @param step_type :: The combo box with the type options
  */
 void SANSRunWindow::setLimitStepParameter(const QString& pname, QString param, QLineEdit* step_value, QComboBox* step_type)
 {
@@ -1053,8 +1053,8 @@ void SANSRunWindow::updateMaskTable()
 
 /**
  * Add a spectrum mask string to the mask table
- * @param mask_string The string of mask information
- * @param det_name The detector it relates to 
+ * @param mask_string :: The string of mask information
+ * @param det_name :: The detector it relates to 
  */
 void SANSRunWindow::addSpectrumMasksToTable(const QString & mask_string, const QString & det_name)
 {
@@ -1092,8 +1092,8 @@ void SANSRunWindow::addSpectrumMasksToTable(const QString & mask_string, const Q
 
 /**
  * Add a time mask string to the mask table
- * @param mask_string The string of mask information
- * @param det_name The detector it relates to 
+ * @param mask_string :: The string of mask information
+ * @param det_name :: The detector it relates to 
  */
 void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QString & det_name)
 {
@@ -1112,10 +1112,10 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
 
 /**
  * Retrieve and set the component distances
- * @param workspace The workspace pointer
- * @param lms The result of the moderator-sample distance
- * @param lsda The result of the sample-detector bank 1 distance
- * @param lsdb The result of the sample-detector bank 2 distance
+ * @param workspace :: The workspace pointer
+ * @param lms :: The result of the moderator-sample distance
+ * @param lsda :: The result of the sample-detector bank 1 distance
+ * @param lsdb :: The result of the sample-detector bank 2 distance
  */
 void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr workspace, double & lms, double & lsda, double & lsdb)
 {
@@ -1146,8 +1146,8 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
 
 /**
  * Set the state of processing.
- * @param running If we are processing then some interaction is disabled
- * @param type The reduction type, 0 = 1D and 1 = 2D
+ * @param running :: If we are processing then some interaction is disabled
+ * @param type :: The reduction type, 0 = 1D and 1 = 2D
  */
 void SANSRunWindow::setProcessingState(bool running, int type)
 {
@@ -1201,7 +1201,7 @@ void SANSRunWindow::setProcessingState(bool running, int type)
 
 /**
  * Does the workspace exist in the AnalysisDataService
- * @param ws_name The name of the workspace
+ * @param ws_name :: The name of the workspace
  * @returns A boolean indicatingif the given workspace exists in the AnalysisDataService
  */
 bool SANSRunWindow::workspaceExists(const QString & ws_name) const
@@ -1555,8 +1555,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 
 /**
  * Set SANS2D geometry info
- * @param workspace The workspace
- * @param logs The log information
+ * @param workspace :: The workspace
+ * @param logs :: The log information
 */
 void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspace, const QString & logs, int wscode)
 {  
@@ -1601,7 +1601,7 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
 
 /**
  * Set LOQ geometry information
- * @param workspace The workspace to operate on
+ * @param workspace :: The workspace to operate on
  */
 void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, int wscode)
 {
@@ -1632,7 +1632,7 @@ void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, 
 
 /**
  * Mark an error on a label
- * @param label A pointer to a QLabel instance
+ * @param label :: A pointer to a QLabel instance
  */
 void SANSRunWindow::markError(QLabel* label)
 {
@@ -1753,7 +1753,7 @@ void SANSRunWindow::runChanged()
 }
 /**
  * Flip the flag to confirm whether data is reloaded
- * @param force If true, the data is reloaded when reduce is clicked
+ * @param force :: If true, the data is reloaded when reduce is clicked
  */
 void SANSRunWindow::forceDataReload(bool force)
 {
@@ -1762,9 +1762,9 @@ void SANSRunWindow::forceDataReload(bool force)
 
 /**
  * Browse for a file and set the text of the given edit box
- * @param box_title The title field for the display box
- * @param A QLineEdit box to use for the file path
- * @param file_filter An optional file filter
+ * @param box_title :: The title field for the display box
+ * @param A :: QLineEdit box to use for the file path
+ * @param file_filter :: An optional file filter
  */
 bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field, QString file_filter)
 {
@@ -2108,7 +2108,7 @@ bool SANSRunWindow::handleLoadButtonClick()
 /** 
  * Construct the python code to perform the analysis based on the 
  * current settings
- * @param type The reduction type: 1D or 2D
+ * @param type :: The reduction type: 1D or 2D
  */
 QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
 {
@@ -2288,7 +2288,7 @@ QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
 }
 /**
  * Run the analysis script
- * @param type The data reduction type, 1D or 2D
+ * @param type :: The data reduction type, 1D or 2D
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
@@ -2597,7 +2597,7 @@ void SANSRunWindow::handleDefSaveClick()
 }
 /**
  * Set up controls based on the users selection in the combination box
- * @param new_index The new index that has been set
+ * @param new_index :: The new index that has been set
  */
 void SANSRunWindow::handleWavComboChange(int new_index)
 {
@@ -2625,7 +2625,7 @@ void SANSRunWindow::handleWavComboChange(int new_index)
 }
 /**
  * A ComboBox option change
- * @param new_index The new index that has been set
+ * @param new_index :: The new index that has been set
  */
 void SANSRunWindow::handleStepComboChange(int new_index)
 {
@@ -2722,7 +2722,7 @@ void SANSRunWindow::setUserFname()
 }
 /**
  * Update the centre finding status label
- * @param msg The message string
+ * @param msg :: The message string
  */
 void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
 {
@@ -2739,7 +2739,7 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
   }  
 }
 /** Enables or disables the floodFile run widget
-*  @param state Qt::CheckState enum value, Checked means enable otherwise disabled
+*  @param state :: Qt::CheckState enum value, Checked means enable otherwise disabled
 */
 void SANSRunWindow::prepareFlood(int state)
 {
@@ -2771,7 +2771,7 @@ void SANSRunWindow::enableOrDisableDefaultSave()
 }
 /**
  * Update the logging window with status messages
- * @param msg The message received
+ * @param msg :: The message received
  */
 void SANSRunWindow::updateLogWindow(const QString & msg)
 {
@@ -2798,7 +2798,7 @@ void SANSRunWindow::updateLogWindow(const QString & msg)
 
 /**
 * Switch between run modes
-* @param mode_id Indicates which toggle has been pressed
+* @param mode_id :: Indicates which toggle has been pressed
 */
 void SANSRunWindow::switchMode(int mode_id)
 {
@@ -2878,7 +2878,7 @@ void SANSRunWindow::clearLogger()
  * the box is checked the transmission fit wavelength maximum and minimum
  * boxs with be set to the defaults for the instrument and disabled.
  * Otherwise they are enabled
- * @param state equal to Qt::Checked or not
+ * @param state :: equal to Qt::Checked or not
  */
 void SANSRunWindow::updateTransInfo(int state)
 {
@@ -2936,7 +2936,7 @@ void SANSRunWindow::checkList()
 }
 /** Record the output workspace name, if there is no output
 *  workspace pass an empty string or an empty argument list
-*  @param wsName the name of the output workspace or empty for no output
+*  @param wsName :: the name of the output workspace or empty for no output
 */
 void SANSRunWindow::resetDefaultOutput(const QString & wsName)
 {
@@ -2950,8 +2950,8 @@ void SANSRunWindow::resetDefaultOutput(const QString & wsName)
 }
 /** 
  * Run a SANS assign command
- * @param key The key of the edit box to assign from
- * @param logs An output parameter specifying the log data
+ * @param key :: The key of the edit box to assign from
+ * @param logs :: An output parameter specifying the log data
  */
 bool SANSRunWindow::runAssign(int key, QString & logs)
 {
@@ -3090,8 +3090,8 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
 }
 /**
  * Run a SANS assign command
- * @param key The key of the edit box to assign from
- * @param logs An output parameter specifying the log data
+ * @param key :: The key of the edit box to assign from
+ * @param logs :: An output parameter specifying the log data
  */
 bool SANSRunWindow::oldAssign(int key, QString & logs)
 {
@@ -3253,7 +3253,7 @@ void SANSRunWindow::fillDetectNames(QComboBox *output)
   output->setItemText(1, dets[3]);
 }
 /** gets the number entered into the periods box
-* @param key The box this applies to
+* @param key :: The box this applies to
 * @return the entry number the user entered into the box, or -1 if the box is empty
 */
 int SANSRunWindow::getPeriod(const int key)
@@ -3271,8 +3271,8 @@ int SANSRunWindow::getPeriod(const int key)
   }
 }
 /** Set number of periods for the given workspace
-* @param key The box this applies to
-* @param num the number of periods there are known to be
+* @param key :: The box this applies to
+* @param num :: the number of periods there are known to be
 */
 void SANSRunWindow::setNumberPeriods(const int key, const int num)
 {
@@ -3294,7 +3294,7 @@ void SANSRunWindow::setNumberPeriods(const int key, const int num)
   }
 }
 /** Blank the periods information in a box
-* @param key The box this applies to
+* @param key :: The box this applies to
 */
 void SANSRunWindow::unSetPeriods(const int key)
 {
@@ -3343,7 +3343,7 @@ QString SANSRunWindow::getWorkspaceName(int key)
 
 /**
  * Handle a delete notification from Mantid
- * @param p_dnf A Mantid delete notification
+ * @param p_dnf :: A Mantid delete notification
  */
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
 {
@@ -3361,10 +3361,10 @@ void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNoti
 
 /**
  * Format a double as a string
- * @param value The double to convert to a string
- * @param colour The colour
- * @param format The format char
- * @param precision The precision
+ * @param value :: The double to convert to a string
+ * @param colour :: The colour
+ * @param format :: The format char
+ * @param precision :: The precision
  */
 QString SANSRunWindow::formatDouble(double value, const QString & colour, char format, int precision)
 {
@@ -3373,8 +3373,8 @@ QString SANSRunWindow::formatDouble(double value, const QString & colour, char f
 
 /**
  * Raise a message if current status allows
- * @param msg The message to include in the box
- * @param index The tab index to set as current
+ * @param msg :: The message to include in the box
+ * @param index :: The tab index to set as current
 */
 void SANSRunWindow::raiseOneTimeMessage(const QString & msg, int index)
 {
@@ -3440,8 +3440,8 @@ void SANSRunWindow::cleanup()
 
 /**
  * Add a csv line to the batch grid
- * @param csv_line Add a line of csv text to the grid 
- * @param separator An optional separator, default = ","
+ * @param csv_line :: Add a line of csv text to the grid 
+ * @param separator :: An optional separator, default = ","
 */
 int SANSRunWindow::addBatchLine(QString csv_line, QString separator)
 {
@@ -3499,7 +3499,7 @@ int SANSRunWindow::addBatchLine(QString csv_line, QString separator)
 
 /**
  * Save the batch file to a CSV file.
- * @param filename An optional filename. If none is given then a temporary file is used and its name returned 
+ * @param filename :: An optional filename. If none is given then a temporary file is used and its name returned 
 */
 QString SANSRunWindow::saveBatchGrid(const QString & filename)
 {
@@ -3602,7 +3602,7 @@ bool SANSRunWindow::exportDataDir()
 }
 /** Update the input directory labels if the Mantid system input
 *  directories have changed
-*  @param pDirInfo a pointer to an object with the output directory name in it
+*  @param pDirInfo :: a pointer to an object with the output directory name in it
 */
 void SANSRunWindow::handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo)
 {

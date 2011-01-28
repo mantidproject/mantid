@@ -64,8 +64,8 @@ class ConfigDialog : public QDialog
 public:
 	//! Constructor
 	/**
-	 * \param parent parent widget (must be the application window!=
-	 * \param fl window flags
+	 * @param parent :: parent widget (must be the application window!=
+	 * @param fl :: window flags
 	 */
     ConfigDialog( QWidget* parent, Qt::WFlags fl = 0 );
 	void setColumnSeparator(const QString& sep);

@@ -6,7 +6,7 @@
 
 /**
  * Constructor
- * @param env A pointer to a scripting environment
+ * @param env :: A pointer to a scripting environment
  */
 Scripted::Scripted(ScriptingEnv *env)
 {
@@ -24,7 +24,7 @@ Scripted::~Scripted()
 
 /**
  * Called when the scripting environment changes
- * @param sce Scripting change event
+ * @param sce :: Scripting change event
  */
 void Scripted::scriptingChangeEvent(ScriptingChangeEvent *sce)
 {

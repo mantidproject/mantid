@@ -24,7 +24,7 @@ namespace Mantid
   namespace Geometry
   {
 
-    /*!
+    /**
     \struct Link
     \author S. Ansell
     \author M. Gigg, Tessella plc
@@ -61,10 +61,10 @@ namespace Mantid
 
       /**
       * Constuctor
-      * @param entry V3D point to start
-      * @param exit V3D point to end track
-      * @param totalDistance Total distance from start of track
-      * @param compID An optional component identifier for the physical object hit. (Default=NULL)
+      * @param entry :: V3D point to start
+      * @param exit :: V3D point to end track
+      * @param totalDistance :: Total distance from start of track
+      * @param compID :: An optional component identifier for the physical object hit. (Default=NULL)
       */
       inline Link(const V3D& entry,const V3D& exit, const double totalDistance, const ComponentID compID = NULL) :
         entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)), 
@@ -98,11 +98,11 @@ namespace Mantid
     {
       /**
       * Constuctor
-      * @param flag Indicates the direction of travel of the track with respect 
+      * @param flag :: Indicates the direction of travel of the track with respect 
       * to the object: +1 is entering, -1 is leaving.
-      * @param end The end point for this partial segment
-      * @param distFromStartOfTrack Total distance from start of track
-      * @param compID An optional unique ID marking the component intersected. (Default=NULL)
+      * @param end :: The end point for this partial segment
+      * @param distFromStartOfTrack :: Total distance from start of track
+      * @param compID :: An optional unique ID marking the component intersected. (Default=NULL)
       */
       inline IntersectionPoint(const int flag, const Geometry::V3D& end,
                                const double distFromStartOfTrack, const ComponentID compID = NULL) :
@@ -114,7 +114,7 @@ namespace Mantid
       * (a) the difference in distances is greater than the tolerance and this distance is less than the other or
       * (b) the distance is less than the other and this point is defined as an exit point
       * 
-      * @param other IntersectionPoint object to compare
+      * @param other :: IntersectionPoint object to compare
       * @return True if the object is considered less than, otherwise false.
       */
       inline bool operator<(const IntersectionPoint& other) const

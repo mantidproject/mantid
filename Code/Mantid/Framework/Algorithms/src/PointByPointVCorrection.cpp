@@ -128,9 +128,9 @@ void PointByPointVCorrection::exec()
 }
 
 /** Checks that the axes of the input workspaces match and creates the output workspace if necessary
- *  @param w1  The first input workspace
- *  @param w2  The second input workspace
- *  @param out Pointer to the output workspace
+ *  @param w1 ::  The first input workspace
+ *  @param w2 ::  The second input workspace
+ *  @param out :: Pointer to the output workspace
  */
 void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr& w1,API::MatrixWorkspace_const_sptr& w2,
                                              API::MatrixWorkspace_sptr& out)
@@ -175,9 +175,9 @@ void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr& w1
 
 /** Checks whether the two input workspaces have the same bin masking.
  *  Prints a warning if not.
- *  @param w1 The first (sample) input workspace
- *  @param w2 The second (vanadium) input workspace
- *  @param index The workspace index to check
+ *  @param w1 :: The first (sample) input workspace
+ *  @param w2 :: The second (vanadium) input workspace
+ *  @param index :: The workspace index to check
  */
 void PointByPointVCorrection::check_masks(const API::MatrixWorkspace_const_sptr& w1,
 		  const API::MatrixWorkspace_const_sptr& w2, const int& index) const

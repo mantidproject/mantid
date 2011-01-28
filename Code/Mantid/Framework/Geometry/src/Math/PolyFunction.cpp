@@ -17,11 +17,11 @@ namespace mathLevel
 
 std::ostream& 
 operator<<(std::ostream& OX,const PolyFunction& A)
-  /*!
+  /**
     External Friend :: outputs point to a stream 
-    \param OX :: output stream
-    \param A :: PolyFunction to write
-    \returns The output stream (OX)
+    @param OX :: output stream
+    @param A :: PolyFunction to write
+    @return The output stream (OX)
   */
 {
   (&A)->write(OX);
@@ -30,33 +30,33 @@ operator<<(std::ostream& OX,const PolyFunction& A)
 
 PolyFunction::PolyFunction() : 
   Eaccuracy(1e-6)
-  /*!
+  /**
     Constructor 
   */
 {}
 
 PolyFunction::PolyFunction(const double E) : 
   Eaccuracy(fabs(E))
-  /*!
+  /**
     Constructor 
-    \param E :: Accuracy
+    @param E :: Accuracy
   */
 {}
 
 PolyFunction::PolyFunction(const PolyFunction& A)  :
   Eaccuracy(A.Eaccuracy)
-  /*! 
+  /** 
     Copy Constructor
-    \param A :: PolyFunction to copy
+    @param A :: PolyFunction to copy
    */
 { }
 
 PolyFunction& 
 PolyFunction::operator=(const PolyFunction& A)
-  /*! 
+  /** 
     Assignment operator
-    \param A :: PolyFunction to copy
-    \return *this
+    @param A :: PolyFunction to copy
+    @return *this
    */
 {
   if (this!=&A)
@@ -73,9 +73,9 @@ PolyFunction::~PolyFunction()
 
 void
 PolyFunction::write(std::ostream& OX) const
-  /*!
+  /**
     Basic write command
-    \param OX :: output stream
+    @param OX :: output stream
   */
 {
   (void) OX; //Avoid compiler warning
@@ -84,12 +84,12 @@ PolyFunction::write(std::ostream& OX) const
 
 int
 PolyFunction::getMaxSize(const std::string& CLine,const char V)
-  /*!
+  /**
     Finds the maximum power in the string
     of the variable type
-    \param CLine :: Line to calcuate V^x componenets
-    \param V :: Variable letter.
-    \return Max Power 
+    @param CLine :: Line to calcuate V^x componenets
+    @param V :: Variable letter.
+    @return Max Power 
   */
 {
   int maxPower(0);

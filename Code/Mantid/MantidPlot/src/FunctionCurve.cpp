@@ -52,10 +52,10 @@ FunctionCurve::FunctionCurve(const FunctionType& t, const QString& name):
 
 /**
  * This constractor creates a function curve from a Mantid IFitFunction and uses a workspace for x values
- * @param fun A pointer to a Mantid function
- * @param wsName A name of a workspace to provide x values and to be passed to the function
- * @param wsIndex An index in the workspace
- * @param name A name of the curve
+ * @param fun :: A pointer to a Mantid function
+ * @param wsName :: A name of a workspace to provide x values and to be passed to the function
+ * @param wsIndex :: An index in the workspace
+ * @param name :: A name of the curve
  */
 FunctionCurve::FunctionCurve(const Mantid::API::IFitFunction* fun, 
     const QString& wsName, int wsIndex, const QString& name):

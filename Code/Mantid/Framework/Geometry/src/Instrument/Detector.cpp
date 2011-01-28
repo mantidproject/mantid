@@ -21,8 +21,8 @@ Detector::Detector(const Detector* base, const ParameterMap * map)
 }
 
 /** Constructor
- *  @param name The name of the component
- *  @param parent The parent component
+ *  @param name :: The name of the component
+ *  @param parent :: The parent component
  */
 Detector::Detector(const std::string& name, int id, IComponent* parent) :
   IDetector(), ObjComponent(name,parent), m_id(id), m_isMonitor(false)
@@ -30,9 +30,9 @@ Detector::Detector(const std::string& name, int id, IComponent* parent) :
 }
 
 /** Constructor
- *  @param name The name of the component
- *  @param shape  A pointer to the object describing the shape of this component
- *  @param parent The parent component
+ *  @param name :: The name of the component
+ *  @param shape ::  A pointer to the object describing the shape of this component
+ *  @param parent :: The parent component
  */
 Detector::Detector(const std::string& name, int id, boost::shared_ptr<Object> shape, IComponent* parent) :
   IDetector(), ObjComponent(name,shape,parent), m_id(id), m_isMonitor(false)
@@ -70,7 +70,7 @@ int Detector::getID() const
 
 
 ///Get the distance between the detector and another component
-///@param comp The other component
+///@param comp :: The other component
 ///@return The distance
 double Detector::getDistance(const IComponent& comp) const
 {
@@ -78,8 +78,8 @@ double Detector::getDistance(const IComponent& comp) const
 }
 
 ///Get the twotheta angle between the detector and an observer
-///@param observer The observer position
-///@param axis The axis
+///@param observer :: The observer position
+///@param axis :: The axis
 ///@return The angle
 double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
 {
@@ -133,7 +133,7 @@ std::map<int, double> Detector::getNeighbours(double radius)
 }
 
 /** Sets the flag for whether this detector object is a monitor
- *  @param flag True to mark the detector a monitor (default), false otherwise
+ *  @param flag :: True to mark the detector a monitor (default), false otherwise
  */
 void Detector::markAsMonitor(const bool flag)
 {

@@ -49,8 +49,8 @@ class ErrDialog : public QDialog
 public:
   //! Constructor
   /**
-   * \param parent parent widget
-   * \param fl window flags
+   * @param parent :: parent widget
+   * @param fl :: window flags
    */
   ErrDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
 

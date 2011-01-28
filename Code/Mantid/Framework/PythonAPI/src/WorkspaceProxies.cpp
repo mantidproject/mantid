@@ -21,8 +21,8 @@ namespace Mantid
     //****************************************
     /**
     * Returns the X values from the spectra at the given index wrapped in a read-only numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
+    * @param self :: A reference to the workspace
+    * @param index :: The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readX(API::MatrixWorkspace& self, int index)
@@ -32,8 +32,8 @@ namespace Mantid
 
     /**
     * Returns the Y values from the spectra at the given index wrapped in a read-only numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
+    * @param self :: A reference to the workspace
+    * @param index :: The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readY(API::MatrixWorkspace& self, int index)
@@ -43,8 +43,8 @@ namespace Mantid
 
     /**
     * Returns the E values from the spectra at the given index wrapped in a read-only numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
+    * @param self :: A reference to the workspace
+    * @param index :: The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readE(API::MatrixWorkspace& self, int index)
@@ -59,12 +59,12 @@ namespace Mantid
     //**********************************************************************************
 
     /** Binary operation for two workspaces
-     * @param lhs the left hand side workspace of the operation
-     * @param rhs the right hand side workspace of the operation
-     * @param op The operation
-     * @param name The output name
-     * @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
-     * @param reverse Unused parameter. Here for consistent interface
+     * @param lhs :: the left hand side workspace of the operation
+     * @param rhs :: the right hand side workspace of the operation
+     * @param op :: The operation
+     * @param name :: The output name
+     * @param inplace :: is this is an inplace operation (i.e. does the output overwrite the lhs
+     * @param reverse :: Unused parameter. Here for consistent interface
      * @returns The resulting workspace
      */
     MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr lhs, 
@@ -103,11 +103,11 @@ namespace Mantid
 
     /** 
     * Perform the given binary operation on a workspace and a double
-    * @param lhs The input workspace
-    * @param rhs The input value
-    * @param op The operation
-    * @param inplace If true, then the lhs argument is replaced by the result of the operation.
-    * @param reverse If true then the double is the lhs argument
+    * @param lhs :: The input workspace
+    * @param rhs :: The input value
+    * @param op :: The operation
+    * @param inplace :: If true, then the lhs argument is replaced by the result of the operation.
+    * @param reverse :: If true then the double is the lhs argument
     * @return A shared pointer to the result workspace
     */
     MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr inputWS, const double value, 

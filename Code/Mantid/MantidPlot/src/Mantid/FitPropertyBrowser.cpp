@@ -72,7 +72,7 @@ protected:
 
 /**
  * Constructor
- * @param parent The parent widget - must be an ApplicationWindow
+ * @param parent :: The parent widget - must be an ApplicationWindow
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
 :QDockWidget("Fit Function",parent),
@@ -706,7 +706,7 @@ std::string FitPropertyBrowser::costFunction()const
 }
 
 /** Called when the function name property changed
- * @param prop A pointer to the function name property m_functionName
+ * @param prop :: A pointer to the function name property m_functionName
  */
 void FitPropertyBrowser::enumChanged(QtProperty* prop)
 {
@@ -749,7 +749,7 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
 }
 
 /** Called when a bool property changed
- * @param prop A pointer to the property 
+ * @param prop :: A pointer to the property 
  */
 void FitPropertyBrowser::boolChanged(QtProperty*)
 {
@@ -758,7 +758,7 @@ void FitPropertyBrowser::boolChanged(QtProperty*)
 }
 
 /** Called when an int property changed
- * @param prop A pointer to the property 
+ * @param prop :: A pointer to the property 
  */
 void FitPropertyBrowser::intChanged(QtProperty* prop)
 {
@@ -796,7 +796,7 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
 }
 
 /** Called when a double property changed
- * @param prop A pointer to the property 
+ * @param prop :: A pointer to the property 
  */
 void FitPropertyBrowser::doubleChanged(QtProperty* prop)
 {
@@ -849,7 +849,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   }
 }
 /** Called when a string property changed
- * @param prop A pointer to the property 
+ * @param prop :: A pointer to the property 
  */
 void FitPropertyBrowser::stringChanged(QtProperty* prop)
 {
@@ -900,7 +900,7 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
 }
 
 /** Called when a filename property changed
- * @param prop A pointer to the property 
+ * @param prop :: A pointer to the property 
  */
 void FitPropertyBrowser::filenameChanged(QtProperty* prop)
 {
@@ -922,7 +922,7 @@ double FitPropertyBrowser::centre()const
 }
 
 /** Set centre of the current peak
- * @param value The new centre value
+ * @param value :: The new centre value
  */
 void FitPropertyBrowser::setCentre(double value)
 {
@@ -943,7 +943,7 @@ double FitPropertyBrowser::height()const
 }
 
 /** Set height of the current peak
- * @param value The new height value
+ * @param value :: The new height value
  */
 void FitPropertyBrowser::setHeight(double value)
 {
@@ -964,7 +964,7 @@ double FitPropertyBrowser::width()const
 }
 
 /** Set width of the current peak
- * @param value The new width value
+ * @param value :: The new width value
  */
 void FitPropertyBrowser::setWidth(double value)
 {
@@ -1019,7 +1019,7 @@ PropertyHandler* FitPropertyBrowser::currentHandler()const
 }
 
 /** Set new current function
- * @param h New current function
+ * @param h :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(PropertyHandler* h)const
 {
@@ -1032,7 +1032,7 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler* h)const
 }
 
 /** Set new current function
- * @param f New current function
+ * @param f :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)const
 {
@@ -1184,7 +1184,7 @@ void FitPropertyBrowser::init()
 
 /** Check if the workspace can be used in the fit. The accepted types are
   * MatrixWorkspaces same size
-  * @param ws The workspace
+  * @param ws :: The workspace
   */
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
@@ -1512,7 +1512,7 @@ void FitPropertyBrowser::deleteTie()
 }
 
 /** Does a parameter have a tie
- * @param parProp The property for a function parameter
+ * @param parProp :: The property for a function parameter
  */
 void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
                                         bool& hasTie,
@@ -1539,7 +1539,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
 }
 
 /** Returns the tie property for a parameter property, or NULL
- * @param The parameter property
+ * @param The :: parameter property
  */
 QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
 {
@@ -1555,7 +1555,7 @@ QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
 }
 
 /** Display a tip
- * @param txt The text to display
+ * @param txt :: The text to display
  */
 void FitPropertyBrowser::setTip(const QString& txt)
 {
@@ -1711,7 +1711,7 @@ void FitPropertyBrowser::plotOrRemoveGuessAll()
 }
 
 /** Create a double property and set some settings
- * @param name The name of the new property
+ * @param name :: The name of the new property
  * @return Pointer to the created property
  */
 QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
@@ -1724,7 +1724,7 @@ QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
 
 /** Create a string property and selects a property manager for it
  * based on the property name
- * @param name The name of the new property
+ * @param name :: The name of the new property
  * @return Pointer to the created property
  */
 QtProperty* FitPropertyBrowser::addStringProperty(const QString& name)const
@@ -1749,8 +1749,8 @@ QtProperty* FitPropertyBrowser::addStringProperty(const QString& name)const
 
 /**
  * Set a value to a string property.
- * @param prop A pointer to the property
- * @param value New value for the property
+ * @param prop :: A pointer to the property
+ * @param value :: New value for the property
  */
 void FitPropertyBrowser::setStringPropertyValue(QtProperty* prop,const QString& value)const
 {
@@ -1928,7 +1928,7 @@ void FitPropertyBrowser::refitAutoBackground()
 
 /**
   * Remember a background function name to be used for creating auto-background
-  * @param aName A name of the auto-background. The may be followed by function
+  * @param aName :: A name of the auto-background. The may be followed by function
   * attributes as name=value pairs separated by spaces.
   */
 void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)

@@ -151,8 +151,8 @@ std::set<QRgb> GLGroupPickBox::getListOfColorsPicked()
 
 /**
  * picking a actor at a input point from image
- * @param x input x-dim value of the point
- * @param y input y-dim value of the point
+ * @param x :: input x-dim value of the point
+ * @param y :: input y-dim value of the point
  */
 QRgb GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate of (x,y)
 {

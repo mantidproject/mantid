@@ -95,7 +95,7 @@ void NormaliseToMonitor::exec()
 }
 
 /** Makes sure that the input properties are set correctly
- *  @param inputWorkspace the input workspace
+ *  @param inputWorkspace :: the input workspace
  *  @throw std::runtime_error If a property is invalid
  */
 void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspace)
@@ -209,8 +209,8 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 }
 
 /** Pulls the monitor spectrum out of a larger workspace
- *  @param WS The workspace containing the spectrum to extract
- *  @param index The index of the spectrum to extract
+ *  @param WS :: The workspace containing the spectrum to extract
+ *  @param index :: The index of the spectrum to extract
  *  @returns A workspace containing the single spectrum requested
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const int index)
@@ -241,7 +241,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
 }
 
 /** Sets the maximum and minimum X values of the monitor spectrum to use for integration
- *  @param inputWorkspace A constant shared pointer to the input workspace
+ *  @param inputWorkspace :: A constant shared pointer to the input workspace
  *  @return True if the maximum or minimum values are set
  *  @throw std::runtime_error If the minimum was set higher than the maximum
  */
@@ -287,8 +287,8 @@ bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inp
 }
 
 /** Carries out a normalisation based on the integrated count of the monitor over a range
- *  @param inputWorkspace A pointer to the input workspace
- *  @param outputWorkspace A pointer to the result workspace
+ *  @param inputWorkspace :: A pointer to the input workspace
+ *  @param outputWorkspace :: A pointer to the result workspace
  */
 void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace,
                                                     API::MatrixWorkspace_sptr& outputWorkspace)
@@ -325,8 +325,8 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
 }
 
 /** Carries out the bin-by-bin normalisation
- *  @param inputWorkspace The input workspace
- *  @param outputWorkspace The output workspace
+ *  @param inputWorkspace :: The input workspace
+ *  @param outputWorkspace :: The output workspace
  */
 void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                                            API::MatrixWorkspace_sptr& outputWorkspace)
@@ -417,9 +417,9 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
 
 /** Calculates the overall normalisation factor.
  *  This multiplies result by (bin width * sum of monitor counts) / total frame width.
- *  @param X The X vector
- *  @param Y The data vector
- *  @param E The error vector
+ *  @param X :: The X vector
+ *  @param Y :: The data vector
+ *  @param E :: The error vector
  */
 void NormaliseToMonitor::normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E)
 {

@@ -127,7 +127,7 @@ Q_DECLARE_METATYPE(QtGroupPropertyType)
 QT_BEGIN_NAMESPACE
 #endif
 
-/*!
+/**
     Returns the type id for an enum property.
 
     Note that the property's value type can be retrieved using the
@@ -141,7 +141,7 @@ int QtVariantPropertyManager::enumTypeId()
     return qMetaTypeId<QtEnumPropertyType>();
 }
 
-/*!
+/**
     Returns the type id for a flag property.
 
     Note that the property's value type can be retrieved using the
@@ -155,7 +155,7 @@ int QtVariantPropertyManager::flagTypeId()
     return qMetaTypeId<QtFlagPropertyType>();
 }
 
-/*!
+/**
     Returns the type id for a group property.
 
     Note that the property's value type can be retrieved using the
@@ -169,7 +169,7 @@ int QtVariantPropertyManager::groupTypeId()
     return qMetaTypeId<QtGroupPropertyType>();
 }
 
-/*!
+/**
     Returns the type id for a icon map attribute.
 
     Note that the property's attribute type can be retrieved using the
@@ -199,7 +199,7 @@ public:
     QtVariantPropertyManager *manager;
 };
 
-/*!
+/**
     \class QtVariantProperty
 
     \brief The QtVariantProperty class is a convenience class handling
@@ -236,7 +236,7 @@ public:
     \sa QtProperty, QtVariantPropertyManager, QtVariantEditorFactory
 */
 
-/*!
+/**
     Creates a variant property using the given \a manager.
 
     Do not use this constructor to create variant property instances;
@@ -252,7 +252,7 @@ QtVariantProperty::QtVariantProperty(QtVariantPropertyManager *manager)
 
 }
 
-/*!
+/**
     Destroys this property.
 
     \sa QtProperty::~QtProperty()
@@ -262,7 +262,7 @@ QtVariantProperty::~QtVariantProperty()
     delete d_ptr;
 }
 
-/*!
+/**
     Returns the property's current value.
 
     \sa valueType(), setValue()
@@ -272,7 +272,7 @@ QVariant QtVariantProperty::value() const
     return d_ptr->manager->value(this);
 }
 
-/*!
+/**
     Returns this property's value for the specified \a attribute.
 
     QtVariantPropertyManager provides a couple of related functions:
@@ -286,7 +286,7 @@ QVariant QtVariantProperty::attributeValue(const QString &attribute) const
     return d_ptr->manager->attributeValue(this, attribute);
 }
 
-/*!
+/**
     Returns the type of this property's value.
 
     \sa propertyType()
@@ -296,7 +296,7 @@ int QtVariantProperty::valueType() const
     return d_ptr->manager->valueType(this);
 }
 
-/*!
+/**
     Returns this property's type.
 
     QtVariantPropertyManager provides several related functions:
@@ -311,7 +311,7 @@ int QtVariantProperty::propertyType() const
     return d_ptr->manager->propertyType(this);
 }
 
-/*!
+/**
     Sets the value of this property to \a value.
 
     The specified \a value must be of the type returned by
@@ -326,7 +326,7 @@ void QtVariantProperty::setValue(const QVariant &value)
     d_ptr->manager->setValue(this, value);
 }
 
-/*!
+/**
     Sets the \a attribute of property to \a value.
 
     QtVariantPropertyManager provides the related
@@ -725,7 +725,7 @@ void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(QtProperty *property,
         emit q_ptr->attributeChanged(varProp, m_flagNamesAttribute, QVariant(flagNames));
 }
 
-/*!
+/**
     \class QtVariantPropertyManager
 
     \brief The QtVariantPropertyManager class provides and manages QVariant based properties.
@@ -943,7 +943,7 @@ void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(QtProperty *property,
     \sa QtVariantProperty, QtVariantEditorFactory
 */
 
-/*!
+/**
     \fn void QtVariantPropertyManager::valueChanged(QtProperty *property, const QVariant &value)
 
     This signal is emitted whenever a property created by this manager
@@ -953,7 +953,7 @@ void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(QtProperty *property,
     \sa setValue()
 */
 
-/*!
+/**
     \fn void QtVariantPropertyManager::attributeChanged(QtProperty *property,
                 const QString &attribute, const QVariant &value)
 
@@ -964,7 +964,7 @@ void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(QtProperty *property,
     \sa setAttribute()
 */
 
-/*!
+/**
     Creates a manager with the given \a parent.
 */
 QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
@@ -1284,7 +1284,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
     d_ptr->m_typeToValueType[groupId] = QVariant::Invalid;
 }
 
-/*!
+/**
     Destroys this manager, and all the properties it has created.
 */
 QtVariantPropertyManager::~QtVariantPropertyManager()
@@ -1293,7 +1293,7 @@ QtVariantPropertyManager::~QtVariantPropertyManager()
     delete d_ptr;
 }
 
-/*!
+/**
     Returns the given \a property converted into a QtVariantProperty.
 
     If the \a property was not created by this variant manager, the
@@ -1309,7 +1309,7 @@ QtVariantProperty *QtVariantPropertyManager::variantProperty(const QtProperty *p
     return it.value().first;
 }
 
-/*!
+/**
     Returns true if the given \a propertyType is supported by this
     variant manager; otherwise false.
 
@@ -1322,7 +1322,7 @@ bool QtVariantPropertyManager::isPropertyTypeSupported(int propertyType) const
     return false;
 }
 
-/*!
+/**
    Creates and returns a variant property of the given \a propertyType
    with the given \a name.
 
@@ -1354,7 +1354,7 @@ QtVariantProperty *QtVariantPropertyManager::addProperty(int propertyType, const
     return variantProperty(property);
 }
 
-/*!
+/**
     Returns the given \a property's value.
 
     If the given \a property is not managed by this manager, this
@@ -1420,7 +1420,7 @@ QVariant QtVariantPropertyManager::value(const QtProperty *property) const
     return QVariant();
 }
 
-/*!
+/**
     Returns the given \a property's value type.
 
     \sa propertyType()
@@ -1431,7 +1431,7 @@ int QtVariantPropertyManager::valueType(const QtProperty *property) const
     return valueType(propType);
 }
 
-/*!
+/**
     \overload
 
     Returns the value type associated with the given \a propertyType.
@@ -1443,7 +1443,7 @@ int QtVariantPropertyManager::valueType(int propertyType) const
     return 0;
 }
 
-/*!
+/**
     Returns the given \a property's type.
 
     \sa valueType()
@@ -1456,7 +1456,7 @@ int QtVariantPropertyManager::propertyType(const QtProperty *property) const
     return it.value().second;
 }
 
-/*!
+/**
     Returns the given \a property's value for the specified \a
     attribute
 
@@ -1560,7 +1560,7 @@ QVariant QtVariantPropertyManager::attributeValue(const QtProperty *property, co
     return QVariant();
 }
 
-/*!
+/**
     Returns a list of the given \a propertyType 's attributes.
 
     \sa attributeValue(), attributeType()
@@ -1574,7 +1574,7 @@ QStringList QtVariantPropertyManager::attributes(int propertyType) const
     return it.value().keys();
 }
 
-/*!
+/**
     Returns the type of the specified \a attribute of the given \a
     propertyType.
 
@@ -1598,7 +1598,7 @@ int QtVariantPropertyManager::attributeType(int propertyType, const QString &att
     return itAttr.value();
 }
 
-/*!
+/**
     \fn void QtVariantPropertyManager::setValue(QtProperty *property, const QVariant &value)
 
     Sets the value of the given \a property to \a value.
@@ -1699,7 +1699,7 @@ void QtVariantPropertyManager::setValue(QtProperty *property, const QVariant &va
     }
 }
 
-/*!
+/**
     Sets the value of the specified \a attribute of the given \a
     property, to \a value.
 
@@ -1799,7 +1799,7 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property,
     }
 }
 
-/*!
+/**
     \reimp
 */
 bool QtVariantPropertyManager::hasValue(const QtProperty *property) const
@@ -1809,7 +1809,7 @@ bool QtVariantPropertyManager::hasValue(const QtProperty *property) const
     return true;
 }
 
-/*!
+/**
     \reimp
 */
 QString QtVariantPropertyManager::valueText(const QtProperty *property) const
@@ -1818,7 +1818,7 @@ QString QtVariantPropertyManager::valueText(const QtProperty *property) const
     return internProp ? internProp->valueText() : QString();
 }
 
-/*!
+/**
     \reimp
 */
 QIcon QtVariantPropertyManager::valueIcon(const QtProperty *property) const
@@ -1827,7 +1827,7 @@ QIcon QtVariantPropertyManager::valueIcon(const QtProperty *property) const
     return internProp ? internProp->valueIcon() : QIcon();
 }
 
-/*!
+/**
     \reimp
 */
 void QtVariantPropertyManager::initializeProperty(QtProperty *property)
@@ -1858,7 +1858,7 @@ void QtVariantPropertyManager::initializeProperty(QtProperty *property)
     }
 }
 
-/*!
+/**
     \reimp
 */
 void QtVariantPropertyManager::uninitializeProperty(QtProperty *property)
@@ -1881,7 +1881,7 @@ void QtVariantPropertyManager::uninitializeProperty(QtProperty *property)
     d_ptr->m_propertyToType.erase(type_it);
 }
 
-/*!
+/**
     \reimp
 */
 QtProperty *QtVariantPropertyManager::createProperty()
@@ -1921,7 +1921,7 @@ public:
     QMap<int, QtAbstractEditorFactoryBase *> m_typeToFactory;
 };
 
-/*!
+/**
     \class QtVariantEditorFactory
 
     \brief The QtVariantEditorFactory class provides widgets for properties
@@ -1978,7 +1978,7 @@ public:
     \sa QtAbstractEditorFactory, QtVariantPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtVariantEditorFactory::QtVariantEditorFactory(QObject *parent)
@@ -2041,7 +2041,7 @@ QtVariantEditorFactory::QtVariantEditorFactory(QObject *parent)
     d_ptr->m_typeToFactory[enumId] = d_ptr->m_comboBoxFactory;
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtVariantEditorFactory::~QtVariantEditorFactory()
@@ -2049,7 +2049,7 @@ QtVariantEditorFactory::~QtVariantEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2178,7 +2178,7 @@ void QtVariantEditorFactory::connectPropertyManager(QtVariantPropertyManager *ma
         d_ptr->m_checkBoxFactory->addPropertyManager(itFlag.next()->subBoolPropertyManager());
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2193,7 +2193,7 @@ QWidget *QtVariantEditorFactory::createEditor(QtVariantPropertyManager *manager,
     return factory->createEditor(wrappedProperty(property), parent);
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.

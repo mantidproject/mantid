@@ -87,7 +87,7 @@ namespace Mantid
       virtual std::string getName() const = 0;
       //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
       virtual void setPos(double, double, double) = 0;
-      /*! Set the position of the component
+      /** Set the position of the component
       *  The position is with respect to the parent component
       */
       virtual void setPos(const V3D&) = 0;

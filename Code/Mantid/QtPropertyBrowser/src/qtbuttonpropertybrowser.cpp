@@ -546,7 +546,7 @@ void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item)
 
 
 
-/*!
+/**
     \class QtButtonPropertyBrowser
 
     \brief The QtButtonPropertyBrowser class provides a drop down QToolButton
@@ -572,7 +572,7 @@ void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item)
     \sa QtTreePropertyBrowser, QtAbstractPropertyBrowser
 */
 
-/*!
+/**
     \fn void QtButtonPropertyBrowser::collapsed(QtBrowserItem *item)
 
     This signal is emitted when the \a item is collapsed.
@@ -580,7 +580,7 @@ void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item)
     \sa expanded(), setExpanded()
 */
 
-/*!
+/**
     \fn void QtButtonPropertyBrowser::expanded(QtBrowserItem *item)
 
     This signal is emitted when the \a item is expanded.
@@ -588,7 +588,7 @@ void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item)
     \sa collapsed(), setExpanded()
 */
 
-/*!
+/**
     Creates a property browser with the given \a parent.
 */
 QtButtonPropertyBrowser::QtButtonPropertyBrowser(QWidget *parent)
@@ -600,7 +600,7 @@ QtButtonPropertyBrowser::QtButtonPropertyBrowser(QWidget *parent)
     d_ptr->init(this);
 }
 
-/*!
+/**
     Destroys this property browser.
 
     Note that the properties that were inserted into this browser are
@@ -618,7 +618,7 @@ QtButtonPropertyBrowser::~QtButtonPropertyBrowser()
     delete d_ptr;
 }
 
-/*!
+/**
     \reimp
 */
 void QtButtonPropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem)
@@ -626,7 +626,7 @@ void QtButtonPropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *a
     d_ptr->propertyInserted(item, afterItem);
 }
 
-/*!
+/**
     \reimp
 */
 void QtButtonPropertyBrowser::itemRemoved(QtBrowserItem *item)
@@ -634,7 +634,7 @@ void QtButtonPropertyBrowser::itemRemoved(QtBrowserItem *item)
     d_ptr->propertyRemoved(item);
 }
 
-/*!
+/**
     \reimp
 */
 void QtButtonPropertyBrowser::itemChanged(QtBrowserItem *item)
@@ -642,7 +642,7 @@ void QtButtonPropertyBrowser::itemChanged(QtBrowserItem *item)
     d_ptr->propertyChanged(item);
 }
 
-/*!
+/**
     Sets the \a item to either collapse or expanded, depending on the value of \a expanded.
 
     \sa isExpanded(), expanded(), collapsed()
@@ -655,7 +655,7 @@ void QtButtonPropertyBrowser::setExpanded(QtBrowserItem *item, bool expanded)
         d_ptr->setExpanded(itm, expanded);
 }
 
-/*!
+/**
     Returns true if the \a item is expanded; otherwise returns false.
 
     \sa setExpanded()

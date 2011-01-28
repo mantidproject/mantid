@@ -68,7 +68,7 @@ public:
   /**
    * Expose createSubAlgorithm to python so that a python algorithm can
    * create a sub-algorithm that will not log itself.
-   * @param algo_name Name of the algorithm to create
+   * @param algo_name :: Name of the algorithm to create
    */
   boost::shared_ptr<API::IAlgorithm>  _createSubAlgorithm(const std::string algo_name)
   {
@@ -77,11 +77,11 @@ public:
 
   /**
    * Declare a property, templated on the value along with a validator
-   * @param prop_name The name of the property
-   * @param default_value The default value
-   * @param validator A validator for this property
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_value :: The default value
+   * @param validator :: A validator for this property
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   template<typename TYPE>
   void _declareProperty(const std::string & prop_name, TYPE default_value, 
@@ -93,10 +93,10 @@ public:
  
   /**
    * Declare a property, templated on the value
-   * @param prop_name The name of the property
-   * @param default_value The default value
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_value :: The default value
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   template<typename TYPE>
   void _declareProperty(const std::string & prop_name, TYPE default_value, 
@@ -107,11 +107,11 @@ public:
 
   /**
    * Declare a list property, templated on the list type
-   * @param prop_name The name of the property
-   * @param values A python list of values
-   * @param validator A validator for the parameter
-   * @param doc A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param values :: A python list of values
+   * @param validator :: A validator for the parameter
+   * @param doc :: A string describing the property
+   * @param direction :: The direction
    */
   template<typename TYPE>
   void _declareListProperty(const std::string & prop_name, boost::python::list values, 
@@ -124,10 +124,10 @@ public:
 
   /**
    * Declare a list property, templated on the list type
-   * @param prop_name The name of the property
-   * @param values A python list of values
-   * @param doc A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param values :: A python list of values
+   * @param doc :: A string describing the property
+   * @param direction :: The direction
    */
   template<typename TYPE>
   void _declareListProperty(const std::string & prop_name, boost::python::list values, const std::string &doc,
@@ -139,10 +139,10 @@ public:
 
   /**
    * Declare a MatrixWorkspace property
-   * @param prop_name The name of the property
-   * @param default_wsname A default name to use for the workspace name
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_wsname :: A default name to use for the workspace name
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
 			       const std::string & description, const unsigned int direction)
@@ -152,11 +152,11 @@ public:
 
   /**
    * Declare a MatrixWorkspace property with a validator
-   * @param prop_name The name of the property
-   * @param default_wsname A default name to use for the workspace name
-   * @param validator A pointer to a validator object
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_wsname :: A default name to use for the workspace name
+   * @param validator :: A pointer to a validator object
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname,
 			       Kernel::IValidator<API::MatrixWorkspace_sptr> & validator,
@@ -167,10 +167,10 @@ public:
 
   /**
    * Declare a TableWorkspace property
-   * @param prop_name The name of the property
-   * @param default_wsname A default name to use for the workspace name
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_wsname :: A default name to use for the workspace name
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, 
 			      const std::string & description, const unsigned int direction)
@@ -180,12 +180,12 @@ public:
 
   /**
    * Declare a FileProperty
-   * @param prop_name The name of the property
-   * @param default_value A default value for the filename
-   * @param type The load/save type for the property, FileAction.{Save,OptionalSave,Load,OptionalLoad}
-   * @param exts A Python list giving the extensions
-   * @param description A string describing the property
-   * @param direction The direction
+   * @param prop_name :: The name of the property
+   * @param default_value :: A default value for the filename
+   * @param type :: The load/save type for the property, FileAction.{Save,OptionalSave,Load,OptionalLoad}
+   * @param exts :: A Python list giving the extensions
+   * @param description :: A string describing the property
+   * @param direction :: The direction
    */
   void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
 			    boost::python::list exts, const std::string & description, const unsigned int direction)
@@ -195,7 +195,7 @@ public:
   
   /**
    * Retrieve a property
-   * @param prop_name The name of the property
+   * @param prop_name :: The name of the property
    * @returns The value of the property
    */
   template<typename TYPE>
@@ -207,7 +207,7 @@ public:
 
   /**
    * Retrieve a list property
-   * @param prop_name The name of the property
+   * @param prop_name :: The name of the property
    * @returns The values of the property as a python list
    */
   template<typename TYPE>
@@ -219,8 +219,8 @@ public:
   
   /**
    * Special function to set MatrixWorkspace
-   * @param prop_name The name of the property
-   * @param workspace A pointer to the workspace
+   * @param prop_name :: The name of the property
+   * @param workspace :: A pointer to the workspace
    */
   void _setMatrixWorkspaceProperty(const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
@@ -229,8 +229,8 @@ public:
 
   /**
    * Special function to set TableWorkspace
-   * @param prop_name The name of the property
-   * @param workspace A pointer to the workspace
+   * @param prop_name :: The name of the property
+   * @param workspace :: A pointer to the workspace
    */
   void _setTableWorkspaceProperty(const std::string & prop_name, API::ITableWorkspace_sptr workspace)
   {

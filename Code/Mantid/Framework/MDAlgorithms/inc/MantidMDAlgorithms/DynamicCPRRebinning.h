@@ -47,10 +47,10 @@ public:
   *
   *  function returns the list of the cell numbers which can contribute into the cut described by the output geometry description
   *  Input arguments:
-     @param source           -- the geometry of the initial workspace
-     @param target           --  the geometry description of the final WS
+     @param source ::           -- the geometry of the initial workspace
+     @param target ::           --  the geometry description of the final WS
   *  Output arguments:
-     @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
+     @param cells_to_select ::  -- the list of the cell indexes, which can contribute into the cut
      @param n_preselected_pix-- number of pixels(DataPoints, events) contributed into the cells. 
 
      As all rebinning classes currently use this function, it is here and not abstract at all; May change in a future as, say, sparce images 
@@ -115,14 +115,14 @@ protected:
     MDDataObjects::MD_image_point        *     pTargetImgData;
 
   
- ///*! function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
+ ///** function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
  //    *  rebins these data (adds them) to MD image of the taget workspace;
  //    * Alternative (USA)vdescription: Identifies the locations of the datapoints in the multidimensional grid of the target workspace
  //    * and calculates the statistical properties of these points
 
  //    * Input arguments:
- //    @param source_pix_buf  -- the buffer where the data are stored as sequences of bytes;
- //    @param nPix            -- number of data points (pixels) contained in the buffer; 
+ //    @param source_pix_buf ::  -- the buffer where the data are stored as sequences of bytes;
+ //    @param nPix ::            -- number of data points (pixels) contained in the buffer; 
  //                              The user of the rebinning class supposes to organise the interpretation of these bytes. 
  //     * Output arguments: 
  //       Returns              -- number of pixels(MDpoints, events) contribiting into the final dataset and retained from the initial data

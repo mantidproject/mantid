@@ -448,9 +448,9 @@ public slots:
   void updateMarkersBoundingRect();
 
   long selectedMarkerKey();
-  /*!\brief Set the selected marker.
-   * \param mrk key of the marker to be selected.
-   * \param add whether the marker is to be added to an existing selection.
+  /**\brief Set the selected marker.
+   * @param mrk :: key of the marker to be selected.
+   * @param add :: whether the marker is to be added to an existing selection.
    * If <i>add</i> is false (the default) or there is no existing selection, a new SelectionMoveResizer is
    * created and stored in #d_markers_selector.
    */
@@ -580,7 +580,7 @@ public slots:
 
   void disableTools();
 
-  /*! Enables the data range selector tool.
+  /** Enables the data range selector tool.
    *
    * This one is a bit special, because other tools can depend upon an existing selection.
    * Therefore, range selection (like zooming) has to be provided in addition to the generic
@@ -601,9 +601,9 @@ public slots:
   void addFitCurve(QwtPlotCurve *c);
   void deleteFitCurves();
   QList<QwtPlotCurve *> fitCurvesList(){return d_fit_curves;};
-  /*! Set start and end to selected X range of curve index or, if there's no selection, to the curve's total range.
+  /** Set start and end to selected X range of curve index or, if there's no selection, to the curve's total range.
    *
-   * \return the number of selected or total points
+   * @return the number of selected or total points
    */
   int range(int index, double *start, double *end);
 

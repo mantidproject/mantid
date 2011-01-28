@@ -5,8 +5,8 @@
 #define SUCCESS 0
 
 /** Gets an item
-@param item_name the item name
-@param value A pointer to the item
+@param item_name :: the item name
+@param value :: A pointer to the item
 @return 0 on success
 */
 template <typename T>
@@ -32,10 +32,10 @@ int item_struct<T>::getItem(const std::string& item_name, T& value)
 
 /** Gets an item
 nspec number of 0 means no spec average
-@param item_name the item name
-@param spec_array The array of spectra numbers
-@param nspec the number of spectra in the array
-@param lVal A pointer to the item
+@param item_name :: the item name
+@param spec_array :: The array of spectra numbers
+@param nspec :: the number of spectra in the array
+@param lVal :: A pointer to the item
 @return 0 on success
 */
 template <typename T>
@@ -100,9 +100,9 @@ int item_struct<T>::getItem(const std::string& item_name, long* spec_array, int 
 }
 
 /** Gets the size of an array of items
-@param item_name the item name
-@param dims_array The array of dimensions
-@param ndims the number of dimensions in the array
+@param item_name :: the item name
+@param dims_array :: The array of dimensions
+@param ndims :: the number of dimensions in the array
 @return 0 on success
 */
 template <typename T>
@@ -133,10 +133,10 @@ int item_struct<T>::getArrayItemSize(const std::string& item_name, int* dims_arr
 }
 
 /** Gets an array of items
-@param item_name the item name
-@param spec_array The array of spectra numbers
-@param nspec the number of spectra in the array
-@param larray The returned array
+@param item_name :: the item name
+@param spec_array :: The array of spectra numbers
+@param nspec :: the number of spectra in the array
+@param larray :: The returned array
 @return 0 on success
 */
 template <typename T>
@@ -172,8 +172,8 @@ int item_struct<T>::getArrayItem(const std::string& item_name, long* spec_array,
 }
 
 /** Gets an array of items
-@param item_name the item name
-@param larray The returned array
+@param item_name :: the item name
+@param larray :: The returned array
 @return 0 on success
 */
 template <typename T>

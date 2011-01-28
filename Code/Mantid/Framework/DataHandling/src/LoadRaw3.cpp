@@ -289,10 +289,10 @@ void LoadRaw3::exec()
   fclose(file);
 }
 /** This method creates outputworkspace excluding monitors
-  *@param file -pointer to file
-  *@param period period number
-  *@param monitorList - a list conatining the spectrum numbers for monitors
-  *@param ws_sptr shared pointer to workspace
+  *@param file :: -pointer to file
+  *@param period :: period number
+  *@param monitorList :: a list conatining the spectrum numbers for monitors
+  *@param ws_sptr :: shared pointer to workspace
 */
 void LoadRaw3::excludeMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
 							   DataObjects::Workspace2D_sptr ws_sptr)
@@ -343,9 +343,9 @@ void LoadRaw3::excludeMonitors(FILE* file,const int& period,const std::vector<in
 }
 
 /**This method creates outputworkspace including monitors
-  *@param file -pointer to file
-  *@param period period number
-  *@param ws_sptr shared pointer to workspace
+  *@param file :: -pointer to file
+  *@param period :: period number
+  *@param ws_sptr :: shared pointer to workspace
 */
 void LoadRaw3::includeMonitors(FILE* file,const int& period,DataObjects::Workspace2D_sptr ws_sptr)
 {
@@ -390,11 +390,11 @@ void LoadRaw3::includeMonitors(FILE* file,const int& period,DataObjects::Workspa
 }
 
 /** This method separates monitors and creates two outputworkspaces 
-  *@param file -pointer to file
-  *@param period period number
-  *@param monitorList -a list conatining the spectrum numbers for monitors
-  *@param ws_sptr -shared pointer to workspace
-  *@param mws_sptr -shared pointer to monitor workspace
+  *@param file :: -pointer to file
+  *@param period :: period number
+  *@param monitorList :: -a list conatining the spectrum numbers for monitors
+  *@param ws_sptr :: -shared pointer to workspace
+  *@param mws_sptr :: -shared pointer to monitor workspace
 */
 
 void LoadRaw3::separateMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
@@ -459,10 +459,10 @@ void LoadRaw3::setOptionalProperties()
 }
 
 /**This method validatates worksapce sizes if exclude monitors or separate monitors options is selected
-  *@param bexcludeMonitors boolean option for exclude monitors
-  *@param bseparateMonitors boolean option for separate monitors
-  *@param normalwsSpecs number of spectrums in the output workspace excluding monitors
-  *@param monitorwsSpecs number of monitor spectra
+  *@param bexcludeMonitors :: boolean option for exclude monitors
+  *@param bseparateMonitors :: boolean option for separate monitors
+  *@param normalwsSpecs :: number of spectrums in the output workspace excluding monitors
+  *@param monitorwsSpecs :: number of monitor spectra
 */
 void LoadRaw3::validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
 										   const int normalwsSpecs,const int  monitorwsSpecs)
@@ -517,8 +517,8 @@ bool LoadRaw3::isSeparateMonitors()
 }
 
 /** This method checks given spectrum is a monitor
- *  @param monitorIndexes a vector holding the list of monitors
- *  @param spectrumNum  the requested spectrum number
+ *  @param monitorIndexes :: a vector holding the list of monitors
+ *  @param spectrumNum ::  the requested spectrum number
  *  @return true if it's a monitor 
  */
 bool LoadRaw3::isMonitor(const std::vector<int>& monitorIndexes, int spectrumNum)
@@ -531,10 +531,10 @@ bool LoadRaw3::isMonitor(const std::vector<int>& monitorIndexes, int spectrumNum
 }
 
 /// Creates a ManagedRawFileWorkspace2D
-/// @param bincludeMonitors Include monitors or not
-/// @param bexcludeMonitors Exclude monitors or not
-/// @param bseparateMonitors Separate monitors or not
-/// @param fileName the filename
+/// @param bincludeMonitors :: Include monitors or not
+/// @param bexcludeMonitors :: Exclude monitors or not
+/// @param bseparateMonitors :: Separate monitors or not
+/// @param fileName :: the filename
 void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool bseparateMonitors,
 							const std::string& fileName)
 {
@@ -579,12 +579,12 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
 
 /** This method separates/excludes monitors from output workspace and creates a separate workspace for monitors
  *  THIS METHOD IS ONLY CALLED BY THE goManagedRaw METHOD ABOVE AND NOT IN THE GENERAL CASE
- *  @param localWorkspace shared pointer to workspace
- *  @param binclude boolean  variable for including monitors
- *  @param bexclude  boolean variable for excluding monitors
- *  @param bseparate  boolean variable for separating the monitor workspace from output workspace
- *  @param m_numberOfSpectra  number of spectra 
- *  @param fileName  raw file name
+ *  @param localWorkspace :: shared pointer to workspace
+ *  @param binclude :: boolean  variable for including monitors
+ *  @param bexclude ::  boolean variable for excluding monitors
+ *  @param bseparate ::  boolean variable for separating the monitor workspace from output workspace
+ *  @param m_numberOfSpectra ::  number of spectra 
+ *  @param fileName ::  raw file name
  */
 void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
 					 bool binclude,bool bexclude,bool bseparate,
@@ -666,8 +666,8 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
 
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
  *  @param filePath- path of the file including name.
- *  @param nread - no.of bytes read
- *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @param nread :: no.of bytes read
+ *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
 bool LoadRaw3::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -676,7 +676,7 @@ bool LoadRaw3::quickFileCheck(const std::string& filePath,size_t nread,unsigned 
  
 }
 /**checks the file by opening it and reading few lines 
- *  @param filePath name of the file inluding its path
+ *  @param filePath :: name of the file inluding its path
  *  @return an integer value how much this algorithm can load the file 
  */
 int LoadRaw3::fileCheck(const std::string& filePath)

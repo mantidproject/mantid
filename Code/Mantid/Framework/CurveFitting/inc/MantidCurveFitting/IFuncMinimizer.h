@@ -72,8 +72,8 @@ public:
 
   /** Calculates covariance matrix
    *
-   * @param epsrel Is used to remove linear-dependent columns
-   * @param covar Returned covariance matrix, here as 
+   * @param epsrel :: Is used to remove linear-dependent columns
+   * @param covar :: Returned covariance matrix, here as 
    */
   virtual void calCovarianceMatrix(double epsrel, gsl_matrix * covar) = 0;
 };

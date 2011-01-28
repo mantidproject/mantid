@@ -19,11 +19,11 @@ namespace mathLevel
 
 std::ostream& 
 operator<<(std::ostream& OX,const PolyBase& A)
-  /*!
+  /**
     External Friend :: outputs point to a stream 
-    \param OX :: output stream
-    \param A :: PolyBase to write
-    \returns The output stream (OX)
+    @param OX :: output stream
+    @param A :: PolyBase to write
+    @return The output stream (OX)
   */
 {
   A.write(OX);
@@ -33,37 +33,37 @@ operator<<(std::ostream& OX,const PolyBase& A)
 PolyBase::PolyBase (const int iD) : 
   iDegree((iD>0) ? iD : 0),
   afCoeff(iDegree+1),Eaccuracy(1e-6)
-  /*!
+  /**
     Constructor 
-    \param iD :: degree
+    @param iD :: degree
   */
 {}
 
 PolyBase::PolyBase (const int iD,const double E) : 
   iDegree((iD>0) ? iD : 0),
   afCoeff(iDegree+1),Eaccuracy(fabs(E))
-  /*!
+  /**
     Constructor 
-    \param iD :: degree
-    \param E :: Accuracy
+    @param iD :: degree
+    @param E :: Accuracy
   */
 {}
 
 PolyBase::PolyBase (const PolyBase& A)  :
   iDegree(A.iDegree),afCoeff(A.afCoeff),
   Eaccuracy(A.Eaccuracy)
-  /*! 
+  /** 
     Copy Constructor
-    \param A :: PolyBase to copy
+    @param A :: PolyBase to copy
    */
 { }
 
 PolyBase& 
 PolyBase::operator=(const PolyBase& A)
-  /*! 
+  /** 
     Assignment operator
-    \param A :: PolyBase to copy
-    \return *this
+    @param A :: PolyBase to copy
+    @return *this
    */
 {
   if (this!=&A)
@@ -81,9 +81,9 @@ PolyBase::~PolyBase()
 
 void 
 PolyBase::setDegree(const int iD)
-  /*!
+  /**
     Set the degree value
-    \param iD :: degree
+    @param iD :: degree
    */
 {
   iDegree = (iD>0) ? iD : 0;
@@ -92,27 +92,27 @@ PolyBase::setDegree(const int iD)
 
 int 
 PolyBase::getDegree() const 
-  /*!
+  /**
     Accessor to degree size
-    \return size 
+    @return size 
   */
 {
   return iDegree;
 }
 
 PolyBase::operator const std::vector<double>& () const
-  /*!
+  /**
     Accessor to a vector component
-    \return vector
+    @return vector
   */
 {
   return afCoeff;
 }
 
 PolyBase::operator std::vector<double>& ()
-  /*!
+  /**
     Accessor to a vector component
-    \return vector
+    @return vector
   */
 {
   return afCoeff;
@@ -121,10 +121,10 @@ PolyBase::operator std::vector<double>& ()
 
 double
 PolyBase::operator[](const int i) const
-  /*!
+  /**
     Accessor to component
-    \param i :: index 
-    \return Coeficient c_i
+    @param i :: index 
+    @return Coeficient c_i
    */
 {
   if (i>iDegree || i<0)
@@ -134,10 +134,10 @@ PolyBase::operator[](const int i) const
 
 double& 
 PolyBase::operator[](const int i)
-  /*!
+  /**
     Accessor to component
-    \param i :: index 
-    \return Coeficient c_i
+    @param i :: index 
+    @return Coeficient c_i
    */
 {
   if (i>iDegree || i<0)
@@ -147,10 +147,10 @@ PolyBase::operator[](const int i)
 
 double 
 PolyBase::operator()(const double X) const
-  /*!
+  /**
     Calculate polynomial at x
-    \param X :: Value to calculate poly
-    \return polyvalue(x)
+    @param X :: Value to calculate poly
+    @return polyvalue(x)
   */
 {
   double Result = afCoeff[iDegree];
@@ -164,10 +164,10 @@ PolyBase::operator()(const double X) const
 
 PolyBase& 
 PolyBase::operator+=(const PolyBase& A)
-  /*!
+  /**
     Self addition value
-    \param A :: PolyBase to add 
-    \return *this+=A;
+    @param A :: PolyBase to add 
+    @return *this+=A;
    */
 {
   iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -179,10 +179,10 @@ PolyBase::operator+=(const PolyBase& A)
 
 PolyBase& 
 PolyBase::operator-=(const PolyBase& A)
-  /*!
+  /**
     Self addition value
-    \param A :: PolyBase to add 
-    \return *this+=A;
+    @param A :: PolyBase to add 
+    @return *this+=A;
    */
 {
   iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -194,10 +194,10 @@ PolyBase::operator-=(const PolyBase& A)
 
 PolyBase& 
 PolyBase::operator*=(const PolyBase& A)
-  /*!
+  /**
     Self multiplication value
-    \param A :: PolyBase to add 
-    \return *this*=A;
+    @param A :: PolyBase to add 
+    @return *this*=A;
    */
 {
   const int iD=iDegree+A.iDegree;
@@ -214,10 +214,10 @@ PolyBase::operator*=(const PolyBase& A)
 
 PolyBase 
 PolyBase::operator+(const PolyBase& A) const
-  /*!
+  /**
     PolyBase addition
-    \param A :: PolyBase addition
-    \return (*this+A);
+    @param A :: PolyBase addition
+    @return (*this+A);
    */
 {
   PolyBase kSum(*this);
@@ -226,10 +226,10 @@ PolyBase::operator+(const PolyBase& A) const
 
 PolyBase
 PolyBase::operator-(const PolyBase& A) const
-  /*!
+  /**
     PolyBase subtraction
-    \param A :: PolyBase addition
-    \return (*this-A);
+    @param A :: PolyBase addition
+    @return (*this-A);
    */
 {
   PolyBase kSum(*this);
@@ -238,10 +238,10 @@ PolyBase::operator-(const PolyBase& A) const
 
 PolyBase 
 PolyBase::operator*(const PolyBase& A) const
-  /*!
+  /**
     PolyBase multiplication
-    \param A :: PolyBase multiplication
-    \return (*this*A);
+    @param A :: PolyBase multiplication
+    @return (*this*A);
    */
 {
   PolyBase kSum(*this);
@@ -250,10 +250,10 @@ PolyBase::operator*(const PolyBase& A) const
 
 PolyBase 
 PolyBase::operator+(const double V) const
-  /*!
+  /**
     PolyBase addition
-    \param V :: Value Addtion
-    \return (*this+V);
+    @param V :: Value Addtion
+    @return (*this+V);
    */
 {
   PolyBase kSum(*this);
@@ -262,10 +262,10 @@ PolyBase::operator+(const double V) const
 
 PolyBase 
 PolyBase::operator-(const double V) const
-  /*!
+  /**
     PolyBase substractr
-    \param V :: Value substract
-    \return (*this-V);
+    @param V :: Value substract
+    @return (*this-V);
    */
 {
   PolyBase kSum(*this);
@@ -274,10 +274,10 @@ PolyBase::operator-(const double V) const
 
 PolyBase 
 PolyBase::operator*(const double V) const
-  /*!
+  /**
     PolyBase multiplication
-    \param V :: Value multiplication
-    \return (*this*V);
+    @param V :: Value multiplication
+    @return (*this*V);
    */
 {
   PolyBase kSum(*this);
@@ -286,10 +286,10 @@ PolyBase::operator*(const double V) const
 
 PolyBase 
 PolyBase::operator/(const double V) const
-  /*!
+  /**
     PolyBase division
-    \param V :: Value division
-    \return (*this/V);
+    @param V :: Value division
+    @return (*this/V);
    */
 {
   PolyBase kSum(*this);
@@ -300,10 +300,10 @@ PolyBase::operator/(const double V) const
 
 PolyBase&
 PolyBase::operator+=(const double V) 
-  /*!
+  /**
     PolyBase addition
-    \param V :: Value to add
-    \return (*this+V);
+    @param V :: Value to add
+    @return (*this+V);
    */
 {
   afCoeff[0]+=V;  // There is always zero component
@@ -312,10 +312,10 @@ PolyBase::operator+=(const double V)
 
 PolyBase&
 PolyBase::operator-=(const double V) 
-  /*!
+  /**
     PolyBase subtraction
-    \param V :: Value to subtract
-    \return (*this+V);
+    @param V :: Value to subtract
+    @return (*this+V);
    */
 {
   afCoeff[0]-=V;  // There is always zero component
@@ -324,10 +324,10 @@ PolyBase::operator-=(const double V)
 
 PolyBase&
 PolyBase::operator*=(const double V) 
-  /*!
+  /**
     PolyBase multiplication
-    \param V :: Value to multipication
-    \return (*this*V);
+    @param V :: Value to multipication
+    @return (*this*V);
    */
 {
   transform(afCoeff.begin(),afCoeff.end(),afCoeff.begin(),
@@ -337,10 +337,10 @@ PolyBase::operator*=(const double V)
 
 PolyBase&
 PolyBase::operator/=(const double V) 
-  /*!
+  /**
     PolyBase division scalar
-    \param V :: Value to divide
-    \return (*this/V);
+    @param V :: Value to divide
+    @return (*this/V);
    */
 {
   transform(afCoeff.begin(),afCoeff.end(),afCoeff.begin(),
@@ -349,9 +349,9 @@ PolyBase::operator/=(const double V)
 }
 
 PolyBase PolyBase::operator-() const
-  /*!
+  /**
     PolyBase negation operator
-    \return -(*this);
+    @return -(*this);
    */
 {
   PolyBase KOut(*this);
@@ -361,9 +361,9 @@ PolyBase PolyBase::operator-() const
  
 PolyBase 
 PolyBase::getDerivative() const
-  /*!
+  /**
     Take derivative
-    \return dP / dx
+    @return dP / dx
   */
 {
   PolyBase KOut(*this);
@@ -372,9 +372,9 @@ PolyBase::getDerivative() const
 
 PolyBase&
 PolyBase::derivative()
-  /*!
+  /**
     Take derivative of this polynomial
-    \return dP / dx
+    @return dP / dx
   */
 {
   if (iDegree<1)
@@ -392,9 +392,9 @@ PolyBase::derivative()
 
 PolyBase 
 PolyBase::GetInversion() const
-  /*!
+  /**
     Inversion of the coefficients
-    \return (Poly)^-1
+    @return (Poly)^-1
    */
 {
   PolyBase InvPoly(iDegree);
@@ -405,11 +405,11 @@ PolyBase::GetInversion() const
 
 void 
 PolyBase::compress(const double epsilon)
-  /*!
+  /**
     Two part process remove coefficients of zero or near zero: 
     Reduce degree by eliminating all (nearly) zero leading coefficients
     and by making the leading coefficient one.  
-    \param epsilon :: coeficient to use to decide if a values is zero
+    @param epsilon :: coeficient to use to decide if a values is zero
    */
 {
   const double eps((epsilon>0.0) ? epsilon : Eaccuracy);
@@ -432,7 +432,7 @@ PolyBase::compress(const double epsilon)
 void 
 PolyBase::divide(const PolyBase& pD,PolyBase& pQ, 
 		 PolyBase& pR,const double epsilon) const
-  /*!
+  /**
     Carry out polynomial division of this / pD  (Euclidean algorithm)
     If 'this' is P(t) and the divisor is D(t) with degree(P) >= degree(D),
     then P(t) = Q(t)*D(t)+R(t) where Q(t) is the quotient with
@@ -442,10 +442,10 @@ PolyBase::divide(const PolyBase& pD,PolyBase& pQ,
     of epsilon is used as a threshold on the coefficients of the remainder
     polynomial.  If smaller, the coefficient is assumed to be zero.
 
-    \param pD :: Polynominal to divide
-    \param pQ :: Quotant
-    \param pR :: Remainder
-    \param epsilon :: Tolerance  [-ve to use master tolerance]
+    @param pD :: Polynominal to divide
+    @param pQ :: Quotant
+    @param pR :: Remainder
+    @param epsilon :: Tolerance  [-ve to use master tolerance]
   */
 {
   const int iQuotDegree = iDegree - pD.iDegree;
@@ -478,10 +478,10 @@ PolyBase::divide(const PolyBase& pD,PolyBase& pQ,
 
 std::vector<double> 
 PolyBase::realRoots(const double epsilon)
-  /*!
+  /**
     Get just the real roots
-    \param epsilon :: tolerance factor (-ve to use default)
-    \return vector of the real roots (if any)
+    @param epsilon :: tolerance factor (-ve to use default)
+    @return vector of the real roots (if any)
    */
 {
   const double eps((epsilon>0.0) ? epsilon : Eaccuracy);
@@ -498,7 +498,7 @@ PolyBase::realRoots(const double epsilon)
 
 std::vector<std::complex<double> >
 PolyBase::calcRoots(const double epsilon)
-  /*!
+  /**
     Calculate all the roots of the polynominal.
     Uses the GSL which uses a Hessian reduction of the 
     characteristic compainion matrix.
@@ -506,8 +506,8 @@ PolyBase::calcRoots(const double epsilon)
     where the matrix component below A is the Indenty.
     However, GSL requires that the input coefficient is a_m == 1,
     hence the call to this->compress().
-    \param epsilon :: tolerance factor (-ve to use default) 
-    \return roots (not sorted/uniqued)
+    @param epsilon :: tolerance factor (-ve to use default) 
+    @return roots (not sorted/uniqued)
   */
 {
   compress(epsilon);
@@ -552,12 +552,12 @@ PolyBase::calcRoots(const double epsilon)
 int
 PolyBase::solveQuadratic(std::complex<double>& AnsA,
 			 std::complex<double>& AnsB) const
-  /*!
+  /**
     Solves Complex Quadratic component.
     compress MUST have been called.
-    \param AnsA :: complex roots of the equation 
-    \param AnsB :: complex roots of the equation 
-    \return Number of unique solutions 
+    @param AnsA :: complex roots of the equation 
+    @param AnsB :: complex roots of the equation 
+    @return Number of unique solutions 
   */
 {
   const double b=afCoeff[1];
@@ -587,13 +587,13 @@ PolyBase::solveQuadratic(std::complex<double>& AnsA,
 int
 PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 		     std::complex<double>& AnsC) const
-  /*!
+  /**
     Solves Cubic equation
     Compress MUST have been called.
-    \param AnsA :: complex roots of the equation 
-    \param AnsB :: complex roots of the equation 
-    \param AnsC :: complex roots of the equation 
-    \return Number of unique solutions 
+    @param AnsA :: complex roots of the equation 
+    @param AnsB :: complex roots of the equation 
+    @param AnsC :: complex roots of the equation 
+    @return Number of unique solutions 
   */
 
 {
@@ -655,9 +655,9 @@ PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 
 void
 PolyBase::write(std::ostream& OX) const
-  /*!
+  /**
     Basic write command
-    \param OX :: output stream
+    @param OX :: output stream
   */
 {
   copy(afCoeff.begin(),afCoeff.end(),

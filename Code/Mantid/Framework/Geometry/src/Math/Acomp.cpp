@@ -17,11 +17,11 @@ namespace Mantid
     // Friend function
     std::ostream&
       operator<<(std::ostream& OX,const Acomp& A) 
-      /*!
+      /**
       Stream operator (uses Acomp::write)
-      \param OX :: output stream
-      \param A :: Acomp unit to output
-      \returns Output stream
+      @param OX :: output stream
+      @param A :: Acomp unit to output
+      @return Output stream
       */
 
     {
@@ -31,12 +31,12 @@ namespace Mantid
 
     void 
       split(const int A,int& S,int& V)
-      /*!
+      /**
       Split a number into the sign and
       positive value
-      \param A :: number to split
-      \param S :: sign value +/- 1
-      \param V :: abs(A) 
+      @param A :: number to split
+      @param S :: sign value +/- 1
+      @param V :: abs(A) 
       */
     {
       if (A>=0)
@@ -58,17 +58,17 @@ namespace Mantid
 
     Acomp::Acomp(const int Tx) : 
     Intersect(Tx)
-      /*!
+      /**
       Standard Constructor 
-      \param Tx :: 1 it means intersect 0 it meanse union
+      @param Tx :: 1 it means intersect 0 it meanse union
       */
     {}
 
     Acomp::Acomp(const Acomp& A) : 
     Intersect(A.Intersect),Units(A.Units)
-      /*!
+      /**
       Copy constructor
-      \param A :: Acomp object to copy
+      @param A :: Acomp object to copy
       */
     { 
       std::vector<Acomp>::const_iterator vc;
@@ -78,11 +78,11 @@ namespace Mantid
 
     Acomp&
       Acomp::operator=(const Acomp& A)
-      /*!
+      /**
       The assignment operator carries out a 
       down level deletion of the Comp vector
-      \param A :: Object to copy
-      \returns *this
+      @param A :: Object to copy
+      @return *this
       */
     {
       if (this!=&A)
@@ -96,7 +96,7 @@ namespace Mantid
 
 
     Acomp::~Acomp()
-      /*!
+      /**
       Destructor deletes each Comp Unit and
       down the chain.
       */
@@ -104,10 +104,10 @@ namespace Mantid
 
     bool
       Acomp::operator!=(const Acomp& A) const
-      /*!
+      /**
       Inequality operator
-      \param A :: other Acomp item to compare
-      \returns Not this==A
+      @param A :: other Acomp item to compare
+      @return Not this==A
       */
     {
       return !(this->operator==(A));
@@ -115,12 +115,12 @@ namespace Mantid
 
     bool
       Acomp::operator==(const Acomp& A) const
-      /*!
+      /**
       Equals operator requires that the
       Units are equal and the Comp units
       are equal. Sort of the class is required.
-      \param A :: other Acomp item to compare
-      \returns A==*this
+      @param A :: other Acomp item to compare
+      @return A==*this
       */
     {
       // Size not equal then definately not equal
@@ -158,7 +158,7 @@ namespace Mantid
 
     bool
       Acomp::operator<(const Acomp& A) const
-      /*!
+      /**
       Comparitor operator:: Comparies the 
       unit list (which is already sorted)
       part by part.  The sort is ASSUMED.
@@ -168,8 +168,8 @@ namespace Mantid
       - Intersections
       - Units (largest negative)
       - Acomps.
-      \param A :: Object to compare
-      \returns this<A
+      @param A :: Object to compare
+      @return this<A
       */
     {
       // PROCESS Singular
@@ -221,10 +221,10 @@ namespace Mantid
 
     Acomp&
       Acomp::operator+=(const Acomp& A)
-      /*!
+      /**
       Operator + (union addition)
-      \param A :: Object to union with this
-      \returns *this
+      @param A :: Object to union with this
+      @return *this
       */
     {
       if (Intersect)                // If this is an intersection
@@ -249,14 +249,14 @@ namespace Mantid
 
     Acomp&
       Acomp::operator-=(const Acomp& A)
-      /*!
+      /**
       Operator - (removal)
       This operation can be carried out in many ways.
       It is by direct pattern subtraction followed
       by complementary subtraction or the remainder
       Complementary subtraction is by making A-B == A*B'
-      \param A :: Object to subtract
-      \return *this 
+      @param A :: Object to subtract
+      @return *this 
       */
     {
 
@@ -319,12 +319,12 @@ namespace Mantid
 
     bool
       Acomp::operator>(const Acomp& A) const
-      /*! 
+      /** 
       Operator> takes first to last precidence.
       Uses operator<  to obtain value.
       Note it does not uses 1-(A<this)
-      \param  A :: object to compare
-      \returns this>A
+      @param  A :: object to compare
+      @return this>A
       */
     {
       return A.operator<(*this);
@@ -333,11 +333,11 @@ namespace Mantid
 
     Acomp&
       Acomp::operator*=(const Acomp& A)
-      /*!
+      /**
       This carries out the intersection operation 
       with A. e.g. (a+b) * (ced) == (a+b)ced
-      \param A :: Acomp unit to intersect
-      \returns *this
+      @param A :: Acomp unit to intersect
+      @return *this
       */
     {
       if (!Intersect)                // If this is an intersection
@@ -363,7 +363,7 @@ namespace Mantid
 
     void
       Acomp::deleteComp()
-      /*!
+      /**
       Deletes everything in Composite
       */
     {
@@ -373,12 +373,12 @@ namespace Mantid
 
     void
       Acomp::addComp(const Acomp& AX)
-      /*!
+      /**
       Adds a pointer to the Comp list.
       If the pointer is singular, extracts the
       object and adds that componenet.
       Assumes that the component is sorted and inserts appropiately.
-      \param AX :: Acomp component to add
+      @param AX :: Acomp component to add
       */
     {
       std::pair<int,int> Stype=AX.size();
@@ -415,9 +415,9 @@ namespace Mantid
 
     void
       Acomp::addUnitItem(const int Item)
-      /*!
+      /**
       Adds a unit to the Unit list (if it doesn't exist). 
-      \param Item :: Unit to add
+      @param Item :: Unit to add
       */
     {
       // Quick and cheesy insertion if big.
@@ -430,13 +430,13 @@ namespace Mantid
 
     void
       Acomp::processIntersection(const std::string& Ln)
-      /*!
+      /**
       Helper function :: assumes that Ln has been
       checked for bracket consistency.
       Units are sorted after this function is returned.
-      \param Ln :: String to processed as an intersection
+      @param Ln :: String to processed as an intersection
       must not contain a toplevel +
-      \throws ExBase on failure to pass string
+      @throw ExBase on failure to pass string
       */
     {
       std::string Bexpress;           // bracket expression
@@ -508,13 +508,13 @@ namespace Mantid
 
     void
       Acomp::processUnion(const std::string& Ln)
-      /*!
+      /**
       Helper function :: assumes that Ln has been
       checked for bracket consistency
       Units are sorted after this function is returned.
-      \param Ln :: String to processed as a union 
+      @param Ln :: String to processed as a union 
       (must contain one external +)
-      \throws ExBase on failure to pass string
+      @throw ExBase on failure to pass string
       */
     {
       std::string Express;           // Intersection Expression
@@ -584,12 +584,12 @@ namespace Mantid
 
     int
       Acomp::copySimilar(const Acomp& A)
-      /*!
+      /**
       Class to merge two list of similar
       objects. Makes a full copy of the objects
       It requires that the Intersect is the same for both
-      \param A :: Object to copy
-      \returns 0 on success -1 on failure
+      @param A :: Object to copy
+      @return 0 on success -1 on failure
       */
     {
       // copy units and components
@@ -613,11 +613,11 @@ namespace Mantid
 
     void
       Acomp::addUnit(const std::vector<int>& Index,const BnId& BX)
-      /*!
+      /**
       Given a single BnId unit and an index
       adds it to the main Units object.
-      \param Index :: number , surfNumber
-      \param BX :: binary component
+      @param Index :: number , surfNumber
+      @param BX :: binary component
       */
     {
       int flag,S,V;
@@ -639,11 +639,11 @@ namespace Mantid
 
     void
       Acomp::assignDNF(const std::vector<int>& Index,const std::vector<BnId>& A)
-      /*!
+      /**
       Assign the object to the Essentual PI in the vector
       A. This will make the form DNF.
-      \param Index :: SurfNumbers
-      \param A :: Vector of BnId's that are valid
+      @param Index :: SurfNumbers
+      @param A :: Vector of BnId's that are valid
       */
     {
       Units.clear();
@@ -671,11 +671,11 @@ namespace Mantid
 
     void
       Acomp::assignCNF(const std::vector<int>& Index,const std::vector<BnId>& A)
-      /*!
+      /**
       Assign the object to the Essentual PI in the vector
       A. This will make the form DNF.
-      \param Index :: SurfNumbers
-      \param A :: Vector of BnId's that are valid
+      @param Index :: SurfNumbers
+      @param A :: Vector of BnId's that are valid
       */
     {
       Units.clear();
@@ -711,7 +711,7 @@ namespace Mantid
 
     void
       Acomp::Sort()
-      /*!
+      /**
       Function to sort the components of the lists.
       Decends down the Comp Tree.
       */
@@ -726,12 +726,12 @@ namespace Mantid
 
     int
       Acomp::makeReadOnce() 
-      /*!
+      /**
       This function attempts to make the function
       a read one form. Assumes that it is either DNF or
       CNF form
-      \retval 0 if fails
-      \retval 1 if success (and sets it into the appropiate form)
+      @retval 0 if fails
+      @retval 1 if success (and sets it into the appropiate form)
       */
     {
       std::map<int,int> LitSet;
@@ -750,11 +750,11 @@ namespace Mantid
 
     int
       Acomp::logicalEqual(const Acomp& A) const
-      /*!
+      /**
       Test that the system that is logically the same:
-      \param A :: Logical state to test
-      \retval 0 :: false  
-      \retval 1 :: true
+      @param A :: Logical state to test
+      @retval 0 :: false  
+      @retval 1 :: true
       */
     {
       std::map<int,int> litMap;       // keynumber :: number of occurances
@@ -784,8 +784,8 @@ namespace Mantid
 
     int
       Acomp::isNull() const
-      /*!
-      \returns 1 if there are no memebers
+      /**
+      @return 1 if there are no memebers
       */
     {
       return ((!Units.size() && !Comp.size()) ? 1 : 0);
@@ -793,12 +793,12 @@ namespace Mantid
 
     int
       Acomp::isDNF() const
-      /*!
+      /**
       Determines if the component is in
       DNF form. This Acomp needs to be a union
       of intersection. 
-      \retval 1 ::  DNF form
-      \retval 0 ::  not DNF form
+      @retval 1 ::  DNF form
+      @retval 0 ::  not DNF form
       */
     {
       // If an intersect (single component) 
@@ -815,12 +815,12 @@ namespace Mantid
 
     int
       Acomp::isCNF() const
-      /*!
+      /**
       Determines if the component is in
       CNF form. This Acomp needs to be an intersection
       of unions
-      \retval 1 ::  DNF form
-      \retval 0 ::  not DNF form
+      @retval 1 ::  DNF form
+      @retval 0 ::  not DNF form
       */
     {
       // If an intersect (single component) 
@@ -837,11 +837,11 @@ namespace Mantid
 
     void
       Acomp::getAbsLiterals(std::map<int,int>& literalMap) const
-      /*!
+      /**
       get a map of the literals and the frequency
       that they occur.
       This does not keep the +/- part of the literals separate
-      \param literalMap :: Map the get the frequency of the 
+      @param literalMap :: Map the get the frequency of the 
       literals 
       */
     {
@@ -865,11 +865,11 @@ namespace Mantid
 
     void
       Acomp::getLiterals(std::map<int,int>& literalMap) const
-      /*!
+      /**
       Get a map of the literals and the frequency
       that they occur.
       This keeps + and - literals separate
-      \param literalMap :: Map the get the frequency of the 
+      @param literalMap :: Map the get the frequency of the 
       literals 
       */
     {
@@ -896,10 +896,10 @@ namespace Mantid
 
     int
       Acomp::isSimple() const
-      /*!
+      /**
       Determines if there are not complex components.
-      \retval 1 :: Comp is empty
-      \retval 0 :: Contains Components.
+      @retval 1 :: Comp is empty
+      @retval 0 :: Contains Components.
       */
     {
       return (Comp.empty() ? 1 : 0);
@@ -907,10 +907,10 @@ namespace Mantid
 
     int
       Acomp::isSingle() const
-      /*!
+      /**
       Deterimines if the item's singular
-      \retval 1 if only one/zero item
-      \retval 0 if more than one item.
+      @retval 1 if only one/zero item
+      @retval 0 if more than one item.
       */
     {
       return (Comp.size()+Units.size()>1 ? 0 : 1);
@@ -919,9 +919,9 @@ namespace Mantid
 
     int
       Acomp::removeEqComp()
-      /*!
+      /**
       Remove identical items.
-      \returns number removed.
+      @return number removed.
       */
     {
       // First check all the Comp units:
@@ -944,11 +944,11 @@ namespace Mantid
 
     int
       Acomp::makePI(std::vector<BnId>& DNFobj) const
-      /*!
+      /**
       This method finds the principle implicants.
-      \param DNFobj :: A vector of Binary ID from a true 
+      @param DNFobj :: A vector of Binary ID from a true 
       vectors of keyvalues.
-      \returns number of PIs found.
+      @return number of PIs found.
       \todo  Can we set this up to get non-pairs
       i.e. one pass.
 
@@ -1021,15 +1021,15 @@ namespace Mantid
     int
       Acomp::makeEPI(std::vector<BnId>& DNFobj,
       std::vector<BnId>& PIform) const
-      /*!
+      /**
       Creates an essentual PI list (note: this is 
       not unique).
       Given the list form the EPI based on the Quine-McClusky method.
 
-      \param DNFobj :: Object in DNF form 
-      \param PIform :: List of rules in Prime Implicant form
+      @param DNFobj :: Object in DNF form 
+      @param PIform :: List of rules in Prime Implicant form
       It is set on exit (to the EPI)
-      \returns :: 1 if successful and 0 if failed
+      @return :: 1 if successful and 0 if failed
       */
     {
       const int debug(0);
@@ -1175,9 +1175,9 @@ namespace Mantid
 
     std::vector<int>
       Acomp::getKeys() const
-      /*!
+      /**
       Get the key numbers in the system
-      \return Key of literals
+      @return Key of literals
       */
     {
       std::map<int,int> litMap;       // keynumber :: number of occurances
@@ -1193,16 +1193,16 @@ namespace Mantid
     int
       Acomp::getDNFobject(std::vector<int>& keyNumbers,
       std::vector<BnId>& DNFobj) const
-      /*!
+      /**
       Creates the DNF items (ie the binary list
       of true statements) It forms a sum of products.
       The original is not changed by the keynumbers and the 
       DNF objects are output into the function parameters.
-      \param keyNumbers :: index list of the DNFobj. The
+      @param keyNumbers :: index list of the DNFobj. The
       [bitNum]->rule/key number.
-      \param DNFobj :: write out the DNF object into BnId form
-      \retval 0 :: on success.
-      \retval -1 :: on error.
+      @param DNFobj :: write out the DNF object into BnId form
+      @retval 0 :: on success.
+      @retval -1 :: on error.
       */
     {
       std::map<int,int> litMap;       // keynumber :: number of occurances
@@ -1238,10 +1238,10 @@ namespace Mantid
 
     int
       Acomp::makeDNFobject()
-      /*!
+      /**
       Sets the object to the DNF form.
-      \retval 0 on failure
-      \retval Number of DNF components
+      @retval 0 on failure
+      @retval Number of DNF components
       */
     {
       std::vector<BnId> DNFobj;
@@ -1257,10 +1257,10 @@ namespace Mantid
 
     int
       Acomp::makeCNFobject()
-      /*!
+      /**
       Sets the object to the CNF form.
-      \retval 0 on failure
-      \retval Number of CNF components
+      @retval 0 on failure
+      @retval Number of CNF components
       */
     {
       std::vector<BnId> CNFobj;
@@ -1276,15 +1276,15 @@ namespace Mantid
 
     int
       Acomp::getDNFpart(std::vector<Acomp>& Parts) const
-      /*!
+      /**
       Sets the object into parts of the DNF form
       then puts the object in the Parts section
-      \param Parts:: vector of the Parts found (Acomp units without
+      @param Parts:: vector of the Parts found (Acomp units without
       component)
-      \returns number of parts
+      @return number of parts
       */
     {
-      /*!
+      /**
       If this is DNF then we don't want
       to calculate the DNF but just use it
       */
@@ -1327,16 +1327,16 @@ namespace Mantid
     int
       Acomp::getCNFobject(std::vector<int>& keyNumbers,
       std::vector<BnId>& CNFobj) const
-      /*!
+      /**
       Creates the CNF items (ie the binary list
       of false statements) It forms a sum of products.
       The original is not changed by the keynumbers and the 
       DNF objects are output into the function parameters.
-      \param keyNumbers :: index list of the CNFobj. The
+      @param keyNumbers :: index list of the CNFobj. The
       [bitNum]->rule/key number.
-      \param CNFobj :: write out the CNF object into BnId form
-      \retval 0 :: on success.
-      \retval -1 :: on error.
+      @param CNFobj :: write out the CNF object into BnId form
+      @retval 0 :: on success.
+      @retval -1 :: on error.
       */
     {
       std::map<int,int> litMap;       // keynumber :: number of occurances
@@ -1372,11 +1372,11 @@ namespace Mantid
 
     int
       Acomp::isTrue(const std::map<int,int>& Base) const
-      /*!
+      /**
       Determines if the rule is true, given
       the Base state.
-      \param Base :: map of <LiteralNumber, State> 
-      \returns 1 if true and 0 if false
+      @param Base :: map of <LiteralNumber, State> 
+      @return 1 if true and 0 if false
       */
     {
       if (Units.empty() &&  Comp.empty())
@@ -1416,10 +1416,10 @@ namespace Mantid
 
     std::pair<Acomp,Acomp>
       Acomp::algDiv(const Acomp& G)
-      /*!
+      /**
       Carries out algebraic division
-      \param G :: The divisor
-      \return Pair of Divided + Remainder
+      @param G :: The divisor
+      @return Pair of Divided + Remainder
       */
     {
       //First make completely DNF (if necessary)
@@ -1502,12 +1502,12 @@ namespace Mantid
 
     int 
       Acomp::contains(const Acomp& A) const
-      /*!
+      /**
       Checks the Units of A to  see if they are in this->Units.
       Assumes that Units is sorted.
-      \param A :: Object to cross compare
-      \retval 0 :: all literals in A are in this
-      \retval 1 :: A is unique from this
+      @param A :: Object to cross compare
+      @retval 0 :: all literals in A are in this
+      @retval 1 :: A is unique from this
       */
     {
       std::vector<int>::const_iterator vc,tc;
@@ -1524,11 +1524,11 @@ namespace Mantid
 
     int
       Acomp::joinDepth()
-      /*!
+      /**
       Searchs down the tree to find if any
       singles exist and up-promotes them.
-      \throw ColErr::ExBase on mal-formed state
-      \returns number of up-promotions.
+      @throw ColErr::ExBase on mal-formed state
+      @return number of up-promotions.
       */
     {
 
@@ -1606,10 +1606,10 @@ namespace Mantid
 
     void
       Acomp::setString(const std::string& Line)
-      /*!
+      /**
       Sort out stuff like abc'+efg
       given a inner bracket expand that etc.
-      \param Line :: string of for abc'.
+      @param Line :: string of for abc'.
       */
     {
       Acomp CM;            /// Complementary object
@@ -1677,9 +1677,9 @@ namespace Mantid
 
     std::pair<int,int>
       Acomp::size() const
-      /*!
+      /**
       Gets the size of the Units and the Comp
-      \returns size of Unit, Comp
+      @return size of Unit, Comp
       */
     {
       return std::pair<int,int>(Units.size(),Comp.size());
@@ -1687,10 +1687,10 @@ namespace Mantid
 
     int
       Acomp::itemN(const int Index) const
-      /*!
+      /**
       Assessor function to get a unit number
-      \param Index :: Number of Unit to aquire
-      \returns Units[Index] or 0 on failure
+      @param Index :: Number of Unit to aquire
+      @return Units[Index] or 0 on failure
       */
     {
       if (Index>=0 && Index<static_cast<int>(Units.size()))
@@ -1700,10 +1700,10 @@ namespace Mantid
 
     const Acomp*
       Acomp::itemC(const int Index) const
-      /*!
+      /**
       Assessor function to get a Comp points
-      \param Index :: Number of Comp to aquire
-      \returns Comp[Index] or 0 on failure
+      @param Index :: Number of Comp to aquire
+      @return Comp[Index] or 0 on failure
       */
     {
       if (Index<0 || Index>=static_cast<int>(Comp.size()))
@@ -1714,7 +1714,7 @@ namespace Mantid
 
     void
       Acomp::complement() 
-      /*!
+      /**
       Take a complement of the current object
       This will reverse the type since 
       union<->intersection as a+b -> a'b' and
@@ -1735,10 +1735,10 @@ namespace Mantid
 
     void
       Acomp::writeFull(std::ostream& OXF,const int Indent) const
-      /*!
+      /**
       Real pretty print out statement  :-)
-      \param OXF :: output stream
-      \param Indent :: level of indentation (allows a cascaded call system)
+      @param OXF :: output stream
+      @param Indent :: level of indentation (allows a cascaded call system)
       */
     {
       for(int i=0;i<Indent;i++)
@@ -1758,9 +1758,9 @@ namespace Mantid
 
     std::string
       Acomp::display() const
-      /*!
+      /**
       Real pretty print out statement  
-      \returns Full string of the output in abc+efg type form
+      @return Full string of the output in abc+efg type form
       */
     {
       std::string out;
@@ -1800,10 +1800,10 @@ namespace Mantid
 
     std::string
       Acomp::displayDepth(const int dval) const
-      /*!
+      /**
       Real pretty print out statement  :-)
-      \param dval :: parameter to keep track of depth
-      \returns Full string of print line
+      @param dval :: parameter to keep track of depth
+      @return Full string of print line
       */
     {
       std::string out;
@@ -1844,11 +1844,11 @@ namespace Mantid
     void
       Acomp::printImplicates(const std::vector<BnId>& PIform,
       const Geometry::Matrix<int>& Grid) const
-      /*!
+      /**
       Debug function to print out 
       PI and Grid :
-      \param PIform :: Principle implicates
-      \param Grid :: grid form
+      @param PIform :: Principle implicates
+      @param Grid :: grid form
       */
 
     {

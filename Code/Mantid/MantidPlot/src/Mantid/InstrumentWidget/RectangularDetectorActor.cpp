@@ -112,7 +112,7 @@ void RectangularDetectorActor::redraw()
 //-------------------------------------------------------------------------------------------------
 /** Append the detector ID of this object to the list, if it is a detector.
  *
- * @param idList sequential list of detector IDs.
+ * @param idList :: sequential list of detector IDs.
  */
 void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
 {

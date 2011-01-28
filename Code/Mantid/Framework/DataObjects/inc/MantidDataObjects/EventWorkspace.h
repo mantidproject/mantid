@@ -40,7 +40,7 @@ class MantidVecWithMarker {
 public:
   /**
    * Constructor.
-   * @param the_index unique index into the workspace of this data
+   * @param the_index :: unique index into the workspace of this data
    */
   MantidVecWithMarker(const int the_index)
   : m_index(the_index)

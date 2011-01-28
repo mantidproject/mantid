@@ -13,7 +13,7 @@
 
 class UnwrappedSurface;
 
-/*!
+/**
   \class  GL3DWidget
   \brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
   \author Chapon Laurent & Srikanth Nagella

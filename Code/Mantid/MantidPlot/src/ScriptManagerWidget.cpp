@@ -161,8 +161,8 @@ void ScriptManagerWidget::askSave(int index)
 
 /**
  * Opens a script
- * @param filename An filename to use 
- * @param ok Indicate if the file read went ok
+ * @param filename :: An filename to use 
+ * @param ok :: Indicate if the file read went ok
  * @returns The contents of the script
  */
 QString ScriptManagerWidget::readScript(const QString& filename, bool *ok)
@@ -306,7 +306,7 @@ QAction* ScriptManagerWidget::zoomOutAction() const
 //-------------------------------------------
 /**
  * Create a new tab such that it is the specified index within the tab range.
- * @param index The index to give the new tab. If this is invalid the tab is simply appended
+ * @param index :: The index to give the new tab. If this is invalid the tab is simply appended
  */
 ScriptEditor* ScriptManagerWidget::newTab(int index)
 {
@@ -338,7 +338,7 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
 
 /**
  * Open a file in the current tab
- * @param filename An optional file name
+ * @param filename :: An optional file name
  */
 void ScriptManagerWidget::openInCurrentTab(const QString & filename)
 {
@@ -348,7 +348,7 @@ void ScriptManagerWidget::openInCurrentTab(const QString & filename)
 
 /**
  * Open a file in a new tab
- * @param filename An optional file name
+ * @param filename :: An optional file name
  */
 void ScriptManagerWidget::openInNewTab(const QString & filename)
 {
@@ -358,7 +358,7 @@ void ScriptManagerWidget::openInNewTab(const QString & filename)
 
 /**
  * Save script under a different file name
- * @param The index of the tab to save
+ * @param The :: index of the tab to save
  */
 QString ScriptManagerWidget::saveAs(int index)
 {
@@ -381,7 +381,7 @@ QString ScriptManagerWidget::saveAs(int index)
 
 /**
  * Save the tab text given by the index
- * @param The index of the tab to save
+ * @param The :: index of the tab to save
  */
 void ScriptManagerWidget::save(int index)
 {
@@ -488,7 +488,7 @@ void ScriptManagerWidget::evaluate()
 
 /** 
  * Execute an interpreter line
- * @param code The chunk of code to execute
+ * @param code :: The chunk of code to execute
  */
 void ScriptManagerWidget::executeInterpreter(const QString & code)
 {
@@ -526,8 +526,8 @@ void ScriptManagerWidget::executeMultiLine()
 
 /**
  * Run a piece of code in the current environment
- * @param code The chunk of code to execute
- * @param line_offset If this is a chunk of code from an editor, give offset from the start
+ * @param code :: The chunk of code to execute
+ * @param line_offset :: If this is a chunk of code from an editor, give offset from the start
  */
 bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_offset)
 {
@@ -569,7 +569,7 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
 
 /**
  * Compile a piece of code in the current environment
- * @param code the code to compile
+ * @param code :: the code to compile
  */
 void ScriptManagerWidget::compile(const QString & code)
 {
@@ -599,7 +599,7 @@ void ScriptManagerWidget::compile(const QString & code)
  
 }
 /**Run the multi line code set to runner
- * @param line_offset offset of the line
+ * @param line_offset :: offset of the line
  * @returns true if executed successfully
  */
 bool ScriptManagerWidget::runMultiLineCode(int line_offset)
@@ -618,8 +618,8 @@ bool ScriptManagerWidget::runMultiLineCode(int line_offset)
 }
 /** 
  * Display an output message
- * @param msg The message string
- * @param timestamp Whether to display a timestamp
+ * @param msg :: The message string
+ * @param timestamp :: Whether to display a timestamp
  */
 void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
 {  
@@ -629,8 +629,8 @@ void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
 
 /**
  * Display an error message
- * @param msg The message string
- * @param timestamp Whether to display a timestamp
+ * @param msg :: The message string
+ * @param timestamp :: Whether to display a timestamp
  */
 void ScriptManagerWidget::displayError(const QString & msg, bool timestamp)
 { 
@@ -737,7 +737,7 @@ void ScriptManagerWidget::markCurrentAsChanged()
 
 /**
  * Enable/disable script interaction based on script execution status
- * @param running The state of the script
+ * @param running :: The state of the script
  */
 void ScriptManagerWidget::setScriptIsRunning(bool running)
 {
@@ -749,7 +749,7 @@ void ScriptManagerWidget::setScriptIsRunning(bool running)
 
 /**
  * Toggle the progress arrow on/off
- * @param state The state of the option
+ * @param state :: The state of the option
  */
 void ScriptManagerWidget::toggleProgressArrow(bool state)
 {
@@ -767,7 +767,7 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
 
 /**
  * Toggle code folding on/off
- * @param state The state of the option
+ * @param state :: The state of the option
  */
 void ScriptManagerWidget::toggleCodeFolding(bool state)
 {
@@ -782,7 +782,7 @@ void ScriptManagerWidget::toggleCodeFolding(bool state)
 }
 /**
  * Toggle code completion. Note that turning off code completion automatically turns off call tips
- * @param state The state of the option
+ * @param state :: The state of the option
  */
 void ScriptManagerWidget::toggleCodeCompletion(bool state)
 {
@@ -798,7 +798,7 @@ void ScriptManagerWidget::toggleCodeCompletion(bool state)
 
 /**
  * Toggle call tips.
- * @param state The state of the option
+ * @param state :: The state of the option
  */
 void ScriptManagerWidget::toggleCallTips(bool state)
 {
@@ -891,7 +891,7 @@ void ScriptManagerWidget::initActions()
 
 /**
  * A context menu event for the tab widget itself
- * @param event The context menu event
+ * @param event :: The context menu event
  */  
 void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
 {
@@ -925,7 +925,7 @@ void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
 
 /**
  * A custom event handler, which in this case monitors for ScriptChangeEvent signals
- * @param event The custome event
+ * @param event :: The custome event
  */
 void ScriptManagerWidget::customEvent(QEvent *event)
 {
@@ -948,8 +948,8 @@ void ScriptManagerWidget::customEvent(QEvent *event)
 
 /**
  * Open a file
- * @param newtab If true, a new tab will be created
- * @param filename An optional file name
+ * @param newtab :: If true, a new tab will be created
+ * @param filename :: An optional file name
  */
 void ScriptManagerWidget::open(bool newtab, const QString & filename)
 {
@@ -1009,7 +1009,7 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
 
 /**
  * Create and return a new Script object, connecting up the relevant signals.
- * @param An optional ScriptEditor object
+ * @param An :: optional ScriptEditor object
  */
 Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
@@ -1034,7 +1034,7 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 
 /**
  * Close a given tab
- * @param index The tab index
+ * @param index :: The tab index
  */ 
 void ScriptManagerWidget::closeTabAtIndex(int index)
 {
@@ -1059,7 +1059,7 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
 
 /**
  * Close a tab at a given position
- * @param pos The tab at the given position
+ * @param pos :: The tab at the given position
  */ 
 void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
 {
@@ -1069,7 +1069,7 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
 }
 
 /** Writes the file to disk
- *  @param The editor tab to be saved
+ *  @param The :: editor tab to be saved
  */
 void ScriptManagerWidget::doSave(ScriptEditor * editor)
 {
@@ -1082,8 +1082,8 @@ void ScriptManagerWidget::doSave(ScriptEditor * editor)
 
 /** 
  * Set auto complete behaviour for the given editor
- * @param editor The editor widget to set the behaviour on
- * @param state The state required
+ * @param editor :: The editor widget to set the behaviour on
+ * @param state :: The state required
  */
 void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool state)
 {
@@ -1106,8 +1106,8 @@ void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool 
 
 /** 
  * Set call tips behaviour for the given editor
- * @param editor The editor widget to set the behaviour on
- * @param state The state required
+ * @param editor :: The editor widget to set the behaviour on
+ * @param state :: The state required
  */
 void ScriptManagerWidget::setCallTipsBehaviour(ScriptEditor *editor, bool state)
 {
@@ -1130,8 +1130,8 @@ void ScriptManagerWidget::setCallTipsBehaviour(ScriptEditor *editor, bool state)
 
 /** 
  * Set code folding behaviour for the given editor
- * @param editor The editor widget to set the behaviour on
- * @param state The state required
+ * @param editor :: The editor widget to set the behaviour on
+ * @param state :: The state required
  */
 void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool state)
 {
@@ -1150,7 +1150,7 @@ void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool sta
 
 /** 
  * open the selected script from the File->Recent Scripts  in a new tab
- * @param index The index of the selected script
+ * @param index :: The index of the selected script
  */
 void ScriptManagerWidget::openRecentScript(int index)
 {
@@ -1162,7 +1162,7 @@ void ScriptManagerWidget::openRecentScript(int index)
 
 /** 
 * update the Recent Scripts menu items
-* @param index The index of the selected script
+* @param index :: The index of the selected script
 */
 void ScriptManagerWidget::updateRecentScriptList()
 {
@@ -1189,7 +1189,7 @@ QStringList ScriptManagerWidget::recentScripts()
 
 /** 
  * sets the recent scripts list
- * @param rslist list containing the name of the recent scripts.
+ * @param rslist :: list containing the name of the recent scripts.
  */
 void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
 {
@@ -1324,7 +1324,7 @@ FindReplaceDialog::FindReplaceDialog(ScriptManagerWidget *manager, bool replace,
 //------------------------------------------------------
 /**
  * Find the current search term
- * @param backwards If true then the search procedes backwards from the cursor's current position
+ * @param backwards :: If true then the search procedes backwards from the cursor's current position
  * @returns A boolean indicating success/failure
  */
 bool FindReplaceDialog::find(bool backwards)

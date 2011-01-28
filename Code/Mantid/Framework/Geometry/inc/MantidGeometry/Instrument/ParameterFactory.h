@@ -94,7 +94,7 @@ private:
 };
 
 /**  Templated method for parameter subscription
- *   @param className The parameter type name
+ *   @param className :: The parameter type name
  *   @tparam C The parameter type
  */
 template<class C>

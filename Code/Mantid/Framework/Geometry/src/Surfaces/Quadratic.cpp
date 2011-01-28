@@ -39,26 +39,26 @@ Kernel::Logger& Quadratic::PLog(Kernel::Logger::get("Quadratic"));
 
 Quadratic::Quadratic() : Surface(),
   BaseEqn(10)
-  /*!
+  /**
     Constructor
   */
 {}
 
 Quadratic::Quadratic(const Quadratic& A) : Surface(A),
   BaseEqn(A.BaseEqn)
-  /*!
+  /**
     Copy constructor
-    \param A :: Quadratic to copy
+    @param A :: Quadratic to copy
   */
 { }
 
 
 Quadratic&
 Quadratic::operator=(const Quadratic& A)
-  /*!
+  /**
     Assignment operator
-    \param A :: Quadratic to copy
-    \return *this
+    @param A :: Quadratic to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -70,7 +70,7 @@ Quadratic::operator=(const Quadratic& A)
 }
 
 Quadratic::~Quadratic()
-  /*!
+  /**
     Destructor
   */
 {}
@@ -78,12 +78,12 @@ Quadratic::~Quadratic()
 
 double 
 Quadratic::eqnValue(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Helper function to calcuate the value
     of the equation at a fixed point 
-    \param Pt :: Point to determine the equation surface 
+    @param Pt :: Point to determine the equation surface 
     value at
-    \return value Eqn(Pt) : -ve inside +ve outside
+    @return value Eqn(Pt) : -ve inside +ve outside
   */
 {
   double res(0.0);
@@ -102,13 +102,13 @@ Quadratic::eqnValue(const Geometry::V3D& Pt) const
 
 int
 Quadratic::side(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Determine if the the Point is true to the surface or
     on the other side
-    \param Pt :: Point to check
-    \retval 1 : if the point is "true" to the surface  
-    \retval -1 : if the point is "false" to the surface  
-    \retval 0 :: The point is on the surface
+    @param Pt :: Point to check
+    @retval 1 : if the point is "true" to the surface  
+    @retval -1 : if the point is "false" to the surface  
+    @retval 0 :: The point is on the surface
   */
 {
   double res=eqnValue(Pt);
@@ -120,13 +120,13 @@ Quadratic::side(const Geometry::V3D& Pt) const
 
 Geometry::V3D
 Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Given a point on the surface 
     Calculate the normal at the point 
     Some rather disturbing behaviour happens if 
     the point is a significant distance from the surface
-    \param Pt :: Point to calcution
-    \return normal unit vector
+    @param Pt :: Point to calcution
+    @return normal unit vector
   */
 {
    Geometry::V3D N(2*BaseEqn[0]*Pt[0]+BaseEqn[3]*Pt[1]+BaseEqn[4]*Pt[2]+BaseEqn[6],
@@ -139,12 +139,12 @@ Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
 void
 Quadratic::matrixForm(Geometry::Matrix<double>& A,
 		      Geometry::V3D& B,double& C) const
-  /*!
+  /**
     Converts the baseEqn into the matrix form such that
     \f[ x^T A x + B^T x + C =0 \f]
-    \param A :: Matrix to place equation into
-    \param B :: Vector point 
-    \param C :: Constant value
+    @param A :: Matrix to place equation into
+    @param B :: Vector point 
+    @param C :: Constant value
   */
 {
   A.setMem(3,3);    // set incase memory out
@@ -163,10 +163,10 @@ Quadratic::matrixForm(Geometry::Matrix<double>& A,
 
 double
 Quadratic::distance(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Proper calcuation of a point to a general surface 
-    \param Pt :: Point to calculate distance from surace
-    \return distance from point to surface (signed)
+    @param Pt :: Point to calculate distance from surace
+    @return distance from point to surface (signed)
   */
 {
   // Job 1 :: Create matrix and vector representation
@@ -282,10 +282,10 @@ Quadratic::distance(const Geometry::V3D& Pt) const
 
 int
 Quadratic::onSurface(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Test to see if a point is on the surface 
-    \param Pt :: Point to test
-    \returns 0 : if not on surface; 1 if on surace
+    @param Pt :: Point to test
+    @return 0 : if not on surface; 1 if on surace
   */
 {
   const double res=eqnValue(Pt);
@@ -295,9 +295,9 @@ Quadratic::onSurface(const Geometry::V3D& Pt) const
 
 void
 Quadratic::displace(const Geometry::V3D& Pt)
-  /*!
+  /**
     Apply a general displacement to the surface
-    \param Pt :: Point to add to surface coordinate
+    @param Pt :: Point to add to surface coordinate
   */
 {
   BaseEqn[9]+= Pt[0]*(Pt[0]*BaseEqn[0]-BaseEqn[6])+
@@ -314,9 +314,9 @@ Quadratic::displace(const Geometry::V3D& Pt)
 
 void 
 Quadratic::rotate(const Geometry::Matrix<double>& MX) 
-  /*!
+  /**
     Rotate the surface by matrix MX
-    \param MX :: Matrix for rotation (not inverted like MCNPX)
+    @param MX :: Matrix for rotation (not inverted like MCNPX)
    */
 {
   Geometry::Matrix<double> MA=MX;
@@ -356,7 +356,7 @@ Quadratic::rotate(const Geometry::Matrix<double>& MX)
 
 void
 Quadratic::print() const
-  /*! 
+  /** 
     Print out the genreal equation 
     for debugging.
   */
@@ -370,11 +370,11 @@ Quadratic::print() const
 
 void
 Quadratic::write(std::ostream& OX) const
-  /*!
+  /**
     Writes out  an MCNPX surface description 
     Note : Swap since base equation is swapped in gq output 
     (mcnp 4c manual pg. 3-14)
-    \param OX :: Output stream (required for multiple std::endl)
+    @param OX :: Output stream (required for multiple std::endl)
   */
 {
   std::ostringstream cx;

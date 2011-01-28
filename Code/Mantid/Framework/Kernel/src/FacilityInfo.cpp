@@ -21,8 +21,8 @@ namespace Kernel
 Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
 
 /** Constructor.
-  * @param elem The Poco::XML::Element to read the data from
-  * @throws std::runtime_error if name or file extensions are not defined
+  * @param elem :: The Poco::XML::Element to read the data from
+  * @throw std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
   m_name(elem->getAttribute("name")), m_zeroPadding(0), m_extensions(), m_archiveSearch(), 
@@ -124,7 +124,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
 
 /**
   * Add new extension. Adds both a lowercase and uppercase version
-  * @param ext File extension, including the dot, e.g. ".nxs" or ".raw"
+  * @param ext :: File extension, including the dot, e.g. ".nxs" or ".raw"
   */
 void FacilityInfo::addExtension(const std::string& ext)
 {
@@ -143,7 +143,7 @@ void FacilityInfo::addExtension(const std::string& ext)
   * Returns instruments with given name
   * @param  iName Instrument name
   * @return the instrument information object
-  * @throws NotFoundError if iName was not found
+  * @throw NotFoundError if iName was not found
   */
 const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
 {
@@ -183,7 +183,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
 
 /**
   * Returns a list of instruments of given technique
-  * @param tech Technique name
+  * @param tech :: Technique name
   * @return a list of instrument information objects
   */
 std::vector<InstrumentInfo> FacilityInfo::Instruments(const std::string& tech)const

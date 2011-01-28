@@ -26,8 +26,8 @@ namespace Mantid
     }
 
     /** Static callback function used by MuParser to initialize variables implicitly
-    @param varName The name of a new variable
-    @param pufun Pointer to the function
+    @param varName :: The name of a new variable
+    @param pufun :: Pointer to the function
     */
     double* UserFunction::AddVariable(const char *varName, void *pufun)
     {
@@ -52,8 +52,8 @@ namespace Mantid
     }
 
     /**  Declare fit parameters using muParser's implicit variable initialization.
-     * @param attName Attribute name, must be "Formula"
-     * @param value The attribute value. For "Formula" it must be a mu::Parser expression string
+     * @param attName :: Attribute name, must be "Formula"
+     * @param value :: The attribute value. For "Formula" it must be a mu::Parser expression string
      */
     void UserFunction::setAttribute(const std::string& attName,const Attribute& value)
     {
@@ -100,10 +100,10 @@ namespace Mantid
     }
 
     /** Calculate the fitting function.
-    *  @param out A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
+    *  @param out :: A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
     *        The fitting procedure will try to minimise Sum(out[i]^2)
-    *  @param xValues The array of nData x-values.
-    *  @param nData The size of the fitted data.
+    *  @param xValues :: The array of nData x-values.
+    *  @param nData :: The size of the fitted data.
     */
     void UserFunction::function(double* out, const double* xValues, const int& nData)const
     {
@@ -115,9 +115,9 @@ namespace Mantid
     }
 
     /** 
-    * @param out Derivatives
-    * @param xValues X values for data points
-    * @param nData Number of data points
+    * @param out :: Derivatives
+    * @param xValues :: X values for data points
+    * @param nData :: Number of data points
     */
     void UserFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
     {

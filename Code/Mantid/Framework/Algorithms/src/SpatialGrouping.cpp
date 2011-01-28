@@ -24,8 +24,8 @@ namespace
 * centre point.
 * Needs to be outside of SpatialGrouping class because of the way STL handles
 * passing functions as arguments.
-* @param left element to compare
-* @param right element to compare
+* @param left :: element to compare
+* @param right :: element to compare
 * @return true if left should come before right in the order
 */
 static bool compareIDPair(const std::pair<int,double> & left, const std::pair<int,double> & right)
@@ -156,11 +156,11 @@ void SpatialGrouping::exec()
 /**
 * This method will, using the NearestNeighbours methods, expand our view on the nearby detectors from
 * the standard eight closest that are recorded in the graph.
-* @param nearest neighbours found in previous requests
-* @param det pointer to the central detector, for calculating distances
-* @param noNeighbours number of neighbours that must be found (in total, including those already found)
-* @param bbox BoundingBox object representing the search region
-* @param scale V3D object used for scaling in determination of distances
+* @param nearest :: neighbours found in previous requests
+* @param det :: pointer to the central detector, for calculating distances
+* @param noNeighbours :: number of neighbours that must be found (in total, including those already found)
+* @param bbox :: BoundingBox object representing the search region
+* @param scale :: V3D object used for scaling in determination of distances
 * @return true if neighbours were found matching the parameters, false otherwise
 */
 bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry::IDetector_sptr det, const int & noNeighbours, const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale)
@@ -227,8 +227,8 @@ bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry
 /**
 * This method will trim the result set down to the specified number required by sorting
 * the results and removing those that are the greatest distance away.
-* @param input map of values that need to be sorted, will be modified by the method
-* @param noNeighbours number of elements that should be kept
+* @param input :: map of values that need to be sorted, will be modified by the method
+* @param noNeighbours :: number of elements that should be kept
 */
 void SpatialGrouping::sortByDistance(std::map<int,double> & input, const int & noNeighbours)
 {
@@ -249,9 +249,9 @@ void SpatialGrouping::sortByDistance(std::map<int,double> & input, const int & n
 /**
 * Creates a bounding box representing the area in which to search for neighbours, and a scaling vector representing the dimensions
 * of the detector
-* @param det input detector
-* @param bndbox reference to BoundingBox object (changed by this function)
-* @param scale reference to V3D object (changed by this function)
+* @param det :: input detector
+* @param bndbox :: reference to BoundingBox object (changed by this function)
+* @param scale :: reference to V3D object (changed by this function)
 */
 void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> det, Mantid::Geometry::BoundingBox & bndbox, Mantid::Geometry::V3D & scale)
 {
@@ -282,9 +282,9 @@ void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> d
 
 /**
 * Enlarges values given by a certain factor. Used to "grow" the BoundingBox object.
-* @param min min value (changed by this function)
-* @param max max value (changed by this function)
-* @param factor factor by which to grow the values
+* @param min :: min value (changed by this function)
+* @param max :: max value (changed by this function)
+* @param factor :: factor by which to grow the values
 */
 void SpatialGrouping::growBox(double & min, double & max, const double & factor)
 {

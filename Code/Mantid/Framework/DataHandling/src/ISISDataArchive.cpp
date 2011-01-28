@@ -26,7 +26,7 @@ DECLARE_ARCHIVESEARCH(ISISDataArchive,ISISDataSearch);
 
 /**
   * Calls a web service to get a full path to a file
-  * @param fName The file name.
+  * @param fName :: The file name.
   * @return The path to the file or empty string in case of error.
   */
 std::string ISISDataArchive::getPath(const std::string& fName)const

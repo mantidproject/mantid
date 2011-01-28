@@ -14,8 +14,8 @@ namespace Mantid
     Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
     /** Constructor that takes a list of detectors to add
-    *  @param dets The vector of IDetector pointers that this virtual detector will hold
-    *  @param warnAboutMasked If true a log message at warning level will be generated if a one of the detectors in dets is masked. 
+    *  @param dets :: The vector of IDetector pointers that this virtual detector will hold
+    *  @param warnAboutMasked :: If true a log message at warning level will be generated if a one of the detectors in dets is masked. 
     *  @throw std::invalid_argument If an empty vector is passed as argument
     */
     DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked) :
@@ -39,8 +39,8 @@ namespace Mantid
     }
 
     /** Add a detector to the collection
-    *  @param det  A pointer to the detector to add
-    *  @param warn Whether to issue warnings to the log
+    *  @param det ::  A pointer to the detector to add
+    *  @param warn :: Whether to issue warnings to the log
     */
     void DetectorGroup::addDetector(IDetector_sptr det, bool& warn)
     {
@@ -164,7 +164,7 @@ namespace Mantid
 
     /** Gives the total solid angle subtended by a group of detectors by summing the
     *  contributions from the individual detectors.
-    *  @param observer The point from which the detector is being viewed
+    *  @param observer :: The point from which the detector is being viewed
     *  @return The solid angle in steradians
     *  @throw NullPointerException If geometrical form of any detector has not been provided in the instrument definition file
     */
@@ -222,7 +222,7 @@ namespace Mantid
 
     /** isValid() is true if the point is inside any of the detectors, i.e. one of the
     *  detectors has isValid() == true
-    *  @param point this point is tested to see if it is one of the detectors
+    *  @param point :: this point is tested to see if it is one of the detectors
     *  @return if the point is in a detector it returns true else it returns false
     */
     bool DetectorGroup::isValid(const V3D& point) const
@@ -236,7 +236,7 @@ namespace Mantid
     }
 
     /** Does the point given lie on the surface of one of the detectors
-    *  @param point the point that is tested to see if it is one of the detectors
+    *  @param point :: the point that is tested to see if it is one of the detectors
     *  @return true if the point is on the side of a detector else it returns false
     */
     bool DetectorGroup::isOnSide(const V3D& point) const
@@ -251,7 +251,7 @@ namespace Mantid
 
     /** tries to find a point that lies on or within the first detector in the storage
     * found in the storage map
-    *  @param point if a point is found its coordinates will be stored in this varible
+    *  @param point :: if a point is found its coordinates will be stored in this varible
     *  @return 1 if point found, 0 otherwise
     */
     int  DetectorGroup::getPointInObject(V3D& point) const
@@ -264,7 +264,7 @@ namespace Mantid
 
     /**
     * Get the names of the parameters for this component.
-    * @param recursive If true, the parameters for all of the parent components are also included
+    * @param recursive :: If true, the parameters for all of the parent components are also included
     * @returns A set of strings giving the parameter names for this component
     */
     std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const
@@ -275,7 +275,7 @@ namespace Mantid
 
     /**
     * Get the bounding box for this group of detectors. It is simply the sum of the bounding boxes of its constituents.
-    * @param boundingBox [Out] The resulting bounding box is stored here.
+    * @param boundingBox :: [Out] The resulting bounding box is stored here.
     */
     void DetectorGroup::getBoundingBox(BoundingBox & boundingBox) const
     {
@@ -291,8 +291,8 @@ namespace Mantid
 
     /**
     * Returns a boolean indicating if the component has the named parameter
-    * @param name The name of the parameter
-    * @param recursive If true the parent components will also be searched (Default: true)
+    * @param name :: The name of the parameter
+    * @param recursive :: If true the parent components will also be searched (Default: true)
     * @returns A boolean indicating if the search was successful or not. Always false as this is not
     * parameterized
     */

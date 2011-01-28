@@ -84,7 +84,7 @@ namespace Mantid
       const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
       /**
        * Returns the named property
-       * @param name The name of the property
+       * @param name :: The name of the property
        * @returns The named property
        */
       Kernel::Property * getProperty(const std::string & name) const
@@ -104,13 +104,13 @@ namespace Mantid
 
       /**
        * Add a log entry
-       * @param p A pointer to the property containing the log entry
+       * @param p :: A pointer to the property containing the log entry
        */
       void addLogData( Kernel::Property *p ) { addProperty(p); }
 
       /**
        * Access a single log entry
-       * @param name The name of the log entry to retrieve
+       * @param name :: The name of the log entry to retrieve
        * @returns A pointer to a property containing the log entry
        */ 
       Kernel::Property* getLogData(const std::string &name) const { return getProperty(name); }
@@ -122,7 +122,7 @@ namespace Mantid
       const std::vector< Kernel::Property* >& getLogData() const {return getProperties(); } 
       /**
        * Remove a named log entry
-       * @param name The name of the entry to remove
+       * @param name :: The name of the entry to remove
        */
       void removeLogData(const std::string &name) { return removeProperty(name); }
       //@}
@@ -136,9 +136,9 @@ namespace Mantid
 
     /**
      * Add a property of a specified type (Simply creates a Kernel::Property of that type
-     * @param name The name of the type
-     * @param value The value of the property
-     * @param overwrite If true, a current value is overwritten. (Default: False)
+     * @param name :: The name of the type
+     * @param value :: The value of the property
+     * @param overwrite :: If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
       void Run::addProperty(const std::string & name, const TYPE & value, bool overwrite)
@@ -149,10 +149,10 @@ namespace Mantid
     /**
      * Add a property of a specified type (Simply creates a Kernel::Property of that type)
      *  and set its units.
-     * @param name The name of the type
-     * @param value The value of the property
-     * @param units a string giving the units of the property.
-     * @param overwrite If true, a current value is overwritten. (Default: False)
+     * @param name :: The name of the type
+     * @param value :: The value of the property
+     * @param units :: a string giving the units of the property.
+     * @param overwrite :: If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
       void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units, bool overwrite)

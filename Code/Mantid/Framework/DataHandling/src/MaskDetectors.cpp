@@ -183,9 +183,9 @@ void MaskDetectors::exec()
 
 /**
  * Convert a list of spectra numbers into the corresponding workspace indices
- * @param indexList An output index list from the given spectra list
- * @param spectraList A list of spectra numbers
- * @param WS The input workspace to be masked
+ * @param indexList :: An output index list from the given spectra list
+ * @param spectraList :: A list of spectra numbers
+ * @param WS :: The input workspace to be masked
  */
 void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, const std::vector<int>& spectraList,
 					     const API::MatrixWorkspace_sptr WS)
@@ -210,8 +210,8 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, const 
 
 /**
  * Append the indices of the masked spectra from the given workspace list to the given list
- * @param indexList An existing list of indices
- * @param maskedWorkspace An workspace with masked spectra
+ * @param indexList :: An existing list of indices
+ * @param maskedWorkspace :: An workspace with masked spectra
  */
 void MaskDetectors::appendToIndexListFromWS(std::vector<int>& indexList, const MatrixWorkspace_sptr maskedWorkspace)
 {

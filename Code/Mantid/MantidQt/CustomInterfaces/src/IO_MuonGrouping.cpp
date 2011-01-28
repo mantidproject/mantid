@@ -298,7 +298,7 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 /**
  * Set Group / Group Pair name
  *
- * @param name Name you want to set the front Group / Group Pair name to
+ * @param name :: Name you want to set the front Group / Group Pair name to
  */
 void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
 {
@@ -318,7 +318,7 @@ void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
 /**
  * create 'map' relating group number to row number in group table
  *
- * @param groupToRow The 'map' returned
+ * @param groupToRow :: The 'map' returned
  */
 void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow)
 {
@@ -357,7 +357,7 @@ void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToR
 /**
  * create 'map' relating pair number to row number in pair table
  *
- * @param pairToRow The 'map' returned
+ * @param pairToRow :: The 'map' returned
  */
 void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow)
 {

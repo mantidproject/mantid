@@ -197,7 +197,7 @@ void CalculateTransmissionBeamSpreader::exec()
 }
 
 /** Sum all detector pixels except monitors and masked detectors
- *  @param WS    The workspace containing the spectrum to sum
+ *  @param WS ::    The workspace containing the spectrum to sum
  *  @return A Workspace2D containing the sum
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS)
@@ -210,8 +210,8 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::Mat
 }
 
 /** Extracts a single spectrum from a Workspace2D into a new workspaces. Uses CropWorkspace to do this.
- *  @param WS    The workspace containing the spectrum to extract
- *  @param index The workspace index of the spectrum to extract
+ *  @param WS ::    The workspace containing the spectrum to extract
+ *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS, const int index)
@@ -230,7 +230,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
 }
 
 /** Uses 'Linear' as a subalgorithm to fit the log of the exponential curve expected for the transmission.
- *  @param WS The single-spectrum workspace to fit
+ *  @param WS :: The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS)

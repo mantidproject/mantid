@@ -14,7 +14,7 @@ namespace Geometry
   class V3D;
   template<class T>
   class Matrix;
-/*!
+/**
   \class  Surface
   \brief Holds a basic quadratic surface
   \author S. Ansell

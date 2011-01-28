@@ -87,7 +87,7 @@ public:
 
   /**
    * Set function parameter value read from a QtProperty
-   * @param prop The (double) property with the new parameter value
+   * @param prop :: The (double) property with the new parameter value
    * @return true if successfull
    */
   bool setParameter(QtProperty* prop);
@@ -97,22 +97,22 @@ public:
 
   /**
    * Set function attribute value read from a QtProperty
-   * @param prop The (string) property with the new attribute value
+   * @param prop :: The (string) property with the new attribute value
    * @return true if successfull
    */
   bool setAttribute(QtProperty* prop);
 
   /**
    * Set function's double attribute
-   * @param attName The name of the attribute
-   * @param attValue The new attribute value
+   * @param attName :: The name of the attribute
+   * @param attValue :: The new attribute value
    */
   void setAttribute(const QString& attName, const double& attValue);
 
   /**
    * Set function's attribute of any type.
-   * @param attName The name of the attribute
-   * @param attValue The new attribute value as a string. If the attValue's
+   * @param attName :: The name of the attribute
+   * @param attValue :: The new attribute value as a string. If the attValue's
    *  format doesn't match the attribute's type it is ignored.
    */
   void setAttribute(const QString& attName, const QString& attValue);
@@ -130,8 +130,8 @@ public:
 
   /**
    * Change the type of the function (replace the function)
-   * @param prop The "Type" property with new value
-   * @param fnName New function name (type) or full initialization expression
+   * @param prop :: The "Type" property with new value
+   * @param fnName :: New function name (type) or full initialization expression
    */
   Mantid::API::IFitFunction* changeType(QtProperty* prop);
 

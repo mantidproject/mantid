@@ -53,7 +53,7 @@ namespace Mantid
 			
 		}
 		/** This method does advanced search by calling icat api
-		  *@param outputws shared pointer to output workspace
+		  *@param outputws :: shared pointer to output workspace
 		*/
 		void CAdvancedSearch::doAdvancedSearch(ITableWorkspace_sptr& outputws)
 		{
@@ -65,7 +65,7 @@ namespace Mantid
 		}
 
 		/** This method gets the input properties of the algorithm
-		  *@param inputs reference to searchinput class.
+		  *@param inputs :: reference to searchinput class.
 		*/
 		void CAdvancedSearch::getInputProperties(CICatHelper& helper,CSearchParam& inputs)
 		{

@@ -380,11 +380,11 @@ namespace Mantid
     *  algorithms directly via the new operator is prefered since then
     *  the framework can take care of all of the necessary book-keeping.
     *
-    *  @param name           The concrete algorithm class of the sub algorithm
-    *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
-    *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
-    *  @param enableLogging  Set to false to disable logging from the child algorithm
-    *  @param version        The version of the child algorithm to create. By default gives the latest version.
+    *  @param name ::           The concrete algorithm class of the sub algorithm
+    *  @param startProgress ::  The percentage progress value of the overall algorithm where this child algorithm starts
+    *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
+    *  @param enableLogging ::  Set to false to disable logging from the child algorithm
+    *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
     *  @returns Set to point to the newly created algorithm object
     */
     IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress, 
@@ -435,7 +435,7 @@ namespace Mantid
     }
 
     /**  Add an observer to a notification
-    @param observer Reference to the observer to add
+    @param observer :: Reference to the observer to add
     */
     void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
     {
@@ -443,7 +443,7 @@ namespace Mantid
     }
 
     /**  Remove an observer
-    @param observer Reference to the observer to remove
+    @param observer :: Reference to the observer to remove
     */
     void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
     {
@@ -475,7 +475,7 @@ namespace Mantid
 
     /** Initialize using proxy algorithm.
     Call the main initialize method and then copy in the property values.
-    @param proxy Initialising proxy algorithm
+    @param proxy :: Initialising proxy algorithm
     */
     void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
     {
@@ -494,7 +494,7 @@ namespace Mantid
     /** Set the executed flag to the specified state
     // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
     //     Also don't know reason for different return type and argument.
-    @param state New executed state
+    @param state :: New executed state
     */
     void Algorithm::setExecuted(bool state)
     {
@@ -502,8 +502,8 @@ namespace Mantid
     }
 
     /** Sends ProgressNotification. 
-    @param p Reported progress,  must be between 0 (just started) and 1 (finished)
-    @param msg Optional message string
+    @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
+    @param msg :: Optional message string
     */
     void Algorithm::progress(double p, const std::string& msg)
     {
@@ -524,8 +524,8 @@ namespace Mantid
     //----------------------------------------------------------------------
 
     /** Fills History, Algorithm History and Algorithm Parameters
-    *  @param start a date and time defnining the start time of the algorithm
-    *  @param duration a double defining the length of duration of the algorithm
+    *  @param start :: a date and time defnining the start time of the algorithm
+    *  @param duration :: a double defining the length of duration of the algorithm
     *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
     void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,unsigned int uexecCount)
@@ -555,8 +555,8 @@ namespace Mantid
 
     /** Populate lists of the input & output workspace properties.
     *  (InOut workspaces go in both lists)
-    *  @param inputWorkspaces  A reference to a vector for the input workspaces
-    *  @param outputWorkspaces A reference to a vector for the output workspaces
+    *  @param inputWorkspaces ::  A reference to a vector for the input workspaces
+    *  @param outputWorkspaces :: A reference to a vector for the output workspaces
     */
     void Algorithm::findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
       std::vector<Workspace_sptr>& outputWorkspaces) const
@@ -627,7 +627,7 @@ namespace Mantid
     }
 
     /** To set whether algorithm is a child.
-    *  @param isChild True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
     */
     void Algorithm::setChild(const bool isChild)
     {
@@ -648,7 +648,7 @@ namespace Mantid
     }
 
     /** To Process workspace groups.
-    *  @param ingrpws_sptr input workspacegroup pointer to iterate through all members
+    *  @param ingrpws_sptr :: input workspacegroup pointer to iterate through all members
     *  @param  props a vector holding the input properties
     *  @returns true - if all the workspace members are executed.
     */
@@ -778,8 +778,8 @@ namespace Mantid
     }
 
     /**This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props a list of properties for the algorithm
-    *  @param ingroupwsName  input groupworkspace
+    *  @param props :: a list of properties for the algorithm
+    *  @param ingroupwsName ::  input groupworkspace
     */ 
     void Algorithm::getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName)
     {
@@ -807,7 +807,7 @@ namespace Mantid
     }
 
     /** This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props a list of properties for the algorithm
+    *  @param props :: a list of properties for the algorithm
     *  @returns true if the input and output groupworkspaces are of same names
     */ 
     bool Algorithm::isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>& props)
@@ -832,8 +832,8 @@ namespace Mantid
 
 
     /**This method checks the member workspace are of similar names in a group workspace .
-    *  @param ingroupwsName input group workspace name
-    *  @param grpmembersNames a list of group member names
+    *  @param ingroupwsName :: input group workspace name
+    *  @param grpmembersNames :: a list of group member names
     *  @returns true if workspaces are of similar names
     */ 
     bool Algorithm::isGroupWorkspacesofSimilarNames(const std::string& ingroupwsName,const std::vector<std::string>& grpmembersNames)
@@ -867,10 +867,10 @@ namespace Mantid
 
     }
     /**virtual method to set the non workspace properties for this algorithm.
-    *  @param alg pointer to the algorithm
-    *  @param propertyName name of the property
-    *  @param propertyValue value  of the property
-    *  @param nPeriod period number
+    *  @param alg :: pointer to the algorithm
+    *  @param propertyName :: name of the property
+    *  @param propertyValue :: value  of the property
+    *  @param nPeriod :: period number
     */ 
     void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
     {
@@ -879,7 +879,7 @@ namespace Mantid
     }
 
     /** Setting input workspace properties for an algorithm,for handling workspace groups.
-    *  @param pAlg  pointer to algorithm
+    *  @param pAlg ::  pointer to algorithm
     *  @param  prop  pointer to a vector holding the input properties
     *  @param  inMemberWSName input workspace name
     *  @returns true - if property is set .
@@ -902,13 +902,13 @@ namespace Mantid
     /** setting output workspace properties for an algorithm,
     *  This used for processing workspace groups and this  method is called when
     *  the input and out workspaces are not same
-    *  @param pAlg      pointer to algorithm
-    *  @param prop      pointer to the input properties
-    *  @param nPeriod   period number 
-    *  @param inmemberwsName outputworksapce name
-    *  @param outwsgrp_sptr shared pointer for workspacegroup
-    *  @param bSimilarNames -true if the input member workspaces are of similar names
-    *  @param bequal -true if both the input and output group workspaces are same
+    *  @param pAlg ::      pointer to algorithm
+    *  @param prop ::      pointer to the input properties
+    *  @param nPeriod ::   period number 
+    *  @param inmemberwsName :: outputworksapce name
+    *  @param outwsgrp_sptr :: shared pointer for workspacegroup
+    *  @param bSimilarNames :: -true if the input member workspaces are of similar names
+    *  @param bequal :: -true if both the input and output group workspaces are same
     *  @returns true if property is set 
     */
     bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,const std::string& inmemberwsName,
@@ -968,7 +968,7 @@ namespace Mantid
     }
 
     /** To query the property is a workspace property
-    *  @param prop pointer to input properties
+    *  @param prop :: pointer to input properties
     *  @returns true if this is a workspace property
     */
     bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
@@ -982,7 +982,7 @@ namespace Mantid
     }
 
     /** checks the property is a input workspace property
-    * @param prop pointer to the input properties
+    * @param prop :: pointer to the input properties
     *  @returns true if this is a input workspace property
     */
     bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
@@ -998,7 +998,7 @@ namespace Mantid
 
     }
     /** checks the property is a output workspace property
-    * @param prop pointer to input  properties
+    * @param prop :: pointer to input  properties
     * @returns true if this is a output workspace property
     */
     bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
@@ -1022,7 +1022,7 @@ namespace Mantid
       struct AsyncFlagHolder
       {
         /** Constructor
-        * @param A reference to the running flag
+        * @param A :: reference to the running flag
         */
         AsyncFlagHolder(bool & running_flag) : m_running_flag(running_flag)
         {
@@ -1052,7 +1052,7 @@ namespace Mantid
     }
 
     /** Handles and rescales child algorithm progress notifications.
-    *  @param pNf The progress notification from the child algorithm.
+    *  @param pNf :: The progress notification from the child algorithm.
     */
     void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
     {

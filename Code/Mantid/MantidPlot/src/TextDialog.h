@@ -53,16 +53,16 @@ class TextDialog : public QDialog
 public:
 	//! Label types
 	enum TextType{
-		TextMarker, /*!< normal text label */
-		AxisTitle,   /*!< axis label */
+		TextMarker, /**< normal text label */
+		AxisTitle,   /**< axis label */
 		LayerTitle
 	};
 
 	//! Constructor
 	/**
-	 * \param type text type (TextMarker | AxisTitle)
-	 * \param parent parent widget
-	 * \param fl window flags
+	 * @param type :: text type (TextMarker | AxisTitle)
+	 * @param parent :: parent widget
+	 * @param fl :: window flags
 	 */
 	TextDialog(TextType type, QWidget* parent = 0, Qt::WFlags fl = 0 );
 
@@ -77,7 +77,7 @@ public slots:
 	void setText(const QString & t);
 	//! Set axis label alignment
 	/**
-	 * \param align alignment (can be -1 for invalid,
+	 * @param align :: alignment (can be -1 for invalid,
 	 *  Qt::AlignHCenter, Qt::AlignLeft, or Qt::AlignRight)
 	 */
 	void setAlignment(int align);

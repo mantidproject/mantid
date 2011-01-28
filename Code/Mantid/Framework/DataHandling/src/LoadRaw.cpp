@@ -210,7 +210,7 @@ namespace Mantid
     }
 
     /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
-     *  @param period The data period
+     *  @param period :: The data period
      *  @return the times when requested period was active
      */
 Kernel::Property*  LoadRaw::createPeriodLog(int period)const
@@ -233,7 +233,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
 
     /**
      * Check if a file is a text file
-     * @param filename The file path to check
+     * @param filename :: The file path to check
      * @returns true if the file an ascii text file, false otherwise
      */
     bool LoadRaw::isAscii(const std::string & filename) const
@@ -296,13 +296,13 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
     }
 
     /** Read in a single spectrum from the raw file
-     *  @param tcbs     The vector containing the time bin boundaries
-     *  @param hist     The workspace index
-     *  @param i        The spectrum number
-     *  @param iraw     A reference to the ISISRAW object
-     *  @param lengthIn The number of elements in a spectrum
-     *  @param spectrum Pointer to the array into which the spectrum will be read
-     *  @param localWorkspace A pointer to the workspace in which the data will be stored
+     *  @param tcbs ::     The vector containing the time bin boundaries
+     *  @param hist ::     The workspace index
+     *  @param i ::        The spectrum number
+     *  @param iraw ::     A reference to the ISISRAW object
+     *  @param lengthIn :: The number of elements in a spectrum
+     *  @param spectrum :: Pointer to the array into which the spectrum will be read
+     *  @param localWorkspace :: A pointer to the workspace in which the data will be stored
      */
     void LoadRaw::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {

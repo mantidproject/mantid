@@ -22,7 +22,7 @@ namespace Mantid
 
     /**
      * (Re-)seed the generator
-     * @param seedValue A seed for the generator
+     * @param seedValue :: A seed for the generator
      */
     void MersenneTwister::setSeed(unsigned int seedValue)
     {
@@ -33,8 +33,8 @@ namespace Mantid
 
     /**
      * Sets the range of the subsequent calls to next() 
-     * @param start The lowest value a call to next() will produce
-     * @param end The largest value a call to next() will produce
+     * @param start :: The lowest value a call to next() will produce
+     * @param end :: The largest value a call to next() will produce
      */
     void MersenneTwister::setRange(double start, double end)
     {

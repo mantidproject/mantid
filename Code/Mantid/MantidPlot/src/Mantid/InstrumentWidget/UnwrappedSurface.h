@@ -22,7 +22,7 @@ namespace Mantid{
 class GLColor;
 class GL3DWidget;
 
-/*!
+/**
 \class UnwrappedDetector
 \brief Class helper for drawing detectors on unwraped surfaces
 \date 15 Nov 2010

@@ -18,7 +18,7 @@ NumericAxis::NumericAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
- *  @param parentWorkspace The workspace is not used in this implementation
+ *  @param parentWorkspace :: The workspace is not used in this implementation
  *  @returns A pointer to a copy of the NumericAxis on which the method is called
  */
 Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
@@ -45,8 +45,8 @@ double NumericAxis::operator()(const int& index, const int& verticalIndex) const
 }
 
 /** Sets the axis value at a given position
- *  @param index The position along the axis for which to set the value
- *  @param value The new value
+ *  @param index :: The position along the axis for which to set the value
+ *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 void NumericAxis::setValue(const int& index, const double& value)
@@ -60,7 +60,7 @@ void NumericAxis::setValue(const int& index, const double& value)
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
- *  @param axis2 Reference to the axis to compare to
+ *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and second axis are equal
  */
 bool NumericAxis::operator==(const Axis& axis2) const
@@ -79,7 +79,7 @@ bool NumericAxis::operator==(const Axis& axis2) const
 
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
- *  @param index The index of an axis value
+ *  @param index :: The index of an axis value
  *  @return the label of the requested axis
  */
 std::string NumericAxis::label(const int& index)const

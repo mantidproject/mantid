@@ -25,7 +25,7 @@ namespace Mantid
     
     //-----------------------------------------------------------------------------------------------
     /// copy constructor
-    /// @param other the PropertyManager to copy
+    /// @param other :: the PropertyManager to copy
     PropertyManager::PropertyManager(const PropertyManager& other) :
       m_properties(), m_orderedProperties(other.m_orderedProperties.size())
     {
@@ -42,7 +42,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /// Assignment operator - performs a deep copy
-    /// @param other the PropertyManager to copy
+    /// @param other :: the PropertyManager to copy
     /// @return pointer to this
     PropertyManager& PropertyManager::operator=(const PropertyManager& other)
     {
@@ -81,7 +81,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------
     /**
      * Addition operator
-     * @param rhs The object that is being added to this.
+     * @param rhs :: The object that is being added to this.
      * @returns A reference to the summed object
      */
     PropertyManager& PropertyManager::operator+=(const PropertyManager& rhs)
@@ -119,8 +119,8 @@ namespace Mantid
      * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
      *  absolute time range.
      *
-     * @param start Absolute start time. Any log entries at times >= to this time are kept.
-     * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+     * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
+     * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
      */
     void PropertyManager::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
     {
@@ -141,8 +141,8 @@ namespace Mantid
      *
      * Total proton charge will get re-integrated after filtering.
      *
-     * @param splitter TimeSplitterType with the intervals and destinations.
-     * @param outputs Vector of output runs.
+     * @param splitter :: TimeSplitterType with the intervals and destinations.
+     * @param outputs :: Vector of output runs.
      */
     void PropertyManager::splitByTime(TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const
     {
@@ -176,8 +176,8 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Add a property to the list of managed properties
-     *  @param p The property object to add
-     *  @param doc A description of the property that may be displayed to users
+     *  @param p :: The property object to add
+     *  @param doc :: A description of the property that may be displayed to users
      *  @throw Exception::ExistsError if a property with the given name already exists
      *  @throw std::invalid_argument  if the property declared has an empty name.
      */
@@ -207,8 +207,8 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Set the ordered list of properties by one string of values.
-     *  @param propertiesArray The list of property values
-     *  @throws invalid_argument if error in parameters
+     *  @param propertiesArray :: The list of property values
+     *  @throw invalid_argument if error in parameters
      */
     // Care will certainly be required in the calling of this function or it could all go horribly wrong!
     void PropertyManager::setProperties( const std::string &propertiesArray )
@@ -247,8 +247,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------
     /** Set the value of a property by string
      *  N.B. bool properties must be set using 1/0 rather than true/false
-     *  @param name The name of the property (case insensitive)
-     *  @param value The value to assign to the property
+     *  @param name :: The name of the property (case insensitive)
+     *  @param value :: The value to assign to the property
      *  @throw Exception::NotFoundError if the named property is unknown
      *  @throw std::invalid_argument If the value is not valid for the property given
      */
@@ -267,8 +267,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------
     /** Set the value of a property by an index
      *  N.B. bool properties must be set using 1/0 rather than true/false
-     *  @param index The index of the property to assign
-     *  @param value The value to assign to the property
+     *  @param index :: The index of the property to assign
+     *  @param value :: The value to assign to the property
      *  @throw std::runtime_error if the property index is too high
      *  @throw std::invalid_argument If the value is not valid for the property given
      */
@@ -286,7 +286,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Checks whether the named property is already in the list of managed property.
-     *  @param name The name of the property (case insensitive)
+     *  @param name :: The name of the property (case insensitive)
      *  @return True if the property is already stored
      */
     bool PropertyManager::existsProperty( const std::string& name ) const
@@ -327,7 +327,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Get the value of a property as a string
-     *  @param name The name of the property (case insensitive)
+     *  @param name :: The name of the property (case insensitive)
      *  @return The value of the named property
      *  @throw Exception::NotFoundError if the named property is unknown
      */
@@ -340,7 +340,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Get a property by name
-     *  @param name The name of the property (case insensitive)
+     *  @param name :: The name of the property (case insensitive)
      *  @return A pointer to the named property
      *  @throw Exception::NotFoundError if the named property is unknown
      */
@@ -358,7 +358,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Get a property by name
-     *  @param name The name of the property (case insensitive)
+     *  @param name :: The name of the property (case insensitive)
      *  @return A pointer to the named property; NULL if not found
      */
     Property* PropertyManager::getPointerToPropertyOrNull( const std::string &name ) const
@@ -375,7 +375,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Get a property by an index
-     *  @param index The name of the property (case insensitive)
+     *  @param index :: The name of the property (case insensitive)
      *  @return A pointer to the named property
      *  @throw std::runtime_error if the property index is too high
      */
@@ -408,7 +408,7 @@ namespace Mantid
      *      Note that you can, though, construct a local string variable by writing,
      *      e.g. std::string s = getProperty("myProperty"). ***
      *
-     *  @param name The name of the property
+     *  @param name :: The name of the property
      *  @return The value of the property. Will be cast to the desired type (if a supported type).
      *  @throw std::runtime_error If an attempt is made to assign a property to a different type
      *  @throw Exception::NotFoundError If the property requested does not exist
@@ -420,7 +420,7 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------
     /** Removes the property from properties map.
-     *  @param name  name of the property to be removed.
+     *  @param name ::  name of the property to be removed.
      */
     void PropertyManager::removeProperty(const std::string &name)
     {

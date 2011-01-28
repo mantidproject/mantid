@@ -14,7 +14,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class BitmapGeometryHandler
 		\brief Handler for geometry objects that are rendered as bitmaps (e.g. RectangularDetector), rather than primitives.
 		\author Janik Zikovsky

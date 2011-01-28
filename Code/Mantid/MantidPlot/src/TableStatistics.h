@@ -32,7 +32,7 @@
 
 #include "Table.h"
 
-/*!\brief Table that computes and displays statistics on another Table.
+/**\brief Table that computes and displays statistics on another Table.
  *
  * \section future Future Plans
  * Make it possible to add new columns/rows to be monitored.

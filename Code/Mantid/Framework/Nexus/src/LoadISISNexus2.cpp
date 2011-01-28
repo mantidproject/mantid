@@ -374,9 +374,9 @@ namespace Mantid
 
     /**
     * Load a given period into the workspace
-    * @param period The period number to load (starting from 1) 
-    * @param entry The opened root entry node for accessing the monitor and data nodes
-    * @param local_workspace The workspace to place the data in
+    * @param period :: The period number to load (starting from 1) 
+    * @param entry :: The opened root entry node for accessing the monitor and data nodes
+    * @param local_workspace :: The workspace to place the data in
     */
     void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
     {
@@ -486,13 +486,13 @@ namespace Mantid
 
     /**
     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize
-    * @param data The NXDataSet object
-    * @param blocksize The blocksize to use
-    * @param period The period number
-    * @param start The index within the file to start reading from (zero based)
-    * @param hist The workspace index to start reading into
-    * @param spec_num The spectrum number that matches the hist variable
-    * @param local_workspace The workspace to fill the data with
+    * @param data :: The NXDataSet object
+    * @param blocksize :: The blocksize to use
+    * @param period :: The period number
+    * @param start :: The index within the file to start reading from (zero based)
+    * @param hist :: The workspace index to start reading into
+    * @param spec_num :: The spectrum number that matches the hist variable
+    * @param local_workspace :: The workspace to fill the data with
     */
     void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start,
       int &hist, int& spec_num, 
@@ -555,8 +555,8 @@ namespace Mantid
     
     /**
     * Load data about the run
-    *   @param local_workspace The workspace to load the run information in to
-    *   @param entry The Nexus entry
+    *   @param local_workspace :: The workspace to load the run information in to
+    *   @param entry :: The Nexus entry
     */
     void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
@@ -627,9 +627,9 @@ namespace Mantid
 
     /**
      * Parse an ISO formatted date-time string into separate date and time strings
-     * @param datetime_iso The string containing the ISO formatted date-time
-     * @param date An output parameter containing the date from the original string or ??-??-???? if the format is unknown
-     * @param time An output parameter containing the time from the original string or ??-??-?? if the format is unknown
+     * @param datetime_iso :: The string containing the ISO formatted date-time
+     * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
+     * @param time :: An output parameter containing the time from the original string or ??-??-?? if the format is unknown
      */
     void LoadISISNexus2::parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const
     {
@@ -651,8 +651,8 @@ namespace Mantid
 
     /**
     * Load data about the sample
-    *   @param local_workspace The workspace to load the logs to.
-    *   @param entry The Nexus entry
+    *   @param local_workspace :: The workspace to load the logs to.
+    *   @param entry :: The Nexus entry
     */
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
@@ -677,9 +677,9 @@ namespace Mantid
     /**  Load logs from Nexus file. Logs are expected to be in
     *   /raw_data_1/runlog group of the file. Call to this method must be done
     *   within /raw_data_1 group.
-    *   @param ws The workspace to load the logs to.
-    *   @param entry The Nexus entry
-    *   @param period The period of this workspace
+    *   @param ws :: The workspace to load the logs to.
+    *   @param entry :: The Nexus entry
+    *   @param period :: The period of this workspace
     */
     void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry & entry,int period)
     {
@@ -759,8 +759,8 @@ namespace Mantid
 
  /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
-    *  @param nread - no.of bytes read
-    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @param nread :: no.of bytes read
+    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
     bool LoadISISNexus2::quickFileCheck(const std::string& filePath, size_t nread,unsigned char* header_buffer)
@@ -784,7 +784,7 @@ namespace Mantid
       return false;
     }
      /**checks the file by opening it and reading few lines 
-    *  @param filePath name of the file inluding its path
+    *  @param filePath :: name of the file inluding its path
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadISISNexus2::fileCheck(const std::string& filePath)

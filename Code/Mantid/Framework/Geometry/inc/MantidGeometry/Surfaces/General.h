@@ -15,7 +15,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/*!
+/**
   \class General
   \brief Holds a general quadratic surface
   \author S. Ansell

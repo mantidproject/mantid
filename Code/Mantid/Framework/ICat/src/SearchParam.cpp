@@ -12,71 +12,71 @@ namespace Mantid
 			/// Destructor
 			CSearchParam::~CSearchParam(){}
 			/** This method  sets start date
-             *  @param startRun start run number
+             *  @param startRun :: start run number
 			 */
 			void CSearchParam::setRunStart(const double& startRun){m_startRun=startRun;}
 			/** This method  sets end date
-           	 *  @param endRun end run number
+           	 *  @param endRun :: end run number
 			 */
 			void CSearchParam::setRunEnd(const double& endRun){m_endRun=endRun;}
 			/** This method  sets isntrument name
-           	 *  @param instrName name of the instrument
+           	 *  @param instrName :: name of the instrument
 			 */
 			void CSearchParam::setInstrument(const std::string& instrName){m_instrName=instrName;}
 			/** This method  sets the start date
-           	 *  @param startDate start date for search
+           	 *  @param startDate :: start date for search
 			 */
 			void CSearchParam::setStartDate(const time_t& startDate){m_startDate=startDate;}
 			/** This method  sets the end date
-           	 *  @param endDate end date for search
+           	 *  @param endDate :: end date for search
 			 */
 			void CSearchParam::setEndDate(const time_t& endDate){m_endDate=endDate;}
 			/** This method  sets the CaseSensitive
-           	 *  @param setCaseSensitive flag to do case sensitive  search
+           	 *  @param setCaseSensitive :: flag to do case sensitive  search
 			 */
 			void CSearchParam::setCaseSensitive(bool bCase){m_caseSensitive=bCase;}
 			/** This method  sets the InvestigationInclude
-           	 *  @param include enum for selecting dat from the icat db
+           	 *  @param include :: enum for selecting dat from the icat db
 			 */
 			//void CSearchParam::setInvestigationInclude(const ns1__investigationInclude& include){m_include=include;}
 
 			/** This method  sets the InvestigationInclude
-           	 *  @param include enum for selecting data from the icat db
+           	 *  @param include :: enum for selecting data from the icat db
 			 */
 			void CSearchParam::setKeywords(const std::string& keywords){m_keywords=keywords;}
 
 			/** This method  sets investigationName used for searching
-           	 *  @param investigation name
+           	 *  @param investigation :: name
 			 */
 			void  CSearchParam::setInvestigationName(const std::string& instName){ m_investigationName = instName;}
 
 			/** This method  sets investigationAbstract used for searching
-           	 *  @param investigation abstract
+           	 *  @param investigation :: abstract
 			 */
 			 void CSearchParam::setInvestigationAbstract(const std::string& invstabstract){ m_investigationAbstract=invstabstract;}
 
 			/** This method  sets sample used for searching
-           	 *  @param samplename
+           	 *  @param samplename:: 
 			 */
 			void CSearchParam::setSampleName(const std::string& sampleName){ m_sampleName = sampleName;}
 
 			/** This method  sets Investigator surname
-           	 *@param surname of the investigator
+           	 *@param surname :: of the investigator
 			 */
 			void  CSearchParam::setInvestigatorSurName(const std::string& investigatorName){m_investigatorSurname = investigatorName;}
 
 			/** This method  sets Rb Number
-           	 *@param Rb number
+           	 *@param Rb :: number
 			 */
 			 void CSearchParam::setRbNumber(const std::string& RbNumber){m_RbNumber = RbNumber;}
 
 			/** This method  sets Investigation Type
-           	 *@param Rb number
+           	 *@param Rb :: number
 			 */
 			 void CSearchParam::setInvestigationType(const std::string& invstType){m_investigationType = invstType;}
 
 			/** This method  sets datafileName
-           	 *@param m_datafileName
+           	 *@param m_datafileName:: 
 			 */
 			void CSearchParam::setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
 
@@ -150,7 +150,7 @@ namespace Mantid
 			const std::string& CSearchParam::getDatafileName()const{return m_datafileName;}
 
 		/**This method saves the date components to C library struct tm
-		 *@param sDate string containing the date 
+		 *@param sDate :: string containing the date 
 		 *@return time_t value of date 
 		 */
 		time_t CSearchParam::getTimevalue(const std::string& sDate)

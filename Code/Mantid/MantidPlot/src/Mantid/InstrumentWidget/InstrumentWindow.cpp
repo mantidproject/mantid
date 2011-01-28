@@ -188,7 +188,7 @@ void InstrumentWindow::showPickOptions()
 
 /**
  * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
- * @param information about the detector that is at the location of the users mouse pointer
+ * @param information :: about the detector that is at the location of the users mouse pointer
  */
 void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos)
 {
@@ -563,7 +563,7 @@ void InstrumentWindow::selectComponent(const QString & name)
 
 /**
  * Set the scale type programmatically
- * @param type The scale choice
+ * @param type :: The scale choice
  */
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
 {
@@ -794,7 +794,7 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 
 /** 
  * Called just before a show event
- * @param A pointer to the QShowEvent object
+ * @param A :: pointer to the QShowEvent object
  */
 void InstrumentWindow::showEvent(QShowEvent* event)
 {

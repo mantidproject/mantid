@@ -145,7 +145,7 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 /**
 * Add an item to the tree list
 * @ws_name The name of the workspace
-* @param workspace A pointer to the workspace
+* @param workspace :: A pointer to the workspace
 */
 void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
@@ -169,7 +169,7 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
 /**
 * Replace an item in the tree list
 * @ws_name The name of the workspace
-* @param workspace A pointer to the workspace
+* @param workspace :: A pointer to the workspace
 */
 void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
@@ -265,7 +265,7 @@ QString MantidDockWidget::findParentName(const QString & ws_name, Mantid::API::W
 
 /**
 * When an item is expanded, populate the child data for this item
-* @param item The item being expanded
+* @param item :: The item being expanded
 */
 void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
 {
@@ -326,8 +326,8 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 
 /**
 * Create a tree item for the given workspace
-* @param ws_name The worksapce name
-* @param workspace A pointer to the workspace
+* @param ws_name :: The worksapce name
+* @param workspace :: A pointer to the workspace
 */
 QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
@@ -343,8 +343,8 @@ QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid:
 
 /*
 * This slot handles the notification sent by the UnGroupWorkspace algorithm.
-* @param group_name The name of the group
-* @param ws_group The pointer to the workspace group
+* @param group_name :: The name of the group
+* @param ws_group :: The pointer to the workspace group
 */
 void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::API::Workspace_sptr ws_group)
 {
@@ -379,8 +379,8 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
 
 /**
 * Populate the children of this item with data relevant to the MatrixWorkspace object
-* @param workspace A pointer to the MatrixWorkspace object to inspect
-* @param ws_item The tree item that has been expanded
+* @param workspace :: A pointer to the MatrixWorkspace object to inspect
+* @param ws_item :: The tree item that has been expanded
 */
 void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
@@ -446,8 +446,8 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
 
 /**
 * Populate the children of this item with data relevant to the WorkspaceGroup object
-* @param workspace A pointer to the WorkspaceGroup object to inspect
-* @param ws_item The tree item that has been expanded
+* @param workspace :: A pointer to the WorkspaceGroup object to inspect
+* @param ws_item :: The tree item that has been expanded
 */
 void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item)
 {
@@ -475,8 +475,8 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
 
 /**
 * Populate the children of this item with data relevant to the TableWorkspace object
-* @param workspace A pointer to the TableWorkspace object to inspect
-* @param ws_item The tree item that has been expanded
+* @param workspace :: A pointer to the TableWorkspace object to inspect
+* @param ws_item :: The tree item that has been expanded
 */
 void MantidDockWidget::populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
@@ -544,8 +544,8 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 
 /**
  * Add the actions that are appropriate for a MatrixWorspace
- * @param menu The menu to store the items
- * @param matrixWS The workspace related to the menu
+ * @param menu :: The menu to store the items
+ * @param matrixWS :: The workspace related to the menu
  */
 void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const
 {
@@ -577,7 +577,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
 
 /**
  * Add the actions that are appropriate for a MatrixWorspace
- * @param menu The menu to store the items
+ * @param menu :: The menu to store the items
  */
 void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 {
@@ -590,7 +590,7 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 
 /**
  * Add the actions that are appropriate for a MatrixWorspace
- * @param menu The menu to store the items
+ * @param menu :: The menu to store the items
  */
 void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 {

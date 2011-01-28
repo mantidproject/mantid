@@ -27,9 +27,9 @@ namespace Mantid
     {}
 
     /** Sets the size of the workspace and initializes arrays to zero
-    *  @param NVectors The number of vectors/histograms/detectors in the workspace
-    *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
-    *  @param YLength The number of data/error points in each vector (must all be the same)
+    *  @param NVectors :: The number of vectors/histograms/detectors in the workspace
+    *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
+    *  @param YLength :: The number of data/error points in each vector (must all be the same)
     */
     void Workspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
@@ -53,8 +53,8 @@ namespace Mantid
 
     /**
     Set the x values
-    \param histnumber :: Index to the histogram
-    \param Vec :: Shared ptr base object
+    @param histnumber :: Index to the histogram
+    @param Vec :: Shared ptr base object
     */
     void Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
     {
@@ -69,8 +69,8 @@ namespace Mantid
 
     /**
     Set the x values
-    \param histnumber :: Index to the histogram
-    \param PA :: Reference counted histogram
+    @param histnumber :: Index to the histogram
+    @param PA :: Reference counted histogram
     */
     void Workspace2D::setX(const int histnumber, const MantidVecPtr& PA)
     {
@@ -84,8 +84,8 @@ namespace Mantid
 
     /**
     Sets the data in the workspace
-    \param histnumber The histogram to be set
-    \param PY A reference counted data range
+    @param histnumber :: The histogram to be set
+    @param PY :: A reference counted data range
     */
     void Workspace2D::setData(const int histnumber, const MantidVecPtr& PY)
     {
@@ -97,9 +97,9 @@ namespace Mantid
 
     /**
     Sets the data in the workspace
-    \param histnumber The histogram to be set
-    \param PY A reference counted data range
-    \param PE A reference containing the corresponding errors
+    @param histnumber :: The histogram to be set
+    @param PY :: A reference counted data range
+    @param PE :: A reference containing the corresponding errors
     */
     void Workspace2D::setData(const int histnumber, const MantidVecPtr& PY,
       const MantidVecPtr& PE)
@@ -113,9 +113,9 @@ namespace Mantid
 
     /**
     Sets the data in the workspace
-    \param histnumber The histogram to be set
-    \param PY A reference counted data range
-    \param PE A reference containing the corresponding errors
+    @param histnumber :: The histogram to be set
+    @param PY :: A reference counted data range
+    @param PE :: A reference containing the corresponding errors
     */
     void Workspace2D::setData(const int histnumber, const MantidVecPtr::ptr_type& PY,
       const MantidVecPtr::ptr_type& PE)
@@ -128,7 +128,7 @@ namespace Mantid
     }
 
     /** Gets the number of histograms
-    \return Integer
+    @return Integer
     */
     int Workspace2D::getNumberHistograms() const
     {
@@ -137,7 +137,7 @@ namespace Mantid
 
     /**
     Get the x data of a specified histogram
-    @param index The number of the histogram
+    @param index :: The number of the histogram
     @return A vector of doubles containing the x data
     */
     const MantidVec& Workspace2D::dataX(const int index) const
@@ -150,7 +150,7 @@ namespace Mantid
 
     /**
     Get the y data of a specified histogram
-    @param index The number of the histogram
+    @param index :: The number of the histogram
     @return A vector of doubles containing the y data
     */
     const MantidVec& Workspace2D::dataY(const int index) const
@@ -166,7 +166,7 @@ namespace Mantid
 
     /**
     Get the error data for a specified histogram
-    @param index The number of the histogram
+    @param index :: The number of the histogram
     @return A vector of doubles containing the error data
     */
     const MantidVec& Workspace2D::dataE(const int index) const

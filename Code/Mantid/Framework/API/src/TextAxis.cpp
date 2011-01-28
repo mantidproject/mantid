@@ -16,7 +16,7 @@ TextAxis::TextAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
- *  @param parentWorkspace The workspace is not used in this implementation
+ *  @param parentWorkspace :: The workspace is not used in this implementation
  *  @return A pointer to a copy of the TextAxis on which the method is called
  */
 Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
@@ -43,8 +43,8 @@ double TextAxis::operator()(const int& index, const int& verticalIndex) const
 }
 
 /** Sets the axis value at a given position
- *  @param index The position along the axis for which to set the value
- *  @param value The new value
+ *  @param index :: The position along the axis for which to set the value
+ *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 void TextAxis::setValue(const int& index, const double& value)
@@ -55,7 +55,7 @@ void TextAxis::setValue(const int& index, const double& value)
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
- *  @param axis2 Reference to the axis to compare to
+ *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and other axis are equal
  */
 bool TextAxis::operator==(const Axis& axis2) const
@@ -74,7 +74,7 @@ bool TextAxis::operator==(const Axis& axis2) const
 
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
- *  @param index The index of an axis value
+ *  @param index :: The index of an axis value
  *  @return The label
  */
 std::string TextAxis::label(const int& index)const
@@ -84,8 +84,8 @@ std::string TextAxis::label(const int& index)const
 
 /**
   * Set the label for value at index
-  * @param index Index
-  * @param lbl The text label
+  * @param index :: Index
+  * @param lbl :: The text label
   */
 void TextAxis::setLabel(const int& index, const std::string& lbl)
 {

@@ -244,9 +244,9 @@ namespace Mantid
 
     /**  Calculate the integral asymmetry for a workspace. 
     *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration algorithms.
-    *   @param ws The workspace
-    *   @param Y Reference to a variable receiving the value of asymmetry
-    *   @param E Reference to a variable receiving the value of the error
+    *   @param ws :: The workspace
+    *   @param Y :: Reference to a variable receiving the value of asymmetry
+    *   @param E :: Reference to a variable receiving the value of the error
     */
     void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double& Y, double& E)
     {
@@ -323,10 +323,10 @@ namespace Mantid
 
     /**  Calculate the integral asymmetry for a workspace (red & green). 
     *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration algorithms.
-    *   @param ws_red The red workspace
-    *   @param ws_green The green workspace
-    *   @param Y Reference to a variable receiving the value of asymmetry
-    *   @param E Reference to a variable receiving the value of the error
+    *   @param ws_red :: The red workspace
+    *   @param ws_green :: The green workspace
+    *   @param Y :: Reference to a variable receiving the value of asymmetry
+    *   @param E :: Reference to a variable receiving the value of the error
     */
     void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
       API::MatrixWorkspace_sptr ws_green,double& Y, double& E)
@@ -419,8 +419,8 @@ namespace Mantid
     }
 
     /**  Group detectors in the workspace.
-     *  @param ws A local workspace
-     *  @param spectraList A list of spectra to group.
+     *  @param ws :: A local workspace
+     *  @param spectraList :: A list of spectra to group.
      */
     void PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr ws,const std::vector<int>& spectraList)
     {

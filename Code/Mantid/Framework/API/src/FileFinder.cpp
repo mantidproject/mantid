@@ -40,7 +40,7 @@ FileFinderImpl::FileFinderImpl()
 
 /**
  * Return the full path to the file given its name
- * @param fName A full file name (without path) including extension
+ * @param fName :: A full file name (without path) including extension
  * @return The full path if the file exists and can be found in one of the search locations
  *  or an empty string otherwise.
  */
@@ -80,7 +80,7 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
 
 /**
  * Extracts the instrument name and run number from a hint
- * @param hint The name hint
+ * @param hint :: The name hint
  * @return A pair of instrument name and run number
  */
 std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string& hint) const
@@ -130,10 +130,10 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * Make a data file name (without extension) from a hint. The hint can be either a run number or
  * a run number prefixed with an instrument name/short name. If the instrument
  * name is absent the default one is used.
- * @param hint The name hint
+ * @param hint :: The name hint
  * @return The file name
- * @throws NotFoundError if a required default is not set
- * @throws std::invalid_argument if the argument is malformed or run number is too long
+ * @throw NotFoundError if a required default is not set
+ * @throw std::invalid_argument if the argument is malformed or run number is too long
  */
 std::string FileFinderImpl::makeFileName(const std::string& hint) const
 {
@@ -159,8 +159,8 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
 /**
  * Find the file given a hint. If the name contains a dot(.) then it is assumed that it is already a file stem
  * otherwise calls makeFileName internally.
- * @param hint The name hint
- * @param exts Optional list of allowed extensions. Only those extensions found in both
+ * @param hint :: The name hint
+ * @param exts :: Optional list of allowed extensions. Only those extensions found in both
  *  facilities extension list and exts will be used in the search
  * @return The full path to the file or empty string if not found
  */
@@ -241,11 +241,11 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
 
 /**
  * Find a list of files file given a hint. Calls findRun internally.
- * @param hint Comma separated list of hints to findRun method.
+ * @param hint :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
  * @return A vector of full paths or empty vector
- * @throws std::invalid_argument if the argument is malformed
+ * @throw std::invalid_argument if the argument is malformed
  */
 std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
 {

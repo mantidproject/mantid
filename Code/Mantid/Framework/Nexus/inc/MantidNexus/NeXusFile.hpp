@@ -114,16 +114,16 @@ namespace NeXus {
     /** should be close handle on exit */
     bool m_close_handle;
     /**
-     * \return A pair of the next entry available in a listing.
+     * @return A pair of the next entry available in a listing.
      */
     std::pair<std::string, std::string> getNextEntry();
     /**
-     * \return Information about the next attribute.
+     * @return Information about the next attribute.
      */
     AttrInfo getNextAttr();
     /**
      * This is a deprecated function.
-     * \param com The compression type.
+     * @param com :: The compression type.
      */
     void compress(NXcompression comp);
 
@@ -141,16 +141,16 @@ namespace NeXus {
     /**
      * Create a new File.
      *
-     * \param filename The name of the file to open.
-     * \param access How to access the file.
+     * @param filename :: The name of the file to open.
+     * @param access :: How to access the file.
      */
     File(const std::string& filename, const NXaccess access = NXACC_READ);
 
     /**
      * Use an existing handle returned from NXopen()
      *
-     * \param handle Handle to connect to
-     * \param close_handle Should the handle be closed on destruction
+     * @param handle :: Handle to connect to
+     * @param close_handle :: Should the handle be closed on destruction
      */
     File(NXhandle handle, bool close_handle = false);
 
@@ -172,9 +172,9 @@ namespace NeXus {
     /**
      * Create a new group.
      *
-     * \param name The name of the group to create (i.e. "entry").
-     * \param class_name The type of group to create (i.e. "NXentry").
-     * \param open_group Whether or not to automatically open the group after 
+     * @param name :: The name of the group to create (i.e. "entry").
+     * @param class_name :: The type of group to create (i.e. "NXentry").
+     * @param open_group :: Whether or not to automatically open the group after 
      * creating it.
      */
     void makeGroup(const std::string& name, const std::string& class_name,
@@ -183,15 +183,15 @@ namespace NeXus {
     /**
      * Open an existing group.
      *
-     * \param name The name of the group to create (i.e. "entry").
-     * \param class_name The type of group to create (i.e. "NXentry").
+     * @param name :: The name of the group to create (i.e. "entry").
+     * @param class_name :: The type of group to create (i.e. "NXentry").
      */
     void openGroup(const std::string& name, const std::string& class_name);
 
     /**
      * Open the NeXus object with the path specified.
      *
-     * \param path A unix like path string to a group or field. The path 
+     * @param path :: A unix like path string to a group or field. The path 
      * string is a list of group names and SDS names separated with a slash,
      * '/' (i.e. "/entry/sample/name").
      */
@@ -200,14 +200,14 @@ namespace NeXus {
     /**
      * Open the group in which the NeXus object with the specified path exists.
      *
-     * \param path A unix like path string to a group or field. The path 
+     * @param path :: A unix like path string to a group or field. The path 
      * string is a list of group names and SDS names separated with a slash,
      * '/' (i.e. "/entry/sample/name").
      */
     void openGroupPath(const std::string& path);
     /**
      * Get the path into the current file
-     * \return A unix like path string pointing to the current 
+     * @return A unix like path string pointing to the current 
      *         position in the file
      */
     std::string  getPath();
@@ -220,10 +220,10 @@ namespace NeXus {
     /**
      * Create a data field with the specified information.
      *
-     * \param name The name of the field to create (i.e. "distance").
-     * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
-     * \param dims The dimensions of the field.
-     * \param open_data Whether or not to open the data after creating it.
+     * @param name :: The name of the field to create (i.e. "distance").
+     * @param type :: The primative type of the field (i.e. "NeXus::FLOAT32").
+     * @param dims :: The dimensions of the field.
+     * @param open_data :: Whether or not to open the data after creating it.
      */
     void makeData(const std::string& name, NXnumtype type,
                   const std::vector<int>& dims, bool open_data = false);
@@ -231,10 +231,10 @@ namespace NeXus {
     /**
      * Create a 1D data field with the specified information.
      *
-     * \param name The name of the field to create (i.e. "distance").
-     * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
-     * \param length The number of elements in the field.
-     * \param open_data Whether or not to open the data after creating it.
+     * @param name :: The name of the field to create (i.e. "distance").
+     * @param type :: The primative type of the field (i.e. "NeXus::FLOAT32").
+     * @param length :: The number of elements in the field.
+     * @param open_data :: Whether or not to open the data after creating it.
      */
     void makeData(const std::string& name, const NXnumtype type,
                   const int length, bool open_data = false);
@@ -242,16 +242,16 @@ namespace NeXus {
     /**
      * Create a 1D data field, insert the data, and close the data.
      *
-     * \param name The name of the field to create.
-     * \param value The string to put into the file.
+     * @param name :: The name of the field to create.
+     * @param value :: The string to put into the file.
      */
     void writeData(const std::string& name, const std::string& value);
 
     /**
      * Create a 1D data field, insert the data, and close the data.
      *
-     * \param name The name of the field to create.
-     * \param value The string to put into the file.
+     * @param name :: The name of the field to create.
+     * @param value :: The string to put into the file.
      */
     void writeData(const std::string& name, const char* value);
 
@@ -259,8 +259,8 @@ namespace NeXus {
      * Create a 1D data field, insert the data, and close the data.
      *
      * \tparam NumT numeric data type of \a value
-     * \param name The name of the field to create.
-     * \param value The vector to put into the file.
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
      */
     template <typename NumT>
     void writeData(const std::string& name, const std::vector<NumT>& value);
@@ -269,8 +269,8 @@ namespace NeXus {
      * Create a 1D data field, insert the data, and close the data.
      *
      * \tparam NumT numeric data type of \a value
-     * \param name The name of the field to create.
-     * \param value The value to put into the file.
+     * @param name :: The name of the field to create.
+     * @param value :: The value to put into the file.
      */
     template <typename NumT>
     void writeData(const std::string& name, const NumT& value);
@@ -278,9 +278,9 @@ namespace NeXus {
     /**
      * Create a n-dimension data field, insert the data, and close the data.
      *
-     * \param name The name of the field to create.
-     * \param value The data to put into the file.
-     * \param dims The dimensions of the data.
+     * @param name :: The name of the field to create.
+     * @param value :: The data to put into the file.
+     * @param dims :: The dimensions of the data.
      * \tparam NumT numeric data type of \a value
      */
     template <typename NumT>
@@ -290,12 +290,12 @@ namespace NeXus {
     /**
      * Create a field with compression.
      *
-     * \param name The name of the data to create.
-     * \param type The primitive type for the data.
-     * \param dims The dimensions of the data.
-     * \param comp The compression algorithm to use.
-     * \param bufsize The size of the compression buffer to use.
-     * \param open_data Whether or not to open the data after creating it.
+     * @param name :: The name of the data to create.
+     * @param type :: The primitive type for the data.
+     * @param dims :: The dimensions of the data.
+     * @param comp :: The compression algorithm to use.
+     * @param bufsize :: The size of the compression buffer to use.
+     * @param open_data :: Whether or not to open the data after creating it.
      */
     void makeCompData(const std::string& name, const NXnumtype type,
                       const std::vector<int>& dims, const NXcompression comp,
@@ -304,11 +304,11 @@ namespace NeXus {
     /**
      * Create a compressed data, insert the data, and close it.
      *
-     * \param name The name of the data to create.
-     * \param value The vector to put into the file.
-     * \param dims The dimensions of the data.
-     * \param comp The compression algorithm to use.
-     * \param bufsize The size of the compression buffer to use.
+     * @param name :: The name of the data to create.
+     * @param value :: The vector to put into the file.
+     * @param dims :: The dimensions of the data.
+     * @param comp :: The compression algorithm to use.
+     * @param bufsize :: The size of the compression buffer to use.
      * \tparam NumT numeric data type of \a value
      */
     template <typename NumT>
@@ -318,7 +318,7 @@ namespace NeXus {
                        const std::vector<int> & bufsize);
 
     /**
-     * \param name The name of the data to open.
+     * @param name :: The name of the data to open.
      */
     void openData(const std::string& name);
 
@@ -328,12 +328,12 @@ namespace NeXus {
     void closeData();
 
     /**
-     * \param data The data to put in the file.
+     * @param data :: The data to put in the file.
      */
     void putData(const void* data);
 
     /**
-     * \param data The data to put in the file.
+     * @param data :: The data to put in the file.
      * \tparam NumT numeric data type of \a data
      */
     template <typename NumT>
@@ -342,16 +342,16 @@ namespace NeXus {
     /**
      * Put the supplied data as an attribute into the currently open data.
      *
-     * \param info Description of the attribute to add.
-     * \param data The attribute value.
+     * @param info :: Description of the attribute to add.
+     * @param data :: The attribute value.
      */
     void putAttr(const AttrInfo& info, const void* data);
 
     /**
      * Put the supplied data as an attribute into the currently open data.
      *
-     * \param name Name of the attribute to add.
-     * \param value The attribute value.
+     * @param name :: Name of the attribute to add.
+     * @param value :: The attribute value.
      * \tparam NumT numeric data type of \a value
      */
     template <typename NumT>
@@ -360,25 +360,25 @@ namespace NeXus {
     /**
      * Put a string as an attribute in the file.
      *
-     * \param name Name of the attribute to add.
-     * \param value The attribute value.
+     * @param name :: Name of the attribute to add.
+     * @param value :: The attribute value.
      */
     void putAttr(const char* name, const char* value);
 
     /**
      * Put a string as an attribute in the file.
      *
-     * \param name Name of the attribute to add.
-     * \param value The attribute value.
+     * @param name :: Name of the attribute to add.
+     * @param value :: The attribute value.
      */
     void putAttr(const std::string& name, const std::string value);
 
     /**
      * Insert an array as part of a data in the final file.
      *
-     * \param data The array to put in the file.
-     * \param start The starting index to insert the data.
-     * \param size The size of the array to put in the file.
+     * @param data :: The array to put in the file.
+     * @param start :: The starting index to insert the data.
+     * @param size :: The size of the array to put in the file.
      */
     void putSlab(void* data, std::vector<int>& start,
                  std::vector<int>& size);
@@ -386,9 +386,9 @@ namespace NeXus {
     /**
      * Insert an array as part of a data in the final file.
      *
-     * \param data The array to put in the file.
-     * \param start The starting index to insert the data.
-     * \param size The size of the array to put in the file.
+     * @param data :: The array to put in the file.
+     * @param start :: The starting index to insert the data.
+     * @param size :: The size of the array to put in the file.
      * \tparam NumT numeric data type of \a data
      */
     template <typename NumT>
@@ -398,31 +398,31 @@ namespace NeXus {
     /**
      * Insert a number as part of a data in the final file.
      *
-     * \param data The array to put in the file.
-     * \param start The starting index to insert the data.
-     * \param size The size of the array to put in the file.
+     * @param data :: The array to put in the file.
+     * @param start :: The starting index to insert the data.
+     * @param size :: The size of the array to put in the file.
      * \tparam NumT numeric data type of \a data
      */
     template <typename NumT>
     void putSlab(std::vector<NumT>& data, int start, int size);
 
     /**
-     * \return The id of the data used for linking.
+     * @return The id of the data used for linking.
      */
     NXlink getDataID();
 
     /**
      * Create a link in the current location to the supplied id.
      *
-     * \param link The object (group or data) in the file to link to.
+     * @param link :: The object (group or data) in the file to link to.
      */
     void makeLink(NXlink& link);
 
     /**
      * Create a link with a new name.
      *
-     * \param name The name of this copy of the link.
-     * \param link The object (group or data) in the file to link to.
+     * @param name :: The name of this copy of the link.
+     * @param link :: The object (group or data) in the file to link to.
      */
     void makeNamedLink(const std::string& name, NXlink& link);
 
@@ -435,7 +435,7 @@ namespace NeXus {
     /**
      * Put the currently open data in the supplied pointer.
      *
-     * \param data The pointer to copy the data to.
+     * @param data :: The pointer to copy the data to.
      */
     void getData(void* data);
 
@@ -445,7 +445,7 @@ namespace NeXus {
      * calling "delete".
      * \tparam NumT numeric data type of result
      *
-     * \return The data as a vector.
+     * @return The data as a vector.
      */
     template <typename NumT>
     std::vector<NumT> * getData();
@@ -455,7 +455,7 @@ namespace NeXus {
      * be the correct size, just the correct type as it is resized to
      * the appropriate value.
      *
-     * \param data Where to put the data.
+     * @param data :: Where to put the data.
      * \tparam NumT numeric data type of \a data
      */
     template <typename NumT>
@@ -466,14 +466,14 @@ namespace NeXus {
      *
      * @throw Exception if the data is actually a float or
      *    another type that cannot be coerced to an int.
-     * @param data vector to be filled.
+     * @param data :: vector to be filled.
      */
     void getDataCoerce(std::vector<int> &data);
 
     /** Get data and coerce into a vector of doubles.
      *
      * @throw Exception if the data cannot be coerced to a double.
-     * @param data vector to be filled.
+     * @param data :: vector to be filled.
      */
     void getDataCoerce(std::vector<double> &data);
 
@@ -483,12 +483,12 @@ namespace NeXus {
     bool isDataInt();
 
     /**
-     * \return String data from the file.
+     * @return String data from the file.
      */
     std::string getStrData();
 
     /**
-     * \return The Info structure that describes the currently open data.
+     * @return The Info structure that describes the currently open data.
      */
     Info getInfo();
 
@@ -500,16 +500,16 @@ namespace NeXus {
     /**
      * Get a section of data from the file.
      *
-     * \param data The pointer to insert that data into.
-     * \param start The offset into the file's data block to start the read 
+     * @param data :: The pointer to insert that data into.
+     * @param start :: The offset into the file's data block to start the read 
      * from.
-     * \param size The size of the block to read from the file.
+     * @param size :: The size of the block to read from the file.
      */
     void getSlab(void* data, const std::vector<int>& start,
                  std::vector<int>& size);
 
     /**
-     * \return Information about all attributes on the data that is
+     * @return Information about all attributes on the data that is
      * currently open.
      */
     std::vector<AttrInfo> getAttrInfos();
@@ -517,9 +517,9 @@ namespace NeXus {
     /**
      * Get the value of the attribute specified by the AttrInfo supplied.
      *
-     * \param info Designation of which attribute to read.
-     * \param data The pointer to put the attribute value in.
-     * \param length The length of the attribute. If this is "-1" then the 
+     * @param info :: Designation of which attribute to read.
+     * @param data :: The pointer to put the attribute value in.
+     * @param length :: The length of the attribute. If this is "-1" then the 
      * information in the supplied AttrInfo object will be used.
      */
     void getAttr(const AttrInfo& info, void* data, int length = -1);
@@ -527,10 +527,10 @@ namespace NeXus {
     /**
      * Get the value of an attribute that is a scalar number.
      *
-     * \param info Designation of which attribute to read.
+     * @param info :: Designation of which attribute to read.
      * \tparam NumT numeric data type of result
      *
-     * \return The attribute value.
+     * @return The attribute value.
      */
     template <typename NumT>
     NumT getAttr(const AttrInfo& info);
@@ -539,8 +539,8 @@ namespace NeXus {
     /**
      * Get the value of an attribute that is a scalar number.
      *
-     * \param[in] name Name of attribute to read
-     * \param[out] value The read attribute value.
+     * @param[in] name Name of attribute to read
+     * @param[out] value The read attribute value.
      * \tparam NumT numeric data type of \a value
      */
     template <typename NumT>
@@ -550,31 +550,31 @@ namespace NeXus {
     /**
      * Get the value of a string attribute.
      *
-     * \param info Which attribute to read.
+     * @param info :: Which attribute to read.
      *
-     * \return The value of the attribute.
+     * @return The value of the attribute.
      */
     std::string getStrAttr(const AttrInfo & info);
 
     /**
-     * \return The id of the group used for linking.
+     * @return The id of the group used for linking.
      */
     NXlink getGroupID();
 
     /**
      * Determine whether or not two links refer to the same data or group.
      *
-     * \param first The first link information to compare.
-     * \param second The second link information to compare.
+     * @param first :: The first link information to compare.
+     * @param second :: The second link information to compare.
      *
-     * \return True if the two point at the same data or group.
+     * @return True if the two point at the same data or group.
      */
     bool sameID(NXlink& first, NXlink& second);
 
     /**
      * Diagnostic print of the link information.
      *
-     * \param link The link to print to stdout.
+     * @param link :: The link to print to stdout.
      */
     void printLink(NXlink & link);
 
@@ -582,28 +582,28 @@ namespace NeXus {
      * Set the number format used for a particular type when using the
      * xml base. This is ignore in the other bases.
      *
-     * \param type The primitive type to set the format for.
-     * \param format The format to use.
+     * @param type :: The primitive type to set the format for.
+     * @param format :: The format to use.
      */
     void setNumberFormat(NXnumtype& type, const std::string& format);
 
     /**
      * Find out the name of the file this object is holding onto.
      *
-     * \param buff_length The size of the buffer to use for reading the name.
+     * @param buff_length :: The size of the buffer to use for reading the name.
      *
-     * \return The name of the file.
+     * @return The name of the file.
      */
     std::string inquireFile(const int buff_length = NX_MAXNAMELEN);
 
     /**
      * Determine Whether or not a supplied group is external.
      *
-     * \param name The name of the group to check.
-     * \param type The type of the group to check.
-     * \param buff_length The size of the buffer to use for reading the url.
+     * @param name :: The name of the group to check.
+     * @param type :: The type of the group to check.
+     * @param buff_length :: The size of the buffer to use for reading the url.
      *
-     * \return The url to the external group.
+     * @return The url to the external group.
      */
     std::string isExternalGroup(const std::string& name,
                                 const std::string& type,
@@ -612,15 +612,15 @@ namespace NeXus {
     /**
      * Create a link to a group in an external file.
      *
-     * \param name The name for the group in this file.
-     * \param type The type for the group in this file.
-     * \param url The url to the group in the external file.
+     * @param name :: The name for the group in this file.
+     * @param type :: The type for the group in this file.
+     * @param url :: The url to the group in the external file.
      */
     void linkExternal(const std::string& name, const std::string& type,
                       const std::string& url);
     /**
      * This function checksi if we are in an open dataset
-     * \returns true if we are currently in an open dataset else false
+     * @return true if we are currently in an open dataset else false
      */
     bool isDataSetOpen();
   };

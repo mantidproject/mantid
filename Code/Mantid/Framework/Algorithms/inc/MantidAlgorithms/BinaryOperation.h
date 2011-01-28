@@ -117,26 +117,26 @@ namespace Mantid
 
       /** Carries out the binary operation on a single spectrum, with another spectrum as the right-hand operand.
        *
-       *  @param lhsX The X values, made available if required.
-       *  @param lhsY The vector of lhs data values
-       *  @param lhsE The vector of lhs error values
-       *  @param rhsY The vector of rhs data values
-       *  @param rhsE The vector of rhs error values
-       *  @param YOut The vector to hold the data values resulting from the operation
-       *  @param EOut The vector to hold the error values resulting from the operation
+       *  @param lhsX :: The X values, made available if required.
+       *  @param lhsY :: The vector of lhs data values
+       *  @param lhsE :: The vector of lhs error values
+       *  @param rhsY :: The vector of rhs data values
+       *  @param rhsE :: The vector of rhs error values
+       *  @param YOut :: The vector to hold the data values resulting from the operation
+       *  @param EOut :: The vector to hold the error values resulting from the operation
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
 
       /** Carries out the binary operation when the right hand operand is a single number.
        *
-       *  @param lhsX The X values, made available if required.
-       *  @param lhsY The vector of lhs data values
-       *  @param lhsE The vector of lhs error values
-       *  @param rhsY The rhs data value
-       *  @param rhsE The rhs error value
-       *  @param YOut The vector to hold the data values resulting from the operation
-       *  @param EOut The vector to hold the error values resulting from the operation
+       *  @param lhsX :: The X values, made available if required.
+       *  @param lhsY :: The vector of lhs data values
+       *  @param lhsE :: The vector of lhs error values
+       *  @param rhsY :: The rhs data value
+       *  @param rhsE :: The rhs error value
+       *  @param YOut :: The vector to hold the data values resulting from the operation
+       *  @param EOut :: The vector to hold the error values resulting from the operation
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
@@ -148,8 +148,8 @@ namespace Mantid
        * with another EventList as the right-hand operand.
        * The event lists simply get appended.
        *
-       *  @param lhs Reference to the EventList that will be modified in place.
-       *  @param rhs Const reference to the EventList on the right hand side.
+       *  @param lhs :: Reference to the EventList that will be modified in place.
+       *  @param rhs :: Const reference to the EventList on the right hand side.
        */
       virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
           const DataObjects::EventList & rhs);
@@ -158,10 +158,10 @@ namespace Mantid
       /** Carries out the binary operation IN-PLACE on a single EventList,
        * with another (histogrammed) spectrum as the right-hand operand.
        *
-       *  @param lhs Reference to the EventList that will be modified in place.
-       *  @param rhsX The vector of rhs X bin boundaries
-       *  @param rhsY The vector of rhs data values
-       *  @param rhsE The vector of rhs error values
+       *  @param lhs :: Reference to the EventList that will be modified in place.
+       *  @param rhsX :: The vector of rhs X bin boundaries
+       *  @param rhsY :: The vector of rhs data values
+       *  @param rhsE :: The vector of rhs error values
        */
       virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
           const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
@@ -169,9 +169,9 @@ namespace Mantid
       /** Carries out the binary operation IN-PLACE on a single EventList,
        * with a single (double) value as the right-hand operand
        *
-       *  @param lhs Reference to the EventList that will be modified in place.
-       *  @param rhsY The rhs data value
-       *  @param rhsE The rhs error value
+       *  @param lhs :: Reference to the EventList that will be modified in place.
+       *  @param rhsY :: The rhs data value
+       *  @param rhsE :: The rhs error value
        */
       virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
           const double& rhsY, const double& rhsE);
@@ -181,9 +181,9 @@ namespace Mantid
 
       /** Should be overridden by operations that need to manipulate the units of the output workspace.
        *  Does nothing by default.
-       *  @param lhs The first input workspace
-       *  @param rhs The second input workspace
-       *  @param out The output workspace
+       *  @param lhs :: The first input workspace
+       *  @param rhs :: The second input workspace
+       *  @param out :: The output workspace
        */
       virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
       {
@@ -194,9 +194,9 @@ namespace Mantid
 
       /** Only overridden by operations that affect the properties of the run (e.g. Plus
        *  where the proton currents (charges) are added). Otherwise it does nothing.
-       *  @param lhs one of the workspaces to operate on
-       *  @param rhs the other workspace
-       *  @param ans the output workspace
+       *  @param lhs :: one of the workspaces to operate on
+       *  @param rhs :: the other workspace
+       *  @param ans :: the output workspace
        */
 
       virtual void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run& ans) const

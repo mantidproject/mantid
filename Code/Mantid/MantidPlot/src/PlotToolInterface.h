@@ -31,7 +31,7 @@
 
 class Graph;
 
-/*! Interface for tools operating on a Graph.
+/** Interface for tools operating on a Graph.
  *
  * The basic idea is to have one PlotToolInterface subclass per user-visible tool operating on a Graph,
  * although there may be cases where exceptions to this rule are appropriate.

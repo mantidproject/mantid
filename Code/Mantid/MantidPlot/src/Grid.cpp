@@ -49,17 +49,17 @@ mrkY(-1)
     setRenderHint(QwtPlotItem::RenderAntialiased, false);
 }
 
-/*!
+/**
   \brief Draw the grid
 
   The grid is drawn into the bounding rectangle such that
   gridlines begin and end at the rectangle's borders. The X and Y
   maps are used to map the scale divisions into the drawing region
   screen.
-  \param painter  Painter
-  \param mx X axis map
-  \param my Y axis
-  \param r Contents rect of the plot canvas
+  @param painter ::  Painter
+  @param mx :: X axis map
+  @param my :: Y axis
+  @param r :: Contents rect of the plot canvas
   */
 void Grid::draw(QPainter *painter,
 		const QwtScaleMap &mx, const QwtScaleMap &my,

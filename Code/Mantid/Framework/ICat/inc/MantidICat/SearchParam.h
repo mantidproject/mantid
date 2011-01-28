@@ -37,67 +37,67 @@ namespace Mantid
 			/// Destructor
 			~CSearchParam();
 			/**This method  sets start date
-        *@param startRun start run number
+        *@param startRun :: start run number
 			 */
 			void setRunStart(const double& startRun);
 			/**This method  sets end date
-        *@param endRun end run number
+        *@param endRun :: end run number
 			 */
 			void setRunEnd(const double& endRun);
 			/**This method  sets isntrument name
-        *@param instrName name of the instrument
+        *@param instrName :: name of the instrument
 			 */
 			void setInstrument(const std::string& instrName);
 			/**This method  sets the start date
-        *@param startDate start date for search
+        *@param startDate :: start date for search
 			 */
 			void setStartDate(const time_t& startDate);
 			/**This method  sets the end date
-        *@param endDate end date for search
+        *@param endDate :: end date for search
 			 */
 			void setEndDate(const time_t& endDate);
 			/**This method  sets the CaseSensitive
-        *@param bCase flag to do case sensitive  search
+        *@param bCase :: flag to do case sensitive  search
 			 */
 			void setCaseSensitive(bool bCase);
 			
 			/**This method  sets the keywords
-        *@param keywords the key words used for searching investigations 
+        *@param keywords :: the key words used for searching investigations 
 			 */
 			void setKeywords(const std::string& keywords);
 
 			/**This method  sets investigationName used for searching
-        *@param instName  investigation name
+        *@param instName ::  investigation name
 			 */
 			void  setInvestigationName(const std::string& instName);
 
 			/**This method  sets investigationAbstract used for searching
-        *@param invstabstract investigation abstract
+        *@param invstabstract :: investigation abstract
 			 */
 			 void setInvestigationAbstract(const std::string& invstabstract);
 
 			/**This method  sets sample used for searching
-        *@param sampleName name of the sample 
+        *@param sampleName :: name of the sample 
 			 */
 			void setSampleName(const std::string& sampleName);
 
 			/**This method  sets Investigator surname
-        *@param investigatorName surname of the investigator
+        *@param investigatorName :: surname of the investigator
 			 */
 			void  setInvestigatorSurName(const std::string& investigatorName);
 
 			/** This method  sets Rb Number
-        *@param RbNumber Rb number used for search
+        *@param RbNumber :: Rb number used for search
 			 */
 			 void setRbNumber(const std::string& RbNumber);
 
 			/**This method  sets Investigation Type
-        *@param invstType investigation type used for search
+        *@param invstType :: investigation type used for search
 			 */
 			 void setInvestigationType(const std::string& invstType);
 
 			/**This method  sets datafileName
-        *@param datafileName data file name used for search
+        *@param datafileName :: data file name used for search
 			 */
 			void setDatafileName(const std::string& datafileName );
 
@@ -168,7 +168,7 @@ namespace Mantid
 			 const std::string& getDatafileName() const;
 
 			/**This method returns the time_t value for a Date which is in "DD/MM/YYYY" format
-        *@param sDate - input date string
+        *@param sDate :: input date string
       */
 			time_t getTimevalue(const std::string& sDate);
 

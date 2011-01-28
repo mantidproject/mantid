@@ -2656,7 +2656,7 @@ void Graph3D::setAntialiasing(bool smooth)
 	sp->updateGL();
 }
 
-/*!
+/**
 Turns 3D animation on or off
 */
 void Graph3D::animate(bool on)

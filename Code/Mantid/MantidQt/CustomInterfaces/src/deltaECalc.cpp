@@ -14,7 +14,7 @@ using namespace Mantid::API;
 const QString deltaECalc::tempWS = "mono_sample_temporyWS";
 
 /** Read the data the user supplied to create Python code to do their calculation
-* @param userSettings the form that the user filled in
+* @param userSettings :: the form that the user filled in
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
 deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &userSettings, 
@@ -24,8 +24,8 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &use
 }
 
 /** Adds user values from the GUI into the Python script
-* @param inputFiles a coma separated list of data file names
-* @param whiteB The filename of the white beam run
+* @param inputFiles :: a coma separated list of data file names
+* @param whiteB :: The filename of the white beam run
 */
 void deltaECalc::createProcessingScript(const QStringList &runFiles, const QString &whiteBeam,
 					const QStringList &absRunFiles, const QString &absWhiteBeam,
@@ -113,7 +113,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
 
 /**
  * Add the analysis options from the form to the script
- * @param pyCode The string containing the script to update
+ * @param pyCode :: The string containing the script to update
  */
   void deltaECalc::addAnalysisOptions(QString & pyCode)
 {
@@ -199,15 +199,15 @@ QString deltaECalc::createPyListAsString(const QStringList & names) const
 
 /** Use the detector masking present in the workspace whose name was passed in
 *  the input workspace/s
-*  @param maskWS name of the workspace whose detector masking will be copied
+*  @param maskWS :: name of the workspace whose detector masking will be copied
 */
 void deltaECalc::setDiagnosedWorkspaceName(const QString &maskWS)
 {
   m_diagnosedWS = maskWS;
 }
 /** Insert the number before the dot of the extension
-* @param filename the a full path or partial path or just the name of a file
-* @param number the number to insert
+* @param filename :: the a full path or partial path or just the name of a file
+* @param number :: the number to insert
 * @return the filename with the number inserted
 */
 std::string deltaECalc::insertNumber(const std::string &filename, const int number) const

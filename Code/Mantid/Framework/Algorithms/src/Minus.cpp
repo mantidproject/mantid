@@ -62,8 +62,8 @@ namespace Mantid
      * with another EventList as the right-hand operand.
      * The event lists simply get appended, with the rhs being negatively weighted.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhs Const reference to the EventList on the right hand side.
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhs :: Const reference to the EventList on the right hand side.
      */
     void Minus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -75,10 +75,10 @@ namespace Mantid
     /** Carries out the binary operation IN-PLACE on a single EventList,
      * with another (histogrammed) spectrum as the right-hand operand.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsX The vector of rhs X bin boundaries
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsX :: The vector of rhs X bin boundaries
+     *  @param rhsY :: The vector of rhs data values
+     *  @param rhsE :: The vector of rhs error values
      */
     void Minus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE)
@@ -92,9 +92,9 @@ namespace Mantid
      * with a single (double) value as the right-hand operand.
      * THROWS since it is not possible to add a value to an event list.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsY The rhs data value
-     *  @param rhsE The rhs error value
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsY :: The rhs data value
+     *  @param rhsE :: The rhs error value
      */
     void Minus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const double& rhsY, const double& rhsE)

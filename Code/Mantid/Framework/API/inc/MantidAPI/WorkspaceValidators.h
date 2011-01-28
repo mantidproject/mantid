@@ -74,7 +74,7 @@ public:
   }
 
   /** Adds a validator to the group of validators to check
-   *  @param child A pointer to the validator to add
+   *  @param child :: A pointer to the validator to add
    */
   void add(Kernel::IValidator<boost::shared_ptr<TYPE> >* child)
   {
@@ -86,7 +86,7 @@ private:
   CompositeValidator(const CompositeValidator&);
 
   /** Checks the value of all child validators. Fails if any child fails.
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description of the first problem it finds otherwise ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -119,7 +119,7 @@ class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<boost::shared
 {
 public:
   /** Constructor
-   *  @param unitID The name of the unit that the workspace must have. If left empty,
+   *  @param unitID :: The name of the unit that the workspace must have. If left empty,
    *                the validator will simply check that the workspace is not unitless.
    */
   explicit WorkspaceUnitValidator(const std::string& unitID = "") : m_unitID(unitID) {}
@@ -134,7 +134,7 @@ public:
 private:
   /** Checks that the units of the workspace data are declared match any required units
    *
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description of the error or "" for no error
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -173,7 +173,7 @@ class DLLExport HistogramValidator : public Kernel::IValidator<boost::shared_ptr
 {
 public:
   /** Constructor
-   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
+   *  @param mustBeHistogram :: Flag indicating whether the check is that a workspace should
    *                         contain histogram data (true, default) or shouldn't (false).
    */
   explicit HistogramValidator(const bool& mustBeHistogram = true) :
@@ -188,7 +188,7 @@ public:
 
 private:
   /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description if a problem exists or ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -222,7 +222,7 @@ class DLLExport EventWorkspaceValidator : public Kernel::IValidator<boost::share
 {
 public:
   /** Constructor
-   *  @param mustBeEvent Flag indicating whether the check is that a workspace should
+   *  @param mustBeEvent :: Flag indicating whether the check is that a workspace should
    *                     be EventWorkspace (true, default) or shouldn't (false).
    */
   explicit EventWorkspaceValidator(const bool& mustBeEvent = true) :
@@ -237,7 +237,7 @@ public:
 
 private:
   /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description if a problem exists or ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -274,7 +274,7 @@ class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<
 {
 public:
   /** Constructor
-   *  @param mustNotBeDistribution Flag indicating whether the check is that a workspace should
+   *  @param mustNotBeDistribution :: Flag indicating whether the check is that a workspace should
    *                               not be a distribution (true, default) or should be (false).
    */
   RawCountValidator(const bool& mustNotBeDistribution = true) :
@@ -289,7 +289,7 @@ public:
 
 private:
   /** Checks if the workspace must be a distribution but isn't and vice-versa
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description of any problem that exists or "" no problem
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -334,7 +334,7 @@ public:
 
 private:
   /** Checks that the bin boundaries of each histogram in the workspace are the same
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A message for users saying that bins are different, otherwise ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -367,7 +367,7 @@ class DLLExport SpectraAxisValidator : public Kernel::IValidator<boost::shared_p
 {
 public:
   /** Class constructor with parameter.
-   * @param axisNumber set the axis number to validate
+   * @param axisNumber :: set the axis number to validate
    */
   SpectraAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
   virtual ~SpectraAxisValidator() {}
@@ -379,7 +379,7 @@ public:
 
 private:
   /** Checks that the axis stated 
-  *  @param value The workspace to test
+  *  @param value :: The workspace to test
   *  @return A message for users with negative results, otherwise ""
   */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -401,7 +401,7 @@ class DLLExport NumericAxisValidator : public Kernel::IValidator<boost::shared_p
 {
 public:
   /** Class constructor with parameter.
-   * @param axisNumber set the axis number to validate
+   * @param axisNumber :: set the axis number to validate
    */
   NumericAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
   virtual ~NumericAxisValidator() {}
@@ -413,7 +413,7 @@ public:
 
 private:
   /** Checks that the axis stated 
-  *  @param value The workspace to test
+  *  @param value :: The workspace to test
   *  @return A message for users with negative results, otherwise ""
   */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
@@ -438,7 +438,7 @@ class DLLExport InstrumentValidator : public Kernel::IValidator<boost::shared_pt
 {
 public:
   /** Constructor
-   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
+   *  @param mustBeHistogram :: Flag indicating whether the check is that a workspace should
    *                         contain histogram data (true, default) or shouldn't (false).
    */
   explicit InstrumentValidator() {}
@@ -452,7 +452,7 @@ public:
 
 private:
   /** Checks that the workspace has an instrument defined
-   *  @param value The workspace to test
+   *  @param value :: The workspace to test
    *  @return A user level description if a problem exists or ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const

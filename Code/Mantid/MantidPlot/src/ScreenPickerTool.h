@@ -39,7 +39,7 @@ class ApplicationWindow;
 class Table;
 class DataCurve;
 
-/*!Plot tool for selecting arbitrary points.
+/**Plot tool for selecting arbitrary points.
  *
  * This is a rather thin wrapper around QwtPlotPicker, providing selection of points
  * on a Graph/Plot and displaying coordinates.
@@ -52,7 +52,7 @@ class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface
 		virtual ~ScreenPickerTool();
 
 	signals:
-		/*! Emitted whenever a new message should be presented to the user.
+		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
 		 */
@@ -63,7 +63,7 @@ class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface
 		QwtPlotMarker d_selection_marker;
 };
 
-/*!Plot tool for drawing arbitrary points.
+/**Plot tool for drawing arbitrary points.
  *
  */
 class DrawPointTool : public ScreenPickerTool

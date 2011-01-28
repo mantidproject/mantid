@@ -82,9 +82,9 @@ namespace Mantid
 
     /**
      * Set the X data on given spectra
-     * @param outputWS The destination workspace
-     * @param inputWS The input workspace
-     * @param index The index
+     * @param outputWS :: The destination workspace
+     * @param inputWS :: The input workspace
+     * @param index :: The index
      */
     void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS, 
 				  const API::MatrixWorkspace_sptr inputWS,

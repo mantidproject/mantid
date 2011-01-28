@@ -191,8 +191,8 @@ QComboBox* ShapeDetails::createLengthUnitsCombo()
 }
 
 /** Convert a string value from the given unit to metres (static)
- * @param value The value to change
- * @param start_unit Initial unit
+ * @param value :: The value to change
+ * @param start_unit :: Initial unit
  * @returns A new string value in metres
  */
 QString ShapeDetails::convertToMetres(const QString & value, Unit start_unit)
@@ -214,7 +214,7 @@ QString ShapeDetails::convertToMetres(const QString & value, Unit start_unit)
 
 /**
  * Set the complement flag
- * @param flag The value of the flag
+ * @param flag :: The value of the flag
  */
 void ShapeDetails::setComplementFlag(bool flag)
 {

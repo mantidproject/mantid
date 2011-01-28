@@ -34,9 +34,9 @@ Workspace2D(), m_bufferedData(NBlocks)
 
 
 /** Sets the size of the workspace and sets up the temporary file
-*  @param NVectors The number of vectors/histograms/detectors in the workspace
-*  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
-*  @param YLength The number of data/error points in each vector (must all be the same)
+*  @param NVectors :: The number of vectors/histograms/detectors in the workspace
+*  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
+*  @param YLength :: The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
 void AbsManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
@@ -74,8 +74,8 @@ int AbsManagedWorkspace2D::blocksize() const
 }
 
 /** Set the x values
-*  @param histnumber Index of the histogram to be set
-*  @param PA The data to enter
+*  @param histnumber :: Index of the histogram to be set
+*  @param PA :: The data to enter
 */
 void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr& PA)
 {
@@ -87,8 +87,8 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr& PA)
 }
 
 /** Set the x valuesMantid
-*  @param histnumber Index of the histogram to be set
-*  @param Vec The data to enter
+*  @param histnumber :: Index of the histogram to be set
+*  @param Vec :: The data to enter
 */
 void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
 {
@@ -100,8 +100,8 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr::ptr_t
 }
 
 /** Set the data values
-*  @param histnumber Index of the histogram to be set
-*  @param PY The data to enter
+*  @param histnumber :: Index of the histogram to be set
+*  @param PY :: The data to enter
 */
 void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY)
 {
@@ -113,9 +113,9 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY
 }
 
 /** Set the data values
-*  @param histnumber Index of the histogram to be set
-*  @param PY The data to enter
-*  @param PE The corresponding errors
+*  @param histnumber :: Index of the histogram to be set
+*  @param PY :: The data to enter
+*  @param PE :: The corresponding errors
 */
 void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY,
                                     const MantidVecPtr& PE)
@@ -128,9 +128,9 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY
 }
 
 /** Set the data values
-*  @param histnumber Index of the histogram to be set
-*  @param PY The data to enter
-*  @param PE The corresponding errors
+*  @param histnumber :: Index of the histogram to be set
+*  @param PY :: The data to enter
+*  @param PE :: The corresponding errors
 */
 void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr::ptr_type& PY,
                                     const MantidVecPtr::ptr_type& PE)
@@ -143,7 +143,7 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr::pt
 }
 
 /** Get the x data of a specified histogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the x data
 */
 MantidVec& AbsManagedWorkspace2D::dataX(const int index)
@@ -155,7 +155,7 @@ MantidVec& AbsManagedWorkspace2D::dataX(const int index)
 }
 
 /** Get the y data of a specified hMRUList<ManagedDataBlock2D>istogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the y data
 */
 MantidVec& AbsManagedWorkspace2D::dataY(const int index)
@@ -167,7 +167,7 @@ MantidVec& AbsManagedWorkspace2D::dataY(const int index)
 }
 
 /** Get the error data of a specified histogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the error data
 */
 MantidVec& AbsManagedWorkspace2D::dataE(const int index)
@@ -179,7 +179,7 @@ MantidVec& AbsManagedWorkspace2D::dataE(const int index)
 }
 
 /** Get the x data of a specified histogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the x data
 */
 const MantidVec& AbsManagedWorkspace2D::dataX(const int index) const
@@ -191,7 +191,7 @@ const MantidVec& AbsManagedWorkspace2D::dataX(const int index) const
 }
 
 /** Get the y data of a specified histogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the y data
 */
 const MantidVec& AbsManagedWorkspace2D::dataY(const int index) const
@@ -203,7 +203,7 @@ const MantidVec& AbsManagedWorkspace2D::dataY(const int index) const
 }
 
 /** Get the error data of a specified histogram
-*  @param index The number of the histogram
+*  @param index :: The number of the histogram
 *  @return A vector of doubles containing the error data
 */
 const MantidVec& AbsManagedWorkspace2D::dataE(const int index) const
@@ -233,7 +233,7 @@ int AbsManagedWorkspace2D::getHistogramNumberHelper() const
 }
 
 /** Get a pointer to the data block containing the data corresponding to a given index
-*  @param index The index to search for
+*  @param index :: The index to search for
 *  @return A pointer to the data block containing the index requested
 */
 // not really a const method, but need to pretend it is so that const data getters can call it

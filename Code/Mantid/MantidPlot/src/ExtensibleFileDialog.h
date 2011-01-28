@@ -48,9 +48,9 @@ class ExtensibleFileDialog : public QFileDialog
 	public:
 		//! Constructor.
 		/**
-		 * \param parent parent widget (only affects placement of the dialog)
-		 * \param extended flag: show/hide the advanced options on start-up
-		 * \param flags window flags
+		 * @param parent :: parent widget (only affects placement of the dialog)
+		 * @param extended :: flag: show/hide the advanced options on start-up
+		 * @param flags :: window flags
 		 */
 		ExtensibleFileDialog(QWidget *parent=0, bool extended = true, Qt::WFlags flags=0);
 		//! Set the extension widget to be displayed when the user presses the toggle button.

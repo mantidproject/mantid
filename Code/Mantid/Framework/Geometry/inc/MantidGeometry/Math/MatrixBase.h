@@ -11,7 +11,7 @@ namespace mathLevel
   class PolyVar;
 }
 
-/*!
+/**
    \brief Classes for geometric handlers
    \version 1.0
    \author S. Ansell
@@ -21,7 +21,7 @@ namespace mathLevel
 namespace Geometry
 {
 
-/*!
+/**
   \class MatrixBase
   \brief Numerical MatrixBase class
   \version 1.0

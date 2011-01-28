@@ -132,10 +132,10 @@ void SaveFocusedXYE::exec()
 }
 
 /** virtual method to set the non workspace properties for this algorithm
- *  @param alg pointer to the algorithm
- *  @param propertyName name of the property
- *  @param propertyValue value  of the property
- *  @param perioidNum period number
+ *  @param alg :: pointer to the algorithm
+ *  @param propertyName :: name of the property
+ *  @param propertyValue :: value  of the property
+ *  @param perioidNum :: period number
  */
 void SaveFocusedXYE::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
 {
@@ -153,8 +153,8 @@ void SaveFocusedXYE::setOtherProperties(IAlgorithm* alg,const std::string& prope
 
 /**
  * Write the header information for the given workspace
- * @param os The stream to use to write the information
- * @param workspace A shared pointer to MatrixWorkspace
+ * @param os :: The stream to use to write the information
+ * @param workspace :: A shared pointer to MatrixWorkspace
  */
 void SaveFocusedXYE::writeHeaders(std::ostream& os, Mantid::API::MatrixWorkspace_const_sptr& workspace) const
 {

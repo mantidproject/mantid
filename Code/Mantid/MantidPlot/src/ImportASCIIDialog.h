@@ -104,10 +104,10 @@ public:
 
 	//! Constructor
 	/**
-	 * \param importModeEnabled flag: enable/disable import mode combo box
-	 * \param parent parent widget (only affects placement of the dialog)
-	 * \param extended flag: show/hide the advanced options on start-up
-	 * \param flags window flags
+	 * @param importModeEnabled :: flag: enable/disable import mode combo box
+	 * @param parent :: parent widget (only affects placement of the dialog)
+	 * @param extended :: flag: show/hide the advanced options on start-up
+	 * @param flags :: window flags
 	 */
 	ImportASCIIDialog(bool new_windows_only, QWidget * parent = 0, bool extended = true, Qt::WFlags flags = 0 );
 

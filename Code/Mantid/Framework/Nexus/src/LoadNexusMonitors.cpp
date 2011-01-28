@@ -168,8 +168,8 @@ void LoadNexusMonitors::exec()
 }
 /**
  * Load the instrument geometry File
- *  @param instrument instrument name.
- *  @param localWorkspace MatrixWorkspace in which to put the instrument geometry
+ *  @param instrument :: instrument name.
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
 void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
     API::MatrixWorkspace_sptr localWorkspace)

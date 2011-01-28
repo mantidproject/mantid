@@ -50,8 +50,8 @@ namespace Mantid
 
     /** Executes the algorithm
      *
-     *  @throws runtime_error Thrown if the algorithm cannot execute
-     *  @throws invalid_argument is the LowThreshold property is greater than HighThreshold
+     *  @throw runtime_error Thrown if the algorithm cannot execute
+     *  @throw invalid_argument is the LowThreshold property is greater than HighThreshold
      */
     void FindDetectorsOutsideLimits::exec()
     {

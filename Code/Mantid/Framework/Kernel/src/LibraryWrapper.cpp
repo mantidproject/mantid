@@ -23,8 +23,8 @@ LibraryWrapper::~LibraryWrapper()
 }
 
 /** Opens a DLL.
- *  \param libName The name of the file to open (not including the lib/so/dll).
- *  \return True if DLL is opened or already open.
+ *  @param libName :: The name of the file to open (not including the lib/so/dll).
+ *  @return True if DLL is opened or already open.
  */
 bool LibraryWrapper::OpenLibrary(const std::string& libName)
 {
@@ -43,9 +43,9 @@ bool LibraryWrapper::OpenLibrary(const std::string& libName)
 }
 
 /** Opens a DLL.
- *  \param libName The name of the file to open (not including the lib/so/dll).
- *  \param filePath The filepath to the directory where the library is.
- *  \return True if DLL is opened or already open
+ *  @param libName :: The name of the file to open (not including the lib/so/dll).
+ *  @param filePath :: The filepath to the directory where the library is.
+ *  @return True if DLL is opened or already open
  */
 bool LibraryWrapper::OpenLibrary(const std::string& libName,
     const std::string& filePath)

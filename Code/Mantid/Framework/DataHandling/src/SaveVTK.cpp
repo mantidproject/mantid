@@ -161,11 +161,11 @@ namespace Mantid
 
     /**
     * Write a histogram as a VTK <Piece .../> block
-    * @param outVTP The output stream
-    * @param xValue The x data
-    * @param yValue The y data
-    * @param errors The error data
-    * @param index The histogram number
+    * @param outVTP :: The output stream
+    * @param xValue :: The x data
+    * @param yValue :: The y data
+    * @param errors :: The error data
+    * @param index :: The histogram number
     */
     void SaveVTK::writeVTKPiece(std::ostream & outVTP, const std::vector<double> & xValue, const std::vector<double> & yValue, const std::vector<double> & errors, int index) const
     {

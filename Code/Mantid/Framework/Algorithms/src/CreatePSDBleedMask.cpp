@@ -191,8 +191,8 @@ namespace Mantid
 
     /**
      * Process a tube whose indices are given
-     * @param tubeIndices A list of workspace indices that point to members of a single tube
-     * @param inputWS The workspace containing the rates or counts for each bin
+     * @param tubeIndices :: A list of workspace indices that point to members of a single tube
+     * @param inputWS :: The workspace containing the rates or counts for each bin
      * @returns True if the tube is to be masked, false otherwise
      */
     bool CreatePSDBleedMask::performBleedTest(const std::vector<int> & tubeIndices, 
@@ -251,8 +251,8 @@ namespace Mantid
 
     /** 
      * Mask a tube with the given workspace indices
-     * @param tubeIndices A list of the workspaces indices for the tube
-     * @param workspace The workspace to accumulate the masking
+     * @param tubeIndices :: A list of the workspaces indices for the tube
+     * @param workspace :: The workspace to accumulate the masking
      */
     void CreatePSDBleedMask::maskTube(const std::vector<int> & tubeIndices, 
 				      API::MatrixWorkspace_sptr workspace)
@@ -267,8 +267,8 @@ namespace Mantid
 
     /**
      * Mark a tube's data values as passing the tests
-     * @param tubeIndices A list of the workspaces indices for the tube
-     * @param workspace The workspace's data values to change
+     * @param tubeIndices :: A list of the workspaces indices for the tube
+     * @param workspace :: The workspace's data values to change
      */
     void CreatePSDBleedMask::markAsPassed(const std::vector<int> & tubeIndices, 
 					  API::MatrixWorkspace_sptr workspace)

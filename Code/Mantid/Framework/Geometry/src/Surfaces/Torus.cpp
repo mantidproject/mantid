@@ -31,7 +31,7 @@ Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
 		 Iradius(0),Dradius(0),Displacement(0)
-  /*!
+  /**
     Constructor with centre line along X axis 
     and centre on origin
   */
@@ -44,17 +44,17 @@ Torus::Torus(const Torus& A) : Surface(A),
   Centre(A.Centre), Normal(A.Normal), 
   Iradius(A.Iradius), Dradius(A.Dradius),
   Displacement(A.Displacement)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: Torus to copy
+    @param A :: Torus to copy
   */
 {}
 
 Torus*
 Torus::clone() const
-  /*! 
+  /** 
     Makes a clone (implicit virtual copy constructor) 
-    \return new(*this)
+    @return new(*this)
   */
 {
   return new Torus(*this);
@@ -62,10 +62,10 @@ Torus::clone() const
 
 Torus&
 Torus::operator=(const Torus& A)
-  /*!
+  /**
     Assignment operator
-    \param A :: Torus to copy
-    \return *this
+    @param A :: Torus to copy
+    @return *this
   */
 {
   if(this!=&A)
@@ -82,18 +82,18 @@ Torus::operator=(const Torus& A)
 
 
 Torus::~Torus()
-  /*!
+  /**
     Destructor
   */
 {} 
 
 int
 Torus::operator==(const Torus& A) const
-  /*!
+  /**
     Equality operator. Checks angle,centre and 
     normal separately
-    \param A :: Torus to compare
-    \return A==this within TTolerance
+    @param A :: Torus to compare
+    @return A==this within TTolerance
   */
 {
   if(this==&A)
@@ -114,13 +114,13 @@ Torus::operator==(const Torus& A) const
 
 int 
 Torus::setSurface(const std::string& Pstr)
-  /*! 
+  /** 
     Processes a standard MCNPX cone string    
     Recall that cones can only be specified on an axis
      Valid input is: 
      - number {transformNumber} t/x cen_x cen_y cen_z a,b,c
-    \param Pstr :: String to process
-    \return : 0 on success, neg of failure 
+    @param Pstr :: String to process
+    @return : 0 on success, neg of failure 
   */
 {
   enum { errDesc=-1, errAxis=-2,
@@ -158,9 +158,9 @@ Torus::setSurface(const std::string& Pstr)
 
 void
 Torus::rotate(const Geometry::Matrix<double>& R)
-  /*!
+  /**
     Rotate both the centre and the normal direction 
-    \param R :: Matrix for rotation. 
+    @param R :: Matrix for rotation. 
   */
 {
   Centre.rotate(R);
@@ -170,10 +170,10 @@ Torus::rotate(const Geometry::Matrix<double>& R)
 
 void 
 Torus::displace(const Geometry::V3D& A)
-  /*!
+  /**
     Displace the centre
     Only need to update the centre position 
-    \param A :: Point to add
+    @param A :: Point to add
   */
 {
     Centre+=A;
@@ -182,9 +182,9 @@ Torus::displace(const Geometry::V3D& A)
 
 void 
 Torus::setCentre(const Geometry::V3D& A)
-  /*!
+  /**
     Sets the central point and the Base Equation
-    \param A :: New Centre point
+    @param A :: New Centre point
   */
 {
   Centre=A;
@@ -193,9 +193,9 @@ Torus::setCentre(const Geometry::V3D& A)
 
 void 
 Torus::setNorm(const Geometry::V3D& A)
-  /*!
+  /**
     Sets the Normal and the Base Equation
-    \param A :: New Normal direction
+    @param A :: New Normal direction
   */
 {
   if (A.norm()>Tolerance)
@@ -208,11 +208,11 @@ Torus::setNorm(const Geometry::V3D& A)
 
 Geometry::V3D
 Torus::surfaceNormal(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Get the normal at a point
-    \param Pt :: The Point of interest
+    @param Pt :: The Point of interest
     \todo Does not work
-    \return the normal to the surface at that point
+    @return the normal to the surface at that point
   */
 {
   return Normal;
@@ -221,15 +221,15 @@ Torus::surfaceNormal(const Geometry::V3D& Pt) const
 
 double
 Torus::distance(const Geometry::V3D& Pt) const
-  /*!
+  /**
     Calculates the distance from the point to the Torus
     does not calculate the point on the Torusthat is closest
-    \param Pt :: Point to calcuate from
+    @param Pt :: Point to calcuate from
 
     - normalise to a cone vertex at the origin
     - calculate the angle between the axis and the Point
     - Calculate the distance to P
-    \return distance to Pt
+    @return distance to Pt
   */
 {
   const Geometry::V3D Px=Pt-Centre;
@@ -242,15 +242,15 @@ Torus::distance(const Geometry::V3D& Pt) const
 int
 Torus::side(const Geometry::V3D& R) const
 
-  /*!
+  /**
     Calculate if the point R is within
     the torus (return -1) or outside, 
     (return 1)
     \todo NEEDS ON SURFACE CALCULATING::
     waiting for a point to cone distance function
 
-    \param R :: Point to determine if in/out of cone
-    \return Side of R
+    @param R :: Point to determine if in/out of cone
+    @return Side of R
   */
 {
   return -1;
@@ -259,13 +259,13 @@ Torus::side(const Geometry::V3D& R) const
 int
 Torus::onSurface(const Geometry::V3D& R) const
 {
-  /*! 
+  /** 
      Calculate if the point R is on
      the cone (Note: have to be careful here
      since angle calcuation calcuates an angle.
      We need a distance for tolerance!)
-     \param R :: Point to check
-     \return 1 if on surface and -1 if not no surface
+     @param R :: Point to check
+     @return 1 if on surface and -1 if not no surface
   */
 
   return -1;
@@ -273,10 +273,10 @@ Torus::onSurface(const Geometry::V3D& R) const
 
 void
 Torus::write(std::ostream& OX) const
-  /*!
+  /**
     Write out the cone class in an mcnpx
     format.
-    \param OX :: Output Stream (required for multiple std::endl)
+    @param OX :: Output Stream (required for multiple std::endl)
   */
 {
   //               -3 -2 -1 0 1 2 3        
@@ -299,12 +299,12 @@ Torus::write(std::ostream& OX) const
 }
 
 /** SGenerates a bounding box for the Torus
- *  @param xmax the X max value
- *  @param ymax the Y max value
- *  @param zmax the Z max value
- *  @param xmin the X min value
- *  @param ymin the Y min value
- *  @param zmin the Z min value
+ *  @param xmax :: the X max value
+ *  @param ymax :: the Y max value
+ *  @param zmax :: the Z max value
+ *  @param xmin :: the X min value
+ *  @param ymin :: the Y min value
+ *  @param zmin :: the Z min value
  */
 void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
@@ -313,7 +313,7 @@ void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,d
 }
 
 /** Supposed to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)
- *  @param dist The distance
+ *  @param dist :: The distance
  */
 void Torus::setDistanceFromCentreToTube(double dist)
 {
@@ -321,7 +321,7 @@ void Torus::setDistanceFromCentreToTube(double dist)
 }
 
 /** Supposed to set the radius of the tube which makes up the torus
- *  @param dist The radius
+ *  @param dist :: The radius
  */
 void Torus::setTubeRadius(double dist)
 {

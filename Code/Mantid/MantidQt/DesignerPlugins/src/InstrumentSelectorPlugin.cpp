@@ -11,7 +11,7 @@ using namespace MantidQt::MantidWidgets;
 
 /**
  * Default constructor
- * @param parent The parent of the plugin (default: NULL)
+ * @param parent :: The parent of the plugin (default: NULL)
  */
 InstrumentSelectorPlugin::InstrumentSelectorPlugin(QObject *parent) : QObject(parent), m_initialized(false)
 {
@@ -19,7 +19,7 @@ InstrumentSelectorPlugin::InstrumentSelectorPlugin(QObject *parent) : QObject(pa
 
 /**
  * Initialize the plugin
- * @param formEditor A pointer to the interface that will control this plugin
+ * @param formEditor :: A pointer to the interface that will control this plugin
  */
 void InstrumentSelectorPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 {
@@ -33,7 +33,7 @@ void InstrumentSelectorPlugin::initialize(QDesignerFormEditorInterface * formEdi
 
 /**
  * Create a widget of the type wrapped by the plugin
- * @param parent The parent widget
+ * @param parent :: The parent widget
  * @returns A newly constructed widget for the wrapped type.
  */
 QWidget *InstrumentSelectorPlugin::createWidget(QWidget *parent)

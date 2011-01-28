@@ -96,7 +96,7 @@ protected:
     /// Removes an item.
     void remove(int index){m_data.erase(m_data.begin()+index);}
     /**  Gets the void pointer to a data element
-         @param index Index of the element
+         @param index :: Index of the element
          @return Pointer to the element
       */  
     void* void_pointer(int index){return &(*m_data[index]);}

@@ -59,7 +59,7 @@ namespace Mantid
 
       const Geometry::V3D & getDetLoc(const double wav) const;
       /** Calculates the drop very much faster than running the workspace's gravitationalDrop function
-      *  @param wav the wave length in Angstrom
+      *  @param wav :: the wave length in Angstrom
       *  @return the drop in meters
       */
       double gravitationalDrop(const double wav) const {return m_dropPerAngstrom2*wav*wav;}

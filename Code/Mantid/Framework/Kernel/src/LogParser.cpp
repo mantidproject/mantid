@@ -29,7 +29,7 @@ namespace Mantid
 
     /** 
     * Constructor.
-    * @param eventFName ICPevent file name.
+    * @param eventFName :: ICPevent file name.
     */
     LogParser::LogParser(const std::string& eventFName)
       :m_nOfPeriods(1)
@@ -101,7 +101,7 @@ namespace Mantid
     }
 
     /** Create given the icpevent log property.
-    *  @param log A pointer to the property
+    *  @param log :: A pointer to the property
     */
     LogParser::LogParser(const Kernel::Property* log)
       :m_nOfPeriods(1)
@@ -170,8 +170,8 @@ namespace Mantid
 
 
     /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
-    @param logFName The name of the log file
-    @param name The name of the property
+    @param logFName :: The name of the log file
+    @param name :: The name of the property
     @return A pointer to the created property.
     */
     Kernel::Property* LogParser::createLogProperty(const std::string& logFName, const std::string& name)const
@@ -259,7 +259,7 @@ namespace Mantid
     }
 
     /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
-     *  @param period The data period
+     *  @param period :: The data period
      *  @return times requested period was active
      */
     Kernel::Property* LogParser::createPeriodLog(int period)const
@@ -301,7 +301,7 @@ namespace Mantid
      *
      * TODO: Make this more efficient.
      *
-      @param p Property with the data. Will throw if not TimeSeriesProperty<double>.
+      @param p :: Property with the data. Will throw if not TimeSeriesProperty<double>.
       @return The mean value over time.
       @throw runtime_error if the property is not TimeSeriesProperty<double>
     */
@@ -346,8 +346,8 @@ namespace Mantid
     * 2) Unix-style     - LF ('\\n');
     * 3) Old MAC style  - CR ('\\r').
     * This function will give the string preceding any of these sequences
-    * @param is The input stream to read from
-    * @param str The output string to use to accumulate the line
+    * @param is :: The input stream to read from
+    * @param str :: The output string to use to accumulate the line
     * @returns A reference to the input stream
     */
     std::istream& extractToEOL(std::istream& is, std::string& str)

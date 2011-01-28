@@ -35,8 +35,8 @@ namespace API
   Kernel::Logger& IFunctionMW::g_log = Kernel::Logger::get("IFunctionMW");
 
   /** Set the workspace
-    * @param ws A shared pointer to a workspace. Must be a MatrixWorkspace.
-    * @param slicing A string identifying the data to be fitted. Format for IFunctionMW:
+    * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
+    * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */
   void IFunctionMW::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
@@ -204,7 +204,7 @@ namespace API
   }
 
   /// Function you want to fit to. 
-  /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   void IFunctionMW::function(double* out)const
   {
     if (m_dataSize == 0) return;
@@ -237,9 +237,9 @@ namespace API
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
- * @param out Derivatives
- * @param xValues X values for data points
- * @param nData Number of data points
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
@@ -248,10 +248,10 @@ void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int&
 }
 
 /** Initialize the function providing it the workspace
- * @param workspace The workspace to set
- * @param wi The workspace index
- * @param xMin The lower bin index
- * @param xMax The upper bin index
+ * @param workspace :: The workspace to set
+ * @param wi :: The workspace index
+ * @param xMin :: The lower bin index
+ * @param xMax :: The upper bin index
  */
 void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
 {
@@ -403,10 +403,10 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
 /** Convert a value from unit defined in workspace (ws) to outUnit
  *
- *  @param value   assumed to be in unit of workspace
- *  @param outUnit  unit to convert to
- *  @param ws      workspace
- *  @param wsIndex workspace index
+ *  @param value ::   assumed to be in unit of workspace
+ *  @param outUnit ::  unit to convert to
+ *  @param ws ::      workspace
+ *  @param wsIndex :: workspace index
  *  @return converted value
  */
 double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
@@ -459,11 +459,11 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
 
 /** Convert values from unit defined in workspace (ws) to outUnit
  *
- *  @param values   As input: assumed to be in unit of workspace. 
+ *  @param values ::   As input: assumed to be in unit of workspace. 
  *                  As output: in unit of outUnit
- *  @param outUnit  unit to convert to
- *  @param ws      workspace
- *  @param wsIndex workspace index
+ *  @param outUnit ::  unit to convert to
+ *  @param ws ::      workspace
+ *  @param wsIndex :: workspace index
  */
 void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
@@ -511,9 +511,9 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
 
 /**
  * Calculate the Jacobian with respect to parameters actually declared in the IFunctionMW
- * @param out The output Jacobian
- * @param xValues The x-values
- * @param nData The number of data points (and x-values).
+ * @param out :: The output Jacobian
+ * @param xValues :: The x-values
+ * @param nData :: The number of data points (and x-values).
  */
 void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
@@ -616,9 +616,9 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
 }
 
 /** Calculate numerical derivatives.
- * @param out Derivatives
- * @param xValues X values for data points
- * @param nData Number of data points
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData)
 {

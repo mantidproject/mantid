@@ -104,7 +104,7 @@ public:
   }
   /**
    * Set a new file name
-   * @param filename The new filename
+   * @param filename :: The new filename
    */
   inline void setFileName(const QString & filename)
   {

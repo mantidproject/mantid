@@ -85,8 +85,8 @@ namespace Mantid
     /** Carries out the binary operation IN-PLACE on a single EventList,
      * with another EventList as the right-hand operand.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhs Const reference to the EventList on the right hand side.
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhs :: Const reference to the EventList on the right hand side.
      */
     void Divide::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -100,10 +100,10 @@ namespace Mantid
     /** Carries out the binary operation IN-PLACE on a single EventList,
      * with another (histogrammed) spectrum as the right-hand operand.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsX The vector of rhs X bin boundaries
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsX :: The vector of rhs X bin boundaries
+     *  @param rhsY :: The vector of rhs data values
+     *  @param rhsE :: The vector of rhs error values
      */
     void Divide::performEventBinaryOperation(DataObjects::EventList & lhs,
         const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE)
@@ -116,9 +116,9 @@ namespace Mantid
      * with a single (double) value as the right-hand operand.
      * Performs the multiplication by a scalar (with error)
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsY The rhs data value
-     *  @param rhsE The rhs error value
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsY :: The rhs data value
+     *  @param rhsE :: The rhs error value
      */
     void Divide::performEventBinaryOperation(DataObjects::EventList & lhs,
         const double& rhsY, const double& rhsE)
@@ -164,8 +164,8 @@ namespace Mantid
      *  In order to be size compatible then the larger workspace
      *  must divide be the size of the smaller workspace leaving no remainder
      *
-     *  @param lhs the first workspace to compare
-     *  @param rhs the second workspace to compare
+     *  @param lhs :: the first workspace to compare
+     *  @param rhs :: the second workspace to compare
      *  @retval true The two workspaces are size compatible
      *  @retval false The two workspaces are NOT size compatible
      */

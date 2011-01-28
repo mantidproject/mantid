@@ -241,9 +241,9 @@ void ConvertUnits::execEvent()
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
- * @param numberOfSpectra The number of Spectra
- * @param fromUnit The unit of the input workspace
- * @param outputWS The output workspace
+ * @param numberOfSpectra :: The number of Spectra
+ * @param fromUnit :: The unit of the input workspace
+ * @param outputWS :: The output workspace
  */
 void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS)
 {
@@ -420,10 +420,10 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b) relationship
- * @param numberOfSpectra The number of Spectra
- * @param outputWS the output workspace
- * @param factor the conversion factor a to apply
- * @param power the Power b to apply to the conversion
+ * @param numberOfSpectra :: The number of Spectra
+ * @param outputWS :: the output workspace
+ * @param factor :: the conversion factor a to apply
+ * @param power :: the Power b to apply to the conversion
  */
 void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power)
 {
@@ -480,9 +480,9 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
- * @param numberOfSpectra The number of Spectra
- * @param fromUnit The unit of the input workspace
- * @param outputWS The output workspace
+ * @param numberOfSpectra :: The number of Spectra
+ * @param fromUnit :: The unit of the input workspace
+ * @param outputWS :: The output workspace
  */
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
@@ -757,7 +757,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
  *  As presently implemented, it unfortunately requires testing for and knowledge of
  *  aspects of the particular units conversion instead of keeping all that in the
  *  units class. It could be made more general, but that would be less efficient.
- *  @param workspace The workspace after initial unit conversion
+ *  @param workspace :: The workspace after initial unit conversion
  *  @return The workspace after bins have been removed
  */
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::MatrixWorkspace_const_sptr workspace)

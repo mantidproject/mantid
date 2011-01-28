@@ -13,7 +13,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/*!
+/**
   \class  Algebra
   \brief Computes Boolean algebra for simplification
   \author S. Ansell

@@ -16,8 +16,8 @@ using namespace MantidQt::API;
  * Update the stored map with new property value. If the algorithm
  * doesn't exist then it is appended to the list otherwise the previous
  * value is overwritten.
- * @param algName The name of the algorithm
- * @param property A pair containing <name,value> of a property
+ * @param algName :: The name of the algorithm
+ * @param property :: A pair containing <name,value> of a property
  */
 void AlgorithmInputHistoryImpl::storeNewValue(const QString & algName, 
 					      const QPair<QString, QString> & property)
@@ -35,8 +35,8 @@ void AlgorithmInputHistoryImpl::clearAlgorithmInput(const QString & algName)
 
 /**
  * Retrieve an old parameter value 
- * @param algName The name of the algorithm
- * @param The name of the property
+ * @param algName :: The name of the algorithm
+ * @param The :: name of the property
  */
 QString AlgorithmInputHistoryImpl::previousInput(const QString & algName, const QString & propName) const
 {
@@ -48,7 +48,7 @@ QString AlgorithmInputHistoryImpl::previousInput(const QString & algName, const 
 
 /**
   * Set the directory that was accessed when the previous open file dialog was used
-  * @param lastdir A QString giving the path of the directory that was last accessed with a file dialog
+  * @param lastdir :: A QString giving the path of the directory that was last accessed with a file dialog
   */
 void AlgorithmInputHistoryImpl::setPreviousDirectory(const QString & lastdir)
 {

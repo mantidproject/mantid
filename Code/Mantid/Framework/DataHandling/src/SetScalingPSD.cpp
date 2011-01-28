@@ -72,8 +72,8 @@ namespace DataHandling
   }
 
   /** Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
-   *  @param scalingFile Name of scaling file .sca
-   *  @param truepos V3D vector of actual positions as read from the file
+   *  @param scalingFile :: Name of scaling file .sca
+   *  @param truepos :: V3D vector of actual positions as read from the file
    *  @return False if unable to open file, True otherwise
    */
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
@@ -292,9 +292,9 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
 
   /** Move all the detectors to their actual positions, as stored in posMap and
   *   set their scaling as in scaleMap
-  *   @param WS pointer to the workspace 
-  *   @param posMap A map of integer detector ID and corresponding position shift
-  *   @param scaleMap A map of integer detectorID and corresponding scaling (in Y)
+  *   @param WS :: pointer to the workspace 
+  *   @param posMap :: A map of integer detector ID and corresponding position shift
+  *   @param scaleMap :: A map of integer detectorID and corresponding scaling (in Y)
   */
   std::map<int,Geometry::V3D>::iterator iter = posMap.begin();
   boost::shared_ptr<IInstrument> inst = WS->getInstrument();
@@ -360,7 +360,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
 }
 
 /** Find all detectors in the comp and push the IComp pointers onto m_vectDet
- * @param comp The component to search
+ * @param comp :: The component to search
  */
 void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
 {
@@ -380,9 +380,9 @@ void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
 }
 
 /** Read detector true positions from raw file
- * @param rawfile Name of raw file
- * @param detID Vector of detector numbers
- * @param pos V3D of detector positions corresponding to detID
+ * @param rawfile :: Name of raw file
+ * @param detID :: Vector of detector numbers
+ * @param pos :: V3D of detector positions corresponding to detID
  */
 void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos)
 {

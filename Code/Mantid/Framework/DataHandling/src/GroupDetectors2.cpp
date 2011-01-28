@@ -147,8 +147,8 @@ void GroupDetectors2::exec()
 
 /** Make a map containing spectra indexes to group, the indexes could have come from
 *  file, or an array, spectra numbers ...
-*  @param workspace the user selected input workspace
-*  @param unUsedSpec spectra indexes that are members of any group
+*  @param workspace :: the user selected input workspace
+*  @param unUsedSpec :: spectra indexes that are members of any group
 */
 void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
                        std::vector<int> &unUsedSpec)
@@ -238,10 +238,10 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 }
 /** Read the spectra numbers in from the input file (the file format is in the
 *  source file "GroupDetectors2.h" and make an array of spectra indexes to group
-*  @param fname the full path name of the file to open
-*  @param workspace a pointer to the input workspace, used to get spectra indexes from numbers
-*  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @throws FileError if there's any problem with the file or its format
+*  @param fname :: the full path name of the file to open
+*  @param workspace :: a pointer to the input workspace, used to get spectra indexes from numbers
+*  @param unUsedSpec :: the list of spectra indexes that have been included in a group (so far)
+*  @throw FileError if there's any problem with the file or its format
 */
 void GroupDetectors2::processFile(std::string fname,
   API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec)
@@ -323,10 +323,10 @@ void GroupDetectors2::processFile(std::string fname,
 }
 
 /** Get groupings from XML file
-*  @param fname the full path name of the file to open
-*  @param workspace a pointer to the input workspace, used to get spectra indexes from numbers
-*  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @throws FileError if there's any problem with the file or its format
+*  @param fname :: the full path name of the file to open
+*  @param workspace :: a pointer to the input workspace, used to get spectra indexes from numbers
+*  @param unUsedSpec :: the list of spectra indexes that have been included in a group (so far)
+*  @throw FileError if there's any problem with the file or its format
 */
 void GroupDetectors2::processXMLFile(std::string fname,
   API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec)
@@ -418,10 +418,10 @@ void GroupDetectors2::processXMLFile(std::string fname,
 
 /** The function expects that the string passed to it contains an integer number,
 *  it reads the number and returns it
-*  @param line a line read from the file, we'll interpret this
+*  @param line :: a line read from the file, we'll interpret this
 *  @return the integer read from the line, error code if not readable
-*  @throws invalid_argument when the line contains more just an integer
-*  @throws boost::bad_lexical_cast when the string can't be interpreted as an integer
+*  @throw invalid_argument when the line contains more just an integer
+*  @throw boost::bad_lexical_cast when the string can't be interpreted as an integer
 */
 int GroupDetectors2::readInt(std::string line)
 {
@@ -462,11 +462,11 @@ int GroupDetectors2::readInt(std::string line)
 }
 /** Reads from the file getting in order: an unused integer, on the next line the number of
 *  spectra in the group and next one or more lines the spectra numbers, (format in GroupDetectors.h)
-* @param specs2index a map that links spectra numbers to indexes
-* @param File the input stream that is linked to the file
-* @param lineNum the last line read in the file, is updated by this function
-* @param unUsedSpec list of spectra that haven't yet been included in a group
-* @throws invalid_argument if there is any problem with the file
+* @param specs2index :: a map that links spectra numbers to indexes
+* @param File :: the input stream that is linked to the file
+* @param lineNum :: the last line read in the file, is updated by this function
+* @param unUsedSpec :: list of spectra that haven't yet been included in a group
+* @throw invalid_argument if there is any problem with the file
 */
 void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &File, int &lineNum, std::vector<int> &unUsedSpec)
 {
@@ -521,12 +521,12 @@ void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &Fi
 }
 /** The function expects that the string passed to it contains a series of integers,
 *  ranges specified with a '-' are possible
-*  @param line a line read from the file, we'll interpret this
-*  @param specs2index a map with spectra numbers as indexes and index numbers as values
-*  @param output the list of integers, with any ranges expanded
-*  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @param seperator the symbol for the index range separator
-*  @throws invalid_argument when a number couldn't be found or the number is not in the spectra map
+*  @param line :: a line read from the file, we'll interpret this
+*  @param specs2index :: a map with spectra numbers as indexes and index numbers as values
+*  @param output :: the list of integers, with any ranges expanded
+*  @param unUsedSpec :: the list of spectra indexes that have been included in a group (so far)
+*  @param seperator :: the symbol for the index range separator
+*  @throw invalid_argument when a number couldn't be found or the number is not in the spectra map
 */
 void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &specs2index, std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator)
 {
@@ -566,10 +566,10 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
 *  This function reads DetectorID lists contained in XML File and expands any ranges signified by a '-'.
 *  It modifies the unUsedSpec map which is keeping track of which Workspace Indexes are contained in a
 *  group.
-*  @param line a line read from the file, we'll interpret this
-*  @param output the list of integers, with any ranges expanded
-*  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @param detIdToWiMap map taken from the input workspace linking detector IDs to workspace index
+*  @param line :: a line read from the file, we'll interpret this
+*  @param output :: the list of integers, with any ranges expanded
+*  @param unUsedSpec :: the list of spectra indexes that have been included in a group (so far)
+*  @param detIdToWiMap :: map taken from the input workspace linking detector IDs to workspace index
 */
 void GroupDetectors2::readDetectorIDs(std::string line, std::vector<int> &output, std::vector<int> &unUsedSpec, Mantid::API::IndexToIndexMap* detIdToWiMap)
 {
@@ -592,8 +592,8 @@ void GroupDetectors2::readDetectorIDs(std::string line, std::vector<int> &output
 
 /** Called while reading input file to report progress (doesn't update m_FracCompl ) and
 *  check for algorithm cancel messages, doesn't look at file size to estimate progress
-*  @param numGroupsRead number of groups read from the file so far (not the number of spectra)
-*  @param numInHists the total number of histograms in the input workspace
+*  @param numGroupsRead :: number of groups read from the file so far (not the number of spectra)
+*  @param numInHists :: the total number of histograms in the input workspace
 *  @return estimate of the amount of algorithm progress obtained by reading from the file
 */
 double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
@@ -610,9 +610,9 @@ double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
 }
 /**
 *  Move the user selected spectra in the input workspace into groups in the output workspace
-*  @param inputWS user selected input workspace for the algorithm
-*  @param outputWS user selected output workspace for the algorithm
-*  @param prog4Copy the amount of algorithm progress to attribute to moving a single spectra
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param prog4Copy :: the amount of algorithm progress to attribute to moving a single spectra
 *  @return number of new grouped spectra
 */
 int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, const double prog4Copy)
@@ -702,10 +702,10 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
 /**
 *  Only to be used if the KeepUnGrouped property is true, moves the spectra that were not selected
 *  to be in a group to the end of the output spectrum
-*  @param unGroupedSet list of spectra indexes that were included in a group
-*  @param inputWS user selected input workspace for the algorithm
-*  @param outputWS user selected output workspace for the algorithm
-*  @param outIndex the next spectra index available after the grouped spectra
+*  @param unGroupedSet :: list of spectra indexes that were included in a group
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param outIndex :: the next spectra index available after the grouped spectra
 */
 void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int outIndex)
 {
@@ -741,9 +741,9 @@ void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, API::MatrixW
 }
 //RangeHelper
 /** Expands any ranges in the input string, eg. "1 3-5 4" -> "1 3 4 5 4"
-*  @param line a line of input that is interpreted and expanded
-*  @param outList all integers specified both as ranges and individually in order
-*  @throws invalid_argument if a character is found that is not an integer or hypehn and when a hyphen occurs at the start or the end of the line
+*  @param line :: a line of input that is interpreted and expanded
+*  @param outList :: all integers specified both as ranges and individually in order
+*  @throw invalid_argument if a character is found that is not an integer or hypehn and when a hyphen occurs at the start or the end of the line
 */
 void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<int> &outList)
 {

@@ -16,7 +16,7 @@ namespace Mantid
 		Kernel::Logger& CacheGeometryGenerator::PLog(Kernel::Logger::get("CacheGeometryGenerator"));
 		/**
 		 * Constructor
-		 * @param obj input object
+		 * @param obj :: input object
 		 */
 		CacheGeometryGenerator::CacheGeometryGenerator(Object *obj):Obj(obj)
 		{
@@ -73,10 +73,10 @@ namespace Mantid
 
 		/**
 		Sets the geometry cache using the triangulation information provided
-		@param noPts the number of points
-		@param noFaces the number of faces
-		@param pts a double array of the points
-		@param faces an int array of the faces
+		@param noPts :: the number of points
+		@param noFaces :: the number of faces
+		@param pts :: a double array of the points
+		@param faces :: an int array of the faces
 		*/
 		void CacheGeometryGenerator::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
 		{

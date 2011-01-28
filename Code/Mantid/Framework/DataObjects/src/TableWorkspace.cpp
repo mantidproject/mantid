@@ -37,8 +37,8 @@ namespace Mantid
       return data_size;
     }
 
-    /** @param type Data type of the column.
-        @param name Column name.
+    /** @param type :: Data type of the column.
+        @param name :: Column name.
         @return True if the column was successfully created.
     */
     bool TableWorkspace::addColumn(const std::string& type, const std::string& name)
@@ -78,7 +78,7 @@ namespace Mantid
 
     /** If count is greater than the current number of rows extra rows are added to the bottom of the table.
         Otherwise rows at the end are erased to reach the new size.
-        @param count New number of rows.
+        @param count :: New number of rows.
     */
     void TableWorkspace::setRowCount(int count)
     {
@@ -126,7 +126,7 @@ namespace Mantid
         }
     }
 
-    /** @param index Points where to insert the new row.
+    /** @param index :: Points where to insert the new row.
         @return Position of the inserted row.
     */
     int TableWorkspace::insertRow(int index)
@@ -138,7 +138,7 @@ namespace Mantid
         return index;
     }
 
-    /** @param index Row to delete.
+    /** @param index :: Row to delete.
     */
     void TableWorkspace::removeRow(int index)
     {

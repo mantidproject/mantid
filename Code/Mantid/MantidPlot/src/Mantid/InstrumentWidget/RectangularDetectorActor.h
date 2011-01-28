@@ -6,7 +6,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/V3D.h"
-/*!
+/**
   \class  RectangularDetectorActor
   \brief  This class wraps a RectangularDetector into Actor.
   \author Janik Zikovsky

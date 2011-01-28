@@ -54,7 +54,7 @@ namespace Mantid
       virtual ~IArchiveSearch(){}
       /**
         * Return the full path to a data file in an archive
-        * @param fName The file name
+        * @param fName :: The file name
         */
       virtual std::string getPath(const std::string& fName)const = 0;
     };

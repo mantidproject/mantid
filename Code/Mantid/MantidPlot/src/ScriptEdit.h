@@ -48,7 +48,7 @@ class QMenu;
 class QsciLexer;
 
 
-/*!\brief Editor widget with support for evaluating expressions and executing code.
+/**\brief Editor widget with support for evaluating expressions and executing code.
  *
  * Inherits from QsciScintilla, which supports syntax highlighting and line numbering
  */

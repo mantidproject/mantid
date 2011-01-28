@@ -66,10 +66,10 @@ namespace Mantid
     public:
       /** Constructor.
       *  Sets the property and workspace names but initialises the workspace pointer to null.
-      *  @param name The name to assign to the property
+      *  @param name :: The name to assign to the property
       *  @param Value : property value expressed as a string
-      *  @param direction Whether this is a Direction::Input, Direction::Output or In-Out property
-      *  @param validator The (optional) validator to use for this property
+      *  @param direction :: Whether this is a Direction::Input, Direction::Output or In-Out property
+      *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       MDPropertyGeometry( const std::string &name, const std::string &Value="", const unsigned int direction=Kernel::Direction::Input,

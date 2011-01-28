@@ -192,7 +192,7 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction)
 /**
  * This method is the slot when the detectors are picked using mouse. This method emits
  * signals the ids of the detector and the spectra index(not spectra number).
- * @param pickedActor the input passed by the the signal.
+ * @param pickedActor :: the input passed by the the signal.
  */
 void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 {
@@ -217,7 +217,7 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
  * signals the id of the detector and the spectra index(not spectra number).
- * @param pickedActor the input passed by the the signal.
+ * @param pickedActor :: the input passed by the the signal.
  */
 void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 {
@@ -232,7 +232,7 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
  * signals the id of the detector and the spectra index(not spectra number).
- * @param pickedActor the input passed by the the signal.
+ * @param pickedActor :: the input passed by the the signal.
  */
 void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
 {
@@ -253,7 +253,7 @@ void Instrument3DWidget::fireDetectorHighligted(int detID)
 //------------------------------------------------------------------------------------------------
 /**
  * This method sets the workspace name input to the widget.
- * @param wsName input workspace name
+ * @param wsName :: input workspace name
  */
 void Instrument3DWidget::setWorkspace(const QString& wsName)
 {
@@ -380,8 +380,8 @@ void Instrument3DWidget::calculateBinRange()
  * Integrate the workspace. This calculates the total counts
  * in all spectra and makes the color list for each pixel, using
  * the current color map.
- * @param workspace new workspace being set.
- * @param firstCalculation set to true when changing the workspace; false is simply changing the color scale
+ * @param workspace :: new workspace being set.
+ * @param firstCalculation :: set to true when changing the workspace; false is simply changing the color scale
  *
  */
 void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation)
@@ -579,7 +579,7 @@ void Instrument3DWidget::setMinData(const double new_min)
 //------------------------------------------------------------------------------------------------
 /**
  * Mark the min data as bein user edited
- * @param If true the data min value has been set by the user
+ * @param If :: true the data min value has been set by the user
  */
 void Instrument3DWidget::setDataMinEdited(bool state)
 {
@@ -589,7 +589,7 @@ void Instrument3DWidget::setDataMinEdited(bool state)
 //------------------------------------------------------------------------------------------------
 /**
  * Mark the min data as bein user edited
- * @param If true the data max value has been set by the user
+ * @param If :: true the data max value has been set by the user
  */
 void Instrument3DWidget::setDataMaxEdited(bool state)
 {
@@ -602,8 +602,8 @@ void Instrument3DWidget::setDataMaxEdited(bool state)
  *  i.e. the detector at index i of det_ids has a spectrum at workspace index given in
  *      m_workspace_indices[i].
  *
- * @param det_ids is list of detector id's
- * @param forceNew set to true to force the creation of a new list; otherwise, the old one will be reused
+ * @param det_ids :: is list of detector id's
+ * @param forceNew :: set to true to force the creation of a new list; otherwise, the old one will be reused
  * if possible.
  */
 void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids, bool forceNew)
@@ -642,7 +642,7 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
 //------------------------------------------------------------------------------------------------
 /**
  * This method sets the Time bin values. the value has to be greater than zero
- * @param value input is the time bin value
+ * @param value :: input is the time bin value
  */
 void Instrument3DWidget::setTimeBin(int value)
 {
@@ -921,10 +921,10 @@ void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid:
 
 /** Set pointers to the workspace data that is needed to obtain information about
 *  detectors
-*  @param DetID id number of the detector to retrieve information for
-*  @param workspace the workspace with counts data for the detector
-*  @param counts integral of the number of counts in each spectrum
-*  @throws runtime_error if there was an error creating the spectra index to detector index map
+*  @param DetID :: id number of the detector to retrieve information for
+*  @param workspace :: the workspace with counts data for the detector
+*  @param counts :: integral of the number of counts in each spectrum
+*  @throw runtime_error if there was an error creating the spectra index to detector index map
 */
 Instrument3DWidget::DetInfo::DetInfo(Mantid::API::MatrixWorkspace_const_sptr workspace, const std::vector<double> * const counts) :
     m_workspace(workspace),
@@ -944,7 +944,7 @@ void Instrument3DWidget::DetInfo::setDet(const int detID)
   m_lastDet = NO_INDEX;
 }
 /** specify a range of detectors by giving the id of a detector at the end of the range
-*  @param detID id number of detector to add
+*  @param detID :: id number of detector to add
 */
 void Instrument3DWidget::DetInfo::setEndRange(const int detID)
 {
@@ -1060,7 +1060,7 @@ void Instrument3DWidget::DetInfo::printV(Mantid::Geometry::V3D pos, std::ostring
 }
 /** Returns the index number of the spectrum generated by the detector whose ID number
 *  was passed or DetInfo::NO_INDEX on error
-*  @param someDetID an ID of a detector that exists in the workspace
+*  @param someDetID :: an ID of a detector that exists in the workspace
 *  @return the index number of the spectrum associated with that detector or -1
 */
 int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const

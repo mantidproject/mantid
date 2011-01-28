@@ -88,30 +88,30 @@ namespace Mantid
       bool hasParameter(const std::string & name, bool recursive = true) const;
       /**
        * Get a parameter defined as a double
-       * @param pname The name of the parameter
-       * @param recursive If true the search will walk up through the parent components
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const;
       /**
        * Get a parameter defined as a V3D
-       * @param pname The name of the parameter
-       * @param recursive If true the search will walk up through the parent components
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const;
       /**
        * Get a parameter defined as a Quaternion
-       * @param pname The name of the parameter
-       * @param recursive If true the search will walk up through the parent components
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const;
 
       /**
        * Get a parameter defined as a string
-       * @param pname The name of the parameter
-       * @param recursive If true the search will walk up through the parent components
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;

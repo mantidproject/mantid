@@ -36,12 +36,12 @@ struct FileDialogHandler
 {
   /** The MacOS's native save file browse button hangs so this function, which takes
   *  the same arguments as the Qt function, ensures a nonnative object is used on the Mac
-  *  @param parent the dialog will be shown centered over this parent widget
-  *  @param caption The dialog's caption 
-  *  @param dir The file dialog's working directory will be set to dir. If dir includes a file name, the file will be selected
-  *  @param filter extensions of files to look for
-  *  @param selectedFilter pass a pointer an existing string that will be filled with the extension the user selected
-  *  @param options The options argument holds various options about how to run the dialog
+  *  @param parent :: the dialog will be shown centered over this parent widget
+  *  @param caption :: The dialog's caption 
+  *  @param dir :: The file dialog's working directory will be set to dir. If dir includes a file name, the file will be selected
+  *  @param filter :: extensions of files to look for
+  *  @param selectedFilter :: pass a pointer an existing string that will be filled with the extension the user selected
+  *  @param options :: The options argument holds various options about how to run the dialog
   */
   static QString getSaveFileName(QWidget * parent = 0, const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0)
   {

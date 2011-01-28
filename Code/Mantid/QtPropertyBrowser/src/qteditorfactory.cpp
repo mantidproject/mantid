@@ -259,7 +259,7 @@ void QtSpinBoxFactoryPrivate::slotSetValue(int value)
     }
 }
 
-/*!
+/**
     \class QtSpinBoxFactory
 
     \brief The QtSpinBoxFactory class provides QSpinBox widgets for
@@ -268,7 +268,7 @@ void QtSpinBoxFactoryPrivate::slotSetValue(int value)
     \sa QtAbstractEditorFactory, QtIntPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtSpinBoxFactory::QtSpinBoxFactory(QObject *parent)
@@ -279,7 +279,7 @@ QtSpinBoxFactory::QtSpinBoxFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtSpinBoxFactory::~QtSpinBoxFactory()
@@ -288,7 +288,7 @@ QtSpinBoxFactory::~QtSpinBoxFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -303,7 +303,7 @@ void QtSpinBoxFactory::connectPropertyManager(QtIntPropertyManager *manager)
                 this, SLOT(slotSingleStepChanged(QtProperty *, int)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -323,7 +323,7 @@ QWidget *QtSpinBoxFactory::createEditor(QtIntPropertyManager *manager, QtPropert
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -412,7 +412,7 @@ void QtSliderFactoryPrivate::slotSetValue(int value)
     }
 }
 
-/*!
+/**
     \class QtSliderFactory
 
     \brief The QtSliderFactory class provides QSlider widgets for
@@ -421,7 +421,7 @@ void QtSliderFactoryPrivate::slotSetValue(int value)
     \sa QtAbstractEditorFactory, QtIntPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtSliderFactory::QtSliderFactory(QObject *parent)
@@ -432,7 +432,7 @@ QtSliderFactory::QtSliderFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtSliderFactory::~QtSliderFactory()
@@ -441,7 +441,7 @@ QtSliderFactory::~QtSliderFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -456,7 +456,7 @@ void QtSliderFactory::connectPropertyManager(QtIntPropertyManager *manager)
                 this, SLOT(slotSingleStepChanged(QtProperty *, int)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -476,7 +476,7 @@ QWidget *QtSliderFactory::createEditor(QtIntPropertyManager *manager, QtProperty
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -565,7 +565,7 @@ void QtScrollBarFactoryPrivate::slotSetValue(int value)
         }
 }
 
-/*!
+/**
     \class QtScrollBarFactory
 
     \brief The QtScrollBarFactory class provides QScrollBar widgets for
@@ -574,7 +574,7 @@ void QtScrollBarFactoryPrivate::slotSetValue(int value)
     \sa QtAbstractEditorFactory, QtIntPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtScrollBarFactory::QtScrollBarFactory(QObject *parent)
@@ -585,7 +585,7 @@ QtScrollBarFactory::QtScrollBarFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtScrollBarFactory::~QtScrollBarFactory()
@@ -594,7 +594,7 @@ QtScrollBarFactory::~QtScrollBarFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -609,7 +609,7 @@ void QtScrollBarFactory::connectPropertyManager(QtIntPropertyManager *manager)
                 this, SLOT(slotSingleStepChanged(QtProperty *, int)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -628,7 +628,7 @@ QWidget *QtScrollBarFactory::createEditor(QtIntPropertyManager *manager, QtPrope
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -684,7 +684,7 @@ void QtCheckBoxFactoryPrivate::slotSetValue(bool value)
         }
 }
 
-/*!
+/**
     \class QtCheckBoxFactory
 
     \brief The QtCheckBoxFactory class provides QCheckBox widgets for
@@ -693,7 +693,7 @@ void QtCheckBoxFactoryPrivate::slotSetValue(bool value)
     \sa QtAbstractEditorFactory, QtBoolPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtCheckBoxFactory::QtCheckBoxFactory(QObject *parent)
@@ -704,7 +704,7 @@ QtCheckBoxFactory::QtCheckBoxFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtCheckBoxFactory::~QtCheckBoxFactory()
@@ -713,7 +713,7 @@ QtCheckBoxFactory::~QtCheckBoxFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -724,7 +724,7 @@ void QtCheckBoxFactory::connectPropertyManager(QtBoolPropertyManager *manager)
                 this, SLOT(slotPropertyChanged(QtProperty *, bool)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -741,7 +741,7 @@ QWidget *QtCheckBoxFactory::createEditor(QtBoolPropertyManager *manager, QtPrope
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -857,7 +857,7 @@ void QtDoubleSpinBoxFactoryPrivate::slotSetValue(double value)
     }
 }
 
-/*! \class QtDoubleSpinBoxFactory
+/** \class QtDoubleSpinBoxFactory
 
     \brief The QtDoubleSpinBoxFactory class provides QDoubleSpinBox
     widgets for properties created by QtDoublePropertyManager objects.
@@ -865,7 +865,7 @@ void QtDoubleSpinBoxFactoryPrivate::slotSetValue(double value)
     \sa QtAbstractEditorFactory, QtDoublePropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtDoubleSpinBoxFactory::QtDoubleSpinBoxFactory(QObject *parent)
@@ -876,7 +876,7 @@ QtDoubleSpinBoxFactory::QtDoubleSpinBoxFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtDoubleSpinBoxFactory::~QtDoubleSpinBoxFactory()
@@ -885,7 +885,7 @@ QtDoubleSpinBoxFactory::~QtDoubleSpinBoxFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -902,7 +902,7 @@ void QtDoubleSpinBoxFactory::connectPropertyManager(QtDoublePropertyManager *man
                 this, SLOT(slotDecimalsChanged(QtProperty *, int)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -923,7 +923,7 @@ QWidget *QtDoubleSpinBoxFactory::createEditor(QtDoublePropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1008,7 +1008,7 @@ void QtLineEditFactoryPrivate::slotSetValue(const QString &value)
         }
 }
 
-/*!
+/**
     \class QtLineEditFactory
 
     \brief The QtLineEditFactory class provides QLineEdit widgets for
@@ -1017,7 +1017,7 @@ void QtLineEditFactoryPrivate::slotSetValue(const QString &value)
     \sa QtAbstractEditorFactory, QtStringPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtLineEditFactory::QtLineEditFactory(QObject *parent)
@@ -1028,7 +1028,7 @@ QtLineEditFactory::QtLineEditFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtLineEditFactory::~QtLineEditFactory()
@@ -1037,7 +1037,7 @@ QtLineEditFactory::~QtLineEditFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1050,7 +1050,7 @@ void QtLineEditFactory::connectPropertyManager(QtStringPropertyManager *manager)
                 this, SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1074,7 +1074,7 @@ QWidget *QtLineEditFactory::createEditor(QtStringPropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1148,7 +1148,7 @@ void QtDateEditFactoryPrivate::slotSetValue(const QDate &value)
         }
 }
 
-/*!
+/**
     \class QtDateEditFactory
 
     \brief The QtDateEditFactory class provides QDateEdit widgets for
@@ -1157,7 +1157,7 @@ void QtDateEditFactoryPrivate::slotSetValue(const QDate &value)
     \sa QtAbstractEditorFactory, QtDatePropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtDateEditFactory::QtDateEditFactory(QObject *parent)
@@ -1168,7 +1168,7 @@ QtDateEditFactory::QtDateEditFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtDateEditFactory::~QtDateEditFactory()
@@ -1177,7 +1177,7 @@ QtDateEditFactory::~QtDateEditFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1190,7 +1190,7 @@ void QtDateEditFactory::connectPropertyManager(QtDatePropertyManager *manager)
                 this, SLOT(slotRangeChanged(QtProperty *, const QDate &, const QDate &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1210,7 +1210,7 @@ QWidget *QtDateEditFactory::createEditor(QtDatePropertyManager *manager, QtPrope
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1263,7 +1263,7 @@ void QtTimeEditFactoryPrivate::slotSetValue(const QTime &value)
         }
 }
 
-/*!
+/**
     \class QtTimeEditFactory
 
     \brief The QtTimeEditFactory class provides QTimeEdit widgets for
@@ -1272,7 +1272,7 @@ void QtTimeEditFactoryPrivate::slotSetValue(const QTime &value)
     \sa QtAbstractEditorFactory, QtTimePropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtTimeEditFactory::QtTimeEditFactory(QObject *parent)
@@ -1283,7 +1283,7 @@ QtTimeEditFactory::QtTimeEditFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtTimeEditFactory::~QtTimeEditFactory()
@@ -1292,7 +1292,7 @@ QtTimeEditFactory::~QtTimeEditFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1303,7 +1303,7 @@ void QtTimeEditFactory::connectPropertyManager(QtTimePropertyManager *manager)
                 this, SLOT(slotPropertyChanged(QtProperty *, const QTime &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1321,7 +1321,7 @@ QWidget *QtTimeEditFactory::createEditor(QtTimePropertyManager *manager, QtPrope
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1375,7 +1375,7 @@ void QtDateTimeEditFactoryPrivate::slotSetValue(const QDateTime &value)
         }
 }
 
-/*!
+/**
     \class QtDateTimeEditFactory
 
     \brief The QtDateTimeEditFactory class provides QDateTimeEdit
@@ -1384,7 +1384,7 @@ void QtDateTimeEditFactoryPrivate::slotSetValue(const QDateTime &value)
     \sa QtAbstractEditorFactory, QtDateTimePropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtDateTimeEditFactory::QtDateTimeEditFactory(QObject *parent)
@@ -1395,7 +1395,7 @@ QtDateTimeEditFactory::QtDateTimeEditFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtDateTimeEditFactory::~QtDateTimeEditFactory()
@@ -1404,7 +1404,7 @@ QtDateTimeEditFactory::~QtDateTimeEditFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1415,7 +1415,7 @@ void QtDateTimeEditFactory::connectPropertyManager(QtDateTimePropertyManager *ma
                 this, SLOT(slotPropertyChanged(QtProperty *, const QDateTime &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1433,7 +1433,7 @@ QWidget *QtDateTimeEditFactory::createEditor(QtDateTimePropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1486,7 +1486,7 @@ void QtKeySequenceEditorFactoryPrivate::slotSetValue(const QKeySequence &value)
         }
 }
 
-/*!
+/**
     \class QtKeySequenceEditorFactory
 
     \brief The QtKeySequenceEditorFactory class provides editor
@@ -1495,7 +1495,7 @@ void QtKeySequenceEditorFactoryPrivate::slotSetValue(const QKeySequence &value)
     \sa QtAbstractEditorFactory
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtKeySequenceEditorFactory::QtKeySequenceEditorFactory(QObject *parent)
@@ -1506,7 +1506,7 @@ QtKeySequenceEditorFactory::QtKeySequenceEditorFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtKeySequenceEditorFactory::~QtKeySequenceEditorFactory()
@@ -1515,7 +1515,7 @@ QtKeySequenceEditorFactory::~QtKeySequenceEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1526,7 +1526,7 @@ void QtKeySequenceEditorFactory::connectPropertyManager(QtKeySequencePropertyMan
                 this, SLOT(slotPropertyChanged(QtProperty *, const QKeySequence &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1544,7 +1544,7 @@ QWidget *QtKeySequenceEditorFactory::createEditor(QtKeySequencePropertyManager *
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1767,7 +1767,7 @@ void QtCharEditorFactoryPrivate::slotSetValue(const QChar &value)
         }
 }
 
-/*!
+/**
     \class QtCharEditorFactory
 
     \brief The QtCharEditorFactory class provides editor
@@ -1776,7 +1776,7 @@ void QtCharEditorFactoryPrivate::slotSetValue(const QChar &value)
     \sa QtAbstractEditorFactory
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtCharEditorFactory::QtCharEditorFactory(QObject *parent)
@@ -1787,7 +1787,7 @@ QtCharEditorFactory::QtCharEditorFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtCharEditorFactory::~QtCharEditorFactory()
@@ -1796,7 +1796,7 @@ QtCharEditorFactory::~QtCharEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1807,7 +1807,7 @@ void QtCharEditorFactory::connectPropertyManager(QtCharPropertyManager *manager)
                 this, SLOT(slotPropertyChanged(QtProperty *, const QChar &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1825,7 +1825,7 @@ QWidget *QtCharEditorFactory::createEditor(QtCharPropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1928,7 +1928,7 @@ void QtEnumEditorFactoryPrivate::slotSetValue(int value)
         }
 }
 
-/*!
+/**
     \class QtEnumEditorFactory
 
     \brief The QtEnumEditorFactory class provides QComboBox widgets for
@@ -1937,7 +1937,7 @@ void QtEnumEditorFactoryPrivate::slotSetValue(int value)
     \sa QtAbstractEditorFactory, QtEnumPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtEnumEditorFactory::QtEnumEditorFactory(QObject *parent)
@@ -1948,7 +1948,7 @@ QtEnumEditorFactory::QtEnumEditorFactory(QObject *parent)
 
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtEnumEditorFactory::~QtEnumEditorFactory()
@@ -1957,7 +1957,7 @@ QtEnumEditorFactory::~QtEnumEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1970,7 +1970,7 @@ void QtEnumEditorFactory::connectPropertyManager(QtEnumPropertyManager *manager)
                 this, SLOT(slotEnumNamesChanged(QtProperty *, const QStringList &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -1995,7 +1995,7 @@ QWidget *QtEnumEditorFactory::createEditor(QtEnumPropertyManager *manager, QtPro
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2090,7 +2090,7 @@ void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object)
         }
 }
 
-/*!
+/**
     \class QtCursorEditorFactory
 
     \brief The QtCursorEditorFactory class provides QComboBox widgets for
@@ -2099,7 +2099,7 @@ void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object)
     \sa QtAbstractEditorFactory, QtCursorPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtCursorEditorFactory::QtCursorEditorFactory(QObject *parent)
@@ -2115,7 +2115,7 @@ QtCursorEditorFactory::QtCursorEditorFactory(QObject *parent)
     d_ptr->m_enumEditorFactory->addPropertyManager(d_ptr->m_enumPropertyManager);
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtCursorEditorFactory::~QtCursorEditorFactory()
@@ -2123,7 +2123,7 @@ QtCursorEditorFactory::~QtCursorEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2134,7 +2134,7 @@ void QtCursorEditorFactory::connectPropertyManager(QtCursorPropertyManager *mana
                 this, SLOT(slotPropertyChanged(QtProperty *, const QCursor &)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2164,7 +2164,7 @@ QWidget *QtCursorEditorFactory::createEditor(QtCursorPropertyManager *manager, Q
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2309,7 +2309,7 @@ void QtColorEditorFactoryPrivate::slotSetValue(const QColor &value)
         }
 }
 
-/*!
+/**
     \class QtColorEditorFactory
 
     \brief The QtColorEditorFactory class provides color editing  for
@@ -2318,7 +2318,7 @@ void QtColorEditorFactoryPrivate::slotSetValue(const QColor &value)
     \sa QtAbstractEditorFactory, QtColorPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtColorEditorFactory::QtColorEditorFactory(QObject *parent) :
@@ -2328,7 +2328,7 @@ QtColorEditorFactory::QtColorEditorFactory(QObject *parent) :
     d_ptr->q_ptr = this;
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtColorEditorFactory::~QtColorEditorFactory()
@@ -2337,7 +2337,7 @@ QtColorEditorFactory::~QtColorEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2348,7 +2348,7 @@ void QtColorEditorFactory::connectPropertyManager(QtColorPropertyManager *manage
             this, SLOT(slotPropertyChanged(QtProperty*,QColor)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2363,7 +2363,7 @@ QWidget *QtColorEditorFactory::createEditor(QtColorPropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2520,7 +2520,7 @@ void QtFontEditorFactoryPrivate::slotSetValue(const QFont &value)
         }
 }
 
-/*!
+/**
     \class QtFontEditorFactory
 
     \brief The QtFontEditorFactory class provides font editing for
@@ -2529,7 +2529,7 @@ void QtFontEditorFactoryPrivate::slotSetValue(const QFont &value)
     \sa QtAbstractEditorFactory, QtFontPropertyManager
 */
 
-/*!
+/**
     Creates a factory with the given \a parent.
 */
 QtFontEditorFactory::QtFontEditorFactory(QObject *parent) :
@@ -2539,7 +2539,7 @@ QtFontEditorFactory::QtFontEditorFactory(QObject *parent) :
     d_ptr->q_ptr = this;
 }
 
-/*!
+/**
     Destroys this factory, and all the widgets it has created.
 */
 QtFontEditorFactory::~QtFontEditorFactory()
@@ -2548,7 +2548,7 @@ QtFontEditorFactory::~QtFontEditorFactory()
     delete d_ptr;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2559,7 +2559,7 @@ void QtFontEditorFactory::connectPropertyManager(QtFontPropertyManager *manager)
             this, SLOT(slotPropertyChanged(QtProperty*,QFont)));
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.
@@ -2574,7 +2574,7 @@ QWidget *QtFontEditorFactory::createEditor(QtFontPropertyManager *manager,
     return editor;
 }
 
-/*!
+/**
     \internal
 
     Reimplemented from the QtAbstractEditorFactory class.

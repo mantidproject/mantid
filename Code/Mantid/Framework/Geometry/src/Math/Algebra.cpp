@@ -26,11 +26,11 @@ namespace Geometry
 
 std::ostream&
 operator<<(std::ostream& OX,const Algebra& A)
-  /*!
+  /**
     Write to standard stream
-    \param OX :: Output stream
-    \param A :: Algebra to write
-    \return stream representation
+    @param OX :: Output stream
+    @param A :: Algebra to write
+    @return stream representation
    */
 {
   OX<<A.display();
@@ -41,25 +41,25 @@ Kernel::Logger& Algebra::PLog(Kernel::Logger::get("Algebra"));
 
 Algebra::Algebra() :
   F(0)
-  /*!
+  /**
     Constructor
   */
 {}
 
 Algebra::Algebra(const Algebra& A) :
   SurfMap(A.SurfMap),F(A.F)
-  /*!
+  /**
     Copy Constructor 
-    \param A :: Algebra to copy
+    @param A :: Algebra to copy
   */
 {}
 
 Algebra&
 Algebra::operator=(const Algebra& A) 
-  /*!
+  /**
     Assignment operator
-    \param A :: object to copy
-    \returns *this
+    @param A :: object to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -77,10 +77,10 @@ Algebra::~Algebra()
 
 bool
 Algebra::operator==(const Algebra& A) const
-  /*!
+  /**
     Equality operator
-    \param A :: object to compary
-    \returns this==A
+    @param A :: object to compary
+    @return this==A
   */
 {
   if (this==&A)
@@ -90,10 +90,10 @@ Algebra::operator==(const Algebra& A) const
 
 bool
 Algebra::operator!=(const Algebra& A) const
-  /*!
+  /**
     Inequality operator
-    \param A :: object to compary
-    \returns this!=A (via ==)
+    @param A :: object to compary
+    @return this!=A (via ==)
   */
 {
   return (F!=A.F);
@@ -101,10 +101,10 @@ Algebra::operator!=(const Algebra& A) const
 
 Algebra&
 Algebra::operator+=(const Algebra& M)
-  /*!
+  /**
     Adds this by M algebrically 
-    \param M :: Algebric object to add
-    \return *this
+    @param M :: Algebric object to add
+    @return *this
   */
 {
   F+=M.F;
@@ -113,10 +113,10 @@ Algebra::operator+=(const Algebra& M)
 
 Algebra&
 Algebra::operator*=(const Algebra& M)
-  /*!
+  /**
     Multiplies this by M algebrically 
-    \param M :: Algebric object to multiply by
-    \return *this
+    @param M :: Algebric object to multiply by
+    @return *this
   */
 {
   F*=M.F;
@@ -125,10 +125,10 @@ Algebra::operator*=(const Algebra& M)
 
 Algebra
 Algebra::operator+(const Algebra& M) const
-  /*!
+  /**
     Addition operator (or construction)
-    \param M :: Algebra to add
-    \return this+M
+    @param M :: Algebra to add
+    @return this+M
   */
 {
   Algebra T(*this);
@@ -138,10 +138,10 @@ Algebra::operator+(const Algebra& M) const
 
 Algebra
 Algebra::operator*(const Algebra& M) const
-  /*!
+  /**
     Addition operator (and construction)
-    \param M :: Algebra to multiply (and)
-    \return this+M
+    @param M :: Algebra to multiply (and)
+    @return this+M
   */
 {
   Algebra T(*this);
@@ -151,7 +151,7 @@ Algebra::operator*(const Algebra& M) const
 
 void
 Algebra::Complement()
-  /*!
+  /**
     Takes the complement of the algebric
     function.
   */
@@ -161,10 +161,10 @@ Algebra::Complement()
 
 std::pair<Algebra,Algebra>
 Algebra::algDiv(const Algebra& D) const
-  /*!
+  /**
     Divide by D algebrically
-    \param D :: Divisor
-    \returns Quotian + Remainder
+    @param D :: Divisor
+    @return Quotian + Remainder
    */
 {
   Algebra Q;
@@ -184,14 +184,14 @@ Algebra::algDiv(const Algebra& D) const
 
 std::string
 Algebra::writeMCNPX() const
-  /*!
+  /**
     Writes out the string in terms
     of surface numbers for MCNPX.
     Note the ugly use of valEqual to find the cell
     since the SrufMap is the wrong way round.
     This also has the problem that Algebra uses
     intersection as master but MCNPX uses union 
-    \return string representation of MCNPX
+    @return string representation of MCNPX
   */
 {
   std::string Out=F.display();
@@ -231,10 +231,10 @@ Algebra::writeMCNPX() const
 
 std::ostream&
 Algebra::write(std::ostream& Out) const
-  /*!
+  /**
     Output function
-    \param Out :: Ostream to write out
-    \return Out
+    @param Out :: Ostream to write out
+    @return Out
   */
 {
   Out<<"F == "<<F.display()<<std::endl;
@@ -251,14 +251,14 @@ std::string Algebra::display() const
 
 int
 Algebra::setFunctionObjStr(const std::string& A)
-  /*!
+  /**
     Fill the algebra (AComp) with an object given an 
     MCNPX String. 
     The string type is of 3 : 5 : 6 -4 #( xx  ) 
     - where #( ) surroud the string
-    \param A :: string to process (stripped of id,density etc)
-    \retval -1 ::  Failure
-    \retval 0 ::  Success
+    @param A :: string to process (stripped of id,density etc)
+    @retval -1 ::  Failure
+    @retval 0 ::  Success
   */
 {
   // get first item
@@ -341,11 +341,11 @@ Algebra::setFunctionObjStr(const std::string& A)
 
 int
 Algebra::setFunction(const std::string& A)
-  /*!
+  /**
     Set the function using a basic string (abc etc)
-    \param A :: String to use for the function
-    \retval 1 Error
-    \retval 0 on success
+    @param A :: String to use for the function
+    @retval 1 Error
+    @retval 0 on success
   */
 {
   // Get copy
@@ -368,11 +368,11 @@ Algebra::setFunction(const std::string& A)
 
 int
 Algebra::setFunction(const Acomp& A)
-  /*!
+  /**
     Set the function using a toplevel
     Acomp.
-    \param A :: Acomp to be copied to F.
-    \returns 0 on success
+    @param A :: Acomp to be copied to F.
+    @return 0 on success
   */
 {
   F=A;
@@ -381,11 +381,11 @@ Algebra::setFunction(const Acomp& A)
 
 int
 Algebra::countLiterals() const
-  /*!
+  /**
     Count the number of different literals
     in the algebraic function
     Does this by generating the map of literals
-    \returns number of literals found
+    @return number of literals found
   */
 {
   std::map<int,int> Lit;
@@ -395,11 +395,11 @@ Algebra::countLiterals() const
 
 int
 Algebra::logicalEqual(const Algebra& A) const
-  /*!
+  /**
     Calculate if two functions are logically
     equivilent (exhaustive search)
-    \param A :: Algrebra to testg
-    \return True/False
+    @param A :: Algrebra to testg
+    @return True/False
    */  
 {
   return F.logicalEqual(A.F);

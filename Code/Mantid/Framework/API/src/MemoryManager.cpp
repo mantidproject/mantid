@@ -43,10 +43,10 @@ MemoryManagerImpl::~MemoryManagerImpl()
 
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
     and workspace parameters NVectors, XLength,and YLength.
-    @param NVectors the number of vectors
-    @param XLength the size of the X vector
-    @param YLength the size of the Y vector
-    @param isCompressedOK The address of a boolean indicating if the compression succeeded or not
+    @param NVectors :: the number of vectors
+    @param XLength :: the size of the X vector
+    @param YLength :: the size of the Y vector
+    @param isCompressedOK :: The address of a boolean indicating if the compression succeeded or not
     @return true is managed workspace is needed
  */
 bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength, bool* isCompressedOK)

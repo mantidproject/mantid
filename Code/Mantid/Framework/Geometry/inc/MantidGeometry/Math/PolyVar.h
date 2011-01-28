@@ -9,7 +9,7 @@ namespace Mantid
 namespace mathLevel
 {
 
-  /*!
+  /**
     \class PolyVar
     \version 1.0
     \author S. Ansell 

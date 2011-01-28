@@ -35,7 +35,7 @@
 
 class ScriptingEnv;
 
-/*!\brief Notes window class.
+/**\brief Notes window class.
  *
  * \section future Future Plans
  * - Search and replace

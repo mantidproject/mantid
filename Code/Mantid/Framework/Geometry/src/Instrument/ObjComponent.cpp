@@ -25,8 +25,8 @@ namespace Mantid
 
 
     /** Constructor
-    *  @param name   The name of the component
-    *  @param parent The Parent geometry object of this component
+    *  @param name ::   The name of the component
+    *  @param parent :: The Parent geometry object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, IComponent* parent)
       : IObjComponent(), Component(name,parent), m_shape(), m_material()
@@ -34,10 +34,10 @@ namespace Mantid
     }
 
     /** Constructor
-    *  @param name   The name of the component
-    *  @param shape  A pointer to the object describing the shape of this component
-    *  @param parent The Parent geometry object of this component
-    *  @param material An optional pointer to the material object of this component
+    *  @param name ::   The name of the component
+    *  @param shape ::  A pointer to the object describing the shape of this component
+    *  @param parent :: The Parent geometry object of this component
+    *  @param material :: An optional pointer to the material object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, Object_sptr shape, 
 			       IComponent* parent, Material_sptr material)
@@ -98,7 +98,7 @@ namespace Mantid
     }
 
     /** Checks whether the track given will pass through this Component.
-    *  @param track The Track object to test (N.B. Will be modified if hits are found)
+    *  @param track :: The Track object to test (N.B. Will be modified if hits are found)
     *  @returns The number of track segments added (i.e. 1 if the track enters and exits the object once each)
     *  @throw NullPointerException if the underlying geometrical Object has not been set
     */
@@ -134,7 +134,7 @@ namespace Mantid
     }
 
     /** Finds the approximate solid angle covered by the component when viewed from the point given
-    *  @param observer The position from which the component is being viewed
+    *  @param observer :: The position from which the component is being viewed
     *  @returns The solid angle in steradians
     *  @throw NullPointerException if the underlying geometrical Object has not been set
     */
@@ -201,7 +201,7 @@ namespace Mantid
     /**
     * Get the bounding box for this object-component. The underlying shape has a bounding box defined in its own coorindate
     * system. This needs to be adjusted for the actual position and rotation of this ObjComponent.
-    * @param absoluteBB [Out] The bounding box for this object component will be stored here.
+    * @param absoluteBB :: [Out] The bounding box for this object component will be stored here.
     */
     void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
@@ -262,7 +262,7 @@ namespace Mantid
 
     /**
     * Try to find a point that lies within (or on) the object
-    * @param point On exit, set to the point value (if found)
+    * @param point :: On exit, set to the point value (if found)
     * @return 1 if point found, 0 otherwise
     */
     int ObjComponent::getPointInObject(V3D& point) const

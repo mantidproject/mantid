@@ -205,7 +205,7 @@ using namespace DataObjects;
     return(true);
   }
   /** Returns true if the given property is a time series property
-   * @param prop The property to test
+   * @param prop :: The property to test
    * @returns True if it is a time series, false otherwise
    */
   bool NexusFileIO::isTimeSeries(Kernel::Property* prop) const
@@ -223,7 +223,7 @@ using namespace DataObjects;
     }
   }
   /** Write a time series log entry.
-   * @param prop The time series property containing the data. This must be a time series or it will fail.
+   * @param prop :: The time series property containing the data. This must be a time series or it will fail.
    * @returns A boolean indicating success or failure
    */
   bool NexusFileIO::writeTimeSeriesLog(Kernel::Property* prop) const
@@ -252,7 +252,7 @@ using namespace DataObjects;
     return success;
   }
   /** Write a single-valued log entry
-   * @param prop The property containing the data.
+   * @param prop :: The property containing the data.
    * @returns A boolean indicating success or failure
    */
   bool NexusFileIO::writeSingleValueLog(Kernel::Property* prop) const
@@ -1074,7 +1074,7 @@ using namespace DataObjects;
 
 
   /** Write the algorithm and environment information.
-   *  @param localworkspace The workspace
+   *  @param localworkspace :: The workspace
    *  @return 0 on success
    */
   int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace) const
@@ -1209,13 +1209,13 @@ using namespace DataObjects;
 
   }
 
-  /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
+  /** Write the details of the spectra detector mapping to the Nexus file using the format proposed for
         Muon data, but using only one NXdetector section for the whole instrument.
         Also do not place other data the Muon NXdetector would hold.
         NXdetector section to be placed in existing NXinstrument.
         return should leave Nexus at entry level.
-        @param localWorkspace The workspace
-        @param spec A vector with spectra indeces
+        @param localWorkspace :: The workspace
+        @param spec :: A vector with spectra indeces
         @return true on success
    */
   bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace,
@@ -1356,8 +1356,8 @@ using namespace DataObjects;
 
   bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws) const
   {
-    /*! Writes the instrument parameter map if not empty. Must be called inside NXentry group.
-        @param ws The workspace
+    /** Writes the instrument parameter map if not empty. Must be called inside NXentry group.
+        @param ws :: The workspace
         @return true for OK, false for error
      */
 
@@ -1370,7 +1370,7 @@ using namespace DataObjects;
 
   /**
    * Write bin masking information
-   * @param ws The workspace
+   * @param ws :: The workspace
    * @return true for OK, false for error
    */
   bool NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const
@@ -1450,9 +1450,9 @@ using namespace DataObjects;
    * If definition not found, try and return "analysis" field (Muon V1 files)
    * Closes file on exit.
    *
-   * @param fileName file to open
-   * @param entryName vector that gets filled with strings with entry names
-   * @param definition vector that gets filled with the "definition" or "analysis" string.
+   * @param fileName :: file to open
+   * @param entryName :: vector that gets filled with strings with entry names
+   * @param definition :: vector that gets filled with the "definition" or "analysis" string.
    * @return count of entries if OK, -1 failed to open file.
    */
   int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,

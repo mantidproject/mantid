@@ -145,7 +145,7 @@ void CorrectToFile::exec()
   setProperty("Outputworkspace", outputWS);
 }
 /** Load in the RKH file for that has the correction information
-*  @param corrFile the name of the correction to load
+*  @param corrFile :: the name of the correction to load
 *  @return workspace containing the loaded data
 *  @throw runtime_error if load algorithm fails
 */

@@ -221,8 +221,8 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
 }
 
 /** Divide each bin by the width of its q bin.
- *  @param outputWS The output workspace
- *  @param qAxis    A vector of the q bin boundaries
+ *  @param outputWS :: The output workspace
+ *  @param qAxis ::    A vector of the q bin boundaries
  */
 void SofQW::makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis)
 {

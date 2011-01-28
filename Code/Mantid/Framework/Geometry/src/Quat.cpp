@@ -11,7 +11,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/*! Null Constructor
+/** Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
  */
 Quat::Quat():w(1),a(0),b(0),c(0)
@@ -19,13 +19,13 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 }
 
 
-/*!
+/**
  * Construct a Quat between two vectors.
  * v=(src+des)/�src+des�
  * w=v.des
  * (a,b,c)=(v x des)
- * @param src the source position
- * @param des the destination position
+ * @param src :: the source position
+ * @param des :: the destination position
  */
 Quat::Quat(const V3D& src,const V3D& des)
 {
@@ -60,27 +60,27 @@ Quat::Quat(const Quat& _q)
 	c=_q.c;
 }
 
-/*! Constructor from an angle and axis.
+/** Constructor from an angle and axis.
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
  *
- * \param _deg :: angle of rotation
- * \param _axis :: axis to rotate about
+ * @param _deg :: angle of rotation
+ * @param _axis :: axis to rotate about
  * */
 Quat::Quat(const double _deg,const V3D& _axis)
 {
   setAngleAxis(_deg,_axis);
 }
 
-/*!
+/**
  * Construct a Quaternion that performs a reference frame rotation.
  *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
  *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0), Z=(0,0,1).
  *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
  *
- * @param rX rotated X reference axis; unit vector.
- * @param rY rotated Y reference axis; unit vector.
- * @param rZ rotated Z reference axis; unit vector.
+ * @param rX :: rotated X reference axis; unit vector.
+ * @param rY :: rotated Y reference axis; unit vector.
+ * @param rZ :: rotated Z reference axis; unit vector.
  */
 Quat::Quat(const V3D& rX, const V3D& rY, const V3D& rZ)
 {
@@ -89,7 +89,7 @@ Quat::Quat(const V3D& rX, const V3D& rY, const V3D& rZ)
 }
 
 /** Assignment Operator
- * @param q the Quat to copy
+ * @param q :: the Quat to copy
  * @returns a pointer to this
  */
 Quat& Quat::operator=(const Quat& q)
@@ -105,10 +105,10 @@ Quat& Quat::operator=(const Quat& q)
 }
 
 /** Sets the quat values from four doubles
- * @param ww the value for w
- * @param aa the value for a
- * @param bb the value for b
- * @param cc the value for c
+ * @param ww :: the value for w
+ * @param aa :: the value for a
+ * @param bb :: the value for b
+ * @param cc :: the value for c
  */
 void Quat::set(const double ww, const double aa, const double bb, const double cc)
 {
@@ -119,9 +119,9 @@ void Quat::set(const double ww, const double aa, const double bb, const double c
 	return;
 }
 
-/*! Constructor from an angle and axis.
- * \param _deg :: angle of rotation
- * \param _axis :: axis to rotate about
+/** Constructor from an angle and axis.
+ * @param _deg :: angle of rotation
+ * @param _axis :: axis to rotate about
  *
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
@@ -146,10 +146,10 @@ bool Quat::isNull(const double tolerance) const
 }
 
 ///Extracts the angle of roatation and axis
-/// @param _deg the angle of rotation
-/// @param _ax0 The first component of the axis
-/// @param _ax1 The second component of the axis
-/// @param _ax2 The third component of the axis
+/// @param _deg :: the angle of rotation
+/// @param _ax0 :: The first component of the axis
+/// @param _ax1 :: The second component of the axis
+/// @param _ax2 :: The third component of the axis
 void Quat::getAngleAxis(double& _deg,double& _ax0, double& _ax1, double& _ax2) const
 {
 	// If it represents a rotation of 0(2\pi), get an angle of 0 and axis (0,0,1)
@@ -172,7 +172,7 @@ void Quat::getAngleAxis(double& _deg,double& _ax0, double& _ax1, double& _ax2) c
 }
 
 /** Set the rotation (both don't change rotation axis). This method has an error
- * \param deg :: angle of rotation
+ * @param deg :: angle of rotation
  */
 void Quat::setRotation(const double deg)
 {
@@ -181,10 +181,10 @@ void Quat::setRotation(const double deg)
 }
 
 /** Sets the quat values from four doubles
- * @param ww the value for w
- * @param aa the value for a
- * @param bb the value for b
- * @param cc the value for c
+ * @param ww :: the value for w
+ * @param aa :: the value for a
+ * @param bb :: the value for b
+ * @param cc :: the value for c
  */
 void Quat::operator()(const double ww, const double aa, const double bb, const double cc)
 {
@@ -192,8 +192,8 @@ void Quat::operator()(const double ww, const double aa, const double bb, const d
 }
 
 /** Sets the quat values from an angle and a vector
- * @param angle the numbers of degrees
- * @param axis the axis of rotation
+ * @param angle :: the numbers of degrees
+ * @param axis :: the axis of rotation
  */
 void Quat::operator()(const double angle, const V3D& axis)
 {
@@ -201,7 +201,7 @@ void Quat::operator()(const double angle, const V3D& axis)
 }
 
 /** Sets the quat values from another Quat
- * @param q the quat to copy
+ * @param q :: the quat to copy
  */
 void Quat::operator()(const Quat& q)
 {
@@ -212,15 +212,15 @@ void Quat::operator()(const Quat& q)
 	return;
 }
 
-/*!
+/**
  * Set a Quaternion that performs a reference frame rotation.
  *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
  *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0), Z=(0,0,1).
  *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
  *
- * @param rX rotated X reference axis; unit vector.
- * @param rY rotated Y reference axis; unit vector.
- * @param rZ rotated Z reference axis; unit vector.
+ * @param rX :: rotated X reference axis; unit vector.
+ * @param rY :: rotated Y reference axis; unit vector.
+ * @param rZ :: rotated Z reference axis; unit vector.
  */
 void Quat::operator()(const V3D& rX, const V3D& rY, const V3D& rZ)
 {
@@ -270,7 +270,7 @@ Quat::~Quat()
 {}
 
 
-/*! Re-initialise a quaternion to identity.
+/** Re-initialise a quaternion to identity.
  */
 void Quat::init()
 {
@@ -279,18 +279,18 @@ void Quat::init()
 	return;
 }
 
-/*! Quaternion addition operator
- * \param _q :: the quaternion to add
- * \return *this+_q
+/** Quaternion addition operator
+ * @param _q :: the quaternion to add
+ * @return *this+_q
  */
 Quat Quat::operator+(const Quat& _q) const
 {
 	return Quat(w+_q.w,a+_q.a,b+_q.b,c+_q.c);
 }
 
-/*! Quaternion self-addition operator
- * \param _q :: the quaternion to add
- * \return *this+=_q
+/** Quaternion self-addition operator
+ * @param _q :: the quaternion to add
+ * @return *this+=_q
  */
 Quat& Quat::operator+=(const Quat& _q)
 {
@@ -298,18 +298,18 @@ Quat& Quat::operator+=(const Quat& _q)
 	return *this;
 }
 
-/*! Quaternion subtraction operator
- * \param _q :: the quaternion to add
- * \return *this-_q
+/** Quaternion subtraction operator
+ * @param _q :: the quaternion to add
+ * @return *this-_q
  */
 Quat Quat::operator-(const Quat& _q) const
 {
 	return Quat(w-_q.w,a-_q.a,b-_q.b,c-_q.c);
 }
 
-/*! Quaternion self-substraction operator
- * \param _q :: the quaternion to add
- * \return *this-=_q
+/** Quaternion self-substraction operator
+ * @param _q :: the quaternion to add
+ * @return *this-=_q
  */
 Quat& Quat::operator-=(const Quat& _q)
 {
@@ -320,9 +320,9 @@ Quat& Quat::operator-=(const Quat& _q)
 	return *this;
 }
 
-/*! Quaternion multiplication operator
- * \param _q :: the quaternion to multiply
- * \return *this*_q
+/** Quaternion multiplication operator
+ * @param _q :: the quaternion to multiply
+ * @return *this*_q
  *
  *  Quaternion multiplication is non commutative
  *  in the same way multiplication of rotation matrices
@@ -338,9 +338,9 @@ Quat Quat::operator*(const Quat& _q) const
 	return Quat(w1,a1,b1,c1);
 }
 
-/*! Quaternion self-multiplication operator
- * \param _q :: the quaternion to multiply
- * \return *this*=_q
+/** Quaternion self-multiplication operator
+ * @param _q :: the quaternion to multiply
+ * @return *this*=_q
  */
 Quat& Quat::operator*=(const Quat& _q)
 {
@@ -353,8 +353,8 @@ Quat& Quat::operator*=(const Quat& _q)
 	return (*this);
 }
 
-/*! Quaternion equal operator
- * \param q :: the quaternion to compare
+/** Quaternion equal operator
+ * @param q :: the quaternion to compare
  *
  * Compare two quaternions at 1e-6%tolerance.
  * Use boost close_at_tolerance method
@@ -371,19 +371,19 @@ bool Quat::operator==(const Quat& q) const
 	//return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
 }
 
-/*! Quaternion non-equal operator
- * \param _q :: the quaternion to compare
+/** Quaternion non-equal operator
+ * @param _q :: the quaternion to compare
  *
  * Compare two quaternions at 1e-6%tolerance.
  *  Use boost close_at_tolerance method
- * \return true if not equal
+ * @return true if not equal
  */
 bool Quat::operator!=(const Quat& _q) const
 {
 	return (!operator==(_q));
 }
 
-/*! Quaternion normalization
+/** Quaternion normalization
  *
  * Divide all elements by the quaternion norm
  */
@@ -401,7 +401,7 @@ void Quat::normalize()
 	return;
 }
 
-/*! Quaternion complex conjugate
+/** Quaternion complex conjugate
  *
  *  Reverse the sign of the 3 imaginary components of the
  *  quaternion
@@ -414,23 +414,23 @@ void Quat::conjugate()
 	return;
 }
 
-/*! Quaternion length
- * \return the length
+/** Quaternion length
+ * @return the length
  */
 double Quat::len() const
 {
 	return sqrt(len2());
 }
 
-/*! Quaternion norm (length squared)
- * \return the length squared
+/** Quaternion norm (length squared)
+ * @return the length squared
  */
 double Quat::len2() const
 {
 	return (w*w+a*a+b*b+c*c);
 }
 
-/*! Inverse a quaternion
+/** Inverse a quaternion
  *
  */
 void Quat::inverse()
@@ -447,8 +447,8 @@ void Quat::inverse()
 	c*=overnorm;
 }
 
-/*! 	Rotate a vector.
- *  \param v :: the vector to be rotated
+/** 	Rotate a vector.
+ *  @param v :: the vector to be rotated
  *
  *   The quaternion needs to be normalized beforehand to
  *   represent a rotation. If q is thequaternion, the rotation
@@ -467,10 +467,10 @@ void Quat::rotate(V3D& v) const
  	v[2]=pos[3];
  }
 
-/*! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
+/** Convert quaternion rotation to an OpenGL matrix [4x4] matrix
  * stored as an linear array of 16 double
  * The function glRotated must be called
- * @param mat The output matrix
+ * @param mat :: The output matrix
  */
 void Quat::GLMatrix(double* mat) const
 {
@@ -502,7 +502,7 @@ void Quat::GLMatrix(double* mat) const
 	return;
 }
 
-/*!
+/**
  * Converts the GL Matrix into Quat
  */
 void Quat::setQuat(double mat[16])
@@ -539,7 +539,7 @@ void Quat::setQuat(double mat[16])
 }
 /** Bracket operator overload
  * returns the internal representation values based on an index
- * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c
+ * @param Index :: the index of the value required 0=w, 1=a, 2=b, 3=c
  * @returns a double of the value requested
  */
 const double& Quat::operator[](const int Index) const
@@ -557,7 +557,7 @@ const double& Quat::operator[](const int Index) const
 
 /** Bracket operator overload
  * returns the internal representation values based on an index
- * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c
+ * @param Index :: the index of the value required 0=w, 1=a, 2=b, 3=c
  * @returns a double of the value requested
  */
 double& Quat::operator[](const int Index)
@@ -574,7 +574,7 @@ double& Quat::operator[](const int Index)
 }
 
 /** Prints a string representation of itself
- * @param os the stream to output to
+ * @param os :: the stream to output to
  */
 void Quat::printSelf(std::ostream& os) const
 {
@@ -611,8 +611,8 @@ void Quat::readPrinted(std::istream& IX)
 }
 
 /** Prints a string representation
- * @param os the stream to output to
- * @param q the quat to output
+ * @param os :: the stream to output to
+ * @param q :: the quat to output
  * @returns the stream
  */
 std::ostream& operator<<(std::ostream& os,const Quat& q)
@@ -622,8 +622,8 @@ std::ostream& operator<<(std::ostream& os,const Quat& q)
 }
 
 /**  Reads in a quat from an input stream
- *   @param ins The input stream
- *   @param q The quat
+ *   @param ins :: The input stream
+ *   @param q :: The quat
  */
 std::istream& operator>>(std::istream& ins,Quat& q)
 {

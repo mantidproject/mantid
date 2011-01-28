@@ -14,11 +14,11 @@
 using namespace Mantid::API;
 
 /**
- *  @param name The curve's name - shown in the legend
- *  @param wsName The workspace name.
- *  @param g The Graph widget which will display the curve
- *  @param index The index of the spectrum or bin in the workspace
- *  @param err True if the errors are to be plotted
+ *  @param name :: The curve's name - shown in the legend
+ *  @param wsName :: The workspace name.
+ *  @param g :: The Graph widget which will display the curve
+ *  @param index :: The index of the spectrum or bin in the workspace
+ *  @param err :: True if the errors are to be plotted
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
@@ -45,10 +45,10 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,cons
 }
 
 /**
- *  @param wsName The workspace name.
- *  @param g The Graph widget which will display the curve
- *  @param index The index of the spectrum or bin in the workspace
- *  @param err True if the errors are to be plotted
+ *  @param wsName :: The workspace name.
+ *  @param g :: The Graph widget which will display the curve
+ *  @param index :: The index of the spectrum or bin in the workspace
+ *  @param err :: True if the errors are to be plotted
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,const QString& type,int index,bool err)
@@ -92,9 +92,9 @@ MantidCurve::MantidCurve(const MantidCurve& c)
 }
 
 /**
- *  @param workspace The source workspace for the curve's data
- *  @param g The Graph widget which will display the curve
- *  @param index The index of the spectrum or bin in the workspace
+ *  @param workspace :: The source workspace for the curve's data
+ *  @param g :: The Graph widget which will display the curve
+ *  @param index :: The index of the spectrum or bin in the workspace
  */
 void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index)
 {
@@ -217,8 +217,8 @@ void MantidCurve::itemChanged()
 }
 
 /** Create the name for a curve from the following input:
- *  @param wsName The workspace name
- *  @param index  The spectra (bin) index
+ *  @param wsName :: The workspace name
+ *  @param index ::  The spectra (bin) index
  */
 QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                      const QString& wsName,int index)
@@ -228,7 +228,7 @@ QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::
 }
 
 /** Create the name for a curve which is a copy of another curve.
- *  @param curveName The original curve name.
+ *  @param curveName :: The original curve name.
  */
 QString MantidCurve::createCopyName(const QString& curveName)
 {
@@ -241,7 +241,7 @@ QString MantidCurve::createCopyName(const QString& curveName)
 }
 
 /**  Resets the data if wsName is the name of this workspace
- *  @param wsName The name of a workspace which data has been changed in the data service.
+ *  @param wsName :: The name of a workspace which data has been changed in the data service.
  */
 void MantidCurve::dataReset(const QString& wsName)
 {
@@ -383,8 +383,8 @@ size_t MantidQwtData::size() const
 
 /**
 Return the x value of data point i
-\param i Index
-\return x X value of data point i
+@param i :: Index
+@return x X value of data point i
 */
 double MantidQwtData::x(size_t i) const
 {
@@ -393,8 +393,8 @@ double MantidQwtData::x(size_t i) const
 
 /**
 Return the y value of data point i
-\param i Index
-\return y Y value of data point i
+@param i :: Index
+@return y Y value of data point i
 */
 double MantidQwtData::y(size_t i) const
 {

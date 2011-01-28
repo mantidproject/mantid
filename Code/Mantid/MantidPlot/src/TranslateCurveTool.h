@@ -44,12 +44,12 @@ class TranslateCurveTool : public QObject, public PlotToolInterface
 	Q_OBJECT
 	public:
 		enum Direction { Vertical, Horizontal };
-		/*!\brief Standard constructor.
-		 * \param graph the Graph to operate on (or rather, on whose image markers to operate on)
-		 * \param app parent window of graph
-		 * \param dir the direction in which to translate curves
-		 * \param status_target target to which the statusText(const QString&) signal will be connected
-		 * \param status_slot slot on status_target to which the statusText(const QString&) signal will be connected
+		/**\brief Standard constructor.
+		 * @param graph :: the Graph to operate on (or rather, on whose image markers to operate on)
+		 * @param app :: parent window of graph
+		 * @param dir :: the direction in which to translate curves
+		 * @param status_target :: target to which the statusText(const QString&) signal will be connected
+		 * @param status_slot :: slot on status_target to which the statusText(const QString&) signal will be connected
 		 * The status_target/status_slot arguments are provided, because statusText(const QString&) is emitted
 		 * during initialization, before there's any other chance of connecting to it.
 		 */
@@ -57,7 +57,7 @@ class TranslateCurveTool : public QObject, public PlotToolInterface
 
         virtual int rtti() const {return PlotToolInterface::Rtti_TranslateCurveTool;};
 	signals:
-		/*!\brief Emitted whenever a new message should be presented to the user.
+		/**\brief Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
 		 */

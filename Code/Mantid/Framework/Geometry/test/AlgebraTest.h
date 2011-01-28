@@ -18,7 +18,7 @@ class AlgebraTest: public CxxTest::TestSuite
 public:
 
 void testcountLiterals() 
-  /*!
+  /**
     Test the number of literals in a string.
     Single test includes not.
    */
@@ -32,7 +32,7 @@ void testcountLiterals()
 }
 
 void testDNF()
-  /*! 
+  /** 
     Test the DNF Structure 
    */
 {
@@ -58,7 +58,7 @@ void testDNF()
 
 
 void testCNF()
-  /*!
+  /**
     Test the CNF Structure 
   */
 {
@@ -89,7 +89,7 @@ void testCNF()
 }
 
 void testAdditions()
-  /*!
+  /**
     add two different algebra's by union
   */
 {
@@ -103,7 +103,7 @@ void testAdditions()
 }
 
 void testmakeString()
-  /*!
+  /**
     Process algebra from a string
   */
 {
@@ -119,7 +119,7 @@ void testmakeString()
 
 
 void testMult()
-  /*!
+  /**
     Test algebraic multiplication
 
   */
@@ -143,7 +143,7 @@ void testMult()
 }  
 
 void testWeakDiv()
-  /*!
+  /**
     Test weak division algorithm
   */
 {
@@ -164,7 +164,7 @@ void testWeakDiv()
 }
 
 void testComplementary()
-  /*!
+  /**
     Test the complementary rule:
    */
 {

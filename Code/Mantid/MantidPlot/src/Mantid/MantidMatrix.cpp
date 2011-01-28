@@ -137,7 +137,7 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 }
 
 /** Called when switching between tabs
- *  @param index The index of the new active tab
+ *  @param index :: The index of the new active tab
  */
 void MantidMatrix::viewChanged(int index)
 {
@@ -236,8 +236,8 @@ QString MantidMatrix::text(int row, int col)
 }
 
 /** Sets new column width in a table view(s).
-    @param width New column width in pixels. All columns have the same width.
-    @param all If true the change will be applied to all three table views.
+    @param width :: New column width in pixels. All columns have the same width.
+    @param all :: If true the change will be applied to all three table views.
 */
 void MantidMatrix::setColumnsWidth(int width, bool all)
 {
@@ -275,8 +275,8 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
 }
 
 /**  Sets column width to one table view.
-     @param i ordinal number of the view. 0 - Y, 1 - X, 2 - Error
-     @param width New column width in pixels. All columns have the same width.
+     @param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+     @param width :: New column width in pixels. All columns have the same width.
 */
 void MantidMatrix::setColumnsWidth(int i,int width)
 {
@@ -299,7 +299,7 @@ void MantidMatrix::setColumnsWidth(int i,int width)
 }
 
 /**  Returns the width of a column.
-     @param i ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+     @param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
      @return The column width in pixels. All columns have the same width.
 */
 int MantidMatrix::columnsWidth(int i)
@@ -890,7 +890,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
 
 /** Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram.
 
-    @param type The "curve" type.
+    @param type :: The "curve" type.
     @return Pointer to the created graph.
 */
 MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
@@ -1376,12 +1376,12 @@ const std::string & MantidMatrix::getWorkspaceName()
 // ----------   MantidMatrixModel   ------------------ //
 
 /**   MantidMatrixModel constructor.
-      @param parent Pointer to the parent MantidMatrix
-      @param ws Underlying workspace
-      @param rows Number of rows in the workspace to be visible via MantidMatrixModel
-      @param cols Number of columns (time bins)
-      @param start Starting index
-      @param type Type of the data to display: Y, X, or E
+      @param parent :: Pointer to the parent MantidMatrix
+      @param ws :: Underlying workspace
+      @param rows :: Number of rows in the workspace to be visible via MantidMatrixModel
+      @param cols :: Number of columns (time bins)
+      @param start :: Starting index
+      @param type :: Type of the data to display: Y, X, or E
   */
 MantidMatrixModel::MantidMatrixModel(QObject *parent,
                                      Mantid::API::MatrixWorkspace* ws,
@@ -1453,8 +1453,8 @@ Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
 }
 
 /**
-      @param f Number format:  'f' - fixed, 'e' - scientific.
-      @param prec New precision (number of digits after the decimal point) with which the data will
+      @param f :: Number format:  'f' - fixed, 'e' - scientific.
+      @param prec :: New precision (number of digits after the decimal point) with which the data will
                    be shown in MantidMatrix.
   */
 void MantidMatrixModel::setFormat(const QChar& f,int prec)

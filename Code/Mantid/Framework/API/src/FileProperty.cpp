@@ -26,11 +26,11 @@ using namespace Mantid::Kernel;
 //-----------------------------------------------------------------
 /**
  * Constructor
- * @param name          The name of the property
- * @param default_value A default value for the property
- * @param exts          The allowed extensions, the front entry in the vector will be the default extension
- * @param action        An enum indicating whether this should be a load/save property
- * @param direction     An optional direction (default=Input)
+ * @param name ::          The name of the property
+ * @param default_value :: A default value for the property
+ * @param exts ::          The allowed extensions, the front entry in the vector will be the default extension
+ * @param action ::        An enum indicating whether this should be a load/save property
+ * @param direction ::     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
          const std::vector<std::string> & exts, unsigned int direction)
@@ -51,11 +51,11 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
 
 /**
  * Constructor
- * @param name          The name of the property
- * @param default_value A default value for the property
- * @param ext           The allowed extension
- * @param action        An enum indicating whether this should be a load/save property
- * @param direction     An optional direction (default=Input)
+ * @param name ::          The name of the property
+ * @param default_value :: A default value for the property
+ * @param ext ::           The allowed extension
+ * @param action ::        An enum indicating whether this should be a load/save property
+ * @param direction ::     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
          const std::string & ext, unsigned int direction)
@@ -113,7 +113,7 @@ bool FileProperty::isOptional() const
 
 /**
  * Set the value of the property
- * @param propValue The value here is treated as relating to a filename
+ * @param propValue :: The value here is treated as relating to a filename
  * @returns A string indicating the outcome of the attempt to set the property. An empty string indicates success.
  */
 std::string FileProperty::setValue(const std::string & propValue)
@@ -161,7 +161,7 @@ std::string FileProperty::setValue(const std::string & propValue)
 
 /**
  * Set up the property
- * @param defExt The default extension
+ * @param defExt :: The default extension
  */
 void FileProperty::setUp(const std::string & defExt)
 {
@@ -204,7 +204,7 @@ bool FileProperty::extsMatchRunFiles()
 
 /**
  * Handles the filename if this is a load property
- * @param propValue The filename to treat as a filepath to be loaded
+ * @param propValue :: The filename to treat as a filepath to be loaded
  * @returns A string contain the result of the operation, empty if successful.
  */
 std::string FileProperty::setLoadProperty(const std::string & propValue)
@@ -241,7 +241,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
 
 /**
  * Handles the filename if this is a save property
- * @param propValue The filename to treat as a filepath to be saved
+ * @param propValue :: The filename to treat as a filepath to be saved
  * @returns A string contain the result of the operation, empty if successful.
  */
 std::string FileProperty::setSaveProperty(const std::string & propValue)
@@ -283,7 +283,7 @@ std::string FileProperty::setSaveProperty(const std::string & propValue)
 
 /**
  * Create a given directory if it does not already exist.
- * @param path The path to the directory, which can include file stem
+ * @param path :: The path to the directory, which can include file stem
  * @returns A string indicating a problem if one occurred
  */
 std::string FileProperty::createDirectory(const std::string & path) const
@@ -318,7 +318,7 @@ std::string FileProperty::createDirectory(const std::string & path) const
 
 /**
  * Check file extension to see if a lower- or upper-cased version will also match if the given one does not exist
- * @param filepath A filename whose extension is checked and converted to lower/upper case if necessary.
+ * @param filepath :: A filename whose extension is checked and converted to lower/upper case if necessary.
  * @returns The new filename
  */
 std::string FileProperty::convertExtension(const std::string & filepath) const

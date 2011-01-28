@@ -22,7 +22,7 @@ public:
 
 
 
-/*! Empty constructor
+/** Empty constructor
  */
 CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(NULL)
 {
@@ -40,7 +40,7 @@ CompAssembly::CompAssembly(const IComponent* base, const ParameterMap * map)
 }
 
 
-/*! Valued constructor
+/** Valued constructor
  *  @param n :: name of the assembly
  *  @param reference :: the parent Component
  * 
@@ -62,7 +62,7 @@ CompAssembly::CompAssembly(const std::string& n, IComponent* reference) :
   }
 }
 
-/*! Copy constructor
+/** Copy constructor
  *  @param assem :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly& assem) :
@@ -78,7 +78,7 @@ CompAssembly::CompAssembly(const CompAssembly& assem) :
   }
 }
 
-/*! Destructor
+/** Destructor
  */
 CompAssembly::~CompAssembly()
 {
@@ -91,7 +91,7 @@ CompAssembly::~CompAssembly()
   m_children.clear();
 }
 
-/*! Clone method
+/** Clone method
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
@@ -100,7 +100,7 @@ IComponent* CompAssembly::clone() const
   return new CompAssembly(*this);
 }
 
-/*! Add method
+/** Add method
  * @param comp :: component to add 
  * @return number of components in the assembly
  * 
@@ -120,7 +120,7 @@ int CompAssembly::add(IComponent* comp)
   return static_cast<int>(m_children.size());
 }
 
-/*! AddCopy method
+/** AddCopy method
  * @param comp :: component to add 
  * @return number of components in the assembly
  * 
@@ -142,9 +142,9 @@ int CompAssembly::addCopy(IComponent* comp)
   return m_children.size();
 }
 
-/*! AddCopy method
+/** AddCopy method
  * @param comp :: component to add 
- * @param n    :: name of the copied component. 
+ * @param n :: name of the copied component. 
  * @return number of components in the assembly
  * 
  *  Add a copy of a component in the assembly. 
@@ -166,7 +166,7 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
   return m_children.size();
 }
 
-/*! Return the number of components in the assembly
+/** Return the number of components in the assembly
  * @return m_children.size() 
  */
 int CompAssembly::nelements() const
@@ -177,14 +177,14 @@ int CompAssembly::nelements() const
     return static_cast<int>(m_children.size());
 }
 
-/*! Get a pointer to the ith component in the assembly. Note standard C/C++
+/** Get a pointer to the ith component in the assembly. Note standard C/C++
  *  array notation used, that is, i most be an integer i = 0,1,..., N-1, where
  *  N is the number of component in the assembly. Easier to use than the [] operator 
  *  when you have a pointer
  *
- * @param i The index of the component you want
+ * @param i :: The index of the component you want
  * @return m_children[i] 
- * @throws std::runtime_error if i is not in range
+ * @throw std::runtime_error if i is not in range
  */
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
@@ -206,10 +206,10 @@ boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
   }
 }
 
-/*! Overloaded index access operator. \link getChild() \endlink
- * @param i Element i within the component assembly
+/** Overloaded index access operator. \link getChild() \endlink
+ * @param i :: Element i within the component assembly
  * @return A shared pointer to the ith component
- * @throws std:runtime_error if i is out of range 
+ * @throw std:runtime_error if i is out of range 
  */
 boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
 {
@@ -218,7 +218,7 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
 
 /**
  * Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children
- * @param assemblyBox [Out] The resulting bounding box is stored here.
+ * @param assemblyBox :: [Out] The resulting bounding box is stored here.
  */
 void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
 {
@@ -267,7 +267,7 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
   }
 }
 
-/*! Print information about elements in the assembly to a stream
+/** Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 
  *  Loops through all components in the assembly 
@@ -284,7 +284,7 @@ void CompAssembly::printChildren(std::ostream& os) const
   }
 }
 
-/*! Print information about all the elements in the tree to a stream
+/** Print information about all the elements in the tree to a stream
  *  Loops through all components in the tree 
  *  and call printSelf(os). 
  *
@@ -351,9 +351,9 @@ const Quat CompAssembly::getRotation() const
 }
 
 
-/*! Print information about elements in the assembly to a stream
+/** Print information about elements in the assembly to a stream
  *  Overload the operator <<
- * @param os  :: output stream 
+ * @param os :: output stream 
  * @param ass :: component assembly 
  * @return stream representation of component assembly
  * 

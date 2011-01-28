@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 #include "CompAssemblyActor.h"
-/*!
+/**
   \class  InstrumentActor
   \brief  InstrumentActor class is wrapper actor for the instrument.
   \author Srikanth Nagella

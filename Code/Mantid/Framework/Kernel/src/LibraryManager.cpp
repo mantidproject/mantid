@@ -28,9 +28,9 @@ namespace Mantid
     }
 
 /** Opens all suitable DLLs on a given path.
- *  \param filePath :: The filepath to the directory where the libraries are.
- *  \param isRecursive :: Whether to search subdirectories.
- *  \return The number of libraries opened.
+ *  @param filePath :: The filepath to the directory where the libraries are.
+ *  @param isRecursive :: Whether to search subdirectories.
+ *  @return The number of libraries opened.
  */
     int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 					     bool isRecursive)

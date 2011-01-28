@@ -102,9 +102,9 @@ namespace Mantid
     }
 
     /** Function called by IDC routines to report an error. Passes the error through to the logger
-     * @param status  The status code of the error (disregarded)
-     * @param code    The error code (disregarded)
-     * @param message The error message - passed to the logger at error level
+     * @param status ::  The status code of the error (disregarded)
+     * @param code ::    The error code (disregarded)
+     * @param message :: The error message - passed to the logger at error level
      */
     void LoadDAE::IDCReporter(int status, int code, const char* message)
     {
@@ -454,8 +454,8 @@ namespace Mantid
 
 
     /** Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw).
-     *  @param localWorkspace The workspace
-     *  @param iName The instrument name
+     *  @param localWorkspace :: The workspace
+     *  @param iName :: The instrument name
      */
     void LoadDAE::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace, const char* iName)
     {
@@ -487,8 +487,8 @@ namespace Mantid
     }
 
     /** Populate spectra-detector map
-        @param dae_handle The internal DAE identifier
-        @param localWorkspace The workspace
+        @param dae_handle :: The internal DAE identifier
+        @param localWorkspace :: The workspace
      */
     void LoadDAE::loadSpectraMap(idc_handle_t dae_handle, DataObjects::Workspace2D_sptr localWorkspace)
     {

@@ -108,8 +108,8 @@ void CheckWorkspacesMatch::doComparison()
 }
 
 /// Checks that the data matches
-/// @param ws1 the first workspace
-/// @param ws2 the second workspace
+/// @param ws1 :: the first workspace
+/// @param ws2 :: the second workspace
 /// @retval true The data matches
 /// @retval false The data does not matches
 bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
@@ -169,8 +169,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
 }
 
 /// Checks that the axes matches
-/// @param ws1 the first workspace
-/// @param ws2 the second workspace
+/// @param ws1 :: the first workspace
+/// @param ws2 :: the second workspace
 /// @retval true The axes match
 /// @retval false The axes do not match
 bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
@@ -241,8 +241,8 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
 }
 
 /// Checks that the spectra maps match
-/// @param map1 the first sp det map
-/// @param map2 the second sp det map
+/// @param map1 :: the first sp det map
+/// @param map2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
 bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, const API::SpectraDetectorMap& map2)
@@ -259,8 +259,8 @@ bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, 
 }
 
 /// Checks that the instruments match
-/// @param ws1 the first workspace
-/// @param ws2 the second workspace
+/// @param ws1 :: the first workspace
+/// @param ws2 :: the second workspace
 /// @retval true The instruments match
 /// @retval false The instruments do not match
 bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
@@ -291,8 +291,8 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
 }
 
 /// Checks that the masking matches
-/// @param ws1 the first workspace
-/// @param ws2 the second workspace
+/// @param ws1 :: the first workspace
+/// @param ws2 :: the second workspace
 /// @retval true The masking matches
 /// @retval false The masking does not match
 bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
@@ -323,8 +323,8 @@ bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API
 }
 
 /// Checks that the sample matches
-/// @param sample1 the first sample
-/// @param sample2 the second sample
+/// @param sample1 :: the first sample
+/// @param sample2 :: the second sample
 /// @retval true The sample matches
 /// @retval false The samples does not match
 bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sample& sample2)
@@ -343,8 +343,8 @@ bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sa
 }
 
 /// Checks that the Run matches
-/// @param run1 the first run object
-/// @param run2 the second run object
+/// @param run1 :: the first run object
+/// @param run2 :: the second run object
 /// @retval true The sample matches
 /// @retval false The samples does not match
 

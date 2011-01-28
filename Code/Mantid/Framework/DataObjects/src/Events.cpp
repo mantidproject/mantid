@@ -22,7 +22,7 @@ namespace DataObjects
   /// --------------------- TofEvent stuff ----------------------------------
   //==========================================================================
   /** Constructor, specifying the time of flight only
-   * @param tof time of flight, in microseconds
+   * @param tof :: time of flight, in microseconds
    */
   TofEvent::TofEvent(const double tof) :
               m_tof(tof), m_pulsetime(0)
@@ -30,8 +30,8 @@ namespace DataObjects
   }
 
   /** Constructor, specifying the time of flight and the frame id
-   * @param tof time of flight, in microseconds
-   * @param pulsetime absolute pulse time of the neutron.
+   * @param tof :: time of flight, in microseconds
+   * @param pulsetime :: absolute pulse time of the neutron.
    */
   TofEvent::TofEvent(const double tof, const DateAndTime pulsetime) :
               m_tof(tof), m_pulsetime(pulsetime)
@@ -39,7 +39,7 @@ namespace DataObjects
   }
 
   /** Constructor, copy from another TofEvent object
-   * @param rhs Other TofEvent to copy.
+   * @param rhs :: Other TofEvent to copy.
    */
   TofEvent::TofEvent(const TofEvent& rhs) :
       m_tof(rhs.m_tof), m_pulsetime(rhs.m_pulsetime)
@@ -60,7 +60,7 @@ namespace DataObjects
 
 
   /** Copy from another TofEvent object
-   * @param rhs Other TofEvent to copy.
+   * @param rhs :: Other TofEvent to copy.
    * @return reference to this.
    */
   TofEvent& TofEvent::operator=(const TofEvent& rhs)
@@ -104,8 +104,8 @@ namespace DataObjects
   }
 
   /** Output a string representation of the event to a stream
-   * @param os Stream
-   * @param event TofEvent to output to the stream
+   * @param os :: Stream
+   * @param event :: TofEvent to output to the stream
    */
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
@@ -189,7 +189,7 @@ namespace DataObjects
   }
 
   /** Comparison operator.
-   * @param rhs event to which we are comparing.
+   * @param rhs :: event to which we are comparing.
    * @return true if all elements of this event are identical
    *  */
   bool WeightedEvent::operator==(const WeightedEvent & rhs) const
@@ -203,8 +203,8 @@ namespace DataObjects
 
 
   /** Output a string representation of the event to a stream
-   * @param os Stream
-   * @param event WeightedEvent to output to the stream
+   * @param os :: Stream
+   * @param event :: WeightedEvent to output to the stream
    */
   ostream& operator<<(ostream &os, const WeightedEvent &event)
   {
@@ -307,7 +307,7 @@ namespace DataObjects
   }
 
   /** Comparison operator.
-   * @param rhs event to which we are comparing.
+   * @param rhs :: event to which we are comparing.
    * @return true if all elements of this event are identical
    *  */
   bool WeightedEventNoTime::operator==(const WeightedEventNoTime & rhs) const

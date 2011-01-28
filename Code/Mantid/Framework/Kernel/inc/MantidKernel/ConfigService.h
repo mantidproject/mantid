@@ -93,9 +93,9 @@ namespace Mantid
       {
       public:
         /** Creates the Notification object with the required values
-        *   @param name property that has been changed
-        *   @param newvalue new value of property
-        *   @param prevvalue previous value of property
+        *   @param name :: property that has been changed
+        *   @param newvalue :: new value of property
+        *   @param prevvalue :: previous value of property
         */
         ValueChanged(const std::string name, const std::string newvalue, const std::string prevvalue) : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
         /// The name of the user property that has changed, as it appears in the user.properties file

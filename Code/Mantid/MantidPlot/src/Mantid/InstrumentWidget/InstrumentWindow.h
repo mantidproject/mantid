@@ -39,7 +39,7 @@ class QComboBox;
 class OneCurvePlot;
 class QShowEvent;
 
-/*!
+/**
   \class  InstrumentWindow
   \brief  This is the main window for the control of display on geometry
   \author Srikanth Nagella

@@ -8,15 +8,15 @@ namespace Mantid
 namespace  StrFunc
 {
 
-/*!
+/**
   Takes a character string and evaluates 
   the first [typename T] object. The string is then 
   erase upt to the end of number.
   The diffierence between this and section is that
   it allows trailing characters after the number. 
-  \param out :: place for output
-  \param A :: string to process
-  \returns 1 on success 0 on failure
+  @param out :: place for output
+  @param A :: string to process
+  @return 1 on success 0 on failure
  */ 
 template<typename T>
 int sectPartNum(std::string& A,T& out)
@@ -37,13 +37,13 @@ int sectPartNum(std::string& A,T& out)
   return 1; 
 }
 
-/*!
+/**
   Takes a character string and evaluates 
   the first [typename T] object. The string is then filled with
   spaces upto the end of the [typename T] object
-  \param out :: place for output
-  \param cA :: char array for input and output. 
-  \returns 1 on success 0 on failure
+  @param out :: place for output
+  @param cA :: char array for input and output. 
+  @return 1 on success 0 on failure
  */ 
 template<typename T>
 int section(char* cA,T& out)
@@ -63,9 +63,9 @@ int section(char* cA,T& out)
   takes a character string and evaluates 
   the first <T> object. The string is then filled with
   spaces upto the end of the <T> object
-  \param out :: place for output
-  \param A :: string for input and output. 
-  \return 1 on success 0 on failure
+  @param out :: place for output
+  @param A :: string for input and output. 
+  @return 1 on success 0 on failure
 */
 template<typename T>
 int section(std::string& A,T& out)
@@ -94,9 +94,9 @@ int section(std::string& A,T& out)
   This version deals with MCNPX numbers. Those
   are numbers that are crushed together like
   - 5.4938e+04-3.32923e-6
-  \param out :: place for output
-  \param A :: string for input and output. 
-  \return 1 on success 0 on failure
+  @param out :: place for output
+  @param A :: string for input and output. 
+  @return 1 on success 0 on failure
 */
 template<typename T>
 int sectionMCNPX(std::string& A,T& out)
@@ -126,16 +126,16 @@ int sectionMCNPX(std::string& A,T& out)
   return 0;
 }
 
-/*!
+/**
   Takes a character string and evaluates 
   the first [typename T] object. The string is then 
   erase upto the end of number.
   The diffierence between this and convert is that
   it allows trailing characters after the number. 
-  \param out :: place for output
-  \param A :: string to process
-  \retval number of char read on success
-  \retval 0 on failure
+  @param out :: place for output
+  @param A :: string to process
+  @retval number of char read on success
+  @retval 0 on failure
  */ 
 template<typename T>
 int convPartNum(const std::string& A,T& out)
@@ -153,11 +153,11 @@ int convPartNum(const std::string& A,T& out)
   return static_cast<int>(xpt); 
 }
 
-/*!
+/**
   Convert a string into a value 
-  \param A :: string to pass
-  \param out :: value if found
-  \returns 0 on failure 1 on success
+  @param A :: string to pass
+  @param out :: value if found
+  @return 0 on failure 1 on success
 */
 template<typename T>
 int convert(const std::string& A,T& out)
@@ -177,11 +177,11 @@ int convert(const std::string& A,T& out)
   return 1;
 }
 
-/*!
+/**
   Convert a string into a value 
-  \param A :: string to pass
-  \param out :: value if found
-  \returns 0 on failure 1 on success
+  @param A :: string to pass
+  @param out :: value if found
+  @return 0 on failure 1 on success
 */
 template<typename T>
 int convert(const char* A,T& out)
@@ -192,12 +192,12 @@ int convert(const char* A,T& out)
   return convert(Cx,out);
 }
 
-/*!
+/**
   Write out the three vectors into a file of type dc 9
-  \param step :: parameter to control x-step (starts from zero)
-  \param Y :: Y column
-  \param Fname :: Name of the file
-  \returns 0 on success and -ve on failure
+  @param step :: parameter to control x-step (starts from zero)
+  @param Y :: Y column
+  @param Fname :: Name of the file
+  @return 0 on success and -ve on failure
 */
 template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
@@ -210,12 +210,12 @@ int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
   return writeFile(Fname,X,Y,Ex);
 }
 
-/*!
+/**
   Write out the three vectors into a file of type dc 9
-  \param X :: X column
-  \param Y :: Y column
-  \param Fname :: Name of the file
-  \returns 0 on success and -ve on failure
+  @param X :: X column
+  @param Y :: Y column
+  @param Fname :: Name of the file
+  @return 0 on success and -ve on failure
 */
 template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
@@ -224,16 +224,16 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
   return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
 }
 
-/*!
+/**
   Write out the three container into a file with
   column free-formated data in the form :
    - X  Y Err
    If Err does not exist (or is short) 0.0 is substituted.
-  \param X :: X column
-  \param Y :: Y column
-  \param Err :: Err column
-  \param Fname :: Name of the file
-  \returns 0 on success and -ve on failure
+  @param X :: X column
+  @param Y :: Y column
+  @param Err :: Err column
+  @param Fname :: Name of the file
+  @return 0 on success and -ve on failure
 */
 template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err)
@@ -273,15 +273,15 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   return 0;
 }
 
-/*!  
+/**  
   Call to read in various values in position x1,x2,x3 from the
   line. Note to avoid the dependency on crossSort this needs
   to be call IN ORDER 
-  \param Line :: string to read
-  \param Index :: Indexes to read
-  \param Out :: OutValues [unchanged if not read]
-  \retval 0 :: success
-  \retval -ve on failure.
+  @param Line :: string to read
+  @param Index :: Indexes to read
+  @param Out :: OutValues [unchanged if not read]
+  @retval 0 :: success
+  @retval -ve on failure.
 */
 template<typename T> 
 int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<T>& Out)

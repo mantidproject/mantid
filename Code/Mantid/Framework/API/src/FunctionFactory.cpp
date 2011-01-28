@@ -41,7 +41,7 @@ namespace Mantid
 
 
     /**Creates an instance of a function
-     * @param input An input string which defines the function and initial values for the parameters.
+     * @param input :: An input string which defines the function and initial values for the parameters.
      * Parameters of different functions are separated by ';'. Parameters of the same function
      * are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
      * "name" parameter must be set to a function name. E.g.
@@ -81,7 +81,7 @@ namespace Mantid
 
     /** 
      * Create a function from an expression.
-     * @param expr The input expression
+     * @param expr :: The input expression
      * @return A pointer to the created function
      */
     IFitFunction* FunctionFactoryImpl::createSimple(const Expression& expr)const
@@ -142,7 +142,7 @@ namespace Mantid
 
     /** 
      * Create a composite function from an expression.
-     * @param expr The input expression
+     * @param expr :: The input expression
      * @return A pointer to the created function
      */
     CompositeFunction* FunctionFactoryImpl::createComposite(const Expression& expr)const
@@ -255,8 +255,8 @@ namespace Mantid
 
     /** 
      * Add constraints to the created function
-     * @param fun The function
-     * @param expr The constraint expression. The expression name must be either a single constraint
+     * @param fun :: The function
+     * @param expr :: The constraint expression. The expression name must be either a single constraint
      *    expression such as "0 < Sigma < 1" or a list of constraint expressions separated by commas ','
      *    and enclosed in brackets "(...)" .
      */
@@ -277,8 +277,8 @@ namespace Mantid
 
     /** 
      * Add a constraints to the function
-     * @param fun The function
-     * @param expr The constraint expression.
+     * @param fun :: The function
+     * @param expr :: The constraint expression.
      */
     void FunctionFactoryImpl::addConstraint(IFitFunction* fun,const Expression& expr)const
     {
@@ -287,8 +287,8 @@ namespace Mantid
     }
 
     /**
-     * @param fun The function
-     * @param expr The tie expression: either parName = TieString or a list
+     * @param fun :: The function
+     * @param expr :: The tie expression: either parName = TieString or a list
      *   of name = string pairs
      */
     void FunctionFactoryImpl::addTies(IFitFunction* fun,const Expression& expr)const
@@ -307,8 +307,8 @@ namespace Mantid
     }
 
     /**
-     * @param fun The function
-     * @param expr The tie expression: parName = TieString
+     * @param fun :: The function
+     * @param expr :: The tie expression: parName = TieString
      */
     void FunctionFactoryImpl::addTie(IFitFunction* fun,const Expression& expr)const
     {
@@ -325,7 +325,7 @@ namespace Mantid
 
     /**
       * Create a fitting function from a string.
-      * @param input The input string, has a form of a function call: funName(attr1=val,param1=val,...,ties=(param3=2*param1,...),constraints=(p2>0,...))
+      * @param input :: The input string, has a form of a function call: funName(attr1=val,param1=val,...,ties=(param3=2*param1,...),constraints=(p2>0,...))
       */
     IFitFunction* FunctionFactoryImpl::createFitFunction(const std::string& input) const
     {
@@ -343,7 +343,7 @@ namespace Mantid
 
     /**
       * Create a fitting function from an expression.
-      * @param expr The input expression made by parsing the input string to createFitFunction(const std::string& input)
+      * @param expr :: The input expression made by parsing the input string to createFitFunction(const std::string& input)
       */
     IFitFunction* FunctionFactoryImpl::createFitFunction(const Expression& expr) const
     {

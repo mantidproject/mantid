@@ -168,10 +168,10 @@ namespace Mantid
 
     /**
      * Perform the simulation
-     * @param detector A pointer to the current detector
-     * @param lambda The chosen wavelength
-     * @param attenFactor [Output] The calculated attenuation factor for this wavelength
-     * @param error [Output] The value of the error on the factor
+     * @param detector :: A pointer to the current detector
+     * @param lambda :: The chosen wavelength
+     * @param attenFactor :: [Output] The calculated attenuation factor for this wavelength
+     * @param error :: [Output] The value of the error on the factor
      */
     void MonteCarloAbsorption::doSimulation(const IDetector *const detector, const double lambda,
                                             double & attenFactor, double & error)
@@ -253,10 +253,10 @@ namespace Mantid
 
     /**
      * Return the attenuation factor for the given track
-     * @param startPos The origin of the track
-     * @param scatterPoint The point of scatter
-     * @param finalPos The end point of the track
-     * @param lambda The wavelength of the neutron
+     * @param startPos :: The origin of the track
+     * @param scatterPoint :: The point of scatter
+     * @param finalPos :: The end point of the track
+     * @param lambda :: The wavelength of the neutron
      * @returns The attenuation factor for this neutron's track
      */
     double 
@@ -321,9 +321,9 @@ namespace Mantid
 
     /**
      * Calculate the attenuation for a given length, material and wavelength
-     * @param length Distance through the material
-     * @param material A reference to the Material 
-     * @param lambda The wavelength
+     * @param length :: Distance through the material
+     * @param material :: A reference to the Material 
+     * @param lambda :: The wavelength
      * @returns The attenuation factor
      */
     double 
@@ -338,7 +338,7 @@ namespace Mantid
 
     /**
      * Gather the input values and check validity
-     * @throws std::invalid_argument If the input is invalid. Currently if there is
+     * @throw std::invalid_argument If the input is invalid. Currently if there is
      * no defined sample shape
      */
     void MonteCarloAbsorption::retrieveInput()

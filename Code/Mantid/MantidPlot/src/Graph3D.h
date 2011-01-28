@@ -48,7 +48,7 @@ class UserFunction;
 class UserParametricSurface;
 class UserHelperFunction;//Mantid
 
-/*!\brief 3D graph widget.
+/**\brief 3D graph widget.
  *
  * This provides 3D plotting using Qwt3D.
  *

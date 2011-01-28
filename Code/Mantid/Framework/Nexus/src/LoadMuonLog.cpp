@@ -125,7 +125,7 @@ void LoadMuonLog::exec()
 
 
 /** change each element of the string to lower case
-* @param strToConvert The input string
+* @param strToConvert :: The input string
 * @returns The string but with all characters in lower case
 */
 std::string LoadMuonLog::stringToLower(std::string strToConvert)
@@ -139,7 +139,7 @@ std::string LoadMuonLog::stringToLower(std::string strToConvert)
 
 
 /** check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
-* @param str The string to test
+* @param str :: The string to test
 * @returns true if the strings format matched the expected date format
 */
 bool LoadMuonLog::isDateTimeString(const std::string& str)

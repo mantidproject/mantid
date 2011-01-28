@@ -26,7 +26,7 @@ namespace Mantid
 
     /** 
      * Copy constructor 
-     *  @param copy const reference to the sample object
+     *  @param copy :: const reference to the sample object
      */
     Sample::Sample(const Sample& copy) :
       m_name(copy.m_name), m_shape(copy.m_shape), m_material(copy.m_material), 
@@ -36,7 +36,7 @@ namespace Mantid
     }
 
     /** Assignment operator 
-     * @param rhs const reference to the sample object
+     * @param rhs :: const reference to the sample object
      * @return A reference to this object, which will have the same 
      * state as the argument
      */
@@ -65,7 +65,7 @@ namespace Mantid
 
     /** 
      * Update the name of the sample
-     * @param name The name of the sample
+     * @param name :: The name of the sample
      */
     void Sample::setName(const std::string & name)
     {
@@ -85,8 +85,8 @@ namespace Mantid
     /**
      * Set the object that describes the sample shape. It is assumed that this is defined such
      * that its centre is at [0,0,0]
-     * @param object The object describing the shape
-     * @throws An std::invalid_argument error if the object does 
+     * @param object :: The object describing the shape
+     * @throw An std::invalid_argument error if the object does 
      * not have a valid shape
      */
     void Sample::setShape(const Object & object)
@@ -112,7 +112,7 @@ namespace Mantid
     
     /**
      * Set the type of material that this sample is composed from
-     * @param material A reference to the material object. It is copied into the sample.
+     * @param material :: A reference to the material object. It is copied into the sample.
      */
     void Sample::setMaterial(const Geometry::Material& material)
     {
@@ -122,7 +122,7 @@ namespace Mantid
     /**
      * Return a reference to the sample environment that this sample is attached to
      * @returns A const reference to a SampleEnvironment object
-     * @throws std::runtime_error If the environment has not been defined
+     * @throw std::runtime_error If the environment has not been defined
      */
     const SampleEnvironment & Sample::getEnvironment() const
     {
@@ -135,7 +135,7 @@ namespace Mantid
 
     /**
      * Attach an environment oto this sample
-     * @param env A pointer to a created sample environment. This takes 
+     * @param env :: A pointer to a created sample environment. This takes 
      * ownership of the object.
      */
     void Sample::setEnvironment(SampleEnvironment * env)
@@ -146,7 +146,7 @@ namespace Mantid
     /**
      * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT
      * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal
-     * @param geom_id The flag for the geometry
+     * @param geom_id :: The flag for the geometry
      */
     void Sample::setGeometryFlag(int geom_id)
     {
@@ -165,7 +165,7 @@ namespace Mantid
 
     /**
      * Set the thickness value
-     * @param thick The parameter e_thick in the SPB_STRUCT
+     * @param thick :: The parameter e_thick in the SPB_STRUCT
      */
     void Sample::setThickness(double thick)
     {
@@ -183,7 +183,7 @@ namespace Mantid
 
     /**
      * Set the height value
-     * @param height The parameter e_height in the SPB_STRUCT
+     * @param height :: The parameter e_height in the SPB_STRUCT
      */
     void Sample::setHeight(double height)
     {
@@ -201,7 +201,7 @@ namespace Mantid
 
     /**
      * Set the width value
-     * @param width The parameter e_width in the SPB_STRUCT
+     * @param width :: The parameter e_width in the SPB_STRUCT
      */
     void Sample::setWidth(double width)
     {

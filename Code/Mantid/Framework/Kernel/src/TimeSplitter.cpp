@@ -114,8 +114,8 @@ bool isFilter(const TimeSplitterType& a)
  * Combines a filter and a splitter by removing entries that are filtered out from the splitter.
  * Also, will combine two filters together by "and"ing them
  *
- * @param a TimeSplitterType splitter OR filter
- * @param b TimeSplitterType splitter OR filter.
+ * @param a :: TimeSplitterType splitter OR filter
+ * @param b :: TimeSplitterType splitter OR filter.
  * @throw std::invalid_argument if two splitters are given.
  */
 TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b)
@@ -151,8 +151,8 @@ TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b
  * Works on splitter + filter if (a) is a splitter and b is a filter.
  *  In general, use the + operator since it will resolve the order for you.
  *
- * @param a TimeSplitterType filter or Splitter.
- * @param b TimeSplitterType filter.
+ * @param a :: TimeSplitterType filter or Splitter.
+ * @param b :: TimeSplitterType filter.
  * @return the ANDed filter
  */
 TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b)
@@ -185,7 +185,7 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
 //------------------------------------------------------------------------------------------------
 /** Remove any overlap in a filter (will not work properly on a splitter)
  *
- * @param a TimeSplitterType filter.
+ * @param a :: TimeSplitterType filter.
  */
 TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
 {
@@ -220,8 +220,8 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
  * Only works on Filters, not splitters. Combines the splitters
  * to only keep times where EITHER Filter is TRUE.
  *
- * @param a TimeSplitterType filter.
- * @param b TimeSplitterType filter.
+ * @param a :: TimeSplitterType filter.
+ * @param b :: TimeSplitterType filter.
  * @return the ORed filter
  */
 TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b)
@@ -255,7 +255,7 @@ TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b
  * Only works on Filters. Returns a filter with the reversed
  * time intervals as the incoming filter.
  *
- * @param a TimeSplitterType filter.
+ * @param a :: TimeSplitterType filter.
  */
 TimeSplitterType operator ~(const TimeSplitterType& a)
 {

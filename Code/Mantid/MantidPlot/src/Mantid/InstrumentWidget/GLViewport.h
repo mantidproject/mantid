@@ -1,4 +1,4 @@
-/*!________________________________________________
+/**________________________________________________
 * Library        : NTK
 * Name           : GLViewport.h
 * Author         : L.C.Chapon
@@ -10,7 +10,7 @@
 */
 #ifndef GLVIEWPORT_H_
 #define GLVIEWPORT_H_
-/*!
+/**
   \class  GLViewport
   \brief  class handling OpenGL Viewport
   \author Chapon Laurent & Srikanth Nagella

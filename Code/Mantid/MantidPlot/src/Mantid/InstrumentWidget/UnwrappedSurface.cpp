@@ -163,8 +163,8 @@ void UnwrappedSurface::callback(boost::shared_ptr<const Mantid::Geometry::IDetec
 
 /**
   * Calculate the rectangular region in uv coordinates occupied by an assembly.
-  * @param comp A member of the assebmly. The total area of the assembly is a sum of areas of its members
-  * @param compRect A rect. area occupied by comp in uv space
+  * @param comp :: A member of the assebmly. The total area of the assembly is a sum of areas of its members
+  * @param compRect :: A rect. area occupied by comp in uv space
   */
 void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
 {
@@ -199,7 +199,7 @@ void UnwrappedSurface::draw(GL3DWidget *widget)
 
 /**
   * Draw the unwrapped instrument onto the screen
-  * @param widget The widget to draw it on.
+  * @param widget :: The widget to draw it on.
   */
 void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 {
@@ -382,14 +382,14 @@ void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::
   *   R.rotate(Xfrom) == Xto
   *   R.rotate(Yfrom) == Yto
   *   R.rotate(Zfrom) == Zto
-  * @param Xfrom The X axis of the original basis set
-  * @param Yfrom The Y axis of the original basis set
-  * @param Zfrom The Z axis of the original basis set
-  * @param Xto The X axis of the final basis set
-  * @param Yto The Y axis of the final basis set
-  * @param Zto The Z axis of the final basis set
-  * @param R The output rotation as a quaternion
-  * @param out Debug printout flag
+  * @param Xfrom :: The X axis of the original basis set
+  * @param Yfrom :: The Y axis of the original basis set
+  * @param Zfrom :: The Z axis of the original basis set
+  * @param Xto :: The X axis of the final basis set
+  * @param Yto :: The Y axis of the final basis set
+  * @param Zto :: The Z axis of the final basis set
+  * @param R :: The output rotation as a quaternion
+  * @param out :: Debug printout flag
   */
 void UnwrappedSurface::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
                 const Mantid::Geometry::V3D& Yfrom,
@@ -643,8 +643,8 @@ QRectF UnwrappedSurface::selectionRectUV()const
 
 /**
   * Set detector color in OpenGL context.
-  * @param index Detector's index in m_unwrappedDetectors
-  * @param picking True if detector is being drawn in the picking mode.
+  * @param index :: Detector's index in m_unwrappedDetectors
+  * @param picking :: True if detector is being drawn in the picking mode.
   *   In this case index is transformed into color
   */
 void UnwrappedSurface::setColor(int index,bool picking)

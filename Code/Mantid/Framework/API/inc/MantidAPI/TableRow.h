@@ -83,7 +83,7 @@ public:
     /**  Input streaming operator. Makes TableRow look like a standard input stream.
          Every << operatr moves an internal pointer to the next element in the row.
          If the types of the input value and the current element don't match an exception is thrown.
-         @param t Input value
+         @param t :: Input value
          @return Self reference
      */
     template<class T>
@@ -109,7 +109,7 @@ public:
     /**  Output streaming operator. Makes TableRow look like a standard output stream.
          Every >> operatr moves an internal pointer to the next element in the row.
          If the types of the receiving variable and the current element don't match an exception is thrown.
-         @param t Variable for output
+         @param t :: Variable for output
          @return Self reference
      */
     template<class T>
@@ -125,7 +125,7 @@ public:
     const TableRow& operator>>(bool& t)const;
 
     /**  Templated method to access the element col in the row. The internal pointer moves to point to the element after col.
-         @param col Element's position in the row
+         @param col :: Element's position in the row
          @return cell of the template type
      */
     template<class T>
@@ -143,25 +143,25 @@ public:
     }
 
     /**  Returns a reference to the element in position col if its type is int
-         @param col Position of the element
+         @param col :: Position of the element
          @return Reference to the element
      */
     int& Int(int col){return cell<int>(col);}
 
     /**  Returns a reference to the element in position col if its type is double
-         @param col Position of the element
+         @param col :: Position of the element
          @return Reference to the element
      */
     double& Double(int col){return cell<double>(col);}
 
     /**  Returns a reference to the element in position col if its type is bool
-         @param col Position of the element
+         @param col :: Position of the element
          @return Reference to the element
      */
     Boolean& Bool(int col){return cell<Boolean>(col);}
 
     /**  Returns a reference to the element in position col if its type is std::string
-         @param col Position of the element
+         @param col :: Position of the element
          @return Reference to the element
      */
     std::string& String(int col){return cell<std::string>(col);}

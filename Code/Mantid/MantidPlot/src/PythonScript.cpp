@@ -356,7 +356,7 @@ bool PythonScript::exec()
 
 /**
  * Perform the appropriate call to a Python eval command.
- * @param return_tuple If this is a valid pointer then the code object is called rather than executed and the return values are placed into this tuple
+ * @param return_tuple :: If this is a valid pointer then the code object is called rather than executed and the return values are placed into this tuple
  * @returns A pointer to an object indicating the success/failure of the code execution
  */
 PyObject* PythonScript::executeScript(PyObject* return_tuple)

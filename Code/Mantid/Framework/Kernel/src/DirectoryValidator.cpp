@@ -26,7 +26,7 @@ namespace Kernel
 Logger& DirectoryValidator::g_log = Logger::get("DirectoryValidator");
 
 /** Constructor
- *  @param testDirectoryExists Flag indicating whether to test for existence of directory (default: yes)
+ *  @param testDirectoryExists :: Flag indicating whether to test for existence of directory (default: yes)
  */
 DirectoryValidator::DirectoryValidator(bool testDirectoryExists)
   : FileValidator()
@@ -53,7 +53,7 @@ IValidator<std::string>* DirectoryValidator::clone()
 }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path syntax looks valid
- *  @param value file name
+ *  @param value :: file name
  *  @returns An error message to display to users or an empty string on no error
  */
 std::string DirectoryValidator::checkValidity(const std::string &value) const

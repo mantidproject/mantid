@@ -214,10 +214,10 @@ class PropertyWithValue : public Property
 {
 public:
   /** Constructor
-   *  @param name The name to assign to the property
-   *  @param defaultValue Is stored initial default value of the property
-   *  @param validator The validator to use for this property (this class will take ownership of the validator)
-   *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+   *  @param name :: The name to assign to the property
+   *  @param defaultValue :: Is stored initial default value of the property
+   *  @param validator :: The validator to use for this property (this class will take ownership of the validator)
+   *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
   PropertyWithValue( const std::string &name, const TYPE& defaultValue, IValidator<TYPE> *validator = new NullValidator<TYPE>, const unsigned int direction = Direction::Input ) :
     Property( name, typeid( TYPE ), direction ),
@@ -228,9 +228,9 @@ public:
   }
 
   /** Constructor
-   *  @param name The name to assign to the property
-   *  @param defaultValue Is stored initial default value of the property
-   *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+   *  @param name :: The name to assign to the property
+   *  @param defaultValue :: Is stored initial default value of the property
+   *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
   PropertyWithValue( const std::string &name, const TYPE& defaultValue, const unsigned int direction) :
     Property( name, typeid( TYPE ), direction ),
@@ -277,7 +277,7 @@ public:
 
   /** Set the value of the property from a string representation.
    *  Note that "1" & "0" must be used for bool properties rather than true/false.
-   *  @param value The value to assign to the property
+   *  @param value :: The value to assign to the property
    *  @return Returns "" if the assignment was successful or a user level description of the problem
    */
   virtual std::string setValue(const std::string& value )
@@ -343,7 +343,7 @@ public:
   /** Assignment operator.
    *  Allows assignment of a new value to the property by writing,
    *  e.g., myProperty = 3;
-   *  @param value The new value to assign to the property
+   *  @param value :: The new value to assign to the property
    *  @return the reference to itself
    */
   virtual TYPE& operator=( const TYPE& value )

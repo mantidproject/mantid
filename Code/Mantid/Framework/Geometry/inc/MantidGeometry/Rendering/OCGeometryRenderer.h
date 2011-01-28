@@ -9,7 +9,7 @@ namespace Mantid
 
   namespace Geometry
   {
-    /*!
+    /**
     \class OCGeometryRenderer
     \brief rendering geometry primitives of OpenCascade
     \author Srikanth Nagella

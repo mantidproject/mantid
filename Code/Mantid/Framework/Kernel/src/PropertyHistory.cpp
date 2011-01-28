@@ -21,7 +21,7 @@ PropertyHistory::~PropertyHistory()
 
 /**
  * Standard Copy Constructor
- * \param A :: PropertyHistory Item to copy
+ * @param A :: PropertyHistory Item to copy
  */
 PropertyHistory::PropertyHistory(const PropertyHistory& A) :
   m_name(A.m_name),m_value(A.m_value),
@@ -30,8 +30,8 @@ PropertyHistory::PropertyHistory(const PropertyHistory& A) :
 
 /**
  * Standard Assignment operator
- * \param A :: PropertyHistory Item to assign to 'this'
- * \return pointer to this
+ * @param A :: PropertyHistory Item to assign to 'this'
+ * @return pointer to this
  */
 PropertyHistory& PropertyHistory::operator=(const PropertyHistory& A)
 {
@@ -47,8 +47,8 @@ PropertyHistory& PropertyHistory::operator=(const PropertyHistory& A)
 }
 
 /** Prints a text representation of itself
- *  @param os The ouput stream to write to
- *  @param indent an indentation value to make pretty printing of object and sub-objects
+ *  @param os :: The ouput stream to write to
+ *  @param indent :: an indentation value to make pretty printing of object and sub-objects
  */
 void PropertyHistory::printSelf(std::ostream& os, const int indent) const
 {
@@ -59,8 +59,8 @@ void PropertyHistory::printSelf(std::ostream& os, const int indent) const
 }
 
 /** Prints a text representation
- *  @param os The ouput stream to write to
- *  @param AP The PropertyHistory to output
+ *  @param os :: The ouput stream to write to
+ *  @param AP :: The PropertyHistory to output
  *  @returns The ouput stream
  */
 std::ostream& operator<<(std::ostream& os, const PropertyHistory& AP)

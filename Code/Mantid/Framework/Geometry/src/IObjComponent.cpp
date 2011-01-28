@@ -58,7 +58,7 @@ namespace Mantid
 
     /**
      * Copy constructor
-     * @param origin The object to initialize this with
+     * @param origin :: The object to initialize this with
      */
     IObjComponent::IObjComponent(const IObjComponent& origin) : 
       m_ScaleFactor(origin.m_ScaleFactor)

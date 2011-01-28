@@ -71,12 +71,12 @@ public:
   virtual bool isText() const{return false;}
 
   /// Returns the value at a specified index
-  /// @param index the index
-  /// @param verticalIndex The verticalIndex
+  /// @param index :: the index
+  /// @param verticalIndex :: The verticalIndex
   virtual double operator()(const int& index, const int& verticalIndex = 0) const = 0;
   /// Sets the value at the specified index
-  /// @param index The index
-  /// @param value The new value
+  /// @param index :: The index
+  /// @param value :: The new value
   virtual void setValue(const int& index, const double& value) = 0;
   virtual const int& spectraNo(const int& index) const;
   virtual int& spectraNo(const int& index);

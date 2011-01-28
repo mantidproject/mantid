@@ -177,7 +177,7 @@ ExistsError : public std::runtime_error
   const char* what() const throw();
 };
 
-/*!
+/**
   \class AbsObjMethod
   \brief Exception for a call to an abstract class function
 
@@ -268,7 +268,7 @@ class DLLExport OpenGLError: public std::runtime_error
 
   const char* what() const throw();
 };
-  /*!
+  /**
   \class MisMatch
   \brief Error when two numbers should be identical (or close)
   \date October 2005
@@ -299,7 +299,7 @@ class DLLExport OpenGLError: public std::runtime_error
   };
 
 
-  /*!
+  /**
   \class IndexError
   \brief Exception for index errors
   \author Stuart Ansell

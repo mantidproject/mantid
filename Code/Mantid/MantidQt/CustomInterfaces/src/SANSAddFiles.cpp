@@ -138,7 +138,7 @@ QListWidgetItem* SANSAddFiles::insertListFront(const QString &text)
 }
 /** Sets directory to which files will be saved and the label
 *  that users see
-*  @param dir full path of the output directory
+*  @param dir :: full path of the output directory
 */
 void SANSAddFiles::setOutDir(std::string dir)
 {
@@ -147,7 +147,7 @@ void SANSAddFiles::setOutDir(std::string dir)
 }
 /** Update the output directory label if the Mantid system output
 *  directory has changed
-*  @param pDirInfo a pointer to an object with the output directory name in it
+*  @param pDirInfo :: a pointer to an object with the output directory name in it
 */
 void SANSAddFiles::changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo)
 {

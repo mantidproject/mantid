@@ -14,8 +14,8 @@ namespace Mantid
     DECLARE_ALGORITHM(PoissonErrors)
 
     /** Performs a simple check to see if the sizes of two workspaces are identically sized
-    * @param lhs the first workspace to compare
-    * @param rhs the second workspace to compare
+    * @param lhs :: the first workspace to compare
+    * @param rhs :: the second workspace to compare
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */

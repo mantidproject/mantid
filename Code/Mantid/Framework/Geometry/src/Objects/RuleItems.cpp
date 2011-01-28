@@ -35,19 +35,19 @@ Kernel::Logger& Intersection::PLog(Kernel::Logger::get("Intersection"));
 
 Intersection::Intersection() : Rule(),
   A(0),B(0)
-  /*!
+  /**
     Standard Constructor with null leaves
   */
 {}
 
 Intersection::Intersection(Rule* Ix,Rule* Iy) : Rule(),
   A(Iy),B(Ix)
-  /*!
+  /**
     Intersection constructor from two Rule ptrs.
     - Sets A,B's parents to *this
     - Allowed to control Ix and Iy
-    \param Ix :: Rule A
-    \param Iy :: Rule B 
+    @param Ix :: Rule A
+    @param Iy :: Rule B 
   */
 { 
   if (A)
@@ -58,12 +58,12 @@ Intersection::Intersection(Rule* Ix,Rule* Iy) : Rule(),
 
 Intersection::Intersection(Rule* Parent,Rule* Ix,Rule* Iy) : 
   Rule(Parent),A(Ix),B(Iy)    
-  /*!
+  /**
     Intersection constructor from two Rule ptrs 
     - Sets A,B's parents to *this.
-    \param Parent :: Set the Rule::Parent pointer
-    \param Ix :: Rule A
-    \param Iy :: Rule B 
+    @param Parent :: Set the Rule::Parent pointer
+    @param Ix :: Rule A
+    @param Iy :: Rule B 
   */
 {
   if (A)
@@ -74,10 +74,10 @@ Intersection::Intersection(Rule* Parent,Rule* Ix,Rule* Iy) :
 
 Intersection::Intersection(const Intersection& Iother) : 
   Rule(),A(0),B(0)
-  /*!
+  /**
     Copy constructor:
     Does a clone on the sub-tree below
-    \param Iother :: Intersection to copy
+    @param Iother :: Intersection to copy
   */
 {
   if (Iother.A)
@@ -94,11 +94,11 @@ Intersection::Intersection(const Intersection& Iother) :
 
 Intersection&
 Intersection::operator=(const Intersection& Iother) 
-  /*!
+  /**
     Assignment operator :: Does a deep copy
     of the leaves of Iother. 
-    \param Iother :: object to copy
-    \returns *this
+    @param Iother :: object to copy
+    @return *this
   */
 {
   if (this!=&Iother)
@@ -124,7 +124,7 @@ Intersection::operator=(const Intersection& Iother)
 }
 
 Intersection::~Intersection()
-  /*!
+  /**
     Destructor :: responsible for the two
     leaf intersections.
   */
@@ -135,9 +135,9 @@ Intersection::~Intersection()
 
 Intersection*
 Intersection::clone() const
-  /*!
+  /**
     Virtual copy constructor
-    \returns new Intersection(this)
+    @return new Intersection(this)
   */
 {
   return new Intersection(*this);
@@ -145,12 +145,12 @@ Intersection::clone() const
 
 int
 Intersection::isComplementary() const 
-  /*!
+  /**
     Determine is the rule has complementary
     sub components
-    \retval 1 :: A side
-    \retval -1 :: B side
-    \retval 0 :: no complement
+    @retval 1 :: A side
+    @retval -1 :: B side
+    @retval 0 :: no complement
   */
 {
   if (A && A->isComplementary())
@@ -163,11 +163,11 @@ Intersection::isComplementary() const
 
 void
 Intersection::setLeaves(Rule* aR,Rule* bR)
-  /*!
+  /**
     Replaces a both with a rule.
     No deletion is carried out but sets the parents.
-    \param aR :: Rule on the left
-    \param bR :: Rule on the right
+    @param aR :: Rule on the left
+    @param bR :: Rule on the right
   */
 {
   A=aR;
@@ -181,11 +181,11 @@ Intersection::setLeaves(Rule* aR,Rule* bR)
 
 void
 Intersection::setLeaf(Rule* nR,const int side)
-  /*!
+  /**
     Replaces a leaf with a rule.
     Calls delete on previous leaf.
-    \param nR :: new rule
-    \param side :: side to use 
+    @param nR :: new rule
+    @param side :: side to use 
     - 0 == LHS 
     - 1 == RHS
   */
@@ -209,12 +209,12 @@ Intersection::setLeaf(Rule* nR,const int side)
 
 int 
 Intersection::findLeaf(const Rule* R) const
-  /*!
+  /**
     Finds out if the Rule is the
     same as the leaves
-    \param R :: Rule pointer to compare
-    \retval 0 / 1 for LHS / RHS leaf 
-    \retval -1 :: neither leaf
+    @param R :: Rule pointer to compare
+    @retval 0 / 1 for LHS / RHS leaf 
+    @retval -1 :: neither leaf
   */
 {
   if (A==R)
@@ -226,11 +226,11 @@ Intersection::findLeaf(const Rule* R) const
 
 Rule*
 Intersection::findKey(const int KeyN)
-  /*!
+  /**
     Finds the leaf with the surface number KeyN
-    \param KeyN :: Number to search for
-    \retval 0 :: no leaf with that key number availiable
-    \retval Rule* if an appropiate leaf is found
+    @param KeyN :: Number to search for
+    @retval 0 :: no leaf with that key number availiable
+    @retval Rule* if an appropiate leaf is found
   */
 {
   Rule* PtrOut=(A) ? A->findKey(KeyN) : 0;
@@ -241,9 +241,9 @@ Intersection::findKey(const int KeyN)
 
 std::string
 Intersection::display() const
-  /*!
+  /**
     Displaces a bracket wrapped object
-    \return Bracketed string
+    @return Bracketed string
   */
 {
   std::string out;
@@ -265,11 +265,11 @@ Intersection::display() const
 
 std::string
 Intersection::displayAddress() const
-  /*!
+  /**
     Debug function that converts the 
     the intersection ion space delimited unit
     to denote intersection.
-    \returns ( leaf leaf )
+    @return ( leaf leaf )
   */
 {
   std::stringstream cx;
@@ -287,11 +287,11 @@ Intersection::displayAddress() const
 
 bool 
 Intersection::isValid(const Geometry::V3D& Vec) const
-  /*!
+  /**
     Calculates if Vec is within the object
-    \param Vec :: Point to test
-    \retval 1 ::  Vec is within object 
-    \retval 0 :: Vec is outside object.
+    @param Vec :: Point to test
+    @retval 1 ::  Vec is within object 
+    @retval 0 :: Vec is outside object.
   */
 {
   if (!A || !B)
@@ -301,12 +301,12 @@ Intersection::isValid(const Geometry::V3D& Vec) const
 
 bool
 Intersection::isValid(const std::map<int,int>& MX) const
-  /*!
+  /**
     Use MX to determine if the surface truth etc is 
     valie
-    \param MX :: map of key + logical value XOR sign
-    \retval 1 ::  Both sides are valid
-    \retval 0 :: Either side is invalid.
+    @param MX :: map of key + logical value XOR sign
+    @retval 1 ::  Both sides are valid
+    @retval 0 :: Either side is invalid.
   */
 {
   if (!A || !B)
@@ -316,15 +316,15 @@ Intersection::isValid(const std::map<int,int>& MX) const
 
 int
 Intersection::simplify() 
-  /*!
+  /**
     Union simplification:: 
       - -S S simplify to True.
       - S S simplify to S 
       - -S -S simplifies to -S
-      \retval 1 if clauses removed (not top)
-      \retval -1 replacement of this intersection is required
+      @retval 1 if clauses removed (not top)
+      @retval -1 replacement of this intersection is required
                   by leaf 0
-      \retval 0 if no work to do.
+      @retval 0 if no work to do.
   */
 {
   return 0;
@@ -367,20 +367,20 @@ Kernel::Logger& Union::PLog(Kernel::Logger::get("Union"));
 
 Union::Union() : 
   Rule(),A(0),B(0)
-  /*!
+  /**
     Standard Constructor with null leaves
   */
 {}
 
 Union::Union(Rule* Parent,Rule* Ix,Rule* Iy) : Rule(Parent),
   A(Ix),B(Iy)    
-  /*!
+  /**
     Union constructor from two Rule ptrs.
     - Sets A,B's parents to *this
     - Allowed to control Ix and Iy
-    \param Parent :: Rule that is the parent to this 
-    \param Ix :: Rule A
-    \param Iy :: Rule B 
+    @param Parent :: Rule that is the parent to this 
+    @param Ix :: Rule A
+    @param Iy :: Rule B 
   */
 {
   if (A)
@@ -391,12 +391,12 @@ Union::Union(Rule* Parent,Rule* Ix,Rule* Iy) : Rule(Parent),
 
 Union::Union(Rule* Ix,Rule* Iy) : Rule(),
   A(Ix),B(Iy)
-  /*!
+  /**
     Union constructor from two Rule ptrs 
     - Sets A,B's parents to *this.
     - Allowed to control Ix and Iy
-    \param Ix :: Rule A
-    \param Iy :: Rule B 
+    @param Ix :: Rule A
+    @param Iy :: Rule B 
   */
 {
   if (A)
@@ -407,10 +407,10 @@ Union::Union(Rule* Ix,Rule* Iy) : Rule(),
 
 Union::Union(const Union& Iother) : Rule(Iother),
    A(0),B(0)
-  /*!
+  /**
     Copy constructor:
     Does a clone on the sub-tree below
-    \param Iother :: Union to copy
+    @param Iother :: Union to copy
   */
 {
   if (Iother.A)
@@ -427,11 +427,11 @@ Union::Union(const Union& Iother) : Rule(Iother),
 
 Union&
 Union::operator=(const Union& Iother) 
-  /*!
+  /**
     Assignment operator :: Does a deep copy
     of the leaves of Iother. 
-    \param Iother :: Union to assign to it. 
-    \returns this union (copy).
+    @param Iother :: Union to assign to it. 
+    @return this union (copy).
   */
 {
   if (this!=&Iother)
@@ -457,7 +457,7 @@ Union::operator=(const Union& Iother)
 }
 
 Union::~Union()
-  /*!
+  /**
     Delete operator : deletes both leaves
   */
 {
@@ -467,9 +467,9 @@ Union::~Union()
 
 Union*
 Union::clone() const
-  /*!
+  /**
     Clone allows deep virtual coping
-    \returns new Union copy.
+    @return new Union copy.
   */
 {
   return new Union(*this);
@@ -477,11 +477,11 @@ Union::clone() const
 
 void
 Union::setLeaf(Rule* nR,const int side)
-  /*!
+  /**
     Replaces a leaf with a rule.
     Calls delete on previous leaf.
-    \param nR :: new rule
-    \param side :: side to use 
+    @param nR :: new rule
+    @param side :: side to use 
     - 0 == LHS 
     - 1 == RHS
   */
@@ -505,11 +505,11 @@ Union::setLeaf(Rule* nR,const int side)
 
 void
 Union::setLeaves(Rule* aR,Rule* bR)
-  /*!
+  /**
      Replaces a both with a rule.
     No deletion is carried out but sets the parents.
-    \param aR :: Rule on the left
-    \param bR :: Rule on the right
+    @param aR :: Rule on the left
+    @param bR :: Rule on the right
   */
 {
   A=aR;
@@ -523,12 +523,12 @@ Union::setLeaves(Rule* aR,Rule* bR)
 
 int 
 Union::findLeaf(const Rule* R) const
-  /*!
+  /**
     Finds out if the Rule is the
     same as the leaves
-    \param R :: Rule pointer to compare
-    \retval 0 / 1 for LHS / RHS leaf 
-    \retval -1 :: neither leaf
+    @param R :: Rule pointer to compare
+    @retval 0 / 1 for LHS / RHS leaf 
+    @retval -1 :: neither leaf
   */
 {
   if (A==R)
@@ -540,11 +540,11 @@ Union::findLeaf(const Rule* R) const
 
 Rule*
 Union::findKey(const int KeyN)
-  /*!
+  /**
     Finds the leaf with the surface number KeyN
-    \param KeyN :: Number to search for
-    \retval 0 :: no leaf with that key number availiable
-    \retval Rule* if an appropiate leaf is found
+    @param KeyN :: Number to search for
+    @retval 0 :: no leaf with that key number availiable
+    @retval Rule* if an appropiate leaf is found
   */
 {
 
@@ -556,12 +556,12 @@ Union::findKey(const int KeyN)
 
 int
 Union::isComplementary() const 
-  /*!
+  /**
     Determine is the rule has complementary
     sub components
-    \retval 1 :: A side
-    \retval -1 :: B side
-    \retval 0 :: no complement
+    @retval 1 :: A side
+    @retval -1 :: B side
+    @retval 0 :: no complement
   */
 {
   if (A && A->isComplementary())
@@ -574,15 +574,15 @@ Union::isComplementary() const
 
 int
 Union::simplify() 
-  /*!
+  /**
     Union simplification:: 
       - -S S simplify to True.
       - S S simplify to S 
       - -S -S simplifies to -S
-      \retval 1 if clauses removed (not top)
-      \retval -1 replacement of this intersection is required
+      @retval 1 if clauses removed (not top)
+      @retval -1 replacement of this intersection is required
                   by leaf 0
-      \retval 0 if no work to do.
+      @retval 0 if no work to do.
   */
 {
   if (!commonType())
@@ -592,11 +592,11 @@ Union::simplify()
 
 bool 
 Union::isValid(const Geometry::V3D& Vec) const
-  /*!
+  /**
     Calculates if Vec is within the object
-    \param Vec :: Point to test
-    \retval  1 ::  Vec is within object 
-    \retval 0 :: Vec is outside object.
+    @param Vec :: Point to test
+    @retval  1 ::  Vec is within object 
+    @retval 0 :: Vec is outside object.
   */
 {
   return ((A && A->isValid(Vec)) ||
@@ -605,12 +605,12 @@ Union::isValid(const Geometry::V3D& Vec) const
 
 bool 
 Union::isValid(const std::map<int,int>& MX) const
-  /*!
+  /**
     Use MX to determine if the surface truth etc is 
     valie
-    \param MX :: map of key + logical value XOR sign
-    \retval 1 :: if either side is valid
-    \retval 0 :: Neither side is valid
+    @param MX :: map of key + logical value XOR sign
+    @retval 1 :: if either side is valid
+    @retval 0 :: Neither side is valid
   */
 {
   return ((A && A->isValid(MX)) ||
@@ -620,11 +620,11 @@ Union::isValid(const std::map<int,int>& MX) const
 
 std::string
 Union::display() const
-  /*!
+  /**
     Display the union in the form
     (N:M) where N,M are the downward
     rules
-    \returns bracket string 
+    @return bracket string 
   */
 {
   std::string out;
@@ -647,10 +647,10 @@ Union::display() const
 
 std::string
 Union::displayAddress() const
-  /*!
+  /**
     Returns the memory address as 
     a string. Displays addresses of leaves
-    \returns String of address
+    @return String of address
   */
 {
   std::stringstream cx;
@@ -702,24 +702,24 @@ Kernel::Logger& SurfPoint::PLog(Kernel::Logger::get("SurfPoint"));
 
 SurfPoint::SurfPoint() : Rule(),
   key(0),keyN(0),sign(1)
-  /*!
+  /**
     Constructor with null key/number
   */
 {}
 
 SurfPoint::SurfPoint(const SurfPoint& A) : Rule(),
   key(A.key->clone()),keyN(A.keyN),sign(A.sign)
-  /*!
+  /**
     Copy constructor
-    \param A SurfPoint to copy
+    @param A :: SurfPoint to copy
   */
 {}
 
 SurfPoint*
 SurfPoint::clone() const
-  /*!
+  /**
     Clone constructor
-    \return new(*this)
+    @return new(*this)
   */
 {
   return new SurfPoint(*this);
@@ -728,10 +728,10 @@ SurfPoint::clone() const
 
 SurfPoint&
 SurfPoint::operator=(const SurfPoint& A) 
-  /*!
+  /**
     Assigment operator
-    \param A :: Object to copy
-    \returns *this
+    @param A :: Object to copy
+    @return *this
   */
 {
   if (&A!=this)
@@ -745,7 +745,7 @@ SurfPoint::operator=(const SurfPoint& A)
 }
 
 SurfPoint::~SurfPoint()
-  /*!
+  /**
     Destructor
   */
 {
@@ -754,11 +754,11 @@ SurfPoint::~SurfPoint()
 
 void
 SurfPoint::setLeaf(Rule* nR,const int)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that nR is of type SurfPoint
-    \param nR :: new rule
-    \param int :: ignored
+    @param nR :: new rule
+    @param int :: ignored
   */
 {
  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
@@ -770,10 +770,10 @@ SurfPoint::setLeaf(Rule* nR,const int)
 
 void
 SurfPoint::setLeaves(Rule* aR,Rule*)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that nR is of type SurfPoint
-    \param aR :: new rule
+    @param aR :: new rule
   */
 {
   //std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
@@ -785,11 +785,11 @@ SurfPoint::setLeaves(Rule* aR,Rule*)
 
 int
 SurfPoint::findLeaf(const Rule* A) const
-  /*!
+  /**
     Determines if this rule is a particular leaf value
     uses memory address to compare.
-    \param A :: Rule to check
-    \returns 0 if true and -1 if false.
+    @param A :: Rule to check
+    @return 0 if true and -1 if false.
   */
 {
   return (this==A) ? 0 : -1;
@@ -797,11 +797,11 @@ SurfPoint::findLeaf(const Rule* A) const
 
 Rule*
 SurfPoint::findKey(const int KeyNum)
-  /*!
+  /**
     Finds the leaf with the surface number KeyN
-    \param KeyNum :: Number to search for
-    \retval 0 :: no leaf with that key number availiable
-    \retval Rule* if an appropiate leaf is found
+    @param KeyNum :: Number to search for
+    @retval 0 :: no leaf with that key number availiable
+    @retval Rule* if an appropiate leaf is found
   */
 {
   return (KeyNum==keyN) ? this : 0;
@@ -810,9 +810,9 @@ SurfPoint::findKey(const int KeyNum)
 
 void
 SurfPoint::setKeyN(const int Ky)
-  /*!
+  /**
     Sets the key and the sign 
-    \param Ky :: key value (+/- is used for sign)
+    @param Ky :: key value (+/- is used for sign)
   */
 {
   sign= (Ky<0) ? -1 : 1;
@@ -822,9 +822,9 @@ SurfPoint::setKeyN(const int Ky)
 
 void
 SurfPoint::setKey(Surface* Spoint)
-  /*!
+  /**
     Sets the key pointer. The class takes ownership.
-    \param Spoint :: new key values
+    @param Spoint :: new key values
   */
 {
   if (key!=Spoint) delete key;
@@ -834,10 +834,10 @@ SurfPoint::setKey(Surface* Spoint)
 
 int
 SurfPoint::simplify() 
-  /*!
+  /**
     Impossible to simplify a simple 
     rule leaf. Therefore returns 0
-    \returns 0
+    @return 0
   */
 {
   return 0;
@@ -845,12 +845,12 @@ SurfPoint::simplify()
 
 bool 
 SurfPoint::isValid(const Geometry::V3D& Pt) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
-    \param Pt :: Point to test
-    \retval 1 :: Pt is the +ve side of the 
+    @param Pt :: Point to test
+    @retval 1 :: Pt is the +ve side of the 
     surface or on the surface
-    \retval 0 :: Pt is on the -ve side of the surface
+    @retval 0 :: Pt is on the -ve side of the surface
   */
 {
   if (key)
@@ -861,11 +861,11 @@ SurfPoint::isValid(const Geometry::V3D& Pt) const
 
 bool 
 SurfPoint::isValid(const std::map<int,int>& MX) const
-  /*! 
+  /** 
     Use MX to determine if the surface truth etc is 
     valid
-    \param MX :: map of key + logical value XOR sign
-    \returns MX.second if key found or 0
+    @param MX :: map of key + logical value XOR sign
+    @return MX.second if key found or 0
   */
 {
   std::map<int,int>::const_iterator lx=MX.find(keyN);
@@ -877,10 +877,10 @@ SurfPoint::isValid(const std::map<int,int>& MX) const
 
 std::string
 SurfPoint::display() const
-  /*!
+  /**
     Returns the signed surface number as
     a string.
-    \returns string of the value
+    @return string of the value
   */
 {
   std::stringstream cx;
@@ -890,10 +890,10 @@ SurfPoint::display() const
 
 std::string
 SurfPoint::displayAddress() const
-  /*!
+  /**
     Returns the memory address as 
     a string.
-    \returns memory address as string
+    @return memory address as string
   */
 {
   std::stringstream cx;
@@ -960,7 +960,7 @@ Kernel::Logger& CompObj::PLog(Kernel::Logger::get("CompObj"));
 
 CompObj::CompObj() : Rule(),
   objN(0),key(0)
-  /*!
+  /**
     Constructor
   */
 {}
@@ -968,18 +968,18 @@ CompObj::CompObj() : Rule(),
 CompObj::CompObj(const CompObj& A) : 
   Rule(A),
   objN(A.objN),key(A.key)
-  /*!
+  /**
     Standard copy constructor
-    \param A :: CompObj to copy
+    @param A :: CompObj to copy
    */
 {}
 
 CompObj&
 CompObj::operator=(const CompObj& A)
-  /*!
+  /**
     Standard assignment operator
-    \param A :: CompObj to copy
-    \return *this
+    @param A :: CompObj to copy
+    @return *this
    */
 {
   if (this!=&A)
@@ -992,7 +992,7 @@ CompObj::operator=(const CompObj& A)
 }
 
 CompObj::~CompObj()
-  /*!
+  /**
     Destructor
   */
 {}
@@ -1000,9 +1000,9 @@ CompObj::~CompObj()
 
 CompObj*
 CompObj::clone() const
-  /*!
+  /**
     Clone of this
-    \return new copy of this
+    @return new copy of this
   */
 {
   return new CompObj(*this);
@@ -1010,9 +1010,9 @@ CompObj::clone() const
 
 void
 CompObj::setObjN(const int Ky)
-  /*!
+  /**
     Sets the object Number
-    \param Ky :: key value 
+    @param Ky :: key value 
   */
 {
   objN= Ky;
@@ -1021,9 +1021,9 @@ CompObj::setObjN(const int Ky)
 
 void
 CompObj::setObj(Object *val)
-  /*!
+  /**
     Sets the object
-    \param val :: Object value 
+    @param val :: Object value 
   */
 {
   key= val;
@@ -1032,11 +1032,11 @@ CompObj::setObj(Object *val)
 
 void
 CompObj::setLeaf(Rule* aR,const int)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
-    \param aR :: new rule
-    \param int :: Null side point
+    @param aR :: new rule
+    @param int :: Null side point
   */
 {
   CompObj* newX = dynamic_cast<CompObj*>(aR);
@@ -1048,11 +1048,11 @@ CompObj::setLeaf(Rule* aR,const int)
 
 void
 CompObj::setLeaves(Rule* aR,Rule* oR)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type CompObj
-    \param aR :: new rule
-    \param oR :: Null other rule
+    @param aR :: new rule
+    @param oR :: Null other rule
   */
 {
   (void) oR; //Avoid compiler warning
@@ -1065,12 +1065,12 @@ CompObj::setLeaves(Rule* aR,Rule* oR)
 
 Rule*
 CompObj::findKey(const int i)
-  /*!
+  /**
     This is a complementary object and we dont
     search into CompObjs. If that is needed
     then the CompObj should be removed first
-    \param i :: Null index key
-    \return 0
+    @param i :: Null index key
+    @return 0
   */
 {
   (void) i; //Avoid compiler warning
@@ -1079,10 +1079,10 @@ CompObj::findKey(const int i)
 
 int
 CompObj::findLeaf(const Rule* A) const
-  /*!
+  /**
     Check to see if this is a copy of a given Rule
-    \param A :: Rule Ptr to find
-    \retval 0 on success -ve on failuire
+    @param A :: Rule Ptr to find
+    @retval 0 on success -ve on failuire
   */
 {
   return (this==A) ? 0 : -1;
@@ -1090,13 +1090,13 @@ CompObj::findLeaf(const Rule* A) const
 
 bool
 CompObj::isValid(const Geometry::V3D& Pt) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object
     and returns ture if it is not valid.
-    \param  Pt :: Point to test
-    \retval not valid in the object 
-    \retval true is no object is set
+    @param  Pt :: Point to test
+    @retval not valid in the object 
+    @retval true is no object is set
   */
 {
   if (key)
@@ -1106,10 +1106,10 @@ CompObj::isValid(const Geometry::V3D& Pt) const
 
 bool
 CompObj::isValid(const std::map<int,int>& SMap) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
-    \param  SMap :: map of surface number and true values
-    \returns :: status
+    @param  SMap :: map of surface number and true values
+    @return :: status
   */
 {
   return (key) ? !(key->isValid(SMap)) : true;
@@ -1117,10 +1117,10 @@ CompObj::isValid(const std::map<int,int>& SMap) const
 
 int
 CompObj::simplify() 
-  /*!
+  /**
     Impossible to simplify a simple 
     rule leaf. Therefore returns 0
-    \returns 0
+    @return 0
   */
 {
   return 0;
@@ -1128,9 +1128,9 @@ CompObj::simplify()
 
 std::string
 CompObj::display() const
-  /*!
+  /**
     Displays the object as \#number
-    \returns string component
+    @return string component
   */
 {
   std::stringstream cx;
@@ -1140,10 +1140,10 @@ CompObj::display() const
 
 std::string
 CompObj::displayAddress() const
-  /*!
+  /**
     Returns the memory address as 
     a string.
-    \returns memory address as string
+    @return memory address as string
   */
 {
   std::stringstream cx;
@@ -1209,7 +1209,7 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
 Kernel::Logger& BoolValue::PLog(Kernel::Logger::get("BoolValue"));
 
 BoolValue::BoolValue() : Rule(), status(-1)
-  /*!
+  /**
     Constructor
   */
 {}
@@ -1217,18 +1217,18 @@ BoolValue::BoolValue() : Rule(), status(-1)
 BoolValue::BoolValue(const BoolValue& A) : 
   Rule(A),
   status(A.status)
-  /*!
+  /**
     Copy Constructor 
-    \param A :: BoolValue to copy
+    @param A :: BoolValue to copy
   */
 {}
 
 BoolValue&
 BoolValue::operator=(const BoolValue& A)
-  /*!
+  /**
     Assignment operator 
-    \param A :: BoolValue to copy
-    \return *this
+    @param A :: BoolValue to copy
+    @return *this
    */
 {
   if (this!=&A)
@@ -1241,27 +1241,27 @@ BoolValue::operator=(const BoolValue& A)
 
 BoolValue*
 BoolValue::clone() const
-  /*!
+  /**
     Clone constructor
-    \return new(*this)
+    @return new(*this)
    */
 {
   return new BoolValue(*this);
 }
 
 BoolValue::~BoolValue()
-  /*!
+  /**
     Destructor
   */
 {}
 
 void
 BoolValue::setLeaf(Rule* aR,const int)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
-    \param aR :: new rule
-    \param int :: Null side point
+    @param aR :: new rule
+    @param int :: Null side point
   */
 {
   //std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
@@ -1273,11 +1273,11 @@ BoolValue::setLeaf(Rule* aR,const int)
 
 void
 BoolValue::setLeaves(Rule* aR,Rule* oR)
-  /*!
+  /**
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
-    \param aR :: new rule
-    \param oR :: Null other rule
+    @param aR :: new rule
+    @param oR :: Null other rule
   */
 {
   (void) oR; //Avoid compiler warning
@@ -1296,10 +1296,10 @@ BoolValue::findLeaf(const Rule* A) const
 
 bool
 BoolValue::isValid(const Geometry::V3D& pt) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
-    \param pt :: Point to test
-    \returns status
+    @param pt :: Point to test
+    @return status
   */
 {
   (void) pt; //Avoid compiler warning
@@ -1308,10 +1308,10 @@ BoolValue::isValid(const Geometry::V3D& pt) const
 
 bool
 BoolValue::isValid(const std::map<int,int>& map) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
-    \param map :: map of surface number and true values
-    \returns :: status
+    @param map :: map of surface number and true values
+    @return :: status
   */
 {
   (void) map; //Avoid compiler warning
@@ -1320,9 +1320,9 @@ BoolValue::isValid(const std::map<int,int>& map) const
 
 int
 BoolValue::simplify()
-  /*!
+  /**
     Bool value is always in simplest form
-    \return 0 
+    @return 0 
   */
 {
   return 0;
@@ -1330,8 +1330,8 @@ BoolValue::simplify()
 
 std::string
 BoolValue::display() const
-  /*!
-    \returns string of 
+  /**
+    @return string of 
      - "true" "false" or "unknown"
   */
 
@@ -1349,10 +1349,10 @@ BoolValue::display() const
 
 std::string
 BoolValue::displayAddress() const
-  /*!
+  /**
     Returns the memory address as 
     a string.
-    \returns string of Address
+    @return string of Address
   */
 {
   std::stringstream cx;
@@ -1387,17 +1387,17 @@ Kernel::Logger& CompGrp::PLog(Kernel::Logger::get("CompGrp"));
 
 CompGrp::CompGrp() : 
   Rule(),A(0)
-  /*!
+  /**
     Constructor
   */
 {}
 
 CompGrp::CompGrp(Rule* Parent,Rule* Cx) :
   Rule(Parent),A(Cx)
-  /*!
+  /**
     Constructor to build parent and complent tree
-    \param Parent :: Rule that is the parent to this
-    \param Cx :: Complementary object below
+    @param Parent :: Rule that is the parent to this
+    @param Cx :: Complementary object below
   */
 {
   if (Cx)
@@ -1406,9 +1406,9 @@ CompGrp::CompGrp(Rule* Parent,Rule* Cx) :
 
 CompGrp::CompGrp(const CompGrp& Cother) : 
   Rule(Cother),A(0)
-  /*!
+  /**
     Standard copy constructor
-    \param Cother :: CompGrp to copy
+    @param Cother :: CompGrp to copy
    */
 {
   if (Cother.A)
@@ -1420,10 +1420,10 @@ CompGrp::CompGrp(const CompGrp& Cother) :
 
 CompGrp&
 CompGrp::operator=(const CompGrp& Cother)
-  /*!
+  /**
     Standard assignment operator
-    \param Cother :: CompGrp to copy
-    \return *this
+    @param Cother :: CompGrp to copy
+    @return *this
    */
 {
   if (this!=&Cother)
@@ -1441,7 +1441,7 @@ CompGrp::operator=(const CompGrp& Cother)
 }
 
 CompGrp::~CompGrp()
-  /*!
+  /**
     Destructor
   */
 {
@@ -1451,9 +1451,9 @@ CompGrp::~CompGrp()
 
 CompGrp*
 CompGrp::clone() const
-  /*!
+  /**
     Clone of this
-    \return new copy of this
+    @return new copy of this
   */
 {
   return new CompGrp(*this);
@@ -1461,11 +1461,11 @@ CompGrp::clone() const
 
 void
 CompGrp::setLeaf(Rule* nR,const int side)
-  /*!
+  /**
     Replaces a leaf with a rule.
     No deletion is carried out
-    \param nR :: new rule
-    \param side :: side to use 
+    @param nR :: new rule
+    @param side :: side to use 
   */
 {
   (void) side; //Avoid compiler warning
@@ -1477,11 +1477,11 @@ CompGrp::setLeaf(Rule* nR,const int side)
 
 void
 CompGrp::setLeaves(Rule* aR,Rule* oR)
-  /*!
+  /**
     Replaces a leaf with a rule.
     No deletion is carried out but sets the parents.
-    \param aR :: new rule
-    \param oR :: Null other rule
+    @param aR :: new rule
+    @param oR :: Null other rule
   */
 {
   (void) oR; //Avoid compiler warning
@@ -1493,12 +1493,12 @@ CompGrp::setLeaves(Rule* aR,Rule* oR)
 
 Rule*
 CompGrp::findKey(const int i)
-  /*!
+  /**
     This is a complementary object and we dont
     search into CompGrps. If that is needed
     then the CompGrp should be removed first
-    \param i :: Null index key
-    \return 0
+    @param i :: Null index key
+    @return 0
   */
 {
   (void) i; //Avoid compiler warning
@@ -1507,10 +1507,10 @@ CompGrp::findKey(const int i)
 
 int
 CompGrp::findLeaf(const Rule* R) const
-  /*!
+  /**
     Check to see if this is a copy of a given Rule
-    \param R :: Rule Ptr to find
-    \retval 0 on success -ve on failuire
+    @param R :: Rule Ptr to find
+    @retval 0 on success -ve on failuire
   */
 {
   return (A==R) ? 0 : -1;
@@ -1518,14 +1518,14 @@ CompGrp::findLeaf(const Rule* R) const
 
 bool
 CompGrp::isValid(const Geometry::V3D& Pt) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object
     and returns ture if it is not valid.
     Note the complementary reverse in the test.
-    \param  Pt :: Point to test
-    \retval not valid in the object 
-    \retval true is no object is set
+    @param  Pt :: Point to test
+    @retval not valid in the object 
+    @retval true is no object is set
   */
 {
   // Note:: if isValid is true then return 0:
@@ -1536,10 +1536,10 @@ CompGrp::isValid(const Geometry::V3D& Pt) const
 
 bool
 CompGrp::isValid(const std::map<int,int>& SMap) const
-  /*! 
+  /** 
     Determines if a point  is valid.  
-    \param  SMap :: map of surface number and true values
-    \returns :: status
+    @param  SMap :: map of surface number and true values
+    @return :: status
   */
 {
   // Note:: if isValid is true then return 0:
@@ -1550,10 +1550,10 @@ CompGrp::isValid(const std::map<int,int>& SMap) const
 
 int
 CompGrp::simplify() 
-  /*!
+  /**
     Impossible to simplify a simple 
     rule leaf. Therefore returns 0
-    \returns 0
+    @return 0
   */
 {
   return 0;
@@ -1561,9 +1561,9 @@ CompGrp::simplify()
 
 std::string
 CompGrp::display() const
-  /*!
+  /**
     Displays the object as \#number
-    \returns string component
+    @return string component
   */
 {
   std::stringstream cx;
@@ -1575,10 +1575,10 @@ CompGrp::display() const
 
 std::string
 CompGrp::displayAddress() const
-  /*!
+  /**
     Returns the memory address as 
     a string.
-    \returns memory address as string
+    @return memory address as string
   */
 {
   std::stringstream cx;

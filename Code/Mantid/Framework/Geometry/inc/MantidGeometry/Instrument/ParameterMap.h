@@ -95,10 +95,10 @@ namespace Geometry
     /**
      * Method for adding a parameter providing its value of a particular type
      * @tparam T The concrete type
-     * @param type A string denoting the type, e.g. double, string, fitting
-     * @param comp A pointer to the component that this parameter is attached to
-     * @param name The name of the parameter
-     * @param value The parameter's value
+     * @param type :: A string denoting the type, e.g. double, string, fitting
+     * @param comp :: A pointer to the component that this parameter is attached to
+     * @param name :: The name of the parameter
+     * @param value :: The parameter's value
      */
     template<class T>
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
@@ -139,7 +139,7 @@ namespace Geometry
     void addString(const IComponent* comp,const std::string& name, const std::string& value);
     /// Adds a V3D value to the parameter map.
     void addV3D(const IComponent* comp,const std::string& name, const std::string& value);
-    /// @param value Parameter value as a V3D
+    /// @param value :: Parameter value as a V3D
     void addV3D(const IComponent* comp,const std::string& name, const V3D& value);
     /// Adds a Quat value to the parameter map.
     void addQuat(const IComponent* comp,const std::string& name, const Quat& value);
@@ -162,8 +162,8 @@ namespace Geometry
 
     /** Get the values of a given parameter of all the components that have the name: compName
      *  @tparam The parameter type
-     *  @param compName The name of the component
-     *  @param name The name of the parameter
+     *  @param compName :: The name of the component
+     *  @param name :: The name of the parameter
      *  @return all component values from the given component name
      */
     template<class T>
@@ -193,8 +193,8 @@ namespace Geometry
     }
     /**  
      * Returns a double parameter as vector's first element if exists and an empty vector if it doesn't
-     * @param compName Component name
-     * @param name Parameter name
+     * @param compName :: Component name
+     * @param name :: Parameter name
      * @return a double parameter from component with the requested name
      */
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const
@@ -203,8 +203,8 @@ namespace Geometry
     }
     /**  
      * Returns a V3D parameter as vector's first element if exists and an empty vector if it doesn't
-     * @param compName Component name
-     * @param name Parameter name
+     * @param compName :: Component name
+     * @param name :: Parameter name
      * @return a V3D parameter from component with the requested name
      */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const

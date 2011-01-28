@@ -157,7 +157,7 @@ void Indirect::helpClicked()
 /**
 * This function will control the actions needed for the Indirect interface when the
 * "Run" button is clicked by the user.
-* @param tryToSave whether to try and save the output. Generally true, false when user has clicked on the "Rebin" button instead of "Run"
+* @param tryToSave :: whether to try and save the output. Generally true, false when user has clicked on the "Rebin" button instead of "Run"
 */
 void Indirect::runClicked()
 {
@@ -357,7 +357,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
 /**
 * This function holds any steps that must be performed on the selection of an instrument,
 * for example loading values from the Instrument Definition File (IDF).
-* @param prefix The selected instruments prefix in Mantid.
+* @param prefix :: The selected instruments prefix in Mantid.
 */
 void Indirect::setIDFValues(const QString & prefix)
 {
@@ -448,7 +448,7 @@ void Indirect::clearReflectionInfo()
 }
 /**
 * This function creates the mapping/grouping file for the data analysis.
-* @param groupType Type of grouping (All, Group, Indiviual)
+* @param groupType :: Type of grouping (All, Group, Indiviual)
 * @return path to mapping file, or an empty string if file could not be created.
 */
 QString Indirect::createMapFile(const QString& groupType)
@@ -525,7 +525,7 @@ QString Indirect::savePyCode()
 }
 /**
 * This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
-* @param file the input file (WBV run.raw)
+* @param file :: the input file (WBV run.raw)
 */
 void Indirect::createRESfile(const QString& file)
 {
@@ -837,7 +837,7 @@ bool Indirect::isDirty()
 /**
 * Used to set value of m_isDirty, called from each function that signifies a change in the user interface.
 * Will be set to false in functions that use the input.
-* @param state whether to set the value to true or false.
+* @param state :: whether to set the value to true or false.
 */
 void Indirect::isDirty(bool state)
 {
@@ -854,7 +854,7 @@ bool Indirect::isDirtyRebin()
 /**
 * Used to set value of m_isDirtyRebin, called from each function that signifies a change in the user interface.
 * Will be set to false in functions that use the input.
-* @param state whether to set the value to true or false.
+* @param state :: whether to set the value to true or false.
 */
 void Indirect::isDirtyRebin(bool state)
 {
@@ -1082,7 +1082,7 @@ void Indirect::refreshWSlist()
 /**
 * This function is called when the user selects an analyser from the cbAnalyser QComboBox
 * object. It's main purpose is to initialise the values for the Reflection ComboBox.
-* @param index Index of the value selected in the combo box.
+* @param index :: Index of the value selected in the combo box.
 */
 void Indirect::analyserSelected(int index)
 {
@@ -1114,7 +1114,7 @@ void Indirect::analyserSelected(int index)
 /**
 * This function is called when the user selects a reflection from the cbReflection QComboBox
 * object.
-* @param index Index of the value selected in the combo box.
+* @param index :: Index of the value selected in the combo box.
 */
 void Indirect::reflectionSelected(int index)
 {
@@ -1190,7 +1190,7 @@ void Indirect::reflectionSelected(int index)
 }
 /**
 * This function runs when the user makes a selection on the cbMappingOptions QComboBox.
-* @param groupType Value of selection made by user.
+* @param groupType :: Value of selection made by user.
 */
 void Indirect::mappingOptionSelected(const QString& groupType)
 {
@@ -1305,7 +1305,7 @@ void Indirect::plotRaw()
 /**
 * This function will disable the necessary elements of the interface when the user selects "Do Not Rebin"
 * and enable them again when this is de-selected.
-* @param state whether the "Do Not Rebin" checkbox is checked
+* @param state :: whether the "Do Not Rebin" checkbox is checked
 */
 void Indirect::rebinCheck(bool state) 
 {
@@ -1330,7 +1330,7 @@ void Indirect::rebinCheck(bool state)
 /**
 * Disables/enables the relevant parts of the UI when user checks/unchecks the Detailed Balance
 * ckDetailedBalance checkbox.
-* @param state state of the checkbox
+* @param state :: state of the checkbox
 */
 void Indirect::detailedBalanceCheck(bool state)
 {
@@ -1341,7 +1341,7 @@ void Indirect::detailedBalanceCheck(bool state)
 }
 /**
 * This function enables/disables the display of the options involved in creating the RES file.
-* @param state whether checkbox is checked or unchecked
+* @param state :: whether checkbox is checked or unchecked
 */
 void Indirect::resCheck(bool state)
 {
@@ -1431,7 +1431,7 @@ void Indirect::setasDirtyRebin()
 }
 /**
 * Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.
-* @param calib path to calib file
+* @param calib :: path to calib file
 */
 void Indirect::calibFileChanged(const QString & calib)
 {

@@ -29,7 +29,7 @@ namespace Kernel
 
 
   /** Get interpolated value at location at
-  * @param at Location where to get interpolated value
+  * @param at :: Location where to get interpolated value
   * @return the value
   */
   double Interpolation::value(const double& at) const
@@ -68,8 +68,8 @@ namespace Kernel
 
   /** Add point in the interpolation.
   *
-  * @param xx x-value
-  * @param yy y-value
+  * @param xx :: x-value
+  * @param yy :: y-value
   */
   void Interpolation::addPoint(const double& xx, const double& yy)
   { 
@@ -116,7 +116,7 @@ namespace Kernel
 
   /**
     Prints object to stream
-    @param os the Stream to output to
+    @param os :: the Stream to output to
   */
   void Interpolation::printSelf(std::ostream& os) const
   {
@@ -130,8 +130,8 @@ namespace Kernel
 
   /**
     Prints the value of parameter
-    @param os the Stream to output to
-    @param f the FitParameter to output
+    @param os :: the Stream to output to
+    @param f :: the FitParameter to output
     @return the output stream
     */
   std::ostream& operator<<(std::ostream& os, const Interpolation& f)
@@ -142,8 +142,8 @@ namespace Kernel
 
   /**
     Reads in parameter value
-    @param in Input Stream
-    @param f FitParameter to write to
+    @param in :: Input Stream
+    @param f :: FitParameter to write to
     @return Current state of stream
   */
   std::istream& operator>>(std::istream& in, Interpolation& f)

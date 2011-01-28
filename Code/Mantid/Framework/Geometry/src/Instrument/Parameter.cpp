@@ -12,8 +12,8 @@ namespace Mantid
     ParameterFactory::FactoryMap ParameterFactory::s_map;
 
     /**  Creates an instance of a parameter
-     *   @param className The parameter registered type name
-     *   @param name The parameter name
+     *   @param className :: The parameter registered type name
+     *   @param name :: The parameter name
      *   @return A pointer to the created parameter
      *   @throw runtime_error if the type has not been registered
      */

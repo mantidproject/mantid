@@ -228,8 +228,8 @@ public:
   /// The string operator
   virtual operator std::string()const{return asString();}
   /// Set the workspace
-  /// @param ws Shared pointer to a workspace
-  /// @param slicing A string identifying the data in the worspace to be fitted, e.g. spectrum index, starting and ending x values, etc
+  /// @param ws :: Shared pointer to a workspace
+  /// @param slicing :: A string identifying the data in the worspace to be fitted, e.g. spectrum index, starting and ending x values, etc
   ///     Concrete form is defined by the derived functions.
   virtual void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing) = 0;
   /// Get the workspace
@@ -243,7 +243,7 @@ public:
   virtual const double* getData()const = 0;
   virtual const double* getWeights()const = 0;
   /// Function you want to fit to. 
-  /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(double* out)const = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out);
@@ -292,7 +292,7 @@ public:
   /// Get a function containing the parameter refered to by the reference. In case of a simple function
   /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
   /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
-  /// @param ref The Parameter reference
+  /// @param ref :: The Parameter reference
   /// @return A pointer to the containing function
   virtual IFitFunction* getContainingFunction(const ParameterReference& ref)const = 0;
   /// The same as the method above but the argument is a function
@@ -380,15 +380,15 @@ class Jacobian
 {
 public:
   /**  Set a value to a Jacobian matrix element.
-  *   @param iY The index of a data point.
-  *   @param iP The index of a declared parameter.
-  *   @param value The derivative value.
+  *   @param iY :: The index of a data point.
+  *   @param iP :: The index of a declared parameter.
+  *   @param value :: The derivative value.
   */
   virtual void set(int iY, int iP, double value) = 0;
 
   ///@cond do not document
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value Value to add
+  *   @param value :: Value to add
   */
   virtual void addNumberToColumn(const double& value, const int& iActiveP) 
   {

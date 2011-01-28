@@ -73,8 +73,8 @@ std::vector<std::string> Resolution::getAttributeNames()const
 }
 
 /** Set a value to attribute attName
- * @param attName The attribute name
- * @param value The new value
+ * @param attName :: The attribute name
+ * @param value :: The new value
  */
 void Resolution::setAttribute(const std::string& attName,const IFitFunction::Attribute& value)
 {
@@ -102,7 +102,7 @@ void Resolution::setAttribute(const std::string& attName,const IFitFunction::Att
 
 /**
  * Decide whether to load the file as an ASCII file or as a Nexus file.
- * @param fname The file name
+ * @param fname :: The file name
  */
 void Resolution::load(const std::string& fname)
 {
@@ -125,7 +125,7 @@ void Resolution::load(const std::string& fname)
 
 /**
  * Load input file as an Ascii file.
- * @param fname The file name
+ * @param fname :: The file name
  */
 void Resolution::loadAscii(const std::string& fname)
 {
@@ -156,7 +156,7 @@ void Resolution::loadAscii(const std::string& fname)
 
 /**
  * Load input file as a Nexus file.
- * @param fname The file name
+ * @param fname :: The file name
  */
 void Resolution::loadNexus(const std::string& fname)
 {

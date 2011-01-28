@@ -18,7 +18,7 @@ namespace Mantid
 
   namespace Geometry
   {
-    /*!
+    /**
     \class vtkGeometryCacheReader
     \brief Reads the Geometry Cache from the file to the Object
     \author Srikanth Nagella

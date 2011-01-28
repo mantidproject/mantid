@@ -47,7 +47,7 @@ public:
      *  returns number of selected cells and the number of pixels (datapoints, events) contained in these cells which can contribute
      * into the cut.     */
     virtual size_t preselect_cells()=0; 
-  /*! function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
+  /** function takes input multidimensional data points (pixels, events) stored in the source data buffer and 
      *  rebins these data (adds them) to MD image of the taget workspace;
      * Alternative (USA)vdescription: Identifies the locations of the datapoints in the multidimensional grid of the target workspace
      * and calculates the statistical properties of these points

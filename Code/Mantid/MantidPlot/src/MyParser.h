@@ -37,7 +37,7 @@
 
 using namespace mu;
 
-/*!\brief Mathematical parser class based on muParser.
+/**\brief Mathematical parser class based on muParser.
  *
  * \section future Future Plans
  * Eliminate in favour of Script/ScriptingEnv.

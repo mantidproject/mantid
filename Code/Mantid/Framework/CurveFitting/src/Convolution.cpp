@@ -242,7 +242,7 @@ void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int&
  * The second is the convoluted (model) function. If third, fourth and so on
  * functions added they will be combined in a composite function. So the
  * Convolution always has two member functions: the resolution and the model.
- * @param f A pointer to the function to add
+ * @param f :: A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
 int Convolution::addFunction(IFitFunction* f)

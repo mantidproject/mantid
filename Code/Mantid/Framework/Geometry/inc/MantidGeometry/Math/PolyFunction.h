@@ -8,7 +8,7 @@ namespace Mantid
 
 namespace mathLevel
 {
-  /*!
+  /**
     \class PolyFunction
     \version 1.0
     \author S. Ansell

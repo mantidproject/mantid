@@ -7,18 +7,18 @@ namespace Mantid
   namespace API
   {
 
-    /*!
+    /**
     Standard Copy Constructor
-    \param A :: LocatedDataValue Item to copy
+    @param A :: LocatedDataValue Item to copy
     */
     LocatedDataValue::LocatedDataValue(const LocatedDataValue& A) : ILocatedData(),
       xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),
       x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
-    /*!
+    /**
     Standard Copy Constructor
-    \param A :: LocatedDataValue Item to copy
+    @param A :: LocatedDataValue Item to copy
     */
     LocatedDataValue::LocatedDataValue(const ILocatedData& A) : ILocatedData(),
       xValue(A.X()),yValue(A.Y()),eValue(A.E()),
@@ -35,10 +35,10 @@ namespace Mantid
       xValue(0),yValue(0),eValue(0)
     {}
 
-    /*!
+    /**
     Standard Assignment Constructor
-    \param A :: LocatedDataValue Item to copy
-    \return *this
+    @param A :: LocatedDataValue Item to copy
+    @return *this
     */
     LocatedDataValue& LocatedDataValue::operator=(const LocatedDataValue& A)
     {
@@ -53,10 +53,10 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Standard Assignment Constructor
-    \param A :: ILocatedData Item to copy
-    \return *this
+    @param A :: ILocatedData Item to copy
+    @return *this
     */
     LocatedDataValue& LocatedDataValue::operator=(const ILocatedData& A)
     {
@@ -75,7 +75,7 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Standard Destructor
     */
     LocatedDataValue::~LocatedDataValue()
@@ -83,9 +83,9 @@ namespace Mantid
     }
 
 
-    /*! 
+    /** 
     Operator== all components must be equal
-    \param A :: Other object to compare
+    @param A :: Other object to compare
     */
     int LocatedDataValue::operator==(const LocatedDataValue& A) const
     {
@@ -93,10 +93,10 @@ namespace Mantid
         eValue!=A.eValue) ? 0 : 1;
     }
 
-    /*! 
+    /** 
     Operator!= any component is not equal
-    \param A :: Other object to compare
-    \return this!=A
+    @param A :: Other object to compare
+    @return this!=A
     */
     int LocatedDataValue::operator!=(const LocatedDataValue& A) const
     {
@@ -104,10 +104,10 @@ namespace Mantid
         eValue== A.eValue) ? 0 : 1;
     }
 
-    /*! 
+    /** 
     Operator< takes xValue to last precidence.
-    \param A :: LocatedDataValue to compare
-    \return this < A
+    @param A :: LocatedDataValue to compare
+    @return this < A
     */
     int LocatedDataValue::operator<(const LocatedDataValue& A) const
     {
@@ -133,12 +133,12 @@ namespace Mantid
       return 0;
     }
 
-    /*! 
+    /** 
     Operator> takes xValue to last precidence.
     Uses operator<  to obtain value.
     Note it does not uses 1-(A<this)
-    \param A :: LocatedDataValue to compare
-    \return this > A
+    @param A :: LocatedDataValue to compare
+    @return this > A
     */
     int LocatedDataValue::operator>(const LocatedDataValue& A) const
     {

@@ -20,9 +20,9 @@ namespace Mantid
 		{
 		}
 		/**This method is responsible for connecting the client application to ICat3 based catalog services
-		  *@param username - login name(eg. federal id) of the user
-		  *@param password - passowrd of the user
-		  *@param url - url of the user
+		  *@param username :: login name(eg. federal id) of the user
+		  *@param password :: passowrd of the user
+		  *@param url :: url of the user
 		*/
 		void ICat3Catalog::login(const std::string& username,const std::string& password,const std::string& url)
 		{
@@ -39,7 +39,7 @@ namespace Mantid
 		}
 		
 		/*This method returns the logged in user's investigations data .
-		 *@param mydataws_sptr pointer to table workspace which stores the data
+		 *@param mydataws_sptr :: pointer to table workspace which stores the data
 		 */
 		void  ICat3Catalog::myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr)
 		{
@@ -48,8 +48,8 @@ namespace Mantid
 		}
 
 		/*This method returns  the datasets associated to the given investigationid .
-		 *@param investigationId unique identifier of the investigation
-		 *@param datasetsws_sptr shared pointer to datasets
+		 *@param investigationId :: unique identifier of the investigation
+		 *@param datasetsws_sptr :: shared pointer to datasets
 		 */
 		void ICat3Catalog::getDataSets(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
 		{
@@ -60,8 +60,8 @@ namespace Mantid
 		}
 
 		/*This method returns the datafiles associated to the given investigationid .
-		 *@param investigationId unique identifier of the investigation
-	     *@param datafilesws_sptr shared pointer to datasets
+		 *@param investigationId :: unique identifier of the investigation
+	     *@param datafilesws_sptr :: shared pointer to datasets
 	     */
 		void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
 		{
@@ -70,7 +70,7 @@ namespace Mantid
 		}
 
 	 /**This method returns the list of instruments
-	   *@param instruments - instruments list
+	   *@param instruments :: instruments list
 	   */
 		void ICat3Catalog::listInstruments(std::vector<std::string>& instruments)
 		{
@@ -79,7 +79,7 @@ namespace Mantid
 		}
 
 	 /**This method returns the list of investigationtypes
-	   *@param invstTypes - investigation types list
+	   *@param invstTypes :: investigation types list
 	   */
 		void  ICat3Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
 		{			
@@ -88,8 +88,8 @@ namespace Mantid
 		}
 
 	 /**This method method gets the file location strings from isis archive
-	   *@param fileid - id of the file
-	   *@param filelocation - location string  of the file
+	   *@param fileid :: id of the file
+	   *@param filelocation :: location string  of the file
 	   */
 		void ICat3Catalog::getFileLocation(const long long & fileid,std::string & filelocation)
 		{
@@ -98,8 +98,8 @@ namespace Mantid
 		}
 
 	 /**This method method gets the url for downloading the file from isis server
-	   *@param fileid - id of the file
-	   *@param url - url  of the file
+	   *@param fileid :: id of the file
+	   *@param url :: url  of the file
 	   */
 		void ICat3Catalog::getDownloadURL(const long long & fileid,std::string& url)
 		{
@@ -108,8 +108,8 @@ namespace Mantid
 		}
 
 	 /**This method method does the search for investigations
-	   *@param inputs - reference to a class conatains search inputs
-	   *@param ws_sptr -shared pointer to search results workspace
+	   *@param inputs :: reference to a class conatains search inputs
+	   *@param ws_sptr :: -shared pointer to search results workspace
 	   */
 		void ICat3Catalog::search(const CSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
 		{

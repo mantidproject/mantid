@@ -11,7 +11,7 @@ namespace Mantid
 	namespace Geometry
 	{
 
-		/*!
+		/**
 		\class CacheGeometryGenerator
 		\brief Generates geometry using other geometry handlers or keeps the cache of the triangles
 		\author Mr. Srikanth Nagella

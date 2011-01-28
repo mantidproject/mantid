@@ -21,16 +21,16 @@ class PartialJacobian1: public Jacobian
   int m_iY0;      ///< offset in the overall Jacobian for a particular function
 public:
   /** Constructor
-   * @param J A pointer to the overall Jacobian
-   * @param iY0 The data offset for a particular function
+   * @param J :: A pointer to the overall Jacobian
+   * @param iY0 :: The data offset for a particular function
    */
   PartialJacobian1(Jacobian* J,int iY0):m_J(J),m_iY0(iY0)
   {}
   /**
    * Overridden Jacobian::set(...).
-   * @param iY The index of the data point
-   * @param iP The parameter index of an individual function.
-   * @param value The derivative value
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   * @param value :: The derivative value
    */
   void set(int iY, int iP, double value)
   {
@@ -57,9 +57,9 @@ IPeakFunction::IPeakFunction()
  * General implementation of the method for all peaks. Limits the peak evaluation to
  * a certain number of FWHMs around the peak centre. The outside points are set to 0. 
  * Calls functionLocal() to compute the actual values
- * @param out Output function values
- * @param xValues X values for data points
- * @param nData Number of data points
+ * @param out :: Output function values
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void IPeakFunction::function(double* out, const double* xValues, const int& nData)const
 {
@@ -89,9 +89,9 @@ void IPeakFunction::function(double* out, const double* xValues, const int& nDat
  * for a range of x values limited to a certain number of FWHM around the peak centre.
  * For the points outside the range all derivatives are set to 0.
  * Calls functionDerivLocal() to compute the actual values
- * @param out Derivatives
- * @param xValues X values for data points
- * @param nData Number of data points
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void IPeakFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {

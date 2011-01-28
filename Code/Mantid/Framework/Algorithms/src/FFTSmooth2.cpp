@@ -207,7 +207,7 @@ void FFTSmooth2::exec()
 }
 
 /** Smoothing by truncation.
- *  @param n The order of truncation
+ *  @param n :: The order of truncation
  */
 void FFTSmooth2::truncate(int n)
 {
@@ -267,7 +267,7 @@ void FFTSmooth2::truncate(int n)
 }
 
 /** Smoothing by zeroing.
- *  @param n The order of truncation
+ *  @param n :: The order of truncation
  */
 void FFTSmooth2::zero(int n)
 {
@@ -306,13 +306,13 @@ void FFTSmooth2::zero(int n)
 
 
 /** Smoothing using Butterworth filter.
- *  @param n     The cutoff frequency control parameter.
+ *  @param n ::     The cutoff frequency control parameter.
  *               Cutoff frequency = my/n where my is the 
  *               number of sample points in the data.
  *               As with the "Zeroing" case, the cutoff
  *               frequency is truncated to an integer value
  *               and set to 1 if the truncated value was zero.
- *  @param order The order of the Butterworth filter, 1, 2, etc. 
+ *  @param order :: The order of the Butterworth filter, 1, 2, etc. 
  *               This must be a positive integer.
  */
 void FFTSmooth2::Butterworth(int n, int order)

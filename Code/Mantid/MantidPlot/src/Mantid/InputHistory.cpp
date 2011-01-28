@@ -68,7 +68,7 @@ void InputHistoryImpl::save()
 }
 /**
      Upadates the non-default algorithm properties in the history.
-     @param alg Pointer to the algorthm
+     @param alg :: Pointer to the algorthm
 */
 void InputHistoryImpl::updateAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 {
@@ -102,7 +102,7 @@ void InputHistoryImpl::printAll()
 }
 
 /** 
-    @param algName Algorithm name
+    @param algName :: Algorithm name
 */
 QMap< QString,QString > InputHistoryImpl::algorithmProperties(const QString& algName)
 {
@@ -119,8 +119,8 @@ QMap< QString,QString > InputHistoryImpl::algorithmProperties(const QString& alg
 }
 
 /**  Returns the last entered value for property propName
-     @param algName Name of the algorithm
-     @param propName Property
+     @param algName :: Name of the algorithm
+     @param propName :: Property
      @return The last entered value for the property or the empty string if the default value was used.
 */
 

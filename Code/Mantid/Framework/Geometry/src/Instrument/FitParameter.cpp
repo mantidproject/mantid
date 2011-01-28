@@ -68,7 +68,7 @@ namespace Geometry
   /**
     Get parameter value. The default parameter 'at' is ignored expect if
     the value of the parameter is determined from a look up table or a formula.
-    @param at number to return the value at
+    @param at :: number to return the value at
     @return the value of the fit parameter
   */
   double FitParameter::getValue(const double& at) const
@@ -129,7 +129,7 @@ namespace Geometry
 
   /**
     Prints object to stream
-    @param os the Stream to output to
+    @param os :: the Stream to output to
   */
   void FitParameter::printSelf(std::ostream& os) const
   {
@@ -141,8 +141,8 @@ namespace Geometry
 
   /**
     Prints the value of parameter
-    @param os the Stream to output to
-    @param f the FitParameter to output
+    @param os :: the Stream to output to
+    @param f :: the FitParameter to output
     @return the output stream
     */
   std::ostream& operator<<(std::ostream& os, const FitParameter& f)
@@ -153,8 +153,8 @@ namespace Geometry
 
   /**
     Reads in parameter value
-    @param in Input Stream
-    @param f FitParameter to write to
+    @param in :: Input Stream
+    @param f :: FitParameter to write to
     @return Current state of stream
   */
   std::istream& operator>>(std::istream& in, FitParameter& f)

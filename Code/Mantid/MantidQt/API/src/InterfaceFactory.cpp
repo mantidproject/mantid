@@ -16,7 +16,7 @@ using namespace MantidQt::API;
 
 /**
  * Create a raw pointer to the interface with the given name
- * @param name The name of the interface that should have been registered into the factory
+ * @param name :: The name of the interface that should have been registered into the factory
  */
 UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & name) const
 {
@@ -54,7 +54,7 @@ UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAli
 
 /**
  * Create a user sub window by searching for an alias name
- * @param name The alias name to use to try and create an interface
+ * @param name :: The alias name to use to try and create an interface
  * @returns A pointer to a created interface pointer if this alias exists and is not multiply defined
  */
 UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & name) const

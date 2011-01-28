@@ -1255,8 +1255,8 @@ void Graph::setScale(int axis, double start, double end, double step,
 }
 /** Overload of setScale() to that only allows setting the axis type
  *  to linear or log. Does nothing if the scale is already the that type
- *  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
- *  @param scaleType either QwtScaleTransformation::Log10 or ::Linear
+ *  @param axis :: the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
+ *  @param scaleType :: either QwtScaleTransformation::Log10 or ::Linear
  */
 void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
 {
@@ -1296,8 +1296,8 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
 }
 /** This setScale overload allows setting the scale type by passing "linear"
  *  or "log" as a string
- *  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
- *  @param logOrLin either "log" or "linear"
+ *  @param axis :: the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
+ *  @param logOrLin :: either "log" or "linear"
  */
 void Graph::setScale(QwtPlot::Axis axis, QString logOrLin)
 {
@@ -2934,7 +2934,7 @@ QwtErrorPlotCurve* Graph::addErrorBars(const QString& xColName, const QString& y
 }
 
 /** Adds the display of error to an existing MantidCurve
- *  @param curveName The name of the curve
+ *  @param curveName :: The name of the curve
  */
 void Graph::addMantidErrorBars(const QString& curveName,bool drawAll)
 {
@@ -2952,7 +2952,7 @@ void Graph::addMantidErrorBars(const QString& curveName,bool drawAll)
 }
 
 /** Removes the error bars form a MantidCurve
- *  @param curveName The name of the curve
+ *  @param curveName :: The name of the curve
  */
 void Graph::removeMantidErrorBars(const QString& curveName)
 {
@@ -5464,7 +5464,7 @@ void Graph::changeIntensity(bool bIntensityChanged)
   }
 }
 /* This method zooms the selected grpah using using zoom tool and mouse drag
- * @param on boolean parameter to   swicth on zooming
+ * @param on :: boolean parameter to   swicth on zooming
  */
 void Graph::enablePanningMagnifier(bool on)
 {

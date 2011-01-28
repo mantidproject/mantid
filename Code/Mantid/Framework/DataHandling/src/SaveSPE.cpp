@@ -153,8 +153,8 @@ namespace Mantid
       fclose(outSPE_File);
     }
     /** Write the bin values and errors for all histograms to the file
-    *  @param WS the workspace to be saved
-    *  @param outFile the file object to write to
+    *  @param WS :: the workspace to be saved
+    *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile)
     {
@@ -200,9 +200,9 @@ namespace Mantid
       logMissingMasked(spuriousSpectra, nHist-nMasked, nMasked);
     }
     /** Write the bin values and errors in a single histogram spectra to the file
-    *  @param WS the workspace to being saved
-    *  @param outFile the file object to write to
-    *  @param specIn the index number of the histgram to write
+    *  @param WS :: the workspace to being saved
+    *  @param outFile :: the file object to write to
+    *  @param specIn :: the index number of the histgram to write
     */
     void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
     {
@@ -213,7 +213,7 @@ namespace Mantid
       writeBins(WS->readE(specIn), outFile);
     }
     /** Write the mask flags for in a histogram entry
-    *  @param outFile the file object to write to
+    *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeMaskFlags(FILE * const outFile) const
     {
@@ -224,8 +224,8 @@ namespace Mantid
       writeValue(MASK_ERROR, outFile);
     }
     /** Write the the values in the array to the file in the correct format
-    *  @param Vs the array of values to write (must have length given by m_nbins)
-    *  @param outFile the file object to write to
+    *  @param Vs :: the array of values to write (must have length given by m_nbins)
+    *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeBins(const MantidVec &Vs, FILE * const outFile) const
     {
@@ -244,8 +244,8 @@ namespace Mantid
       }
     }
     /** Write the the value the file a number of times given by m_nbins
-    *  @param value the value that will be writen continuely
-    *  @param outFile the file object to write to
+    *  @param value :: the value that will be writen continuely
+    *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeValue(const double value, FILE * const outFile) const
     {
@@ -265,9 +265,9 @@ namespace Mantid
     }
     /**Write a summary information about what the algorithm had managed to save to the
     *  file
-    *  @param inds the indices of histograms whose detectors couldn't be found
-    *  @param nonMasked the number of histograms saved successfully
-    *  @param masked the number of histograms for which mask values were writen
+    *  @param inds :: the indices of histograms whose detectors couldn't be found
+    *  @param nonMasked :: the number of histograms saved successfully
+    *  @param masked :: the number of histograms for which mask values were writen
     */
     void SaveSPE::logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const
     {

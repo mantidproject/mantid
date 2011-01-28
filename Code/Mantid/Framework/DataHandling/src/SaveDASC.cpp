@@ -96,8 +96,8 @@ void SaveDASC::exec()
 
 /** The header contains what the units of the X-values (axis(0)) and
 *  the values, at the centre of the bin, the axis(1) and its values
-*  @param WS the input workspace
-*  @param output file stream to write to
+*  @param WS :: the input workspace
+*  @param output :: file stream to write to
 */
 void SaveDASC::writeHeader(API::MatrixWorkspace_const_sptr WS, std::ofstream &output)
 {// Write to the header what the units of the X-values are

@@ -90,8 +90,8 @@ void FrameworkManagerImpl::clearInstruments()
 
 /** Creates and initialises an instance of an algorithm
  * 
- *  @param algName The name of the algorithm required
- *  @param version The version of the algorithm
+ *  @param algName :: The name of the algorithm required
+ *  @param version :: The version of the algorithm
  *  @return A pointer to the created algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
@@ -104,10 +104,10 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, co
 
 /** Creates an instance of an algorithm and sets the properties provided
  * 
- *  @param algName The name of the algorithm required
- *  @param propertiesArray A single string containing properties in the 
+ *  @param algName :: The name of the algorithm required
+ *  @param propertiesArray :: A single string containing properties in the 
  *                         form "Property1=Value1;Property2=Value2;..."
- *  @param version The version of the algorithm
+ *  @param version :: The version of the algorithm
  *  @return A pointer to the created algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
@@ -124,10 +124,10 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
 /** Creates an instance of an algorithm, sets the properties provided and
  *       then executes it.
  * 
- *  @param algName The name of the algorithm required
- *  @param propertiesArray A single string containing properties in the 
+ *  @param algName :: The name of the algorithm required
+ *  @param propertiesArray :: A single string containing properties in the 
  *                         form "Property1=Value1;Property2=Value2;..."
- *  @param version The version of the algorithm
+ *  @param version :: The version of the algorithm
  *  @return A pointer to the executed algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
@@ -147,7 +147,7 @@ IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::st
 
 /** Returns a shared pointer to the workspace requested
  * 
- *  @param wsName The name of the workspace
+ *  @param wsName :: The name of the workspace
  *  @return A pointer to the workspace
  * 
  *  @throw NotFoundError If workspace is not registered with analysis data service
@@ -168,7 +168,7 @@ Workspace* FrameworkManagerImpl::getWorkspace(const std::string& wsName)
 
 /** Removes and deletes a workspace from the data service store.
  * 
- *  @param wsName The user-given name for the workspace 
+ *  @param wsName :: The user-given name for the workspace 
  *  @return true if the workspace was found and deleted
  * 
  *  @throw NotFoundError Thrown if workspace cannot be found

@@ -9,8 +9,8 @@ namespace Mantid
   {
 
     /** Constructor for a parametrized Component.
-    * @param base a Component that is the base (un-parametrized) component
-    * @param map a ParameterMap to parameterize the component
+    * @param base :: a Component that is the base (un-parametrized) component
+    * @param map :: a ParameterMap to parameterize the component
     */
     Component::Component(const IComponent* base,  const ParameterMap * map)
       : m_base(dynamic_cast<const Component*>(base)), m_map(map), m_isParametrized(true)
@@ -34,7 +34,7 @@ namespace Mantid
     }
 
 
-    /*! Empty constructor
+    /** Empty constructor
     *  Create a component with null parent
     */
     Component::Component()
@@ -42,7 +42,7 @@ namespace Mantid
     {
     }
 
-    /*! Constructor by value
+    /** Constructor by value
     *  @param name :: Component name
     *  @param parent :: parent Component (optional)
     */
@@ -52,7 +52,7 @@ namespace Mantid
     {
     }
 
-    /*! Constructor by value
+    /** Constructor by value
     *  @param name :: Component name
     *  @param position :: position
     *  absolute or relative if the parent is defined
@@ -64,7 +64,7 @@ namespace Mantid
     {
     }
 
-    /*! Constructor
+    /** Constructor
     *  @param name :: Component name
     *  @param position :: position (relative to parent, if present)
     *  @param rotation :: orientation quaternion (relative to parent, if present)
@@ -92,7 +92,7 @@ namespace Mantid
       return m_isParametrized;
     }
 
-    /*! Clone method
+    /** Clone method
     *  Make a copy of the Component
     *  @return new(*this)
     */
@@ -101,7 +101,7 @@ namespace Mantid
       return new Component(*this);
     }
 
-    /*!  Get the component's ID (pointer address)
+    /**  Get the component's ID (pointer address)
     *   @return ID
     */
     ComponentID Component::getComponentID()const
@@ -113,7 +113,7 @@ namespace Mantid
     }
 
     //-------------------------------------------------------------------------------
-    /*! Set the parent. Previous parenting is lost.
+    /** Set the parent. Previous parenting is lost.
     *  @param comp :: the parent Component
     */
     void Component::setParent(IComponent* comp)
@@ -123,7 +123,7 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /*! Get a pointer to the parent.
+    /** Get a pointer to the parent.
     *  @return this.parent
     */
     boost::shared_ptr<const IComponent> Component::getParent() const
@@ -138,7 +138,7 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------------------------
-    /*! Returns an array of all ancestors of this component,
+    /** Returns an array of all ancestors of this component,
     *  starting with the direct parent and moving up
     *  @return An array of pointers to ancestor components
     */
@@ -169,7 +169,7 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------------------------
-    /*! Set the name of the Component (currently does nothing)
+    /** Set the name of the Component (currently does nothing)
     *  @param s :: name string
     */
     void Component::setName(const std::string& s)
@@ -181,7 +181,7 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------------------------
-    /*! Get the name of the Component
+    /** Get the name of the Component
     *  @return this.name
     */
     std::string Component::getName() const
@@ -192,7 +192,7 @@ namespace Mantid
         return m_name;
     }
 
-    /*! Set the position of the Component
+    /** Set the position of the Component
     *  The position is with respect to the parent Component
     *  @param x :: x position
     *  @param y :: y position
@@ -206,7 +206,7 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
     }
 
-    /*! Set the position of the Component
+    /** Set the position of the Component
     *  The position is with respect to the parent Component
     *  @param v :: vector position
     */
@@ -218,7 +218,7 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
     }
 
-    /*! Set the orientation of the Component
+    /** Set the orientation of the Component
     *  The position is with respect to the parent Component
     *  @param q :: rotation quaternion
     */
@@ -231,7 +231,7 @@ namespace Mantid
     }
 
 
-    /*! Translate the Component relative to the parent Component
+    /** Translate the Component relative to the parent Component
     *  @param x :: translation on the x-axis
     *   @param y :: translation on the y-axis
     *  @param z :: translation on the z-axis
@@ -248,7 +248,7 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
     }
 
-    /*! Translate the Component relative to the parent Component
+    /** Translate the Component relative to the parent Component
     *  @param v :: translation vector
     */
     void Component::translate(const V3D& v)
@@ -259,7 +259,7 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
     }
 
-    /*! Rotate the Component relative to the parent Component
+    /** Rotate the Component relative to the parent Component
     *  @param r :: translation vector
     */
     void Component::rotate(const Quat& r)
@@ -270,9 +270,9 @@ namespace Mantid
         throw Kernel::Exception::NotImplementedError("Component::rotate (for Parametrized Component)");
     }
 
-    /*! Rotate the Component by an angle in degrees with respect to an axis.
-    * @param angle the number of degrees to rotate
-    * @param axis The Vector to rotate around
+    /** Rotate the Component by an angle in degrees with respect to an axis.
+    * @param angle :: the number of degrees to rotate
+    * @param axis :: The Vector to rotate around
     */
     void Component::rotate(double angle, const V3D& axis)
     {
@@ -424,7 +424,7 @@ namespace Mantid
 
 
     /** Gets the distance between two Components
-    *  @param comp The Component to measure against
+    *  @param comp :: The Component to measure against
     *  @returns The distance
     */
     double Component::getDistance(const IComponent& comp) const
@@ -434,7 +434,7 @@ namespace Mantid
 
     /**
     * Get the bounding box for this component. It is no shape so gives an empty box.
-    * @param boundingBox [Out] The resulting bounding box is stored here.
+    * @param boundingBox :: [Out] The resulting bounding box is stored here.
     */
     void Component::getBoundingBox(BoundingBox & boundingBox) const
     {
@@ -443,7 +443,7 @@ namespace Mantid
 
     /**
     * Get the names of the parameters for this component.
-    * @param recursive If true, the parameters for all of the parent components are also included
+    * @param recursive :: If true, the parameters for all of the parent components are also included
     * @returns A set of strings giving the parameter names for this component
     */
     std::set<std::string> Component::getParameterNames(bool recursive) const
@@ -466,8 +466,8 @@ namespace Mantid
 
     /**
     * Returns a boolean indicating if the component has the named parameter
-    * @param name The name of the parameter
-    * @param recursive If true the parent components will also be searched (Default: true)
+    * @param name :: The name of the parameter
+    * @param recursive :: If true the parent components will also be searched (Default: true)
     * @returns A boolean indicating if the search was successful or not.
     */
     bool Component::hasParameter(const std::string & name, bool recursive) const
@@ -500,7 +500,7 @@ namespace Mantid
 
 
     /** Prints a text representation of itself
-    * @param os The ouput stream to write to
+    * @param os :: The ouput stream to write to
     */
     void Component::printSelf(std::ostream& os) const
     {
@@ -517,8 +517,8 @@ namespace Mantid
     }
 
     /** Prints a text representation
-    * @param os The ouput stream to write to
-    * @param comp The Component to output
+    * @param os :: The ouput stream to write to
+    * @param comp :: The Component to output
     * @returns The ouput stream
     */
     std::ostream& operator<<(std::ostream& os, const Component& comp)

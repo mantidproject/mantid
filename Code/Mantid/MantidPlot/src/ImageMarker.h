@@ -34,7 +34,7 @@
 
 #include <QPixmap>
 
-/*!\brief Draw images on a QwtPlot.
+/**\brief Draw images on a QwtPlot.
  *
  * ImageMarker draws #d_pic at the position specified by #d_pos,
  * scaled to #d_size. #d_file_name isn't used internally, but only provided to help

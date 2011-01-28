@@ -124,10 +124,10 @@ struct MDPointsLocations
   //------------------------------------------------------------------------------------------------
   /** function sets data from external source into MDDataPoint format 
    *
-   *  @param ind           - the location of the pixel in the MDDataPoints dataset
-   *  @param dim_fields    - the values of the dimension coordinates (may be absent)
-   *  @param Signal_fields - Signal and error for histogram data, absent for event data
-   *  @param iFields       - array of dimension ID in some look-up table; 
+   *  @param ind ::           - the location of the pixel in the MDDataPoints dataset
+   *  @param dim_fields ::    - the values of the dimension coordinates (may be absent)
+   *  @param Signal_fields :: Signal and error for histogram data, absent for event data
+   *  @param iFields ::       - array of dimension ID in some look-up table; 
    */
    void setData(size_t ind,T dim_fields[],S SignalFields[],I iFields[]){
      unsigned int i0;
@@ -147,9 +147,9 @@ struct MDPointsLocations
    }
  /** function sets data from external source into MDDataPoint format using the information that signal and dimension fields are equal
    *
-   *  @param ind           - the location of the pixel in the MDDataPoints dataset
-   *  @param sdim_fields   - the values of the dimension coordinates (may be absent) and signals places in the same array
-   *  @param iFields       - array of dimension ID in some look-up table; 
+   *  @param ind ::           - the location of the pixel in the MDDataPoints dataset
+   *  @param sdim_fields ::   - the values of the dimension coordinates (may be absent) and signals places in the same array
+   *  @param iFields ::       - array of dimension ID in some look-up table; 
    */
    void setData(size_t ind,T sdim_fields[],I iFields[]){
      unsigned int i0;
@@ -274,10 +274,10 @@ struct MDPointsLocations
    *  for Horace data e.g. expetcs no more than 2^pix_id_shift-1 runs and no more than
    *  2^(32-pix_id_shift) pixels (unique detectors)
    *
-   *  @param ind           - the location of the pixel in the MDDataPoints dataset
-   *  @param dim_fields    - the values of the dimension coordinates (may be absent)
-   *  @param Signal_fields - Signal and error for histogram data, absent for event data
-   *  @param iFields       - array of dimension ID in some look-up table; this function assumes that 2 first 
+   *  @param ind ::           - the location of the pixel in the MDDataPoints dataset
+   *  @param dim_fields ::    - the values of the dimension coordinates (may be absent)
+   *  @param Signal_fields :: Signal and error for histogram data, absent for event data
+   *  @param iFields ::       - array of dimension ID in some look-up table; this function assumes that 2 first 
    *                         fields represent the detector location (detectorId and runID)
    */
    void setData(unsigned int ind,T dim_fields[],S SignalFields[],int iFields[]){

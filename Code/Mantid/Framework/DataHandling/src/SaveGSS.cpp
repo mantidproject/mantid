@@ -183,10 +183,10 @@ void SaveGSS::exec()
 /** Ensures that when a workspace group is passed as output to this workspace
  *  everything is saved to one file and the bank number increments for each
  *  group member.
- *  @param alg           Pointer to the algorithm
- *  @param propertyName  Name of the property
- *  @param propertyValue Value  of the property
- *  @param periodNum     Effectively a counter through the group members
+ *  @param alg ::           Pointer to the algorithm
+ *  @param propertyName ::  Name of the property
+ *  @param propertyValue :: Value  of the property
+ *  @param periodNum ::     Effectively a counter through the group members
  */
 void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int periodNum)
 {
@@ -233,8 +233,8 @@ void writeValue(std::ostream &os, const Run& runinfo, const std::string& name) {
 
 /**
  * Write the header information for the given workspace
- * @param os The stream to use to write the information
- * @param workspace A shared pointer to MatrixWorkspace
+ * @param os :: The stream to use to write the information
+ * @param workspace :: A shared pointer to MatrixWorkspace
  */
 void SaveGSS::writeHeaders(const std::string &format, std::ostream& os, Mantid::API::MatrixWorkspace_const_sptr& workspace) const
 {

@@ -230,9 +230,9 @@ void RemoveBins::crop(const double& start, const double& end)
 }
 
 /** Convert the X range given into the unit of the input workspace
- *  @param index  The current spectrum index
- *  @param startX Returns the start of the range in the workspace's unit
- *  @param endX   Returns the end of the range in the workspace's unit
+ *  @param index ::  The current spectrum index
+ *  @param startX :: Returns the start of the range in the workspace's unit
+ *  @param endX ::   Returns the end of the range in the workspace's unit
  */
 void RemoveBins::transformRangeUnit(const int& index, double& startX, double& endX)
 {
@@ -270,10 +270,10 @@ void RemoveBins::transformRangeUnit(const int& index, double& startX, double& en
 }
 
 /** Retrieves the detector postion for a given spectrum
- *  @param index    The workspace index of the spectrum
- *  @param l1       Returns the source-sample distance
- *  @param l2       Returns the sample-detector distance
- *  @param twoTheta Returns the detector's scattering angle
+ *  @param index ::    The workspace index of the spectrum
+ *  @param l1 ::       Returns the source-sample distance
+ *  @param l2 ::       Returns the sample-detector distance
+ *  @param twoTheta :: Returns the detector's scattering angle
  */
 void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double& l2, double& twoTheta)
 {
@@ -307,8 +307,8 @@ void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double&
 }
 
 /** Finds the index in an ordered vector which follows the given value
- *  @param value The value to search for
- *  @param vec   The vector to search
+ *  @param value :: The value to search for
+ *  @param vec ::   The vector to search
  *  @return The index (will give vec.size()+1 if the value is past the end of the vector)
  */
 int RemoveBins::findIndex(const double& value, const MantidVec& vec)
@@ -318,10 +318,10 @@ int RemoveBins::findIndex(const double& value, const MantidVec& vec)
 }
 
 /** Zeroes data (Y/E) at the end of a spectrum
- *  @param start The index to start zeroing at
- *  @param end   The index to end zeroing at
- *  @param Y     The data vector
- *  @param E     The error vector
+ *  @param start :: The index to start zeroing at
+ *  @param end ::   The index to end zeroing at
+ *  @param Y ::     The data vector
+ *  @param E ::     The error vector
  */
 void RemoveBins::RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E)
 {
@@ -339,12 +339,12 @@ void RemoveBins::RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E)
 /** Removes bins in the middle of the data (Y/E).
  *  According to the value of the Interpolation property, they are either zeroed or the gap is interpolated linearly.
  *  If the former, the edge bins will be scaled according to how much of them falls within the range being removed.
- *  @param start     The first index to remove
- *  @param end       The last index to remove
- *  @param startFrac The fraction of the first bin that's outside the range being zeroed
- *  @param endFrac   The fraction of the last bin that's outside the range being zeroed
- *  @param Y         The data vector
- *  @param E         The error vector
+ *  @param start ::     The first index to remove
+ *  @param end ::       The last index to remove
+ *  @param startFrac :: The fraction of the first bin that's outside the range being zeroed
+ *  @param endFrac ::   The fraction of the last bin that's outside the range being zeroed
+ *  @param Y ::         The data vector
+ *  @param E ::         The error vector
  */
 void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E)
 {

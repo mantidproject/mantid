@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTID_API WorkspaceTracerImpl
 
     /**
      * Insert an algorithm at the end of the chain
-     * @param alg The algorithm pointer to insert
+     * @param alg :: The algorithm pointer to insert
      */
     void addToEnd(Mantid::API::Algorithm* alg) 
     { 

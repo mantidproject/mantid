@@ -7,7 +7,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/*!
+/**
   \class SurfaceFactory
   \brief Creates instances of Surfaces
   \version 1.0

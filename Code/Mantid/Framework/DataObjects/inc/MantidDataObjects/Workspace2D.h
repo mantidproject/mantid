@@ -59,7 +59,7 @@ public:
 
   /**
   Gets the name of the workspace type
-  \return Standard string name
+  @return Standard string name
    */
   virtual const std::string id() const {return "Workspace2D";}
 
@@ -96,13 +96,13 @@ public:
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
 
   /** sets the monitorWorkspace indexlist
-	@param mList a vector holding the monitor workspace indexes
+	@param mList :: a vector holding the monitor workspace indexes
   */
   void setMonitorList(std::vector<int>& mList){m_monitorList=mList;}
 
    /** sets the number of histograms.This method is mainly useful when the user selects 
    monitor 'select' or 'exclude' options from loadraw UI
-	@param nhistograms is the number of histograms
+	@param nhistograms :: is the number of histograms
   */
   void sethistogramNumbers(const int &nhistograms ){m_noVectors=nhistograms;}
  

@@ -17,9 +17,9 @@ namespace Kernel
  *  Look to see if conversion from the unit upon which this method is called requires
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.
- *  @param destination The unit to which conversion is sought
- *  @param factor      Returns the constant by which to multiply the input unit (if a conversion is found)
- *  @param power       Returns the power to which to raise the unput unit (if a conversion is found)
+ *  @param destination :: The unit to which conversion is sought
+ *  @param factor ::      Returns the constant by which to multiply the input unit (if a conversion is found)
+ *  @param power ::       Returns the power to which to raise the unput unit (if a conversion is found)
  *  @return            True if a 'quick conversion' exists, false otherwise
  */
 bool Unit::quickConversion(const Unit& destination, double& factor, double& power) const
@@ -33,9 +33,9 @@ bool Unit::quickConversion(const Unit& destination, double& factor, double& powe
  *  Look to see if conversion from the unit upon which this method is called requires
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.
- *  @param destUnitName The class name of the unit to which conversion is sought
- *  @param factor       Returns the constant by which to multiply the input unit (if a conversion is found)
- *  @param power        Returns the power to which to raise the unput unit (if a conversion is found)
+ *  @param destUnitName :: The class name of the unit to which conversion is sought
+ *  @param factor ::       Returns the constant by which to multiply the input unit (if a conversion is found)
+ *  @param power ::        Returns the power to which to raise the unput unit (if a conversion is found)
  *  @return             True if a 'quick conversion' exists, false otherwise
  */
 bool Unit::quickConversion(std::string destUnitName, double& factor, double& power) const
@@ -61,9 +61,9 @@ bool Unit::quickConversion(std::string destUnitName, double& factor, double& pow
 Unit::ConversionsMap Unit::s_conversionFactors = Unit::ConversionsMap();
 
 /** Add a 'quick conversion' from the unit class on which this method is called.
- *  @param to     The destination Unit for this conversion (use name returned by the unit's unitID() method)
- *  @param factor The constant by which to multiply the input unit
- *  @param power  The power to which to raise the input unit (defaults to 1)
+ *  @param to ::     The destination Unit for this conversion (use name returned by the unit's unitID() method)
+ *  @param factor :: The constant by which to multiply the input unit
+ *  @param power ::  The power to which to raise the input unit (defaults to 1)
  */
 void Unit::addConversion(std::string to, const double& factor, const double& power) const
 {

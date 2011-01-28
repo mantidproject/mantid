@@ -637,11 +637,11 @@ int Plot::axisLabelPrecision(int axis)
 	return 4;
 }
 
-/*!
-  \return the number format for the major scale labels of a specified axis
-  \param axis axis index
-  \retval f format character
-  \retval prec precision
+/**
+  @return the number format for the major scale labels of a specified axis
+  @param axis :: axis index
+  @retval f format character
+  @retval prec precision
   */
 void Plot::axisLabelFormat(int axis, char &f, int &prec) const
 {
@@ -654,7 +654,7 @@ void Plot::axisLabelFormat(int axis, char &f, int &prec) const
 	}
 }
 
-/*!
+/**
   \brief Adjust plot content to its current size.
   Must be reimplemented because the base implementation adds a mask causing an ugly drawing artefact.
 */
@@ -707,13 +707,13 @@ void Plot::showEvent (QShowEvent * event)
     updateCurveLabels();
 }
 
-/*!
+/**
   \brief Paint the plot into a given rectangle.
   Paint the contents of a QwtPlot instance into a given rectangle (Qwt modified code).
 
-  \param painter Painter
-  \param plotRect Bounding rectangle
-  \param pfilter Print filter
+  @param painter :: Painter
+  @param plotRect :: Bounding rectangle
+  @param pfilter :: Print filter
 */
 void Plot::print(QPainter *painter, const QRect &plotRect,
         const QwtPlotPrintFilter &pfilter)

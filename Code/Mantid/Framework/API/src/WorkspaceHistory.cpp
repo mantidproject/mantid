@@ -16,9 +16,9 @@ WorkspaceHistory::WorkspaceHistory() : m_environment(), m_algorithms()
 WorkspaceHistory::~WorkspaceHistory()
 {}
 
-/*!
+/**
   Standard Copy Constructor
-  \param A :: WorkspaceHistory Item to copy
+  @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory& A) :
   m_environment(A.m_environment),m_algorithms(A.m_algorithms)
@@ -55,8 +55,8 @@ void WorkspaceHistory::addAlgorithmHistory(const AlgorithmHistory& algHistory)
 }
 
 /** Prints a text representation of itself
- *  @param os The ouput stream to write to
- *  @param indent an indentation value to make pretty printing of object and sub-objects
+ *  @param os :: The ouput stream to write to
+ *  @param indent :: an indentation value to make pretty printing of object and sub-objects
  */
 void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
 {
@@ -74,8 +74,8 @@ void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
 }
 
 /** Prints a text representation
- * @param os The ouput stream to write to
- * @param WH The WorkspaceHistory to output
+ * @param os :: The ouput stream to write to
+ * @param WH :: The WorkspaceHistory to output
  * @returns The ouput stream
  */
 std::ostream& operator<<(std::ostream& os, const WorkspaceHistory& WH)

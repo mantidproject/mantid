@@ -519,7 +519,7 @@ void ICatAdvancedSearch::getKeyWords(QString& keywords)
 }
 
 /* This method updates the search result to search tree
- * @param ws_sptr workspace shared pointer
+ * @param ws_sptr :: workspace shared pointer
 */ 
 void ICatAdvancedSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 {	
@@ -547,7 +547,7 @@ void ICatAdvancedSearch::onClose()
 }
 
 /** This method is called when an investigation is selected  from investigations list
-  *@param item  item in the table
+  *@param item ::  item in the table
 */
 void ICatAdvancedSearch::investigationSelected(QTableWidgetItem * item )
 {

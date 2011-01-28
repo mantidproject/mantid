@@ -20,7 +20,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 /** Sets up all the controls in the dialog box using the settings found under
  *  the passed group string, the settings must be setup before this called
- *  @param parent used by QT
+ *  @param parent :: used by QT
  */
 Background::Background(QWidget *parent) :
   API::MantidDialog(parent), m_ckDoRemove(new QCheckBox),
@@ -82,7 +82,7 @@ bool Background::removeBackground() const
 
 /**
  * Set whether to remove the background or not
- * @param remove If true, the background will be removed
+ * @param remove :: If true, the background will be removed
  */
 void Background::removeBackground(bool remove)
 {
@@ -100,8 +100,8 @@ QPair<double, double> Background::getRange() const
 
 /**
  * Set the background range
- * @param min Minimum value
- * @param max Maximum value
+ * @param min :: Minimum value
+ * @param max :: Maximum value
  */
 void Background::setRange(double min, double max)
 {
@@ -120,7 +120,7 @@ void Background::initLayout()
 
 /**
  * Called in response to a show() event
- * @param event The event details
+ * @param event :: The event details
  */
 void Background::showEvent(QShowEvent* e)
 {

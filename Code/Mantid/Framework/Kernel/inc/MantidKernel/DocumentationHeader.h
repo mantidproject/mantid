@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_DOCUMENTATIONHEADER_H_
 
 // The following stuff is for the doxygen title page
-/*!  \mainpage Mantid - Manipulation and Analysis Toolkit for ISIS Data - API documentation
+/**  \mainpage Mantid - Manipulation and Analysis Toolkit for ISIS Data - API documentation
   \image html "http://svn.mantidproject.org/mantid/trunk/Images/Mantid Logo.png"
   \section description Program description:
 The Mantid application framework will provide a platform to supports high-performance computing on neutron data. The framework will provide a set of common services, algorithms and data objects that can be extended further by specialised applications or directly by users if required. The main aims of the project are as follows 

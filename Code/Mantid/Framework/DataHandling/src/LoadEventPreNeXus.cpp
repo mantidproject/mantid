@@ -263,8 +263,8 @@ void LoadEventPreNeXus::exec()
 
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
- *  @param eventfilename Used to pick the instrument.
- *  @param localWorkspace MatrixWorkspace in which to put the instrument geometry
+ *  @param eventfilename :: Used to pick the instrument.
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
 void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
 {
@@ -353,7 +353,7 @@ void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
 
 //-----------------------------------------------------------------------------
 /** Process the event file properly.
- * @param workspace EventWorkspace to write to.
+ * @param workspace :: EventWorkspace to write to.
  */
 void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
@@ -459,10 +459,10 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
 //-----------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
- * @param workspace EventWorkspace to write to.
- * @param event_buffer The buffer containing the DAS events
- * @param current_event_buffer_size The length of the given DAS buffer
- * @param fileOffset Value for an offset into the binary file
+ * @param workspace :: EventWorkspace to write to.
+ * @param event_buffer :: The buffer containing the DAS events
+ * @param current_event_buffer_size :: The length of the given DAS buffer
+ * @param fileOffset :: Value for an offset into the binary file
  */
 void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
@@ -565,7 +565,7 @@ bool intermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y)
  * Add a sample environment log for the proton chage (charge of the pulse in picoCoulombs)
  * and set the scalar value (total proton charge, microAmps*hours, on the sample)
  *
- * @param workspace Event workspace to set the proton charge on
+ * @param workspace :: Event workspace to set the proton charge on
  */
 void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
 {
@@ -596,7 +596,7 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
- * @param filename Path to file.
+ * @param filename :: Path to file.
  */
 void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 {
@@ -638,7 +638,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 
 //-----------------------------------------------------------------------------
 /** Open an event file
- * @param filename file to open.
+ * @param filename :: file to open.
  */
 void LoadEventPreNeXus::openEventFile(const std::string &filename)
 {
@@ -655,8 +655,8 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
 
 //-----------------------------------------------------------------------------
 /** Read a pulse ID file
- * @param filename file to load.
- * @param throwError Flag to trigger error throwing instead of just logging
+ * @param filename :: file to load.
+ * @param throwError :: Flag to trigger error throwing instead of just logging
  */
 void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool throwError)
 {

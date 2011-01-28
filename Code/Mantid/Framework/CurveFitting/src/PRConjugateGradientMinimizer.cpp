@@ -103,8 +103,8 @@ double PRConjugateGradientMinimizer::costFunctionVal()
 
 /* Calculates covariance matrix
  *
- * @param epsrel Is used to remove linear-dependent columns
- * @param covar Returned covariance matrix, here as 
+ * @param epsrel :: Is used to remove linear-dependent columns
+ * @param covar :: Returned covariance matrix, here as 
  */
 void PRConjugateGradientMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {

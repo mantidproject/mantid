@@ -60,8 +60,8 @@ namespace Mantid
     void setJ(gsl_matrix * J){m_J = J;}
 
     /// overwrite base method
-    /// @param value the value
-    /// @param iActiveP the index of the parameter
+    /// @param value :: the value
+    /// @param iActiveP :: the index of the parameter
     ///  @throw runtime_error Thrown if column of Jacobian to add number to does not exist
     void addNumberToColumn(const double& value, const int& iActiveP) 
     {

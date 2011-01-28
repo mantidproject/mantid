@@ -58,14 +58,14 @@ public:
   virtual std::size_t nDets() const = 0;
 
   /** Get the distance of this detector object from another Component
-   *  @param comp The component to give the distance to
+   *  @param comp :: The component to give the distance to
    *  @return The distance
    */
   virtual double getDistance(const IComponent& comp) const = 0;
 
   /** Gives the angle of this detector object with respect to an axis
-   *  @param observer The point to calculate the angle relative to (typically the sample position)
-   *  @param axis     The axis to which the required angle is relative
+   *  @param observer :: The point to calculate the angle relative to (typically the sample position)
+   *  @param axis ::     The axis to which the required angle is relative
    *  @return The angle in radians
    */
   virtual double getTwoTheta(const V3D& observer, const V3D& axis) const = 0;

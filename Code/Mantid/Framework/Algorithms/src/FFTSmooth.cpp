@@ -168,7 +168,7 @@ void FFTSmooth::exec()
 }
 
 /** Smoothing by truncation.
- *  @param n The order of truncation
+ *  @param n :: The order of truncation
  */
 void FFTSmooth::truncate(int n)
 {
@@ -228,7 +228,7 @@ void FFTSmooth::truncate(int n)
 }
 
 /** Smoothing by zeroing.
- *  @param n The order of truncation
+ *  @param n :: The order of truncation
  */
 void FFTSmooth::zero(int n)
 {

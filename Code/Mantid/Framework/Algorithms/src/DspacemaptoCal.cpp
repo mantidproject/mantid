@@ -32,7 +32,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants
 //-----------------------------------------------------------------------
 /** Calculate the conversion factor for a single pixel.
  *
- * @param l1 Primary flight path.
+ * @param l1 :: Primary flight path.
  * @param beamline: vector = samplePos-sourcePos = a vector pointing from the source to the sample,
  *        the length of the distance between the two.
  * @param beamline_norm: (source to sample distance) * 2.0 (apparently)

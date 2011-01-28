@@ -1,7 +1,7 @@
 #ifndef OBJCOMPONENT_ACTOR_H_
 #define OBJCOMPONENT_ACTOR_H_
 #include "GLActor.h"
-/*!
+/**
   \class  ObjComponentActor
   \brief  ObjComponentActor is an actor class for rendering ObjComponents.
   \author Srikanth Nagella

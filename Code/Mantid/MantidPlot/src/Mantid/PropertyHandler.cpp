@@ -273,7 +273,7 @@ void PropertyHandler::initParameters()
 
 /**
   * Add a function to the function handled by this handler.
-  * @param fnName A function name or full initialization string
+  * @param fnName :: A function name or full initialization string
   *   in the form name=FunctionName,param1=Value,param2=Value,...
   */
 PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
@@ -560,7 +560,7 @@ PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFitFunction* f
 
 /**
 * Set function parameter value read from a QtProperty
-* @param prop The (double) property with the new parameter value
+* @param prop :: The (double) property with the new parameter value
 * @return true if successfull
 */
 bool PropertyHandler::setParameter(QtProperty* prop)
@@ -654,7 +654,7 @@ private:
 
 /**
 * Set function attribute value read from a QtProperty
-* @param prop The (string) property with the new attribute value
+* @param prop :: The (string) property with the new attribute value
 * @return true if successfull
 */
 bool PropertyHandler::setAttribute(QtProperty* prop)
@@ -773,8 +773,8 @@ void PropertyHandler::updateParameters()
 
 /**
 * Change the type of the function (replace the function)
-* @param prop The "Type" property with new value
-* @param fnName New function name (type) or full initialization expression
+* @param prop :: The "Type" property with new value
+* @param fnName :: New function name (type) or full initialization expression
 */
 Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 {
@@ -968,7 +968,7 @@ void PropertyHandler::fix(const QString& parName)
 
 /**
  * Remove the tie.
- * @param prop The tie property to remove
+ * @param prop :: The tie property to remove
  */
 void PropertyHandler::removeTie(QtProperty* prop)
 {
@@ -989,7 +989,7 @@ void PropertyHandler::removeTie(QtProperty* prop)
 
 /**
  * Remove the tie.
- * @param parName The name of the parameter
+ * @param parName :: The name of the parameter
  */
 void PropertyHandler::removeTie(const QString& parName)
 {
@@ -1246,7 +1246,7 @@ QList<PropertyHandler*> PropertyHandler::getPeakList()
 
 /**
  * Plot this function on a graph
- * @param g The graph to plot on
+ * @param g :: The graph to plot on
  */
 void PropertyHandler::plot(Graph* g)const
 {

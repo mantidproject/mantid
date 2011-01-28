@@ -23,16 +23,16 @@ Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit
 LineIntersectVisit::LineIntersectVisit
   (const Geometry::V3D& Pt,const Geometry::V3D& uVec) :
     ATrack(Pt,uVec)
-  /*!
+  /**
     Constructor
   */
 {}
 
 void
 LineIntersectVisit::Accept(const Surface& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   (void) Surf; //Avoid compiler warning
@@ -42,9 +42,9 @@ LineIntersectVisit::Accept(const Surface& Surf)
 
 void
 LineIntersectVisit::Accept(const Quadratic& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -54,9 +54,9 @@ LineIntersectVisit::Accept(const Quadratic& Surf)
 
 void
 LineIntersectVisit::Accept(const Plane& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -66,9 +66,9 @@ LineIntersectVisit::Accept(const Plane& Surf)
 
 void
 LineIntersectVisit::Accept(const Cone& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -78,9 +78,9 @@ LineIntersectVisit::Accept(const Cone& Surf)
 
 void
 LineIntersectVisit::Accept(const Cylinder& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -90,9 +90,9 @@ LineIntersectVisit::Accept(const Cylinder& Surf)
 
 void
 LineIntersectVisit::Accept(const Sphere& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -102,9 +102,9 @@ LineIntersectVisit::Accept(const Sphere& Surf)
 
 void
 LineIntersectVisit::Accept(const General& Surf)
-  /*!
+  /**
     Process an intersect track
-    \param Surf :: Surface to use int line Interesect
+    @param Surf :: Surface to use int line Interesect
   */
 {
   ATrack.intersect(PtOut,Surf);
@@ -114,7 +114,7 @@ LineIntersectVisit::Accept(const General& Surf)
 
 void
 LineIntersectVisit::procTrack() 
-  /*!
+  /**
     Sorts the PtOut and distances
     with a closes first order.
   */

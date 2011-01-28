@@ -61,7 +61,7 @@ namespace Mantid
 		}
 
 	  /**This method filters log files from the workspace
-	    *@param ws_sptr shared pointer to workspace
+	    *@param ws_sptr :: shared pointer to workspace
 		*/
 		void CGetDataFiles::filterLogFiles( API::ITableWorkspace_sptr& ws_sptr)
 		{
@@ -84,7 +84,7 @@ namespace Mantid
 		}
 
 	 /**This checks the datafile boolean  selected
-		 * @param fileName - name of the  file 
+		 * @param fileName :: name of the  file 
 		 * @return bool - returns true if it's a raw file or nexus file
 		 */
 		bool CGetDataFiles::isDataFile(const std::string& fileName)

@@ -114,25 +114,25 @@ class PartialJacobian: public Jacobian
   int m_iaP0;      ///< offset in the active Jacobian for a particular function
 public:
   /** Constructor
-   * @param J A pointer to the overall Jacobian
-   * @param iP0 The parameter index (declared) offset for a particular function
-   * @param iap0 The active parameter index (declared) offset for a particular function
+   * @param J :: A pointer to the overall Jacobian
+   * @param iP0 :: The parameter index (declared) offset for a particular function
+   * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
   PartialJacobian(Jacobian* J,int iP0, int iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
   {}
   /**
    * Overridden Jacobian::set(...).
-   * @param iY The index of the data point
-   * @param iP The parameter index of an individual function.
-   * @param value The derivative value
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   * @param value :: The derivative value
    */
   void set(int iY, int iP, double value)
   {
       m_J->set(iY,m_iP0 + iP,value);
   }
  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value Value to add
-  *   @param iActiveP The index of an active parameter.
+  *   @param value :: Value to add
+  *   @param iActiveP :: The index of an active parameter.
   */
   virtual void addNumberToColumn(const double& value, const int& iActiveP) 
   {
@@ -164,10 +164,10 @@ void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* 
 }
 
 /** Initialize the function providing it the workspace
- * @param workspace The shared pointer to a workspace to which the function will be fitted
- * @param spec The number of a spectrum for fitting
- * @param xMin The minimum bin index of spectrum spec that will be used in fitting
- * @param xMax The maximum bin index of spectrum spec that will be used in fitting
+ * @param workspace :: The shared pointer to a workspace to which the function will be fitted
+ * @param spec :: The number of a spectrum for fitting
+ * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
+ * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
  */
 void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 {

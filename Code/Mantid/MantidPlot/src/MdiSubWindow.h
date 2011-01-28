@@ -56,10 +56,10 @@ public:
 
 	//! Constructor
 	/**
-	 * \param label window label
-	 * \param parent parent widget
-	 * \param name window name
-	 * \param f window flags
+	 * @param label :: window label
+	 * @param parent :: parent widget
+	 * @param name :: window name
+	 * @param f :: window flags
 	 * \sa setCaptionPolicy(), captionPolicy()
 	 */
 	MdiSubWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);

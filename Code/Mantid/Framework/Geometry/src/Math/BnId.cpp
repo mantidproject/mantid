@@ -22,10 +22,10 @@ namespace Geometry
 
 Kernel::Logger& BnId::PLog(Kernel::Logger::get("BnId"));
 
-/*! Output as a stream
- *  \param of Reference to the output stream
- *  \param A  The object to output
- *  \return stream representation
+/** Output as a stream
+ *  @param of :: Reference to the output stream
+ *  @param A ::  The object to output
+ *  @return stream representation
  */
 std::ostream&
 operator<<(std::ostream& of,const BnId& A) 
@@ -36,18 +36,18 @@ operator<<(std::ostream& of,const BnId& A)
 
 BnId::BnId() :
   size(0),PI(1),Tnum(0),Znum(0)
-  /*!
+  /**
     Standard Constructor
   */
 {}
 
 BnId::BnId(const int A,const unsigned int X) :
   size(A),PI(1),Tnum(0),Znum(0),Tval(A)
-  /*!
+  /**
     Constructer that creates a true/false mapping
     without the  undetermined option
-    \param A :: size of the vector Tval. (number of surfaces)
-    \param X :: interger for of the binary representation
+    @param A :: size of the vector Tval. (number of surfaces)
+    @param X :: interger for of the binary representation
   */
 {
   unsigned int cnt=1;
@@ -63,18 +63,18 @@ BnId::BnId(const int A,const unsigned int X) :
 BnId::BnId(const BnId& A) :
   size(A.size),PI(A.PI),Tnum(A.Tnum),
   Znum(A.Znum),Tval(A.Tval)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: Object to copy
+    @param A :: Object to copy
   */
 {}
 
 BnId&
 BnId::operator=(const BnId& A) 
-  /*!
+  /**
     Assignment operator
-    \param A :: object to copy
-    \returns *this
+    @param A :: object to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -89,18 +89,18 @@ BnId::operator=(const BnId& A)
 }
 
 BnId::~BnId()
-  /*!
+  /**
     Destructor
    */
 {}
 
 int
 BnId::operator==(const BnId& A) const
-  /*!
+  /**
     Tri-state return of the equality 
-    \param A :: BnId object to compare
-    \retval 1 == absolutely identical
-    \retval 0 == not equal 
+    @param A :: BnId object to compare
+    @retval 1 == absolutely identical
+    @retval 0 == not equal 
   */
 {
   if (A.size!=size || A.Tnum!=Tnum
@@ -120,11 +120,11 @@ BnId::operator==(const BnId& A) const
 
 int
 BnId::equivalent(const BnId& A) const
-  /*!
+  /**
     Tri-state return of the equality 
-    \param A :: BnId object to compare
-    \retval 1 == absolutely identical
-    \retval 0 == not equal 
+    @param A :: BnId object to compare
+    @retval 1 == absolutely identical
+    @retval 0 == not equal 
   */
 {
   if (A.size!=size)
@@ -142,10 +142,10 @@ BnId::equivalent(const BnId& A) const
 
 int 
 BnId::operator>(const BnId& A) const
-  /*!
+  /**
     Tri-state return of the ordering of number of true
-    \param A :: BnId object to compare
-    \returns !(this<A)
+    @param A :: BnId object to compare
+    @return !(this<A)
   */
 {
   return (&A!=this) ? 
@@ -154,10 +154,10 @@ BnId::operator>(const BnId& A) const
 
 int
 BnId::operator<(const BnId& A) const
-  /*!
+  /**
     Tri-state return of the ordering of number of true states
-    \param A :: BnId object to compare
-    \returns Size<A.size, N of True<A.N of True,
+    @param A :: BnId object to compare
+    @return Size<A.size, N of True<A.N of True,
        IntVal<A.IntVal
   */
 {
@@ -185,10 +185,10 @@ BnId::operator<(const BnId& A) const
 
 int
 BnId::operator[](const int A) const
-  /*!
+  /**
     Returns the particular rule value
-    \param A :: array offset 0->size-1
-    \returns -99 on err, Tval[A] normally
+    @param A :: array offset 0->size-1
+    @return -99 on err, Tval[A] normally
   */
 {
   if (A<0 && A>=size)
@@ -198,11 +198,11 @@ BnId::operator[](const int A) const
 
 int 
 BnId::operator++(int)
-  /*!
+  /**
     convertion to ++operator (prefix) 
     from operator++ (postfix)
-    \retval 0 :: the function has looped (carry flag)
-    \retval 1 :: no loop occored
+    @retval 0 :: the function has looped (carry flag)
+    @retval 1 :: no loop occored
    */
 {
   return this->operator++();
@@ -210,12 +210,12 @@ BnId::operator++(int)
 
 int
 BnId::operator++()
-  /*!
+  /**
     Addition operator
     Carrys out a rotational addition (effective binary
     addition. It ignores non-important flags (Tval[i]==0)
-    \retval 0 :: the function has looped (carry flag)
-    \retval 1 :: no loop occored
+    @retval 0 :: the function has looped (carry flag)
+    @retval 1 :: no loop occored
   */
 {
   std::vector<int>::iterator vc;
@@ -237,11 +237,11 @@ BnId::operator++()
 
 int 
 BnId::operator--(const int)
-  /*!
+  /**
     Convertion to --operator (prefix) 
     from operator-- (postfix)
-    \retval 0 :: the function has looped (carry flag)
-    \retval 1 :: no loop occored
+    @retval 0 :: the function has looped (carry flag)
+    @retval 1 :: no loop occored
    */
 {
   return this->operator--();
@@ -249,12 +249,12 @@ BnId::operator--(const int)
 
 int
 BnId::operator--()
-  /*!
+  /**
     Subtraction operator
     Carrys out a rotational subtraction (effective binary
     addition. It ignores non-important flags (Tval[i]==0)
-    \retval 0 :: the function has looped (carry flag)
-    \retval 1 :: no loop occored
+    @retval 0 :: the function has looped (carry flag)
+    @retval 1 :: no loop occored
   */
 {
   std::vector<int>::iterator vc;
@@ -275,7 +275,7 @@ BnId::operator--()
 
 void
 BnId::setCounters()           
-  /*!
+  /**
     Sets the counters Tnum and Znum
   */
 {
@@ -294,10 +294,10 @@ BnId::setCounters()
 
 int
 BnId::intValue() const
-  /*!
+  /**
     Returns the lowest int value associated with 
     the string 
-    \returns lowest bit in the BnId vector
+    @return lowest bit in the BnId vector
   */
 {
   unsigned out(0);
@@ -313,10 +313,10 @@ BnId::intValue() const
 void
 BnId::mapState(const std::vector<int>& Index,
 	       std::map<int,int>& Base) const
-  /*!
+  /**
     Sets the components within base with true/false
-    \param Index :: vector of Literal/Surface numbers
-    \param Base :: map to be filled
+    @param Index :: vector of Literal/Surface numbers
+    @param Base :: map to be filled
   */
 {
   std::vector<int>::const_iterator vc;
@@ -330,15 +330,15 @@ BnId::mapState(const std::vector<int>& Index,
 
 std::pair<int,BnId>
 BnId::makeCombination(const BnId& A) const
-  /*!
+  /**
     Find if A and this can be differ by one
     1/-1 bit and make a 0 value for that bit
-    \param A :: value to check
+    @param A :: value to check
     Output 
       -  0 :: nothing to do.
       -  1 :: complement found
       - -1 :: items are too differnt
-    \returns pair<status,BnId> of possible new PI
+    @return pair<status,BnId> of possible new PI
     BnId is valid only if status ==1
   */
 {
@@ -386,7 +386,7 @@ BnId::makeCombination(const BnId& A) const
 
 void
 BnId::reverse() 
-  /*!
+  /**
     Reverset the bits.
     Transform 1 -> -1
   */
@@ -399,10 +399,10 @@ BnId::reverse()
 
 std::string
 BnId::display() const
-  /*!
+  /**
     Simple display to string
     0 == false, - == any, 1 == true
-    \returns String value of true etc
+    @return String value of true etc
    */
 {
   std::string Out;

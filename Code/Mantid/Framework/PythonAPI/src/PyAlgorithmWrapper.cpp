@@ -21,7 +21,7 @@ PyAlgorithmBase::PyAlgorithmBase() : CloneableAlgorithm()
 //--------------------------------------------------
 /**
  * Constructor for callback
- * @param self The python object to use to perform the callback
+ * @param self :: The python object to use to perform the callback
  */
 PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_self(self), m_ref_killed(false)
 {

@@ -226,9 +226,9 @@ void MaskBins::execEvent()
 
 
 /** Finds the indices of the bins at the limits of the range given. 
- *  @param X        The X vector to search
- *  @param startBin Returns the bin index including the starting value
- *  @param endBin   Returns the bin index after the end value
+ *  @param X ::        The X vector to search
+ *  @param startBin :: Returns the bin index including the starting value
+ *  @param endBin ::   Returns the bin index after the end value
  */
 void MaskBins::findIndices(const MantidVec& X, MantidVec::difference_type& startBin, MantidVec::difference_type& endBin)
 {

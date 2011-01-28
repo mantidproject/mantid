@@ -31,15 +31,15 @@ Kernel::Logger& Rule::PLog(Kernel::Logger::get("Rule"));
 
 int
 Rule::addToKey(std::vector<int>& AV,const int passN)
-  /*! 
+  /** 
     Static function ::
     Given a vector AV increase the number from lowest
     to highest in an iterative counting chain.
     (effectively an N-bit binary number++)
-    \param AV :: vector of the N-bit array
-    \param passN :: number that is to be skipped 
-    \retval bit number that was set from 0 to 1
-    \retval -1 if the a carry flag is set 
+    @param AV :: vector of the N-bit array
+    @param passN :: number that is to be skipped 
+    @retval bit number that was set from 0 to 1
+    @retval -1 if the a carry flag is set 
   */
 {
   for(int i=0;i<static_cast<int>(AV.size());i++)
@@ -57,15 +57,15 @@ Rule::addToKey(std::vector<int>& AV,const int passN)
 
 int
 Rule::removeComplementary(Rule*& TopRule)
-  /*!
+  /**
     Given a rule tree remove any parts that 
     are (-A B C D A) -> (B C D) and 
     (A B C D A ) -> (A B C D) 
     Code is borrowed from makeCNF. See comments
     within that for a better howto.
     Currently it passes the line down
-    \retval 1 :: some simplification
-    \retval 0 :: no simplification
+    @retval 1 :: some simplification
+    @retval 0 :: no simplification
     
   */
 {
@@ -134,12 +134,12 @@ Rule::removeComplementary(Rule*& TopRule)
 
 int
 Rule::makeCNFcopy(Rule* &TopRule)
-  /*!
+  /**
     Static Function::
 
     Function to make the tree into CNF
     (conditional normal form) 
-    \param TopRule :: Rule to simplify.
+    @param TopRule :: Rule to simplify.
 
     We do not use *this :: The reason is that 
     we need to change the toprule type eg from 
@@ -147,7 +147,7 @@ Rule::makeCNFcopy(Rule* &TopRule)
     Since the type of a class can't be changed
     it is necessary to have a static function,
     so that the place that TopRule points is changable
-    \return number of changes 
+    @return number of changes 
   */
 {
   // Start at top to tree to find an instance
@@ -272,12 +272,12 @@ Rule::makeCNFcopy(Rule* &TopRule)
 
 int
 Rule::makeCNF(Rule* &TopRule)
-  /*!
+  /**
     Static Function::
 
     Function to make the tree into CNF
     (conditional normal form) 
-    \param TopRule :: Rule to simplify.
+    @param TopRule :: Rule to simplify.
 
     We do not use *this :: The reason is that 
     we need to change the toprule type e.g. from 
@@ -286,8 +286,8 @@ Rule::makeCNF(Rule* &TopRule)
     it is necessary to have a static function,
     so that the place that TopRule points is changable
 
-    \retval 0 on failure
-    \retval 1 on success
+    @retval 0 on failure
+    @retval 1 on success
   */
 {
   // Start at top to tree to find an instance
@@ -401,13 +401,13 @@ Rule::makeCNF(Rule* &TopRule)
 
 int
 Rule::removeItem(Rule* &TRule,const int SurfN) 
-  /*!
+  /**
     Given an item as a surface name,
     remove the surface from the Rule tree.
     - If the found leaf is on a
-    \param TRule :: Top rule to down search
-    \param SurfN :: Surface key number to remove
-    \return Number of instances removed
+    @param TRule :: Top rule to down search
+    @param SurfN :: Surface key number to remove
+    @return Number of instances removed
   */
 {
   int cnt(0);
@@ -453,14 +453,14 @@ Rule::removeItem(Rule* &TRule,const int SurfN)
 }
 
 Rule::Rule()  : Parent(0)
-  /*!
+  /**
     Standard Constructor
   */
 {}
 
 Rule::Rule(const Rule&) : 
   Parent(0)
-  /*!
+  /**
     Constructor copies. 
     Parent set to 0
   */
@@ -468,36 +468,36 @@ Rule::Rule(const Rule&) :
 
 Rule::Rule(Rule* A) : 
   Parent(A)
-  /*!
+  /**
     Constructor copies. 
     Parent set to A
-    \param A :: Parent value
+    @param A :: Parent value
   */
 {}
 
 Rule&
 Rule::operator=(const Rule&) 
-  /*!
+  /**
     Assignment operator=
     does not set parent as Rules
     are cloned 
-    \return *this
+    @return *this
   */
 {
   return *this;
 }
 
 Rule::~Rule()
-  /*!
+  /**
     Destructor
   */
 {}
 
 void
 Rule::setParent(Rule* A)
-  /*!
+  /**
     Sets the parent object (not check for A==this)
-    \param A :: Partent Object Ptr 
+    @param A :: Partent Object Ptr 
   */
 {
   Parent=A;
@@ -505,9 +505,9 @@ Rule::setParent(Rule* A)
 
 Rule*
 Rule::getParent() const
-  /*!
+  /**
     Returns the parent object 
-    \return Parent
+    @return Parent
   */
 {
   return Parent;
@@ -515,7 +515,7 @@ Rule::getParent() const
 
 void
 Rule::makeParents()
-  /*!
+  /**
     This is initialisation code that populates 
     all the parents in the rule tree.
   */
@@ -545,11 +545,11 @@ Rule::makeParents()
 
 int
 Rule::checkParents() const
-  /*!
+  /**
     This code checks if a parent tree
     is valid
-    \retval 0 on failure 
-    \retval 1 on success
+    @retval 0 on failure 
+    @retval 1 on success
   */
 {
   std::stack<const Rule*> Tree;
@@ -578,12 +578,12 @@ Rule::checkParents() const
 
 int
 Rule::commonType() const
-  /*!
+  /**
     Function to return the common type
     of an rule.
-    \retval 1 :: every rule is an intersection or component
-    \retval -1 :: every rule is an union or component
-    \retval 0 :: mixed rule group or only component
+    @retval 1 :: every rule is an intersection or component
+    @retval -1 :: every rule is an union or component
+    @retval 0 :: mixed rule group or only component
   */
 {
   // initial type
@@ -615,12 +615,12 @@ Rule::commonType() const
 
 int
 Rule::substituteSurf(const int SurfN,const int newSurfN,Surface* SPtr)
-  /*!
+  /**
     Substitues a surface item if within a rule
-    \param SurfN :: Number number to change
-    \param newSurfN :: New surface number (if -ve then the key is reversed)
-    \param SPtr :: New surface Pointer
-    \returns number of substitutions
+    @param SurfN :: Number number to change
+    @param newSurfN :: New surface number (if -ve then the key is reversed)
+    @param SPtr :: New surface Pointer
+    @return number of substitutions
   */
 {
   int cnt(0);
@@ -639,11 +639,11 @@ Rule::substituteSurf(const int SurfN,const int newSurfN,Surface* SPtr)
 
 int
 Rule::getKeyList(std::vector<int>& IList)  const
-  /*!
+  /**
     Generate the key list given an insertion
     type object. The list is a unique list.
-    \param IList :: place to put keyList
-    \returns number of object inserted 
+    @param IList :: place to put keyList
+    @return number of object inserted 
   */
 {
   IList.clear();
@@ -682,11 +682,11 @@ Rule::getKeyList(std::vector<int>& IList)  const
 
 int
 Rule::Eliminate()
-  /*!
+  /**
     This rule eliminates any unnecessary rules.
     \todo Currently does not work since removeItem changes the top rule
     (so should this)
-    \return number of items eliminated
+    @return number of items eliminated
   */
 {
   std::map<int,int> Base;     // map of key names + test value (initially 1) 

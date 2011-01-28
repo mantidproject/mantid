@@ -58,12 +58,12 @@ namespace Mantid
       Expression& operator=(const Expression& expr);
       /**
        * Parse a string and create an expression.
-       * @param str The input string.
+       * @param str :: The input string.
        */
       void parse(const std::string& str);
       /**
        * Print the expression into std::cerr to show its structure
-       * @param pads Padding to make indentation
+       * @param pads :: Padding to make indentation
        */
       void logPrint(const std::string& pads = "")const;
       /// Returns this expression as a string. It does not simply returns the input string but recreates it.
@@ -87,7 +87,7 @@ namespace Mantid
       iterator end()const{return m_terms.end();}
       /**
        * Gets the Expression at the specified index
-       * @param i the index
+       * @param i :: the index
        * @return Expression at the given index
        */
       const Expression& operator[](int i)const{return m_terms.at(i);}
@@ -98,13 +98,13 @@ namespace Mantid
       std::set<std::string> getVariables()const;
       /**
        * Rename all variables with a given name 
-       * @param oldName The old name
-       * @param newName The new name
+       * @param oldName :: The old name
+       * @param newName :: The new name
        */
       void renameAll(const std::string& oldName,const std::string& newName);
       /**
        * Rename this expression 
-       * @param newName The new name
+       * @param newName :: The new name
        */
       void rename(const std::string& newName);
     private:
@@ -121,11 +121,11 @@ namespace Mantid
       {
         /**
          * Constructor.
-         * @param i The index of the first symbol of the token.
-         * @param j The index of the last symbol of the token.
-         * @param k The index of the first symbol of the next token. The substring
+         * @param i :: The index of the first symbol of the token.
+         * @param j :: The index of the last symbol of the token.
+         * @param k :: The index of the first symbol of the next token. The substring
          *    between j and k contains the operator connecting the next token to this one.
-         * @param p The precedence of the connecting operator.
+         * @param p :: The precedence of the connecting operator.
          */
         Token(unsigned int i,unsigned int j,unsigned int k,size_t p)
           :is(i),ie(j),is1(k),prec(p){}
@@ -151,12 +151,12 @@ namespace Mantid
       /**
        * Set the function name of this expression. It is also called when
        * name cannot be split into tokens. 
-       * @param name The name of the function
+       * @param name :: The name of the function
        */
       void setFunct(const std::string& name);
       /** 
        * Remove leading and ending empty spaces from a string
-       * @param str The string.
+       * @param str :: The string.
        */
       static void trim(std::string& str);
 
@@ -181,29 +181,29 @@ namespace Mantid
 
       /**
        * Returns the precedence of operator op
-       * @param op The operator
+       * @param op :: The operator
        * @return The precedence
        */
       size_t op_prec(const std::string& op)const;
       /**
        * Adds new binary operators to the expression
-       * @param ops A vector with operators in reverse order of precedence
+       * @param ops :: A vector with operators in reverse order of precedence
        */
       void add_operators(const std::vector<std::string>& ops);
       /**
        * Adds new unary operators to the expression
-       * @param ops A vector with unary operators
+       * @param ops :: A vector with unary operators
        */
       void add_unary(const std::set<std::string>& ops);
       /**
        * Check if a string is a unary operator
-       * @param op The string to check
+       * @param op :: The string to check
        * @return True if the argument is a unary operator
        */
       bool is_unary(const std::string& op)const;
       /**
        * Check if a character is a part of an operator
-       * @param c The character to check
+       * @param c :: The character to check
        * @return True if it is true
        */
       bool is_op_symbol(const char c)const;

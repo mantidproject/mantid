@@ -60,7 +60,7 @@ public:
   }
 
   /** Constructor with a class to wrap
-   *  @param F The object to wrap
+   *  @param F :: The object to wrap
    */
   template<typename Field>
   WrappedObject(Field& F) :
@@ -192,8 +192,8 @@ ConfigServiceImpl::~ConfigServiceImpl()
 /** Loads the config file provided.
  *  If the file contains logging setup instructions then these will be used to setup the logging framework.
  *
- *  @param filename The filename and optionally path of the file to load
- *  @param append If false (default) then any previous configuration is discarded, otherwise the new keys are added, and repeated keys will override existing ones.
+ *  @param filename :: The filename and optionally path of the file to load
+ *  @param append :: If false (default) then any previous configuration is discarded, otherwise the new keys are added, and repeated keys will override existing ones.
  */
 void ConfigServiceImpl::loadConfig(const std::string& filename, const bool append)
 {
@@ -253,8 +253,8 @@ void ConfigServiceImpl::loadConfig(const std::string& filename, const bool appen
 
 /**
  * Read a file and place its contents into the given string
- * @param filename The filename of the file to read
- * @param contents The file contents will be placed here
+ * @param filename :: The filename of the file to read
+ * @param contents :: The file contents will be placed here
  * @returns A boolean indicating whether opening the file was successful
  */
 bool ConfigServiceImpl::readFile(const std::string& filename, std::string & contents) const
@@ -329,8 +329,8 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
 
 /**
  * Make a relative path or a list of relative paths into an absolute one.
- * @param dir The directory to convert
- * @param key The key variable this relates to
+ * @param dir :: The directory to convert
+ * @param key :: The key variable this relates to
  * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
  */
 std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
@@ -448,7 +448,7 @@ void ConfigServiceImpl::cacheUserSearchPaths()
 /**
  *  The path that is passed should be as returned by makeAbsolute() and
  *  this function will return true if that path is in the list
- *  @param path the absolute path name to search for
+ *  @param path :: the absolute path name to search for
  *  @return true if the path was found
  */
 bool ConfigServiceImpl::isADataSearchDir(const std::string & path) const
@@ -467,7 +467,7 @@ bool ConfigServiceImpl::isADataSearchDir(const std::string & path) const
 /**
  *  Adds the passed path to the end of the list of data search paths
  *  the path name must be absolute
- *  @param path the absolute path to add
+ *  @param path :: the absolute path to add
  */
 void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
 {
@@ -559,10 +559,10 @@ std::string ConfigServiceImpl::defaultConfig() const
 //-------------------------------
 
 /** Updates and existing configuration and restarts the logging
- *  @param filename The filename and optionally path of the file to load
- *  @param append   If false (default) then any previous configuration is discarded,
+ *  @param filename :: The filename and optionally path of the file to load
+ *  @param append ::   If false (default) then any previous configuration is discarded,
  *                  otherwise the new keys are added, and repeated keys will override existing ones.
- *  @param update_caches If true(default) then the various property caches are updated
+ *  @param update_caches :: If true(default) then the various property caches are updated
  */
 void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append,
     const bool update_caches)
@@ -581,8 +581,8 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
 
 /**
  * Save the configuration to the user file
- * @param filename The filename for the saved configuration
- * @throws std::runtime_error if the file cannot be opened
+ * @param filename :: The filename for the saved configuration
+ * @throw std::runtime_error if the file cannot be opened
  */
 void ConfigServiceImpl::saveConfig(const std::string & filename) const
 {
@@ -692,8 +692,8 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
  *  returns the value as a string. If the key is one of those that was a possible relative path
  *  then the local store is searched first.
  *
- *  @param keyName The case sensitive name of the property that you need the value of.
- *  @param use_cache If true, the local cache of directory names is queried first.
+ *  @param keyName :: The case sensitive name of the property that you need the value of.
+ *  @param use_cache :: If true, the local cache of directory names is queried first.
  *  @returns The string value of the property, or an empty string if the key cannot be found
  */
 std::string ConfigServiceImpl::getString(const std::string& keyName, bool use_cache) const
@@ -720,8 +720,8 @@ std::string ConfigServiceImpl::getString(const std::string& keyName, bool use_ca
 
 /**
  * Set a configuration property. An existing key will have its value updated.
- * @param key The key to refer to this property
- * @param value The value of the property
+ * @param key :: The key to refer to this property
+ * @param value :: The value of the property
  */
 void ConfigServiceImpl::setString(const std::string & key, const std::string & value)
 {
@@ -772,8 +772,8 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
 /** Searches for a string within the currently loaded configuaration values and
  *  attempts to convert the values to the template type supplied.
  *
- *  @param keyName The case sensitive name of the property that you need the value of.
- *  @param out     The value if found
+ *  @param keyName :: The case sensitive name of the property that you need the value of.
+ *  @param out ::     The value if found
  *  @returns A success flag - 0 on failure, 1 on success
  */
 template<typename T>
@@ -796,7 +796,7 @@ std::string ConfigServiceImpl::getUserFilename() const
 /** Searches for the string within the environment variables and returns the
  *  value as a string.
  *
- *  @param keyName The name of the environment variable that you need the value of.
+ *  @param keyName :: The name of the environment variable that you need the value of.
  *  @returns The string value of the property
  */
 std::string ConfigServiceImpl::getEnvironment(const std::string& keyName)
@@ -934,7 +934,7 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
 /**
  * Load facility information from instrumentDir/Facilities.xml file if fName parameter
  * is not set
- * @param fName An alternative file name for loading facilities information.
+ * @param fName :: An alternative file name for loading facilities information.
  */
 void ConfigServiceImpl::updateFacilities(const std::string& fName)
 {
@@ -1007,7 +1007,7 @@ const FacilityInfo& ConfigServiceImpl::Facility() const
 }
 
 /**  Add an observer to a notification
-     @param observer Reference to the observer to add
+     @param observer :: Reference to the observer to add
  */
 void ConfigServiceImpl::addObserver(const Poco::AbstractObserver& observer)const
 {
@@ -1015,7 +1015,7 @@ void ConfigServiceImpl::addObserver(const Poco::AbstractObserver& observer)const
 }
 
 /**  Remove an observer
-     @param observer Reference to the observer to remove
+     @param observer :: Reference to the observer to remove
  */
 void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer)const
 {
@@ -1025,9 +1025,9 @@ void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer)co
 
 /**
  * Get a facility
- * @param fName Facility name
+ * @param fName :: Facility name
  * @return the facility information object
- * @throws NotFoundException if the facility is not found
+ * @throw NotFoundException if the facility is not found
  */
 const FacilityInfo& ConfigServiceImpl::Facility(const std::string& fName) const
 {

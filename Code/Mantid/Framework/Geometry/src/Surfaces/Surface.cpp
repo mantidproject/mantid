@@ -32,26 +32,26 @@ Kernel::Logger& Surface::PLog = Kernel::Logger::get("Surface");
 
 Surface::Surface() : 
   Name(-1)
-  /*!
+  /**
     Constructor
   */
 {}
 
 Surface::Surface(const Surface& A) : 
   Name(A.Name)
-  /*!
+  /**
     Copy constructor
-    \param A :: Surface to copy
+    @param A :: Surface to copy
   */
 { }
 
 
 Surface&
 Surface::operator=(const Surface& A)
-  /*!
+  /**
     Assignment operator
-    \param A :: Surface to copy
-    \return *this
+    @param A :: Surface to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -62,7 +62,7 @@ Surface::operator=(const Surface& A)
 }
 
 Surface::~Surface()
-  /*!
+  /**
     Destructor
   */
 {}
@@ -76,7 +76,7 @@ Surface::side(const Geometry::V3D&) const
 
 void 
 Surface::print() const
-  /*!
+  /**
     Simple print out function for surface header 
   */
 {
@@ -86,10 +86,10 @@ Surface::print() const
 
 void
 Surface::writeHeader(std::ostream& OX) const
-  /*!
+  /**
     Writes out the start of an MCNPX surface description .
     Does not check the length etc
-    \param OX :: Output stream
+    @param OX :: Output stream
   */
 {
   OX<<Name<<" ";
@@ -99,9 +99,9 @@ Surface::writeHeader(std::ostream& OX) const
 
 void
 Surface::write(std::ostream& out) const  
-/*!
+/**
     The writes the data to the output stream.
-    \param out :: The output stream 
+    @param out :: The output stream 
   */
 {
   (void) out; //Avoid compiler warning

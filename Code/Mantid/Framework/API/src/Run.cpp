@@ -33,7 +33,7 @@ using namespace Kernel;
 
   /**
    * Copy constructor
-   * @param copy The object to initialize the copy from
+   * @param copy :: The object to initialize the copy from
    */
   Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName)
   {
@@ -43,7 +43,7 @@ using namespace Kernel;
   //-----------------------------------------------------------------------------------------------
   /**
    * Assignment operator
-   * @param rhs The object whose properties should be copied into this
+   * @param rhs :: The object whose properties should be copied into this
    * @returns A cont reference to the copied object
    */
   const Run& Run::operator=(const Run& rhs)
@@ -58,7 +58,7 @@ using namespace Kernel;
   //-----------------------------------------------------------------------------------------------
   /**
    * Addition operator
-   * @param rhs The object that is being added to this.
+   * @param rhs :: The object that is being added to this.
    * @returns A reference to the summed object
    */
   Run& Run::operator+=(const Run& rhs)
@@ -76,8 +76,8 @@ using namespace Kernel;
    *
    * Total proton charge will get re-integrated after filtering.
    *
-   * @param start Absolute start time. Any log entries at times >= to this time are kept.
-   * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+   * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
+   * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
    */
   void Run::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
@@ -95,8 +95,8 @@ using namespace Kernel;
    *
    * Total proton charge will get re-integrated after filtering.
    *
-   * @param splitter TimeSplitterType with the intervals and destinations.
-   * @param outputs Vector of output runs.
+   * @param splitter :: TimeSplitterType with the intervals and destinations.
+   * @param outputs :: Vector of output runs.
    */
   void Run::splitByTime(TimeSplitterType& splitter, std::vector< Run * > outputs) const
   {
@@ -127,8 +127,8 @@ using namespace Kernel;
   //-----------------------------------------------------------------------------------------------
   /**
    * Add data to the object in the form of a property
-   * @param prop A pointer to a property whose ownership is transferred to this object
-   * @param overwrite If true, a current value is overwritten. (Default: False)
+   * @param prop :: A pointer to a property whose ownership is transferred to this object
+   * @param overwrite :: If true, a current value is overwritten. (Default: False)
    */
   void Run::addProperty(Kernel::Property *prop, bool overwrite)
   {
@@ -146,7 +146,7 @@ using namespace Kernel;
   //-----------------------------------------------------------------------------------------------
   /**
    * Set the good proton charge total for this run
-   *  @param charge The proton charge in uA.hour
+   *  @param charge :: The proton charge in uA.hour
    */
   void Run::setProtonCharge(const double charge)
   {
@@ -166,7 +166,7 @@ using namespace Kernel;
   /**
    * Retrieve the total good proton charge delivered in this run
    * @return The proton charge in uA.hour
-   * @throws Exception::NotFoundError if the proton charge has not been set
+   * @throw Exception::NotFoundError if the proton charge has not been set
    */
   double Run::getProtonCharge() const
   {

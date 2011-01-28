@@ -13,7 +13,7 @@ namespace Mantid
 template<typename T>
 void
 indexSort(const std::vector<T>& pVec,std::vector<int>& Index)
-  /*!
+  /**
     Function to take a vector and sort the vector 
     so as to produce an index.
     Leaves the vector unchanged.
@@ -42,12 +42,12 @@ template<typename InputIter>
 int
 solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
 	       std::complex<double> >& OutAns)
-  /*!
+  /**
     Solves Complex Quadratic 
-    \param Coef :: iterator over all the coefients in the order
+    @param Coef :: iterator over all the coefients in the order
     \f[ Ax^2+Bx+C \f].
-    \param OutAns :: complex roots of the equation 
-    \return number of unique solutions 
+    @param OutAns :: complex roots of the equation 
+    @return number of unique solutions 
   */
 {
   double a,b,c,cf;
@@ -95,12 +95,12 @@ template<typename CInputIter>
 int
 solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
 	   std::complex<double>& AnsB,std::complex<double>& AnsC)
-  /*!
+  /**
     Solves Cubic equation
-    \param Coef :: iterator over all the coefients in the order
+    @param Coef :: iterator over all the coefients in the order
     \f[ Ax^3+Bx^2+Cx+D \f].
-    \param AnsA,AnsB,AnsC :: complex roots of the equation 
-    \return number of unique solutions 
+    @param AnsA,AnsB,AnsC :: complex roots of the equation 
+    @return number of unique solutions 
   */
 
 {

@@ -97,7 +97,7 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
 
 /** 
  * Set the list of data sets that are available to plot
- * @param workspaces A list of string indicating the available data
+ * @param workspaces :: A list of string indicating the available data
  */
 void SANSPlotDialog::setAvailableData(const QStringList & workspaces)
 {
@@ -257,9 +257,9 @@ void SANSPlotDialog::plotOptionClicked(const QString & item_text)
 
 /**
  * Write a Python plot command (this assumes the input has already been checked)
- * @param workspace The workspace name
- * @param spec_num The spectrum number
- * @param show_plot Whether to make the plot visibl or not
+ * @param workspace :: The workspace name
+ * @param spec_num :: The spectrum number
+ * @param show_plot :: Whether to make the plot visibl or not
  */
 QString SANSPlotDialog::writePlotCmd(const QString & workspace, const QString & spec_num, bool show_plot)
 {
@@ -274,8 +274,8 @@ QString SANSPlotDialog::writePlotCmd(const QString & workspace, const QString & 
 
 /**
  * Check the current spectra list
- * @param workspace The workspace to check
- * @param speclist The list of spectra to check
+ * @param workspace :: The workspace to check
+ * @param speclist :: The list of spectra to check
  * @returns A valid list of spectra from the box
  */
 QString SANSPlotDialog::checkSpectraList(const QString & workspace, const QString & speclist )

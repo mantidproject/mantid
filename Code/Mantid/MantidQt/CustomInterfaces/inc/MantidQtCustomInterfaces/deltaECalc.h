@@ -20,7 +20,7 @@ namespace MantidQt
 				  const QString & saveName);
  
       /** Removes the path from the filename passed and replaces extensions with .spe
-      * @param inputFilename name of the file that the .SPE file is based on
+      * @param inputFilename :: name of the file that the .SPE file is based on
       */
       static QString SPEFileName(const QString &inputFilename)
       {

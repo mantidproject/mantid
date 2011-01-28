@@ -49,9 +49,9 @@ ParamFunction::~ParamFunction()
 
 
 /** Sets a new value to the i-th parameter.
- *  @param i The parameter index
- *  @param value The new value
- *  @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ *  @param i :: The parameter index
+ *  @param value :: The new value
+ *  @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
 void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
 {
@@ -67,7 +67,7 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
 }
 
 /** Get the i-th parameter.
- *  @param i The parameter index
+ *  @param i :: The parameter index
  *  @return the value of the requested parameter
  */
 double ParamFunction::getParameter(int i)const
@@ -81,9 +81,9 @@ double ParamFunction::getParameter(int i)const
 
 /**
  * Sets a new value to a parameter by name.
- * @param name The name of the parameter.
- * @param value The new value
- * @param explicitlySet A boolean flagging the parameter as explicitly set (by user)
+ * @param name :: The name of the parameter.
+ * @param value :: The new value
+ * @param explicitlySet :: A boolean flagging the parameter as explicitly set (by user)
  */
 void ParamFunction::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
@@ -102,7 +102,7 @@ void ParamFunction::setParameter(const std::string& name, const double& value, b
 
 /**
  * Parameters by name.
- * @param name The name of the parameter.
+ * @param name :: The name of the parameter.
  * @return the value of the named parameter
  */
 double ParamFunction::getParameter(const std::string& name)const
@@ -122,7 +122,7 @@ double ParamFunction::getParameter(const std::string& name)const
 
 /**
  * Returns the index of the parameter named name.
- * @param name The name of the parameter.
+ * @param name :: The name of the parameter.
  * @return the index of the named parameter
  */
 int ParamFunction::parameterIndex(const std::string& name)const
@@ -141,7 +141,7 @@ int ParamFunction::parameterIndex(const std::string& name)const
 }
 
 /** Returns the name of parameter i
- * @param i The index of a parameter
+ * @param i :: The index of a parameter
  * @return the name of the parameter at the requested index
  */
 std::string ParamFunction::parameterName(int i)const
@@ -154,8 +154,8 @@ std::string ParamFunction::parameterName(int i)const
 }
 /**
  * Declare a new parameter. To used in the implementation'c constructor.
- * @param name The parameter name.
- * @param initValue The initial value for the parameter
+ * @param name :: The parameter name.
+ * @param initValue :: The initial value for the parameter
  */
 void ParamFunction::declareParameter(const std::string& name,double initValue )
 {
@@ -178,7 +178,7 @@ void ParamFunction::declareParameter(const std::string& name,double initValue )
 
 /**
  * Returns the "global" index of an active parameter.
- * @param i The index of an active parameter
+ * @param i :: The index of an active parameter
  * @return the global index of the requested parameter
  */
 int ParamFunction::indexOfActive(int i)const
@@ -191,7 +191,7 @@ int ParamFunction::indexOfActive(int i)const
 
 /**
  * Returns the name of an active parameter.
- * @param i The index of an active parameter
+ * @param i :: The index of an active parameter
  * @return the name of the active parameter
  */
 std::string ParamFunction::nameOfActive(int i)const
@@ -201,7 +201,7 @@ std::string ParamFunction::nameOfActive(int i)const
 
 /**
  * query if the parameter is active
- * @param i The index of a declared parameter
+ * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
 bool ParamFunction::isActive(int i)const
@@ -210,7 +210,7 @@ bool ParamFunction::isActive(int i)const
 }
 
 /** This method doesn't create a tie
- * @param i A declared parameter index to be removed from active
+ * @param i :: A declared parameter index to be removed from active
  */
 void ParamFunction::removeActive(int i)
 {
@@ -235,7 +235,7 @@ void ParamFunction::removeActive(int i)
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
- * @param i A declared parameter index to be restored to active
+ * @param i :: A declared parameter index to be restored to active
  */
 void ParamFunction::restoreActive(int i)
 {
@@ -256,7 +256,7 @@ void ParamFunction::restoreActive(int i)
 }
 
 /**
- * @param i The index of a declared parameter
+ * @param i :: The index of a declared parameter
  * @return The index of declared parameter i in the list of active parameters or -1
  *         if the parameter is tied.
  */
@@ -269,7 +269,7 @@ int ParamFunction::activeIndex(int i)const
 
 /**
  * Attaches a tie to this ParamFunction. The attached tie is owned by the ParamFunction.
- * @param tie A pointer to a new tie
+ * @param tie :: A pointer to a new tie
  */
 void ParamFunction::addTie(ParameterTie* tie)
 {
@@ -313,7 +313,7 @@ public:
    */
   ReferenceEqual(int i):m_i(i){}
   /**Bracket operator
-   * @param p the parameter you are looking for
+   * @param p :: the parameter you are looking for
    * @return True if found
    */
   bool operator()(ParameterReference* p)
@@ -323,7 +323,7 @@ public:
 };
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
- * @param i The index of the tied parameter.
+ * @param i :: The index of the tied parameter.
  * @return True if successfull
  */
 bool ParamFunction::removeTie(int i)
@@ -344,7 +344,7 @@ bool ParamFunction::removeTie(int i)
 }
 
 /** Get tie of parameter number i
- * @param i The index of a declared parameter.
+ * @param i :: The index of a declared parameter.
  * @return A pointer to the tie
  */
 ParameterTie* ParamFunction::getTie(int i)const
@@ -375,7 +375,7 @@ void ParamFunction::clearTies()
 }
 
 /** Add a constraint
- *  @param ic Pointer to a constraint.
+ *  @param ic :: Pointer to a constraint.
  */
 void ParamFunction::addConstraint(IConstraint* ic)
 {
@@ -398,7 +398,7 @@ void ParamFunction::addConstraint(IConstraint* ic)
 }
 
 /** Get constraint of parameter number i
- * @param i The index of a declared parameter.
+ * @param i :: The index of a declared parameter.
  * @return A pointer to the constraint or NULL
  */
 IConstraint* ParamFunction::getConstraint(int i)const
@@ -416,7 +416,7 @@ IConstraint* ParamFunction::getConstraint(int i)const
 }
 
 /** Remove a constraint
- * @param parName The name of a parameter which constarint to remove.
+ * @param parName :: The name of a parameter which constarint to remove.
  */
 void ParamFunction::removeConstraint(const std::string& parName)
 {
@@ -462,7 +462,7 @@ void ParamFunction::clearAllParameters()
 }
 
 /// Get the address of the parameter
-/// @param i the index of the parameter required
+/// @param i :: the index of the parameter required
 /// @returns the address of the parameter
 double* ParamFunction::getParameterAddress(int i)
 {
@@ -485,7 +485,7 @@ bool ParamFunction::isExplicitlySet(int i)const
 
 /**
  * Returns the index of parameter if the ref points to this ParamFunction or -1
- * @param ref A reference to a parameter
+ * @param ref :: A reference to a parameter
  * @return Parameter index or -1
  */
 int ParamFunction::getParameterIndex(const ParameterReference& ref)const
@@ -498,7 +498,7 @@ int ParamFunction::getParameterIndex(const ParameterReference& ref)const
 }
 
 /**
- * @param ref The reference
+ * @param ref :: The reference
  * @return A ParamFunction containing parameter pointed to by ref
  */
 IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
@@ -511,7 +511,7 @@ IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref
 }
 
 /**
- * @param fun The ParamFunction
+ * @param fun :: The ParamFunction
  * @return A ParamFunction containing fun
  */
 IFitFunction* ParamFunction::getContainingFunction(const IFitFunction* fun)

@@ -138,7 +138,7 @@ void GL3DWidget::setRenderingOptions()
 
 /**
  * Toggles the use of high resolution lighting
- * @param state An integer indicating lighting state. (Note that this is not a boolean because Qt's CheckBox emits an integer signal)
+ * @param state :: An integer indicating lighting state. (Note that this is not a boolean because Qt's CheckBox emits an integer signal)
  * Unchecked = 0, ,PartiallyChecked = 1, Checked = 2
  */
 void GL3DWidget::setLightingModel(int state)
@@ -406,7 +406,7 @@ void GL3DWidget::resizeGL(int width, int height)
  * Right Button: Rotate
  * Middle Button: Translate
  * Key + Left Button: Pick (TODO: Yet to implement)
- * @param event This is the event variable which has the position and button states
+ * @param event :: This is the event variable which has the position and button states
  */
 void GL3DWidget::mousePressEvent(QMouseEvent* event)
 {
@@ -488,7 +488,7 @@ void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
  * Right Button: Rotate
  * Middle Button: Translate
  * Key + Left Button: Pick (TODO: Yet to implement)
- * @param event This is the event variable which has the position and button states
+ * @param event :: This is the event variable which has the position and button states
  */
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
@@ -553,7 +553,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 
 /**
  * This is mouse button release callback method. This resets the cursor to pointing hand cursor
- * @param event This is the event variable which has the position and button states
+ * @param event :: This is the event variable which has the position and button states
  */
 void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
@@ -585,7 +585,7 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 
 /**
  * Mouse wheel event to set the zooming in and out
- * @param event This is the event variable which has the status of the wheel
+ * @param event :: This is the event variable which has the status of the wheel
  */
 void GL3DWidget::wheelEvent(QWheelEvent* event)
 {
@@ -600,7 +600,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
 
 /**
  * This method is to handle keyboard events to mimic the mouse operations of click and move
- * @param event This is the event variable which has the status of the keyboard
+ * @param event :: This is the event variable which has the status of the keyboard
  */
 void GL3DWidget::keyPressEvent(QKeyEvent *event)
 {
@@ -723,7 +723,7 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
 
 /**
  * This method is to handle keyboard events to mimic the mouse operations of mouse button up.
- * @param event This is the event variable which has the status of the keyboard
+ * @param event :: This is the event variable which has the status of the keyboard
  */
 void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 {
@@ -738,7 +738,7 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 }
 /**
  * This method sets the collection of actors that widget needs to display
- * @param col input collection of actors
+ * @param col :: input collection of actors
  */
 void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
 {
@@ -879,7 +879,7 @@ QColor GL3DWidget::currentBackgroundColor() const
 
 /**
  * This saves the GL scene to a file.
- * @param filename The name of the file
+ * @param filename :: The name of the file
  */
 void GL3DWidget::saveToFile(const QString & filename)
 {
@@ -904,7 +904,7 @@ void GL3DWidget::resetWidget()
 
 /**
   * Enables / disables lighting
-  * @param on Set true to turn lighting on or false to turn it off.
+  * @param on :: Set true to turn lighting on or false to turn it off.
   */
 void GL3DWidget::enableLighting(bool on)
 {
@@ -919,7 +919,7 @@ void GL3DWidget::enableLighting(bool on)
 
 /**
   * Set wireframe view on or off
-  * @param on If true set wireframe, otherwise it's SOLID
+  * @param on :: If true set wireframe, otherwise it's SOLID
   */
 void GL3DWidget::setWireframe(bool on)
 {

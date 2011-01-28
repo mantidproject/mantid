@@ -39,9 +39,9 @@ SurfaceFactory* SurfaceFactory::FOBJ(0);
 
 SurfaceFactory*
 SurfaceFactory::Instance() 
-  /*!
+  /**
     Effective new command / this command 
-    \returns Single instance of SurfaceFactory
+    @return Single instance of SurfaceFactory
   */
 {
   if (!FOBJ)
@@ -52,7 +52,7 @@ SurfaceFactory::Instance()
 }
 
 SurfaceFactory::SurfaceFactory() 
-  /*!
+  /**
     Constructor
   */
 {
@@ -61,9 +61,9 @@ SurfaceFactory::SurfaceFactory()
 
 SurfaceFactory::SurfaceFactory(const SurfaceFactory& A)  :
   ID(A.ID)
-  /*! 
+  /** 
     Copy constructor 
-    \param A :: Object to copy
+    @param A :: Object to copy
   */
 {
   MapType::const_iterator vc;
@@ -74,7 +74,7 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory& A)  :
 }
   
 SurfaceFactory::~SurfaceFactory()
-  /*!
+  /**
     Destructor removes memory for atom/cluster list
   */
 {
@@ -85,7 +85,7 @@ SurfaceFactory::~SurfaceFactory()
 
 void
 SurfaceFactory::registerSurface()
-  /*!
+  /**
     Register tallies to be used
   */
 {
@@ -107,13 +107,13 @@ SurfaceFactory::registerSurface()
   
 Surface*
 SurfaceFactory::createSurface(const std::string& Key) const
-  /*!
+  /**
     Creates an instance of tally
     given a valid key. 
     
-    \param Key :: Item to get 
-    \throw NotFoundError for the key if not found
-    \return new tally object.
+    @param Key :: Item to get 
+    @throw NotFoundError for the key if not found
+    @return new tally object.
   */    
 {
   MapType::const_iterator vc;
@@ -128,13 +128,13 @@ SurfaceFactory::createSurface(const std::string& Key) const
 
 Surface*
 SurfaceFactory::createSurfaceID(const std::string& Key) const
-  /*!
+  /**
     Creates an instance of tally
     given a valid key. 
     
-    \param Key :: Form of first ID
-    \throw NotFoundError for the key if not found
-    \return new tally object.
+    @param Key :: Form of first ID
+    @throw NotFoundError for the key if not found
+    @return new tally object.
   */    
 {
   std::map<char,std::string>::const_iterator mc;
@@ -150,13 +150,13 @@ SurfaceFactory::createSurfaceID(const std::string& Key) const
 
 Surface*
 SurfaceFactory::processLine(const std::string& Line) const
-  /*!
+  /**
     Creates an instance of a surface
     given a valid line
     
-    \param Line :: Full description of line
-    \throw InContainerError for the key if not found
-    \return new surface object.
+    @param Line :: Full description of line
+    @throw InContainerError for the key if not found
+    @return new surface object.
   */    
 {
   std::string key;

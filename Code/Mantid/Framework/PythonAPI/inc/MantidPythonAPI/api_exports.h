@@ -108,7 +108,7 @@ namespace PythonAPI
   public:
     /**
      * Call the corresponding FileFinder method
-     * @param input The input for the function
+     * @param input :: The input for the function
      * @returns A string containing either the full path or nothing if the file could not be found
      */
     static std::string getFullPath(const std::string & input)
@@ -118,7 +118,7 @@ namespace PythonAPI
 
     /**
      * Call the corresponding FileFinder method
-     * @param input The input for the function
+     * @param input :: The input for the function
      * @returns A list of runs that have been found
      */
     static std::vector<std::string> findRuns(const std::string & input)
@@ -130,7 +130,7 @@ namespace PythonAPI
 
   /**
   * Creates a NumericAxis
-  * @param number of elements in the axis
+  * @param number :: of elements in the axis
   * @return pointer to the axis object
   */
   Mantid::API::Axis* createNumericAxis(int length)
@@ -139,7 +139,7 @@ namespace PythonAPI
   }
   /**
   * Creates a SpectraAxis
-  * @param number of elements in the axis
+  * @param number :: of elements in the axis
   * @return pointer to the axis object
   */
   Mantid::API::Axis* createSpectraAxis(int length)
@@ -148,7 +148,7 @@ namespace PythonAPI
   }
   /**
   * Creates a TextAxis
-  * @param number of elements in the axis
+  * @param number :: of elements in the axis
   * @return pointer to the axis object
   */
   Mantid::API::Axis* createTextAxis(int length)

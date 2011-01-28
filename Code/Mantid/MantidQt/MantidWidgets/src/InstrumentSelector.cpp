@@ -26,8 +26,8 @@ namespace MantidWidgets
 
   /**
   * Default constructor
-  * @param parent A widget to act as this widget's parent (default = NULL)
-  * @param init If true then the widget will be populated with the instrument list (default = true)
+  * @param parent :: A widget to act as this widget's parent (default = NULL)
+  * @param init :: If true then the widget will be populated with the instrument list (default = true)
   */
   InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL), 
     m_changeObserver(*this, &InstrumentSelector::handleConfigChange), m_init(init)
@@ -67,7 +67,7 @@ namespace MantidWidgets
 
   /**
   * Set the list of techniques
-  * @param techniques Only those instruments that support these techniques will be shown
+  * @param techniques :: Only those instruments that support these techniques will be shown
   */
   void InstrumentSelector::setTechniques(const QStringList & techniques)
   {
@@ -104,7 +104,7 @@ namespace MantidWidgets
 
   /**
   * Populate list with instruments from the named facility. Note the current list is cleared.
-  * @param name The name of the facility whose instruments should be placed in the list. An empty string uses the default
+  * @param name :: The name of the facility whose instruments should be placed in the list. An empty string uses the default
   * facility defined in Mantid.
   */
   void InstrumentSelector::fillWithInstrumentsFromFacility(const QString & name)
@@ -166,7 +166,7 @@ namespace MantidWidgets
   //------------------------------------------------------
   /**
   * Set the named instrument as the default for Mantid  
-  * @param name A string containing the new instrument to set as the default 
+  * @param name :: A string containing the new instrument to set as the default 
   */
   void InstrumentSelector::updateDefaultInstrument(const QString & name) const
   {
@@ -182,8 +182,8 @@ namespace MantidWidgets
 
   /**
   * Filter the list to only show those supporting the given technique
-  * @param techniques A string list containing the names of a techniques to filter the instrument list by
-  * @param facility A FacilityInfo object
+  * @param techniques :: A string list containing the names of a techniques to filter the instrument list by
+  * @param facility :: A FacilityInfo object
   */
   void InstrumentSelector::filterByTechniquesAtFacility(const QStringList & techniques, const Mantid::Kernel::FacilityInfo & facility)
   {

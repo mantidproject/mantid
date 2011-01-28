@@ -117,7 +117,7 @@ void FrameworkManagerProxy::clearInstruments()
 
 /**
  * Return a string property from the ConfigService
- * @param key the key of the config value you require
+ * @param key :: the key of the config value you require
  * @returns the value of the config item you require
  */
 std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) const
@@ -127,7 +127,7 @@ std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) co
 
 /**
  * Check whether a given name is an algorithm using a case-insensitive search
- * @param testName The name to test
+ * @param testName :: The name to test
  * @returns The algorithm name in the correct case or an empty string if there is no
  * algorithm of this name.
  */
@@ -150,8 +150,8 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 
 /**
  * Creates a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
-  * \return Pointer to algorithm.
+ * @param algName :: The name of the algorithm to execute.
+  * @return Pointer to algorithm.
  **/
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
 {
@@ -219,8 +219,8 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
 
 /**
  * Returns a specified MatrixWorkspace.
- * \param wsName :: The name of the workspace to retrieve.
- * \return Shared pointer to workspace.
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
  **/
 boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWorkspace(const std::string& wsName)
 {
@@ -257,7 +257,7 @@ boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWork
 
 /**
  * Return a pointer to a WorkspaceGroup
- * @param group_name The name of the group
+ * @param group_name :: The name of the group
  * @return A pointer to API::WorkspaceGroup object
  */
 boost::shared_ptr<API::WorkspaceGroup> FrameworkManagerProxy::retrieveWorkspaceGroup(const std::string& group_name)
@@ -276,8 +276,8 @@ boost::shared_ptr<API::WorkspaceGroup> FrameworkManagerProxy::retrieveWorkspaceG
 
 /**
  * Deletes a specified workspace.
- * \param wsName :: The name of the workspace to delete.
- * \return Boolean result.
+ * @param wsName :: The name of the workspace to delete.
+ * @return Boolean result.
  **/
 bool FrameworkManagerProxy::deleteWorkspace(const std::string& wsName)
 {
@@ -286,7 +286,7 @@ bool FrameworkManagerProxy::deleteWorkspace(const std::string& wsName)
 
 /**
  * Returns the name of all the workspaces.
- * \return Vector of strings.
+ * @return Vector of strings.
  **/
 std::set<std::string> FrameworkManagerProxy::getWorkspaceNames() const
 {
@@ -295,7 +295,7 @@ std::set<std::string> FrameworkManagerProxy::getWorkspaceNames() const
 
 /**
  * Returns the names of all the workspace groups
- * \return A vector of strings.
+ * @return A vector of strings.
  **/
 std::set<std::string> FrameworkManagerProxy::getWorkspaceGroupNames() const
 {
@@ -317,7 +317,7 @@ std::set<std::string> FrameworkManagerProxy::getWorkspaceGroupNames() const
 
 /**
  * Get the names within a workspace group
- * @param group_name The name of the group
+ * @param group_name :: The name of the group
  * @return Vector of the names of the contained workspaces
  */
 std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const std::string & group_name) const
@@ -334,7 +334,7 @@ std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const s
 
 /**
   * Create the simple Python API module
-  * @param gui Whether the module is being made for use with qtiplot or not
+  * @param gui :: Whether the module is being made for use with qtiplot or not
   **/
 void FrameworkManagerProxy::createPythonSimpleAPI(bool gui)
 {
@@ -346,7 +346,7 @@ void FrameworkManagerProxy::createPythonSimpleAPI(bool gui)
 
 /**
  * Send a log message to Mantid
- * @param msg The log message
+ * @param msg :: The log message
  */
 void FrameworkManagerProxy::sendLogMessage(const std::string & msg) 
 {
@@ -355,7 +355,7 @@ void FrameworkManagerProxy::sendLogMessage(const std::string & msg)
 
 /**
  * Check if a given workspace name exists in the ADS 
- * @param name A string specifying a name to check
+ * @param name :: A string specifying a name to check
  * @return true if it exists
  */
 bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
@@ -365,7 +365,7 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 
 /**
  * Add a python algorithm to the algorithm factory
- * @param pyobj The python algorithm object wrapped in a boost object
+ * @param pyobj :: The python algorithm object wrapped in a boost object
  */
 void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
 {
@@ -392,7 +392,7 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
 //--------------------------------------------------------------------------
 /**
  * Get a workspace pointer from the ADS
- * @param wsName The name of the workspace to retrieve, throws if the pointer is invalid
+ * @param wsName :: The name of the workspace to retrieve, throws if the pointer is invalid
  * @return The workspace requested, a NotFoundError is thrown is it is not present
  */
 boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspace(const std::string & wsName)
@@ -410,7 +410,7 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
 
 /**
  * Utility function called when a workspace is deleted within the service
- * @param notice A pointer to a WorkspaceDeleteNotification object
+ * @param notice :: A pointer to a WorkspaceDeleteNotification object
  */
 void FrameworkManagerProxy::
 deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
@@ -421,7 +421,7 @@ deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 
 /**
  * Utility function called when a workspace is added within the service
- * @param notice A pointer to a WorkspaceDeleteNotification object
+ * @param notice :: A pointer to a WorkspaceDeleteNotification object
  */
 void FrameworkManagerProxy::
 addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
@@ -431,7 +431,7 @@ addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
 
 /**
  * Utility function called when a workspace is replaced within the service
- * @param notice A pointer to a WorkspaceAfterReplaceNotification object
+ * @param notice :: A pointer to a WorkspaceAfterReplaceNotification object
  */
 void FrameworkManagerProxy::
 replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
@@ -442,7 +442,7 @@ replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr n
 
 /**
  * Utility function called when a workspace is replaced within the service
- * @param notice A pointer to a ClearADSNotification object
+ * @param notice :: A pointer to a ClearADSNotification object
  */
 void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr)
 {
@@ -452,7 +452,7 @@ void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotif
 
 /**
  * Called by AlgorithmFactory updates
- * @param notice The nofification object
+ * @param notice :: The nofification object
  */
 void FrameworkManagerProxy::
 handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)

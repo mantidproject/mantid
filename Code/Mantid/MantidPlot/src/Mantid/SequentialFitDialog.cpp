@@ -368,8 +368,8 @@ void SequentialFitDialog::helpClicked()
   * Slot. Called in response to QTableWidget's cellChanged signal.
   * If the cell contains spectra or workspace index of a workspace
   * make them consistent.
-  * @param row Row index of the modified cell
-  * @param col Column index of the modified cell
+  * @param row :: Row index of the modified cell
+  * @param col :: Column index of the modified cell
   */
 void SequentialFitDialog::spectraChanged(int row,int col)
 {

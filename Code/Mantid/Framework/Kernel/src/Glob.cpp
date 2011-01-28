@@ -21,11 +21,11 @@ namespace Kernel
     *    Directories that for whatever reason cannot be traversed are
     *    ignored.
     *
-    *    @param base The base directory: the search is done only within this directory. base cannot 
+    *    @param base :: The base directory: the search is done only within this directory. base cannot 
     *                contain wildcards.
-    *    @param pathPattern The search pattern 
-    *    @param files The names of the files that match the pattern
-    *    @param options Options
+    *    @param pathPattern :: The search pattern 
+    *    @param files :: The names of the files that match the pattern
+    *    @param options :: Options
     */
 void Glob::glob(const std::string& base, const std::string& pathPattern, std::set<std::string>& files, int options)
 {
@@ -47,9 +47,9 @@ void Glob::glob(const std::string& base, const std::string& pathPattern, std::se
      *    Directories that for whatever reason cannot be traversed are
      *    ignored.
      *
-     *    @param pathPattern The search pattern 
-     *    @param files The names of the files that match the pattern
-     *    @param options Options
+     *    @param pathPattern :: The search pattern 
+     *    @param files :: The names of the files that match the pattern
+     *    @param options :: Options
      */
 void Glob::glob(const Poco::Path& pathPattern, std::set<std::string>& files, int options)
 {
@@ -92,11 +92,11 @@ void Glob::glob(const Poco::Path& pathPattern, std::set<std::string>& files, int
      *    Directories that for whatever reason cannot be traversed are
      *    ignored.
      *
-     *    @param base The base directory: the search is done only within this directory. base cannot 
+     *    @param base :: The base directory: the search is done only within this directory. base cannot 
      *                contain wildcards.
-     *    @param pathPattern The search pattern 
-     *    @param files The names of the files that match the pattern
-     *    @param options Options
+     *    @param pathPattern :: The search pattern 
+     *    @param files :: The names of the files that match the pattern
+     *    @param options :: Options
      */
 void Glob::glob(const Poco::Path& base, const Poco::Path& pathPattern, std::set<std::string>& files, int options)
 {

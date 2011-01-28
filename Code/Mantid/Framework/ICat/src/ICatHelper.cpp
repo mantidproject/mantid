@@ -16,9 +16,9 @@ namespace Mantid
 		
 
 		/* This method calls ICat API searchbydavanced and do the basic run search 
-		 * @param icat Proxy object for ICat
-		 * @param request request object
-		 * @param response response object
+		 * @param icat :: Proxy object for ICat
+		 * @param request :: request object
+		 * @param response :: response object
 		 */
 		int CICatHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
 		{
@@ -49,8 +49,8 @@ namespace Mantid
 		}
 
 		/* This method does a search  by different parameters and  investigation data
-		 * @param inputs reference to class containing search inputs
-		 * @param outputws shared pointer to output workspace
+		 * @param inputs :: reference to class containing search inputs
+		 * @param outputws :: shared pointer to output workspace
 		 */
 		void CICatHelper::doISISSearch(const CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
 		{
@@ -186,8 +186,8 @@ namespace Mantid
 	   
 	  		
 	/** This method saves the search response( investigations )data to a table workspace
-		*  @param response const reference to response object
-		*  @param outputws shared pointer to output workspace
+		*  @param response :: const reference to response object
+		*  @param outputws :: shared pointer to output workspace
 		*/
 		void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
@@ -218,8 +218,8 @@ namespace Mantid
 		
 		}
 	   /** This method saves investigations  to a table workspace
-		*  @param investigations a vector containing investigation data
-		*  @param outputws shared pointer to output workspace
+		*  @param investigations :: a vector containing investigation data
+		*  @param outputws :: shared pointer to output workspace
 		*/
 		void CICatHelper::saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws)
 		{
@@ -275,8 +275,8 @@ namespace Mantid
 		}
 
 	   /** This method saves investigations  to a table workspace
-		*  @param investigation pointer to a single investigation data
-		*  @param t reference to a row in a table workspace
+		*  @param investigation :: pointer to a single investigation data
+		*  @param t :: reference to a row in a table workspace
 		*/
 		void CICatHelper::saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t)
 		{
@@ -358,7 +358,7 @@ namespace Mantid
 		}
 		
 		/** This method loops through the response return_vector and saves the datafile details to a table workspace
-		 * @param response const reference to response object
+		 * @param response :: const reference to response object
 		 * @returns shared pointer to table workspace which stores the data
 		 */
 		API::ITableWorkspace_sptr CICatHelper::saveFileSearchResponse(const ns1__searchByAdvancedResponse& response)
@@ -438,9 +438,9 @@ namespace Mantid
 			return outputws;
 		}
 		/** This method sets the request parameters for the investigations includes
-		 * @param invstId - investigation id 
-		 * @param include - enum parameter to retrieve dat from DB
-		 * @param request - request object
+		 * @param invstId :: investigation id 
+		 * @param include :: enum parameter to retrieve dat from DB
+		 * @param request :: request object
 		*/
 		void CICatHelper::setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request)
 		{
@@ -451,10 +451,10 @@ namespace Mantid
 
 		}
 	   /**This method calls ICat API getInvestigationIncludes and returns investigation details for a given investigation Id
-		* @param invstId - investigation id
-		* @param include - enum parameter for selecting the response data from the db.
-		* @param responsews_sptr - table workspace to save the response data
-		* @param returns zero if success
+		* @param invstId :: investigation id
+		* @param include :: enum parameter for selecting the response data from the db.
+		* @param responsews_sptr :: table workspace to save the response data
+		* @param returns :: zero if success
 		*/
 		int CICatHelper::getDataFiles(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
@@ -511,9 +511,9 @@ namespace Mantid
 			return ret_advsearch;
 		}
 		/** This method loops through the response return_vector and saves the datafile details to a table workspace
-		 * @param response const reference to response object
-		 * @param bloadonlyData boolean to load only data files
-		 * @param outputws shared pointer to table workspace which stores the data
+		 * @param response :: const reference to response object
+		 * @param bloadonlyData :: boolean to load only data files
+		 * @param outputws :: shared pointer to table workspace which stores the data
 		*/
 		void  CICatHelper::saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse& response,
 			API::ITableWorkspace_sptr& outputws)
@@ -610,7 +610,7 @@ namespace Mantid
 		}
 
 	    /**This checks the datafile boolean  selected
-		 * @param fileName - pointer to file name
+		 * @param fileName :: pointer to file name
 		 * @return bool - returns true if it's a raw file or nexus file
 		 */
 
@@ -630,9 +630,9 @@ namespace Mantid
 		}
 
 		/**This method calls ICat API getInvestigationIncludes and returns datasets details for a given investigation Id
-		 * @param invstId - investigation id
-		 * @param include - enum parameter for selecting the response data from iact db.
-		 * @param responsews_sptr - table workspace to save the response data
+		 * @param invstId :: investigation id
+		 * @param include :: enum parameter for selecting the response data from iact db.
+		 * @param responsews_sptr :: table workspace to save the response data
 		 */
 		int CICatHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
@@ -695,8 +695,8 @@ namespace Mantid
 		}
 
 		/** This method loops through the response return_vector and saves the datasets details to a table workspace
-		 * @param response const reference to response object
-		 * @param outputws  shred pointer to workspace
+		 * @param response :: const reference to response object
+		 * @param outputws ::  shred pointer to workspace
 		 * @returns shared pointer to table workspace which stores the data
 		 */
 		void  CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
@@ -742,7 +742,7 @@ namespace Mantid
 		}
 
 		/**This method calls ICat api listruments and returns the list of instruments a table workspace
-		 *@param instruments  list of instruments
+		 *@param instruments ::  list of instruments
 		 */
 		void CICatHelper::listInstruments(std::vector<std::string>& instruments)
 		{		
@@ -798,7 +798,7 @@ namespace Mantid
 		}
 
 	  /**This method sets the request parameter for ICat api list isnturments
-		* @param request - reference to request object
+		* @param request :: reference to request object
 		*/
 		void CICatHelper::setReqparamforlistInstruments(ns1__listInstruments& request)
 		{
@@ -807,7 +807,7 @@ namespace Mantid
 
 		
 		/**This method calls ICat api listruments and returns the list of instruments a table workspace
-		 *@param investTypes  list of investigationtypes
+		 *@param investTypes ::  list of investigationtypes
 		 */
 		void  CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
 		{		
@@ -913,7 +913,7 @@ namespace Mantid
 		}
 
 		/**This method calls ICat api getmyinvestigations and do returns the investigations of the logged in user
-		 * @param ws_sptr - shared pointer to table workspace which stores the investigations search result
+		 * @param ws_sptr :: shared pointer to table workspace which stores the investigations search result
 		 */
 		void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
 		{
@@ -968,8 +968,8 @@ namespace Mantid
 		}
 
 		/**This method calls ICat api getmyinvestigations and do returns the investigations of the logged in user
-		 * @param response - reference to response  object 
-		 * @param outputws - shared pointer to table workspace which stores the investigations search result
+		 * @param response :: reference to response  object 
+		 * @param outputws :: shared pointer to table workspace which stores the investigations search result
 		 */
 		void CICatHelper::saveMyInvestigations( const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
@@ -991,8 +991,8 @@ namespace Mantid
 
 
 		/* This method does advanced search and returns investigation data
-		 * @param inputs reference to class containing search inputs
-		 * @param outputws shared pointer to output workspace
+		 * @param inputs :: reference to class containing search inputs
+		 * @param outputws :: shared pointer to output workspace
 		 */
 		void CICatHelper::doAdvancedSearch(CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
 		{
@@ -1128,7 +1128,7 @@ namespace Mantid
 		}
 
 	   /**This method saves the date components to C library struct tm
-		 *@param sDate string containing the date 
+		 *@param sDate :: string containing the date 
 		 *@return time_t value of date 
 		 */
 		time_t CICatHelper::getTimevalue(const std::string& sDate)
@@ -1231,9 +1231,9 @@ namespace Mantid
 		}
 		
 		/**This method uses ICat API login to connect to catalog 
-		  *@param name login name of the user
-		  *@param password of the user
-		  *@param url endpoint url of the catalog
+		  *@param name :: login name of the user
+		  *@param password :: of the user
+		  *@param url :: endpoint url of the catalog
 		*/
 		void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
 		{

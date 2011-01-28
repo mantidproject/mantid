@@ -9,7 +9,7 @@ namespace Geometry
 {
 
 
-/*!
+/**
   \class Torus
   \brief Holds a torus in vector form
   \author S. Ansell

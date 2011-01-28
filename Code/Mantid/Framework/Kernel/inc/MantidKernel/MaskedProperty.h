@@ -42,10 +42,10 @@ namespace Mantid
 		{
 		public:
 		  /** Constructor  for Maskedproperty class
-			* @param name - name of the property
-			* @param defaultvalue - defaultvalue of the property
-			* @param validator - property validator
-			* @param direction - Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+			* @param name :: name of the property
+			* @param defaultvalue :: defaultvalue of the property
+			* @param validator :: property validator
+			* @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
 			*/
 			  MaskedProperty(const std::string& name,TYPE defaultvalue,IValidator<TYPE> *validator = new NullValidator<TYPE>,const unsigned int direction = Direction::Input):
 			  Kernel::PropertyWithValue<TYPE>(name,defaultvalue , validator, direction ),m_maskedValue("")
@@ -53,9 +53,9 @@ namespace Mantid
 			  }
 
 			/** Constructor  for Maskedproperty class
-			  * @param name - name of the property
-			  * @param defaultvalue - defaultvalue of the property
-			  * @param direction - Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+			  * @param name :: name of the property
+			  * @param defaultvalue :: defaultvalue of the property
+			  * @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
 			  */
 			  MaskedProperty( const std::string& name, const TYPE& defaultvalue, const unsigned int direction):
 			  Kernel::PropertyWithValue <TYPE>(name,defaultvalue,direction ),m_maskedValue("")

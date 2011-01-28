@@ -9,7 +9,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class OCGeometryHandler
 		\brief Place holder for OpenCascade library geometry triangulation and rendering.
 		\author Srikanth Nagella

@@ -77,7 +77,7 @@ namespace Mantid
 
     /**
      * Adds the geometry of the Object to the document
-     * @param obj The object to add
+     * @param obj :: The object to add
      */
     void vtkGeometryCacheWriter::addObject(Object* obj)
     {

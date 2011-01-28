@@ -21,7 +21,7 @@ int Cylinder::g_nstacks = 1;
 
 Cylinder::Cylinder() : Quadratic(),
    Centre(),Normal(1,0,0),Nvec(0),Radius(0.0)
-  /*!
+  /**
     Standard Constructor creats a cylinder (radius 0)
     along the x axis
   */
@@ -33,17 +33,17 @@ Cylinder::Cylinder() : Quadratic(),
 Cylinder::Cylinder(const Cylinder& A) :
   Quadratic(A),Centre(A.Centre),Normal(A.Normal),
   Nvec(A.Nvec),Radius(A.Radius)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: Cyclinder to copy
+    @param A :: Cyclinder to copy
   */
 {}
 
 Cylinder*
 Cylinder::clone() const
-  /*!
+  /**
     Makes a clone (implicit virtual copy constructor) 
-    \return Copy(*this)
+    @return Copy(*this)
   */
 {
   return new Cylinder(*this);
@@ -51,10 +51,10 @@ Cylinder::clone() const
 
 Cylinder&
 Cylinder::operator=(const Cylinder& A) 
-  /*!
+  /**
     Standard Assignment operator
-    \param A :: Cylinder object to copy
-    \return *this
+    @param A :: Cylinder object to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -69,21 +69,21 @@ Cylinder::operator=(const Cylinder& A)
 }
 
 Cylinder::~Cylinder()
-  /*!
+  /**
     Standard Destructor
   */
 {}
 
 int
 Cylinder::setSurface(const std::string& Pstr)
-  /*! 
+  /** 
     Processes a standard MCNPX cone string    
     Recall that cones can only be specified on an axis
      Valid input is: 
      - c/x cen_y cen_z radius 
      - cx radius 
-     \param Pstr :: Input string
-    \return : 0 on success, neg of failure 
+     @param Pstr :: Input string
+    @return : 0 on success, neg of failure 
   */
 {
   enum { errDesc=-1, errAxis=-2,
@@ -133,13 +133,13 @@ Cylinder::setSurface(const std::string& Pstr)
 
 int 
 Cylinder::side(const Geometry::V3D& Pt) const 
-  /*!
+  /**
     Calculate if the point PT within the middle
     of the cylinder 
-    \param Pt :: Point to check
-    \retval -1 :: within cylinder 
-    \retval 1 :: outside the cylinder
-    \retval 0 :: on the surface 
+    @param Pt :: Point to check
+    @retval -1 :: within cylinder 
+    @retval 1 :: outside the cylinder
+    @retval 0 :: on the surface 
   */
 {
   if (Nvec)      // Nvec =1-3 (point to exclude == Nvec-1)
@@ -165,11 +165,11 @@ Cylinder::side(const Geometry::V3D& Pt) const
 
 int 
 Cylinder::onSurface(const Geometry::V3D& Pt) const 
-  /*!
+  /**
     Calculate if the point PT on the cylinder 
-    \param Pt :: Geometry::V3D to test
-    \retval 1 :: on the surface 
-    \retval 0 :: not on the surface
+    @param Pt :: Geometry::V3D to test
+    @retval 1 :: on the surface 
+    @retval 0 :: not on the surface
   */
 {
   if (Nvec)      // Nvec =1-3 (point to exclude == Nvec-1)
@@ -185,10 +185,10 @@ Cylinder::onSurface(const Geometry::V3D& Pt) const
 
 void
 Cylinder::setNvec()
-  /*! 
+  /** 
      Find if the normal vector allows it to be a special
      type of cylinder on the x,y or z axis
-     \return 1,2,3 :: corresponding to a x,y,z alignment
+     @return 1,2,3 :: corresponding to a x,y,z alignment
   */
 {
   Nvec=0;
@@ -205,10 +205,10 @@ Cylinder::setNvec()
 
 void
 Cylinder::rotate(const Geometry::Matrix<double>& MA)
-/*!
+/**
   Apply a rotation to the cylinder and re-check the
   status of the main axis.
-  \param MA :: Rotation Matrix (not inverted)
+  @param MA :: Rotation Matrix (not inverted)
 */
 {
   Centre.rotate(MA);
@@ -221,9 +221,9 @@ Cylinder::rotate(const Geometry::Matrix<double>& MA)
 
 void 
 Cylinder::displace(const Geometry::V3D& Pt)
-  /*!
+  /**
     Apply a displacement Pt 
-    \param Pt :: Displacement to add to the centre
+    @param Pt :: Displacement to add to the centre
   */ 
 {
   if (Nvec)
@@ -239,9 +239,9 @@ Cylinder::displace(const Geometry::V3D& Pt)
 
 void
 Cylinder::setCentre(const Geometry::V3D& A)
-  /*!
+  /**
     Sets the centre Geometry::V3D
-    \param A :: centre point 
+    @param A :: centre point 
   */
 {
   Centre=A;
@@ -251,10 +251,10 @@ Cylinder::setCentre(const Geometry::V3D& A)
 
 void
 Cylinder::setNorm(const Geometry::V3D& A)
-  /*! 
+  /** 
     Sets the centre line unit vector 
     A does not need to be a unit vector
-    \param A :: Vector along the centre line 
+    @param A :: Vector along the centre line 
   */
 {
   Normal=A;
@@ -266,7 +266,7 @@ Cylinder::setNorm(const Geometry::V3D& A)
 
 void
 Cylinder::setBaseEqn()
-  /*!
+  /**
     Sets an equation of type (cylinder)
     \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
   */
@@ -287,11 +287,11 @@ Cylinder::setBaseEqn()
 
 double
 Cylinder::distance(const Geometry::V3D& A) const
-  /*!
+  /**
     Calculates the distance of point A from 
     the surface of the  cylinder.
-    \param A :: Point to calculate distance from
-    \return :: +ve distance to the surface.
+    @param A :: Point to calculate distance from
+    @return :: +ve distance to the surface.
 
     \todo INCOMPLETE AS Does not deal with the case of 
     non axis centre line  (has been updated?? )
@@ -307,9 +307,9 @@ Cylinder::distance(const Geometry::V3D& A) const
 
 void
 Cylinder::write(std::ostream& OX) const
-  /*! 
+  /** 
     Write out the cylinder for MCNPX
-    \param OX :: output stream
+    @param OX :: output stream
   */
 {
   //               -3 -2 -1 0 1 2 3        
@@ -357,13 +357,13 @@ Cylinder::write(std::ostream& OX) const
 double 
 Cylinder::lineIntersect(const Geometry::V3D& Pt,
 			const Geometry::V3D& uVec) const
-  /*!
+  /**
     Given a track starting from Pt and traveling along
     uVec determine the intersection point (distance)
-    \param Pt :: Point of track start
-    \param uVec Unit vector of length
-    \retval Distance to intersect
-    \retval -1 Failed to intersect
+    @param Pt :: Point of track start
+    @param uVec :: Unit vector of length
+    @retval Distance to intersect
+    @retval -1 Failed to intersect
   */
 {
   (void) Pt; //Avoid compiler warning
@@ -374,7 +374,7 @@ Cylinder::lineIntersect(const Geometry::V3D& Pt,
 
 void
 Cylinder::print() const
- /*!
+ /**
    Debug routine to print out basic information 
  */
 {
@@ -387,16 +387,16 @@ Cylinder::print() const
 
 void Cylinder::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
-	/*!
+	/**
 	  Cylinder bounding box
 	  find the intersection points of the axis of cylinder with the input bounding box.
 	  Using the end points calculate improved limits on the bounding box, if possible.
-	  \param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
-	  \param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
-	  \param ymax :: as for xmax
-	  \param ymin :: as for xmin
-	  \param zmax :: as for xmax
-	  \param zmin :: as for xmin
+	  @param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+	  @param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+	  @param ymax :: as for xmax
+	  @param ymin :: as for xmin
+	  @param zmax :: as for xmax
+	  @param zmin :: as for xmin
 	*/
 	std::vector<V3D> listOfPoints;
 	double txmax,tymax,tzmax,txmin,tymin,tzmin;

@@ -49,7 +49,7 @@ namespace Mantid
 		Kernel::Logger& OCGeometryGenerator::PLog(Kernel::Logger::get("OCGeometryGenerator"));
 		/**
 		 * Constructor
-		 * @param obj input object
+		 * @param obj :: input object
 		 */
 		OCGeometryGenerator::OCGeometryGenerator(const Object *obj):Obj(obj)
 		{
@@ -113,7 +113,7 @@ namespace Mantid
 		}
 		/**
 		 * Analyze intersection
-     * \return the resulting TopoDS_Shape
+     * @return the resulting TopoDS_Shape
 		 */
 		TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection* rule)
 		{

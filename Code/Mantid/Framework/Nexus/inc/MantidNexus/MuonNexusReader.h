@@ -58,7 +58,7 @@ class MuonNexusReader
 		std::time_t startTime_time_t; ///< startTime in time_t format
 		std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
         {
-			/*!
+			/**
 			Take the input Posix time, subtract the unix epoch, and return the seconds
 			as a std::time_t value.
 			@param t :: time of interest as ptime

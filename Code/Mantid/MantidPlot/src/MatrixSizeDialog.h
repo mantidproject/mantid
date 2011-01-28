@@ -45,8 +45,8 @@ class MatrixSizeDialog : public QDialog
 public:
 	//! Constructor
 	/**
-	 * \param parent parent widget
-	 * \param fl window flags
+	 * @param parent :: parent widget
+	 * @param fl :: window flags
 	 */
     MatrixSizeDialog(Matrix *m, QWidget* parent = 0, Qt::WFlags fl = 0);
 

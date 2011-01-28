@@ -56,7 +56,7 @@ class DLLExport ManagedRawFileWorkspace2D : public DataObjects::ManagedWorkspace
 public:
   /**
   Gets the name of the workspace type
-  \return Standard string name
+  @return Standard string name
    */
   virtual const std::string id() const {return "ManagedRawFileWorkspace2D";}
 

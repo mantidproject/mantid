@@ -84,7 +84,7 @@ namespace Mantid
 
       /** Sets the value of type T to the parameter if it has type ParameterType<T>
 	  Throws an exception if the types don't match.
-	  @param t Value to set
+	  @param t :: Value to set
       */ 
       template<class T>
       void set(const T& t);
@@ -152,7 +152,7 @@ namespace Mantid
     /**
      * Sets the value of the parameter
      * @tparam T The concrete type
-     * @param The value of the parameter
+     * @param The :: value of the parameter
      */
     template<class T>
     void Parameter::set(const T& t)
@@ -182,7 +182,7 @@ namespace Mantid
     /**
      * Set the value of the parameter from a string
      * @tparam T The type of the parameter
-     * @param value A string representation of the parameter's value
+     * @param value :: A string representation of the parameter's value
      */
     template<class Type>
     void ParameterType<Type>::fromString(const std::string& value)
@@ -193,7 +193,7 @@ namespace Mantid
 
     /** Set the value of the parameter via the assignment operator
      * @tparam The parameter type
-     * @param value The vlue of the parameter
+     * @param value :: The vlue of the parameter
      */
     template<class Type>
     void ParameterType<Type>::setValue(const Type& value)
@@ -202,7 +202,7 @@ namespace Mantid
     }
     
     /** Set the value of the parameter via the assignment operator
-     * @param value The vlue of the paramter
+     * @param value :: The vlue of the paramter
      * @returns A reference to the parameter 
      */
     template<class Type>

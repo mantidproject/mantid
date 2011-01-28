@@ -327,7 +327,7 @@ public:
   }
 
   void xtestTrackTwoIsolatedCubes()
-    /*!
+    /**
     Test a track going through an object
     */
   {
@@ -359,7 +359,7 @@ public:
   }
 
   void testTrackTwoTouchingCubes()
-    /*!
+    /**
     Test a track going through an object
     */
   {
@@ -391,7 +391,7 @@ public:
   }
 
   void testTrackCubeWithInternalSphere()
-    /*!
+    /**
     Test a track going through an object
     */
   {
@@ -423,7 +423,7 @@ public:
   }
 
   void testTrack_CubePlusInternalEdgeTouchSpheres()
-    /*!
+    /**
     Test a track going through an object
     */
   {
@@ -455,7 +455,7 @@ public:
   }
 
   void testTrack_CubePlusInternalEdgeTouchSpheresMiss()
-    /*!
+    /**
     Test a track missing an object
     */
   {
@@ -485,7 +485,7 @@ public:
   }
 
   void testFindPointInCube()
-    /*!
+    /**
     Test find point in cube
     */
   {
@@ -555,7 +555,7 @@ public:
 
 
   void testSolidAngleSphere()
-    /*!
+    /**
     Test solid angle calculation for a sphere
     */
   {
@@ -589,7 +589,7 @@ public:
   }
 
   void testSolidAngleCappedCylinder()
-    /*!
+    /**
     Test solid angle calculation for a capped cylinder
     */
   {
@@ -623,7 +623,7 @@ public:
   }
 
   void testSolidAngleCubeTriangles()
-    /*!
+    /**
     Test solid angle calculation for a cube using triangles
     - test for using Open Cascade surface triangulation for all solid angles.
     */
@@ -665,7 +665,7 @@ public:
   }
 
   void testGetBoundingBoxForCylinder()
-    /*!
+    /**
     Test bounding box for a object capped cylinder
     */
   {
@@ -683,7 +683,7 @@ public:
   }
 
   void testdefineBoundingBox()
-    /*!
+    /**
     Test use of defineBoundingBox
     */
   {
@@ -709,7 +709,7 @@ public:
 
   }
   void testSurfaceTriangulation()
-    /*!
+    /**
     Test triangle solid angle calc
     */
   {
@@ -766,7 +766,7 @@ public:
 
   }
   void testSolidAngleSphereTri()
-    /*!
+    /**
     Test solid angle calculation for a sphere from triangulation
     */
   {
@@ -907,7 +907,7 @@ private:
   }
 
   void clearSurfMap()
-    /*!
+    /**
     Clears the surface map for a new test
     or destruction.
     */
@@ -917,7 +917,7 @@ private:
   }
 
   void createSurfaces(const std::string& desired)
-    /*!
+    /**
     Creates a list of surfaces for used in the objects
     and populates the MObj layers.
     */

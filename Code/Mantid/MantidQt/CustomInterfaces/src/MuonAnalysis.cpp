@@ -203,7 +203,7 @@ void MuonAnalysis::runFrontPlotButton()
 /**
 * If the instrument selection has changed, calls instrumentSelectChanged (slot)
 *
-* @param prefix instrument name from QComboBox object
+* @param prefix :: instrument name from QComboBox object
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix) 
 {
@@ -512,9 +512,9 @@ void MuonAnalysis::groupTableClicked(int row)
  *    1) user changed detector sequence 
  *    2) user type in a group name
  *
- * @param row 
+ * @param row :: 
  * @param column
- */
+::  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
   if ( column == 2 )
@@ -600,9 +600,9 @@ void MuonAnalysis::groupTableChanged(int row, int column)
  *    1) user changed alpha value
  *    2) pair name changed
  *
- * @param row 
+ * @param row :: 
  * @param column
- */
+::  */
 void MuonAnalysis::pairTableChanged(int row, int column)
 {
   // alpha been modified
@@ -1069,7 +1069,7 @@ void MuonAnalysis::updateFrontAndCombo()
  * Return the group-number for the group in a row. Return -1 if 
  * invalid group in row
  *
- * @param row A row in the group table
+ * @param row :: A row in the group table
  * @return Group number
  */
 int MuonAnalysis::getGroupNumberFromRow(int row)
@@ -1087,7 +1087,7 @@ int MuonAnalysis::getGroupNumberFromRow(int row)
  * Return the pair-number for the pair in a row. Return -1 if 
  * invalid pair in row
  *
- * @param row A row in the pair table
+ * @param row :: A row in the pair table
  * @return Pair number
  */
 int MuonAnalysis::getPairNumberFromRow(int row)
@@ -1315,7 +1315,7 @@ bool MuonAnalysis::isGroupingSet()
 /**
  * Apply grouping specified in xml file to workspace
  *
- * @param filename Name of grouping file
+ * @param filename :: Name of grouping file
  */
 bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
    const std::string& filename)
@@ -1378,7 +1378,7 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
 /**
  * Calculate number of detectors from string of type 1-3, 5, 10-15
  *
- * @param str String of type "1-3, 5, 10-15"
+ * @param str :: String of type "1-3, 5, 10-15"
  * @return Number of detectors. Return 0 if not recognised
  */
 int MuonAnalysis::numOfDetectors(const std::string& str) const
@@ -1390,7 +1390,7 @@ int MuonAnalysis::numOfDetectors(const std::string& str) const
 /**
  * Return a vector of IDs for row number from string of type 1-3, 5, 10-15
  *
- * @param str String of type "1-3, 5, 10-15"
+ * @param str :: String of type "1-3, 5, 10-15"
  * @return Vector of IDs
  */
 std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
@@ -1461,7 +1461,7 @@ std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
 
 /** Is input string a number?
  *
- *  @param s The input string
+ *  @param s :: The input string
  *  @return True is input string is a number
  */
 bool MuonAnalysis::isNumber(const std::string& s) const

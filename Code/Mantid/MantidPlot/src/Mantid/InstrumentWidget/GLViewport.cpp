@@ -39,13 +39,13 @@ void GLViewport::getViewport(int* w, int* h) const
 /**
  * This will set the projection to Ortho
  *
- * @param l left side of the Ortho projection (xmin)
- * @param r right side of the Ortho projection (xmax)
- * @param b bottom side of the Ortho projection (ymin)
- * @param t top side of the Ortho projection (ymax)
- * @param near near side of the Ortho Projection (zmin)
- * @param far far side of the Ortho Projection (zmax)
- * @param useZ If set to false near and far will not be used. It is a quick fix of a problem with viewing
+ * @param l :: left side of the Ortho projection (xmin)
+ * @param r :: right side of the Ortho projection (xmax)
+ * @param b :: bottom side of the Ortho projection (ymin)
+ * @param t :: top side of the Ortho projection (ymax)
+ * @param near :: near side of the Ortho Projection (zmin)
+ * @param far :: far side of the Ortho Projection (zmax)
+ * @param useZ :: If set to false near and far will not be used. It is a quick fix of a problem with viewing
  *          selected instrument pixels
  */
 void GLViewport::setOrtho(double l,double r,double b,double t,double nearz,double farz,bool useZ)
@@ -71,12 +71,12 @@ void GLViewport::setOrtho(double l,double r,double b,double t,double nearz,doubl
  * This will set the projection to perspective.
  * UNUSED! as of 2010-11-01.
  *
- * @param l left side of the perspective projection (xmin)
- * @param r right side of the perspective projection (xmax)
- * @param b bottom side of the perspective projection (ymin)
- * @param t top side of the perspective projection (ymax)
- * @param near near side of the perspective Projection (zmin)
- * @param far far side of the perspective Projection (zmax)
+ * @param l :: left side of the perspective projection (xmin)
+ * @param r :: right side of the perspective projection (xmax)
+ * @param b :: bottom side of the perspective projection (ymin)
+ * @param t :: top side of the perspective projection (ymax)
+ * @param near :: near side of the perspective Projection (zmin)
+ * @param far :: far side of the perspective Projection (zmax)
  */
 void GLViewport::setPrespective(double l,double r,double b,double t,double nearz,double farz)
 {

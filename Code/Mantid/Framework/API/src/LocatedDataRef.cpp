@@ -6,9 +6,9 @@ namespace Mantid
   namespace API
   {
 
-    /*!
+    /**
     Standard Copy Constructor
-    \param A :: LocatedDataRef Item to copy
+    @param A :: LocatedDataRef Item to copy
     */
     LocatedDataRef::LocatedDataRef(const LocatedDataRef& A) : ILocatedData(),
       xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer)
@@ -19,10 +19,10 @@ namespace Mantid
       xPointer(0),x2Pointer(0),yPointer(0),ePointer(0)
     {}
 
-    /*!
+    /**
     Standard Assignment Constructor
-    \param A :: LocatedDataRef Item to copy
-    \return *this
+    @param A :: LocatedDataRef Item to copy
+    @return *this
     */
     LocatedDataRef& LocatedDataRef::operator=(const LocatedDataRef& A)
     {
@@ -39,10 +39,10 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Standard Assignment Constructor
-    \param A :: ILocatedData Item to copy
-    \return *this
+    @param A :: ILocatedData Item to copy
+    @return *this
     */
     LocatedDataRef& LocatedDataRef::operator=(const ILocatedData& A)
     {
@@ -59,7 +59,7 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Standard Destructor
     */
     LocatedDataRef::~LocatedDataRef()
@@ -68,9 +68,9 @@ namespace Mantid
     }
 
 
-    /*! 
+    /** 
     Operator== all components must be equal
-    \param A :: Other object to compare
+    @param A :: Other object to compare
     */
     int LocatedDataRef::operator==(const LocatedDataRef& A) const
     {
@@ -78,10 +78,10 @@ namespace Mantid
         *ePointer!=*A.ePointer) ? 0 : 1;
     }
 
-    /*! 
+    /** 
     Operator!= any component is not equal
-    \param A :: Other object to compare
-    \return this!=A
+    @param A :: Other object to compare
+    @return this!=A
     */
     int LocatedDataRef::operator!=(const LocatedDataRef& A) const
     {
@@ -89,10 +89,10 @@ namespace Mantid
         *ePointer== *A.ePointer) ? 0 : 1;
     }
 
-    /*! 
+    /** 
     Operator< takes xPointer to last precidence.
-    \param A :: LocatedDataRef to compare
-    \return this < A
+    @param A :: LocatedDataRef to compare
+    @return this < A
     */
     int LocatedDataRef::operator<(const LocatedDataRef& A) const
     {
@@ -114,12 +114,12 @@ namespace Mantid
       return 0;
     }
 
-    /*! 
+    /** 
     Operator> takes xPointer to last precidence.
     Uses operator<  to obtain value.
     Note it does not uses 1-(A<this)
-    \param A :: LocatedDataRef to compare
-    \return this > A
+    @param A :: LocatedDataRef to compare
+    @return this > A
     */
     int LocatedDataRef::operator>(const LocatedDataRef& A) const
     {
@@ -213,7 +213,7 @@ namespace Mantid
     }
 
 
-    /*! Clone method
+    /** Clone method
     *  Make a copy of the LocatedDataRef
     *  @return new(*this)
     */

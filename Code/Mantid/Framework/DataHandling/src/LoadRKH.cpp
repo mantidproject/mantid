@@ -94,7 +94,7 @@ void LoadRKH::exec()
 }
 /** Determines if the file is 1D or 2D based on the first after the workspace's
 *  title
-*  @param testLine the first line in the file after the title
+*  @param testLine :: the first line in the file after the title
 *  @return true if the file must contain 1D data
 */
 bool LoadRKH::is2D(const std::string & testLine)
@@ -218,10 +218,10 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D()
 }
 /** Reads from the third line of the input file to the end assuming it contains
 *  2D data
-*  @param firstLine the second line in the file
+*  @param firstLine :: the second line in the file
 *  @return a workspace containing the loaded data
-*  @throws NotFoundError if there is compulsulary data is missing from the file
-*  @throws invalid_argument if there is an inconsistency in the header information
+*  @throw NotFoundError if there is compulsulary data is missing from the file
+*  @throw invalid_argument if there is an inconsistency in the header information
 */
 const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
 {
@@ -266,8 +266,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
 *  @param[out] outWrksp the workspace that the data will be writen to
 *  @param[out] axis0Data x-values for the workspace
 *  @return a progress bar object
-*  @throws NotFoundError if there is compulsulary data is missing from the file
-*  @throws invalid_argument if there is an inconsistency in the header information
+*  @throw NotFoundError if there is compulsulary data is missing from the file
+*  @throw invalid_argument if there is an inconsistency in the header information
 */
 Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_sptr & outWrksp, MantidVec & axis0Data)
 {
@@ -364,7 +364,7 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec & output)
 }
 /** Convert the units specification line from the RKH file into a
 *  Mantid unit name
-*  @param line units specification line
+*  @param line :: units specification line
 *  @return Mantid unit name
 */
 const std::string LoadRKH::readUnit(const std::string & line)
@@ -414,8 +414,8 @@ const std::string LoadRKH::readUnit(const std::string & line)
 }
 /**
  * Remove lines from an input stream
- * @param strm The input stream to adjust
- * @param nlines The number of lines to remove
+ * @param strm :: The input stream to adjust
+ * @param nlines :: The number of lines to remove
  */
 void LoadRKH::skipLines(std::istream & strm, int nlines)
 {
@@ -435,8 +435,8 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) con
 }
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
  *  @param filePath- path of the file including name.
- *  @param nread - no.of bytes read
- *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @param nread :: no.of bytes read
+ *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
 bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -455,7 +455,7 @@ bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,unsigned c
 }
 
 /**checks the file by opening it and reading few lines 
- *  @param filePath name of the file inluding its path
+ *  @param filePath :: name of the file inluding its path
  *  @return an integer value how much this algorithm can load the file 
  */
 int LoadRKH::fileCheck(const std::string& filePath)

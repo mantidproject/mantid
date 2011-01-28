@@ -22,10 +22,10 @@ using namespace API;
 Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
 
 /** Constructor with boundary arguments
- * @param fun The function
- * @param paramName The parameter name
- * @param lowerBound The lower bound
- * @param upperBound The upper bound
+ * @param fun :: The function
+ * @param paramName :: The parameter name
+ * @param lowerBound :: The lower bound
+ * @param upperBound :: The upper bound
  */
 BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
 m_activeParameterIndex(-1),
@@ -41,8 +41,8 @@ m_upperBound(upperBound)
 }
 
 /** Initialize the constraint from an expression.
- * @param fun The function
- * @param expr The initializing expression which must look like this:
+ * @param fun :: The function
+ * @param expr :: The initializing expression which must look like this:
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
  */
@@ -150,7 +150,7 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
 
 /** Set penalty factor
  *
- *  @param c penalty factor
+ *  @param c :: penalty factor
  */
 void BoundaryConstraint::setPenaltyFactor(const double& c) 
 { 
@@ -168,7 +168,7 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
 /* determine which is the active parameter. If constraint name is not amoung
  *  the active parameter of function then return -1
  *
- *  @param fn fitting function
+ *  @param fn :: fitting function
  *  @return active parameter index or -1 if no active parameter index found
  */
 //int BoundaryConstraint::determineParameterIndex(IFitFunction* fn)

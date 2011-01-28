@@ -53,12 +53,12 @@ namespace Mantid
       }
 
       /** Constructor taking six points. If inconsistent points are defined, i.e. xmin > xmax, then an error is thrown
-      * @param xmax Value of maximum in X. It must be greater than xmin.
-      * @param ymax Value of maximum in Y. It must be greater than ymin.
-      * @param zmax Value of maximum in Z. It must be greater than zmin.
-      * @param xmin Value of minimum in X. It must be less than xmax.
-      * @param ymin Value of minimum in Y. It must be less than ymax.
-      * @param zmin Value of minimum in Z. It must be less than zmax.
+      * @param xmax :: Value of maximum in X. It must be greater than xmin.
+      * @param ymax :: Value of maximum in Y. It must be greater than ymin.
+      * @param zmax :: Value of maximum in Z. It must be greater than zmin.
+      * @param xmin :: Value of minimum in X. It must be less than xmax.
+      * @param ymin :: Value of minimum in Y. It must be less than ymax.
+      * @param zmin :: Value of minimum in Z. It must be less than zmax.
       */
       BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin, double zmin)
         : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax), m_null(false)

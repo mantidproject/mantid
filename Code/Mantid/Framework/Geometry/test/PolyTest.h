@@ -21,7 +21,7 @@ class PolyTest: public CxxTest::TestSuite
 public:
 
   void testAddition()
-    /*!
+    /**
     Test the SetComponent to make an interesting function
     */ 
   {
@@ -58,7 +58,7 @@ public:
   }
 
   void testEqualTemplate()
-    /*!
+    /**
     Test operator=
     */ 
   {
@@ -79,7 +79,7 @@ public:
   }
 
   void testGetMaxSize()
-    /*!
+    /**
     Test of the getMaxSize routine
     */
   {
@@ -89,7 +89,7 @@ public:
   }
 
   void testMultiplication()
-    /*!
+    /**
     Test the SetComponent to make an interesting function
     */ 
   {
@@ -127,7 +127,7 @@ public:
   }
 
   void testRead()
-    /*!
+    /**
     Test the read function
     */
   {
@@ -189,7 +189,7 @@ public:
   }
 
   void testSetComp()
-    /*!
+    /**
     Test the SetComponent to make an interesting function
     */ 
   {

@@ -444,9 +444,9 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
  *  to cover the full range covered by the two input workspaces. In regions of overlap, the bins from
  *  the workspace having the wider bins are taken. Note that because the list of input workspaces
  *  is sorted, ws1 will always start before (or at the same point as) ws2.
- *  @param ws1    The first input workspace. Will start before ws2.
- *  @param ws2    The second input workspace.
- *  @param params A reference to the vector of rebinning parameters
+ *  @param ws1 ::    The first input workspace. Will start before ws2.
+ *  @param ws2 ::    The second input workspace.
+ *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const
 {
@@ -486,9 +486,9 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1,
 
 //------------------------------------------------------------------------------------------------
 /** Calculates the rebin paramters in the case where the two input workspaces do not overlap at all.
- *  @param X1     The bin boundaries from the first workspace
- *  @param X2     The bin boundaries from the second workspace
- *  @param params A reference to the vector of rebinning parameters
+ *  @param X1 ::     The bin boundaries from the first workspace
+ *  @param X2 ::     The bin boundaries from the second workspace
+ *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::vector<double>& params) const
 {
@@ -516,10 +516,10 @@ void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::v
 //------------------------------------------------------------------------------------------------
 /** Calculates the rebin parameters in the case where the bins of the two workspaces intersect.
  *  'Intersect' is used in the sense of two intersecting sets.
- *  @param X1     The bin boundaries from the first workspace
- *  @param i      Indicates the index in X1 immediately before the overlap region starts
- *  @param X2     The bin boundaries from the second workspace
- *  @param params A reference to the vector of rebinning parameters
+ *  @param X1 ::     The bin boundaries from the first workspace
+ *  @param i ::      Indicates the index in X1 immediately before the overlap region starts
+ *  @param X2 ::     The bin boundaries from the second workspace
+ *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
 {
@@ -563,10 +563,10 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
 /** Calculates the rebin parameters in the case where the range of the second workspace is
  *  entirely within that of the first workspace.
  *  'Inclusion' is used in the sense of a set being included in anothre.
- *  @param X1     The bin boundaries from the first workspace
- *  @param i      Indicates the index in X1 immediately before the overlap region starts
- *  @param X2     The bin boundaries from the second workspace
- *  @param params A reference to the vector of rebinning parameters
+ *  @param X1 ::     The bin boundaries from the first workspace
+ *  @param i ::      Indicates the index in X1 immediately before the overlap region starts
+ *  @param X2 ::     The bin boundaries from the second workspace
+ *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
 {

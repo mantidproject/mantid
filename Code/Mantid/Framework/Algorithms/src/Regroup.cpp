@@ -124,13 +124,13 @@ void Regroup::exec()
 
 /** Regroup the data according to new output X array
  *
- * @param xold - old x array of data
- * @param xoldIndex - indeces of new x in XValues_old
- * @param yold - old y array of data
- * @param ynew - new y array of data
- * @param eold - old error array of data
- * @param enew - new error array of data
- * @param distribution - flag defining if distribution data (1) or not (0)
+ * @param xold :: old x array of data
+ * @param xoldIndex :: indeces of new x in XValues_old
+ * @param yold :: old y array of data
+ * @param ynew :: new y array of data
+ * @param eold :: old error array of data
+ * @param enew :: new error array of data
+ * @param distribution :: flag defining if distribution data (1) or not (0)
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
@@ -185,10 +185,10 @@ void Regroup::rebin(const std::vector<double>& xold, const std::vector<double>& 
 
 /** Creates a new  output X array  according to specific boundary defnitions
  *
- *  @param params    rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
- *  @param xold      the current x array
- *  @param xnew      new output workspace x array
- *  @param xoldIndex indeces of new x in XValues_old
+ *  @param params ::    rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
+ *  @param xold ::      the current x array
+ *  @param xnew ::      new output workspace x array
+ *  @param xoldIndex :: indeces of new x in XValues_old
  *  @return The number of bin boundaries in the new X array
  **/
 int Regroup::newAxis(const std::vector<double>& params,

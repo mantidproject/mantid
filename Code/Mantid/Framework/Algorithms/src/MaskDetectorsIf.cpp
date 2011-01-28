@@ -134,8 +134,8 @@ void MaskDetectorsIf::retrieveProperties()
 
 /**
  * Create a new cal file based on the old file
- * @param oldfile The old cal file path
- * @param newfile The new cal file path
+ * @param oldfile :: The old cal file path
+ * @param newfile :: The new cal file path
  */
 void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::string& newfile)
 {

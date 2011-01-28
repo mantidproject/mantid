@@ -39,7 +39,7 @@ class QImage;
 class ImageMarker;
 class ApplicationWindow;
 
-/*!\brief Plot tool for calculating intensity profiles of image markers along a line.
+/**\brief Plot tool for calculating intensity profiles of image markers along a line.
  *
  * It is assumed that on the parent Graph an ImageMarker is selected. During initialization,
  * a pointer to this marker is stored and the selection is removed. The LineProfileTool
@@ -70,7 +70,7 @@ class LineProfileTool : public QWidget, public PlotToolInterface
         virtual int rtti() const {return PlotToolInterface::Rtti_LineProfileTool;};
 
 	signals:
-		/*! Emitted whenever a new message should be presented to the user.
+		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
 		 */
@@ -79,18 +79,18 @@ class LineProfileTool : public QWidget, public PlotToolInterface
 	protected:
 		int averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal);
 		void addLineMarker(const QPoint &start, const QPoint &end);
-		/*!\brief Draw line during operation (replaced by a LineMarker at the end).
+		/**\brief Draw line during operation (replaced by a LineMarker at the end).
 		 */
 		virtual void paintEvent(QPaintEvent *e);
-		/*!\brief Pressing the left mouse button starts line selection.
+		/**\brief Pressing the left mouse button starts line selection.
 		 *
 		 * Clicks with anything else than the left button are propagated to the parent as usual.
 		 */
 		virtual void mousePressEvent(QMouseEvent *e);
-		/*!\brief Mouse movements need to be monitored for updating the line during operation.
+		/**\brief Mouse movements need to be monitored for updating the line during operation.
 		 */
 		virtual void mouseMoveEvent(QMouseEvent *e);
-		/*!\brief Mouse releases end line selection and cause the profile to be displayed.
+		/**\brief Mouse releases end line selection and cause the profile to be displayed.
 		 */
 		virtual void mouseReleaseEvent(QMouseEvent *e);
 
@@ -100,7 +100,7 @@ class LineProfileTool : public QWidget, public PlotToolInterface
 		int d_average_pixels;
 		//! The image marker to operate on.
 		ImageMarker *d_target;
-		/*!\brief Mouse position where an operation started.
+		/**\brief Mouse position where an operation started.
 		 */
 		QPoint d_op_start;
 		//! Difference between current and start position during operation.

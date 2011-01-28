@@ -28,7 +28,7 @@ ThreadSafeLogStreamBuf::~ThreadSafeLogStreamBuf()
 /**
  * If the character is an EOL character then write the buffered messsage to the chosen device(s). If
  * not, buffer the character
- * @param c The input character
+ * @param c :: The input character
  * @returns The ASCII code of the input character
  */
 int ThreadSafeLogStreamBuf::writeToDevice(char c)
@@ -55,8 +55,8 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c)
 //************************************************************
 /**
  * Constructor
- * @param logger A reference to the logger associated with this stream
- * @param priority The stream priority
+ * @param logger :: A reference to the logger associated with this stream
+ * @param priority :: The stream priority
  */
 ThreadSafeLogIOS::ThreadSafeLogIOS(Poco::Logger& logger, Poco::Message::Priority priority):
   m_buf(logger, priority)
@@ -86,8 +86,8 @@ Poco::LogStreamBuf* ThreadSafeLogIOS::rdbuf()
 //************************************************************
 /**
  * Constructor
- * @param logger A reference to the logger associated with this stream
- * @param priority The stream priority
+ * @param logger :: A reference to the logger associated with this stream
+ * @param priority :: The stream priority
  */
 ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger& logger, Poco::Message::Priority priority):
   ThreadSafeLogIOS(logger, priority), std::ostream(&m_buf)
@@ -96,8 +96,8 @@ ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger& logger, Poco::Message::Pr
 
 /**
  * Constructor taking a name for a logger
- * @param loggerName A name for the logger stream
- * @param priority The stream priority
+ * @param loggerName :: A name for the logger stream
+ * @param priority :: The stream priority
  */
 ThreadSafeLogStream::ThreadSafeLogStream(const std::string& loggerName, Poco::Message::Priority priority):
 	ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority),
@@ -123,7 +123,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::fatal()
 
 /**
  * Log a message as fatal and return a reference to the log stream with the priority set to fatal
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with fatal priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::fatal(const std::string& message)
@@ -143,7 +143,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::critical()
 
 /**
  * Log a message as critical and return a reference to the log stream with the priority set to critical
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with critical priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::critical(const std::string& message)
@@ -163,7 +163,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::error()
 
 /**
  * Log a message as error and return a reference to the log stream with the priority set to error
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with error priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::error(const std::string& message)
@@ -183,7 +183,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::warning()
 
 /**
  * Log a message as a warning and return a reference to the log stream with the priority set to warning
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with warning priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::warning(const std::string& message)
@@ -203,7 +203,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::notice()
 
 /**
  * Log a message as a notice and return a reference to the log stream with the priority set to notice
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with notice priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::notice(const std::string& message)
@@ -223,7 +223,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::information()
 
 /**
  * Log a message as information and return a reference to the log stream with the priority set to information
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with information  priority level
  */	
 ThreadSafeLogStream& ThreadSafeLogStream::information(const std::string& message)
@@ -243,7 +243,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::debug()
 
 /**
  * Log a message as debug  and return a reference to the log stream with the priority set to debug
- * @param message The string to send to the logger
+ * @param message :: The string to send to the logger
  * @returns A reference to the log stream with debug priority level
  */
 ThreadSafeLogStream& ThreadSafeLogStream::debug(const std::string& message)
@@ -254,7 +254,7 @@ ThreadSafeLogStream& ThreadSafeLogStream::debug(const std::string& message)
 
 /**
  * Return a reference to the log stream with the priority set at the given level
- * @param priority The priority level
+ * @param priority :: The priority level
  * @returns A reference to the log stream with the given priority level
  */
 ThreadSafeLogStream& ThreadSafeLogStream::priority(Poco::Message::Priority priority)

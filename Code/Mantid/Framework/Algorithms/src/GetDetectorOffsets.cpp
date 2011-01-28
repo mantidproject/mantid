@@ -114,7 +114,7 @@ namespace Mantid
     }
 
    /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
-    *  @param s The spectrum index to fit
+    *  @param s :: The spectrum index to fit
     *  @return The calculated offset value
     */
     double GetDetectorOffsets::fitSpectra(const int s)

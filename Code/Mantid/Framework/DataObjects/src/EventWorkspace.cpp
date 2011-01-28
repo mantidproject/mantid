@@ -78,10 +78,10 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /** Initialize the pixels
-    *  @param NVectors The number of vectors/histograms/detectors in the workspace. Does not need
+    *  @param NVectors :: The number of vectors/histograms/detectors in the workspace. Does not need
     *         to be set, but needs to be > 0
-    *  @param XLength The number of X data points/bin boundaries in each vector (ignored)
-    *  @param YLength The number of data/error points in each vector (ignored)
+    *  @param XLength :: The number of X data points/bin boundaries in each vector (ignored)
+    *  @param YLength :: The number of data/error points in each vector (ignored)
    */
   void EventWorkspace::init(const int &NVectors, const int &XLength, const int &YLength)
   {
@@ -314,7 +314,7 @@ namespace DataObjects
    * If never referred to before, an empty EventList (holding just the right pixel ID) is returned.
    * Not thread-safe!
    *
-   * @param pixelID pixelID of this event list. This is not necessarily the same as the workspace Index.
+   * @param pixelID :: pixelID of this event list. This is not necessarily the same as the workspace Index.
    * @returns A reference to the eventlist
    */
   EventList& EventWorkspace::getEventListAtPixelID(const int pixelID)
@@ -342,7 +342,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /** Get an EventList object at the given workspace index number
-   * @param workspace_index The histogram workspace index number.
+   * @param workspace_index :: The histogram workspace index number.
    * @returns A reference to the eventlist
    */
   EventList& EventWorkspace::getEventList(const int workspace_index)
@@ -356,7 +356,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /** Get a const EventList object at the given workspace index number
-   * @param workspace_index The workspace index number.
+   * @param workspace_index :: The workspace index number.
    * @returns A const reference to the eventlist
    */
   const EventList& EventWorkspace::getEventList(const int workspace_index) const
@@ -383,7 +383,7 @@ namespace DataObjects
    * NOTE: After you are done adding event lists, call doneAddingEventLists()
    *  to finalize the stuff that needs to.
    **
-   * @param workspace_index The workspace index number.
+   * @param workspace_index :: The workspace index number.
    * @return An event list (new or existing) at the index provided
    */
   EventList& EventWorkspace::getOrAddEventList(const int workspace_index)
@@ -662,7 +662,7 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /// Return the data X vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
-  /// @param index the workspace index to return
+  /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataX(const int index)
   {
@@ -673,7 +673,7 @@ namespace DataObjects
 
   /// Return the data Y vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
-  /// @param index the workspace index to return
+  /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataY(const int index)
   {
@@ -684,7 +684,7 @@ namespace DataObjects
 
   /// Return the data E vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
-  /// @param index the workspace index to return
+  /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataE(const int index)
   {
@@ -860,8 +860,8 @@ namespace DataObjects
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
   /*** Set a histogram X vector. Should only be called after doneLoadingData().
-   * @param index Workspace histogram index to set.
-   * @param x The X vector of histogram bins to use.
+   * @param index :: Workspace histogram index to set.
+   * @param x :: The X vector of histogram bins to use.
    */
   void EventWorkspace::setX(const int index, const Kernel::cow_ptr<MantidVec> &x)
   {
@@ -874,8 +874,8 @@ namespace DataObjects
 
 
   /*** Set a histogram X vector but create a COW pointer for it. Should only be called after doneLoadingData().
-   * @param index Workspace histogram index to set.
-   * @param x The X vector of histogram bins to use.
+   * @param index :: Workspace histogram index to set.
+   * @param x :: The X vector of histogram bins to use.
    */
   void EventWorkspace::setX(const int index, const MantidVec &X)
   {
@@ -888,7 +888,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /*** Set all histogram X vectors. Should only be called after doneLoadingData().
-   * @param x The X vector of histogram bins to use.
+   * @param x :: The X vector of histogram bins to use.
    */
   void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
   {
@@ -908,8 +908,8 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /*** Sort all event lists. Uses a parallelized algorithm
-   * @param sortType How to sort the event lists.
-   * @param prog a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
+   * @param sortType :: How to sort the event lists.
+   * @param prog :: a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
    */
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
@@ -1037,11 +1037,11 @@ namespace DataObjects
   /** Integrate all the spectra in the matrix workspace within the range given.
    * Default implementation, can be overridden by base classes if they know something smarter!
    *
-   * @param out returns the vector where there is one entry per spectrum in the workspace. Same
+   * @param out :: returns the vector where there is one entry per spectrum in the workspace. Same
    *            order as the workspace indices.
-   * @param minX minimum X bin to use in integrating.
-   * @param maxX maximum X bin to use in integrating.
-   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
    */
   void EventWorkspace::getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const
   {

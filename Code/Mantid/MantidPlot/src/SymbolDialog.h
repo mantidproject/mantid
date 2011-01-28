@@ -47,18 +47,18 @@ class SymbolDialog : public QDialog
 public:
 	//! Character set
 	enum CharSet{
-		lowerGreek = 0, /*!< lower case Greek letters */
-		upperGreek = 1,  /*!< upper case Greek letters */
-		mathSymbols = 2, /*!< mathematical symbols */
-		arrowSymbols = 3, /*!< arrow symbols */
-		numberSymbols = 4 /*!< number symbols (e.g. 1/2, vi)*/
+		lowerGreek = 0, /**< lower case Greek letters */
+		upperGreek = 1,  /**< upper case Greek letters */
+		mathSymbols = 2, /**< mathematical symbols */
+		arrowSymbols = 3, /**< arrow symbols */
+		numberSymbols = 4 /**< number symbols (e.g. 1/2, vi)*/
 	};
 
 	//! Constructor
 	/**
-	 * \param charSet character set (lower- or uppercase)
-	 * \param parent parent widget
-	 * \param fl window flags
+	 * @param charSet :: character set (lower- or uppercase)
+	 * @param parent :: parent widget
+	 * @param fl :: window flags
 	 */
     SymbolDialog(CharSet charSet, QWidget* parent = 0, Qt::WFlags fl = 0 );
 	//! Destructor

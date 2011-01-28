@@ -21,8 +21,8 @@ QwtPlot(parent),m_curve(NULL)
 
 /**
   * Set the scale of the horizontal axis
-  * @param from Minimum value
-  * @param to Maximum value
+  * @param from :: Minimum value
+  * @param to :: Maximum value
   */
 void OneCurvePlot::setXScale(double from, double to)
 {
@@ -41,8 +41,8 @@ void OneCurvePlot::setXScale(double from, double to)
 
 /**
   * Set the scale of the vertical axis
-  * @param from Minimum value
-  * @param to Maximum value
+  * @param from :: Minimum value
+  * @param to :: Maximum value
   */
 void OneCurvePlot::setYScale(double from, double to)
 {
@@ -51,9 +51,9 @@ void OneCurvePlot::setYScale(double from, double to)
 
 /**
   * Set the data for the curve to display
-  * @param x A pointer to x values
-  * @param y A pointer to y values
-  * @param dataSize The size of the data
+  * @param x :: A pointer to x values
+  * @param y :: A pointer to y values
+  * @param dataSize :: The size of the data
   */
 void OneCurvePlot::setData(const double* x,const double* y,int dataSize)
 {

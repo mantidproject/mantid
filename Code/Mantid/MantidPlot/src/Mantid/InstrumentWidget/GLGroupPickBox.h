@@ -6,7 +6,7 @@
 #include <QMouseEvent>
 #include <vector>
 #include <set>
-/*!
+/**
   \class  GLGroupPickBox
   \brief  class to display and pick group of detectors
   \author Srikanth Nagella

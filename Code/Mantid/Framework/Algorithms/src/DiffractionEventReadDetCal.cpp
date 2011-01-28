@@ -45,15 +45,11 @@ namespace Algorithms
 
 /**
  * The intensity function calculates the intensity as a function of detector position and angles
- * @param x The shift along the X-axis
- * @param y The shift along the Y-axis
- * @param z The shift along the Z-axis
- * @param ax The rotation vector for the X-axis
- * @param ay The rotation vector for the Y-axis
- * @param az The rotation vector for the Z-axis
- * @param angle The rotation around the Y-axis
- * @param detname The detector name
- * @param inname The workspace name
+ * @param x :: The shift along the X-axis
+ * @param y :: The shift along the Y-axis
+ * @param z :: The shift along the Z-axis
+ * @param detname :: The detector name
+ * @param inname :: The workspace name
  */
 
   void DiffractionEventReadDetCal::center(double x, double y, double z, std::string detname, std::string inname)

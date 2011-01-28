@@ -284,7 +284,7 @@ namespace Mantid
     }
 
     /** Reads in a string value from the nexus file
-    *  @param name The name of the data value in the nexus file. The name can be either absolute or relative
+    *  @param name :: The name of the data value in the nexus file. The name can be either absolute or relative
     *  @return The string's value
     *  @throw std::runtime_error in case of any error
     */
@@ -326,8 +326,8 @@ namespace Mantid
     }
 
     /** Opens a Nexus group. This makes it the working group.
-    *  @param name The group's name
-    *  @param nx_class Nexus class of the group
+    *  @param name :: The group's name
+    *  @param nx_class :: Nexus class of the group
     *  @throw std::runtime_error if the group cannot be opened
     */
     void LoadISISNexus::openNexusGroup(const std::string& name, const std::string& nx_class)const
@@ -428,10 +428,10 @@ namespace Mantid
 
     /** Group /raw_data_1/detector_1 must be open to call this function.
     *  loadMappingTable() must be done before any calls to this method.
-    *  @param period The data period
-    *  @param hist The index of the histogram in the workspace
-    *  @param i The index of the histogram in the file
-    *  @param localWorkspace The workspace
+    *  @param period :: The data period
+    *  @param hist :: The index of the histogram in the workspace
+    *  @param i :: The index of the histogram in the file
+    *  @param localWorkspace :: The workspace
     */
     void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspace2D_sptr localWorkspace)
     {
@@ -504,7 +504,7 @@ namespace Mantid
 
     /**  Populate the ws's spectra-detector map. The Nexus file must be in /raw_data_1 group.
     *   After finishing the file remains in the same group (/raw_data_1 group is open).
-    *   @param ws The workspace which spectra-detector map is to be populated.
+    *   @param ws :: The workspace which spectra-detector map is to be populated.
     */
     void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
     {
@@ -554,7 +554,7 @@ namespace Mantid
 
     /**  Loag the run details from the file
     *   Group /raw_data_1 must be open.
-    * @param localWorkspace The workspace details to use
+    * @param localWorkspace :: The workspace details to use
     */
     void LoadISISNexus::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
     {
@@ -629,9 +629,9 @@ namespace Mantid
 
     /**
      * Parse an ISO formatted date-time string into separate date and time strings
-     * @param datetime_iso The string containing the ISO formatted date-time
-     * @param date An output parameter containing the date from the original string or ??-??-???? if the format is unknown
-     * @param time An output parameter containing the time from the original string or ??:??:?? if the format is unknown
+     * @param datetime_iso :: The string containing the ISO formatted date-time
+     * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
+     * @param time :: An output parameter containing the time from the original string or ??:??:?? if the format is unknown
      */
     void LoadISISNexus::parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const
     {
@@ -656,8 +656,8 @@ namespace Mantid
     /**  Load logs from Nexus file. Logs are expected to be in
     *   /raw_data_1/runlog group of the file. Call to this method must be done
     *   within /raw_data_1 group.
-    *   @param ws The workspace to load the logs to.
-    *   @param period The period of this workspace
+    *   @param ws :: The workspace to load the logs to.
+    *   @param period :: The period of this workspace
     */
     void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
     {

@@ -4,7 +4,7 @@
 
 namespace Mantid
 {
-/*!
+/**
   \class Triple
   \brief Triple of three identical types
   \author S. Ansell
@@ -59,7 +59,7 @@ class DLLExport Triple
 };
 
 
-/*!
+/**
   \class DTriple
   \brief Triple of three different things
   \author S. Ansell

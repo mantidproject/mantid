@@ -20,7 +20,7 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator() : IValidator<std::vector<TY
 
 /**
  * Copy constructor
- * @param abv the ArrayBoundedValidator to copy
+ * @param abv :: the ArrayBoundedValidator to copy
  */
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv) : IValidator<std::vector<TYPE> >()
@@ -30,8 +30,8 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const ArrayBoundedValidator<T
 
 /**
  * Constructor via bounds parameters
- * @param lowerBound the lower bound value to validate
- * @param upperBound the upper bound value to validate
+ * @param lowerBound :: the lower bound value to validate
+ * @param upperBound :: the upper bound value to validate
  */
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound) : IValidator<std::vector<TYPE> >()
@@ -41,7 +41,7 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound, const 
 
 /**
  * Constructor via a BoundedValidator
- * @param bv the BoundedValidator object to use
+ * @param bv :: the BoundedValidator object to use
  */
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(BoundedValidator<TYPE> &bv)
@@ -83,7 +83,7 @@ BoundedValidator<TYPE>* ArrayBoundedValidator<TYPE>::getValidator() const
 
 /**
  * Function to check the validity of the array elements
- * @param value the array to be checked
+ * @param value :: the array to be checked
  * @return a listing of the indicies that fail the bounds checks
  */
 template <typename TYPE>
@@ -97,7 +97,7 @@ ArrayBoundedValidator<TYPE>::isValid( const std::vector<TYPE> &value ) const
 /**
  * Function that actually does the work of checking the validity of the
  * array elements.
- * @param value the array to be checked
+ * @param value :: the array to be checked
  * @return a listing of the indicies that fail the bounds checks
  */
 template <typename TYPE>

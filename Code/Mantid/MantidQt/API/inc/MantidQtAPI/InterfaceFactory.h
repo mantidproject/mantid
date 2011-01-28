@@ -156,7 +156,7 @@ private:
 
 /**
  * Save the alias names of an interface
- * @param realName The real name of the interface
+ * @param realName :: The real name of the interface
  */
 template<typename TYPE>
 void UserSubWindowFactoryImpl::saveAliasNames(const std::string & realName)

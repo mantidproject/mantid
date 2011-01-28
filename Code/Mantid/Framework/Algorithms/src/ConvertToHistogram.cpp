@@ -64,8 +64,8 @@ namespace Mantid
      * Calculate the histogram boundaries. For uniform bins this should work correctly
      * and should be convertable back to point data. For non-uniform bins the boundaries 
      * are guessed such that the boundary goes mid-way between each point
-     * @param inputX A const reference to the input data
-     * @param outputX A reference to the output data
+     * @param inputX :: A const reference to the input data
+     * @param outputX :: A reference to the output data
      */
     void ConvertToHistogram::calculateXPoints(const MantidVec & inputX, MantidVec &outputX) const
     {

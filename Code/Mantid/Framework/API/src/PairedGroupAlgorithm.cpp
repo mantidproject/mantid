@@ -21,8 +21,8 @@ namespace Mantid
 
 
     /** This method is called if one of the selected workspaces for binary operation is a workspacegroup
-    *  @param inputWSGrp pointer to the first workspace group
-    *  @param props a vector holding properties
+    *  @param inputWSGrp :: pointer to the first workspace group
+    *  @param props :: a vector holding properties
     *  @retval false if  selected workspace groups sizes not match
     */
     bool PairedGroupAlgorithm::processGroups(WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&props)
@@ -146,15 +146,15 @@ namespace Mantid
     }
 
     /** This method sets properties for the algorithm
-    *  @param alg pointer to the algorithm
-    *  @param props a vector holding properties
-    *  @param lhswsName name of the LHS workspace
-    *  @param rhswsName name of the RHS workspace
-    *  @param nPeriod period number
-    *  @param outWSGrp shared pointer to output workspace
-    *  @param lhsEqual true if lhs and output ws are of same names
-    *  @param rhsEqual true if rhs and output ws are of same names
-    *  @param bSimilarNames  if workspaces are of similar names
+    *  @param alg :: pointer to the algorithm
+    *  @param props :: a vector holding properties
+    *  @param lhswsName :: name of the LHS workspace
+    *  @param rhswsName :: name of the RHS workspace
+    *  @param nPeriod :: period number
+    *  @param outWSGrp :: shared pointer to output workspace
+    *  @param lhsEqual :: true if lhs and output ws are of same names
+    *  @param rhsEqual :: true if rhs and output ws are of same names
+    *  @param bSimilarNames ::  if workspaces are of similar names
     */
     void PairedGroupAlgorithm::setProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&props,
       const std::string& lhswsName,const std::string& rhswsName,int nPeriod,WorkspaceGroup_sptr outWSGrp,bool lhsEqual,bool rhsEqual,bool bSimilarNames)
@@ -256,7 +256,7 @@ namespace Mantid
     }
 
     /**This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props a list of properties for the algorithm
+    *  @param props :: a list of properties for the algorithm
     *  @returns true if the input and output groupworkspaces are of same names
     */ 
     bool PairedGroupAlgorithm::isOutputequaltoLHS(const std::vector<Mantid::Kernel::Property*>& props)
@@ -268,7 +268,7 @@ namespace Mantid
       return(!lhswsName.compare(outputwsName) ? true:false);
     }
     /**This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props a list of properties for the algorithm
+    *  @param props :: a list of properties for the algorithm
     *  @returns true if the input and output groupworkspaces are of same names
     */ 
     bool PairedGroupAlgorithm::isOutputequaltoRHS(const std::vector<Mantid::Kernel::Property*>& props)
@@ -280,10 +280,10 @@ namespace Mantid
       return(!rhswsName.compare(outputwsName) ? true:false);
     }
   /**This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props a list of properties for the algorithm
-    *  @param lhswsName name of lhs workspace
-    *  @param rhswsName name of rhs workspace
-    *  @param outputwsName name of output workspace
+    *  @param props :: a list of properties for the algorithm
+    *  @param lhswsName :: name of lhs workspace
+    *  @param rhswsName :: name of rhs workspace
+    *  @param outputwsName :: name of output workspace
     */ 
     void PairedGroupAlgorithm::getlhsandrhsworkspace(const std::vector<Mantid::Kernel::Property*>& props,std::string& lhswsName,
                                           std::string& rhswsName,std::string& outputwsName )
@@ -312,8 +312,8 @@ namespace Mantid
       }
     }
 /**This method checks the member workspace are of similar names in a group workspace .
-  *  @param ingroupwsName input group workspace name
-  *  @param grpmembersNames a list of group member names
+  *  @param ingroupwsName :: input group workspace name
+  *  @param grpmembersNames :: a list of group member names
   *  @returns true if workspaces are of similar names
  */ 
 bool PairedGroupAlgorithm::isGroupWorkspacesofSimilarNames(const std::string& ingroupwsName,const std::vector<std::string>& grpmembersNames)
@@ -352,8 +352,8 @@ bool PairedGroupAlgorithm::isGroupWorkspacesofSimilarNames(const std::string& in
 }
        
     /** This method checks both LHS and RHS workspaces are of same size
-    *  @param lhsWSGrpNames a vector holding names of LHS Workspace
-    *  @param rhsWSGrpNames a vector holding names of RHS Workspace
+    *  @param lhsWSGrpNames :: a vector holding names of LHS Workspace
+    *  @param rhsWSGrpNames :: a vector holding names of RHS Workspace
     *  @retval true if  selected workspace groups are of same size
     *  @retval false if  selected workspace groups sizes not match
     */
@@ -369,9 +369,9 @@ bool PairedGroupAlgorithm::isGroupWorkspacesofSimilarNames(const std::string& in
     }
 
     /** This method iterates through property vector and returns  LHS and RHS workspaces group names vectors
-    *  @param prop  vector holding the properties
-    *  @param lhsWSGrpNames a vector holding names of LHS Workspace
-    *  @param rhsWSGrpNames a vector holding names of RHS Workspace
+    *  @param prop ::  vector holding the properties
+    *  @param lhsWSGrpNames :: a vector holding names of LHS Workspace
+    *  @param rhsWSGrpNames :: a vector holding names of RHS Workspace
     */
     void PairedGroupAlgorithm::getGroupNames(const std::vector<Kernel::Property*>&prop, 
       std::vector<std::string> &lhsWSGrpNames, std::vector<std::string> &rhsWSGrpNames) const

@@ -4,7 +4,7 @@
 #include "ICompAssemblyActor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
-/*!
+/**
   \class  CompAssemblyActor
   \brief  This class wraps the ICompAssembly into Actor.
   \author Srikanth Nagella

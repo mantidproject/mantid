@@ -18,7 +18,7 @@ namespace Mantid
 
   namespace Geometry
   {
-   /*!
+   /**
     \class Sphere
     \brief Holds a Sphere as vector form
     \author S. Ansell

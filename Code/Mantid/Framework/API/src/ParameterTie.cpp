@@ -11,8 +11,8 @@ namespace API
 {
 
   /** Constructor
-   * @param funct A pointer to the function which parameter will be tied
-   * @param parName The name of the parameter to be tied
+   * @param funct :: A pointer to the function which parameter will be tied
+   * @param parName :: The name of the parameter to be tied
    */
   ParameterTie::ParameterTie(IFitFunction* funct,const std::string& parName)
     :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser()),m_function1(funct)
@@ -34,8 +34,8 @@ namespace API
   }
 
   /** Static callback function used by MuParser to initialize variables implicitly
-   * @param varName The name of a new variable
-   * @param palg Pointer to this ParameterTie
+   * @param varName :: The name of a new variable
+   * @param palg :: Pointer to this ParameterTie
    * @return pointer to added variable
    */
   double* ParameterTie::AddVariable(const char *varName, void *palg)
@@ -50,7 +50,7 @@ namespace API
 
   /**
    * Set tie expression
-   * @param expr A math expression
+   * @param expr :: A math expression
    */
   void ParameterTie::set(const std::string& expr)
   {
@@ -128,7 +128,7 @@ namespace API
 
   /**
    * All parameters in the tie must be parameters of fun.
-   * @param fun Function that can re-create the tie from the output string.
+   * @param fun :: Function that can re-create the tie from the output string.
    * @return string representation of function
    */
   std::string ParameterTie::asString(const IFitFunction* fun)const
@@ -181,7 +181,7 @@ namespace API
 
   /** This method takes a list of double pointers and checks if any of them match
    * to the variables defined in the internal mu::Parser
-   * @param fun A function
+   * @param fun :: A function
    * @return True if any of the parameters is used as a variable in the mu::Parser
    */
   bool ParameterTie::findParametersOf(const IFitFunction* fun)const

@@ -21,7 +21,7 @@ namespace Mantid
     class BaseVisit;
     template <typename T> class Matrix;
 
-    /*!
+    /**
     \class Plane
     \brief Holds a simple Plane
     \author S. Ansell

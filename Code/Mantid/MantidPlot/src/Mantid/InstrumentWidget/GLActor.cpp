@@ -32,7 +32,7 @@ void GLActor::markUnPicked()
 
 /**
  * This method sets the color for the actor
- * @param color input color for the actor
+ * @param color :: input color for the actor
  */
 void GLActor::setColor(boost::shared_ptr<GLColor> color)
 {
@@ -41,7 +41,7 @@ void GLActor::setColor(boost::shared_ptr<GLColor> color)
 
 /**
  * This method sets the visiblity of the actor
- * @param visible input visibility ( true for visible and false for hidden
+ * @param visible :: input visibility ( true for visible and false for hidden
  */
 void GLActor::setVisibility(bool visible)
 {

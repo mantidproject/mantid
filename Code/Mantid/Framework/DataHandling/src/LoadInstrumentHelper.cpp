@@ -121,9 +121,9 @@ class myContentHandler : public Poco::XML::ContentHandler
 
 /** Return from an IDF the values of the valid-from and valid-to attributes 
 *
-*  @param IDFname Full path of an IDF
-*  @param outValidFrom Used to return valid-from date
-*  @param outValidto Used to return valid-to date
+*  @param IDFfilename :: Full path of an IDF
+*  @param outValidFrom :: Used to return valid-from date
+*  @param outValidto :: Used to return valid-to date
 */
 void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
   std::string& outValidTo)
@@ -178,8 +178,8 @@ std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<
 *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
 *  then is the part of a filename that identifies the IDF valid at a given date.
 *
-*  @param instrumentName Instrument name e.g. GEM, TOPAS or BIOSANS
-*  @param date ISO 8601 date
+*  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+*  @param date :: ISO 8601 date
 *  @return full path of IDF
 */
 std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instrumentName, const std::string& date)

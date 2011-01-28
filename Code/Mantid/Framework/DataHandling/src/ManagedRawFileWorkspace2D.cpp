@@ -46,7 +46,7 @@ namespace Mantid
     }
 
     /** Sets the RAW file for this workspace.
-        \param opt Caching option.  0 - cache on local drive if raw file is very slow to read.
+        @param opt :: Caching option.  0 - cache on local drive if raw file is very slow to read.
         1 - cache anyway, 2 - never cache.
     */
     void ManagedRawFileWorkspace2D::setRawFile(const int opt)
@@ -271,7 +271,7 @@ namespace Mantid
 	  newBlock->hasChanges(false);
 	}
 	/** This method checks given spectrum is a monitor
-	  * @param readIndex a spectrum index
+	  * @param readIndex :: a spectrum index
 	  * @return true if it's a monitor ,otherwise false
 	*/
 	bool ManagedRawFileWorkspace2D::isMonitor(const int readIndex)const

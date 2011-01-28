@@ -12,7 +12,7 @@ using namespace Mantid::Geometry;
 
 /**
  * Constructor
- * @param ins             :: Instrument
+ * @param ins :: Instrument
  * @param withDisplayList :: true use display list, false use immediate rendering
  */
 InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::Geometry::IInstrument> ins, bool withDisplayList):CompAssemblyActor(withDisplayList)

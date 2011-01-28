@@ -491,7 +491,7 @@ void QtGroupBoxPropertyBrowserPrivate::updateItem(WidgetItem *item)
 
 
 
-/*!
+/**
     \class QtGroupBoxPropertyBrowser
 
     \brief The QtGroupBoxPropertyBrowser class provides a QGroupBox
@@ -517,7 +517,7 @@ void QtGroupBoxPropertyBrowserPrivate::updateItem(WidgetItem *item)
     \sa QtTreePropertyBrowser, QtAbstractPropertyBrowser
 */
 
-/*!
+/**
     Creates a property browser with the given \a parent.
 */
 QtGroupBoxPropertyBrowser::QtGroupBoxPropertyBrowser(QWidget *parent)
@@ -529,7 +529,7 @@ QtGroupBoxPropertyBrowser::QtGroupBoxPropertyBrowser(QWidget *parent)
     d_ptr->init(this);
 }
 
-/*!
+/**
     Destroys this property browser.
 
     Note that the properties that were inserted into this browser are
@@ -547,7 +547,7 @@ QtGroupBoxPropertyBrowser::~QtGroupBoxPropertyBrowser()
     delete d_ptr;
 }
 
-/*!
+/**
     \reimp
 */
 void QtGroupBoxPropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem)
@@ -555,7 +555,7 @@ void QtGroupBoxPropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem 
     d_ptr->propertyInserted(item, afterItem);
 }
 
-/*!
+/**
     \reimp
 */
 void QtGroupBoxPropertyBrowser::itemRemoved(QtBrowserItem *item)
@@ -563,7 +563,7 @@ void QtGroupBoxPropertyBrowser::itemRemoved(QtBrowserItem *item)
     d_ptr->propertyRemoved(item);
 }
 
-/*!
+/**
     \reimp
 */
 void QtGroupBoxPropertyBrowser::itemChanged(QtBrowserItem *item)

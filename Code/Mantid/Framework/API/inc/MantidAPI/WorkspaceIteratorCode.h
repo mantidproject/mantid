@@ -7,7 +7,7 @@ namespace Mantid
 {
   namespace API
   {
-    /*!
+    /**
     Null constructor
     */
     template<typename _Iterator, typename _Container>
@@ -17,9 +17,9 @@ namespace Mantid
       m_IsX2Present(false)
     {}
 
-    /*!
+    /**
     Workspace based constructor
-    \param WA :: Workspace to take pointer
+    @param WA :: Workspace to take pointer
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA) :
@@ -32,10 +32,10 @@ namespace Mantid
       validateIndex();
     }
 
-    /*!
+    /**
     Multiple loop workspace based constructor
-    \param WA :: Workspace to take pointer
-    \param loopCount :: The number of time this iterator should loop over the same data before stopping.
+    @param WA :: Workspace to take pointer
+    @param loopCount :: The number of time this iterator should loop over the same data before stopping.
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount) :
@@ -50,11 +50,11 @@ namespace Mantid
       validateIndex();
     }
 
-    /*!
+    /**
     Multiple loop workspace based constructor also specifying the loop orientation
-    \param WA :: Workspace to take pointer
-    \param loopCount :: The number of time this iterator should loop over the same data before stopping.
-    \param loopOrientation :: true = vertical, false = horizontal.
+    @param WA :: Workspace to take pointer
+    @param loopCount :: The number of time this iterator should loop over the same data before stopping.
+    @param loopOrientation :: true = vertical, false = horizontal.
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
@@ -69,9 +69,9 @@ namespace Mantid
       validateIndex();
     }
     
-    /*!
+    /**
     Copy constructor
-    \param A :: workspace_iterator to copy
+    @param A :: workspace_iterator to copy
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(const workspace_iterator<_Iterator, _Container>& A) :
@@ -82,7 +82,7 @@ namespace Mantid
       validateIndex();
     }
 
-    /*!
+    /**
     Validate the index
     */
     template<typename _Iterator, typename _Container>
@@ -150,10 +150,10 @@ namespace Mantid
       }
     }
       
-    /*!
+    /**
     Addition to index 
-    \param N :: Number to add
-    \return Iterator advanced by N
+    @param N :: Number to add
+    @return Iterator advanced by N
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator+(difference_type N) const
@@ -163,10 +163,10 @@ namespace Mantid
       return Out;
     }
 
-    /*!
+    /**
     Negation to index
-    \param N :: Number to subtract
-    \return Iterator decreased by N
+    @param N :: Number to subtract
+    @return Iterator decreased by N
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator-(difference_type N) const
@@ -176,10 +176,10 @@ namespace Mantid
       return Out;
     }
 
-    /*!
+    /**
     Addition to self by N
-    \param N :: Number to add to index
-    \return *this
+    @param N :: Number to add to index
+    @return *this
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator+=(difference_type N)
@@ -189,10 +189,10 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Negation to self by N
-    \param N :: Number to subtract
-    \return *this
+    @param N :: Number to subtract
+    @return *this
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator-=(difference_type N)
@@ -202,9 +202,9 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Increment iterator (pre)
-    \return Iterator
+    @return Iterator
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator++()
@@ -214,9 +214,9 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Decrement iterator (pre)
-    \return Iterator 
+    @return Iterator 
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator--()
@@ -226,9 +226,9 @@ namespace Mantid
       return *this;
     }
 
-    /*!
+    /**
     Increment iterator (post)
-    \return Iterator before increment
+    @return Iterator before increment
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator++(int) 
@@ -238,9 +238,9 @@ namespace Mantid
       return Out;
     }
 
-    /*!
+    /**
     Negation iterator (post)
-    \return Iterator before decrement
+    @return Iterator before decrement
     */
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator--(int) 
@@ -250,9 +250,9 @@ namespace Mantid
       return Out;
     }
 
-    /*!
+    /**
     Difference iterator
-    \return difference (as a non-inclusive count)
+    @return difference (as a non-inclusive count)
     */
     template<typename _Iterator, typename _Container>
     typename std::iterator_traits<_Iterator*>::difference_type workspace_iterator<_Iterator, _Container>::operator-(const workspace_iterator<_Iterator, _Container>& A) const

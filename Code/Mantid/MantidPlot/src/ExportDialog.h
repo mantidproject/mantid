@@ -43,9 +43,9 @@ class ExportDialog : public QDialog
 public:
 	//! Constructor
 	/**
-	 * \param tableName active table name
-	 * \param parent parent widget
-	 * \param fl window flags
+	 * @param tableName :: active table name
+	 * @param parent :: parent widget
+	 * @param fl :: window flags
 	 */
     ExportDialog(const QString& tableName, QWidget* parent = 0, Qt::WFlags fl = 0 );
 

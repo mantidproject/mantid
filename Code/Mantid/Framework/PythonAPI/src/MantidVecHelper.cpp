@@ -37,8 +37,8 @@ namespace Mantid
 
     /**
     * Creates an approriate wrapper for the MantidVec array, i.e. numpy array if it is available or Python list if not
-    * @param values A reference to the MantidVec
-    * @param readonly If true the array is flagged as read only (only used for numpy arrays)
+    * @param values :: A reference to the MantidVec
+    * @param readonly :: If true the array is flagged as read only (only used for numpy arrays)
     * @returns A pointer to a PyObject that contains the data
     */
     PyObject * MantidVecHelper::createPythonWrapper(const MantidVec & values, bool readonly)
@@ -55,8 +55,8 @@ namespace Mantid
 
     /**
     * Create a NumPy wrapper around the given values and marks it as read only
-    * @param values A reference to the array of values that will be wrapped by NumPy
-    * @param readonly If true the array is flagged as read only
+    * @param values :: A reference to the array of values that will be wrapped by NumPy
+    * @param readonly :: If true the array is flagged as read only
     * @returns A numpy wrapped array C-array
     */
     PyObject * MantidVecHelper::createNumPyArray(const MantidVec & values, bool readonly)
@@ -73,7 +73,7 @@ namespace Mantid
 
     /**
     * Creates a Python list from a Mantid vector
-    * @param values A reference to the MantidVec
+    * @param values :: A reference to the MantidVec
     * @returns A standard Python list object
     */
     PyObject * MantidVecHelper::createPythonList(const MantidVec & values)

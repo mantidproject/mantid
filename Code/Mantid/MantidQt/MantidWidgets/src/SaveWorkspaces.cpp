@@ -29,9 +29,9 @@ using namespace Mantid::API;
 // Public member functions
 //----------------------
 /** 
- *  @param parent used by QT
- *  @param suggFname sets the initial entry in the filename box
- *  @param defSavs sets which boxes are ticked
+ *  @param parent :: used by QT
+ *  @param suggFname :: sets the initial entry in the filename box
+ *  @param defSavs :: sets which boxes are ticked
  */
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
   API::MantidDialog(parent)
@@ -59,7 +59,7 @@ void SaveWorkspaces::initLayout()
 }
 /** Puts the controls that go on the first line, the output
 *  filename commands, on to the layout that's passed to it
-*  @param lineOne the layout on to which the controls will be placed
+*  @param lineOne :: the layout on to which the controls will be placed
 */
 void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne, const QString defName)
 {
@@ -79,7 +79,7 @@ void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne, const QString defNa
 }
 /** Puts the controls that go on the second line, the workspace
 *  list and save commands, on to the layout that's passed to it
-*  @param lineTwo the layout on to which the controls will be placed
+*  @param lineTwo :: the layout on to which the controls will be placed
 */
 void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const QCheckBox * const, QString> & defSavs)
 {
@@ -226,7 +226,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
 }
 /** Gets the first extension that the algorithm passed algorithm has in it's
 *  FileProperty (the FileProperty must have the name "Filename"
-*  @param algName name of the Mantid save algorithm
+*  @param algName :: name of the Mantid save algorithm
 *  @return the first extension, if the algorithm's Filename property has an extension list or ""
 */
 QString SaveWorkspaces::getSaveAlgExt(const QString & algName)

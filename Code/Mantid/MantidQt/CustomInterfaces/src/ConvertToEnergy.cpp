@@ -33,7 +33,7 @@ using namespace MantidQt::CustomInterfaces;
 
 /**
  * Default constructor for class. Initialises interface pointers to NULL values.
- * @param parent This is a pointer to the "parent" object in Qt, most likely the main MantidPlot window.
+ * @param parent :: This is a pointer to the "parent" object in Qt, most likely the main MantidPlot window.
  */
 ConvertToEnergy::ConvertToEnergy(QWidget *parent) :
   UserSubWindow(parent), m_directInstruments(NULL), m_indirectInstruments(NULL), 
@@ -168,7 +168,7 @@ void ConvertToEnergy::saveSettings()
 /**
  * Sets up the initial instrument for the interface. This value is taken from the users'
  * settings in the menu View -> Preferences -> Mantid -> Instrument
- * @param name The name of the default instrument
+ * @param name :: The name of the default instrument
  */
 void ConvertToEnergy::setDefaultInstrument(const QString & name)
 {
@@ -185,7 +185,7 @@ void ConvertToEnergy::setDefaultInstrument(const QString & name)
 /**
  * This function: 1. loads the instrument and gets the value of deltaE-mode parameter
  *				 2. Based on this value, makes the necessary changes to the form setup (direct or indirect).
- * @param name name of the instrument from the QComboBox
+ * @param name :: name of the instrument from the QComboBox
  */
 void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 {
@@ -232,7 +232,7 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 
 /**
  * Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
- * @param prefix the instrument's name from the QComboBox
+ * @param prefix :: the instrument's name from the QComboBox
  * @return A string containing the path to the IDF, or an empty string if no parameter file exists.
  */
 QString ConvertToEnergy::getIDFPath(const QString& prefix)
@@ -267,7 +267,7 @@ QString ConvertToEnergy::getIDFPath(const QString& prefix)
 
 /**
  * Runs a Python script to discover whether the selected instrument is direct or indirect.
- * @param defFile path to instrument definition file.
+ * @param defFile :: path to instrument definition file.
  * @return 'Undefined' deltaE-mode not found, otherwise the relevant value ('Direct' or 'InDirect')
  */
 ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString& defFile)
@@ -306,7 +306,7 @@ ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString&
 
 /**
  * Makes the changes necessary for switching between Direct and Indirect interfaces.
- * @param desired The interface format that is to be changed to.
+ * @param desired :: The interface format that is to be changed to.
  */
 void ConvertToEnergy::changeInterface(DeltaEMode desired)
 {
@@ -359,7 +359,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 
 /**
  * If the instrument selection has changed, calls instrumentSelectChanged
- * @param prefix instrument name from QComboBox object
+ * @param prefix :: instrument name from QComboBox object
  */
 void ConvertToEnergy::userSelectInstrument(const QString& prefix) 
 {

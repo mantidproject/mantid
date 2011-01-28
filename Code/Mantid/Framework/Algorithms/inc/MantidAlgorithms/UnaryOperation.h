@@ -72,11 +72,11 @@ namespace Mantid
       virtual void retrieveProperties() { /*Empty in base class*/ }
 
       /** Carries out the Unary operation on the current 'cell'
-       *  @param XIn The X value. This will be the bin centre for histogram workspaces.
-       *  @param YIn The input data value
-       *  @param EIn The input error value
-       *  @param YOut A reference to the output data
-       *  @param EOut A reference to the output error
+       *  @param XIn :: The X value. This will be the bin centre for histogram workspaces.
+       *  @param YIn :: The input data value
+       *  @param EIn :: The input error value
+       *  @param YOut :: A reference to the output data
+       *  @param EOut :: A reference to the output error
        */
       virtual void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut) = 0;
     };

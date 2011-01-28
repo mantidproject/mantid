@@ -29,8 +29,8 @@ MantidDialog::~MantidDialog()
 
 /**
  *   Checks if receiver derives from MantidDialog. If it does calls the virtual handleException method.
- *   @param receiver The Qt event receiver
- *   @param e The exception
+ *   @param receiver :: The Qt event receiver
+ *   @param e :: The exception
  *   @return True if the exception was handled, false otherwise.
  */
 bool MantidDialog::handle( QObject* receiver, const std::exception& e )
@@ -49,7 +49,7 @@ bool MantidDialog::handle( QObject* receiver, const std::exception& e )
 }
 
 /** Override this method to handle an exception in a derived class.
- *  @param e exception to handle
+ *  @param e :: exception to handle
  */
 void MantidDialog::handleException( const std::exception& e )
 {
@@ -59,8 +59,8 @@ void MantidDialog::handleException( const std::exception& e )
 }
 
 /** Run a piece of python code and return any output that it writes to stdout
-*  @param code the Python commands to execute
-*  @param no_output if set to true this method returns an empty string, if false it returns the output from any Python print statements
+*  @param code :: the Python commands to execute
+*  @param no_output :: if set to true this method returns an empty string, if false it returns the output from any Python print statements
 *  @return output from Python print statements unless no_output is false
 */
 QString MantidDialog::runPythonCode(const QString & code, bool no_output)

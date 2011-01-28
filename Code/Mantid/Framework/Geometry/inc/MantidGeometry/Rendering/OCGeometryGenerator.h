@@ -17,7 +17,7 @@ namespace Mantid
 	namespace Geometry
 	{
 
-		/*!
+		/**
 		\class OCGeometryGenerator
 		\brief Generates OpenCascade geometry from the ObjComponent
 		\author Mr. Srikanth Nagella

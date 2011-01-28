@@ -93,7 +93,7 @@ void GetEi2::exec()
 }
 
 /** Calculate the incident energy of the neutrons for the input workspace on this algorithm
- *  @param initial_guess A guess for value of the incident energy
+ *  @param initial_guess :: A guess for value of the incident energy
  *  @return The calculated incident energy
  */
 double GetEi2::calculateEi(const double initial_guess)
@@ -162,7 +162,7 @@ double GetEi2::calculateEi(const double initial_guess)
 }
 
 /** Gets the distance between the source and detectors whose workspace index is passed
- *  @param ws_index The workspace index of the detector
+ *  @param ws_index :: The workspace index of the detector
  *  @return The distance between the source and the given detector(or DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
@@ -186,9 +186,9 @@ double GetEi2::getDistanceFromSource(int ws_index) const
 
 /**
  * Calculate the peak position of a given TOF range within the chosen spectrum
- * @param ws_index the wokspace index 
- * @param t_min the min time to consider
- * @param t_max the max time to consider
+ * @param ws_index :: the wokspace index 
+ * @param t_min :: the min time to consider
+ * @param t_max :: the max time to consider
  * @return the peak position
  */
 double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
@@ -218,9 +218,9 @@ double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
 }
 
 /** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
- *  @param ws_index the index number of the histogram to extract
- *  @param start the number of the first bin to include (starts counting bins at 0)
- *  @param end the number of the last bin to include (starts counting bins at 0)
+ *  @param ws_index :: the index number of the histogram to extract
+ *  @param start :: the number of the first bin to include (starts counting bins at 0)
+ *  @param end :: the number of the last bin to include (starts counting bins at 0)
  *  @return The cropped workspace
  *  @throw out_of_range if start, end or specInd are set outside of the vaild range for the workspace
  *  @throw runtime_error if the algorithm just falls over
@@ -254,11 +254,11 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(int ws_index, const double start, c
 
 /**
  * Calculate the width of the peak within the given region
- * @param data_ws The workspace containg the window around the peak
- * @param prominence The factor that the peak must be above the error to count as a peak
- * @param peak_x An output vector containing just the X values of the peak data
- * @param peak_y An output vector containing just the Y values of the peak data
- * @param peak_e An output vector containing just the E values of the peak data
+ * @param data_ws :: The workspace containg the window around the peak
+ * @param prominence :: The factor that the peak must be above the error to count as a peak
+ * @param peak_x :: An output vector containing just the X values of the peak data
+ * @param peak_y :: An output vector containing just the Y values of the peak data
+ * @param peak_e :: An output vector containing just the E values of the peak data
  * @returns The width of the peak at half height
 */
 double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws, const double prominence, 
@@ -457,8 +457,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
 }
 
 /** Calculate the first moment of the given workspace
- *  @param monitor_ws The workspace containing a single spectrum to work on
- *  @param prominence The factor over the background by which a peak is to be considered a "real" peak
+ *  @param monitor_ws :: The workspace containing a single spectrum to work on
+ *  @param prominence :: The factor over the background by which a peak is to be considered a "real" peak
  *  @return The calculated first moment
  */
 double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws, const double prominence)
@@ -481,9 +481,9 @@ double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws, const 
 /**
  * Rebin the workspace using the given bin widths 
  * @param monitor_ws
- * @param first The minimum value for the new bin range
- * @param width The new bin width
- * @param end The maximum value for the new bin range
+::  * @param first :: The minimum value for the new bin range
+ * @param width :: The new bin width
+ * @param end :: The maximum value for the new bin range
  * @returns The rebinned workspace
 */
 API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws, const double first, const double width, const double end)
@@ -514,13 +514,13 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws, co
 
 /**
  * Integrate a point data set
- * @param integral_val The result of the integral
- * @param integral_err The error value
- * @param x The X values
- * @param s The Y values
- * @param e The E values
- * @param xmin The minimum value for the integration
- * @param xmax The maximum value for the integration
+ * @param integral_val :: The result of the integral
+ * @param integral_err :: The error value
+ * @param x :: The X values
+ * @param s :: The Y values
+ * @param e :: The E values
+ * @param xmin :: The minimum value for the integration
+ * @param xmax :: The maximum value for the integration
  */
 void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid::MantidVec &x, const Mantid::MantidVec &s, const Mantid::MantidVec &e, 
                        const double xmin, const double xmax) const
@@ -619,7 +619,7 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
 
 /**
  * Store the value of Ei wihin the log data on the Sample object
- * @param ei The value of the incident energy of the neutron
+ * @param ei :: The value of the incident energy of the neutron
  */
 void GetEi2::storeEi(const double ei) const
 {

@@ -36,9 +36,9 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
 #endif //_WIN32
 
 /** Sets the size of the workspace and sets up the temporary file
- *  @param NVectors The number of vectors/histograms/detectors in the workspace
- *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
- *  @param YLength The number of data/error points in each vector (must all be the same)
+ *  @param NVectors :: The number of vectors/histograms/detectors in the workspace
+ *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
+ *  @param YLength :: The number of data/error points in each vector (must all be the same)
  *  @throw std::runtime_error if unable to open a temporary file
  */
 void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
@@ -169,8 +169,8 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
 
 /**  This function decides if ManagedDataBlock2D with given startIndex needs to 
      be loaded from storage and loads it.
-     @param newBlock Returned data block address
-     @param startIndex Starting spectrum index in the block
+     @param newBlock :: Returned data block address
+     @param startIndex :: Starting spectrum index in the block
 */
 void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
 {
@@ -196,7 +196,7 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startInd
 
 /**
  * Write a data block to disk.
- * @param toWrite pointer to the ManagedDataBlock2D to write.
+ * @param toWrite :: pointer to the ManagedDataBlock2D to write.
  */
 void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {

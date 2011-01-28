@@ -93,12 +93,12 @@ private:
   /// Execution code
   void exec();
   /// Read a grouping file and construct the calibration map
-  /// @param groupingFileName (filename extension .cal, including path)
+  /// @param groupingFileName :: (filename extension .cal, including path)
   void readGroupingFile(const std::string& groupingFileName);
   /// Read an XML Grouping File
   void readXMLGroupingFile(const std::string& filename);
   /// Sub-algorithm to Load the associated empty instrument
-  /// @param instrument_xml_name The instrument xml name including extension(.xml or .XML) but no path
+  /// @param instrument_xml_name :: The instrument xml name including extension(.xml or .XML) but no path
   /// this is determine by the mantid instrument.directory
   /// @return Shared pointer to the 2D workspace
   DataObjects::Workspace2D_sptr loadEmptyInstrument(const std::string& instrument_xml_name);

@@ -10,7 +10,7 @@ namespace API
 Kernel::Logger& TableRow::g_log = Kernel::Logger::get("TableRow");
 
 /**   Constructor
-      @param trh TableRowHelper returned by TableWorkspace::getRow
+      @param trh :: TableRowHelper returned by TableWorkspace::getRow
   */
 TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",")
 {
@@ -22,7 +22,7 @@ TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",
 }
 
 /**  Makes the TableRow point to i-th row in the TableWorkspace
-     @param i New row number
+     @param i :: New row number
  */
 void TableRow::row(int i)
 {
@@ -71,8 +71,8 @@ const TableRow& TableRow::operator>>(bool& t)const
 }
 
 /**  Output stream operator
-     @param s Output stream
-     @param row The TableRow
+     @param s :: Output stream
+     @param row :: The TableRow
      @return stream representation of row
  */  
 std::ostream& operator<<(std::ostream& s,const TableRow& row)

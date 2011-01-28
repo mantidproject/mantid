@@ -28,8 +28,8 @@ namespace Mantid
     }
 
     /** Creates a mangled name for interal storage
-     * @param name the name of the Algrorithm 
-     * @param version the version of the algroithm 
+     * @param name :: the name of the Algrorithm 
+     * @param version :: the version of the algroithm 
      * @returns a mangled name string
      */
     std::string AlgorithmFactoryImpl::createName(const std::string& name, const int& version)const
@@ -40,8 +40,8 @@ namespace Mantid
     }
 
     /** Creates an instance of an algorithm
-     * @param name the name of the Algrorithm to create
-     * @param version the version of the algroithm to create
+     * @param name :: the name of the Algrorithm to create
+     * @param version :: the version of the algroithm to create
      * @returns a shared pointer to the created algorithm
      */
     boost::shared_ptr<IAlgorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
@@ -139,7 +139,7 @@ namespace Mantid
 
     /**
      * Store a pointer to an Algorithm object that is cloneable, e.g. a Python algorithm
-     * @param algorithm A pointer to a clonable algorithm object
+     * @param algorithm :: A pointer to a clonable algorithm object
      */
     bool AlgorithmFactoryImpl::storeCloneableAlgorithm(CloneableAlgorithm* algorithm)
     {
@@ -189,7 +189,7 @@ namespace Mantid
     }
 
     /** Extract the name of an algorithm
-     * @param alg the Algrorithm to use
+     * @param alg :: the Algrorithm to use
      * @returns the name of the algroithm
      */
     const std::string AlgorithmFactoryImpl::extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const
@@ -198,7 +198,7 @@ namespace Mantid
     }
     
     /** Extract the version of an algorithm
-     * @param alg the Algrorithm to use
+     * @param alg :: the Algrorithm to use
      * @returns the version of the algroithm
      */
     int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const
@@ -209,8 +209,8 @@ namespace Mantid
     /**
      * Create a shared pointer to an algorithm object with the given name and version. If the algorithm is one registered with a clean pointer rather than
      * an instantiator then a clone is returned.
-     * @param name Algorithm name
-     * @param version Algorithm version
+     * @param name :: Algorithm name
+     * @param version :: Algorithm version
      * @returns A shared pointer to the algorithm object
      */
     boost::shared_ptr<IAlgorithm> AlgorithmFactoryImpl::createAlgorithm(const std::string & name, const int version) const

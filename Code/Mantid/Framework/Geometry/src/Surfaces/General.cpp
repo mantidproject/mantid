@@ -14,7 +14,7 @@ Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
 const double GTolerance(1e-6);  ///< Tolerance
 
 General::General() : Quadratic()
-  /*!
+  /**
     Standard Constructor
   */
 {
@@ -22,17 +22,17 @@ General::General() : Quadratic()
 
 General::General(const General& A) : 
   Quadratic(A)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: General Object to copy
+    @param A :: General Object to copy
   */
 {}
 
 General*
 General::clone() const
-  /*!
+  /**
     Makes a clone (implicit virtual copy constructor) 
-    \return General(this)
+    @return General(this)
   */
 {
   return new General(*this);
@@ -40,10 +40,10 @@ General::clone() const
 
 General&
 General::operator=(const General& A)
-  /*!
+  /**
     Standard assignment operator
-    \param A :: General Object to copy
-    \return *this
+    @param A :: General Object to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -54,7 +54,7 @@ General::operator=(const General& A)
 }
 
 General::~General()
-  /*!
+  /**
     Destructor
   */
 {}
@@ -62,7 +62,7 @@ General::~General()
 
 int 
 General::setSurface(const std::string& Pstr)
-  /*! 
+  /** 
     Processes a standard MCNPX general string (GQ/SQ types)
     Despite type, moves both to the general equation.
 
@@ -70,8 +70,8 @@ General::setSurface(const std::string& Pstr)
           since there are multiple version of xy xz yz parameter
 	  read-in which swap xz and yz. [This code uses the first]
 
-    \param Pstr :: String to process (with name and transform)
-    \return 0 on success, neg of failure
+    @param Pstr :: String to process (with name and transform)
+    @return 0 on success, neg of failure
   */
 {
   std::string Line=Pstr;
@@ -115,7 +115,7 @@ General::setSurface(const std::string& Pstr)
 
 void 
 General::setBaseEqn()
-  /*!
+  /**
     Set baseEqn (nothing to do) as it is 
     already a baseEqn driven system
   */
@@ -125,16 +125,16 @@ General::setBaseEqn()
 
 void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	/*!
+	/**
 	  General bounding box
 	  Intended to improve bounding box for a general quadratic surface
 	  Using the surface calculate improved limits on the bounding box, if possible.
-	  \param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
-	  \param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
-	  \param ymax :: as for xmax
-	  \param ymin :: as for xmin
-	  \param zmax :: as for xmax
-	  \param zmin :: as for xmin
+	  @param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+	  @param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+	  @param ymax :: as for xmax
+	  @param ymin :: as for xmin
+	  @param zmax :: as for xmax
+	  @param zmin :: as for xmin
       //TODO: Implement bounding box for General
 	*/
 

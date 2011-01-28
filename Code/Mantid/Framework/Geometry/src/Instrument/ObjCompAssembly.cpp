@@ -36,7 +36,7 @@ ObjCompAssembly::ObjCompAssembly(const IComponent* base, const ParameterMap * ma
 }
 
 
-/*! Valued constructor
+/** Valued constructor
  *  @param n :: name of the assembly
  *  @param reference :: the parent Component
  * 
@@ -56,7 +56,7 @@ ObjCompAssembly::ObjCompAssembly(const std::string& n, Component* reference) :
   }
 }
 
-/*! Copy constructor
+/** Copy constructor
  *  @param ass :: assembly to copy
  */
 ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly& ass) :
@@ -78,7 +78,7 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly& ass) :
   }
 }
 
-/*! Destructor
+/** Destructor
  */
 ObjCompAssembly::~ObjCompAssembly()
 {
@@ -91,7 +91,7 @@ ObjCompAssembly::~ObjCompAssembly()
   group.clear();
 }
 
-/*! Clone method
+/** Clone method
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
@@ -100,7 +100,7 @@ IComponent* ObjCompAssembly::clone() const
   return new ObjCompAssembly(*this);
 }
 
-/*! Add method
+/** Add method
  * @param comp :: component to add 
  * @return number of components in the assembly
  * 
@@ -124,7 +124,7 @@ int ObjCompAssembly::add(IComponent* comp)
   return group.size();
 }
 
-/*! AddCopy method
+/** AddCopy method
  * @param comp :: component to add 
  * @return number of components in the assembly
  * 
@@ -151,9 +151,9 @@ int ObjCompAssembly::addCopy(IComponent* comp)
   return group.size();
 }
 
-/*! AddCopy method
+/** AddCopy method
  * @param comp :: component to add 
- * @param n    :: name of the copied component. 
+ * @param n :: name of the copied component. 
  * @return number of components in the assembly
  * 
  *  Add a copy of a component in the assembly. 
@@ -180,7 +180,7 @@ int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
   return group.size();
 }
 
-/*! Return the number of components in the assembly
+/** Return the number of components in the assembly
  * @return group.size() 
  */
 int ObjCompAssembly::nelements() const
@@ -191,11 +191,11 @@ int ObjCompAssembly::nelements() const
     return group.size();
 }
 
-/*! Get a pointer to the ith component in the assembly. Note standard C/C++
+/** Get a pointer to the ith component in the assembly. Note standard C/C++
  *  array notation used, that is, i most be an integer i = 0,1,..., N-1, where
  *  N is the number of component in the assembly.
  *
- * @param i The index of the component you want
+ * @param i :: The index of the component you want
  * @return group[i] 
  * 
  *  Throws if i is not in range
@@ -219,7 +219,7 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const
   }
 }
 
-/*! Print information about elements in the assembly to a stream
+/** Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 
  *  Loops through all components in the assembly 
@@ -236,7 +236,7 @@ void ObjCompAssembly::printChildren(std::ostream& os) const
   }
 }
 
-/*! Print information about all the elements in the tree to a stream
+/** Print information about all the elements in the tree to a stream
  *  Loops through all components in the tree 
  *  and call printSelf(os). 
  *
@@ -304,7 +304,7 @@ const Quat ObjCompAssembly::getRotation() const
 
 
 
-/*! Set the outline of the assembly. Creates an Object and sets m_shape point to it.
+/** Set the outline of the assembly. Creates an Object and sets m_shape point to it.
  *  All child components must be detectors and positioned along a straight line and have the same shape.
  *  The shape can be either a box or a cylinder.
  *  @return The shape of the outline: "cylinder", "box", ...
@@ -545,16 +545,16 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
 
 /**
  * Sets the outline shape for this assembly
- * @param obj The outline shape created previously fith createOutline()
+ * @param obj :: The outline shape created previously fith createOutline()
  */
 void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj)
 {
   m_shape = obj;
 }
 
-/*! Print information about elements in the assembly to a stream
+/** Print information about elements in the assembly to a stream
  *  Overload the operator <<
- * @param os  :: output stream 
+ * @param os :: output stream 
  * @param ass :: component assembly 
  * @return the stream representation of the object component assembly
  *  Loops through all components in the assembly 

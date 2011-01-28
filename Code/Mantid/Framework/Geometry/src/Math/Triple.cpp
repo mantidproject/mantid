@@ -6,7 +6,7 @@ namespace Mantid
 
 template<typename T>
 Triple<T>::Triple() : first(),second(),third()
-  /*!
+  /**
     Standard Constructor
   */
 {}
@@ -14,30 +14,30 @@ Triple<T>::Triple() : first(),second(),third()
 template<typename T>
 Triple<T>::Triple(const Triple<T>& A) :
   first(A.first),second(A.second),third(A.third)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: Triple Item to copy
+    @param A :: Triple Item to copy
   */
 {}
 
 template<typename T>
 Triple<T>::Triple(const T& A,const T& B,const T& C) :
   first(A),second(B),third(C)
-  /*!
+  /**
     Constructor from a 3 value input 
-    \param A :: first item
-    \param B :: second item
-    \param C :: third item
+    @param A :: first item
+    @param B :: second item
+    @param C :: third item
   */
 {}
 
 template<typename T>
 Triple<T>&
 Triple<T>::operator=(const Triple<T>& A)
-  /*!
+  /**
     Standard Assignment Constructor
-    \param A :: Triple Item to copy
-    \return *this
+    @param A :: Triple Item to copy
+    @return *this
   */
 {
   if (this!=&A)
@@ -51,7 +51,7 @@ Triple<T>::operator=(const Triple<T>& A)
 
 template<typename T>
 Triple<T>::~Triple()
-  /*!
+  /**
     Standard Destructor
   */
 {}
@@ -60,7 +60,7 @@ Triple<T>::~Triple()
 template<typename T>
 int
 Triple<T>::operator==(const Triple<T>& A) const
-  /*! 
+  /** 
     Operator== all components must be equal
   */
 {
@@ -71,10 +71,10 @@ Triple<T>::operator==(const Triple<T>& A) const
 template<typename T>
 int
 Triple<T>::operator!=(const Triple<T>& A) const
-  /*! 
+  /** 
     Operator!= any component is not equal
-    \param A :: Other object to compare
-    \return this!=A
+    @param A :: Other object to compare
+    @return this!=A
   */
 {
   return  (first==A.first && second==A.second &&
@@ -84,10 +84,10 @@ Triple<T>::operator!=(const Triple<T>& A) const
 template<typename T>
 int
 Triple<T>::operator<(const Triple<T>& A) const
-  /*! 
+  /** 
     Operator< takes first to last precidence.
-    \param A :: Triple to compare
-    \return this < A
+    @param A :: Triple to compare
+    @return this < A
   */
 {
   if (first>A.first)
@@ -106,12 +106,12 @@ Triple<T>::operator<(const Triple<T>& A) const
 template<typename T>
 int
 Triple<T>::operator>(const Triple<T>& A) const
-  /*! 
+  /** 
     Operator> takes first to last precidence.
     Uses operator<  to obtain value.
     Note it does not uses 1-(A<this)
-    \param A :: Triple to compare
-    \return this > A
+    @param A :: Triple to compare
+    @return this > A
   */
 {
   return A.operator<(*this);
@@ -120,10 +120,10 @@ Triple<T>::operator>(const Triple<T>& A) const
 template<typename T>
 T&
 Triple<T>::operator[](const int A)
-  /*!
+  /**
     Accessor Reference Function
-    \param A :: Index to item to get 0-2
-    \return Reference Item[A]
+    @param A :: Index to item to get 0-2
+    @return Reference Item[A]
   */
 {
   switch (A)
@@ -144,10 +144,10 @@ Triple<T>::operator[](const int A)
 template<typename T>
 T
 Triple<T>::operator[](const int A) const
-  /*!
+  /**
     Accessor Value Function
-    \param A :: Index to item to get 0-2
-    \return Item[A]
+    @param A :: Index to item to get 0-2
+    @return Item[A]
   */
 {
   switch (A)
@@ -174,7 +174,7 @@ Triple<T>::operator[](const int A) const
 
 template<typename F,typename S,typename T>
 DTriple<F,S,T>::DTriple() : first(),second(),third()
-  /*!
+  /**
     Standard Constructor
   */
 {}
@@ -182,30 +182,30 @@ DTriple<F,S,T>::DTriple() : first(),second(),third()
 template<typename F,typename S,typename T>
 DTriple<F,S,T>::DTriple(const DTriple<F,S,T>& A) :
   first(A.first),second(A.second),third(A.third)
-  /*!
+  /**
     Standard Copy Constructor
-    \param A :: DTriple Item to copy
+    @param A :: DTriple Item to copy
   */
 {}
 
 template<typename F,typename S,typename T>
 DTriple<F,S,T>::DTriple(const F& A,const S& B,const T& C) :
   first(A),second(B),third(C)
-  /*!
+  /**
     Constructor from a 3 value input 
-    \param A :: first item
-    \param B :: second item
-    \param C :: third item
+    @param A :: first item
+    @param B :: second item
+    @param C :: third item
   */
 {}
 
 template<typename F,typename S,typename T>
 DTriple<F,S,T>&
 DTriple<F,S,T>::operator=(const DTriple<F,S,T>& A)
-  /*!
+  /**
     Assignment from a 3 value input 
-    \param A :: DTriple to copy from 
-    \returns *this
+    @param A :: DTriple to copy from 
+    @return *this
   */
 {
   if (this!=&A)
@@ -219,7 +219,7 @@ DTriple<F,S,T>::operator=(const DTriple<F,S,T>& A)
 
 template<typename F,typename S,typename T>
 DTriple<F,S,T>::~DTriple()
-  /*!
+  /**
     Standard Destructor
   */
 {}
@@ -228,10 +228,10 @@ DTriple<F,S,T>::~DTriple()
 template<typename F,typename S,typename T>
 int
 DTriple<F,S,T>::operator==(const DTriple<F,S,T>& A) const
-  /*! 
+  /** 
     Operator== all components must be equal
-    \param A :: Object to compare
-    \returns A==*this
+    @param A :: Object to compare
+    @return A==*this
   */
 {
   return  (first!=A.first || second!=A.second || 
@@ -241,7 +241,7 @@ DTriple<F,S,T>::operator==(const DTriple<F,S,T>& A) const
 template<typename F,typename S,typename T>
 int
 DTriple<F,S,T>::operator!=(const DTriple<F,S,T>& A) const
-  /*! 
+  /** 
     Operator!= any component is not equal
   */
 {
@@ -252,10 +252,10 @@ DTriple<F,S,T>::operator!=(const DTriple<F,S,T>& A) const
 template<typename F,typename S,typename T>
 int
 DTriple<F,S,T>::operator<(const DTriple<F,S,T>& A) const
-  /*! 
+  /** 
     Operator< takes first to last precidence.
-    \param A :: Triple to compare
-    \return this < A
+    @param A :: Triple to compare
+    @return this < A
   */
 {
   if (first>A.first)
@@ -274,10 +274,10 @@ DTriple<F,S,T>::operator<(const DTriple<F,S,T>& A) const
 template<typename F,typename S,typename T>
 int
 DTriple<F,S,T>::operator>(const DTriple<F,S,T>& A) const
-  /*! 
+  /** 
     Operator> takes first to last precidence.
-    \param A :: Triple to compare
-    \return this < A
+    @param A :: Triple to compare
+    @return this < A
   */
 {
   return A.operator<(*this);

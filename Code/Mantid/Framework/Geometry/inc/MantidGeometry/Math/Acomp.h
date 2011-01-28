@@ -22,7 +22,7 @@ namespace Mantid
     template<typename T> class Matrix;
 
 
-    /*!
+    /**
     \class Acomp
     \brief Holds a state point in the decision tree.
     \version 1.0

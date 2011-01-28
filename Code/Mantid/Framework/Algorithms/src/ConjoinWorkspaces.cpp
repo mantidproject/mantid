@@ -215,8 +215,8 @@ void ConjoinWorkspaces::execEvent()
 //----------------------------------------------------------------------------------------------
 /** Checks that the two input workspace have common binning & size, the same instrument & unit.
  *  Also calls the checkForOverlap method.
- *  @param ws1 The first input workspace
- *  @param ws2 The second input workspace
+ *  @param ws1 :: The first input workspace
+ *  @param ws2 :: The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
 void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
@@ -266,9 +266,9 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
 
 //----------------------------------------------------------------------------------------------
 /** Checks that the two input workspaces have non-overlapping spectra numbers and contributing detectors
- *  @param ws1 The first input workspace
- *  @param ws2 The second input workspace
- *  @param checkSpectra set to true to check for overlapping spectra numbers (non-sensical for event workspaces)
+ *  @param ws1 :: The first input workspace
+ *  @param ws2 :: The second input workspace
+ *  @param checkSpectra :: set to true to check for overlapping spectra numbers (non-sensical for event workspaces)
  *  @throw std::invalid_argument If there is some overlap
  */
 void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const

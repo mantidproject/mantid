@@ -3,7 +3,7 @@
 //
 #include <string>
 
-/*! The is the collection of the constants and enums, which are used in Multidimensional Workspace, usually in more then one file
+/** The is the collection of the constants and enums, which are used in Multidimensional Workspace, usually in more then one file
 *    
 *  Collected here to simplify references and modifications, the dimensionsID will be replaced by proper class
 

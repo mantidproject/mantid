@@ -123,8 +123,8 @@ namespace Mantid
 
 	 
 	   /**This method calls ICat API downloadDatafile and gets the URL string and uses the URL to down load file server
-		 * @param url - url of the file to download.
-		 * @param fileName - name of the file to be saved to disk
+		 * @param url :: url of the file to download.
+		 * @param fileName :: name of the file to be saved to disk
 		*/
 		void CDownloadDataFile::downloadFileOverInternet(const std::string & url,const std::string& fileName)
 		{			
@@ -136,7 +136,7 @@ namespace Mantid
 	  /** This method checks the file extn and if it's a raw file reurns true
 		* This is useful when the we download a file over internet and save to local drive,
 		* to open the file in binary or ascii mode
-		* @param fileName  file name
+		* @param fileName ::  file name
 		*/
 		bool CDownloadDataFile::isDataFile(const std::string & fileName)
 		{			
@@ -155,7 +155,7 @@ namespace Mantid
 
 	   /** This method downloads file over internet using Poco HTTPClientSession 
 		* @param URL- URL of the file to down load
-		* @param fileName  file name
+		* @param fileName ::  file name
 		*/
 		void CDownloadDataFile::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
 		{
@@ -198,8 +198,8 @@ namespace Mantid
 		}
 
 	  /** This method saves the input stream to a file
-		* @param rs input stream
-		* @param fileName name of the output file
+		* @param rs :: input stream
+		* @param fileName :: name of the output file
 		*/
 		void CDownloadDataFile::saveFiletoDisk(std::istream& rs,const std::string& fileName)
 		{			
@@ -224,8 +224,8 @@ namespace Mantid
 		* I'm testing the download from mantid server.
 		* as the downlaod method I've written is private I can't access that in unit testing.
 		* so adding this public method to call the private downlaod method and testing.
-		* @param URL - URL of the file to download
-		* @param fileName - name of the file
+		* @param URL :: URL of the file to download
+		* @param fileName :: name of the file
 		*/
 		void CDownloadDataFile::testDownload(const std::string& URL,const std::string& fileName)
 		{
@@ -233,7 +233,7 @@ namespace Mantid
 
 		}
 		/** This method replaces backward slash with forward slash for linux compatibility.
-		 * @param inputString input string
+		 * @param inputString :: input string
   		 */
 		void CDownloadDataFile::replaceBackwardSlash(std::string& inputString)
 		{

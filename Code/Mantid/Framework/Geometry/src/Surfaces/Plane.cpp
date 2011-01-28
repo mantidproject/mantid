@@ -17,7 +17,7 @@ Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
 Plane::Plane() : Quadratic(),
   NormV(1.0,0.0,0.0),Dist(0)
-  /*!
+  /**
     Constructor: sets plane in y-z plane and throught origin
   */
 {
@@ -26,17 +26,17 @@ Plane::Plane() : Quadratic(),
 
 Plane::Plane(const Plane& A) : Quadratic(A),
    NormV(A.NormV),Dist(A.Dist)
-  /*!
+  /**
     Copy Constructor
-    \param A :: Plane to copy
+    @param A :: Plane to copy
   */
 {}
 
 Plane*
 Plane::clone() const
-  /*!
+  /**
     Makes a clone (implicit virtual copy constructor) 
-    \return new(this)
+    @return new(this)
   */
 {
   return new Plane(*this);
@@ -44,10 +44,10 @@ Plane::clone() const
 
 Plane&
 Plane::operator=(const Plane& A) 
-  /*!
+  /**
     Assignment operator
-    \param A :: Plane to copy
-    \return *this
+    @param A :: Plane to copy
+    @return *this
   */
 {
   if (&A!=this)
@@ -60,21 +60,21 @@ Plane::operator=(const Plane& A)
 }
 
 Plane::~Plane()
-  /*!
+  /**
     Destructor
   */
 {}
 
 int
 Plane::setSurface(const std::string& Pstr)
-  /*! 
+  /** 
      processes a standard MCNPX plane string:
      There are three types : 
      - (A) px Distance
      - (B) p A B C D (equation Ax+By+Cz=D)
      - (C) p V3D V3D V3D
-     \param Pstr :: String to make into a plane of type p{xyz} or p 
-     \return 0 on success, -ve of failure
+     @param Pstr :: String to make into a plane of type p{xyz} or p 
+     @return 0 on success, -ve of failure
   */
 {
   // Two types of plane string p[x-z]  and p
@@ -132,11 +132,11 @@ Plane::setSurface(const std::string& Pstr)
 
 int
 Plane::setPlane(const Geometry::V3D& P,const Geometry::V3D& N) 
-  /*!
+  /**
     Given a point and a normal direction set the plane
-    \param P :: Point for plane to pass thought
-    \param N :: Normal for the plane
-    \retval 0 :: success
+    @param P :: Point for plane to pass thought
+    @param N :: Normal for the plane
+    @retval 0 :: success
   */
 {
   NormV=N;
@@ -148,9 +148,9 @@ Plane::setPlane(const Geometry::V3D& P,const Geometry::V3D& N)
 
 void
 Plane::rotate(const Geometry::Matrix<double>& MA) 
-  /*!
+  /**
     Rotate the plane about the origin by MA 
-    \param MA direct rotation matrix (3x3)
+    @param MA :: direct rotation matrix (3x3)
   */
 {
   NormV.rotate(MA);
@@ -161,10 +161,10 @@ Plane::rotate(const Geometry::Matrix<double>& MA)
 
 void
 Plane::displace(const Geometry::V3D& Sp) 
-  /*!
+  /**
     Displace the plane by Point Sp.  
     i.e. r+sp now on the plane 
-    \param Sp :: point value of displacement
+    @param Sp :: point value of displacement
   */
 {
   Dist+=NormV.scalar_prod(Sp);
@@ -174,11 +174,11 @@ Plane::displace(const Geometry::V3D& Sp)
 
 double
 Plane::distance(const Geometry::V3D& A) const
-  /*!
+  /**
     Determine the distance of point A from the plane 
     returns a value relative to the normal
-    \param A :: point to get distance from 
-    \returns singed distance from point
+    @param A :: point to get distance from 
+    @return singed distance from point
   */
 {
   return A.scalar_prod(NormV)-Dist;
@@ -186,9 +186,9 @@ Plane::distance(const Geometry::V3D& A) const
 
 double
 Plane::dotProd(const Plane& A) const
-  /*!
-    \param A :: plane to calculate the normal distance from x
-    \returns the Normal.A.Normal dot product
+  /**
+    @param A :: plane to calculate the normal distance from x
+    @return the Normal.A.Normal dot product
   */
 {
   return NormV.scalar_prod(A.NormV);
@@ -196,10 +196,10 @@ Plane::dotProd(const Plane& A) const
 
 Geometry::V3D
 Plane::crossProd(const Plane& A) const
-  /*!
+  /**
     Take the cross produce of the normals
-    \param A :: plane to calculate the cross product from 
-    \returns the Normal x A.Normal cross product 
+    @param A :: plane to calculate the cross product from 
+    @return the Normal x A.Normal cross product 
   */
 {
 	return NormV.cross_prod(A.NormV);
@@ -209,12 +209,12 @@ Plane::crossProd(const Plane& A) const
 
 int
 Plane::side(const Geometry::V3D& A) const
-  /*!
+  /**
     Calcualates the side that the point is on
-    \param A :: test point
-    \retval +ve :: on the same side as the normal
-    \retval -ve :: the  opposite side 
-    \retval 0 :: A is on the plane itself (within tolerence) 
+    @param A :: test point
+    @retval +ve :: on the same side as the normal
+    @retval -ve :: the  opposite side 
+    @retval 0 :: A is on the plane itself (within tolerence) 
   */
 {
   double Dp=NormV.scalar_prod(A);
@@ -226,12 +226,12 @@ Plane::side(const Geometry::V3D& A) const
 
 int
 Plane::onSurface(const Geometry::V3D& A) const
-  /*! 
+  /** 
      Calcuate the side that the point is on
      and returns success if it is on the surface.
      - Uses getSurfaceTolerance to determine the closeness
-     \retval 1 if on the surface 
-     \retval 0 if off the surface 
+     @retval 1 if on the surface 
+     @retval 0 if off the surface 
      
   */
 {
@@ -240,7 +240,7 @@ Plane::onSurface(const Geometry::V3D& A) const
 
 void 
 Plane::print() const
-  /*!
+  /**
     Prints out the surface info and
     the Plane info.
   */
@@ -252,12 +252,12 @@ Plane::print() const
 
 int
 Plane::planeType() const
-  /*! 
+  /** 
      Find if the normal vector allows it to be a special
      type of plane (x,y,z direction) 
      (Assumes NormV is a unit vector)
-     \retval 1-3 :: on the x,y,z axis
-     \retval 0 :: general plane
+     @retval 1-3 :: on the x,y,z axis
+     @retval 0 :: general plane
   */
 {
   for(int i=0;i<3;i++)
@@ -313,8 +313,8 @@ void Plane::write(std::ostream& OX) const
 /**
  * Returns the point of intersection of line with the plane
  * @param startpt :: input start point of the line
- * @param endpt   :: input end point of the line
- * @param output  :: output point of intersection
+ * @param endpt :: input end point of the line
+ * @param output :: output point of intersection
  * @return The number of points of intersection
  */
 int Plane::LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output){

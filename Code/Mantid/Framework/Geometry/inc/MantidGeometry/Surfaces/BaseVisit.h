@@ -17,7 +17,7 @@ namespace Mantid
     class General;
     class Line;
 
-    /*!
+    /**
     \class BaseVisit
     \version 1.0
     \author S. Ansell

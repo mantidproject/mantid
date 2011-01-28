@@ -130,7 +130,7 @@ public:
   /// Returns a reference to the fitting weights.
   virtual const double* getWeights()const;
   /// Function you want to fit to. 
-  /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(double* out)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out);

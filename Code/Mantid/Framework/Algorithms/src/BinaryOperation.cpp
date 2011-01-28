@@ -210,8 +210,8 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /**
      * Execute a binary operation on events. Should be overridden.
-     * @param lhs left-hand event workspace
-     * @param rhs right-hand event workspace
+     * @param lhs :: left-hand event workspace
+     * @param rhs :: right-hand event workspace
      */
     void BinaryOperation::execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs )
     {
@@ -226,8 +226,8 @@ namespace Mantid
     /**
      * Return true if the two workspaces are compatible for this operation
      * Virtual: will be overridden as needed.
-     * @param lhs left-hand workspace to check
-     * @param rhs right-hand workspace to check
+     * @param lhs :: left-hand workspace to check
+     * @param rhs :: right-hand workspace to check
      * @return flag for the compatibility to the two workspaces
      */
     bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
@@ -270,8 +270,8 @@ namespace Mantid
     /** Return true if the two workspaces can be treated as event workspaces
      * for the binary operation. If so, execEvent() will be called.
      * (e.g. Plus algorithm will concatenate event lists)
-     * @param lhs left-hand event workspace to check
-     * @param rhs right-hand event workspace to check
+     * @param lhs :: left-hand event workspace to check
+     * @param rhs :: right-hand event workspace to check
      * @return false by default; will be overridden by specific algorithms
      */
     bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
@@ -285,8 +285,8 @@ namespace Mantid
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
      *  In order to be size compatible then the larger workspace
      *  must divide be the size of the smaller workspace leaving no remainder
-     *  @param lhs the first workspace to compare
-     *  @param rhs the second workspace to compare
+     *  @param lhs :: the first workspace to compare
+     *  @param rhs :: the second workspace to compare
      *  @retval true The two workspaces are size compatible
      *  @retval false The two workspaces are NOT size compatible
      */
@@ -319,10 +319,10 @@ namespace Mantid
     /**
      * Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
      * and is also masked. 
-     * @param lhs A pointer to the left-hand operand
-     * @param rhs A pointer to the right-hand operand
-     * @param index The workspace index to check
-     * @param out A pointer to the output workspace
+     * @param lhs :: A pointer to the left-hand operand
+     * @param rhs :: A pointer to the right-hand operand
+     * @param index :: The workspace index to check
+     * @param out :: A pointer to the output workspace
      * @returns True if further processing is not required on the spectra, false if the binary operation should be performed.
      */
     bool BinaryOperation::propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs, 
@@ -724,8 +724,8 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /** Copies any bin masking from the smaller/rhs input workspace to the output.
      *  Masks on the other input workspace are copied automatically by the workspace factory.
-     *  @param rhs The workspace which is the right hand operand
-     *  @param out The result workspace
+     *  @param rhs :: The workspace which is the right hand operand
+     *  @param out :: The result workspace
      */
     void BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out)
     {
@@ -751,7 +751,7 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /**
      * Apply the requested masking to the output workspace
-     * @param out The workspace to mask
+     * @param out :: The workspace to mask
      */
     void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out)
     {
@@ -787,8 +787,8 @@ namespace Mantid
      * with another EventList as the right-hand operand.
      * The event lists simply get appended.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhs Const reference to the EventList on the right hand side.
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhs :: Const reference to the EventList on the right hand side.
      */
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -801,10 +801,10 @@ namespace Mantid
      * Carries out the binary operation IN-PLACE on a single EventList,
      * with another (histogrammed) spectrum as the right-hand operand.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsX The vector of rhs X bin boundaries
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsX :: The vector of rhs X bin boundaries
+     *  @param rhsY :: The vector of rhs data values
+     *  @param rhsE :: The vector of rhs error values
      */
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE)
@@ -818,9 +818,9 @@ namespace Mantid
      * Carries out the binary operation IN-PLACE on a single EventList,
      * with a single (double) value as the right-hand operand
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsY The rhs data value
-     *  @param rhsE The rhs error value
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsY :: The rhs data value
+     *  @param rhsE :: The rhs error value
      */
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const double& rhsY, const double& rhsE)
@@ -835,7 +835,7 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /**
      * Get the type of operand from a workspace
-     * @param ws workspace to check
+     * @param ws :: workspace to check
      * @return OperandType describing what type of workspace it will be operated as.
      */
     OperandType BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr ws)

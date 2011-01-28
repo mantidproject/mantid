@@ -12,9 +12,9 @@ ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0)
 }
 
 /** Loads the headers of the file, leaves the file pointer at a specific position
-*   @param file The file handle to use
-*   @param from_file Wether to read from or write to a file
-*   @param read_data Wether to go on to read the data
+*   @param file :: The file handle to use
+*   @param from_file :: Wether to read from or write to a file
+*   @param read_data :: Wether to go on to read the data
 *   @return file readin exit code, 0 is OK
 **/
 int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
@@ -96,8 +96,8 @@ int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
 }
 
 /// Skip data
-/// @param file The file pointer
-/// @param i The amount of data to skip
+/// @param file :: The file pointer
+/// @param i :: The amount of data to skip
 void ISISRAW2::skipData(FILE* file, int i)
 {
     if (i < ndes)
@@ -105,8 +105,8 @@ void ISISRAW2::skipData(FILE* file, int i)
 }
 
 /// Read data
-/// @param file The file pointer
-/// @param i The amount of data to read
+/// @param file :: The file pointer
+/// @param i :: The amount of data to read
 /// @return true on success
 bool ISISRAW2::readData(FILE* file, int i)
 {

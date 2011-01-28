@@ -57,8 +57,8 @@ namespace Mantid
       public:
         /**
          * Constructor. 
-         * @param data A pointer to the transformed complex data
-         * @param n The size of untransformed real data
+         * @param data :: A pointer to the transformed complex data
+         * @param n :: The size of untransformed real data
          */
         HalfComplex(double* data,const int& n):m_size(n/2+1),m_data(data),m_even(n/2*2==n)
         {
@@ -67,7 +67,7 @@ namespace Mantid
         int size()const{return m_size;}
         /**
          * The real part of i-th transform coefficient
-         * @param i The index of the complex transform coefficient
+         * @param i :: The index of the complex transform coefficient
          * @return The real part 
          */
         double real(int i)const
@@ -78,7 +78,7 @@ namespace Mantid
         }
         /**
          * The imaginary part of i-th transform coefficient
-         * @param i The index of the complex transform coefficient
+         * @param i :: The index of the complex transform coefficient
          * @return The imaginary part 
          */
         double imag(int i)const
@@ -90,9 +90,9 @@ namespace Mantid
         }
         /**
          * Set a new value for i-th complex coefficient
-         * @param i The index of the coefficient
-         * @param re The real part of the new value
-         * @param im The imaginary part of the new value
+         * @param i :: The index of the coefficient
+         * @param re :: The real part of the new value
+         * @param im :: The imaginary part of the new value
          */
         void set(int i,const double& re,const double& im)
         {

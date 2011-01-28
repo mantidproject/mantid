@@ -31,7 +31,7 @@ std::vector<std::string> NXAttributes::values()const
 }
 
 /**  Returns the value of an attribute
- *   @param name The name of the attribute
+ *   @param name :: The name of the attribute
  *   @return The value of the attribute if it exists or an empty string otherwise
  */
 std::string NXAttributes::operator()(const std::string& name)const
@@ -42,8 +42,8 @@ std::string NXAttributes::operator()(const std::string& name)const
 }
 
 /**  Sets the value of the attribute.
- *   @param name The name of the attribute
- *   @param value The new value of the attribute
+ *   @param name :: The name of the attribute
+ *   @param value :: The new value of the attribute
  */
 void NXAttributes::set(const std::string &name, const std::string &value)
 {
@@ -51,8 +51,8 @@ void NXAttributes::set(const std::string &name, const std::string &value)
 }
 
 /**  Sets the value of the attribute as a double.
- *   @param name The name of the attribute
- *   @param value The new value of the attribute
+ *   @param name :: The name of the attribute
+ *   @param value :: The new value of the attribute
  */
 void NXAttributes::set(const std::string &name, double value)
 {
@@ -67,9 +67,9 @@ void NXAttributes::set(const std::string &name, double value)
 //---------------------------------------------------------
 
 /**  NXObject constructor.
- *   @param fileID The Nexus file id
- *   @param parent The parent Nexus class. In terms of HDF it is the group containing the object.
- *   @param name The name of the object relative to its parent
+ *   @param fileID :: The Nexus file id
+ *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the object.
+ *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(const NXhandle fileID,const NXClass* parent,const std::string& name):m_fileID(fileID),m_open(false)
 {
@@ -215,7 +215,7 @@ void NXClass::open()
  *    class.openLocal();
  *    // work with class
  *    class.close();
- * @param nxclass The NX class name. If empty NX_class() will be used
+ * @param nxclass :: The NX class name. If empty NX_class() will be used
  * @return true if OK
  */
 bool NXClass::openLocal(const std::string& nxclass)
@@ -291,7 +291,7 @@ int NXClass::getInt(const std::string& name)const
     return *number();
 }
 /** Returns whether an individual group (or group) is present
-*  @param query the class name to search for
+*  @param query :: the class name to search for
 *  @return true if the name is found and false otherwise
 */
 bool NXClass::containsGroup(const std::string & query) const
@@ -402,7 +402,7 @@ std::vector<char>& NXBinary::binary()
 //---------------------------------------------------------
 
 /**  Constructor. On creation opens the Nexus file for reading only.
- *   @param fname The file name to open
+ *   @param fname :: The file name to open
  */
 NXRoot::NXRoot(const std::string& fname)
     :m_filename(fname)
@@ -419,8 +419,8 @@ NXRoot::NXRoot(const std::string& fname)
 
 /**  Constructor.
  *   Creates a new Nexus file. The first root entry will be also created.
- *   @param fname The file name to create
- *   @param entry The name of the first entry in the new file
+ *   @param fname :: The file name to create
+ *   @param entry :: The name of the first entry in the new file
  */
 NXRoot::NXRoot(const std::string& fname,const std::string& entry)
     :m_filename(fname)
@@ -449,8 +449,8 @@ bool NXRoot::isStandard()const
 //---------------------------------------------------------
 
 /**  Constructor.
- *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
- *   @param name The name of the dataset relative to its parent
+ *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the dataset.
+ *   @param name :: The name of the dataset relative to its parent
  */
 NXDataSet::NXDataSet(const NXClass& parent,const std::string& name)
     :NXObject(parent.m_fileID,&parent,name)
@@ -501,7 +501,7 @@ void NXDataSet::openLocal()
 }
 
 /**  Wrapper to the NXgetdata.
- *   @param data The pointer to the buffer accepting the data from the file.
+ *   @param data :: The pointer to the buffer accepting the data from the file.
  *   @throw runtime_error if the operation fails.
  */
 void NXDataSet::getData(void* data)
@@ -513,10 +513,10 @@ void NXDataSet::getData(void* data)
 }
 
 /**  Wrapper to the NXgetslab.
- *   @param data The pointer to the buffer accepting the data from the file.
- *   @param start The array of starting indeces to read in from the file. The size of the array must be equal to 
+ *   @param data :: The pointer to the buffer accepting the data from the file.
+ *   @param start :: The array of starting indeces to read in from the file. The size of the array must be equal to 
  *          the rank of the data.
- *   @param size The array of numbers of data elements to read along each dimenstion.
+ *   @param size :: The array of numbers of data elements to read along each dimenstion.
  *          The number of dimensions (the size of the array) must be equal to the rank of the data.
  *   @throw runtime_error if the operation fails.
  */
@@ -596,9 +596,9 @@ Kernel::Property* NXLog::createSingleValueProperty()
 /** createTimeSeries
  * Create a TimeSeries property form the records of the NXLog group. Times are in dataset "time"
  * and the values are in dataset "value"
- * @param start_time If the "time" dataset does not have the "start" attribute sets the
+ * @param start_time :: If the "time" dataset does not have the "start" attribute sets the
  *   start time for the series.
- * @param new_name If not empty it is used as the TimeSeries property name
+ * @param new_name :: If not empty it is used as the TimeSeries property name
  *   @return The property or NULL
  */
 Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const std::string& new_name)

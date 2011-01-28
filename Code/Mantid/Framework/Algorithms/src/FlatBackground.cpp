@@ -178,8 +178,8 @@ void FlatBackground::exec()
 }
 
 /** Checks that the range parameters have been set correctly
- *  @param startX The starting point
- *  @param endX   The ending point
+ *  @param startX :: The starting point
+ *  @param endX ::   The ending point
  *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less than XMin
  */
 void FlatBackground::checkRange(double& startX, double& endX)
@@ -198,8 +198,8 @@ void FlatBackground::checkRange(double& startX, double& endX)
 
 /** checks if the array is empty and if so fills it with all the index numbers
 *  in the workspace. Non-empty arrays are left untouched
-*  @param output the array to be checked
-*  @param workspaceTotal required to be the total number of spectra in the workspace
+*  @param output :: the array to be checked
+*  @param workspaceTotal :: required to be the total number of spectra in the workspace
 */
 void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTotal)
 {
@@ -215,7 +215,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
   }
 }
 /** Checks the user selected mode value
-*  @param mode must be one of LinearFit or Mean
+*  @param mode :: must be one of LinearFit or Mean
 *  @return true if the user selected Mean background analysis and false if Linear Fit was selected
 *  @throw invalid_argument if the mode is not recognised
 */
@@ -235,7 +235,7 @@ bool FlatBackground::isModeMean(const std::string &mode)
 /**
  * Checks the user selected output mode value.
  * @param outputMode
- * @return true if we are subtracting the background, false if not.  If neither then return true.
+::  * @return true if we are subtracting the background, false if not.  If neither then return true.
  */
 bool FlatBackground::subtractBackground(const std::string &outputMode)
 {
@@ -255,11 +255,11 @@ bool FlatBackground::subtractBackground(const std::string &outputMode)
 
 /** Gets the mean number of counts in each bin the background region and the variance (error^2) of that
 *  number
-*  @param WS points to the input workspace
-*  @param specInd index of the spectrum to process
-*  @param startX a X-value in the first bin that will be considered, must not be greater endX
-*  @param endX a X-value in the last bin that will be considered, must not less than startX
-*  @param variance will be set to the number of counts divided by the number of bins squared (= error^2)
+*  @param WS :: points to the input workspace
+*  @param specInd :: index of the spectrum to process
+*  @param startX :: a X-value in the first bin that will be considered, must not be greater endX
+*  @param endX :: a X-value in the last bin that will be considered, must not less than startX
+*  @param variance :: will be set to the number of counts divided by the number of bins squared (= error^2)
 *  @return the mean number of counts in each bin the background region
 *  @throw out_of_range if either startX or endX are out of the range of X-values in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the spectra

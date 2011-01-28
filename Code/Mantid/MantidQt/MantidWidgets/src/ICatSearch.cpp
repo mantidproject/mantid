@@ -136,7 +136,7 @@ bool ICatSearch::isCaseSensitiveSearch()
 
 
 /* This method updates the search result to search tree
- * @param ws_sptr workspace shared pointer
+ * @param ws_sptr :: workspace shared pointer
 */ 
 void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 {	
@@ -163,8 +163,8 @@ void ICatSearch::populateInstrumentBox(){
 }
 
 /**This method gets run numbers from the start and end run boxes.
-  *@param startRun - start run number
-  *@param endRun - end run number
+  *@param startRun :: start run number
+  *@param endRun :: end run number
 */
 void ICatSearch::getRunValues(double& startRun,double& endRun)
 {
@@ -173,8 +173,8 @@ void ICatSearch::getRunValues(double& startRun,double& endRun)
 }
 
 /**This method gets start and end dates from the start and end date boxes.
-  *@param startDate - start date  
-  *@param endDate - end date
+  *@param startDate :: start date  
+  *@param endDate :: end date
 */
 void ICatSearch::getDates(QString& startDate,QString& endDate)
 {
@@ -223,7 +223,7 @@ void ICatSearch::getDate(const QDate& date  )
 }
 
 /**This method gets the selected instrument
-  *@param instrName name of the selected instrument
+  *@param instrName :: name of the selected instrument
 */
 void ICatSearch::getSelectedInstrument(QString& instrName)
 {
@@ -247,7 +247,7 @@ Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
 
 }
 /**This method executes the search by run number algorithm
- *@param ws_sptr shared pointer to outputworkspace
+ *@param ws_sptr :: shared pointer to outputworkspace
 */
 bool  ICatSearch::executeSearch(ITableWorkspace_sptr& ws_sptr)
 {
@@ -455,7 +455,7 @@ void ICatSearch::onClose()
 }
 
 /** This method is called when an investigation is selected  from investigations list
-  *@param item  item in the table
+  *@param item ::  item in the table
 */
 void ICatSearch::investigationSelected(QTableWidgetItem * item )
 {

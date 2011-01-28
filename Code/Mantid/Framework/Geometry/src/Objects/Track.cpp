@@ -21,8 +21,8 @@ namespace Mantid
 
     /**
     * Constructor
-    * @param startPoint Initial point
-    * @param direction Directional vector. It must be unit vector.
+    * @param startPoint :: Initial point
+    * @param direction :: Directional vector. It must be unit vector.
     */ 
     Track::Track(const V3D& startPoint, const V3D& direction) : 
     m_startPoint(startPoint),m_unitVector(direction)
@@ -30,7 +30,7 @@ namespace Mantid
 
     /**
      * Copy Constructor
-     * @param other Track to initialise this copy with.
+     * @param other :: Track to initialise this copy with.
      */ 
     Track::Track(const Track& other) : m_startPoint(other.m_startPoint),m_unitVector(other.m_unitVector),
       m_links(other.m_links),m_surfPoints(other.m_surfPoints)
@@ -38,7 +38,7 @@ namespace Mantid
 
     /**
     * Assignment operator
-    * @param other The track to copy from
+    * @param other :: The track to copy from
     * @return *this
     */ 
     Track& Track::operator=(const Track& other)
@@ -61,8 +61,8 @@ namespace Mantid
 
     /**
      * Resets the track starting point and direction. 
-     * @param startPoint The new starting point
-     * @param direction The new direction
+     * @param startPoint :: The new starting point
+     * @param direction :: The new direction
      */
     void Track::reset(const V3D& startPoint, const V3D& direction)
     {
@@ -147,9 +147,9 @@ namespace Mantid
     /**
      * Objective is to merge in partial information about the beginning and end of the tracks.
      * The points are kept in order
-     * @param directionFlag A flag indicating if the direction of travel is entering/leaving
+     * @param directionFlag :: A flag indicating if the direction of travel is entering/leaving
      * an object. +1 is entering, -1 is leaving.
-     * @param point Point of intersection
+     * @param point :: Point of intersection
      * @param compID :: ID of the component that this link is about (Default=NULL)
      */
     void Track::addPoint(const int directionFlag, const V3D& point, const ComponentID compID) 

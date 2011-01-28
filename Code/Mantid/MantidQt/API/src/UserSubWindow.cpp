@@ -87,7 +87,7 @@ bool UserSubWindow::isPyInitialized() const
 /**
  *  A boost 'slot' for the Mantid signal channel connection. This relays the message to
  * a Qt signal
- * @param msg The Poco message parameter
+ * @param msg :: The Poco message parameter
  */
 void UserSubWindow::mantidLogReceiver(const Poco::Message & msg)
 {
@@ -112,7 +112,7 @@ void UserSubWindow::initializeLocalPython()
 //-------------------------------------
 /**
  * Raise a dialog box with some information for the user
- * @param message The message to show
+ * @param message :: The message to show
  */
 
 void UserSubWindow::showInformationBox(const QString & message) const
@@ -126,8 +126,8 @@ void UserSubWindow::showInformationBox(const QString & message) const
 /**
  * Execute a piece of Python code and the output that was written to stdout, i.e. the output from print
  * statements
- * @param code The code to execute
- * @param no_output An optional flag to specify that no output is needed. If running only small commands enable this
+ * @param code :: The code to execute
+ * @param no_output :: An optional flag to specify that no output is needed. If running only small commands enable this
  * as it should be faster. The default value is false
  */
 QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
@@ -166,8 +166,8 @@ QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
 
 /**
  * Open a file selection box
- * @param save if true a save dialog box used (prompts for replace if file exists) otherwise a load file (file must then exist)
- * @param exts the dialog boxes will only show files that have extensions that match one of the QStrings in the list
+ * @param save :: if true a save dialog box used (prompts for replace if file exists) otherwise a load file (file must then exist)
+ * @param exts :: the dialog boxes will only show files that have extensions that match one of the QStrings in the list
  */
 QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts)
 {
@@ -202,7 +202,7 @@ QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts)
 }
 /** Returns a pointer to a new validator QLabel. The code is copied from
 *  AlgorithmDialog.cpp and wont know if the validator label changes there
-*  @param parent a pointer to an object that will look after it deleting it
+*  @param parent :: a pointer to an object that will look after it deleting it
 */
 QLabel* UserSubWindow::newValidator(QWidget *parent)
 {
@@ -218,7 +218,7 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
 //-------------------------------------
 /**
  * Set the interface name
- * @param iface_name The name of the interface
+ * @param iface_name :: The name of the interface
  */
 void UserSubWindow::setInterfaceName(const QString & iface_name)
 {

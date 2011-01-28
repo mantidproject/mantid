@@ -75,7 +75,7 @@ void ObjComponentActor::define()
 //-------------------------------------------------------------------------------------------------
 /** Append the detector ID of this object to the list, if it is a detector.
  *
- * @param idList sequential list of detector IDs.
+ * @param idList :: sequential list of detector IDs.
  */
 void ObjComponentActor::appendObjCompID(std::vector<int>& idList)
 {

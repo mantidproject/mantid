@@ -36,11 +36,11 @@ namespace Mantid
 
     /**
      * Integrate each spectra to get the number of counts
-     * @param inputWS The workspace to integrate
-     * @param indexMin The lower bound of the spectra to integrate
-     * @param indexMax The upper bound of the spectra to integrate
-     * @param lower The lower bound
-     * @param upper The upper bound
+     * @param inputWS :: The workspace to integrate
+     * @param indexMin :: The lower bound of the spectra to integrate
+     * @param indexMax :: The upper bound of the spectra to integrate
+     * @param lower :: The lower bound
+     * @param upper :: The upper bound
      * @param outputWorkspace2D :: set to true to output a workspace 2D even if the input is an EventWorkspace
      * @returns A workspace containing the integrated counts
      */
@@ -99,8 +99,8 @@ namespace Mantid
      *  Fnds the median of values in single bin histograms rejecting spectra from masked
      *  detectors and the results of divide by zero (infinite and NaN).  
      * The median is an average that is less affected by small numbers of very large values.
-     * @param input A histogram workspace with one entry in each bin
-     * @param badIndices [Output] A set filled with indices to skip when performing tests
+     * @param input :: A histogram workspace with one entry in each bin
+     * @param badIndices :: [Output] A set filled with indices to skip when performing tests
      * @return The median value of the histograms in the workspace that was passed to it
      * @throw out_of_range if a value is incountered that is unbelievibly high or negative
      */
@@ -185,7 +185,7 @@ namespace Mantid
 
     /** 
      * Convert to a distribution
-     * @param workspace The input workspace to convert to a count rate
+     * @param workspace :: The input workspace to convert to a count rate
      */
     API::MatrixWorkspace_sptr DetectorDiagnostic::convertToRate(API::MatrixWorkspace_sptr workspace)
     {
@@ -209,7 +209,7 @@ namespace Mantid
 
     /** Update the percentage complete estimate assuming that the algorithm 
      * has completed a task with the given estimated run time
-     * @param toAdd the estimated additional run time passed since the last update, 
+     * @param toAdd :: the estimated additional run time passed since the last update, 
      * where m_TotalTime holds the total algorithm run time
      * @return estimated fraction of algorithm runtime that has passed so far
      */
@@ -225,7 +225,7 @@ namespace Mantid
 
     /** Update the percentage complete estimate assuming that the algorithm aborted a task with the given
      *  estimated run time
-     * @param aborted the amount of algorithm run time that was saved by aborting a 
+     * @param aborted :: the amount of algorithm run time that was saved by aborting a 
      * part of the algorithm, where m_TotalTime holds the total algorithm run time
      */
     void DetectorDiagnostic::failProgress(RunTime aborted)

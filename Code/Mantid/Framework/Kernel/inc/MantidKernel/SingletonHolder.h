@@ -64,7 +64,7 @@ struct CreateUsingNew
 	/// @returns New instance
 	static T* Create(){return new T;}
    /// delete an object instantiated using Create
-   /// @param p pointer to instance to destroy
+   /// @param p :: pointer to instance to destroy
 	static void Destroy(T* p){delete p;}
 };
 

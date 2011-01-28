@@ -22,7 +22,7 @@ const QString& pythonCalc::python() const
   return m_pyScript;
 }
 /** Protected constructor only desendents of this class can be construected
-*  @param interface this parent widget needs to have its runAsPythonScript signal connected to MantidPlot
+*  @param interface :: this parent widget needs to have its runAsPythonScript signal connected to MantidPlot
 */
 pythonCalc::pythonCalc(QWidget *interface) : MantidWidget(interface),
   m_pyScript(""), m_fails()
@@ -30,7 +30,7 @@ pythonCalc::pythonCalc(QWidget *interface) : MantidWidget(interface),
 }
 /** Looks for error reports from the object passed to it.  If the map returned by the
 *  the objects invalid() method isn't empty it places displays red stars and throws
-*  @param pythonGenerat the object with an invalid() map that contains a list of bad controls and error messages
+*  @param pythonGenerat :: the object with an invalid() map that contains a list of bad controls and error messages
 *  @return a description of any error
 */
 QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &validLbls) const
@@ -53,7 +53,7 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
   return "";
 }
 /** Sets m_pyScript to the contents of the named file
-* @param pythonFile the name of the file to read
+* @param pythonFile :: the name of the file to read
 */
 void pythonCalc::appendFile(const QString &pythonFile)
 {
@@ -80,7 +80,7 @@ void pythonCalc::appendFile(const QString &pythonFile)
   }
 }
 /** Sets m_pyScript to the contents of the named file
-* @param pythonFile the name of the file to read
+* @param pythonFile :: the name of the file to read
 */
 void pythonCalc::loadFile(const QString &pythonFile)
 {
@@ -109,9 +109,9 @@ void pythonCalc::loadFile(const QString &pythonFile)
 }
 /** Replaces the marker word in the m_pyScript with the text in the QLineEdit
 *  checking if the value will fail validation, storing any error in m_fails
-* @param pythonMark the word to search for and replace
-* @param userVal points to the QLineEdit containing the user value
-* @param check the property that will be used to for validity checking
+* @param pythonMark :: the word to search for and replace
+* @param userVal :: points to the QLineEdit containing the user value
+* @param check :: the property that will be used to for validity checking
 */
 void pythonCalc::LEChkCp(QString pythonMark, const QLineEdit * const userVal, Property * const check)
 {
@@ -124,9 +124,9 @@ void pythonCalc::LEChkCp(QString pythonMark, const QLineEdit * const userVal, Pr
 }
 /** Replaces the marker word in the m_pyScript with the passed string checking
 *  if the value will fail validation (errors are stored m_fails)
-* @param pythonMark the word to search for and replace
-* @param setting textual representation of the value
-* @param check the property that will be used to for validity checking
+* @param pythonMark :: the word to search for and replace
+* @param setting :: textual representation of the value
+* @param check :: the property that will be used to for validity checking
 */
 std::string pythonCalc::replaceErrsFind(QString pythonMark, const QString &setting, Property * const check)
 {
@@ -135,8 +135,8 @@ std::string pythonCalc::replaceErrsFind(QString pythonMark, const QString &setti
 }
 /** Appends the text in the QLineEdit to m_pyScript and stores any error
 *   in m_fails
-* @param userVal points to the QLineEdit containing the user value
-* @param check the property that will be used to for validity checking
+* @param userVal :: points to the QLineEdit containing the user value
+* @param check :: the property that will be used to for validity checking
 */
 void pythonCalc::appendChk(const QLineEdit * const userVal, Property * const check)
 {

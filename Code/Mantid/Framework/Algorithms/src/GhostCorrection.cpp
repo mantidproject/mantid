@@ -97,7 +97,7 @@ namespace Mantid
 
     //=============================================================================
     /** Reads in the file with the grouping information
-     * @param groupingFilename The file that contains the group information
+     * @param groupingFilename :: The file that contains the group information
      * TODO: Abstract this out into its own class, to reuse code better.
      */
     void GhostCorrection::readGroupingFile(const std::string& groupingFilename)
@@ -146,7 +146,7 @@ namespace Mantid
      * Loads a ghost mapping file from disk. Does a lot of the
      * work of mapping what ghost pixels should go were.
      * this->inputW needs to be set first!
-     * @param ghostMapFile the filename containing the ghost mapping
+     * @param ghostMapFile :: the filename containing the ghost mapping
      */
     void GhostCorrection::loadGhostMap(std::string ghostMapFile)
     {

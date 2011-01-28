@@ -26,9 +26,9 @@ namespace Mantid
     {}
 
     /** Sets the size of the workspace and initializes arrays to zero
-    *  @param NVectors This value can only be equal to one, otherwise exception is thrown
-    *  @param XLength The number of X data points/bin boundaries
-    *  @param YLength The number of data/error points
+    *  @param NVectors :: This value can only be equal to one, otherwise exception is thrown
+    *  @param XLength :: The number of X data points/bin boundaries
+    *  @param YLength :: The number of data/error points
     */
     void Workspace1D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
@@ -47,7 +47,7 @@ namespace Mantid
     }
 
     /** Returns the size of the workspace
-    * \returns The number of items the workspace contains
+    * @return The number of items the workspace contains
     */
     int Workspace1D::size() const
     {

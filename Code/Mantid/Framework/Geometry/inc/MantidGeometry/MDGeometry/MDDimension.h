@@ -16,7 +16,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 
-/*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
+/** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
  *
  *   A multidimensional dataset has N such dimensions and usual problem would have maximal number of
  *   dimensions N_max with N<=N_max
@@ -84,7 +84,7 @@ namespace Geometry
     /// scale of the data along this axis
     /// TO DO: what is this scale and what constraint we want to apply on it? 
     virtual double getScale(void)const{return latticeParam;}
-    /*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
+    /** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
      *   coinsiding with min and max values rMin and rMax; */
     virtual bool        getIntegrated(void)const{return isIntegrated;}
     /// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
@@ -127,8 +127,8 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     
     void  setName(const char *name) {this->AxisName.assign(name);}
     
-    /*! Set the scale of a particular dimension
-     * @param Value -- the value to set;    */
+    /** Set the scale of a particular dimension
+     * @param Value :: -- the value to set;    */
     void   setScale(double Value){latticeParam=Value;}
     /// functions clears axis, makes nBins=1 and sets "integrated" sign to the dimension. Meaningless and dangerous without real integration procedure
     void   setIntegrated(void);

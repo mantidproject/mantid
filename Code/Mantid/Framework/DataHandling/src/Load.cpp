@@ -60,12 +60,12 @@ namespace Mantid
     struct hasProperty
     { 
       /** constructor which takes 1 arguement.
-        *@param name - name of the property
+        *@param name :: name of the property
         */
       hasProperty(const std::string name):m_name(name){}
 
       /**This method comapres teh property name
-        *@param prop - shared pointer to property
+        *@param prop :: shared pointer to property
         *@return true if the property exists in the list of properties.
       */
       bool operator()(Mantid::Kernel::Property* prop)
@@ -126,7 +126,7 @@ namespace Mantid
 
 
    /** get a shared pointer to the load algorithm with highest preference for loading
-     *@param filePath path of the file
+     *@param filePath :: path of the file
      *@return filePath - path of the file
      */
      API::IAlgorithm_sptr Load::getLoadAlgorithmfromFile(const std::string& filePath)
@@ -186,11 +186,11 @@ namespace Mantid
      }
 
   /** This method set the algorithm as a child algorithm.
-    *  @param alg            The shared pointer to a  algorithm
-    *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
-    *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
-    *  @param enableLogging  Set to false to disable logging from the child algorithm
-    *  @param version        The version of the child algorithm to create. By default gives the latest version.
+    *  @param alg ::            The shared pointer to a  algorithm
+    *  @param startProgress ::  The percentage progress value of the overall algorithm where this child algorithm starts
+    *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
+    *  @param enableLogging ::  Set to false to disable logging from the child algorithm
+    *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
     */
     void Load::initialiseLoadSubAlgorithm(API::IAlgorithm_sptr alg, const double startProgress, const double endProgress, 
 						  const bool enableLogging, const int& version)
@@ -223,7 +223,7 @@ namespace Mantid
     /**
       * Set the output workspace(s) if the load's return workspace
       *  has type API::Workspace
-      *@param load shared pointer to load algorithm
+      *@param load :: shared pointer to load algorithm
       */
     void Load::setOutputWorkspace(API::IAlgorithm_sptr& load)
     {

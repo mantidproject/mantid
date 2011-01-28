@@ -18,7 +18,7 @@ namespace Mantid{
   }
 }
 
-/*!
+/**
 \class TexObject
 \brief Class for an object with a texture
 \version 1.0

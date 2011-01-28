@@ -10,7 +10,7 @@
 
 class QAction;
 
-/*!
+/**
   \class  GL3DWidget
   \brief  OpenGL Qt Widget which renders Instrument
   \author Chapon Laurent & Srikanth Nagella
@@ -61,7 +61,7 @@ public:
   {
   public:
     /** Returns the index number of the spectrum for the given detector
-    *  @param someDetID id of detector to be queried
+    *  @param someDetID :: id of detector to be queried
     */
     int operator()(const int someDetID) const{return getIndexOf(someDetID);}
     /// Get pointers to the workspace that contain information about detectors
@@ -87,7 +87,7 @@ public:
     void printLocation(std::ostringstream & output) const;///< Writes the location of the detectors
     void printV(Mantid::Geometry::V3D pos, std::ostringstream & out) const;///< Writes a position vector in a nice way
     /** Returns true only if the value passed can't be missing data
-    *  @param testVal the data value to check
+    *  @param testVal :: the data value to check
     *  @return if there are no error flags returns true
     */
     bool is_good(const int testVal) const { return testVal > NO_INDEX; }

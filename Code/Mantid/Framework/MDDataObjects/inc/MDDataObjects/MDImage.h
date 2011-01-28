@@ -67,7 +67,7 @@ public:
     virtual ~MDImage();
     /** function returns vector of points left after the selection has been applied to the multidimensinal image
 	*
-    * @param selection -- vector of indexes, which specify which dimensions are selected and the location of the selected point
+    * @param selection :: -- vector of indexes, which specify which dimensions are selected and the location of the selected point
     *                     e.g. selection[0]=10 -- selects the index 10 in the last expanded dimension or
     *                     selection.assign(2,10) for 4-D dataset lead to 2D image extracted from 4D image at range of points (:,:,10,10);
     *                     throws if attempeted to select more dimensions then the number of expanded dimensions

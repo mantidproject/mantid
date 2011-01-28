@@ -112,10 +112,10 @@ void SaveNexus::exec()
   return;
 }
 /** virtual method to set the non workspace properties for this algorithm
- *  @param alg pointer to the algorithm
- *  @param propertyName name of the property
- *  @param propertyValue value  of the property
- *  @param perioidNum period number
+ *  @param alg :: pointer to the algorithm
+ *  @param propertyName :: name of the property
+ *  @param propertyValue :: value  of the property
+ *  @param perioidNum :: period number
  */
 void SaveNexus::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
 {	

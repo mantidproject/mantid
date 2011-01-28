@@ -98,8 +98,8 @@ void GroupWorkspaces::exec()
 }
 
 /** checks the input workspaces are of same types
- *  @param firstWS    first workspace added to group vector
- *  @param newWStoAdd   new workspace to add to group
+ *  @param firstWS ::    first workspace added to group vector
+ *  @param newWStoAdd ::   new workspace to add to group
  *  @retval boolean  true if two workspaces are of same types else false
  */
 bool GroupWorkspaces::isCompatibleWorkspaces(const std::string & firstWS, const std::string& newWStoAdd)
@@ -130,8 +130,8 @@ bool GroupWorkspaces::isCompatibleWorkspaces(const std::string & firstWS, const 
 }
 
 /** add workspace to groupworkspace
- *  @param outgrp_sptr    shared pointer to groupworkspace
- *  @param wsName   name of the workspace to add to group
+ *  @param outgrp_sptr ::    shared pointer to groupworkspace
+ *  @param wsName ::   name of the workspace to add to group
  */
 void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const std::string &wsName)
 {

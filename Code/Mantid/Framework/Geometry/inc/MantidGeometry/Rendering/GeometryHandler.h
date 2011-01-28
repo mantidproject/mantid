@@ -12,7 +12,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class GeometryHandler
 		\brief Place holder for geometry triangulation and rendering.
 		\author Srikanth Nagella

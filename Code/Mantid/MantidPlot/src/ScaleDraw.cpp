@@ -343,14 +343,14 @@ void ScaleDraw::setNumericFormat(NumericFormat format)
 	}
 }
 
-/*!
+/**
   \brief Return the number format for the major scale labels
 
   Format character and precision have the same meaning as for
   sprintf().
-  \param f format character 'e', 'f' or 'g'
-  \param prec
-    - for 'e', 'f': the number of digits after the radix character (point)
+  @param f :: format character 'e', 'f' or 'g'
+  @param prec
+::     - for 'e', 'f': the number of digits after the radix character (point)
     - for 'g': the maximum number of significant digits
 
   \sa setNumericFormat()

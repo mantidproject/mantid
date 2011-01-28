@@ -121,18 +121,18 @@ public:
   bool workspaceExists(const std::string & name) const;
   /** 
    * A function that can be overridden in Python to handle the removal of a workspace from the ADS
-   * @param name The name of the workspace
+   * @param name :: The name of the workspace
    */
   virtual void workspaceRemoved(const std::string & name) {(void)name;}
   /** 
    * A function that can be overridden in Python to handle the adding a workspace to the ADS
-   * @param name The name of the workspace
+   * @param name :: The name of the workspace
    */
   virtual void workspaceAdded(const std::string & name) {(void)name;}
 
   /** 
    * A function that can be overridden in Python to handle the replacing a workspace to the ADS
-   * @param name The name of the workspace
+   * @param name :: The name of the workspace
    */
   virtual void workspaceReplaced(const std::string & name) {(void)name;}
   /**
@@ -142,7 +142,7 @@ public:
   //@}
 
   /** Set GIL state
-   * @param lock If true, the next call to Python will acquire the GIL before the call. Note that it is unlocked automatically
+   * @param lock :: If true, the next call to Python will acquire the GIL before the call. Note that it is unlocked automatically
    */
   static void setGILRequired(bool lock) { g_gil_required = lock; }
   /** Return if we need to aquire the GIL

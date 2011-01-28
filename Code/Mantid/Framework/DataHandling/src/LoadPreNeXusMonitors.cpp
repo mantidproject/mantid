@@ -236,8 +236,8 @@ void LoadPreNeXusMonitors::exec()
 
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
- *  @param instrument instrument name.
- *  @param localWorkspace MatrixWorkspace in which to put the instrument geometry
+ *  @param instrument :: instrument name.
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
 void LoadPreNeXusMonitors::runLoadInstrument(const std::string &instrument,
     MatrixWorkspace_sptr localWorkspace)

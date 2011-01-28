@@ -95,7 +95,7 @@ namespace Mantid
       void removeObserver(const Poco::AbstractObserver& observer)const;
 
       ///Set logging on or off
-      ///@param value true = logging enabled
+      ///@param value :: true = logging enabled
       void setLogging(const bool value) { m_isLoggingEnabled=value; }
       /// Is the algorithm have logging enabled
       bool isLogging() const { return m_isLoggingEnabled; }

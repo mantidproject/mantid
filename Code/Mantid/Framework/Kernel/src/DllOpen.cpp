@@ -32,8 +32,8 @@ Logger& DllOpen::log = Logger::get("DllOpen");
 /* Opens the shared library after appending the required formatting,
  * i.e. libName.so for Linux and Name.dll for Windows.
  * Calls the correct implementation based on the current O/S.
- * \param libName :: Name of the library.
- * \return Pointer to library (of type void).
+ * @param libName :: Name of the library.
+ * @return Pointer to library (of type void).
  **/
 void* DllOpen::OpenDll(const std::string& libName)
 {
@@ -44,9 +44,9 @@ void* DllOpen::OpenDll(const std::string& libName)
 /* Opens the shared library after appending the required formatting,
  * i.e. libName.so for Linux and Name.dll for Windows.
  * Calls the correct implementation based on the current O/S.
- * \param libName :: Name of the library.
- * \param filePath :: The location on the library.
- * \return Pointer to library (of type void).
+ * @param libName :: Name of the library.
+ * @param filePath :: The location on the library.
+ * @return Pointer to library (of type void).
  **/
 void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
 {
@@ -57,9 +57,9 @@ void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
 
 /* Retrieves a function from the opened library.
  * Calls the correct implementation based on the current O/S.
- * \param libName :: Name of the library.
- * \param funcName :: The name of the function to retrieve.
- * \return Pointer to the function (of type void).
+ * @param libName :: Name of the library.
+ * @param funcName :: The name of the function to retrieve.
+ * @return Pointer to the function (of type void).
  **/
 void* DllOpen::GetFunction(void* libName, const std::string& funcName)
 {
@@ -68,7 +68,7 @@ void* DllOpen::GetFunction(void* libName, const std::string& funcName)
 
 /* Closes an open library.
  * Calls the correct implementation based on the current O/S.
- * \param libName :: Name of the library.
+ * @param libName :: Name of the library.
  **/
 void DllOpen::CloseDll(void* libName)
 {
@@ -77,8 +77,8 @@ void DllOpen::CloseDll(void* libName)
 
 /** Converts a file name (without directory) to a undecorated library name.
  * e.g. MyLibrary.dll or libMyLibary.so would become MyLibrary.
- * \param fileName :: The filename (with extension) to convert
- * \return The converted libName, or empty string if the conversion was not possible.
+ * @param fileName :: The filename (with extension) to convert
+ * @return The converted libName, or empty string if the conversion was not possible.
  **/
 const std::string DllOpen::ConvertToLibName(const std::string& fileName)
 {
@@ -124,8 +124,8 @@ const std::string DllOpen::LIB_POSTFIX = ".dll";
 const std::string DllOpen::PATH_SEPERATOR = "\\";
 
 /* Opens the Windows .dll file.
- * \param filePath :: Filepath of the library.
- * \return Pointer to library (of type void).
+ * @param filePath :: Filepath of the library.
+ * @return Pointer to library (of type void).
  **/
 void* DllOpen::OpenDllImpl(const std::string& filePath)
 {
@@ -166,9 +166,9 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
 
 /* Retrieves a function from the opened .dll file.
  * Only works if the function has been declared as extern 'C'.
- * \param libName :: Name of the library.
- * \param funcName :: The name of the function to retrieve.
- * \return Pointer to the function (of type void).
+ * @param libName :: Name of the library.
+ * @param funcName :: The name of the function to retrieve.
+ * @return Pointer to the function (of type void).
  **/
 void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 {
@@ -176,7 +176,7 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 }
 
 /* Closes an open .dll file.
- * \param libName :: Name of the library.
+ * @param libName :: Name of the library.
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {
@@ -203,8 +203,8 @@ const std::string DllOpen::LIB_POSTFIX = ".dylib";
 const std::string DllOpen::PATH_SEPERATOR = "/";
 
 /* Opens the Linux .so file
- * \param filePath :: Filepath of the library.
- * \return Pointer to library (of type void).
+ * @param filePath :: Filepath of the library.
+ * @return Pointer to library (of type void).
  **/
 void* DllOpen::OpenDllImpl(const std::string& filePath)
 {
@@ -218,9 +218,9 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
 
 /* Retrieves a function from the opened library.
  * Only works if the function has been declared as extern 'C'.
- * \param libName :: Name of the library.
- * \param funcName :: The name of the function to retrieve.
- * \return Pointer to the function (of type void).
+ * @param libName :: Name of the library.
+ * @param funcName :: The name of the function to retrieve.
+ * @return Pointer to the function (of type void).
  **/
 void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 {
@@ -228,7 +228,7 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 }
 
 /* Closes an open .so file.
- * \param libName :: Name of the library.
+ * @param libName :: Name of the library.
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {

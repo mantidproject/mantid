@@ -44,10 +44,10 @@ class DLLExport ArrayProperty : public PropertyWithValue< std::vector<T> >
 {
 public:
   /** Constructor
-   *  @param name      The name to assign to the property
-   *  @param vec       The initial vector of values to assign to the property.
-   *  @param validator The validator to use for this property, if required.
-   *  @param direction The direction (Input/Output/InOut) of this property
+   *  @param name ::      The name to assign to the property
+   *  @param vec ::       The initial vector of values to assign to the property.
+   *  @param validator :: The validator to use for this property, if required.
+   *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name, const std::vector<T> &vec,
                 IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
@@ -59,9 +59,9 @@ public:
   /** Constructor
    *  Will lead to the property having a default-constructed (i.e. empty) vector
    *  as its initial (default) value
-   *  @param name      The name to assign to the property
-   *  @param validator The validator to use for this property, if required
-   *  @param direction The direction (Input/Output/InOut) of this property
+   *  @param name ::      The name to assign to the property
+   *  @param validator :: The validator to use for this property, if required
+   *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name,
                 IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
@@ -71,11 +71,11 @@ public:
   }
 
   /** Constructor from which you can set the property's values through a string
-   *  @param name      The name to assign to the property
-   *  @param values    A comma-separated string containing the values to store in the property
-   *  @param validator The validator to use for this property, if required
-   *  @param direction The direction (Input/Output/InOut) of this property
-   *  @throws std::invalid_argument if the string passed is not compatible with the array type
+   *  @param name ::      The name to assign to the property
+   *  @param values ::    A comma-separated string containing the values to store in the property
+   *  @param validator :: The validator to use for this property, if required
+   *  @param direction :: The direction (Input/Output/InOut) of this property
+   *  @throw std::invalid_argument if the string passed is not compatible with the array type
    */
   ArrayProperty(const std::string &name, const std::string& values,
                 IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >,
@@ -116,7 +116,7 @@ public:
   }
 
   /** Sets the values stored in the ArrayProperty from a string representation
-   *  @param value The values to assign to the property, given as a comma-separated list
+   *  @param value :: The values to assign to the property, given as a comma-separated list
    *  @return True if the assignment was successful
    */
   std::string setValue( const std::string& value )

@@ -34,8 +34,8 @@ namespace std
 {
   /**
    * Output an InstrumentInfo object to a stream
-   * @param os The output stream.
-   * @param instr The object to write out.
+   * @param os :: The output stream.
+   * @param instr :: The object to write out.
    * @returns A reference to the stream that was written to.
    */
   inline ostream & operator<<(ostream & os, const Mantid::Kernel::InstrumentInfo& instr)

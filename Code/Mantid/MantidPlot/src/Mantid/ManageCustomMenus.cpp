@@ -7,7 +7,7 @@
 #include <QtGui>
 /**
 * Constructor for object. Performs initial setup and calls subsequent setup functions.
-* @param parent pointer to the main MantidPlot ApplicationWindow object
+* @param parent :: pointer to the main MantidPlot ApplicationWindow object
 */
 ManageCustomMenus::ManageCustomMenus(QWidget *parent) : QDialog(parent),
 m_scriptsTree(0), m_customInterfacesTree(0), m_menusTree(0)

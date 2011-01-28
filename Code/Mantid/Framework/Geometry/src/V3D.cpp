@@ -28,9 +28,9 @@ V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
 /**
   Sets the vector position based on spherical coordinates
 
-  \param R :: The R value (distance)
-  \param theta :: The theta value (in degrees) = the polar angle away from the +Z axis.
-  \param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points along +X and rotates counter-clockwise in the XY plane
+  @param R :: The R value (distance)
+  @param theta :: The theta value (in degrees) = the polar angle away from the +Z axis.
+  @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points along +X and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical(const double& R, const double& theta, const double& phi)
 {
@@ -49,9 +49,9 @@ if (std::abs(y) < Tolerance) y = 0.0;
 /**
   Sets the vector position based on spherical coordinates, in radians
 
-  \param R :: The R value (distance)
-  \param polar :: the polar angle (in radians) away from the +Z axis.
-  \param azimuth :: the azimuthal angle (in radians), where 0 points along +X and rotates counter-clockwise in the XY plane
+  @param R :: The R value (distance)
+  @param polar :: the polar angle (in radians) away from the +Z axis.
+  @param azimuth :: the azimuthal angle (in radians), where 0 points along +X and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical_rad(const double& R, const double& polar, const double& azimuth)
 {
@@ -71,9 +71,9 @@ if (std::abs(y) < Tolerance) y = 0.0;
   Sets the vector position based on azimuth and polar angle, in RADIANS, in the SNS instrument coordinate system,
     where +Z = beam direction, +Y = vertical.
 
-  \param R :: The R value (distance)
-  \param azimuth :: The azimuthal angle (in Radians)
-  \param polar :: The polar value (in Radians)
+  @param R :: The R value (distance)
+  @param azimuth :: The azimuthal angle (in Radians)
+  @param polar :: The polar value (in Radians)
 */
 
 void V3D::azimuth_polar_SNS(const double& R, const double& azimuth, const double& polar)
@@ -93,8 +93,8 @@ void V3D::azimuth_polar_SNS(const double& R, const double& azimuth, const double
 
   /**
     Assignment operator
-    \param rhs :: V3D to copy
-    \return *this
+    @param rhs :: V3D to copy
+    @return *this
   */
 V3D& V3D::operator=(const V3D& rhs)
 {
@@ -126,8 +126,8 @@ V3D::~V3D()
 
   /**
     Addtion operator
-     \param v :: Vector to add
-     \return *this+v;
+     @param v :: Vector to add
+     @return *this+v;
   */
 V3D
 V3D::operator+(const V3D& v) const
@@ -139,8 +139,8 @@ V3D::operator+(const V3D& v) const
 
   /**
     Subtraction operator
-    \param v :: Vector to sub.
-    \return *this-v;
+    @param v :: Vector to sub.
+    @return *this-v;
   */
 V3D
 V3D::operator-(const V3D& v) const
@@ -152,8 +152,8 @@ V3D::operator-(const V3D& v) const
 
   /**
     Inner product
-    \param v :: Vector to sub.
-    \return *this * v;
+    @param v :: Vector to sub.
+    @return *this * v;
   */
 V3D
 V3D::operator*(const V3D& v) const
@@ -165,8 +165,8 @@ V3D::operator*(const V3D& v) const
 
   /**
     Inner division
-    \param v :: Vector to divide
-    \return *this * v;
+    @param v :: Vector to divide
+    @return *this * v;
   */
 V3D
 V3D::operator/(const V3D& v) const
@@ -178,8 +178,8 @@ V3D::operator/(const V3D& v) const
 
   /**
     Self-Addition operator
-    \param v :: Vector to add.
-    \return *this+=v;
+    @param v :: Vector to add.
+    @return *this+=v;
   */
 V3D&
 V3D::operator+=(const V3D& v)
@@ -192,8 +192,8 @@ V3D::operator+=(const V3D& v)
 
   /**
     Self-Subtraction operator
-    \param v :: Vector to sub.
-    \return *this-v;
+    @param v :: Vector to sub.
+    @return *this-v;
   */
 V3D&
 V3D::operator-=(const V3D& v)
@@ -206,8 +206,8 @@ V3D::operator-=(const V3D& v)
 
   /**
     Self-Inner product
-    \param v :: Vector to multiply
-    \return *this*=v;
+    @param v :: Vector to multiply
+    @return *this*=v;
   */
 V3D&
 V3D::operator*=(const V3D& v)
@@ -220,8 +220,8 @@ V3D::operator*=(const V3D& v)
 
   /**
     Self-Inner division
-    \param v :: Vector to divide
-    \return *this*=v;
+    @param v :: Vector to divide
+    @return *this*=v;
   */
 V3D&
 V3D::operator/=(const V3D& v)
@@ -234,8 +234,8 @@ V3D::operator/=(const V3D& v)
 
   /**
     Scalar product
-    \param D :: value to scale
-    \return this * D
+    @param D :: value to scale
+    @return this * D
    */
 V3D
 V3D::operator*(const double D) const
@@ -247,8 +247,8 @@ V3D::operator*(const double D) const
 
   /**
     Scalar divsion
-    \param D :: value to scale
-    \return this / D
+    @param D :: value to scale
+    @return this / D
   */
 V3D
 V3D::operator/(const double D) const
@@ -260,8 +260,8 @@ V3D::operator/(const double D) const
 
   /**
     Scalar product
-    \param D :: value to scale
-    \return this *= D
+    @param D :: value to scale
+    @return this *= D
   */
 V3D&
 V3D::operator*=(const double D)
@@ -274,8 +274,8 @@ V3D::operator*=(const double D)
 
   /**
     Scalar division
-    \param D :: value to scale
-    \return this /= D
+    @param D :: value to scale
+    @return this /= D
     \todo ADD TOLERANCE
   */
 V3D&
@@ -292,8 +292,8 @@ V3D::operator/=(const double D)
 
   /**
     Equals operator with tolerance factor
-    \param v :: V3D for comparison
-    \return true if the items are equal
+    @param v :: V3D for comparison
+    @return true if the items are equal
   */
 bool
 V3D::operator==(const V3D& v) const
@@ -305,7 +305,7 @@ V3D::operator==(const V3D& v) const
 }
 
 /** Not equals operator with tolerance factor.
- *  @param other The V3D to compare against
+ *  @param other :: The V3D to compare against
  *  @returns True if the vectors are different
  */
 bool V3D::operator!=(const V3D& other) const
@@ -315,7 +315,7 @@ bool V3D::operator!=(const V3D& other) const
 
   /**
     compare
-    \return true if V is greater
+    @return true if V is greater
    */
 bool
 V3D::operator<(const V3D& V) const
@@ -329,9 +329,9 @@ V3D::operator<(const V3D& V) const
 
   /**
     Sets the vector position from a triplet of doubles x,y,z
-    \param xx The X coordinate
-    \param yy The Y coordinate
-    \param zz The Z coordinate
+    @param xx :: The X coordinate
+    @param yy :: The Y coordinate
+    @param zz :: The Z coordinate
   */
 void
 V3D::operator()(const double xx, const double yy, const double zz)
@@ -344,7 +344,7 @@ V3D::operator()(const double xx, const double yy, const double zz)
 
   /**
     Set is x position
-    \param xx The X coordinate
+    @param xx :: The X coordinate
   */
 void V3D::setX(const double xx)
 {
@@ -353,7 +353,7 @@ void V3D::setX(const double xx)
 
   /**
     Set is y position
-    \param yy The Y coordinate
+    @param yy :: The Y coordinate
   */
 void V3D::setY(const double yy)
 {
@@ -362,7 +362,7 @@ void V3D::setY(const double yy)
 
   /**
     Set is z position
-    \param zz The Z coordinate
+    @param zz :: The Z coordinate
   */
 void V3D::setZ(const double zz)
 {
@@ -371,8 +371,8 @@ void V3D::setZ(const double zz)
 
   /**
     Returns the axis value based in the index provided
-    \param Index 0=x, 1=y, 2=z
-    \returns a double value of the requested axis
+    @param Index :: 0=x, 1=y, 2=z
+    @return a double value of the requested axis
   */
 const double&
 V3D::operator[](const int Index) const
@@ -389,8 +389,8 @@ V3D::operator[](const int Index) const
 
   /**
     Returns the axis value based in the index provided
-    \param Index 0=x, 1=y, 2=z
-    \returns a double value of the requested axis
+    @param Index :: 0=x, 1=y, 2=z
+    @return a double value of the requested axis
   */
 double&
 V3D::operator[](const int Index)
@@ -406,9 +406,9 @@ V3D::operator[](const int Index)
 }
 
 /** Return the vector's position in spherical coordinates
- *  @param R     Returns the radial distance
- *  @param theta Returns the theta angle in degrees
- *  @param phi   Returns the phi (azimuthal) angle in degrees
+ *  @param R ::     Returns the radial distance
+ *  @param theta :: Returns the theta angle in degrees
+ *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
 void V3D::getSpherical(double& R, double& theta, double& phi) const
 {
@@ -422,7 +422,7 @@ void V3D::getSpherical(double& R, double& theta, double& phi) const
 
   /**
     Vector length
-    \return vec.length()
+    @return vec.length()
   */
 double
 V3D::norm() const
@@ -432,7 +432,7 @@ V3D::norm() const
 
   /**
     Vector length without the sqrt
-    \return vec.length()
+    @return vec.length()
   */
 double
 V3D::norm2() const
@@ -443,7 +443,7 @@ V3D::norm2() const
   /**
     Normalises the vector and
     then returns the scalar value of the vector
-    \return Norm
+    @return Norm
   */
 double
 V3D::normalize()
@@ -455,8 +455,8 @@ V3D::normalize()
 
   /**
     Calculates the scalar product
-    \param V The second vector to include in the calculation
-    \return The scalar product of the two vectors
+    @param V :: The second vector to include in the calculation
+    @return The scalar product of the two vectors
   */
 double
 V3D::scalar_prod(const V3D& V) const
@@ -466,8 +466,8 @@ V3D::scalar_prod(const V3D& V) const
 
   /**
     Calculates the cross product. Returns (this * v).
-    \param v The second vector to include in the calculation
-    \return The cross product of the two vectors (this * v)
+    @param v :: The second vector to include in the calculation
+    @return The cross product of the two vectors (this * v)
   */
 V3D
 V3D::cross_prod(const V3D& v) const
@@ -477,8 +477,8 @@ V3D::cross_prod(const V3D& v) const
 
   /**
     Calculates the distance between two vectors
-    \param v The second vector to include in the calculation
-    \return The distance between the two vectors
+    @param v :: The second vector to include in the calculation
+    @return The distance between the two vectors
   */
 double
 V3D::distance(const V3D& v) const
@@ -489,8 +489,8 @@ V3D::distance(const V3D& v) const
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
- *  \param v The other vector
- *  \return The azimuthal angle in radians (0 < theta < pi)
+ *  @param v :: The other vector
+ *  @return The azimuthal angle in radians (0 < theta < pi)
  */
 double V3D::zenith(const V3D& v) const
 {
@@ -508,8 +508,8 @@ double V3D::zenith(const V3D& v) const
 
 /** Calculates the angle between this and another vector.
  *
- *  \param v The other vector
- *  \return The angle between the vectors in radians (0 < theta < pi)
+ *  @param v :: The other vector
+ *  @return The angle between the vectors in radians (0 < theta < pi)
  */
 double V3D::angle(const V3D& v) const
 {
@@ -518,15 +518,15 @@ double V3D::angle(const V3D& v) const
 
 int
 V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
-  /*!
+  /**
      Re-express this point components of A,B,C.
      Assuming that A,B,C are form an basis set (which
      does not have to be othonormal.
-     \param A :: Unit vector in basis
-     \param B :: Unit vector in basis
-     \param C :: Unit vector in basis
-     \retval -1 :: The points do not form a basis set.
-     \retval 0  :: Vec3D has successfully been re-expressed.
+     @param A :: Unit vector in basis
+     @param B :: Unit vector in basis
+     @param C :: Unit vector in basis
+     @retval -1 :: The points do not form a basis set.
+     @retval 0  :: Vec3D has successfully been re-expressed.
   */
 {
   Matrix<double> T(3,3);
@@ -545,9 +545,9 @@ V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
 
 void
 V3D::rotate(const Geometry::Matrix<double>& A)
-  /*!
+  /**
     Rotate a point by a matrix
-    \param A :: Rotation matrix (needs to be >3x3)
+    @param A :: Rotation matrix (needs to be >3x3)
   */
 {
   Matrix<double> Pv(3,1);
@@ -561,11 +561,11 @@ V3D::rotate(const Geometry::Matrix<double>& A)
   return;
 }
 
-/*!
+/**
   Determines if this,B,C are collinear
-  \param Bv :: Vector to test
-  \param Cv :: Vector to test
-  \returns false is no colinear and true if they are (within Ptolerance)
+  @param Bv :: Vector to test
+  @param Cv :: Vector to test
+  @return false is no colinear and true if they are (within Ptolerance)
 */
 bool
 V3D::coLinear(const V3D& Bv,const V3D& Cv) const
@@ -577,12 +577,12 @@ V3D::coLinear(const V3D& Bv,const V3D& Cv) const
 
 bool
 V3D::nullVector(const double Tol) const
-  /*!
+  /**
     Checks the size of the vector
-    \param Tol :: size of the biggest zero vector allowed.
-    \retval 1 : the vector squared components
+    @param Tol :: size of the biggest zero vector allowed.
+    @retval 1 : the vector squared components
     magnitude are less than Tol
-    \retval 0 :: Vector bigger than Tol
+    @retval 0 :: Vector bigger than Tol
   */
 {
   if (std::fabs(x)>Tol)
@@ -598,13 +598,13 @@ V3D::nullVector(const double Tol) const
 
 int
 V3D::masterDir(const double Tol) const
-  /*!
+  /**
      Calculates the index of the primary direction (if there is one)
-     \param Tol :: Tolerance accepted
-     \retval range -3,-2,-1 1,2,3  if the vector
+     @param Tol :: Tolerance accepted
+     @retval range -3,-2,-1 1,2,3  if the vector
      is orientaged within Tol on the x,y,z direction (the sign
      indecates the direction to the +ve side )
-     \retval 0 :: No master direction
+     @retval 0 :: No master direction
   */
 {
   // Calc max dist
@@ -633,10 +633,10 @@ V3D::masterDir(const double Tol) const
   return idx;
 }
 
-/*!
+/**
   Read data from a stream.
   \todo Check Error handling
-  \param IX :: Input Stream
+  @param IX :: Input Stream
 */
 void
 V3D::read(std::istream& IX)
@@ -647,9 +647,9 @@ V3D::read(std::istream& IX)
 
 void
 V3D::write(std::ostream& OX) const
-  /*!
+  /**
     Write out the point values
-    \param OX :: Output stream
+    @param OX :: Output stream
   */
 {
   OX<<x<<" "<<y<<" "<<z;
@@ -658,7 +658,7 @@ V3D::write(std::ostream& OX) const
 
   /**
     Prints a text representation of itself in format "[x,y,z]"
-    \param os the Stream to output to
+    @param os :: the Stream to output to
   */
 void
 V3D::printSelf(std::ostream& os) const
@@ -667,10 +667,10 @@ V3D::printSelf(std::ostream& os) const
   return;
 }
 
-/*!
+/**
   Read data from a stream in the format returned by printSelf ("[x,y,z]").
-  \param IX :: Input Stream
-  \throw std::runtime_error if the input is of wrong format
+  @param IX :: Input Stream
+  @throw std::runtime_error if the input is of wrong format
 */
 void
 V3D::readPrinted(std::istream& IX)
@@ -695,9 +695,9 @@ V3D::readPrinted(std::istream& IX)
 
   /**
     Prints a text representation of itself
-    \param os the Stream to output to
-    \param v the vector to output
-    \returns the output stream
+    @param os :: the Stream to output to
+    @param v :: the vector to output
+    @return the output stream
     */
 std::ostream&
 operator<<(std::ostream& os, const V3D& v)
@@ -708,11 +708,11 @@ operator<<(std::ostream& os, const V3D& v)
 
 std::istream&
 operator>>(std::istream& IX,V3D& A)
-  /*!
+  /**
     Calls Vec3D method write to output class
-    \param IX :: Input Stream
-    \param A :: Vec3D to write
-    \return Current state of stream
+    @param IX :: Input Stream
+    @param A :: Vec3D to write
+    @return Current state of stream
   */
 {
   A.read(IX);

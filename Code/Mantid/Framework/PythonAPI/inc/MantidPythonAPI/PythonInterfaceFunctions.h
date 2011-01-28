@@ -243,7 +243,7 @@ namespace Mantid
       //@{
       /**
       * Convert a Boost Python list to a std::vector of the requested type
-      * @param pylist The Python list
+      * @param pylist :: The Python list
       */
       template<typename TYPE>
       std::vector<TYPE> convertToStdVector(const boost::python::list & pylist)

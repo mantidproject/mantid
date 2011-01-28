@@ -14,7 +14,7 @@ extern const char * release_date;
 
 /**
  * Constructor
- * @param parent The parent widget
+ * @param parent :: The parent widget
  */
 
 MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)

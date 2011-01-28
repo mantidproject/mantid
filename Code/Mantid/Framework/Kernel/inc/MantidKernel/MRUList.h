@@ -73,7 +73,7 @@ namespace Kernel
   public:
     //---------------------------------------------------------------------------------------------
     /** Constructor
-     *  @param max_num_items_ The length of the list
+     *  @param max_num_items_ :: The length of the list
      */
     MRUList(const std::size_t &max_num_items_)  :
       max_num_items(max_num_items_)
@@ -99,7 +99,7 @@ namespace Kernel
     /** Insert an item into the list. If it's already in the list, it's moved to the top.
      *  If it's a new item, it's put at the top and the last item in the list is written to file and dropped.
      *
-     *  @param item The item, of type T, to put in the list
+     *  @param item :: The item, of type T, to put in the list
      *  @return pointer to an item that is being dropped from the MRU. The calling code can
      *     do stuff to it (save it) and needs to delete it. NULL if nothing needs to be dropped.
      */
@@ -167,7 +167,7 @@ namespace Kernel
 
     //---------------------------------------------------------------------------------------------
     /** Find an element of the list from the key of the index
-     *  @param index The index value to search the list for
+     *  @param index :: The index value to search the list for
      *  @return The object found, or NULL if not found.
      */
     T* find(const unsigned int index) const

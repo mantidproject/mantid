@@ -25,8 +25,8 @@ namespace API
   Kernel::Logger& IFunctionMD::g_log = Kernel::Logger::get("IFunctionMD");
 
   /** Set the workspace
-    * @param ws A shared pointer to a workspace. Must be a MatrixWorkspace.
-    * @param slicing A string identifying the data to be fitted. 
+    * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
+    * @param slicing :: A string identifying the data to be fitted. 
   */
   void IFunctionMD::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
   {
@@ -116,7 +116,7 @@ namespace API
   }
 
   /// Function you want to fit to. 
-  /// @param out The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   void IFunctionMD::function(double* out)const
   {
     if (m_dataSize == 0) return;
@@ -190,7 +190,7 @@ namespace API
 
   /**
     * Constructor.
-    * @param ws A pointer to the iterated workspace.
+    * @param ws :: A pointer to the iterated workspace.
     */
   IFunctionMD::MDIterator::MDIterator(boost::shared_ptr<const IMDWorkspace> ws):
   m_workspace(ws),
@@ -208,7 +208,7 @@ namespace API
 
   /**
     * Constructor.
-    * @param ws A pointer to a MD funtion.
+    * @param ws :: A pointer to a MD funtion.
     */
   IFunctionMD::MDIterator::MDIterator(const IFunctionMD* fun):
   m_workspace(fun->m_workspace),
@@ -237,7 +237,7 @@ namespace API
 
   /**
     * Get the value of the i-th coordinate at the current point.
-    * @param i Index of the dimension.
+    * @param i :: Index of the dimension.
     */
   double IFunctionMD::MDIterator::getAxisValue(int i)const
   {
@@ -247,7 +247,7 @@ namespace API
 
   /**
     * Return the current value in a data array
-    * @param data A pointer to the first element of a data array. 
+    * @param data :: A pointer to the first element of a data array. 
     */
   double IFunctionMD::MDIterator::getData(const double* data)const
   {
@@ -256,8 +256,8 @@ namespace API
 
   /**
     * Set a value to an element of data pointed to by this iterator
-    * @param data A pointer to the first element of a data array. 
-    * @param value A value to set.
+    * @param data :: A pointer to the first element of a data array. 
+    * @param value :: A value to set.
     */
   void IFunctionMD::MDIterator::setData(double* data,const double& value)const
   {
@@ -295,7 +295,7 @@ namespace API
   }
 
   /** User functions call this method in their constructors to set up the order of the dimensions.
-    * @param id The id of a dimension in the workspace
+    * @param id :: The id of a dimension in the workspace
     */
   void IFunctionMD::useDimension(const std::string& id)
   {

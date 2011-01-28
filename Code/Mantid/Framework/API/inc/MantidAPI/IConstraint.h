@@ -69,7 +69,7 @@ public:
   /// set the penalty factor for the constraint
   /// Set panelty factor. The larger the number to thigter the constraint. This number
   /// must be set to a number larger than zero
-  /// @param c the penalt factor
+  /// @param c :: the penalt factor
   virtual void setPenaltyFactor(const double& c) = 0;   
 
   /// get the penalty factor for the constraint

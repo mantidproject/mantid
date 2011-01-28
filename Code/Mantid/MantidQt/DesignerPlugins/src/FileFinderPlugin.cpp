@@ -7,7 +7,7 @@ using namespace MantidQt::MantidWidgets;
 
 /**
  * Default constructor
- * @param parent The parent of the plugin (default: NULL)
+ * @param parent :: The parent of the plugin (default: NULL)
  */
 FileFinderPlugin::FileFinderPlugin(QObject *parent) : QObject(parent), m_initialized(false)
 {
@@ -15,7 +15,7 @@ FileFinderPlugin::FileFinderPlugin(QObject *parent) : QObject(parent), m_initial
 
 /**
  * Initialize the plugin
- * @param formEditor A pointer to the interface that will control this plugin
+ * @param formEditor :: A pointer to the interface that will control this plugin
  */
 void FileFinderPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 {
@@ -29,7 +29,7 @@ void FileFinderPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 
 /**
  * Create a widget of the type wrapped by the plugin
- * @param parent The parent widget
+ * @param parent :: The parent widget
  * @returns A newly constructed widget for the wrapped type.
  */
 QWidget *FileFinderPlugin::createWidget(QWidget *parent)

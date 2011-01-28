@@ -12,7 +12,7 @@ namespace API
 
 /** Set the title of the workspace
  *
- *  @param t The title
+ *  @param t :: The title
  */
 void Workspace::setTitle(const std::string& t)
 {
@@ -21,7 +21,7 @@ void Workspace::setTitle(const std::string& t)
 
 /** Set the comment field of the workspace
  *
- *  @param c The comment
+ *  @param c :: The comment
  */
 void Workspace::setComment(const std::string& c)
 {
@@ -30,7 +30,7 @@ void Workspace::setComment(const std::string& c)
 
 /** Set the name field of the workspace
  *
- *  @param name The name
+ *  @param name :: The name
  */
 void Workspace::setName(const std::string& name)
 {

@@ -14,7 +14,7 @@ namespace Mantid
     Poco::NullOutputStream* Logger::m_nullStream = NULL;
 
     /** Constructor
-     * @param name The class name invoking this logger
+     * @param name :: The class name invoking this logger
      */
     Logger::Logger(const std::string& name) : m_enabled(true)
     {  
@@ -53,7 +53,7 @@ namespace Mantid
 
     /** set if the logging is enabled
      * 
-     *  @param enabled  true - logging is enabled, false - all messages are ignored.
+     *  @param enabled ::  true - logging is enabled, false - all messages are ignored.
      */
     void Logger::setEnabled(const bool enabled)
     {
@@ -63,7 +63,7 @@ namespace Mantid
     /** If the Logger's log level is at least PRIO_FATAL, creates a Message with 
      *  priority PRIO_FATAL and the given message text and sends it to the attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::fatal(const std::string& msg)
     {
@@ -73,7 +73,7 @@ namespace Mantid
     /** If the Logger's log level is at least PRIO_ERROR, creates a Message with priority
      *  PRIO_ERROR and the given message text and sends it to the attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::error(const std::string& msg)
     {
@@ -83,7 +83,7 @@ namespace Mantid
     /** If the Logger's log level is at least PRIO_WARNING, creates a Message with 
      *  priority PRIO_WARNING and the given message text and sends it to the attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::warning(const std::string& msg)
     {
@@ -93,7 +93,7 @@ namespace Mantid
     /** If the Logger's log level is at least PRIO_NOTICE, creates a Message with 
      *  priority PRIO_NOTICE and the given message text and sends it to the attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::notice(const std::string& msg)
     {
@@ -104,7 +104,7 @@ namespace Mantid
      *  priority PRIO_INFORMATION and the given message text and sends it to the 
      *  attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::information(const std::string& msg)
     {
@@ -114,7 +114,7 @@ namespace Mantid
     /** If the Logger's log level is at least PRIO_DEBUG, creates a Message with priority
      *  PRIO_DEBUG and the given message text and sends it to the attached channel.
      * 
-     *  @param msg The message to log.
+     *  @param msg :: The message to log.
      */
     void Logger::debug(const std::string& msg)
     {
@@ -130,9 +130,9 @@ namespace Mantid
      *  For bytes outside the range 32 .. 127, a dot is printed.  
      *  Note all Dump messages go out at Debug message level
      * 
-     *  @param msg The message to log
-     *  @param buffer the binary data to log
-     *  @param length The length of the binaary data to log
+     *  @param msg :: The message to log
+     *  @param buffer :: the binary data to log
+     *  @param length :: The length of the binaary data to log
      */
     void Logger::dump(const std::string& msg, const void* buffer, std::size_t length)
     {
@@ -151,7 +151,7 @@ namespace Mantid
     }
 
     /** Returns true if at least the given log level is set.
-     *  @param level The logging level it is best to use the Logger::Priority enum (7=debug, 6=information, 4=warning, 3=error, 2=critical, 1=fatal)
+     *  @param level :: The logging level it is best to use the Logger::Priority enum (7=debug, 6=information, 4=warning, 3=error, 2=critical, 1=fatal)
      *  @return true if at least the given log level is set.
      */
     bool Logger::is(int level) const
@@ -184,7 +184,7 @@ namespace Mantid
 
     /// Sets the Logger's log level using a symbolic value.
     ///
-    /// @param level Valid values are: fatal, critical, error, warning, notice, information, debug
+    /// @param level :: Valid values are: fatal, critical, error, warning, notice, information, debug
     void Logger::setLevel(const std::string& level)
     {
       try
@@ -326,7 +326,7 @@ namespace Mantid
 
     /** Deletes the logger and clears it from the cache.
      * 
-     *  @param logger The logger to destroy. 
+     *  @param logger :: The logger to destroy. 
      */
     void Logger::destroy(Logger& logger)
     {
@@ -377,7 +377,7 @@ namespace Mantid
     /** Returns a reference to the Logger with the given name.
      *  This logger is stored until in a static list until it is destroyed, released or Logger::shutdown is called.
      * 
-     *  @param name The name of the logger to use - this is usually the class name. 
+     *  @param name :: The name of the logger to use - this is usually the class name. 
      *  @return a reference to the Logger with the given name.
      */
     Logger& Logger::get(const std::string& name)
@@ -402,8 +402,8 @@ namespace Mantid
 
     /**
      * Log a given message at a given priority
-     * @param message The message to log
-     * @param priority The priority level
+     * @param message :: The message to log
+     * @param priority :: The priority level
      */
     void Logger::log(const std::string message, Logger::Priority priority)
     {

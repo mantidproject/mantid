@@ -33,8 +33,8 @@ namespace DataObjects
   /// --------------------- TofEvent Comparators ----------------------------------
   //==========================================================================
   /** Compare two events' TOF, return true if e1 should be before e2.
-   * @param e1 first event
-   * @param e2 second event
+   * @param e1 :: first event
+   * @param e2 :: second event
    *  */
   template< typename T>
   bool compareEventTof(const T & e1, const T & e2)
@@ -43,8 +43,8 @@ namespace DataObjects
   }
 
   /** Compare two events' FRAME id, return true if e1 should be before e2.
-  * @param e1 first event
-  * @param e2 second event
+  * @param e1 :: first event
+  * @param e2 :: second event
   *  */
   bool compareEventPulseTime(const TofEvent& e1, const TofEvent& e2)
   {
@@ -93,7 +93,7 @@ namespace DataObjects
   }
 
   /** Constructor copying from an existing event list
-   * @param rhs EventList object to copy*/
+   * @param rhs :: EventList object to copy*/
   EventList::EventList(const EventList& rhs)
   {
     //Call the copy operator to do the job,
@@ -101,7 +101,7 @@ namespace DataObjects
   }
 
   /** Constructor, taking a vector of events.
-   * @param events Vector of TofEvent's */
+   * @param events :: Vector of TofEvent's */
   EventList::EventList(const std::vector<TofEvent> &events)
   {
 
@@ -126,7 +126,7 @@ namespace DataObjects
   // --- Operators -------------------------------------------------------------------
 
   /** Copy into this event list from another
-   * @param rhs We will copy all the events from that into this object.
+   * @param rhs :: We will copy all the events from that into this object.
    * @return reference to this
    * */
   EventList& EventList::operator=(const EventList& rhs)
@@ -146,7 +146,7 @@ namespace DataObjects
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram.
-   * @param event TofEvent to add at the end of the list.
+   * @param event :: TofEvent to add at the end of the list.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const TofEvent &event)
@@ -177,7 +177,7 @@ namespace DataObjects
   /** Append a list of events to the histogram.
    * The internal event list will switch to the required type.
    *
-   * @param more_events A vector of events to append.
+   * @param more_events :: A vector of events to append.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
@@ -216,7 +216,7 @@ namespace DataObjects
    * Note: The whole list will switch to weights (a possibly lengthy operation)
    *  if it did not have weights before.
    *
-   * @param event WeightedEvent to add at the end of the list.
+   * @param event :: WeightedEvent to add at the end of the list.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const WeightedEvent &event)
@@ -232,7 +232,7 @@ namespace DataObjects
    * Note: The whole list will switch to weights (a possibly lengthy operation)
    *  if it did not have weights before.
    *
-   * @param more_events A vector of events to append.
+   * @param more_events :: A vector of events to append.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const std::vector<WeightedEvent> & more_events)
@@ -268,7 +268,7 @@ namespace DataObjects
    * Note: The whole list will switch to weights (a possibly lengthy operation)
    *  if it did not have weights before.
    *
-   * @param more_events A vector of events to append.
+   * @param more_events :: A vector of events to append.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const std::vector<WeightedEventNoTime> & more_events)
@@ -298,7 +298,7 @@ namespace DataObjects
    * The event lists are concatenated, and a union of the sets of detector ID's is done.
    * Switching of event types may occur if the two are different.
    *
-   * @param more_events Another EventList.
+   * @param more_events :: Another EventList.
    * @return reference to this
    * */
   EventList& EventList::operator+=(const EventList& more_events)
@@ -337,8 +337,8 @@ namespace DataObjects
    *    list are multiplied by -1.0.
    *
    * @tparam T1, T2 :: TofEvent, WeightedEvent or WeightedEventNoTime
-   * @param events The event vector being changed.
-   * @param more_events Another event vector being subtracted from this.
+   * @param events :: The event vector being changed.
+   * @param more_events :: Another event vector being subtracted from this.
    * @return reference to this
    * */
   template<class T1, class T2>
@@ -368,7 +368,7 @@ namespace DataObjects
    * The event lists are concatenated, but the weights of the incoming
    *    list are multiplied by -1.0.
    *
-   * @param more_events Another EventList.
+   * @param more_events :: Another EventList.
    * @return reference to this
    * */
   EventList& EventList::operator-=(const EventList& more_events)
@@ -451,7 +451,7 @@ namespace DataObjects
   /** Append an event to the histogram, without clearing the cache, to make it faster.
    * NOTE: Only call this on a un-weighted event list!
    *
-   * @param event TofEvent to add at the end of the list.
+   * @param event :: TofEvent to add at the end of the list.
    * */
   void EventList::addEventQuickly(const TofEvent &event)
   {
@@ -460,7 +460,7 @@ namespace DataObjects
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
-   * @param event WeightedEvent to add at the end of the list.
+   * @param event :: WeightedEvent to add at the end of the list.
    * */
   void EventList::addEventQuickly(const WeightedEvent &event)
   {
@@ -474,7 +474,7 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Add a detector ID to the set of detector IDs
    *
-   * @param detID detector ID to insert in set.
+   * @param detID :: detector ID to insert in set.
    */
   void EventList::addDetectorID(const int detID)
   {
@@ -775,7 +775,7 @@ namespace DataObjects
 
   // --------------------------------------------------------------------------
   /** Sort events by TOF or Frame
-   * @param order Order by which to sort.
+   * @param order :: Order by which to sort.
    * */
   void EventList::sort(const EventSortType order) const
   {
@@ -1419,7 +1419,7 @@ namespace DataObjects
    * Will return events.end() if nothing is found!
    *
    * @param events :: event vector in which to look.
-   * @param seek_tof tof to find (typically the first bin X[0])
+   * @param seek_tof :: tof to find (typically the first bin X[0])
    * @return iterator where the first event matching it is.
    */
   template<class T>
@@ -1442,7 +1442,7 @@ namespace DataObjects
    * Will return events.end() if nothing is found!
    *
    * @param events :: event vector in which to look.
-   * @param seek_tof tof to find (typically the first bin X[0])
+   * @param seek_tof :: tof to find (typically the first bin X[0])
    * @return iterator where the first event matching it is.
    */
   template<class T>
@@ -1584,8 +1584,8 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Fill a histogram given specified histogram bounds. Does not modify
    * the eventlist (const method).
-   * @param X The x bins
-   * @param Y The generated counts histogram
+   * @param X :: The x bins
+   * @param Y :: The generated counts histogram
    */
   void EventList::generateCountsHistogram(const MantidVec& X, MantidVec& Y) const
   {
@@ -1659,8 +1659,8 @@ namespace DataObjects
    * Generate the Error histogram for the provided counts histogram.
    * It simply returns the sqrt of the number of counts for each bin.
    *
-   * @param Y The counts histogram
-   * @param E The generated error histogram
+   * @param Y :: The counts histogram
+   * @param E :: The generated error histogram
    */
   void EventList::generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const
   {
@@ -1679,9 +1679,9 @@ namespace DataObjects
   //----------------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.
    *
-   * @param minX minimum X bin to use in integrating.
-   * @param maxX maximum X bin to use in integrating.
-   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
    * @return the integrated number of events.
    */
   template<class T>
@@ -1726,9 +1726,9 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.
    *
-   * @param minX minimum X bin to use in integrating.
-   * @param maxX maximum X bin to use in integrating.
-   * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
    * @return the integrated number of events.
    */
   double EventList::integrate(const double minX, const double maxX, const bool entireRange) const
@@ -1762,8 +1762,8 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /**
    * Convert the time of flight by tof'=tof*factor+offset
-   * @param factor The value to scale the time-of-flight by
-   * @param offset The value to shift the time-of-flight by
+   * @param factor :: The value to scale the time-of-flight by
+   * @param offset :: The value to shift the time-of-flight by
    */
   void EventList::convertTof(const double factor, const double offset)
   {
@@ -1799,8 +1799,8 @@ namespace DataObjects
    * on either the TofEvent list or the WeightedEvent list.
    * Does NOT reverse the event list if the factor < 0
    *
-   * @param factor multiply by this
-   * @param offset add this
+   * @param factor :: multiply by this
+   * @param offset :: add this
    */
   template<class T>
   void EventList::convertTofHelper(std::vector<T> & events, const double factor, const double offset)
@@ -1817,7 +1817,7 @@ namespace DataObjects
   /**
    * Convert the units in the TofEvent's m_tof field to
    *  some other value, by scaling by a multiplier.
-   * @param factor conversion factor (e.g. multiply TOF by this to get d-spacing)
+   * @param factor :: conversion factor (e.g. multiply TOF by this to get d-spacing)
    */
   void EventList::scaleTof(const double factor)
   {
@@ -1827,7 +1827,7 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Add an offset to the TOF of each event in the list.
    *
-   * @param offset The value to shift the time-of-flight by
+   * @param offset :: The value to shift the time-of-flight by
    */
   void EventList::addTof(const double offset)
   {
@@ -1842,8 +1842,8 @@ namespace DataObjects
   /**
    * Mask out events that have a tof between tofMin and tofMax (inclusively).
    * Events are removed from the list.
-   * @param tofMin lower bound of TOF to filter out
-   * @param tofMax upper bound of TOF to filter out
+   * @param tofMin :: lower bound of TOF to filter out
+   * @param tofMax :: upper bound of TOF to filter out
    */
   template<class T>
   void EventList::maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax)
@@ -1871,8 +1871,8 @@ namespace DataObjects
   /**
    * Mask out events that have a tof between tofMin and tofMax (inclusively).
    * Events are removed from the list.
-   * @param tofMin lower bound of TOF to filter out
-   * @param tofMax upper bound of TOF to filter out
+   * @param tofMin :: lower bound of TOF to filter out
+   * @param tofMax :: upper bound of TOF to filter out
    */
   void EventList::maskTof(const double tofMin, const double tofMax)
   {
@@ -2035,7 +2035,7 @@ namespace DataObjects
    * The event list switches to WeightedEvent's if needed.
    * Note that if the multiplier is exactly 1.0, the list is NOT switched to WeightedEvents - nothing happens.
    *
-   * @param value multiply by this
+   * @param value :: multiply by this
    * @return reference to this
    */
   EventList& EventList::operator*=(const double value)
@@ -2354,7 +2354,7 @@ namespace DataObjects
    * Use divide(value,error) if your scalar has an error!
    * This simply calls the equivalent function: multiply(1.0/value).
    *
-   * @param value divide by this
+   * @param value :: divide by this
    * @return reference to this
    * @throw std::invalid_argument if value == 0; cannot divide by zero.
    */
@@ -2400,9 +2400,9 @@ namespace DataObjects
   /** Filter a vector of events into another.
    * TODO: Make this more efficient using STL-fu.
    * @param events :: input events
-   * @param start start time (absolute)
-   * @param stop end time (absolute)
-   * @param output reference to an event list that will be output.
+   * @param start :: start time (absolute)
+   * @param stop :: end time (absolute)
+   * @param output :: reference to an event list that will be output.
    */
   template<class T>
   void EventList::filterByPulseTimeHelper(std::vector<T> & events, DateAndTime start, DateAndTime stop, std::vector<T> & output)
@@ -2427,9 +2427,9 @@ namespace DataObjects
    * keeping only events within the >= start and < end pulse times.
    * Detector IDs and the X axis are copied as well.
    *
-   * @param start start time (absolute)
-   * @param stop end time (absolute)
-   * @param output reference to an event list that will be output.
+   * @param start :: start time (absolute)
+   * @param stop :: end time (absolute)
+   * @param output :: reference to an event list that will be output.
    */
   void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop, EventList & output) const
   {
@@ -2635,8 +2635,8 @@ namespace DataObjects
   //------------------------------------------------------------------------------------------------
   /** Split the event list into n outputs
    *
-   * @param splitter a TimeSplitterType giving where to split
-   * @param outputs a vector of where the split events will end up. The # of entries in there should
+   * @param splitter :: a TimeSplitterType giving where to split
+   * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    */
   void EventList::splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const

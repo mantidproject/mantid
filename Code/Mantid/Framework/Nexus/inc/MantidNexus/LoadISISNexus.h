@@ -171,7 +171,7 @@ namespace Mantid
       
       /**
        * Get a value from the nexus file. The name should be relative and the parent group already opened.
-       * @param name The name of the NX entry
+       * @param name :: The name of the NX entry
        * @returns The value of entry
        */
       template<class TYPE>
@@ -186,7 +186,7 @@ namespace Mantid
 
       /**
        * Get the first entry from an NX data group
-       * @param name The group name
+       * @param name :: The group name
        * @returns The data value
        */
       template<class TYPE>

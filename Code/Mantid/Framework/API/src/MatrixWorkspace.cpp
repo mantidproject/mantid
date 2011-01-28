@@ -48,9 +48,9 @@ namespace Mantid
 
     /** Initialize the workspace. Calls the protected init() method, which is implemented in each type of
     *  workspace. Returns immediately if the workspace is already initialized.
-    *  @param NVectors The number of spectra in the workspace (only relevant for a 2D workspace
-    *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
-    *  @param YLength The number of data/error points in each vector (must all be the same)
+    *  @param NVectors :: The number of spectra in the workspace (only relevant for a 2D workspace
+    *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
+    *  @param YLength :: The number of data/error points in each vector (must all be the same)
     */
     void MatrixWorkspace::initialize(const int &NVectors, const int &XLength, const int &YLength)
     {
@@ -83,7 +83,7 @@ namespace Mantid
     //---------------------------------------------------------------------------------------
     /** Set the instrument
     *
-    * \param instr Shared pointer to an instrument.
+    * @param instr :: Shared pointer to an instrument.
     */
     void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
     {
@@ -174,9 +174,9 @@ namespace Mantid
     /** Return a map where:
     *    KEY is the DetectorID (pixel ID)
     *    VALUE is the Workspace Index
-    *  @param throwIfMultipleDets set to true to make the algorithm throw an error
+    *  @param throwIfMultipleDets :: set to true to make the algorithm throw an error
     *         if there is more than one detector for a specific workspace index.
-    *  @throws runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
+    *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
     *  @return Index to Index Map object
     */
     IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
@@ -223,7 +223,7 @@ namespace Mantid
     /** Return a map where:
     *    KEY is the Workspace Index
     *    VALUE is the DetectorID (pixel ID)
-    *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
+    *  @throw runtime_error if there is more than one detector per spectrum, or other incompatibilities.
     *  @return Map of workspace index to detector/pixel id.
     */
     IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
@@ -260,8 +260,8 @@ namespace Mantid
     //---------------------------------------------------------------------------------------
     /** Converts a list of spectrum numbers to the corresponding workspace indices.
     *  Not a very efficient operation, but unfortunately it's sometimes required.
-    *  @param spectraList The list of spectrum numbers required
-    *  @param indexList   Returns a reference to the vector of indices (empty if not a Workspace2D)
+    *  @param spectraList :: The list of spectrum numbers required
+    *  @param indexList ::   Returns a reference to the vector of indices (empty if not a Workspace2D)
     */
     void MatrixWorkspace::getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const
     {
@@ -299,11 +299,11 @@ namespace Mantid
     /** Integrate all the spectra in the matrix workspace within the range given.
      * Default implementation, can be overridden by base classes if they know something smarter!
      *
-     * @param out returns the vector where there is one entry per spectrum in the workspace. Same
+     * @param out :: returns the vector where there is one entry per spectrum in the workspace. Same
      *            order as the workspace indices.
-     * @param minX minimum X bin to use in integrating.
-     * @param maxX maximum X bin to use in integrating.
-     * @param entireRange set to true to use the entire range. minX and maxX are then ignored!
+     * @param minX :: minimum X bin to use in integrating.
+     * @param maxX :: maximum X bin to use in integrating.
+     * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
      */
     void MatrixWorkspace::getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const
     {
@@ -440,7 +440,7 @@ namespace Mantid
     }
 
     /** Returns the 2Theta scattering angle for a detector
-    *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
+    *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
     *  @return The scattering angle (0 < theta < pi)
     */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
@@ -456,8 +456,8 @@ namespace Mantid
     *  for the same detector you can call this function once, with waveLength=1, and use
     *  the fact drop is proportional to wave length squared .This function has no knowledge
     *  of which axis is vertical for a given instrument
-    *  @param det the detector that the neutron entered
-    *  @param waveLength the neutrons wave length in meters
+    *  @param det :: the detector that the neutron entered
+    *  @param waveLength :: the neutrons wave length in meters
     *  @return the deviation in meters
     */
     double MatrixWorkspace::gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const
@@ -535,7 +535,7 @@ namespace Mantid
     }
 
     /** Get a pointer to a workspace axis
-    *  @param axisIndex The index of the axis required
+    *  @param axisIndex :: The index of the axis required
     *  @throw IndexError If the argument given is outside the range of axes held by this workspace
     *  @return Pointer to Axis object
     */
@@ -551,8 +551,8 @@ namespace Mantid
     }
 
     /** Replaces one of the workspace's axes with the new one provided.
-    *  @param axisIndex The index of the axis to replace
-    *  @param newAxis A pointer to the new axis. The class will take ownership.
+    *  @param axisIndex :: The index of the axis to replace
+    *  @param newAxis :: A pointer to the new axis. The class will take ownership.
     *  @throw IndexError If the axisIndex given is outside the range of axes held by this workspace
     *  @throw std::runtime_error If the new axis is not of the correct length (within one of the old one)
     */
@@ -646,8 +646,8 @@ namespace Mantid
 
     /**
      * Mask a given workspace index, setting the data and error values to the given value
-     * @param index The index within the workspace to mask
-     * @param maskValue A value to assign to the data and error values of the spectra
+     * @param index :: The index within the workspace to mask
+     * @param maskValue :: A value to assign to the data and error values of the spectra
      */
     void MatrixWorkspace::maskWorkspaceIndex(const int index, const double maskValue)
     {
@@ -692,9 +692,9 @@ namespace Mantid
     }
 
     /** Masks a single bin. It's value (and error) will be scaled by (1-weight).
-    *  @param spectrumIndex The workspace spectrum index of the bin
-    *  @param binIndex      The index of the bin in the spectrum
-    *  @param weight        'How heavily' the bin is to be masked. =1 for full masking (the default).
+    *  @param spectrumIndex :: The workspace spectrum index of the bin
+    *  @param binIndex ::      The index of the bin in the spectrum
+    *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
     */
     void MatrixWorkspace::maskBin(const int& spectrumIndex, const int& binIndex, const double& weight)
     {
@@ -721,7 +721,7 @@ namespace Mantid
     }
 
     /** Does this spectrum contain any masked bins 
-    *  @param spectrumIndex The workspace spectrum index to test
+    *  @param spectrumIndex :: The workspace spectrum index to test
     *  @return True if there are masked bins for this spectrum
     */
     bool MatrixWorkspace::hasMaskedBins(const int& spectrumIndex) const
@@ -920,8 +920,8 @@ namespace Mantid
 
     /**
     * Returns the bin index of the given X value
-    * @param xValue The X value to search for
-    * @param index The index within the workspace to search within (default = 0)
+    * @param xValue :: The X value to search for
+    * @param index :: The index within the workspace to search within (default = 0)
     * @returns An index that 
     */
     size_t MatrixWorkspace::binIndexOf(const double xValue, const int index) const

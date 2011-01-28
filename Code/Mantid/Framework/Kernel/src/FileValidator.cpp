@@ -30,8 +30,8 @@ FileValidator::FileValidator() : IValidator<std::string>(), m_extensions(), m_fu
 {}
 
 /** Constructor
- *  @param extensions The permitted file extensions (e.g. .RAW)
- *  @param testFileExists Flag indicating whether to test for existence of file (default: yes)
+ *  @param extensions :: The permitted file extensions (e.g. .RAW)
+ *  @param testFileExists :: Flag indicating whether to test for existence of file (default: yes)
  */
 FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists) :
   IValidator<std::string>(),
@@ -60,7 +60,7 @@ IValidator<std::string>* FileValidator::clone()
 }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path syntax looks valid
- *  @param value file name
+ *  @param value :: file name
  *  @returns An error message to display to users or an empty string on no error
  */
 std::string FileValidator::checkValidity(const std::string &value) const
@@ -99,8 +99,8 @@ std::string FileValidator::checkValidity(const std::string &value) const
 
 /**
  * Confirm that the value string ends with then ending string.
- * @param value The string to check the ending for.
- * @param ending The ending the string should have.
+ * @param value :: The string to check the ending for.
+ * @param ending :: The ending the string should have.
  */
 bool has_ending(const std::string &value, const std::string & ending)
 {
@@ -114,7 +114,7 @@ bool has_ending(const std::string &value, const std::string & ending)
 
 /**
  * Checks the extension of a filename
- * @param value the filename to check
+ * @param value :: the filename to check
  * @return flag that true if the extension matches in the filename
  */
 bool FileValidator::endswith(const std::string &value) const

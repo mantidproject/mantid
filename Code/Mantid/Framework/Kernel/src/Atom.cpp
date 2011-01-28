@@ -3245,8 +3245,8 @@ bool compareAtoms(const Atom &left, const Atom &right)
 }
 
 /**
- * @param z_number Atomic number of the atom to get
- * @param a_number Mass number of the atom to get
+ * @param z_number :: Atomic number of the atom to get
+ * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
 Atom getAtom(const uint16_t z_number, const uint16_t a_number)

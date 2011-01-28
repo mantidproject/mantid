@@ -166,22 +166,22 @@ public:
   /// Copy constructor
   MantidQwtData(const MantidQwtData& data);
 
-    //! \return Pointer to a copy (virtual copy constructor)
+    //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtData *copy() const {return new MantidQwtData(*this);}
 
-  //! \return Size of the data set
+  //! @return Size of the data set
   virtual size_t size() const;
 
-  /*!
+  /**
   Return the x value of data point i
-  \param i Index
-  \return x X value of data point i
+  @param i :: Index
+  @return x X value of data point i
   */
   virtual double x(size_t i) const;
-  /*!
+  /**
   Return the y value of data point i
-  \param i Index
-  \return y Y value of data point i
+  @param i :: Index
+  @return y Y value of data point i
   */
   virtual double y(size_t i) const;
 

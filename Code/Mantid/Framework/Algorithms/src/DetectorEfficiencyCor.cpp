@@ -178,7 +178,7 @@ void DetectorEfficiencyCor::retrieveProperties()
 
 /** Corrects a spectra for the detector efficiency calculated from detector information
 Gets the detector information and uses this to calculate its efficiency
-*  @param spectraIn index of the spectrum to get the efficiency for
+*  @param spectraIn :: index of the spectrum to get the efficiency for
 *  @throw invalid_argument if the shape of a detector is isn't a cylinder aligned along one axis
 *  @throw runtime_error if the SpectraDetectorMap has not been filled
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness were not found
@@ -271,8 +271,8 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
 
 /**
  * Calculates one over the wave number of a neutron based on a lower and upper bin boundary
- * @param loBinBound A value interpreted as the lower bin bound of a histogram
- * @param uppBinBound A value interpreted as the upper bin bound of a histogram
+ * @param loBinBound :: A value interpreted as the lower bin bound of a histogram
+ * @param uppBinBound :: A value interpreted as the upper bin bound of a histogram
  * @return The value of 1/K for this energy bin
  */
 double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBinBound) const
@@ -283,9 +283,9 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 }
 
 /** Update the shape cache if necessary
-* @param det a pointer to the detector to query
-* @param detRadius An output paramater that contains the detector radius
-* @param detAxis An output parameter that contains the detector axis vector
+* @param det :: a pointer to the detector to query
+* @param detRadius :: An output paramater that contains the detector radius
+* @param detAxis :: An output parameter that contains the detector axis vector
 */
 void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, V3D & detAxis)
 {
@@ -341,8 +341,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDet
 
 /** For basic shapes centred on the origin (0,0,0) this returns the distance to the surface in
  *  the direction of the point given
- *  @param start the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
- *  @param shape the object to calculate for, should be centred on the origin
+ *  @param start :: the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
+ *  @param shape :: the object to calculate for, should be centred on the origin
  *  @return the distance to the surface in the direction of the point given
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
@@ -367,7 +367,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D start, const Object *shape
 }
 
 /** Calculates detector efficiency, copied from the fortran code in effic_3he_cylinder.for
- *  @param alpha From T.G.Perring's effic_3he_cylinder.for: alpha = const*rad*(1.0d0-t2rad)*atms/wvec
+ *  @param alpha :: From T.G.Perring's effic_3he_cylinder.for: alpha = const*rad*(1.0d0-t2rad)*atms/wvec
  *  @return detector efficiency
  */
 double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const
@@ -389,10 +389,10 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const
 
 /** Calculates an expansion similar to that in CHEBEV of "Numerical Recipes"
 *  copied from the fortran code in effic_3he_cylinder.for
-* @param a a fit parameter, only the difference between a and b enters this equation
-* @param b a fit parameter, only the difference between a and b enters this equation 
-* @param exspansionCoefs one of the 25 element constant arrays declared in this file
-* @param x a fit parameter
+* @param a :: a fit parameter, only the difference between a and b enters this equation
+* @param b :: a fit parameter, only the difference between a and b enters this equation 
+* @param exspansionCoefs :: one of the 25 element constant arrays declared in this file
+* @param x :: a fit parameter
 * @return a numerical approximation provided by the expansion
 */
 double DetectorEfficiencyCor::chebevApprox(double a, double b, const double exspansionCoefs[], double x) const

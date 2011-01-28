@@ -161,9 +161,9 @@ void LoadSPE::exec()
 }
 
 /** Reads in the data corresponding to a single spectrum
- *  @param speFile   The file handle
- *  @param workspace The output workspace
- *  @param index     The index of the current spectrum
+ *  @param speFile ::   The file handle
+ *  @param workspace :: The output workspace
+ *  @param index ::     The index of the current spectrum
  */
 void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, int index)
 {
@@ -219,8 +219,8 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 }
 
 /** Called if the file is not formatted as expected
- *  @param what A string describing where the problem occurred
- *  @throws Mantid::Kernel::Exception::FileError terminating the algorithm
+ *  @param what :: A string describing where the problem occurred
+ *  @throw Mantid::Kernel::Exception::FileError terminating the algorithm
  */
 void LoadSPE::reportFormatError(const std::string& what)
 {
@@ -230,8 +230,8 @@ void LoadSPE::reportFormatError(const std::string& what)
 
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
  *  @param filePath- path of the file including name.
- *  @param nread - no.of bytes read
- *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+ *  @param nread :: no.of bytes read
+ *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
 bool LoadSPE::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -249,7 +249,7 @@ bool LoadSPE::quickFileCheck(const std::string& filePath,size_t nread,unsigned c
 }
 
 /**checks the file by opening it and reading few lines 
- * @param filePath name of the file inluding its path
+ * @param filePath :: name of the file inluding its path
  * @return an integer value how much this algorithm can load the file 
  */
 int LoadSPE::fileCheck(const std::string& filePath)

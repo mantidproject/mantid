@@ -511,7 +511,7 @@ void PeakPickerTool::xMax(double x)
 
 /**
  * Slot. Reacts on the index change in the Fit Browser.
- * @param i The new function index.
+ * @param i :: The new function index.
  */
 void PeakPickerTool::currentChanged()
 {
@@ -520,7 +520,7 @@ void PeakPickerTool::currentChanged()
 
 /**
  * Slot. Reacts on the function deletion in the Fit Browser.
- * @param f The address of the deleted function.
+ * @param f :: The address of the deleted function.
  */
 void PeakPickerTool::functionRemoved()
 {
@@ -529,7 +529,7 @@ void PeakPickerTool::functionRemoved()
 
 /**
  * Slot. Called when the Fit algorithm finishes. 
- * @param out The name of the output workspace with the results of the fit.
+ * @param out :: The name of the output workspace with the results of the fit.
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
@@ -548,7 +548,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
 
 /**
  * Slot. Called when the workspace index is changed in the FitBrowser
- * @param i The new workspace index.
+ * @param i :: The new workspace index.
  */
 void PeakPickerTool::workspaceIndexChanged(int i)
 {
@@ -562,7 +562,7 @@ void PeakPickerTool::workspaceIndexChanged(int i)
   * Slot. Called when the workspace name is changed in the FitBrowser.
   * It doesn't allow changing the workspace name unless it is a name of
   * the workspace group containing m_wsName
-  * @param wsName The new workspace name.
+  * @param wsName :: The new workspace name.
   */
 void PeakPickerTool::workspaceNameChanged(const QString& wsName)
 {
@@ -593,7 +593,7 @@ void PeakPickerTool::workspaceNameChanged(const QString& wsName)
 
 /**
  * Slot. Called when the startX changed in the FitBrowser
- * @param sX The new startX
+ * @param sX :: The new startX
  */
 void PeakPickerTool::startXChanged(double sX)
 {
@@ -603,7 +603,7 @@ void PeakPickerTool::startXChanged(double sX)
 
 /**
  * Slot. Called when the endX changed in the FitBrowser
- * @param eX The new endX
+ * @param eX :: The new endX
  */
 void PeakPickerTool::endXChanged(double eX)
 {
@@ -613,7 +613,7 @@ void PeakPickerTool::endXChanged(double eX)
 
 /**
  * Slot. Called in response to parameterChanged signal from FitBrowser
- * @param f The pointer to the function with the changed parameter
+ * @param f :: The pointer to the function with the changed parameter
  */
 void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
 {
@@ -630,7 +630,7 @@ void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
 
 /**
  * Adds commands specific to the tool to a context menu
- * @param menu A reference to the context menu
+ * @param menu :: A reference to the context menu
  */
 void PeakPickerTool::prepareContextMenu(QMenu& menu)
 {
@@ -825,7 +825,7 @@ void PeakPickerTool::clear()
 }
 
 /** Set the tool tip text
- * @param tst The tip text
+ * @param tst :: The tip text
  */
 void PeakPickerTool::setToolTip(const QString& txt)
 {

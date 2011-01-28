@@ -30,7 +30,7 @@ EXPORT_OPT_MANTID_KERNEL void CleanupSingletons()
 
 /// Adds singleton cleanup function to our atexit list
 /// functions are added to the start of the list so on deletion it is last in, first out
-/// @param func Exit function to call - the singleton destructor function
+/// @param func :: Exit function to call - the singleton destructor function
 EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func)
 {
     if (cleanup_list == NULL)

@@ -225,9 +225,9 @@ namespace Mantid
     /** Takes the masks in the input workspace and apportions the weights into the new bins that overlap
      *  with a masked bin. These bins are then masked with the calculated weight.
      * 
-     *  @param inputW  The input workspace
-     *  @param outputW The output workspace
-     *  @param hist    The index of the current histogram
+     *  @param inputW ::  The input workspace
+     *  @param outputW :: The output workspace
+     *  @param hist ::    The index of the current histogram
      */
     void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist)
     {

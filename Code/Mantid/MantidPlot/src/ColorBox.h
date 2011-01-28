@@ -39,7 +39,7 @@ class ColorBox : public QComboBox
 public:
 	//! Constructor
 	/**
-	 * \param parent parent widget
+	 * @param parent :: parent widget
 	 */
 	ColorBox(QWidget *parent = 0);
 	//! Set the current color

@@ -22,7 +22,7 @@ namespace Mantid
     class Plane;
     class Sphere;
 
-    /*!
+    /**
     \class Line
     \brief Impliments a line
     \author S. Ansell

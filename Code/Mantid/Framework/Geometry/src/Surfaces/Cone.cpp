@@ -44,7 +44,7 @@ namespace Mantid
 
 		Cone::Cone() : Quadratic(),
 			Centre(), Normal(1,0,0), alpha(0.0), cangle(1.0)
-			/*!
+			/**
 			Constructor with centre line along X axis 
 			and centre on origin
 			*/
@@ -55,17 +55,17 @@ namespace Mantid
 		Cone::Cone(const Cone& A) :Quadratic(A),
 			Centre(A.Centre), Normal(A.Normal), 
 			alpha(A.alpha), cangle(A.cangle)
-			/*!
+			/**
 			Standard Copy Constructor
-			\param A :: Cone to copy
+			@param A :: Cone to copy
 			*/
 		{}
 
 		Cone*
 			Cone::clone() const
-			/*! 
+			/** 
 			Makes a clone (implicit virtual copy constructor) 
-			\return new(*this)
+			@return new(*this)
 			*/
 		{
 			return new Cone(*this);
@@ -73,10 +73,10 @@ namespace Mantid
 
 		Cone&
 			Cone::operator=(const Cone& A)
-			/*!
+			/**
 			Assignment operator
-			\param A :: Cone to copy
-			\return *this
+			@param A :: Cone to copy
+			@return *this
 			*/
 		{
 			if(this!=&A)
@@ -92,20 +92,20 @@ namespace Mantid
 
 
 		Cone::~Cone()
-			/*!
+			/**
 			Destructor
 			*/
 		{} 
 
 		int
 			Cone::setSurface(const std::string& Pstr)
-			/*! 
+			/** 
 			Processes a standard MCNPX cone string    
 			Recall that cones can only be specified on an axis
 			Valid input is: 
 			- k/x cen_x cen_y cen_z radius 
 			- kx radius 
-			\return : 0 on success, neg of failure 
+			@return : 0 on success, neg of failure 
 			*/
 		{
 			std::string Line=Pstr;
@@ -150,11 +150,11 @@ namespace Mantid
 
 		int
 			Cone::operator==(const Cone& A) const
-			/*!
+			/**
 			Equality operator. Checks angle,centre and 
 			normal separately
-			\param A :: Cone to compare
-			\return A==this within SurfaceTolerance
+			@param A :: Cone to compare
+			@return A==this within SurfaceTolerance
 			*/
 		{
 			if(this==&A)
@@ -171,7 +171,7 @@ namespace Mantid
 
 		void
 			Cone::setBaseEqn()
-			/*!
+			/**
 			Sets an equation of type 
 			\f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
 			*/
@@ -193,9 +193,9 @@ namespace Mantid
 
 		void
 			Cone::rotate(const Geometry::Matrix<double>& R)
-			/*!
+			/**
 			Rotate both the centre and the normal direction 
-			\param R :: Matrix for rotation. 
+			@param R :: Matrix for rotation. 
 			*/
 		{
 			Centre.rotate(R);
@@ -206,10 +206,10 @@ namespace Mantid
 
 		void 
 			Cone::displace(const Geometry::V3D& A)
-			/*!
+			/**
 			Displace the centre
 			Only need to update the centre position 
-			\param A :: Geometry::V3D to add
+			@param A :: Geometry::V3D to add
 			*/
 		{
 			Centre+=A;
@@ -219,9 +219,9 @@ namespace Mantid
 
 		void 
 			Cone::setCentre(const Geometry::V3D& A)
-			/*!
+			/**
 			Sets the central point and the Base Equation
-			\param A :: New Centre point
+			@param A :: New Centre point
 			*/
 		{
 			Centre=A;
@@ -231,9 +231,9 @@ namespace Mantid
 
 		void 
 			Cone::setNorm(const Geometry::V3D& A)
-			/*!
+			/**
 			Sets the Normal and the Base Equation
-			\param A :: New Normal direction
+			@param A :: New Normal direction
 			*/
 		{
 			if (A.norm()>Tolerance)
@@ -247,9 +247,9 @@ namespace Mantid
 
 		void
 			Cone::setAngle(const double A) 
-			/*!
+			/**
 			Set the angle of the cone.
-			\param A :: Angle in degrees.
+			@param A :: Angle in degrees.
 			Resets the base equation
 			*/
 		{
@@ -261,10 +261,10 @@ namespace Mantid
 
 		void
 			Cone::setTanAngle(const double A) 
-			/*! 
+			/** 
 			Set the cone angle
 			Resets the base equation 
-			\param A :: Tan of the angle  (for MCNPX)
+			@param A :: Tan of the angle  (for MCNPX)
 			*/
 		{
 			cangle=1.0/sqrt(A*A+1.0);        // convert tan(theta) to cos(theta)
@@ -275,15 +275,15 @@ namespace Mantid
 
 		double
 			Cone::distance(const Geometry::V3D& Pt) const
-			/*!
+			/**
 			Calculates the distance from the point to the Cone
 			does not calculate the point on the cone that is closest
-			\param Pt :: Point to calcuate from
+			@param Pt :: Point to calcuate from
 
 			- normalise to a cone vertex at the origin
 			- calculate the angle between the axis and the Point
 			- Calculate the distance to P
-			\return distance to Pt
+			@return distance to Pt
 			*/
 		{
 			const Geometry::V3D Px=Pt-Centre;
@@ -300,15 +300,15 @@ namespace Mantid
 			return Px.norm()*sin(Pangle);
 		}
 
-		/*!
+		/**
 		Calculate if the point R is within
 		the cone (return -1) or outside, 
 		(return 1)
 		\todo NEEDS ON SURFACE CALCULATING::
 		waiting for a point to cone distance function
 
-		\param R :: Point to determine if in/out of cone
-		\return Side of R
+		@param R :: Point to determine if in/out of cone
+		@return Side of R
 		*/
 		int Cone::side(const Geometry::V3D& R) const
 		{
@@ -322,13 +322,13 @@ namespace Mantid
 			return (eqn>cangle) ? 1 : -1;  
 		}
 
-		/*! 
+		/** 
 		Calculate if the point R is on
 		the cone (Note: have to be careful here
 		since angle calcuation calcuates an angle.
 		We need a distance for tolerance!)
-		\param R :: Point to check
-		\return 1 if on surface and 0 if not not on surface
+		@param R :: Point to check
+		@return 1 if on surface and 0 if not not on surface
 		*/
 		int Cone::onSurface(const Geometry::V3D& R) const
 		{
@@ -343,10 +343,10 @@ namespace Mantid
 
 		void
 			Cone::write(std::ostream& OX) const
-			/*!
+			/**
 			Write out the cone class in an mcnpx
 			format.
-			\param OX :: Output Stream (required for multiple std::endl)
+			@param OX :: Output Stream (required for multiple std::endl)
 			*/
 		{
 			//               -3 -2 -1 0 1 2 3        
@@ -386,16 +386,16 @@ namespace Mantid
 
 		void Cone::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 		{
-			/*!
+			/**
 			Cone bounding box
 			Intended to improve bounding box for a general quadratic surface
 			Using the surface calculate improved limits on the bounding box, if possible.
-			\param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
-			\param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
-			\param ymax :: as for xmax
-			\param ymin :: as for xmin
-			\param zmax :: as for xmax
-			\param zmin :: as for xmin
+			@param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+			@param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+			@param ymax :: as for xmax
+			@param ymin :: as for xmin
+			@param zmax :: as for xmax
+			@param zmin :: as for xmin
 			///TODO: its bit difficult to find resonable AABB 
 			///For now it will return the same bounding box as input
 			*/

@@ -37,7 +37,7 @@ class DataPickerTool;
 class ApplicationWindow;
 class QwtPlotCurve;
 
-/*! Plot tool for doing multi-peak fitting.
+/** Plot tool for doing multi-peak fitting.
  *
  * This class can be seen as a user-interface wrapper around MultiPeakFit, providing functionality for visually
  * selecting estimated peak positions and finally executing the fit.
@@ -54,7 +54,7 @@ class MultiPeakFitTool : public QObject, public PlotToolInterface
 
         virtual int rtti() const {return PlotToolInterface::Rtti_MultiPeakFitTool;};
 	signals:
-		/*! Emitted whenever a new message should be presented to the user.
+		/** Emitted whenever a new message should be presented to the user.
 		 *
 		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
 		 */

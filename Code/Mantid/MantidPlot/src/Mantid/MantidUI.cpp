@@ -259,7 +259,7 @@ QStringList MantidUI::getAlgorithmNames()
 /**
     CreateAlgorithm
 
-    @param algName Algorithm's name
+    @param algName :: Algorithm's name
     @return Pointer to the created algorithm
  */
 IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
@@ -279,7 +279,7 @@ void MantidUI::saveNexusWorkspace()
 
 /**
  * DeleteWorkspace
- @param workspaceName Name of the workspace to delete
+ @param workspaceName :: Name of the workspace to delete
  */
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
@@ -359,11 +359,11 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 }
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
-     @param wsName Workspace name
-     @param lower An optional lower boundary
-     @param upper An optional upper boundary
-     @param showDlg If true show a dialog box to set some import parameters
-     @param makeVisible If true show the created MantidMatrix, hide otherwise.
+     @param wsName :: Workspace name
+     @param lower :: An optional lower boundary
+     @param upper :: An optional upper boundary
+     @param showDlg :: If true show a dialog box to set some import parameters
+     @param makeVisible :: If true show the created MantidMatrix, hide otherwise.
      @return A pointer to the new MantidMatrix.
  */
 MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
@@ -408,9 +408,9 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
 }
 
 /**  Import a Workspace into MantidPlot.
-     @param wsName Workspace name
-     @param showDlg If true show a dialog box to set some import parameters
-     @param makeVisible If true show the created widget, hide otherwise.
+     @param wsName :: Workspace name
+     @param showDlg :: If true show a dialog box to set some import parameters
+     @param makeVisible :: If true show the created widget, hide otherwise.
  */
 void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
@@ -457,9 +457,9 @@ void MantidUI::showAlgorithmHistory()
 }
 
 /**  Create a new Table and fill it with the data from a Tableworkspace
-     @param wsName Workspace name
-     @param showDlg If true show a dialog box to set some import parameters
-     @param makeVisible If true show the created Table, hide otherwise.
+     @param wsName :: Workspace name
+     @param showDlg :: If true show a dialog box to set some import parameters
+     @param makeVisible :: If true show the created Table, hide otherwise.
      @return A pointer to the new Table.
  */
 Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible)
@@ -827,8 +827,8 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 }
 
 /** This method is to execute loadraw from ICat Interface
- *@param fileName - name of the file
- *@param wsName - name of the workspace
+ *@param fileName :: name of the file
+ *@param wsName :: name of the workspace
  */
 void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& wsName)
 {
@@ -948,7 +948,7 @@ void MantidUI::executeAlgorithm(const QString & algName, const QString & paramLi
 
 /**
  * Find the first input workspace for an algorithm
- * @param algorithm A pointer to the algorithm instance
+ * @param algorithm :: A pointer to the algorithm instance
  */
 QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const
 {
@@ -984,7 +984,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 
 /**
  * Renames selected workspace
- * @param wsName selected workspace name
+ * @param wsName :: selected workspace name
  */
 void MantidUI::renameWorkspace(QString wsName)
 { 
@@ -1477,7 +1477,7 @@ void MantidUI::enableSaveNexus(const QString& wsName)
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
  *  saves the names of all the workspaces loaded into mantid workspace tree
  *  into a string and calls save nexus on each workspace to save the data to a nexus file.
- * @param workingDir -working directory of teh current project
+ * @param workingDir :: -working directory of teh current project
  */
 QString MantidUI::saveToString(const std::string& workingDir)
 {
@@ -1742,8 +1742,8 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
 
 
 /** Displays a string in a Qtiplot table
- *  @param logName the title of the table is based on this
- *  @param data the string to display
+ *  @param logName :: the title of the table is based on this
+ *  @param data :: the string to display
  */
 void MantidUI::importString(const QString &logName, const QString &data)
 {
@@ -1766,8 +1766,8 @@ void MantidUI::importString(const QString &logName, const QString &data)
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
- *  @param logName the title of the table is based on this
- *  @param data a formated string with the time series data to display
+ *  @param logName :: the title of the table is based on this
+ *  @param data :: a formated string with the time series data to display
  */
 void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 {
@@ -1809,9 +1809,9 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 
 //------------------------------------------------------------------------------------------------
 /**  Import a numeric log data. It will be shown in a graph and copied into a table
-     @param wsName The workspace name which log data will be imported
-     @param logname The name of the log property to import
-     @param filter Filter flag telling how to filter the log data.
+     @param wsName :: The workspace name which log data will be imported
+     @param logname :: The name of the log property to import
+     @param filter :: Filter flag telling how to filter the log data.
                 - 0 means no filtering
                 - 1 filter by running status
                 - 2 filter by period
@@ -2106,11 +2106,11 @@ void MantidUI::showLogFileWindow()
 //  *****      Plotting Methods     *****  //
 
 /** Create a Table form specified spectra in a MatrixWorkspace
-    @param tableName Table name
-    @param workspace Shared pointer to the workspace
-    @param indexList A list of spectra indices to go to the table
-    @param errs If true include the errors into the table
-    @param binCentres If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
+    @param tableName :: Table name
+    @param workspace :: Shared pointer to the workspace
+    @param indexList :: A list of spectra indices to go to the table
+    @param errs :: If true include the errors into the table
+    @param binCentres :: If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
        If false the Y values will be in the same row with the left bin boundaries.
        If the workspace is not a histogram the parameter is ignored.
  */
@@ -2211,8 +2211,8 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool bi
 }
 
 /**  Create a 1d graph from a Table.
-     @param t Pointer to the Table.
-     @param type Type of the curve. Possible values are:
+     @param t :: Pointer to the Table.
+     @param type :: Type of the curve. Possible values are:
          - Graph::Line
          - Graph::Scatter
          - Graph::LineSymbols
@@ -2247,8 +2247,8 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 }
 
 /** Set properties of a 1d graph which plots spectrum data from a workspace such as the title and axes captions.
-    @param ml MultiLayer plot with the graph
-    @param wsName Workspace Name
+    @param ml :: MultiLayer plot with the graph
+    @param wsName :: Workspace Name
  */
 void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 {
@@ -2284,9 +2284,9 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 }
 
 /** Set properties of a 1d graph which plots bin data from a workspace.
-    @param ml MultiLayer plot with the graph
-    @param Name Name of the graph
-    @param workspace The workspace
+    @param ml :: MultiLayer plot with the graph
+    @param Name :: Name of the graph
+    @param workspace :: The workspace
  */
 void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::MatrixWorkspace_sptr workspace)
 {
@@ -2305,9 +2305,9 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
-    @param wsName Workspace name
-    @param indexList A list of spectra indices to be shown in the graph
-    @param errs If true include the errors on the graph
+    @param wsName :: Workspace name
+    @param indexList :: A list of spectra indices to be shown in the graph
+    @param errs :: If true include the errors on the graph
  */
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs)
 {
@@ -2325,8 +2325,8 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
-    @param toPlot A list of spectra indices to be shown in the graph
-    @param errs If true include the errors to the graph
+    @param toPlot :: A list of spectra indices to be shown in the graph
+    @param errs :: If true include the errors to the graph
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs)
 {
@@ -2372,8 +2372,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 /**
  * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
  * initimately linked to MantidMatrix so that one of these needs to be created first
- * @param wsNames For each workspace listed create a 2D colorfill plot 
- * @param curveType The curve type for each of the plots
+ * @param wsNames :: For each workspace listed create a 2D colorfill plot 
+ * @param curveType :: The curve type for each of the plots
  */
 void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType)
 {
@@ -2385,8 +2385,8 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 
 /**
  * Draw a single ColorFill plot for the named workspace
- * @param wsName The name of the workspace which provides data for the plot
- * @param curveType The type of curve
+ * @param wsName :: The name of the workspace which provides data for the plot
+ * @param curveType :: The type of curve
  * @returns A pointer to the created plot
  */
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
@@ -2400,14 +2400,14 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
-    @param wsName Workspace name
-    @param workspace Shared pointer to the workspace
-    @param i0 Starting index
-    @param i1 Last index
-    @param errs If true include the errors to the graph
-    @param binCentres  If the workspace is a histogram binCentres defines the way the plot is drawn.
+    @param wsName :: Workspace name
+    @param workspace :: Shared pointer to the workspace
+    @param i0 :: Starting index
+    @param i1 :: Last index
+    @param errs :: If true include the errors to the graph
+    @param binCentres ::  If the workspace is a histogram binCentres defines the way the plot is drawn.
          If true it is a line going through the bin centres. Otherwise it will be made of horizontal steps
-    @param tableVisible Visibility flag for the Table with the plotted data.
+    @param tableVisible :: Visibility flag for the Table with the plotted data.
  */
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs)
 {
@@ -2424,8 +2424,8 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
-     @param m Mantid matrix
-     @param errs True if the errors to be plotted
+     @param m :: Mantid matrix
+     @param errs :: True if the errors to be plotted
  */
 MultiLayer* MantidUI::plotSelectedRows(MantidMatrix *m, bool errs)
 {
@@ -2507,8 +2507,8 @@ MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs,
   return ml;
 }
 /** Saves data to  nexus file
- * @param wsName Name of the workspace to be saved
- * @param fileName name of the nexus file to created
+ * @param wsName :: Name of the workspace to be saved
+ * @param fileName :: name of the nexus file to created
  */
 void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
 { 
@@ -2524,8 +2524,8 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
   }
 }
 /** Loads data from nexus file
- * @param wsName Name of the workspace to be created
- * @param fileName name of the nexus file
+ * @param wsName :: Name of the workspace to be created
+ * @param fileName :: name of the nexus file
  */
 void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
 {
@@ -2543,8 +2543,8 @@ void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string
   }
 }
 /** Loads data from raw file
- * @param wsName Name of the workspace to be created
- * @param fileName name of the raw file
+ * @param wsName :: Name of the workspace to be created
+ * @param fileName :: name of the raw file
  */
 void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
 {

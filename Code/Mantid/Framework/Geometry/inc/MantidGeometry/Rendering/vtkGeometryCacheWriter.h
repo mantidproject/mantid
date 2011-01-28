@@ -15,7 +15,7 @@ namespace Mantid
 
   namespace Geometry
   {
-    /*!
+    /**
     \class vtkGeometryCacheWriter
     \brief Writes the Geometry from Object to Cache
     \author Srikanth Nagella

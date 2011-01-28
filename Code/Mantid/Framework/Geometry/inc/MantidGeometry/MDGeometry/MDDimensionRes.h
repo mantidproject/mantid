@@ -94,7 +94,7 @@ public:
 /// scale of the data along this axis 
     /// TO DO: what is this scale and what constraint we want to apply on it? 
     virtual double getScale(void)const{return 1;}
-/*! return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
+/** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
  *   coinsiding with min and max values rMin and rMax; */
     bool        getIntegrated(void)const{return true;}
 /// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1

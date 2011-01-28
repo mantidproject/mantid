@@ -43,7 +43,7 @@ ShapeFactory::ShapeFactory()
 
 /** Creates a geometric object directly from a XML shape string
  *
- *  @param shapeXML XML shape string
+ *  @param shapeXML :: XML shape string
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
  */
 boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML)
@@ -78,7 +78,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML)
 /** Creates a geometric object from a DOM-element-node pointing to a \<type> element
  *  containing shape information. If no shape information an empty Object is returned
  *
- *  @param pElem XML element from instrument def. file which may specify a geometric shape
+ *  @param pElem :: XML element from instrument def. file which may specify a geometric shape
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
  *
  *  @throw logic_error Thrown if argument is not a pointer to a 'type' XML element
@@ -302,9 +302,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
 /** Parse XML 'sphere' element
  *
- *  @param pElem XML 'sphere' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'sphere' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -332,9 +332,9 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
 
 /** Parse XML 'infinite-plane' element
  *
- *  @param pElem XML 'infinite-plane' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'infinite-plane' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -358,9 +358,9 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map
 
 /** Parse XML 'infinite-cylinder' element
  *
- *  @param pElem XML 'infinite-cylinder' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'infinite-cylinder' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -395,9 +395,9 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
 
 /** Parse XML 'cylinder' element
  *
- *  @param pElem XML 'cylinder' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'cylinder' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -449,9 +449,9 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
 
 /** Parse XML 'cylinder' element
  *
- *  @param pElem XML 'cylinder' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'cylinder' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -503,9 +503,9 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std:
 
 /** Parse XML 'cuboid' element
  *
- *  @param pElem XML 'cuboid' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'cuboid' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -583,9 +583,9 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
 /** Parse XML 'infinite-cone' element
  *
- *  @param pElem XML 'infinite-cone' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'infinite-cone' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -627,9 +627,9 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
 
 /** Parse XML 'cone' element
  *
- *  @param pElem XML 'cone' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'cone' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -681,9 +681,9 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Sur
 
 /** Parse XML 'hexahedron' element
  *
- *  @param pElem XML 'hexahedron' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'hexahedron' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -768,9 +768,9 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
 
 /** Parse XML 'torus' element
  *
- *  @param pElem XML 'torus' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'torus' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -807,9 +807,9 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Su
 
 /** Parse XML 'slice-of-cylinder-ring' element
  *
- *  @param pElem XML 'slice-of-cylinder-ring' element from instrument def. file
- *  @param prim To add shapes to
- *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @param pElem :: XML 'slice-of-cylinder-ring' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
  *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -887,8 +887,8 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 /** Return a subelement of an XML element, but also checks that there exist exactly one entry
  *  of this subelement.
  *
- *  @param pElem XML from instrument def. file
- *  @param name Name of subelement 
+ *  @param pElem :: XML from instrument def. file
+ *  @param name :: Name of subelement 
  *  @return The subelement
  *
  *  @throw std::invalid_argument Thrown if issues with XML string
@@ -910,8 +910,8 @@ Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, con
 /** Return value of attribute to XML element. It is an extension of poco's getAttribute method, which
  *  in addition check that this attribute exists and if not throws an error. 
  *
- *  @param pElem XML from instrument def. file
- *  @param name Name of subelement 
+ *  @param pElem :: XML from instrument def. file
+ *  @param name :: Name of subelement 
  *  @return Value of attribute
  *
  *  @throw std::invalid_argument Thrown if issues with XML string
@@ -932,7 +932,7 @@ double ShapeFactory::getDoubleAttribute(Poco::XML::Element* pElem, const std::st
 
 /** Get position coordinates from XML element
  *
- *  @param pElem XML element whose attributes contain position coordinates
+ *  @param pElem :: XML element whose attributes contain position coordinates
  *  @return Position coordinates in the form of a V3D object 
  */
 V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)

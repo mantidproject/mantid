@@ -30,9 +30,9 @@
 //***************************************************************************
 /**
  * Constructor 
- * @param title The title
- * @param parent The parent widget
- * @param flags Window flags
+ * @param title :: The title
+ * @param parent :: The parent widget
+ * @param flags :: Window flags
  */
 ScriptOutputDock::ScriptOutputDock(const QString & title, ScriptManagerWidget* manager, 
 				   QWidget * parent, Qt::WindowFlags flags ) : 
@@ -76,7 +76,7 @@ void ScriptOutputDock::clear()
 
 /**
  * Change the title based on the script's execution state
- * @param running The current state of the script environment
+ * @param running :: The current state of the script environment
  */
 void ScriptOutputDock::setScriptIsRunning(bool running)
 {
@@ -97,9 +97,9 @@ void ScriptOutputDock::setScriptIsRunning(bool running)
 //-------------------------------------------
 /**
  * Display an output message in the output dock
- * @param msg The msg
- * @param error Indicate that this is an error
- * @param timestamp Indicates if the message has a timestamp attached to it. In this case the 
+ * @param msg :: The msg
+ * @param error :: Indicate that this is an error
+ * @param timestamp :: Indicates if the message has a timestamp attached to it. In this case the 
  * message will appear on a new line regardless of the last cursor position
  */
 void ScriptOutputDock::displayOutputMessage(const QString &msg, bool error, bool timestamp)
@@ -253,9 +253,9 @@ void ScriptOutputDock::resetFont()
 //-------------------------------------------
 /**
  * Constructor
- * @param env The scripting environment
- * @param parent The parent widget
- * @param flags Window flags passed to the base class
+ * @param env :: The scripting environment
+ * @param parent :: The parent widget
+ * @param flags :: Window flags passed to the base class
  */
 ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFlags flags) : 
   QMainWindow(parent, flags)
@@ -354,8 +354,8 @@ void ScriptingWindow::saveSettings()
 /**
  * Open a script directly. This is here for backwards compatability with the old ScriptWindow
  * class
- * @param filename The file name
- * @param newtab Do we want a new tab
+ * @param filename :: The file name
+ * @param newtab :: Do we want a new tab
  */
 void ScriptingWindow::open(const QString & filename, bool newtab)
 {
@@ -372,7 +372,7 @@ void ScriptingWindow::executeAll()
 //-------------------------------------------
 /**
  * Accept a custom event and in this case test if it is a ScriptingChangeEvent
- * @param event The custom event
+ * @param event :: The custom event
  */ 
 void ScriptingWindow::customEvent(QEvent *event)
 {

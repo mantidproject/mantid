@@ -44,7 +44,7 @@ namespace Mantid
 
     /** Gets the names and categories of all the currently available algorithms
     *
-    *  \return A vector of pairs of algorithm names and categories
+    *  @return A vector of pairs of algorithm names and categories
     */
     const std::vector<std::pair<std::string,std::string> > 
       AlgorithmManagerImpl::getNamesAndCategories() const

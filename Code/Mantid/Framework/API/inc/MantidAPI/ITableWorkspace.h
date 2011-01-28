@@ -118,8 +118,8 @@ public:
     virtual const std::string id() const{return "ITableWorkspace";}
 
     /** Creates a new column
-     * @param type The datatype of the column
-     * @param name The name to assign to the column
+     * @param type :: The datatype of the column
+     * @param name :: The name to assign to the column
      * @return True if the column was successfully added
      */
     virtual bool addColumn(const std::string& type, const std::string& name) = 0;
@@ -179,8 +179,8 @@ public:
 
     template <class T>
     /**  Get a reference to a data element
-         @param name Column name.
-         @param index Element's opsition in the column.
+         @param name :: Column name.
+         @param index :: Element's opsition in the column.
          @tparam T Type of the data in the column. If it doesn't match the actual type 
            a runtime_error exception is thrown.
          @return the reference to the data element
@@ -199,8 +199,8 @@ public:
     }
 
     /**  Get the reference to the element in row \c row and column \c col.
-         @param row Row number
-         @param col Column number
+         @param row :: Row number
+         @param col :: Column number
          @tparam T Type of the data in the column. If it doesn't match the actual type 
            a runtime_error exception is thrown.
          @return the reference to the requested cell
@@ -221,35 +221,35 @@ public:
 
     /**  Get the reference to the element in row \c row and column \c col if its type is \c int.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
+         @param row :: Row number
+         @param col :: Column number
          @return the reference of a requested cell if it's an integer
      */
     int& Int(int row,int col){return cell<int>(row,col);}
     /**  Get the reference to the element in row \c row and column \c col if its type is \c double.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
+         @param row :: Row number
+         @param col :: Column number
          @return the reference of a requested cell if it's a double
      */
     double& Double(int row,int col){return cell<double>(row,col);}
     /**  Get the reference to the element in row \c row and column \c col if its type is \c bool.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
+         @param row :: Row number
+         @param col :: Column number
          @return the reference of a requested cell if it's a boolean
      */
     Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
     /**  Get the reference to the element in row \a row and column \a col if its type is \c std::string.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
+         @param row :: Row number
+         @param col :: Column number
          @return the reference of a requested cell if it's a string
      */
     std::string& String(int row,int col){return cell<std::string>(row,col);}
 
     /**  Creates a TableRow object for row \a row.
-         @param row Row number
+         @param row :: Row number
          @return the requested row
      */
     TableRowHelper getRow(int row){return TableRowHelper(this,row);}
@@ -273,8 +273,8 @@ public:
 protected:
 
     /**  Resize a column.
-         @param c Pointer to the column
-         @param size New column size
+         @param c :: Pointer to the column
+         @param size :: New column size
      */
     void resizeColumn(Column* c,int size)
     {
@@ -282,8 +282,8 @@ protected:
     }
 
     /**  Insert a new element into a column.
-         @param c Pointer to the column
-         @param index Index in the column before which a new element wil be inserted.
+         @param c :: Pointer to the column
+         @param index :: Index in the column before which a new element wil be inserted.
      */
     void insertInColumn(Column* c,int index)
     {
@@ -291,8 +291,8 @@ protected:
     }
 
     /**  Remove an element from a column.
-         @param c Pointer to the column
-         @param index Index of the element to be removed.
+         @param c :: Pointer to the column
+         @param index :: Index of the element to be removed.
      */
     void removeFromColumn(Column* c,int index)
     {
@@ -323,7 +323,7 @@ public:
         }
     }
     /** Get the element
-        @param i Element's position
+        @param i :: Element's position
         @return the column at the requested index
      */
     T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}

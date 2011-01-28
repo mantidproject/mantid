@@ -155,10 +155,10 @@ void LoadNexusProcessed::exec()
 }
 /**
  * Load a single entry into a workspace
- * @param root The opened root node
- * @param entry_name The entry name
- * @param progressStart The percentage value to start the progress reporting for this entry
- * @param progressRange The percentage range that the progress reporting should cover
+ * @param root :: The opened root node
+ * @param entry_name :: The entry name
+ * @param progressStart :: The percentage value to start the progress reporting for this entry
+ * @param progressRange :: The percentage range that the progress reporting should cover
  * @returns A 2D workspace containing the loaded data
  */
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
@@ -425,8 +425,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
 
 /**
  * Read the instrument group
- * @param mtd_entry The node for the current workspace
- * @param local_workspace The workspace to attach the instrument
+ * @param mtd_entry :: The node for the current workspace
+ * @param local_workspace :: The workspace to attach the instrument
  */
 void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
@@ -538,8 +538,8 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 /**
 * Loads the information contained in non-Spectra (ie, Text or Numeric) axis in the Nexus
 * file into the workspace.
-* @param local_workspace pointer to workspace object
-* @param data reference to the NeXuS data for the axis
+* @param local_workspace :: pointer to workspace object
+* @param data :: reference to the NeXuS data for the axis
 */
 void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data)
 {
@@ -576,8 +576,8 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
 
 /**
  * Read the instrument group
- * @param mtd_entry The node for the current workspace
- * @param local_workspace The workspace to attach the instrument
+ * @param mtd_entry :: The node for the current workspace
+ * @param local_workspace :: The workspace to attach the instrument
  */
 void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
@@ -656,9 +656,9 @@ void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspa
 }
 
 /** Add a property to the sample object
- * @param sample_entry The NX entry for the sample group
- * @param entryName The name of the entry
- * @param sampleDetails The sample object to add the property to
+ * @param sample_entry :: The NX entry for the sample group
+ * @param entryName :: The name of the entry
+ * @param sampleDetails :: The sample object to add the property to
  * @returns True if the property has been handled, false otherwise
  */
 bool LoadNexusProcessed::addSampleProperty(NXMainClass & sample_entry, const std::string & entryName, API::Sample& sampleDetails)
@@ -723,8 +723,8 @@ bool LoadNexusProcessed::addSampleProperty(NXMainClass & sample_entry, const std
 
 /**
  * Binary predicate function object to sort the AlgorithmHistory vector by execution order
- * @param elem1 first element in the vector
- * @param elem2 second element in the vecor
+ * @param elem1 :: first element in the vector
+ * @param elem2 :: second element in the vecor
  */
 bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
 {
@@ -759,8 +759,8 @@ bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
 
 /**
  * Read the algorithm history from the "mantid_workspace_i/process" group
- * @param mtd_entry The node for the current workspace
- * @param local_workspace The workspace to attach the history to
+ * @param mtd_entry :: The node for the current workspace
+ * @param local_workspace :: The workspace to attach the history to
  *  @throw out_of_range an algorithm history entry doesn't have the excepted number of entries
  */
 void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
@@ -900,8 +900,8 @@ void LoadNexusProcessed::getWordsInString(const std::string & words4, std::strin
 
 /**
  * Read the parameter map from the mantid_workspace_i/instrument_parameter_map group.
- * @param mtd_entry The entry object that points to the root node
- * @param local_workspace The workspace to read into
+ * @param mtd_entry :: The entry object that points to the root node
+ * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
     API::MatrixWorkspace_sptr local_workspace)
@@ -953,8 +953,8 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
 /**
  * Read the bin masking information from the mantid_workspace_i/workspace group.
- * @param wksp_cls The data group
- * @param local_workspace The workspace to read into
+ * @param wksp_cls :: The data group
+ * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_sptr local_workspace)
 {
@@ -984,8 +984,8 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_
 
 
 /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
- * @param inst_name The name written in the Nexus file
- * @param localWorkspace The workspace to insert the instrument into
+ * @param inst_name :: The name written in the Nexus file
+ * @param localWorkspace :: The workspace to insert the instrument into
  */
 void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
     API::MatrixWorkspace_sptr localWorkspace)
@@ -1014,12 +1014,12 @@ void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
 /**
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. This assumes that the
  * xbins have alread been cached
- * @param data The NXDataSet object of y values
- * @param errors The NXDataSet object of error values
- * @param blocksize The blocksize to use
- * @param nchannels The number of channels for the block
- * @param hist The workspace index to start reading into
- * @param local_workspace A pointer to the workspace
+ * @param data :: The NXDataSet object of y values
+ * @param errors :: The NXDataSet object of error values
+ * @param blocksize :: The blocksize to use
+ * @param nchannels :: The number of channels for the block
+ * @param hist :: The workspace index to start reading into
+ * @param local_workspace :: A pointer to the workspace
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
     int blocksize, int nchannels, int &hist,
@@ -1048,13 +1048,13 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
 /**
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. This assumes that the
  * xbins have alread been cached
- * @param data The NXDataSet object of y values
- * @param errors The NXDataSet object of error values
- * @param blocksize The blocksize to use
- * @param nchannels The number of channels for the block
- * @param hist The workspace index to start reading into
- * @param wsIndex The workspace index to save data into
- * @param local_workspace A pointer to the workspace
+ * @param data :: The NXDataSet object of y values
+ * @param errors :: The NXDataSet object of error values
+ * @param blocksize :: The blocksize to use
+ * @param nchannels :: The number of channels for the block
+ * @param hist :: The workspace index to start reading into
+ * @param wsIndex :: The workspace index to save data into
+ * @param local_workspace :: A pointer to the workspace
  */
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
@@ -1086,14 +1086,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
 /**
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. The xbins are read along with
  * each call to the data/error loading
- * @param data The NXDataSet object of y values
- * @param errors The NXDataSet object of error values
- * @param xbins The xbin NXDataSet
- * @param blocksize The blocksize to use
- * @param nchannels The number of channels for the block
- * @param hist The workspace index to start reading into
- * @param wsIndex The workspace index to save data into
- * @param local_workspace A pointer to the workspace
+ * @param data :: The NXDataSet object of y values
+ * @param errors :: The NXDataSet object of error values
+ * @param xbins :: The xbin NXDataSet
+ * @param blocksize :: The blocksize to use
+ * @param nchannels :: The number of channels for the block
+ * @param hist :: The workspace index to start reading into
+ * @param wsIndex :: The workspace index to save data into
+ * @param local_workspace :: A pointer to the workspace
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
     int blocksize, int nchannels, int &hist, int& wsIndex,
@@ -1129,7 +1129,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
 
 /**
  *Validates the optional 'spectra to read' properties, if they have been set
- * @param numberofspectra number of spectrum
+ * @param numberofspectra :: number of spectrum
  */
 void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
 {
@@ -1174,7 +1174,7 @@ void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
 
 /**
  * Calculate the size of a workspace
- * @param numberofspectra number of spectrums
+ * @param numberofspectra :: number of spectrums
  * @return the size of a workspace
  */
 int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
@@ -1223,8 +1223,8 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
 
   /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
-    *  @param nread - no.of bytes read
-    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @param nread :: no.of bytes read
+    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
     bool LoadNexusProcessed::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -1249,7 +1249,7 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
           
     }
    /**checks the file by opening it and reading few lines 
-    *  @param filePath name of the file inluding its path
+    *  @param filePath :: name of the file inluding its path
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadNexusProcessed::fileCheck(const std::string& filePath)

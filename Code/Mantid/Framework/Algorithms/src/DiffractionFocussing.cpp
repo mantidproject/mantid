@@ -234,10 +234,10 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
 
 /** Calculates rebin parameters: the min and max bin boundaries and the logarithmic step. The aim is to have approx.
     the same number of bins as in the input workspace.
-    @param workspace The workspace being rebinned
-    @param min       (return) The calculated frame starting point
-    @param max       (return) The calculated frame ending point
-    @param step      (return) The calculated bin width
+    @param workspace :: The workspace being rebinned
+    @param min ::       (return) The calculated frame starting point
+    @param max ::       (return) The calculated frame ending point
+    @param step ::      (return) The calculated bin width
  */
 void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step)
 {

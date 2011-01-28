@@ -18,7 +18,7 @@ SpectraAxis::SpectraAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
- *  @param parentWorkspace not used in this implementation
+ *  @param parentWorkspace :: not used in this implementation
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
 Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
@@ -45,8 +45,8 @@ double SpectraAxis::operator()(const int& index, const int& verticalIndex) const
 }
 
 /** Sets the axis value at a given position
- *  @param index The position along the axis for which to set the value
- *  @param value The new value
+ *  @param index :: The position along the axis for which to set the value
+ *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 void SpectraAxis::setValue(const int& index, const double& value)
@@ -137,7 +137,7 @@ void SpectraAxis::populateSimple(int end)
 
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
- *  @param axis2 Reference to the axis to compare to
+ *  @param axis2 :: Reference to the axis to compare to
  *  @return true is self and second axis are equal
  */
 bool SpectraAxis::operator==(const Axis& axis2) const
@@ -156,7 +156,7 @@ bool SpectraAxis::operator==(const Axis& axis2) const
 
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
- *  @param index The index of an axis value
+ *  @param index :: The index of an axis value
  *  @return label of requested axis index
  */
 std::string SpectraAxis::label(const int& index)const

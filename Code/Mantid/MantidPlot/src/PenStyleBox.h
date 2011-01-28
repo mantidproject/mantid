@@ -42,7 +42,7 @@ class PenStyleBox : public QComboBox
 public:
 		//! Constructor.
 		/**
-		 * \param parent parent widget (only affects placement of the widget)
+		 * @param parent :: parent widget (only affects placement of the widget)
 		 */
 		PenStyleBox(QWidget *parent = 0);
   		void setStyle(const Qt::PenStyle& style);

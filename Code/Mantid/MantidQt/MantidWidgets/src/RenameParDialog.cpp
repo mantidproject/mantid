@@ -54,7 +54,7 @@ bool RenameParDialog::isUnique(const QString& name)const
 /**
  * Adds a suffix to the unput parameter name in the form: _n where n is a number.
  * The method ensures that the new name is unique
- * @param name The name to rename
+ * @param name :: The name to rename
  */
 QString RenameParDialog::makeUniqueIndexedName(const QString& name)
 {
@@ -93,7 +93,7 @@ QString RenameParDialog::makeUniqueIndexedName(const QString& name)
 
 /**
  * Output the new names to a vector 
- * @param out Reference to a vector for output
+ * @param out :: Reference to a vector for output
  */
 void RenameParDialog::setOutput(std::vector<std::string>& out)const
 {

@@ -82,7 +82,7 @@ bool Script::exec()
 
 /**
  * Ensure that any line endings are converted to single '\n' so that the Python C API is happy
- * @param text The text to check and convert
+ * @param text :: The text to check and convert
  */
 QString Script::normaliseLineEndings(QString text) const
 {

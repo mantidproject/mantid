@@ -1,7 +1,7 @@
 #ifndef GLCOLOR_H_
 #define GLCOLOR_H_
 
-/*!
+/**
   \class  GLColor
   \brief  class handling OpenGL color for objects
   \author Chapon Laurent & Srikanth Nagella

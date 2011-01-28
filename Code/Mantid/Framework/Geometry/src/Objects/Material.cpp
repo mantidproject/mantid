@@ -22,11 +22,11 @@ namespace Mantid
 
     /**
     * Construct a material object
-    * @param name The name of the material
-    * @param element The element it is composed from
-    * @param numberDensity Density in A^-3
-    * @param temperature The temperature in Kelvin (Default = 300K)
-    * @param pressure Pressure in kPa (Default: 101.325 kPa)
+    * @param name :: The name of the material
+    * @param element :: The element it is composed from
+    * @param numberDensity :: Density in A^-3
+    * @param temperature :: The temperature in Kelvin (Default = 300K)
+    * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
     */
     Material::Material(const std::string & name, const NeutronAtom element, 
 		       const double numberDensity, const double temperature, 
@@ -75,7 +75,7 @@ namespace Mantid
     /**
      * Get the coherent scattering cross section for a given wavelength.
      * CURRENTLY this simply returns the value for the underlying element
-     * @param lambda The wavelength to evaluate the cross section
+     * @param lambda :: The wavelength to evaluate the cross section
      * @returns The value of the coherent scattering cross section at 
      * the given wavelength
      */ 
@@ -89,7 +89,7 @@ namespace Mantid
     /**
      * Get the incoherent scattering cross section for a given wavelength
      * CURRENTLY this simply returns the value for the underlying element
-     * @param lambda The wavelength to evaluate the cross section
+     * @param lambda :: The wavelength to evaluate the cross section
      * @returns The value of the coherent scattering cross section at 
      * the given wavelength
      */
@@ -103,7 +103,7 @@ namespace Mantid
      * Get the total scattering cross section for a given wavelength
      * CURRENTLY this simply returns the value for sum of the incoherent
      * and coherent scattering cross sections.
-     * @param lambda The wavelength to evaluate the cross section
+     * @param lambda :: The wavelength to evaluate the cross section
      * @returns The value of the total scattering cross section at 
      * the given wavelength
      */
@@ -116,7 +116,7 @@ namespace Mantid
      * Get the absorption cross section for a given wavelength.
      * CURRENTLY This assumes a linear dependence on the wavelength with the reference
      * wavelegnth = 1.7982 angstroms.
-     * @param lambda The wavelength to evaluate the cross section
+     * @param lambda :: The wavelength to evaluate the cross section
      * @returns The value of the absoprtioncross section at 
      * the given wavelength
      */

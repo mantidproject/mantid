@@ -15,10 +15,10 @@ namespace DataObjects
 Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBlock2D");
 
 /** Constructor.
- *  @param minIndex The index of the workspace that this data block starts at
- *  @param NVectors The number of Histogram1D's in this data block
- *  @param XLength  The number of elements in the X data
- *  @param YLength  The number of elements in the Y/E data
+ *  @param minIndex :: The index of the workspace that this data block starts at
+ *  @param NVectors :: The number of Histogram1D's in this data block
+ *  @param XLength ::  The number of elements in the X data
+ *  @param YLength ::  The number of elements in the Y/E data
  */
 ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors, 
     const int &XLength, const int &YLength) :
@@ -66,7 +66,7 @@ bool ManagedDataBlock2D::hasChanges() const
 
 /** Gives the possibility to drop the flag. Used in ManagedRawFileWorkspace2D atfer
  *  reading in from a raw file.
- *  @param has True if the data has been changed.
+ *  @param has :: True if the data has been changed.
  */
 void ManagedDataBlock2D::hasChanges(bool has)
 {
@@ -107,8 +107,8 @@ void ManagedDataBlock2D::setX(const int index, const MantidVecPtr& PA)
 
 /**
  Sets the data in the workspace
- @param index The histogram to be set
- @param PY A reference counted data range  
+ @param index :: The histogram to be set
+ @param PY :: A reference counted data range  
  */
 void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY)
 {
@@ -123,9 +123,9 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY)
 
 /**
  Sets the data in the workspace
- @param index The histogram to be set
- @param PY A reference counted data range  
- @param PE A reference containing the corresponding errors
+ @param index :: The histogram to be set
+ @param PY :: A reference counted data range  
+ @param PE :: A reference containing the corresponding errors
  */
 void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY,
     const MantidVecPtr& PE)
@@ -141,9 +141,9 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY,
 
 /**
  Sets the data in the workspace
- @param index The histogram to be set
- @param PY A reference counted data range  
- @param PE A reference containing the corresponding errors
+ @param index :: The histogram to be set
+ @param PY :: A reference counted data range  
+ @param PE :: A reference containing the corresponding errors
  */
 void ManagedDataBlock2D::setData(const int index, const MantidVecPtr::ptr_type& PY,
     const MantidVecPtr::ptr_type& PE)
@@ -159,7 +159,7 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr::ptr_type& 
 
 /**
   Get the x data of a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the x data
 */
 MantidVec& ManagedDataBlock2D::dataX(const int index)
@@ -174,7 +174,7 @@ MantidVec& ManagedDataBlock2D::dataX(const int index)
 
 /**
   Get the y data of a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the y data
 */
 MantidVec& ManagedDataBlock2D::dataY(const int index)
@@ -189,7 +189,7 @@ MantidVec& ManagedDataBlock2D::dataY(const int index)
 
 /**
   Get the error data for a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the error data
 */
 MantidVec& ManagedDataBlock2D::dataE(const int index)
@@ -204,7 +204,7 @@ MantidVec& ManagedDataBlock2D::dataE(const int index)
 
 /**
   Get the x data of a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the x data
 */
 const MantidVec& ManagedDataBlock2D::dataX(const int index) const
@@ -218,7 +218,7 @@ const MantidVec& ManagedDataBlock2D::dataX(const int index) const
 
 /**
   Get the y data of a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the y data
 */
 const MantidVec& ManagedDataBlock2D::dataY(const int index) const
@@ -232,7 +232,7 @@ const MantidVec& ManagedDataBlock2D::dataY(const int index) const
 
 /**
   Get the error data for a specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A vector of doubles containing the error data
 */
 const MantidVec& ManagedDataBlock2D::dataE(const int index) const
@@ -246,7 +246,7 @@ const MantidVec& ManagedDataBlock2D::dataE(const int index) const
 
 /**
   Gets reference to the X vector of the specified histogram
-  @param index The number of the histogram
+  @param index :: The number of the histogram
   @return A reference to the X vector of the specified histogram
 */
 MantidVecPtr ManagedDataBlock2D::refX(const int index) const
@@ -259,8 +259,8 @@ MantidVecPtr ManagedDataBlock2D::refX(const int index) const
 }
 
 /** Output file stream operator.
- *  @param fs The stream to write to
- *  @param data The object to write to file
+ *  @param fs :: The stream to write to
+ *  @param data :: The object to write to file
  *  @return stream representation of data
  */
 std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
@@ -294,8 +294,8 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
 }
 
 /** Input file stream operator.
- *  @param fs The stream to read from
- *  @param data The object to fill with the read-in data
+ *  @param fs :: The stream to read from
+ *  @param data :: The object to fill with the read-in data
  *  @return stream representation of data
  */
 std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)

@@ -731,7 +731,7 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     }
 }
 
-/*!
+/**
     \class QtTreePropertyBrowser
 
     \brief The QtTreePropertyBrowser class provides QTreeWidget based
@@ -758,7 +758,7 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     \sa QtGroupBoxPropertyBrowser, QtAbstractPropertyBrowser
 */
 
-/*!
+/**
     \fn void QtTreePropertyBrowser::collapsed(QtBrowserItem *item)
 
     This signal is emitted when the \a item is collapsed.
@@ -766,7 +766,7 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     \sa expanded(), setExpanded()
 */
 
-/*!
+/**
     \fn void QtTreePropertyBrowser::expanded(QtBrowserItem *item)
 
     This signal is emitted when the \a item is expanded.
@@ -774,7 +774,7 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     \sa collapsed(), setExpanded()
 */
 
-/*!
+/**
     Creates a property browser with the given \a parent.
 */
 QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent)
@@ -787,7 +787,7 @@ QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent)
     connect(this, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(slotCurrentBrowserItemChanged(QtBrowserItem*)));
 }
 
-/*!
+/**
     Destroys this property browser.
 
     Note that the properties that were inserted into this browser are
@@ -802,7 +802,7 @@ QtTreePropertyBrowser::~QtTreePropertyBrowser()
     delete d_ptr;
 }
 
-/*!
+/**
     \property QtTreePropertyBrowser::indentation
     \brief indentation of the items in the tree view.
 */
@@ -816,7 +816,7 @@ void QtTreePropertyBrowser::setIndentation(int i)
     d_ptr->m_treeWidget->setIndentation(i);
 }
 
-/*!
+/**
   \property QtTreePropertyBrowser::rootIsDecorated
   \brief whether to show controls for expanding and collapsing root items.
 */
@@ -836,7 +836,7 @@ void QtTreePropertyBrowser::setRootIsDecorated(bool show)
     }
 }
 
-/*!
+/**
   \property QtTreePropertyBrowser::alternatingRowColors
   \brief whether to draw the background using alternating colors.
   By default this property is set to true.
@@ -852,7 +852,7 @@ void QtTreePropertyBrowser::setAlternatingRowColors(bool enable)
     QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
 }
 
-/*!
+/**
   \property QtTreePropertyBrowser::headerVisible
   \brief whether to show the header.
 */
@@ -870,7 +870,7 @@ void QtTreePropertyBrowser::setHeaderVisible(bool visible)
     d_ptr->m_treeWidget->header()->setVisible(visible);
 }
 
-/*!
+/**
   \enum QtTreePropertyBrowser::ResizeMode
 
   The resize mode specifies the behavior of the header sections.
@@ -891,7 +891,7 @@ void QtTreePropertyBrowser::setHeaderVisible(bool visible)
   \sa setResizeMode()
 */
 
-/*!
+/**
     \property QtTreePropertyBrowser::resizeMode
     \brief the resize mode of setions in the header.
 */
@@ -918,7 +918,7 @@ void QtTreePropertyBrowser::setResizeMode(QtTreePropertyBrowser::ResizeMode mode
     d_ptr->m_treeWidget->header()->setResizeMode(m);
 }
 
-/*!
+/**
     \property QtTreePropertyBrowser::splitterPosition
     \brief the position of the splitter between the colunms.
 */
@@ -933,7 +933,7 @@ void QtTreePropertyBrowser::setSplitterPosition(int position)
     d_ptr->m_treeWidget->header()->resizeSection(0, position);
 }
 
-/*!
+/**
     Sets the \a item to either collapse or expanded, depending on the value of \a expanded.
 
     \sa isExpanded(), expanded(), collapsed()
@@ -946,7 +946,7 @@ void QtTreePropertyBrowser::setExpanded(QtBrowserItem *item, bool expanded)
         treeItem->setExpanded(expanded);
 }
 
-/*!
+/**
     Returns true if the \a item is expanded; otherwise returns false.
 
     \sa setExpanded()
@@ -960,7 +960,7 @@ bool QtTreePropertyBrowser::isExpanded(QtBrowserItem *item) const
     return false;
 }
 
-/*!
+/**
     Returns true if the \a item is visible; otherwise returns false.
 
     \sa setItemVisible()
@@ -974,7 +974,7 @@ bool QtTreePropertyBrowser::isItemVisible(QtBrowserItem *item) const
     return false;
 }
 
-/*!
+/**
     Sets the \a item to be visible, depending on the value of \a visible.
 
    \sa isItemVisible()
@@ -987,7 +987,7 @@ void QtTreePropertyBrowser::setItemVisible(QtBrowserItem *item, bool visible)
         treeItem->setHidden(!visible);
 }
 
-/*!
+/**
     Sets the \a item's background color to \a color. Note that while item's background
     is rendered every second row is being drawn with alternate color (which is a bit lighter than items \a color)
 
@@ -1005,7 +1005,7 @@ void QtTreePropertyBrowser::setBackgroundColor(QtBrowserItem *item, const QColor
     d_ptr->m_treeWidget->viewport()->update();
 }
 
-/*!
+/**
     Returns the \a item's color. If there is no color set for item it returns invalid color.
 
     \sa calculatedBackgroundColor(), setBackgroundColor()
@@ -1016,7 +1016,7 @@ QColor QtTreePropertyBrowser::backgroundColor(QtBrowserItem *item) const
     return d_ptr->m_indexToBackgroundColor.value(item);
 }
 
-/*!
+/**
     Returns the \a item's color. If there is no color set for item it returns parent \a item's
     color (if there is no color set for parent it returns grandparent's color and so on). In case
     the color is not set for \a item and it's top level item it returns invalid color.
@@ -1029,7 +1029,7 @@ QColor QtTreePropertyBrowser::calculatedBackgroundColor(QtBrowserItem *item) con
     return d_ptr->calculatedBackgroundColor(item);
 }
 
-/*!
+/**
     \property QtTreePropertyBrowser::propertiesWithoutValueMarked
     \brief whether to enable or disable marking properties without value.
 
@@ -1058,7 +1058,7 @@ bool QtTreePropertyBrowser::propertiesWithoutValueMarked() const
     return d_ptr->m_markPropertiesWithoutValue;
 }
 
-/*!
+/**
     \reimp
 */
 void QtTreePropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem)
@@ -1066,7 +1066,7 @@ void QtTreePropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *aft
     d_ptr->propertyInserted(item, afterItem);
 }
 
-/*!
+/**
     \reimp
 */
 void QtTreePropertyBrowser::itemRemoved(QtBrowserItem *item)
@@ -1074,7 +1074,7 @@ void QtTreePropertyBrowser::itemRemoved(QtBrowserItem *item)
     d_ptr->propertyRemoved(item);
 }
 
-/*!
+/**
     \reimp
 */
 void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item)
@@ -1082,7 +1082,7 @@ void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item)
     d_ptr->propertyChanged(item);
 }
 
-/*!
+/**
     Sets the current item to \a item and opens the relevant editor for it.
 */
 void QtTreePropertyBrowser::editItem(QtBrowserItem *item)

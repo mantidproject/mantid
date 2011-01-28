@@ -28,8 +28,8 @@ namespace Mantid
     {}
 
     /** Constructor to create a parametrized instrument
-     * @param instr instrument for parameter inclusion
-     * @param map parameter map to include
+     * @param instr :: instrument for parameter inclusion
+     * @param map :: parameter map to include
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
     : CompAssembly(instr.get(), map.get() ),
@@ -133,7 +133,7 @@ namespace Mantid
     }
 
     /**  Get a shared pointer to a component by its ID
-    *   @param id ID
+    *   @param id :: ID
     *   @return A pointer to the component.
     */
     boost::shared_ptr<Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)
@@ -146,7 +146,7 @@ namespace Mantid
     }
 
     /**  Get a shared pointer to a component by its ID, const version
-    *   @param id ID
+    *   @param id :: ID
     *   @return A pointer to the component.
     */
     boost::shared_ptr<const Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)const
@@ -217,7 +217,7 @@ namespace Mantid
 
 
     /**	Gets a pointer to the requested child component
-    * @param name the name of the object requested (case insensitive)
+    * @param name :: the name of the object requested (case insensitive)
     * @returns a pointer to the component
     */
     Geometry::IComponent* Instrument::getChild(const std::string& name) const
@@ -253,7 +253,7 @@ namespace Mantid
     * to be 'the' samplePos Component. For now it is assumed that we have
     * at most one of these.
     *
-    * @param comp Component to be marked (stored for later retrievel) as a "SamplePos" Component
+    * @param comp :: Component to be marked (stored for later retrievel) as a "SamplePos" Component
     */
     void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
     {
@@ -270,7 +270,7 @@ namespace Mantid
     * to be 'the' source Component. For now it is assumed that we have
     * at most one of these.
     *
-    * @param comp Component to be marked (stored for later retrievel) as a "source" Component
+    * @param comp :: Component to be marked (stored for later retrievel) as a "source" Component
     */
     void Instrument::markAsSource(Geometry::ObjComponent* comp)
     {
@@ -286,7 +286,7 @@ namespace Mantid
     /** Mark a Component which has already been added to the Instrument (as a child component)
     * to be a Detector by adding it to a detector cache.
     *
-    * @param det Component to be marked (stored for later retrievel) as a detector Component
+    * @param det :: Component to be marked (stored for later retrievel) as a detector Component
     *
     */
     void Instrument::markAsDetector(Geometry::IDetector* det)
@@ -308,7 +308,7 @@ namespace Mantid
     /** Mark a Component which has already been added to the Instrument class
     * as a monitor and add it to the detector cache.
     *
-    * @param det Component to be marked (stored for later retrieval) as a detector Component
+    * @param det :: Component to be marked (stored for later retrieval) as a detector Component
     *
     * @throw Exception::ExistsError if cannot add detector to cache
     */
@@ -349,7 +349,7 @@ namespace Mantid
 
    /**
     * Get the bounding box for this instrument. It is simply the sum of the bounding boxes of its children excluding the source
-    * @param assemblyBox [Out] The resulting bounding box is stored here.
+    * @param assemblyBox :: [Out] The resulting bounding box is stored here.
     */
     void Instrument::getBoundingBox(BoundingBox & assemblyBox) const
     {

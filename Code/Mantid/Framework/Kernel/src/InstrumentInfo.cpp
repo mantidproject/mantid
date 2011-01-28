@@ -20,9 +20,9 @@ namespace Mantid
     Logger& InstrumentInfo::g_log = Logger::get("InstrumentInfo");
 
     /** Constructor.
-    * @param f The facility
-    * @param elem The Poco::XML::Element to read the data from
-    * @throws std::runtime_error if name or at least one technique are not defined
+    * @param f :: The facility
+    * @param elem :: The Poco::XML::Element to read the data from
+    * @throw std::runtime_error if name or at least one technique are not defined
     */
     InstrumentInfo::InstrumentInfo(FacilityInfo* f,const Poco::XML::Element* elem)
       :m_facility(f)
@@ -84,7 +84,7 @@ namespace Mantid
 
     /**
     * Equality operator. Two objects are considered equal if their names, short names and zero padding are the same.
-    * @param rhs The object to compare this with
+    * @param rhs :: The object to compare this with
     * @returns True if the objects are considered equal, false otherwise
     */
     bool InstrumentInfo::operator==(const InstrumentInfo & rhs) const

@@ -17,7 +17,7 @@ namespace Geometry
 
 
 
-/*! Empty constructor
+/** Empty constructor
  */
 RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
 {
@@ -36,7 +36,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector* base, const 
 }
 
 
-/*! Valued constructor
+/** Valued constructor
  *  @param n :: name of the assembly
  *  @param reference :: the parent Component
  * 
@@ -52,7 +52,7 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
-///*! Copy constructor
+///** Copy constructor
 // *  @param other :: RectangularDetector to copy
 // */
 //RectangularDetector::RectangularDetector(const RectangularDetector& other) :
@@ -61,14 +61,14 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
 //  //TODO: Copy other fields here
 //}
 
-/*! Destructor
+/** Destructor
  */
 RectangularDetector::~RectangularDetector()
 {
 
 }
 
-/*! Clone method
+/** Clone method
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
@@ -83,10 +83,10 @@ IComponent* RectangularDetector::clone() const
 /** Return a pointer to the component in the assembly at the
  * (X,Y) pixel position.
  *
- * @param X index from 0..m_xpixels-1
- * @param Y index from 0..m_ypixels-1
+ * @param X :: index from 0..m_xpixels-1
+ * @param Y :: index from 0..m_ypixels-1
  * @return a pointer to the component in the assembly at the (X,Y) pixel position
- * @throws runtime_error if the x/y pixel width is not set, or X/Y are out of range
+ * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of range
  */
 boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
 {
@@ -193,8 +193,8 @@ double RectangularDetector::ysize() const
 /** Returns the position of the center of the pixel at x,y, relative to the center
  * of the RectangularDetector, in the plain X,Y coordinates of the
  * pixels (i.e. unrotated).
- * @param x x pixel integer
- * @param y y pixel integer
+ * @param x :: x pixel integer
+ * @param y :: y pixel integer
  * @return a V3D vector of the relative position
  */
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
@@ -211,20 +211,20 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
  * contained within it. You should have set the name, position
  * and rotation and facing of this object BEFORE calling this.
  *
- * @param shape a geometry Object containing the shape of each (individual) pixel in the assembly.
+ * @param shape :: a geometry Object containing the shape of each (individual) pixel in the assembly.
  *              All pixels must have the same shape.
- * @param xpixels number of pixels in X
- * @param xstart x-position of the 0-th pixel (in length units, normally meters)
- * @param xstep step size between pixels in the horizontal direction (in length units, normally meters)
- * @param ypixels number of pixels in Y
- * @param ystart y-position of the 0-th pixel (in length units, normally meters)
- * @param ystep step size between pixels in the vertical direction (in length units, normally meters)
- * @param idstart detector ID of the first pixel
- * @param idfillbyfirst_y set to true if ID numbers increase with Y indices first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
- * @param idstepbyrow amount to increase the ID number on each row. e.g, if you fill by Y first,
+ * @param xpixels :: number of pixels in X
+ * @param xstart :: x-position of the 0-th pixel (in length units, normally meters)
+ * @param xstep :: step size between pixels in the horizontal direction (in length units, normally meters)
+ * @param ypixels :: number of pixels in Y
+ * @param ystart :: y-position of the 0-th pixel (in length units, normally meters)
+ * @param ystep :: step size between pixels in the vertical direction (in length units, normally meters)
+ * @param idstart :: detector ID of the first pixel
+ * @param idfillbyfirst_y :: set to true if ID numbers increase with Y indices first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
+ * @param idstepbyrow :: amount to increase the ID number on each row. e.g, if you fill by Y first,
  *            and set  idstepbyrow = 100, and have 50 Y pixels, you would get:
  *            (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100; (1,1)=101; etc.
- * @param idstep amount to increase each individual ID number with a row. e.g, if you fill by Y first,
+ * @param idstep :: amount to increase each individual ID number with a row. e.g, if you fill by Y first,
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
@@ -363,12 +363,12 @@ int RectangularDetector::getPointInObject(V3D& point) const
 //-------------------------------------------------------------------------------------------------
 /**
  * Return the bounding box (as 6 double values)
- * @param xmax maximum x of the bounding box
- * @param ymax maximum y of the bounding box
- * @param zmax maximum z of the bounding box
- * @param xmin minimum x of the bounding box
- * @param ymin minimum y of the bounding box
- * @param zmin minimum z of the bounding box
+ * @param xmax :: maximum x of the bounding box
+ * @param ymax :: maximum y of the bounding box
+ * @param zmax :: maximum z of the bounding box
+ * @param xmin :: minimum x of the bounding box
+ * @param ymin :: minimum y of the bounding box
+ * @param zmin :: minimum z of the bounding box
  */
 void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 {
@@ -408,7 +408,7 @@ void RectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
 /**
  * Return the number of pixels to make a texture in, given the
  * desired pixel size. A texture has to have 2^n pixels per side.
- * @param desired the requested pixel size
+ * @param desired :: the requested pixel size
  * @return number of pixels for texture
  */
 int getOneTextureSize(int desired)
@@ -424,8 +424,8 @@ int getOneTextureSize(int desired)
 /**
  * Return the number of pixels to make a texture in, given the
  * desired pixel size. A texture has to have 2^n pixels per side.
- * @param xsize pixel texture size in x direction
- * @param ysize pixel texture size in y direction
+ * @param xsize :: pixel texture size in x direction
+ * @param ysize :: pixel texture size in y direction
  */
 void RectangularDetector::getTextureSize(int & xsize, int & ysize) const
 {
@@ -535,9 +535,9 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const
 
 
 
-/*! Print information about elements in the assembly to a stream
+/** Print information about elements in the assembly to a stream
  *  Overload the operator <<
- * @param os  :: output stream
+ * @param os :: output stream
  * @param ass :: component assembly
  * @return stream representation of rectangular detector
  *

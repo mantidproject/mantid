@@ -44,8 +44,8 @@ namespace Mantid
      * with another EventList as the right-hand operand.
      * The event lists simply get appended.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhs Const reference to the EventList on the right hand side.
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhs :: Const reference to the EventList on the right hand side.
      */
     void Plus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -57,10 +57,10 @@ namespace Mantid
     /** Carries out the binary operation IN-PLACE on a single EventList,
      * with another (histogrammed) spectrum as the right-hand operand.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsX The vector of rhs X bin boundaries
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsX :: The vector of rhs X bin boundaries
+     *  @param rhsY :: The vector of rhs data values
+     *  @param rhsE :: The vector of rhs error values
      */
     void Plus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE)
@@ -74,9 +74,9 @@ namespace Mantid
      * with a single (double) value as the right-hand operand.
      * THROWS since it is not possible to add a value to an event list.
      *
-     *  @param lhs Reference to the EventList that will be modified in place.
-     *  @param rhsY The rhs data value
-     *  @param rhsE The rhs error value
+     *  @param lhs :: Reference to the EventList that will be modified in place.
+     *  @param rhsY :: The rhs data value
+     *  @param rhsE :: The rhs error value
      */
     void Plus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const double& rhsY, const double& rhsE)
@@ -120,8 +120,8 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /**
      *  Return true if the units and distribution-type of the workspaces make them compatible
-     *  @param lhs first workspace to check for compatibility
-     *  @param rhs second workspace to check for compatibility
+     *  @param lhs :: first workspace to check for compatibility
+     *  @param rhs :: second workspace to check for compatibility
      *  @return workspace unit compatibility flag
      */
     bool Plus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
@@ -146,8 +146,8 @@ namespace Mantid
     /**
      *  Check the given workspaces for unit, distribution and binary operation
      *  compatibility. Return is true is the workspaces are compatible.
-     *  @param lhs first workspace to check for compatibility
-     *  @param rhs second workspace to check for compatibility
+     *  @param lhs :: first workspace to check for compatibility
+     *  @param rhs :: second workspace to check for compatibility
      *  @return workspace compatibility flag
      */
     bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
@@ -163,9 +163,9 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /** Adds the integrated proton currents, proton charges, of the two input
     *  workspaces together
-    *  @param lhs one of the workspace samples to be summed
-    *  @param rhs the other workspace sample to be summed
-    *  @param ans the sample in the output workspace
+    *  @param lhs :: one of the workspace samples to be summed
+    *  @param rhs :: the other workspace sample to be summed
+    *  @param ans :: the sample in the output workspace
     */
     void Plus::operateOnRun(const Run& lhs, const Run& rhs, Run& ans) const
     {

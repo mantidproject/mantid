@@ -9471,7 +9471,7 @@ void ApplicationWindow::chooseHelpFolder()
 {
   QFileInfo hfi(helpFilePath);
   QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the MantidPlot help folder!"),
-      hfi.dir().absolutePath(), 0 /*!QFileDialog::ShowDirsOnly*/);
+      hfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()){
     helpFilePath = dir + "index.html";
@@ -15426,7 +15426,7 @@ bool ApplicationWindow::copyFolder(Folder *src, Folder *dest)
 //	}
 //}
 
-/*!
+/**
   Turns 3D animation on or off
  */
 void ApplicationWindow::toggle3DAnimation(bool on)
@@ -15574,7 +15574,7 @@ void ApplicationWindow::showScriptInterpreter()
 
 }
 
-/*!
+/**
   Turns perspective mode on or off
  */
 void ApplicationWindow::togglePerspective(bool on)
@@ -15586,7 +15586,7 @@ void ApplicationWindow::togglePerspective(bool on)
   g->setOrthogonal(!on);
 }
 
-/*!
+/**
   Resets rotation of 3D plots to default values
  */
 void ApplicationWindow::resetRotation()
@@ -15598,7 +15598,7 @@ void ApplicationWindow::resetRotation()
   g->setRotation(30, 0, 15);
 }
 
-/*!
+/**
   Finds best layout for the 3D plot
  */
 void ApplicationWindow::fitFrameToLayer()
@@ -16538,7 +16538,7 @@ QString ApplicationWindow::endOfLine()
 }
 
 /**  Switch on the right tool buttons associated with a MultiLayer window
- *   @param w The active MultiLayer window.
+ *   @param w :: The active MultiLayer window.
  */
 void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
 {
@@ -16589,8 +16589,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
     btnPointer->setOn(true);
 }
 /**  save workspace data in nexus format
- *   @param wsName name of the ouput file.
- *   @param fileName name of the ouput file.
+ *   @param wsName :: name of the ouput file.
+ *   @param fileName :: name of the ouput file.
  */
 void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const std::string& fileName)
 {		
@@ -16699,8 +16699,8 @@ void ApplicationWindow::ICatLogout()
 
 /**
  * Write a message to the log window
- * @param message A string containing the message
- * @param error A boolean indicating if this is an error
+ * @param message :: A string containing the message
+ * @param error :: A boolean indicating if this is an error
  */
 void ApplicationWindow::writeToLogWindow(const QString& message,bool error)
 {		
@@ -16722,7 +16722,7 @@ void ApplicationWindow::writeToLogWindow(const QString& message,bool error)
 
   /**
   * Write an error message to the log window (convenience slot)
-  * @param message The string to send the log window
+  * @param message :: The string to send the log window
   */
   void ApplicationWindow::writeErrorToLogWindow(const QString& message)
   {
@@ -16731,7 +16731,7 @@ void ApplicationWindow::writeToLogWindow(const QString& message,bool error)
 
 /* This method executes loadraw asynchrnously
  * @param  fileName - name of the file to load
- * @param wsName -name of the workspace to store data
+ * @param wsName :: -name of the workspace to store data
  */
 void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QString& wsName )
 {
@@ -16740,7 +16740,7 @@ void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QStri
 
 /* This method executes loadnexus asynchrnously
  * @param  fileName - name of the file to load
- * @param wsName -name of the workspace to store data
+ * @param wsName :: -name of the workspace to store data
  */
 void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
 {

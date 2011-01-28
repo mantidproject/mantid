@@ -12,7 +12,7 @@ namespace Mantid
 
 namespace Geometry
 {
-/*!
+/**
   \class  BnId
   \brief Tri-state variable 
   \author S. Ansell

@@ -26,9 +26,9 @@ namespace Mantid
     {}
 
     /** Does nothing in this case
-    *  @param NVectors This value can only be equal to one, otherwise exception is thrown
-    *  @param XLength The number of X data points/bin boundaries
-    *  @param YLength The number of data/error points
+    *  @param NVectors :: This value can only be equal to one, otherwise exception is thrown
+    *  @param XLength :: The number of X data points/bin boundaries
+    *  @param YLength :: The number of data/error points
     */
     void WorkspaceSingleValue::init(const int &NVectors, const int &XLength, const int &YLength)
     {

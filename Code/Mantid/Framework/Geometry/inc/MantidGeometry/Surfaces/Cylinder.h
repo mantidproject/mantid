@@ -15,7 +15,7 @@ namespace Mantid
   namespace Geometry
   {
 
-    /*!
+    /**
     \class  Cylinder
     \brief Holds a cylinder as a vector form
     \author S. Ansell

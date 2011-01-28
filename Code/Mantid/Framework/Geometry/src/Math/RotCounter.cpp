@@ -13,11 +13,11 @@ namespace Geometry
 {
 std::ostream&
 operator<<(std::ostream& OX,const RotaryCounter& A) 
-  /*!
+  /**
     Output stream assesor
-    \param OX :: Output stream
-    \param A :: RotaryCounter to writeout
-    \return the ouput stream
+    @param OX :: Output stream
+    @param A :: RotaryCounter to writeout
+    @return the ouput stream
    */
 {
   A.write(OX);
@@ -27,11 +27,11 @@ operator<<(std::ostream& OX,const RotaryCounter& A)
 
 RotaryCounter::RotaryCounter(const int S,const int N) :
   Rmax(N),RC(S)
-  /*!
+  /**
     Simple constructor with fixed size and number.
     Fills RC with a flat 0->N number list
-    \param S :: Size  (number of components)
-    \param N :: Max number to get to
+    @param S :: Size  (number of components)
+    @param N :: Max number to get to
   */
 {
   for(int i=0;i<S;i++)
@@ -40,18 +40,18 @@ RotaryCounter::RotaryCounter(const int S,const int N) :
 
 RotaryCounter::RotaryCounter(const RotaryCounter& A) :
   Rmax(A.Rmax),RC(A.RC)
-  /*!
+  /**
     Standard copy constructor
-    \param A :: Object to copy
+    @param A :: Object to copy
   */
 { }
 
 RotaryCounter&
 RotaryCounter::operator=(const RotaryCounter& A)
-  /*!
+  /**
     Assignment operator
-    \param A :: Object to copy
-    \return *this
+    @param A :: Object to copy
+    @return *this
    */
 {
   if (this!=&A)
@@ -63,18 +63,18 @@ RotaryCounter::operator=(const RotaryCounter& A)
 }
 
 RotaryCounter::~RotaryCounter()
-  /*!
+  /**
     Standard Destructor
   */
 {}
 
 int
 RotaryCounter::operator==(const RotaryCounter& A) const
-  /*!
+  /**
     Chec to find if Counters identical in ALL respects
-    \param A :: Counter to compare
-    \retval 1 :: All things identical
-    \retval 0 :: Something not the same
+    @param A :: Counter to compare
+    @retval 1 :: All things identical
+    @retval 0 :: Something not the same
   */
 {
   if (A.RC.size()!=A.RC.size())
@@ -88,11 +88,11 @@ RotaryCounter::operator==(const RotaryCounter& A) const
 
 int
 RotaryCounter::operator>(const RotaryCounter& A) const 
-  /*! 
+  /** 
     Determines the precidence of the RotaryCounters
     Operator works on the 0 to high index 
-    \param A :: RotaryCounter to compare
-    \return This > A
+    @param A :: RotaryCounter to compare
+    @return This > A
    */
 {
   const int maxI(A.RC.size()>RC.size() ? RC.size() : A.RC.size());
@@ -106,11 +106,11 @@ RotaryCounter::operator>(const RotaryCounter& A) const
 
 int
 RotaryCounter::operator<(const RotaryCounter& A) const
-  /*! 
+  /** 
     Determines the precidence of the RotaryCounters
     Operator works on the 0 to high index 
-    \param A :: RotaryCounter to compare
-    \return This < A
+    @param A :: RotaryCounter to compare
+    @return This < A
    */
 {
   const int maxI(A.RC.size()>RC.size() ? RC.size() : A.RC.size());
@@ -124,11 +124,11 @@ RotaryCounter::operator<(const RotaryCounter& A) const
 
 int 
 RotaryCounter::operator++(int a)
-  /*!
+  /**
     Convertion to ++operator (prefix) 
     from operator++ (postfix)
-    \param a ignored
-    \return ++operator
+    @param a :: ignored
+    @return ++operator
    */
 {
   (void) a; //Avoid compiler warning
@@ -137,12 +137,12 @@ RotaryCounter::operator++(int a)
 
 int
 RotaryCounter::operator++()
-  /*!
+  /**
     Carrys out a rotational addition.
     Objective is a rolling integer stream ie 1,2,3
     going to 1,2,N-1 and then 1,3,4 etc...
-    \retval 1 :: the function has looped (carry flag)
-    \retval 0 :: no loop occored
+    @retval 1 :: the function has looped (carry flag)
+    @retval 0 :: no loop occored
   */
 {
   int Npart=Rmax-1;
@@ -163,11 +163,11 @@ RotaryCounter::operator++()
 
 int 
 RotaryCounter::operator--(int a)
-  /*!
+  /**
     convertion to --operator (prefix) 
     from operator-- (postfix)
-    \param a ignored
-    \return --operator
+    @param a :: ignored
+    @return --operator
    */
 {
   (void) a; //Avoid compiler warning
@@ -176,12 +176,12 @@ RotaryCounter::operator--(int a)
 
 int
 RotaryCounter::operator--()
-  /*!
+  /**
     Carrys out a rotational addition.
     Objective is a rooling integer stream ie 1,2,3
     going to 1,2,N-1 and then 1,3,4 etc...
-    \retval 1 :: the function has looped (carry flag)
-    \retval 0 :: no loop occored
+    @retval 1 :: the function has looped (carry flag)
+    @retval 0 :: no loop occored
   */
 {
   const int Size(RC.size());
@@ -204,9 +204,9 @@ RotaryCounter::operator--()
 
 void
 RotaryCounter::write(std::ostream& OX) const
-  /*!
+  /**
     Write out object to a stream
-    \param OX :: output stream
+    @param OX :: output stream
   */
 {
   OX<<" ";

@@ -25,9 +25,9 @@
 //----------------------------------
 /**
  * Construct an object of this type
- * @param wsname The name of the workspace object from which to retrieve the log files
- * @param mui The MantidUI area
- * @param flags Window flags that are passed the the QDialog constructor
+ * @param wsname :: The name of the workspace object from which to retrieve the log files
+ * @param mui :: The MantidUI area
+ * @param flags :: Window flags that are passed the the QDialog constructor
  */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags)  :
   QDialog(mui->appWindow(), flags), m_wsname(wsname), m_mantidUI(mui)
@@ -120,7 +120,7 @@ void MantidSampleLogDialog::importSelectedFiles()
 /**
 * Import an item from sample logs
 *
-* @param item The item to be imported
+* @param item :: The item to be imported
 * @throw invalid_argument if format identifier for the item is wrong
 */
 void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)

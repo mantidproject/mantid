@@ -44,7 +44,7 @@ MantidGLWidget::~MantidGLWidget()
 
 /**
  * Set the shape object
- * @param object A pointer to the Mantid::Geometry::Object
+ * @param object :: A pointer to the Mantid::Geometry::Object
  */
 void MantidGLWidget::setDisplayObject(boost::shared_ptr<Mantid::Geometry::Object> object)
 {
@@ -171,8 +171,8 @@ void MantidGLWidget::paintGL()
 
 /**
  * Handle a resize event
- * @param width The width of the resized viewport
- * @param height The height of the resized viewport
+ * @param width :: The width of the resized viewport
+ * @param height :: The height of the resized viewport
  */
 void MantidGLWidget::resizeGL(int width, int height)
 {
@@ -214,7 +214,7 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 /**
  * Set the current rotation angle around the X-axis.
- * @param angle The angle of rotation
+ * @param angle :: The angle of rotation
  */
 void MantidGLWidget::setXRotation(int angle)
 {
@@ -227,7 +227,7 @@ void MantidGLWidget::setXRotation(int angle)
 
 /**
  * Set the current rotation angle around the Y-axis.
- * @param angle The angle of rotation
+ * @param angle :: The angle of rotation
  */
 void MantidGLWidget::setYRotation(int angle)
 {
@@ -240,7 +240,7 @@ void MantidGLWidget::setYRotation(int angle)
 
 /**
  * Set the current rotation angle around the Z-axis.
- * @param angle The angle of rotation
+ * @param angle :: The angle of rotation
  */
 void MantidGLWidget::setZRotation(int angle)
 {
@@ -291,7 +291,7 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio)
   /**
  * Adjust the angle given so that it is within the range 0 < x < (360 * 16)
  * (Note: The factor of 16 is due to Qt using angles in 1/16th of a degree)
- * @param angle The angle of rotation
+ * @param angle :: The angle of rotation
  */
 void MantidGLWidget::normalizeAngle(int *angle)
 {

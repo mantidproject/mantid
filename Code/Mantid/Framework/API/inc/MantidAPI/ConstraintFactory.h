@@ -64,14 +64,14 @@ namespace API
   {
   public:
     /**Creates an instance of a Constraint
-     * @param fun The function
-     * @param input The creation expression
+     * @param fun :: The function
+     * @param input :: The creation expression
      * @return A pointer to the created Constraint
      */
     IConstraint* createInitialized(IFitFunction* fun, const std::string& input) const;
     /**Creates an instance of a Constraint
-     * @param fun The function
-     * @param expr The creation expression
+     * @param fun :: The function
+     * @param expr :: The creation expression
      * @return A pointer to the created Constraint
      */
     IConstraint* createInitialized(IFitFunction* fun, const Expression& expr) const;

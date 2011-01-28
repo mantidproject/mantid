@@ -10,7 +10,7 @@ Q_EXPORT_PLUGIN2(LIBRARY_NAME, PluginCollectionInterface)
 
 /**
  * Default constructor
- * @param parent The parent widget
+ * @param parent :: The parent widget
  */
 PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(parent)
 {
@@ -20,7 +20,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
 
 /**
  * Return the custom widgets exported by this library
- * @param Returns a list of custom widget interfaces contained within this library
+ * @param Returns :: a list of custom widget interfaces contained within this library
  */
 QList<QDesignerCustomWidgetInterface*> PluginCollectionInterface::customWidgets() const
 {

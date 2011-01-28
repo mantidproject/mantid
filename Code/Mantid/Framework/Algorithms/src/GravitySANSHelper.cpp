@@ -8,8 +8,8 @@ namespace Mantid
     using namespace Geometry;
     /** sets up the object with workspace data and calculates cached values ready to calculate gravitional
     *  effects across a spectrum
-    *  @param ws the workspace that contains the neutron counts
-    *  @param det the detector for which the calculations will be for
+    *  @param ws :: the workspace that contains the neutron counts
+    *  @param det :: the detector for which the calculations will be for
     */
     GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws, Geometry::IDetector_const_sptr det) :
           m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0)
@@ -26,7 +26,7 @@ namespace Mantid
        m_dropPerAngstrom2 = ws->gravitationalDrop(m_det, 1e-10);
      }
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity
-    *  @param wavAngstroms the neutrons' wave length in Angstoms
+    *  @param wavAngstroms :: the neutrons' wave length in Angstoms
     *  @return the sin of theta
     */
     double GravitySANSHelper::calcSinTheta(const double wavAngstroms) const
@@ -51,7 +51,7 @@ namespace Mantid
     }
     /** Finds the location of the detector the neutron would have entered if it followed a
     *  straight line path from the sample
-    *  @param wav wavelength of the neutron in Angstrom
+    *  @param wav :: wavelength of the neutron in Angstrom
     *  @return a reference to the cached location
     */
     const V3D & GravitySANSHelper::getDetLoc(const double wav) const

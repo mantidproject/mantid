@@ -9,9 +9,9 @@ namespace Kernel
 {
 
 /** Constructor
- *  @param name The name of the property
- *  @param type The type of the property
- *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+ *  @param name :: The name of the property
+ *  @param type :: The type of the property
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
  */
 Property::Property( const std::string &name, const std::type_info &type, const unsigned int direction ) :
   m_name( name ),
@@ -41,7 +41,7 @@ Property::~Property()
 }
 
 /** Copy assignment operator. Does nothing.
-* @param right The right hand side value
+* @param right :: The right hand side value
 * @return pointer to this
 */
 Property& Property::operator=( const Property& right )
@@ -102,7 +102,7 @@ bool Property::remember() const
 }
 
 /** Sets the property's (optional) documentation string
- *  @param documentation The string containing the descriptive comment
+ *  @param documentation :: The string containing the descriptive comment
  */
 void Property::setDocumentation( const std::string& documentation )
 {
@@ -149,7 +149,7 @@ std::string Property::units() const
 //-------------------------------------------------------------------------------------------------
 /** Sets the units of the property, as a string. This is optional.
  *
- * @param unit string to set for the units.
+ * @param unit :: string to set for the units.
  */
 void Property::setUnits(std::string unit)
 {
@@ -161,7 +161,7 @@ void Property::setUnits(std::string unit)
 
 //-------------------------------------------------------------------------------------------------
 /** Add to the property.
- * @param rhs the property to get more information
+ * @param rhs :: the property to get more information
  * @return the augmented property
  * @throw NotImplementedError always, since this should have been overridden
  */
@@ -176,8 +176,8 @@ Property& Property::operator+=( Property * rhs )
 
 //-------------------------------------------------------------------------------------------------
 /** Filter out a property by time. Will be overridden by TimeSeriesProperty (only)
- * @param start the beginning time to filter from
- * @param stop the ending time to filter to
+ * @param start :: the beginning time to filter from
+ * @param stop :: the ending time to filter to
  * */
 void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
 {
@@ -191,8 +191,8 @@ void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateA
 //-----------------------------------------------------------------------------------------------
 /** Split a property by time. Will be overridden by TimeSeriesProperty (only)
  * For any other property type, this does nothing.
- * @param splitter time splitter
- * @param outputs holder for splitter output
+ * @param splitter :: time splitter
+ * @param outputs :: holder for splitter output
  */
 void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
 {

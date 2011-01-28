@@ -14,7 +14,7 @@ using std::complex;
 /** Implement Exponential Integral function, E1(z), based on formulaes in Abramowitz and Stegun (A&S)
  *  In fact this implementation returns exp(z)*E1(z) where z is a complex number
  *
- *  @param z input
+ *  @param z :: input
  *  @return exp(z)*E1(z)
  */
 complex<double> exponentialIntegral(const complex<double>& z)

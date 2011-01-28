@@ -9,7 +9,7 @@ namespace Mantid
 
 namespace Geometry
 {
-/*!
+/**
   \class RotaryCounter
   \version 1.0
   \date September 2005

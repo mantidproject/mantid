@@ -1,7 +1,7 @@
 #ifndef _MD_GEOMETRY_BAISIS_DIMENSION_H
 #define _MD_GEOMETRY_BAISIS_DIMENSION_H
 
-/*! Represents a 'basis' dimension. Basis dimensions are those known from disk, that are in their raw unbinned form.
+/** Represents a 'basis' dimension. Basis dimensions are those known from disk, that are in their raw unbinned form.
 *   
 
     @author Owen Arnold, RAL ISIS

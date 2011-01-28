@@ -44,8 +44,8 @@ namespace Algorithms
 
 /**
  * The gsl_costFunction is optimized by GSL simplex
- * @param v vector containing center position and rotations
- * @param params names of detector, workspace, and instrument
+ * @param v :: vector containing center position and rotations
+ * @param params :: names of detector, workspace, and instrument
  */
 
   static double gsl_costFunction(const gsl_vector *v, void *params)
@@ -71,14 +71,14 @@ namespace Algorithms
 
 /**
  * The movedetector function changes detector position and angles
- * @param x The shift along the X-axis
- * @param y The shift along the Y-axis
- * @param z The shift along the Z-axis
- * @param rotx The rotation around the X-axis
- * @param roty The rotation around the Y-axis
- * @param rotz The rotation around the Z-axis
- * @param detname The detector name
- * @param inputW The workspace
+ * @param x :: The shift along the X-axis
+ * @param y :: The shift along the Y-axis
+ * @param z :: The shift along the Z-axis
+ * @param rotx :: The rotation around the X-axis
+ * @param roty :: The rotation around the Y-axis
+ * @param rotz :: The rotation around the Z-axis
+ * @param detname :: The detector name
+ * @param inputW :: The workspace
  */
 
   void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, MatrixWorkspace_sptr inputW)
@@ -154,16 +154,16 @@ namespace Algorithms
   }
 /**
  * The intensity function calculates the intensity as a function of detector position and angles
- * @param x The shift along the X-axis
- * @param y The shift along the Y-axis
- * @param z The shift along the Z-axis
- * @param rotx The rotation around the X-axis
- * @param roty The rotation around the Y-axis
- * @param rotz The rotation around the Z-axis
- * @param detname The detector name
- * @param inname The workspace name
- * @param outname The workspace name
- * @param instname The instrument name
+ * @param x :: The shift along the X-axis
+ * @param y :: The shift along the Y-axis
+ * @param z :: The shift along the Z-axis
+ * @param rotx :: The rotation around the X-axis
+ * @param roty :: The rotation around the Y-axis
+ * @param rotz :: The rotation around the Z-axis
+ * @param detname :: The detector name
+ * @param inname :: The workspace name
+ * @param outname :: The workspace name
+ * @param instname :: The instrument name
  */
 
   double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname, std::string rb_param)

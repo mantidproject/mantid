@@ -6,7 +6,7 @@
 namespace Mantid
 {
 
-  /*!
+  /**
   \brief Classes for geometric handlers
   \version 1.0
   \author S. Ansell
@@ -17,7 +17,7 @@ namespace Mantid
   {
 
      class V3D;
-    /*!
+    /**
     \class Matrix
     \brief Numerical Matrix class
     \version 1.0

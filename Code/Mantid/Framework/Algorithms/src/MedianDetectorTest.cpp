@@ -154,8 +154,8 @@ namespace Mantid
 
     /** Makes a worksapce with the total solid angle all the detectors in each spectrum cover from the sample
      *  note returns an empty shared pointer on failure, uses the SolidAngle algorithm
-     * @param firstSpec the index number of the first histogram to analyse
-     * @param lastSpec the index number of the last histogram to analyse
+     * @param firstSpec :: the index number of the first histogram to analyse
+     * @param lastSpec :: the index number of the last histogram to analyse
      * @return A pointer to the workspace (or an empty pointer)
      */
     API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec )
@@ -194,9 +194,9 @@ namespace Mantid
     /** 
      * Takes a single valued histogram workspace and assesses which histograms are within the limits. 
      * Those that are not are masked on the input workspace.
-     * @param countWorkspace Input/Output Integrated workspace to diagnose
-     * @param average The expected number of counts, spectra within defined threshold won't fail
-     * @param badIndices If an index is in this list then it will not be included in the tests
+     * @param countWorkspace :: Input/Output Integrated workspace to diagnose
+     * @param average :: The expected number of counts, spectra within defined threshold won't fail
+     * @param badIndices :: If an index is in this list then it will not be included in the tests
      * @return The number of detectors that failed the tests, not including those skipped
      */
     int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace,

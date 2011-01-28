@@ -190,7 +190,7 @@ void SumSpectra::exec()
 
 /** Executes the algorithm
  *
- *@param indices set of indices to sum up
+ *@param indices :: set of indices to sum up
  */
 void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<int> &indices)
 {

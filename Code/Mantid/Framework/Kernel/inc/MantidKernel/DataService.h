@@ -91,9 +91,9 @@ public:
     public:
         /** Constructor.
 
-            @param name The name of the replaced object
-            @param obj  The pointer to the old object
-            @param new_obj The pointer to the new object
+            @param name :: The name of the replaced object
+            @param obj ::  The pointer to the old object
+            @param new_obj :: The pointer to the new object
 
             Both old and new objects are guaranteed to exist when an observer receives the notification.
         */
@@ -109,8 +109,8 @@ public:
     public:
         /** Constructor.
 
-            @param name The name of the replaced object
-            @param new_obj The pointer to the new object
+            @param name :: The name of the replaced object
+            @param new_obj :: The pointer to the new object
 
             Only new objects are guaranteed to exist when an observer receives the notification.
         */
@@ -296,8 +296,8 @@ private:
     };
     /** case-independent (ci) less binary function for strings
     * Compares strings alphabetically
-    * @param s1 first string for comparison
-    * @param s2 second string for comparison
+    * @param s1 :: first string for comparison
+    * @param s2 :: second string for comparison
     * @return true if s1 < s2
     */
     bool operator() (const std::string &s1, const std::string &s2) const

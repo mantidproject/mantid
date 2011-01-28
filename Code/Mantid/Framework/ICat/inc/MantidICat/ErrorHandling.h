@@ -43,7 +43,7 @@ namespace Mantid
 			~CErrorHandling();
 			
 			/**This method throws the error string returned by gsoap to mantid upper layer
-			  *@param iact -ICat proxy object 
+			  *@param iact :: -ICat proxy object 
 			*/
 			static void throwErrorMessages(ICATPortBindingProxy& icat);
 			

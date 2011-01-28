@@ -23,7 +23,7 @@ namespace Mantid
 
     /**
     * Find a component by name.
-    * @param cname The name of the component. If there are multiple matches, the first one found is returned.
+    * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
     * @returns A shared pointer to the component
     */
     boost::shared_ptr<Geometry::IComponent> IInstrument::getComponentByName(const std::string & cname)
@@ -72,7 +72,7 @@ namespace Mantid
     * Find all components in an Instrument Definition File (IDF) with a given name. If you know a component
     * has a unique name use instead getComponentByName(), which is as fast or faster for retrieving a uniquely
     named component.
-    * @param cname The name of the component. If there are multiple matches, the first one found is returned.
+    * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
     * @returns Pointers to components
     */
     std::vector<boost::shared_ptr<Mantid::Geometry::IComponent> > IInstrument::getAllComponentsWithName(const std::string & cname)

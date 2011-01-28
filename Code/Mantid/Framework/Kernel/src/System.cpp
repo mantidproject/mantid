@@ -103,7 +103,7 @@ std::string Mantid::Kernel::getPathToExecutable()
 
 /**
  * Check if the path is on a network drive
- * @param path The path to be checked
+ * @param path :: The path to be checked
  * @return True if the path is on a network drive.
  */
 bool Mantid::Kernel::isNetworkDrive(const std::string & path)
@@ -174,7 +174,7 @@ bool Mantid::Kernel::isNetworkDrive(const std::string & path)
 /**
  * Get the unmangled name of the given typestring for some common types that we use. Note that
  * this is just a lookup and NOT an unmangling algorithm
- * @param type A pointer to the type_info object for this type
+ * @param type :: A pointer to the type_info object for this type
  * @returns An unmangled version of the name
  */
 std::string  Mantid::Kernel::getUnmangledTypeName(const std::type_info& type)

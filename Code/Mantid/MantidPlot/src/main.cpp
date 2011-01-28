@@ -40,7 +40,7 @@
 #include "Mantid/MantidApplication.h"
 
 // The following stuff is for the doxygen title page
-/*!  \mainpage QtiPlot - Data analysis and scientific plotting - API documentation
+/**  \mainpage QtiPlot - Data analysis and scientific plotting - API documentation
 
   \section description Program description:
 Scientists often need to use data analysis and plotting software.

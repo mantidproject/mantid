@@ -140,8 +140,8 @@ namespace Mantid
 
       /**
       * Get a parameter defined as a double
-      * @param pname The name of the parameter
-      * @param recursive If true the search will walk up through the parent components
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
       std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const
@@ -151,8 +151,8 @@ namespace Mantid
 
       /**
       * Get a parameter defined as a V3D
-      * @param pname The name of the parameter
-      * @param recursive If true the search will walk up through the parent components
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
       std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const
@@ -162,8 +162,8 @@ namespace Mantid
 
       /**
       * Get a parameter defined as a Quaternion
-      * @param pname The name of the parameter
-      * @param recursive If true the search will walk up through the parent components
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
       std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const
@@ -173,8 +173,8 @@ namespace Mantid
 
       /**
       * Get a parameter defined as a string
-      * @param pname The name of the parameter
-      * @param recursive If true the search will walk up through the parent components
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const
@@ -220,8 +220,8 @@ namespace Mantid
 
       /**
       *  Get a parameter from the parameter map
-      * @param p_name The name of the parameter
-      * @param recursive If true then the lookup will walk up the tree if this component does not have parameter
+      * @param p_name :: The name of the parameter
+      * @param recursive :: If true then the lookup will walk up the tree if this component does not have parameter
       * @return A list of size 0 or 1 containing the parameter value or
       * nothing if it does not exist
       */

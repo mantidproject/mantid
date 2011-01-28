@@ -68,7 +68,7 @@ void StripPeaks::exec()
 }
 
 /** Calls FindPeaks as a sub-algorithm.
- *  @param WS The workspace to search
+ *  @param WS :: The workspace to search
  *  @return list of found peaks
  */
 API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
@@ -103,8 +103,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 /** If a peak was successfully fitted, it is subtracted from the data.
  *  THIS METHOD ASSUMES THAT THE FITTING WAS DONE TO A GAUSSIAN FUNCTION.
  *  Note that the error value is left unchanged.
- *  @param input     The input workspace
- *  @param peakslist The succesfully fitted peaks
+ *  @param input ::     The input workspace
+ *  @param peakslist :: The succesfully fitted peaks
  *  @return A workspace containing the peak-subtracted data
  */
 API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist)

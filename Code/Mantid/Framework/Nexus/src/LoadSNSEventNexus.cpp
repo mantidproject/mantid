@@ -369,8 +369,8 @@ void LoadSNSEventNexus::loadEntryMetadata(const std::string &entry_name) {
 //------------------------------------------------------------------------------------------------
 /**
  * Load one of the banks' event data from the nexus file
- * @param entry_name The pathname of the bank to load
- * @param pixelID_to_wi_map a map where key = pixelID and value = the workpsace index to use.
+ * @param entry_name :: The pathname of the bank to load
+ * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
  */
 void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map)
 {
@@ -594,8 +594,8 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
 
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
- *  @param nexusfilename Used to pick the instrument.
- *  @param localWorkspace MatrixWorkspace in which to put the instrument geometry
+ *  @param nexusfilename :: Used to pick the instrument.
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
 void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace)
 {

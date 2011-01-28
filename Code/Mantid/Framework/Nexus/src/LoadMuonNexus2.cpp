@@ -273,9 +273,9 @@ namespace Mantid
 
     /**  Load logs from Nexus file. Logs are expected to be in
     *   /run/sample group of the file. 
-    *   @param ws The workspace to load the logs to.
-    *   @param entry The Nexus entry
-    *   @param period The period of this workspace
+    *   @param ws :: The workspace to load the logs to.
+    *   @param entry :: The Nexus entry
+    *   @param period :: The period of this workspace
     */
     void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry & entry,int period)
     {
@@ -307,8 +307,8 @@ namespace Mantid
 
     /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
-    *  @param nread - no.of bytes read
-    *  @param header_buffer - buffer containing the 1st 100 bytes of the file
+    *  @param nread :: no.of bytes read
+    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
     bool LoadMuonNexus2::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
@@ -333,7 +333,7 @@ namespace Mantid
      
     }
     /**checks the file by opening it and reading few lines 
-    *  @param filePath name of the file inluding its path
+    *  @param filePath :: name of the file inluding its path
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadMuonNexus2::fileCheck(const std::string& filePath)

@@ -23,11 +23,11 @@ namespace Mantid
     template<int VCount>
     std::ostream& 
       operator<<(std::ostream& OX,const PolyVar<VCount>& A)
-      /*!
+      /**
       External Friend :: outputs point to a stream 
-      \param OX :: output stream
-      \param A :: PolyFunction to write
-      \returns The output stream (OX)
+      @param OX :: output stream
+      @param A :: PolyFunction to write
+      @return The output stream (OX)
       */
     {
       if (!A.write(OX))
@@ -40,9 +40,9 @@ namespace Mantid
     PolyFunction(),
       iDegree((iD>0) ? iD : 0),
       PCoeff(iDegree+1)
-      /*!
+      /**
       Constructor 
-      \param iD :: degree
+      @param iD :: degree
       */
     {
       fill(PCoeff.begin(),PCoeff.end(),PolyVar<VCount-1>(0));
@@ -53,10 +53,10 @@ namespace Mantid
     PolyFunction(E),
       iDegree((iD>0) ? iD : 0),
       PCoeff(iDegree+1)
-      /*!
+      /**
       Constructor 
-      \param iD :: degree
-      \param E :: Accuracy
+      @param iD :: degree
+      @param E :: Accuracy
       */
     {
       fill(PCoeff.begin(),PCoeff.end(),PolyVar<VCount-1>(0,E));
@@ -66,9 +66,9 @@ namespace Mantid
     PolyVar<VCount>::PolyVar(const PolyVar<VCount>& A)  :
     PolyFunction(A),iDegree(A.iDegree),
       PCoeff(A.PCoeff)
-      /*! 
+      /** 
       Copy Constructor
-      \param A :: PolyVar to copy
+      @param A :: PolyVar to copy
       */
     { }
 
@@ -76,9 +76,9 @@ namespace Mantid
     template<int ICount>
     PolyVar<VCount>::PolyVar(const PolyVar<ICount>& A) :
     iDegree(0),PCoeff(1)
-      /*! 
+      /** 
       Copy constructor to a down reference
-      \param A :: PolyVar to copy assign as PCoeff[0]
+      @param A :: PolyVar to copy assign as PCoeff[0]
       */
     {
       if (ICount>VCount)
@@ -93,10 +93,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>& 
       PolyVar<VCount>::operator=(const PolyVar<VCount>& A)
-      /*! 
+      /** 
       Assignment operator
-      \param A :: PolyVar to copy
-      \return *this
+      @param A :: PolyVar to copy
+      @return *this
       */
     {
       if (this!=&A)
@@ -112,10 +112,10 @@ namespace Mantid
     template<int ICount>
     PolyVar<VCount>& 
       PolyVar<VCount>::operator=(const PolyVar<ICount>& A)
-      /*! 
+      /** 
       Assignment operator
-      \param A :: PolyVar to copy
-      \return *this
+      @param A :: PolyVar to copy
+      @return *this
       */
     {
       iDegree = 0;
@@ -127,10 +127,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>& 
       PolyVar<VCount>::operator=(const double& V)
-      /*! 
+      /** 
       Assignment operator
-      \param V :: Double value to set
-      \return *this
+      @param V :: Double value to set
+      @return *this
       */
     {
       iDegree = 0;
@@ -147,10 +147,10 @@ namespace Mantid
     template<int VCount>
     void 
       PolyVar<VCount>::setDegree(const int iD)
-      /*!
+      /**
       Set the degree value (assuming that we have
       a valid iDegree setup)
-      \param iD :: degree
+      @param iD :: degree
       */
     {
       const int xD = (iD>0) ? iD : 0;
@@ -169,7 +169,7 @@ namespace Mantid
     template<int VCount>
     void 
       PolyVar<VCount>::zeroPoly()
-      /*!
+      /**
       Zeros each polynominal coefficient
       */
     {
@@ -183,9 +183,9 @@ namespace Mantid
     template<int VCount>
     int 
       PolyVar<VCount>::getDegree() const 
-      /*!
+      /**
       Accessor to degree size
-      \return size 
+      @return size 
       */
     {
       return iDegree;
@@ -194,10 +194,10 @@ namespace Mantid
     template<int VCount>
     void
       PolyVar<VCount>::setComp(const int Index,const double& V)
-      /*!
+      /**
       Set a component
-      \param Index :: The Index
-      \param V :: Value
+      @param Index :: The Index
+      @param V :: Value
       */
     {
       if (Index>iDegree || Index<0)
@@ -210,10 +210,10 @@ namespace Mantid
     template<int ICount>
     void
       PolyVar<VCount>::setComp(const int Index,const PolyVar<ICount>& FX)
-      /*!
+      /**
       Set a component
-      \param Index :: The index
-      \param FX :: Base compoenente
+      @param Index :: The index
+      @param FX :: Base compoenente
       */
     {
       if (Index>iDegree || Index<0)
@@ -222,10 +222,10 @@ namespace Mantid
       return;
     }
 
-          /*!
+          /**
       Calculate the value of the polynomial at a point
-      \param DArray :: Values [x,y,z]
-      \return the value
+      @param DArray :: Values [x,y,z]
+      @return the value
       */
     template<int VCount>
     double PolyVar<VCount>::operator()(const double* DArray) const
@@ -243,10 +243,10 @@ namespace Mantid
     template<int VCount>
     double 
       PolyVar<VCount>::operator()(const std::vector<double>& DArray) const
-      /*!
+      /**
       Calculate the value of the polynomial at a point
-      \param DArray :: Values [x,y,z]
-      \return results
+      @param DArray :: Values [x,y,z]
+      @return results
       */
     {
       if (DArray.size()<VCount)
@@ -265,10 +265,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator+=(const PolyVar<VCount>& A)
-      /*!
+      /**
       PolyVar addition
-      \param A :: PolyVar 
-      \return (*this+A);
+      @param A :: PolyVar 
+      @return (*this+A);
       */
     {
       const int iMax((iDegree>A.iDegree)  ? iDegree : A.iDegree);
@@ -282,10 +282,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator-=(const PolyVar<VCount>& A)
-      /*!
+      /**
       PolyVar subtraction
-      \param A :: PolyVar 
-      \return (*this-A);
+      @param A :: PolyVar 
+      @return (*this-A);
       */
     {
       const int iMax((iDegree>A.iDegree)  ? iDegree : A.iDegree);
@@ -300,10 +300,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator*=(const PolyVar<VCount>& A)
-      /*!
+      /**
       Multiply two Polynomials
-      \param A :: PolyVar 
-      \return (*this*A);
+      @param A :: PolyVar 
+      @return (*this*A);
       */
     {
       std::vector<PolyVar<VCount-1> > POut(iDegree+A.iDegree+2); 
@@ -333,10 +333,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator+(const PolyVar<VCount>& A) const
-      /*!
+      /**
       PolyVar addition
-      \param A :: PolyVar addition
-      \return (*this+A);
+      @param A :: PolyVar addition
+      @return (*this+A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -346,10 +346,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator-(const PolyVar<VCount>& A) const
-      /*!
+      /**
       PolyVar subtraction
-      \param A :: PolyVar 
-      \return (*this-A);
+      @param A :: PolyVar 
+      @return (*this-A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -359,10 +359,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator*(const PolyVar<VCount>& A) const
-      /*!
+      /**
       PolyVar multiplication
-      \param A :: PolyVar 
-      \return (*this*A);
+      @param A :: PolyVar 
+      @return (*this*A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -375,10 +375,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator+(const double V) const
-      /*!
+      /**
       PolyVar addition
-      \param V :: PolyVar 
-      \return (*this+A);
+      @param V :: PolyVar 
+      @return (*this+A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -388,10 +388,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator-(const double V) const
-      /*!
+      /**
       PolyVar substraction
-      \param V :: Value to subtract
-      \return (*this-A);
+      @param V :: Value to subtract
+      @return (*this-A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -401,10 +401,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>
       PolyVar<VCount>::operator*(const double V) const
-      /*!
+      /**
       PolyVar multiplication
-      \param V :: Value to Multiply
-      \return (*this*V);
+      @param V :: Value to Multiply
+      @return (*this*V);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -414,10 +414,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>
       PolyVar<VCount>::operator/(const double V) const
-      /*!
+      /**
       PolyVar division
-      \param V :: Value to divide by
-      \return (*this/A);
+      @param V :: Value to divide by
+      @return (*this/A);
       */
     {
       PolyVar<VCount> kSum(*this);
@@ -431,10 +431,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator+=(const double V) 
-      /*!
+      /**
       PolyVar addition
-      \param V :: Value to add
-      \return (*this+V);
+      @param V :: Value to add
+      @return (*this+V);
       */
     {
       PCoeff[0]+=V;
@@ -444,10 +444,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator-=(const double V) 
-      /*!
+      /**
       PolyVar subtraction
-      \param V :: Value to subtract
-      \return (*this+V);
+      @param V :: Value to subtract
+      @return (*this+V);
       */
     {
       PCoeff[0]-=V;  // There is always zero component
@@ -457,10 +457,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator*=(const double V)  
-      /*!
+      /**
       PolyVar multiplication
-      \param V :: Value to multipication
-      \return (*this*V);
+      @param V :: Value to multipication
+      @return (*this*V);
       */
     {
       typename std::vector< PolyVar<VCount-1> >::iterator vc;
@@ -472,10 +472,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::operator/=(const double V) 
-      /*!
+      /**
       PolyVar division scalar
-      \param V :: Value to divide
-      \return (*this/V);
+      @param V :: Value to divide
+      @return (*this/V);
       */
     {
       typename std::vector< PolyVar<VCount-1> >::iterator vc;
@@ -487,9 +487,9 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::operator-() const
-      /*!
+      /**
       PolyVar negation operator
-      \return -(*this);
+      @return -(*this);
       */
     {
       PolyVar<VCount> KOut(*this);
@@ -500,10 +500,10 @@ namespace Mantid
     template<int VCount>
     int
       PolyVar<VCount>::operator==(const PolyVar<VCount>& A) const
-      /*!
+      /**
       Determine if two polynomials are equal
-      \param A :: Other polynomial to use
-      \return 1 :: true 0 on false
+      @param A :: Other polynomial to use
+      @return 1 :: true 0 on false
       */
     {
       int i;
@@ -528,10 +528,10 @@ namespace Mantid
     template<int VCount>
     int
       PolyVar<VCount>::operator!=(const PolyVar<VCount>& A) const
-      /*!
+      /**
       Determine if two polynomials are different
-      \param A :: Other polynomial to use
-      \return 1 is polynomial differ:  0 on false
+      @param A :: Other polynomial to use
+      @return 1 is polynomial differ:  0 on false
       */
     {
       return (A==*this) ? 0 : 1;
@@ -540,9 +540,9 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount> 
       PolyVar<VCount>::getDerivative() const
-      /*!
+      /**
       Take derivative
-      \return dP / dx
+      @return dP / dx
       */
     {
       PolyVar<VCount> KOut(*this);
@@ -552,9 +552,9 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>&
       PolyVar<VCount>::derivative()
-      /*!
+      /**
       Take derivative of this polynomial
-      \return dP / dx
+      @return dP / dx
       */
     {
       if (iDegree<1)
@@ -573,10 +573,10 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount>
       PolyVar<VCount>::GetInversion() const
-      /*!
+      /**
       Inversion of the coefficients
       Note that this is useful for power balancing.
-      \return (Poly)^-1
+      @return (Poly)^-1
       */
     {
       PolyVar<VCount> InvPoly(iDegree);
@@ -588,11 +588,11 @@ namespace Mantid
     template<int VCount>
     void 
       PolyVar<VCount>::compress(const double epsilon)
-      /*!
+      /**
       Two part process remove coefficients of zero or near zero: 
       Reduce degree by eliminating all (nearly) zero leading coefficients
       and by making the leading coefficient one.  
-      \param epsilon :: coeficient to use to decide if a values is zero
+      @param epsilon :: coeficient to use to decide if a values is zero
       */
     {
       const double eps((epsilon>0.0) ? epsilon : this->Eaccuracy);
@@ -606,10 +606,10 @@ namespace Mantid
     template<int VCount>
     int 
       PolyVar<VCount>::getCount(const double eps) const
-      /*!
+      /**
       Determine number of not zero
-      \param eps :: Value to used
-      \return Number of non-zero components
+      @param eps :: Value to used
+      @return Number of non-zero components
       */
     {
       int cnt(0);
@@ -622,11 +622,11 @@ namespace Mantid
     template<int VCount>
     int 
       PolyVar<VCount>::isZero(const double eps) const
-      /*!
+      /**
       Determine if is zero
-      \param eps :: Value to used
-      \retval 1 :: all components  -eps<Value<eps
-      \retval 0 :: one or more non zero po
+      @param eps :: Value to used
+      @retval 1 :: all components  -eps<Value<eps
+      @retval 0 :: one or more non zero po
       */
     {
       int i;
@@ -637,14 +637,14 @@ namespace Mantid
     template<int VCount>
     int 
       PolyVar<VCount>::isUnit(const double eps) const
-      /*!
+      /**
       Determine if is a unit base value.
       Note: this needs to be suttle, since
       x is unit, as is y, as is xy
-      \param eps :: Value to used
-      \retval 1 :: +ve unit
-      \retval 0 :: Not unit
-      \retval -1 :: -ve unit 
+      @param eps :: Value to used
+      @retval 1 :: +ve unit
+      @retval 0 :: Not unit
+      @retval -1 :: -ve unit 
       */
     {
       int i;
@@ -658,14 +658,14 @@ namespace Mantid
     template<int VCount>
     int 
       PolyVar<VCount>::isUnitary(const double eps) const
-      /*!
+      /**
       Determine if is a unit base value.
       Note: this needs to be suttle, since
       x is unit, as is y, as is xy
-      \param eps :: Value to used
-      \retval 1 :: +ve unit
-      \retval 0 :: Not unit
-      \retval -1 :: -ve unit 
+      @param eps :: Value to used
+      @retval 1 :: +ve unit
+      @retval 0 :: Not unit
+      @retval -1 :: -ve unit 
       */
     {
       int item(0);
@@ -686,11 +686,11 @@ namespace Mantid
     template<int VCount>
     PolyVar<VCount-1>
       PolyVar<VCount>::reduce(const PolyVar<VCount>& A) const
-      /*!
+      /**
       The objective is to use A and this to reduce the
       variable count by 1.
-      \param A :: PolyVar to use
-      \return new polynomial
+      @param A :: PolyVar to use
+      @return new polynomial
       */
     {
       const int ANum=PCoeff.size();
@@ -731,13 +731,13 @@ namespace Mantid
       return Out;
     }
 
-          /*!
+          /**
       Given a line of type 
       y^2+xy+3.0x 
       convert into a function:
       Variables in list are x,y,z,a,b,c,....
-      \param Line the inpout values in the format x,y,z,a,b,c,....
-      \return 0 on success
+      @param Line :: the inpout values in the format x,y,z,a,b,c,....
+      @return 0 on success
       */
     template<int VCount>
     int PolyVar<VCount>::read(const std::string& Line)
@@ -821,13 +821,13 @@ namespace Mantid
     template<int VCount>
     int
       PolyVar<VCount>::write(std::ostream& OX,const int prePlus) const
-      /*!
+      /**
       Basic write command
-      \param OX :: output stream
-      \param prePlus :: prePlus
-      \retval 0 :: nothing written 
-      \retval 1 :: normal equation
-      \retval -1 :: unitary equation ("1") 
+      @param OX :: output stream
+      @param prePlus :: prePlus
+      @retval 0 :: nothing written 
+      @retval 1 :: normal equation
+      @retval -1 :: unitary equation ("1") 
       */
     {
       const char Variable("xyzabc"[VCount-1]);

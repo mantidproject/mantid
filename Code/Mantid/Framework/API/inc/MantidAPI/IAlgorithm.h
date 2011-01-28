@@ -112,7 +112,7 @@ public:
 
 
   /** To set whether algorithm is a child.
-   *  @param isChild True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+   *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
    */
   virtual void setChild(const bool isChild) = 0;
 

@@ -2,7 +2,7 @@
 #define I_MD_DIMENSION_H
 #include <vector>
 
-/*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
+/** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
 *
 *   Abstract type for a multi dimensional dimension. Gives a read-only layer to the concrete implementation.
 

@@ -211,11 +211,11 @@ public:
   }
 
   void testSphereDistanceComplex()
-    /*!
+    /**
     Test the distance of a point from the cone
-    \retval -1 :: failed build a cone
-    \retval -2 :: Failed on the distance calculation
-    \retval 0 :: All passed
+    @retval -1 :: failed build a cone
+    @retval -2 :: Failed on the distance calculation
+    @retval 0 :: All passed
     */
   {
     std::vector<std::string> SphStr;

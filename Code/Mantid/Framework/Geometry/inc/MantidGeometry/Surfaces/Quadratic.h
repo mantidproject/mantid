@@ -12,7 +12,7 @@ namespace Mantid
   namespace Geometry
   {
 
-    /*!
+    /**
     \class  Quadratic
     \brief Holds a basic quadratic surface
     \author S. Ansell

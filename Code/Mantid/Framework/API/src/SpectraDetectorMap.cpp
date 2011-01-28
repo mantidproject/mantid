@@ -71,8 +71,8 @@ namespace Mantid
 
     /** Links a list of UDETs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
-     *  @param spectrum The spectrum number to which detectors should be added
-     *  @param udetList The list of detectors id's to add to the map
+     *  @param spectrum :: The spectrum number to which detectors should be added
+     *  @param udetList :: The list of detectors id's to add to the map
      */
     void SpectraDetectorMap::addSpectrumEntries(const int spectrum, const std::vector<int>& udetList)
     {
@@ -86,8 +86,8 @@ namespace Mantid
 
     /** Links a SET of detector IDs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
-     *  @param spectrum The spectrum number to which detectors should be added
-     *  @param detectorIDs The std::set of detectors id's to add to the map
+     *  @param spectrum :: The spectrum number to which detectors should be added
+     *  @param detectorIDs :: The std::set of detectors id's to add to the map
      */
     void SpectraDetectorMap::addSpectrumEntries(const int spectrum, const std::set<int>& detectorIDs)
     {
@@ -100,8 +100,8 @@ namespace Mantid
 
     /** Moves all detectors assigned to a particular spectrum number to a different one.
      *  Does nothing if the oldSpectrum number does not exist in the map.
-     *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
-     *  @param newSpectrum The spectrum number to map the detectors to
+     *  @param oldSpectrum :: The spectrum number to be removed and have its detectors reassigned
+     *  @param newSpectrum :: The spectrum number to map the detectors to
      */
     void SpectraDetectorMap::remap(const int oldSpectrum, const int newSpectrum)
     {
@@ -138,7 +138,7 @@ namespace Mantid
     }
 
     /** Get a vector of detectors ids contributing to a spectrum
-     * @param spectrum_number The # of the spectrum you are looking for.
+     * @param spectrum_number :: The # of the spectrum you are looking for.
      * @return list of detector ids in map
      */
     std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
@@ -160,7 +160,7 @@ namespace Mantid
     }
 
     /** Gets a list of spectra corresponding to a list of detector numbers.
-    *  @param detectorList A list of detector Ids
+    *  @param detectorList :: A list of detector Ids
     *  @return A vector where matching indices correspond to the relevant spectra id
     */
     std::vector<int> SpectraDetectorMap::getSpectra(const std::vector<int>& detectorList) const

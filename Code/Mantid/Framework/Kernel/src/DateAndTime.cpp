@@ -27,8 +27,8 @@ namespace DateAndTimeHelpers
 /** Convert time_t to tm as UTC time.
  * Portable implementation of gmtime_r (re-entrant gmtime) that works on Windows and Linux
  *
- * @param clock pointer to time_t to convert
- * @param result pointer to a struct tm (timeinfo structure) that will be filled.
+ * @param clock :: pointer to time_t to convert
+ * @param result :: pointer to a struct tm (timeinfo structure) that will be filled.
  * @return result if successful, or NULL if there was an error.
  */
 std::tm * gmtime_r_portable( const std::time_t *clock, struct std::tm *result )
@@ -133,7 +133,7 @@ DateAndTime::DateAndTime() : _nanoseconds(0)
 
 //------------------------------------------------------------------------------------------------
 /** Construct a date from nanoseconds.
- * @param total_nanoseconds nanoseconds since Jan 1, 1990 (our epoch).
+ * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
  */
 DateAndTime::DateAndTime(const int64_t total_nanoseconds)
 {
@@ -160,7 +160,7 @@ DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0)
 
 //------------------------------------------------------------------------------------------------
 /** Construct time from a boost::posix_time::ptime.
- * @param _ptime boost::posix_time::ptime
+ * @param _ptime :: boost::posix_time::ptime
  */
 DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime) : _nanoseconds(0)
 {
@@ -169,8 +169,8 @@ DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime) : _nanoseconds(0
 
 //------------------------------------------------------------------------------------------------
 /** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
- * @param seconds seconds since Jan 1, 1990.
- * @param nanoseconds nanoseconds to add to the number of seconds
+ * @param seconds :: seconds since Jan 1, 1990.
+ * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const double seconds, const double nanoseconds)
 {
@@ -187,8 +187,8 @@ DateAndTime::DateAndTime(const double seconds, const double nanoseconds)
 //------------------------------------------------------------------------------------------------
 
 /** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
- * @param seconds seconds since Jan 1, 1990.
- * @param nanoseconds nanoseconds to add to the number of seconds
+ * @param seconds :: seconds since Jan 1, 1990.
+ * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds)
 {
@@ -203,8 +203,8 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds)
 //------------------------------------------------------------------------------------------------
 
 /** Construct a time from the number of seconds and nanoseconds since Jan 1, 1990.
- * @param seconds seconds since Jan 1, 1990.
- * @param nanoseconds nanoseconds to add to the number of seconds
+ * @param seconds :: seconds since Jan 1, 1990.
+ * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds)
 {
@@ -232,7 +232,7 @@ boost::posix_time::ptime DateAndTime::to_ptime() const
 //------------------------------------------------------------------------------------------------
 /** Sets the date and time using a boost::posix_time::ptime
  *
- * @param _ptime boost::posix_time::ptime date and time.
+ * @param _ptime :: boost::posix_time::ptime date and time.
  */
 void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime)
 {
@@ -279,7 +279,7 @@ void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime)
 //------------------------------------------------------------------------------------------------
 /** Sets the date and time using a std::time_t
  *
- * @param _timet std::time_t to set to
+ * @param _timet :: std::time_t to set to
  */
 void DateAndTime::set_from_time_t(std::time_t _timet)
 {
@@ -389,7 +389,7 @@ const DateAndTime DateAndTime::defaultTime()
 //------------------------------------------------------------------------------------------------
 /** Sets the date and time using an ISO8601-formatted string
  *
- * @param str ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
  */
 void DateAndTime::set_from_ISO8601_string(const std::string str)
 {
@@ -587,7 +587,7 @@ int64_t DateAndTime::total_nanoseconds() const
 
 //------------------------------------------------------------------------------------------------
 /** == operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if equals
  */
 bool DateAndTime::operator==(const DateAndTime& rhs) const
@@ -596,7 +596,7 @@ bool DateAndTime::operator==(const DateAndTime& rhs) const
 }
 
 /** == operator for boost::posix_time::ptime
- * @param rhs boost::posix_time::ptime to compare
+ * @param rhs :: boost::posix_time::ptime to compare
  * @return true if equals
  */
 bool DateAndTime::operator==(const boost::posix_time::ptime& rhs) const
@@ -606,7 +606,7 @@ bool DateAndTime::operator==(const boost::posix_time::ptime& rhs) const
 
 
 /** != operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if not equals
  */
 bool DateAndTime::operator!=(const DateAndTime& rhs) const
@@ -615,7 +615,7 @@ bool DateAndTime::operator!=(const DateAndTime& rhs) const
 }
 
 /** < operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if less than
  */
 bool DateAndTime::operator<(const DateAndTime& rhs) const
@@ -624,7 +624,7 @@ bool DateAndTime::operator<(const DateAndTime& rhs) const
 }
 
 /** <= operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if less than or equals
  */
 bool DateAndTime::operator<=(const DateAndTime& rhs) const
@@ -633,7 +633,7 @@ bool DateAndTime::operator<=(const DateAndTime& rhs) const
 }
 
 /** > operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if greater than
  */
 bool DateAndTime::operator>(const DateAndTime& rhs) const
@@ -642,7 +642,7 @@ bool DateAndTime::operator>(const DateAndTime& rhs) const
 }
 
 /** >= operator
- * @param rhs DateAndTime to compare
+ * @param rhs :: DateAndTime to compare
  * @return true if greater than or equals
  */
 bool DateAndTime::operator>=(const DateAndTime& rhs) const
@@ -654,7 +654,7 @@ bool DateAndTime::operator>=(const DateAndTime& rhs) const
 
 //------------------------------------------------------------------------------------------------
 /** + operator to add time.
- * @param nanosec number of nanoseconds to add
+ * @param nanosec :: number of nanoseconds to add
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator+(const int64_t nanosec) const
@@ -663,7 +663,7 @@ DateAndTime DateAndTime::operator+(const int64_t nanosec) const
 }
 
 /** += operator to add time.
- * @param nanosec number of nanoseconds to add
+ * @param nanosec :: number of nanoseconds to add
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator+=(const int64_t nanosec)
@@ -675,7 +675,7 @@ DateAndTime& DateAndTime::operator+=(const int64_t nanosec)
 }
 
 /** - operator to subtract time.
- * @param nanosec number of nanoseconds to subtract
+ * @param nanosec :: number of nanoseconds to subtract
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator-(const int64_t nanosec) const
@@ -684,7 +684,7 @@ DateAndTime DateAndTime::operator-(const int64_t nanosec) const
 }
 
 /** -= operator to subtract time.
- * @param nanosec number of nanoseconds to subtract
+ * @param nanosec :: number of nanoseconds to subtract
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator-=(const int64_t nanosec)
@@ -698,7 +698,7 @@ DateAndTime& DateAndTime::operator-=(const int64_t nanosec)
 
 //------------------------------------------------------------------------------------------------
 /** + operator to add time.
- * @param td time_duration to add
+ * @param td :: time_duration to add
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator+(const time_duration& td) const
@@ -707,7 +707,7 @@ DateAndTime DateAndTime::operator+(const time_duration& td) const
 }
 
 /** += operator to add time.
- * @param td time_duration to add
+ * @param td :: time_duration to add
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator+=(const time_duration& td)
@@ -716,7 +716,7 @@ DateAndTime& DateAndTime::operator+=(const time_duration& td)
 }
 
 /** - operator to subtract time.
- * @param td time_duration to subtract
+ * @param td :: time_duration to subtract
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator-(const time_duration& td) const
@@ -725,7 +725,7 @@ DateAndTime DateAndTime::operator-(const time_duration& td) const
 }
 
 /** -= operator to subtract time.
- * @param td time_duration to subtract
+ * @param td :: time_duration to subtract
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator-=(const time_duration& td)
@@ -736,7 +736,7 @@ DateAndTime& DateAndTime::operator-=(const time_duration& td)
 
 //------------------------------------------------------------------------------------------------
 /** + operator to add time.
- * @param sec duration to add
+ * @param sec :: duration to add
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator+(const double sec) const
@@ -745,7 +745,7 @@ DateAndTime DateAndTime::operator+(const double sec) const
 }
 
 /** += operator to add time.
- * @param sec duration to add
+ * @param sec :: duration to add
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator+=(const double sec)
@@ -754,7 +754,7 @@ DateAndTime& DateAndTime::operator+=(const double sec)
 }
 
 /** - operator to subtract time.
- * @param sec duration to subtract
+ * @param sec :: duration to subtract
  * @return modified DateAndTime.
  */
 DateAndTime DateAndTime::operator-(const double sec) const
@@ -763,7 +763,7 @@ DateAndTime DateAndTime::operator-(const double sec) const
 }
 
 /** -= operator to subtract time.
- * @param sec duration to subtract
+ * @param sec :: duration to subtract
  * @return modified DateAndTime.
  */
 DateAndTime& DateAndTime::operator-=(const double sec)
@@ -839,7 +839,7 @@ time_duration DateAndTime::duration_from_seconds(double duration)
 //-----------------------------------------------------------------------------------------------
 /** time duration in nanoseconds. Duration is limited to
  * MAX_NANOSECONDS and MIN_NANOSECONDS to avoid overflows.
- * @param td time_duration instance.
+ * @param td :: time_duration instance.
  * @Return an int64 of the number of nanoseconds
  */
 int64_t DateAndTime::nanoseconds_from_duration(const time_duration & td)
@@ -863,7 +863,7 @@ int64_t DateAndTime::nanoseconds_from_duration(const time_duration & td)
 
 //-----------------------------------------------------------------------------------------------
 /** time duration from nanoseconds
- * @param dur duration in nanoseconds, as an int
+ * @param dur :: duration in nanoseconds, as an int
  * @return a time_duration type
  */
 time_duration DateAndTime::duration_from_nanoseconds(int64_t dur)
@@ -879,7 +879,7 @@ time_duration DateAndTime::duration_from_nanoseconds(int64_t dur)
 
 //-----------------------------------------------------------------------------------------------
 /** Nanoseconds from seconds, with limits
- * @param dur duration in seconds, as a double
+ * @param sec :: duration in seconds, as a double
  * @return int64 of the number of nanoseconds
  */
 int64_t DateAndTime::nanoseconds_from_seconds(double sec)
@@ -941,7 +941,7 @@ TimeInterval::TimeInterval(const DateAndTime& from, const DateAndTime& to)
 }
 
 /**  Returns an intersection of this interval with \a ti
-     @param ti Time interval
+     @param ti :: Time interval
      @return A valid time interval if this interval intersects with \a ti or
              an empty interval otherwise.
  */

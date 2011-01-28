@@ -19,21 +19,21 @@ namespace Mantid
     Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
 
     /** Constructor
-    *  @param logfileID The logfile id -- the part of the file name which identifies the log 
-    *  @param value Rather then extracting value from logfile, specify a value directly
-    *  @param paramName The name of the parameter which will be created based on the log values
-    *  @param type The type
-    *  @param extractSingleValueAs Describes the way to extract a single value from the log file( average, first number, etc)
-    *  @param eq muParser equation to calculate the parameter value from the log value
-    *  @param comp The pointer to the instrument component
-    *  @param interpolation The pointer to the interpolation class
-    *  @param formula The string formula to apply
-    *  @param formulaUnit The unit that the formul requires the input vaule in
-    *  @param resultUnit The unit of the result of the formula
-    *  @param tie What to tie the value to
-    *  @param constraint The constraint associated with this parameter
-    *  @param penaltyFactor The level of penalty associated with the constraint
-    *  @param fitFunc What fit function this applies to
+    *  @param logfileID :: The logfile id -- the part of the file name which identifies the log 
+    *  @param value :: Rather then extracting value from logfile, specify a value directly
+    *  @param paramName :: The name of the parameter which will be created based on the log values
+    *  @param type :: The type
+    *  @param extractSingleValueAs :: Describes the way to extract a single value from the log file( average, first number, etc)
+    *  @param eq :: muParser equation to calculate the parameter value from the log value
+    *  @param comp :: The pointer to the instrument component
+    *  @param interpolation :: The pointer to the interpolation class
+    *  @param formula :: The string formula to apply
+    *  @param formulaUnit :: The unit that the formul requires the input vaule in
+    *  @param resultUnit :: The unit of the result of the formula
+    *  @param tie :: What to tie the value to
+    *  @param constraint :: The constraint associated with this parameter
+    *  @param penaltyFactor :: The level of penalty associated with the constraint
+    *  @param fitFunc :: What fit function this applies to
     */
     XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation, 
       const std::string& formula, const std::string& formulaUnit, const std::string& resultUnit, const std::string& paramName, 
@@ -55,7 +55,7 @@ namespace Mantid
      *  - Interpolate the value, if desired.
      *  - Just extract the value (perhaps the man or just the n-th position) and return that.
     *
-    *  @param logData Data in logfile
+    *  @param logData :: Data in logfile
     *  @return parameter value
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument definition file

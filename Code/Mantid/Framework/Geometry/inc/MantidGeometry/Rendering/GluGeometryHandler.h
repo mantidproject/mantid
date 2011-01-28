@@ -10,7 +10,7 @@ namespace Mantid
 
 	namespace Geometry
 	{
-		/*!
+		/**
 		\class GluGeometryHandler
 		\brief Place holder for geometry triangulation and rendering with special cases of cube, sphere, cone and cylinder.
 		\author Srikanth Nagella

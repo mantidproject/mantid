@@ -149,7 +149,7 @@ namespace Mantid
     }
     /**
      * Load an empty instrument
-     * @param instrument_xml_name The name of the instrument definition file
+     * @param instrument_xml_name :: The name of the instrument definition file
      * @returns A pointer to a Workspace2D containing the loaded instrument
      */    
     DataObjects::Workspace2D_sptr ReadGroupsFromFile::loadEmptyInstrument(const std::string& instrument_xml_name)
@@ -200,8 +200,8 @@ namespace Mantid
 
     /**
      * Reads detctor ids for groups from an XML grouping file, such as one created by the SpatialGrouping algorithm.
-     * @param filename path and name of input file
-     * @throws FileError is there is a problem with the XML file
+     * @param filename :: path and name of input file
+     * @throw FileError is there is a problem with the XML file
      */
     void ReadGroupsFromFile::readXMLGroupingFile(const std::string& filename)
     {

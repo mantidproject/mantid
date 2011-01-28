@@ -23,7 +23,7 @@ namespace Mantid
     class Cylinder;
     class General;
 
-    /*!
+    /**
     \class LineIntersectVisit
     \author S. Ansell
     \version 1.0

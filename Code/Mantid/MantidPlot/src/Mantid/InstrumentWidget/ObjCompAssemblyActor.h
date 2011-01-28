@@ -11,7 +11,7 @@ namespace Mantid{
 	}
 }
 
-/*!
+/**
   \class  ObjCompAssemblyActor
   \brief  This class wraps the ICompAssembly into Actor.
   \author Srikanth Nagella

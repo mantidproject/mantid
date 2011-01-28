@@ -181,7 +181,7 @@ public:
   }
 
   void testCylinderDistanceComplex()
-    /*!
+    /**
     Test the distance of a point from the cylinder
     */
   {

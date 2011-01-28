@@ -8,7 +8,7 @@
 
 #include <map>
 
-/*!
+/**
   \class  ICompAssemblyActor
   \brief  This class wraps the ICompAssembly into Actor.
   \author Srikanth Nagella

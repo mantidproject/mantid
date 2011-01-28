@@ -231,9 +231,9 @@ int CropWorkspace::getXMax(const int wsIndex)
 }
 
 /** Zeroes all data points outside the X values given
- *  @param outputWorkspace The output workspace - data has already been copied
- *  @param inIndex         The workspace index of the spectrum in the input workspace
- *  @param outIndex        The workspace index of the spectrum in the output workspace
+ *  @param outputWorkspace :: The output workspace - data has already been copied
+ *  @param inIndex ::         The workspace index of the spectrum in the input workspace
+ *  @param outIndex ::        The workspace index of the spectrum in the output workspace
  */
 void CropWorkspace::cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex)
 {

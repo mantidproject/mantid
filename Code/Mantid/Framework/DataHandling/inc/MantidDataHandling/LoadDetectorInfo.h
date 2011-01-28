@@ -127,9 +127,9 @@ private:
   /// Holds data about the where detector information is stored in the user tables of raw files
   struct detectDatForm {
     /** default constructor
-    *  @param total value for totalNumTabs
-    *  @param pressure value pressureTabNum will be set to
-    *  @param wall value to set wallThickTabNum to
+    *  @param total :: value for totalNumTabs
+    *  @param pressure :: value pressureTabNum will be set to
+    *  @param wall :: value to set wallThickTabNum to
     */    
     detectDatForm(unsigned int total=-1, unsigned int pressure=-1, unsigned int wall=-1) :
       totalNumTabs(total), pressureTabNum(pressure), wallThickTabNum(wall) {}

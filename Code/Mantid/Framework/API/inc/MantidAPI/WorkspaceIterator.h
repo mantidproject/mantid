@@ -134,10 +134,10 @@ public:
   workspace_iterator operator-(difference_type) const;
   difference_type operator-(const workspace_iterator&) const;
 
-  /*!
+  /**
    lessthan operator
-   \param A :: Iterator to compare
-   \return  status
+   @param A :: Iterator to compare
+   @return  status
    */
   bool operator<(const workspace_iterator& A) const
   {
@@ -148,10 +148,10 @@ public:
     return (m_index<A.m_index);
   }
 
-  /*!
+  /**
    Equality operator
-   \param A :: Iterator to compare
-   \return equality status
+   @param A :: Iterator to compare
+   @return equality status
    */
   bool operator==(const workspace_iterator& A) const
   {
@@ -167,10 +167,10 @@ public:
     return (m_index==A.m_index);
   }
 
-  /*!
+  /**
    InEquality operator
-   \param A :: Iterator to compare
-   \return equality status
+   @param A :: Iterator to compare
+   @return equality status
    */
   bool operator!=(const workspace_iterator& A) const
   {
@@ -178,9 +178,9 @@ public:
   }
 
   workspace_iterator begin_const() const
-  /*!
+  /**
    Begin iterator (Effective copy+set zero)
-   \return beginning iterator
+   @return beginning iterator
    */
   {
     workspace_iterator Out(*this);
@@ -189,9 +189,9 @@ public:
     return Out;
   }
 
-  /*!
+  /**
    Begin iterator (Set zero)
-   \return beginning iterator
+   @return beginning iterator
    */
   workspace_iterator& begin()
   {
@@ -200,9 +200,9 @@ public:
     return *this;
   }
 
-  /*!
+  /**
    End iterator
-   \return Null/end iterator
+   @return Null/end iterator
    */
   workspace_iterator& end() const
   {

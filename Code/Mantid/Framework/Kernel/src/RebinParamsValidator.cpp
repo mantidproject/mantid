@@ -6,7 +6,7 @@ namespace Kernel
 {
 
 /** Check on the inputed bin boundaries and widths.
- *  @param value The parameter array to check
+ *  @param value :: The parameter array to check
  *  @return A user level description of any problem or "" if there is no problem
  */
 std::string RebinParamsValidator::checkValidity( const std::vector<double>& value ) const

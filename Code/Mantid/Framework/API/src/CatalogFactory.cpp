@@ -20,7 +20,7 @@ CatalogFactoryImpl::~CatalogFactoryImpl()
 /** Returns an instance of the class with the given name. Overrides the base class method.
  *  If an instance already exists, a pointer to it is returned, otherwise
  *  a new instance is created by the DynamicFactory::create method.
- *  @param className The name of the class to be created
+ *  @param className :: The name of the class to be created
  *  @return A shared pointer to the instance of the requested unit
  */
 boost::shared_ptr<ICatalog> CatalogFactoryImpl::create(const std::string& className) const

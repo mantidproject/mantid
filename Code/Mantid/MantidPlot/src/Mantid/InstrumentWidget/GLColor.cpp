@@ -12,10 +12,10 @@
 
 /**
  * Default Constructor
- * @param red The red component of the RGB colour
- * @param green The green component of the RGB colour
- * @param blue The blue component of the RGB colour
- * @param alpha The alpha blending value
+ * @param red :: The red component of the RGB colour
+ * @param green :: The green component of the RGB colour
+ * @param blue :: The blue component of the RGB colour
+ * @param alpha :: The alpha blending value
  
  */
 GLColor::GLColor(float red, float green, float blue, float alpha)
@@ -35,10 +35,10 @@ GLColor::~GLColor()
 
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
- * @param red Red component of color value between [0 - 1]
- * @param green Green Componenent of color value between [0 - 1]
- * @param blue Blue Componenent of color value between [0 - 1]
- * @param alpha Alpha componenet of color value between [0 - 1]
+ * @param red :: Red component of color value between [0 - 1]
+ * @param green :: Green Componenent of color value between [0 - 1]
+ * @param blue :: Blue Componenent of color value between [0 - 1]
+ * @param alpha :: Alpha componenet of color value between [0 - 1]
  */
 void GLColor::set(float red, float green, float blue, float alpha)
 {
@@ -50,10 +50,10 @@ void GLColor::set(float red, float green, float blue, float alpha)
 
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
- * @param red Red component of color value between [0 - 1]
- * @param green Green Componenent of color value between [0 - 1]
- * @param blue Blue Componenent of color value between [0 - 1]
- * @param alpha Alpha componenet of color value between [0 - 1]
+ * @param red :: Red component of color value between [0 - 1]
+ * @param green :: Green Componenent of color value between [0 - 1]
+ * @param blue :: Blue Componenent of color value between [0 - 1]
+ * @param alpha :: Alpha componenet of color value between [0 - 1]
  */
 void GLColor::get(float& red, float& green, float& blue, float& alpha)const
 {
@@ -65,7 +65,7 @@ void GLColor::get(float& red, float& green, float& blue, float& alpha)const
 
 /**
   * This method sets copies red,green, and blue color components into a provided buffer
-  * @param c Pointer to an array of unsigned chars big enough to accept 3 bytes
+  * @param c :: Pointer to an array of unsigned chars big enough to accept 3 bytes
   */
 void GLColor::getUB3(unsigned char* c)const
 {
@@ -76,7 +76,7 @@ void GLColor::getUB3(unsigned char* c)const
 
 /**
  * This method executes opengl color commands based on the method provided.
- * @param pm type of opengl color to be used
+ * @param pm :: type of opengl color to be used
  */
 void GLColor::paint(GLColor::PaintMethod pm)
 {

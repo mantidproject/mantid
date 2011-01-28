@@ -116,7 +116,7 @@ class TableColumn_ptr: public boost::shared_ptr<TableColumn<T> >
 {
 public:
     /** Constructor
-        @param c Shared pointer to a column
+        @param c :: Shared pointer to a column
       */
     TableColumn_ptr(boost::shared_ptr<API::Column> c):boost::shared_ptr<TableColumn<T> >(boost::dynamic_pointer_cast<TableColumn<T> >(c))
     {
@@ -136,7 +136,7 @@ class TableColumn_ptr<bool>: public TableColumn_ptr<API::Boolean>
 {
 public:
     /** Constructor
-        @param c Shared pointer to a column
+        @param c :: Shared pointer to a column
       */
     TableColumn_ptr(boost::shared_ptr<API::Column> c):TableColumn_ptr<API::Boolean>(c)
     {

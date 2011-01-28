@@ -68,17 +68,17 @@ protected:
 
 public:
 
-  /*!
+  /**
    * \brief Constructor
    *
-   * \param env scripting interpreter
-   * \param r initial number of rows
-   * \param c initial number of columns
-   * \param label window label
-   * \param parent parent object
-   * \param name
-   * \param name window name
-   * \param f window flags
+   * @param env :: scripting interpreter
+   * @param r :: initial number of rows
+   * @param c :: initial number of columns
+   * @param label :: window label
+   * @param parent :: parent object
+   * @param name
+::    * @param name :: window name
+   * @param f :: window flags
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
   Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
@@ -192,27 +192,27 @@ public slots:
   //! Set the value of the cell
   void setCell(int row, int col, double value );
 
-  /*!
+  /**
    * \brief Return the text format code ('e', 'f', ...)
    *
    * \sa setNumerFormat(), setTextFormat()
    */
   QChar textFormat(){return txt_format;};
-  /*!
+  /**
    * \brief Return the number precision digits
    *
    * See arguments of setNumericFormat().
    * \sa setNumericFormat(), setTextFormat()
    */
   int precision(){return num_precision;};
-  /*!
+  /**
    * \brief Set the number of significant digits
    *
    * \sa precision(), setNumericFormat(), setTextFormat()
    */
   void setNumericPrecision(int prec){num_precision = prec;};
 
-  /*!
+  /**
    * \brief Set the number format for the cells
    *
    * This method should only be called before any user

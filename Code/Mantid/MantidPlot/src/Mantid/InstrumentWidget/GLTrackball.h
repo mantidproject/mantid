@@ -4,7 +4,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 
-/*!
+/**
   \class  GLTrackball
   \brief  An class that implements virtual trackball using mouse interactions
   \author Chapon Laurent & Srikanth Nagella

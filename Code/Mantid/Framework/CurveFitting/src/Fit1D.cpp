@@ -39,9 +39,9 @@ public:
     /// The index map
     std::map<int,int> m_map;
     /**  Set a value to a Jacobian matrix element.
-    *   @param iY The index of the data point.
-    *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
-    *   @param value The derivative value.
+    *   @param iY :: The index of the data point.
+    *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
+    *   @param value :: The derivative value.
     */
     void set(int iY, int iP, double value)
     {
@@ -80,9 +80,9 @@ struct FitData {
 };
 
 /** Fit1D GSL function wrapper
-* @param x Input function arguments
-* @param params Input data
-* @param f Output function values = (y_cal-y_data)/sigma for each data point
+* @param x :: Input function arguments
+* @param params :: Input data
+* @param f :: Output function values = (y_cal-y_data)/sigma for each data point
 * @return A GSL status information
 */
 static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
@@ -108,9 +108,9 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 }
 
 /** Fit1D GSL derivative function wrapper
-* @param x Input function arguments
-* @param params Input data
-* @param J Output derivatives
+* @param x :: Input function arguments
+* @param params :: Input data
+* @param J :: Output derivatives
 * @return A GSL status information
 */
 static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
@@ -138,10 +138,10 @@ static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 }
 
 /** Fit1D derivatives and function GSL wrapper
-* @param x Input function arguments
-* @param params Input data
-* @param f Output function values = (y_cal-y_cal)/sigma for each data point
-* @param J Output derivatives
+* @param x :: Input function arguments
+* @param params :: Input data
+* @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
+* @param J :: Output derivatives
 * @return A GSL status information
 */
 static int gsl_fdf(const gsl_vector * x, void *params,
@@ -154,8 +154,8 @@ static int gsl_fdf(const gsl_vector * x, void *params,
 /** Calculating the cost function assuming it has the least-squared
     format. Initially implemented to use the gsl simplex routine within
     the least-squared scheme.
-* @param x Input function arguments
-* @param params Input data
+* @param x :: Input function arguments
+* @param params :: Input data
 * @return Value of least squared cost function
 */
 static double gsl_costFunction(const gsl_vector * x, void *params)
@@ -192,10 +192,10 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
-* @param in Input fitting parameter values
-* @param out Derivatives
-* @param xValues X values for data points
-* @param nData Number of data points
+* @param in :: Input fitting parameter values
+* @param out :: Derivatives
+* @param xValues :: X values for data points
+* @param nData :: Number of data points
  */
 void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
@@ -207,14 +207,14 @@ void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues
     parameters as listed in declareParameters(). By default no changes is made
     to these. If this method is overloaded, the method modifyFinalFittedParameters()
     must also be overloaded.
-* @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
+* @param fittedParameter :: Values of fitting parameters in the order listed in declareParameters()
  */
 void Fit1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter) 
 {}
 
 /** If modifyInitialFittedParameters is overloaded this method must also be overloaded
     to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user.
-* @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
+* @param fittedParameter :: Values of fitting parameters in the order listed in declareParameters()
  */
 void Fit1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter)
 {}
@@ -715,8 +715,8 @@ void Fit1D::exec()
 }
 
 /**  Constructor.
- *   @param fit A pointer to the Fit1D class
- *   @param fixed A list of comma separated names of the fixed parameters.
+ *   @param fit :: A pointer to the Fit1D class
+ *   @param fixed :: A list of comma separated names of the fixed parameters.
  */
 FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
 {

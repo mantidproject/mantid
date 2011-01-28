@@ -28,11 +28,11 @@ private:
 public:
 
   /** Adds an item
-  @param name the item name
-  @param value the item 
-  @param det_average Detector average or not
-  @param dim0 Diemnsion array zero
-  @param dim1 Diemnsion array one
+  @param name :: the item name
+  @param value :: the item 
+  @param det_average :: Detector average or not
+  @param dim0 :: Diemnsion array zero
+  @param dim1 :: Diemnsion array one
   @return 0 on success, -1 if it is a duplicate
   */
 	int addItem(const std::string& name, const T* value, bool det_average = false, const int* dim0 = NULL, const int* dim1 = NULL)
@@ -50,8 +50,8 @@ public:
 	}
 
   /** finds an item
-  @param item_name the item name
-  @param det_average Detector average or not
+  @param item_name :: the item name
+  @param det_average :: Detector average or not
   @return The item pointer or NULL
   */
 	const item_t* findItem(const std::string& item_name, bool det_average)

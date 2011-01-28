@@ -8,24 +8,24 @@ namespace Mantid
 namespace DataObjects
 {
 
-/*!
+/**
  Constructor
  */
 Histogram1D::Histogram1D()
 {}
 
-/*!
+/**
  Copy constructor
- \param A :: Histogram to copy
+ @param A :: Histogram to copy
  */
 Histogram1D::Histogram1D(const Histogram1D& A) :
   refX(A.refX), refY(A.refY), refE(A.refE)
 {}
 
-/*!
+/**
  Assignment operator
- \param A :: Histogram to copy
- \return *this
+ @param A :: Histogram to copy
+ @return *this
  */
 Histogram1D& Histogram1D::operator=(const Histogram1D& A)
 {

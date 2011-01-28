@@ -32,7 +32,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
 
-/*!\brief Draw images on a QwtPlot.
+/**\brief Draw images on a QwtPlot.
  *
  * PlotEnrichement draws #d_pic at the position specified by #d_pos,
  * scaled to #d_size. #d_file_name isn't used internally, but only provided to help

@@ -40,7 +40,7 @@ class LegendWidget;
 class ArrowMarker;
 class ImageMarker;
 
-/*!\brief Handler for modifying one or more QWidget and/or QwtPlotMarker with mouse or keyboard.
+/**\brief Handler for modifying one or more QWidget and/or QwtPlotMarker with mouse or keyboard.
  *
  * During initialization, the SelectionMoveResizer adds itself as a new child widget to
  * the target's parentWidget() or QwtPlotCanvas. Because Qt 4.1 and beyond propagate a widget's
@@ -101,7 +101,7 @@ class SelectionMoveResizer : public QWidget
 		SelectionMoveResizer(QWidget *target);
 		//! Clean up after myself.
 		~SelectionMoveResizer();
-		/*!\brief React on geometry changes of parent and targets.
+		/**\brief React on geometry changes of parent and targets.
 		 */
 		virtual bool eventFilter(QObject *o, QEvent *e);
 		//! Returns true if w is one of targets, false else.
@@ -141,30 +141,30 @@ class SelectionMoveResizer : public QWidget
 		//! Available modes of operation.
 		enum Operation { None=-2, Move, Resize_N, Resize_NE, Resize_E, Resize_SE, Resize_S, Resize_SW, Resize_W, Resize_NW };
 
-		/*!\brief Draw frame and resize handlers.
+		/**\brief Draw frame and resize handlers.
 		 *
 		 * Besides managing resize operations, this also provides a visual feedback
 		 * on the selection state.
 		 */
 		virtual void paintEvent(QPaintEvent *e);
-		/*!\brief Mouse button presses start move/resize operations.
+		/**\brief Mouse button presses start move/resize operations.
 		 *
 		 * Clicks outside of #d_bounding_rect or with anything else than the left button
 		 * are propagated to the parent as usual.
 		 */
 		virtual void mousePressEvent(QMouseEvent *e);
-		/*!\brief Mouse movements need to be monitored for updating the frame during operation.
+		/**\brief Mouse movements need to be monitored for updating the frame during operation.
 		 *
 		 * When no operation is in progress, the mouse cursor is updated based on its position
 		 * before the event is passed on to the parent.
 		 */
 		virtual void mouseMoveEvent(QMouseEvent *e);
-		/*!\brief Mouse releases end the current operation and apply it to the targets.
+		/**\brief Mouse releases end the current operation and apply it to the targets.
 		 *
 		 * When there is no operation in progress, the event is passed on to the parent.
 		 */
 		virtual void mouseReleaseEvent(QMouseEvent *e);
-		/*!\brief Allow keyboard-based moving of the selection.
+		/**\brief Allow keyboard-based moving of the selection.
 		 *
 		 * Unused keys are passed on to the parent.
 		 */

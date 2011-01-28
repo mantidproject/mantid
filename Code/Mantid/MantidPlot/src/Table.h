@@ -52,7 +52,7 @@ private:
     void activateNextCell();
 };
 
-/*!\brief MDI window providing a spreadsheet table with column logic.
+/**\brief MDI window providing a spreadsheet table with column logic.
  *
  * \section future Future Plans
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
@@ -154,20 +154,20 @@ public slots:
 
 	//! \name Sorting
 	//@{
-	/*!\brief Sort the current column in ascending order.
+	/**\brief Sort the current column in ascending order.
 	 * \sa sortColDesc(), sortColumn(), Q3Table::currentColumn()
 	 */
 	void sortColAsc();
-	/*!\brief Sort the current column in descending order.
+	/**\brief Sort the current column in descending order.
 	 * \sa sortColAsc(), sortColumn(), Q3Table::currentColumn()
 	 */
 	void sortColDesc();
-	/*!\brief Sort the specified column.
-	 * \param col the column to be sorted
-	 * \param order 0 means ascending, anything else means descending
+	/**\brief Sort the specified column.
+	 * @param col :: the column to be sorted
+	 * @param order :: 0 means ascending, anything else means descending
 	 */
 	void sortColumn(int col = -1, int order = 0);
-	/*!\brief Display a dialog with some options for sorting all columns.
+	/**\brief Display a dialog with some options for sorting all columns.
 	 *
 	 * The sorting itself is done using sort(int,int,const QString&).
 	 */
@@ -176,14 +176,14 @@ public slots:
 	void sort(int type = 0, int order  = 0, const QString& leadCol = QString());
 	//! Sort selected columns as in sortColumns(const QStringList&,int,int,const QString&).
 	void sortColumns(int type = 0, int order = 0, const QString& leadCol = QString());
-	/*!\brief Sort the specified columns.
-	 * \param cols the columns to be sorted
-	 * \param type 0 means sort individually (as in sortColumn()), anything else means together
-	 * \param order 0 means ascending, anything else means descending
-	 * \param leadCol for sorting together, the column which determines the permutation
+	/**\brief Sort the specified columns.
+	 * @param cols :: the columns to be sorted
+	 * @param type :: 0 means sort individually (as in sortColumn()), anything else means together
+	 * @param order :: 0 means ascending, anything else means descending
+	 * @param leadCol :: for sorting together, the column which determines the permutation
 	 */
 	void sortColumns(const QStringList& cols, int type = 0, int order = 0, const QString& leadCol = QString());
-	/*!\brief Display a dialog with some options for sorting the selected columns.
+	/**\brief Display a dialog with some options for sorting the selected columns.
 	 *
 	 * The sorting itself is done using sortColumns(int,int,const QString&).
 	 */
@@ -217,7 +217,7 @@ public slots:
 	bool muParserCalculate(int col, int startRow, int endRow, bool notifyChanges = true);
 	//! Compute selected cells from column formulae; use current cell if there's no selection.
 	bool calculate();
-	//! Recalculates values in all columns with formulas containing \param columnName
+	//! Recalculates values in all columns with formulas containing @param columnName:: 
 	void updateValues(Table*, const QString& columnName);
 
 	//! \name Row Operations
@@ -317,12 +317,12 @@ public slots:
 	QString& getNewSpecifications();
 	void setNewSpecifications();
 
-	/*!
+	/**
 	 *used for restoring the table old caption stored in specifications string
 	 */
 	QString oldCaption();
 
-	/*!
+	/**
 	 *used for restoring the table caption stored in new specifications string
 	 */
 	QString newCaption();

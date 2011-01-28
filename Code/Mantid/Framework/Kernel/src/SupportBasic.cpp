@@ -15,11 +15,11 @@ namespace Mantid
 namespace StrFunc
 {
 
-/*!
+/**
   Function to convert a number into hex
   output (and leave the stream un-changed)
-  \param OFS :: Output stream
-  \param n :: Integer to convert
+  @param OFS :: Output stream
+  @param n :: Integer to convert
   \todo Change this to a stream operator
 */
 void printHex(std::ostream& OFS,const int n)
@@ -34,10 +34,10 @@ void printHex(std::ostream& OFS,const int n)
   return;
 } 
 
-/*!
+/**
   Removes the multiple spaces in the line
-  \param Line :: Line to process
-  \return String with single space components
+  @param Line :: Line to process
+  @return String with single space components
 */
 std::string stripMultSpc(const std::string& Line)
 {
@@ -65,15 +65,15 @@ std::string stripMultSpc(const std::string& Line)
   return Out;
 }
 
-/*!
+/**
   Checks that as least cnt letters of 
   works is part of the string. It is currently 
   case sensative. It removes the Word if found
-  \param Line :: Line to process
-  \param Word :: Word to use
-  \param cnt :: Length of Word for significants [default =4]
-  \retval 1 on success (and changed Line) 
-  \retval 0 on failure 
+  @param Line :: Line to process
+  @param Word :: Word to use
+  @param cnt :: Length of Word for significants [default =4]
+  @retval 1 on success (and changed Line) 
+  @retval 0 on failure 
 */
 int extractWord(std::string& Line,const std::string& Word,const int cnt)
 {
@@ -95,12 +95,12 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
   return 1;
 }
 
-/*!
+/**
   Check to see if S is the same as the
   first part of a phrase. (case insensitive)
-  \param S :: string to check
-  \param fullPhrase :: complete phrase
-  \returns 1 on success 
+  @param S :: string to check
+  @param fullPhrase :: complete phrase
+  @return 1 on success 
 */
 int confirmStr(const std::string& S,const std::string& fullPhrase)
 {
@@ -114,16 +114,16 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
   return 1;
 }
 
-/*!
+/**
   Gets a line and determine if there is addition component to add
   in the case of a very long line.
-  \param fh :: input stream to get line 
-  \param Out :: string up to last 'tab' or ' '
-  \param Excess :: string after 'tab or ' ' 
-  \param spc :: number of char to try to read 
-  \retval 1 :: more line to be found
-  \retval -1 :: Error with file
-  \retval 0  :: line finished.
+  @param fh :: input stream to get line 
+  @param Out :: string up to last 'tab' or ' '
+  @param Excess :: string after 'tab or ' ' 
+  @param spc :: number of char to try to read 
+  @retval 1 :: more line to be found
+  @retval -1 :: Error with file
+  @retval 0  :: line finished.
 */
 int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
 {
@@ -161,11 +161,11 @@ int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int 
   return -1;
 }
 
-/*!
+/**
   Removes all spaces from a string 
   except those with in the form '\ '
-  \param CLine :: Line to strip
-  \return String without space
+  @param CLine :: Line to strip
+  @return String without space
 */
 std::string removeSpace(const std::string& CLine)
 {
@@ -182,12 +182,12 @@ std::string removeSpace(const std::string& CLine)
   return Out;
 }
 	
-/*!
+/**
   Reads a line from the stream of max length spc.
   Trailing comments are removed. (with # or ! character)
-  \param fh :: already open file handle
-  \param spc :: max number of characters to read 
-  \return String read.
+  @param fh :: already open file handle
+  @param spc :: max number of characters to read 
+  @return String read.
 */
 std::string getLine(std::istream& fh,const int spc)
 {
@@ -207,10 +207,10 @@ std::string getLine(std::istream& fh,const int spc)
   return Line;
 }
 
-/*!
+/**
   Determines if a string is only spaces
-  \param A :: string to check
-  \returns 1 on an empty string , 0 on failure
+  @param A :: string to check
+  @return 1 on an empty string , 0 on failure
 */
 int isEmpty(const std::string& A)
 {
@@ -219,10 +219,10 @@ int isEmpty(const std::string& A)
   return (pos!=std::string::npos) ? 0 : 1;
 }
 
-/*!
+/**
   removes the string after the comment type of 
   '$ ' or '!' or '#  '
-  \param A :: String to process
+  @param A :: String to process
 */
 void stripComment(std::string& A)
 {
@@ -238,11 +238,11 @@ void stripComment(std::string& A)
   return;
 }
 
-/*!
+/**
   Returns the string from the first non-space to the 
   last non-space 
-  \param A :: string to process
-  \returns shortened string
+  @param A :: string to process
+  @return shortened string
 */
 std::string fullBlock(const std::string& A)
 {
@@ -254,12 +254,12 @@ std::string fullBlock(const std::string& A)
 }
 
 
-/*!
+/**
   Write out the line in the limited form for MCNPX
   ie initial line from 0->72 after that 8 to 72
   (split on a space or comma)
-  \param Line :: full MCNPX line
-  \param OX :: ostream to write to
+  @param Line :: full MCNPX line
+  @param OX :: ostream to write to
 */
 void writeMCNPX(const std::string& Line,std::ostream& OX)
 {
@@ -294,10 +294,10 @@ void writeMCNPX(const std::string& Line,std::ostream& OX)
   return;
 }
 
-/*!
+/**
   Splits the sting into parts that are space delminated.
-  \param Ln :: line component to strip
-  \returns vector of components
+  @param Ln :: line component to strip
+  @return vector of components
 */
 std::vector<std::string> StrParts(std::string Ln)
 {
@@ -308,10 +308,10 @@ std::vector<std::string> StrParts(std::string Ln)
   return Out;
 }
 
-/*!
+/**
   Converts a vax number into a standard unix number
-  \param A :: float number as read from a VAX file
-  \returns float A in IEEE little eindian format
+  @param A :: float number as read from a VAX file
+  @return float A in IEEE little eindian format
 */
 float getVAXnum(const float A) 
 {

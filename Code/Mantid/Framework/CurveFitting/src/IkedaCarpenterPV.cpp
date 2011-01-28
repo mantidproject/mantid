@@ -94,8 +94,8 @@ void IkedaCarpenterPV::init()
  *  Also if size of m_waveLength is equal to number of data (for a new instance of this 
  *  class this vector is empty initially) then don't recalculate it.
  *
- *  @param xValues x values
- *  @param nData length of xValues
+ *  @param xValues :: x values
+ *  @param nData :: length of xValues
  */
 void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const
 {
@@ -126,10 +126,10 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
 
 /** convert voigt params to pseudo voigt params
  *
- *  @param voigtSigmaSq voigt param
- *  @param voigtGamma voigt param
- *  @param H pseudo voigt param
- *  @param eta pseudo voigt param
+ *  @param voigtSigmaSq :: voigt param
+ *  @param voigtGamma :: voigt param
+ *  @param H :: pseudo voigt param
+ *  @param eta :: pseudo voigt param
  */
 void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
   double& H, double& eta) const

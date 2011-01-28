@@ -77,7 +77,7 @@ private:
   /// The name and path of the input file
   std::string m_filename;
   /// Determine whether the grouping file already exists.
-  /// @param filename GroupingFilename (extension .cal)
+  /// @param filename :: GroupingFilename (extension .cal)
   /// @return true if the grouping file exists
   bool groupingFileDoesExist(const std::string& filename) const;
   void saveGroupingFile(const std::string&,bool overwrite) const;

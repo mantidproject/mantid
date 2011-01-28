@@ -18,14 +18,14 @@ namespace Mantid
     Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 
     Line::Line() : Origin(),Direct()
-      /*!
+      /**
       Constructor
       */
     {}
 
     Line::Line(const Geometry::V3D& O,const Geometry::V3D& D) 
       : Origin(O),Direct(D)
-      /*!
+      /**
       Constructor
       */
     {
@@ -34,17 +34,17 @@ namespace Mantid
 
     Line::Line(const Line& A) : 
     Origin(A.Origin),Direct(A.Direct)
-      /*!
+      /**
       Copy Constructor
-      \param A :: Line to copy
+      @param A :: Line to copy
       */
     {}
 
     Line*
       Line::clone() const
-      /*! 
+      /** 
       Virtual copy constructor (not currently used)
-      \return the cloned line
+      @return the cloned line
       */
     {
       return new Line(*this);
@@ -52,10 +52,10 @@ namespace Mantid
 
     Line&
       Line::operator=(const Line& A)
-      /*!
+      /**
       Assignment operator
-      \param A :: Line to copy
-      \return *this
+      @param A :: Line to copy
+      @return *this
       */
     {
       if (this!=&A)
@@ -67,17 +67,17 @@ namespace Mantid
     }
 
     Line::~Line()
-      /*!
+      /**
       Destructor
       */
     {}
 
     Geometry::V3D
       Line::getPoint(const double lambda) const
-      /*!
+      /**
       Return the point on the line given lambda*direction
-      \param lambda :: line position scalar
-      \returns \f$ \vec{O}+ \lambda \vec{D} \f$
+      @param lambda :: line position scalar
+      @return \f$ \vec{O}+ \lambda \vec{D} \f$
       */
     {
       return Origin+Direct*lambda;
@@ -85,10 +85,10 @@ namespace Mantid
 
     double
       Line::distance(const Geometry::V3D& A) const
-      /*!
+      /**
       Distance of a point from the line
-      \param A :: test Point
-      \returns absolute distance (not signed)
+      @param A :: test Point
+      @return absolute distance (not signed)
       */
     {
       const double lambda=Direct.scalar_prod(A-Origin);
@@ -99,12 +99,12 @@ namespace Mantid
 
     int 
       Line::isValid(const Geometry::V3D& A) const
-      /*! 
+      /** 
       Calculate is point is on line by using distance to determine
       if the point is within Tolerance of the line
-      \param A :: Point to test
-      \retval 1 : the point is on the line
-      \retval 0 : Point is not on the line
+      @param A :: Point to test
+      @retval 1 : the point is on the line
+      @retval 0 : Point is not on the line
       */ 
     {
       return (distance(A)>Tolerance) ? 0 : 1;
@@ -112,10 +112,10 @@ namespace Mantid
 
     void
       Line::rotate(const Geometry::Matrix<double>& MA) 
-      /*!
+      /**
       Applies the rotation matrix to the 
       object.
-      \param MA :: Rotation Matrix
+      @param MA :: Rotation Matrix
       */
     {
       Origin.rotate(MA);
@@ -126,9 +126,9 @@ namespace Mantid
 
     void 
       Line::displace(const Geometry::V3D& Pt)
-      /*! 
+      /** 
       Apply a displacement Pt 
-      \param Pt :: Point value of the displacement
+      @param Pt :: Point value of the displacement
       */ 
     {
       Origin+=Pt;
@@ -139,7 +139,7 @@ namespace Mantid
       Line::lambdaPair(const int ix,const std::pair<
       std::complex<double>,std::complex<double> >& SQ,
       std::vector<Geometry::V3D>& PntOut) const
-      /*! 
+      /** 
       Helper function to decide which roots to take.
       The assumption is that lambda has been solved by quadratic
       equation and we require the points that correspond to these
@@ -148,10 +148,10 @@ namespace Mantid
       This makes the quadratic solutions consistent with the ones returned
       when asking if a line hits a plane. It is not clear if some other use
       cases exist.
-      \param ix : number of solutions in SQ (0,1,2)
-      \param SQ : solutions to lambda (the distance along the line
-      \param PntOut : Output vector of points (added to)
-      \return Number of real unique points found.
+      @param ix : number of solutions in SQ (0,1,2)
+      @param SQ : solutions to lambda (the distance along the line
+      @param PntOut : Output vector of points (added to)
+      @return Number of real unique points found.
       */
     { 
       // check results
@@ -192,13 +192,13 @@ namespace Mantid
     int
       Line::intersect(std::vector<Geometry::V3D>& VecOut,
       const Quadratic& Sur) const
-      /*!
+      /**
       For the line that intersects the surfaces 
       add the point(s) to the VecOut, return number of points
       added. It does not check the points for validity.
-      \param VecOut :: intersection points of the line and surface
-      \param Sur :: Surface to intersect with a line
-      \return Number of points found. 
+      @param VecOut :: intersection points of the line and surface
+      @param Sur :: Surface to intersect with a line
+      @return Number of points found. 
       */
     {
       const std::vector<double> BN=Sur.copyBaseEqn();
@@ -221,14 +221,14 @@ namespace Mantid
 
     int 
       Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Plane& Pln) const
-      /*! 
+      /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
       added. It does not check the points for validity. 
 
-      \param PntOut :: Vector of points found by the line/cylinder intersection
-      \param Pln :: Plane for intersect
-      \return Number of points found by intersection
+      @param PntOut :: Vector of points found by the line/cylinder intersection
+      @param Pln :: Plane for intersect
+      @return Number of points found by intersection
       */
     {
 
@@ -245,14 +245,14 @@ namespace Mantid
 
     int 
       Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Cylinder& Cyl) const
-      /*! 
+      /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
       added. It does not check the points for validity. 
 
-      \param PntOut :: Vector of points found by the line/cylinder intersection
-      \param Cyl :: Cylinder to intersect line with
-      \return Number of points found by intersection
+      @param PntOut :: Vector of points found by the line/cylinder intersection
+      @param Cyl :: Cylinder to intersect line with
+      @return Number of points found by intersection
       */
     {
       const Geometry::V3D Cent=Cyl.getCentre();
@@ -274,14 +274,14 @@ namespace Mantid
 
     int 
       Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Sphere& Sph) const
-      /*! 
+      /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
       added. It does not check the points for validity. 
 
-      \param PntOut :: Vector of points found by the line/sphere intersection
-      \param Sph :: Sphere to intersect line with
-      \returns Number of points found by intersection
+      @param PntOut :: Vector of points found by the line/sphere intersection
+      @param Sph :: Sphere to intersect line with
+      @return Number of points found by intersection
       */
     {
       // Nasty stripping of useful stuff from sphere
@@ -301,12 +301,12 @@ namespace Mantid
 
     int 
       Line::setLine(const Geometry::V3D& O,const Geometry::V3D& D) 
-      /*!
+      /**
       sets the line given the Origne and direction
-      \param O :: origin
-      \param D :: direction
-      \retval  0 ::  Direction == 0 ie no line
-      \retval 1 :: on success
+      @param O :: origin
+      @param D :: direction
+      @retval  0 ::  Direction == 0 ie no line
+      @retval 1 :: on success
       */
     {
       if (D.nullVector())
@@ -319,7 +319,7 @@ namespace Mantid
 
     void
       Line::print() const
-      /*!
+      /**
       Print statement for debugging
       */
     {

@@ -30,7 +30,7 @@ WorkspaceGroup::~WorkspaceGroup()
 }
 
 /** Add the named workspace to the group
- *  @param name The name of the workspace (in the AnalysisDataService) to add
+ *  @param name :: The name of the workspace (in the AnalysisDataService) to add
  */
 void WorkspaceGroup::add(const std::string& name)
 {
@@ -40,7 +40,7 @@ void WorkspaceGroup::add(const std::string& name)
 
 /**
  * Does this group contain the named workspace?
- * @param wsName A string to compare
+ * @param wsName :: A string to compare
  * @returns True if the name is part of this group, false otherwise
  */
 bool WorkspaceGroup::contains(const std::string & wsName) const
@@ -56,7 +56,7 @@ void WorkspaceGroup::removeAll()
 }
 
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
- *  @param name The name of the workspace to be removed from the group.
+ *  @param name :: The name of the workspace to be removed from the group.
  */
 void WorkspaceGroup::remove(const std::string& name)
 {
@@ -93,7 +93,7 @@ void WorkspaceGroup::print() const
 
 /**M
  * Callback for a workspace delete notification
- * @param notice A pointer to a workspace delete notificiation object
+ * @param notice :: A pointer to a workspace delete notificiation object
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 {  
@@ -109,7 +109,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotificat
 
 /**
  * Callback for a workspace rename notification
- * @param notice A pointer to a workspace rename notfication object
+ * @param notice :: A pointer to a workspace rename notfication object
  */
 void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice)
 {

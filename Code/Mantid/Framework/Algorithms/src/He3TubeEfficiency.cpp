@@ -151,7 +151,7 @@ void He3TubeEfficiency::exec()
  * Corrects a spectra for the detector efficiency calculated from detector
  * information. Gets the detector information and uses this to calculate its
  * efficiency
- *  @param spectraIndex index of the spectrum to get the efficiency for
+ *  @param spectraIndex :: index of the spectrum to get the efficiency for
  *  @throw invalid_argument if the shape of a detector is isn't a cylinder
  *  aligned along one axis
  *  @throw runtime_error if the SpectraDetectorMap has not been filled
@@ -233,9 +233,9 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
 
 /**
  * Update the shape cache if necessary
- * @param det a pointer to the detector to query
- * @param detRadius An output parameter that contains the detector radius
- * @param detAxis An output parameter that contains the detector axis vector
+ * @param det :: a pointer to the detector to query
+ * @param detRadius :: An output parameter that contains the detector radius
+ * @param detAxis :: An output parameter that contains the detector axis vector
  */
 void He3TubeEfficiency::getDetectorGeometry(\
     boost::shared_ptr<Geometry::IDetector> det,
@@ -304,9 +304,9 @@ void He3TubeEfficiency::getDetectorGeometry(\
 /**
  * For basic shapes centered on the origin (0,0,0) this returns the distance to
  * the surface in the direction of the point given
- *  @param start the distance calculated from origin to the surface in a line
+ *  @param start :: the distance calculated from origin to the surface in a line
  *  towards this point. It should be outside the shape
- *  @param shape the object to calculate for, should be centered on the origin
+ *  @param shape :: the object to calculate for, should be centered on the origin
  *  @return the distance to the surface in the direction of the point given
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
@@ -339,8 +339,8 @@ double He3TubeEfficiency::distToSurface(const Geometry::V3D start,
 /**
  * Calculate the detector efficiency from the detector parameters and the
  * spectrum's x-axis.
- * @param alpha the value to feed to the exponential
- * @param scale_factor an overall value for scaling the efficiency
+ * @param alpha :: the value to feed to the exponential
+ * @param scale_factor :: an overall value for scaling the efficiency
  * @return the calculated efficiency
  */
 double He3TubeEfficiency::detectorEfficiency(const double alpha,
@@ -371,10 +371,10 @@ void He3TubeEfficiency::logErrors() const
 /**
  * Retrieve the detector parameter either from the workspace property or from
  * the associated detector property.
- * @param wsPropName the workspace property name for the detector parameter
- * @param currentIndex the currently requested spectra index
- * @param detPropName the detector property name for the detector parameter
- * @param idet the current detector
+ * @param wsPropName :: the workspace property name for the detector parameter
+ * @param currentIndex :: the currently requested spectra index
+ * @param detPropName :: the detector property name for the detector parameter
+ * @param idet :: the current detector
  * @return the value of the detector property
  */
 double He3TubeEfficiency::getParameter(std::string wsPropName, int currentIndex,

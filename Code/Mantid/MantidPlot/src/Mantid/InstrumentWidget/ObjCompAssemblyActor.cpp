@@ -118,7 +118,7 @@ void ObjCompAssemblyActor::initChilds(bool withDisplayList)
 /**
 * This method checks the list of Objects in mObjects for obj, if found returns the MantidObject. if the obj is not found
 * then creates a new MantidObject for obj and adds to the list of mObjects and returns the newly created MantidObject.
-* @param obj             :: Object input for which MantidObject needed
+* @param obj :: Object input for which MantidObject needed
 * @param withDisplayList :: whether the new MantidObject if needed uses the display list attribute
 * @return  the MantidObject corresponding to the obj.
 */

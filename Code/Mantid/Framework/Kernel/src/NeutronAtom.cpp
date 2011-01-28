@@ -19,13 +19,13 @@ const double NeutronAtom::ReferenceLambda = 1.7982;
 
 /**
  * Atom constructor
- * @param z The atomic number of the atom
- * @param coh_b_real The real part of the coherent scattering length
- * @param inc_b_real The real part of the incoherent scattering length
- * @param coh_xs The coherent neutron cross-section
- * @param inc_xs The incoherent neutron cross-section
- * @param tot_xs The total neutron cross-section
- * @param abs_xs The absolute neutron cross-section
+ * @param z :: The atomic number of the atom
+ * @param coh_b_real :: The real part of the coherent scattering length
+ * @param inc_b_real :: The real part of the incoherent scattering length
+ * @param coh_xs :: The coherent neutron cross-section
+ * @param inc_xs :: The incoherent neutron cross-section
+ * @param tot_xs :: The total neutron cross-section
+ * @param abs_xs :: The absolute neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z,
                          const double coh_b_real, const double inc_b_real,
@@ -38,14 +38,14 @@ NeutronAtom::NeutronAtom(const uint16_t z,
                          tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 /**
  * Atom constructor
- * @param z The atomic number of the atom
- * @param a The mass number of the atom
- * @param coh_b_real The real part of the coherent scattering length
- * @param inc_b_real The real part of the incoherent scattering length
- * @param coh_xs The coherent neutron cross-section
- * @param inc_xs The incoherent neutron cross-section
- * @param tot_xs The total neutron cross-section
- * @param abs_xs The absolute neutron cross-section
+ * @param z :: The atomic number of the atom
+ * @param a :: The mass number of the atom
+ * @param coh_b_real :: The real part of the coherent scattering length
+ * @param inc_b_real :: The real part of the incoherent scattering length
+ * @param coh_xs :: The coherent neutron cross-section
+ * @param inc_xs :: The incoherent neutron cross-section
+ * @param tot_xs :: The total neutron cross-section
+ * @param abs_xs :: The absolute neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double inc_b_real,
@@ -58,16 +58,16 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 /**
  * Atom constructor
- * @param z The atomic number of the atom
- * @param a The mass number of the atom
- * @param coh_b_real The real part of the coherent scattering length
- * @param coh_b_img The imaginary part of the coherent scattering length
- * @param inc_b_real The real part of the incoherent scattering length
- * @param inc_b_img The imaginary part of the incoherent scattering length
- * @param coh_xs The coherent neutron cross-section
- * @param inc_xs The incoherent neutron cross-section
- * @param tot_xs The total neutron cross-section
- * @param abs_xs The absolute neutron cross-section
+ * @param z :: The atomic number of the atom
+ * @param a :: The mass number of the atom
+ * @param coh_b_real :: The real part of the coherent scattering length
+ * @param coh_b_img :: The imaginary part of the coherent scattering length
+ * @param inc_b_real :: The real part of the incoherent scattering length
+ * @param inc_b_img :: The imaginary part of the incoherent scattering length
+ * @param coh_xs :: The coherent neutron cross-section
+ * @param inc_xs :: The incoherent neutron cross-section
+ * @param tot_xs :: The total neutron cross-section
+ * @param abs_xs :: The absolute neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double coh_b_img,
@@ -590,8 +590,8 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
 }
 
 /**
- * @param z_number Atomic number of the atom to get
- * @param a_number Mass number of the atom to get
+ * @param z_number :: Atomic number of the atom to get
+ * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
 NeutronAtom getNeutronAtom(const int z_number, const int a_number)

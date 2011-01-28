@@ -18,7 +18,7 @@ namespace Mantid
     }
 
     /** returns the extension of the given file
-     *  @param fileName - name of the file.
+     *  @param fileName :: name of the file.
      */
     std::string IDataFileChecker::extension(const std::string& fileName)
     {

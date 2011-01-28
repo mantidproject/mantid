@@ -46,7 +46,7 @@ public:
 
   /** Calls the validator
    *  
-   *  @param value The value to be checked
+   *  @param value :: The value to be checked
    *  @returns An error message to display to users or an empty string on no error
    */
   std::string isValid(const TYPE &value) const

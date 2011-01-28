@@ -43,7 +43,7 @@ bool MWRunFiles::isForRunFiles() const
 
 /**
 * Sets whether this widget is for run file searching or not
-* @param True if this widget searches for run files, false otherwise
+* @param True :: if this widget searches for run files, false otherwise
 */
 void MWRunFiles::isForRunFiles(const bool mode)
 {
@@ -61,7 +61,7 @@ QString MWRunFiles::getLabelText() const
 
 /**
 * Set the text on the label
-* @param text A string giving the label to use for the text
+* @param text :: A string giving the label to use for the text
 */
 void MWRunFiles::setLabelText(const QString & text) 
 { 
@@ -79,7 +79,7 @@ bool MWRunFiles::allowMultipleFiles() const
 
 /**
 * Set whether this widget allows multiple files to be specifed or not
-* @param allow If true then the widget will accept multiple files else only a single file may be specified
+* @param allow :: If true then the widget will accept multiple files else only a single file may be specified
 */
 void MWRunFiles::allowMultipleFiles(const bool allow)
 {
@@ -97,7 +97,7 @@ bool MWRunFiles::isOptional() const
 
 /**
 * Sets if the text field is optional
-* @param optional Set the optional status of the text field
+* @param optional :: Set the optional status of the text field
 */
 void MWRunFiles::isOptional(const bool optional)
 {
@@ -116,7 +116,7 @@ QString MWRunFiles::getAlgorithmProperty() const
 
 /**
 * Sets an algorithm name that can be tied to this widget
-* @param name The name of the algorithm and property in the form [AlgorithmName|PropertyName]
+* @param name :: The name of the algorithm and property in the form [AlgorithmName|PropertyName]
 */
 void MWRunFiles::setAlgorithmProperty(const QString & text)
 {
@@ -132,7 +132,7 @@ QStringList MWRunFiles::getFileExtensions() const
 }
 /**
 * Sets the list of file extensions the dialog will search for. Only taken notice of if AlgorithmProperty not set.
-* @param extensions list of file extensions
+* @param extensions :: list of file extensions
 */
 void MWRunFiles::setFileExtensions(const QStringList & extensions)
 {
@@ -179,7 +179,7 @@ QString MWRunFiles::getFirstFilename() const
 
 /**
 * Save settings to the given group
-* @param group The name of the group key to save to
+* @param group :: The name of the group key to save to
 */
 void MWRunFiles::saveSettings(const QString & group)
 {
@@ -193,7 +193,7 @@ void MWRunFiles::saveSettings(const QString & group)
 
 /** 
 * Set the file text
-* @param text The text string to set
+* @param text :: The text string to set
 */
 void MWRunFiles::setFileText(const QString & text)
 {
@@ -276,7 +276,7 @@ void MWRunFiles::findFiles()
   }
 }/**
 * Read settings from the given group
-* @param group The name of the group key to retrieve data from
+* @param group :: The name of the group key to retrieve data from
 */
 void MWRunFiles::readSettings(const QString & group)
 {
@@ -348,8 +348,8 @@ QString MWRunFiles::createFileFilter()
 
 /**
 * Create a list of file extensions from the given algorithm
-* @param algName The name of the algorithm
-* @param propName The name of the property
+* @param algName :: The name of the algorithm
+* @param propName :: The name of the property
 * @returns A list of file extensions
 */
 QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName)
@@ -418,7 +418,7 @@ QString MWRunFiles::openFileDia()
 
 /**
 * Mark an error on the form
-* @param A message to include (default: "")
+* @param A :: message to include (default: "")
 */
 void MWRunFiles::showError(const QString & message)
 {

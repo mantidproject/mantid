@@ -231,8 +231,8 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
 }
 
 /** this method gets called when an item on the investigation tree widget is  clicked
-  *@param item - selected item
-  *@param int 
+  *@param item :: selected item
+  *@param int :: 
 */
 void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 {
@@ -273,9 +273,9 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 	
 }
 /**This method populates the investigation table widget
-  *@param ws_sptr - shared pointer to workspace
+  *@param ws_sptr :: shared pointer to workspace
   *@param  type - string used to identify datasets or data files
-  *@param bEnable - flag to enable sorting
+  *@param bEnable :: flag to enable sorting
 */
 void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr dataws_sptr,const QString& type,bool bEnable)
 {	
@@ -392,7 +392,7 @@ bool ICatInvestigation::isDataFilesChecked()
 	return m_uiForm.dataFilescheckBox->isChecked();
 }
 /** This method gets the selected file name from the selected row in the table
-  * @param fileNames - table widget item selected.
+  * @param fileNames :: table widget item selected.
 */
 void ICatInvestigation::getSelectedFileNames(std::vector<std::string>& fileNames)
 {
@@ -410,8 +410,8 @@ void ICatInvestigation::getSelectedFileNames(std::vector<std::string>& fileNames
 }
 
 /** This method returns the fileids of the given files.
-@param fileNames - list of filenames
-@param fileIds - reference to a vector of fileIds
+@param fileNames :: list of filenames
+@param fileIds :: reference to a vector of fileIds
 */
 void ICatInvestigation::getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds)
 {
@@ -484,7 +484,7 @@ void ICatInvestigation::setfileLocations(const std::vector<std::string>& fileLoc
 }
 
 /**This method gets called when Treewidget item defaults expanded
-  *@param item - treewidget item 
+  *@param item :: treewidget item 
 */
 void ICatInvestigation::investigationWidgetItemExpanded(QTreeWidgetItem* item )
 {
@@ -581,7 +581,7 @@ bool ICatInvestigation::isFileExistsInDownloadedList(const std::string& selected
 
 }
 /**This method loads the data file
-  *@param filePath name of the file
+  *@param filePath :: name of the file
 */
 void ICatInvestigation::loadData( const QString& filePath)
 {
@@ -632,7 +632,7 @@ bool ICatInvestigation::isLoadingControlled()
 }
 
 /**This method checks the file name extension and returns true if it's raw file 
-  *@param fileName name of the file
+  *@param fileName :: name of the file
   *@return  boolean
 */
 bool ICatInvestigation::isRawFile(const QString& fileName)
@@ -649,7 +649,7 @@ bool ICatInvestigation::isRawFile(const QString& fileName)
 }
 
 /**This method checks the file name extension and returns true if it's nexus file 
-  *@param fileName name of the file
+  *@param fileName :: name of the file
   *@return  true if it's nexus file
 */
 bool ICatInvestigation::isNexusFile(const QString& fileName)
@@ -668,8 +668,8 @@ bool ICatInvestigation::isNexusFile(const QString& fileName)
 }
 
 /** This method executes loadRaw algorithm
-  * @param fileName name of the raw file
-  * @param wsName name of the workspace to store the data
+  * @param fileName :: name of the raw file
+  * @param wsName :: name of the workspace to store the data
 */
 void ICatInvestigation::executeLoadRaw(const QString& fileName,const QString& wsName)
 {	
@@ -677,18 +677,18 @@ void ICatInvestigation::executeLoadRaw(const QString& fileName,const QString& ws
 }
 
 /** This method executes loadNexus algorithm
-  * @param fileName name of the nexus file
-  * @param wsName name of the workspace to store the data
+  * @param fileName :: name of the nexus file
+  * @param wsName :: name of the workspace to store the data
 */
 void ICatInvestigation::executeLoadNexus(const QString& fileName,const QString& wsName)
 {
 	emit executeLoadAlgorithm("LoadNexus",fileName,wsName);
 }
 /**This method executes loadraw/loadnexus algorithm
-  *@param algName - algoritm name
-  *@param version -algorithm version
-  *@param fileName - name of the file to load
-  *@param wsName name of the workspace to store the data
+  *@param algName :: algoritm name
+  *@param version :: -algorithm version
+  *@param fileName :: name of the file to load
+  *@param wsName :: name of the workspace to store the data
 */
 bool ICatInvestigation::execute(const QString& algName,const int& version,const QString& fileName,const QString& wsName)
 {

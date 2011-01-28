@@ -70,7 +70,7 @@ private:
   //==========================================================================
   /** Unary function for searching the event list.
    * Returns true if the event's TOF is >= a value
-   * @param event the event being checked.
+   * @param event :: the event being checked.
    */
   template <class T>
   class tofGreaterOrEqual: std::unary_function<T, double>
@@ -92,7 +92,7 @@ private:
   //==========================================================================
   /** Unary function for searching the event list.
    * Returns true if the event's TOF is > a value
-   * @param event the event being checked.
+   * @param event :: the event being checked.
    */
   template <class T>
   class tofGreater: std::unary_function<T, double>
