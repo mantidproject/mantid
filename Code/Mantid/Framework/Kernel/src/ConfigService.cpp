@@ -133,16 +133,17 @@ ConfigServiceImpl::ConfigServiceImpl() :
       Poco::SignalChannel, Poco::Channel>);
 
   // Define the directory to search for the Mantid.properties file.
-  if (Poco::Environment::has("MANTIDPATH"))
+  //check the executable directory to see if it includes a mantid.properties file
+  m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
+  Poco::File f (m_strBaseDir + m_properties_file_name);
+  if (!f.exists())
   {
-    // Here we have to follow the convention of the rest of this code and add a trailing slash.
-    // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
-    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
-  }
-  else
-  {
-    // Use the path of the executable
-    m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
+    if (Poco::Environment::has("MANTIDPATH"))
+    {
+      // Here we have to follow the convention of the rest of this code and add a trailing slash.
+      // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
+      m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+    }
   }
 
   //Fill the list of possible relative path keys that may require conversion to absolute paths
