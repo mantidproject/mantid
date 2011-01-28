@@ -59,53 +59,53 @@ namespace Mantid
 
     protected:
       /// Perform convolution on one MDPoint
-      void TobyFitSimulate::sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
+      void sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
               double answer, double error);
       /// Perform convolution on one MDPoint
-      void TobyFitSimulate::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
+      void sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
               double answer, double error);
       /// Pointer to the cut data
       boost::shared_ptr<Mantid::API::IMDWorkspace> imdwCut;
       /// For MC integration return next point in space
-      void TobyFitSimulate::getNextPoint(std::vector<double>&, int);
+      void getNextPoint(std::vector<double>&, int);
       /// Initialise random number generators
-      void TobyFitSimulate::initRandomNumbers();
+      void initRandomNumbers();
       /// Reset random number generators
-      void TobyFitSimulate::resetRandomNumbers();
+      void resetRandomNumbers();
       /// A pointer to the random number generator
       Kernel::RandomNumberGenerator *m_randGen;
       /// Sample S(Q,eps) function from tobyfit
-      double TobyFitSimulate::sqwBroad601(const std::vector<double> &, const std::vector<double> & ,
+      double sqwBroad601(const std::vector<double> &, const std::vector<double> & ,
                   const double, const Geometry::Matrix<double> & );
       /// function to evaluate y/(1-exp(-y)) including y=0 and large -ve y
-      double TobyFitSimulate::pop(double);
+      double pop(double);
       /// function to bose factor
-      double TobyFitSimulate::bose(double, double);
+      double bose(double, double);
       /// function to perform look up of magnetic form factor
-      double TobyFitSimulate::formTable(const double);
+      double formTable(const double);
       /// Sample_area_table is lookup function for moderator parameters
-      double TobyFitSimulate::sampleAreaTable( const double );
+      double sampleAreaTable( const double );
       /// convert 2 uniform random values to two gaussian distribution values
-      void TobyFitSimulate::gasdev2d( const double, const double, double &, double &);
+      void gasdev2d( const double, const double, double &, double &);
       /// tridev function from tf - maps a uniform distribution to triangular form?
-      double TobyFitSimulate::tridev(const double);
-      void TobyFitSimulate::monteCarloSampleVolume( const double, const double, const double, double &, double &, double & );
+      double tridev(const double);
+      void monteCarloSampleVolume( const double, const double, const double, double &, double &, double & );
       /// function to build bmatrix
-      void TobyFitSimulate::bMatrix(const double, const double, const double, const double, const double,
+      void bMatrix(const double, const double, const double, const double, const double,
             const double, const double, const double,
             const Geometry::Matrix<double> & , const Geometry::Matrix<double> & ,
             Geometry::Matrix<double> & );
       /// function to build matrices dMat and dinvMat
-      void TobyFitSimulate::dMatrix(const double , const double , Geometry::Matrix<double> & ,
+      void dMatrix(const double , const double , Geometry::Matrix<double> & ,
                                   Geometry::Matrix<double> & );
       /// Energy resoultion function for moderator and chopper from TF
-      double TobyFitSimulate::enResModChop(const double , const double , const double , const double ,
+      double enResModChop(const double , const double , const double , const double ,
             const double , const double , const double );
       /// generate a random scaled vector in the selected space of up to 13 dimensions
-      void TobyFitSimulate::mcYVec(const double detWidth, const double detHeight, const double detTimeBin,
+      void mcYVec(const double detWidth, const double detHeight, const double detTimeBin,
             std::vector<double> & yVec, double & eta2, double & eta3 );
       /// get transform matrices, vectors for reciprocal space
-      void TobyFitSimulate::rlatt(const std::vector<double> & a, const std::vector<double> & ang,
+      void rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                  std::vector<double> & arlu, std::vector<double> & angrlu,
                  Geometry::Matrix<double> & dMat );
       /// The default seed for MT random numbers

@@ -270,7 +270,7 @@ public:
     TestableTobyFitSimulate() : TobyFitSimulate() {}
     ~TestableTobyFitSimulate() {}
 
-    double TestableTobyFitSimulate::wrapBose(double eps,double temp) { return TobyFitSimulate::bose(eps,temp) ;};
+    double wrapBose(double eps,double temp) { return TobyFitSimulate::bose(eps,temp) ;};
 
   };
 
