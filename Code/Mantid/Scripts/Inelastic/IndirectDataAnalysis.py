@@ -162,11 +162,12 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
         # Remove monitor workspace
         DeleteWorkspace(mon_ws)
-        # Convert to dSpacing
-        ConvertUnits(det_ws, det_ws, 'dSpacing')
+        # Convert to dSpacing - need to AlignBins so we can group later
+        ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
         IEC.groupData(grouping, savefile, detectors=det_ws)
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
+        workspaces.append(savefile)
     if ( Plot != 'None' ):
         for demon in workspaces:
             if ( Plot == 'Contour' ):

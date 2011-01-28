@@ -36,7 +36,7 @@ void IndirectDiffractionReduction::demonRun()
       "first = " +m_uiForm.set_leSpecMin->text()+"\n"
       "last = " +m_uiForm.set_leSpecMax->text()+"\n"
       "instrument = '" + m_uiForm.set_cbInst->currentText() + "'\n"
-      "grouping = '" + m_uiForm.dem_cbGrouping->currentText() + "'\n";
+      "grouping = " + grouping() + "\n";
 
     pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
 
@@ -46,8 +46,7 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
     
-    pyInput += "ws = demon(files, first, last, instrument, Verbose=verbose, Plot=plot, Save=save)\n";
-
+    pyInput += "ws = demon(files, first, last, instrument, Verbose=verbose, Plot=plot, grouping=grouping, Save=save)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -119,6 +118,13 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   }
 }
 
+void IndirectDiffractionReduction::groupingSelected(const QString & selected)
+{
+  bool state = ( selected == "N Groups" );
+  m_uiForm.dem_leNumGroups->setEnabled(state);
+  m_uiForm.dem_lbNumGroups->setEnabled(state);  
+}
+
 void IndirectDiffractionReduction::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -142,6 +148,7 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
+  connect(m_uiForm.dem_cbGrouping, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(groupingSelected(const QString &)));
 
   loadSettings();
 }
@@ -166,6 +173,27 @@ void IndirectDiffractionReduction::loadSettings()
 bool IndirectDiffractionReduction::validateDemon()
 {
   return m_uiForm.dem_rawFiles->isValid();
+}
+
+QString IndirectDiffractionReduction::grouping()
+{
+  QString option = "'" + m_uiForm.dem_cbGrouping->currentText() + "'";
+
+  if ( option == "'Individual'" || option == "'All'" )
+  {
+    return option;
+  }
+  else
+  {
+    QString pyInput = "import IndirectEnergyConversion as IEC\n"
+      "nspec =  (( %2 - %3 ) + 1 )/ %1\n"
+      "file = IEC.createMappingFile('demon.map', %1, nspec, %3)\n"
+      "print file\n";
+    pyInput = pyInput.arg(m_uiForm.dem_leNumGroups->text(), m_uiForm.set_leSpecMax->text(), m_uiForm.set_leSpecMin->text());
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+    return "r'" + pyOutput + "'";
+  }
+
 }
 
 }

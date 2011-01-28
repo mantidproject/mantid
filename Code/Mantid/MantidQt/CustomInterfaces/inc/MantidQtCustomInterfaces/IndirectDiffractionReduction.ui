@@ -120,7 +120,23 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="dem_cbGrouping" />
+          <widget class="QComboBox" name="dem_cbGrouping" >
+           <item>
+            <property name="text" >
+             <string>All</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>N Groups</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Individual</string>
+            </property>
+           </item>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="dem_lbNumGroups" >
