@@ -190,12 +190,14 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
   std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
 
   // hack to look for long name versions
+  if (instrument == "EQSANS")
+    instrument = "EQ-SANS";
+  if (instrument == "NOM")
+    instrument = "NOMAD";
   if (instrument == "SEQ")
     instrument = "SEQUOIA";
   if (instrument == "PG3")
     instrument = "POWGEN";
-  if (instrument == "EQSANS")
-    instrument = "EQ-SANS";
 
   // Get the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
