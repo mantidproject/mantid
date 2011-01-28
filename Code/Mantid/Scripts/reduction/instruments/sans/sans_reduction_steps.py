@@ -702,11 +702,23 @@ class Mask(ReductionStep):
         self._ny_high = ny_high        
         
     def add_xml_shape(self, complete_xml_element):
+        """
+            Add an arbitrary shape to region to be masked
+            @param complete_xml_element: description of the shape to add
+        """
         if not complete_xml_element.startswith('<') :
             raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
         self._xml.append(complete_xml_element)
 
     def _infinite_plane(self, id, plane_pt, normal_pt, complement = False):
+        """
+            Generates xml code for an infinte plane
+            @param id: a string to refer to the shape by
+            @param plane_pt: a point in the plane
+            @param normal_pt: the direction of a normal to the plane
+            @param complement: mask in the direction of the normal or away
+            @return the xml string
+        """
         if complement:
             addition = '#'
         else:
@@ -717,6 +729,15 @@ class Mask(ReductionStep):
             '</infinite-plane><algebra val="'+addition+str(id)+'"/>\n'
 
     def _infinite_cylinder(self, centre, radius, axis, complement=False, id='shape'):
+        """
+            Generates xml code for an infintely long cylinder
+            @param centre: a tupple for a point on the axis
+            @param radius: cylinder radius
+            @param axis: cylinder orientation
+            @param complement: if True mask all outside the cylinder, default false
+            @param id: a string to refer to the shape by
+            @return the xml string
+        """
         if complement:
             addition = '#'
         else:
@@ -780,15 +801,85 @@ class Mask(ReductionStep):
             
         return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList")))
 
-    def view_mask(self):
+class UnitsConvert(ReductionStep):
+    """
+        Executes ConvertUnits and then Rebin on the same workspace. If no re-bin limits are
+        set for the x-values of the final workspace the range of the first spectrum is used.
+    """
+    def __init__(self, units, rebin = 'Rebin'):
+        super(UnitsConvert, self).__init__()
+        self._units = units
+        self.wav_low = None
+        self.wav_high = None
+        self.wav_step = None
+        # currently there are two possible re-bin algorithms, the other is InterpolatingRebin
+        self.rebin_alg = rebin
+
+    def execute(self, reducer, workspace):
+        ConvertUnits(workspace, workspace, self._units)
+        
+        low_wav = self.wav_low
+        high_wav = self.wav_high
+        
+        if low_wav is None and high_wav is None:
+            low_wav = min(mtd[workspace].readX(0))
+            high_wav = max(mtd[workspace].readX(0))
+
+         
+        rebin_com = self.rebin_alg+'(workspace, workspace, "'+\
+            self._get_rebin(low_wav, self.wav_step, high_wav)+'")'
+        eval(rebin_com)
+
+    def _get_rebin(self, low, step, high):
         """
-            Display the masked detectors in the bank in a different color
-            in instrument view
+            Convert the range limits and step into a form passable to re-bin
+            @param low: first number in the Rebin string, the first bin boundary
+            @param step: bin width
+            @param high: high bin boundary
+        """        
+        return str(low)+', ' + str(step) + ', ' + str(high)
+
+    def get_rebin(self):
         """
-        ws_name = 'CurrentMask'
-        ReductionSingleton().instrument.view(ws_name)
-        # Mark up "dead" detectors with error value 
-        FindDeadDetectors(ws_name, ws_name, DeadValue=500)
+            Get the string that is passed as the "param" property to Rebin
+            @return the string that is passed to Rebin
+        """
+        return self._get_rebin(self.wav_low, self.wav_step, self.wav_high)
+    
+    def set_rebin(self, w_low = None, w_step = None, w_high = None, override=True):
+        """
+            Set the parameters that are passed to Rebin
+            @param w_low: first number in the Rebin string, the first bin boundary
+            @param w_step: bin width
+            @param w_high: high bin boundary
+        """
+        if not w_low is None:
+            if self.wav_low is None or override:
+                self.wav_low = w_low
+        if not w_step is None:
+            if self.wav_step is None or override:
+                self.wav_step = w_step
+        if not w_high is None:
+            if self.wav_high is None or override:
+                self.wav_high = w_high
+
+    def get_range(self):
+        """
+            Get the values of the highest and lowest boundaries
+            @return low'_'high
+        """
+        return str(self.wav_low)+'_'+str(self.wav_high)
+
+    def set_range(self, w_low = None, w_high = None):
+        """
+            Set the highest and lowest bin boundary values
+            @param w_low: first number in the Rebin string, the first bin boundary
+            @param w_high: high bin boundary
+        """
+        self.set_rebin(w_low, None, w_high)
+
+    def __str__(self):
+        return '    Wavelength range: ' + self.get_rebin()
 
 class CorrectToFileStep(ReductionStep):
     """

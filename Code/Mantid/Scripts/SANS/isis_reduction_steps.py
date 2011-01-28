@@ -858,45 +858,6 @@ class CropDetBank(ReductionStep):
             StartWorkspaceIndex = reducer.instrument.cur_detector().get_first_spec_num() - 1,
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
-class UnitsConvert(ReductionStep):
-    def __init__(self, units):
-        super(UnitsConvert, self).__init__()
-        self._units = units
-        self.wav_low = None
-        self.wav_high = None
-        self.wav_step = None
-
-    def execute(self, reducer, workspace, rebin_alg = 'use default'):
-        ConvertUnits(workspace, workspace, self._units)
-        
-        if rebin_alg == 'use default':
-            rebin_alg = 'Rebin' 
-        rebin_com = rebin_alg+'(workspace, workspace, "'+self.get_rebin()+'")'
-        eval(rebin_com)
-
-    def get_rebin(self):
-        return str(self.wav_low)+', ' + str(self.wav_step) + ', ' + str(self.wav_high)
-    
-    def set_rebin(self, w_low = None, w_step = None, w_high = None, override=True):
-        if not w_low is None:
-            if self.wav_low is None or override:
-                self.wav_low = w_low
-        if not w_step is None:
-            if self.wav_step is None or override:
-                self.wav_step = w_step
-        if not w_high is None:
-            if self.wav_high is None or override:
-                self.wav_high = w_high
-
-    def get_range(self):
-        return str(self.wav_low)+'_'+str(self.wav_high)
-
-    def set_range(self, w_low = None, w_high = None):
-        self.set_rebin(w_low, None, w_high)
-
-    def __str__(self):
-        return '    Wavelength range: ' + self.get_rebin()
-
 class ConvertToQ(ReductionStep):
     _OUTPUT_TYPES = {'1D' : 'Q1D', '2D': 'Qxy'}
     _DEFAULT_GRAV = False
@@ -955,10 +916,9 @@ class ConvertToQ(ReductionStep):
 
 class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
-        This step performs background removal on the monitor spectrum
-        used for normalization and, for LOQ runs, executes a LOQ specific
-        correction. It's input workspace is copied and accessible later
-        as prenomed 
+        Before normalisation the monitor spectrum's background is removed 
+        and for LOQ runs also the prompt peak. The input workspace is copied
+        and accessible later as prenomed 
     """
     def __init__(self, spectrum_number=None, raw_ws=None):
         if not spectrum_number is None:
@@ -997,12 +957,14 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
                 EndX = reducer.BACKMON_END, WorkspaceIndexList = '0')
     
-        #perform the sample conversion on the monitor spectrum as was applied to the workspace
+        #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
+        sample_rebin = reducer.to_wavelen.rebin_alg 
         if reducer.instrument.is_interpolating_norm():
-            rebin_alg = 'InterpolatingRebin'
+            reducer.to_wavelen.rebin_alg = 'InterpolatingRebin'
         else :
-            rebin_alg = 'use default'
-        reducer.to_wavelen.execute(reducer, norm_ws, rebin_alg)
+            reducer.to_wavelen.rebin_alg = 'Rebin'
+        reducer.to_wavelen.execute(reducer, norm_ws)
+        reducer.to_wavelen.rebin_alg = sample_rebin 
 
         out_workspace = workspace
         if reducer.to_Q.get_output_type() == '1D':
