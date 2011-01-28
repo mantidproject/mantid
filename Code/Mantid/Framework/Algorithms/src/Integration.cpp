@@ -143,7 +143,9 @@ void Integration::exec()
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);
 
-    double sumY, sumE;
+    double sumY = 0.0;
+    double sumE = 0.0;
+
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
       sumY = std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
