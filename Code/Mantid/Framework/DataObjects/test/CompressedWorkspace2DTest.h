@@ -4,16 +4,17 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/CompressedWorkspace2D.h"
 
-using namespace std;
-using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
 
 class CompressedWorkspace2DTest : public CxxTest::TestSuite
 {
 public:
+  static CompressedWorkspace2DTest *createSuite() { return new CompressedWorkspace2DTest(); }
+  static void destroySuite( CompressedWorkspace2DTest *suite ) { delete suite; }
+
   CompressedWorkspace2DTest()
   {
-    smallWorkspace.setTitle("smallWorkspace");
+    smallWorkspace.setTitle("CompressedWorkspace2DTest_smallWorkspace");
     smallWorkspace.initialize(2,4,3);
     for (int i = 0; i < 4; ++i)
     {
@@ -29,7 +30,7 @@ public:
       smallWorkspace.dataE(1)[i] = sqrt(smallWorkspace.dataY(1)[i]);     
     }
     
-    bigWorkspace.setTitle("bigWorkspace");
+    bigWorkspace.setTitle("CompressedWorkspace2DTest_bigWorkspace");
     int nVec = 1250;
     int vecLength = 25;
     bigWorkspace.initialize(nVec, vecLength, vecLength);
@@ -45,7 +46,7 @@ public:
   
   void testInit()
   {
-    CompressedWorkspace2D ws;
+    Mantid::DataObjects::CompressedWorkspace2D ws;
     ws.setTitle("testInit");
     TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) );;
     TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 );;
@@ -63,8 +64,8 @@ public:
 
   void testCast()
   {
-    CompressedWorkspace2D *ws = new CompressedWorkspace2D;
-    TS_ASSERT( dynamic_cast<Workspace2D*>(ws) );
+    Mantid::DataObjects::CompressedWorkspace2D *ws = new Mantid::DataObjects::CompressedWorkspace2D;
+    TS_ASSERT( dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws) );
     TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(ws) );
     delete ws;
   }
@@ -80,13 +81,13 @@ public:
     TS_ASSERT_EQUALS( smallWorkspace.getNumberHistograms(), 2 );
     TS_ASSERT_EQUALS( bigWorkspace.getNumberHistograms(), 1250 );
     
-    Workspace2D &ws = dynamic_cast<Workspace2D&>(smallWorkspace);
+    Mantid::DataObjects::Workspace2D &ws = dynamic_cast<Mantid::DataObjects::Workspace2D&>(smallWorkspace);
     TS_ASSERT_EQUALS( ws.getNumberHistograms(), 2);;
   }
 
   void testSetX()
   {
-    CompressedWorkspace2D ws;
+    Mantid::DataObjects::CompressedWorkspace2D ws;
     ws.setTitle("testSetX");
     ws.initialize(1,1,1);
     double aNumber = 5.5;
@@ -105,7 +106,7 @@ public:
 
   void testSetData()
   {
-    CompressedWorkspace2D ws;
+    Mantid::DataObjects::CompressedWorkspace2D ws;
     ws.setTitle("testSetData");
     ws.initialize(1,1,1);
     double aNumber = 9.9;
@@ -161,7 +162,7 @@ public:
     }
     
     // test const version
-    const CompressedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::CompressedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(-1), std::range_error );
     const MantidVec xc = constRefToData.dataX(0);
     const MantidVec xxc = constRefToData.dataX(1);
@@ -197,7 +198,7 @@ public:
     }    
 
     // test const version
-    const CompressedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::CompressedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(-1), std::range_error );
     const MantidVec yc = constRefToData.dataY(0);
     const MantidVec yyc = constRefToData.dataY(1);
@@ -233,7 +234,7 @@ public:
     }    
     
     // test const version
-    const CompressedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::CompressedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(-1), std::range_error );
     const MantidVec ec = constRefToData.dataE(0);
     const MantidVec eec = constRefToData.dataE(1);
@@ -252,13 +253,9 @@ public:
     TS_ASSERT_EQUALS( bigWorkspace.dataE(11)[11], 4.44 );
   }
 
-  void testDestructor()
-  {
-  }
-
 private:
-  CompressedWorkspace2D smallWorkspace;
-  CompressedWorkspace2D bigWorkspace;
+  Mantid::DataObjects::CompressedWorkspace2D smallWorkspace;
+  Mantid::DataObjects::CompressedWorkspace2D bigWorkspace;
 };
 
 #endif /*COMPRESSEDWORKSPACE2D_H_*/

@@ -4,23 +4,11 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/MRUList.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
-#include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidKernel/ConfigService.h"
-
-#include <fstream>
-#include <valarray>
-
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
 
 namespace Mantid
 {
 namespace DataObjects
 {
-
   /** AbsManagedWorkspace2D
 
   This is an abstract class for a managed workspace. 

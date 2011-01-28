@@ -2,26 +2,20 @@
 #define MANAGEDWORKSPACE2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 
-using namespace std;
-using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
 
 class ManagedWorkspace2DTest : public CxxTest::TestSuite
 {
 public:
+  static ManagedWorkspace2DTest *createSuite() { return new ManagedWorkspace2DTest(); }
+  static void destroySuite( ManagedWorkspace2DTest *suite ) { delete suite; }
+
   ManagedWorkspace2DTest()
   {
-    try
-    {
-    remove("WS2D3testInit.tmp");
-    }
-    catch (...)
-    {
-    }
-
-    smallWorkspace.setTitle("smallWorkspace");
+    smallWorkspace.setTitle("ManagedWorkspace2DTest_smallWorkspace");
     smallWorkspace.initialize(2,4,3);
     for (int i = 0; i < 4; ++i)
     {
@@ -37,7 +31,7 @@ public:
       smallWorkspace.dataE(1)[i] = sqrt(smallWorkspace.dataY(1)[i]);     
     }
     
-    bigWorkspace.setTitle("bigWorkspace");
+    bigWorkspace.setTitle("ManagedWorkspace2DTest_bigWorkspace");
     int nVec = 1250;
     int vecLength = 25;
     bigWorkspace.initialize(nVec, vecLength, vecLength);
@@ -53,7 +47,7 @@ public:
   
   void testInit()
   {
-    ManagedWorkspace2D ws;
+    Mantid::DataObjects::ManagedWorkspace2D ws;
     ws.setTitle("testInit");
     TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) );;
     TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 );;
@@ -69,7 +63,7 @@ public:
 
     // Test all is as it should be with the temporary file
     std::string filename = ws.get_filename() + "0";
-    fstream file(filename.c_str(), ios::in | ios::binary);
+    std::fstream file(filename.c_str(), std::ios::in | std::ios::binary);
     TSM_ASSERT(filename, file);;
     
     double temp;
@@ -80,8 +74,8 @@ public:
 
   void testCast()
   {
-    ManagedWorkspace2D *ws = new ManagedWorkspace2D;
-    TS_ASSERT( dynamic_cast<Workspace2D*>(ws) );
+    Mantid::DataObjects::ManagedWorkspace2D *ws = new Mantid::DataObjects::ManagedWorkspace2D;
+    TS_ASSERT( dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws) );
     TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(ws) );
     delete ws;
   }
@@ -96,13 +90,13 @@ public:
     TS_ASSERT_EQUALS( smallWorkspace.getNumberHistograms(), 2 );
     TS_ASSERT_EQUALS( bigWorkspace.getNumberHistograms(), 1250 );
     
-    Workspace2D &ws = dynamic_cast<Workspace2D&>(smallWorkspace);
+    Mantid::DataObjects::Workspace2D &ws = dynamic_cast<Mantid::DataObjects::Workspace2D&>(smallWorkspace);
     TS_ASSERT_EQUALS( ws.getNumberHistograms(), 2);;
   }
 
   void testSetX()
   {
-    ManagedWorkspace2D ws;
+    Mantid::DataObjects::ManagedWorkspace2D ws;
     ws.setTitle("testSetX");
     ws.initialize(1,1,1);
     double aNumber = 5.5;
@@ -121,7 +115,7 @@ public:
 
   void testSetData()
   {
-    ManagedWorkspace2D ws;
+    Mantid::DataObjects::ManagedWorkspace2D ws;
     ws.setTitle("testSetData");
     ws.initialize(1,1,1);
     double aNumber = 9.9;
@@ -177,7 +171,7 @@ public:
     }
     
     // test const version
-    const ManagedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::ManagedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(-1), std::range_error );
     const MantidVec xc = constRefToData.dataX(0);
     const MantidVec xxc = constRefToData.dataX(1);
@@ -213,7 +207,7 @@ public:
     }    
 
     // test const version
-    const ManagedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::ManagedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(-1), std::range_error );
     const MantidVec yc = constRefToData.dataY(0);
     const MantidVec yyc = constRefToData.dataY(1);
@@ -249,7 +243,7 @@ public:
     }    
     
     // test const version
-    const ManagedWorkspace2D &constRefToData = smallWorkspace;
+    const Mantid::DataObjects::ManagedWorkspace2D &constRefToData = smallWorkspace;
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(-1), std::range_error );
     const MantidVec ec = constRefToData.dataE(0);
     const MantidVec eec = constRefToData.dataE(1);
@@ -270,13 +264,20 @@ public:
 
   void testDestructor()
   {
-    fstream deletedFile("WS2D3testInit.tmp");
-    TS_ASSERT( ! deletedFile );
+    std::string filename;
+    { // Scoping block
+      Mantid::DataObjects::ManagedWorkspace2D tmp;
+      tmp.initialize(1,1,1);
+      filename = tmp.get_filename() + "0";
+      // File should exist
+      TS_ASSERT ( Poco::File(filename).exists() );
+    }
+    TSM_ASSERT ( "File should have been deleted", ! Poco::File(filename).exists() );
   }
 
 private:
-  ManagedWorkspace2D smallWorkspace;
-  ManagedWorkspace2D bigWorkspace;
+  Mantid::DataObjects::ManagedWorkspace2D smallWorkspace;
+  Mantid::DataObjects::ManagedWorkspace2D bigWorkspace;
 };
 
 #endif /*MANAGEDWORKSPACE2DTEST_H_*/

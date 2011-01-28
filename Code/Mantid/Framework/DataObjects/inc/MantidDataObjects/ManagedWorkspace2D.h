@@ -4,14 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataObjects/ManagedDataBlock2D.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/AbsManagedWorkspace2D.h"
-#include <fstream>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
 
 namespace Mantid
 {
@@ -27,7 +20,7 @@ namespace DataObjects
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -47,9 +40,8 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport ManagedWorkspace2D : public AbsManagedWorkspace2D
+class DLLExport ManagedWorkspace2D : public AbsManagedWorkspace2D
 {
-
 public:
   ManagedWorkspace2D();
   virtual ~ManagedWorkspace2D();
@@ -57,9 +49,9 @@ public:
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 
   virtual size_t getMemorySize() const;
-	virtual bool threadSafe() const { return false; }
+  virtual bool threadSafe() const { return false; }
 
-	std::string get_filename() const;
+  std::string get_filename() const;
 
 protected:
 
