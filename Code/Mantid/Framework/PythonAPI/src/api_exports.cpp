@@ -24,6 +24,7 @@ namespace Mantid
 namespace PythonAPI
 {
   using namespace API;
+  using namespace Kernel;
   using namespace boost::python;
 
   //@cond
@@ -70,6 +71,27 @@ namespace PythonAPI
     ;
   }
 
+  /**
+   * Function used to define the IAlgorithm.setWorkspaceProperty() method in python.
+   * Since getProperty/setProperty only deal with strings, we need a new method if we
+   * want to set workspace properties by passing a pointer to an actual workspace.
+   * This is necessary to be able to run sub-algorithm within a PythonAlgorithm.
+   * TODO: This can be removed if we properly expose the getProperty/setProperty
+   * methods to deal with the type of the properties as opposed to strings.
+   */
+  int _setMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
+  {
+	  self.setProperty(prop_name,workspace);
+  }
+
+  /**
+   * Function used to define the IAlgorithm.getWorkspaceProperty() method in python.
+   */
+  API::MatrixWorkspace_sptr _getMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name)
+  {
+	   return self.getProperty(prop_name);
+  }
+
   void export_ialgorithm()
   {
     
@@ -89,6 +111,8 @@ namespace PythonAPI
       .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
       .def("getProperties", &API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
       .def("getProperty", &API::IAlgorithm::getPointerToProperty, return_value_policy<return_by_value>())
+      .def("_setWorkspaceProperty", &_setMatrixWorkspaceProperty)
+      .def("_getWorkspaceProperty", &_getMatrixWorkspaceProperty)
       ;
 
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)

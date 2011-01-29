@@ -1254,6 +1254,49 @@ class PythonAlgorithm(PyAlgorithmBase):
             return self.declareListProperty_str, str
         else:
             raise TypeError('Unrecognized list type')
+        
+    def executeSubAlg(self, algorithm, *args, **kwargs):
+        """
+        Execute an algorithm as a sub-algorithm.
+        The method will set the input/output workspace objects so that they can be
+        passed to sub-algs without having to save them in the ADS.
+        
+        @param algorithm: mantidsimple algorithm function returning an IAlgorithm object
+        @param *args: arguments to pass to the instantiated algorithm
+        @param **kwargs: keyword arguments to pass to the instantiated algorithm
+        @return: algorithm proxy for the executed algorithm
+        """
+        if not isinstance(algorithm, types.FunctionType):
+            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
+        
+        algm = self._createSubAlgorithm(algorithm.func_name)
+        # Check that algm is of the right type without having to import IAlgorithm
+        if not algm.__class__.__name__ == "IAlgorithm":
+            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
+        
+        argspec = inspect.getargspec(algorithm)                    
+        # Go through provided arguments
+        for i in range(len(args)):
+            if isinstance(args[i], WorkspaceProxy):
+                algm._setWorkspaceProperty(argspec.args[i], args[i]._getHeldObject())                
+            else:
+                algm.setPropertyValue(argspec.args[i], args[i])
+        
+        # Go through keyword arguments
+        proxy = mtd._createAlgProxy(algm)
+        for key in kwargs:
+            if key not in proxy.keys():
+                continue           
+            if isinstance(kwargs[key], WorkspaceProxy):
+                algm._setWorkspaceProperty(key, kwargs[key]._getHeldObject())
+            else:             
+                algm.setPropertyValue(key, kwargs[key])
+        
+        # Execute synchronously        
+        algm.setRethrows(True)
+        algm.execute()
+                
+        return proxy
 
 #------------------------------------------------------------------------------------------------
 # WorkspaceFactory
