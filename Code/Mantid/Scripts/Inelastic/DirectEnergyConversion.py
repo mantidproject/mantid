@@ -428,6 +428,8 @@ class DirectEnergyConversion(object):
             raise ValueError("Inconsistent mono-vanadium integration range defined!")
         Rebin(data_ws, data_ws, [e_low, 2.*(e_upp-e_low), e_upp])
         
+        ConvertToMatrixWorkspace(data_ws, data_ws)
+        
         min_value = self.tiny
         max_value = self.large
         median_lbound = self.monovan_lo_bound
