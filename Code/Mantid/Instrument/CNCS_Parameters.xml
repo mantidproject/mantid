@@ -8,11 +8,11 @@
 		</parameter>
 
 		<parameter name="ei-mon1-spec">
-			<value val="-2" />
+			<value val="2" />
 		</parameter>
 
 		<parameter name="ei-mon2-spec">
-			<value val="-3" />
+			<value val="3" />
 		</parameter>
 
 		<parameter name="TS_mapping_file" type="string">
