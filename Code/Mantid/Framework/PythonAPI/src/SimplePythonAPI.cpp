@@ -155,7 +155,7 @@ namespace Mantid
           << "  result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(_algm.name())\n"
           << "  mtd._setGILRequired(False)\n"
           << "  if result == False:\n"
-          << "    sys.exit('An error occurred while running AlignDetectors. See results log for details.')\n\n";
+          << "    sys.exit('An error occurred while running %s. See results log for details.' % _algm.name())\n\n";
       }
       else
       {
