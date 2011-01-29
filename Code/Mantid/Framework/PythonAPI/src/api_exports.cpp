@@ -79,7 +79,7 @@ namespace PythonAPI
    * TODO: This can be removed if we properly expose the getProperty/setProperty
    * methods to deal with the type of the properties as opposed to strings.
    */
-  int _setMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
+  void _setMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
 	  self.setProperty(prop_name,workspace);
   }
