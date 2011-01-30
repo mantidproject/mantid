@@ -140,7 +140,7 @@ class DirectEnergyConversion(object):
         """Convert a mono vanadium run to DeltaE.
         If multiple run files are passed to this function, they are summed into a run and then processed         
         """
-                # Load data
+        # Load data
         sample_data = self.load_data(mono_van, 'mono-van')
         # Create the result name if necessary
         if result_name is None:
@@ -194,20 +194,31 @@ class DirectEnergyConversion(object):
             elif mono_run.endswith("_event.dat"):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
                 loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+            
             monitor_ws = loader.workspace()
-            alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
             
-            Tzero = float(alg.getPropertyValue("Tzero"))
-                    
-            if (self.fix_ei):
-                ei_value = ei_guess    
-            else:
-                ei_value = monitor_ws.getRun().getLogData("Ei").value
-            
-            if (Tzero is None):
+            try:
+            	alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, self.fix_ei)
+            	TzeroCalculated = float(alg.getPropertyValue("Tzero"))
+            except:
+            	self.log("Error in GetEi. Using entered values.")
+            	ei_value = ei_guess
+            	TzeroCalculated = Tzero
+            	
+            # Set the tzero to be the calculated value
+            if (TzeroCalculated is None):
                 tzero = 0.0
             else:	
-            	tzero = Tzero
+            	tzero = TzeroCalculated
+            
+            # If we are fixing, then use the guess if given
+            if (self.fix_ei):
+                ei_value = ei_guess
+                # If a Tzero has been entered, use it, if we are fixing.
+                if (Tzero is not None):
+                	tzero = Tzero
+            else:
+                ei_value = monitor_ws.getRun().getLogData("Ei").value
             
             mon1_peak = 0.0
             # apply T0 shift
@@ -281,8 +292,8 @@ class DirectEnergyConversion(object):
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-		# TODO: Write log message
-		CorrectKiKf(result_ws, result_ws, EMode='Direct')
+        	# TODO: Write log message
+        	CorrectKiKf(result_ws, result_ws, EMode='Direct')
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
@@ -639,12 +650,12 @@ class DirectEnergyConversion(object):
         self.abs_spectra_masks = None
         self.sample_mass = 1.0
         self.sample_rmm = 1.0
-
-	# Detector Efficiency Correction
+        
+        # Detector Efficiency Correction
         self.apply_detector_eff = True
-
-	# Ki/Kf factor correction
-	self.apply_kikf_correction = True
+        
+        # Ki/Kf factor correction
+        self.apply_kikf_correction = True
 	
      
     def init_idf_params(self):
