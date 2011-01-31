@@ -15,10 +15,7 @@ using namespace Mantid::DataObjects;
 class ConjoinWorkspacesTest : public CxxTest::TestSuite
 {
 public:
-  static ConjoinWorkspacesTest *createSuite() { return new ConjoinWorkspacesTest(); }
-  static void destroySuite(ConjoinWorkspacesTest *suite) { delete suite; }
-
-  ConjoinWorkspacesTest()
+  void setupWS()
   {
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
@@ -59,11 +56,6 @@ public:
     delete loader;
   }
 
-  ~ConjoinWorkspacesTest()
-  {
-    AnalysisDataService::Instance().clear();
-  }
-
   void testTheBasics()
   {
     conj = new ConjoinWorkspaces();
@@ -84,6 +76,8 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExec()
   {
+    setupWS();
+
     conj = new ConjoinWorkspaces();
     if ( !conj->isInitialized() ) conj->initialize();
 
@@ -127,6 +121,8 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces()
   {
+    setupWS();
+
     // Check it fails if input overlap
     conj = new ConjoinWorkspaces();
     conj->initialize();
@@ -148,6 +144,8 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExecEvent()
   {
+    setupWS();
+
     //Save some initial data
     EventWorkspace_sptr in1, in2, out;
     in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
@@ -181,6 +179,8 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExecGroup()
   {
+    setupWS();
+
     //Save some initial data
     EventWorkspace_sptr in1, in2, out;
     in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
