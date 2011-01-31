@@ -69,15 +69,15 @@ void LoadSNSEventNexus::init()
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTime_Start", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events after the provided start time, in seconds (relative to the start of the run");
+    "Optional: To only include events after the provided start time, in seconds (relative to the start of the run).");
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run");
+    "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run).");
 
   declareProperty(
       new PropertyWithValue<string>("BankName", "", Direction::Input),
-    "Optional: To only include events from one bank.");
+    "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
 
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
@@ -90,7 +90,7 @@ void LoadSNSEventNexus::init()
   declareProperty(
       new PropertyWithValue<bool>("Precount", false, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory (optional, default False). \n"
-      "This reduces memory use and memory fragmentation; it may speed up loading.");
+      "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
 }
 
 
