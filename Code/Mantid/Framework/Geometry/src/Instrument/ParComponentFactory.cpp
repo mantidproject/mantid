@@ -18,10 +18,10 @@ namespace Mantid
 
     /// Detector pool static storage
     ComponentPool<Detector> ParComponentFactory::g_detPool = 
-      ComponentPool<Detector>(2*omp_get_max_threads());
+      ComponentPool<Detector>(2*PARALLEL_NUMBER_OF_THREADS);
     /// Instrument pool static storage
     ComponentPool<Instrument> ParComponentFactory::g_instPool = 
-      ComponentPool<Instrument>(2*omp_get_max_threads());
+      ComponentPool<Instrument>(2*PARALLEL_NUMBER_OF_THREADS);
 
 
     //--------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace Mantid
       if( cached_first && !cached_first.unique() )
       {
     	// Try the extra storage
-    	index += omp_get_max_threads();
+    	index += PARALLEL_NUMBER_OF_THREADS;
     	const PtrType & cached_second = m_store[index];
     	if( cached_second && !cached_second.unique() )
     	{
