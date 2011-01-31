@@ -47,6 +47,9 @@ private:
 
   std::vector<double> m_normal;
 
+  /// Get the normal vector magnitude.
+  double magnitude() const;
+
 public:
 
   NormalParameter(double n1, double n2, double n3);
@@ -76,6 +79,10 @@ public:
   double getY() const;
 
   double getZ() const;
+
+  NormalParameter asUnitVector() const;
+
+  bool isUnitVector() const;
 
   std::string toXMLString() const;
 

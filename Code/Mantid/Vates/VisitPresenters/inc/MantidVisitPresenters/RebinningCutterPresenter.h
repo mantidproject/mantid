@@ -79,6 +79,8 @@ private:
 
 public:
 
+  std::vector<double> createMatrix(double* a);
+
 	/// Constructor
 	RebinningCutterPresenter();
 
@@ -95,10 +97,8 @@ public:
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont,
-      const double width,
-      const double height,
-      const double depth,
-      std::vector<double>& origin, vtkDataSet* inputDataSet);
+      Mantid::MDAlgorithms::CompositeImplicitFunction* compositeFunction,
+      vtkDataSet* inputDataSet);
 
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(boost::shared_ptr<vtkDataSetFactory> spvtkDataSetFactory);
@@ -157,11 +157,7 @@ public:
       Dimension_sptr dimensionX,
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
-      Dimension_sptr dimensiont,
-      double height,
-      double width,
-      double depth,
-      std::vector<double>& origin);
+      Dimension_sptr dimensiont);
 
   /// Helper method to get dimensions from a geometry xml element.
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);

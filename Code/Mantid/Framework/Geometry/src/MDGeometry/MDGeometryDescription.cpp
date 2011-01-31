@@ -83,10 +83,17 @@ MDGeometryDescription::MDGeometryDescription(
       Dimension_sptr dimensionX, 
       Dimension_sptr dimensionY,  
       Dimension_sptr dimensionZ, 
-      Dimension_sptr dimensiont)
+      Dimension_sptr dimensiont,
+      RotationMatrix rotationMatrix
+)
 {
   this->nDimensions = dimensions.size();
   this->data.resize(dimensions.size());
+  this->rotations = rotationMatrix;
+  if(rotations.size() != 9)
+  {
+    throw std::logic_error("Nine components are required for a rotation matrix.");
+  }
 
   //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
   DimensionVecIterator dimX = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionX));
@@ -111,14 +118,7 @@ MDGeometryDescription::MDGeometryDescription(
       count++;
     }
     it++;
-   
-   rotations.assign(9,0);
-   rotations[0]=rotations[4]=rotations[8]=1;
-
   }
-  //Rotations ignored. HACK: Rotations must be dealt with properly.
-  rotations.assign(9,0);
-  rotations[0]=rotations[4]=rotations[8]=1;
 }
 
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)

@@ -73,7 +73,7 @@ protected:
     virtual Mantid::API::ImplicitFunction* getImplicitFunction(Poco::XML::Element* pRootElem) const;
 
     /// Get the geometry description from the xml.
-    virtual Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem) const;
+    virtual Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const;
 
     /// Create a dimension from the xml.
     virtual Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML) const;

@@ -83,7 +83,7 @@ namespace Mantid
             {
                 if(0 == m_successor.get())
                 {
-                    std::string message = "There is no successor function parser"; 
+                    std::string message = "There is no successor function parser. Is this an empty composite function?";
                     throw std::runtime_error(message);
                 }
             }

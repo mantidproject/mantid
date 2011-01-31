@@ -49,6 +49,9 @@
 #include <vtkCellData.h>
 #include <avtExtents.h>
 #include <avtDatasetVerifier.h>
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include "MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h"
@@ -183,6 +186,68 @@ Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(vtkDataSet
   }
 }
 
+bool avtRebinningCutterFilter::anyPlaneApplied() const
+{
+  return ((atts.GetNormalX() != 0) || (atts.GetNormalY() != 0) || (atts.GetNormalZ() != 0));
+}
+
+boost::shared_ptr<Mantid::API::ImplicitFunction> avtRebinningCutterFilter::constructPlane() const
+{
+  using namespace Mantid::MDAlgorithms;
+  Mantid::API::ImplicitFunction* appliedFunction;
+  if(atts.GetIsSetUp() && anyPlaneApplied())
+  {
+    NormalParameter normal(atts.GetNormalX(), atts.GetNormalY(), atts.GetNormalZ());
+    OriginParameter origin(atts.GetOriginX(), atts.GetOriginY(), atts.GetOriginZ());
+    appliedFunction = new PlaneImplicitFunction(normal, origin);
+  }
+  else
+  {
+    appliedFunction = new NullImplicitFunction;
+  }
+  return boost::shared_ptr<Mantid::API::ImplicitFunction>(appliedFunction);
+}
+
+boost::shared_ptr<Mantid::API::ImplicitFunction> avtRebinningCutterFilter::constructBox(
+    Dimension_sptr spDimX, Dimension_sptr spDimY, Dimension_sptr spDimZ) const
+{
+  using namespace Mantid::MDAlgorithms;
+  BoxImplicitFunction* boxFunction;
+  if (atts.GetIsSetUp())
+  {
+    //Create domain parameters.
+    OriginParameter originParam = OriginParameter(atts.GetOriginX(), atts.GetOriginY(),
+        atts.GetOriginZ());
+    WidthParameter widthParam = WidthParameter(atts.GetWidth());
+    HeightParameter heightParam = HeightParameter(atts.GetHeight());
+    DepthParameter depthParam = DepthParameter(atts.GetDepth());
+
+    //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
+    boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam, originParam);
+  }
+  else
+  {
+    //Have to use dimension knowledge to construct box.
+    double originX = (spDimX->getMaximum() + spDimX->getMinimum()) / 2;
+    double originY = (spDimY->getMaximum() + spDimY->getMinimum()) / 2;
+    double originZ = (spDimZ->getMaximum() + spDimZ->getMinimum()) / 2;
+    double width = spDimX->getMaximum() - spDimX->getMinimum();
+    double height = spDimY->getMaximum() - spDimY->getMinimum();
+    double depth = spDimZ->getMaximum() - spDimZ->getMinimum();
+
+    //Create domain parameters.
+    OriginParameter originParam = OriginParameter(originX, originY, originZ);
+    WidthParameter widthParam = WidthParameter(width);
+    HeightParameter heightParam = HeightParameter(height);
+    DepthParameter depthParam = DepthParameter(depth);
+
+    //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
+     boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
+        originParam);
+  }
+  return boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunction);
+}
+
 
 vtkDataSetFactory_sptr avtRebinningCutterFilter::createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
 {
@@ -212,6 +277,8 @@ void avtRebinningCutterFilter::Execute()
 {
   using namespace Mantid::VATES;
   using namespace Mantid::Geometry;
+  using namespace Mantid::MDAlgorithms;
+
   using Mantid::VATES::DimensionVec;
   using Mantid::VATES::Dimension_sptr;
 
@@ -231,46 +298,27 @@ void avtRebinningCutterFilter::Execute()
   dimensionsVec.push_back(spDimZ);
   dimensionsVec.push_back(spDimt);
 
-  doubleVector origin;
   Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs;
 
+  //Create the composite holder.
+  CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
+
   //Setup is only relevant once the controls have been setup.
-  if(atts.GetIsSetUp())
+  if (atts.GetIsSetUp())
   {
+    compFunction->addFunction(constructBox(spDimX, spDimY, spDimZ));
+    compFunction->addFunction(constructPlane());
 
-  origin.push_back(atts.GetOriginX());
-  origin.push_back(atts.GetOriginY());
-  origin.push_back(atts.GetOriginZ());
-
-  spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
-      atts.GetWidth(), //width
-      atts.GetHeight(), //height
-      atts.GetDepth(), //depth
-        origin, //origin
-        in_ds);
-
+    spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
+        spDimt, compFunction, in_ds);
   }
   else
   {
-    double originX = (spDimX->getMaximum() + spDimX->getMinimum()) / 2;
-    double originY = (spDimY->getMaximum() + spDimY->getMinimum()) / 2;
-    double originZ = (spDimZ->getMaximum() + spDimZ->getMinimum()) / 2;
-    double width = spDimX->getMaximum() - spDimX->getMinimum();
-    double height = spDimY->getMaximum() - spDimY->getMinimum();
-    double depth = spDimZ->getMaximum() - spDimZ->getMinimum();
+    compFunction->addFunction(constructBox(spDimX, spDimY, spDimZ));
 
-
-    origin.push_back(originX);
-    origin.push_back(originY);
-    origin.push_back(originZ);
-
-  // Construct reduction knowledge.
-    spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
-      width,
-      height,
-      depth,
-      origin, //origin
-      in_ds);
+    // Construct reduction knowledge.
+    spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
+        spDimt, compFunction, in_ds);
   }
 
   /// Create the dataset factory from the user selection.
@@ -294,7 +342,7 @@ void avtRebinningCutterFilter::Execute()
 
   //Persist the execution output geometry so that it can be dermined later in VisIT gui.
   MapNode geometryXMLNode;
-  geometryXMLNode[XMLDefinitions::geometryNodeName] =  m_presenter.getWorkspaceGeometry();
+  geometryXMLNode[XMLDefinitions::geometryNodeName] = m_presenter.getWorkspaceGeometry();
   MapNode functionXMLNode;
   functionXMLNode[XMLDefinitions::functionNodeName] = m_presenter.getFunction()->toXMLString();
 

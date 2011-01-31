@@ -14,17 +14,20 @@ boxVector BoxInterpreter::walkTree(CompositeImplicitFunction* compFunc) const
   functionVector nestedFuncs = compFunc->getFunctions();
   for (int i = 0; i < nestedFuncs.size(); i++)
   {
-    ImplicitFunction* impFunc = nestedFuncs[i].get();
-    CompositeImplicitFunction* nestedFunc =
-        dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (impFunc);
-    if (NULL != nestedFunc)
+    if (CompositeImplicitFunction::functionName()  == nestedFuncs[i]->getName())
     {
-      boxVector boxes = walkTree(nestedFunc); //recursive walk
+      CompositeImplicitFunction* compFunc =
+        dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (nestedFuncs[i].get());
+
+      boxVector boxes = walkTree(compFunc); //recursive walk
       flattenedboxes.insert(flattenedboxes.end(), boxes.begin(), boxes.end());
     }
-    else if (BoxImplicitFunction* box = dynamic_cast<BoxImplicitFunction*>(impFunc))
+    else if (BoxImplicitFunction::functionName()  == nestedFuncs[i]->getName())
     {
-      flattenedboxes.push_back(boost::shared_ptr<BoxImplicitFunction>(box));
+      boost::shared_ptr<BoxImplicitFunction> spBox =
+             boost::static_pointer_cast<BoxImplicitFunction, Mantid::API::ImplicitFunction>(nestedFuncs[i]);
+
+      flattenedboxes.push_back(spBox);
     }
   }
   return flattenedboxes;

@@ -54,12 +54,12 @@ public:
       CompositeImplicitFunction* innerComposite = new CompositeImplicitFunction;
       innerComposite->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxTwo));
 
-      CompositeImplicitFunction* topComposite = new CompositeImplicitFunction;
-      topComposite->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
-      topComposite->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(innerComposite));
+      CompositeImplicitFunction topComposite;
+      topComposite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
+      topComposite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(innerComposite));
 
       BoxInterpreter boxInterpreter;
-      std::vector<double> box = boxInterpreter(topComposite);
+      std::vector<double> box = boxInterpreter(&topComposite);
 
       TSM_ASSERT_EQUALS("The box min x is incorrect", -0.5, box[0]); //From box1
       TSM_ASSERT_EQUALS("The box max x is incorrect", 0.5, box[1]);  //From box1

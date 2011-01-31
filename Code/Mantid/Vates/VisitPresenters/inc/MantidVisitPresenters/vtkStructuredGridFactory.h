@@ -40,7 +40,7 @@ namespace VATES
 {
 
 template<typename Image>
-class vtkStructuredGridFactory : public vtkDataSetFactory
+class DLLExport vtkStructuredGridFactory : public vtkDataSetFactory
 {
 public:
 
@@ -231,4 +231,4 @@ vtkFloatArray* vtkStructuredGridFactory<Image>::createScalarArray() const
 
 
 
-#endif /* GENERATESTRUCTUREDGRID_H_ */
+#endif

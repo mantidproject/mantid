@@ -28,7 +28,7 @@ namespace Mantid
     ImplicitFunctionParser* ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(Poco::XML::Element* functionElement) const
     {
       std::string name = functionElement->localName();
-      if(functionElement->localName() != "Function")
+      if(name != "Function")
       {
         throw std::runtime_error("Root node must be a Funtion element. Unable to determine parsers.");
       }
@@ -44,14 +44,26 @@ namespace Mantid
       functionParser->setParameterParser(paramParser);
 
       Poco::XML::NodeList* childFunctions = functionElement->getElementsByTagName("Function");
+      ImplicitFunctionParser* childParser;
       for(unsigned long i = 0; i < childFunctions->length(); i++)
       {
         Poco::XML::Node* childFunctionNode = childFunctions->item(i);
 
         //Recursive call to handle nested parameters.
         Poco::XML::Element* childFunctionElement =( Poco::XML::Element*)childFunctionNode;
-        ImplicitFunctionParser* childParser = createImplicitFunctionParserFromXML(childFunctionElement);
-        functionParser->setSuccessorParser(childParser);
+        ImplicitFunctionParser* tempParser = createImplicitFunctionParserFromXML(childFunctionElement);
+        if(i==0)
+        {
+         childParser = tempParser;
+         //Add the first child function parser to the parent (composite) directly.
+         functionParser->setSuccessorParser(childParser);
+        }
+        else
+        {
+          //Add all other function parsers are added as successors to those before them in the loop.
+          childParser->setSuccessorParser(tempParser);
+          childParser = tempParser;
+        }
       }
 
       return functionParser;

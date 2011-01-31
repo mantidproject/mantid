@@ -5,8 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
+#include <gsl/gsl_blas.h>
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/Math/Matrix.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/VectorMathematics.h"
@@ -64,7 +66,11 @@ namespace Mantid
             double getNormalZ() const;
             bool operator==(const PlaneImplicitFunction &other) const;
             bool operator!=(const PlaneImplicitFunction &other) const;
-
+            double getAngleMadeWithXAxis() const;
+            double getAngleMadeWithYAxis() const;
+            double getAngleMadeWithZAxis() const;
+            //Interpret the plane as a rotation matrix.
+            std::vector<double> asRotationMatrixVector() const;
             static std::string functionName()
             {
                 return "PlaneImplicitFunction";
@@ -76,6 +82,9 @@ namespace Mantid
             NormalParameter m_normal;
 
         };
+
+        //Non-member helper.
+        Mantid::Geometry::Matrix<double> extractRotationMatrix(const PlaneImplicitFunction& plane);
     }
 }
 

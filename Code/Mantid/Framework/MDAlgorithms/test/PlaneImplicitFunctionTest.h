@@ -6,6 +6,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <vector>
+#include <MantidGeometry/Math/Matrix.h>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 
 class PlaneImplicitFunctionTest: public CxxTest::TestSuite
@@ -22,10 +23,11 @@ private:
 
 Mantid::MDAlgorithms::NormalParameter normal;
 Mantid::MDAlgorithms::OriginParameter origin;
+const double PI;
 
 public:
 
-PlaneImplicitFunctionTest() : normal(1, 1, 1), origin(2, 3, 4)
+PlaneImplicitFunctionTest() : normal(1, 1, 1), origin(2, 3, 4), PI(3.14159265)
 {
 }
 
@@ -262,6 +264,66 @@ void testNotEqual()
   TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, B);
   TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, C);
 }
+
+void testGetAngleWithXAxis()
+{
+  using namespace Mantid::MDAlgorithms;
+  NormalParameter normalPerpendicular(0, 2, 0);
+  NormalParameter normalParallel(3, 0, 0);
+  OriginParameter origin(0, 0, 0);
+  PlaneImplicitFunction A(normalPerpendicular, origin);
+  PlaneImplicitFunction B(normalParallel, origin);
+
+  TSM_ASSERT_DELTA("The angle made with the x-axis should be PI/2", PI/2 , A.getAngleMadeWithXAxis(), 0.001);
+  TSM_ASSERT_DELTA("The angle made with the x-axis should be 0", 0 , B.getAngleMadeWithXAxis(), 0.001);
+}
+
+void testGetAngleWithYAxis()
+{
+  using namespace Mantid::MDAlgorithms;
+  NormalParameter normalPerpendicular(2, 0, 0);
+  NormalParameter normalParallel(0, 3, 0);
+  OriginParameter origin(0, 0, 0);
+  PlaneImplicitFunction A(normalPerpendicular, origin);
+  PlaneImplicitFunction B(normalParallel, origin);
+
+  TSM_ASSERT_DELTA("The angle made with the y-axis should be PI/2", PI/2 , A.getAngleMadeWithYAxis(), 0.001);
+  TSM_ASSERT_DELTA("The angle made with the y-axis should be 0", 0 , B.getAngleMadeWithYAxis(), 0.001);
+}
+
+void testGetAngleWithZAxis()
+{
+  using namespace Mantid::MDAlgorithms;
+  NormalParameter normalPerpendicular(2, 0, 0);
+  NormalParameter normalParallel(0, 0, 3);
+  OriginParameter origin(0, 0, 0);
+  PlaneImplicitFunction A(normalPerpendicular, origin);
+    PlaneImplicitFunction B(normalParallel, origin);
+
+    TSM_ASSERT_DELTA("The angle made with the z-axis should be PI/2", PI/2 , A.getAngleMadeWithZAxis(), 0.001);
+    TSM_ASSERT_DELTA("The angle made with the z-axis should be 0", 0 , B.getAngleMadeWithZAxis(), 0.001);
+  }
+
+  void testWellFormedRotationMatrix()
+  {
+    using namespace Mantid::MDAlgorithms;
+    using namespace Mantid::Geometry;
+
+    NormalParameter normal(1, 2, 3);
+    OriginParameter origin(0, 0, 0);
+    PlaneImplicitFunction plane(normal, origin);
+
+    Matrix<double> rotationMatrix = extractRotationMatrix(plane);
+    //Copy and modify.
+    Matrix<double> transposeRotationMatrix = rotationMatrix;
+    transposeRotationMatrix.Transpose();
+    //Copy and modify.
+    Matrix<double> invertRotationMatrix = rotationMatrix;
+    invertRotationMatrix.Invert();
+
+    TSM_ASSERT_EQUALS("The determinant of a rotation matrix is always 1", 1, rotationMatrix.determinant());
+    TSM_ASSERT_EQUALS("The inverse of a rotation matrix is equal to its transpose", invertRotationMatrix, transposeRotationMatrix);
+  }
 
 };
 

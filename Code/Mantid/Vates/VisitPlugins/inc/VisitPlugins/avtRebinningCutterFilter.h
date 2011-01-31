@@ -116,6 +116,18 @@ private:
 
     Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
 
+    /// Determine if a plane has been applied.
+    bool anyPlaneApplied() const;
+
+    /// Construct a plane, which specifies rotations if the correct information is available.
+    boost::shared_ptr<Mantid::API::ImplicitFunction> constructPlane() const;
+
+    /// Construct a plane, which specifies rotations if the correct information is available.
+    boost::shared_ptr<Mantid::API::ImplicitFunction> constructBox(
+        Mantid::VATES::Dimension_sptr spDimX,
+        Mantid::VATES::Dimension_sptr spDimY,
+        Mantid::VATES::Dimension_sptr spDimZ) const;
+
     /// Helper method. Selects the dataset factory to use.
     boost::shared_ptr<Mantid::VATES::vtkDataSetFactory> createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
 

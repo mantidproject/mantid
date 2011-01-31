@@ -2,8 +2,10 @@
 #include "boost/format.hpp"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
+#include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <vector>
+#include <iostream>
 
 namespace Mantid
 {
@@ -70,6 +72,33 @@ double PlaneImplicitFunction::getNormalZ() const
   return this->m_normal.getZ();
 }
 
+double PlaneImplicitFunction::getAngleMadeWithXAxis() const
+{
+  using Mantid::Geometry::V3D;
+  NormalParameter unitVecNormal = m_normal.asUnitVector();
+  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
+  V3D unitVecXAxis(1, 0, 0);
+  return std::acos(unitVecXAxis.scalar_prod(vNormal));
+}
+
+double PlaneImplicitFunction::getAngleMadeWithYAxis() const
+{
+  using Mantid::Geometry::V3D;
+  NormalParameter unitVecNormal = m_normal.asUnitVector();
+  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
+  V3D unitVecYAxis(0, 1, 0);
+  return std::acos(unitVecYAxis.scalar_prod(vNormal));
+}
+
+double PlaneImplicitFunction::getAngleMadeWithZAxis() const
+{
+  using Mantid::Geometry::V3D;
+  NormalParameter unitVecNormal = m_normal.asUnitVector();
+  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
+  V3D unitVecZAxis(0, 0, 1);
+  return std::acos(unitVecZAxis.scalar_prod(vNormal));
+}
+
 std::string PlaneImplicitFunction::toXMLString() const
 {
   using namespace Poco::XML;
@@ -96,6 +125,45 @@ std::string PlaneImplicitFunction::toXMLString() const
   std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
       % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str());
   return formattedXMLString;
+}
+
+
+std::vector<double> PlaneImplicitFunction::asRotationMatrixVector() const
+{
+  using namespace std;
+  const double phi = getAngleMadeWithXAxis();
+  const double theta = getAngleMadeWithYAxis();
+  const double psi =getAngleMadeWithZAxis();
+
+  double rotateAroundXYZArry[9] = {
+  cos(theta)*cos(psi),
+  -cos(phi)*sin(psi) + sin(phi)*sin(theta)*cos(psi),
+  sin(phi)*sin(psi) + cos(phi)*sin(theta)*cos(psi),
+  cos(theta)*sin(psi),
+  cos(phi)*cos(psi) + sin(phi)*sin(theta)*sin(psi),
+  -sin(phi)*cos(psi) + cos(phi)*sin(theta)*sin(psi),
+  -sin(theta),
+  sin(phi)*cos(theta),
+  cos(phi)*cos(theta)};
+
+  return std::vector<double>(rotateAroundXYZArry, rotateAroundXYZArry+9);
+}
+
+/// Convenience method. Translates rotation result into Mantid Matrix form.
+Mantid::Geometry::Matrix<double> extractRotationMatrix(const PlaneImplicitFunction& plane)
+{
+  std::vector<double> rotationMatrixVector = plane.asRotationMatrixVector();
+  Mantid::Geometry::Matrix<double> rotationMatrix(3,3);
+  rotationMatrix[0][0] = rotationMatrixVector[0];
+  rotationMatrix[0][1] = rotationMatrixVector[1];
+  rotationMatrix[0][2] = rotationMatrixVector[2];
+  rotationMatrix[1][0] = rotationMatrixVector[3];
+  rotationMatrix[1][1] = rotationMatrixVector[4];
+  rotationMatrix[1][2] = rotationMatrixVector[5];
+  rotationMatrix[2][0] = rotationMatrixVector[6];
+  rotationMatrix[2][1] = rotationMatrixVector[7];
+  rotationMatrix[2][2] = rotationMatrixVector[8];
+  return rotationMatrix;
 }
 
 PlaneImplicitFunction::~PlaneImplicitFunction()

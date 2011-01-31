@@ -65,6 +65,7 @@ public:
 typedef boost::shared_ptr<IMDDimension> Dimension_sptr;
 typedef std::vector<boost::shared_ptr<IMDDimension> > DimensionVec;
 typedef std::vector<boost::shared_ptr<IMDDimension> >::iterator DimensionVecIterator;
+typedef std::vector<double> RotationMatrix;
 
 class DLLExport MDGeometryDescription
 {
@@ -76,7 +77,9 @@ public:
       Dimension_sptr dimensionX, 
       Dimension_sptr dimensionY,  
       Dimension_sptr dimensionZ, 
-      Dimension_sptr dimensiont ); 
+      Dimension_sptr dimensiont,
+      RotationMatrix rotationMatrix
+    );
 
 	MDGeometryDescription(const MDGeometryBasis &basis);
     MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);

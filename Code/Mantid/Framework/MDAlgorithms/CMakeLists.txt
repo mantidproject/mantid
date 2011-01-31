@@ -20,11 +20,13 @@ src/InvalidParameterParser.cpp
 src/Load_MDWorkspace.cpp
 src/NormalParameter.cpp
 src/NormalParameterParser.cpp
+src/NullImplicitFunction.cpp
 src/OriginParameter.cpp
 src/OriginParameterParser.cpp
 src/PlaneFunctionBuilder.cpp
 src/PlaneImplicitFunction.cpp
 src/PlaneImplicitFunctionParser.cpp
+src/PlaneInterpreter.cpp
 src/SimulateMDD.cpp
 src/SingleValueParameterParser.cpp
 src/TobyFitSimulate.cpp
@@ -51,11 +53,13 @@ inc/MantidMDAlgorithms/InvalidParameterParser.h
 inc/MantidMDAlgorithms/Load_MDWorkspace.h
 inc/MantidMDAlgorithms/NormalParameter.h
 inc/MantidMDAlgorithms/NormalParameterParser.h
+inc/MantidMDAlgorithms/NullImplicitFunction.h
 inc/MantidMDAlgorithms/OriginParameter.h
 inc/MantidMDAlgorithms/OriginParameterParser.h
 inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
 inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
+inc/MantidMDAlgorithms/PlaneInterpreter.h
 inc/MantidMDAlgorithms/SimulateMDD.h
 inc/MantidMDAlgorithms/SingleValueParameterParser.h
 inc/MantidMDAlgorithms/TobyFitSimulate.h
@@ -78,7 +82,6 @@ test/NormalParameterTest.h
 test/OriginParameterTest.h
 test/PlaneFunctionBuilderTest.h
 test/SimulateMDDataTest.h
-#test/SingleValueParameterBaseTest.h TODO: Not a CxxTest? Sure looks like one.
 #test/testCPComponents.h TODO: Is this test really necessary?
 test/testCPrebinning.h
 test/TobyFitSimulateTest.h
@@ -95,12 +98,13 @@ test/CompositeBuilderTest.h
 test/CompositeImplicitFunctionParserTest.h
 test/CompositeImplicitFunctionTest.h
 test/DepthParameterParserTest.h
-#test/FunctionParserTest.h TODO: No tests defined??
 test/HeightParameterParserTest.h
 test/NormalParameterParserTest.h
+test/NullImplicitFunctionTest.h
 test/OriginParameterParserTest.h
 test/PlaneImplicitFunctionParserTest.h
 test/PlaneImplicitFunctionTest.h
+test/PlaneInterpreterTest.h
 test/WidthParameterParserTest.h
 )
 

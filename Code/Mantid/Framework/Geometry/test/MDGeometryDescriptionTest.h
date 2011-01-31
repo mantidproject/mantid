@@ -25,7 +25,9 @@ class MDGeometryDescriptionTest: public CxxTest::TestSuite
     dimensions.push_back(dimZ);
     dimensions.push_back(dimt);
     dimensions.push_back(dimTemp);
-    return new MDGeometryDescription(dimensions, dimX, dimY, dimZ, dimTemp);
+    RotationMatrix rotationMatrix(9,0);
+    rotationMatrix[0] = rotationMatrix[4] = rotationMatrix[8] = 1; //Setup identity matrix for.
+    return new MDGeometryDescription(dimensions, dimX, dimY, dimZ, dimTemp, rotationMatrix);
   }
   
 

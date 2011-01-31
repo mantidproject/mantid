@@ -91,10 +91,10 @@ private:
       return DynamicRebinFromXML::getImplicitFunction(pRootElem);
     }
 
-    Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem) const
+    Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
     {
       //call method on base class.
-      return DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(pRootElem);
+      return DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(pRootElem, impFunction);
     }
 
     void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const
@@ -280,7 +280,8 @@ public:
   void testGetMDDimensionDescription()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    boost::scoped_ptr<Mantid::Geometry::MDGeometryDescription> geomDescription(xmlRebinAlg.getMDGeometryDescriptionWithoutCuts(MDInstructionXML()));
+    CompositeImplicitFunction compFunction;
+    boost::scoped_ptr<Mantid::Geometry::MDGeometryDescription> geomDescription(xmlRebinAlg.getMDGeometryDescriptionWithoutCuts(MDInstructionXML(), &compFunction));
 
     //Characteristic of existing behaviour rather than correct behaviour!
     TSM_ASSERT_EQUALS("The xml generated from the dimension description did not match the expectation.", geomDescription->toXMLstring(), "TEST PROPERTY"); 
@@ -319,9 +320,9 @@ public:
   void testApplyImplicitFunctionToMDGeometryDescription()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-
-    MDGeometryDescription* description = xmlRebinAlg.getMDGeometryDescriptionWithoutCuts(MDInstructionXML());
     ImplicitFunction* impFunction = xmlRebinAlg.getImplicitFunction(MDInstructionXML());
+    MDGeometryDescription* description = xmlRebinAlg.getMDGeometryDescriptionWithoutCuts(MDInstructionXML(), impFunction);
+
     xmlRebinAlg.ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);
 
 	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -0.75, description->pDimDescription(0)->cut_min);

@@ -112,6 +112,29 @@ void testNotEqual()
   TSM_ASSERT_DIFFERS("The two Normal instances are considered equal, but should not be.", A, D);
 }
 
+void testIsUnitVector()
+{
+  using namespace Mantid::MDAlgorithms;
+  NormalParameter notUnit(1, 2, 3);
+  NormalParameter unit(0, 1, 0);
+  TSM_ASSERT("This is not a unit vector", !notUnit.isUnitVector());
+  TSM_ASSERT("This is a unit vector", unit.isUnitVector());
+}
+
+
+void testAsUnitVector()
+{
+  using namespace Mantid::MDAlgorithms;
+  NormalParameter A(2, 0, 0);
+  NormalParameter B = A.asUnitVector();
+  TSM_ASSERT("This is not a unit vector", !A.isUnitVector());
+  TSM_ASSERT("This is a unit vector", B.isUnitVector());
+  TSM_ASSERT_EQUALS("x component incorrect", 1, B.getX());
+  TSM_ASSERT_EQUALS("y component incorrect", 0, B.getY());
+  TSM_ASSERT_EQUALS("z component incorrect", 0, B.getZ());
+
+}
+
 };
 
 #endif

@@ -1,6 +1,7 @@
 ﻿#include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "MantidMDAlgorithms/NormalParameter.h"
+#include <cmath>
 
 namespace Mantid
 {
@@ -95,6 +96,22 @@ std::string NormalParameter::toXMLString() const
       % m_normal.at(1) % m_normal.at(2));
 
   return this->parameterXMLTemplate(valueXMLtext);
+}
+
+NormalParameter NormalParameter::asUnitVector() const
+{
+  double mag = magnitude();
+  return NormalParameter(m_normal[0]/mag, m_normal[1]/mag, m_normal[2]/mag);
+}
+
+bool NormalParameter::isUnitVector() const
+{
+  return 1 == magnitude();
+}
+
+double NormalParameter::magnitude() const
+{
+  std::sqrt(m_normal[0]*m_normal[0] + m_normal[1]*m_normal[1] + m_normal[2]*m_normal[2]);
 }
 
 }

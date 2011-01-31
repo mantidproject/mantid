@@ -13,6 +13,7 @@
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
+#include "MantidMDAlgorithms/PlaneInterpreter.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
@@ -141,7 +142,7 @@ namespace Mantid
       return mdDimension;
     }
 
-    Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem) const
+    Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
     {
       using namespace Mantid::Geometry;
       Poco::XML::Element* geometryXML = pRootElem->getChildElement("DimensionSet");
@@ -196,8 +197,12 @@ namespace Mantid
         throw std::invalid_argument("Cannot determine t-dimension mapping.");
       }
 
+      //Interpret planes found in the implicit function.
+      PlaneInterpreter planeInterpreter;
+      std::vector<double> rotationMatrix = planeInterpreter(impFunction);
+
       //Create A geometry Description.
-      return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, *tDimensionIt);
+      return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, *tDimensionIt, planeInterpreter(impFunction));
     }
 
     void DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const
@@ -278,7 +283,7 @@ namespace Mantid
       const std::string location = getWorkspaceLocation(pRootElem);
 
       //get the md geometry without cuts applied. Cuts are applied by the implicit functions.
-      MDGeometryDescription* geomDescription = getMDGeometryDescriptionWithoutCuts(pRootElem);
+      MDGeometryDescription* geomDescription = getMDGeometryDescriptionWithoutCuts(pRootElem, function);
 
       //apply cuts to the geometrydescription.
       ApplyImplicitFunctionToMDGeometryDescription(geomDescription, function);

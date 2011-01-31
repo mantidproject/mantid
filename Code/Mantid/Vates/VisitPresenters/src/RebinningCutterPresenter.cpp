@@ -11,6 +11,7 @@
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
 #include <vtkCellData.h>
+#include <vtkMath.h>
 
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
@@ -71,39 +72,62 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 
 }
 
+std::vector<double> RebinningCutterPresenter::createMatrix(double* a)
+{
+            double vUp[] = {0, 1.0, 0.0};
+            double vRight[3];
+            vtkMath::Cross(vUp, a, vRight);
+            vtkMath::Cross(a, vRight, vUp);
+
+            std::vector<double> rotationMatrix(9);
+            rotationMatrix[0] = vRight[0];
+            rotationMatrix[1] = vRight[1];
+            rotationMatrix[2] = vRight[2];
+            rotationMatrix[3] = vUp[0];
+            rotationMatrix[4] = vUp[1];
+            rotationMatrix[5] = vUp[2];
+            rotationMatrix[6] = a[0];
+            rotationMatrix[7] = a[1];
+            rotationMatrix[8] = a[2];
+
+
+            return rotationMatrix;
+}
+
+
+
+//std::vector<double> RebinningCutterPresenter::createMatrix(double* a)
+//{
+//  double b[3];
+//  double c[3];
+//
+//  vtkMath::Perpendiculars(a, b, c, vtkMath::Pi()/2);
+//  printf("b %f %f %f\n", b[0], b[1], b[2]);
+//  printf("c %f %f %f\n", c[0], c[1], c[2]);
+//  std::vector<double> rotMatrix(9);
+//  rotMatrix[0] = a[0];
+//  rotMatrix[1] = b[0];
+//  rotMatrix[2] = c[0];
+//  rotMatrix[3] = a[1];
+//  rotMatrix[4] = b[1];
+//  rotMatrix[5] = c[1];
+//  rotMatrix[6] = a[2];
+//  rotMatrix[7] = b[2];
+//  rotMatrix[8] = c[2];
+//  return rotMatrix;
+//}
+
+
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReductionKnowledge(
     DimensionVec dimensions,
     Dimension_sptr dimensionX,
     Dimension_sptr dimensionY,
     Dimension_sptr dimensionZ,
     Dimension_sptr dimensiont,
-    const double width,
-    const double height,
-    const double depth,
-    std::vector<double>& origin, vtkDataSet* inputDataSet)
+    Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction,
+    vtkDataSet* inputDataSet)
 {
   using namespace Mantid::MDAlgorithms;
-
-  if (origin.size() != 3)
-  {
-    throw std::invalid_argument("Three origin components expected.");
-  }
-
-  //Create domain parameters.
-  OriginParameter originParam = OriginParameter(origin.at(0), origin.at(1), origin.at(2));
-  WidthParameter widthParam = WidthParameter(width);
-  HeightParameter heightParam = HeightParameter(height);
-  DepthParameter depthParam = DepthParameter(depth);
-
-  //Create the composite holder.
-  Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
-
-  //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
-  BoxImplicitFunction* boxFunc =
-      new BoxImplicitFunction(widthParam, heightParam, depthParam, originParam);
-
-  //Add the new function.
-  compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunc));
 
   //Add existing functions.
   Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId.c_str());
@@ -116,7 +140,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReduc
   //Apply the implicit function.
   m_serializer.setImplicitFunction(m_function);
   //Apply the geometry.
-  m_serializer.setGeometryXML( constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, height, width, depth, origin) );
+  m_serializer.setGeometryXML(constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont));
   //Apply the workspace name after extraction from the input xml.
   m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId.c_str()));
   //Apply the workspace location after extraction from the input xml.
@@ -378,11 +402,7 @@ std::string constructGeometryXML(
   Dimension_sptr dimensionX,
   Dimension_sptr dimensionY,
   Dimension_sptr dimensionZ,
-  Dimension_sptr dimensiont,
-  double height,
-  double width,
-  double depth,
-  std::vector<double>& origin)
+  Dimension_sptr dimensiont)
 {
   using namespace Mantid::Geometry;
   std::set<MDBasisDimension> basisDimensions;
@@ -402,7 +422,12 @@ std::string constructGeometryXML(
   UnitCell cell; // Unit cell currently does nothing.
   MDGeometryBasis basis(basisDimensions, cell);
 
-  MDGeometryDescription description(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont);
+  //TODO: Get Rotation matrix from Plane ImplicitFunction
+        RotationMatrix identityMatrix(9, 0);
+        identityMatrix[0] = 1;
+        identityMatrix[4] = 1;
+        identityMatrix[8] = 1;
+  MDGeometryDescription description(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, identityMatrix);
 
   //Create a geometry.
   MDGeometry geometry(basis, description);

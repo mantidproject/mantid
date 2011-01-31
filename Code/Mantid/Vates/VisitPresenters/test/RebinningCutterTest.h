@@ -45,8 +45,11 @@ private:
     {
       using namespace Mantid::VATES;
       using namespace Mantid::Geometry;
+      using namespace Mantid::MDAlgorithms;
       using Mantid::VATES::DimensionVec;
       using Mantid::VATES::Dimension_sptr;
+      using Mantid::MDDataObjects::MDImage;
+      using Mantid::MDDataObjects::MDWorkspace_sptr;
 
       RebinningCutterPresenter presenter;
 
@@ -72,9 +75,16 @@ private:
       vec.push_back(dimZ);
       vec.push_back(dimT);
 
-      using Mantid::MDDataObjects::MDImage;
-      using Mantid::MDDataObjects::MDWorkspace_sptr;
-      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, m_origin, in_ds);
+      OriginParameter originParam = OriginParameter(m_origin.at(0), m_origin.at(1), m_origin.at(2));
+      WidthParameter widthParam = WidthParameter(1);
+      HeightParameter heightParam = HeightParameter(2);
+      DepthParameter depthParam = DepthParameter(3);
+
+      //Create the composite holder.
+      Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
+
+
+      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
       vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
       vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
@@ -344,30 +354,6 @@ void testNoExistingRebinningDefinitions()
   TSM_ASSERT_THROWS("There were no previous definitions carried through. Should have thrown.", findExistingRebinningDefinitions(dataset, XMLDefinitions::metaDataId.c_str()), std::runtime_error);
 }
 
-
-void testConstructionWithoutValidOriginThrows()
-{
-  using namespace Mantid::Geometry;
-  RebinningCutterPresenter presenter;
-  using Mantid::VATES::DimensionVec;
-  using Mantid::VATES::Dimension_sptr;
-
-  DimensionVec vec;
-  Dimension_sptr dimX = Dimension_sptr(new MDDimension("1"));
-  Dimension_sptr dimY = Dimension_sptr(new MDDimension("2"));
-  Dimension_sptr dimZ = Dimension_sptr(new MDDimension("3"));
-  Dimension_sptr dimT = Dimension_sptr(new MDDimension("4"));
-
-  vec.push_back(dimX);
-  vec.push_back(dimY);
-  vec.push_back(dimZ);
-  vec.push_back(dimT);
-
-  std::vector<double> badOrigin;
-
-  TSM_ASSERT_THROWS("The origin vector is the wrong size. Should have thrown.",
-      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, 1, 2, 3, badOrigin, vtkStructuredGrid::New()), std::invalid_argument);
-}
 //
 //void testCreateVisualDataSetThrows()
 //{
@@ -463,7 +449,6 @@ void testGetWorkspaceGeometryThrows()
   Mantid::VATES::RebinningCutterPresenter presenter;
   TSM_ASSERT_THROWS("Not properly initalized. Getting workspace geometry should throw.", presenter.getWorkspaceGeometry(), std::runtime_error);
 }
-
 
 
 };
