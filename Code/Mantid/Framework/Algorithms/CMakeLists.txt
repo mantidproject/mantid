@@ -257,7 +257,13 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SumNeighbours.h
 		inc/MantidAlgorithms/SumRowColumn.h
 		inc/MantidAlgorithms/SumSpectra.h
-		inc/MantidAlgorithms/TofCorrection.h )
+		inc/MantidAlgorithms/TofCorrection.h
+		inc/MantidAlgorithms/Transpose.h
+		inc/MantidAlgorithms/UnaryOperation.h
+		inc/MantidAlgorithms/UnGroupWorkspaces.h
+		inc/MantidAlgorithms/Unwrap.h
+		inc/MantidAlgorithms/WeightedMean.h
+		inc/MantidAlgorithms/XDataConverter.h )
 
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
@@ -375,7 +381,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
-                 test/WeightedMeanTest.h
+         test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 )
 
