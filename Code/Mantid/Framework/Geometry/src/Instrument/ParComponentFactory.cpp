@@ -49,6 +49,11 @@ namespace Mantid
     ComponentPool<ClassType>::create(ConstPtrType base, 
 				     const ParameterMap * map)
     {
+
+      // Temporary. Problems in debug with the SolidAngle algorithm, which probably means there
+      // are other issues lurking
+      return PtrType(createUsingNew(base, map));
+
       try
       {
     	const size_t index = getIndexInCache();
