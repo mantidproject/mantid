@@ -277,16 +277,17 @@ class DirectEnergyConversion(object):
         # TODO: This really should be done as soon as possible after loading
         self.normalise(result_ws, result_ws, self.normalise_method, range_offset=bin_offset)
 
-        ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
+        ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+        
         if not self.energy_bins is None:
             Rebin(result_ws, result_ws, self.energy_bins)
         
         if self.apply_detector_eff:
             if (self.facility == "SNS"):
                 # Need to be in lambda for detector efficiency correction
-                ConvertUnits(result_ws, result_ws, Target="Wavelength", EMode="Direct")
+                ConvertUnits(result_ws, result_ws, Target="Wavelength", EMode="Direct", EFixed=ei_value)
                 He3TubeEfficiency(result_ws, result_ws)
-                ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
+                ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(result_ws, result_ws)
 
