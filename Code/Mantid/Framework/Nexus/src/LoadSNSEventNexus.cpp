@@ -170,6 +170,14 @@ void LoadSNSEventNexus::exec()
       std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
       for (size_t i =0; i < temp.size(); i++)
         pulseTimes.push_back( temp[i] );
+
+      // Use the first pulse as the run_start time.
+      if (temp.size() > 0)
+      {
+        // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
+        // (this is used in LoadInstrumentHelper to find the right instrument file to use).
+        WS->mutableRun().addProperty("run_start", temp[0].to_ISO8601_string(), true );
+      }
     }
     catch (...)
     {

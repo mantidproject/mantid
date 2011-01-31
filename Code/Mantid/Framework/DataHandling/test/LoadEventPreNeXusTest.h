@@ -188,7 +188,7 @@ public:
     Kernel::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getEventListPtr(1000)->getEvents();
-    for (int i=0; i < events1.size(); i++)
+    for (size_t i=0; i < events1.size(); i++)
     {
       std::cout << (events1[i].pulseTime()-start) << " sec \n";
     }
@@ -264,6 +264,16 @@ public:
     TS_ASSERT_THROWS_NOTHING( outputWS->setX(0, x) );
     //Accessing Y is still possible
     const MantidVec Y = boost::dynamic_pointer_cast<const EventWorkspace>(outputWS)->dataY(0);
+
+
+    // Check the run_start property exists and is right.
+    Property * p = NULL;
+    TS_ASSERT( outputWS->mutableRun().hasProperty("run_start") );
+    TS_ASSERT_THROWS_NOTHING( p = outputWS->mutableRun().getProperty("run_start"); )
+    if (p)
+    {
+      TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37") ;
+    }
   }
 
 

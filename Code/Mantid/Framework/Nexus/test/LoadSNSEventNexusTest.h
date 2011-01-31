@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Property.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadLogsFromSNSNexus.h"
 
@@ -125,7 +126,7 @@ public:
       TS_ASSERT_EQUALS( events1.size(), events2.size());
       if (events1.size() == events2.size())
       {
-        for (int i=0; i < events1.size(); i++)
+        for (size_t i=0; i < events1.size(); i++)
         {
           TS_ASSERT_DELTA( events1[i].tof(), events2[i].tof(), 0.05);
           TS_ASSERT_DELTA( events1[i].pulseTime(), events2[i].pulseTime(), 1e9); //TODO:: Fix nexus start times
@@ -165,6 +166,16 @@ public:
 
     //Check one event from one pixel - does it have a reasonable pulse time
     TS_ASSERT( WS->getEventListPtr(7)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
+
+    // Check the run_start property exists and is right.
+    Property * p = NULL;
+    TS_ASSERT( WS->mutableRun().hasProperty("run_start") );
+    TS_ASSERT_THROWS_NOTHING( p = WS->mutableRun().getProperty("run_start"); )
+    if (p)
+    {
+      TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37") ;
+    }
+
   }
 
   void test_Monitors()

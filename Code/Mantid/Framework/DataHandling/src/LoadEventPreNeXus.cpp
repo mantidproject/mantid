@@ -215,12 +215,6 @@ void LoadEventPreNeXus::exec()
 
   this->readPulseidFile(pulseid_filename, throwError);
 
-
-//  // add the frame information to the event workspace
-//  for (size_t i = 0; i < this->num_pulses; i++)
-//    workspace->addTime(i, this->pulsetimes[i]);
-
-
   this->openEventFile(event_filename);
 
   // prep the output workspace
@@ -233,6 +227,16 @@ void LoadEventPreNeXus::exec()
   localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   localWorkspace->setYUnit("Counts");
   // TODO localWorkspace->setTitle(title);
+
+  // Add the run_start property
+  // Use the first pulse as the run_start time.
+  if (pulsetimes.size() > 0)
+  {
+    // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
+    // (this is used in LoadInstrumentHelper to find the right instrument file to use).
+    localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
+  }
+
 
   //Get the instrument!
   this->runLoadInstrument(event_filename, localWorkspace);
