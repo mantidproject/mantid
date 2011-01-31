@@ -11,6 +11,8 @@ project ( Mantid )
 if ( WIN32 )
   set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   include ( WindowsSetup )
+elseif ( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
+  include ( GNUSetup )
 endif ()
 
 # Call our setup script
