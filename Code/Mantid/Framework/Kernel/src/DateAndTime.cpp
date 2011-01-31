@@ -101,6 +101,7 @@ time_t utc_mktime(struct tm *utctime)
     tmp.tm_min  += utctime->tm_min - check.tm_min;
     tmp.tm_hour += utctime->tm_hour - check.tm_hour;
     tmp.tm_mday += utctime->tm_mday - check.tm_mday;
+    tmp.tm_mon +=  utctime->tm_mon - check.tm_mon;
     tmp.tm_year += utctime->tm_year - check.tm_year;
     tmp.tm_isdst = -1;
 
