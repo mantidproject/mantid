@@ -24,7 +24,6 @@ namespace Mantid
 namespace PythonAPI
 {
   using namespace API;
-  using namespace Kernel;
   using namespace boost::python;
 
   //@cond

@@ -1280,7 +1280,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             if isinstance(args[i], WorkspaceProxy):
                 algm._setWorkspaceProperty(argspec.args[i], args[i]._getHeldObject())                
             else:
-                algm.setPropertyValue(argspec.args[i], args[i])
+                algm.setPropertyValue(argspec.args[i], makeString(args[i]).lstrip('? '))
         
         # Go through keyword arguments
         proxy = mtd._createAlgProxy(algm)
@@ -1290,7 +1290,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             if isinstance(kwargs[key], WorkspaceProxy):
                 algm._setWorkspaceProperty(key, kwargs[key]._getHeldObject())
             else:             
-                algm.setPropertyValue(key, kwargs[key])
+                algm.setPropertyValue(key, makeString(kwargs[key]).lstrip('? '))
         
         # Execute synchronously        
         algm.setRethrows(True)
