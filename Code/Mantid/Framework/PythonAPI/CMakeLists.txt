@@ -21,6 +21,7 @@ set ( TEST_FILES test/PythonFrameworkTests.h
                  test/SimplePythonAPITest.h )
 
 set ( TEST_PY_FILES test/ImportTest.py
+                    test/PythonAlgorithmTest.py 
                     test/NumpyTest.py )
 
 # Add local dependencies
