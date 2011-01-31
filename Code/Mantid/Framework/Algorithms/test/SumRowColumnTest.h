@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SumRowColumn.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -15,20 +15,14 @@ public:
   static SumRowColumnTest *createSuite() { return new SumRowColumnTest(); }
   static void destroySuite(SumRowColumnTest *suite) { delete suite; }
 
-  SumRowColumnTest() : summer(), inputWS("loq-front")
+  SumRowColumnTest() : inputWS("SumRowColumnTestWS")
   {
-    Mantid::DataHandling::LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","LOQ48094.raw");
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.setPropertyValue("SpectrumMin","3");
-    loader.setPropertyValue("SpectrumMax","16386");
-    loader.execute();
+    AnalysisDataService::Instance().add(inputWS,WorkspaceCreationHelper::Create2DWorkspaceBinned(100,10));
   }
   
   ~SumRowColumnTest()
   {
-    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().clear();
   }
 
   void testName()
@@ -76,20 +70,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(
                                         AnalysisDataService::Instance().retrieve("H")));
     // Check a couple of values
-    TS_ASSERT_EQUALS( output->readX(0).size(), 128 )
-    TS_ASSERT_EQUALS( output->readY(0).size(), 128 )
-    TS_ASSERT_EQUALS( output->readX(0)[10], 10 )
-    TS_ASSERT_EQUALS( output->readX(0)[99], 99 )
-    TS_ASSERT_EQUALS( output->readY(0)[10], 131 )
-    TS_ASSERT_EQUALS( output->readY(0)[99], 115 )
-    TS_ASSERT_EQUALS( output->readE(0)[10], 0 )
-    TS_ASSERT_EQUALS( output->readE(0)[99], 0 )
+    TS_ASSERT_EQUALS( output->readX(0).size(), 10 )
+    TS_ASSERT_EQUALS( output->readY(0).size(), 10 )
+    TS_ASSERT_EQUALS( output->readX(0)[1], 1 )
+    TS_ASSERT_EQUALS( output->readX(0)[9], 9 )
+    TS_ASSERT_EQUALS( output->readY(0)[1], 200 )
+    TS_ASSERT_EQUALS( output->readY(0)[9], 200 )
+    // This algorithm doesn't compute errors
+    TS_ASSERT_EQUALS( output->readE(0)[1], 0 )
+    TS_ASSERT_EQUALS( output->readE(0)[9], 0 )
 
     TS_ASSERT( ! output->getAxis(0)->unit() )
-
-    AnalysisDataService::Instance().remove("H");
   }
-	
+
   void testVertical()
   {
     Mantid::Algorithms::SumRowColumn summer2;
@@ -97,10 +90,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("OutputWorkspace","V") )
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("Orientation","D_V") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMin","4000") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMax","10000") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Min","50") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Max","100") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMin","4") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMax","10") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Min","5") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Max","9") )
     
     TS_ASSERT_THROWS_NOTHING( summer2.execute() )
     TS_ASSERT( summer2.isExecuted() )
@@ -109,18 +102,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(
                                         AnalysisDataService::Instance().retrieve("V")));
     // Check a couple of values
-    TS_ASSERT_EQUALS( output->readX(0).size(), 128 )
-    TS_ASSERT_EQUALS( output->readY(0).size(), 128 )
-    TS_ASSERT_EQUALS( output->readX(0)[10], 10 )
-    TS_ASSERT_EQUALS( output->readX(0)[99], 99 )
-    TS_ASSERT_EQUALS( output->readY(0)[10], 3 )
-    TS_ASSERT_EQUALS( output->readY(0)[99], 5 )
-    TS_ASSERT_EQUALS( output->readE(0)[10], 0 )
-    TS_ASSERT_EQUALS( output->readE(0)[99], 0 )
-
-    AnalysisDataService::Instance().remove("H");
+    TS_ASSERT_EQUALS( output->readX(0).size(), 10 )
+    TS_ASSERT_EQUALS( output->readY(0).size(), 10 )
+    TS_ASSERT_EQUALS( output->readX(0)[1], 1 )
+    TS_ASSERT_EQUALS( output->readX(0)[9], 9 )
+    TS_ASSERT_EQUALS( output->readY(0)[1], 60 )
+    TS_ASSERT_EQUALS( output->readY(0)[9], 60 )
+    // This algorithm doesn't compute errors
+    TS_ASSERT_EQUALS( output->readE(0)[1], 0 )
+    TS_ASSERT_EQUALS( output->readE(0)[9], 0 )
   }
-	
+
 private:
   Mantid::Algorithms::SumRowColumn summer;
   std::string inputWS;

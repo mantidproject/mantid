@@ -374,14 +374,14 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/StripPeaksTest.h
 		 test/StripVanadiumPeaksTest.h
 		 test/SumNeighboursTest.h
-		 test/SumRowColumnTest.h # TODO loads data in the constructor
-		 test/SumSpectraTest.h # TODO loads data in the constructor
+		 test/SumRowColumnTest.h
+		 test/SumSpectraTest.h
 		 test/TofCorrectionTest.h
 		 test/TransposeTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
-         test/WeightedMeanTest.h
+                 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 )
 

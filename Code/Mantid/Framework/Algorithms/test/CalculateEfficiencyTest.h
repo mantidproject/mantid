@@ -18,7 +18,7 @@ public:
   /*
    * Generate fake data for which we know what the result should be
    */
-  void setUp()
+  void setUpWorkspace()
   {
     inputWS = "sampledata";
 
@@ -28,8 +28,6 @@ public:
     for ( int i=0; i<SANSInstrumentCreationHelper::nMonitors; i++ )
     {
       Mantid::MantidVec& X = ws->dataX(i);
-      Mantid::MantidVec& Y = ws->dataY(i);
-      Mantid::MantidVec& E = ws->dataE(i);
       X[0] = 1;
       X[1] = 2;
     }
@@ -78,6 +76,8 @@ public:
 
   void testExec()
   {
+    setUpWorkspace();
+
     if (!correction.isInitialized()) correction.initialize();
 
     const std::string outputWS("result");

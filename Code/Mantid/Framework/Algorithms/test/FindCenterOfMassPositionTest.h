@@ -19,11 +19,13 @@ using namespace Mantid;
 class FindCenterOfMassPositionTest : public CxxTest::TestSuite
 {
 public:
+  static FindCenterOfMassPositionTest *createSuite() { return new FindCenterOfMassPositionTest(); }
+  static void destroySuite(FindCenterOfMassPositionTest *suite) { delete suite; }
 
   /*
    * Generate fake data for which we know what the result should be
    */
-  void setUp()
+  FindCenterOfMassPositionTest()
   {
     inputWS = "sampledata";
     center_x = 25.5;
@@ -49,8 +51,12 @@ public:
         ws->getAxis(1)->spectraNo(i) = i;
       }
     }
-
   }
+
+ ~FindCenterOfMassPositionTest()
+ {
+   AnalysisDataService::Instance().clear();
+ }
 
   void testParameters()
   {
@@ -90,8 +96,6 @@ public:
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"Y (m)");
     TS_ASSERT_DELTA(row.Double(1),10.5,0.0001);
-
-    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
   void testExecScatteredData()
@@ -124,8 +128,6 @@ public:
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"Y (m)");
     TS_ASSERT_DELTA(row.Double(1),10.5,0.0001);
-
-    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
   void testExecWithArrayResult()
@@ -144,8 +146,6 @@ public:
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_DELTA(list[0], center_x, 0.0001);
     TS_ASSERT_DELTA(list[1], center_y, 0.0001);
-
-    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
   /*
@@ -189,8 +189,6 @@ public:
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"Y (m)");
     TS_ASSERT_DELTA(row.Double(1),96.771,1e-4);
-    
-    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
 private:

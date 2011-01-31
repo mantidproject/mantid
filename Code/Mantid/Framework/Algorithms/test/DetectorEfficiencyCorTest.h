@@ -39,19 +39,12 @@ class DetectorEfficiencyCorTest : public CxxTest::TestSuite
 public:
     DetectorEfficiencyCorTest() :
       m_InoutWS("DetectorEfficiencyCorTest_input_workspace"),
-      m_OutWS("DetectorEfficiencyCorTest_output_workspace"),
-      m_DatFile("DetectorEfficiencyCorTest_filename.dat")
+      m_OutWS("DetectorEfficiencyCorTest_output_workspace")
   {
     // the Ei value depends on the RAW file, during normal testing only use the small RAW file
     m_Ei = 12.9462875; m_rawFile = "MAR11001.raw";
   }
 
-  void setUp()
-  {
-    // create a .dat file in the current directory that we'll load later
-    writeDatFile();
-  }
-  
   void testInit()
   {
 
@@ -280,11 +273,6 @@ public:
     TS_ASSERT( loader.isExecuted() );
   }
 
-  void tearDown()
-  {
-    Poco::File(m_DatFile).remove();    
-  }
-
   boost::shared_ptr<Object> getObject(std::string xmlShape)
   {
     std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
@@ -307,24 +295,11 @@ public:
 
 
   private:
-    const std::string m_InoutWS, m_OutWS, m_DatFile;
+    const std::string m_InoutWS, m_OutWS;
     std::string m_rawFile;
     double m_Ei;
     enum constants { NSpectra = 10, NBins = 4, NOTUSED = -123456, DAT_MONTOR_IND = 1};
     static const std::string delta[NSpectra], pressure[NSpectra], wallThick[NSpectra], code[NSpectra];
-
-    void writeDatFile()
-    {
-      std::ofstream file(m_DatFile.c_str());
-      file << "DETECTOR.DAT writen by LoadDetecs" << std::endl;
-      file << 165888  <<    14 << std::endl;
-      file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
-      for( int i = 0; i < NSpectra; ++i )
-      {
-        file << i  << "\t" << delta[i]<< "\t"  << NOTUSED<< "\t"  << code[i]<< "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[i]<< "\t"  << wallThick[i]<< "\t"  << NOTUSED << std::endl;
-      }
-      file.close();
-    }
 };
 
 const std::string DetectorEfficiencyCorTest::delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};

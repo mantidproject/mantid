@@ -15,10 +15,10 @@ using namespace Mantid::DataObjects;
 class ConjoinWorkspacesTest : public CxxTest::TestSuite
 {
 public:
-  ConjoinWorkspacesTest()
-  {}
+  static ConjoinWorkspacesTest *createSuite() { return new ConjoinWorkspacesTest(); }
+  static void destroySuite(ConjoinWorkspacesTest *suite) { delete suite; }
 
-  void setUp()
+  ConjoinWorkspacesTest()
   {
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
@@ -57,8 +57,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );
     delete loader;
+  }
 
-
+  ~ConjoinWorkspacesTest()
+  {
+    AnalysisDataService::Instance().clear();
   }
 
   void testTheBasics()
