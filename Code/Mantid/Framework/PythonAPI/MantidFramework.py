@@ -1274,14 +1274,17 @@ class PythonAlgorithm(PyAlgorithmBase):
         if not algm.__class__.__name__ == "IAlgorithm":
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
         
-        argspec = inspect.getargspec(algorithm)                    
+        # The inspect module has changed in python 2.6 
+        if sys.version_info[0]==2 and sys.version_info[1]<6:
+            _args = inspect.getargspec(algorithm)[0] 
+        else:
+            _args = inspect.getargspec(algorithm).args     
         # Go through provided arguments
         for i in range(len(args)):
             if isinstance(args[i], WorkspaceProxy):
-                algm._setWorkspaceProperty(argspec.args[i], args[i]._getHeldObject())                
+                algm._setWorkspaceProperty(_args[i], args[i]._getHeldObject())                
             else:
-                algm.setPropertyValue(argspec.args[i], makeString(args[i]).lstrip('? '))
-        
+                algm.setPropertyValue(_args[i], makeString(args[i]).lstrip('? '))
         # Go through keyword arguments
         proxy = mtd._createAlgProxy(algm)
         for key in kwargs:
