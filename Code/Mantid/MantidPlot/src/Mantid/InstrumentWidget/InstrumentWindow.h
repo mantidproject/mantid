@@ -26,6 +26,9 @@ class MatrixWorkspace;
 
 }
 
+class OneCurvePlot;
+class CollapsiblePanel;
+
 // Qt forward declarations
 class QPushButton;
 class QDialog;
@@ -36,7 +39,7 @@ class QLineEdit;
 class QLabel;
 class QCheckBox;
 class QComboBox;
-class OneCurvePlot;
+class QTextEdit;
 class QShowEvent;
 
 /**
@@ -167,8 +170,11 @@ private:
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
   QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
-  QLabel* m_plotCaption;
+  CollapsiblePanel* m_plotPanel;
+  QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
+  CollapsiblePanel* m_infoPanel;
   void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
+  void updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos);
   private slots:
     void plotContextMenu();
     void sumDetectors();

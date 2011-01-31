@@ -194,6 +194,8 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost:
   int text_x_size, text_y_size;
   mDet->getTextureSize(text_x_size, text_y_size);
 
+  std::cerr << "Texture size: " << text_x_size << ',' << text_y_size <<std::endl;
+
   //For using color IDs
   int rgb = this->mColorStartID;
 

@@ -1,5 +1,6 @@
 #include "InstrumentWindow.h"
 #include "OneCurvePlot.h"
+#include "CollapsiblePanel.h"
 #include "../MantidUI.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -194,6 +195,7 @@ void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & c
 {
   mInteractionInfo->setText(cursorPos.display());
   updatePlot(cursorPos);
+  updateSelectionInfo(cursorPos);
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
@@ -927,7 +929,9 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   QFrame* tab = new QFrame(ControlsTab);
   QVBoxLayout* layout=new QVBoxLayout(tab);
 
-  m_plotCaption = new QLabel(this);
+  // set up the selection display
+  m_selectionInfoDisplay = new QTextEdit(this);
+
   // set up the plot widget
   m_plot = new OneCurvePlot(ControlsTab);
   m_plot->setYAxisLabelRotation(-90);
@@ -939,6 +943,11 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   connect(m_sumDetectors,SIGNAL(triggered()),this,SLOT(sumDetectors()));
   connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
 
+  CollapsibleStack* panelStack = new CollapsibleStack(this);
+  m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
+  m_plotPanel = panelStack->addPanel("Name",m_plot);
+
+  // set up the tool bar
   m_one = new QPushButton("One");
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
@@ -952,10 +961,9 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   connect(m_one,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
   connect(m_many,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
 
+  // lay out the widgets
   layout->addLayout(toolBox);
-  layout->addStretch();
-  layout->addWidget(m_plotCaption);
-  layout->addWidget(m_plot);
+  layout->addWidget(panelStack);
 
   connect(ControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
@@ -965,6 +973,7 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
 
 void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
 {
+  if (m_plotPanel->isCollapsed()) return;
   Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
   int wi = cursorPos.getWorkspaceIndex();
   if (cursorPos.getDetID() >= 0 && wi >= 0)
@@ -1065,6 +1074,33 @@ void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
   m_plot->replot();
 }
 
+void InstrumentWindow::updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos)
+{
+  if (cursorPos.getDetID() >= 0)
+  {
+    Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
+    Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
+    QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
+    text += "Detector ID: " + QString::number(cursorPos.getDetID()) + '\n';
+    text += "Workspace index: " + QString::number(cursorPos.getWorkspaceIndex()) + '\n';
+    Mantid::Geometry::V3D pos = det->getPos();
+    text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
+    double r,t,p;
+    pos.getSpherical(r,t,p);
+    text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," + QString::number(p)  + '\n';
+    Mantid::Geometry::ICompAssembly_const_sptr parent = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(det->getParent());
+    if (parent)
+    {
+      text += "Parent assembly: " + QString::fromStdString(parent->getName()) + '\n';
+    }
+    m_selectionInfoDisplay->setText(text);
+  }
+  else
+  {
+    m_selectionInfoDisplay->clear();
+  }
+}
+
 void InstrumentWindow::plotContextMenu()
 {
   QMenu context(this);
@@ -1090,7 +1126,7 @@ void InstrumentWindow::setPlotCaption()
   {
     caption = "Plotting integral";
   }
-  m_plotCaption->setText(caption);
+  m_plotPanel->setCaption(caption);
 }
 
 void InstrumentWindow::sumDetectors()
