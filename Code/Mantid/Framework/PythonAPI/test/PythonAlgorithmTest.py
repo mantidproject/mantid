@@ -23,7 +23,6 @@ class DummyAlg(PythonAlgorithm):
         output_ws = self.getPropertyValue("OutputWorkspace")
         a = self.executeSubAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
-mtd.registerPyAlgorithm(DummyAlg())
 
 
 class PythonAlgorithmTest(unittest.TestCase):
@@ -34,12 +33,13 @@ class PythonAlgorithmTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def skip_test_sub_alg_wksp_transfer(self):
+    def test_sub_alg_wksp_transfer(self):
         """
             Check that we can execute a sub-algorithm and pass
             ownership of an output workspace to the parent algo. 
         """
-        algm = mantid.createAlgorithm("DummyAlg")
+        algm = DummyAlg()
+        algm.initialize()
         algm.setPropertyValue("OutputWorkspace", "subalgtest")
         algm.setRethrows(True)
         algm.execute()
@@ -57,8 +57,8 @@ class PythonAlgorithmTest(unittest.TestCase):
                 output_ws = self.getPropertyValue("OutputWorkspace")
                 a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
                 self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
-        mtd.registerPyAlgorithm(DummyAlg2())
-        algm = mantid.createAlgorithm("DummyAlg2")
+        algm = DummyAlg2()
+        algm.initialize()
         algm.setPropertyValue("OutputWorkspace", "subalgtest2")
         algm.setRethrows(True)
         algm.execute()
