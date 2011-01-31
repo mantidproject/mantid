@@ -634,7 +634,7 @@ namespace DataObjects
     case WEIGHTED_NOTIME:
       return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0, weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
     }
-
+    throw std::runtime_error("EventList: invalid event type value was found.");
   }
 
 
@@ -1171,6 +1171,7 @@ namespace DataObjects
     case WEIGHTED_NOTIME:
       return this->weightedEventsNoTime.size();
     }
+    throw std::runtime_error("EventList: invalid event type value was found.");
   }
 
 
@@ -1192,6 +1193,7 @@ namespace DataObjects
     case WEIGHTED_NOTIME:
       return this->weightedEventsNoTime.capacity() * sizeof(WeightedEventNoTime) + sizeof(EventList);
     }
+    throw std::runtime_error("EventList: invalid event type value was found.");
   }
 
 
@@ -1553,7 +1555,7 @@ namespace DataObjects
    * @param Y: counts returned
    * @param E: errors returned
    * @param skipError: skip calculating the error. This has no effect for weighted
-   *        events; just ignore the returned E vector.
+   *        events; you can just ignore the returned E vector.
    */
   void EventList::generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
   {
@@ -1565,7 +1567,8 @@ namespace DataObjects
     case TOF:
       // Make the single ones
       this->generateCountsHistogram(X, Y);
-      this->generateErrorsHistogram(Y, E);
+      if (!skipError)
+        this->generateErrorsHistogram(Y, E);
       break;
 
     case WEIGHTED:
@@ -1749,7 +1752,7 @@ namespace DataObjects
     case WEIGHTED_NOTIME:
       return integrateHelper(this->weightedEventsNoTime, minX, maxX, entireRange);
     }
-
+    throw std::runtime_error("EventList: invalid event type value was found.");
   }
 
 

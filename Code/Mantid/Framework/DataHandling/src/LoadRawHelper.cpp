@@ -660,6 +660,8 @@ namespace Mantid
     /// @param period :: The period number that the workspace holds
     void LoadRawHelper::runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, int period)
     {
+      (void) period; // Avoid compiler warning
+
       g_log.debug("Loading the log files...");
       progress(m_prog, "Reading log files...");
       IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");

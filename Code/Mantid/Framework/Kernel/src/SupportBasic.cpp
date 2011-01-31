@@ -104,8 +104,8 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
 */
 int confirmStr(const std::string& S,const std::string& fullPhrase)
 {
-  const int nS(S.length());
-  const int nC(fullPhrase.length());
+  const size_t nS(S.length());
+  const size_t nC(fullPhrase.length());
   if (nS>nC || nS<=0)    
     return 0;           
   for(size_t i=0;i<nS;i++)

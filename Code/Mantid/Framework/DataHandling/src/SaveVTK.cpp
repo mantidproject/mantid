@@ -169,6 +169,8 @@ namespace Mantid
     */
     void SaveVTK::writeVTKPiece(std::ostream & outVTP, const std::vector<double> & xValue, const std::vector<double> & yValue, const std::vector<double> & errors, int index) const
     {
+      (void) errors; // Avoid compiler warning
+
       std::vector<double>::size_type nY = yValue.size();
       int nPoints(8*nY); 
       outVTP << "<Piece NumberOfPoints=\"" << nPoints << "\" NumberOfCells=\"" << nY << "\">";

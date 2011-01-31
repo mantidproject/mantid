@@ -435,6 +435,8 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
     /// Run the LoadLog sub-algorithm
     void LoadRaw2::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int period)
     {
+      (void) period; // Avoid compiler warning
+
       IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);

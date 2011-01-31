@@ -19,7 +19,7 @@ namespace Kernel
     boundaries.clear();
     stepSizes.clear();
 
-    int n = binParams.size();
+    size_t n = binParams.size();
     if (n < 3)
       throw std::invalid_argument("BinFinder: not enough bin parameters.");
     if (n % 2 == 0)

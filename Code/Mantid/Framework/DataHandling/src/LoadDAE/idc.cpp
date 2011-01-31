@@ -60,6 +60,9 @@ int IDCsetreportfunc(idc_error_report_t report_func)
 /** returns 0 on success, -1 on failure */
 int IDCopen(const char* host, int mode, int options, idc_handle_t* pfh)
 {
+  (void) mode; // Avoid compiler warning
+  (void) options; // Avoid compiler warning
+
 	SOCKET s;
 	*pfh = NULL;
 	s = isisds_send_open(host, ISISDSDAEAccess);
@@ -328,6 +331,8 @@ void __stdcall IDCFGETPARC(int fh[], const char* name, unsigned len_name, char v
 void idcfgetparc_(int fh[], const char* name, char* value, int dims_array[], int* ndims,  int* errcode, unsigned len_name, unsigned len_value)
 #endif
 {
+  (void) len_value; // Avoid compiler warning
+
 	int stat;
 	char t_name[256];
 	idc_handle_t tfh;

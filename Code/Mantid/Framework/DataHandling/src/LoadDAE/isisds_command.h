@@ -33,6 +33,7 @@ typedef void (*isisds_error_report_t)(int status, int code, const char* messsage
 typedef enum { ISISDSDAEAccess = 0, ISISDSCRPTAccess = 1} ISISDSAccessMode;
 
 typedef enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal64 = 3, ISISDSChar = 4 } ISISDSDataType;
+
 static int isisds_type_size[] = { 0, 4, 4, 8, 1 };
 static const char* isisds_type_name[] = { "Unknown", "Int32", "Real32", "Real64", "Char" };
 static const char* isisds_type_code[] = { "U00", "I32", "R32", "R64", "C08" }; /* 3 char in length */

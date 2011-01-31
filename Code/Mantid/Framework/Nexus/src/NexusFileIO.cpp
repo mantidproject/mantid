@@ -733,7 +733,7 @@ using namespace DataObjects;
     if(status==NX_ERROR) return(2);
     status=NXopengroup(fileID,"event_workspace","NXdata");
 
-    for (size_t wi=0; wi < ws->getNumberHistograms(); wi++)
+    for (int wi=0; wi < ws->getNumberHistograms(); wi++)
     {
       std::ostringstream group_name;
       group_name << "event_list_" << wi;

@@ -19,6 +19,7 @@ ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0)
 **/
 int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
 {
+  (void) read_data; // Avoid compiler warning
 
   int i;
   fpos_t add_pos, dhdr_pos; 

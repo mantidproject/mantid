@@ -247,7 +247,7 @@ namespace DataObjects
    * @param weight: weight of this neutron event.
    * @param errorSquared: the square of the error on the event
    */
-  WeightedEventNoTime::WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared)
+  WeightedEventNoTime::WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime , float weight, float errorSquared)
   : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared)
   {
   }

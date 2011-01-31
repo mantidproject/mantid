@@ -55,7 +55,7 @@ void CompressEvents::exec()
 
   // Some starting things
   bool inplace = (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"));
-  size_t noSpectra = inputWS->getNumberHistograms();
+  int noSpectra = inputWS->getNumberHistograms();
   Progress prog(this,0.0,1.0, noSpectra*2);
 
   // Sort the input workspace in-place by TOF. This can be faster if there are few event lists.

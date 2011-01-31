@@ -290,7 +290,7 @@ namespace NeXus
     indices.reserve( m_eventWorkspace->getNumberHistograms()+1 );
     // First we need to index the events in each spectrum
     size_t index = 0;
-    for (size_t wi =0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    for (int wi =0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
     {
       indices.push_back(index);
       // Track the total # of events

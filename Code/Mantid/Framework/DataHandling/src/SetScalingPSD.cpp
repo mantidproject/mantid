@@ -386,6 +386,8 @@ void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
  */
 void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos)
 {
+  (void) rawfile; // Avoid compiler warning
+
     // open raw file
     ISISRAW iraw(NULL);
     if (iraw.readFromFile(m_filename.c_str(),false) != 0)

@@ -196,6 +196,7 @@ namespace Mantid
 						  const bool enableLogging, const int& version)
     
     {
+      (void) version; // Avoid compiler warning.
       //set as a child
       alg->initialize();
       alg->setChild(true);

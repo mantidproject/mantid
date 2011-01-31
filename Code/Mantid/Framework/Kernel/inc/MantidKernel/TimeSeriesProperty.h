@@ -181,13 +181,13 @@ public:
    */
   void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
   {
-    int numOutputs = static_cast<int>( outputs.size() );
+    size_t numOutputs = outputs.size();
     if (numOutputs <= 0)
       return;
 
     std::vector< TimeSeriesProperty<TYPE> *> outputs_tsp;
     //Clear the outputs before you start
-    for (std::size_t i=0; i < numOutputs; i++)
+    for (size_t i=0; i < numOutputs; i++)
     {
       TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
@@ -240,7 +240,7 @@ public:
       //Go through all the events that are in the interval (if any)
       while ((it != this->m_propertySeries.end()) && (it->first < stop))
       {
-        if ((index >= 0) && (index < numOutputs))
+        if ((index >= 0) && (index < static_cast<int>(numOutputs)))
         {
           TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
           //Copy the log out to the output
@@ -680,7 +680,7 @@ public:
     {
       if (m_propertySeries.count(it->first) > 1)
         continue;
-      if (j == n)
+      if (j == static_cast<size_t>(n))
         return it->second;
       j++;
     }
@@ -717,7 +717,7 @@ public:
     {
       if (m_propertySeries.count(it->first) > 1)
         continue;
-      if (j == n)
+      if (j == static_cast<size_t>(n))
       {
         typename timeMap::const_iterator it1 = it;
         it1++;

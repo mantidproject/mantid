@@ -590,6 +590,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
 					 bool binclude,bool bexclude,bool bseparate,
 					 int m_numberOfSpectra,const std::string &fileName)
 {
+  (void) binclude; // Avoid compiler warning
 
   std::vector<int> monitorSpecList;
   std::vector<int> monitorwsList;

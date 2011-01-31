@@ -108,6 +108,7 @@ namespace Mantid
      */
     void LoadDAE::IDCReporter(int status, int code, const char* message)
     {
+      (void) status; (void) code; // Avoid compiler warning
       g_StaticLog.error(message);
     }
 

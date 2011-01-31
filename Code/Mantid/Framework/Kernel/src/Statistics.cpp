@@ -104,6 +104,7 @@ Statistics getStatistics(const vector<TYPE>& data, const bool sorted)
 template<>
 DLLExport Statistics getStatistics<string>(const vector<string>& data, const bool sorted)
 {
+  (void) sorted; (void) data;
   return getNanStatistics();
 }
 
