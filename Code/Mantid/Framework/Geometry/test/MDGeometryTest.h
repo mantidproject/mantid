@@ -55,7 +55,9 @@ class MDGeometryTest : public CxxTest::TestSuite
     dimensions.push_back(dimZ);
     dimensions.push_back(dimt);
     dimensions.push_back(dimTemp);
-    MDGeometryDescription description(dimensions, dimX, dimY, dimZ, dimTemp);
+    RotationMatrix rotationMatrix(9,0);
+    rotationMatrix[0] = rotationMatrix[4] = rotationMatrix[8] = 1;
+    MDGeometryDescription description(dimensions, dimX, dimY, dimZ, dimTemp, rotationMatrix);
 
     //Create a geometry.
     return new MDGeometry(basis, description);
