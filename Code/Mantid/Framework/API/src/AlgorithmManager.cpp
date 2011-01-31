@@ -37,7 +37,7 @@ namespace Mantid
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
-    IAlgorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
+    Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
     {
         return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
@@ -72,7 +72,7 @@ namespace Mantid
     {
       try
       {
-        IAlgorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
+        Algorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
         m_managed_algs.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
         m_managed_algs.back()->initialize();
         

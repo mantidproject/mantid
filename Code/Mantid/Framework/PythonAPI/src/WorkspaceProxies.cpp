@@ -68,35 +68,35 @@ namespace Mantid
      * @returns The resulting workspace
      */
     MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr lhs, 
-					 const MatrixWorkspace_sptr rhs, 
-					 const std::string& op, const std::string & name, 
-					 bool inplace,bool reverse)
+        const MatrixWorkspace_sptr rhs,
+        const std::string& op, const std::string & name,
+        bool inplace,bool reverse)
     {
       MatrixWorkspace_sptr result;
       std::string error("");
       try
       {
-	if( reverse ) 
-	{
-	  result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name, true);
-	}
-	else
-	{
-	  result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name, true);
-	}
+        if( reverse )
+        {
+          result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name, true);
+        }
+        else
+        {
+          result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name, true);
+        }
       }
       catch(std::runtime_error & exc)
       {
-	error = exc.what();
-	if( error.find("algorithm") == 0 )
-	{
-	  error = "Unknown binary operation requested: " + op;
-	  throw std::runtime_error(error);
-	}
-	else
-	{
-	  throw;
-	}
+        error = exc.what();
+        if( error.find("algorithm") == 0 )
+        {
+          error = "Unknown binary operation requested: " + op;
+          throw std::runtime_error(error);
+        }
+        else
+        {
+          throw;
+        }
       }
       return result;
     }
@@ -111,12 +111,12 @@ namespace Mantid
     * @return A shared pointer to the result workspace
     */
     MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr inputWS, const double value, 
-					 const std::string& op, const std::string & name, 
-					 bool inplace, bool reverse)
+        const std::string& op, const std::string & name,
+        bool inplace, bool reverse)
     {
       // Create the single valued workspace first so that it is run as a top-level algorithm
       // such that it's history can be recreated
-      API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
+      API::Algorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
       alg->setChild(false);
       alg->initialize();
       alg->setProperty<double>("DataValue",value);
@@ -127,11 +127,11 @@ namespace Mantid
       API::AnalysisDataServiceImpl & data_store = API::AnalysisDataService::Instance();
       if( alg->isExecuted() )
       {
-	singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(data_store.retrieve(tmp_name));
+        singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(data_store.retrieve(tmp_name));
       }
       else
       {
-	throw std::runtime_error("performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
+        throw std::runtime_error("performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
       }      
       MatrixWorkspace_sptr result = performBinaryOp(inputWS, singleValue, op, name, inplace, reverse);
       // Delete the temporary

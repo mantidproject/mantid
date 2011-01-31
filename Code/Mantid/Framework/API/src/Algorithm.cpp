@@ -387,10 +387,10 @@ namespace Mantid
     *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
     *  @returns Set to point to the newly created algorithm object
     */
-    IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress, 
+    Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress,
       const bool enableLogging, const int& version)
     {
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
       //set as a child
       alg->setChild(true);
       alg->setLogging(enableLogging);

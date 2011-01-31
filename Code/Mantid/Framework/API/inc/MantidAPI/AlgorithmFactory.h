@@ -61,7 +61,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 {
 public:
   ///Creates an instance of an algorithm
-  boost::shared_ptr<IAlgorithm> create(const std::string& ,const int& ) const;
+  boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
 
   /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
   template <class C>
@@ -109,7 +109,7 @@ public:
   int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
 
   ///Create an algorithm object with the specified name
-  boost::shared_ptr<IAlgorithm> createAlgorithm(const std::string & name, const int version) const;
+  boost::shared_ptr<Algorithm> createAlgorithm(const std::string & name, const int version) const;
 	
   /// Private Constructor for singleton class
   AlgorithmFactoryImpl();	

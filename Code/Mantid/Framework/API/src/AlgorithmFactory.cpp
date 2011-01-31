@@ -44,7 +44,7 @@ namespace Mantid
      * @param version :: the version of the algroithm to create
      * @returns a shared pointer to the created algorithm
      */
-    boost::shared_ptr<IAlgorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
+    boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
     {   
       int local_version=version;
       if( version < 0)
@@ -213,7 +213,7 @@ namespace Mantid
      * @param version :: Algorithm version
      * @returns A shared pointer to the algorithm object
      */
-    boost::shared_ptr<IAlgorithm> AlgorithmFactoryImpl::createAlgorithm(const std::string & name, const int version) const
+    boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::createAlgorithm(const std::string & name, const int version) const
     {
       try
       {

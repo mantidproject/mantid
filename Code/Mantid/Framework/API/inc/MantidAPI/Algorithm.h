@@ -205,6 +205,7 @@ public:
 
   /// Asynchronous execution.
   Poco::ActiveResult<bool> executeAsync();
+
   /// Execute as a sub-algorithm
   void executeAsSubAlg();
 
@@ -237,6 +238,7 @@ public:
   void setChildStartProgress(const double startProgress){m_startChildProgress=startProgress;}
   /// setting the child end progress
   void setChildEndProgress(const double endProgress){m_endChildProgress=endProgress;}
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -250,7 +252,7 @@ protected:
   void initializeFromProxy(const AlgorithmProxy&);
 
   //creates a sub algorithm for use in this algorithm
-  IAlgorithm_sptr createSubAlgorithm(const std::string& name, const double startProgress = -1.,
+  boost::shared_ptr<Algorithm> createSubAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
   void setInitialized();

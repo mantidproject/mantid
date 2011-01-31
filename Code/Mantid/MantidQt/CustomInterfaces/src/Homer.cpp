@@ -8,6 +8,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "Poco/Path.h"
@@ -279,37 +280,23 @@ bool Homer::isParamInputValid() const
 */
 bool Homer::isRebinStringValid() const
 {
-  bool valid(false);
-  QString rbParams("%1,%2,%3");
-  rbParams = rbParams.arg(m_uiForm.leELow->text(), m_uiForm.leEWidth->text(), m_uiForm.leEHigh->text());
-  Mantid::API::IAlgorithm_sptr rebin = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
-  if( rebin )
+  // Get the values into a vector
+  std::vector<double> rbParams(3);
+  rbParams[0] = m_uiForm.leELow->text().toDouble();
+  rbParams[1] = m_uiForm.leEWidth->text().toDouble();
+  rbParams[2] = m_uiForm.leEHigh->text().toDouble();
+  // Create a validator and pass it the vector. Empty string from isValid() signals success.
+  Mantid::Kernel::RebinParamsValidator validator;
+  if ( validator.isValid(rbParams).empty() )
   {
-    rebin->initialize();
-    try
-    {
-      rebin->setPropertyValue("Params", rbParams.toStdString());
-      valid = true;
-    }
-    catch(...)
-    {
-      valid = false;
-    }
-    if( valid )
-    {
-      m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: white}");
-    }
-    else
-    {
-      m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: red}");
-    }
+    m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: white}");
+    return true;
   }
   else
   {
-    valid = false;
-    QMessageBox::critical(this->parentWidget(), "Homer", "Error creating Rebin algorithm, check algorithms have been loaded.");
+    m_uiForm.gbRebin->setStyleSheet("QLineEdit {background-color: red}");
+    return false;
   }
-  return valid;
 }
 
 /**

@@ -9,7 +9,7 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 
 namespace Mantid
@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTID_API AlgorithmManagerImpl
 public:
   // Methods to create algorithm instances
   IAlgorithm_sptr create(const std::string& algName, const int& version = -1);
-  IAlgorithm_sptr createUnmanaged(const std::string& algName, const int& version = -1) const;
+  boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 
   /// deletes all registered algorithms
   void clear();

@@ -202,7 +202,7 @@ void CalculateTransmissionBeamSpreader::exec()
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("SumSpectra");
+  Algorithm_sptr childAlg = createSubAlgorithm("SumSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("IncludeMonitors", false);
   childAlg->executeAsSubAlg();
@@ -222,7 +222,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
     g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
 
-  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
+  Algorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
   childAlg->executeAsSubAlg();
@@ -236,7 +236,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting the experimental transmission curve");
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear",0.6,1.0);
+  Algorithm_sptr childAlg = createSubAlgorithm("Linear",0.6,1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   const double lambdaMin = getProperty("MinWavelength");
   const double lambdaMax = getProperty("MaxWavelength");

@@ -11,7 +11,10 @@ project ( Mantid )
 if ( WIN32 )
   set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   include ( WindowsSetup )
-elseif ( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
+endif ()
+
+# Add compiler options if using gcc
+if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
 endif ()
 

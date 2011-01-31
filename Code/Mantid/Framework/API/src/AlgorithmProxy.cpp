@@ -20,7 +20,7 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 //----------------------------------------------------------------------
 
 /// Constructor
-AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
+AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg) :
   PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
   m_name(alg->name()),m_category(alg->category()),
   m_version(alg->version()),
@@ -74,12 +74,6 @@ bool AlgorithmProxy::execute()
   stopped();
 
   return m_isExecuted;
-}
-
-/// Execute as a sub-algorithm. Should never be called from an AlgorithmProxy
-void AlgorithmProxy::executeAsSubAlg()
-{
-  throw std::runtime_error("executeAsSubAlg() should not be called from an AlgorithmProxy: use execute() instead.");
 }
 
 /// Asynchronous execution of the algorithm.

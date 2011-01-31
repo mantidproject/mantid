@@ -87,10 +87,6 @@ public:
 
   /// Asynchronous execution of the algorithm.
   virtual Poco::ActiveResult<bool> executeAsync() = 0;
-  /** Execute as a sub-algorithm. An entry is logged when an exception
-   *  is raised. The exception is then re-thrown. The isExecuted flag is also checked.
-   */
-  virtual void executeAsSubAlg() = 0;
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
