@@ -25,6 +25,7 @@ namespace Mantid
     //------------------------------------------------------------------
     class XMLlogfile;
     class ParameterMap;
+    template<typename T> class ComponentPool;
 
     /**
     Base Instrument Class.
@@ -145,6 +146,12 @@ namespace Mantid
 
       /// Add a plottable component
       void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst)const;
+
+      // This method is only required for efficent caching of parameterized components and
+      // should not form part of the interface. It is an implementation detail.
+      template<typename T> friend class ComponentPool;
+      /// Swap the current references to the un-parameterized component and parameter map for new ones
+      void swap(const Instrument* base, const ParameterMap * map);
 
       /// Map which holds detector-IDs and pointers to detector components
       std::map<int, Geometry::IDetector_sptr > _detectorCache;

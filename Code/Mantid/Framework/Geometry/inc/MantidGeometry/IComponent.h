@@ -104,7 +104,7 @@ namespace Mantid
       //! Rotate the IComponent by an angle in degrees with respect to an axis.
       virtual void rotate(double,const V3D&) = 0;
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      virtual V3D getRelativePos() const = 0;
+      virtual const V3D & getRelativePos() const = 0;
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
       virtual V3D getPos() const = 0;
       //! Get the relative Orientation
@@ -136,13 +136,12 @@ namespace Mantid
       /** Prints a text representation of itself
       */
       virtual void printSelf(std::ostream&) const = 0;
-    private:
-      /// Private, unimplemented copy assignment operator
-      IComponent& operator=(const IComponent&);
     };
 
     ///Typedef of a shared pointer to a IComponent
-    typedef boost::shared_ptr<Mantid::Geometry::IComponent> IComponent_sptr;
+    typedef boost::shared_ptr<IComponent> IComponent_sptr;
+    ///Typdef of a shared poitner to a const IComponent
+    typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
 
     /** Prints a text representation
     */

@@ -45,12 +45,6 @@ namespace Mantid
     {
     }
 
-    /// Copy constructor
-    ObjComponent::ObjComponent(const ObjComponent& rhs) :
-      IObjComponent(rhs),Component(rhs), m_shape(rhs.m_shape), m_material(rhs.m_material)
-    {
-    }
-
     /// Destructor
     ObjComponent::~ObjComponent()
     {

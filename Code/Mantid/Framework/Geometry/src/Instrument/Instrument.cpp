@@ -85,10 +85,6 @@ namespace Mantid
       {
         //You can just return the detector cache directly.
         return _detectorCache;
-//        std::map<int, Geometry::IDetector_sptr> res;
-//        for(std::map<int, Geometry::IDetector_sptr >::const_iterator it=_detectorCache.begin();it!=_detectorCache.end();it++)
-//          res.insert(std::pair<int, Geometry::IDetector_sptr>(it->first,Geometry::IDetector_sptr(it->second,NoDeleting()) ));
-//        return res;
       }
     }
 
@@ -170,15 +166,12 @@ namespace Mantid
     {
       if (m_isParametrized)
       {
-        boost::shared_ptr<Detector> det = boost::dynamic_pointer_cast<Detector>(dynamic_cast<const Instrument*>(m_base)->getDetector(detector_id));
-        return IDetector_sptr(new Geometry::Detector(det.get(),m_map));
+	IDetector_sptr baseDet = m_instr->getDetector(detector_id);
+	return ParComponentFactory::createParDetector(baseDet, m_map);
       }
       else
       {
-        std::map<int, Geometry::IDetector_sptr >::const_iterator it;
-
-        it = _detectorCache.find(detector_id);
-
+        std::map<int, Geometry::IDetector_sptr >::const_iterator it = _detectorCache.find(detector_id);
         if ( it == _detectorCache.end() )
         {
           g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
@@ -409,7 +402,7 @@ namespace Mantid
       if (m_isParametrized)
       {
         // Get the 'base' plottable components
-        IInstrument::plottables_const_sptr objs = dynamic_cast<const Instrument*>(m_base)->getPlottable();
+        IInstrument::plottables_const_sptr objs = m_instr->getPlottable();
 
         // Get a reference to the underlying vector, casting away the constness so that we
         // can modify it to get our result rather than creating another long vector
@@ -417,10 +410,8 @@ namespace Mantid
         const plottables::size_type total = res.size();
         for(plottables::size_type i = 0; i < total; ++i)
         {
-          if ( boost::dynamic_pointer_cast<const Detector>(objs->at(i)) )
-            res[i] = IObjComponent_const_sptr(new Detector(dynamic_cast<const Detector*>(objs->at(i).get()),m_map));
-          else
-            res[i] = IObjComponent_const_sptr(new ObjComponent(dynamic_cast<const ObjComponent*>(objs->at(i).get()),m_map));
+	  res[i] = boost::dynamic_pointer_cast<const Detector>(
+	    ParComponentFactory::createParComponent(objs->at(i), m_map));
         }
         return objs;
 
@@ -428,8 +419,7 @@ namespace Mantid
       else
       {
         // Base instrument
-        boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
-          new std::vector<Geometry::IObjComponent_const_sptr> );
+        boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res( new std::vector<Geometry::IObjComponent_const_sptr> );
         res->reserve(_detectorCache.size()+10);
         appendPlottable(*this,*res);
         return res;
@@ -458,7 +448,19 @@ namespace Mantid
         }
       }
     }
-
+    
+    /**
+     * Swap the references to the base component and ParameterMap. The instrument has to be slightly special
+     * @param base A pointer to the base component
+     * @param map A pointer to the parameter map
+     */
+    void Instrument::swap(const Instrument* base, const ParameterMap * map)
+    {
+      m_instr = boost::shared_ptr<Instrument>(const_cast<Instrument*>(base), NoDeleting());
+      m_map_nonconst = ParameterMap_sptr(const_cast<ParameterMap*>(map), NoDeleting());
+      Component::swap(base, map);
+    }
+    
 
   } // namespace Geometry
 } // Namespace Mantid

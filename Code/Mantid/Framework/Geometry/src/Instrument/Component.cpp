@@ -23,17 +23,6 @@ namespace Mantid
 
     }
 
-    /// Copy constructor
-    Component::Component(const Component& comp)
-      :m_base(comp.m_base),m_map(comp.m_map),m_isParametrized(comp.m_isParametrized)
-    {
-      m_name=comp.m_name;
-      m_parent=comp.m_parent;
-      m_pos=comp.m_pos;
-      m_rot=comp.m_rot;
-    }
-
-
     /** Empty constructor
     *  Create a component with null parent
     */
@@ -131,7 +120,7 @@ namespace Mantid
       if (this->m_isParametrized)
       {
         boost::shared_ptr<const IComponent> parent = m_base->getParent();
-        return ParComponentFactory::create(parent,m_map);
+        return ParComponentFactory::createParComponent(parent,m_map);
       }
       else
         return boost::shared_ptr<const IComponent>(m_parent, NoDeleting());
@@ -284,19 +273,17 @@ namespace Mantid
     /** Gets the position relative to the parent
     * @returns A vector of the relative position
     */
-    V3D Component::getRelativePos() const
+    const V3D & Component::getRelativePos() const
     {
-      if (!m_isParametrized)
-        return m_pos;
-      else
+      if( m_isParametrized )
       {
-        Parameter_sptr par = m_map->get(m_base,"pos");
-        if (par)
-        {
-          return par->value<V3D>();
-        }
-        return m_base->getRelativePos();
+	if( m_map->contains(m_base, "pos") )
+	{
+	  return m_map->get(m_base, "pos")->value<V3D>();
+	}
+	else return m_base->m_pos;
       }
+      else return m_pos;
     }
 
     /** Get ScaleFactor of detector
@@ -371,18 +358,16 @@ namespace Mantid
     */
     const Quat& Component::getRelativeRot() const
     {
-      if (m_isParametrized)
+      if( m_isParametrized )
       {
-        Parameter_sptr par = m_map->get(m_base,"rot");
-        if (par)
-          return par->value<Quat>();
-        else
-          return m_base->getRelativeRot();
+	if( m_map->contains(m_base, "rot") ) 
+	{
+	  return m_map->get(m_base, "rot")->value<Quat>();
+	}
+	return m_base->m_rot;
       }
-      else
-        return m_rot;
+      else return m_rot;
     }
-
 
     /** Returns the absolute rotation of the Component
     *  @return A quaternion representing the total rotation
@@ -400,7 +385,7 @@ namespace Mantid
         else
         {
 	  Quat parentRot;
-	  if( !m_map->getCachedRotation(baseParent, parentRot) )
+ 	  if( !m_map->getCachedRotation(baseParent, parentRot) )
 	  {
 	    // Get the parent's rotation
 	    boost::shared_ptr<const IComponent> parParent = getParent();
@@ -525,6 +510,22 @@ namespace Mantid
     {
       comp.printSelf(os);
       return os;
+    }
+
+    //--------------------------------------------------------------------------
+    // Private methods
+    //--------------------------------------------------------------------------
+
+    /**
+     * Swap the current references to the un-parameterized component and 
+     * parameter map for new ones
+     * @param base A pointer to the new un-parameterized component
+     * @param pmap A pointer to the new parameter map
+     */
+    void Component::swap(const Component* base, const ParameterMap * pmap)
+    {
+      m_base = base;
+      m_map = pmap;
     }
 
   } // Namespace Geometry

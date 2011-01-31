@@ -1,5 +1,4 @@
 #include "MantidGeometry/Instrument/Detector.h"
-
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 namespace Mantid
@@ -39,13 +38,6 @@ Detector::Detector(const std::string& name, int id, boost::shared_ptr<Object> sh
 {
 }
 
-/// Copy constructor
-Detector::Detector(const Detector& rhs) :
-  IObjComponent(rhs), IDetector(rhs), ObjComponent(rhs), m_id(rhs.m_id), 
-  m_isMonitor(rhs.m_isMonitor)
-{
-}
-
 ///Destructor
 Detector::~Detector()
 {
@@ -61,13 +53,6 @@ int Detector::getID() const
   else
     return m_id;
 }
-
-//// IDetector methods. Just pull in Component implementation
-//V3D Detector::getPos() const
-//{
-//  return ObjComponent::getPos();
-//}
-
 
 ///Get the distance between the detector and another component
 ///@param comp :: The other component

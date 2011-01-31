@@ -19,7 +19,7 @@ namespace Mantid
     *  @throw std::invalid_argument If an empty vector is passed as argument
     */
     DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked) :
-    IDetector(), m_id(), m_detectors(), m_unImplementedForInterface()
+    IDetector(), m_id(), m_detectors()
     {
       if ( dets.empty() )
       {

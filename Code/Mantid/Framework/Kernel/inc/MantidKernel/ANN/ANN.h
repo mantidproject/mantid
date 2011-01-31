@@ -59,6 +59,14 @@
 #ifndef ANN_H
 #define ANN_H
 
+// M. Gigg: Added the next two pragmas to supress the warnings regarding
+// unused parameters since this is a third party package
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined _WIN32 
+#pragma warning( disable: 4100 )
+#endif
+
 #ifdef WIN32
   //----------------------------------------------------------------------
   // For Microsoft Visual C++, externally accessible symbols must be

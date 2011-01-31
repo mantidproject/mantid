@@ -131,9 +131,6 @@ namespace Mantid
       /// The collection of grouped detectors
       DetCollection m_detectors;
 
-      /// required to for the function getRelativeRot() in IComponent interface, left at the default value
-      const Quat m_unImplementedForInterface;
-
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
   
@@ -161,8 +158,8 @@ namespace Mantid
       void translate(double, double, double){}
       void rotate(const Quat&){}
       void rotate(double,const V3D&){}
-      V3D getRelativePos() const{ return V3D(); }
-      const Quat& getRelativeRot() const{ return m_unImplementedForInterface; }
+      const V3D& getRelativePos() const { throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");  }
+      const Quat& getRelativeRot() const{ throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup"); }
       const Quat getRotation() const{ return Quat(); }
       void printSelf(std::ostream&) const{}
 

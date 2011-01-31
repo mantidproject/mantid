@@ -55,7 +55,6 @@ public:
   virtual ~Detector();
   // functions inherited from IObjectComponent
   virtual Component* clone() const {return new Detector(*this);}
-  //void setID(int);
 
   // IDetector methods
   int getID() const;
@@ -72,15 +71,9 @@ public:
 
   void markAsMonitor(const bool flag = true);
 
-protected:
-  Detector(const Detector&);
-
 private:
-  /// Private, unimplemented copy assignment operator
-  Detector& operator=(const Detector&);
-
   /// The detector id
-  const int m_id;
+  mutable int m_id;
   /// Flags if this is a monitor
   bool m_isMonitor;
 

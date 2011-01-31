@@ -188,13 +188,12 @@ int CompAssembly::nelements() const
  */
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
-
   if (m_isParametrized)
   {
     //Get the child of the base (unparametrized) assembly
     boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->getChild(i);
     //And build up a parametrized version of it using the factory, and return that
-    return ParComponentFactory::create(child_base,m_map);
+    return ParComponentFactory::createParComponent(child_base,m_map);
   }
   else
   {

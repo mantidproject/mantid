@@ -68,6 +68,21 @@ namespace Mantid
       handle = origin.handle->createInstance(this);
     }
 
+    /**
+     * Assignment operator
+     * @param rhs The rvalue to copy into this object
+     * @returns A reference to this object
+     */
+    IObjComponent& IObjComponent::operator=(const IObjComponent& rhs)
+    {
+      if( &rhs != this )
+      {
+	m_ScaleFactor = rhs.m_ScaleFactor;
+	handle = rhs.handle->createInstance(this);
+      }
+      return *this;
+    }
+
     
   } // namespace Geometry
 } // namespace Mantid

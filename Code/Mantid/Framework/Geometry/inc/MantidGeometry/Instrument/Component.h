@@ -21,6 +21,7 @@ namespace Mantid
     //----------------------------------------------------------------------
     class V3D;
     class Quat;
+    template<typename T> class ComponentPool;
 
     /** @class Component Component.h Geometry/Component.h
 
@@ -65,8 +66,6 @@ namespace Mantid
       //! Create a named component with positioning vector, orientation and parent component
       Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent=0);
 
-      /// Copy Constructor
-      Component(const Component&);
       ///  destructor
       ~Component();
 
@@ -112,7 +111,7 @@ namespace Mantid
       void rotate(double,const V3D&);
 
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      V3D getRelativePos() const;
+      const V3D & getRelativePos() const;
 
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
       virtual V3D getPos() const;
@@ -195,28 +194,19 @@ namespace Mantid
       /// The base component - this is the unmodifed component (without the parameters). Stored
       /// as a pointer to Component so that it's properties can be accessed without casting each time
       const Component* m_base;
-
       /// A const pointer to a const ParameterMap containing the parameters
-      const ParameterMap * const m_map;
-
+      const ParameterMap *m_map;
       /// Flag to determine if component is parameterized
-      const bool m_isParametrized;
+      bool m_isParametrized;
 
       //! Name of the component
       std::string m_name;
-
       //! Position w
       V3D m_pos;
-
       //! Orientation
       Quat m_rot;
-
       /// Parent component in the tree
       const IComponent* m_parent;
-
-    private:
-      /// Private, unimplemented copy assignment operator
-      Component& operator=(const Component&);
 
       /**
       *  Get a parameter from the parameter map
@@ -254,6 +244,13 @@ namespace Mantid
           return std::vector<TYPE>(0);
         }
       }
+
+    protected:
+      // This method is only required for efficent caching of parameterized components and
+      // should not form part of the interface. It is an implementation detail.
+      template<typename T> friend class ComponentPool;
+      /// Swap the current references to the un-parameterized component and parameter map for new ones
+      void swap(const Component* base, const ParameterMap * pmap);
     };
 
   } // namespace Geometry

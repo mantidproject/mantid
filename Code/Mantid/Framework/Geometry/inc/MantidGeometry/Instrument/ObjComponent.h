@@ -97,18 +97,12 @@ public:
   const Material_const_sptr material() const;
 
 protected:
-  ObjComponent(const ObjComponent&);
-
   /// The phyical geometry representation
   // Made a const pointer to a const object. Since this is a shared object we shouldn't be
   // exposing non-const methods of Object through this class.
   Object_const_sptr m_shape;
   /// The material this object is made of
   Material_const_sptr m_material;
-
-private:
-  /// Private, unimplemented copy assignment operator
-  ObjComponent& operator=(const ObjComponent&);
 
   const V3D factorOutComponentPosition(const V3D& point) const;
   const V3D takeOutRotation(V3D point) const;

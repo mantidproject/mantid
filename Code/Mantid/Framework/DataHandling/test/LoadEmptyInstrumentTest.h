@@ -2,7 +2,6 @@
 #define LOADEMPTYINSTRUMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Instrument.h"
@@ -16,6 +15,11 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,7 +31,118 @@ class LoadEmptyInstrumentTest : public CxxTest::TestSuite
 {
 public:
 
-  void testExecSLS()
+  void testWISHTimings()
+  {
+    LoadEmptyInstrument loaderWISH;
+    TS_ASSERT_THROWS_NOTHING(loaderWISH.initialize());
+    TS_ASSERT( loaderWISH.isInitialized() );
+    loaderWISH.setPropertyValue("Filename", "WISH_Definition.xml");
+    inputFile = loaderWISH.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentTestWISH";
+    loaderWISH.setPropertyValue("OutputWorkspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderWISH.getPropertyValue("Filename") );
+    TS_ASSERT_EQUALS( result, inputFile);
+    TS_ASSERT_THROWS_NOTHING( result = loaderWISH.getPropertyValue("OutputWorkspace") );
+    TS_ASSERT( ! result.compare(wsName));
+    TS_ASSERT_THROWS_NOTHING(loaderWISH.execute());
+    TS_ASSERT( loaderWISH.isExecuted() );
+
+    MatrixWorkspace_sptr output = 
+      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+//     std::map<int, IDetector_sptr> pixels = output->getInstrument()->getDetectors();
+//     std::cout <<"\n" << pixels.size() << "\n";
+    const size_t numSpectra = output->getNumberHistograms();
+    int pixelCount(0);
+    //IDetector_sptr cached = output->getDetector(0);
+    Timer clock;
+    PARALLEL_FOR1(output)
+    for( int i = 0; i < numSpectra; ++i )
+    {
+      IDetector_sptr det = output->getDetector(i);
+      V3D pos = det->getPos();
+      //Quat rot = det->getRotation();
+      ++pixelCount;
+    }
+    std::cout << "Elapsed: " << clock.elapsed() << "\n";
+    std::cout << pixelCount << "\n";
+
+//     //Test two detectors
+//     std::cout << "\n";
+//     IDetector_sptr det0 = output->getDetector(0);
+//     std::cout << "det 0: " << det0->getID() << "\n";
+//     IDetector_sptr det1 = output->getDetector(1);
+//     std::cout << "det 1: " << det1->getID() << "\n";
+//     IDetector_sptr det2 = output->getDetector(2);
+//     std::cout << "det 2: " << det2->getID() << "\n";
+//     IDetector_sptr det3 = output->getDetector(3);
+//     std::cout << "det 3: " << det3->getID() << "\n";
+
+//     det3 = IDetector_sptr();
+//     det3 = output->getDetector(3);
+//     std::cout << "det 3: " << det3->getID() << "\n";
+
+
+    AnalysisDataService::Instance().remove(wsName);
+
+  }
+
+//   private:
+  
+//   IDetector_sptr getDetector(MatrixWorkspace_sptr ws, int index)
+//   {
+//     const SpectraDetectorMap & m_spectramap = ws->spectraMap();
+
+//     if ( ! m_spectramap.nElements() )
+//     {
+//       throw std::runtime_error("SpectraDetectorMap has not been populated.");
+//     }
+
+//       const int spectrum_number = ws->getAxis(1)->spectraNo(index);
+//       const std::vector<int> dets = m_spectramap.getDetectors(spectrum_number);
+//       if ( dets.empty() )
+//       {
+//         throw Exception::NotFoundError("Spectrum number not found", spectrum_number);
+//       }
+
+//       IInstrument_sptr localInstrument = getInstrument(ws);
+
+//       if( !localInstrument )
+//       {
+//         throw Exception::NotFoundError("Instrument not found", "");
+//       }
+//       const size_t ndets = dets.size();
+//       if ( ndets == 1 ) 
+//       {
+//         // If only 1 detector for the spectrum number, just return it
+//         return localInstrument->getDetector(dets[0]);
+//       }
+//       // Else need to construct a DetectorGroup and return that
+//       std::vector<IDetector_sptr> dets_ptr;
+//       dets_ptr.reserve(ndets);
+//       std::vector<int>::const_iterator it;
+//       for ( it = dets.begin(); it != dets.end(); ++it )
+//       {
+//         dets_ptr.push_back( localInstrument->getDetector(*it) );
+//       }
+
+//       return IDetector_sptr( new DetectorGroup(dets_ptr, false) );
+//   }
+
+//   IInstrument_sptr m_inst_cache;
+
+//   IInstrument_sptr getInstrument(MatrixWorkspace_sptr ws)
+//   {
+//     if( !m_inst_cache ) m_inst_cache = ws->getInstrument();
+//     return m_inst_cache;
+//   }
+
+public:
+
+
+  void xtestExecSLS()
   {
     LoadEmptyInstrument loaderSLS;
 
@@ -58,7 +173,7 @@ public:
 	AnalysisDataService::Instance().remove(wsName);
   }
 
-  void testExecENGINEX()
+  void xtestExecENGINEX()
   {
     LoadEmptyInstrument loaderSLS;
 
@@ -88,7 +203,7 @@ public:
     TS_ASSERT_EQUALS(output->spectraMap().nElements(),2502);
   }
 
-  void testExecMUSR()
+  void xtestExecMUSR()
   {
     LoadEmptyInstrument loaderMUSR;
 
@@ -119,7 +234,7 @@ public:
   }
 
 
-  void testParameterTags()
+  void xtestParameterTags()
   {
 
     LoadEmptyInstrument loader;
@@ -399,7 +514,7 @@ public:
   }
 
   // Tests specific to when  <offsets spherical="delta" /> is set in IDF
-  void testIDFwhenSphericalOffsetSet()
+  void xtestIDFwhenSphericalOffsetSet()
   {
 
     LoadEmptyInstrument loader;
@@ -513,7 +628,7 @@ public:
 
   // also test that when loading in instrument a 2nd time that parameters defined
   // in instrument gets loaded as well
-  void testToscaParameterTags()
+  void xtestToscaParameterTags()
   {
     LoadEmptyInstrument loader;
 
@@ -575,7 +690,7 @@ public:
 
   // also test that when loading in instrument a 2nd time that parameters defined
   // in instrument gets loaded as well
-  void testHRPDParameterTags()
+  void xtestHRPDParameterTags()
   {
     LoadEmptyInstrument loader;
 
@@ -633,7 +748,7 @@ public:
 
   }
 
-  void testGEMParameterTags()
+  void xtestGEMParameterTags()
   {
     LoadEmptyInstrument loader;
 
@@ -678,7 +793,7 @@ public:
   }
 
 
-  void test_DUM_Instrument()
+  void xtest_DUM_Instrument()
   {
     LoadEmptyInstrument loader;
 
@@ -737,7 +852,7 @@ public:
   }
 
 
-  void test_BIOSANS_Instrument()
+  void xtest_BIOSANS_Instrument()
   {
     LoadEmptyInstrument loader;
 
@@ -769,7 +884,7 @@ public:
 
 
 
-void testCheckIfVariousInstrumentsLoad()
+void xtestCheckIfVariousInstrumentsLoad()
   {
     LoadEmptyInstrument loader;
 
