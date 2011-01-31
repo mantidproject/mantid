@@ -200,6 +200,7 @@ class DirectEnergyConversion(object):
             try:
             	alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, self.fix_ei)
             	TzeroCalculated = float(alg.getPropertyValue("Tzero"))
+            	ei_calc = monitor_ws.getRun().getLogData("Ei").value
             except:
             	self.log("Error in GetEi. Using entered values.")
             	ei_value = ei_guess
@@ -218,7 +219,10 @@ class DirectEnergyConversion(object):
                 if (Tzero is not None):
                 	tzero = Tzero
             else:
-                ei_value = monitor_ws.getRun().getLogData("Ei").value
+            	if (ei_calc is not None):
+            		ei_value = ei_calc
+            	else:
+            		ei_value = ei_guess
             
             mon1_peak = 0.0
             # apply T0 shift
