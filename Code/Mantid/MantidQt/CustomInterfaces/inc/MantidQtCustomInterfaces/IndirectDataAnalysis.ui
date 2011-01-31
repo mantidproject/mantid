@@ -1357,6 +1357,305 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabAbs" >
+      <attribute name="title" >
+       <string>Abs (F2PY)</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_14" >
+       <item>
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>41</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="findRunFiles" stdset="0" >
+          <bool>false</bool>
+         </property>
+         <property name="label" stdset="0" >
+          <string>Sample file:</string>
+         </property>
+         <property name="multipleFiles" stdset="0" >
+          <bool>false</bool>
+         </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>.nxs</string>
+          </stringlist>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_30" >
+         <item>
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>Sample Shape:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="absp_cbShape" >
+           <item>
+            <property name="text" >
+             <string>Flat</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Cylinder</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="label_2" >
+           <property name="text" >
+            <string>ncan</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="absp_lencan" >
+           <property name="text" >
+            <string>2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="label_3" >
+           <property name="text" >
+            <string>samden</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="absp_lesamden" >
+           <property name="text" >
+            <string>0.1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" >
+          <widget class="QLineEdit" name="absp_lecanden" >
+           <property name="text" >
+            <string>0.01</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="label_4" >
+           <property name="text" >
+            <string>canden</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" >
+          <widget class="QLabel" name="label_5" >
+           <property name="text" >
+            <string>samsigs</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" >
+          <widget class="QLabel" name="label_6" >
+           <property name="text" >
+            <string>samsiga</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" >
+          <widget class="QLabel" name="label_7" >
+           <property name="text" >
+            <string>cansigs</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2" >
+          <widget class="QLabel" name="label_8" >
+           <property name="text" >
+            <string>cansiga</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" >
+          <widget class="QLineEdit" name="absp_lesamsigs" >
+           <property name="text" >
+            <string>5.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1" >
+          <widget class="QLineEdit" name="absp_lesamsiga" >
+           <property name="text" >
+            <string>1.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3" >
+          <widget class="QLineEdit" name="absp_lecansigs" >
+           <property name="text" >
+            <string>0.1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3" >
+          <widget class="QLineEdit" name="absp_lecansiga" >
+           <property name="text" >
+            <string>5.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="label_9" >
+           <property name="text" >
+            <string>width</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QLineEdit" name="absp_lewidth" >
+           <property name="text" >
+            <string>3.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" >
+          <widget class="QLineEdit" name="absp_leavar" >
+           <property name="text" >
+            <string>45.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" >
+          <widget class="QLabel" name="label_10" >
+           <property name="text" >
+            <string>avar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="absp_swShapeDetails" >
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page_5" >
+          <layout class="QGridLayout" name="gridLayout_2" >
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_11" >
+             <property name="text" >
+              <string>ts</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLineEdit" name="absp_lets" >
+             <property name="text" >
+              <string>0.1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLineEdit" name="absp_letc1" >
+             <property name="text" >
+              <string>0.01</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" >
+            <widget class="QLineEdit" name="absp_letc2" >
+             <property name="text" >
+              <string>0.01</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_12" >
+             <property name="text" >
+              <string>tc1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" >
+            <widget class="QLabel" name="label_13" >
+             <property name="text" >
+              <string>tc2</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_6" >
+          <layout class="QGridLayout" name="gridLayout_3" >
+           <item row="0" column="3" >
+            <widget class="QLineEdit" name="absp_ler2" >
+             <property name="text" >
+              <string>0.25</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3" >
+            <widget class="QLineEdit" name="absp_ler4" >
+             <property name="text" >
+              <string>0.0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" >
+            <widget class="QLineEdit" name="absp_ler1" >
+             <property name="text" >
+              <string>0.0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLineEdit" name="absp_ler3" >
+             <property name="text" >
+              <string>0.26</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" >
+            <widget class="QLabel" name="label_14" >
+             <property name="text" >
+              <string>r2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2" >
+            <widget class="QLabel" name="label_15" >
+             <property name="text" >
+              <string>r4</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" >
+            <widget class="QLabel" name="label_16" >
+             <property name="text" >
+              <string>r1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLabel" name="label_17" >
+             <property name="text" >
+              <string>r3</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

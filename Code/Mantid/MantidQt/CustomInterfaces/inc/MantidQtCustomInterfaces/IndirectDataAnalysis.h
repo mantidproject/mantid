@@ -153,6 +153,11 @@ namespace MantidQt
 
       // Absorption (Basic)
       void absorptionShape(int index);
+
+      // Absorption (F2PY)
+      void abspInit();
+      void abspRun();
+      void abspShape(int index);
       
       // Common Elements
       void openDirectoryDialog();

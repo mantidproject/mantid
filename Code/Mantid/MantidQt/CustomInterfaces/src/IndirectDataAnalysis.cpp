@@ -89,6 +89,8 @@ void IndirectDataAnalysis::initLayout()
   setupFury();
   setupFuryFit();
   setupConFit();
+
+  abspInit();
     
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
@@ -905,6 +907,7 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "FuryFit" ) { furyfitRun(); }
   else if ( tabName == "ConvFit" ) { confitRun(); }
   else if ( tabName == "Absorption" ) { absorptionRun(); }
+  else if ( tabName == "Abs (F2PY)" ) { abspRun(); }
   else { showInformationBox("This tab does not have a 'Run' action."); }
 }
 
@@ -2104,6 +2107,71 @@ void IndirectDataAnalysis::help()
   else if ( tabName == "Absorption" )
     url += "Absorption";
   QDesktopServices::openUrl(QUrl(url));
+}
+
+
+void IndirectDataAnalysis::abspInit()
+{
+  connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(abspShape(int)));
+}
+
+void IndirectDataAnalysis::abspRun()
+{
+  QString pyInput = "import SpencerAbsCor\n";
+  
+  QString geom;
+  QString size;
+
+  if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
+  {
+    geom = "flt";
+    size = "[" + m_uiForm.absp_lets->text() + ", " +
+      m_uiForm.absp_letc1->text() + ", " +
+      m_uiForm.absp_letc2->text() + "]";
+  }
+  else if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
+  {
+    geom = "cyl";
+    size = "[" + m_uiForm.absp_ler1->text() + ", " +
+      m_uiForm.absp_ler2->text() + ", " +
+      m_uiForm.absp_ler3->text() + ", " +
+      m_uiForm.absp_ler4->text() + "]";
+  }
+
+  QString width = m_uiForm.absp_lewidth->text();
+
+  // need to load the nexus file
+  QString input = m_uiForm.absp_inputFile->getFirstFilename();
+  if ( input == "" ) { return; }
+
+  pyInput +=
+    "import os.path as op\n"
+    "file = r'" + input + "'\n"
+    "( dir, filename ) = op.split(file)\n"
+    "( name, ext ) = op.splitext(filename)\n"
+    "LoadNexusProcessed(file, name)\n"
+    "inputws = name\n";
+
+  pyInput +=
+    "geom = '" + geom + "'\n"
+    "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
+    "ncan = " + m_uiForm.absp_lencan->text() + "\n"
+    "size = " + size + "\n"
+    "density = [" + m_uiForm.absp_lesamden->text() + ", " + m_uiForm.absp_lecanden->text() + ", " + m_uiForm.absp_lecanden->text() + "]\n"
+    "sigs = [" + m_uiForm.absp_lesamsigs->text() + "," + m_uiForm.absp_lecansigs->text() + "," + m_uiForm.absp_lecansigs->text() + "]\n"
+    "siga = [" + m_uiForm.absp_lesamsiga->text() + "," + m_uiForm.absp_lecansiga->text() + "," + m_uiForm.absp_lecansiga->text() + "]\n"
+    "avar = " + m_uiForm.absp_leavar->text() + "\n"
+    "SpencerAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar)\n";
+
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+
+void IndirectDataAnalysis::abspShape(int index)
+{
+  m_uiForm.absp_swShapeDetails->setCurrentIndex(index);
+  if ( index == 0 ) { m_uiForm.absp_leavar->setText("45.0"); }
+  else if ( index == 1 ) { m_uiForm.absp_leavar->setText("0.02"); }
 }
 
 } //namespace CustomInterfaces
