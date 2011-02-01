@@ -122,8 +122,8 @@ class myContentHandler : public Poco::XML::ContentHandler
 /** Return from an IDF the values of the valid-from and valid-to attributes 
 *
 *  @param IDFfilename :: Full path of an IDF
-*  @param outValidFrom :: Used to return valid-from date
-*  @param outValidto :: Used to return valid-to date
+*  @param[out] outValidFrom :: Used to return valid-from date
+*  @param[out] outValidto :: Used to return valid-to date
 */
 void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
   std::string& outValidTo)
@@ -152,7 +152,7 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
 /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the 
 *   method returns current date.
 *
-*  @parad instrumentName Instrument name e.g. GEM, TOPAS or BIOSANS
+*  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
 *  @return workspace start date
 */
 std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace)
@@ -220,7 +220,13 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
       getValidFromTo(dir_itr->path(), validFrom, validTo);
 
       DateAndTime from(validFrom);
-      DateAndTime to(validTo);
+      // Use a default valid-to date if none was found.
+      DateAndTime to;
+      if (validTo.length() > 0)
+        to.set_from_ISO8601_string(validTo);
+      else
+        to.set_from_ISO8601_string("2100-01-01");
+
       if ( from <= d && d <= to )
       {
         return dir_itr->path();

@@ -90,7 +90,12 @@ public:
             fromToEntry ft;
             ft.path = dir_itr->path();
             ft.from.set_from_ISO8601_string(validFrom);
-            ft.to.set_from_ISO8601_string(validTo);
+            // Valid TO is optional
+            if (validTo.length() > 0)
+              ft.to.set_from_ISO8601_string(validTo);
+            else
+              ft.to.set_from_ISO8601_string("2100-01-01");
+
             idfFiles.insert( std::pair<std::string,fromToEntry>(l_filenamePart.substr(0,found), 
               ft) );
             idfIdentifiers.insert(l_filenamePart.substr(0,found));
@@ -121,7 +126,7 @@ public:
             else
             {
               // some more intelligent stuff here later
-              TS_ASSERT("dates in IDF overlap"=="0");
+              TS_ASSERT_EQUALS("dates in IDF overlap", "0");
             }
           }
         }
@@ -136,6 +141,14 @@ public:
     LoadInstrumentHelper helper;
 
     std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
+    TS_ASSERT(!boevs.empty());
+  }
+
+  //
+  void testInstrumentHelper_TOPAZ_No_To_Date()
+  {
+    LoadInstrumentHelper helper;
+    std::string boevs = helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
   }
 

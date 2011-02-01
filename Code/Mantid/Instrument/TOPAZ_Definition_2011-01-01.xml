@@ -2,7 +2,6 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="TOPAZ" valid-from   ="2011-01-01 00:00:01"
-                         valid-to     ="2100-01-31 23:59:59"
 		         last-modified="2011-02-01 00:00:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Janik Zikovsky using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->

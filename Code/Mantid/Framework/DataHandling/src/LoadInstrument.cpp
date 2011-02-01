@@ -160,9 +160,11 @@ namespace Mantid
           throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", m_filename);
         }
       }
+
       if ( !pRootElem->hasAttribute("valid-to") )
       {
-        throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
+        // Ticket #2335: no required valid-to date.
+        //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
       }
       else
       {
