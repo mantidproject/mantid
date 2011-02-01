@@ -856,6 +856,71 @@ namespace DataObjects
     return this->data[index]->getRefX();
   }
 
+
+  //---------------------------------------------------------------------------
+  /** Returns a read-only (i.e. const) reference to both the Y
+   * and E arrays.
+   * This will retrieve both from the MRU list if they are there, or will
+   * generate both histograms at the same time, to save speed.
+   *
+   * @param index :: workspace index to retrieve.
+   * @param[out] Y :: reference to the pointer to the const data vector
+   * @param[out] E :: reference to the pointer to the const error vector
+   */
+  void EventWorkspace::readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const
+  {
+    if ((index >= this->m_noVectors) || (index < 0))
+      throw std::range_error("EventWorkspace::readYE, histogram number out of range");
+
+    // This is the thread number from which this function was called.
+    int thread = PARALLEL_THREAD_NUMBER;
+    this->ensureEnoughBuffersE(thread);
+    this->ensureEnoughBuffersY(thread);
+
+    //Is the data in the mrulist?
+    MantidVecWithMarker * data;
+    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    {
+      data = m_bufferedDataY[thread]->find(index);
+    }
+    MantidVecWithMarker * data_errors;
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+    {
+      data_errors = m_bufferedDataE[thread]->find(index);
+    }
+
+    if ((data == NULL) || (data_errors == NULL))
+    {
+      //Get a handle on the event list.
+      const EventList * el = this->data[index];
+
+      //Create the MRU object
+      data = new MantidVecWithMarker(index);
+      data_errors = new MantidVecWithMarker(index);
+
+      //Now use that to get E -- Y values are generated from another function
+      el->generateHistogram(*(el->getRefX()), data->m_data, data_errors->m_data);
+
+      //Lets save it in the MRUs
+      MantidVecWithMarker * oldData;
+
+      PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+      {        oldData = m_bufferedDataY[thread]->insert(data);      }
+      if (oldData)
+        delete oldData;
+
+      PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+      {        oldData = m_bufferedDataE[thread]->insert(data_errors);      }
+      if (oldData)
+        delete oldData;
+
+    }
+
+    Y = &data->m_data;
+    E = &data_errors->m_data;
+  }
+
+
   //-----------------------------------------------------------------------------
   // --- Histogramming ----
   //-----------------------------------------------------------------------------

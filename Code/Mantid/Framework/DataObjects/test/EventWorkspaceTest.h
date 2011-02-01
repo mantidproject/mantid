@@ -402,6 +402,17 @@ public:
     //Can't try the const access; copy constructors are not allowed.
   }
 
+  void test_readYE()
+  {
+    MantidVec const * Y=NULL;
+    MantidVec const * E=NULL;
+    ew->readYE(0, Y, E);
+    TS_ASSERT( Y );
+    TS_ASSERT( E );
+    TS_ASSERT_EQUALS( (*Y)[0], 2.0 );
+    TS_ASSERT_EQUALS( (*E)[0], sqrt(2.0) );
+  }
+
   //------------------------------------------------------------------------------
   void test_data_access_not_setting_num_vectors()
   {

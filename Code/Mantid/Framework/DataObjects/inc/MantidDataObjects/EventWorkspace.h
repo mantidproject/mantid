@@ -173,6 +173,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const int) const;
 
+  void readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const;
+
   //------------------------------------------------------------
 
   /// Set the x-axis data for the given pixel via cow_ptr.

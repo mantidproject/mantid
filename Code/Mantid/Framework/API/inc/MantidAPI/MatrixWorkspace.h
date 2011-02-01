@@ -156,8 +156,8 @@ namespace Mantid
       /** Returns a read-only (i.e. const) reference to both the Y
        * and E arrays
        * @param index :: workspace index to retrieve.
-       * @param Y :: pointer to the data vector
-       * @param E :: pointer to the error vector
+       * @param[out] Y :: reference to the pointer to the const data vector
+       * @param[out] E :: reference to the pointer to the const error vector
        */
       virtual void readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const
       {
