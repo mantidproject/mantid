@@ -10,6 +10,8 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Timer.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
 
 #include <cmath>
@@ -56,6 +58,9 @@ namespace NeXus
     declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save, exts),
           "The name of the Nexus file to write, as a full or relative\n"
           "path");
+
+    declareProperty(new PropertyWithValue<bool>("Compress", false, Direction::Input),
+          "Will the output NXS file data be compressed?");
 
   }
 
@@ -174,6 +179,227 @@ namespace NeXus
     return NX_OK;
   }
 
+
+
+
+
+
+
+
+
+
+
+
+  //------------------------------------------------------------------------
+  /** Utility function to write out the
+   * data or errors to a field in the group.
+   */
+  int SaveSNSNexus::WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
+      const char * field_name, const char * errors_field_name, bool doErrors, bool doBoth, int is_definition,
+      std::string bank)
+  {
+    int dataRank, dataDimensions[NX_MAXRANK];
+    int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
+
+    dataRank = 3;
+
+    // Dimension 0 = the X pixels
+    dataDimensions[0] = det->xpixels();
+    // Dimension 1 = the Y pixels
+    dataDimensions[1] = det->ypixels();
+    // Dimension 2 = time of flight bins
+    dataDimensions[2] = inputWorkspace->blocksize();
+
+    // ---- Determine slab size -----
+    // Number of pixels to collect in X before slabbing
+    int x_pixel_slab = 128;
+    slabDimensions[0] = x_pixel_slab;
+    slabDimensions[1] = dataDimensions[1];
+    slabDimensions[2] = dataDimensions[2];
+
+    if (doBoth)
+      slabDimensions[0] = dataDimensions[0];
+
+    std::cout << "RectangularDetector " << det->getName() << " being copied. Dimensions : " << dataDimensions[0] << ", " << dataDimensions[1] << ", " << dataDimensions[2] << ".\n";
+
+
+    // ----- Open the data field -----------------------
+    if (m_compress)
+    { if (NXcompmakedata (outId, field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK) return NX_ERROR; }
+    else
+    { if (NXmakedata (outId, field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR; }
+    if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
+    if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+    if (!doErrors)
+    {
+      // Add an attribute called "errors" with value = the name of the data_errors field.
+      NXname attrName = "errors";
+      std::string attrBuffer = "data_errors";
+      if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), attrBuffer.size(), NX_CHAR) != NX_OK) return NX_ERROR;
+    }
+
+    // ---- Errors field -----
+    if (doBoth)
+    {
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+
+      if (m_compress)
+      { if (NXcompmakedata (outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK) return NX_ERROR; }
+      else
+      { if (NXmakedata (outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR; }
+      if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
+      if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+    }
+
+
+    double fillTime = 0;
+    double saveTime = 0;
+
+    // Make a buffer of floats will all the counts in that bank.
+    float * data;
+    float * errors;
+    data = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
+    if (doBoth)
+      errors = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
+
+//    for (size_t i=0; i < slabDimensions[0]*slabDimensions[1]*slabDimensions[2]; i++)
+//      data[i]=i;
+
+    for (int x = 0; x < det->xpixels(); x++)
+    {
+      // Which slab are we in?
+      int slabnum = x / x_pixel_slab;
+
+      // X index into the slabbed output array
+      int slabx = x % x_pixel_slab;
+
+      Timer tim1;
+
+      PARALLEL_FOR1(inputWorkspace)
+      for (int y = 0; y < det->ypixels(); y++)
+      {
+        //Get the workspace index for the detector ID at this spot
+        int wi;
+        try
+        {
+          wi = (*map)[ det->getAtXY(x,y)->getID() ];
+        }
+        catch (...)
+        {
+          std::cout << "Error finding " << bank << " x " << x << " y " << y << "\n";
+        }
+
+        // Offset into array.
+        int index = slabx*dataDimensions[1]*dataDimensions[2] + y*dataDimensions[2];
+
+        if (doBoth && !doErrors)
+        {
+          const MantidVec & Y = inputWorkspace->readY(wi);
+          std::copy(Y.begin(), Y.end(), data+index);
+        }
+
+        // Get the histogram then copy it over to the float array.
+        if (doErrors || doBoth)
+        {
+          const MantidVec & E = inputWorkspace->readE(wi);
+          if (doBoth)
+            std::copy(E.begin(), E.end(), errors+index);
+          else
+            std::copy(E.begin(), E.end(), data+index);
+        }
+      }
+
+      fillTime += tim1.elapsed();
+
+      // Is this the last pixel in the slab?
+      if (!doBoth && (x % x_pixel_slab == x_pixel_slab-1))
+      {
+        Timer tim2;
+        std::cout << "starting slab " << x << "\n";
+        // This is where the slab is in the greater data array.
+        slabStartIndices[0]=slabnum*x_pixel_slab;
+        slabStartIndices[1]=0;
+        slabStartIndices[2]=0;
+        if (NXputslab (outId, data, slabStartIndices, slabDimensions) != NX_OK) return NX_ERROR;
+        saveTime += tim2.elapsed();
+      }
+
+    }// X loop
+
+    if (doBoth)
+    {
+      Timer tim2;
+      if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+      if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+      saveTime += tim2.elapsed();
+    }
+    else
+    {
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+    }
+
+    std::cout << "Filling out " << det->getName() << " took " << fillTime << " sec.\n";
+    std::cout << "Saving      " << det->getName() << " took " << saveTime << " sec.\n";
+
+
+    delete [] data;
+    if (doBoth)
+      delete [] errors;
+
+
+    return NX_OK;
+
+  }
+
+
+
+  //=================================================================================================
+  /** Write the group labeled "data"
+   *
+   */
+  int SaveSNSNexus::WriteDataGroup(std::string bank, int is_definition)
+  {
+    int dataType, dataRank, dataDimensions[NX_MAXRANK];
+    NXname name;
+    void *dataBuffer;
+
+    if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
+
+    // Get the rectangular detector
+    IComponent_sptr det_comp = inputWorkspace->getInstrument()->getComponentByName( std::string(bank) );
+    boost::shared_ptr<RectangularDetector> det = boost::dynamic_pointer_cast<RectangularDetector>(det_comp);
+    if (!det)
+    {
+      g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";
+      //Just copy that then.
+      if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
+      if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
+      if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
+      if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
+      if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
+      if (NXfree((void**)&dataBuffer) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+    }
+    else
+    {
+      //YES it is a rectangular detector.
+//      if (this->WriteOutDataOrErrors(det, "data", false, is_definition, bank) != NX_OK) return NX_ERROR;
+//      if (this->WriteOutDataOrErrors(det, "errors", false, is_definition, bank) != NX_OK) return NX_ERROR;
+      if (this->WriteOutDataOrErrors(det, "data", "errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
+
+      this->prog->reportIncrement(det->xpixels()*det->ypixels(), "det->getName()");
+    }
+
+    return NX_OK;
+  }
+
+
   //------------------------------------------------------------------------
   /** Prints the contents of each group as XML tags and values */
   int SaveSNSNexus::WriteGroup (int is_definition)
@@ -244,92 +470,7 @@ namespace NeXus
             //---------------------------------------------------------------------------------------
             if (data_label=="data" && (bank != ""))
             {
-              if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
-
-              // Get the rectangular detector
-              IComponent_sptr det_comp = inputWorkspace->getInstrument()->getComponentByName( std::string(bank) );
-              boost::shared_ptr<RectangularDetector> det = boost::dynamic_pointer_cast<RectangularDetector>(det_comp);
-              if (!det)
-              {
-                g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";
-                //Just copy that then.
-                if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
-                if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
-                if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
-                if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
-                if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
-                if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
-                if (NXfree((void**)&dataBuffer) != NX_OK) return NX_ERROR;
-                if (NXclosedata (outId) != NX_OK) return NX_ERROR;
-              }
-              else
-              {
-                //YES it is a rectangular detector.
-
-                // Dimension 0 = the X pixels
-                dataDimensions[0] = det->xpixels();
-                // Dimension 1 = the Y pixels
-                dataDimensions[1] = det->ypixels();
-                // Dimension 2 = time of flight bins
-                dataDimensions[2] = inputWorkspace->blocksize();
-
-                std::cout << "RectangularDetector " << det->getName() << " being copied. Dimensions : " << dataDimensions[0] << ", " << dataDimensions[1] << ", " << dataDimensions[2] << ".\n";
-
-                // Make a buffer of floats will all the counts in that bank.
-                float * data;
-                data = new float[dataDimensions[0]*dataDimensions[1]*dataDimensions[2]];
-                // Here's one with the errors
-                float * errors;
-                errors = new float[dataDimensions[0]*dataDimensions[1]*dataDimensions[2]];
-
-                for (int x = 0; x < det->xpixels(); x++)
-                {
-                  for (int y = 0; y < det->ypixels(); y++)
-                  {
-                    //Get the workspace index for the detector ID at this spot
-                    int wi;
-                    try
-                    {
-                      wi = (*map)[ det->getAtXY(x,y)->getID() ];
-                      const MantidVec & Y = inputWorkspace->readY(wi);
-                      const MantidVec & E = inputWorkspace->readE(wi);
-                      // Offset into array.
-                      int index = x*dataDimensions[1]*dataDimensions[2] + y*dataDimensions[2];
-                      // Save in the float array
-                      for (int i=0; i < static_cast<int>(Y.size()); i++)
-                      {
-                        data[index+i] = Y[i];
-                        errors[index+i] = E[i];
-                      }
-                    }
-                    catch (...)
-                    {
-                      std::cout << "Error finding " << bank << " x " << x << " y " << y << "\n";
-                    }
-                  }
-                }
-
-                if (NXcompmakedata (outId, name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
-                if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
-                if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
-
-                // Add an attribute called "errors" with value = the name of the data_errors field.
-                NXname attrName = "errors";
-                std::string attrBuffer = "data_errors";
-                if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), attrBuffer.size(), NX_CHAR) != NX_OK) return NX_ERROR;
-                if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
-
-                // ----- Save the data_errors field -------
-                NXname errors_name = "data_errors";
-                if (NXcompmakedata (outId, errors_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
-                if (NXopendata (outId, errors_name) != NX_OK) return NX_ERROR;
-                if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
-
-                if (NXclosedata (outId) != NX_OK) return NX_ERROR;
-
-                delete [] data;
-                delete [] errors;
-              }
+              if (this->WriteDataGroup(bank, is_definition) != NX_OK) return NX_ERROR;;
             }
             //---------------------------------------------------------------------------------------
             else if (data_label=="time_of_flight" && (bank != ""))
@@ -402,6 +543,8 @@ namespace NeXus
   /** Copy the attributes from input to output */
   int SaveSNSNexus::WriteAttributes (int is_definition)
   {
+    (void) is_definition;
+
     int status, i, attrLen, attrType;
     NXname attrName;
     void *attrBuffer;
@@ -442,11 +585,21 @@ namespace NeXus
     m_inputFilename = getPropertyValue("InputFileName");
     m_inputWorkspaceName = getPropertyValue("InputWorkspace");
     m_outputFilename = getPropertyValue("OutputFileName");
+    m_compress = getProperty("Compress");
 
     inputWorkspace = getProperty("InputWorkspace");
 
     // We'll need to get workspace indices
     map = inputWorkspace->getDetectorIDToWorkspaceIndexMap( false );
+
+    // Start the progress bar
+    prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms());
+
+    EventWorkspace_const_sptr eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
+    if (eventWorkspace)
+    {
+      eventWorkspace->sortAll(TOF_SORT, prog);
+    }
 
     this->copy_file(m_inputFilename.c_str(),  NXACC_READ, m_outputFilename.c_str(),  NXACC_CREATE5);
 

@@ -8,8 +8,10 @@
 #include <climits>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 //Copy of the NexusCpp API was placed in MantidNexus
 #include "MantidNexus/NeXusFile.hpp"
@@ -86,6 +88,11 @@ namespace Mantid
       // Map from detector ID to WS index
       API::IndexToIndexMap * map;
 
+      // Progress reporting
+      API::Progress * prog;
+
+      bool m_compress;
+
 
       // Stuff needed by the copy_file() functions
       struct link_to_make
@@ -107,6 +114,13 @@ namespace Mantid
       int WriteGroup (int is_definition);
       int WriteAttributes (int is_definition);
       int copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
+
+      int WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
+          const char * field_name , const char * errors_field_name, bool doErrors, bool doBoth, int is_definition,
+          std::string bank);
+
+      int WriteDataGroup(std::string bank, int is_definition);
+
 
 //
 //      // For iterating through the HDF file...

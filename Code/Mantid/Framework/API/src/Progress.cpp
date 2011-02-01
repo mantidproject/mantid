@@ -9,7 +9,9 @@ namespace Mantid
 namespace API
 {
 
-/** Sends the progress notification on bahave of its algorithm
+/** Sends the progress notification on behalf of its algorithm.
+ * Increments the loop counter by 1.
+ *
     @param msg :: Optional message string
 */
 void Progress::report(const std::string& msg)
@@ -21,13 +23,25 @@ void Progress::report(const std::string& msg)
   m_alg->interruption_point();
   m_last_reported = m_i;
 }
-/** Sends the progress notification on bahave of its algorithm
+/** Sends the progress notification on behalf of its algorithm
     @param i ::   The new value of the loop counter
     @param msg :: Optional message string
 */
 void Progress::report(int i, const std::string& msg)
 {
   m_i = i;
+  if (m_i < m_ifirst) m_i = m_ifirst;
+  report(msg);
+}
+
+/** Sends the progress notification and increment it by more than one.
+ *
+    @param inc :: Increment the loop counter by this much
+    @param msg :: Optional message string
+*/
+void Progress::reportIncrement(int inc, const std::string& msg)
+{
+  m_i += (inc-1); // report will also increment by 1!
   if (m_i < m_ifirst) m_i = m_ifirst;
   report(msg);
 }
