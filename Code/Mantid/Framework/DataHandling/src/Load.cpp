@@ -43,40 +43,40 @@ namespace Mantid
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		      "The name of the file to read, including its full or relative\n"
 		      "path. (N.B. case sensitive if running on Linux).");
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the workspace that will be created, filled with the\n"
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output, true), 
+		      "The name of the workspace that will be created, filled with the\n"
 		      "read-in data and stored in the Analysis Data Service.");
-
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(1);
-      declareProperty("SpectrumMin", 1, mustBePositive);
-      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("EntryNumber", 0, 
-        "Load a particular entry, if supported by the file format (default: Load all entries)");
+      declareProperty("FindLoader", false, "If true the algorithm will only be run as\n"
+ 		      "far as is necessary to discover the concrete Load algorithm to use");
+      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
+ 		      Direction::Output);
     }
-    /** checks this property exists in the list of algorithm properties.
-    */
-    struct hasProperty
-    { 
-      /** constructor which takes 1 arguement.
-        *@param name :: name of the property
-        */
-      hasProperty(const std::string name):m_name(name){}
 
-      /**This method comapres teh property name
-        *@param prop :: shared pointer to property
-        *@return true if the property exists in the list of properties.
-      */
-      bool operator()(Mantid::Kernel::Property* prop)
-      {
-        std::string name=prop->name();
-        return (!name.compare(m_name));
-      }
-      /// name of teh property
-      std::string m_name;
-      
-    };
+    namespace 
+    {
+      /** 
+       * Checks this property exists in the list of algorithm properties.
+       */
+      struct hasProperty
+      { 
+	/** constructor which takes 1 arguement.
+	 *@param name :: name of the property
+        */
+	hasProperty(const std::string name):m_name(name){}
+	
+	/**This method comapres teh property name
+	 *@param prop :: shared pointer to property
+	 *@return true if the property exists in the list of properties.
+	 */
+	bool operator()(Mantid::Kernel::Property* prop)
+	{
+	  std::string name=prop->name();
+	  return (!name.compare(m_name));
+	}
+	/// name of teh property
+	std::string m_name;
+      };
+    }
 
    /** 
      *   Executes the algorithm.
@@ -88,11 +88,14 @@ namespace Mantid
       std::string ext = fileName.substr(i+1);
       std::transform(ext.begin(),ext.end(),ext.begin(),tolower);
       //get the shared pointer to the specialised load algorithm to execute  
-      API::IAlgorithm_sptr alg= getLoadAlgorithmfromFile(fileName);
+      API::IAlgorithm_sptr alg= getFileLoader(fileName);
       if(!alg)
       {
         throw std::runtime_error("Cannot load file " + fileName);
       }
+      bool findOnly = getProperty("FindLoader");
+      if( findOnly ) return;
+
       g_log.information()<<"The sub load algorithm  created to execute is "<<alg->name()<<"  and it version is  "<<alg->version()<<std::endl;
       double startProgress=0,endProgress=1;
       // set the load algorithm as a child algorithm 
@@ -129,7 +132,7 @@ namespace Mantid
      *@param filePath :: path of the file
      *@return filePath - path of the file
      */
-     API::IAlgorithm_sptr Load::getLoadAlgorithmfromFile(const std::string& filePath)
+     API::IAlgorithm_sptr Load::getFileLoader(const std::string& filePath)
      {
        unsigned char* header_buffer = header_buffer_union.c;
        int nread;
@@ -181,6 +184,10 @@ namespace Mantid
            val=ret;
            load=alg_itr->second;
          }
+       }
+       if( load )
+       {
+	 setPropertyValue("LoaderName", load->name());
        }
        return load;
      }

@@ -192,6 +192,7 @@ namespace Mantid
           }
           else
           {
+	    if( m_optional ) return error; 
             //Return a user level error
             error = "Enter a name for the Output workspace";
             //the debug message has more detail to put it in context
@@ -292,7 +293,7 @@ namespace Mantid
       virtual bool store()
       {
         bool result = false;
-
+	if ( ! this->operator()() && m_optional ) return result; 
         if ( this->direction() ) // Output or InOut
         {
           // Check that workspace exists

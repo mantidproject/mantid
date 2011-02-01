@@ -15,6 +15,28 @@ using namespace Mantid::DataHandling;
 class LoadTest : public CxxTest::TestSuite
 {
 public:
+
+  void testFindLoader()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","IRS38633.raw");
+    const std::string outputName("LoadTest_IRS38633raw");
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    loader.setPropertyValue("FindLoader", "1");
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    // Did it find the right loader
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadRaw");
+    AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
+    TS_ASSERT_EQUALS(dataStore.doesExist(outputName), false);
+    if( dataStore.doesExist(outputName) )
+    {
+      AnalysisDataService::Instance().remove(outputName);
+    }
+  }
+
   void testRaw()
   {
     Load loader;
@@ -59,8 +81,9 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_6");
   }
   //disabled because hdf4 can't be opened on windows 64-bit, I think
-  void t1estNexus()
+  void testNexus()
   {
+#ifndef _WIN64
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","emu00006473.nxs");
@@ -69,10 +92,12 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
+    #endif
   }
 
-  void t1estNexusGroup()
+  void testNexusGroup()
   {
+#ifndef _WIN64
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","MUSR00015189.nxs");
@@ -85,8 +110,9 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
+#endif
   }
-   void t1estISISNexus()
+   void testISISNexus()
   {
     Load loader;
     loader.initialize();
@@ -98,18 +124,6 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testEntryNumber()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","TEST00000008.nxs");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_entry2");
-    loader.setPropertyValue("EntryNumber","2");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    Workspace2D_sptr wsg = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("LoadTest_entry2"));
-    TS_ASSERT(wsg);
-    AnalysisDataService::Instance().remove("LoadTest_entry2");
-  }
   void testUnknownExt()
   {
     Load loader;
