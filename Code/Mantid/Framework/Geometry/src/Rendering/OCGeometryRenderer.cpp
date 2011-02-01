@@ -1,4 +1,5 @@
 #include "MantidGeometry/Rendering/OCGeometryRenderer.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
@@ -6,7 +7,6 @@
 #ifdef _WIN32
   #include "windows.h"
 #endif
-#include "GL/gl.h"
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>

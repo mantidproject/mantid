@@ -139,7 +139,7 @@ namespace WorkspaceCreationHelper
       instrument->markAsDetector(det);
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
       {
-	pmap.addBool(det,"masked",true);
+        pmap.addBool(det,"masked",true);
       }
     }
     return workspace;
@@ -231,11 +231,13 @@ namespace WorkspaceCreationHelper
     {
       Detector *monitor1 = new Detector("mon1", ndets, Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
+      monitor1->markAsMonitor();
       testInst->add(monitor1);
       testInst->markAsMonitor(monitor1);
 
       Detector *monitor2 = new Detector("mon2", ndets+1, Object_sptr(), testInst.get());
       monitor2->setPos(-2.0,0.0,0.0);
+      monitor2->markAsMonitor();
       testInst->add(monitor2);
       testInst->markAsMonitor(monitor2);
       
@@ -364,7 +366,7 @@ namespace WorkspaceCreationHelper
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(1,2,1);
 
-    for (int g=0; g < groups.size(); g++)
+    for (size_t g=0; g < groups.size(); g++)
     {
       std::vector<int> dets = groups[g];
       for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); it++)

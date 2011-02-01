@@ -2,7 +2,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/Object.h"
 
 #include <cstdio>

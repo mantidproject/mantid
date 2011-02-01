@@ -1,12 +1,11 @@
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <climits>
 #ifdef _WIN32
 #include "windows.h"
 #endif
-#include "GL/gl.h"
-#include "GL/glu.h"
 
 namespace Mantid
 {
