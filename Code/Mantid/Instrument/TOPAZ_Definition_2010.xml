@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="TOPAZ" valid-from   ="1900-01-31 23:59:59"
-                         valid-to     ="2100-01-31 23:59:59"
+                         valid-to     ="2010-12-31 23:59:59"
 		         last-modified="2010-11-04 00:00:00">
   <!--Data taken from /SNS/TOPAZ/2010_2_12_CAL/calibrations/TOPAZ_geom_2010_05_03.xml-->
   <!--Created by Vickie Lynch-->
