@@ -436,10 +436,10 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) con
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
  *  @param filePath- path of the file including name.
  *  @param nread :: no.of bytes read
- *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
+ *  @param header :: The first 100 bytes of the file as a union
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
+bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
 {
   std::string extn=extension(filePath);
   bool bascii(false);
@@ -448,7 +448,7 @@ bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,unsigned c
   bool is_ascii (true);
   for(size_t i=0; i<nread; i++)
   {
-    if (!isascii(header_buffer[i]))
+    if (!isascii(header.full_hdr[i]))
       is_ascii =false;
   }
   return(is_ascii|| bascii?true:false);

@@ -75,6 +75,7 @@ namespace NeXus {
 
   template<>
   NXDLL_EXPORT NXnumtype getType(char number) {
+    (void)number; // Avoid compiler warning
     return CHAR;
     //NOTE: I have no idea why this code (below) was there and that it was not allowed to have CHAR (Janik Zikovsky, sep 22, 2010)
 //    stringstream msg;
@@ -85,51 +86,61 @@ namespace NeXus {
   // template specialisations for types we know 
   template<>
   NXDLL_EXPORT NXnumtype getType(float number) {
+    (void)number; // Avoid compiler warning 
     return FLOAT32;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(double number) {
+    (void)number;  // Avoid compiler warning
     return FLOAT64;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(int8_t number) {
+    (void)number;  // Avoid compiler warning
     return INT8;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(uint8_t number) {
+    (void)number;  // Avoid compiler warning
     return UINT8;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(int16_t number) {
+    (void)number;  // Avoid compiler warning
     return INT16;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(uint16_t number) {
+    (void)number;  // Avoid compiler warning
     return UINT16;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(int32_t number) {
+    (void)number;  // Avoid compiler warning
     return INT32;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(uint32_t number) {
+    (void)number;  // Avoid compiler warning
     return UINT32;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(int64_t number) {
+    (void)number;  // Avoid compiler warning
     return INT64;
   }
 
   template<>
   NXDLL_EXPORT NXnumtype getType(uint64_t number) {
+    (void)number;  // Avoid compiler warning
     return UINT64;
   }
 

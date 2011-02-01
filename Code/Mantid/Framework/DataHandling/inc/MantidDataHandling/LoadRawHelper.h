@@ -65,7 +65,7 @@ namespace Mantid
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
 
       /// do a quick check that this file can be loaded 
-     virtual bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer);
+     virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and if this file can be loaded return a value between 1 and 100
      virtual int fileCheck(const std::string& filePath);
       
@@ -179,6 +179,8 @@ namespace Mantid
      
       /// Overwrites Algorithm method
       void exec();
+      /// Check if the buffer looks like a RAW file header
+      bool isRawFileHeader(const int nread, const unsigned char* buffer) const;
                 
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
@@ -205,14 +207,6 @@ namespace Mantid
       
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;
-
-      /// union used for identifying the raw file type
-      unsigned char* m_buffer;
-      union { 
-        unsigned u; 
-        unsigned long ul; 
-        unsigned char c[bufferSize+1]; 
-      }buffer_union;
     };
 
   } // namespace DataHandling

@@ -56,7 +56,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
   ///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-  bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer);
+  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
   /// check the structure of the file and if this file can be loaded return a value between 1 and 100
   int fileCheck(const std::string& filePath);
 private:

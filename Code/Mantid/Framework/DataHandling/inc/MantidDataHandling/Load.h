@@ -4,9 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"
-
 
 namespace Mantid
 {
@@ -42,13 +40,11 @@ namespace Mantid
     */
 
  
-    class DLLExport Load : public API::Algorithm
+    class DLLExport Load : public API::IDataFileChecker
     {
     public:
       /// Default constructor
-      Load(){}
-       /// Destructor
-      ~Load() {}
+      Load();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Load"; }
       /// Algorithm's version for identification overriding a virtual method
@@ -57,11 +53,16 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
+      /// Quick file always returns false here
+      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+      /// file check by looking at the structure of the data file
+      virtual int fileCheck(const std::string& filePath);
+
+    private:
       ///init
       void init();
       /// execute
       void exec();
-
       /// This method returns shared pointer to load algorithm which got 
       /// the highest preference after file check.
       API::IAlgorithm_sptr getFileLoader(const std::string& filePath);
@@ -73,11 +74,11 @@ namespace Mantid
     private:
       /// union used for identifying teh file type
       unsigned char* m_header_buffer;
-       union { 
-        unsigned u; 
-        unsigned long ul; 
-        unsigned char c[bufferSize+1]; 
-      } header_buffer_union;
+//        union { 
+//         unsigned u; 
+//         unsigned long ul; 
+//         unsigned char c[bufferSize+1]; 
+//       } header_buffer_union;
      };
 
   } // namespace DataHandling

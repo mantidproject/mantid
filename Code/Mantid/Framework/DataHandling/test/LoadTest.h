@@ -80,9 +80,10 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_5");
     AnalysisDataService::Instance().remove("LoadTest_Output_6");
   }
-  //disabled because hdf4 can't be opened on windows 64-bit, I think
-  void testNexus()
+  
+  void testHDF4Nexus()
   {
+    // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
     Load loader;
     loader.initialize();
@@ -95,8 +96,9 @@ public:
     #endif
   }
 
-  void testNexusGroup()
+  void testHDF4NexusGroup()
   {
+    // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
     Load loader;
     loader.initialize();
@@ -130,7 +132,8 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename","hrpd_new_072_01.cal");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS(loader.execute(), std::runtime_error);
     TS_ASSERT( !loader.isExecuted() );
   }
 

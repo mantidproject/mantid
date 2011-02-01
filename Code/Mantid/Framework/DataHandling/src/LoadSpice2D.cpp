@@ -406,10 +406,10 @@ namespace Mantid
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
  *  @param filePath- path of the file including name.
  *  @param nread :: no.of bytes read
- *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
+ *  @param header :: The first 100 bytes of the file as a union
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-    bool LoadSpice2D::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
+    bool LoadSpice2D::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       std::string extn=extension(filePath);
       bool bspice2d(false);
@@ -417,7 +417,7 @@ namespace Mantid
 
       const char* xml_header="<?xml version=";
       if ( ((unsigned)nread >= strlen(xml_header)) && 
-        !strncmp((char*)header_buffer, xml_header, strlen(xml_header)) )
+        !strncmp((char*)header.full_hdr, xml_header, strlen(xml_header)) )
       {
       }
       return(bspice2d?true:false);

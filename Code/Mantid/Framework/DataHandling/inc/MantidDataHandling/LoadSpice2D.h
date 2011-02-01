@@ -66,7 +66,7 @@ namespace Mantid
       static const int nMonitors = 2;
 
      /// do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer);
+      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
 

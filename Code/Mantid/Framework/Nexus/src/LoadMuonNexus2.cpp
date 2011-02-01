@@ -308,23 +308,24 @@ namespace Mantid
     /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
     *  @param nread :: no.of bytes read
-    *  @param header_buffer :: buffer containing the 1st 100 bytes of the file
+    *  @param header :: The first 100 bytes of the file as a union
     *  @return true if the given file is of type which can be loaded by this algorithm
     */
-    bool LoadMuonNexus2::quickFileCheck(const std::string& filePath,size_t nread,unsigned char* header_buffer)
+    bool LoadMuonNexus2::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       std::string extn=extension(filePath);
       bool bnexs(false);
       (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
       /*
-      * HDF files have magic cookie 0x0e031301 in the first 4 bytes
+      * HDF files have magic cookie in the first 4 bytes
       */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header_buffer_union.u) == 0x0e031301)) || bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf5_cookie)) || bnexs )
       {
         //hdf
         return true;
       }
-      else if ( (nread >= sizeof(hdf5_signature)) && (!memcmp(header_buffer, hdf5_signature, sizeof(hdf5_signature)))  )
+      else if ( (nread >= sizeof(g_hdf5_signature)) && 
+		(!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature)))  )
       { 
         //hdf5
         return true;
