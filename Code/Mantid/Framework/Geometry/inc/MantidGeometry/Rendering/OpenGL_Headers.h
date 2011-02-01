@@ -28,11 +28,20 @@
 */
 
 #ifdef __APPLE__
+
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+
 #else
+
+// On Windows, this has to be included before the OpenGL headers
+#ifdef _WIN32
+  #include "windows.h"
+#endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
+
 #endif
 
 #endif /* MANTID_GEOMETRY_OPENGL_HEADERS_H_ */

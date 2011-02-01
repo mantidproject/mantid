@@ -4,9 +4,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include <climits>
-#ifdef _WIN32
-  #include "windows.h"
-#endif
+
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>

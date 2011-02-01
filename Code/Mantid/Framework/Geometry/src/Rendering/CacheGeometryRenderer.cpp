@@ -3,9 +3,6 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Quat.h"
 #include <climits>
-#ifdef _WIN32
-#include "windows.h"
-#endif
 
 namespace Mantid
 {

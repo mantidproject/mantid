@@ -6,9 +6,6 @@
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include <climits>
-#ifdef _WIN32
-#include "windows.h"
-#endif
 
 namespace Mantid
 {
