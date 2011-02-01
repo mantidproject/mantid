@@ -95,10 +95,10 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         ( name, ext ) = os.path.splitext(filename)
         try:
             if ( SpecMin == -1 ) and ( SpecMax == -1 ):
-                LoadRaw(file, name+Suffix)
+                LoadRaw(file, name+Suffix, LoadLogFiles=False)
             else:
                 LoadRaw(file, name+Suffix, SpectrumMin=SpecMin, 
-                    SpectrumMax=SpecMax)
+                    SpectrumMax=SpecMax, LoadLogFiles=False)
             workspaces.append(name+Suffix)
         except ValueError, message:
             print message
@@ -303,7 +303,8 @@ def createCalibFile(rawfiles, suffix, peakMin, peakMax, backMin, backMax,
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         try:
-            LoadRaw(file, root, SpectrumMin=specMin, SpectrumMax=specMax)
+            LoadRaw(file, root, SpectrumMin=specMin, SpectrumMax=specMax,
+                LoadLogFiles=False)
             runs.append(root)
         except:
             sys.exit('Indirect-Could not load raw file: ' + file)
@@ -383,9 +384,10 @@ def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         if spec == [0, 0]:
-            LoadRaw(file, root)
+            LoadRaw(file, root, LoadLogFiles=False)
         else:
-            LoadRaw(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1])
+            LoadRaw(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1],
+                LoadLogFiles=False)
         nhist = mtd[root].getNumberHistograms()
         if calib != '':
             useCalib(calib, inWS_n=root, outWS_n=root)
