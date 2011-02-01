@@ -1,30 +1,49 @@
-set ( SRC_FILES src/api_exports.cpp src/FrameworkManagerProxy.cpp
-      src/geometry_exports.cpp src/kernel_exports.cpp
-      src/MantidVecHelper.cpp src/PyAlgorithmWrapper.cpp
-      src/PythonInterfaceFunctions.cpp src/PythonWrapper.cpp
-      src/SimplePythonAPI.cpp src/WorkspaceProxies.cpp )
+###########################################################################
+# Source file listing
+###########################################################################
 
-set ( INC_FILES inc/MantidPythonAPI/api_exports.h
-      inc/MantidPythonAPI/FrameworkManagerProxy.h
-      inc/MantidPythonAPI/kernel_exports.h
-      inc/MantidPythonAPI/MantidVecHelper.h
-      inc/MantidPythonAPI/PyAlgorithmWrapper.h
-      inc/MantidPythonAPI/PythonInterfaceFunctions.h
-      inc/MantidPythonAPI/SimplePythonAPI.h
-      inc/MantidPythonAPI/std_operator_definitions.h
-      inc/MantidPythonAPI/stl_proxies.h
-      inc/MantidPythonAPI/WorkspaceProxies.h )
+set ( SRC_FILES src/kernel_exports.cpp
+                src/geometry_exports.cpp
+                src/api_exports.cpp 
+                src/FrameworkManagerProxy.cpp
+                src/MantidVecHelper.cpp
+                src/PyAlgorithmWrapper.cpp
+                src/PythonInterfaceFunctions.cpp
+                src/PythonWrapper.cpp
+                src/SimplePythonAPI.cpp
+                src/WorkspaceProxies.cpp 
+)
 
+set ( INC_FILES inc/MantidPythonAPI/kernel_exports.h
+                inc/MantidPythonAPI/api_exports.h
+                inc/MantidPythonAPI/FrameworkManagerProxy.h
+                inc/MantidPythonAPI/MantidVecHelper.h
+                inc/MantidPythonAPI/PyAlgorithmWrapper.h
+                inc/MantidPythonAPI/PythonInterfaceFunctions.h
+                inc/MantidPythonAPI/SimplePythonAPI.h
+                inc/MantidPythonAPI/std_operator_definitions.h
+                inc/MantidPythonAPI/stl_proxies.h
+                inc/MantidPythonAPI/WorkspaceProxies.h 
+)
+
+# Python files that need copying across
 set ( PY_FILES MantidFramework.py __init__.py setup.py )
 
+# cxxtest unit tests
 set ( TEST_FILES test/PythonFrameworkTests.h
-                 test/SimplePythonAPITest.h )
+                 test/SimplePythonAPITest.h 
+)
 
+# Python unit tests
 set ( TEST_PY_FILES test/ImportTest.py
-                    test/PythonAlgorithmTest.py 
-                    test/NumpyTest.py )
+                    test/PythonAlgorithmTest.py
+                    test/NumpyTest.py
+)
 
+###########################################################################
 # Add local dependencies
+###########################################################################
+
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
 add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
@@ -34,7 +53,10 @@ include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 
 include_directories ( inc )
 
-# Now copy the required python files into the build destination
+###########################################################################
+# Copy the required python files into the build destination
+###########################################################################
+
 set ( PYTHON_INSTALL_FILES "")
 foreach ( PYFILE ${PY_FILES} )
   add_custom_command ( OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE}
@@ -46,22 +68,32 @@ foreach ( PYFILE ${PY_FILES} )
   set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE})
 endforeach ( PYFILE )
 
-# Add the target for this directory
+###########################################################################
+# Create the target for this directory
+###########################################################################
+
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 # Set the name of the generated library
 set_target_properties ( PythonAPI PROPERTIES OUTPUT_NAME MantidPythonAPI )
 # Add to the 'Framework' group in VS
 set_property ( TARGET PythonAPI PROPERTY FOLDER "Framework" )
-# Library name needs to end in .pyd for Windows
-if ( WIN32 )
-    set_target_properties ( PythonAPI PROPERTIES SUFFIX .pyd )
-    # Intensive use of templated libaries can cause large objects to be generated. These require
-    # an additional flag in MSVC.
-    set_target_properties ( PythonAPI COMPILE_FLAGS "/bigobj" )
-endif ()
 # Debug python library expects imported module names to end in _d
 if ( PYTHON_DEBUG_LIBRARY )
     set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
+endif ()
+
+###########################################################################
+# Platform and compiler-dependent parts
+###########################################################################
+
+# Library name needs to end in .pyd for Windows
+if ( WIN32 )
+    set_target_properties ( PythonAPI PROPERTIES SUFFIX .pyd )
+endif ()
+# Intensive use of templated libaries can cause large objects to be generated. These require
+# an additional flag in MSVC.
+if ( MSVC )
+    set_target_properties ( PythonAPI PROPERTIES COMPILE_FLAGS "/bigobj" )
 endif ()
 
 # Note: On some Linux systems, seen on various Ubuntu versions, importing Mantid into a standalone python
@@ -74,9 +106,15 @@ else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 endif ()
 
-target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
-set ( PYTHON_DEPS )
+###########################################################################
+# Add dependent libraries to target
+###########################################################################
 
+target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
+
+###########################################################################
+# Unit tests setup
+###########################################################################
 
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
