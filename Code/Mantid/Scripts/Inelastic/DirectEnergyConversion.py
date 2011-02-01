@@ -281,8 +281,8 @@ class DirectEnergyConversion(object):
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-        # TODO: Write log message
-        CorrectKiKf(result_ws, result_ws, EMode='Direct')
+            # TODO: Write log message
+            CorrectKiKf(result_ws, result_ws, EMode='Direct')
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
@@ -638,11 +638,11 @@ class DirectEnergyConversion(object):
         self.sample_mass = 1.0
         self.sample_rmm = 1.0
 
-    # Detector Efficiency Correction
+        # Detector Efficiency Correction
         self.apply_detector_eff = True
 
-    # Ki/Kf factor correction
-    self.apply_kikf_correction = True
+        # Ki/Kf factor correction
+        self.apply_kikf_correction = True
     
      
     def init_idf_params(self):
