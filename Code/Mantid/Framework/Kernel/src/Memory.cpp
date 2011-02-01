@@ -78,7 +78,7 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
 
 #ifdef __linux__
 /// This function reads /proc/meminfo to get the system information.
-bool read_mem_info(size_t sys_avail, size_t & sys_total)
+bool read_mem_info(size_t & sys_avail, size_t & sys_total)
 {
   std::ifstream file("/proc/meminfo");
   std::string line;
@@ -123,6 +123,7 @@ bool read_mem_info(size_t sys_avail, size_t & sys_total)
 
 void process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
+
   sys_avail = 0;
   sys_total = 0;
 #ifdef __linux__
@@ -229,6 +230,10 @@ size_t MemoryStats::totalMem() const
   return this->total_memory;
 }
 
+/**
+ * Return the available memory in kilobytes.
+ * @return int
+ */
 size_t MemoryStats::availMem() const
 {
   return this->avail_memory;

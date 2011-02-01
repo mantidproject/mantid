@@ -11,6 +11,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Memory.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -193,9 +195,21 @@ namespace NeXus
   //------------------------------------------------------------------------
   /** Utility function to write out the
    * data or errors to a field in the group.
+   *
+   * @param det :: rectangular detector being written
+   * @param x_pixel_slab :: size of a slab to write, in number of X pixels. ignored if doBoth
+   * @param field_name :: "data" field name
+   * @param errors_field_name :: "errors" field name.
+   * @param doErrors :: set true if you are writing the errors field this time. field_name should be the "errors" field name
+   * @param doBoth :: do both data and errors at once, no slabbing.
+   * @param is_definition ::
+   * @param bank :: name of the bank being written.
+   * @return error code
    */
   int SaveSNSNexus::WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
-      const char * field_name, const char * errors_field_name, bool doErrors, bool doBoth, int is_definition,
+      int x_pixel_slab,
+      const char * field_name, const char * errors_field_name,
+      bool doErrors, bool doBoth, int is_definition,
       std::string bank)
   {
     int dataRank, dataDimensions[NX_MAXRANK];
@@ -212,7 +226,6 @@ namespace NeXus
 
     // ---- Determine slab size -----
     // Number of pixels to collect in X before slabbing
-    int x_pixel_slab = 128;
     slabDimensions[0] = x_pixel_slab;
     slabDimensions[1] = dataDimensions[1];
     slabDimensions[2] = dataDimensions[2];
@@ -234,7 +247,7 @@ namespace NeXus
     {
       // Add an attribute called "errors" with value = the name of the data_errors field.
       NXname attrName = "errors";
-      std::string attrBuffer = "data_errors";
+      std::string attrBuffer = errors_field_name;
       if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), attrBuffer.size(), NX_CHAR) != NX_OK) return NX_ERROR;
     }
 
@@ -293,21 +306,28 @@ namespace NeXus
         // Offset into array.
         int index = slabx*dataDimensions[1]*dataDimensions[2] + y*dataDimensions[2];
 
-        if (doBoth && !doErrors)
+        if (doBoth)
         {
-          const MantidVec & Y = inputWorkspace->readY(wi);
-          std::copy(Y.begin(), Y.end(), data+index);
+          MantidVec const * Y;
+          MantidVec const * E;
+          inputWorkspace->readYE(wi,Y,E);
+          std::copy(Y->begin(), Y->end(), data+index);
+          std::copy(E->begin(), E->end(), errors+index);
+        }
+        else
+        {
+          if (doErrors)
+          {
+            const MantidVec & Y = inputWorkspace->readY(wi);
+            std::copy(Y.begin(), Y.end(), data+index);
+          }
+          else
+          {
+            const MantidVec & E = inputWorkspace->readE(wi);
+            std::copy(E.begin(), E.end(), data+index);
+          }
         }
 
-        // Get the histogram then copy it over to the float array.
-        if (doErrors || doBoth)
-        {
-          const MantidVec & E = inputWorkspace->readE(wi);
-          if (doBoth)
-            std::copy(E.begin(), E.end(), errors+index);
-          else
-            std::copy(E.begin(), E.end(), data+index);
-        }
       }
 
       fillTime += tim1.elapsed();
@@ -316,13 +336,17 @@ namespace NeXus
       if (!doBoth && (x % x_pixel_slab == x_pixel_slab-1))
       {
         Timer tim2;
-        std::cout << "starting slab " << x << "\n";
+        //std::cout << "starting slab " << x << "\n";
         // This is where the slab is in the greater data array.
         slabStartIndices[0]=slabnum*x_pixel_slab;
         slabStartIndices[1]=0;
         slabStartIndices[2]=0;
-        if (NXputslab (outId, data, slabStartIndices, slabDimensions) != NX_OK) return NX_ERROR;
+        if (NXputslab(outId, data, slabStartIndices, slabDimensions) != NX_OK) return NX_ERROR;
         saveTime += tim2.elapsed();
+
+        std::ostringstream mess;
+        mess << det->getName() << ", " << field_name << " slab " << slabnum << " of " << det->xpixels()/x_pixel_slab;
+        this->prog->reportIncrement(x_pixel_slab*det->ypixels(), mess.str());
       }
 
     }// X loop
@@ -333,9 +357,12 @@ namespace NeXus
       if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
       if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
       if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+      this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " data");
+
       if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
       if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
       if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+      this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " errors");
       saveTime += tim2.elapsed();
     }
     else
@@ -361,6 +388,9 @@ namespace NeXus
   //=================================================================================================
   /** Write the group labeled "data"
    *
+   * @param bank :: name of the bank
+   * @param is_definition
+   * @return error code
    */
   int SaveSNSNexus::WriteDataGroup(std::string bank, int is_definition)
   {
@@ -389,11 +419,46 @@ namespace NeXus
     else
     {
       //YES it is a rectangular detector.
-//      if (this->WriteOutDataOrErrors(det, "data", false, is_definition, bank) != NX_OK) return NX_ERROR;
-//      if (this->WriteOutDataOrErrors(det, "errors", false, is_definition, bank) != NX_OK) return NX_ERROR;
-      if (this->WriteOutDataOrErrors(det, "data", "errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
 
-      this->prog->reportIncrement(det->xpixels()*det->ypixels(), "det->getName()");
+      // --- Memory requirements ----
+      size_t memory_required = size_t(det->xpixels()*det->ypixels())*size_t(inputWorkspace->blocksize())*2*sizeof(float);
+      // Make sure you free as much memory as possible if you need a huge block.
+      if (memory_required > 1000000000)
+        API::MemoryManager::Instance().releaseFreeMemory();
+
+      Kernel::MemoryStats mem;
+      mem.update();
+      size_t memory_available = mem.availMem()*1024;
+
+      std::cout << "Memory available: " << memory_available/1024 << " kb. ";
+      std::cout << "Memory required: " << memory_required/1024 << " kb. ";
+
+      // Give a 50% margin of error in allocating the memory
+      memory_available = memory_available/2;
+
+      if (memory_available < memory_required)
+      {
+        // Compute how large of a slab you can still use.
+        int x_slab;
+        x_slab = memory_available/(size_t(det->ypixels())*size_t(inputWorkspace->blocksize())*2*sizeof(float));
+        if (x_slab <= 0) x_slab = 1;
+        // Look for a slab size that evenly divides the # of pixels.
+        while (x_slab > 1)
+        {
+          if ((det->xpixels() % x_slab) == 0) break;
+          x_slab--;
+        }
+
+        std::cout << "Saving in slabs of " << x_slab << " X pixels.\n";
+        if (this->WriteOutDataOrErrors(det, x_slab, "data", "errors", false, false, is_definition, bank) != NX_OK) return NX_ERROR;
+        if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NX_OK) return NX_ERROR;
+      }
+      else
+      {
+        std::cout << "Saving in one block.\n";
+        if (this->WriteOutDataOrErrors(det, -1, "data", "errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
+      }
+
     }
 
     return NX_OK;
@@ -570,7 +635,11 @@ namespace NeXus
   }
 
 
-
+  void nexus_print_error(void *pD, char *text)
+  {
+    (void) pD;
+    std::cout << "Nexus Error: " << text << "\n";
+  }
 
 
 
@@ -581,6 +650,9 @@ namespace NeXus
    */
   void SaveSNSNexus::exec()
   {
+    //NXMSetError(NULL, nexus_print_error);
+    NXMEnableErrorReporting();
+
     // Retrieve the filename from the properties
     m_inputFilename = getPropertyValue("InputFileName");
     m_inputWorkspaceName = getPropertyValue("InputWorkspace");
@@ -592,8 +664,8 @@ namespace NeXus
     // We'll need to get workspace indices
     map = inputWorkspace->getDetectorIDToWorkspaceIndexMap( false );
 
-    // Start the progress bar
-    prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms());
+    // Start the progress bar. 3 reports per histogram.
+    prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms()*3);
 
     EventWorkspace_const_sptr eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
     if (eventWorkspace)
@@ -601,7 +673,11 @@ namespace NeXus
       eventWorkspace->sortAll(TOF_SORT, prog);
     }
 
-    this->copy_file(m_inputFilename.c_str(),  NXACC_READ, m_outputFilename.c_str(),  NXACC_CREATE5);
+    int ret;
+    ret = this->copy_file(m_inputFilename.c_str(),  NXACC_READ, m_outputFilename.c_str(),  NXACC_CREATE5);
+
+    if (ret == NX_ERROR)
+      throw std::runtime_error("Nexus error while copying the file.");
 
     // Free map memory
     delete map;
