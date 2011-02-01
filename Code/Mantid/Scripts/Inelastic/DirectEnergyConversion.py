@@ -126,6 +126,8 @@ class DirectEnergyConversion(object):
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
         delta = 2.0*(upp - low)
         Rebin(white_ws, white_ws, [low, delta, upp])
+        # Why aren't we doing this...
+        #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
 
         # Masking and grouping
         white_ws = self.remap(white_ws, spectra_masks, map_file)
@@ -136,7 +138,7 @@ class DirectEnergyConversion(object):
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
-                 spectra_masks=None, result_name = None, Tzero=None):
+                 spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono vanadium run to DeltaE.
         If multiple run files are passed to this function, they are summed into a run and then processed         
         """
@@ -150,7 +152,7 @@ class DirectEnergyConversion(object):
                                    white_run, map_file, spectra_masks, Tzero)
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
-                    spectra_masks=None, result_name = None, Tzero=None):
+                    spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono-chromatic sample run to DeltaE.
         If multiple run files are passed to this function, they are summed into a run and then processed
         """
@@ -185,7 +187,6 @@ class DirectEnergyConversion(object):
             # apply T0 shift
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
-            self.apply_detector_eff = True
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             mono_run = common.loaded_file('mono-sample')
                            
@@ -203,7 +204,9 @@ class DirectEnergyConversion(object):
             	ei_calc = monitor_ws.getRun().getLogData("Ei").value
             except:
             	self.log("Error in GetEi. Using entered values.")
+                monitor_ws.getRun()['Ei'] = ei_value
             	ei_value = ei_guess
+                ei_calc = None
             	TzeroCalculated = Tzero
             	
             # Set the tzero to be the calculated value
@@ -227,7 +230,6 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             # apply T0 shift
             ChangeBinOffset(data_ws, result_name, -tzero)
-            self.apply_detector_eff = True
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
@@ -335,7 +337,22 @@ class DirectEnergyConversion(object):
             # TODO: Need a better check than this...
             if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
-                norm_factor = self.calc_average(monovan_wkspace)
+                if (self.average_mono):
+                    norm_factor = self.calc_average(monovan_wkspace)
+                else:
+                    e_low = self.monovan_integr_range[0]
+                    e_upp = self.monovan_integr_range[1]
+                    if e_low > e_upp:
+                        raise ValueError("Inconsistent mono-vanadium integration range defined!")
+                    integration_alg = Integration(monovan_wkspace, "monovan_wkspace_integrated", RangeLower=e_low, RangeUpper=e_upp)
+                    # Find if we have any zeros
+                    norm_factor = integration_alg.workspace()
+                    #min_value = self.tiny * self.tiny
+                    #max_value = self.large * self.large
+                    zerovalue_tests_ws = '_tmp_abs_median_tests'
+                    fdol_alg = FindDetectorsOutsideLimits(norm_factor, zerovalue_tests_ws, HighThreshold=self.large, LowThreshold=self.tiny)
+                    MaskDetectors(norm_factor, MaskedWorkspace=fdol_alg.workspace())
+                    mtd.deleteWorkspace(zerovalue_tests_ws)
             else:
                 self.log("Performing Absolute Units Normalisation.")
                 # Perform Abs Units...
@@ -552,7 +569,7 @@ class DirectEnergyConversion(object):
             elif ext == '.nxs':
                 SaveNexus(workspace, filename)
             elif ext == '.nxspe':
-                SaveNXSPE(workspace, filename)
+                SaveNXSPE(workspace, filename, kioverkfscaling=self.apply_kikf_correction)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
     
@@ -655,6 +672,9 @@ class DirectEnergyConversion(object):
         self.abs_spectra_masks = None
         self.sample_mass = 1.0
         self.sample_rmm = 1.0
+        
+        # Divide by the mono norm average
+        self.average_mono = True
         
         # Detector Efficiency Correction
         self.apply_detector_eff = True
