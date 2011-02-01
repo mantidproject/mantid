@@ -154,6 +154,18 @@ public:
     }
   }
 
+  void testReadYE()
+  {
+    ws = Create2DWorkspaceBinned(nhist, nbins);
+    MantidVec const * Y=NULL;
+    MantidVec const * E=NULL;
+    ws->readYE(0, Y, E);
+    TS_ASSERT( Y );
+    TS_ASSERT( E );
+    TS_ASSERT_EQUALS( (*Y)[0], 2.0 );
+    TS_ASSERT_EQUALS( (*E)[0], sqrt(2.0) );
+  }
+
 
 };
 

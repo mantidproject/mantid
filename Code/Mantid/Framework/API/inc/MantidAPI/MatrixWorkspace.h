@@ -142,12 +142,28 @@ namespace Mantid
       //----------------------------------------------------------------------
       // Methods for getting read-only access to the data.
       // Just passes through to the virtual dataX/Y/E function (const version)
+
       /// Returns a read-only (i.e. const) reference to the specified X array
+      /// @param index :: workspace index to retrieve.
       const MantidVec& readX(int const index) const { return dataX(index); }
       /// Returns a read-only (i.e. const) reference to the specified Y array
+      /// @param index :: workspace index to retrieve.
       const MantidVec& readY(int const index) const { return dataY(index); }
       /// Returns a read-only (i.e. const) reference to the specified E array
+      /// @param index :: workspace index to retrieve.
       const MantidVec& readE(int const index) const { return dataE(index); }
+
+      /** Returns a read-only (i.e. const) reference to both the Y
+       * and E arrays
+       * @param index :: workspace index to retrieve.
+       * @param Y :: pointer to the data vector
+       * @param E :: pointer to the error vector
+       */
+      virtual void readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const
+      {
+        Y = &dataY(index);
+        E = &dataE(index);
+      }
 
       /// Returns the x data
       virtual MantidVec& dataX(int const index) = 0;
