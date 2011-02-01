@@ -133,3 +133,25 @@ if (PYUNITTEST_FOUND)
   add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonTest.py )
 endif ()
+
+###########################################################################
+# things to put together a main program
+###########################################################################
+find_program( GEN_TEST_MAIN generatetestmain.py
+              ${PROJECT_SOURCE_DIR}/TestingTools/ ${PROJECT_SOURCE_DIR}/../TestingTools/)
+if (GEN_TEST_MAIN)
+  # generate a default "main.cpp" file
+  add_custom_command ( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+                       COMMAND ${GEN_TEST_MAIN} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
+  add_custom_target( russellcpp
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
+
+  # build an executable
+  add_executable(russell EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
+  target_link_libraries ( russell ${MANTIDLIBS} Algorithms DataHandling )
+
+  # run the executable
+  add_custom_target ( russellhappy
+                      DEPENDS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell 
+                      COMMAND ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell )
+endif ()
