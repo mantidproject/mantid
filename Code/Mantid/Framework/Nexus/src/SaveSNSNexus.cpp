@@ -17,6 +17,7 @@
 #include "MantidAPI/FileProperty.h"
 
 #include <cmath>
+#include <numeric>
 #include <boost/shared_ptr.hpp>
 #include "Poco/File.h"
 //#include "hdf5.h" //This is troublesome on multiple platforms.
@@ -279,6 +280,7 @@ namespace NeXus
 //    for (size_t i=0; i < slabDimensions[0]*slabDimensions[1]*slabDimensions[2]; i++)
 //      data[i]=i;
 
+
     for (int x = 0; x < det->xpixels(); x++)
     {
       // Which slab are we in?
@@ -288,9 +290,10 @@ namespace NeXus
       int slabx = x % x_pixel_slab;
 
       Timer tim1;
+      size_t ypixels = det->ypixels();
 
       PARALLEL_FOR1(inputWorkspace)
-      for (int y = 0; y < det->ypixels(); y++)
+      for (size_t y = 0; y < ypixels; y++)
       {
         //Get the workspace index for the detector ID at this spot
         int wi;
@@ -304,7 +307,8 @@ namespace NeXus
         }
 
         // Offset into array.
-        int index = slabx*dataDimensions[1]*dataDimensions[2] + y*dataDimensions[2];
+        size_t index = size_t(slabx)*size_t(dataDimensions[1])*size_t(dataDimensions[2]) + y*size_t(dataDimensions[2]);
+        size_t start_index = index;
 
         if (doBoth)
         {
@@ -313,20 +317,39 @@ namespace NeXus
           inputWorkspace->readYE(wi,Y,E);
           std::copy(Y->begin(), Y->end(), data+index);
           std::copy(E->begin(), E->end(), errors+index);
+
+//          MantidVec::const_iterator it_end;
+//          it_end = Y->end();
+//          for (MantidVec::const_iterator it = Y->begin(); it != it_end; it++)
+//            data[index++] = *it;
+//
+//          index = start_index;
+//          it_end = E->end();
+//          for (MantidVec::const_iterator it = E->begin(); it != it_end; it++)
+//            errors[index++] = *it;
+
         }
         else
         {
           if (doErrors)
           {
-            const MantidVec & Y = inputWorkspace->readY(wi);
-            std::copy(Y.begin(), Y.end(), data+index);
-          }
-          else
-          {
             const MantidVec & E = inputWorkspace->readE(wi);
             std::copy(E.begin(), E.end(), data+index);
           }
+          else
+          {
+            const MantidVec & Y = inputWorkspace->readY(wi);
+            std::copy(Y.begin(), Y.end(), data+index);
+          }
         }
+
+//        double total = 0;
+//        for (size_t i=start_index; i < start_index+inputWorkspace->blocksize(); ++i)
+//          total += data[i];
+//
+//        if (total > 0)
+//         std::cout << x <<"," << y << "="<<total <<"\n";
+
 
       }
 
@@ -435,6 +458,7 @@ namespace NeXus
 
       // Give a 50% margin of error in allocating the memory
       memory_available = memory_available/2;
+      if (memory_available > 5e9) memory_available = 5e9;
 
       if (memory_available < memory_required)
       {
@@ -450,13 +474,13 @@ namespace NeXus
         }
 
         std::cout << "Saving in slabs of " << x_slab << " X pixels.\n";
-        if (this->WriteOutDataOrErrors(det, x_slab, "data", "errors", false, false, is_definition, bank) != NX_OK) return NX_ERROR;
+        if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, is_definition, bank) != NX_OK) return NX_ERROR;
         if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NX_OK) return NX_ERROR;
       }
       else
       {
         std::cout << "Saving in one block.\n";
-        if (this->WriteOutDataOrErrors(det, -1, "data", "errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
+        if (this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
       }
 
     }
