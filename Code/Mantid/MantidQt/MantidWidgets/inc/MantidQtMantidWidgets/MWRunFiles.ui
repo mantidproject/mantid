@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>244</width>
+    <width>231</width>
     <height>41</height>
    </rect>
   </property>
@@ -35,7 +35,43 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="2" >
+   <item row="0" column="5" >
+    <widget class="QPushButton" name="browseBtn" >
+     <property name="text" >
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" >
+    <widget class="QLabel" name="textLabel" >
+     <property name="text" >
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3" >
+    <widget class="QLineEdit" name="entryNum" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+       <horstretch>40</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>30</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize" >
+      <size>
+       <width>20</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4" >
     <widget class="QLabel" name="valid" >
      <property name="sizePolicy" >
       <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
@@ -82,20 +118,6 @@
      </property>
      <property name="text" >
       <string>*</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="3" >
-    <widget class="QPushButton" name="browseBtn" >
-     <property name="text" >
-      <string>Browse</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" >
-    <widget class="QLabel" name="textLabel" >
-     <property name="text" >
-      <string>TextLabel</string>
      </property>
     </widget>
    </item>

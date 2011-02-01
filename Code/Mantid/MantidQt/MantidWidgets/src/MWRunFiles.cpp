@@ -10,26 +10,37 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
+#include "Poco/File.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 static const int MAX_FILE_NOT_FOUND_DISP = 3;
 
-MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(true), 
-m_isOptional(false), m_algorithmProperty(""), m_fileFilter("")
+MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
+  m_findRunFiles(true), m_allowMultipleFiles(true), m_isOptional(false),
+  m_doMultiEntry(false), m_fileProblem(""), m_entryNumProblem(""),
+  m_algorithmProperty(""), m_fileFilter("")
 {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
-  connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SLOT(findFiles()));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(findFiles()));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
+
+  connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this, SLOT(checkEntry()));
+  connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
+
   m_uiForm.fileEditor->clear();
+  
+  m_doMultiEntry ? m_uiForm.entryNum->show() : m_uiForm.entryNum->hide();
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
+
+  findFiles();
 }
 
 /**
@@ -106,6 +117,33 @@ void MWRunFiles::isOptional(const bool optional)
 }
 
 /**
+* Whether to find the number of entries in the file or assume (the
+* normal situation) of one entry
+* @return true if the widget is to look for multiple entries
+*/
+bool MWRunFiles::doMultiEntry() const
+{
+  return m_doMultiEntry;
+}
+
+/**
+* Set to true to enable the period number box
+* @param multiEntry whether to show the multiperiod box
+*/
+void MWRunFiles::doMultiEntry(const bool multiEntry)
+{
+  m_doMultiEntry = multiEntry;
+  if (m_doMultiEntry)
+  {
+    m_uiForm.entryNum->show();
+  }
+  else
+  {
+    m_uiForm.entryNum->hide();
+  }
+}
+
+/**
 * Returns the algorithm name
 * @returns The algorithm name
 */
@@ -177,6 +215,24 @@ QString MWRunFiles::getFirstFilename() const
     return m_foundFiles[0];
 }
 
+/** The number the user entered into the entryNum lineEdit
+* or NO_ENTRY_NUM on error. Checking if isValid is true should
+* eliminate the possiblity of getting NO_ENTRY_NUM
+*/
+int MWRunFiles::getEntryNum() const
+{
+  if ( m_doMultiEntry && isValid() )
+  {
+    bool isANumber;
+    const int period = m_uiForm.entryNum->text().toInt(&isANumber);
+    if (isANumber)
+    {
+      return period;
+    }
+  }
+  return NO_ENTRY_NUM;
+}
+
 /**
 * Save settings to the given group
 * @param group :: The name of the group key to save to
@@ -205,25 +261,24 @@ void MWRunFiles::setFileText(const QString & text)
 */
 void MWRunFiles::findFiles()
 {
-
-  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
-  QString file;
-
   std::string text = this->m_uiForm.fileEditor->text().toStdString();
   if( text.empty() )
   {
     if( this->isOptional() )
     {
-      m_uiForm.valid->hide();
+      setFileProblem("");
       m_foundFiles.clear();
       return;
     }
     else
     {
-      showError("No files specified.");
+      setFileProblem("No files specified.");
       return;
     }
   }
+
+  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
+  QString file;
 
   Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
   std::vector<std::string> filenames;
@@ -239,7 +294,15 @@ void MWRunFiles::findFiles()
       foreach(file, filestext)
       {
         std::string result = fileSearcher.getFullPath(file.toStdString());
-        if( !result.empty() ) filenames.push_back(file.toStdString());
+        Poco::File test(result);
+        if ( ( ! result.empty() ) && test.exists() )
+        {
+          filenames.push_back(file.toStdString());
+        }
+        else
+        {
+          throw std::invalid_argument("File \"" + file.toStdString() + "\" not found");
+        }
       }
     }
   }
@@ -253,7 +316,7 @@ void MWRunFiles::findFiles()
   }
   if( !error.isEmpty() )
   {
-    showError(error);
+    setFileProblem(error);
     return;
   }
 
@@ -264,15 +327,15 @@ void MWRunFiles::findFiles()
   }
   if( m_foundFiles.isEmpty() )
   {
-    showError("Error: No files found. Check search paths.");
+    setFileProblem("Error: No files found. Check search paths and instrument selection.");
   }
   else if( m_foundFiles.count() > 1 && this->allowMultipleFiles() == false )
   {
-    showError("Error: Multiple files specified.");
+    setFileProblem("Error: Multiple files specified.");
   }
   else
   {
-    m_uiForm.valid->hide();
+    setFileProblem("");
   }
 }/**
 * Read settings from the given group
@@ -417,13 +480,45 @@ QString MWRunFiles::openFileDia()
 }
 
 /**
-* Mark an error on the form
-* @param A :: message to include (default: "")
+* Flag a problem with the file the user entered, an empty string means no error but
+* there may be an error with the entry box if enabled. Errors passed here are shown first
+* @param A message to include or "" for no error
 */
-void MWRunFiles::showError(const QString & message)
+void MWRunFiles::setFileProblem(const QString & message)
 {
-  m_uiForm.valid->setToolTip(message);
-  m_uiForm.valid->show();
+  m_fileProblem = message;
+  refreshvalidator();
+}
+
+/** flag a problem with the supplied entry number, an empty string means no error.
+*  file errors take precedence of these errors
+*  @param message the message to display
+*/
+void MWRunFiles::setEntryNumProblem(const QString & message)
+{
+  m_entryNumProblem = message;
+  refreshvalidator();
+}
+
+/** Checks the data m_fileProblem and m_entryNumProblem to see if the validator label
+*  needs to be displayed
+*/
+void MWRunFiles::refreshvalidator()
+{
+  if ( ! m_fileProblem.isEmpty() )
+  {
+    m_uiForm.valid->setToolTip(m_fileProblem);
+    m_uiForm.valid->show();
+  }
+  else if ( ! m_entryNumProblem.isEmpty() )
+  {
+    m_uiForm.valid->setToolTip(m_entryNumProblem);
+    m_uiForm.valid->show();
+  }
+  else
+  {
+    m_uiForm.valid->hide();
+  }
 }
 
 /** This slot opens a file browser
@@ -450,4 +545,20 @@ void MWRunFiles::browseClicked()
   }
   findFiles();
   emit fileEditingFinished();
+}
+/** Currently just checks that entryNum contains an int > 0 and hence might be a
+*  valid entry number
+*/
+void MWRunFiles::checkEntry()
+{
+  bool good;
+  const int num = m_uiForm.entryNum->text().toInt(&good);
+  if ( (! good) || ( num < 1 ) )
+  {
+    setEntryNumProblem("The entry number must be a string > 0");
+  }
+  else
+  {
+    refreshvalidator();
+  }
 }

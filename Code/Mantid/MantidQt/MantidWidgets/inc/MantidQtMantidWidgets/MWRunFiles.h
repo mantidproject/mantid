@@ -48,10 +48,12 @@ namespace MantidQt
       Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
       Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
       Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
+      Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
 
     public:
+      static const int NO_ENTRY_NUM = -1;                       ///< flag that says the entry number box hasn't been filled in
 
       ///Default constructor
       MWRunFiles(QWidget *parent=NULL);
@@ -64,6 +66,8 @@ namespace MantidQt
       void allowMultipleFiles(const bool);
       bool isOptional() const;
       void isOptional(const bool);
+      bool doMultiEntry() const;
+      void doMultiEntry(const bool);
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
       QStringList getFileExtensions() const;
@@ -73,6 +77,7 @@ namespace MantidQt
       bool isValid() const;
       QStringList getFilenames() const;
       QString getFirstFilename() const;
+      int getEntryNum() const;
 
       /// Read settings from the given group
       void readSettings(const QString & group);
@@ -98,12 +103,18 @@ namespace MantidQt
       QStringList getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName);
       /// Open a file dialog
       QString openFileDia();
-      ///Show an error
-      void showError(const QString & message = "");
+      /// flag a problem with the file the user entered, an empty string means no error
+      void setFileProblem(const QString & message);
+      /// flag a problem with the supplied entry number, an empty string means no error
+      void setEntryNumProblem(const QString & message);
+      /// displays the validator red star if either m_fileProblem or m_entryNumProblem are not empty
+      void refreshvalidator();
 
     private slots:
       /// Browse clicked slot
       void browseClicked();
+      /// currently checks only if the entry number is any integer > 0
+      void checkEntry();
 
     private:
       /// Is the widget for run files or standard files
@@ -112,6 +123,12 @@ namespace MantidQt
       bool m_allowMultipleFiles;
       /// Whether the widget can be empty
       bool m_isOptional;
+      /// Whether to allow the user to state an entry number
+      bool m_doMultiEntry;
+      /// Holds any error with the user entry for the filename, "" means no error
+      QString m_fileProblem;
+      /// If applicable holds any error with the user in entryNum, "" means no error
+      QString m_entryNumProblem;
       /// The algorithm name and property (can be empty)
       QString m_algorithmProperty;
       /// The file extensions to look for
