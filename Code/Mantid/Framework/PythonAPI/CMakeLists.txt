@@ -55,6 +55,9 @@ set_property ( TARGET PythonAPI PROPERTY FOLDER "Framework" )
 # Library name needs to end in .pyd for Windows
 if ( WIN32 )
     set_target_properties ( PythonAPI PROPERTIES SUFFIX .pyd )
+    # Intensive use of templated libaries can cause large objects to be generated. These require
+    # an additional flag in MSVC.
+    set_target_properties ( PythonAPI COMPILE_FLAGS "/bigobj" )
 endif ()
 # Debug python library expects imported module names to end in _d
 if ( PYTHON_DEBUG_LIBRARY )
