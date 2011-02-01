@@ -53,7 +53,12 @@ namespace MantidQt
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
 
     public:
-      static const int NO_ENTRY_NUM = -1;                       ///< flag that says the entry number box hasn't been filled in
+      /// Flags for workspace entries
+      enum
+      {
+        NO_ENTRY_NUM = -1,                       ///< error in the entry number setting
+        ALL_ENTRIES = -2                         ///< use all entries (i.e. entry number was left blank)
+      };
 
       ///Default constructor
       MWRunFiles(QWidget *parent=NULL);

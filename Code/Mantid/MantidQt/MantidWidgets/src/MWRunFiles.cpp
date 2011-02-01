@@ -141,6 +141,7 @@ void MWRunFiles::doMultiEntry(const bool multiEntry)
   {
     m_uiForm.entryNum->hide();
   }
+  refreshvalidator();
 }
 
 /**
@@ -221,7 +222,11 @@ QString MWRunFiles::getFirstFilename() const
 */
 int MWRunFiles::getEntryNum() const
 {
-  if ( m_doMultiEntry && isValid() )
+  if ( m_uiForm.entryNum->text().isEmpty() || (! m_doMultiEntry) )
+  {
+    return ALL_ENTRIES;
+  }
+  if  (isValid())
   {
     bool isANumber;
     const int period = m_uiForm.entryNum->text().toInt(&isANumber);
@@ -510,7 +515,7 @@ void MWRunFiles::refreshvalidator()
     m_uiForm.valid->setToolTip(m_fileProblem);
     m_uiForm.valid->show();
   }
-  else if ( ! m_entryNumProblem.isEmpty() )
+  else if ( ! m_entryNumProblem.isEmpty() && m_doMultiEntry )
   {
     m_uiForm.valid->setToolTip(m_entryNumProblem);
     m_uiForm.valid->show();
@@ -551,14 +556,24 @@ void MWRunFiles::browseClicked()
 */
 void MWRunFiles::checkEntry()
 {
+  if (m_uiForm.entryNum->text().isEmpty())
+  {
+    setEntryNumProblem("");
+    return;
+  }
+
   bool good;
   const int num = m_uiForm.entryNum->text().toInt(&good);
-  if ( (! good) || ( num < 1 ) )
+  if (! good )
   {
-    setEntryNumProblem("The entry number must be a string > 0");
+    setEntryNumProblem("The entry number must be an integer");
+    return;
   }
-  else
+  if ( num < 1 )
   {
-    refreshvalidator();
+    setEntryNumProblem("The entry number must be an integer > 0");
+    return;
   }
+
+  setEntryNumProblem("");
 }

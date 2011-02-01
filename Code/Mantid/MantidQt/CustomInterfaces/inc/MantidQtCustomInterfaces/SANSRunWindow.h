@@ -240,8 +240,6 @@ private:
   SANSAddFiles *m_addFilesTab;
   /// this points to a saveWorkspaces, which allows users to save any workspace, when one is opened
   MantidWidgets::SaveWorkspaces *m_saveWorkspaces;
-  /// The data directory (as an absolute path)
-  QString m_data_dir;
   /// The instrument definition directory
   QString m_ins_defdir;
   /// The last directory that was viewed
@@ -301,7 +299,6 @@ private:
   void initAnalysDetTab();
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
   void upDateDataDir();
-  bool exportDataDir();
   void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
   QString getInstrumentClass() const;
   bool entriesAreValid();

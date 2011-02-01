@@ -62,7 +62,7 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_addFilesTab(NULL), m_saveWorkspaces(NULL),
-  m_data_dir(""), m_ins_defdir(""), m_last_dir(""),
+  m_ins_defdir(""), m_last_dir(""),
   m_cfg_loaded(true), m_userFname(false), m_sample_no(), m_run_no_boxes(),
   m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
@@ -500,10 +500,6 @@ void SANSRunWindow::saveSettings()
 {
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
-  if( !m_data_dir.isEmpty() ) 
-  {
-    value_store.setValue("data_dir", m_data_dir);
-  }
   if( !m_uiForm.userfile_edit->text().isEmpty() ) 
   {
     value_store.setValue("user_file", m_uiForm.userfile_edit->text());
@@ -592,7 +588,9 @@ bool SANSRunWindow::oldLoadUserFile()
   if( filetext.isEmpty() ) return false;
   if( QFileInfo(filetext).isRelative() )
   {
-    filetext = QDir(m_data_dir).absoluteFilePath(filetext);
+    QString data_path(m_uiForm.saveDir_lb->text().trimmed());
+
+    filetext = QDir(data_path).absoluteFilePath(filetext);
   }
 
   if( !QFileInfo(filetext).exists() ) return false;
@@ -744,7 +742,8 @@ bool SANSRunWindow::loadUserFile(QString & errors)
 
   if( QFileInfo(filetext).isRelative() )
   {
-    filetext = QDir(m_data_dir).absoluteFilePath(filetext);
+    QString dataDir(m_uiForm.saveDir_lb->text().trimmed());
+    filetext = QDir(dataDir).absoluteFilePath(filetext);
   }
   if( !QFileInfo(filetext).exists() )
   {
@@ -1784,13 +1783,10 @@ bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_fie
 bool SANSRunWindow::oldLoadButtonClick()
 {
   QString origin_dir = QDir::currentPath();
-  if( m_data_dir.isEmpty() || !QDir(m_data_dir).exists() )
-  {
-    showInformationBox("The data directory " + m_data_dir + " does not exist.");
-    return false;
-  }
-  if( !m_data_dir.endsWith('/') ) m_data_dir += "/";
-  runReduceScriptFunction("import SANSReduction\nSANSReduction.INSTRUMENT = i.ReductionSingleton().instrument\nSANSReduction.DataPath('" + m_data_dir + "')");
+
+  QString data_dir(m_uiForm.saveDir_lb->text());
+  if( !data_dir.endsWith('/') ) data_dir += "/";
+  runReduceScriptFunction("import SANSReduction\nSANSReduction.INSTRUMENT = i.ReductionSingleton().instrument\nSANSReduction.DataPath('" + data_dir + "')");
 
   runReduceScriptFunction("SANSReduction.UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
   oldLoadUserFile();
@@ -1919,11 +1915,6 @@ bool SANSRunWindow::oldLoadButtonClick()
  */
 bool SANSRunWindow::handleLoadButtonClick()
 {
-  if ( ! exportDataDir() )
-  {
-    return false;
-  }
-
   // Check if we have loaded the data_file
   if( !isUserFileLoaded() )
   {
@@ -2116,8 +2107,6 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   QString exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
 
-  exportDataDir();
-
   exec_reduce += "i.ReductionSingleton().to_Q.output_type='"+type+"'\n";
   //Analysis details
   exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
@@ -2204,7 +2193,8 @@ QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
   QString exec_reduce = "SANSReduction.Detector('" + m_uiForm.detbank_sel->currentText() + "')\n";
 
   //Add the path in the single mode data box if it is not empty
-  QString data_path = m_data_dir;
+  QString data_path(m_uiForm.saveDir_lb->text().trimmed());
+
   if( !data_path.isEmpty() )
   {
     exec_reduce += "SANSReduction.DataPath('" + data_path + "')\n";
@@ -3569,36 +3559,23 @@ void SANSRunWindow::upDateDataDir()
     = ConfigService::Instance().getDataSearchDirs();
   if ( ! dirs.empty() )
   {// use the first directory in the list
-    m_data_dir = QString::fromStdString(dirs.front());
-    m_uiForm.saveDir_lb->setText(m_data_dir);
+    QString dataDir = QString::fromStdString(dirs.front());
+    //check for windows and its annoying path separator thing, windows' paths can't contain /
+    if ( dataDir.contains('\\') && ! dataDir.contains('/') )
+    {
+      dataDir.replace('\\', '/');
+    }
+    m_uiForm.saveDir_lb->setText(dataDir);
 
     m_uiForm.plusDirs_lb->setText(
       QString("+ ") + QString::number(dirs.size()-1) + QString(" others"));
   }
   else
   {
-    m_data_dir = "";
     m_uiForm.saveDir_lb->setText("No input search directories defined");
     m_uiForm.plusDirs_lb->setText("");
   }
 
-}
-/** Set the Python data directory to that displayed on this GUI, which is the first data
-*  serach directory
-*  @return false if the there were Python errors, otherwise true
-*/
-bool SANSRunWindow::exportDataDir()
-{
-  if( m_data_dir.isEmpty() || !QDir(m_data_dir).exists() )
-  {
-    showInformationBox("The specified data directory \"" + m_data_dir + "\" does not exist. Use the \"Manage Directories\" button to change this");
-    return false;
-  }
-  if( !m_data_dir.endsWith('/') ) m_data_dir += "/";
-  const QString worked =
-    runReduceScriptFunction("i.ReductionSingleton().set_data_path('" + m_data_dir + "')");
-
-  return worked != "Error";
 }
 /** Update the input directory labels if the Mantid system input
 *  directories have changed
