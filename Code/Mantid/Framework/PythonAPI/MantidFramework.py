@@ -1270,8 +1270,8 @@ class PythonAlgorithm(PyAlgorithmBase):
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
         
         algm = self._createSubAlgorithm(algorithm.func_name)
-        # Check that algm is of the right type without having to import IAlgorithm
-        if not algm.__class__.__name__ == "IAlgorithm":
+        proxy = mtd._createAlgProxy(algm)
+        if not isinstance(proxy, IAlgorithmProxy):
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
         
         # The inspect module has changed in python 2.6 
@@ -1286,7 +1286,6 @@ class PythonAlgorithm(PyAlgorithmBase):
             else:
                 algm.setPropertyValue(_args[i], makeString(args[i]).lstrip('? '))
         # Go through keyword arguments
-        proxy = mtd._createAlgProxy(algm)
         for key in kwargs:
             if key not in proxy.keys():
                 continue           
