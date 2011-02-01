@@ -45,13 +45,13 @@ namespace Mantid
       /// virtual destructor
       virtual ~IDataFileChecker();
 
-    protected:
       /// Magic signature identifying a HDF5 file.
       static unsigned char const g_hdf5_signature[8];
       /// Magic HDF5 cookie that is stored in the first 4 bytes of the file.
       static uint32_t const g_hdf5_cookie;
       /// The default number of bytes of the header to check
       enum { g_hdr_bytes = 100 };
+
       /// A union representing the first g_hdr_bytes of a file
       union file_header
       {
@@ -61,7 +61,6 @@ namespace Mantid
 	unsigned char full_hdr[g_hdr_bytes+1];
       };
 
-    public:
       /// quick file check by reading first g_bufferSize bytes of the file or by checking the extension
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header & header)=0;
       /// file check by looking at the structure of the data file
@@ -72,7 +71,7 @@ namespace Mantid
 
     /// Typedef for a shared pointer
     typedef boost::shared_ptr<IDataFileChecker> IDataFileChecker_sptr;
-
+    
   }
 }
 #endif
