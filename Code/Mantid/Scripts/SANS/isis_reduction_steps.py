@@ -51,7 +51,10 @@ class LoadRun(ReductionStep):
         self._data_file = run_spec
         self._is_trans = trans
         self._reload = reload
-        self._period = int(entry)
+        if int(entry) > 0:
+            self._period = int(entry)
+        else:
+            self._period = self.UNSET_PERIOD
 
         self._spec_min = None
         self._spec_max = None
@@ -80,16 +83,21 @@ class LoadRun(ReductionStep):
 
             SANS2D_log_file = log_file.rpartition('.')[0]+'.log'
         else:
-            #this is the generic situation
+            #a particular entry was selected just load that one
             if not self._period == self.UNSET_PERIOD:
-                Load(self._data_file, workspace,
+                alg = Load(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self._period)
             else:
                 #no specific period was requested
-                Load(self._data_file, workspace,
+                alg = Load(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
 
             SANS2D_log_file = mtd[workspace]
+
+            #get rid of these two lines when files store their logs properly
+            log_file = alg.getPropertyValue("Filename")
+            SANS2D_log_file = log_file.rpartition('.')[0]+'.log'
+
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
@@ -121,7 +129,7 @@ class LoadRun(ReductionStep):
             optional_entry_no = False
             @param optional_entry_no: include the entry number even if it's 1, default: false
         """  
-        run = self.shortrun_no
+        run = str(self.shortrun_no)
         if self._period > self.UNSET_PERIOD:
             if (int(self._period) != 1) or (not optional_entry_no):
                 run += 'p'+str(self._period)
@@ -137,18 +145,15 @@ class LoadRun(ReductionStep):
             return '', '', -1
 
         try:
-            run_no, logname, data_file = self._extract_run_details(
+            data_file = self._extract_run_details(
                 self._data_file, self._is_trans, prefix=reducer.instrument.name(), 
                 run_number_width=reducer.instrument.run_number_width, period=self._period)
         except AttributeError:
             raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
-        if run_no == '':
-            return '', '', -1
-
         workspace = self._get_workspace_name()
         #this always contains the period number
-        period_definitely_inc = self._get_workspace_name(False)        
+        period_definitely_inc = self._get_workspace_name(False)
         if self._reload == False and mantid.workspaceExists(workspace):
             return workspace, '', -1
         if self._reload == False and mantid.workspaceExists(period_definitely_inc):
@@ -158,11 +163,10 @@ class LoadRun(ReductionStep):
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
         if not os.path.exists(self._data_file):
             self._data_file = data_file
-        if self._period <= 0:
-            self._period = 1
+
         if self._is_trans:
             try:
-                if reducer.instrument.name() == 'SANS2D' and int(run_no) < 568:
+                if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
                     dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
                     self._spec_min = dimension*dimension*2
                     self._spec_max = self._spec_min + 4
@@ -222,20 +226,36 @@ class LoadRun(ReductionStep):
     def _extract_run_details(self, run_string, is_trans=False, prefix='', run_number_width=8, period=-1):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
-            @param run_string a run number followed by a dot and then the file type, i.e. file extension
+            @param run_string either the name of a run file or a run number followed by a dot and then the file type, i.e. file extension
             @param is_trans true for transmission files, false for sample files (default is false)
         """
         pieces = run_string.split('.')
         if len(pieces) != 2 :
              raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
+        
+        if run_string.find('/') > -1:
+            #assume we have a complete filename
+            filename = run_string
+            #remove the path name
+            run_name = run_string.rpartition('/')[2]
+            #remove the extension
+            file_parts = run_name.rpartition('.')
+            run_name = file_parts[0]
+            self.ext = file_parts[2]
+            if run_name.endswith('-add'):
+                #remove the add files specifier, if it's there
+                run_name = run_name.rpartition('-add')[0]
+            self.shortrun_no = str(run_name.partition(prefix)[2])
         else:
+            #this is a run number dot extension
             run_no = pieces[0]
             self.ext = pieces[1]
-        
-        fullrun_no, logname, self.shortrun_no = _padRunNumber(run_no, run_number_width)
-        self.shortrun_no = str(self.shortrun_no)
-      
-        return run_no, logname, prefix+fullrun_no+'.'+self.ext
+            fullrun_no, self.shortrun_no = _padRunNumber(run_no, run_number_width)
+            filename = prefix+fullrun_no+'.'+self.ext
+            
+        self.shortrun_no = int(self.shortrun_no)
+
+        return filename 
     
     def _find_workspace_num_periods(self, workspace): 
         """
@@ -314,9 +334,6 @@ class CanSubtraction(LoadRun):
         the AssignCan() command was called. Since the loading needs information from the instrument, 
         we load only before doing the subtraction.
     """
-
-    PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
-
     def __init__(self, can_run, reload = True, period = -1):
         """
             @param lambda_min: MinWavelength parameter for CalculateTransmission
@@ -343,8 +360,6 @@ class CanSubtraction(LoadRun):
         if self._scatter_can == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
             return '','()'
-
-        self.PERIOD_NOS["SCATTER_CAN"] = self._period
     
         if reducer.instrument.name() == 'LOQ':
             return self._scatter_can, ""
@@ -749,10 +764,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
 class LoadSample(LoadRun):
     """
+        Handles loading the sample run, this is the main experimental run with data
+        about the sample of interest
     """
-    #TODO: we don't need a dictionary here
-    PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
-
     def __init__(self, sample=None, reload=True, entry=-1):
         super(LoadSample, self).__init__(sample, reload=reload, entry=entry)
         self._scatter_sample = None
@@ -772,7 +786,7 @@ class LoadSample(LoadRun):
         self._clearPrevious(self._scatter_sample)
         self._SAMPLE_N_PERIODS = -1
         
-        if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
+        if self._data_file.startswith('.') or ( not self._data_file ):
             self._SAMPLE_RUN = ''
             self._scatter_sample = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
@@ -802,8 +816,6 @@ class LoadSample(LoadRun):
                 mantid.deleteWorkspace(self._scatter_sample)
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
-        
-        self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
 
         reducer.wksp_name = self.uncropped
         
@@ -1529,7 +1541,7 @@ def _padRunNumber(run_no, field_width):
     
     if digit_end == nchars:
         filebase = run_no.rjust(field_width, '0')
-        return filebase, filebase, run_no
+        return filebase, run_no
     else:
         filebase = run_no[:digit_end].rjust(field_width, '0')
-        return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
+        return filebase + run_no[digit_end:], run_no[:digit_end]

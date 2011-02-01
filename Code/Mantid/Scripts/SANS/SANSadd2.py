@@ -114,8 +114,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     path = path.replace('\\', '/')
 
   logFile = None
-  #file types of .raw need their log files to be copied too
-  if _isType(ext, rawTypes):
+  #change below when logs in Nexus files work  file types of .raw need their log files to be copied too
+  if True:#_isType(ext, rawTypes):
     logFile = fName.rpartition('.')[0]+'.log'
     
   try:

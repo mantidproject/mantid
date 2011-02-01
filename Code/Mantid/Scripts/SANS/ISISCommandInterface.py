@@ -482,7 +482,7 @@ def PlotResult(workspace, canvas=None):
         if numSpecs == 1:
             graph = mantidplot.plotSpectrum(workspace,0)
         else:        
-            graph = mantidplot.importMatrixWorkspace(workspace).plotGraph2D()
+            graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
 
     except NameError:
         issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
@@ -558,3 +558,7 @@ DefaultTrans = 'True'
 NewTrans = 'False'
 
 ReductionSingleton.clean(isis_reducer.ISISReducer)
+
+
+#if __name__ != '__main__':
+#    AssignSample('c:\\mantid\\test\\data\\SANS2D\\SANS2D000992.raw')
