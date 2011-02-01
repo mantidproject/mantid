@@ -22,6 +22,8 @@ public slots:
   void setYScale(double from, double to);
   void clearCurve();
   void recalcAxisDivs();
+  void setYLogScale();
+  void setYLinearScale();
 signals:
   void showContextMenu();
 protected:

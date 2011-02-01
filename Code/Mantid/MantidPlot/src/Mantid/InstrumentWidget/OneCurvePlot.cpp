@@ -46,6 +46,21 @@ void OneCurvePlot::setXScale(double from, double to)
   */
 void OneCurvePlot::setYScale(double from, double to)
 {
+  QwtScaleEngine *engine = axisScaleEngine(yLeft);
+  if (dynamic_cast<QwtLog10ScaleEngine*>(engine) && m_curve)
+  {
+    int n = m_curve->dataSize();
+    double yPositiveMin = to;
+    for(int i = 0; i < n; ++i)
+    {
+      double y = m_curve->y(i);
+      if (y > 0 && y < yPositiveMin)
+      {
+        yPositiveMin = y;
+      }
+    }
+    from = yPositiveMin;
+  }
   setAxisScale(QwtPlot::yLeft,from,to);
 }
 
@@ -107,4 +122,22 @@ void OneCurvePlot::mousePressEvent(QMouseEvent* e)
 void OneCurvePlot::setYAxisLabelRotation(double degrees)
 {
   axisScaleDraw(yLeft)->setLabelRotation(degrees);
+}
+
+/**
+  * Set the log scale on the y axis
+  */
+void OneCurvePlot::setYLogScale()
+{
+  QwtLog10ScaleEngine* logEngine = new QwtLog10ScaleEngine();
+  setAxisScaleEngine(yLeft,logEngine);
+}
+
+/**
+  * Set the linear scale on the y axis
+  */
+void OneCurvePlot::setYLinearScale()
+{
+  QwtLinearScaleEngine* engine = new QwtLinearScaleEngine();
+  setAxisScaleEngine(yLeft,engine);
 }

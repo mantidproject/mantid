@@ -938,10 +938,15 @@ QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
   m_plot->setXScale(0,1);
   m_plot->setYScale(-1.2,1.2);
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
+
   m_sumDetectors = new QAction("Sum",this);
   m_integrateTimeBins = new QAction("Integrate",this);
+  m_logY = new QAction("Y log scale",this);
+  m_linearY = new QAction("Y linear scale",this);
   connect(m_sumDetectors,SIGNAL(triggered()),this,SLOT(sumDetectors()));
   connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
+  connect(m_logY,SIGNAL(triggered()),m_plot,SLOT(setYLogScale()));
+  connect(m_linearY,SIGNAL(triggered()),m_plot,SLOT(setYLinearScale()));
 
   CollapsibleStack* panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
@@ -985,8 +990,8 @@ void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
       m_plot->setXScale(x.front(),x.back());
       Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
       Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-      m_plot->setYScale(*min_it,*max_it);
       m_plot->setData(&x[0],&y[0],y.size());
+      m_plot->setYScale(*min_it,*max_it);
     }
     else
     {// plot integrals
@@ -1017,8 +1022,8 @@ void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
           }
           Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
           Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-          m_plot->setYScale(*min_it,*max_it);
           m_plot->setData(&x[0],&y[0],y.size());
+          m_plot->setYScale(*min_it,*max_it);
         }
         else // plot detector integrals vs detID
         {
@@ -1054,9 +1059,9 @@ void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
               if (val < ymin) ymin = val;
               if (val > ymax) ymax = val;
             }
+            m_plot->setData(&x[0],&y[0],y.size());
             m_plot->setXScale(x.front(),x.back());
             m_plot->setYScale(ymin,ymax);
-            m_plot->setData(&x[0],&y[0],y.size());
           }
         }
       }
@@ -1107,6 +1112,11 @@ void InstrumentWindow::plotContextMenu()
   
   context.addAction(m_sumDetectors);
   context.addAction(m_integrateTimeBins);
+
+  QMenu* axes = new QMenu("Axes",this);
+  axes->addAction(m_logY);
+  axes->addAction(m_linearY);
+  context.addMenu(axes);
 
   context.exec(QCursor::pos());
 }
