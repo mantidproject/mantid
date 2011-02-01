@@ -776,8 +776,7 @@ namespace Mantid
         //hdf
         return true;
       }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-		(!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
+      else if ( (nread >= sizeof(g_hdf5_signature)) && (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
       { 
         //hdf5
         return true;
