@@ -293,7 +293,7 @@ namespace NeXus
       size_t ypixels = det->ypixels();
 
       PARALLEL_FOR1(inputWorkspace)
-      for (size_t y = 0; y < ypixels; y++)
+      for (int y = 0; y < ypixels; y++)
       {
         //Get the workspace index for the detector ID at this spot
         int wi;
@@ -307,8 +307,7 @@ namespace NeXus
         }
 
         // Offset into array.
-        size_t index = size_t(slabx)*size_t(dataDimensions[1])*size_t(dataDimensions[2]) + y*size_t(dataDimensions[2]);
-        size_t start_index = index;
+        size_t index = size_t(slabx)*size_t(dataDimensions[1])*size_t(dataDimensions[2]) + size_t(y)*size_t(dataDimensions[2]);
 
         if (doBoth)
         {
@@ -317,17 +316,6 @@ namespace NeXus
           inputWorkspace->readYE(wi,Y,E);
           std::copy(Y->begin(), Y->end(), data+index);
           std::copy(E->begin(), E->end(), errors+index);
-
-//          MantidVec::const_iterator it_end;
-//          it_end = Y->end();
-//          for (MantidVec::const_iterator it = Y->begin(); it != it_end; it++)
-//            data[index++] = *it;
-//
-//          index = start_index;
-//          it_end = E->end();
-//          for (MantidVec::const_iterator it = E->begin(); it != it_end; it++)
-//            errors[index++] = *it;
-
         }
         else
         {
@@ -342,14 +330,6 @@ namespace NeXus
             std::copy(Y.begin(), Y.end(), data+index);
           }
         }
-
-//        double total = 0;
-//        for (size_t i=start_index; i < start_index+inputWorkspace->blocksize(); ++i)
-//          total += data[i];
-//
-//        if (total > 0)
-//         std::cout << x <<"," << y << "="<<total <<"\n";
-
 
       }
 
