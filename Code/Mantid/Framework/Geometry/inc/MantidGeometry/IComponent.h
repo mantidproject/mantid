@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/System.h"
 #include <string>
 #include <vector>
@@ -115,6 +116,11 @@ namespace Mantid
       virtual double getDistance(const IComponent&) const = 0;
       /// Get the bounding box for this component and store it in the given argument
       virtual void getBoundingBox(BoundingBox& boundingBox) const = 0;
+
+      /** Gets the scaling factor of the object for the Object Component.
+       * @return a vector with 1 in all 3 directions.
+       */
+      virtual V3D getScaleFactor()const{ return V3D(1.0, 1.0, 1.0);}
 
       /** @name ParameterMap access */
       //@{

@@ -588,6 +588,7 @@ public:
     //
   }
 
+
   void testSolidAngleCappedCylinder()
     /**
     Test solid angle calculation for a capped cylinder
@@ -621,6 +622,7 @@ public:
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),2*M_PI,satol);
 
   }
+
 
   void testSolidAngleCubeTriangles()
     /**
@@ -663,6 +665,20 @@ public:
     }
 
   }
+
+
+
+  /** Add a scale factor */
+  void testSolidAngleCubeTriangles_WithScaleFactor()
+  {
+    Object_sptr geom_obj = createUnitCube();
+    double satol=1e-3; // tolerance for solid angle
+    // solid angle at distance 0.5 should be 4pi/6 by symmetry
+    double expected = M_PI*2.0/3.0;
+    V3D scaleFactor(2.0,2.0,2.0);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2.0,0,0), scaleFactor),expected,satol);
+  }
+
 
   void testGetBoundingBoxForCylinder()
     /**

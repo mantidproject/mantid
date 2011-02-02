@@ -89,7 +89,6 @@ public:
   void draw() const;
   void drawObject() const;
   void initDraw() const;
-  V3D getScaleFactorP() const;
 
   ///Return the shape of the component
   const boost::shared_ptr<const Object> shape()const;

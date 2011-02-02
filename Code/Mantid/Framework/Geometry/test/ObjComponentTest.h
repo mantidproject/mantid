@@ -280,79 +280,83 @@ public:
     TS_ASSERT_DELTA(point.Z(),-31.5,1e-6);
   }
 
+  ObjComponent * MakeWithScaleFactor(ObjComponent * parent, double X, double Y, double Z)
+  {
+    ParameterMap * map = new ParameterMap;
+    ObjComponent * ret = new ObjComponent(parent, map);
+    map->addV3D(ret, "sca", V3D(X,Y,Z));
+    return ret;
+  }
+
   void testIsValidWithScaleFactor()
   {
-    ObjComponent ocyl("ocyl", createCappedCylinder());
-    //set the scale factor
-    ocyl.setScaleFactor(2.0,1.0,1.0);
-    TS_ASSERT(ocyl.isValid(V3D(2.4,0.0,0.0)));
-    TS_ASSERT(ocyl.isValid(V3D(-6.4,0.0,0.0)));
-    TS_ASSERT(!ocyl.isValid(V3D(2.5,0.0,0.0)));
-    TS_ASSERT(!ocyl.isValid(V3D(-6.5,0.0,0.0)));
-    TS_ASSERT(ocyl.isValid(V3D(2.3,0.0,0.0)));
-    TS_ASSERT(ocyl.isValid(V3D(-6.3,0.0,0.0)));
+    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,1.0);
+    TS_ASSERT(ocyl->isValid(V3D(2.4,0.0,0.0)));
+    TS_ASSERT(ocyl->isValid(V3D(-6.4,0.0,0.0)));
+    TS_ASSERT(!ocyl->isValid(V3D(2.5,0.0,0.0)));
+    TS_ASSERT(!ocyl->isValid(V3D(-6.5,0.0,0.0)));
+    TS_ASSERT(ocyl->isValid(V3D(2.3,0.0,0.0)));
+    TS_ASSERT(ocyl->isValid(V3D(-6.3,0.0,0.0)));
   }
 
   void testIsOnSideWithScaleFactor()
   {
-    ObjComponent ocyl("ocyl", createCappedCylinder());
-    //set the scale factor
-    ocyl.setScaleFactor(2.0,1.0,1.0);
-    TS_ASSERT(ocyl.isOnSide(V3D(2.4,0.0,0.0)));
-    TS_ASSERT(ocyl.isOnSide(V3D(-6.4,0.0,0.0)));
-    TS_ASSERT(!ocyl.isOnSide(V3D(2.5,0.0,0.0)));
-    TS_ASSERT(!ocyl.isOnSide(V3D(-6.5,0.0,0.0)));
-    TS_ASSERT(!ocyl.isOnSide(V3D(2.3,0.0,0.0)));
-    TS_ASSERT(!ocyl.isOnSide(V3D(-6.3,0.0,0.0)));
+    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,1.0);
+    TS_ASSERT(ocyl->isOnSide(V3D(2.4,0.0,0.0)));
+    TS_ASSERT(ocyl->isOnSide(V3D(-6.4,0.0,0.0)));
+    TS_ASSERT(!ocyl->isOnSide(V3D(2.5,0.0,0.0)));
+    TS_ASSERT(!ocyl->isOnSide(V3D(-6.5,0.0,0.0)));
+    TS_ASSERT(!ocyl->isOnSide(V3D(2.3,0.0,0.0)));
+    TS_ASSERT(!ocyl->isOnSide(V3D(-6.3,0.0,0.0)));
   }
 
-  void testIntercepSurfaceWithScaleFactor()
+  void testInterceptSurfaceWithScaleFactor()
   {
-    ObjComponent ocyl("ocyl", createCappedCylinder());
-    //set the scale factor
-    ocyl.setScaleFactor(2.0,1.0,1.0);
+    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,3.0);
+
     Track trackScale(V3D(-6.5,0,0),V3D(1.0,0,0));
-    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScale), 1 );
+    TS_ASSERT_EQUALS( ocyl->interceptSurface(trackScale), 1 );
     Track::LType::const_iterator itscale=trackScale.begin();
     TS_ASSERT_EQUALS(itscale->distFromStart, 8.9);
     TS_ASSERT_EQUALS(itscale->entryPoint, V3D(-6.4,0.0,0.0));
     TS_ASSERT_EQUALS(itscale->exitPoint, V3D( 2.4,0.0,0.0));
 
-    Track trackScaleY(V3D(-6.0,-1,0),V3D(0,1.0,0));
-    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleY), 1 );
+    Track trackScaleY(V3D(0.0,-2,0),V3D(0,2.0,0));
+    TS_ASSERT_EQUALS( ocyl->interceptSurface(trackScaleY), 1 );
     Track::LType::const_iterator itscaleY=trackScaleY.begin();
-    TS_ASSERT_EQUALS(itscaleY->distFromStart, 1.5);
-    TS_ASSERT_EQUALS(itscaleY->entryPoint, V3D(-6.0,-0.5,0.0));
-    TS_ASSERT_EQUALS(itscaleY->exitPoint, V3D(-6.0, 0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleY->distFromStart, 2.5);
+    TS_ASSERT_EQUALS(itscaleY->entryPoint, V3D(0.0,-0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleY->exitPoint, V3D(0.0, 0.5,0.0));
 
-    Track trackScaleW(V3D(-6.0,-1.5,0),V3D(1.0,1.0,0));
-    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleW), 1 );
+    Track trackScaleW(V3D(0,0,-5),V3D(0,0,5));
+    TS_ASSERT_EQUALS( ocyl->interceptSurface(trackScaleW), 1 );
     Track::LType::const_iterator itscaleW=trackScaleW.begin();
-    TS_ASSERT_DELTA(itscaleW->distFromStart, 2.828427, 1e-6);
-    TS_ASSERT_EQUALS(itscaleW->entryPoint, V3D(-5.0,-0.5,0.0));
-    TS_ASSERT_EQUALS(itscaleW->exitPoint, V3D(-4.0, 0.5,0.0));
+    TS_ASSERT_DELTA(itscaleW->distFromStart, 6.5, 1e-6);
+    TS_ASSERT_EQUALS(itscaleW->entryPoint, V3D(0,0,-1.5));
+    TS_ASSERT_EQUALS(itscaleW->exitPoint, V3D(0,0,+1.5));
   }
 
   void testBoundingBoxWithScaleFactor()
   {
-    ObjComponent A("ocyl", createCappedCylinder());
-    //set the scale factor
-    A.setScaleFactor(2.0,1.0,1.0);
+    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=100; ymax=100; zmax=100;
     xmin=-100;  ymin=-100; zmin=-100;
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);	
+    A->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
     TS_ASSERT_DELTA(xmax, 2.4,0.00001);
     TS_ASSERT_DELTA(xmin,-6.4,0.00001);
   }
 
   void testPointInObjectWithScaleFactor()
   {
-    ObjComponent A("ocyl", createCappedCylinder());
-    //set the scale factor
+    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
     V3D scalept;
-    A.setScaleFactor(2.0,1.0,1.0);
-    TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
+    TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
     TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
@@ -360,44 +364,53 @@ public:
 
   void testPointInObjectWithScaleFactor2()
   {
-    ObjComponent A("ocyl", createCappedCylinder2());
-    //set the scale factor
-    V3D scalept;
-    A.setRot(Quat(90.0,V3D(0,0,1)));
-    A.setScaleFactor(2.0,1.0,1.0);
-    TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
+    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
+    A_base->setRot(Quat(90.0,V3D(0,0,1)));
+    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    V3D scalept(0,0,0);
+    TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
     TS_ASSERT_DELTA(scalept.X(), 0.0,1e-6);
-    TS_ASSERT_DELTA(scalept.Y(),-2.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Y(), 0.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Z(), 0.0,1e-6);
+  }
+
+  void testPointInObjectWithScaleFactorAndWithOffset()
+  {
+    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
+    A_base->setPos(10,0,0);
+    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    V3D scalept(0,0,0);
+    TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
+    TS_ASSERT_DELTA(scalept.X(), 10.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Y(), 0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0,1e-6);
   }
 
   void testSolidAngleCappedCylinderWithScaleFactor()
   {
-    ObjComponent A("ocyl", createCappedCylinder());
+    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
 
-    A.setScaleFactor(2.0,1.0,1.0);
-    A.setPos(10,0,0);
-    A.setRot(Quat(90.0,V3D(0,0,1)));
+    A_base->setPos(10,0,0);
+    A_base->setRot(Quat(90.0,V3D(0,0,1)));
     double satol=3e-3; // tolerance for solid angle
 
     // this point should be 0.5 above the cylinder on its axis of sym
-    TS_ASSERT_DELTA(A.solidAngle(V3D(10,2.9,0)),1.840302,satol);
-    // Surface point
-    TS_ASSERT_DELTA(A.solidAngle(V3D(10,-5,0.5)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A->solidAngle(V3D(10,2.9,0)),1.840302,satol);
+    // Surface point on the edge of cylinder
+    TS_ASSERT_DELTA(A->solidAngle(V3D(10,2.4001,0)),2*M_PI,1e-2);
+    // Internal point
+    TS_ASSERT_DELTA(A->solidAngle(V3D(10,0,0)),4*M_PI,satol);
 
     // Add a parent with a rotation of its own;
-    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
-    A.setParent(&parent);
+    Component parent("parent",V3D(0,10,0),Quat(0.0,V3D(0,1,0)));
+    A_base->setParent(&parent);
 
     // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset of them
     // assume this is the same position as above
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,12.9,-10)),1.840302,satol);
-    // this one was done "experimentally" and now the shape is different
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,2.93333333,-10)),1.25663708,satol);
+    TS_ASSERT_DELTA(A->solidAngle(V3D(10,12.9,0)),1.840302,satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-10)),4*M_PI,satol);
-    // surface point
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0.5,10,-10)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A->solidAngle(V3D(10,10,0)),4*M_PI,satol);
 
     // Calling on an ObjComponent without an associated geometric object will throw
     ObjComponent B("noShape");

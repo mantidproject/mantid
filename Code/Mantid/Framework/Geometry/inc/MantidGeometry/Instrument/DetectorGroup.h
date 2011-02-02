@@ -182,7 +182,6 @@ namespace Mantid
         return boost::shared_ptr<const Material>();
       }
 
-      void setScaleFactor(double,double, double);
     };
 
     /// Typedef for shared pointer

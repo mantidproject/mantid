@@ -114,11 +114,6 @@ public:
   /// Returns the material of the Object
   virtual const boost::shared_ptr<const Material> material()const = 0;
 
-  void setScaleFactor(double xFactor,double yFactor, double zFactor);
-
-  ///Gets the scaling factor of the object for the Object Component.
-  V3D  getScaleFactor()const{return m_ScaleFactor;}
-
   /// Gets the GeometryHandler
   GeometryHandler* Handle()const{return handle;}
 
@@ -130,8 +125,6 @@ protected:
 
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
-  /// Object Scaling factor in 3 axis direction. given as a vector
-  V3D	m_ScaleFactor;
 
 private:
   /// Geometry Handle for rendering

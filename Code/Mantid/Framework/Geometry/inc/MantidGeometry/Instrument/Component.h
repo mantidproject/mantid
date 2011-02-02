@@ -188,7 +188,7 @@ namespace Mantid
       const IComponent* base()const { return m_base;}
 
       /// Returns the ScaleFactor
-      virtual V3D getScaleFactorP() const;
+      virtual V3D getScaleFactor() const;
 
     protected:
       /// The base component - this is the unmodifed component (without the parameters). Stored

@@ -348,7 +348,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
           if(maxScale<scale) maxScale=scale;
           aveScale+=fabs(1.0-scale);
           scaleCount++;
-	  pmap.addV3D(comp.get(),"sca",V3D(1.0,it->second,1.0));
+          pmap.addV3D(comp.get(),"sca",V3D(1.0,it->second,1.0));
       }
       //
       prog+= double(1)/m_vectDet.size();

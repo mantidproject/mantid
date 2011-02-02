@@ -77,7 +77,7 @@ namespace Mantid
       if (!shape()) return (this->getPos() == point);
 
       // Otherwise pass through the shifted point to the Object::isValid method
-      V3D scaleFactor = V3D(1,1,1); //=this->getScaleFactorP();
+      V3D scaleFactor = this->getScaleFactor();
       return shape()->isValid( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
@@ -87,7 +87,7 @@ namespace Mantid
       // If the form of this component is not defined, just treat as a point
       if (!shape()) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isOnSide method
-      V3D scaleFactor = V3D(1,1,1); // = this->getScaleFactorP();
+      V3D scaleFactor = this->getScaleFactor();
       return shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
@@ -114,12 +114,12 @@ namespace Mantid
         V3D in = it->entryPoint;
         this->getRotation().rotate(in);
         //use the scale factor
-        in *= m_ScaleFactor;
+        in *= getScaleFactor();
         in += this->getPos();
         V3D out = it->exitPoint;
         this->getRotation().rotate(out);
         //use the scale factor
-        out *= m_ScaleFactor;
+        out *= getScaleFactor();
         out += this->getPos();
         track.addLink(in,out,out.distance(track.startPoint()),this->getComponentID());
       }
@@ -137,11 +137,16 @@ namespace Mantid
       // If the form of this component is not defined, throw NullPointerException
       if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
       // Otherwise pass through the shifted point to the Object::solidAngle method
-      V3D scaleFactor=this->getScaleFactorP();
+      V3D scaleFactor=this->getScaleFactor();
       if((scaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
         return shape()->solidAngle( factorOutComponentPosition(observer) );
       else
-        return shape()->solidAngle( factorOutComponentPosition(observer)*scaleFactor, scaleFactor );
+      {
+        // This is the observer position in the shape's coordinate system.
+        V3D relativeObserver = factorOutComponentPosition(observer);
+        // This function will scale the object shape when calculating the solid angle.
+        return shape()->solidAngle( relativeObserver, scaleFactor );
+      }
     }
 
     /**
@@ -167,8 +172,9 @@ namespace Mantid
       min-=this->getPos();
       max-=this->getPos();
       // Scale
-      min/=m_ScaleFactor;
-      max/=m_ScaleFactor;
+      V3D scaleFactor = getScaleFactor();
+      min/=scaleFactor;
+      max/=scaleFactor;
 
       //Rotation
       Geometry::Quat inverse(this->getRotation());
@@ -180,8 +186,8 @@ namespace Mantid
       shape()->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
 
       //Apply scale factor
-      min*=m_ScaleFactor;
-      max*=m_ScaleFactor;
+      min*=scaleFactor;
+      max*=scaleFactor;
       // Re-rotate
       (this->getRotation()).rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
       min+=this->getPos();
@@ -204,13 +210,14 @@ namespace Mantid
       absoluteBB = BoundingBox(shapeBox);
       if ( shapeBox.isNull() ) return;
       // modify in place for speed
+      V3D scaleFactor = getScaleFactor();
       // Scale
-      absoluteBB.xMin() *= m_ScaleFactor.X();
-      absoluteBB.xMax() *= m_ScaleFactor.X();
-      absoluteBB.yMin() *= m_ScaleFactor.Y(); 
-      absoluteBB.yMax() *= m_ScaleFactor.Y();
-      absoluteBB.zMin() *= m_ScaleFactor.Z(); 
-      absoluteBB.zMax() *= m_ScaleFactor.Z();
+      absoluteBB.xMin() *= scaleFactor.X();
+      absoluteBB.xMax() *= scaleFactor.X();
+      absoluteBB.yMin() *= scaleFactor.Y();
+      absoluteBB.yMax() *= scaleFactor.Y();
+      absoluteBB.zMin() *= scaleFactor.Z();
+      absoluteBB.zMax() *= scaleFactor.Z();
       // Rotate
       (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
         absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
@@ -231,7 +238,7 @@ namespace Mantid
     double ObjComponent::getHeight() const
     {
       const BoundingBox & bbox = shape()->getBoundingBox();
-      return (bbox.yMax() - bbox.yMin()) / m_ScaleFactor.Y();
+      return (bbox.yMax() - bbox.yMin()) / getScaleFactor().Y();
     }
 
     /**
@@ -241,7 +248,7 @@ namespace Mantid
     double ObjComponent::getWidth() const
     {
       const BoundingBox & bbox = shape()->getBoundingBox();
-      return ( bbox.xMax() - bbox.xMin() ) / m_ScaleFactor.X();
+      return ( bbox.xMax() - bbox.xMin() ) / getScaleFactor().X();
     }
     
     /**
@@ -251,7 +258,7 @@ namespace Mantid
     double ObjComponent::getDepth() const
     {
       const BoundingBox & bbox = shape()->getBoundingBox();
-      return ( bbox.zMax() - bbox.zMin() ) / m_ScaleFactor.Z();
+      return ( bbox.zMax() - bbox.zMin() ) / getScaleFactor().Z();
     }
 
     /**
@@ -269,7 +276,7 @@ namespace Mantid
       if(result)
       {
         //Scale up
-        V3D scaleFactor=this->getScaleFactorP();
+        V3D scaleFactor=this->getScaleFactor();
         point*=scaleFactor;
         Quat Rotate = this->getRotation();
         Rotate.rotate(point);
@@ -297,34 +304,10 @@ namespace Mantid
 
       // Can not Consider scaling factor here as this transform used by solidAngle as well
       // as IsValid etc. While this would work for latter, breaks former
-      //TODO: What is the answere here? ObjComponentTest needs these lines IN!
-
-      //Consider scaling factor
-      point/=m_ScaleFactor;
-      //point/=getScaleFactorP();
 
       return point;
     }
 
-
-
-    /** Get ScaleFactor of the object
-    * @returns A vector of the scale factors (1,1,1) if not set
-    */
-    V3D ObjComponent::getScaleFactorP() const
-    {
-      if (m_isParametrized)
-      {
-        Parameter_sptr par = m_map->get(m_base,"sca");
-        if (par)
-        {
-          //Return the parametrized scaling
-          return par->value<V3D>();
-        }
-      }
-      //Not parametrized; or, no parameter for "sca" aka scale
-      return m_ScaleFactor;
-    }
 
 
     /**

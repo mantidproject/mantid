@@ -844,7 +844,7 @@ namespace Mantid
     }
 
     /**
-     * Find soild angle of object wrt the observer with a scaleFactor for the object.
+     * Find solid angle of object wrt the observer with a scaleFactor for the object.
      * @param observer :: point to measure solid angle from
      * @param scaleFactor :: V3D giving scaling of the object
      * @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
@@ -1082,7 +1082,7 @@ namespace Mantid
     * OC triangluation of the object, if it exists. This method expects a
     * scaling vector scaleFactor that scales the three axes.
     *
-    * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
+    * @param observer :: Point from which solid angle is required.
     * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
     * @return the solid angle
     */
@@ -1094,7 +1094,7 @@ namespace Mantid
       // with the triangle based method. Hence catch these two (unlikely) cases.
       const BoundingBox & boundingBox = this->getBoundingBox();
       double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
-      V3D sObserver = observer / scaleFactor;
+      V3D sObserver = observer;
       if( boundingBox.isNonNull() && boundingBox.isPointInside(sObserver) )
       {
         if (isValid(sObserver))
@@ -1666,7 +1666,7 @@ namespace Mantid
 
     /**
     Try to find a point that lies within (or on) the object
-    @param point :: on exit set to the point value, if found
+    @param[out] point :: on exit set to the point value, if found
     @return 1 if point found, 0 otherwise
     */
     int Object::getPointInObject(Geometry::V3D& point) const
