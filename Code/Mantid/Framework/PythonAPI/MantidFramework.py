@@ -1044,12 +1044,12 @@ class PythonAlgorithm(PyAlgorithmBase):
     """
     Base class for all Mantid Python algorithms
     """
-    # Dictionary of property names/types
-    _proptypes = {}
-    
+
     def __init__(self):
         super(PythonAlgorithm,self).__init__()
-
+        # Dictionary of property names/types
+        self._proptypes = {}
+    
     def clone(self):
         return copy.deepcopy(self)
     
