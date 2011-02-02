@@ -131,9 +131,10 @@ class Transmission(BaseTransmission):
     """
         Perform the transmission correction for EQ-SANS
     """
-    def __init__(self, normalize_to_unity=False):
+    def __init__(self, normalize_to_unity=False, theta_dependent=False):
         super(Transmission, self).__init__()
         self._normalize = normalize_to_unity
+        self._theta_dependent = theta_dependent
     
     def execute(self, reducer, workspace):
         # The transmission calculation only works on the original un-normalized counts
@@ -153,11 +154,13 @@ class Transmission(BaseTransmission):
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
-        Divide(workspace, "transmission", workspace)
-        # To apply the transmission correction using the theta-dependent algorithm
-        # we should get the beam spectrum out of the measured transmission
-        # We should then re-apply it when performing normalization
-        #ApplyTransmissionCorrection(workspace, workspace, "transmission")
+        if self._theta_dependent:
+            # To apply the transmission correction using the theta-dependent algorithm
+            # we should get the beam spectrum out of the measured transmission
+            # We should then re-apply it when performing normalization
+            ApplyTransmissionCorrection(workspace, workspace, "transmission")
+        else:
+            Divide(workspace, "transmission", workspace)
         ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         return "Transmission correction applied"

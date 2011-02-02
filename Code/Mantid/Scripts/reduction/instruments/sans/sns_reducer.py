@@ -79,13 +79,13 @@ class EqSansReducer(SANSReducer):
         if self._transmission_calculator is not None:
             reduction_steps.append(self._transmission_calculator) 
         
-        # Normalize
-        if self._normalizer is not None:
-            reduction_steps.append(self._normalizer)
-        
         # Dark current subtraction
         if self._dark_current_subtracter is not None:
             reduction_steps.append(self._dark_current_subtracter)
+        
+        # Normalize
+        if self._normalizer is not None:
+            reduction_steps.append(self._normalizer)
         
         # Mask
         if self._mask is not None:
