@@ -199,6 +199,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
  */
 void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
+  (void)in; (void)out; (void)xValues; (void)nData; //Avoid compiler warnings
   throw Exception::NotImplementedError("No derivative function provided");
 }
 
@@ -210,14 +211,18 @@ void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues
 * @param fittedParameter :: Values of fitting parameters in the order listed in declareParameters()
  */
 void Fit1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter) 
-{}
+{
+  (void)fittedParameter; //Avoid compiler warning
+}
 
 /** If modifyInitialFittedParameters is overloaded this method must also be overloaded
     to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user.
 * @param fittedParameter :: Values of fitting parameters in the order listed in declareParameters()
  */
 void Fit1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter)
-{}
+{
+  (void)fittedParameter; //Avoid compiler warning
+}
 
 /** Initialisation method
  */

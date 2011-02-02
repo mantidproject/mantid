@@ -20,21 +20,24 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","IRS38633.raw");
-    const std::string outputName("LoadTest_IRS38633raw");
-    loader.setPropertyValue("OutputWorkspace", outputName);
-    loader.setPropertyValue("FindLoader", "1");
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
+//    const char * loadraw_props[5] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
+    const char * loadraw_props[2] = {"Cache", "LoadLogFiles"};
+    const size_t numProps = (size_t)(sizeof(loadraw_props)/sizeof(const char*));
+    // Basic load has no additional loader properties
+    for( size_t i = 0; i < numProps ; ++i )
+    {
+      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), false);
+    }
+    //After setting the file property, the algorithm should have aquired the appropriate properties
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","IRS38633.raw"));
+    // Now
+    for( size_t i = 0; i < numProps; ++i )
+    {
+      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), true);
+    }
 
     // Did it find the right loader
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadRaw");
-    AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
-    TS_ASSERT_EQUALS(dataStore.doesExist(outputName), false);
-    if( dataStore.doesExist(outputName) )
-    {
-      AnalysisDataService::Instance().remove(outputName);
-    }
   }
 
   void testRaw()
@@ -43,10 +46,34 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename","IRS38633.raw");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
+
+  void testRawWithOneSpectrum()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","IRS38633.raw");
+    const std::string outputName("LoadTest_IRS38633raw");
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    loader.setPropertyValue("SpectrumList", "1");
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+
+    AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
+    TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
+    
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(outputName));
+    if(!ws) TS_FAIL("Cannot retrieve workspace from the store");
+
+    // Check it only has 1 spectrum
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+    AnalysisDataService::Instance().remove(outputName);
   }
 
   void testRaw1()
@@ -130,11 +157,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","hrpd_new_072_01.cal");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS(loader.execute(), std::runtime_error);
-    TS_ASSERT( !loader.isExecuted() );
+    TS_ASSERT_THROWS(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"), std::runtime_error);
   }
 
   void testSPE()

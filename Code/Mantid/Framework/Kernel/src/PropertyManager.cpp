@@ -71,10 +71,7 @@ namespace Mantid
     /// Virtual destructor
     PropertyManager::~PropertyManager()
     {
-      for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
-      {
-        delete it->second;
-      }
+      clear();
     }
 
 
@@ -324,6 +321,15 @@ namespace Mantid
       return allValid;
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /**
+     * Count the number of properties under management
+     * @returns The number of properties being managed
+     */
+    size_t PropertyManager::propertyCount() const
+    {
+      return m_orderedProperties.size();
+    }
 
     //-----------------------------------------------------------------------------------------------
     /** Get the value of a property as a string
@@ -436,6 +442,20 @@ namespace Mantid
         m_orderedProperties.erase(itr);
         delete prop;
       }
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /**
+     * Clears the whole property map
+     */
+    void PropertyManager::clear()
+    {
+      m_orderedProperties.clear();
+      for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
+      {
+        delete it->second;
+      }
+      m_properties.clear();
     }
 
   } // namespace Kernel

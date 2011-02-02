@@ -95,6 +95,15 @@ namespace Mantid
         return m_properties->validateProperties();
     }
 
+    /**
+     * Count the number of properties under management
+     * @returns The number of properties being managed
+     */
+    size_t PropertyManagerOwner::propertyCount() const
+    {
+      return m_properties->propertyCount();
+    }
+
     /** Get the value of a property as a string
     *  @param name :: The name of the property (case insensitive)
     *  @return The value of the named property
@@ -152,6 +161,24 @@ namespace Mantid
     {
         return m_properties->getProperty( name );
     }
+
+    /** 
+     * Removes the property from properties map.
+     * @param name :: Name of the property to be removed.
+     */
+    void PropertyManagerOwner::removeProperty(const std::string &name)
+    {
+      m_properties->removeProperty(name);
+    }
+
+    /**
+     * Clears all properties under management
+     */
+    void PropertyManagerOwner::clear()
+    {
+      m_properties->clear();
+    }
+
 
   } // namespace Kernel
 } // namespace Mantid

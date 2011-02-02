@@ -344,7 +344,7 @@ public:
     throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
   }
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& attName)const{return false;}
+  virtual bool hasAttribute(const std::string& attName)const { (void)attName; return false;}
 
   /// Set a function handler
   void setHandler(FitFunctionHandler* handler);
@@ -392,6 +392,7 @@ public:
   */
   virtual void addNumberToColumn(const double& value, const int& iActiveP) 
   {
+    (void)value; (void)iActiveP; // Avoid compiler warning
     throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
   }
   ///@endcond

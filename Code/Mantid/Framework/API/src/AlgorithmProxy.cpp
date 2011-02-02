@@ -13,7 +13,7 @@ namespace API
 {
 
 // Get a reference to the logger
-Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy");
+Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxy");
 
 //----------------------------------------------------------------------
 // Public methods
@@ -23,18 +23,17 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg) :
   PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
   m_name(alg->name()),m_category(alg->category()),
-  m_version(alg->version()),
+  m_version(alg->version()), m_alg(alg),
   m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false)
 {
-  Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
-  if (!a)
+  if (!alg)
   {
     g_log.error("Unable to create a proxy algorithm.");
     throw std::logic_error("Unable to create a proxy algorithm.");
   }
-  a->initialize();
-  m_OptionalMessage = a->getOptionalMessage();
-  copyPropertiesFrom(*a);
+  alg->initialize();
+  m_OptionalMessage = alg->getOptionalMessage();
+  copyPropertiesFrom(*alg);
 }
 
 /// Virtual destructor
@@ -67,7 +66,6 @@ bool AlgorithmProxy::execute()
   }
   catch(...)
   {
-    // zero the pointer and rethrow
     m_alg.reset();
     throw;
   }
@@ -149,17 +147,42 @@ void AlgorithmProxy::setRethrows(const bool rethrow)
   if(m_alg) m_alg->setRethrows(rethrow);
 }
 
+/**
+ * Override setPropertyValue
+ * @param name The name of the property
+ * @param value The value of the property as a string
+ */
+void AlgorithmProxy::setPropertyValue(const std::string &name, const std::string &value)
+{
+  createConcreteAlg(true);
+  const size_t numPropsAtStart = m_alg->propertyCount();
+  m_alg->setPropertyValue(name, value);
+  if( numPropsAtStart != m_alg->propertyCount() )
+  {
+    copyPropertiesFrom(*m_alg);
+  }
+  m_alg.reset();
+}
+
+
 //----------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------
 
-/// Creates an unmanaged instance of the actual algorithm and sets its properties
-void AlgorithmProxy::createConcreteAlg()
+/** 
+ * Creates an unmanaged instance of the actual algorithm and sets its properties
+ * @param initOenly If true then the algorithm will only having its init step run, otherwise observers will 
+ * also be added and rethrows will be true
+ */
+void AlgorithmProxy::createConcreteAlg(bool initOnly)
 {
   m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
   m_alg->initializeFromProxy(*this);
-  m_alg->setRethrows(this->m_rethrow);
-  addObservers();
+  if( !initOnly )
+  {
+    m_alg->setRethrows(this->m_rethrow);
+    addObservers();
+  }
 }
 
 /**
@@ -168,7 +191,6 @@ void AlgorithmProxy::createConcreteAlg()
 void AlgorithmProxy::stopped()
 {
   m_isExecuted = m_alg->isExecuted();
-  // Delete the actual algorithm
   m_alg.reset();
 }
 

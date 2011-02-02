@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
+#include <list>
 
 namespace Mantid
 {
@@ -37,9 +38,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-
- 
+    */ 
     class DLLExport Load : public API::IDataFileChecker
     {
     public:
@@ -51,34 +50,33 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// Category
       virtual const std::string category() const { return "DataHandling"; }
+      /// Override setPropertyValue
+      virtual void setPropertyValue(const std::string &name, const std::string &value);
 
     private:
       /// Quick file always returns false here
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// file check by looking at the structure of the data file
       virtual int fileCheck(const std::string& filePath);
-
-    private:
-      ///init
-      void init();
-      /// execute
-      void exec();
-      /// This method returns shared pointer to load algorithm which got 
-      /// the highest preference after file check.
+      /// This method returns shared pointer to a load algorithm which got 
+      /// the highest preference after file check. 
       API::IAlgorithm_sptr getFileLoader(const std::string& filePath);
+      /// Declare any additional input properties from the concrete loader
+      void declareLoaderProperties(const API::IAlgorithm_sptr loader);
+
+      /// Initialize the static base properties
+      void init();
+      /// Execute
+      void exec();
+      /// Create the concrete instance use for the actual loading.
+      API::IAlgorithm_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
+					const double endProgress=-1.0, const bool logging = true) const;
       /// Set the output workspace(s)
       void setOutputWorkspace(API::IAlgorithm_sptr&);
-      /// intiliases the load algorithm with highest preference and sets this as a child algorithm
-      void initialiseLoadSubAlgorithm(API::IAlgorithm_sptr alg, const double startProgress, 
-				      const double endProgress, const bool enableLogging, const int& version);
+
     private:
-      /// union used for identifying teh file type
-      unsigned char* m_header_buffer;
-//        union { 
-//         unsigned u; 
-//         unsigned long ul; 
-//         unsigned char c[bufferSize+1]; 
-//       } header_buffer_union;
+      /// A list of property names that have been dynamically set
+      std::list<std::string> m_loaderProps;
      };
 
   } // namespace DataHandling

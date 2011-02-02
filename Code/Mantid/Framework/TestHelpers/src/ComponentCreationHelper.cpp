@@ -277,9 +277,6 @@ namespace ComponentCreationHelper
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
 
-    //Just increment pixel ID's
-    int pixelID = 1;
-
     for (int banknum=1; banknum <= num_banks; banknum++)
     {
       //Make a new bank

@@ -75,12 +75,14 @@ public:
 
   bool existsProperty(const std::string &name) const;
   bool validateProperties() const;
-
+  size_t propertyCount() const;
   std::string getPropertyValue(const std::string &name) const;
   const std::vector< Property*>& getProperties() const;
 
   /// removes the property from properties map 
   void removeProperty(const std::string &name);
+  /// Clears the whole property map
+  void clear();
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const;

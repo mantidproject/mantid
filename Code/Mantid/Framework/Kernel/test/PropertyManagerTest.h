@@ -173,6 +173,17 @@ public:
     TS_ASSERT( ! mgr.validateProperties() );
   }
 
+  void testPropertyCount()
+  {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
+    const std::string name("TestProperty");
+    mgr.declareProperty(name, 10.0);
+    TS_ASSERT_EQUALS(mgr.propertyCount(), 1);
+    mgr.removeProperty(name);
+    TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
+  }
+
   void testGetPropertyValue()
   {
     TS_ASSERT( ! manager->getPropertyValue("APROP").compare("1") );
@@ -246,6 +257,19 @@ public:
     
   }
 
+  void testClear()
+  {
+    PropertyManagerHelper mgr;
+    const std::string name("TestProperty");
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name + "1", 10.0));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name + "2", 15.0));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name + "3", 14.0));
+
+    TS_ASSERT_EQUALS(mgr.propertyCount(), 3);
+    TS_ASSERT_THROWS_NOTHING(mgr.clear());
+    TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
+
+  }
 
   //-----------------------------------------------------------------------------------------------------------
   /** Test of adding managers together (this will be used when

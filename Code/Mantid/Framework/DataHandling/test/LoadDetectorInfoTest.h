@@ -189,17 +189,8 @@ public:
 
     // check the X-values for a sample of spectra avoiding the monitors
     const int firstIndex = 5, lastIndex = 690;
-    // you must uncomment this code and choose the appropiate test below to test Different Bins Same Offsets
-    // the next two are numbers picked at random for testing
-    const int alteredHist = 317, alteredBin = 133;
-    const double alteredAmount = 1e-4;
-    /*    WS->dataX(alteredHist)[alteredBin] =
-    WS->dataX(alteredHist)[alteredBin] + alteredAmount;/**/
-
     grouper.setPropertyValue("Workspace", m_MariWS);
-
     grouper.setPropertyValue("DataFilename", m_rawFile); 
-    //    grouper.setPropertyValue("DataFilename", "C:/mantid/Test/Data/merlin_detector.sca");
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );

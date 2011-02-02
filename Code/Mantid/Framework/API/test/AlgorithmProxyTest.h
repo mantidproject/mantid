@@ -53,19 +53,19 @@ class TestProxyObserver: public AlgorithmObserver
 {
 public:
     bool start,progress,finish;
-    TestProxyObserver():AlgorithmObserver(),start(),progress(),finish(){}
-    TestProxyObserver(IAlgorithm_const_sptr alg):AlgorithmObserver(alg),start(),progress(),finish(){}
-    void startHandle(const IAlgorithm* alg)
+    TestProxyObserver():AlgorithmObserver(),start(false),progress(false),finish(false){}
+    TestProxyObserver(IAlgorithm_const_sptr alg):AlgorithmObserver(alg),start(false),progress(false),finish(false){}
+    void startHandle(const IAlgorithm*)
     {
         start = true;
     }
-    void progressHandle(const IAlgorithm* alg,double p,const std::string& msg)
+    void progressHandle(const IAlgorithm* ,double p,const std::string& msg)
     {
         progress = true;
         TS_ASSERT_EQUALS( p, 0.333 );
         TS_ASSERT_EQUALS( msg, "Running" );
     }
-    void finishHandle(const IAlgorithm* alg)
+    void finishHandle(const IAlgorithm* )
     {
         finish = true;
     }

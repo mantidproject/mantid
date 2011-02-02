@@ -30,6 +30,7 @@ namespace API
   */
   void IFunctionMD::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
   {
+    (void)slicing; //Avoid compiler warning
     try
     {
       m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
@@ -198,7 +199,7 @@ namespace API
   m_dataSize(0)
   {
     std::vector<std::string> ids = ws->getDimensionIDs();
-    for(int i = 0; i < ids.size(); ++i)
+    for(size_t i = 0; i < ids.size(); ++i)
     {
       m_dimensions.push_back(ws->getDimension(ids[i]));
     }
@@ -227,7 +228,7 @@ namespace API
     if (m_dataSize == 0)
     {
       m_dataSize = 1;
-      for(int i = 0; i< m_dimensions.size(); ++i)
+      for(int i = 0; i< static_cast<int>(m_dimensions.size()); ++i)
       {
         m_dataSize *= m_dimensions[i]->getNBins();
       }
@@ -270,9 +271,9 @@ namespace API
   bool IFunctionMD::MDIterator::next()
   {
     bool overflow = false;
-    for(int i=0;i<m_index.size();++i)
+    for(size_t i=0;i<m_index.size();++i)
     {
-      int j = m_index[i] + 1;
+      size_t j = m_index[i] + 1;
       overflow = (j == m_dimensions[i]->getNBins());
       if (overflow)
       {
@@ -314,7 +315,7 @@ namespace API
       throw std::runtime_error("Method IFunctionMD::useAllDimensions() can only be called after setting the workspace");
     }
     std::vector<std::string> ids = m_workspace->getDimensionIDs();
-    for(int i = 0; i < ids.size(); ++ i)
+    for(size_t i = 0; i < ids.size(); ++ i)
     {
       useDimension(ids[i]);
     }

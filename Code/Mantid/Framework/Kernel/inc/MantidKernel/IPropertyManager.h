@@ -76,7 +76,8 @@ public:
 
     /// Validates all the properties in the collection
     virtual bool validateProperties() const = 0;
-
+    /// Returns the number of properties under management
+    virtual size_t propertyCount() const = 0;
     /// Get the value of a property as a string
     virtual std::string getPropertyValue(const std::string &name) const = 0;
 
@@ -221,8 +222,11 @@ protected:
    */
   template<typename T>
   T getValue(const std::string &name) const;
-
-
+  
+  /// Removes the property from management
+  virtual void removeProperty(const std::string &name) = 0;
+  /// Clears all properties under management
+  virtual void clear() = 0;
 
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
   struct DLLExport TypedValue

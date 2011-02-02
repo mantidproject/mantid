@@ -6,8 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-#include<algorithm>
-
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {
@@ -19,17 +18,40 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
+    //--------------------------------------------------------------------------
+    // Public methods
+    //--------------------------------------------------------------------------
+
     /// Default constructor
-    Load::Load() : IDataFileChecker(), m_header_buffer(NULL) 
+    Load::Load() : IDataFileChecker(), m_loaderProps()
     {
     }
 
     /**
-    * Quick file always returns false here
-    * @param filePath File path
-    * @param nread Number of bytes read
-    * @param header_buffer A buffer containing the nread bytes
-    */
+     * Override setPropertyValue
+     * @param name The name of the property
+     * @param value The value of the property as a string
+     */
+    void Load::setPropertyValue(const std::string &name, const std::string &value)
+    {
+      IDataFileChecker::setPropertyValue(name, value);
+      if( name == "Filename" )
+      {
+  	IAlgorithm_sptr loader = getFileLoader(getPropertyValue(name));
+  	declareLoaderProperties(loader);
+      }
+    }
+    
+    //--------------------------------------------------------------------------
+    // Private methods
+    //--------------------------------------------------------------------------
+
+    /**
+     * Quick file always returns false here
+     * @param filePath File path
+     * @param nread Number of bytes read
+     * @param header_buffer A buffer containing the nread bytes
+     */
     bool Load::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       (void)filePath; (void)nread; (void)header;
@@ -47,132 +69,11 @@ namespace Mantid
       return -1;
     }
 
-    /// Initialisation method.
-    void Load::init()
-    {
-
-      std::vector<std::string> exts;
-      exts.push_back(".raw");
-      exts.push_back(".s*");
-      exts.push_back(".add");
-
-      exts.push_back(".nxs");
-      exts.push_back(".nx5");
-      exts.push_back(".xml");
-      exts.push_back(".n*");
-
-      exts.push_back(".dat");
-      exts.push_back(".txt");
-      exts.push_back(".csv");
-
-      exts.push_back(".spe");
-
-      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the file to read, including its full or relative\n"
-        "path. (N.B. case sensitive if running on Linux).");
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output, true), 
-        "The name of the workspace that will be created, filled with the\n"
-        "read-in data and stored in the Analysis Data Service.");
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(1);
-      declareProperty("SpectrumMin", 1, mustBePositive);
-      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("EntryNumber", 0, 
-        "Load a particular entry, if supported by the file format (default: Load all entries)");
-      declareProperty("FindLoader", false, "If true the algorithm will only be run as\n"
-        "far as is necessary to discover the concrete Load algorithm to use");
-      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
-        Direction::Output);
-    }
-
-    namespace 
-    {
-      //@cond
-      /** 
-      * Checks this property exists in the list of algorithm properties.
-      */
-      struct hasProperty
-      { 
-        /** constructor which takes 1 arguement.
-        *@param name :: name of the property
-        */
-        hasProperty(const std::string name):m_name(name){}
-
-        /**This method comapres teh property name
-        *@param prop :: shared pointer to property
-        *@return true if the property exists in the list of properties.
-        */
-        bool operator()(Mantid::Kernel::Property* prop)
-        {
-          std::string name=prop->name();
-          return (!name.compare(m_name));
-        }
-        /// name of teh property
-        std::string m_name;
-      };
-
-      //@endcond
-    }
-
-    /** 
-    *   Executes the algorithm.
-    */
-    void Load::exec()
-    {
-      std::string fileName = getPropertyValue("Filename");
-      std::string::size_type i = fileName.find_last_of('.');
-      std::string ext = fileName.substr(i+1);
-      std::transform(ext.begin(),ext.end(),ext.begin(),tolower);
-      //get the shared pointer to the specialised load algorithm to execute  
-      API::IAlgorithm_sptr loader = getFileLoader(fileName);
-      if( !loader )
-      {
-        throw std::runtime_error("Cannot find a loader for \"" + fileName + "\"");
-      }
-      else
-      {
-        setPropertyValue("LoaderName", loader->name());
-      }
-
-      bool findOnly = getProperty("FindLoader");
-      if( findOnly ) return;
-
-      g_log.information()<<"The sub load algorithm  created to execute is "
-        << loader->name() << "  and it version is  " 
-        << loader->version() <<std::endl;
-      double startProgress(0.0), endProgress(1.0);
-      initialiseLoadSubAlgorithm(loader,startProgress,endProgress,true,-1);
-
-      //get the list of properties for this algorithm
-      std::vector<Kernel::Property*> props=getProperties();
-      ///get the list properties for the sub load algorithm
-      std::vector<Kernel::Property*>loader_props=loader->getProperties();
-
-      //loop through the properties of this algorithm 
-      std::vector<Kernel::Property*>::iterator itr;
-      for (itr=props.begin();itr!=props.end();++itr)
-      {        
-        std::vector<Mantid::Kernel::Property*>::iterator prop;
-        //if  the load sub algorithm has the same property then set it.
-        prop=std::find_if(loader_props.begin(),loader_props.end(),hasProperty((*itr)->name()));
-        if(prop!=loader_props.end())
-        { 
-
-          loader->setPropertyValue((*prop)->name(),getPropertyValue((*prop)->name()));
-        }
-
-      }
-      // Execute the concrete loader
-      loader->execute();
-      // Set the workspace. Deals with possible multiple periods
-      setOutputWorkspace(loader);          
-    }
-
-    /** Get a shared pointer to the load algorithm with highest preference for loading
-    *@param filePath :: path of the file
-    *@return filePath - path of the file
-    */
+        /** 
+     * Get a shared pointer to the load algorithm with highest preference for loading
+     * @param filePath :: path of the file
+     * @returns A shared pointer to the unmanaged algorithm
+     */
     API::IAlgorithm_sptr Load::getFileLoader(const std::string& filePath)
     {
       /* Open the file and read in the first bufferSize bytes - these will
@@ -183,8 +84,6 @@ namespace Mantid
       {
         throw Kernel::Exception::FileError("Unable to open the file:", filePath);
       }
-      //unsigned char* header_buffer = header_buffer_union.c;
-      //unsigned char * header_buffer = IDataFileChecker::g_hdr_buf.get();
       file_header header;
       int nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
       // Ensure the character string is null terminated.
@@ -227,53 +126,166 @@ namespace Mantid
       {
         throw std::runtime_error("Cannot find a loader for \"" + filePath + "\"");
       }
+      setPropertyValue("LoaderName", winningLoader->name());
+      winningLoader->initialize();
       return winningLoader;
     }
-
-    /** This method set the algorithm as a child algorithm.
-    *  @param alg :: The shared pointer to a  algorithm
-    *  @param startProgress :: The percentage progress value of the overall 
-    *  algorithm where this child algorithm starts
-    *  @param endProgress :: The percentage progress value of the overall 
-    *  algorithm where this child algorithm ends
-    *  @param enableLogging :: Set to false to disable logging from the child algorithm
-    *  @param version ::  The version of the child algorithm to create. 
-    *  By default gives the latest version.
-    */
-    void Load::initialiseLoadSubAlgorithm(API::IAlgorithm_sptr alg, 
-      const double startProgress, const double endProgress, 
-      const bool enableLogging, const int& version)
+    
+    /**
+     * Declare any additional properties of the concrete loader here
+     * @param loader A pointer to the concrete loader
+     */
+    void Load::declareLoaderProperties(const IAlgorithm_sptr loader)
     {
-      (void) version; // Avoid compiler warning.
-      //Set as a child so that we are in control of output storage
-      alg->initialize();
-      alg->setChild(true);
-      alg->setLogging(enableLogging);
+      if( !m_loaderProps.empty() )
+      {
+	std::list<std::string>::const_iterator cend = m_loaderProps.end();
+	for( std::list<std::string>::const_iterator citr = m_loaderProps.begin();
+	     citr != cend; ++citr )
+	{
+	  this->removeProperty(*citr);
+	}
+	m_loaderProps.clear();
+      }
 
+
+      const std::vector<Property*> &loaderProps = loader->getProperties();
+      size_t numProps(loaderProps.size());
+      for (size_t i = 0; i < numProps; ++i)
+      {
+	Property* loadProp = loaderProps[i];
+	try
+	{
+	  declareProperty(loadProp->clone(), loadProp->documentation());
+	}
+	catch(Exception::ExistsError&)
+	{
+	  // Already exists as a static property
+	  continue;
+	}
+	// Save just in case a this function is called again so that we
+	// can remove the dynamically generated properties
+	m_loaderProps.push_back(loadProp->name());
+      }
+    }
+
+    /// Initialisation method.
+    void Load::init()
+    {
+
+      std::vector<std::string> exts;
+      exts.push_back(".raw");
+      exts.push_back(".s*");
+      exts.push_back(".add");
+
+      exts.push_back(".nxs");
+      exts.push_back(".nx5");
+      exts.push_back(".xml");
+      exts.push_back(".n*");
+
+      exts.push_back(".dat");
+      exts.push_back(".txt");
+      exts.push_back(".csv");
+
+      exts.push_back(".spe");
+
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+        "The name of the file to read, including its full or relative\n"
+        "path. (N.B. case sensitive if running on Linux).");
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output, true), 
+        "The name of the workspace that will be created, filled with the\n"
+        "read-in data and stored in the Analysis Data Service.");
+      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      mustBePositive->setLower(1);
+      declareProperty("SpectrumMin", 1, mustBePositive);
+      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
+      declareProperty(new ArrayProperty<int>("SpectrumList"));
+      declareProperty("EntryNumber", 0, 
+        "Load a particular entry, if supported by the file format (default: Load all entries)");
+      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
+        Direction::Output);
+    }
+
+    /** 
+    *   Executes the algorithm.
+    */
+    void Load::exec()
+    {
+      const std::string loaderName = getPropertyValue("LoaderName");
+      if( loaderName.empty() )
+      {
+	throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
+      }     
+      
+      IAlgorithm_sptr loader = createLoader(loaderName);
+      g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
+       // Get the list of properties for the Load algorithm
+      std::vector<Kernel::Property*> props = this->getProperties();
+      ///get the list properties for the concrete loader load algorithm
+      std::vector<Kernel::Property*> loader_props = loader->getProperties();
+
+      //loop through the properties of this algorithm 
+      std::vector<Kernel::Property*>::iterator itr;
+      for (itr = props.begin(); itr != props.end(); ++itr)
+      {
+	const std::string propName = (*itr)->name();
+	if( loader->existsProperty(propName) )
+	{
+	  loader->setPropertyValue(propName, getPropertyValue(propName));
+	}
+      }
+
+      // Execute the concrete loader
+      loader->execute();
+      // Set the workspace. Deals with possible multiple periods
+      setOutputWorkspace(loader);
+    }
+
+    /** 
+     * Create the concrete instance use for the actual loading.
+     * @param name :: The name of the loader to instantiate
+     * @param startProgress :: The percentage progress value of the overall 
+     * algorithm where this child algorithm starts
+     * @param endProgress :: The percentage progress value of the overall 
+     * algorithm where this child algorithm ends
+     * @param logging :: Set to false to disable logging from the child algorithm
+      */
+    API::IAlgorithm_sptr Load::createLoader(const std::string & name, const double startProgress, 
+					    const double endProgress, const bool logging) const
+    {
+      IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged(name);
+      loader->initialize();
+      if( !loader )
+      {
+	throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
+      }
+
+      //Set as a child so that we are in control of output storage
+      loader->setChild(true);
+      loader->setLogging(logging);
       // If output workspaces are nameless, give them a temporary name to satisfy validator
-      const std::vector< Property*> &props = alg->getProperties();
+      const std::vector< Property*> &props = loader->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )
-        {
-          if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
-        }
+	if (props[i]->direction() == Direction::Output && 
+	    dynamic_cast<IWorkspaceProperty*>(props[i]) )
+	{
+	  if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
+	}
       }
-
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
-        alg->addObserver(m_progressObserver);
-        alg->setChildStartProgress(startProgress);
-        alg->setChildEndProgress(endProgress);
+	loader->addObserver(m_progressObserver);
+	loader->setChildStartProgress(startProgress);
+	loader->setChildEndProgress(endProgress);
       }
-
+      return loader;
     }
 
     /**
-    * Set the output workspace(s) if the load's return workspace
-    *  has type API::Workspace
-    *@param load :: shared pointer to load algorithm
-    */
+     * Set the output workspace(s) if the load's return workspace has type API::Workspace
+     * @param load :: Shared pointer to load algorithm
+     */
     void Load::setOutputWorkspace(API::IAlgorithm_sptr& load)
     {
       try
@@ -305,10 +317,7 @@ namespace Mantid
         MatrixWorkspace_sptr mws=load->getProperty("OutputWorkspace");
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(mws));
       }
-
-
     }
-
 
   } // namespace DataHandling
 } // namespace Mantid

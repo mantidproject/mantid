@@ -417,8 +417,6 @@ public:
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    // get parameter map
-    ParameterMap& paramMap = ws->instrumentParameters();
     boost::shared_ptr<IInstrument> i = ws->getInstrument();
 
     // check if combined translation works
@@ -754,9 +752,6 @@ public:
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    // get parameter map
-    ParameterMap& paramMap = ws->instrumentParameters();
-
     IDetector_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
 
@@ -774,7 +769,7 @@ void testSANS2D()
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "SANS2D_Definition_mod.xml");
+    loader.setPropertyValue("Filename", "SANS2D_Definition.xml");
     wsName = "LoadEmptyInstrumentParaSans2dTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
 
@@ -785,7 +780,6 @@ void testSANS2D()
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     // get parameter map
-    ParameterMap& paramMap = ws->instrumentParameters();
     boost::shared_ptr<IInstrument> i = ws->getInstrument();
 
     double pixelLength = 0.0051;

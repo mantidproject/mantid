@@ -87,6 +87,12 @@ namespace Mantid
       void setChild(const bool) {} ///< Do nothing
       void setRethrows(const bool rethrow);
 
+      /** @name PropertyManager methods */
+      //@{
+      /// Set the property value
+      void setPropertyValue(const std::string& name, const std::string &value);
+      //@}
+
       void cancel() const;
       bool isRunningAsync();
       bool isRunning();
@@ -112,7 +118,7 @@ namespace Mantid
       /// Private assignment operator: NO ASSIGNMENT ALLOWED
       AlgorithmProxy& operator=(const AlgorithmProxy&);
 
-      void createConcreteAlg();
+      void createConcreteAlg(bool initOnly = false);
       void stopped();
       void addObservers();
 
@@ -126,7 +132,7 @@ namespace Mantid
       std::string m_OptionalMessage; ///<Message to display in GUI
       const int m_version;          ///< version of the real algorithm
 
-      Algorithm_sptr m_alg;  ///< Pointer to the real algorithm, only defined when the algorithm is running
+      boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
       bool m_rethrow; ///< Whether or not to rethrow exceptions.
