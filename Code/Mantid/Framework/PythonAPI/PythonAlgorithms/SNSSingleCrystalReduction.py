@@ -21,14 +21,14 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("EmptyInstrumentNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0))
-        self.declareProperty("TOFMin", 400.0,
+        self.declareProperty("TOFMin", 1000.0,
                              Description="Relative time to start filtering by")
-        self.declareProperty("TOFMax", 45000.0,
+        self.declareProperty("TOFMax", 16666.0,
                              Description="Relative time to stop filtering by")
-        self.declareProperty("TOFBinWidth", -0.04,
+        self.declareProperty("TOFBinWidth", -0.004,
                              Description="Positive is linear bins, negative is logorithmic")
 
-        self.declareProperty("VanadiumBinParams", "400,-0.04,45000",
+        self.declareProperty("VanadiumBinParams", "0.2,-0.004,10.00",
                              Description="Binning parameters to use when calculating the vanadium spectra.")
         
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
@@ -102,7 +102,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _bin(self, wksp, filterLogs=None):
+    def _comp(self, wksp, filterLogs=None):
         if wksp is None:
             return None
         # take care of filtering events
@@ -122,17 +122,16 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))
         
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-        #ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
 
         # Compress the events to free up memory
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance="0.05")
+
+        return wksp
+
         
-        #Rebin(InputWorkspace=wksp, OutputWorkspace="tmp", Params=[self._TOFMin, self._delta, self._TOFMax])
-        #RenameWorkspace("tmp",wksp)
-        
+    def _bin(self, wksp, filterLogs=None):
         # Rebin in place as weighted events
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -164,6 +163,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))
         
 
+        # Sorting at this point will increase speed a lot
+        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        
         # Remove old calibration files
         cmd = "rm temp.cal*"
         os.system(cmd)
@@ -173,9 +175,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         
         # Diffraction focusing using new calibration file with offsets
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,GroupingFileName="temp.cal")
-        
-        # Sorting at this point will increase speed a lot
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         
         # This will rebin into a workspace 2D
         oldName = wksp.getName()
@@ -189,11 +188,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         StripVanadiumPeaks(InputWorkspace=wksp, OutputWorkspace=wksp, PeakWidthPercent=self._vanPeakWidthPercent)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         
-        #Rebin(InputWorkspace=wksp, OutputWorkspace="tmp", Params=[self._TOFMin, self._delta, self._TOFMax])
-        #RenameWorkspace("tmp",wksp)
-                
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
         SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._vanSmoothPoints)
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        # Normalize to one pixel of detector (256 X 256)
+        wksp /= 65536.0
 
         return wksp
 
@@ -202,7 +200,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         nxsfile = self._findData(self.getProperty("RunNumber"), ".nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
-            SaveSNSNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs")
+            SaveSNSNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
         if "gsas" in self._outTypes:
             ReplaceSpecialValues(wksp, wksp, NaNValue="0.0", InfinityValue="0.0")
             SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByTOFBinWidth=normalized, Bank=self._bank, Format="SLOG")
@@ -241,27 +239,18 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         empty = self.getProperty("EmptyInstrumentNumber")
         
 
-        # process the vanadium run
-        if van > 0:
-            vanRun = mtd["%s_%d" % (self._instrument, van)]
-            vanRun = self._loadData(van, SUFFIX)
-            vanRun = RenameWorkspace(vanRun, vanRun.getName() + "_vanadium").workspace()
-            vanRun = self._vanbin(vanRun)
-        else:
-            vanRun = None        
-
         # first round of processing the sample 
         samRun = self._loadData(sam, SUFFIX)
         samRun = RenameWorkspace(samRun, samRun.getName() + "_sample").workspace()
-        samRun = self._bin(samRun, filterLogs)
+        samRun = self._comp(samRun, filterLogs)
         
         # process the background
         if bkg > 0:
             bkgRun = mtd["%s_%d" % (self._instrument, bkg)]
             bkgRun = self._loadData(bkg, SUFFIX)
             bkgRun = RenameWorkspace(bkgRun, bkgRun.getName() + "_background").workspace()
-            bkgRun = self._bin(bkgRun)
-            samRun -= bkgRun
+            bkgRun = self._comp(bkgRun)
+            Minus(LHSWorkspace=samRun, RHSWorkspace=bkgRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
             mtd.deleteWorkspace(bkgRun.getName())
         else:
             bkgRun = None 
@@ -271,18 +260,27 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             emptyRun = mtd["%s_%d" % (self._instrument, empty)]
             emptyRun = self._loadData(empty, SUFFIX)
             emptyRun = RenameWorkspace(emptyRun, emptyRun.getName() + "_empty").workspace()
-            emptyRun = self._bin(emptyRun)
-            samRun -= emptyRun
+            emptyRun = self._comp(emptyRun)
+            Minus(LHSWorkspacer=samRun, RHSWorkspace=emptyRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
             mtd.deleteWorkspace(emptyRun.getName())
         else:
             emptyRun = None 
 
+        # process the vanadium run
+        if van > 0:
+            vanRun = mtd["%s_%d" % (self._instrument, van)]
+            vanRun = self._loadData(van, SUFFIX)
+            vanRun = RenameWorkspace(vanRun, vanRun.getName() + "_vanadium").workspace()
+            vanRun = self._vanbin(vanRun)
+        else:
+            vanRun = None        
+
 
         # the final bit of math
         if vanRun is not None:
+            samRun = self._bin(samRun)
             Divide(samRun, vanRun, samRun, AllowDifferentNumberSpectra=True) 
-            #DivideVanadium(samRun, vanRun, samRun)
-            #mtd.deleteWorkspace(vanRun)
+            mtd.deleteWorkspace(vanRun.getName())
             normalized = True
         else:
             normalized = False
