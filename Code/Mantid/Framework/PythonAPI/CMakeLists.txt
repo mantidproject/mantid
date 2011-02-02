@@ -79,7 +79,7 @@ set_target_properties ( PythonAPI PROPERTIES OUTPUT_NAME MantidPythonAPI )
 set_property ( TARGET PythonAPI PROPERTY FOLDER "Framework" )
 # Debug python library expects imported module names to end in _d
 if ( PYTHON_DEBUG_LIBRARY )
-    set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
+  set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
 endif ()
 
 ###########################################################################
@@ -88,12 +88,15 @@ endif ()
 
 # Library name needs to end in .pyd for Windows
 if ( WIN32 )
-    set_target_properties ( PythonAPI PROPERTIES SUFFIX .pyd )
+  set_target_properties ( PythonAPI PROPERTIES SUFFIX .pyd )
+elseif ( APPLE )
+# and in .so on the Mac
+  set_target_properties ( PythonAPI PROPERTIES SUFFIX .so )
 endif ()
 # Intensive use of templated libaries can cause large objects to be generated. These require
 # an additional flag in MSVC.
 if ( MSVC )
-    set_target_properties ( PythonAPI PROPERTIES COMPILE_FLAGS "/bigobj" )
+  set_target_properties ( PythonAPI PROPERTIES COMPILE_FLAGS "/bigobj" )
 endif ()
 
 # Note: On some Linux systems, seen on various Ubuntu versions, importing Mantid into a standalone python

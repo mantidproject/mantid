@@ -18,7 +18,7 @@ SET(QSCINTILLA_FOUND "NO")
 
 IF(QT4_FOUND)
     FIND_PATH(QSCINTILLA_INCLUDE_DIR qsciglobal.h
-    "${QT_INCLUDE_DIR}/Qsci"
+                 "${QT_INCLUDE_DIR}/Qsci" /usr/include/Qsci
     )
 
     SET(QSCINTILLA_NAMES ${QSCINTILLA_NAMES} qscintilla2 libqscintilla2)
