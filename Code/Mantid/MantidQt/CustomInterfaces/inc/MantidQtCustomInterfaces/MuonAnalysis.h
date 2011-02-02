@@ -160,8 +160,8 @@ private:
   /// Check if grouping in table is consistent with data file
   std::string isGroupingAndDataConsistent();
 
-  /// Return a none empty string if the data and group detector info are inconsistent
-  QString dataAndTablesConsistent();
+  ///Return true if data are loaded
+  bool areDataLoaded();
 
   /// Return number of pairs
   int numPairs();

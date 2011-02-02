@@ -659,8 +659,8 @@ void MuonAnalysis::groupTableClicked(int row)
 ::  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
-  if ( column == 2 )
-    return;
+ // if ( column == 2 )
+ //   return;
 
   // changes to the IDs
   if ( column == 1 )
@@ -1337,6 +1337,8 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 }
 
 
+
+
 /**
  * Plot group
  */
@@ -1348,36 +1350,37 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
     QString groupName = itemName->text();
 
-    // create plot title label
+    // Decide on name for workspaceGroup
     Poco::File l_path( m_previousFilename.toStdString() );
-    std::string filenamePart = Poco::Path(l_path.path()).getFileName();
-    std::size_t extPos = filenamePart.find(".");
+    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
-      filenamePart = filenamePart.substr(0,extPos);
+      workspaceGroupName = workspaceGroupName.substr(0,extPos);
 
-    QString titleLabel = QString(filenamePart.c_str()) + "; Group="
-      + groupName + "";
-
-    // create workspace which will be plotted
+    // decide on name for workspace to be plotted
     QString cropWS;
+    QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
+      + groupName + "";
 
     // check if this workspace already exist to avoid replotting an existing workspace
     int plotNum = 1;
     while (1==1)
     {
-      cropWS = titleLabel + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
+      cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
       if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
         plotNum++;
       else
         break;
     }
 
-    createPlotWS(filenamePart,cropWS.toStdString());
-    titleLabel = cropWS;
+    // create the plot workspace
+    createPlotWS(workspaceGroupName,cropWS.toStdString());
 
-    // create plotting Python string
+    // curve plot label
+    QString titleLabel = cropWS;
+
+    // create first part of plotting Python string
     QString gNum = QString::number(groupNum);
-
     QString pyS;
     if ( m_uiForm.showErrorBars->isChecked() )
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",true)\n";
@@ -1451,34 +1454,83 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
-  if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
+  int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
+  if ( pairNum >= 0 )
   {
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
 
-    // create output workspace title
+    // Decide on name for workspaceGroup
     Poco::File l_path( m_previousFilename.toStdString() );
-    std::string filenamePart = Poco::Path(l_path.path()).getFileName();
-    std::size_t extPos = filenamePart.find(".");
+    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
-      filenamePart = filenamePart.substr(0,extPos);
+      workspaceGroupName = workspaceGroupName.substr(0,extPos);
 
-    QString titleLabel = QString(filenamePart.c_str()) + "; Pair=" + pairName;
+    // decide on name for workspace to be plotted
+    QString cropWS;
+    QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
+      + pairName + "";
+
+    // check if this workspace already exist to avoid replotting an existing workspace
+    int plotNum = 1;
+    while (1==1)
+    {
+      cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
+      if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
+        plotNum++;
+      else
+        break;
+    }
+
+    // create the plot workspace
+    createPlotWS(workspaceGroupName,cropWS.toStdString());
+
+    // curve plot label
+    QString titleLabel = cropWS;
 
 
-    // create workspace for plotting
-    QString cropWS = "MuonAnalysis_" + titleLabel;
-    createPlotWS("",cropWS.toStdString());
-
-
-    // create plotting Python string 
-
-    QString pyS = "gs = plotSpectrum(\"" + cropWS + "\",0)\n"
-      "l = gs.activeLayer()\n"
-      "l.setTitle(\"" + m_title.c_str() + "\")\n"
+    // create first part of plotting Python string
+    QString gNum = QString::number(pairNum);
+    QString pyS;
+    if ( m_uiForm.showErrorBars->isChecked() )
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",true)\n";
+    else
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
+    pyS += "l = gs.activeLayer()\n"
       "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
+      "l.setTitle(\"" + m_title.c_str() + "\")\n"
       "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
+
+    if ( !m_uiForm.yAxisAutoscale->isChecked() )
+    {
+      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(pairNum);
+      double min = 0.0; double max = 0.0;
+
+      if (m_uiForm.yAxisMinimumInput->text().isEmpty())
+      {
+        min = *min_element(dataY.begin(), dataY.end());
+      }
+      else
+      {
+        min = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
+      }
+
+      if (m_uiForm.yAxisMaximumInput->text().isEmpty())
+      {
+        max = *max_element(dataY.begin(), dataY.end());
+      }
+      else
+      {
+        max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
+      }
+
+      pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
+    }
+
 
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
@@ -1518,12 +1570,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
  */
 bool MuonAnalysis::isGroupingSet()
 {
-  QTableWidgetItem *item = m_uiForm.groupTable->item(0,1);
-  if (item)
-    if ( !item->text().isEmpty() )
-      return true;
-  
-  return false;
+  std::vector<int> dummy;
+  whichGroupToWhichRow(m_uiForm, dummy);
+
+  if (dummy.empty())
+    return false;
+  else
+    return true;
 }
 
 /**
@@ -1534,22 +1587,8 @@ bool MuonAnalysis::isGroupingSet()
 bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
    const std::string& filename)
 {
-  if ( isGroupingSet() && m_uiForm.frontPlotButton->isEnabled() )
+  if ( AnalysisDataService::Instance().doesExist(inputWS) )
   {
-
-    std::string complaint = isGroupingAndDataConsistent();
-    if ( complaint.empty() )
-    {
-      nowDataAvailable();
-      m_uiForm.frontWarningMessage->setText("");
-    }
-    else
-    {
-      noDataAvailable();
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      //m_uiForm.frontWarningMessage->setText(complaint.c_str());
-      return false;
-    }
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -1573,7 +1612,10 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
       //m_uiForm.frontWarningMessage->setText("Can't group data file according to group-table. Plotting disabled.");
     }
     else
+    {
+      nowDataAvailable();
       return true;
+    }
   }
 }
 
@@ -1582,8 +1624,24 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
  */
 bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
 {
-  if ( isGroupingSet() && m_uiForm.frontPlotButton->isEnabled() )
+  if ( isGroupingSet() && AnalysisDataService::Instance().doesExist(inputWS) )
   {
+
+    std::string complaint = isGroupingAndDataConsistent();
+    if ( complaint.empty() )
+    {
+      nowDataAvailable();
+      m_uiForm.frontWarningMessage->setText("");
+    }
+    else
+    {
+      if (m_uiForm.frontPlotButton->isEnabled() )
+        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+      noDataAvailable();
+      //m_uiForm.frontWarningMessage->setText(complaint.c_str());
+      return false;
+    }
+
     saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
     return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
   }
@@ -1724,11 +1782,11 @@ void MuonAnalysis::nowDataAvailable()
 
 
 /**
- * Return a none empty string if the data and group detector info are inconsistent
+ * Return true if data are loaded
  */
- QString MuonAnalysis::dataAndTablesConsistent()
+ bool MuonAnalysis::areDataLoaded()
  {
-   return QString();
+   return AnalysisDataService::Instance().doesExist(m_workspace_name);
  }
 
  /**
@@ -1993,6 +2051,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
   complaint += "Number of spectra in data = " + boost::lexical_cast<std::string>(nDet) + ". ";
 
   int numG = numGroups();
+  bool returnComplaint = false;
   for (int iG = 0; iG < numG; iG++)
   {
     typedef Poco::StringTokenizer tokenizer;
@@ -2014,7 +2073,8 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
         {
           complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
             + boost::lexical_cast<std::string>(rightInt) + ".";
-          return complaint;
+          returnComplaint = true;
+          break;
         }
       }
       else
@@ -2023,13 +2083,17 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
         {
           complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
             + values[i] + ".";
-          return complaint;
+          returnComplaint = true;
+          break;
         }
       }
     }
   }
 
-  return std::string("");
+  if ( returnComplaint )
+    return complaint;
+  else
+    return std::string("");
 }
 
 

@@ -929,6 +929,9 @@
         </property>
        </widget>
        <widget class="QCheckBox" name="connectPoints" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>150</x>
@@ -939,6 +942,9 @@
         </property>
         <property name="text" >
          <string>Connect points</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
         </property>
        </widget>
        <widget class="QComboBox" name="timeComboBox" >
