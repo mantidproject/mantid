@@ -7,10 +7,14 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 # Define the project name.
 project ( Mantid )
 
-# Set paths to Third_Party for Windows builds
-if ( WIN32 )
+# Set paths to Third_Party for Windows and Mac builds
+if ( NOT THIRD_PARTY )
   set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
-  include ( WindowsSetup )
+  if ( WIN32 )
+    include ( WindowsSetup )
+  elseif ( APPLE )
+    include ( DarwinSetup )
+  endif ()
 endif ()
 
 # Add compiler options if using gcc
