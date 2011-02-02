@@ -135,8 +135,8 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 {
   std::transform(testName.begin(), testName.end(), testName.begin(), tolower);
   const std::vector<std::string> keys = API::AlgorithmFactory::Instance().getKeys();
-  const size_t numKeys = keys.size();
-  for(int i = 0; i < numKeys; ++i)
+  const std::size_t numKeys = keys.size();
+  for(std::size_t i = 0; i < numKeys; ++i)
   {
     std::string key = keys[i];
     const std::string name = key.substr(0, key.find_last_of('|'));
