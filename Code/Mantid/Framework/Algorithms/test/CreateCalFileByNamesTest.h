@@ -50,7 +50,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
-    testerCAL.setPropertyValue("InstrumentName", "INES");
+    testerCAL.setPropertyValue("InstrumentFileName", loaderCAL.getPropertyValue("Filename"));
     std::string outputFile;
     outputFile = "./INES_CreateCalFileByNamesTest.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);

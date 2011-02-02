@@ -52,9 +52,8 @@ namespace Mantid
      */
     void CreateCalFileByNames::init()
     {
-      declareProperty("InstrumentName", "",
-        "The name of the instrument, needs to be present in the Instrument Data\n"
-        "Service" );
+      declareProperty(new FileProperty("InstrumentFileName","",FileProperty::Load, ".xml"),
+        "The instrument definition file.");
       declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save, ".cal"),
         "The name of the output CalFile");
       declareProperty("GroupNames","",
@@ -71,21 +70,14 @@ namespace Mantid
     {
       std::ostringstream mess;
       // Check that the instrument is in store
-      std::string instname=getProperty("InstrumentName");
-      // Get only the first 3 letters
-      std::string instshort=instname;
-      std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
-      instshort=instshort+"_Definition.xml";
-
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+      std::string instfilename=getProperty("InstrumentFileName");
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
       Document* pDoc;
       try
       {
-        pDoc = pParser.parse(directoryName+instshort);
+        pDoc = pParser.parse(instfilename);
       }
       catch(...)
       {
@@ -103,16 +95,16 @@ namespace Mantid
       // Handle used in the singleton constructor for instrument file should append the value
       // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instshort = instshort + pRootElem->getAttribute("last-modified");
+      std::string inst_name = pRootElem->getAttribute("name") + pRootElem->getAttribute("last-modified");
 
       // If instrument not in store, insult the user
-      if (!API::InstrumentDataService::Instance().doesExist(instshort))
+      if (!API::InstrumentDataService::Instance().doesExist(inst_name))
       {
-        g_log.error("Instrument "+instshort+" is not present in data store.");
-        throw std::runtime_error("Instrument "+instshort+" is not present in data store.");
+        g_log.error("Instrument "+inst_name+" is not present in data store.");
+        throw std::runtime_error("Instrument "+inst_name+" is not present in data store.");
       }
       // Get the instrument.
-      IInstrument_sptr inst = API::InstrumentDataService::Instance().retrieve(instshort);
+      IInstrument_sptr inst = API::InstrumentDataService::Instance().retrieve(inst_name);
 
       // Get the names of groups
       std::string groupsname=getProperty("GroupNames");
