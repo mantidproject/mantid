@@ -123,6 +123,54 @@ ArrayBoundedValidator<TYPE>::checkValidity( const std::vector<TYPE> &value ) con
   return error.str();
 }
 
+template <typename TYPE>
+bool ArrayBoundedValidator<TYPE>::hasLower() const
+{
+  return this->boundVal->hasLower();
+}
+
+template <typename TYPE>
+bool ArrayBoundedValidator<TYPE>::hasUpper() const
+{
+  return this->boundVal->hasUpper();
+}
+
+template <typename TYPE>
+const TYPE& ArrayBoundedValidator<TYPE>::lower() const
+{
+  return this->boundVal->lower();
+}
+
+template <typename TYPE>
+const TYPE& ArrayBoundedValidator<TYPE>::upper() const
+{
+  return this->boundVal->upper();
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setLower( const TYPE& value )
+{
+  this->boundVal->setLower(value);
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setUpper( const TYPE& value )
+{
+  this->boundVal->setUpper(value);
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::clearLower()
+{
+  this->boundVal->clearLower();
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::clearUpper()
+{
+  this->boundVal->clearUpper();
+}
+
 // Required explicit instantiations
 template class ArrayBoundedValidator<double>;
 template class ArrayBoundedValidator<int>;

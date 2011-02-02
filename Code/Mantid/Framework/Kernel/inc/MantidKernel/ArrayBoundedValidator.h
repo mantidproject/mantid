@@ -51,6 +51,23 @@ public:
   BoundedValidator<TYPE>* getValidator() const;
   std::string isValid(const std::vector<TYPE> &value) const;
 
+  /// Return if it has a lower bound
+  bool        hasLower() const;
+  /// Return if it has a lower bound
+  bool        hasUpper() const;
+  /// Return the lower bound value
+  const TYPE&    lower()    const;
+  /// Return the upper bound value
+  const TYPE&    upper()    const;
+
+  /// Set lower bound value
+  void setLower( const TYPE& value );
+  /// Set upper bound value
+  void setUpper( const TYPE& value );
+  /// Clear lower bound value
+  void clearLower();
+  /// Clear upper bound value
+  void clearUpper();
 private:
   std::string checkValidity( const std::vector<TYPE> &value ) const;
 
