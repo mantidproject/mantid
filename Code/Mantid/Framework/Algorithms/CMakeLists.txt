@@ -357,6 +357,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/Q1DWeightedTest.h
 		 test/QxyTest.h
 		 test/RealFFTTest.h
+		 test/ReadGroupsFromFileTest.h
 		 test/RebinTest.h
 		 test/RebinToWorkspaceTest.h
 		 test/RebunchTest.h

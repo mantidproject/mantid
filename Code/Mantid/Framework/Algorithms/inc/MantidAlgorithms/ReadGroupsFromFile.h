@@ -12,6 +12,7 @@
 #include <tr1/unordered_map>
 #endif
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 
 namespace Mantid

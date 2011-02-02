@@ -3,17 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateCalFileByNames.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IInstrument.h"
-#include <queue>
+#include "MantidKernel/ConfigService.h"
+#include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <fstream>
 #include <iomanip>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/detail/classification.hpp>
-
+#include <queue>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
