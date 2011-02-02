@@ -18,8 +18,6 @@ def import_to_global(modname, attrs=None, math=False):
         # make functions available in QtiPlot's math function list
         if math and callable(f): qti.mathFunctions[name] = f
 
-# Import standard math functions and constants into global namespace.
-#import_to_global("math", None, True)
 # Import math module
 import math
 
@@ -41,6 +39,10 @@ try:
         print "Imported pygsl.sf. For more information type help(pygsl.sf)."
 except ImportError: 
     pass
+
+# Import PyQt4's QtCore and QtGui packages into our namespace
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 
 # import QtiPlot's classes to the global namespace (particularly useful for fits)
 from qti import *
