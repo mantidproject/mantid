@@ -125,16 +125,20 @@ void Indirect::initLayout()
   loadSettings();
 
   refreshWSlist();
-
-
-  // sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.
 */
 void Indirect::initLocalPython()
 {
-  // Nothing to do at this stage.
+  // Need to determine whether we are on a platform that supports the Fortran unwrap
+  QString pyInput = "import platform\n"
+    "print platform.system()+platform.architecture()[0]\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+  if ( pyOutput != "Windows32bit" )
+  {
+    m_uiForm.ckFortranUnwrap->setEnabled(false);
+  }
 }
 /**
 * This function opens a web browser window to the Mantid Project wiki page for this
@@ -283,12 +287,21 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "clean = True\n";
   }
 
+  if ( m_uiForm.ckFortranUnwrap->isChecked() )
+  {
+    pyInput += "FU = True\n";
+  }
+  else
+  {
+    pyInput += "FU = False\n";
+  }
+
   if ( isDirty() )
   {
-    pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, "
-      "first, last, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
-      "rebinParam = rebinParam, saveFormats = fileFormats,"
-      "analyser = ana, reflection = ref, CleanUp=clean, Verbose=verbose, instrument=iname)\n";
+    pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, first, last,"
+      "instrument=iname, analyser = ana, reflection = ref,"
+      "SumFiles=Sum, bgremove=bgRemove, tempK=tempK, calib=calib, rebinParam=rebinParam,"
+      "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose, FortranUnwrap=FU)\n";
   }
   else if ( isDirtyRebin() )
   {
