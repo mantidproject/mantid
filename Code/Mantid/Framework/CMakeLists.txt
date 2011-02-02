@@ -7,10 +7,14 @@ set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Build/CMake")
 # Define the project name. Allows building framework as a separate project.
 project ( MantidFramework )
 
-# Set paths to Third_Party for Windows builds
-if ( WIN32 AND NOT THIRD_PARTY )
+# Set paths to Third_Party for Windows and Mac builds
+if ( NOT THIRD_PARTY )
   set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../../Third_Party" )
-  include ( WindowsSetup )
+  if ( WIN32 )
+    include ( WindowsSetup )
+  elseif ( APPLE )
+    include ( DarwinSetup )
+  endif ()
 endif ()
 
 # If building as a stand-alone project, call our common setup script

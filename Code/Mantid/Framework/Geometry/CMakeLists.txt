@@ -213,6 +213,11 @@ include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
 include_directories ( ${OPENGL_INCLUDE_DIR} )
 include_directories ( ${GSL_INCLUDE_DIR} )
 
+# A few defines needed for OpenCascade on the Mac
+if ( APPLE )
+  add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
+endif ()
+
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

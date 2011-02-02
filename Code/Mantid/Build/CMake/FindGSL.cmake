@@ -27,7 +27,7 @@
 # www.mip.informatik.uni-kiel.de
 # --------------------------------
 
-IF(WIN32)
+IF( WIN32 OR APPLE )  # We get things out of Third_Party on the Mac
   # JW tested with gsl-1.8, Windows XP, MSVS 7.1
   SET(GSL_POSSIBLE_ROOT_DIRS
     ${GSL_ROOT_DIR}
@@ -80,7 +80,7 @@ IF(WIN32)
   #  "GSL_GSLCBLAS_LIBRARY=${GSL_GSLCBLAS_LIBRARY}\n"
   #  "GSL_LIBRARIES=${GSL_LIBRARIES}")
 
-ELSE(WIN32)
+ELSE()
   
   IF(UNIX) 
     SET(GSL_CONFIG_PREFER_PATH 
@@ -147,7 +147,7 @@ ELSE(WIN32)
     ENDIF(GSL_CONFIG)
 
   ENDIF(UNIX)
-ENDIF(WIN32)
+ENDIF()
 
 
 IF(GSL_LIBRARIES)
