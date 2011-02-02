@@ -38,12 +38,22 @@ class EqSansReducer(SANSReducer):
         ## Normalization
         self._normalizer = sns_reduction_steps.Normalize()
         ## Transmission calculator
-        self._transmission_calculator = sns_reduction_steps.Transmission()
+        self._transmission_calculator = sns_reduction_steps.Transmission(True)
         
         self._solid_angle_correcter = sans_reduction_steps.SolidAngle()
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)
+        
+    def set_normalizer(self, normalizer):
+        """
+            Set the ReductionStep object that takes care of normalization
+            @param normalizer: ReductionStep object
+        """
+        if issubclass(normalizer.__class__, ReductionStep) or normalizer is None:
+            self._normalizer = normalizer
+        else:
+            raise RuntimeError, "Reducer.set_normalizer expects an object of class ReductionStep"
         
     def set_frame_skipping(self, value):
         """

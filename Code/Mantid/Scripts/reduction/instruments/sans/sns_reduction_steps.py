@@ -153,8 +153,11 @@ class Transmission(BaseTransmission):
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
-        #Divide(workspace, "transmission", workspace)
-        ApplyTransmissionCorrection(workspace, workspace, "transmission")
+        Divide(workspace, "transmission", workspace)
+        # To apply the transmission correction using the theta-dependent algorithm
+        # we should get the beam spectrum out of the measured transmission
+        # We should then re-apply it when performing normalization
+        #ApplyTransmissionCorrection(workspace, workspace, "transmission")
         ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         return "Transmission correction applied"
