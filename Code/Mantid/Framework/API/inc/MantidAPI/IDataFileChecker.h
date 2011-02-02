@@ -1,13 +1,8 @@
 #ifndef MANTID_API_IDATAFILECHECKER_H
 #define MANTID_API_IDATAFILECHECKER_H
 
+#include "MantidAPI/DllExport.h"
 #include "MantidAPI/Algorithm.h"
-
-#ifdef WIN32
-static const unsigned char g_hdf5_signature[] = { '\211', 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
-/// Magic HDF5 cookie that is stored in the first 4 bytes of the file.
-static const uint32_t g_hdf5_cookie = 0x0e031301;
-#endif
 
 namespace Mantid
 {
@@ -43,7 +38,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-    class DLLExport IDataFileChecker : public Algorithm
+    class EXPORT_OPT_MANTID_API IDataFileChecker : public Algorithm
     {
     public:
       ///constructor
@@ -51,12 +46,11 @@ namespace Mantid
       /// virtual destructor
       virtual ~IDataFileChecker();
 
-#ifndef WIN32
       /// Magic signature identifying a HDF5 file.
-      static unsigned char const g_hdf5_signature[8];
+      static const unsigned char g_hdf5_signature[8];
       /// Magic HDF5 cookie that is stored in the first 4 bytes of the file.
-      static uint32_t const g_hdf5_cookie;
-#endif
+      static const uint32_t g_hdf5_cookie;
+
       /// The default number of bytes of the header to check
       enum { g_hdr_bytes = 100 };
 

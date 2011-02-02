@@ -147,7 +147,7 @@ public:
     TS_ASSERT( saver->isExecuted() );
     
     TS_ASSERT( Poco::File(outputFile).exists() );
-    if( Poco::File(outputFile).exists() );
+    if( Poco::File(outputFile).exists() )
     {    
       Poco::File(outputFile).remove();  
     }
