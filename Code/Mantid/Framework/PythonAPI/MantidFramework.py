@@ -1332,6 +1332,8 @@ class WorkspaceFactory(WorkspaceFactoryProxy):
 def _createCPPValidator(prop_type, py_valid):
     if isinstance(py_valid, BoundedValidator):
         return _cppBoundedValidator(prop_type, py_valid.lower, py_valid.upper)
+    elif isinstance(py_valid, ArrayBoundedValidator):
+        return _cppArrayBoundedValidator(prop_type, py_valid.lower, py_valid.upper)
     elif isinstance(py_valid, MandatoryValidator):
         return _cppMandatoryValidator(prop_type)
     elif isinstance(py_valid, ListValidator):
@@ -1358,6 +1360,28 @@ def _cppBoundedValidator(prop_type, low, up):
     else:
         raise TypeError("Cannot create BoundedValidator for given property type.")
     
+    if low != None:
+        validator.setLower(low)
+    if up != None:
+        validator.setUpper(up)
+
+    return validator
+
+class ArrayBoundedValidator(object):
+    def __init__(self, Lower=None, Upper=None):
+        if Lower == None and Upper == None:
+            raise TypeError("Cannot create ArrayBoundedValidator with both Lower and Upper limit unset")
+        self.lower = Lower
+        self.upper = Upper
+
+def _cppArrayBoundedValidator(prop_type, low, up):
+    if prop_type == int:
+        validator = ArrayBoundedValidator_int()
+    elif prop_type == float:
+        validator = ArrayBoundedValidator_dbl()
+    else:
+        raise TypeError("Cannot create ArrayBoundedValidator for property type '%s'" % prop_type)
+
     if low != None:
         validator.setLower(low)
     if up != None:
