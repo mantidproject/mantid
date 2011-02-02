@@ -136,6 +136,7 @@ void IndirectDataAnalysis::loadSettings()
   m_uiForm.confit_inputFile->readSettings(settings.group());
   m_uiForm.confit_resInput->readSettings(settings.group());
   m_uiForm.abs_inputFile->readSettings(settings.group());
+  m_uiForm.absp_inputFile->readSettings(settings.group());
   settings.endGroup();
 }
 

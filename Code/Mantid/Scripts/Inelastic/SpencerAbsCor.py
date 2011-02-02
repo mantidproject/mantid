@@ -5,8 +5,8 @@
 import platform                                                              ##
 opeteratingenvironment = platform.system()+platform.architecture()[0]        ##
 if ( opeteratingenvironment == 'Windows32bit' ):                             ##
-    import fltabs as fltabs                                                  ##
-    import cylabs as cylabs                                                  ##
+    import fltabs_win32 as fltabs                                            ##
+    import cylabs_win32 as cylabs                                            ##
 else:                                                                        ##
     sys.exit('F2PY absorption corrections only available on Win32')          ##
 ###############################################################################
@@ -72,26 +72,6 @@ def Array2List(ncan,n,A1,A2,A3,A4):
             Y3.append(A3[m])
             Y4.append(A4[m])
     return Y1,Y2,Y3,Y4
-    
-def conjoincreated(input, name, unit):
-    dataX = []
-    dataY = []
-    dataE = []
-    NoSpectra = 0
-    for ws in input:
-        nSpec = mtd[ws].getNumberHistograms()
-        NoSpectra += nSpec
-        for s in range(0, nSpec):
-            readX = mtd[ws].readX(s)
-            readY = mtd[ws].readY(s)
-            readE = mtd[ws].readE(s)
-            for i in range(0, len(readX)):
-                dataX.append(readX[i])
-            for i in range(0, len(readY)):
-                dataY.append(readY[i])
-            for i in range(0, len(readE)):
-                dataE.append(readE[i])
-    CreateWorkspace(name, dataX, dataY, dataE, NoSpectra, UnitX=unit)
 
 def SaveWork(inWS,workdir,prefix,run,prog,verbose=True):
     file = prefix + run + '_' + prog + '.nxs'
@@ -128,10 +108,6 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
     for n in range(0,nw):
         DataX.append(waves[n])
         DataE.append(0)
-    a1WS = '__A1'
-    a2WS = '__A2'
-    a3WS = '__A3'
-    a4WS = '__A4'
     assWS = '__Ass'
     asscWS = '__Assc'
     acscWS = '__Acsc'
@@ -141,6 +117,10 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
     wrk.ljust(120,' ')
     lwrk = 0 # value 0 means fltabs/cylabs will not save files
     plot_list = []
+    dataY_a1ws = []
+    dataY_a2ws = []
+    dataY_a3ws = []
+    dataY_a4ws = []
     for n in range(0,ndet):
         if geom == 'flt':
             angles = [avar, det[n]]
@@ -154,30 +134,23 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
         if kill == 0:
             print 'Detector '+str(n)+' at angle : '+str(det[n])+' * successful'
             DataY1,DataY2,DataY3,DataY4 = Array2List(ncan,nw,A1,A2,A3,A4)
-            CreateWorkspace(a1WS,DataX,DataY1,DataE,1,'Wavelength')
+            dataY_a1ws += DataY1
             if ncan > 1:
-                CreateWorkspace(a2WS,DataX,DataY2,DataE,1,'Wavelength')
-                CreateWorkspace(a3WS,DataX,DataY3,DataE,1,'Wavelength')
-                CreateWorkspace(a4WS,DataX,DataY4,DataE,1,'Wavelength')
-            if n == 0:
-                CloneWorkspace(a1WS,assWS)
-                if ncan > 1:
-                    CloneWorkspace(a2WS,asscWS)
-                    CloneWorkspace(a3WS,acscWS)
-                    CloneWorkspace(a4WS,accWS)
-            else:
-                list = [assWS,a1WS]
-                conjoincreated(list, assWS, 'Wavelength')
-                if ncan > 1:
-                    list = [asscWS,a2WS]
-                    conjoincreated(list, asscWS, 'Wavelength')
-                    list = [acscWS,a3WS]
-                    conjoincreated(list, acscWS, 'Wavelength')
-                    list = [accWS,a4WS]
-                    conjoincreated(list, accWS, 'Wavelength')
+                dataY_a2ws += DataY2
+                dataY_a3ws += DataY3
+                dataY_a4ws += DataY4
             plot_list.append(n)
         else:
             print 'Detector '+str(n)+' at angle : '+str(det[n])+' *** failed : Error code '+str(kill)
+    ## Create the workspaces
+    nspec = len(plot_list)
+    DataX = DataX * nspec
+    DataE = DataE * nspec
+    CreateWorkspace(assWS, DataX, dataY_a1ws, DataE,nspec,'Wavelength')
+    if ( ncan > 1 ):
+        CreateWorkspace(asscWS, DataX, dataY_a2ws, DataE,nspec,'Wavelength')
+        CreateWorkspace(acscWS, DataX, dataY_a3ws, DataE,nspec,'Wavelength')
+        CreateWorkspace(accWS, DataX, dataY_a4ws, DataE,nspec,'Wavelength')
     ## Plotting
     ass_graph=plotSpectrum(assWS,plot_list)
     if ncan > 1:
@@ -185,28 +158,30 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
         all_graph = plotSpectrum(all_list,0)
     if ndet > 1:
         PlotAngle(det,assWS,0)
-    ## Tidyup and save
-    if ( samWS == 'Sam' ): DeleteWorkspace(samWS)
-    DeleteWorkspace(a1WS)
+    ## Tidy up & Save output
     SaveWork(assWS,workdir,prefix,sam,geom+'_ass',verbose)
     if ncan > 1:
-        DeleteWorkspace(a2WS)
-        DeleteWorkspace(a3WS)
-        DeleteWorkspace(a4WS)
         SaveWork(asscWS,workdir,prefix,sam,geom+'_assc',verbose)
         SaveWork(acscWS,workdir,prefix,sam,geom+'_acsc',verbose)
         SaveWork(accWS,workdir,prefix,sam,geom+'_acc',verbose)
 
 def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar):
+    ws = mtd[inputws]
     ## workdir is default save directory
     workdir = mantid.getConfigProperty('defaultsave.directory')
     ## prefix is instrument short name
-    prefix = mtd[inputws].getInstrument().getName()
+    prefix = ws.getInstrument().getName()
     prefix = ConfigService().facility().instrument(prefix).shortName().lower()
     ## sam = run number
-    sam = mtd[inputws].getRun().getLogData("run_number").value
+    sam = ws.getRun().getLogData("run_number").value
     ## efixed can be taken from the instrument parameter file
-    efixed = mtd[inputws].getDetector(0).getNumberParameter('Efixed')[0]
+    det = ws.getDetector(0)
+    try:
+        efixed = det.getNumberParameter('Efixed')[0]
+    except AttributeError:
+        ids = det.getDetectorIDs()
+        det = ws.getInstrument().getDetector(ids[0])
+        efixed = det.getNumberParameter('Efixed')[0]
     ## Run the routine
     AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga, 
         avar, efixed, samWS=inputws)

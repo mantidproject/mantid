@@ -1381,7 +1381,7 @@
          </property>
          <property name="fileExtensions" >
           <stringlist>
-           <string>.nxs</string>
+           <string>_red.nxs</string>
           </stringlist>
          </property>
         </widget>
