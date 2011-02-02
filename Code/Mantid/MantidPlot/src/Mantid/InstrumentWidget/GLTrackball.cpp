@@ -1,11 +1,8 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include "GLTrackball.h"
+#include <cmath>
+#include <QtOpenGL>
 #include "GLViewport.h"
 #include "OpenGLError.h"
-#include <cmath>
-#include <GL/gl.h>
 
 GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
 {

@@ -1,12 +1,8 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "TexObject.h"
-#include <GL/gl.h>
 
 /**
  * Constructor

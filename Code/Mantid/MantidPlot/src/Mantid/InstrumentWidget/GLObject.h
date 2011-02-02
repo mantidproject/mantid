@@ -1,10 +1,8 @@
 #ifndef MANTIDPLOT_GLOBJECT_H_
 #define MANTIDPLOT_GLOBJECT_H_
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
+
 #include <string>
+#include <QtOpenGL>
 
 /**
   \class  GLObject

@@ -1,6 +1,3 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -8,7 +5,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "ObjComponentActor.h"
 #include "MantidObject.h"
-#include <GL/gl.h>
 
 using namespace Mantid;
 using namespace Geometry;

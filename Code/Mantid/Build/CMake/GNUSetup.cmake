@@ -15,7 +15,7 @@ set( GNUFLAGS "-Wall -Wextra" )
 set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Set the options fo gcc and g++
-set( CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS}" )
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS}" )
 # Cleanup
 set ( GNUFLAGS )

@@ -2,13 +2,7 @@
 // Includes
 //--------------------------------
 #include "GLColor.h"
-
-// On Windows, the windows header file is needed before the OpenGL header
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <GL/gl.h>
+#include <QtOpenGL>
 
 /**
  * Default Constructor
