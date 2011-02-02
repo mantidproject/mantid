@@ -33,7 +33,7 @@ class CreateCalFileByNamesTest : public CxxTest::TestSuite
 {
 public:
 
-  void xtestINES()
+  void testINES()
   {
     LoadEmptyInstrument loaderCAL;
 
@@ -50,7 +50,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
-    testerCAL.setPropertyValue("InstrumentFileName", loaderCAL.getPropertyValue("Filename"));
+    testerCAL.setPropertyValue("InstrumentWorkspace", wsName);
     std::string outputFile;
     outputFile = "./INES_CreateCalFileByNamesTest.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);

@@ -51,7 +51,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(createrDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(createrDSP.isInitialized());
-    createrDSP.setPropertyValue("InstrumentName", "INES");
+    createrDSP.setPropertyValue("InstrumentWorkspace", wsName);
     std::string outputFile = "./INES_DspacemaptoCalTest.cal";
     createrDSP.setPropertyValue("GroupingFileName", outputFile);
     outputFile = createrDSP.getPropertyValue("GroupingFileName");

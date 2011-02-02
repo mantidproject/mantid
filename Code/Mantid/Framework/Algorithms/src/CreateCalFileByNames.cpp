@@ -11,7 +11,6 @@
 #include <queue>
 #include <fstream>
 #include <iomanip>
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
 
@@ -52,11 +51,13 @@ namespace Mantid
         "Use / or , to separate multiple groups");
     }
 
+
     /** Executes the algorithm
      *
      *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
      *  @throw runtime_error If unable to run one of the sub-algorithms successfully
      */
+
     void CreateCalFileByNames::exec()
     {
       std::ostringstream mess;
@@ -66,7 +67,6 @@ namespace Mantid
 
       // Get the instrument.
       IInstrument_sptr inst = ws->getInstrument();
-
       if (!inst)
         throw std::runtime_error("No instrument found in the workspace " + ws->getName());
 
