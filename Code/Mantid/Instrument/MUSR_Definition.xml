@@ -17,12 +17,6 @@
       <handedness val="right"/>
     </reference-frame>
   </defaults>
-
-  
-  <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
-  
-      Data for the MuSR instrument
-  -->
   
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
