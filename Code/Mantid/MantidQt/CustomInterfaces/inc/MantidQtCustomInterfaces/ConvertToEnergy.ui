@@ -839,18 +839,11 @@
               </item>
               <item>
                <widget class="QLineEdit" name="leEfixed" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip" >
                  <string>Value of Efixed for conversion from time to energy.</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valEFixed" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
                 </property>
                </widget>
               </item>

@@ -10,7 +10,7 @@ import re
 import platform # used to determine operating environment
 
 def convert_to_energy(rawfiles, grouping, first, last,
-        instrument='', analyser = '', reflection = '',
+        instrument, analyser, reflection,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
         saveFormats=[], CleanUp = True, Verbose = False, FortranUnwrap=False):        
     # Get hold of base empty instrument workspace
@@ -75,7 +75,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         if ( rebinParam != ''): # Rebin data
             rebinData(rebinParam, detectors=ws)
         if ( tempK != -1 ): # "Detailed Balance" correction
-            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )            
+            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )
         # Final stage, grouping of detectors - apply name
         if isTosca: # TOSCA's grouping is pre-determined and fixed
             groupTosca(name, invalid, detectors=ws)
@@ -230,7 +230,8 @@ def rebinData(rebinParam, detectors=''):
 
 def groupData(grouping, name, detectors=''):
     if (grouping == 'Individual'):
-        RenameWorkspace(detectors, name)
+        if ( detectors != name ):
+            RenameWorkspace(detectors, name)
         return name
     elif ( grouping == 'All' ):
         nhist = mtd[detectors].getNumberHistograms()
@@ -238,7 +239,7 @@ def groupData(grouping, name, detectors=''):
             Behaviour='Average')
     else:
         GroupDetectors(detectors, name, MapFile=grouping, Behaviour='Average')
-    if detectors != name:
+    if ( detectors != name ):
         DeleteWorkspace(detectors)
     return name
 
@@ -280,39 +281,38 @@ def backgroundRemoval(tofStart, tofEnd, detectors=''):
     ConvertFromDistribution(detectors)
     return detectors
 
-def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, 
-        savesuffix, saveFormats, CleanUp=False, Verbose=False):
-    ws_list = mantid.getWorkspaceNames()
-    energy = re.compile('_'+analyser+reflection+r'_intermediate$')
-    int_list = []
-    if ( len(int_list) == 0 ):
+def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
+        saveFormats, CleanUp=False, Verbose=False):
+    # Generate list
+    ws_list = []
+    for workspace in list(mantid.getWorkspaceNames()):
+        if workspace.endswith('_'+analyser+reflection+r'_red_intermediate'):
+            ws_list.append(workspace)
+    if ( len(ws_list) == 0 ):
         message = "No intermediate workspaces were found. Run with \
                 'Keep Intermediate Workspaces' checked."
         print message
         sys.exit(message)
-    output_workspace_names = []
+    output = []
     runNos = []
-    for workspace in ws_list:
-        if energy.search(workspace):
-            int_list.append(workspace)
-    for cte in int_list:
-        runNo = mtd[cte].getRun().getLogData("run_number").value
+    for ws in ws_list:
+        runNo = mtd[ws].getRun().getLogData("run_number").value
         runNos.append(runNo)
+        inst = mtd[ws].getInstrument().getName()
+        inst = ConfigService().facility().instrument(inst).shortName().lower()
+        name = inst + runNo + '_' + analyser + reflection + '_red'
+        if not CleanUp:
+            CloneWorkspace(ws, name)
+            ws = name
         if ( rebinParam != ''):
-            rebin = rebinData(rebinParam, inWS_n=cte)
-            if CleanUp:
-                mantid.deleteWorkspace(cte)
-        else:
-            if CleanUp:
-                RenameWorkspace(cte, 'Energy')
-            else:
-                CloneWorkspace(cte, 'Energy')
-        if ( tempK != -1 ):
-            db = detailedBalance(tempK)
-        scale = scaleAndGroup(mapfile, outWS_n=cte[:-13])
-        output_workspace_names.append(scale)
+            rebin = rebinData(rebinParam, detectors=ws)
+        if ( tempK != -1 ): # Detailed Balance correction
+            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )
+        groupData(grouping, name, detectors=ws)
+        output.append(name)
     if ( saveFormats != [] ):
-        saveItems(output_workspace_names, saveFormats)
+        saveItems(output, saveFormats)
+    return output, runNos
 
 def createMappingFile(groupFile, ngroup, nspec, first):
     filename = mtd.getConfigProperty('defaultsave.directory')

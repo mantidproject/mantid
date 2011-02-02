@@ -67,12 +67,11 @@ void Indirect::initLayout()
   connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ind_calibFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
-  connect(m_uiForm.leEfixed, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ckSumFiles, SIGNAL(pressed()), this, SLOT(setasDirty()));
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
-  connect(m_uiForm.ckCleanUp, SIGNAL(pressed()), this, SLOT(setasDirty()));
+  connect(m_uiForm.ckCleanUp, SIGNAL(pressed()), this, SLOT(setasDirtyRebin()));
 
   connect(m_uiForm.rebin_leELow, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.rebin_leEWidth, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
@@ -104,7 +103,6 @@ void Indirect::initLayout()
   // apply validators
   m_uiForm.leNoGroups->setValidator(m_valInt);
   m_uiForm.leDetailedBalance->setValidator(m_valInt);
-  m_uiForm.leEfixed->setValidator(m_valDbl);
   m_uiForm.leSpectraMin->setValidator(m_valInt);
   m_uiForm.leSpectraMax->setValidator(m_valInt);
   m_uiForm.rebin_leELow->setValidator(m_valDbl);
@@ -198,26 +196,23 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     return;
   }
 
-  QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-  filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
-
   QString pyInput = "from mantidsimple import *\n"
     "import IndirectEnergyConversion as ind\n";
 
   if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
 
-  pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
-  pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
-  pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
-  pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
-  pyInput += "iname = '" + m_uiForm.cbInst->currentText()+"'\n";
-
+  pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n"
+    "last = " +m_uiForm.leSpectraMax->text()+ "\n"
+    "instrument = '" + m_uiForm.cbInst->currentText()+"'\n"
+    "analyser = '"+m_uiForm.cbAnalyser->currentText()+"'\n"
+    "reflection = '"+m_uiForm.cbReflection->currentText()+"'\n";
+  
   QStringList runFiles_list = m_uiForm.ind_runFiles->getFilenames();
   QString runFiles = runFiles_list.join("', r'");
 
   pyInput += "rawfiles = [r'"+runFiles+"']\n"
-    "Sum=";
+    "Sum = ";
   if ( m_uiForm.ckSumFiles->isChecked() )
   {
     pyInput += "True\n";
@@ -299,13 +294,13 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   if ( isDirty() )
   {
     pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, first, last,"
-      "instrument=iname, analyser = ana, reflection = ref,"
+      "instrument, analyser, reflection,"
       "SumFiles=Sum, bgremove=bgRemove, tempK=tempK, calib=calib, rebinParam=rebinParam,"
       "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose, FortranUnwrap=FU)\n";
   }
   else if ( isDirtyRebin() )
   {
-    pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
+    pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, analyser, reflection,"
       "fileFormats, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
@@ -617,17 +612,6 @@ bool Indirect::validateInput()
   else
   {
     m_uiForm.valDetailedBalance->setText("");
-  }
-
-  // efixed
-  if ( m_uiForm.leEfixed->text() == "" )
-  {
-    valid = false;
-    m_uiForm.valEFixed->setText("*");
-  }
-  else
-  {
-    m_uiForm.valEFixed->setText("");
   }
 
   // SpectraMin/SpectraMax
