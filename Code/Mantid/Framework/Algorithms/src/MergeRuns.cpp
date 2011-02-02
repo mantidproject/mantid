@@ -44,12 +44,33 @@ void MergeRuns::init()
 void MergeRuns::exec()
 {
   // Check that all input workspaces exist and match in certain important ways
-  const std::vector<std::string> inputs = getProperty("InputWorkspaces");
+  const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
+
+  // This will hold the inputs, with the groups separated off
+  std::vector<std::string> inputs;
+  for (size_t i=0; i < inputs_orig.size(); i++)
+  {
+    WorkspaceGroup_sptr wsgroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(inputs_orig[i]));
+    if (wsgroup)
+    {// Workspace group
+      std::vector<std::string> group = wsgroup->getNames();
+      inputs.insert(inputs.end(), group.begin(), group.end());
+    }
+    else
+    {
+      // Single workspace
+      inputs.push_back( inputs_orig[i] );
+    }
+  }
+
   if ( inputs.size() == 1 )
   {
     g_log.error("Only one input workspace specified");
     throw std::invalid_argument("Only one input workspace specified");
   }
+
+
+
 
   //First, try as event workspaces
   if (this->validateInputsForEventWorkspaces(inputs))
@@ -329,6 +350,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
   {
     // Fetch the next input workspace as an - throw an error if it's not there
     EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+
     if (!ws)
     { //Either it is not found, or it is not an EventWorkspace
       return false;

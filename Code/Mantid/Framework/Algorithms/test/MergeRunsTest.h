@@ -6,6 +6,7 @@
 #include <stdarg.h>
 
 #include "MantidAlgorithms/MergeRuns.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -37,56 +38,27 @@ public:
 
 
 
-
-
-  //-----------------------------------------------------------------------------------------------
-  void testExec_Event_CNCS()
+  void checkOutput(std::string wsname)
   {
-    std::string eventfile1( "CNCS_7860_neutron_event.dat" );
-    std::string eventfile2( "CNCS_7860_neutron_event.dat" );
-    LoadEventPreNeXus * eventLoader;
-
-    TimeSeriesProperty<double>* log;
     EventWorkspace_sptr output;
+    TimeSeriesProperty<double>* log;
     int log1, log2, logTot;
     int nev1, nev2, nevTot;
     double pc1, pc2, pcTot;
 
-    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", eventfile1);
-    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
-    eventLoader->setProperty("PadEmptyPixels", true);
-    TS_ASSERT( eventLoader->execute() );
-    delete eventLoader;
-
-    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1"));
+    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1")); )
     log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log1 = log->realSize();
     nev1 = output->getNumberEvents();
     pc1 = output->mutableRun().getProtonCharge();
 
-    //For the second one, we wont pad the pixels
-    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", eventfile2);
-    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
-    eventLoader->setProperty("PadEmptyPixels", false);
-    TS_ASSERT( eventLoader->execute() );
-    delete eventLoader;
-
-    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs2"));
+    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs2")); )
     log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log2 = log->realSize();
     nev2 = output->getNumberEvents();
     pc2 = output->mutableRun().getProtonCharge();
 
-    MergeRuns mrg;  mrg.initialize();
-    mrg.setPropertyValue("InputWorkspaces","cncs1,cncs2");
-    mrg.setPropertyValue("OutputWorkspace","outWS");
-    mrg.execute();
-    TS_ASSERT( mrg.isExecuted() );
-    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(wsname)) );
     TS_ASSERT( output );
 
     //This many pixels total at CNCS
@@ -103,6 +75,67 @@ public:
     TS_ASSERT_EQUALS( pcTot, pc1+pc2 );
     //Total events counted.
     TS_ASSERT_EQUALS( nevTot, nev1+nev2 );
+
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Event_CNCS_listed_or_as_workspace_group()
+  {
+    std::string eventfile1( "CNCS_7860_neutron_event.dat" );
+    std::string eventfile2( "CNCS_7860_neutron_event.dat" );
+    LoadEventPreNeXus * eventLoader;
+
+    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
+    eventLoader->setPropertyValue("EventFilename", eventfile1);
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
+    eventLoader->setProperty("PadEmptyPixels", true);
+    TS_ASSERT( eventLoader->execute() );
+    delete eventLoader;
+
+    //For the second one, we wont pad the pixels
+    eventLoader = new LoadEventPreNeXus(); eventLoader->initialize();
+    eventLoader->setPropertyValue("EventFilename", eventfile2);
+    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
+    eventLoader->setProperty("PadEmptyPixels", false);
+    TS_ASSERT( eventLoader->execute() );
+    delete eventLoader;
+
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","cncs1,cncs2");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    checkOutput("outWS");
+
+
+    // --------------------------- Now make a group ---------------------------
+    GroupWorkspaces grpwsalg;
+    grpwsalg.initialize();
+    std::vector<std::string >input;
+    input.push_back("cncs1");
+    input.push_back("cncs2");
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","cncs_grouped"));
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
+    TS_ASSERT( grpwsalg.isExecuted() );
+    WorkspaceGroup_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("cncs_grouped")) );
+    std::vector<std::string> grpVec=result->getNames();
+    TS_ASSERT_EQUALS(grpVec.size(),2);
+
+    MergeRuns mrg2;
+    mrg2.initialize();
+    mrg2.setPropertyValue("InputWorkspaces","cncs_grouped");
+    mrg2.setPropertyValue("OutputWorkspace","outWS_from_group");
+    mrg2.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    checkOutput("outWS_from_group");
+
 
   }
 
