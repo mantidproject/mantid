@@ -10,6 +10,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Logger.h"
@@ -124,12 +125,29 @@ namespace PythonAPI
       .def(init<type,type>())\
       .def("setLower", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setLower )\
       .def("setUpper", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setUpper )\
-      ;\
+      ;
 
     EXPORT_BOUNDEDVALIDATOR(double,dbl);
     EXPORT_BOUNDEDVALIDATOR(int,int);
 #undef EXPORT_BOUNDEDVALIDATOR      
-    
+
+#define EXPORT_IVALIDATOR_V(type,suffix)        \
+    class_<Kernel::IValidator<std::vector<type> >, boost::noncopyable >("IValidator_"#suffix, no_init);
+
+    EXPORT_IVALIDATOR_V(int,int);
+    EXPORT_IVALIDATOR_V(double,dbl);
+#undef EXPORT_IVALIDATOR_V
+
+#define EXPORT_ARRAYBOUNDEDVALIDATOR(type,suffix) \
+    class_<Kernel::ArrayBoundedValidator<type>, bases<Kernel::IValidator<std::vector<type> > > >("ArrayBoundedValidator_"#suffix) \
+      .def("setLower", (void (Kernel::ArrayBoundedValidator<type>::*)(const type& value))&Kernel::ArrayBoundedValidator<type>::setLower )\
+      .def("setUpper", (void (Kernel::ArrayBoundedValidator<type>::*)(const type& value))&Kernel::ArrayBoundedValidator<type>::setUpper )\
+      ;
+
+    EXPORT_ARRAYBOUNDEDVALIDATOR(int,int);
+    EXPORT_ARRAYBOUNDEDVALIDATOR(double,dbl);
+#undef EXPORT_ARRAYBOUNDEDVALIDATOR
+
     // Mandatory validators
 #define EXPORT_MANDATORYVALIDATOR(type,suffix)\
     class_<Kernel::MandatoryValidator<type>, bases<Kernel::IValidator<type> > >("MandatoryValidator_"#suffix); \
