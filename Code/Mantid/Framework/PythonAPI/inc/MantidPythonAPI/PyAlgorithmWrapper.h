@@ -126,6 +126,23 @@ public:
    * Declare a list property, templated on the list type
    * @param prop_name :: The name of the property
    * @param values :: A python list of values
+   * @param validator :: A validator for the parameter
+   * @param doc :: A string describing the property
+   * @param direction :: The direction
+   */
+  template<typename TYPE>
+  void _declareListProperty(const std::string & prop_name, boost::python::list values,
+    Kernel::IValidator<std::vector<TYPE> > & validator,const std::string &doc, const unsigned int direction)
+  {
+    (void)validator;
+    //Extract the values from the python list into a std vector
+    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+  }
+
+  /**
+   * Declare a list property, templated on the list type
+   * @param prop_name :: The name of the property
+   * @param values :: A python list of values
    * @param doc :: A string describing the property
    * @param direction :: The direction
    */
