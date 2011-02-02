@@ -15,6 +15,7 @@
 #include <QAction>
 
 #include <numeric>
+#include <cfloat>
 
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),m_instrWindow(instrWindow)
