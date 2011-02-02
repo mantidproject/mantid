@@ -57,7 +57,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
+    // Same, using the equals() function
+    TS_ASSERT( equals(ws, ws) );
   }
   
   void testEvent_matches()
@@ -71,9 +73,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
     AnalysisDataService::Instance().remove( "ews1" );
     AnalysisDataService::Instance().remove( "ews2" );
+
+    // Same, using the equals() function
+    TS_ASSERT( equals(ews1, ews2) );
   }
 
   void testEvent_different_type()
@@ -85,8 +90,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
     AnalysisDataService::Instance().remove( "ews2" );
+
+    // Same, using the equals() function
+    TS_ASSERT( !equals(ws1, ews2) );
+
   }
 
   void testEvent_different_number_histograms()
@@ -100,9 +109,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
     AnalysisDataService::Instance().remove( "ews1" );
     AnalysisDataService::Instance().remove( "ews2" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ews1, ews2)) );
   }
 
   void testEvent_differentEventLists()
@@ -115,9 +126,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
     AnalysisDataService::Instance().remove( "ews1" );
     AnalysisDataService::Instance().remove( "ews2" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ews1, ews2)) );
   }
 
   void testEvent_differentBinBoundaries()
@@ -130,9 +143,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
     AnalysisDataService::Instance().remove( "ews1" );
     AnalysisDataService::Instance().remove( "ews2" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ews1, ews2)) );
   }
 
   void testDifferentSize()
@@ -148,6 +163,9 @@ public:
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Size mismatch" );
     
     Mantid::API::AnalysisDataService::Instance().remove( "ws2" );
+
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
   
   void testHistNotHist()
@@ -161,6 +179,9 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Histogram/point-like mismatch" );
+
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDistNonDist()
@@ -175,6 +196,9 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Distribution flag mismatch" );
+
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentAxisType()
@@ -190,6 +214,9 @@ public:
     
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis type mismatch" );
+
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentAxisTitles()
@@ -203,7 +230,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis title mismatch" )    ;
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis title mismatch" );
+
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentAxisUnit()
@@ -218,6 +248,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis unit mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentAxisValues()
@@ -232,6 +264,8 @@ public:
     
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis values mismatch" ) ;
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentYUnit()
@@ -246,6 +280,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "YUnit mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentSpectraMap()
@@ -263,6 +299,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "SpectraDetectorMap mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentInstruments()
@@ -277,6 +315,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument name mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentParameterMaps()
@@ -291,6 +331,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
 
   void testDifferentMasking()
@@ -318,6 +360,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Masking mismatch" );
+    // Same, using the !equals() function
+    TS_ASSERT( (!equals(ws1, ws2)) );
   }
   
   void testDifferentSampleName()
@@ -381,7 +425,6 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log value mismatch" );
-    
   }
 
 private:

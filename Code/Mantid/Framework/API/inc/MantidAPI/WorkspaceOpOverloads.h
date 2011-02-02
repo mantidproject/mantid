@@ -16,7 +16,10 @@ namespace OperatorOverloads
     executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, 
 			   const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false, 
 			   bool child = true, const std::string & name = "", bool rethrow = false);
+
 }
+
+bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
 // Workspace operator overloads
 MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);

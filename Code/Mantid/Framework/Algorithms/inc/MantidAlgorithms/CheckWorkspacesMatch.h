@@ -75,6 +75,13 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "General"; }
 
+  /** Return the string output when comparison is successful.
+   */
+  std::string successString()
+  {
+    return "Success!";
+  }
+
 private:
   /// Initialisation code
   void init();

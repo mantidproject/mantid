@@ -45,7 +45,7 @@ void CheckWorkspacesMatch::exec()
   }
   else
   {
-    result = "Success!";
+    result = successString();
   }
   setProperty("Result",result);
   

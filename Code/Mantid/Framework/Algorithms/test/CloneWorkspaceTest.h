@@ -60,7 +60,7 @@ public:
     checker.setPropertyValue("Workspace2","out");
     checker.execute();
 
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
   }
 
 
@@ -84,7 +84,7 @@ public:
     checker.setPropertyValue("Workspace2","out_event");
     checker.execute();
     
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Success!" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString());
   }
   
 private:

@@ -18,86 +18,124 @@ namespace API
 namespace OperatorOverloads
 {
 
-/** Performs a binary operation on two workspaces
- *  @param algorithmName :: The name of the binary operation to perform
- *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @param lhsAsOutput :: If true, indicates that the lhs input is the same workspace as the output one
- *  @param child :: If true the algorithm is run as a child
- *  @param name :: If child is true and this is not an inplace operation then this name is used as output
- *  @param A :: flag indicating whether to rethrow exceptions
- *  @returns The result in a workspace shared pointer
- */
+  /** Performs a binary operation on two workspaces
+   *  @param algorithmName :: The name of the binary operation to perform
+   *  @param lhs :: left hand side workspace shared pointer
+   *  @param rhs :: right hand side workspace shared pointer
+   *  @param lhsAsOutput :: If true, indicates that the lhs input is the same workspace as the output one
+   *  @param child :: If true the algorithm is run as a child
+   *  @param name :: If child is true and this is not an inplace operation then this name is used as output
+   *  @param A :: flag indicating whether to rethrow exceptions
+   *  @return The result in a workspace shared pointer
+   */
   MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput, bool child, const std::string &name, bool rethrow)
-{
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
-  alg->setChild(child);
-  alg->setRethrows(rethrow);
-  alg->initialize();
-
-  if( child )
   {
-    alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
-    alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
-    alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
-    // Have to set a text name for the output workspace if the algorithm is a child even 
-    // though it will not be used.
-    alg->setPropertyValue("OutputWorkspace","��NotApplicable");
-    if( lhsAsOutput )
-    {
-      alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
-    }
-  }
-  // If this is not a child algorithm then we need names for the properties
-  else
-  {
-    alg->setPropertyValue("LHSWorkspace",lhs->getName());
-    alg->setPropertyValue("RHSWorkspace",rhs->getName());
-    alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
-    if( lhsAsOutput )
-    {
-      alg->setPropertyValue("OutputWorkspace",lhs->getName());    
-    }
-    else
-    {
-      alg->setPropertyValue("OutputWorkspace",name);    
-    }
-  }
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
+    alg->setChild(child);
+    alg->setRethrows(rethrow);
+    alg->initialize();
 
-  alg->execute();
-
-  if (alg->isExecuted())
-  {
-    // Get the output workspace property
     if( child )
     {
-      return alg->getProperty("OutputWorkspace");
+      alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
+      alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
+      alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
+      // Have to set a text name for the output workspace if the algorithm is a child even
+      // though it will not be used.
+      alg->setPropertyValue("OutputWorkspace","��NotApplicable");
+      if( lhsAsOutput )
+      {
+        alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
+      }
+    }
+    // If this is not a child algorithm then we need names for the properties
+    else
+    {
+      alg->setPropertyValue("LHSWorkspace",lhs->getName());
+      alg->setPropertyValue("RHSWorkspace",rhs->getName());
+      alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
+      if( lhsAsOutput )
+      {
+        alg->setPropertyValue("OutputWorkspace",lhs->getName());
+      }
+      else
+      {
+        alg->setPropertyValue("OutputWorkspace",name);
+      }
+    }
+
+    alg->execute();
+
+    if (alg->isExecuted())
+    {
+      // Get the output workspace property
+      if( child )
+      {
+        return alg->getProperty("OutputWorkspace");
+      }
+      else
+      {
+        API::Workspace_sptr result =
+            API::AnalysisDataService::Instance().retrieve(alg->getPropertyValue("OutputWorkspace"));
+        return boost::dynamic_pointer_cast<API::MatrixWorkspace>(result);
+      }
     }
     else
     {
-      API::Workspace_sptr result = 
-	API::AnalysisDataService::Instance().retrieve(alg->getPropertyValue("OutputWorkspace"));
-      return boost::dynamic_pointer_cast<API::MatrixWorkspace>(result);
+      std::string message = "Error while executing operation: " + algorithmName;
+      throw std::runtime_error(message);
     }
-  }
-  else
-  {
-    std::string message = "Error while executing operation: " + algorithmName;
-    throw std::runtime_error(message);
+
+    throw Kernel::Exception::NotFoundError("Required output workspace property not found on sub algorithm" ,"OutputWorkspace");
+
+    //Horendous code inclusion to satisfy compilers that all code paths return a value
+    // in reality the above code should either throw or return successfully.
+    return MatrixWorkspace_sptr();
   }
 
-  throw Kernel::Exception::NotFoundError("Required output workspace property not found on sub algorithm" ,"OutputWorkspace");
 
-  //Horendous code inclusion to satisfy compilers that all code paths return a value
-  // in reality the above code should either throw or return successfully.
-  return MatrixWorkspace_sptr();
-}
+
+
 
 } // namespace OperatorOverloads
 
+
+
+/** Performs a comparison operation on two workspaces, using the CheckWorkspacesMatch algorithm
+ *
+ *  @param lhs :: left hand side workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return bool, true if workspaces match
+ */
+bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+{
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+  alg->setChild(true);
+  alg->setRethrows(false);
+  alg->initialize();
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace1",lhs);
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace2",rhs);
+  // Rest: use default
+
+  alg->execute();
+  if (alg->isExecuted())
+  {
+    return (alg->getPropertyValue("Result") == "Success!");
+  }
+  else
+  {
+    std::string message = "Error while executing operation: CheckWorkspacesMatch";
+    throw std::runtime_error(message);
+  }
+  return false;
+}
+
+
+
+
 /** Creates a temporary single value workspace the error is set to zero
  *  @param rhsValue :: the value to use
- *  @returns The value in a workspace shared pointer
+ *  @return The value in a workspace shared pointer
  */
 static MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 {
@@ -111,8 +149,8 @@ using OperatorOverloads::executeBinaryOperation;
 
 /** Adds two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -122,7 +160,7 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const MatrixWorks
 /** Adds a workspace to a single value
  *  @param lhs ::      left hand side workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -131,8 +169,8 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const double& rhs
 
 /** Subtracts two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -142,7 +180,7 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const MatrixWorks
 /** Subtracts  a single value from a workspace
  *  @param lhs ::      left hand side workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -152,7 +190,7 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhs
 /** Subtracts a workspace from a single value
  *  @param lhsValue :: the single value
  *  @param rhs :: right-hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
@@ -160,8 +198,8 @@ MatrixWorkspace_sptr operator-(const double& lhsValue, const MatrixWorkspace_spt
 }
 /** Multiply two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -171,7 +209,7 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const MatrixWorks
 /** Multiply a workspace and a single value
  *  @param lhs ::      left hand side workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -181,7 +219,7 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const double& rhs
 /** Multiply a workspace and a single value. Allows you to write, e.g., 2*workspace.
  *  @param lhsValue :: the single value
  *  @param rhs ::      workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
@@ -190,8 +228,8 @@ MatrixWorkspace_sptr operator*(const double& lhsValue, const MatrixWorkspace_spt
 
 /** Divide two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -201,7 +239,7 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorks
 /** Divide a workspace by a single value
  *  @param lhs ::      left hand side workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -211,7 +249,7 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhs
 /** Divide a single value and a workspace. Allows you to write, e.g., 2/workspace.
  *  @param lhsValue :: the single value
  *  @param rhs ::      workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
@@ -220,8 +258,8 @@ MatrixWorkspace_sptr operator/(const double& lhsValue, const MatrixWorkspace_spt
 
 /** Adds two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -231,7 +269,7 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const MatrixWork
 /** Adds a single value to a workspace
  *  @param lhs ::      workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -240,8 +278,8 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const double& rh
 
 /** Subtracts two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -251,7 +289,7 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const MatrixWork
 /** Subtracts a single value from a workspace
  *  @param lhs ::      workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -260,8 +298,8 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const double& rh
 
 /** Multiply two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -271,7 +309,7 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const MatrixWork
 /** Multiplies a workspace by a single value
  *  @param lhs ::      workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
@@ -280,8 +318,8 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const double& rh
 
 /** Divide two workspaces
  *  @param lhs :: left hand side workspace shared pointer
- *  @param rhs :: left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
+ *  @param rhs :: right hand side workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
@@ -291,12 +329,13 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const MatrixWork
 /** Divides a workspace by a single value
  *  @param lhs ::      workspace shared pointer
  *  @param rhsValue :: the single value
- *  @returns The result in a workspace shared pointer
+ *  @return The result in a workspace shared pointer
  */
 MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
+
 
 //----------------------------------------------------------------------
 // Now the WorkspaceHelpers methods
