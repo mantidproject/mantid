@@ -91,6 +91,22 @@ private slots:
   ///
   void muonAnalysisHelpGroupingClicked();
 
+  ///////////// Plot options ////////////
+  ///
+  void runTimeComboBox(int index);
+  ///
+  void runTimeAxisStartAtInput();
+  ///
+  void runTimeAxisFinishAtInput();
+  ///
+  void runFirstGoodBinFront();
+  ///
+  void runyAxisAutoscale(bool state);
+  ///
+  void runyAxisMinimumInput();
+  ///
+  void runyAxisMaximumInput();
+
 private:
   /// Initialize the layout
   virtual void initLayout();
@@ -112,7 +128,7 @@ private:
     const std::string& filename);
 
   /// create WS contained the data for a plot
-  void createPlotWS(const std::string& wsname);
+  void createPlotWS(const std::string& groupName, const std::string& wsname);
 
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
@@ -212,15 +228,20 @@ private:
   /// Return -1 if invalid pair in row
   int getPairNumberFromRow(int row);
 
-  /// first good bin returend in ms
-  /// returned as the absolute value of first-good-bin minus time zero
+  /// first good bin returned in ms
   QString firstGoodBin();
+
+  /// According to Plot Options what is the time to plot from in ms
+  double plotFromTime();
 
   /// time zero returned in ms
   QString timeZero();
 
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
+
+  /// title of run
+  std::string m_title;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

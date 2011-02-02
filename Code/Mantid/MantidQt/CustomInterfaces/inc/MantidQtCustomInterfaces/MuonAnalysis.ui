@@ -771,6 +771,9 @@
         </property>
        </widget>
        <widget class="QLabel" name="timeAxisStartAtLabel" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>230</x>
@@ -796,20 +799,10 @@
          <string>Finish at (ns):</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="timeAxisFirstGoodData" >
-        <property name="geometry" >
-         <rect>
-          <x>80</x>
-          <y>20</y>
-          <width>141</width>
-          <height>18</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Start at First Good Data</string>
-        </property>
-       </widget>
        <widget class="QLineEdit" name="timeAxisStartAtInput" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>300</x>
@@ -817,6 +810,9 @@
           <width>41</width>
           <height>20</height>
          </rect>
+        </property>
+        <property name="text" >
+         <string>0</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeAxisFinishAtInput" >
@@ -835,7 +831,7 @@
           <x>20</x>
           <y>50</y>
           <width>46</width>
-          <height>14</height>
+          <height>21</height>
          </rect>
         </property>
         <property name="text" >
@@ -848,20 +844,26 @@
           <x>80</x>
           <y>50</y>
           <width>72</width>
-          <height>18</height>
+          <height>21</height>
          </rect>
         </property>
         <property name="text" >
          <string>Autoscale</string>
         </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
        </widget>
        <widget class="QLabel" name="yAxisMinimumLabel" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
         <property name="geometry" >
          <rect>
-          <x>180</x>
+          <x>175</x>
           <y>50</y>
-          <width>46</width>
-          <height>14</height>
+          <width>51</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text" >
@@ -869,9 +871,12 @@
         </property>
        </widget>
        <widget class="QLineEdit" name="yAxisMinimumInput" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
-          <x>240</x>
+          <x>230</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -879,12 +884,15 @@
         </property>
        </widget>
        <widget class="QLabel" name="yAxisMaximumLabel" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
         <property name="geometry" >
          <rect>
-          <x>340</x>
+          <x>295</x>
           <y>50</y>
-          <width>46</width>
-          <height>14</height>
+          <width>51</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text" >
@@ -892,9 +900,12 @@
         </property>
        </widget>
        <widget class="QLineEdit" name="yAxisMaximumInput" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
-          <x>400</x>
+          <x>350</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -902,6 +913,9 @@
         </property>
        </widget>
        <widget class="QCheckBox" name="showErrorBars" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>20</x>
@@ -926,6 +940,26 @@
         <property name="text" >
          <string>Connect points</string>
         </property>
+       </widget>
+       <widget class="QComboBox" name="timeComboBox" >
+        <property name="geometry" >
+         <rect>
+          <x>80</x>
+          <y>20</y>
+          <width>141</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text" >
+          <string>Start at Time Zero</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Start at First Good Data</string>
+         </property>
+        </item>
        </widget>
       </widget>
      </widget>

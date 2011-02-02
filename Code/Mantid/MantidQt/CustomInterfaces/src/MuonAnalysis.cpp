@@ -26,6 +26,8 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
+#include <algorithm>
+
 #include <QLineEdit>
 #include <QFileDialog>
 #include <QHash>
@@ -142,8 +144,25 @@ void MuonAnalysis::initLayout()
   filter.append("Files (*.NXS *.nxs)");
   filter.append(";;All Files (*.*)");
 
-
+  // file input 
   connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
+
+  // Input check for First Good Data
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this, 
+    SLOT(runFirstGoodBinFront()));
+
+  ////////////// Plot Option ///////////////
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(runTimeComboBox(int)));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(lostFocus()), this, 
+    SLOT(runTimeAxisStartAtInput()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(lostFocus()), this, 
+    SLOT(runTimeAxisFinishAtInput()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(lostFocus()), this, 
+    SLOT(runyAxisMinimumInput()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
+    SLOT(runyAxisMaximumInput()));
 }
 
 
@@ -174,6 +193,129 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
   if ( index >= 0 )
     updateFront();
 }
+
+
+/**
+* According to Plot Options what is the time to plot from in ms (slot)
+*/
+void MuonAnalysis::runTimeComboBox(int index)
+{
+  if ( index == 0 ) // Start at Time Zero
+  {
+    m_uiForm.timeAxisStartAtInput->setEnabled(false);
+    m_uiForm.timeAxisStartAtInput->setText("0");
+  }
+
+  if ( index == 1 ) // Start at First Good Data
+  {
+    m_uiForm.timeAxisStartAtInput->setEnabled(true);
+    m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
+  }
+}
+
+/**
+* Check input is valid in input box (slot)
+*/
+void MuonAnalysis::runTimeAxisStartAtInput()
+{
+  try 
+  {
+    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ns)' input box. Reset to zero.");
+    m_uiForm.timeAxisStartAtInput->setText("0");
+  }
+}
+
+
+/**
+* Check input is valid in input box (slot)
+*/
+void MuonAnalysis::runFirstGoodBinFront()
+{
+  try 
+  {
+    double boevs = boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ns)' input box. Reset to 300.");
+    m_uiForm.firstGoodBinFront->setText("300");
+  }
+}
+
+
+/**
+* Check input is valid in input box (slot)
+*/
+void MuonAnalysis::runTimeAxisFinishAtInput()
+{
+  if (m_uiForm.timeAxisFinishAtInput->text().isEmpty())
+    return;
+
+  try 
+  {
+    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ns)' input box.");
+    m_uiForm.timeAxisFinishAtInput->setText("");
+  }
+}
+
+
+/**
+* Check input is valid in input box (slot)
+*/
+void MuonAnalysis::runyAxisMinimumInput()
+{
+  if (m_uiForm.yAxisMinimumInput->text().isEmpty())
+    return;
+
+  try 
+  {
+    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Minimum:' input box.");
+    m_uiForm.yAxisMinimumInput->setText("");
+  }
+}
+
+
+/**
+* Check input is valid in input box (slot)
+*/
+void MuonAnalysis::runyAxisMaximumInput()
+{
+  if (m_uiForm.yAxisMaximumInput->text().isEmpty())
+    return;
+
+  try 
+  {
+    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Maximum:' input box.");
+    m_uiForm.yAxisMaximumInput->setText("");
+  }
+}
+
+
+/**
+* When clicking autoscale (slot)
+*/
+void MuonAnalysis::runyAxisAutoscale(bool state)
+{
+  m_uiForm.yAxisMinimumInput->setEnabled(!state);
+  m_uiForm.yAxisMaximumInput->setEnabled(!state);
+}
+
 
 
 /**
@@ -870,9 +1012,9 @@ void MuonAnalysis::inputFileChanged()
 
 
   // Populate run information text field
-
+  m_title = matrix_workspace->getTitle();
   std::string infoStr = "Title = ";
-  infoStr += matrix_workspace->getTitle() + "\n" + "Comment: "
+  infoStr += m_title + "\n" + "Comment: "
     + matrix_workspace->getComment() + "\n";
   const Run& runDetails = matrix_workspace->run();
   infoStr += "Start: ";
@@ -938,7 +1080,7 @@ void MuonAnalysis::exitClicked()
 }*/
 
 /**
- * Guess Alpha (slot). It cal
+ * Guess Alpha (slot). For now include all data from first good data(bin)
  */
 void MuonAnalysis::guessAlphaClicked()
 {
@@ -1135,11 +1277,11 @@ void MuonAnalysis::clearTablesAndCombo()
 
 /**
  * Create WS contained the data for a plot
- * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to e.g. first-good-bin.
+ * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to Plot Options.
  * If period data then the resulting cropped WS is on for the period, or sum/difference of, selected 
  * by the user on the front panel
  */
-void MuonAnalysis::createPlotWS(const std::string& wsname)
+void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string& wsname)
 {
   QString inputWS = m_workspace_name.c_str() + QString("Grouped");
 
@@ -1167,12 +1309,31 @@ void MuonAnalysis::createPlotWS(const std::string& wsname)
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
   }
 
+
   QString cropStr = "CropWorkspace(\"";
   cropStr += inputWS;
   cropStr += "\",\"";
   cropStr += wsname.c_str();
   cropStr += "\"," + firstGoodBin() + ");";
   runPythonCode( cropStr ).trimmed();
+
+
+  if ( !AnalysisDataService::Instance().doesExist(groupName) )
+  {
+    QString rubbish = "boevsMoreBoevs";
+    QString groupStr = QString("CloneWorkspace('") + wsname.c_str() + "','"+rubbish+"')\n";
+    groupStr += QString("GroupWorkspaces(InputWorkspaces='") + wsname.c_str() + "," + rubbish
+      + "',OutputWorkspace='"+groupName.c_str()+"')\n";
+    runPythonCode( groupStr ).trimmed();
+    AnalysisDataService::Instance().remove(rubbish.toStdString());
+  }
+  else
+  {
+    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsname.c_str() + "," + groupName.c_str()
+      + "',OutputWorkspace='" + groupName.c_str() + "')\n";
+    runPythonCode( groupStr ).trimmed();
+  }
+
 }
 
 
@@ -1187,24 +1348,74 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
     QString groupName = itemName->text();
 
-    // create output workspace title
+    // create plot title label
     Poco::File l_path( m_previousFilename.toStdString() );
     std::string filenamePart = Poco::Path(l_path.path()).getFileName();
+    std::size_t extPos = filenamePart.find(".");
+    if ( extPos!=std::string::npos)
+      filenamePart = filenamePart.substr(0,extPos);
 
-    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Group="
+    QString titleLabel = QString(filenamePart.c_str()) + "; Group="
       + groupName + "";
 
-    // create workspace which starts at first-good-bin 
-    QString cropWS = "MuonAnalysis_" + title;
-    createPlotWS(cropWS.toStdString());
+    // create workspace which will be plotted
+    QString cropWS;
+
+    // check if this workspace already exist to avoid replotting an existing workspace
+    int plotNum = 1;
+    while (1==1)
+    {
+      cropWS = titleLabel + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
+      if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
+        plotNum++;
+      else
+        break;
+    }
+
+    createPlotWS(filenamePart,cropWS.toStdString());
+    titleLabel = cropWS;
 
     // create plotting Python string
     QString gNum = QString::number(groupNum);
 
-    QString pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n"
-      "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + title + "\")\n"
+    QString pyS;
+    if ( m_uiForm.showErrorBars->isChecked() )
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",true)\n";
+    else
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
+    pyS += "l = gs.activeLayer()\n"
+      "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
+      "l.setTitle(\"" + m_title.c_str() + "\")\n"
       "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
+
+    if ( !m_uiForm.yAxisAutoscale->isChecked() )
+    {
+      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(groupNum);
+      double min = 0.0; double max = 0.0;
+
+      if (m_uiForm.yAxisMinimumInput->text().isEmpty())
+      {
+        min = *min_element(dataY.begin(), dataY.end());
+      }
+      else
+      {
+        min = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
+      }
+
+      if (m_uiForm.yAxisMaximumInput->text().isEmpty())
+      {
+        max = *max_element(dataY.begin(), dataY.end());
+      }
+      else
+      {
+        max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
+      }
+
+      pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
+    }
+
 
     QString pyString;
     if (plotType.compare("Counts") == 0)
@@ -1243,27 +1454,30 @@ void MuonAnalysis::plotPair(const std::string& plotType)
   if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
   {
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
-    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
+    QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
 
     // create output workspace title
     Poco::File l_path( m_previousFilename.toStdString() );
     std::string filenamePart = Poco::Path(l_path.path()).getFileName();
+    std::size_t extPos = filenamePart.find(".");
+    if ( extPos!=std::string::npos)
+      filenamePart = filenamePart.substr(0,extPos);
 
-    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Pair="
-      + pairName + "";
+    QString titleLabel = QString(filenamePart.c_str()) + "; Pair=" + pairName;
 
 
-    // create workspace which starts at first-good-bin 
-    QString cropWS = "MuonAnalysis_" + title;
-    createPlotWS(cropWS.toStdString());
+    // create workspace for plotting
+    QString cropWS = "MuonAnalysis_" + titleLabel;
+    createPlotWS("",cropWS.toStdString());
 
 
     // create plotting Python string 
 
     QString pyS = "gs = plotSpectrum(\"" + cropWS + "\",0)\n"
       "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + title + "\")\n"
+      "l.setTitle(\"" + m_title.c_str() + "\")\n"
+      "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
       "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
 
     QString pyString;
@@ -1725,10 +1939,28 @@ QString MuonAnalysis::firstGoodBin()
   str >> fgb;
   fgb /= 1000.0;  // convert from ns to ms
 
- // if (fgb < 0)
- //   fgb = 0.0;
-
   return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+}
+
+ /**
+ * first good bin returend in ms
+ * returned as the absolute value of first-good-bin minus time zero
+ */
+double MuonAnalysis::plotFromTime()
+{
+  double retVal;
+  try 
+  {
+    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+    retVal /= 1000.0;  // convert from ns to ms
+  }
+  catch (...)
+  {
+    retVal = 0.0;
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ns)' input box. Plot from time zero.");
+  }
+
+  return retVal;
 }
 
 
