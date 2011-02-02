@@ -768,22 +768,56 @@ public:
   }
 
 
-
-void testCheckIfVariousInstrumentsLoad()
-  {
+void testSANS2D()
+{
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "SANS2D_Definition.xml");
+    loader.setPropertyValue("Filename", "SANS2D_Definition_mod.xml");
     wsName = "LoadEmptyInstrumentParaSans2dTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
-    AnalysisDataService::Instance().remove(wsName);
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+
+    double pixelLength = 0.0051;
+    double bankLength = 192*pixelLength;
+
+    double startX = -bankLength/2 + pixelLength/2;
+    double startY = -bankLength/2 + pixelLength/2;
+
+    for (int iy = 0; iy <= 191; iy++)
+    {
+      for (int ix = 0; ix <= 191; ix++)
+      {
+        boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1000000+iy*1000+ix);
+        TS_ASSERT_DELTA( ptrDet1->getPos().X(), startX+pixelLength*ix, 0.0000001);
+        TS_ASSERT_DELTA( ptrDet1->getPos().Y(), startY + pixelLength*iy, 0.0000001);
+        TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 23.281, 0.0000001);
+      }
+
+      for (int ix = 0; ix <= 191; ix++)
+      {
+        boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(2000000+iy*1000+ix);
+        TS_ASSERT_DELTA( ptrDet1->getPos().X(), startX+pixelLength*ix+1.1, 0.0000001);
+        TS_ASSERT_DELTA( ptrDet1->getPos().Y(), startY + pixelLength*iy, 0.0000001);
+        TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 23.281, 0.0000001);
+      }
+    }
+    AnalysisDataService::Instance().remove(wsName);
+}
+
+
+void testCheckIfVariousInstrumentsLoad()
+  {
     LoadEmptyInstrument loaderPolRef;
     loaderPolRef.initialize();
     loaderPolRef.setPropertyValue("Filename", "POLREF_Definition.xml");
