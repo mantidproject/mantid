@@ -181,7 +181,7 @@ namespace Mantid
       // Handle used in the singleton constructor for instrument file should append the value
       // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instrumentFile = pRootElem->getAttribute("name") + pRootElem->getAttribute("last-modified");
+      instrumentFile = instrumentFile + pRootElem->getAttribute("last-modified"); // pRootElem->getAttribute("name") + pRootElem->getAttribute("last-modified");
 
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentFile) )

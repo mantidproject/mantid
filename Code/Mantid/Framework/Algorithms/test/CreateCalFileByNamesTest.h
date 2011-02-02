@@ -33,7 +33,7 @@ class CreateCalFileByNamesTest : public CxxTest::TestSuite
 {
 public:
 
-  void testINES()
+  void xtestINES()
   {
     LoadEmptyInstrument loaderCAL;
 

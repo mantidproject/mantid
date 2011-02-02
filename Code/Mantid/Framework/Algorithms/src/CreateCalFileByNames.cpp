@@ -3,31 +3,21 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateCalFileByNames.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IInstrument.h"
 #include <queue>
 #include <fstream>
 #include <iomanip>
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
+
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 
 namespace Mantid
@@ -52,8 +42,9 @@ namespace Mantid
      */
     void CreateCalFileByNames::init()
     {
-      declareProperty(new FileProperty("InstrumentFileName","",FileProperty::Load, ".xml"),
-        "The instrument definition file.");
+      declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input),
+        "A workspace that contains a reference to the instrument of interest.\n"
+        "You can use LoadEmptyInstrument if you do not have any data files to load.");
       declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save, ".cal"),
         "The name of the output CalFile");
       declareProperty("GroupNames","",
@@ -69,42 +60,15 @@ namespace Mantid
     void CreateCalFileByNames::exec()
     {
       std::ostringstream mess;
-      // Check that the instrument is in store
-      std::string instfilename=getProperty("InstrumentFileName");
+      MatrixWorkspace_const_sptr ws = getProperty("InstrumentWorkspace");
+      if (!ws)
+        throw std::runtime_error("Workspace not found!");
 
-      // Set up the DOM parser and parse xml file
-      DOMParser pParser;
-      Document* pDoc;
-      try
-      {
-        pDoc = pParser.parse(instfilename);
-      }
-      catch(...)
-      {
-        g_log.error("Unable to parse file " + m_filename);
-        throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
-      }
-      // Get pointer to root element
-      Element* pRootElem = pDoc->documentElement();
-      if ( !pRootElem->hasChildNodes() )
-      {
-        g_log.error("XML file: " + m_filename + "contains no root element.");
-        throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
-      }
-
-      // Handle used in the singleton constructor for instrument file should append the value
-      // of the last-modified tag inside the file to determine if it is already in memory so that
-      // changes to the instrument file will cause file to be reloaded.
-      std::string inst_name = pRootElem->getAttribute("name") + pRootElem->getAttribute("last-modified");
-
-      // If instrument not in store, insult the user
-      if (!API::InstrumentDataService::Instance().doesExist(inst_name))
-      {
-        g_log.error("Instrument "+inst_name+" is not present in data store.");
-        throw std::runtime_error("Instrument "+inst_name+" is not present in data store.");
-      }
       // Get the instrument.
-      IInstrument_sptr inst = API::InstrumentDataService::Instance().retrieve(inst_name);
+      IInstrument_sptr inst = ws->getInstrument();
+
+      if (!inst)
+        throw std::runtime_error("No instrument found in the workspace " + ws->getName());
 
       // Get the names of groups
       std::string groupsname=getProperty("GroupNames");
