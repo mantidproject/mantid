@@ -1,6 +1,6 @@
 #include "InstrumentWindow.h"
-#include "OneCurvePlot.h"
-#include "CollapsiblePanel.h"
+#include "InstrumentWindowRenderTab.h"
+#include "InstrumentWindowPickTab.h"
 #include "../MantidUI.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -25,9 +25,6 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QImageWriter>
-#include "qwt_scale_widget.h"
-#include "qwt_scale_div.h"
-#include "qwt_scale_engine.h"
 
 #include <numeric>
 
@@ -40,6 +37,8 @@ using namespace Mantid::Geometry;
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
   MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false)
 {
+  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+
   setFocusPolicy(Qt::StrongFocus);
   setFocus();
   QFrame *frame = new QFrame();
@@ -57,16 +56,18 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mainLayout->addWidget(controlPanelLayout);
 
   //Render Controls
-  QFrame* renderControls = createRenderTab(mControlsTab);
-  mControlsTab->addTab( renderControls, QString("Render"));
+  m_renderTab = new InstrumentWindowRenderTab(this);
+  mControlsTab->addTab( m_renderTab, QString("Render"));
   
   // Pick controls
-  QFrame* pickControls = createPickTab(mControlsTab);
-  mControlsTab->addTab( pickControls, QString("Pick"));
+  m_pickTab = new InstrumentWindowPickTab(this);
+  mControlsTab->addTab( m_pickTab, QString("Pick"));
 
   // Instrument tree controls
   QFrame* instrumentTree=createInstrumentTreeTab(mControlsTab);
   mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
+
+  connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
   //Set the main frame to the window
   frame->setLayout(mainLayout);
@@ -126,16 +127,6 @@ void InstrumentWindow::tabChanged(int i)
   }
 }
 
-void InstrumentWindow::selectBinButtonClicked()
-{
-  //At this point (only) do we calculate the bin ranges.
-  this->mInstrumentDisplay->calculateBinRange();
-  //Set the values found + the bool for entire range
-  mBinDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue(), mInstrumentDisplay->getBinEntireRange());
-  //Show the dialog
-  mBinDialog->exec();
-}
-
 /**
  * Change color map button slot. This provides the file dialog box to select colormap or sets it directly a string is provided
  */
@@ -163,7 +154,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
   mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
   if( this->isVisible() )
   {
-    setupColorBarScaling();
+    m_renderTab->setupColorBarScaling();
     mInstrumentDisplay->updateColorsForNewMap();
   }
 }
@@ -194,8 +185,7 @@ void InstrumentWindow::showPickOptions()
 void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos)
 {
   mInteractionInfo->setText(cursorPos.display());
-  updatePlot(cursorPos);
-  updateSelectionInfo(cursorPos);
+  m_pickTab->updatePick(cursorPos);
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
@@ -374,17 +364,17 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
   // Need to check if the values have already been set for the range
   if( !mInstrumentDisplay->dataMinValueEdited() )
   {
-    mMinValueBox->setText(QString::number(mInstrumentDisplay->getDataMinValue()));
+    m_renderTab->setMinValue(mInstrumentDisplay->getDataMinValue(),false);
   }
   if( !mInstrumentDisplay->dataMaxValueEdited() )
   {
-    mMaxValueBox->setText(QString::number(mInstrumentDisplay->getDataMaxValue()));
+    m_renderTab->setMaxValue(mInstrumentDisplay->getDataMaxValue(),false);
   }
   
   // Setup the colour map details
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  GraphOptions::ScaleType type = m_renderTab->getScaleType();
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-  setupColorBarScaling();
+  m_renderTab->setupColorBarScaling();
   
   mInstrumentDisplay->resetUnwrappedViews();
   // Ensure the 3D display is up-to-date
@@ -397,10 +387,7 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
     // set the default view, the axis that the instrument is be viewed from initially can be set in the instrument definition and there is always a value in the Instrument
     QString axisName = QString::fromStdString(
     workspace->getInstrument()->getDefaultAxis());
-    axisName = axisName.toUpper();
-    int axisInd = mAxisCombo->findText(axisName.toUpper());
-    if (axisInd < 0) axisInd = 0;
-    mAxisCombo->setCurrentIndex(axisInd);
+    m_renderTab->setAxis(axisName);
     // this was an automatic view change, only flag that the view changed if the user initiated the change
     mViewChanged = false;
   }
@@ -417,106 +404,19 @@ void InstrumentWindow::setColorMapRange(double minValue, double maxValue)
 /// Set the minimum value of the colour map
 void InstrumentWindow::setColorMapMinValue(double minValue)
 {
-  mMinValueBox->setText(QString::number(minValue));
-  minValueChanged();
+  m_renderTab->setMinValue(minValue);
 }
 
 /// Set the maximumu value of the colour map
 void InstrumentWindow::setColorMapMaxValue(double maxValue)
 {
-  mMaxValueBox->setText(QString::number(maxValue));
-  maxValueChanged();
+  m_renderTab->setMaxValue(maxValue);
 }
-
-/**
- *
- */
-void InstrumentWindow::setupColorBarScaling()
-{
-  double minValue = mMinValueBox->displayText().toDouble();
-  double maxValue = mMaxValueBox->displayText().toDouble();
-
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
-  if( type == GraphOptions::Linear )
-  {
-    QwtLinearScaleEngine linScaler;
-    mColorMapWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
-    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue),mInstrumentDisplay->getColorMap());
-  }
-  else
- {
-    QwtLog10ScaleEngine logScaler;    
-    double logmin(minValue);
-    if( logmin < 1.0 )
-    {
-      logmin = 1.0;
-    }
-    mColorMapWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
-    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), mInstrumentDisplay->getColorMap());
-  }
-}
-
 
 void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue,bool entireRange)
 {
   mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue, entireRange);
 }
-
-/**
- *
- */
-void InstrumentWindow::minValueChanged()
-{
-  double updated_value = mMinValueBox->displayText().toDouble();
-  double old_value = mInstrumentDisplay->getDataMinValue();
-  // If the new value is the same
-  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  //Check it is less than the max
-  if( updated_value < mInstrumentDisplay->getDataMaxValue() )
-  {
-    mInstrumentDisplay->setMinData(updated_value);
-
-    if( this->isVisible() )
-    { 
-      setupColorBarScaling();
-      mInstrumentDisplay->recount();
-    }
-  }
-  else
-  {
-    // Invalid. Reset value.
-    mMinValueBox->setText(QString::number(old_value));
-  }
-}
-
-/**
- *
- */
-void InstrumentWindow::maxValueChanged()
-{
-  double updated_value = mMaxValueBox->displayText().toDouble();
-  double old_value = mInstrumentDisplay->getDataMaxValue();
-  // If the new value is the same
-  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  // Check that it is valid
-  if( updated_value > mInstrumentDisplay->getDataMinValue() )
-  {
-    mInstrumentDisplay->setMaxData(updated_value);
-
-    if( this->isVisible() )
-    { 
-      setupColorBarScaling();
-      mInstrumentDisplay->recount();
-    }
-  }
-  else
-  {
-    // Invalid. Reset
-    mMaxValueBox->setText(QString::number(old_value));
-  }
-}
-
-
 
 /**
  * This is the callback for the combo box that selects the view direction
@@ -569,7 +469,7 @@ void InstrumentWindow::selectComponent(const QString & name)
  */
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
 {
-  mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
+  m_renderTab->setScaleType(type);
 }
 
 /// A slot for the mouse selection
@@ -645,20 +545,6 @@ void InstrumentWindow::saveImage()
 }
 
 /**
- * A slot called when the scale type combo box's selection changes
- */
-void InstrumentWindow::scaleTypeChanged(int index)
-{
-  if( this->isVisible() )
-  {
-    GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(index).toUInt();
-    mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-    setupColorBarScaling();
-    mInstrumentDisplay->recount();
-  }
-}
-
-/**
  * Update the text display that informs the user of the current mode and details about it
  */
 void InstrumentWindow::updateInteractionInfoText()
@@ -667,7 +553,7 @@ void InstrumentWindow::updateInteractionInfoText()
   if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
 	{
     text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
-    if( m3DAxesToggle->isChecked() )
+    if( m_renderTab->areAxesOn() )
     {
       text += "\nAxes: X = Red; Y = Green; Z = Blue";
     }
@@ -679,29 +565,6 @@ void InstrumentWindow::updateInteractionInfoText()
   mInteractionInfo->setText(text);
 }
 
-/** Sets up the controls and surrounding layout that allows uses to view the instrument
-*  from an axis that they select
-*  @return the QFrame that will be inserted on the main instrument view form
-*/
-QFrame * InstrumentWindow::setupAxisFrame()
-{
-  QFrame* axisViewFrame = new QFrame();
-  QHBoxLayout* axisViewLayout = new QHBoxLayout();
-  axisViewLayout->addWidget(new QLabel("Axis View:"));
-
-  mAxisCombo = new QComboBox();
-  mAxisCombo->addItem("Z+");
-  mAxisCombo->addItem("Z-");
-  mAxisCombo->addItem("X+");
-  mAxisCombo->addItem("X-");
-  mAxisCombo->addItem("Y+");
-  mAxisCombo->addItem("Y-");
-
-  axisViewLayout->addWidget(mAxisCombo);
-  axisViewFrame->setLayout(axisViewLayout);
-
-  return axisViewFrame;
-}
 /**
  * This method loads the setting from QSettings
  */
@@ -720,19 +583,8 @@ void InstrumentWindow::loadSettings()
   mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
   
   GraphOptions::ScaleType type = (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10).toUInt();
-  // Block signal emission temporarily since we have not fully initialized the window
-  mScaleOptions->blockSignals(true);
-  mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
-  mScaleOptions->blockSignals(false);
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
 
-  //Restore the setting for the 3D axes visible or not
-  int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
-  if (show3daxes)
-    m3DAxesToggle->setCheckState(Qt::Checked);
-  else
-    m3DAxesToggle->setCheckState(Qt::Unchecked);
-  
   settings.endGroup();
 }
 
@@ -747,8 +599,6 @@ void InstrumentWindow::saveSettings()
   settings.setValue("ColormapFile", mCurrentColorMap);
   settings.setValue("ScaleType", mInstrumentDisplay->getColorMap().getScaleType());
   settings.setValue("ColormapFile", mCurrentColorMap);
-  int val = 0;  if (m3DAxesToggle->isChecked()) val = 1;
-  settings.setValue("3DAxesShown", QVariant(val));
   settings.endGroup();
 }
 
@@ -805,111 +655,6 @@ void InstrumentWindow::showEvent(QShowEvent* event)
 
 
 
-QFrame * InstrumentWindow::createRenderTab(QTabWidget* ControlsTab)
-{
-  QFrame* renderControls=new QFrame(ControlsTab);
-  QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
-  mSelectColormap = new QPushButton(tr("Select ColorMap"));
-  QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
-  mBinDialog = new BinDialog(this);
-  mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
-  // Lighting is needed for testing
-//  QPushButton* setLight = new QPushButton(tr("Set lighting"));
-//  setLight->setCheckable(true);
-  //Save control
-  mSaveImage = new QPushButton(tr("Save image"));
-  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
-  mMinValueBox = new QLineEdit();
-  mMaxValueBox = new QLineEdit();
-  mMinValueBox->setMinimumWidth(40);
-  mMaxValueBox->setMinimumWidth(40);
-  mMinValueBox->setMaximumWidth(60);
-  mMaxValueBox->setMaximumWidth(60);
-  mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
-  mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
-  //Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
-  mMinValueBox->setText("");
-  mMaxValueBox->setText("");
-
-  QFrame * axisViewFrame = setupAxisFrame();
-
-  //Colormap Frame widget
-  QFrame* lColormapFrame = new QFrame();
-
-  QVBoxLayout* lColormapLayout = new QVBoxLayout;
-  lColormapLayout->addWidget(mMaxValueBox);
-  lColormapLayout->addWidget(mColorMapWidget);
-  lColormapLayout->addWidget(mMinValueBox);
-  mColorMapWidget->setColorBarEnabled(true);
-  mColorMapWidget->setColorBarWidth(20);
-  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
-  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
-
-  mScaleOptions = new QComboBox;
-  mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
-  mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
-  connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
-
-  QVBoxLayout* options_layout = new QVBoxLayout;
-  options_layout->addStretch();
-  options_layout->addWidget(mScaleOptions);
-
-  QHBoxLayout *colourmap_layout = new QHBoxLayout;
-  colourmap_layout->addLayout(lColormapLayout);
-  colourmap_layout->addLayout(options_layout);
-  lColormapFrame->setLayout(colourmap_layout);
-
-
-  //Pick background color
-  QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
-
-  //Check box to toggle orientation axes
-  m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
-  m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
-  m3DAxesToggle->setCheckState(Qt::Checked);
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
-
-  //Check box to toggle polygon mode
-  QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
-  poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
-  poligonMOdeToggle->setCheckState(Qt::Unchecked);
-  connect(poligonMOdeToggle, SIGNAL(clicked(bool)), mInstrumentDisplay, SLOT(setWireframe(bool)));
-  
-  QComboBox* renderMode = new QComboBox(this);
-  renderMode->setToolTip("Set render mode");
-  QStringList modeList;
-  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
-  renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),mInstrumentDisplay,SLOT(setRenderMode(int)));
-
-  renderControlsLayout->addWidget(renderMode);
-  renderControlsLayout->addWidget(mSelectBin);
-  renderControlsLayout->addWidget(mSelectColormap);
-  renderControlsLayout->addWidget(mSaveImage);
-//  renderControlsLayout->addWidget(setLight);
-  renderControlsLayout->addWidget(axisViewFrame);
-  renderControlsLayout->addWidget(btnBackgroundColor);
-  renderControlsLayout->addWidget(lColormapFrame);
-  renderControlsLayout->addWidget(m3DAxesToggle);
-  renderControlsLayout->addWidget(poligonMOdeToggle);
-
-
-  connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
-  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
-//  connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
-  connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
-  connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
-
-  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double,bool)));
-  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
-  connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
-
-  return renderControls;
-}
-
 QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
 {
   QFrame* instrumentTree=new QFrame(ControlsTab);
@@ -922,231 +667,3 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
   return instrumentTree;
 }
 
-QFrame * InstrumentWindow::createPickTab(QTabWidget* ControlsTab)
-{
-  m_plotSum = true;
-
-  QFrame* tab = new QFrame(ControlsTab);
-  QVBoxLayout* layout=new QVBoxLayout(tab);
-
-  // set up the selection display
-  m_selectionInfoDisplay = new QTextEdit(this);
-
-  // set up the plot widget
-  m_plot = new OneCurvePlot(ControlsTab);
-  m_plot->setYAxisLabelRotation(-90);
-  m_plot->setXScale(0,1);
-  m_plot->setYScale(-1.2,1.2);
-  connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
-
-  m_sumDetectors = new QAction("Sum",this);
-  m_integrateTimeBins = new QAction("Integrate",this);
-  m_logY = new QAction("Y log scale",this);
-  m_linearY = new QAction("Y linear scale",this);
-  connect(m_sumDetectors,SIGNAL(triggered()),this,SLOT(sumDetectors()));
-  connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
-  connect(m_logY,SIGNAL(triggered()),m_plot,SLOT(setYLogScale()));
-  connect(m_linearY,SIGNAL(triggered()),m_plot,SLOT(setYLinearScale()));
-
-  CollapsibleStack* panelStack = new CollapsibleStack(this);
-  m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
-  m_plotPanel = panelStack->addPanel("Name",m_plot);
-
-  // set up the tool bar
-  m_one = new QPushButton("One");
-  m_one->setCheckable(true);
-  m_one->setAutoExclusive(true);
-  m_one->setChecked(true);
-  m_many = new QPushButton("Many");
-  m_many->setCheckable(true);
-  m_many->setAutoExclusive(true);
-  QHBoxLayout* toolBox = new QHBoxLayout();
-  toolBox->addWidget(m_one);
-  toolBox->addWidget(m_many);
-  connect(m_one,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
-  connect(m_many,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
-
-  // lay out the widgets
-  layout->addLayout(toolBox);
-  layout->addWidget(panelStack);
-
-  connect(ControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
-
-  setPlotCaption();
-  return tab;
-}
-
-void InstrumentWindow::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
-{
-  if (m_plotPanel->isCollapsed()) return;
-  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-  int wi = cursorPos.getWorkspaceIndex();
-  if (cursorPos.getDetID() >= 0 && wi >= 0)
-  {
-    if (m_one->isChecked())
-    {// plot spectrum of a single detector
-      const Mantid::MantidVec& x = ws->readX(wi);
-      const Mantid::MantidVec& y = ws->readY(wi);
-      m_plot->setXScale(x.front(),x.back());
-      Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-      Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-      m_plot->setData(&x[0],&y[0],y.size());
-      m_plot->setYScale(*min_it,*max_it);
-    }
-    else
-    {// plot integrals
-      Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
-      boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-      Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
-      if (parent && ass)
-      {
-        const int n = ass->nelements();
-        if (m_plotSum) // plot sums over detectors vs time bins
-        {
-          const Mantid::MantidVec& x = ws->readX(wi);
-          m_plot->setXScale(x.front(),x.back());
-          std::vector<double> y(ws->blocksize());
-          //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
-          for(int i = 0; i < n; ++i)
-          {
-            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-            if (idet)
-            {
-              int index = cursorPos.getIndexOf(idet->getID());
-              if (index >= 0)
-              {
-                const Mantid::MantidVec& Y = ws->readY(index);
-                std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
-              }
-            }
-          }
-          Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-          Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-          m_plot->setData(&x[0],&y[0],y.size());
-          m_plot->setYScale(*min_it,*max_it);
-        }
-        else // plot detector integrals vs detID
-        {
-          std::vector<double> x;
-          x.reserve(n);
-          std::map<double,double> ymap;
-          for(int i = 0; i < n; ++i)
-          {
-            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-            if (idet)
-            {
-              const int id = idet->getID();
-              int index = cursorPos.getIndexOf(id);
-              if (index >= 0)
-              {
-                x.push_back(id);
-                const Mantid::MantidVec& Y = ws->readY(index);
-                double sum = std::accumulate(Y.begin(),Y.end(),0);
-                ymap[id] = sum;
-              }
-            }
-          }
-          if (!x.empty())
-          {
-            std::sort(x.begin(),x.end());
-            std::vector<double> y(x.size());
-            double ymin =  DBL_MAX;
-            double ymax = -DBL_MAX;
-            for(int i = 0; i < x.size(); ++i)
-            {
-              const double val = ymap[x[i]];
-              y[i] = val;
-              if (val < ymin) ymin = val;
-              if (val > ymax) ymax = val;
-            }
-            m_plot->setData(&x[0],&y[0],y.size());
-            m_plot->setXScale(x.front(),x.back());
-            m_plot->setYScale(ymin,ymax);
-          }
-        }
-      }
-      else
-      {
-        m_plot->clearCurve();
-      }
-    }
-  }
-  else
-  {
-    m_plot->clearCurve();
-  }
-  m_plot->recalcAxisDivs();
-  m_plot->replot();
-}
-
-void InstrumentWindow::updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos)
-{
-  if (cursorPos.getDetID() >= 0)
-  {
-    Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-    Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
-    QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
-    text += "Detector ID: " + QString::number(cursorPos.getDetID()) + '\n';
-    text += "Workspace index: " + QString::number(cursorPos.getWorkspaceIndex()) + '\n';
-    Mantid::Geometry::V3D pos = det->getPos();
-    text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
-    double r,t,p;
-    pos.getSpherical(r,t,p);
-    text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," + QString::number(p)  + '\n';
-    Mantid::Geometry::ICompAssembly_const_sptr parent = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(det->getParent());
-    if (parent)
-    {
-      text += "Parent assembly: " + QString::fromStdString(parent->getName()) + '\n';
-    }
-    m_selectionInfoDisplay->setText(text);
-  }
-  else
-  {
-    m_selectionInfoDisplay->clear();
-  }
-}
-
-void InstrumentWindow::plotContextMenu()
-{
-  QMenu context(this);
-  
-  context.addAction(m_sumDetectors);
-  context.addAction(m_integrateTimeBins);
-
-  QMenu* axes = new QMenu("Axes",this);
-  axes->addAction(m_logY);
-  axes->addAction(m_linearY);
-  context.addMenu(axes);
-
-  context.exec(QCursor::pos());
-}
-
-void InstrumentWindow::setPlotCaption()
-{
-  QString caption;
-  if (m_one->isChecked())
-  {
-    caption = "Plotting detector spectra";
-  }
-  else if (m_plotSum)
-  {
-    caption = "Plotting sum";
-  }
-  else
-  {
-    caption = "Plotting integral";
-  }
-  m_plotPanel->setCaption(caption);
-}
-
-void InstrumentWindow::sumDetectors()
-{
-  m_plotSum = true;
-  setPlotCaption();
-}
-
-void InstrumentWindow::integrateTimeBins()
-{
-  m_plotSum = false;
-  setPlotCaption();
-}

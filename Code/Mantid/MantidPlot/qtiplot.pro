@@ -500,6 +500,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
             src/Mantid/InstrumentWidget/TexObject.h \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.h \
+	    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h \
+	    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h \
 		src/Mantid/InstrumentWidget/BinDialog.h	\
 		src/Mantid/InstrumentWidget/GLGroupPickBox.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h \
@@ -690,6 +692,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
             src/Mantid/InstrumentWidget/TexObject.cpp \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp \
+	    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp \
+	    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp \
 		src/Mantid/InstrumentWidget/BinDialog.cpp  \
 		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp \

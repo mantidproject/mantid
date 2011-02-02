@@ -28,6 +28,8 @@ class MatrixWorkspace;
 
 class OneCurvePlot;
 class CollapsiblePanel;
+class InstrumentWindowRenderTab;
+class InstrumentWindowPickTab;
 
 // Qt forward declarations
 class QPushButton;
@@ -89,6 +91,7 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
+  Instrument3DWidget* getInstrumentDisplay(){return mInstrumentDisplay;}
 
 protected:
   /// Called just before a show event
@@ -96,7 +99,6 @@ protected:
 
 public slots:
   void tabChanged(int i);
-  void selectBinButtonClicked();
   void detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos);
   void showPickOptions();
   void spectraInfoDialog();
@@ -105,33 +107,26 @@ public slots:
   void groupDetectors();
   void maskDetectors();
   void changeColormap(const QString & filename = "");
-  void minValueChanged();
-  void maxValueChanged();
   void setViewDirection(const QString&);
   void componentSelected(const QItemSelection&, const QItemSelection&);
   void pickBackgroundColor();
   void saveImage();
+  void updateInteractionInfoText();
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
   void execMantidAlgorithm(const QString&,const QString&);								  
 
-private slots:
-  void scaleTypeChanged(int);
-  void updateInteractionInfoText();
-
 private:
 
-  QFrame * createRenderTab(QTabWidget* ControlsTab);
   QFrame * createPickTab(QTabWidget* ControlsTab);
   QFrame * createInstrumentTreeTab(QTabWidget* ControlsTab);
-  QFrame * setupAxisFrame();
 
   void loadSettings();
   void saveSettings();
   void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
-  void setupColorBarScaling();
+
   QString asString(const std::vector<int>& numbers) const;
   QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
   QLabel*      mInteractionInfo;
@@ -139,49 +134,23 @@ private:
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
 
-  QPushButton* mSelectColormap; ///< Select colormap button
-  QPushButton* mSaveImage; ///< Save the currently displayed image
   Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
   int          mSpectraIDSelected; ///< spectra index id
   int          mDetectorIDSelected; ///< detector id
   std::set<int> mSpectraIDSelectedList;
   std::vector<int> mDetectorIDSelectedList;
-  QwtScaleWidget* mColorMapWidget; ///< colormap display widget
-  QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
-  QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
-  QComboBox *mScaleOptions;
-  QComboBox *mAxisCombo;           ///< the user can select an axis to view the instrument from, this combo box stores the list of axis names and (behind the scenes) the coordinates of the different axises
-  BinDialog*   mBinDialog;
   InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
-  QCheckBox *m3DAxesToggle; ///< A tick box to toggle the 3D axes in the instrument view
 
   std::string mWorkspaceName; ///< The name of workpace that this window is associated with
   QString mDefaultColorMap; ///< The full path of the default color map
   QString mCurrentColorMap;
   QString m_savedialog_dir; /// The last used dialog directory
 
+  InstrumentWindowRenderTab * m_renderTab;
+  InstrumentWindowPickTab * m_pickTab;
+
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
 
-  /* Pick tab controls */
-  OneCurvePlot* m_plot;
-  QPushButton *m_one; ///< Button switching on single detector selection mode
-  QPushButton *m_many; ///< Botton switching on detector's parent selection mode
-  bool m_plotSum; 
-  // Actions to set integration option for the detector's parent selection mode
-  QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
-  QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
-  QAction *m_logY;
-  QAction *m_linearY;
-  CollapsiblePanel* m_plotPanel;
-  QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
-  CollapsiblePanel* m_infoPanel;
-  void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
-  void updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos);
-  private slots:
-    void plotContextMenu();
-    void sumDetectors();
-    void integrateTimeBins();
-    void setPlotCaption();
 
 private:
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);

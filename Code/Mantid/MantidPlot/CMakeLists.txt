@@ -184,6 +184,8 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
+                   src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
+                   src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/MantidColorMap.cpp
                    src/Mantid/InstrumentWidget/MantidObject.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
@@ -386,6 +388,8 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
+                   src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
+                   src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/MantidColorMap.h
                    src/Mantid/InstrumentWidget/MantidObject.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
@@ -604,6 +608,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
+                       src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
+                       src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
 )
