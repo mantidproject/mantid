@@ -724,7 +724,7 @@ using namespace DataObjects;
   //-------------------------------------------------------------------------------------
   /** Write out all of the event lists in the given workspace
    * @param ws :: an EventWorkspace */
-  int NexusFileIO::writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& ws) const
+  int NexusFileIO::writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& ws)
   {
     NXstatus status;
 
@@ -733,11 +733,24 @@ using namespace DataObjects;
     if(status==NX_ERROR) return(2);
     status=NXopengroup(fileID,"event_workspace","NXdata");
 
+    //PARALLEL_FOR_NO_WSP_CHECK()
     for (int wi=0; wi < ws->getNumberHistograms(); wi++)
     {
+//      this->closeNexusFile();
+//      NexusFileIO filehandle;
+//      filehandle.openNexusWrite(this->m_filename);
+//      NXopengroup(filehandle.fileID, "mantid_workspace_1","NXdata"); //TODO: this won't always be right
+//      NXopengroup(filehandle.fileID, "event_workspace","NXdata");
+
       std::ostringstream group_name;
       group_name << "event_list_" << wi;
+//      filehandle.writeEventList( ws->getEventList(wi), group_name.str());
       this->writeEventList( ws->getEventList(wi), group_name.str());
+
+//      NXclosegroup(filehandle.fileID);
+//      NXclosegroup(filehandle.fileID);
+//      filehandle.closeNexusFile();
+//      this->openNexusWrite(this->m_filename);
     }
 
     // Close up the overall group
@@ -800,7 +813,7 @@ using namespace DataObjects;
     // Write out all the required arrays.
     int dims_array[1] = { num };
     // In this mode, compressing makes things extremely slow! Not to be used for managed event workspaces.
-    bool compress = false; //(num > 100);
+    bool compress = true; //(num > 100);
     if (writeTOF)
       NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
     if (writePulsetime)

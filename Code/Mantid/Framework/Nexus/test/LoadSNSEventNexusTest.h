@@ -68,7 +68,7 @@ public:
     ld2.setPropertyValue("OutputWorkspace",outws_name2);
     ld2.setPropertyValue("Precount", "1");
     ld2.execute();
-    TS_ASSERT( ld.isExecuted() );
+    TS_ASSERT( ld2.isExecuted() );
 
     DataObjects::EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name2));
     //Valid WS and it is an EventWorkspace

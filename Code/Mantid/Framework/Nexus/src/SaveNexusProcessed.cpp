@@ -16,6 +16,7 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -84,6 +85,8 @@ namespace NeXus
    */
   void SaveNexusProcessed::exec()
   {
+    Progress prog_init(this, 0.0, 0.3, 5);
+
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
@@ -121,28 +124,26 @@ namespace NeXus
       g_log.error("Failed to open file");
       throw Exception::FileError("Failed to open file", m_filename);
     }
-    progress(0.2);
+    prog_init.reportIncrement(1, "Opening file");
     if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
     {
       g_log.error("Failed to write file");
       throw Exception::FileError("Failed to write to file", m_filename);
     }
+    prog_init.reportIncrement(1, "Writing header");
 
-
-    progress(0.3);
     // write instrument data, if present and writer enabled
     IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
+    prog_init.reportIncrement(1, "Writing instrument");
 
     nexusFile->writeNexusParameterMap(m_inputWorkspace);
-
-    progress(0.5);
-
+    prog_init.reportIncrement(1, "Writing parameter map");
 
     // write XML source file name, if it exists - otherwise write "NoNameAvailable"
     std::string instrumentName=instrument->getName();
     if(instrumentName != "")
-    {
+    { //TODO: NO ONE SHOULD ASSUME THIS STRUCTURE IN THE INSTRUMENT FILENAME! Fix this and any other such hard-coded instrument file names.
       // force ID to upper case
       std::transform(instrumentName.begin(), instrumentName.end(), instrumentName.begin(), toupper);
       std::string instrumentXml(instrumentName+"_Definition.xml");
@@ -159,13 +160,14 @@ namespace NeXus
     else
       nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
-    progress(0.7);
     if( nexusFile->writeNexusProcessedSample(m_inputWorkspace->sample().getName(), m_inputWorkspace->sample(),
         m_inputWorkspace->run()) != 0 )
     {
       g_log.error("Failed to write NXsample");
       throw Exception::FileError("Failed to write NXsample", m_filename);
     }
+    prog_init.reportIncrement(1, "Writing sample");
+
 
     const int numberOfHist = m_inputWorkspace->getNumberHistograms();
     // check if all X() are in fact the same array
@@ -219,8 +221,8 @@ namespace NeXus
     // Write out the data (2D or event)
     if (m_eventWorkspace)
     {
-      nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
-      //this->execEvent(nexusFile);
+      //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
+      this->execEvent(nexusFile);
     }
     else
     {
@@ -234,7 +236,6 @@ namespace NeXus
       nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
     }
     nexusFile->closeNexusFile();
-    progress(1.0);
 
     delete nexusFile;
 
@@ -285,6 +286,8 @@ namespace NeXus
    * */
   void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile)
   {
+    prog = new Progress(this, 0.3, 1.0,m_eventWorkspace->getNumberEvents());
+
     // Make a super long list of tofs, weights, etc.
     std::vector<size_t> indices;
     indices.reserve( m_eventWorkspace->getNumberHistograms()+1 );
@@ -368,6 +371,7 @@ namespace NeXus
         appendEventListData( el.getWeightedEventsNoTime(), offset, tofs, weights, errorSquareds, pulsetimes);
         break;
       }
+      prog->reportIncrement(el.getNumberEvents(), "Copying EventList");
 
       PARALLEL_END_INTERUPT_REGION
     }

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <climits>
@@ -94,6 +95,9 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
+
+      /// Progress bar
+      API::Progress * prog;
 
     };
 

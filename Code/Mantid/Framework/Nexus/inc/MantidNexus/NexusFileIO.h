@@ -66,7 +66,7 @@ namespace Mantid
       int writeNexusProcessedData2D( const API::MatrixWorkspace_const_sptr& localworkspace,
 				   const bool& uniformSpectra, const std::vector<int>& spec) const;
 
-      int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace) const;
+      int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace);
 
       int writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
           std::vector<size_t> & indices, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const;
