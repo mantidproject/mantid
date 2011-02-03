@@ -87,10 +87,10 @@ namespace MDDataObjects
 
   // Here we export a bunch of version of MDBox with various dimension sizes.
   // We need to define one for every possibility.
-  template DLLExport class MDBox<1,0,char>;
-  template DLLExport class MDBox<2,0,char>;
-  template DLLExport class MDBox<3,0,char>;
-  template DLLExport class MDBox<4,0,char>;
+  template DLLExport class MDBox<1,1,char>;
+  template DLLExport class MDBox<2,1,char>;
+  template DLLExport class MDBox<3,1,char>;
+  template DLLExport class MDBox<4,1,char>;
 
 
 }//namespace MDDataObjects

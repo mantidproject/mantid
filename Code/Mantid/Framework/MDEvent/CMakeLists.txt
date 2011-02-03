@@ -1,6 +1,6 @@
 # Source files
 set (SRC_FILES 
-	src/MDEventWorkspace.cpp
+#	src/MDEventWorkspace.cpp
 	src/MDBox.cpp               
 )
 
@@ -8,7 +8,7 @@ set (SRC_FILES
 set (INC_FILES
 	inc/MantidMDEvent/MDPoint.h
 	inc/MantidMDEvent/MDBox.h
-	inc/MantidMDEvent/MDEventWorkspace.h
+#	inc/MantidMDEvent/MDEventWorkspace.h
 	inc/MantidMDEvent/IMDBox.h
 	inc/MantidMDEvent/MDDimensionExtents.h
 )
