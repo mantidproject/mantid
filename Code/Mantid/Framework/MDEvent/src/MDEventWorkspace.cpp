@@ -1,5 +1,5 @@
-#include "MDDataObjects/Events/MDEventWorkspace.h"
-#include "MDDataObjects/Events/MDEvent.h"
+#include "MantidMDEvent/MDEventWorkspace.h"
+#include "MantidMDEvent/MDEvent.h"
 
 namespace Mantid
 {

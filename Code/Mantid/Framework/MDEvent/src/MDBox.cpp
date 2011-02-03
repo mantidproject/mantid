@@ -1,5 +1,5 @@
-#include "MDDataObjects/Events/MDBox.h"
-#include "MDDataObjects/Events/MDPoint.h"
+#include "MantidMDEvent/MDBox.h"
+#include "MantidMDEvent/MDPoint.h"
 
 namespace Mantid
 {

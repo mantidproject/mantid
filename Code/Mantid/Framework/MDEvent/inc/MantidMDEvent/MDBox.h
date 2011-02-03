@@ -2,8 +2,8 @@
 #define MDBOX_H_
 
 #include "MantidKernel/System.h"
-#include "MDDataObjects/Events/MDPoint.h"
-#include "MDDataObjects/Events/MDDimensionExtents.h"
+#include "MantidMDEvent/MDPoint.h"
+#include "MantidMDEvent/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid

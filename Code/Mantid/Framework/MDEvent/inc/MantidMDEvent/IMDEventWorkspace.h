@@ -2,7 +2,7 @@
 #define IMDEVENTWORKSPACE_H_
 
 #include "MantidKernel/System.h"
-#include "MDDataObjects/Events/MDEvent.h"
+#include "MantidMDEvent/MDEvent.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MDDataObjects/Events/MDPoint.h"
-#include "MDDataObjects/Events/MDBox.h"
+#include "MantidMDEvent/MDPoint.h"
+#include "MantidMDEvent/MDBox.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
