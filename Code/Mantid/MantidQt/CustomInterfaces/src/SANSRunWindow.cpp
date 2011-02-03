@@ -3271,7 +3271,7 @@ void SANSRunWindow::setNumberPeriods(const int key, const int num)
 
   if (num > 0)
   {
-    label->setText("/" + QString::number(num));
+    label->setText("/??");//label->setText("/" + QString::number(num));
     if (userentry->text().isEmpty())
     {//default period to analysis is the first one
       userentry->setText("1");
