@@ -234,6 +234,9 @@ private:
   /// According to Plot Options what is the time to plot from in ms
   double plotFromTime();
 
+  /// According to Plot Options what is the time to plot to in ms
+  double plotToTime();
+
   /// time zero returned in ms
   QString timeZero();
 

@@ -196,7 +196,7 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
 
 
 /**
-* According to Plot Options what is the time to plot from in ms (slot)
+* Plot option time combo box (slot)
 */
 void MuonAnalysis::runTimeComboBox(int index)
 {
@@ -1314,7 +1314,10 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   cropStr += inputWS;
   cropStr += "\",\"";
   cropStr += wsname.c_str();
-  cropStr += "\"," + firstGoodBin() + ");";
+  cropStr += QString("\",") + boost::lexical_cast<std::string>(plotFromTime()).c_str(); 
+  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )  
+    cropStr += QString(",") + boost::lexical_cast<std::string>(plotToTime()).c_str();
+  cropStr += ");";
   runPythonCode( cropStr ).trimmed();
 
 
@@ -2001,8 +2004,8 @@ QString MuonAnalysis::firstGoodBin()
 }
 
  /**
- * first good bin returend in ms
- * returned as the absolute value of first-good-bin minus time zero
+ * According to Plot Options what time should we plot from in ms
+ * @return time to plot from in ms
  */
 double MuonAnalysis::plotFromTime()
 {
@@ -2016,6 +2019,28 @@ double MuonAnalysis::plotFromTime()
   {
     retVal = 0.0;
     QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ns)' input box. Plot from time zero.");
+  }
+
+  return retVal;
+}
+
+
+ /**
+ * According to Plot Options what time should we plot to in ms
+ * @return time to plot to in ms
+ */
+double MuonAnalysis::plotToTime()
+{
+  double retVal;
+  try 
+  {
+    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
+    retVal /= 1000.0;  // convert from ns to ms
+  }
+  catch (...)
+  {
+    retVal = 1.0;
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ns)' input box. Plot to time=1.0.");
   }
 
   return retVal;
