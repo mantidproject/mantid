@@ -58,7 +58,7 @@ namespace MDDataObjects
    * @date Dec 3, 2010
    *
    * */
-  template <size_t nd, size_t nv = 0, typename TE = char[0]>
+  template <size_t nd, size_t nv = 0, typename TE = char>
   class DLLExport MDPoint
   {
   private:
@@ -285,7 +285,7 @@ namespace MDDataObjects
     //---------------------------------------------------------------------------------------------
     /** Returns a reference to the extra type.
      * */
-    TE getExtra()
+    TE & getExtra()
     {
       return extra;
     }
@@ -295,7 +295,7 @@ namespace MDDataObjects
      * NOTE: For friend classes, you may access the .extra field directly. This will be faster.
      *
      * */
-    TE getExtra() const
+    TE & getExtra() const
     {
       return extra;
     }
@@ -307,7 +307,7 @@ namespace MDDataObjects
      *
      * @param _extra :: reference to an instance of type TE.
      * */
-    void setExtra(TE _extra)
+    void setExtra(TE & _extra)
     {
       extra = _extra;
     }

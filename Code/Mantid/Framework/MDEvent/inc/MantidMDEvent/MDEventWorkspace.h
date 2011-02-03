@@ -35,7 +35,7 @@ namespace MDDataObjects
    * @date Dec 3, 2010
    *
    * */
-  template <size_t nd, size_t nv=0, typename TE=char[0]>
+  template <size_t nd, size_t nv=0, typename TE=char>
   class DLLExport MDEventWorkspace  : public IMDEventWorkspace
   {
   public:

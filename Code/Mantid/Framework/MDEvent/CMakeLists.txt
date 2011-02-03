@@ -8,6 +8,7 @@ set (SRC_FILES
 set (INC_FILES
 	inc/MantidMDEvent/MDPoint.h
 	inc/MantidMDEvent/MDBox.h
+	inc/MantidMDEvent/MDEventWorkspace.h
 	inc/MantidMDEvent/IMDBox.h
 	inc/MantidMDEvent/MDDimensionExtents.h
 )
