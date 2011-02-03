@@ -72,51 +72,6 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 
 }
 
-std::vector<double> RebinningCutterPresenter::createMatrix(double* a)
-{
-            double vUp[] = {0, 1.0, 0.0};
-            double vRight[3];
-            vtkMath::Cross(vUp, a, vRight);
-            vtkMath::Cross(a, vRight, vUp);
-
-            std::vector<double> rotationMatrix(9);
-            rotationMatrix[0] = vRight[0];
-            rotationMatrix[1] = vRight[1];
-            rotationMatrix[2] = vRight[2];
-            rotationMatrix[3] = vUp[0];
-            rotationMatrix[4] = vUp[1];
-            rotationMatrix[5] = vUp[2];
-            rotationMatrix[6] = a[0];
-            rotationMatrix[7] = a[1];
-            rotationMatrix[8] = a[2];
-
-
-            return rotationMatrix;
-}
-
-
-
-//std::vector<double> RebinningCutterPresenter::createMatrix(double* a)
-//{
-//  double b[3];
-//  double c[3];
-//
-//  vtkMath::Perpendiculars(a, b, c, vtkMath::Pi()/2);
-//  printf("b %f %f %f\n", b[0], b[1], b[2]);
-//  printf("c %f %f %f\n", c[0], c[1], c[2]);
-//  std::vector<double> rotMatrix(9);
-//  rotMatrix[0] = a[0];
-//  rotMatrix[1] = b[0];
-//  rotMatrix[2] = c[0];
-//  rotMatrix[3] = a[1];
-//  rotMatrix[4] = b[1];
-//  rotMatrix[5] = c[1];
-//  rotMatrix[6] = a[2];
-//  rotMatrix[7] = b[2];
-//  rotMatrix[8] = c[2];
-//  return rotMatrix;
-//}
-
 
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReductionKnowledge(
     DimensionVec dimensions,
@@ -582,8 +537,8 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
    using namespace Mantid::API;
 
    const std::string outputWorkspace = "RebinnedWS";
-     if(true == regenerate) //TODO: Experimental Need proper fix from VISIT team.
-     {
+     //if(true == regenerate) //TODO: Experimental Need proper fix from VISIT team.
+     //{
      //Get the input workspace location and name.
      std::string wsLocation = serializingUtility.getWorkspaceLocation();
      std::string wsName = serializingUtility.getWorkspaceName();
@@ -603,7 +558,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
 
      //Run the rebinning algorithm.
      xmlRebinAlg.execute();
-     }
+    // }
 
      //Use the generated workspace to access the underlying image, which may be rendered.
      MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(

@@ -278,7 +278,6 @@ avtContract_p avtRebinningCutterFilter::ModifyContract(avtContract_p incontract)
 void avtRebinningCutterFilter::Execute()
 {
 
-  std::cout << "IS DIRTY: " << atts.GetIsDirty() << std::endl;
   using namespace Mantid::VATES;
   using namespace Mantid::Geometry;
   using namespace Mantid::MDAlgorithms;

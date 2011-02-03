@@ -351,12 +351,8 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
   {
 
     const PlaneAttributes *tmp = (const PlaneAttributes *) atts;
-    debug5
-      << "origin info: " << tmp->GetOrigin()[0] << " " << tmp->GetOrigin()[1] << " "
-          << tmp->GetOrigin()[2] << endl;
-    debug5
-      << "normal info: " << tmp->GetNormal()[0] << " " << tmp->GetNormal()[1] << " "
-          << tmp->GetNormal()[2] << endl;
+
+    using namespace std;
 
     SetOriginX(tmp->GetOrigin()[0]);
     SetOriginY(tmp->GetOrigin()[1]);
@@ -364,6 +360,9 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
     SetNormalX(tmp->GetNormal()[0]);
     SetNormalY(tmp->GetNormal()[1]);
     SetNormalZ(tmp->GetNormal()[2]);
+    SetUpX(tmp->GetUpAxis()[0]);
+    SetUpY(tmp->GetUpAxis()[1]);
+    SetUpZ(tmp->GetUpAxis()[2]);
 
     retval = true;
   }
@@ -379,17 +378,6 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
     SetOriginX((extents[1] + extents[0]) / 2);
     SetOriginY((extents[3] + extents[2]) / 2);
     SetOriginZ((extents[5] + extents[4]) / 2);
-
-    debug5
-      << "origin info: " << GetOriginX() << " " << GetOriginY() << " " << GetOriginZ() << endl;
-    debug5
-      << "normal info: " << GetNormalX() << " " << GetNormalY() << " " << GetNormalZ() << endl;
-    debug5
-      << "width: " << GetWidth() << endl;
-    debug5
-      << "height: " << GetHeight() << endl;
-    debug5
-      << "depth: " << GetDepth() << endl;
 
     retval = true;
   }
@@ -415,12 +403,58 @@ bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
 AttributeSubject *
 RebinningCutterAttributes::CreateCompatible(const std::string &tname) const
 {
-    AttributeSubject *retval = 0;
-    if(TypeName() == tname)
-        retval = new RebinningCutterAttributes(*this);
-    // Other cases could go here too. 
+  AttributeSubject *retval = 0;
+  if (TypeName() == tname)
+  {
+    retval = new RebinningCutterAttributes(*this);
+  }
+  else if (tname == "PlaneAttributes")
+  {
+    using namespace std;
+    PlaneAttributes *p = new PlaneAttributes;
+    double normal[3];
+    double origin[3];
+    double up[3];
 
-    return retval;
+    normal[0] = GetNormalX();
+    normal[1] = GetNormalY();
+    normal[2] = GetNormalZ();
+
+    origin[0] = GetOriginX();
+    origin[1] = GetOriginY();
+    origin[2] = GetOriginZ();
+
+    // Compute up vector
+    double temp[3] = {0, 0, 1};
+    if (normal[0] == 0 && normal[1] == 0)
+        temp[1] = 1;
+    up[0] = normal[1]*temp[2] - normal[2]*temp[1];
+    up[1] = normal[2]*temp[0] - normal[0]*temp[2];
+    up[2] = normal[0]*temp[1] - normal[1]*temp[0];
+
+    p->SetNormal(normal);
+    p->SetOrigin(origin);
+    p->SetUpAxis(up);
+    p->SetThreeSpace(true);
+
+    retval = p;
+  }
+  else if (tname == "BoxExtents")
+  {
+    BoxExtents *b = new BoxExtents;
+    double extents[6];
+    extents[0] = GetOriginX() - GetWidth()/2;
+    extents[1] = GetOriginX() + GetWidth()/2;
+    extents[2] = GetOriginY() - GetHeight()/2;
+    extents[3] = GetHeight()/2 + GetOriginY();
+    extents[4] = GetOriginZ() - GetDepth()/2;
+    extents[5] = GetOriginZ() + GetDepth()/2;
+    b->SetExtents(extents);
+
+    retval = b;
+  }
+
+  return retval;
 }
 
 // ****************************************************************************

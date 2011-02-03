@@ -79,8 +79,6 @@ private:
 
 public:
 
-  std::vector<double> createMatrix(double* a);
-
 	/// Constructor
 	RebinningCutterPresenter();
 
