@@ -37,7 +37,10 @@ rsync -aC ../colormaps MantidPlot.app/Contents/Resources/
 cp ../../Instrument/*.xml MantidPlot.app/instrument/
 
 # Copy in the scripts (rsync excludes .svn directories)
-rsync -aC ../../Scripts MantidPlot.app/scripts
+rsync -aC ../../Scripts/* MantidPlot.app/scripts
+# Remove stuff that really doesn't belong in svn Scripts directory anyway
+rm MantidPlot.app/scripts/CMakeLists.txt
+rm -R MantidPlot.app/scripts/test
 
 # Now run the Qt macdeployqt tool to copy the Qt libraries and set the 
 # executable to point to them
@@ -64,6 +67,9 @@ install_name_tool -change libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dyl
 # ...third party directory. Specific required versions only.
 cp $THIRDPARTY/lib/mac/lib*.*.dylib MantidPlot.app/Contents/MacOS/
 cp $THIRDPARTY/lib/mac/libboost* MantidPlot.app/Contents/MacOS/
+# Remove a couple that we don't want in the MacOS directory
+rm MantidPlot.app/Contents/MacOS/libqwt.5.dylib
+rm MantidPlot.app/Contents/MacOS/libNeXus.0.dylib
 # The NeXus library
 cp /usr/local/lib/libNeXus.0.dylib MantidPlot.app/Contents/Frameworks/
 # ...other stuff needed for qtiplot
