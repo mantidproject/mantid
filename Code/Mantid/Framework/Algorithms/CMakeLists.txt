@@ -9,6 +9,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/CalculateTransmission.cpp
 		src/ChangeBinOffset.cpp
 		src/CheckWorkspacesMatch.cpp
+		src/ChopData.cpp
 		src/CloneWorkspace.cpp
 		src/CommutativeBinaryOperation.cpp
 		src/ConjoinWorkspaces.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/CalculateTransmission.h
 		inc/MantidAlgorithms/ChangeBinOffset.h
 		inc/MantidAlgorithms/CheckWorkspacesMatch.h
+		inc/MantidAlgorithms/ChopData.h
 		inc/MantidAlgorithms/CloneWorkspace.h
 		inc/MantidAlgorithms/CommutativeBinaryOperation.h
 		inc/MantidAlgorithms/ConjoinWorkspaces.h
@@ -274,6 +276,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/ChainedOperatorTest.h
 		 test/ChangeBinOffsetTest.h
 		 test/CheckWorkspacesMatchTest.h
+		 test/ChopDataTest.h
 		 test/CloneWorkspaceTest.h
 		 test/CommutativeBinaryOperationTest.h
 		 test/CompressedRebinTest.h
