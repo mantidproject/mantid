@@ -51,6 +51,7 @@ namespace Mantid
       std::auto_ptr<PlaneFunctionBuilder> functionBuilder = std::auto_ptr<PlaneFunctionBuilder>(new PlaneFunctionBuilder);
       NodeList* parameterList = functionElement->getChildElement("ParameterList")->childNodes();
 
+      //Loop through all parameters and attemp to identify those that are known to belong to this implicit function type.
       for(int i = 0; i < parameterList->length(); i++)
       {
         Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
@@ -66,6 +67,18 @@ namespace Mantid
           OriginParameter*  pCurr = dynamic_cast<OriginParameter*>(parameter.get());
           OriginParameter origin(pCurr->getX(), pCurr->getY(), pCurr->getZ());
           functionBuilder->addOriginParameter(origin);
+        }
+        else if(UpParameter::parameterName() == parameter->getName())
+        {
+          UpParameter*  pCurr = dynamic_cast<UpParameter*>(parameter.get());
+          UpParameter up(pCurr->getX(), pCurr->getY(), pCurr->getZ());
+          functionBuilder->addUpParameter(up);
+        }
+        else if(WidthParameter::parameterName() == parameter->getName())
+        {
+          WidthParameter*  pCurr = dynamic_cast<WidthParameter*>(parameter.get());
+          WidthParameter width(pCurr->getValue());
+          functionBuilder->addWidthParameter(width);
         }
         else
         {

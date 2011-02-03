@@ -9,7 +9,14 @@ namespace Mantid
 
     HeightParameter::HeightParameter(double height) : m_height(height)
     {
-      m_isValid = true;
+      if(height >= 0)
+      {
+         m_isValid = true;
+      }
+      else
+      {
+        m_isValid = false;
+      }
     }
 
     HeightParameter::HeightParameter()

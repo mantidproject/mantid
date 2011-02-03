@@ -11,6 +11,9 @@
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/UpParameter.h"
+#include "MantidMDAlgorithms/WidthParameter.h"
+#include "MantidMDAlgorithms/PerpendicularParameter.h"
 #include "MantidMDAlgorithms/VectorMathematics.h"
 
 namespace Mantid
@@ -53,7 +56,7 @@ namespace Mantid
         class DLLExport PlaneImplicitFunction : public Mantid::API::ImplicitFunction
         {
         public:
-            PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin);
+            PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, UpParameter& up, WidthParameter& width);
             ~PlaneImplicitFunction();
             std::string getName() const;
             std::string toXMLString() const;
@@ -64,6 +67,13 @@ namespace Mantid
             double getNormalX() const;
             double getNormalY() const;
             double getNormalZ() const;
+            double getUpX() const;
+            double getUpY() const;
+            double getUpZ() const;
+            double getPerpendicularX() const;
+            double getPerpendicularY() const;
+            double getPerpendicularZ() const;
+            double getWidth() const;
             bool operator==(const PlaneImplicitFunction &other) const;
             bool operator!=(const PlaneImplicitFunction &other) const;
             double getAngleMadeWithXAxis() const;
@@ -80,6 +90,9 @@ namespace Mantid
 
             OriginParameter m_origin;
             NormalParameter m_normal;
+            UpParameter m_up;
+            WidthParameter m_width;
+            PerpendicularParameter m_perpendicular;
 
         };
 

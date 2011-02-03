@@ -7,9 +7,16 @@ namespace Mantid
   namespace MDAlgorithms
   {
 
-    DepthParameter::DepthParameter(double width) : m_depth(width)
+    DepthParameter::DepthParameter(double depth) : m_depth(depth)
     {
-      m_isValid = true;
+      if(depth >= 0)
+      {
+        m_isValid = true;
+      }
+      else
+      {
+       m_isValid = false;
+      }
     }
 
     DepthParameter::DepthParameter()

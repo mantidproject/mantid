@@ -83,8 +83,7 @@ private:
       //Create the composite holder.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
-
-      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
+      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds, true);
       vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
       vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 

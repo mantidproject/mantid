@@ -107,6 +107,8 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     void tDimensionXMLProcessText();
     void geometryChangedlistener();
     //writeHeaderCallback unknown for stringVector (variable dimensionXML)
+    void upYProcessText();
+    void upZProcessText();
   private:
     /// If possible create the geometry widget from pipeline information.
     void createGeometryWidget();
@@ -127,6 +129,8 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     QCheckBox *structured;
 
     //writeHeaderData unknown for stringVector (variable dimensionXML)
+    QLineEdit *upY;
+    QLineEdit *upZ;
     QLabel *originXLabel;
     QLabel *originYLabel;
     QLabel *originZLabel;
@@ -136,6 +140,13 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     QLabel *widthLabel;
     QLabel *heightLabel;
     QLabel *depthLabel;
+    QLabel *xDimensionXMLLabel;
+    QLabel *yDimensionXMLLabel;
+    QLabel *zDimensionXMLLabel;
+    QLabel *tDimensionXMLLabel;
+    QLabel *dimensionXMLLabel;
+    QLabel *upYLabel;
+    QLabel *upZLabel;
 
     std::string m_cacheGeometryXML;
     RebinningCutterAttributes *atts;

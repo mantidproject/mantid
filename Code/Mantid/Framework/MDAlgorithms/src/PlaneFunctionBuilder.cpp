@@ -26,6 +26,16 @@ namespace Mantid
             this->m_origin = OriginParameter(parameter);
         }
 
+        void PlaneFunctionBuilder::addWidthParameter(const WidthParameter& width)
+        {
+             this->m_width = WidthParameter(width);
+        }
+
+        void PlaneFunctionBuilder::addUpParameter(const UpParameter& up)
+        {
+              this->m_up = UpParameter(up);
+        }
+
         ImplicitFunction* PlaneFunctionBuilder::create() const
         {
             //check that builder parameters are valid.
@@ -39,12 +49,25 @@ namespace Mantid
                 std::string message = "Invalid normal parameter passed to PlaneFunctionBuilder";
                 throw std::invalid_argument(message);
             }
+            if(!m_up.isValid())
+            {
+              std::string message = "Invalid up parameter passed to PlaneFunctionBuilder";
+              throw std::invalid_argument(message);
+            }
+            if(!m_width.isValid())
+            {
+              std::string message = "Invalid width parameter passed to PlaneFunctionBuilder";
+              throw std::invalid_argument(message);
+            }
             //implement construction.
             NormalParameter& refNormal = m_normal;
             OriginParameter& refOrigin = m_origin;
-            PlaneImplicitFunction* func = new Mantid::MDAlgorithms::PlaneImplicitFunction(refNormal, refOrigin);
+            UpParameter& refUp = m_up;
+            WidthParameter& refWidth = m_width;
+            PlaneImplicitFunction* func = new Mantid::MDAlgorithms::PlaneImplicitFunction(refNormal, refOrigin, refUp, refWidth);
             return func;
         }
+
 
         PlaneFunctionBuilder::~PlaneFunctionBuilder()
         {

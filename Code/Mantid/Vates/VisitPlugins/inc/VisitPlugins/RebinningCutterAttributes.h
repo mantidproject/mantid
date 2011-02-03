@@ -105,6 +105,10 @@ public:
     void SetTDimensionXML(int tDimensionXML_);
     void SetIsSetUp(bool isSetUp_);
     void SetDimensionXML(const stringVector &dimensionXML_);
+    void SetUpX(double upX_);
+    void SetUpY(double upY_);
+    void SetUpZ(double upZ_);
+    void SetIsDirty(bool isDirty_);
 
     // Property getting methods
     double             GetOriginX() const;
@@ -119,12 +123,16 @@ public:
     bool               GetStructured() const;
     const std::string  &GetXDimensionXML() const;
           std::string  &GetXDimensionXML();
-    int  GetYDimensionXML() const;
+    int                GetYDimensionXML() const;
     int                GetZDimensionXML() const;
     int                GetTDimensionXML() const;
     bool               GetIsSetUp() const;
     const stringVector &GetDimensionXML() const;
           stringVector &GetDimensionXML();
+    double             GetUpX() const;
+    double             GetUpY() const;
+    double             GetUpZ() const;
+    bool               GetIsDirty() const;
 
 
     // Keyframing methods
@@ -152,6 +160,10 @@ public:
         ID_tDimensionXML,
         ID_isSetUp,
         ID_dimensionXML,
+        ID_upX,
+        ID_upY,
+        ID_upZ,
+        ID_isDirty,
         ID__LAST
     };
 
@@ -167,16 +179,20 @@ private:
     double       depth;
     bool         structured;
     std::string  xDimensionXML;
-    int  yDimensionXML;
+    int          yDimensionXML;
     int          zDimensionXML;
     int          tDimensionXML;
     bool         isSetUp;
     stringVector dimensionXML;
+    double       upX;
+    double       upY;
+    double       upZ;
+    bool         isDirty;
 
     // Static class format string for type map.
     static const char *TypeMapFormatString;
     static const private_tmfs_t TmfsStruct;
 };
-#define REBINNINGCUTTERATTRIBUTES_TMFS "dddddddddbsiiibs*"
+#define REBINNINGCUTTERATTRIBUTES_TMFS "dddddddddbsiiibs*dddb"
 
 #endif

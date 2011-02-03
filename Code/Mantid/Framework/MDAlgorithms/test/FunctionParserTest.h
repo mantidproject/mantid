@@ -4,10 +4,11 @@
 //Abstract testing base class for function parsers.
 
 #include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/NormalParameterParser.h"
-#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/SingleValueParameterParser.h"
+#include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
+
 #include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include <cxxtest/TestSuite.h>
@@ -25,7 +26,7 @@ protected:
         MockFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) : Mantid::API::ImplicitFunctionParser(paramParser) { ; }
         MOCK_METHOD1(createFunctionBuilder, Mantid::API::ImplicitFunctionBuilder*(Poco::XML::Element* functionElement));
         MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParser* parameterElement));
-		MOCK_METHOD1(setParameterParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterElement));
+		    MOCK_METHOD1(setParameterParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterElement));
     };
 
     //Mock parameter parser class.
@@ -40,12 +41,16 @@ protected:
     Mantid::API::ImplicitFunctionParameterParser* constructRootParameterParser()
     {
         using namespace Mantid::MDAlgorithms;
-		using namespace Mantid::API;
+		    using namespace Mantid::API;
         ImplicitFunctionParameterParser* originParser = new OriginParameterParser;
+        ImplicitFunctionParameterParser* upParser = new UpParameterParser;
         ImplicitFunctionParameterParser*  normalParser = new NormalParameterParser;
-        ImplicitFunctionParameterParser*  invalidParser = new InvalidParameterParser;
+        ImplicitFunctionParameterParser* invalidParser = new InvalidParameterParser;
+        ImplicitFunctionParameterParser* widthParser = new WidthParameterParser;
 
-        originParser->setSuccessorParser(invalidParser);
+        widthParser->setSuccessorParser(invalidParser);
+        upParser->setSuccessorParser(widthParser);
+        originParser->setSuccessorParser(upParser);
         normalParser->setSuccessorParser(originParser);
 
         return normalParser;

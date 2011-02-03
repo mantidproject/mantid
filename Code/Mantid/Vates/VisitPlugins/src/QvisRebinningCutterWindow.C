@@ -291,8 +291,9 @@ void QvisRebinningCutterWindow::createGeometryWidget()
 void
 QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 {
-    createGeometryWidget();
+  createGeometryWidget();
 
+atts->SetIsDirty(false);
 
     for(int i = 0; i < atts->NumAttributes(); ++i)
     {
@@ -507,61 +508,6 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
         }
     }
 
-    // Do xDimensionXML
-//    if(which_widget == RebinningCutterAttributes::ID_xDimensionXML || doAll)
-//    {
-//        QString temp = xDimensionXML->displayText();
-//        if(!temp.isEmpty())
-//            atts->SetXDimensionXML(temp.toStdString());
-//        else
-//        {
-//            ResettingError(tr("unnamed1"),
-//                QString(atts->GetXDimensionXML().c_str()));
-//            atts->SetXDimensionXML(atts->GetXDimensionXML());
-//        }
-//    }
-//
-//    // Do yDimensionXML
-//    if(which_widget == RebinningCutterAttributes::ID_yDimensionXML || doAll)
-//    {
-//        int val;
-//        if(LineEditGetInt(yDimensionXML, val))
-//            atts->SetYDimensionXML(val);
-//        else
-//        {
-//            ResettingError(tr("unnamed1"),
-//                IntToQString(atts->GetYDimensionXML()));
-//            atts->SetYDimensionXML(atts->GetYDimensionXML());
-//        }
-//    }
-//
-//    // Do zDimensionXML
-//    if(which_widget == RebinningCutterAttributes::ID_zDimensionXML || doAll)
-//    {
-//        int val;
-//        if(LineEditGetInt(zDimensionXML, val))
-//            atts->SetZDimensionXML(val);
-//        else
-//        {
-//            ResettingError(tr("unnamed2"),
-//                IntToQString(atts->GetZDimensionXML()));
-//            atts->SetZDimensionXML(atts->GetZDimensionXML());
-//        }
-//    }
-//
-//    // Do tDimensionXML
-//    if(which_widget == RebinningCutterAttributes::ID_tDimensionXML || doAll)
-//    {
-//        int val;
-//        if(LineEditGetInt(tDimensionXML, val))
-//            atts->SetTDimensionXML(val);
-//        else
-//        {
-//            ResettingError(tr("unnamed3"),
-//                IntToQString(atts->GetTDimensionXML()));
-//            atts->SetTDimensionXML(atts->GetTDimensionXML());
-//        }
-//    }
   //Do not apply this behaviour until the geometry has been setup (by running the operator)
   if (m_geomWidget->isSetup())
   {
@@ -608,6 +554,7 @@ QvisRebinningCutterWindow::originZProcessText()
 void
 QvisRebinningCutterWindow::normalXProcessText()
 {
+  atts->SetIsDirty(true);
     GetCurrentValues(RebinningCutterAttributes::ID_normalX);
     Apply();
 }

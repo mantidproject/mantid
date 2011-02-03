@@ -98,7 +98,7 @@ public:
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont,
       Mantid::MDAlgorithms::CompositeImplicitFunction* compositeFunction,
-      vtkDataSet* inputDataSet);
+      vtkDataSet* inputDataSet, bool regenerate);
 
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(boost::shared_ptr<vtkDataSetFactory> spvtkDataSetFactory);
@@ -125,7 +125,7 @@ public:
 //Non-member helper functions.
 
   /// Rebin
-  Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility);
+  Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility, bool regenerate);
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkDataSet * out_ds,

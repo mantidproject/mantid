@@ -8,11 +8,11 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-NormalParameter::NormalParameter(double n1, double n2, double n3)
+NormalParameter::NormalParameter(double n1, double n2, double n3): m_normal(3)
 {
-  m_normal.push_back(n1);
-  m_normal.push_back(n2);
-  m_normal.push_back(n3);
+  m_normal[0] = n1;
+  m_normal[1] = n2;
+  m_normal[2] = n3;
   m_isValid = true;
 }
 
@@ -111,7 +111,7 @@ bool NormalParameter::isUnitVector() const
 
 double NormalParameter::magnitude() const
 {
-  std::sqrt(m_normal[0]*m_normal[0] + m_normal[1]*m_normal[1] + m_normal[2]*m_normal[2]);
+  return std::sqrt(m_normal[0]*m_normal[0] + m_normal[1]*m_normal[1] + m_normal[2]*m_normal[2]);
 }
 
 }

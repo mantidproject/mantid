@@ -128,6 +128,17 @@ PyRebinningCutterAttributes_ToString(const RebinningCutterAttributes *atts, cons
         SNPRINTF(tmpStr, 1000, ")\n");
         str += tmpStr;
     }
+    SNPRINTF(tmpStr, 1000, "%supX = %g\n", prefix, atts->GetUpX());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%supY = %g\n", prefix, atts->GetUpY());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%supZ = %g\n", prefix, atts->GetUpZ());
+    str += tmpStr;
+    if(atts->GetIsDirty())
+        SNPRINTF(tmpStr, 1000, "%sisDirty = 1\n", prefix);
+    else
+        SNPRINTF(tmpStr, 1000, "%sisDirty = 0\n", prefix);
+    str += tmpStr;
     return str;
 }
 
@@ -549,6 +560,102 @@ RebinningCutterAttributes_GetDimensionXML(PyObject *self, PyObject *args)
     return retval;
 }
 
+/*static*/ PyObject *
+RebinningCutterAttributes_SetUpX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the upX in the object.
+    obj->data->SetUpX(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetUpX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetUpX());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetUpY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the upY in the object.
+    obj->data->SetUpY(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetUpY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetUpY());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetUpZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the upZ in the object.
+    obj->data->SetUpZ(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetUpZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetUpZ());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetIsDirty(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the isDirty in the object.
+    obj->data->SetIsDirty(ival != 0);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetIsDirty(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(obj->data->GetIsDirty()?1L:0L);
+    return retval;
+}
+
 
 
 PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH] = {
@@ -585,6 +692,14 @@ PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH]
     {"GetIsSetUp", RebinningCutterAttributes_GetIsSetUp, METH_VARARGS},
     {"SetDimensionXML", RebinningCutterAttributes_SetDimensionXML, METH_VARARGS},
     {"GetDimensionXML", RebinningCutterAttributes_GetDimensionXML, METH_VARARGS},
+    {"SetUpX", RebinningCutterAttributes_SetUpX, METH_VARARGS},
+    {"GetUpX", RebinningCutterAttributes_GetUpX, METH_VARARGS},
+    {"SetUpY", RebinningCutterAttributes_SetUpY, METH_VARARGS},
+    {"GetUpY", RebinningCutterAttributes_GetUpY, METH_VARARGS},
+    {"SetUpZ", RebinningCutterAttributes_SetUpZ, METH_VARARGS},
+    {"GetUpZ", RebinningCutterAttributes_GetUpZ, METH_VARARGS},
+    {"SetIsDirty", RebinningCutterAttributes_SetIsDirty, METH_VARARGS},
+    {"GetIsDirty", RebinningCutterAttributes_GetIsDirty, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -645,6 +760,14 @@ PyRebinningCutterAttributes_getattr(PyObject *self, char *name)
         return RebinningCutterAttributes_GetIsSetUp(self, NULL);
     if(strcmp(name, "dimensionXML") == 0)
         return RebinningCutterAttributes_GetDimensionXML(self, NULL);
+    if(strcmp(name, "upX") == 0)
+        return RebinningCutterAttributes_GetUpX(self, NULL);
+    if(strcmp(name, "upY") == 0)
+        return RebinningCutterAttributes_GetUpY(self, NULL);
+    if(strcmp(name, "upZ") == 0)
+        return RebinningCutterAttributes_GetUpZ(self, NULL);
+    if(strcmp(name, "isDirty") == 0)
+        return RebinningCutterAttributes_GetIsDirty(self, NULL);
 
     return Py_FindMethod(PyRebinningCutterAttributes_methods, self, name);
 }
@@ -691,6 +814,14 @@ PyRebinningCutterAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = RebinningCutterAttributes_SetIsSetUp(self, tuple);
     else if(strcmp(name, "dimensionXML") == 0)
         obj = RebinningCutterAttributes_SetDimensionXML(self, tuple);
+    else if(strcmp(name, "upX") == 0)
+        obj = RebinningCutterAttributes_SetUpX(self, tuple);
+    else if(strcmp(name, "upY") == 0)
+        obj = RebinningCutterAttributes_SetUpY(self, tuple);
+    else if(strcmp(name, "upZ") == 0)
+        obj = RebinningCutterAttributes_SetUpZ(self, tuple);
+    else if(strcmp(name, "isDirty") == 0)
+        obj = RebinningCutterAttributes_SetIsDirty(self, tuple);
 
     if(obj != NULL)
         Py_DECREF(obj);

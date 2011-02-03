@@ -57,6 +57,11 @@ public:
   {
     SVPTDepth::testNotEqual();
   }
+
+  void testInvalidIfUnsigned()
+  {
+    SVPTDepth::testInvalidIfUnsigned();
+  }
 };
 
 #endif

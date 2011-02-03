@@ -75,6 +75,13 @@ public:
 
     TSM_ASSERT_DIFFERS("The two parameter instances are considered equal, but should not be.", A, B);
   }
+
+  void testInvalidIfUnsigned()
+  {
+    SingleValueParameter A(-1);
+    std::string message = "Cannot have a negative: " + A.getName();
+    TSM_ASSERT_EQUALS(message.c_str(), false, A.isValid());
+  }
 };
 
 #endif

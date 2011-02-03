@@ -125,7 +125,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReduc
     Dimension_sptr dimensionZ,
     Dimension_sptr dimensiont,
     Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction,
-    vtkDataSet* inputDataSet)
+    vtkDataSet* inputDataSet, bool regenerate)
 {
   using namespace Mantid::MDAlgorithms;
 
@@ -149,7 +149,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReduc
   this->m_initalized = true;
 
   //Now actually perform rebinning operation and cache the rebinnned workspace.
-  return rebin(m_serializer);
+  return rebin(m_serializer, regenerate);
 }
 
 vtkDataSet* RebinningCutterPresenter::createVisualDataSet(vtkDataSetFactory_sptr spvtkDataSetFactory)
@@ -580,10 +580,14 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
  }
 
 
- Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility)
+ Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility, bool regenerate)
  {
    using namespace Mantid::MDDataObjects;
-     using namespace Mantid::API;
+   using namespace Mantid::API;
+
+   const std::string outputWorkspace = "RebinnedWS";
+     if(true == regenerate) //TODO: Experimental Need proper fix from VISIT team.
+     {
      //Get the input workspace location and name.
      std::string wsLocation = serializingUtility.getWorkspaceLocation();
      std::string wsName = serializingUtility.getWorkspaceName();
@@ -594,7 +598,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
      Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
      xmlRebinAlg.setRethrows(true);
      xmlRebinAlg.initialize();
-     const std::string outputWorkspace = "RebinnedWS";
+
      xmlRebinAlg.setPropertyValue("OutputWorkspace", outputWorkspace);
 
      //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
@@ -603,6 +607,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
 
      //Run the rebinning algorithm.
      xmlRebinAlg.execute();
+     }
 
      //Use the generated workspace to access the underlying image, which may be rendered.
      MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(

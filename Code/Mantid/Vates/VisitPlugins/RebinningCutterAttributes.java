@@ -60,7 +60,7 @@ import java.util.Vector;
 
 public class RebinningCutterAttributes extends AttributeSubject implements Plugin
 {
-    private static int RebinningCutterAttributes_numAdditionalAtts = 16;
+    private static int RebinningCutterAttributes_numAdditionalAtts = 20;
 
     public RebinningCutterAttributes()
     {
@@ -74,7 +74,7 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         normalZ = 0;
         width = 0;
         height = 0;
-        depth = 8.82449e-317;
+        depth = 8.76801e-317;
         structured = false;
         xDimensionXML = new String("");
         yDimensionXML = 0;
@@ -82,6 +82,10 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         tDimensionXML = 0;
         isSetUp = false;
         dimensionXML = new Vector();
+        upX = 0;
+        upY = 0;
+        upZ = 0;
+        isDirty = false;
     }
 
     public RebinningCutterAttributes(int nMoreFields)
@@ -96,7 +100,7 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         normalZ = 0;
         width = 0;
         height = 0;
-        depth = 8.82449e-317;
+        depth = 8.76801e-317;
         structured = false;
         xDimensionXML = new String("");
         yDimensionXML = 0;
@@ -104,6 +108,10 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         tDimensionXML = 0;
         isSetUp = false;
         dimensionXML = new Vector();
+        upX = 0;
+        upY = 0;
+        upZ = 0;
+        isDirty = false;
     }
 
     public RebinningCutterAttributes(RebinningCutterAttributes obj)
@@ -131,6 +139,10 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         for(i = 0; i < obj.dimensionXML.size(); ++i)
             dimensionXML.addElement(new String((String)obj.dimensionXML.elementAt(i)));
 
+        upX = obj.upX;
+        upY = obj.upY;
+        upZ = obj.upZ;
+        isDirty = obj.isDirty;
 
         SelectAll();
     }
@@ -174,7 +186,11 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
                 (zDimensionXML == obj.zDimensionXML) &&
                 (tDimensionXML == obj.tDimensionXML) &&
                 (isSetUp == obj.isSetUp) &&
-                dimensionXML_equal);
+                dimensionXML_equal &&
+                (upX == obj.upX) &&
+                (upY == obj.upY) &&
+                (upZ == obj.upZ) &&
+                (isDirty == obj.isDirty));
     }
 
     public String GetName() { return "RebinningCutter"; }
@@ -277,6 +293,30 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         Select(15);
     }
 
+    public void SetUpX(double upX_)
+    {
+        upX = upX_;
+        Select(16);
+    }
+
+    public void SetUpY(double upY_)
+    {
+        upY = upY_;
+        Select(17);
+    }
+
+    public void SetUpZ(double upZ_)
+    {
+        upZ = upZ_;
+        Select(18);
+    }
+
+    public void SetIsDirty(boolean isDirty_)
+    {
+        isDirty = isDirty_;
+        Select(19);
+    }
+
     // Property getting methods
     public double  GetOriginX() { return originX; }
     public double  GetOriginY() { return originY; }
@@ -294,6 +334,10 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
     public int     GetTDimensionXML() { return tDimensionXML; }
     public boolean GetIsSetUp() { return isSetUp; }
     public Vector  GetDimensionXML() { return dimensionXML; }
+    public double  GetUpX() { return upX; }
+    public double  GetUpY() { return upY; }
+    public double  GetUpZ() { return upZ; }
+    public boolean GetIsDirty() { return isDirty; }
 
     // Write and read methods.
     public void WriteAtts(CommunicationBuffer buf)
@@ -330,6 +374,14 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
             buf.WriteBool(isSetUp);
         if(WriteSelect(15, buf))
             buf.WriteStringVector(dimensionXML);
+        if(WriteSelect(16, buf))
+            buf.WriteDouble(upX);
+        if(WriteSelect(17, buf))
+            buf.WriteDouble(upY);
+        if(WriteSelect(18, buf))
+            buf.WriteDouble(upZ);
+        if(WriteSelect(19, buf))
+            buf.WriteBool(isDirty);
     }
 
     public void ReadAtts(int index, CommunicationBuffer buf)
@@ -384,6 +436,18 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         case 15:
             SetDimensionXML(buf.ReadStringVector());
             break;
+        case 16:
+            SetUpX(buf.ReadDouble());
+            break;
+        case 17:
+            SetUpY(buf.ReadDouble());
+            break;
+        case 18:
+            SetUpZ(buf.ReadDouble());
+            break;
+        case 19:
+            SetIsDirty(buf.ReadBool());
+            break;
         }
     }
 
@@ -406,6 +470,10 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
         str = str + intToString("tDimensionXML", tDimensionXML, indent) + "\n";
         str = str + boolToString("isSetUp", isSetUp, indent) + "\n";
         str = str + stringVectorToString("dimensionXML", dimensionXML, indent) + "\n";
+        str = str + doubleToString("upX", upX, indent) + "\n";
+        str = str + doubleToString("upY", upY, indent) + "\n";
+        str = str + doubleToString("upZ", upZ, indent) + "\n";
+        str = str + boolToString("isDirty", isDirty, indent) + "\n";
         return str;
     }
 
@@ -427,5 +495,9 @@ public class RebinningCutterAttributes extends AttributeSubject implements Plugi
     private int     tDimensionXML;
     private boolean isSetUp;
     private Vector  dimensionXML; // vector of String objects
+    private double  upX;
+    private double  upY;
+    private double  upZ;
+    private boolean isDirty;
 }
 

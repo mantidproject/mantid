@@ -33,5 +33,13 @@
       </Field>
       <Field name="dimensionXML" label="unnamed1" type="stringVector">
       </Field>
+      <Field name="upX" label="" type="double">
+      </Field>
+      <Field name="upY" label="" type="double">
+      </Field>
+      <Field name="upZ" label="" type="double">
+      </Field>
+      <Field name="isDirty" label="unnamed1" type="bool">
+      </Field>
     </Attribute>
   </Plugin>

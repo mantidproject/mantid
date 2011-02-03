@@ -62,6 +62,7 @@ public:
   static const std::string functionNodeName;
   static const std::string geometryOperatorInfo;
   static const std::string functionOperatorInfo;
+
 };
 
 }

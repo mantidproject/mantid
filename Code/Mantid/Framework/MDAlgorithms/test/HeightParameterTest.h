@@ -57,6 +57,11 @@ public:
   {
     SVPTHeight::testNotEqual();
   }
+
+  void testInvalidIfUnsigned()
+  {
+    SVPTHeight::testInvalidIfUnsigned();
+  }
 };
 
 #endif

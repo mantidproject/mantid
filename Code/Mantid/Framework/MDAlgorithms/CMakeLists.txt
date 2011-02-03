@@ -19,10 +19,9 @@ src/InvalidParameter.cpp
 src/InvalidParameterParser.cpp
 src/Load_MDWorkspace.cpp
 src/NormalParameter.cpp
-src/NormalParameterParser.cpp
 src/NullImplicitFunction.cpp
 src/OriginParameter.cpp
-src/OriginParameterParser.cpp
+src/PerpendicularParameter.cpp
 src/PlaneFunctionBuilder.cpp
 src/PlaneImplicitFunction.cpp
 src/PlaneImplicitFunctionParser.cpp
@@ -30,6 +29,9 @@ src/PlaneInterpreter.cpp
 src/SimulateMDD.cpp
 src/SingleValueParameterParser.cpp
 src/TobyFitSimulate.cpp
+src/UpParameter.cpp
+src/VectorParameterParser.cpp
+src/VectorParameter.cpp
 src/WidthParameter.cpp 
 )
 
@@ -52,10 +54,9 @@ inc/MantidMDAlgorithms/InvalidParameter.h
 inc/MantidMDAlgorithms/InvalidParameterParser.h
 inc/MantidMDAlgorithms/Load_MDWorkspace.h
 inc/MantidMDAlgorithms/NormalParameter.h
-inc/MantidMDAlgorithms/NormalParameterParser.h
 inc/MantidMDAlgorithms/NullImplicitFunction.h
 inc/MantidMDAlgorithms/OriginParameter.h
-inc/MantidMDAlgorithms/OriginParameterParser.h
+inc/MantidMDAlgorithms/PerpendicularParameter.h
 inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
 inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
@@ -63,8 +64,10 @@ inc/MantidMDAlgorithms/PlaneInterpreter.h
 inc/MantidMDAlgorithms/SimulateMDD.h
 inc/MantidMDAlgorithms/SingleValueParameterParser.h
 inc/MantidMDAlgorithms/TobyFitSimulate.h
-inc/MantidMDAlgorithms/Topology.h
+inc/MantidMDAlgorithms/UpParameter.h
 inc/MantidMDAlgorithms/VectorMathematics.h
+inc/MantidMDAlgorithms/VectorParameter.h
+inc/MantidMDAlgorithms/VectorParameterParser.h
 inc/MantidMDAlgorithms/WidthParameter.h 
 )
 
@@ -102,10 +105,14 @@ test/HeightParameterParserTest.h
 test/NormalParameterParserTest.h
 test/NullImplicitFunctionTest.h
 test/OriginParameterParserTest.h
+test/PerpendicularParameterParserTest.h
+test/PerpendicularParameterTest.h
 test/PlaneImplicitFunctionParserTest.h
 test/PlaneImplicitFunctionTest.h
 test/PlaneInterpreterTest.h
 test/WidthParameterParserTest.h
+test/UpParameterParserTest.h
+test/UpParameterTest.h
 )
 
 # Add the target for this directory

@@ -6,7 +6,7 @@
 #include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 
 #include "Poco/DOM/DOMParser.h"
@@ -28,7 +28,7 @@ private:
     public: //Make protected method on base public.
         Mantid::MDAlgorithms::OriginParameter* exposedParseOriginParameterValue(std::string value)
         {
-            return this->parseOriginParameter(value);
+            return this->parseVectorParameter(value);
         }
     };
 

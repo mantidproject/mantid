@@ -12,24 +12,36 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin) :
+PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, UpParameter& up, WidthParameter& width) :
   m_origin(origin),
-  m_normal(normal)
+  m_width(width),
+  m_normal(normal),
+  m_up(up)
 {
+//  //TODO: consider not doing calculations in constructor, not exception safe.
+  Mantid::Geometry::V3D normalVector(m_normal.getX(), m_normal.getY(), m_normal.getZ());
+  Mantid::Geometry::V3D upVector(m_up.getX(), m_up.getY(), m_up.getZ());
+  Mantid::Geometry::V3D perpendicularVector = crossProduct(normalVector, upVector);
+
+  //Calculate the perpendicular parameter needed internally.
+  m_perpendicular = PerpendicularParameter(perpendicularVector.X(), perpendicularVector.Y(), perpendicularVector.Z());
 }
+
 
 bool PlaneImplicitFunction::evaluate(const Mantid::API::Point3D* pPoint) const
 {
-  std::vector<double> num;
-  dotProduct<double> (pPoint->getX() - m_origin.getX(), pPoint->getY() - m_origin.getY(), pPoint->getZ()
-      - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ(), num);
+  double num = dotProduct(pPoint->getX() - m_origin.getX(), pPoint->getY() - m_origin.getY(), pPoint->getZ()
+      - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ());
   //return num.at(0) + num.at(1) + num.at(2) / absolute(normalX, normalY, normalZ) <= 0; //Calculates distance, but magnituted of normal not important in this algorithm
-  return num.at(0) + num.at(1) + num.at(2) <= 0;
+  return num <= 0;
 }
 
 bool PlaneImplicitFunction::operator==(const PlaneImplicitFunction &other) const
 {
-  return this->m_normal == other.m_normal && this->m_origin == other.m_origin;
+  return this->m_normal == other.m_normal
+      && this->m_origin == other.m_origin
+      && this->m_width == other.m_width
+      && this->m_up == other.m_up;
 }
 
 bool PlaneImplicitFunction::operator!=(const PlaneImplicitFunction &other) const
@@ -70,6 +82,41 @@ double PlaneImplicitFunction::getNormalY() const
 double PlaneImplicitFunction::getNormalZ() const
 {
   return this->m_normal.getZ();
+}
+
+double PlaneImplicitFunction::getUpX() const
+{
+  return this->m_up.getX();
+}
+
+double PlaneImplicitFunction::getUpY() const
+{
+  return this->m_up.getY();
+}
+
+double PlaneImplicitFunction::getUpZ() const
+{
+  return this->m_up.getZ();
+}
+
+double PlaneImplicitFunction::getPerpendicularX() const
+{
+  return this->m_perpendicular.getX();
+}
+
+double PlaneImplicitFunction::getPerpendicularY() const
+{
+  return this->m_perpendicular.getY();
+}
+
+double PlaneImplicitFunction::getPerpendicularZ() const
+{
+  return this->m_perpendicular.getZ();
+}
+
+double PlaneImplicitFunction::getWidth() const
+{
+  return this->m_width.getValue();
 }
 
 double PlaneImplicitFunction::getAngleMadeWithXAxis() const
@@ -113,7 +160,7 @@ std::string PlaneImplicitFunction::toXMLString() const
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
 
-  AutoPtr<Text> formatText = pDoc->createTextNode("%s%s");
+  AutoPtr<Text> formatText = pDoc->createTextNode("%s%s%s%s");
   paramListElement->appendChild(formatText);
   functionElement->appendChild(paramListElement);
 
@@ -123,7 +170,7 @@ std::string PlaneImplicitFunction::toXMLString() const
   writer.writeNode(xmlstream, pDoc);
 
   std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
-      % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str());
+      % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str() % m_up.toXMLString() % m_width.toXMLString());
   return formattedXMLString;
 }
 

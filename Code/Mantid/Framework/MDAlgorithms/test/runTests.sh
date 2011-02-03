@@ -27,7 +27,7 @@ python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../bin
+mantid_libpath=/home/owen/workspace/MantidDebug/bin
 gmock_libpath=../../../TestingTools/lib/rhel5
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp \
  -I../../Kernel/inc -I../../Geometry/inc -I ../inc -I../../MDDataObjects/inc \
@@ -41,6 +41,7 @@ echo
 echo "Running the tests..."
 ln ../../Build/Tests/*.properties .
 LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./runner.exe
+#valgrind --leak-check=full --show-reachable=yes --track-origins=yes ~/mantid/Code/Mantid/Vates/VisitPresenters/test/runner.exe
 echo
 
 # Remove the generated files to ensure that they're not inadvertently run

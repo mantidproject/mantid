@@ -7,8 +7,7 @@
 #include "FunctionParserTest.h"
 
 #include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
-#include "MantidMDAlgorithms/NormalParameterParser.h"
-#include "MantidMDAlgorithms/OriginParameterParser.h"
+#include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include <cxxtest/TestSuite.h>
@@ -45,17 +44,19 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function>";
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>UpParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>1</Value></Parameter></ParameterList></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         MockParameterParser* paramParser = new MockParameterParser;
         EXPECT_CALL(*paramParser, createParameter(testing::_))
             .WillOnce(testing::Return(new OriginParameter(0, 0, 0)))
-            .WillOnce(testing::Return(new NormalParameter(0, 0, 0)));
+            .WillOnce(testing::Return(new NormalParameter(0, 0, 0)))
+            .WillOnce(testing::Return(new UpParameter(0, 0, 0)))
+            .WillOnce(testing::Return(new WidthParameter(1)));
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(paramParser);
+		    functionParser.setParameterParser(paramParser);
         Mantid::API::ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
@@ -65,7 +66,7 @@ public:
     void testCallsFunctionParserChain()
     {
         using namespace Mantid::MDAlgorithms;
-		using namespace Mantid::API;
+		    using namespace Mantid::API;
 
         Poco::XML::DOMParser pParser;
         std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>X</Type><ParameterList></ParameterList></Function>";
@@ -77,7 +78,7 @@ public:
             .Times(1);
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser());
+		    functionParser.setParameterParser(constructRootParameterParser());
         functionParser.setSuccessorParser(mockFuncParser);
         ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
@@ -90,12 +91,12 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function>";
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter></ParameterList></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         ExposedPlaneFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser());
+		    functionParser.setParameterParser(constructRootParameterParser());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
         boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(planeBuilder->create());
 
@@ -103,13 +104,18 @@ public:
 
         TSM_ASSERT("A plane implicit function should have been created from the xml.", planeFunction != NULL);
 
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameters to give the correct ox value.", 1, planeFunction->getOriginX());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameters to give the correct oy value.", 2, planeFunction->getOriginY());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameters to give the correct oz value.", 3, planeFunction->getOriginZ());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameter parser to give the correct ox value.", 1, planeFunction->getOriginX());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameter parser to give the correct oy value.", 2, planeFunction->getOriginY());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of origin parameter parser to give the correct oz value.", 3, planeFunction->getOriginZ());
 
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameters to give the correct nx value.", -1, planeFunction->getNormalX());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameters to give the correct ny value.", -2, planeFunction->getNormalY());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameters to give the correct nz value.", -3, planeFunction->getNormalZ());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameter parser to give the correct nx value.", -1, planeFunction->getNormalX());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameter parser to give the correct ny value.", -2, planeFunction->getNormalY());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameter parser to give the correct nz value.", -3, planeFunction->getNormalZ());
+
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct nx value.", 4, planeFunction->getUpX());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct ny value.", 5, planeFunction->getUpY());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct nz value.", 6, planeFunction->getUpZ());
+        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of width parameter parser to give the correct nx value.", 7, planeFunction->getWidth());
     }
 
     void testBadXMLSchemaThrows(void)

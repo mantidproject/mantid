@@ -75,8 +75,10 @@ public:
     NormalParameter normalA(1, 0, 0);
     NormalParameter normalB(1, 1, 1);
     OriginParameter origin(0, 0, 0);
-    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin));
-    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin));
+    UpParameter up(0, 0, 0);
+    WidthParameter width(3);
+    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin, up, width));
+    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, up, width));
     compositeFunction.addFunction(functionA);
     compositeFunction.addFunction(functionB);
     PlaneInterpreter interpreter;

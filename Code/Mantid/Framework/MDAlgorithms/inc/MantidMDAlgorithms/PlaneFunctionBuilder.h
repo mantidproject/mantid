@@ -51,10 +51,14 @@ namespace Mantid
         private:
             mutable OriginParameter m_origin;
             mutable NormalParameter m_normal;
+            mutable WidthParameter m_width;
+            mutable UpParameter m_up;
         public:
             PlaneFunctionBuilder();
             void addNormalParameter(const NormalParameter& parameter);
             void addOriginParameter(const OriginParameter& parameter);
+            void addWidthParameter(const WidthParameter& width);
+            void addUpParameter(const UpParameter& up);
             Mantid::API::ImplicitFunction* create() const;
             ~PlaneFunctionBuilder();
         };

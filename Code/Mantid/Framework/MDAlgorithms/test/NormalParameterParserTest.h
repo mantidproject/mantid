@@ -1,5 +1,5 @@
-#ifndef TEST_PLANE_FUNCTION_PARSER_H_
-#define TEST_PLANE_FUNCTION_PARSER_H_
+#ifndef TEST_NORMAL_PARAMETER_PARSER_H_
+#define TEST_NORMAL_PARAMETER_PARSER_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <memory>
-#include "MantidMDAlgorithms/NormalParameterParser.h"
+#include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 
 #include "Poco/DOM/DOMParser.h"
@@ -29,7 +29,7 @@ private:
     public: //Make protected method on base public.
         Mantid::MDAlgorithms::NormalParameter* exposedParseNormalParameterValue(std::string value)
         {
-            return this->parseNormalParameter(value);
+            return this->parseVectorParameter(value);
         }
     };
 

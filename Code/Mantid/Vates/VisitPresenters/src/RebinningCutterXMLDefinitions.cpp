@@ -24,5 +24,6 @@ const std::string XMLDefinitions::geometryNodeName="geometryNodeName";
 const std::string XMLDefinitions::functionNodeName="functionNodeName";
 const std::string XMLDefinitions::geometryOperatorInfo="geometryOperatorInfo";
 const std::string XMLDefinitions::functionOperatorInfo="functionOperatorInfo";
+
 }
 }

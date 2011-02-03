@@ -9,7 +9,14 @@ namespace Mantid
 
     WidthParameter::WidthParameter(double width) : m_width(width)
     {
-      m_isValid = true;
+      if(width >= 0)
+      {
+        m_isValid = true;
+      }
+      else
+      {
+        m_isValid = false;
+      }
     }
 
     WidthParameter::WidthParameter()

@@ -56,6 +56,11 @@ public:
   {
     SVPTWidth::testNotEqual();
   }
+
+  void testInvalidIfUnsigned()
+  {
+    SVPTWidth::testInvalidIfUnsigned();
+  }
 };
 
 #endif

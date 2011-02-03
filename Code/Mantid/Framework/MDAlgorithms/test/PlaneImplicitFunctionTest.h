@@ -23,26 +23,36 @@ private:
 
 Mantid::MDAlgorithms::NormalParameter normal;
 Mantid::MDAlgorithms::OriginParameter origin;
+Mantid::MDAlgorithms::WidthParameter width;
+Mantid::MDAlgorithms::UpParameter up;
 const double PI;
 
 public:
 
-PlaneImplicitFunctionTest() : normal(1, 1, 1), origin(2, 3, 4), PI(3.14159265)
+PlaneImplicitFunctionTest() : normal(1, 1, 1), origin(2, 3, 4), up(0, 1, 0), width(2), PI(3.14159265)
 {
 }
 
 void testPlaneImplicitFunctionConstruction(void)
 {
   using namespace Mantid::MDAlgorithms;
-  NormalParameter nonOrthogonalNormal(0, 0.5, 1); //Non-orthogonal normal used so that getters can be properly verified
+  NormalParameter normalParam(1, 0, 0);
 
-  PlaneImplicitFunction plane(nonOrthogonalNormal, origin);
-  TSM_ASSERT_EQUALS("Normal x component not wired-up correctly", 0, plane.getNormalX());
-  TSM_ASSERT_EQUALS("Normal y component not wired-up correctly", 0.5, plane.getNormalY());
-  TSM_ASSERT_EQUALS("Normal z component not wired-up correctly", 1, plane.getNormalZ());
+  PlaneImplicitFunction plane(normalParam, origin, up, width);
+  TSM_ASSERT_EQUALS("Normal x component not wired-up correctly", 1, plane.getNormalX());
+  TSM_ASSERT_EQUALS("Normal y component not wired-up correctly", 0, plane.getNormalY());
+  TSM_ASSERT_EQUALS("Normal z component not wired-up correctly", 0, plane.getNormalZ());
   TSM_ASSERT_EQUALS("Origin x component not wired-up correctly", 2, plane.getOriginX());
   TSM_ASSERT_EQUALS("Origin y component not wired-up correctly", 3, plane.getOriginY());
   TSM_ASSERT_EQUALS("Origin z component not wired-up correctly", 4, plane.getOriginZ());
+  TSM_ASSERT_EQUALS("Up x component not wired-up correctly", 0, plane.getUpX());
+  TSM_ASSERT_EQUALS("Up y component not wired-up correctly", 1, plane.getUpY());
+  TSM_ASSERT_EQUALS("Up z component not wired-up correctly", 0, plane.getUpZ());
+  TSM_ASSERT_EQUALS("Perpendicular x component not wired-up correctly", 0, plane.getPerpendicularX());
+  TSM_ASSERT_EQUALS("Perpendicular y component not wired-up correctly", 0, plane.getPerpendicularY());
+  TSM_ASSERT_EQUALS("Perpendicular z component not wired-up correctly", 1, plane.getPerpendicularZ());
+  TSM_ASSERT_EQUALS("Width component not wired-up correctly", 2, plane.getWidth());
+
 }
 
 void testEvaluateInsidePoint()
@@ -55,7 +65,7 @@ void testEvaluateInsidePoint()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(1));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(1));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
 }
@@ -72,7 +82,7 @@ void testEvaluateInsidePointReflectNormal()
 
   NormalParameter* reflectNormal = normal.reflect();
   NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin);
+  PlaneImplicitFunction plane(rNormal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should not have been found to be inside the region bounded by the plane after the normal was reflected.", !isInside);
   delete reflectNormal;
@@ -88,7 +98,7 @@ void testEvaluateOutsidePoint()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(4));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(4));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
 }
@@ -105,7 +115,7 @@ void testEvaluateOutsidePointReflectNormal()
 
   NormalParameter* reflectNormal = normal.reflect();;
   NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin);
+  PlaneImplicitFunction plane(rNormal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should not have been found to be outside the region bounded by the plane after the normal was reflected.", isInside);
   delete reflectNormal;
@@ -121,7 +131,7 @@ void testEvaluateOnPlanePoint()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should have been found to be on the region bounded by the plane.", isInside);
 }
@@ -138,7 +148,7 @@ void testEvaluateOnPlanePointReflectNormal()
 
   NormalParameter* reflectNormal = normal.reflect();
   NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin);
+  PlaneImplicitFunction plane(rNormal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point should have been found to be on the region bounded by the plane even after the normal was reflected.", isInside);
   delete reflectNormal;
@@ -154,7 +164,7 @@ void testEvaluateOnPlanePointDecreaseX()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", isInside);
 }
@@ -169,7 +179,7 @@ void testEvaluateOnPlanePointIncreaseX()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !isInside);
 }
@@ -184,7 +194,7 @@ void testEvaluateOnPlanePointDecreaseY()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() - 0.0001));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", isInside);
 }
@@ -199,7 +209,7 @@ void testEvaluateOnPlanePointIncreaseY()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() + 0.0001));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !isInside);
 }
@@ -214,7 +224,7 @@ void testEvaluateOnPlanePointDecreaseZ()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() - 0.0001));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", isInside);
 }
@@ -229,7 +239,7 @@ void testEvaluateOnPlanePointIncreaseZ()
   EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
   EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() + 0.0001));
 
-  PlaneImplicitFunction plane(normal, origin);
+  PlaneImplicitFunction plane(normal, origin, up, width);
   bool isInside = plane.evaluate(&point);
   TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !isInside);
 }
@@ -237,8 +247,12 @@ void testEvaluateOnPlanePointIncreaseZ()
 void testToXML()
 {
   using namespace Mantid::MDAlgorithms;
-  PlaneImplicitFunction plane(normal, origin);
-  TSM_ASSERT_EQUALS("The xml generated by this function did not match the expected schema.", "<Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 1.0000, 1.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>2.0000, 3.0000, 4.0000</Value></Parameter></ParameterList></Function>", plane.toXMLString());
+  NormalParameter tNormal(1, 0, 0);
+  OriginParameter tOrigin(0, 0, 0);
+  UpParameter tUp(0, 1, 0);
+  WidthParameter tWidth(3);
+  PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+  TSM_ASSERT_EQUALS("The xml generated by this function did not match the expected schema.", "<Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>0.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>UpParameter</Type><Value>0.0000, 1.0000, 0.0000</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>3.0000</Value></Parameter></ParameterList></Function>", plane.toXMLString());
 }
 
 void testEqual()
@@ -246,8 +260,10 @@ void testEqual()
   using namespace Mantid::MDAlgorithms;
   NormalParameter n(1, 2, 3);
   OriginParameter o(4, 5, 6);
-  PlaneImplicitFunction A(n, o);
-  PlaneImplicitFunction B(n, o);
+  UpParameter up(7, 8, 9);
+  WidthParameter width(10);
+  PlaneImplicitFunction A(n, o, up, width);
+  PlaneImplicitFunction B(n, o, up, width);
   TSM_ASSERT_EQUALS("These two objects should be considered equal.", A, B);
 }
 
@@ -256,23 +272,31 @@ void testNotEqual()
   using namespace Mantid::MDAlgorithms;
   NormalParameter n1(1, 2, 3);
   OriginParameter o1(4, 5, 6);
+  WidthParameter width1(10);
+  UpParameter up1(7, 8, 9);
   NormalParameter n2(0, 0, 0);
   OriginParameter o2(0, 0, 0);
-  PlaneImplicitFunction A(n1, o1);
-  PlaneImplicitFunction B(n2, o1);
-  PlaneImplicitFunction C(n1, o2);
+  UpParameter up2(0, 0, 0);
+  WidthParameter width2(0);
+  PlaneImplicitFunction A(n1, o1, up1, width1); //Base comparison
+  PlaneImplicitFunction B(n2, o1, up1, width1); //Differ normal only
+  PlaneImplicitFunction C(n1, o2, up1, width1); //Differ origin only
+  PlaneImplicitFunction D(n1, o1, up2, width1); //Differ up only
+  PlaneImplicitFunction E(n1, o1, up1, width2); //Differ width only
   TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, B);
   TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, C);
+  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, D);
+  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, E);
 }
 
 void testGetAngleWithXAxis()
 {
   using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(0, 2, 0);
-  NormalParameter normalParallel(3, 0, 0);
+  NormalParameter normalPerpendicular(0, 1, 0);
+  NormalParameter normalParallel(1, 0, 0);
   OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin);
-  PlaneImplicitFunction B(normalParallel, origin);
+  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+  PlaneImplicitFunction B(normalParallel, origin, up, width);
 
   TSM_ASSERT_DELTA("The angle made with the x-axis should be PI/2", PI/2 , A.getAngleMadeWithXAxis(), 0.001);
   TSM_ASSERT_DELTA("The angle made with the x-axis should be 0", 0 , B.getAngleMadeWithXAxis(), 0.001);
@@ -281,11 +305,11 @@ void testGetAngleWithXAxis()
 void testGetAngleWithYAxis()
 {
   using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(2, 0, 0);
-  NormalParameter normalParallel(0, 3, 0);
+  NormalParameter normalPerpendicular(1, 0, 0);
+  NormalParameter normalParallel(0, 1, 0);
   OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin);
-  PlaneImplicitFunction B(normalParallel, origin);
+  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+  PlaneImplicitFunction B(normalParallel, origin, up, width);
 
   TSM_ASSERT_DELTA("The angle made with the y-axis should be PI/2", PI/2 , A.getAngleMadeWithYAxis(), 0.001);
   TSM_ASSERT_DELTA("The angle made with the y-axis should be 0", 0 , B.getAngleMadeWithYAxis(), 0.001);
@@ -294,11 +318,11 @@ void testGetAngleWithYAxis()
 void testGetAngleWithZAxis()
 {
   using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(2, 0, 0);
-  NormalParameter normalParallel(0, 0, 3);
+  NormalParameter normalPerpendicular(1, 0, 0);
+  NormalParameter normalParallel(0, 0, 1);
   OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin);
-    PlaneImplicitFunction B(normalParallel, origin);
+  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+    PlaneImplicitFunction B(normalParallel, origin, up, width);
 
     TSM_ASSERT_DELTA("The angle made with the z-axis should be PI/2", PI/2 , A.getAngleMadeWithZAxis(), 0.001);
     TSM_ASSERT_DELTA("The angle made with the z-axis should be 0", 0 , B.getAngleMadeWithZAxis(), 0.001);
@@ -311,7 +335,7 @@ void testGetAngleWithZAxis()
 
     NormalParameter normal(1, 2, 3);
     OriginParameter origin(0, 0, 0);
-    PlaneImplicitFunction plane(normal, origin);
+    PlaneImplicitFunction plane(normal, origin, up, width);
 
     Matrix<double> rotationMatrix = extractRotationMatrix(plane);
     //Copy and modify.
@@ -321,7 +345,7 @@ void testGetAngleWithZAxis()
     Matrix<double> invertRotationMatrix = rotationMatrix;
     invertRotationMatrix.Invert();
 
-    TSM_ASSERT_EQUALS("The determinant of a rotation matrix is always 1", 1, rotationMatrix.determinant());
+    TSM_ASSERT_DELTA("The determinant of a rotation matrix is always 1", 1, rotationMatrix.determinant(), 0.001);
     TSM_ASSERT_EQUALS("The inverse of a rotation matrix is equal to its transpose", invertRotationMatrix, transposeRotationMatrix);
   }
 

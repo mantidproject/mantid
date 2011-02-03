@@ -199,7 +199,9 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> avtRebinningCutterFilter::const
   {
     NormalParameter normal(atts.GetNormalX(), atts.GetNormalY(), atts.GetNormalZ());
     OriginParameter origin(atts.GetOriginX(), atts.GetOriginY(), atts.GetOriginZ());
-    appliedFunction = new PlaneImplicitFunction(normal, origin);
+    UpParameter up(atts.GetUpX(), atts.GetUpY(), atts.GetUpZ());
+    WidthParameter width(atts.GetWidth());
+    appliedFunction = new PlaneImplicitFunction(normal, origin, up, width);
   }
   else
   {
@@ -275,6 +277,8 @@ avtContract_p avtRebinningCutterFilter::ModifyContract(avtContract_p incontract)
 
 void avtRebinningCutterFilter::Execute()
 {
+
+  std::cout << "IS DIRTY: " << atts.GetIsDirty() << std::endl;
   using namespace Mantid::VATES;
   using namespace Mantid::Geometry;
   using namespace Mantid::MDAlgorithms;
@@ -310,7 +314,7 @@ void avtRebinningCutterFilter::Execute()
     compFunction->addFunction(constructPlane());
 
     spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
-        spDimt, compFunction, in_ds);
+        spDimt, compFunction, in_ds, atts.GetIsDirty());
   }
   else
   {
@@ -318,7 +322,7 @@ void avtRebinningCutterFilter::Execute()
 
     // Construct reduction knowledge.
     spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
-        spDimt, compFunction, in_ds);
+        spDimt, compFunction, in_ds, true);
   }
 
   /// Create the dataset factory from the user selection.
