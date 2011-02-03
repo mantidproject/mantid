@@ -5,6 +5,7 @@ from reduction.command_interface import *
 from sans_reducer import SANSReducer
 import sans_reduction_steps
 import hfir_instrument
+import mantidsimple
 
 ## List of user commands ######################################################
 def DirectBeamCenter(datafile):
@@ -38,7 +39,8 @@ def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
 def SolidAngle():
-    ReductionSingleton().set_solid_angle_correcter(sans_reduction_steps.SolidAngle())
+    #ReductionSingleton().set_solid_angle_correcter(sans_reduction_steps.SolidAngle())
+    ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, None, None)
     
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)

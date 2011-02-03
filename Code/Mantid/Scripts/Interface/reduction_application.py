@@ -16,7 +16,7 @@ except:
     HAS_MANTID = False    
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
-    def __init__(self, instrument=None):
+    def __init__(self, instrument=None, instrument_list=None):
         QtGui.QMainWindow.__init__(self)
         
         # Application settings
@@ -27,6 +27,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
 
         self._instrument = instrument
+        
+        # List of allowed instrument
+        if instrument_list is None:
+            self._instrument_list = INSTRUMENT_LIST
+        else:
+            self._instrument_list = instrument_list
         
         # Reduction interface
         self._interface = None
@@ -185,14 +191,14 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Invoke an instrument selection dialog
         """ 
         class InstrDialog(QtGui.QDialog, ui.ui_instrument_dialog.Ui_Dialog): 
-            def __init__(self):
+            def __init__(self, instrument_list=[]):
                 QtGui.QDialog.__init__(self)
                 self.setupUi(self)
                 self.instr_combo.clear()
-                for item in INSTRUMENT_LIST:
+                for item in instrument_list:
                     self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 
-        dialog = InstrDialog()
+        dialog = InstrDialog(self._instrument_list)
         dialog.exec_()
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()
@@ -272,6 +278,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             action = self.sender()
             if isinstance(action, QtGui.QAction):
                 file_path = unicode(action.data().toString())
+            
+        # Check whether the file describes the current instrument
+        found_instrument = self._interface.scripter.verify_instrument(file_path)
+        if not found_instrument == self._instrument:
+            self._instrument = found_instrument
+            self.setup_layout()
             
         self._interface.load_file(file_path)
         self._recent_files.append(file_path)

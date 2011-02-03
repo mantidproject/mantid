@@ -11,6 +11,8 @@ try:
 except:
     HAS_MANTID = False  
 
+import xml.dom.minidom
+
 class BaseScriptElement(object):
     """
         Base class for each script element (panel on the UI).
@@ -203,12 +205,32 @@ class BaseReductionScripter(object):
         for item in self._observers:
             item.push()
 
+    def verify_instrument(self, file_name):
+        """
+            Verify that the current scripter object is of the right 
+            class for a given data file
+            @param file_name: name of the file to check 
+        """
+        f = open(file_name, 'r')
+        xml_str = f.read()
+        dom = xml.dom.minidom.parseString(xml_str)
+        element_list = dom.getElementsByTagName("Reduction")
+        if len(element_list)>0:
+            instrument_dom = element_list[0]       
+            found_name = BaseScriptElement.getStringElement(instrument_dom, 
+                                                            "instrument_name", 
+                                                            default=self.instrument_name).strip()
+            return found_name
+        else:
+            raise RuntimeError, "The format of the provided file is not recognized"
+
     def to_xml(self, file_name=None):
         """
             Write all reduction parameters to XML
             @param file_name: name of the file to write the parameters to 
         """
         xml_str = "<Reduction>\n"
+        xml_str += "  <instrument_name>%s</instrument_name>\n" % self.instrument_name
         
         for item in self._observers:
             if item.state() is not None:
