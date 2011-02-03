@@ -34,6 +34,9 @@ else:
     pass
 
 # Update the local copy
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
+if retcode != 0:
+    sys.exit(1)
 retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True, cwd="../Mantid/QtPropertyBrowser")
 if retcode != 0:
     sys.exit(1)
