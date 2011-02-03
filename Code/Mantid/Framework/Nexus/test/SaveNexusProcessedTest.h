@@ -285,7 +285,7 @@ void testExecOnMuonXml()
 
 
 
-void do_testExec_EventWorkspaces(EventType type)
+void do_testExec_EventWorkspaces(EventType type, bool makeDifferentTypes=false)
 {
   std::vector< std::vector<int> > groups(5);
   groups[0].push_back(10);
@@ -300,8 +300,18 @@ void do_testExec_EventWorkspaces(EventType type)
   EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
   WS->getEventList(3).clear();
   // Switch the event type
-  for (size_t wi=0; wi < WS->getNumberHistograms(); wi++)
-    WS->getEventList(wi).switchTo(type);
+  if (makeDifferentTypes)
+  {
+    WS->getEventList(0).switchTo(TOF);
+    WS->getEventList(1).switchTo(WEIGHTED);
+    WS->getEventList(2).switchTo(WEIGHTED_NOTIME);
+    WS->getEventList(4).switchTo(WEIGHTED);
+  }
+  else
+  {
+    for (size_t wi=0; wi < WS->getNumberHistograms(); wi++)
+      WS->getEventList(wi).switchTo(type);
+  }
 
   SaveNexusProcessed alg;
   alg.initialize();
@@ -346,6 +356,11 @@ void testExec_EventWorkspace_WeightedEvent()
 void testExec_EventWorkspace_WeightedEventNoTime()
 {
   do_testExec_EventWorkspaces(WEIGHTED_NOTIME);
+}
+
+void testExec_EventWorkspace_DifferentTypes()
+{
+  do_testExec_EventWorkspaces(WEIGHTED_NOTIME, true);
 }
 
 
