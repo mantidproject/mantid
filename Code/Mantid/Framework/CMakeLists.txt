@@ -128,9 +128,9 @@ if ( MAKE_VATES )
   set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
   include_directories(MDAlgorithms/inc) 
 
-  add_subdirectory (MDEvent)
-  set(MANTIDLIBS ${MANTIDLIBS} MDEvent) 
-  include_directories(MDEvent/inc) 
+  add_subdirectory (MDEvents)
+  set(MANTIDLIBS ${MANTIDLIBS} MDEvents) 
+  include_directories(MDEvents/inc) 
 endif ()
 
 ###########################################################################
@@ -142,7 +142,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
 )
 
 if ( MAKE_VATES )
-  set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms MDEvent)
+  set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms MDEvents)
 endif ()
 
 add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS} )
