@@ -44,11 +44,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _findData(self, runnumber, extension):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
-        if extension.endswith(".nxs"):
-            result = "/home/vel/" + str(runnumber) + "/NeXus/" + str(self._instrument) + "_" + str(runnumber) + extension
-        else:
-            result = "/home/vel/" + str(runnumber) + "/preNeXus/" + str(self._instrument) + "_" + str(runnumber) + extension
-            
         # The default filename. Search in the data directories
         result = str(self._instrument) + "_" + str(runnumber) + extension
         #result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
@@ -169,7 +164,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         # Remove old calibration files
         cmd = "rm temp.cal*"
         os.system(cmd)
-        CreateCalFileByNames(self._instrument, "temp.cal", bankNames)
+        CreateCalFileByNames(wksp, "temp.cal", bankNames)
         # Align detectors using new calibration file with offsets
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp,CalibrationFile="temp.cal")
         
