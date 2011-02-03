@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<detector-grouping instrument="ARGUS" description="ARGUS longitudinal (192 detectors)"> 
+
+<group name="fwd"> <ids val="1-96"/> </group> 
+<group name="bwd"> <ids val="97-192"/> </group> 
+
+<pair name="long"> 
+  <forward-group val="fwd"/> 
+  <backward-group val="bwd"/>                              
+  <alpha val="1"/> 
+</pair> 
+
+<default name="long"/>
+
+
+
+</detector-grouping> 
+

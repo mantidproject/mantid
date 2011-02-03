@@ -1386,7 +1386,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QString gNum = QString::number(groupNum);
     QString pyS;
     if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",true)\n";
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",True)\n";
     else
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
     pyS += "l = gs.activeLayer()\n"
