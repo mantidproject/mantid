@@ -174,7 +174,7 @@ namespace Algorithms
 
     movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
     IAlgorithm_sptr alg2 = createSubAlgorithm("CreateCalFileByNames");
-    alg2->setPropertyValue("InstrumentWorkspace",inputW);
+    alg2->setProperty<MatrixWorkspace_sptr>("InstrumentWorkspace", inputW);
     std::string outputFile;
     outputFile = detname+".cal";
     alg2->setPropertyValue("GroupingFileName", outputFile);
@@ -241,7 +241,7 @@ namespace Algorithms
     const MantidVec & yValues = outputW->readY(0);
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
     const double peakHeight = *it;
-    const double peakLoc = outputW->readX(0)[it - yValues.begin()];
+    //const double peakLoc = outputW->readX(0)[it - yValues.begin()];
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
