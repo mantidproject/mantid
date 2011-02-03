@@ -65,7 +65,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -86,7 +86,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -108,7 +108,7 @@ public:
     NormalParameter tNormal(1, 2, 3);
     NormalParameter rNormal = tNormal.reflect();
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -129,7 +129,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -150,7 +150,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -171,7 +171,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -193,7 +193,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -215,7 +215,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -237,7 +237,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -259,7 +259,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
@@ -281,7 +281,7 @@ public:
 
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     UpParameter tUp;//Not important at all in this test
 
