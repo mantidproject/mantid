@@ -45,11 +45,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
         # The default filename. Search in the data directories
-        result = str(self._instrument) + "_" + str(runnumber) + extension
-        #result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
-                              #Extension=extension)
-        return result
-#["ResultPath"].value
+        #result = str(self._instrument) + "_" + str(runnumber) + extension
+        result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
+                              Extension=extension)
+        return result["ResultPath"].value
 
     def _loadPreNeXusData(self, runnumber, extension):
         # find the file to load
