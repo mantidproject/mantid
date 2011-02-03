@@ -32,8 +32,8 @@
   </component>
   <type name="monitors">
     <component type="monitor" mark-as="monitor">
-      <location z="-0.88125" name="monitor1"/>
-      <location z="2.422081" name="monitor2"/>
+      <location z="-0.879475" name="monitor1"/>
+      <location z="5.748782" name="monitor2"/>
     </component>
   </type>
 
@@ -49,7 +49,7 @@
 
   <type name="Group1">
   <component type="one_inch" idstart="0" idfillbyfirst="y" idstepbyrow="128">
-    <location x="-0.0900825" y="-0.500034125" z="1.940845" name="bank1" rot="-89.3663312172" axis-x="0" axis-y="1" axis-z="0">
+    <location x="-0.0900835" y="-0.500034125" z="1.940845" name="bank1" rot="-89.3663312172" axis-x="0" axis-y="1" axis-z="0">
       <rot val="92.7740541972">
         <rot val="102.872503501" axis-x="0" axis-y="1" axis-z="0" />
       </rot>
