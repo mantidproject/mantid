@@ -92,7 +92,16 @@ namespace Mantid
             NormalParameter m_normal;
             UpParameter m_up;
             WidthParameter m_width;
-            PerpendicularParameter m_perpendicular;
+            mutable PerpendicularParameter m_perpendicular;
+
+            /// Create a valid perpendicular parameter in a lazy fashion.
+            void lazyInitalizePerpendicular() const ;
+            /// Calculate the width applied to the normal direction resolved into the specified axis.
+            inline double calculateNormContributionAlongAxisComponent(const Mantid::Geometry::V3D& axis) const;
+            /// Determine whether the point is bounded by the plane described by the parameters.
+            inline bool isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const Mantid::API::Point3D* pPoint) const;
+            /// Get the effective normal vector to use in calculation.
+            inline NormalParameter calculateEffectiveNormal(const OriginParameter& forwardOrigin) const;
 
         };
 

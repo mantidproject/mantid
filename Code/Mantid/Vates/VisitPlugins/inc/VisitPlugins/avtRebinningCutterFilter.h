@@ -65,7 +65,6 @@
 // ****************************************************************************
 
 class vtkDataSet;
-class Mantid::VATES::vtkDataSetFactory;
 
 class avtRebinningCutterFilter: public avtPluginDatasetToDatasetFilter
 {

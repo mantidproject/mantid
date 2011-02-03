@@ -82,12 +82,11 @@ TSM_ASSERT_EQUALS  ("The static name and the dynamic name of the NormalParameter
 void testReflect()
 {
   Mantid::MDAlgorithms::NormalParameter normal(1, 2, 3);
-  Mantid::MDAlgorithms::NormalParameter* reflected = normal.reflect();
+  Mantid::MDAlgorithms::NormalParameter reflected = normal.reflect();
 
-  TSM_ASSERT_EQUALS("Reflected normal x value is not negative of original.", -1, reflected->getX() );
-  TSM_ASSERT_EQUALS("Reflected normal y value is not negative of original.", -2, reflected->getY() );
-  TSM_ASSERT_EQUALS("Reflected normal z value is not negative of original.", -3, reflected->getZ() );
-  delete reflected;
+  TSM_ASSERT_EQUALS("Reflected normal x value is not negative of original.", -1, reflected.getX() );
+  TSM_ASSERT_EQUALS("Reflected normal y value is not negative of original.", -2, reflected.getY() );
+  TSM_ASSERT_EQUALS("Reflected normal z value is not negative of original.", -3, reflected.getZ() );
 }
 
 void testEqual()

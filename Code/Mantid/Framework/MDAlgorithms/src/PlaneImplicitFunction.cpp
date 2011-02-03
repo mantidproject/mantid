@@ -5,7 +5,7 @@
 #include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <vector>
-#include <iostream>
+#include <stdio.h>
 
 namespace Mantid
 {
@@ -14,26 +14,79 @@ namespace MDAlgorithms
 
 PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, UpParameter& up, WidthParameter& width) :
   m_origin(origin),
-  m_width(width),
   m_normal(normal),
-  m_up(up)
+  m_up(up),
+  m_width(width)
 {
-//  //TODO: consider not doing calculations in constructor, not exception safe.
-  Mantid::Geometry::V3D normalVector(m_normal.getX(), m_normal.getY(), m_normal.getZ());
-  Mantid::Geometry::V3D upVector(m_up.getX(), m_up.getY(), m_up.getZ());
-  Mantid::Geometry::V3D perpendicularVector = crossProduct(normalVector, upVector);
 
-  //Calculate the perpendicular parameter needed internally.
-  m_perpendicular = PerpendicularParameter(perpendicularVector.X(), perpendicularVector.Y(), perpendicularVector.Z());
+}
+
+inline double PlaneImplicitFunction::calculateNormContributionAlongAxisComponent(const Mantid::Geometry::V3D& axis) const
+{
+  using Mantid::Geometry::V3D;
+
+  NormalParameter normalUnit =m_normal.asUnitVector();
+  const V3D normal(normalUnit.getX(), normalUnit.getY(), normalUnit.getZ());
+
+  const double hyp = m_width.getValue()/2;
+
+  //Simple trigonometry. Essentially calculates adjacent along axis specified.
+  return  hyp*dotProduct(normal, axis);
+}
+
+inline NormalParameter PlaneImplicitFunction::calculateEffectiveNormal(const OriginParameter& forwardOrigin) const
+{
+    //Figure out whether the origin is bounded by the forward plane.
+    bool planesOutwardLooking = dotProduct(m_origin.getX() - forwardOrigin.getX(), m_origin.getY() - forwardOrigin.getY(), m_origin.getZ()
+        - forwardOrigin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ()) <= 0;
+    //Fix orientation if necessary.
+    if(planesOutwardLooking)
+    {
+      return m_normal;
+    }
+    else // Inward looking virtual planes.
+    {
+      return m_normal.reflect();
+    }
+}
+
+inline bool PlaneImplicitFunction::isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const Mantid::API::Point3D* pPoint) const
+{
+  return dotProduct(pPoint->getX() - origin.getX(), pPoint->getY() - origin.getY(), pPoint->getZ()
+        - origin.getZ(), normal.getX(), normal.getY(), normal.getZ()) <= 0;
 }
 
 
 bool PlaneImplicitFunction::evaluate(const Mantid::API::Point3D* pPoint) const
 {
-  double num = dotProduct(pPoint->getX() - m_origin.getX(), pPoint->getY() - m_origin.getY(), pPoint->getZ()
-      - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ());
-  //return num.at(0) + num.at(1) + num.at(2) / absolute(normalX, normalY, normalZ) <= 0; //Calculates distance, but magnituted of normal not important in this algorithm
-  return num <= 0;
+  using Mantid::Geometry::V3D;
+  //TODO: consider caching calculation parameters that share lifetime with object.
+
+  //Create virtual planes separated by (absolute) width from from actual origin. Origins are key.
+  const V3D xAxis(1, 0, 0);
+  const V3D yAxis(0, 1, 0);
+  const V3D zAxis(0, 0, 1);
+
+  const double deltaX = calculateNormContributionAlongAxisComponent(xAxis);
+  const double deltaY = calculateNormContributionAlongAxisComponent(yAxis);
+  const double deltaZ = calculateNormContributionAlongAxisComponent(zAxis);
+
+  //Virtual forward origin (+width/2 separated along normal)
+  const OriginParameter vForwardOrigin(m_origin.getX() + deltaX, m_origin.getY() + deltaY, m_origin.getZ() + deltaZ);
+
+  //invert the normal if the normals are defined in such a way that the origin does not appear in the bounded region of the forward plane.
+  const NormalParameter& normal = calculateEffectiveNormal(vForwardOrigin);
+
+  //Virtual backward origin (-width/2 separated along normal)
+  const OriginParameter vBackwardOrigin(m_origin.getX() - deltaX, m_origin.getY() - deltaY, m_origin.getZ() - deltaZ);
+
+  bool isBoundedByForwardPlane = isBoundedByPlane(vForwardOrigin, normal, pPoint);
+
+  NormalParameter rNormal = normal.reflect();
+  bool isBoundedByBackwardPlane = isBoundedByPlane(vBackwardOrigin, rNormal, pPoint);
+
+  //Only if a point is bounded by both the forward and backward planes can it be considered inside the plane with thickness.
+  return isBoundedByForwardPlane && isBoundedByBackwardPlane;
 }
 
 bool PlaneImplicitFunction::operator==(const PlaneImplicitFunction &other) const
@@ -101,16 +154,19 @@ double PlaneImplicitFunction::getUpZ() const
 
 double PlaneImplicitFunction::getPerpendicularX() const
 {
+  lazyInitalizePerpendicular();
   return this->m_perpendicular.getX();
 }
 
 double PlaneImplicitFunction::getPerpendicularY() const
 {
+  lazyInitalizePerpendicular();
   return this->m_perpendicular.getY();
 }
 
 double PlaneImplicitFunction::getPerpendicularZ() const
 {
+  lazyInitalizePerpendicular();
   return this->m_perpendicular.getZ();
 }
 
@@ -172,6 +228,20 @@ std::string PlaneImplicitFunction::toXMLString() const
   std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
       % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str() % m_up.toXMLString() % m_width.toXMLString());
   return formattedXMLString;
+}
+
+void PlaneImplicitFunction::lazyInitalizePerpendicular() const
+{
+  //Perpendicular parameter is invalid by default. Create in lazy fashion.
+  if(!m_perpendicular.isValid())
+  {
+      Mantid::Geometry::V3D normalVector(m_normal.getX(), m_normal.getY(), m_normal.getZ());
+      Mantid::Geometry::V3D upVector(m_up.getX(), m_up.getY(), m_up.getZ());
+      Mantid::Geometry::V3D perpendicularVector = crossProduct(normalVector, upVector);
+
+      //Calculate the perpendicular parameter needed internally.
+      m_perpendicular = PerpendicularParameter(perpendicularVector.X(), perpendicularVector.Y(), perpendicularVector.Z());
+  }
 }
 
 

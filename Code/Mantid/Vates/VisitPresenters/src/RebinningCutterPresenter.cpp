@@ -176,7 +176,6 @@ Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkData
   using namespace Mantid::Geometry;
 
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
@@ -199,7 +198,6 @@ Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkData
 
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
   //Find the requested xDimension alignment from the dimension id provided in the xml.
@@ -221,7 +219,6 @@ Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkData
 
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
   //Find the requested xDimension alignment from the dimension id provided in the xml.
@@ -243,7 +240,6 @@ Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkData
 
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
-  Poco::XML::NodeList* dimensionsXML = geometryXMLElement->getElementsByTagName("Dimension");
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
   //Find the requested xDimension alignment from the dimension id provided in the xml.

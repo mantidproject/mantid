@@ -16,312 +16,362 @@ private:
   class MockPoint3D: public Mantid::API::Point3D
   {
   public:
-  MOCK_CONST_METHOD0  (getX, double());
-  MOCK_CONST_METHOD0(getY, double());
-  MOCK_CONST_METHOD0(getZ, double());
-};
+    MOCK_CONST_METHOD0 (getX, double());
+    MOCK_CONST_METHOD0(getY, double());
+    MOCK_CONST_METHOD0(getZ, double());
+  };
 
-Mantid::MDAlgorithms::NormalParameter normal;
-Mantid::MDAlgorithms::OriginParameter origin;
-Mantid::MDAlgorithms::WidthParameter width;
-Mantid::MDAlgorithms::UpParameter up;
-const double PI;
+  Mantid::MDAlgorithms::NormalParameter normal;
+  Mantid::MDAlgorithms::OriginParameter origin;
+  Mantid::MDAlgorithms::WidthParameter width;
+  Mantid::MDAlgorithms::UpParameter up;
+  const double PI;
 
 public:
 
-PlaneImplicitFunctionTest() : normal(1, 1, 1), origin(2, 3, 4), up(0, 1, 0), width(2), PI(3.14159265)
-{
-}
+  PlaneImplicitFunctionTest() :
+    normal(1, 1, 1), origin(2, 3, 4), up(0, 1, 0), width(2), PI(3.14159265)
+  {
+  }
 
-void testPlaneImplicitFunctionConstruction(void)
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter normalParam(1, 0, 0);
+  void testPlaneImplicitFunctionConstruction(void)
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter normalParam(1, 0, 0);
 
-  PlaneImplicitFunction plane(normalParam, origin, up, width);
-  TSM_ASSERT_EQUALS("Normal x component not wired-up correctly", 1, plane.getNormalX());
-  TSM_ASSERT_EQUALS("Normal y component not wired-up correctly", 0, plane.getNormalY());
-  TSM_ASSERT_EQUALS("Normal z component not wired-up correctly", 0, plane.getNormalZ());
-  TSM_ASSERT_EQUALS("Origin x component not wired-up correctly", 2, plane.getOriginX());
-  TSM_ASSERT_EQUALS("Origin y component not wired-up correctly", 3, plane.getOriginY());
-  TSM_ASSERT_EQUALS("Origin z component not wired-up correctly", 4, plane.getOriginZ());
-  TSM_ASSERT_EQUALS("Up x component not wired-up correctly", 0, plane.getUpX());
-  TSM_ASSERT_EQUALS("Up y component not wired-up correctly", 1, plane.getUpY());
-  TSM_ASSERT_EQUALS("Up z component not wired-up correctly", 0, plane.getUpZ());
-  TSM_ASSERT_EQUALS("Perpendicular x component not wired-up correctly", 0, plane.getPerpendicularX());
-  TSM_ASSERT_EQUALS("Perpendicular y component not wired-up correctly", 0, plane.getPerpendicularY());
-  TSM_ASSERT_EQUALS("Perpendicular z component not wired-up correctly", 1, plane.getPerpendicularZ());
-  TSM_ASSERT_EQUALS("Width component not wired-up correctly", 2, plane.getWidth());
+    PlaneImplicitFunction plane(normalParam, origin, up, width);
+    TSM_ASSERT_EQUALS("Normal x component not wired-up correctly", 1, plane.getNormalX());
+    TSM_ASSERT_EQUALS("Normal y component not wired-up correctly", 0, plane.getNormalY());
+    TSM_ASSERT_EQUALS("Normal z component not wired-up correctly", 0, plane.getNormalZ());
+    TSM_ASSERT_EQUALS("Origin x component not wired-up correctly", 2, plane.getOriginX());
+    TSM_ASSERT_EQUALS("Origin y component not wired-up correctly", 3, plane.getOriginY());
+    TSM_ASSERT_EQUALS("Origin z component not wired-up correctly", 4, plane.getOriginZ());
+    TSM_ASSERT_EQUALS("Up x component not wired-up correctly", 0, plane.getUpX());
+    TSM_ASSERT_EQUALS("Up y component not wired-up correctly", 1, plane.getUpY());
+    TSM_ASSERT_EQUALS("Up z component not wired-up correctly", 0, plane.getUpZ());
+    TSM_ASSERT_EQUALS("Perpendicular x component not wired-up correctly", 0, plane.getPerpendicularX());
+    TSM_ASSERT_EQUALS("Perpendicular y component not wired-up correctly", 0, plane.getPerpendicularY());
+    TSM_ASSERT_EQUALS("Perpendicular z component not wired-up correctly", 1, plane.getPerpendicularZ());
+    TSM_ASSERT_EQUALS("Width component not wired-up correctly", 2, plane.getWidth());
 
-}
+  }
 
-void testEvaluateInsidePoint()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+  void testEvaluateInsidePointOnForwardSurface()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(1));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(1));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(1));
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2));
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3));
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
-}
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-void testEvaluateInsidePointReflectNormal()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    UpParameter tUp;//Not important at all in this test
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(1));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(1));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(1));
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
+  }
 
-  NormalParameter* reflectNormal = normal.reflect();
-  NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should not have been found to be inside the region bounded by the plane after the normal was reflected.", !isInside);
-  delete reflectNormal;
-}
+  void testEvaluateInsidePointOnBackwardSurface()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-void testEvaluateOutsidePoint()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(-1));
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(-2));
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(-3));
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(4));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(4));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(4));
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
-}
+    UpParameter tUp;//Not important at all in this test
 
-void testEvaluateOutsidePointReflectNormal()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
+  }
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(4));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(4));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(4));
+  void testEvaluateInsidePointReflectNormal() //Test that plane automatically relects normals where necessary.
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-  NormalParameter* reflectNormal = normal.reflect();;
-  NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should not have been found to be outside the region bounded by the plane after the normal was reflected.", isInside);
-  delete reflectNormal;
-}
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2));
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3));
 
-void testEvaluateOnPlanePoint()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    NormalParameter tNormal(1, 2, 3);
+    NormalParameter rNormal = tNormal.reflect();
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+    UpParameter tUp;//Not important at all in this test
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should have been found to be on the region bounded by the plane.", isInside);
-}
+    PlaneImplicitFunction plane(rNormal, tOrigin, tUp, tWidth);
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane after the normal was reflected.", isInside);
+  }
 
-void testEvaluateOnPlanePointReflectNormal()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+  void testEvaluatePointOutsideForwardPlane()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1.001)); //Just outside
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2.001)); //Just outside
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3.001)); //Just outside
 
-  NormalParameter* reflectNormal = normal.reflect();
-  NormalParameter rNormal(reflectNormal->getX(), reflectNormal->getY(), reflectNormal->getZ());
-  PlaneImplicitFunction plane(rNormal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point should have been found to be on the region bounded by the plane even after the normal was reflected.", isInside);
-  delete reflectNormal;
-}
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-void testEvaluateOnPlanePointDecreaseX()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    UpParameter tUp;//Not important at all in this test
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX() - 0.0001));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
+  }
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", isInside);
-}
+  void testEvaluatePointOutsideBackwardPlane()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-void testEvaluateOnPlanePointIncreaseX()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(-1.001)); //Just outside
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(-2.001)); //Just outside
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(-3.001)); //Just outside
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()+ 0.0001));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !isInside);
-}
+    UpParameter tUp;//Not important at all in this test
 
-void testEvaluateOnPlanePointDecreaseY()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
+  }
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() - 0.0001));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+  void testEvaluateOnPlanePointDecreaseX()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", isInside);
-}
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(0.999)); //Just inside
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2)); //Just on
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3)); //Just on
 
-void testEvaluateOnPlanePointIncreaseY()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() + 0.0001));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+    UpParameter tUp;//Not important at all in this test
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !isInside);
-}
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
 
-void testEvaluateOnPlanePointDecreaseZ()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", isInside);
+  }
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() - 0.0001));
+  void testEvaluateOnPlanePointIncreaseX()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", isInside);
-}
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1.001)); //Just outside
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2)); //Just on
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3)); //Just on
 
-void testEvaluateOnPlanePointIncreaseZ()
-{
-  using namespace Mantid::MDDataObjects;
-  using namespace Mantid::MDAlgorithms;
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  MockPoint3D point;
-  EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
-  EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
-  EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() + 0.0001));
+    UpParameter tUp;//Not important at all in this test
 
-  PlaneImplicitFunction plane(normal, origin, up, width);
-  bool isInside = plane.evaluate(&point);
-  TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !isInside);
-}
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
 
-void testToXML()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter tNormal(1, 0, 0);
-  OriginParameter tOrigin(0, 0, 0);
-  UpParameter tUp(0, 1, 0);
-  WidthParameter tWidth(3);
-  PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
-  TSM_ASSERT_EQUALS("The xml generated by this function did not match the expected schema.", "<Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>0.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>UpParameter</Type><Value>0.0000, 1.0000, 0.0000</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>3.0000</Value></Parameter></ParameterList></Function>", plane.toXMLString());
-}
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !isInside);
+  }
 
-void testEqual()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter n(1, 2, 3);
-  OriginParameter o(4, 5, 6);
-  UpParameter up(7, 8, 9);
-  WidthParameter width(10);
-  PlaneImplicitFunction A(n, o, up, width);
-  PlaneImplicitFunction B(n, o, up, width);
-  TSM_ASSERT_EQUALS("These two objects should be considered equal.", A, B);
-}
+  void testEvaluateOnPlanePointDecreaseY()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
 
-void testNotEqual()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter n1(1, 2, 3);
-  OriginParameter o1(4, 5, 6);
-  WidthParameter width1(10);
-  UpParameter up1(7, 8, 9);
-  NormalParameter n2(0, 0, 0);
-  OriginParameter o2(0, 0, 0);
-  UpParameter up2(0, 0, 0);
-  WidthParameter width2(0);
-  PlaneImplicitFunction A(n1, o1, up1, width1); //Base comparison
-  PlaneImplicitFunction B(n2, o1, up1, width1); //Differ normal only
-  PlaneImplicitFunction C(n1, o2, up1, width1); //Differ origin only
-  PlaneImplicitFunction D(n1, o1, up2, width1); //Differ up only
-  PlaneImplicitFunction E(n1, o1, up1, width2); //Differ width only
-  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, B);
-  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, C);
-  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, D);
-  TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, E);
-}
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1)); //Just on
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(1.999)); //Just inside
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3)); //Just on
 
-void testGetAngleWithXAxis()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(0, 1, 0);
-  NormalParameter normalParallel(1, 0, 0);
-  OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
-  PlaneImplicitFunction B(normalParallel, origin, up, width);
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
-  TSM_ASSERT_DELTA("The angle made with the x-axis should be PI/2", PI/2 , A.getAngleMadeWithXAxis(), 0.001);
-  TSM_ASSERT_DELTA("The angle made with the x-axis should be 0", 0 , B.getAngleMadeWithXAxis(), 0.001);
-}
+    UpParameter tUp;//Not important at all in this test
 
-void testGetAngleWithYAxis()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(1, 0, 0);
-  NormalParameter normalParallel(0, 1, 0);
-  OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
-  PlaneImplicitFunction B(normalParallel, origin, up, width);
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
 
-  TSM_ASSERT_DELTA("The angle made with the y-axis should be PI/2", PI/2 , A.getAngleMadeWithYAxis(), 0.001);
-  TSM_ASSERT_DELTA("The angle made with the y-axis should be 0", 0 , B.getAngleMadeWithYAxis(), 0.001);
-}
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", isInside);
+  }
 
-void testGetAngleWithZAxis()
-{
-  using namespace Mantid::MDAlgorithms;
-  NormalParameter normalPerpendicular(1, 0, 0);
-  NormalParameter normalParallel(0, 0, 1);
-  OriginParameter origin(0, 0, 0);
-  PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+  void testEvaluateOnPlanePointIncreaseY()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
+
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1)); //Just on
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2.001)); //Just outside
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3)); //Just on
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+
+    UpParameter tUp;//Not important at all in this test
+
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !isInside);
+  }
+
+  void testEvaluateOnPlanePointDecreaseZ()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
+
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1)); //Just on
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2)); //Just on
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(2.999)); //Just inside
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+
+    UpParameter tUp;//Not important at all in this test
+
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", isInside);
+  }
+
+  void testEvaluateOnPlanePointIncreaseZ()
+  {
+    using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDAlgorithms;
+
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).Times(2).WillRepeatedly(testing::Return(1)); //Just on
+    EXPECT_CALL(point, getY()).Times(2).WillRepeatedly(testing::Return(2)); //Just on
+    EXPECT_CALL(point, getZ()).Times(2).WillRepeatedly(testing::Return(3.001)); //Just outside
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2) + (3 * 3)) * 2); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+
+    UpParameter tUp;//Not important at all in this test
+
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+
+    bool isInside = plane.evaluate(&point);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !isInside);
+  }
+
+  void testToXML()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter tNormal(1, 0, 0);
+    OriginParameter tOrigin(0, 0, 0);
+    UpParameter tUp(0, 1, 0);
+    WidthParameter tWidth(3);
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+    TSM_ASSERT_EQUALS("The xml generated by this function did not match the expected schema.", "<Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>1.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>0.0000, 0.0000, 0.0000</Value></Parameter><Parameter><Type>UpParameter</Type><Value>0.0000, 1.0000, 0.0000</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>3.0000</Value></Parameter></ParameterList></Function>", plane.toXMLString());
+  }
+
+  void testEqual()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter n(1, 2, 3);
+    OriginParameter o(4, 5, 6);
+    UpParameter up(7, 8, 9);
+    WidthParameter width(10);
+    PlaneImplicitFunction A(n, o, up, width);
+    PlaneImplicitFunction B(n, o, up, width);
+    TSM_ASSERT_EQUALS("These two objects should be considered equal.", A, B);
+  }
+
+  void testNotEqual()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter n1(1, 2, 3);
+    OriginParameter o1(4, 5, 6);
+    WidthParameter width1(10);
+    UpParameter up1(7, 8, 9);
+    NormalParameter n2(0, 0, 0);
+    OriginParameter o2(0, 0, 0);
+    UpParameter up2(0, 0, 0);
+    WidthParameter width2(0);
+    PlaneImplicitFunction A(n1, o1, up1, width1); //Base comparison
+    PlaneImplicitFunction B(n2, o1, up1, width1); //Differ normal only
+    PlaneImplicitFunction C(n1, o2, up1, width1); //Differ origin only
+    PlaneImplicitFunction D(n1, o1, up2, width1); //Differ up only
+    PlaneImplicitFunction E(n1, o1, up1, width2); //Differ width only
+    TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, B);
+    TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, C);
+    TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, D);
+    TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, E);
+  }
+
+  void testGetAngleWithXAxis()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter normalPerpendicular(0, 1, 0);
+    NormalParameter normalParallel(1, 0, 0);
+    OriginParameter origin(0, 0, 0);
+    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+    PlaneImplicitFunction B(normalParallel, origin, up, width);
+
+    TSM_ASSERT_DELTA("The angle made with the x-axis should be PI/2", PI/2 , A.getAngleMadeWithXAxis(), 0.001);
+    TSM_ASSERT_DELTA("The angle made with the x-axis should be 0", 0 , B.getAngleMadeWithXAxis(), 0.001);
+  }
+
+  void testGetAngleWithYAxis()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter normalPerpendicular(1, 0, 0);
+    NormalParameter normalParallel(0, 1, 0);
+    OriginParameter origin(0, 0, 0);
+    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
+    PlaneImplicitFunction B(normalParallel, origin, up, width);
+
+    TSM_ASSERT_DELTA("The angle made with the y-axis should be PI/2", PI/2 , A.getAngleMadeWithYAxis(), 0.001);
+    TSM_ASSERT_DELTA("The angle made with the y-axis should be 0", 0 , B.getAngleMadeWithYAxis(), 0.001);
+  }
+
+  void testGetAngleWithZAxis()
+  {
+    using namespace Mantid::MDAlgorithms;
+    NormalParameter normalPerpendicular(1, 0, 0);
+    NormalParameter normalParallel(0, 0, 1);
+    OriginParameter origin(0, 0, 0);
+    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
     PlaneImplicitFunction B(normalParallel, origin, up, width);
 
     TSM_ASSERT_DELTA("The angle made with the z-axis should be PI/2", PI/2 , A.getAngleMadeWithZAxis(), 0.001);

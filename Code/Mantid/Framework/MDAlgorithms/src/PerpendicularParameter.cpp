@@ -23,8 +23,11 @@ PerpendicularParameter::PerpendicularParameter()
 PerpendicularParameter::PerpendicularParameter(const PerpendicularParameter& other)
 {
     this->m_isValid = other.m_isValid;
-    this->m_perpendicular = std::vector<double>(3);
-    std::copy(other.m_perpendicular.begin(), other.m_perpendicular.end(), this->m_perpendicular.begin());
+    if(m_isValid)
+    {
+      this->m_perpendicular = std::vector<double>(3);
+      std::copy(other.m_perpendicular.begin(), other.m_perpendicular.end(), this->m_perpendicular.begin());
+    }
 }
 
 PerpendicularParameter& PerpendicularParameter::operator=(const PerpendicularParameter& other)

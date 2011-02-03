@@ -21,12 +21,16 @@ UpParameter::UpParameter()
     this->m_isValid = false;
 }
 
-UpParameter::UpParameter(const UpParameter& other) : m_up(3)
+UpParameter::UpParameter(const UpParameter& other) :
+  m_up(3)
 {
-    this->m_isValid = other.m_isValid;
+  this->m_isValid = other.m_isValid;
+  if (m_isValid)
+  {
     m_up[0] = other.m_up[0];
     m_up[1] = other.m_up[1];
     m_up[2] = other.m_up[2];
+  }
 }
 
 UpParameter& UpParameter::operator=(const UpParameter& other)

@@ -73,11 +73,11 @@ private:
   /// Image from which to draw.
   boost::shared_ptr<Image> m_image;
 
-  /// Name of the scalar to provide on mesh.
-  const std::string m_scalarName;
-
   /// timestep obtained from framework.
   const int m_timestep;
+
+  /// Name of the scalar to provide on mesh.
+  const std::string m_scalarName;
 
   /// Threshold for signal value, below which we do not provide unstructured topologies for.
   const double m_threshold;

@@ -12,7 +12,7 @@ planeVector PlaneInterpreter::walkTree(CompositeImplicitFunction* compFunc) cons
   using namespace Mantid::API;
   planeVector flattenedboxes;
   functionVector nestedFuncs = compFunc->getFunctions();
-  for (int i = 0; i < nestedFuncs.size(); i++)
+  for (unsigned int i = 0; i < nestedFuncs.size(); i++)
   {
     if (CompositeImplicitFunction::functionName() == nestedFuncs[i]->getName())
     {

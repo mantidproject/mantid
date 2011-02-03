@@ -30,6 +30,7 @@ src/SimulateMDD.cpp
 src/SingleValueParameterParser.cpp
 src/TobyFitSimulate.cpp
 src/UpParameter.cpp
+src/VectorMathematics.cpp
 src/VectorParameterParser.cpp
 src/VectorParameter.cpp
 src/WidthParameter.cpp 

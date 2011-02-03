@@ -68,7 +68,7 @@ public:
 
   bool isValid() const;
 
-  NormalParameter* reflect();
+  NormalParameter reflect() const;
 
   NormalParameter* clone() const;
 

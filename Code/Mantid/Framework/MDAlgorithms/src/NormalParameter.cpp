@@ -24,8 +24,11 @@ NormalParameter::NormalParameter()
 NormalParameter::NormalParameter(const NormalParameter& other)
 {
   this->m_isValid = other.m_isValid;
-  this->m_normal = std::vector<double>(3);
-  std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
+  if(m_isValid)
+  {
+    this->m_normal = std::vector<double>(3);
+    std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
+  }
 }
 
 NormalParameter& NormalParameter::operator=(const NormalParameter& other)
@@ -40,9 +43,9 @@ NormalParameter& NormalParameter::operator=(const NormalParameter& other)
   return *this;
 }
 
-NormalParameter* NormalParameter::reflect()
+NormalParameter NormalParameter::reflect() const
 {
-  return new NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
+  return NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
 }
 
 std::string NormalParameter::getName() const

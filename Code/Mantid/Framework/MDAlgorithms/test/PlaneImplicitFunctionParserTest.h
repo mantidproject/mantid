@@ -91,7 +91,16 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter></ParameterList></Function>";
+        std::string xmlToParse = std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+            "<Function>" +
+            "<Type>PlaneImplicitFunction</Type>"+
+            "<ParameterList>"+
+            "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>"+
+            "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>"+
+            "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>"+
+            "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>"+
+            "</ParameterList>"+
+            "</Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
@@ -123,12 +132,21 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><X><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></X>";
+        std::string xmlToParse = std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+                    "<X>" + //Valid XML, but invalid schema
+                    "<Type>PlaneImplicitFunction</Type>"+
+                    "<ParameterList>"+
+                    "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>"+
+                    "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>"+
+                    "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>"+
+                    "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>"+
+                    "</ParameterList>"+
+                    "</X>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         PlaneImplicitFunctionParser functionParser;
-		functionParser.setParameterParser(constructRootParameterParser());
+		    functionParser.setParameterParser(constructRootParameterParser());
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 

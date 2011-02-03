@@ -23,8 +23,11 @@ namespace Mantid
         OriginParameter::OriginParameter(const OriginParameter& other)
         {
             this->m_isValid = other.m_isValid;
-            this->m_origin = std::vector<double>(3);
-            std::copy(other.m_origin.begin(), other.m_origin.end(), this->m_origin.begin());
+            if(m_isValid)
+            {
+              this->m_origin = std::vector<double>(3);
+              std::copy(other.m_origin.begin(), other.m_origin.end(), this->m_origin.begin());
+            }
         }
 
         OriginParameter& OriginParameter::operator=(const OriginParameter& other)

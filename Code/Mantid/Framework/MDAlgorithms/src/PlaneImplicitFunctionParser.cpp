@@ -52,7 +52,7 @@ namespace Mantid
       NodeList* parameterList = functionElement->getChildElement("ParameterList")->childNodes();
 
       //Loop through all parameters and attemp to identify those that are known to belong to this implicit function type.
-      for(int i = 0; i < parameterList->length(); i++)
+      for(unsigned int i = 0; i < parameterList->length(); i++)
       {
         Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
         std::auto_ptr<API::ImplicitFunctionParameter> parameter = std::auto_ptr<API::ImplicitFunctionParameter>(this->parseParameter(parameterElement));
