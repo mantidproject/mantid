@@ -17,7 +17,7 @@ class MDPointTest :    public CxxTest::TestSuite
 
   struct MyExtraData
   {
-    uint detectorID;
+    int detectorID;
     char instrument;
   };
 
