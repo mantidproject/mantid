@@ -81,7 +81,12 @@ class LoadRun(ReductionStep):
 
             log_file = alg.getPropertyValue("Filename")
 
-            SANS2D_log_file = log_file.rpartition('.')[0]+'.log'
+            base_name = os.path.splitext(log_file)[0]
+            if base_name.endswith('-add'):
+                #remove the add files specifier, if it's there
+                base_name = base_name.rpartition('-add')[0]
+            SANS2D_log_file = base_name+'.log'
+            
         else:
             #a particular entry was selected just load that one
             if not self._period == self.UNSET_PERIOD:
@@ -96,13 +101,17 @@ class LoadRun(ReductionStep):
 
             #get rid of these two lines when files store their logs properly
             log_file = alg.getPropertyValue("Filename")
-            SANS2D_log_file = log_file.rpartition('.')[0]+'.log'
+            base_name = os.path.splitext(log_file)[0]
+            if base_name.endswith('-add'):
+                #remove the add files specifier, if it's there
+                base_name = base_name.rpartition('-add')[0]
+            SANS2D_log_file = base_name+'.log'
 
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
         if numPeriods > 1 and self._period == 1:
-            #workspace contains the period number only if it is greater than 1, this always contains the period number
+            #the string "workspace" contains the period number only if it is greater than 1, this always contains the period number
             period_definitely_inc = self._get_workspace_name(False)
             RenameWorkspace(workspace, period_definitely_inc)
             workspace = period_definitely_inc 
@@ -233,6 +242,11 @@ class LoadRun(ReductionStep):
         if len(pieces) != 2 :
              raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
         
+        #get a consistent format for path names, the Linux/Mac version
+        if run_string.find('\\') > -1 and run_string.find('/') == -1:
+            #means we have windows style their paths contain \ but can't contain /   
+            run_string = run_string.replace('\\', '/')
+
         if run_string.find('/') > -1:
             #assume we have a complete filename
             filename = run_string

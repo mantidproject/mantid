@@ -140,7 +140,7 @@ void LoadNexusProcessed::exec()
       std::ostringstream os;
       os << p;
       API::MatrixWorkspace_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + os.str(), base_name + os.str(),
+      declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(prop_name + os.str(), base_name + os.str(),
           Direction::Output));
       wksp_group->add(base_name + os.str());
       setProperty(prop_name + os.str(), local_workspace);

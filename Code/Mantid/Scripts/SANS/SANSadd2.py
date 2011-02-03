@@ -49,7 +49,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
       if mantid.workspaceExists('AddFilesNewTempory') : mantid.deleteWorkspace("AddFilesNewTempory")
       return ""
 
-    lastFile = lastFile.rpartition('.')[0]
+    lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
     outFile = lastFile+'-add.'+'nxs'
     mantid.sendLogMessage('writing file:   '+outFile)
@@ -112,11 +112,14 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
   if path.find('/') == -1:
     #looks like we're on a windows system, convert the directory separators
     path = path.replace('\\', '/')
+    
+  if _isType(ext, rawTypes):
+    LoadSampleDetailsFromRaw(wsName, path+'/'+fName)
 
   logFile = None
   #change below when logs in Nexus files work  file types of .raw need their log files to be copied too
   if True:#_isType(ext, rawTypes):
-    logFile = fName.rpartition('.')[0]+'.log'
+    logFile = os.path.splitext(fName)[0]+'.log'
     
   try:
     samp = mtd[wsName].getSampleDetails()
