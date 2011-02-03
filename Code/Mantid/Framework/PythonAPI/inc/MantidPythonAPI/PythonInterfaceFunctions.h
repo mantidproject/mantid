@@ -78,7 +78,8 @@ namespace Mantid
     };
 
     /// Handle a Python error state
-    void handlePythonError();
+    void handlePythonError(const bool with_trace=true);
+
     /// Check on the current python state
     bool pythonIsReady();
 
