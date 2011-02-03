@@ -85,16 +85,12 @@ namespace MDDataObjects
     errorSquared += point.getErrorSquared();
   }
 
-
-
-
-
   // Here we export a bunch of version of MDBox with various dimension sizes.
   // We need to define one for every possibility.
-  template DLLExport class MDBox<1>;
-  template DLLExport class MDBox<2>;
-  template DLLExport class MDBox<3>;
-  template DLLExport class MDBox<4>;
+  template DLLExport class MDBox<1,0,char>;
+  template DLLExport class MDBox<2,0,char>;
+  template DLLExport class MDBox<3,0,char>;
+  template DLLExport class MDBox<4,0,char>;
 
 
 }//namespace MDDataObjects
