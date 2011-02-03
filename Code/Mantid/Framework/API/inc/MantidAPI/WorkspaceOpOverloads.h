@@ -19,7 +19,7 @@ namespace OperatorOverloads
 
 }
 
-bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+bool DLLExport equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
 // Workspace operator overloads
 MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
