@@ -30,7 +30,7 @@ private:
 public:
 
   PlaneImplicitFunctionTest() :
-    normal(1, 1, 1), origin(2, 3, 4), up(0, 1, 0), width(2), PI(3.14159265)
+    normal(1, 1, 1), origin(2, 3, 4), width(2), up(0, 1, 0), PI(3.14159265)
   {
   }
 
@@ -49,9 +49,6 @@ public:
     TSM_ASSERT_EQUALS("Up x component not wired-up correctly", 0, plane.getUpX());
     TSM_ASSERT_EQUALS("Up y component not wired-up correctly", 1, plane.getUpY());
     TSM_ASSERT_EQUALS("Up z component not wired-up correctly", 0, plane.getUpZ());
-    TSM_ASSERT_EQUALS("Perpendicular x component not wired-up correctly", 0, plane.getPerpendicularX());
-    TSM_ASSERT_EQUALS("Perpendicular y component not wired-up correctly", 0, plane.getPerpendicularY());
-    TSM_ASSERT_EQUALS("Perpendicular z component not wired-up correctly", 1, plane.getPerpendicularZ());
     TSM_ASSERT_EQUALS("Width component not wired-up correctly", 2, plane.getWidth());
 
   }
@@ -339,53 +336,17 @@ public:
     TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, E);
   }
 
-  void testGetAngleWithXAxis()
-  {
-    using namespace Mantid::MDAlgorithms;
-    NormalParameter normalPerpendicular(0, 1, 0);
-    NormalParameter normalParallel(1, 0, 0);
-    OriginParameter origin(0, 0, 0);
-    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
-    PlaneImplicitFunction B(normalParallel, origin, up, width);
-
-    TSM_ASSERT_DELTA("The angle made with the x-axis should be PI/2", PI/2 , A.getAngleMadeWithXAxis(), 0.001);
-    TSM_ASSERT_DELTA("The angle made with the x-axis should be 0", 0 , B.getAngleMadeWithXAxis(), 0.001);
-  }
-
-  void testGetAngleWithYAxis()
-  {
-    using namespace Mantid::MDAlgorithms;
-    NormalParameter normalPerpendicular(1, 0, 0);
-    NormalParameter normalParallel(0, 1, 0);
-    OriginParameter origin(0, 0, 0);
-    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
-    PlaneImplicitFunction B(normalParallel, origin, up, width);
-
-    TSM_ASSERT_DELTA("The angle made with the y-axis should be PI/2", PI/2 , A.getAngleMadeWithYAxis(), 0.001);
-    TSM_ASSERT_DELTA("The angle made with the y-axis should be 0", 0 , B.getAngleMadeWithYAxis(), 0.001);
-  }
-
-  void testGetAngleWithZAxis()
-  {
-    using namespace Mantid::MDAlgorithms;
-    NormalParameter normalPerpendicular(1, 0, 0);
-    NormalParameter normalParallel(0, 0, 1);
-    OriginParameter origin(0, 0, 0);
-    PlaneImplicitFunction A(normalPerpendicular, origin, up, width);
-    PlaneImplicitFunction B(normalParallel, origin, up, width);
-
-    TSM_ASSERT_DELTA("The angle made with the z-axis should be PI/2", PI/2 , A.getAngleMadeWithZAxis(), 0.001);
-    TSM_ASSERT_DELTA("The angle made with the z-axis should be 0", 0 , B.getAngleMadeWithZAxis(), 0.001);
-  }
 
   void testWellFormedRotationMatrix()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::Geometry;
 
-    NormalParameter normal(1, 2, 3);
-    OriginParameter origin(0, 0, 0);
-    PlaneImplicitFunction plane(normal, origin, up, width);
+    NormalParameter tNormal(0.5, 0, 0.5);
+    UpParameter tUp(0, 1, 0);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth; // Width unimportant for this test, so left invalid.
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
 
     Matrix<double> rotationMatrix = extractRotationMatrix(plane);
     //Copy and modify.
@@ -397,6 +358,20 @@ public:
 
     TSM_ASSERT_DELTA("The determinant of a rotation matrix is always 1", 1, rotationMatrix.determinant(), 0.001);
     TSM_ASSERT_EQUALS("The inverse of a rotation matrix is equal to its transpose", invertRotationMatrix, transposeRotationMatrix);
+  }
+
+  void testNonOrthogonalUpandNormalThows()
+  {
+    using namespace Mantid::MDAlgorithms;
+    using namespace Mantid::Geometry;
+
+    NormalParameter tNormal(0.5, 1, 0.5);
+    UpParameter tUp(0, 1, 0); // tUp and tNormal are not orthogonal!
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth; // Width unimportant for this test, so left invalid.
+    PlaneImplicitFunction plane(tNormal, tOrigin, tUp, tWidth);
+
+    TSM_ASSERT_THROWS("Attempting to calculate rotation matrix from two vectors that are not orthogonal. Should throw.", plane.asRotationMatrixVector(), std::logic_error);
   }
 
 };

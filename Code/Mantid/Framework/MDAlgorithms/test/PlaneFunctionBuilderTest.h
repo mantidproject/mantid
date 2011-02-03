@@ -8,7 +8,6 @@
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/UpParameter.h"
-#include "MantidMDAlgorithms/PerpendicularParameter.h"
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 class PlaneFunctionBuilderTest: public CxxTest::TestSuite

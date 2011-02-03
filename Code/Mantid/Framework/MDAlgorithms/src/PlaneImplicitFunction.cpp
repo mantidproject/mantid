@@ -5,7 +5,6 @@
 #include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <vector>
-#include <stdio.h>
 
 namespace Mantid
 {
@@ -152,54 +151,9 @@ double PlaneImplicitFunction::getUpZ() const
   return this->m_up.getZ();
 }
 
-double PlaneImplicitFunction::getPerpendicularX() const
-{
-  lazyInitalizePerpendicular();
-  return this->m_perpendicular.getX();
-}
-
-double PlaneImplicitFunction::getPerpendicularY() const
-{
-  lazyInitalizePerpendicular();
-  return this->m_perpendicular.getY();
-}
-
-double PlaneImplicitFunction::getPerpendicularZ() const
-{
-  lazyInitalizePerpendicular();
-  return this->m_perpendicular.getZ();
-}
-
 double PlaneImplicitFunction::getWidth() const
 {
   return this->m_width.getValue();
-}
-
-double PlaneImplicitFunction::getAngleMadeWithXAxis() const
-{
-  using Mantid::Geometry::V3D;
-  NormalParameter unitVecNormal = m_normal.asUnitVector();
-  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
-  V3D unitVecXAxis(1, 0, 0);
-  return std::acos(unitVecXAxis.scalar_prod(vNormal));
-}
-
-double PlaneImplicitFunction::getAngleMadeWithYAxis() const
-{
-  using Mantid::Geometry::V3D;
-  NormalParameter unitVecNormal = m_normal.asUnitVector();
-  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
-  V3D unitVecYAxis(0, 1, 0);
-  return std::acos(unitVecYAxis.scalar_prod(vNormal));
-}
-
-double PlaneImplicitFunction::getAngleMadeWithZAxis() const
-{
-  using Mantid::Geometry::V3D;
-  NormalParameter unitVecNormal = m_normal.asUnitVector();
-  V3D vNormal(unitVecNormal.getX(), unitVecNormal.getY(), unitVecNormal.getZ());
-  V3D unitVecZAxis(0, 0, 1);
-  return std::acos(unitVecZAxis.scalar_prod(vNormal));
 }
 
 std::string PlaneImplicitFunction::toXMLString() const
@@ -230,40 +184,45 @@ std::string PlaneImplicitFunction::toXMLString() const
   return formattedXMLString;
 }
 
-void PlaneImplicitFunction::lazyInitalizePerpendicular() const
-{
-  //Perpendicular parameter is invalid by default. Create in lazy fashion.
-  if(!m_perpendicular.isValid())
-  {
-      Mantid::Geometry::V3D normalVector(m_normal.getX(), m_normal.getY(), m_normal.getZ());
-      Mantid::Geometry::V3D upVector(m_up.getX(), m_up.getY(), m_up.getZ());
-      Mantid::Geometry::V3D perpendicularVector = crossProduct(normalVector, upVector);
-
-      //Calculate the perpendicular parameter needed internally.
-      m_perpendicular = PerpendicularParameter(perpendicularVector.X(), perpendicularVector.Y(), perpendicularVector.Z());
-  }
-}
-
-
 std::vector<double> PlaneImplicitFunction::asRotationMatrixVector() const
 {
-  using namespace std;
-  const double phi = getAngleMadeWithXAxis();
-  const double theta = getAngleMadeWithYAxis();
-  const double psi =getAngleMadeWithZAxis();
+  using Mantid::Geometry::V3D;
 
-  double rotateAroundXYZArry[9] = {
-  cos(theta)*cos(psi),
-  -cos(phi)*sin(psi) + sin(phi)*sin(theta)*cos(psi),
-  sin(phi)*sin(psi) + cos(phi)*sin(theta)*cos(psi),
-  cos(theta)*sin(psi),
-  cos(phi)*cos(psi) + sin(phi)*sin(theta)*sin(psi),
-  -sin(phi)*cos(psi) + cos(phi)*sin(theta)*sin(psi),
-  -sin(theta),
-  sin(phi)*cos(theta),
-  cos(phi)*cos(theta)};
 
-  return std::vector<double>(rotateAroundXYZArry, rotateAroundXYZArry+9);
+  //Normal.
+  V3D ax(m_normal.getX(), m_normal.getY(), m_normal.getZ());
+
+  //Up.
+  V3D ay(m_up.getX(), m_up.getY(), m_up.getZ());
+
+  if(dotProduct(ax, ay) != 0)
+  {
+    throw std::logic_error("Normal and Up Vectors must be perpendicular");
+  }
+
+  //Perpendicular. Calculate the cross product of the normal vector with the up vector.
+  Mantid::Geometry::V3D az = crossProduct(ax, ay);
+
+  ax.normalize();
+  ay.normalize();
+  az.normalize();
+
+  //b = vectors from original axes.
+  const V3D bx(1, 0, 0);
+  const V3D by(0, 1, 0);
+  const V3D bz(0, 0, 1);
+
+  std::vector<double> rotationMatrix(9);
+  rotationMatrix[0] = dotProduct(ax, bx);
+  rotationMatrix[1] = dotProduct(ax, by);
+  rotationMatrix[2] = dotProduct(ax, bz);
+  rotationMatrix[3] = dotProduct(ay, bx);
+  rotationMatrix[4] = dotProduct(ay, by);
+  rotationMatrix[5] = dotProduct(ay, bz);
+  rotationMatrix[6] = dotProduct(az, bx);
+  rotationMatrix[7] = dotProduct(az, by);
+  rotationMatrix[8] = dotProduct(az, bz);
+  return rotationMatrix;
 }
 
 /// Convenience method. Translates rotation result into Mantid Matrix form.

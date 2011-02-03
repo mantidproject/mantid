@@ -70,15 +70,10 @@ namespace Mantid
             double getUpX() const;
             double getUpY() const;
             double getUpZ() const;
-            double getPerpendicularX() const;
-            double getPerpendicularY() const;
-            double getPerpendicularZ() const;
             double getWidth() const;
             bool operator==(const PlaneImplicitFunction &other) const;
             bool operator!=(const PlaneImplicitFunction &other) const;
-            double getAngleMadeWithXAxis() const;
-            double getAngleMadeWithYAxis() const;
-            double getAngleMadeWithZAxis() const;
+
             //Interpret the plane as a rotation matrix.
             std::vector<double> asRotationMatrixVector() const;
             static std::string functionName()
@@ -92,10 +87,7 @@ namespace Mantid
             NormalParameter m_normal;
             UpParameter m_up;
             WidthParameter m_width;
-            mutable PerpendicularParameter m_perpendicular;
 
-            /// Create a valid perpendicular parameter in a lazy fashion.
-            void lazyInitalizePerpendicular() const ;
             /// Calculate the width applied to the normal direction resolved into the specified axis.
             inline double calculateNormContributionAlongAxisComponent(const Mantid::Geometry::V3D& axis) const;
             /// Determine whether the point is bounded by the plane described by the parameters.
