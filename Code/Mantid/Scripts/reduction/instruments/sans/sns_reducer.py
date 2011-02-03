@@ -19,6 +19,7 @@
 
 """
 from sans_reducer import SANSReducer
+from reduction import ReductionStep
 import sns_reduction_steps
 import sans_reduction_steps
 

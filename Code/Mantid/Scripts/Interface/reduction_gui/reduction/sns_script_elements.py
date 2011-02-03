@@ -105,6 +105,12 @@ class InstrumentDescription(BaseScriptElement):
         else:
             script += "FrameSkipping(False)\n"
         
+        # Normalization
+        if self.normalization == InstrumentDescription.NORMALIZATION_NONE:
+            script += "NoNormalization()\n"
+        elif self.normalization == InstrumentDescription.NORMALIZATION_MONITOR:
+            script += "TotalChargeNormalization()\n"
+        
         return script           
     
     def to_xml(self):
