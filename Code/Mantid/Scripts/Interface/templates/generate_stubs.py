@@ -28,15 +28,14 @@ _replace_strings("script_elements_widget_template.py", "../reduction_gui/widgets
 
 
 print "\nDon't forget to add your instrument to instrument_factory.py!"
-print "The instrument_factory.py should contain the following:\n\n"
+
+print "Add the following line at the top of the file:"
+print
 print "from %s_interface import %sInterface" % (instr_lowercase, instr_name)
-print "INSTRUMENT_LIST = ['%s']\n" % instr_name
-
-print "def instrument_factory(instrument_name, settings=None):"
-print "    if str(instrument_name).strip()=='%s':" % instr_name
-print "        return %sInterface('%s', settings=settings)" % (instr_name, instr_name)
-
-
+print
+print "Then add the following line after the definition of INSTRUMENT_DICT:"
+print 
+print "INSTRUMENT_DICT['%s'] = %sInterface" % (instr_name, instr_name)
 
     
 

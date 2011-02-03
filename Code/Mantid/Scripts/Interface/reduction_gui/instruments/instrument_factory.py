@@ -6,11 +6,13 @@
 from hfir_interface import HFIRInterface
 from sns_interface import SNSInterface
 
-INSTRUMENT_LIST = ["BIOSANS", "EQSANS"]
+INSTRUMENT_DICT = {"BIOSANS": HFIRInterface, 
+                   "EQSANS": SNSInterface}
+
+INSTRUMENT_LIST = INSTRUMENT_DICT.keys()
 
 def instrument_factory(instrument_name, settings=None):
-    if str(instrument_name).strip().upper()=="BIOSANS":
-        return HFIRInterface("BIOSANS", settings=settings)
-    elif str(instrument_name).strip().upper()=="EQSANS":
-        return SNSInterface("EQSANS", settings=settings)
+    for instrument in INSTRUMENT_DICT:
+        if str(instrument_name).strip()==instrument:
+            return INSTRUMENT_DICT[instrument](instrument, settings=settings)
         
