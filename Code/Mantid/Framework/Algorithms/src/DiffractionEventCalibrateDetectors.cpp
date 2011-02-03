@@ -174,7 +174,7 @@ namespace Algorithms
 
     movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
     IAlgorithm_sptr alg2 = createSubAlgorithm("CreateCalFileByNames");
-    alg2->setPropertyValue("InstrumentName", instname);
+    alg2->setPropertyValue("InstrumentWorkspace",inputW);
     std::string outputFile;
     outputFile = detname+".cal";
     alg2->setPropertyValue("GroupingFileName", outputFile);
