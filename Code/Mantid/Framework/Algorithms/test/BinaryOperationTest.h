@@ -177,7 +177,7 @@ public:
   {
     EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
     EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
-    BinaryOperation::BinaryOperationTable * table;
+    BinaryOperation::BinaryOperationTable * table = 0;
     Mantid::Kernel::Timer timer1;
     if (expect_throw)
     {
