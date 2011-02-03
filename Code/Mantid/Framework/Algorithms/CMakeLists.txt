@@ -39,7 +39,6 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/DiffractionFocussing2.cpp
 		src/DiffractionFocussing.cpp
 		src/Divide.cpp
-		src/DivideVanadium.cpp
 		src/DspacemaptoCal.cpp
 		src/ElasticWindow.cpp
 		src/EQSANSTofStructure.cpp
@@ -172,7 +171,6 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/DiffractionFocussing2.h
 		inc/MantidAlgorithms/DiffractionFocussing.h
 		inc/MantidAlgorithms/Divide.h
-		inc/MantidAlgorithms/DivideVanadium.h
 		inc/MantidAlgorithms/DspacemaptoCal.h
 		inc/MantidAlgorithms/ElasticWindow.h
 		inc/MantidAlgorithms/EQSANSTofStructure.h
