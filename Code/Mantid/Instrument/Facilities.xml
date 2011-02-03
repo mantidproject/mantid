@@ -139,6 +139,11 @@
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
   </instrument>  
+ 
+  <instrument name="ARGUS" zeropadding="8">
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument> 
   
 </facility>
 

@@ -834,6 +834,17 @@ void testCheckIfVariousInstrumentsLoad()
 
     AnalysisDataService::Instance().remove(wsName);
 
+    LoadEmptyInstrument loaderARGUS;
+    loaderARGUS.initialize();
+    loaderARGUS.setPropertyValue("Filename", "ARGUS_Definition.xml");
+    wsName = "LoadEmptyInstrumentParamARGUSTest";
+    loaderARGUS.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderARGUS.execute());
+    TS_ASSERT( loaderARGUS.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
     LoadEmptyInstrument loaderEMU2;
     loaderEMU2.initialize();
     loaderEMU2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
