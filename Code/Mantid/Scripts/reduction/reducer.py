@@ -18,6 +18,7 @@
     
 """
 import os
+import sys
 import time
 import types
 import inspect
@@ -90,16 +91,21 @@ def validate_step(f):
                     if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
                     _algm = proxy._getHeldObject()
-                    argspec = inspect.getargspec(self.algm)                    
+                    
+                    # The inspect module has changed in python 2.6 
+                    if sys.version_info[0]==2 and sys.version_info[1]<6:
+                        argspec = inspect.getargspec(self.algm)[0] 
+                    else:
+                        argspec = inspect.getargspec(self.algm).args     
                     
                     # Go through provided arguments
                     for i in range(len(args)):
-                        if argspec.args[i] == "InputWorkspace":
+                        if argspec[i] == "InputWorkspace":
                             _algm.setPropertyValue("InputWorkspace", inputworkspace)
-                        elif argspec.args[i] == "OutputWorkspace":
+                        elif argspec[i] == "OutputWorkspace":
                             _algm.setPropertyValue("OutputWorkspace", outputworkspace)                        
                         else:
-                            _algm.setPropertyValue(argspec.args[i], args[i])
+                            _algm.setPropertyValue(argspec[i], args[i])
                     
                     # Go through keyword arguments
                     for key in kwargs:
