@@ -55,6 +55,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         self.setupUi(self)
         
+        # Event connections
+        if not HAS_MANTID:
+            self.reduce_button.hide()
+        self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
+        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
+        
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 
@@ -78,6 +84,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         self._update_file_menu()
 
+        # Clean up the widgets that have already been created
+        if self._interface is not None:
+            self._interface.destroy()
+            
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
         
         if self._interface is not None:
@@ -91,12 +101,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:
             self.close()
             
-        # Event connections
-        if not HAS_MANTID:
-            self.reduce_button.hide()
-        self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
-        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
-
     def _update_file_menu(self):
         """
             Set up the File menu and update the menu with recent files

@@ -10,8 +10,6 @@ class InstrumentInterface(object):
     """
         Defines the instrument-specific widgets
     """
-    # Output log for reduction execution
-    _output_log = ""
     ## List of widgets with associated observers
     widgets = []      
     
@@ -101,7 +99,7 @@ class InstrumentInterface(object):
         self.scripter.update()
         
         try:
-            self._output_log = self.scripter.apply()
+            self.scripter.apply()
             
             # Update widgets
             self.scripter.push_state()

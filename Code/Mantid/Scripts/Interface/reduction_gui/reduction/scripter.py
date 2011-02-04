@@ -6,7 +6,6 @@
 try:
     from MantidFramework import *
     mtd.initialise(False)
-    from reduction.instruments.sans.hfir_command_interface import *
     HAS_MANTID = True
 except:
     HAS_MANTID = False  
@@ -302,8 +301,6 @@ class BaseReductionScripter(object):
             for item in self._observers:
                 if item.state() is not None:
                     item.state().update()
-            
-            return ReductionSingleton().log_text
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
