@@ -12,13 +12,13 @@
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
-#include "Poco/AutoPtr.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

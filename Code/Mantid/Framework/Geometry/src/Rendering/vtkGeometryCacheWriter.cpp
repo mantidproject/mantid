@@ -1,18 +1,17 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "Poco/FileStream.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/DOMWriter.h"
-#include "Poco/XML/XMLWriter.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
-
 #include "MantidKernel/ConfigService.h"
-
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+
+#include <Poco/FileStream.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <iostream>
 #include <sstream>
