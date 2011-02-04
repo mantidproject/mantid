@@ -5,8 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/DLLExport.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllExport.h"
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -58,12 +57,12 @@ namespace Kernel
     //destructor
     ~UserStringParser();
     /// parses a given string  into a vector of  vector of numbers
-    std::vector<std::vector<unsigned int>> parse(const std::string& userString);
+    std::vector<std::vector<unsigned int> > parse(const std::string& userString);
   private:
     ///separate a given string to a vector of comma separated strings
     std::vector<std::string> separateComma (const std::string&);
     /// separates a given string to vector of vector of numbers using colon as the delimeter
-    std::vector<std::vector<unsigned int>> separateColon(const std::string& input);
+    std::vector<std::vector<unsigned int> > separateColon(const std::string& input);
     ///separate delimiter string from input string and return a vector of numbers created from the separated string 
     std::vector<unsigned int> separateDelimiters(const std::string& input,const std::string& symbol);
         
@@ -76,7 +75,7 @@ namespace Kernel
     void Tokenize(const std::string& input,const std::string& separator,unsigned int& start, unsigned int& end,unsigned int& step);
 
     /// convert the string into numbers
-    void convertToNumbers(const std::string& userString,std::vector<std::vector<unsigned int>>& numbers);
+    void convertToNumbers(const std::string& userString,std::vector<std::vector<unsigned int> >& numbers);
 
   };
 

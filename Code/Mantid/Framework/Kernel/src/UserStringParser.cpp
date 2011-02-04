@@ -21,9 +21,9 @@ namespace Mantid
     *@param userString - the string to parse
     *@returns  a vector containing vectors of numbers.
    */
-    std::vector<std::vector<unsigned int>> UserStringParser::parse(const std::string& userString)
+    std::vector<std::vector<unsigned int> > UserStringParser::parse(const std::string& userString)
     {
-      std::vector<std::vector<unsigned int>> numbers;
+      std::vector<std::vector<unsigned int> > numbers;
       //first separate commas
       std::vector<std::string> commaseparatedstrings;
       if(userString.find(",")!=std::string::npos)
@@ -54,7 +54,7 @@ namespace Mantid
     *@param numbers- a vector containing vectors of numbers.
    */
     void  UserStringParser::convertToNumbers(const std::string& userString,
-                                                             std::vector<std::vector<unsigned int>>& numbers)
+                                                             std::vector<std::vector<unsigned int> >& numbers)
     {
 
       //look for  separators
@@ -83,8 +83,8 @@ namespace Mantid
       }
       else if (Contains(userString,':'))
       {
-        std::vector<std::vector<unsigned int>>colonseparated= separateColon(userString);
-        std::vector<std::vector<unsigned int>>::const_iterator citr1;
+        std::vector<std::vector<unsigned int> >colonseparated= separateColon(userString);
+        std::vector<std::vector<unsigned int> >::const_iterator citr1;
         for(citr1=colonseparated.begin();citr1!=colonseparated.end();++citr1)
         {
           numbers.push_back((*citr1));
@@ -94,9 +94,9 @@ namespace Mantid
     }
 
   /** This method checks input string contains character ch 
-    * @input - the input string
-    * @input - character ch to search
-    * @return - true if the string contains character ch.
+    * @param input - the input string
+    * @param ch - character ch to search
+    * @returns - true if the string contains character ch.
     */
     bool UserStringParser::Contains(const std::string& input,char ch)
     {
@@ -111,7 +111,7 @@ namespace Mantid
     std::vector<std::string> UserStringParser::separateComma(const std::string& input)
     {
      
-      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
       boost::char_separator<char> commasep(",");
        std::vector<std::string> commaseparatedvalues;
       
@@ -128,12 +128,12 @@ namespace Mantid
      *@param input - the string to parse
      *@returns  a vector of vector containing colon separated tokens.
     */
-    std::vector<std::vector<unsigned int>> UserStringParser::separateColon(const std::string& input)
+    std::vector<std::vector<unsigned int> > UserStringParser::separateColon(const std::string& input)
     {     
       unsigned int startNum=0;
       unsigned int endNum=0;
       unsigned int step=1;
-      std::vector<std::vector<unsigned int>> separatedValues;
+      std::vector<std::vector<unsigned int> > separatedValues;
       Tokenize(input,":",startNum,endNum,step);
       for(unsigned int num=startNum;num<=endNum;num+=step)
       {
@@ -177,7 +177,7 @@ namespace Mantid
     void UserStringParser::Tokenize(const std::string& input,const std::string& delimiter,
       unsigned int& start, unsigned int& end,unsigned int& step)
     {
-      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
       
       boost::char_separator<char> seps(delimiter.c_str());
       std::vector<unsigned int> separatedValues;
