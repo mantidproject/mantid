@@ -50,7 +50,7 @@ public:
     TS_ASSERT( offsets.isInitialized() );
   }
 
-  void t1estExec()
+  void testExec()
   {
     if ( !offsets.isInitialized() ) offsets.initialize();
 

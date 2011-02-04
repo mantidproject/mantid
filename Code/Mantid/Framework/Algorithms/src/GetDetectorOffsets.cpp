@@ -165,14 +165,8 @@ namespace Mantid
         throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
       }
 
-      //IFunction* fun = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
-      //if (!fun)
-      //{
-      //  throw std::runtime_error("FunctionFactory cannot create function returned from Fit algorithm");
-      //}
-      //const double offset = fun->getParameter("f1.PeakCentre");
-      const double offset = fit_alg->getProperty("f1.PeakCentre");
-      //delete fun;
+      std::vector<double> params = fit_alg->getProperty("Parameters");
+      const double offset = params[3]; // f1.PeakCentre
       return (-offset*step/(dreference+offset*step));
     }
 
