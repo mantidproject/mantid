@@ -8,9 +8,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
+
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
-#include "Poco/StringTokenizer.h"
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -19,14 +19,15 @@
 #include <vector>
 #include <numeric>
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/StringTokenizer.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

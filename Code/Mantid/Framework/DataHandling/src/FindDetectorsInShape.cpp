@@ -6,9 +6,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

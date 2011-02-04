@@ -7,7 +7,7 @@
 //#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
 

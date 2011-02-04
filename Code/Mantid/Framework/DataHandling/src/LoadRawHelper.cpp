@@ -16,12 +16,12 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadInstrumentHelper.h"
-#include "boost/date_time/gregorian/gregorian.hpp"
-
 #include "MantidAPI/LoadAlgorithmFactory.h"
+
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
-#include "Poco/Path.h"
-#include "Poco/DateTimeParser.h"
+#include <Poco/Path.h>
+#include <Poco/DateTimeParser.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 

@@ -13,9 +13,9 @@
 #include "LoadRaw/isisraw2.h"
 #include <cstdio>
 #include <boost/timer.hpp>
-#include "Poco/File.h"
-#include "Poco/Path.h"
-#include "Poco/Exception.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <Poco/Exception.h>
 
 //DECLARE_WORKSPACE(ManagedRawFileWorkspace2D)
 

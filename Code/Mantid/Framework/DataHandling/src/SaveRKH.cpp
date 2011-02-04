@@ -4,8 +4,8 @@
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-#include "Poco/LocalDateTime.h"
-#include "Poco/DateTimeFormatter.h"
+#include <Poco/LocalDateTime.h>
+#include <Poco/DateTimeFormatter.h>
 
 #include <iomanip>
 
