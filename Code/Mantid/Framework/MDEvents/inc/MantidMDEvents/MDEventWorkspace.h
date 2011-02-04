@@ -19,16 +19,6 @@ namespace MDEvents
    * @tparam nd :: the number of dimensions that each MDPoint will be tracking.
    *               an usigned int > 0.
    *
-   * @tparam nv :: number of corner vertices per dimension. If only the
-   *               center of the point is required, this == 0.
-   *               If all corners are needed, this == nd.
-   *               Default value == 0; meaning only the center coordinates are used.
-   *
-   * @tparam TE :: Type for a bit of extra data that can be carried around in each point.
-   *               For example, this could be a single uint32 representing a detector ID.
-   *               Or, if more complex things are required, this could be a struct with
-   *               a few fields (should not be dynamically allocated like a pointer, in general).
-   *               Default value == char[0] (occupying no memory).
    *
    * @author Janik Zikovsky, SNS
    * @date Dec 3, 2010
@@ -58,7 +48,7 @@ namespace MDEvents
     /** Sample function returning the n-th point in the workspace.
      * This may not be needed.
      *  */
-    Event getPoint(int n);
+    Event getPoint(size_t n);
 
   protected:
 

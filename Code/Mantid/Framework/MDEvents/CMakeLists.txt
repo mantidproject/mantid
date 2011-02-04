@@ -2,11 +2,13 @@
 set (SRC_FILES 
 	src/MDEventWorkspace.cpp
 	src/MDBox.cpp               
+	src/MDDeclarations.cpp               
 )
 
 # Header files
 set (INC_FILES
 	inc/MantidMDEvents/MDEvent.h
+	inc/MantidMDEvents/IMDBox.h
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDDimensionExtents.h
@@ -15,8 +17,8 @@ set (INC_FILES
 # Test files. Other source files required.
 set (TEST_FILES 
 	test/MDEventTest.h  
-	test/MDEventWorkspaceTest.h  
-	test/MDBoxTest.h  
+#	test/MDEventWorkspaceTest.h  
+#	test/MDBoxTest.h  
 )
 
 set ( GMOCK_TEST_FILES
@@ -25,7 +27,7 @@ set ( GMOCK_TEST_FILES
 # Add the target for this directory
 add_library ( MDEvents ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEventss 
+set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents 
                                                  COMPILE_DEFINITIONS IN_MANTID_MDEVENT )
                                                  
 # Add to the 'Framework' group in VS

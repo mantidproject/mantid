@@ -35,6 +35,13 @@ namespace MDEvents
    */
   #define TMDE_CLASS template <size_t nd>
 
+
+  /** Macro MDE to make declaring the MDEvent
+   * data type more maintainable.
+   */
+  #define MDE MDEvent<nd>
+
+
   /** Templated class holding data about a neutron detection event
    * in N-dimensions (for example, Qx, Qy, Qz, E).
    *
@@ -47,15 +54,12 @@ namespace MDEvents
    *
    * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
    *               an int > 0.
-   * @tparam ne :: the number of extra (non-float) ints of information to store.
-   *               These could be detector ids, run numbers, etc. and will consist
-   *               of signed 32-bit ints
    *
    * @author Janik Zikovsky, SNS
    * @date Dec 3, 2010
    *
    * */
-  template <size_t nd>
+  TMDE_CLASS
   class DLLExport MDEvent
   {
   private:

@@ -2,6 +2,7 @@
 #define MDBOX_H_
 
 #include "MantidKernel/System.h"
+#include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -11,13 +12,10 @@ namespace Mantid
 namespace MDEvents
 {
 
-
-
-
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
    *
-   * A box is a container of MDPoint's within a certain range of values
+   * A box is a container of MDEvent's within a certain range of values
    * within the nd dimensions. This range defines a n-dimensional "box"
    * or rectangular prism.
    *
@@ -30,13 +28,13 @@ namespace MDEvents
    * @date Dec 7, 2010
    *
    * */
-  template <size_t nd>
-  class DLLExport MDBox
+  TMDE_CLASS
+  class DLLExport MDBox //: public IMDBox<nd>
   {
   public:
     MDBox();
 
-    void addEvent( const MDEvent<nd> & point);
+    void addEvent( const MDE & point);
 
     void clear();
 
@@ -44,7 +42,7 @@ namespace MDEvents
 
     size_t getNumDims() const;
 
-    std::vector< MDEvent<nd> > & getPoints();
+    std::vector< MDE > & getPoints();
 
     double getSignal() const;
     double getErrorSquared() const;
@@ -53,7 +51,7 @@ namespace MDEvents
 
     /** Vector of MDEvent's, in no particular order.
      * */
-    std::vector< MDEvent<nd> > data;
+    std::vector< MDE > data;
 
     /** Array of MDDimensionExtents giving the extents and
      * in each dimension.
@@ -69,7 +67,7 @@ namespace MDEvents
 
   public:
     /// Typedef for a shared pointer to a MDBox
-    typedef boost::shared_ptr<MDBox<nd> > sptr;
+    typedef boost::shared_ptr< MDBox<nd> > sptr;
 
   };
 
