@@ -52,7 +52,8 @@ namespace API
       int index = -1;
       int xMin = -1;
       int xMax = -1;
-      double startX,endX;
+      double startX = 0;
+      double endX = 0;
       int n = int(mws->blocksize()); // length of each Y vector
 
       Expression expr;
