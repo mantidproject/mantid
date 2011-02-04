@@ -176,7 +176,7 @@ namespace Mantid
         std::string WSName = m_workspace + "_" + suffix.str();
         try
         {
-          Workspace_sptr localWorkspace = loadMuonNexus->getProperty(opWS);
+          MatrixWorkspace_sptr localWorkspace = loadMuonNexus->getProperty(opWS);
           declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
           setProperty<Workspace_sptr>(opWS, localWorkspace);
           period++;

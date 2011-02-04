@@ -64,7 +64,7 @@ public:
 	// MatrixWorkspace_sptr output;
     //TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"))); 
 
-    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
     // Check two X vectors are the same
@@ -108,8 +108,8 @@ public:
     (output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
     (output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
     
-	Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output1);
-    Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
+	MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<MatrixWorkspace>(output1);
+    MatrixWorkspace_sptr output2D2 = boost::dynamic_pointer_cast<MatrixWorkspace>(output2);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
     // Check two X vectors are the same

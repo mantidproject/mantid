@@ -212,7 +212,7 @@ namespace Mantid
           suffix << (period+1);
           outws =outputWorkspace+"_"+suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+          declareProperty(new WorkspaceProperty<MatrixWorkspace>(outws,WSName,Direction::Output));
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
 
@@ -381,7 +381,7 @@ namespace Mantid
         {
           // Assign the result to the output workspace property
           if(m_numberOfPeriods>1)
-            setProperty(outws,localWorkspace);
+            setProperty(outws,boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace));
           else
           {
             setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
