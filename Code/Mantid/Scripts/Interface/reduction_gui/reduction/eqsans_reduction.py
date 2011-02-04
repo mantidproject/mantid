@@ -5,7 +5,7 @@
 import time
 from scripter import BaseReductionScripter
 
-class SNSReductionScripter(BaseReductionScripter):
+class EQSANSReductionScripter(BaseReductionScripter):
     """
         Organizes the set of reduction parameters that will be used to
         create a reduction script. Parameters are organized by groups that
@@ -13,7 +13,7 @@ class SNSReductionScripter(BaseReductionScripter):
     """
     
     def __init__(self, name="EQSANS"):
-        super(SNSReductionScripter, self).__init__(name=name)        
+        super(EQSANSReductionScripter, self).__init__(name=name)        
     
     def to_script(self, file_name=None):
         """

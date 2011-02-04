@@ -4,10 +4,10 @@
     and its corresponding interface class. 
 """
 from hfir_interface import HFIRInterface
-from sns_interface import SNSInterface
+from eqsans_interface import EQSANSInterface
 
 INSTRUMENT_DICT = {"BIOSANS": HFIRInterface, 
-                   "EQSANS": SNSInterface}
+                   "EQSANS": EQSANSInterface}
 
 INSTRUMENT_LIST = INSTRUMENT_DICT.keys()
 

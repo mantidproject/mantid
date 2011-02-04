@@ -10,19 +10,19 @@ from reduction_gui.widgets.sns_instrument import SNSInstrumentWidget
 from reduction_gui.widgets.background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.widgets.mask import MaskTabWidget
-from reduction_gui.reduction.sns_reduction import SNSReductionScripter
+from reduction_gui.reduction.eqsans_reduction import EQSANSReductionScripter
 
 
-class SNSInterface(InstrumentInterface):
+class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
     """
     
     def __init__(self, name, settings):
-        super(SNSInterface, self).__init__(name, settings)
+        super(EQSANSInterface, self).__init__(name, settings)
         
         # Scripter object to interface with Mantid 
-        self.scripter = SNSReductionScripter(name=name)        
+        self.scripter = EQSANSReductionScripter(name=name)        
 
         # Instrument description
         self.attach(SNSInstrumentWidget(settings = self._settings))
