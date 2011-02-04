@@ -17,7 +17,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include <boost/shared_ptr.hpp>
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 #include "MantidDataHandling/LoadInstrumentHelper.h"

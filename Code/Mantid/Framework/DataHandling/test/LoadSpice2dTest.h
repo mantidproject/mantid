@@ -13,7 +13,7 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <vector>
 
 /**

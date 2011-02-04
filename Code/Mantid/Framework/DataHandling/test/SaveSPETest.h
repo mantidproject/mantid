@@ -10,7 +10,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <numeric>

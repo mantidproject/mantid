@@ -10,10 +10,10 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/date_parsing.hpp"
-#include "boost/lexical_cast.hpp"
-#include "boost/algorithm/string.hpp"
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/date_parsing.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <Poco/StringTokenizer.h>
 
 #include <istream>

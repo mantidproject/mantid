@@ -13,7 +13,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

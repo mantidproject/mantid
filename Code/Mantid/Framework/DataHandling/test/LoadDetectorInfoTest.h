@@ -12,7 +12,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <fstream>

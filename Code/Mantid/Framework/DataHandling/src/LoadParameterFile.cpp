@@ -10,15 +10,15 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
-
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
-#include "Poco/File.h"
 #include "MantidKernel/ArrayProperty.h"
+
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/File.h>
 #include <sstream>
 
 using Poco::XML::DOMParser;

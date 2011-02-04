@@ -18,7 +18,7 @@
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/shared_ptr.hpp>
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 

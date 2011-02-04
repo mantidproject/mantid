@@ -7,7 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 class LoadPreNeXusMonitorsTest: public CxxTest::TestSuite
 {

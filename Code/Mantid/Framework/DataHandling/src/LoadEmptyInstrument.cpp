@@ -7,7 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <cmath>
 
 namespace Mantid

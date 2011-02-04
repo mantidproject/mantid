@@ -25,16 +25,15 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/DateTimeParser.h"
-#include "Poco/DateTimeFormat.h"
-#include "Poco/RegularExpression.h"
-
-#include "Poco/SAX/SAXParser.h"
-#include "Poco/SAX/ContentHandler.h"
-#include "Poco/SAX/Attributes.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/RegularExpression.h>
+#include <Poco/SAX/SAXParser.h>
+#include <Poco/SAX/ContentHandler.h>
+#include <Poco/SAX/Attributes.h>
 
 
 using namespace Mantid;

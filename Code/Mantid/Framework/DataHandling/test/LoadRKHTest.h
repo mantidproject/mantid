@@ -9,7 +9,7 @@
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 class LoadRKHTest : public CxxTest::TestSuite
 {

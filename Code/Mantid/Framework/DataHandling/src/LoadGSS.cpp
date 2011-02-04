@@ -5,10 +5,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidAPI/LoadAlgorithmFactory.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <iostream>
 #include <fstream>
 #include <iomanip>

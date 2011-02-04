@@ -6,7 +6,7 @@
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 #include <fstream>
 #include <sstream>

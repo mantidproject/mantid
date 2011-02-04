@@ -6,7 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <fstream>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 class SaveRKHTest : public CxxTest::TestSuite
 {

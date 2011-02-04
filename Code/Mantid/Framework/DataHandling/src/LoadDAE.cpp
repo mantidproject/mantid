@@ -13,7 +13,7 @@
 
 #include <cmath>
 #include <boost/shared_array.hpp>
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <Poco/Thread.h>
 
 

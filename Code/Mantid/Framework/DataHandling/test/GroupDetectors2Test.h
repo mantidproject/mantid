@@ -17,7 +17,7 @@
 #include <iostream>
 #include <numeric>
 #include <fstream>
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using Mantid::DataHandling::GroupDetectors2;
 using namespace Mantid::Kernel;

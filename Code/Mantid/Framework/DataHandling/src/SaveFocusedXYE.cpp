@@ -3,7 +3,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
 

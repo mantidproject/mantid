@@ -5,18 +5,18 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/BinaryFile.h"
 
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/SAX/InputSource.h>
 
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
 #include <fstream>

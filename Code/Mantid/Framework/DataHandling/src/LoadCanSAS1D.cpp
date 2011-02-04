@@ -10,11 +10,11 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
-#include "Poco/Path.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/Text.h"
+#include <Poco/Path.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
 
 #include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------

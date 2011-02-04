@@ -10,12 +10,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/DateTimeParser.h"
-#include "Poco/DateTimeFormat.h"
-#include "Poco/RegularExpression.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/RegularExpression.h>
 
 #include <fstream>  // used to get ifstream
 #include <sstream>
