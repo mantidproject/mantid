@@ -1,25 +1,25 @@
 # Source files
 set (SRC_FILES 
-#	src/MDEventWorkspace.cpp
+	src/MDEventWorkspace.cpp
 	src/MDBox.cpp               
 )
 
 # Header files
 set (INC_FILES
 	inc/MantidMDEvents/MDEvent.h
-	inc/MantidMDEvents/IMDBox.h
 	inc/MantidMDEvents/MDBox.h
-#	inc/MantidMDEvents/MDEventWorkspace.h
+	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDDimensionExtents.h
 )
 
 # Test files. Other source files required.
 set (TEST_FILES 
+	test/MDEventTest.h  
+	test/MDEventWorkspaceTest.h  
+	test/MDBoxTest.h  
 )
 
 set ( GMOCK_TEST_FILES
-	test/MDEventTest.h  
-	test/MDBoxTest.h  
 )
 
 # Add the target for this directory

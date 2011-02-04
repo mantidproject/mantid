@@ -3,7 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDPoint.h"
 #include "MantidMDEvents/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 
@@ -35,16 +34,16 @@ namespace MDEvents
    * @date Dec 3, 2010
    *
    * */
-  template <size_t nd, size_t nv=0, typename TE=char>
+  TMDE_CLASS
   class DLLExport MDEventWorkspace  : public IMDEventWorkspace
   {
   public:
-    /** Typedef of the basic MDPoint data type used in this MDEventWorkspace.
+    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
      * This is for convenience; an algorithm can declare
-     *  MyWorkspace::Point somePoint;
+     *  MyWorkspace::Event someEvent;
      * without having to look up template parameters...
      */
-    typedef MDPoint<nd,nv,TE> Point;
+    typedef MDEvent<nd> Event;
 
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const;
@@ -59,7 +58,7 @@ namespace MDEvents
     /** Sample function returning the n-th point in the workspace.
      * This may not be needed.
      *  */
-    Point getPoint(int n);
+    Event getPoint(int n);
 
   protected:
 

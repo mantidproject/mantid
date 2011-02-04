@@ -11,7 +11,7 @@
 #include <map>
 
 using namespace Mantid;
-using namespace Mantid::MDDataObjects;
+using namespace Mantid::MDEvents;
 
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {

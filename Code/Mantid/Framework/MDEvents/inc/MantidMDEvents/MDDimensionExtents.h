@@ -8,7 +8,6 @@
  *      Author: Janik Zikovsky
  */
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDPoint.h"
 #include <limits>
 
 namespace Mantid

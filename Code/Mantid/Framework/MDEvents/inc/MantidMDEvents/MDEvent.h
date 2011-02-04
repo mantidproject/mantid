@@ -20,8 +20,20 @@ namespace MDEvents
 
   /** Macro TMDE to make declaring template functions
    * faster. Put this macro before function declarations.
+   * Use:
+   * TMDE(void ClassName)::methodName()
+   * {
+   *    // function body here
+   * }
    */
-  #define TMDE template <size_t nd>
+  #define TMDE(decl) template <size_t nd> decl<nd>
+
+  /** Macro to make declaring template classes faster.
+   * Use:
+   * TMDE_CLASS
+   * class ClassName : ...
+   */
+  #define TMDE_CLASS template <size_t nd>
 
   /** Templated class holding data about a neutron detection event
    * in N-dimensions (for example, Qx, Qy, Qz, E).

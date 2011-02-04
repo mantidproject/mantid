@@ -8,8 +8,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
-  TMDE
-  MDBox<nd>::MDBox() :
+  TMDE(MDBox)::MDBox() :
     signal(0.0), errorSquared(0.0)
   {
   }
@@ -17,8 +16,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Clear any points contained. */
-  TMDE
-  void MDBox<nd>::clear()
+  TMDE(void MDBox)::clear()
   {
     signal = 0.0;
     errorSquared = 0.0;
@@ -27,16 +25,14 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this box */
-  TMDE
-  size_t MDBox<nd>::getNumDims() const
+  TMDE(size_t MDBox)::getNumDims() const
   {
     return nd;
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
-  TMDE
-  size_t MDBox<nd>::getNPoints() const
+  TMDE(size_t MDBox)::getNPoints() const
   {
     return data.size();
   }
@@ -44,8 +40,8 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns a reference to the points vector contained within.
    */
-  TMDE
-  std::vector< MDEvent<nd> > & MDBox<nd>::getPoints()
+  TMDE(
+  std::vector< MDEvent<nd> > & MDBox)::getPoints()
   {
     return data;
   }
@@ -53,8 +49,8 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns the integrated signal from all points within.
    */
-  TMDE
-  double MDBox<nd>::getSignal() const
+  TMDE(
+  double MDBox)::getSignal() const
   {
     return signal;
   }
@@ -62,8 +58,8 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns the integrated error squared from all points within.
    */
-  TMDE
-  double MDBox<nd>::getErrorSquared() const
+  TMDE(
+  double MDBox)::getErrorSquared() const
   {
     return errorSquared;
   }
@@ -75,8 +71,8 @@ namespace MDEvents
   /** Add a MDEvent to the box.
    * @param point :: reference to a MDEvent to add.
    * */
-  TMDE
-  void MDBox<nd>::addEvent( const MDEvent<nd> & point)
+  TMDE(
+  void MDBox)::addEvent( const MDEvent<nd> & point)
   {
     this->data.push_back(point);
 

@@ -8,15 +8,15 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this workspace */
-template <size_t nd, size_t nv, typename TE>
-  int MDEventWorkspace<nd,nv,TE>::getNumDims() const
+  TMDE(
+  int MDEventWorkspace)::getNumDims() const
   {
     return nd;
   }
 
   /** Returns the total number of points (events) in this workspace */
-  template <size_t nd, size_t nv, typename TE>
-  size_t MDEventWorkspace<nd,nv,TE>::getNPoints() const
+  TMDE(
+  size_t MDEventWorkspace)::getNPoints() const
   {
     //return data.size();
     return 0;
@@ -24,8 +24,8 @@ template <size_t nd, size_t nv, typename TE>
 
   /** Returns the number of bytes of memory
    * used by the workspace. */
-  template <size_t nd, size_t nv, typename TE>
-  size_t MDEventWorkspace<nd,nv,TE>::getMemoryUsed() const
+  TMDE(
+  size_t MDEventWorkspace)::getMemoryUsed() const
   {
     return this->getNPoints() * sizeof(MDEvent<nd>);
   }
@@ -36,10 +36,10 @@ template <size_t nd, size_t nv, typename TE>
 
 
   // We export a bunch of version of MDEventWorkspace with various dimension sizes.
-  template DLLExport class MDEventWorkspace<1,0,char>;
-  template DLLExport class MDEventWorkspace<2,0,char>;
-  template DLLExport class MDEventWorkspace<3,0,char>;
-  template DLLExport class MDEventWorkspace<4,0,char>;
+  template DLLExport class MDEventWorkspace<1>;
+  template DLLExport class MDEventWorkspace<2>;
+  template DLLExport class MDEventWorkspace<3>;
+  template DLLExport class MDEventWorkspace<4>;
 
 
 
