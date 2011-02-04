@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "sstream"
+#include <sstream>
 
 namespace Mantid
 {
