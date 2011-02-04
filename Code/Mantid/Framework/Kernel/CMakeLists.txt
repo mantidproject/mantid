@@ -48,6 +48,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
                 src/Unit.cpp
 		src/UnitFactory.cpp
 		src/VectorHelper.cpp
+		src/UserStringParser.cpp
 		src/ANN/ANN.cpp
 		src/ANN/bd_fix_rad_search.cpp
 		src/ANN/bd_pr_search.cpp
@@ -139,6 +140,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 		inc/MantidKernel/UnitFactory.h
 		inc/MantidKernel/Unit.h
 		inc/MantidKernel/VectorHelper.h
+		inc/MantidKernel/UserStringParser.h
 		inc/MantidKernel/ANN/ANN.h
 		inc/MantidKernel/ANN/ANNperf.h
 		inc/MantidKernel/ANN/ANNx.h )
@@ -184,7 +186,8 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/TimeSeriesPropertyTest.h
 		 test/TimeSplitterTest.h
 		 test/UnitFactoryTest.h
-		 test/UnitTest.h )
+		 test/UnitTest.h
+         test/UserStringParserTest.h )
 
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES})
