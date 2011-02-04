@@ -15,10 +15,10 @@
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "Poco/Path.h"
-#include "Poco/DateTimeParser.h"
-#include "Poco/StringTokenizer.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include <Poco/Path.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/StringTokenizer.h>
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 

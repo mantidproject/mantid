@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;

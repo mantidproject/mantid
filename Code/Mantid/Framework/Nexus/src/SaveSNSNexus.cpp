@@ -19,10 +19,10 @@
 #include <cmath>
 #include <numeric>
 #include <boost/shared_ptr.hpp>
-#include "Poco/File.h"
-//#include "hdf5.h" //This is troublesome on multiple platforms.
+#include <Poco/File.h>
+//#include <hdf5.h> //This is troublesome on multiple platforms.
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -296,7 +296,7 @@ namespace NeXus
       for (int y = 0; y < ypixels; y++)
       {
         //Get the workspace index for the detector ID at this spot
-        int wi;
+        int wi = 0;
         try
         {
           wi = (*map)[ det->getAtXY(x,y)->getID() ];

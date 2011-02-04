@@ -26,10 +26,10 @@
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidNexus/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

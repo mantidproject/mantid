@@ -23,7 +23,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

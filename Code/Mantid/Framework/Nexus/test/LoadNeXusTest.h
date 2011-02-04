@@ -13,7 +13,7 @@
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidDataHandling/LoadInstrument.h" 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

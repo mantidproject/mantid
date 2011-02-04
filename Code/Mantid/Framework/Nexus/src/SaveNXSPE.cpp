@@ -5,8 +5,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid
 {

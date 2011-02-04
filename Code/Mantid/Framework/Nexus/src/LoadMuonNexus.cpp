@@ -12,7 +12,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

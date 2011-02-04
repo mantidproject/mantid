@@ -20,7 +20,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

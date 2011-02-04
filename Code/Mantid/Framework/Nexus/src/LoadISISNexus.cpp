@@ -12,12 +12,12 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
 
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <sstream>
 #include <cctype>

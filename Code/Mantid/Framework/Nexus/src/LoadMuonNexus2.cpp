@@ -13,8 +13,8 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "Poco/Path.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 

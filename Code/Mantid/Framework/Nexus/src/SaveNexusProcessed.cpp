@@ -10,8 +10,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

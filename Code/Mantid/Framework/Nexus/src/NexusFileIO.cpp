@@ -24,7 +24,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 namespace Mantid
 {

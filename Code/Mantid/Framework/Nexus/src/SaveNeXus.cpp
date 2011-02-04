@@ -12,7 +12,7 @@
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 namespace Mantid
 {
