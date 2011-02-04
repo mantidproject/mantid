@@ -22,8 +22,8 @@ public:
     unsigned int startNum=2010;
 
 
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
-    std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
     for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
     {
       std::vector<unsigned int>::const_iterator citr;
@@ -42,8 +42,8 @@ public:
     std::string str="60-61";
     unsigned int startNum=60;
     
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
-    std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
     for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
     {
       std::vector<unsigned int>::const_iterator citr;
@@ -65,8 +65,8 @@ public:
     std::string str="60-85";
     unsigned int startNum=60;
            
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
-    std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
     for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
     {
       std::vector<unsigned int>::const_iterator citr;
@@ -86,8 +86,8 @@ public:
     std::string str="62+63";
     unsigned int startNum=62;
 
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
-    std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
     for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
     {
       std::vector<unsigned int>::const_iterator citr;
@@ -102,15 +102,13 @@ public:
   }
 
   void testMinusandColonSeparatedStrings()
-  { 
-    std::string s;
-    std::getline(std::cin,s);
+  {     
     UserStringParser parser;
     std::string str="4010-4020:2";
     unsigned int startNum=4010;
 
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
-    std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
     for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
     {
       std::vector<unsigned int>::const_iterator citr;
@@ -129,7 +127,7 @@ public:
     UserStringParser parser;
     std::string str="60-61,62+63,64-65";
    
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
     TS_ASSERT_EQUALS(parsedVals.size(), 3 )
 
     TS_ASSERT_EQUALS((parsedVals[0][0]),60)
@@ -147,7 +145,7 @@ public:
     UserStringParser parser;
     std::string str="60,61+62,64-66,68-74:2";
          
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
     TS_ASSERT_EQUALS(parsedVals.size(), 4 )
 
     TS_ASSERT_EQUALS((parsedVals[0][0]),60)
@@ -170,15 +168,18 @@ public:
     UserStringParser parser;
     std::string str="60,61,62:68";
          
-    std::vector<std::vector<unsigned int>> parsedVals=parser.parse(str);
+    std::vector<std::vector<unsigned int> > parsedVals=parser.parse(str);
     TS_ASSERT_EQUALS(parsedVals.size(),9 )
 
     TS_ASSERT_EQUALS((parsedVals[0][0]),60)
     TS_ASSERT_EQUALS((parsedVals[1][0]),61)
-   /* TS_ASSERT_EQUALS((parsedVals[2]0]),62)
-    TS_ASSERT_EQUALS((parsedVals[3][0]),64)
-    TS_ASSERT_EQUALS((parsedVals[4][0]),65)
-    TS_ASSERT_EQUALS((parsedVals[5][0]),66)*/
+    TS_ASSERT_EQUALS((parsedVals[2][0]),62)
+    TS_ASSERT_EQUALS((parsedVals[3][0]),63)
+    TS_ASSERT_EQUALS((parsedVals[4][0]),64)
+    TS_ASSERT_EQUALS((parsedVals[5][0]),65)
+    TS_ASSERT_EQUALS((parsedVals[6][0]),66)
+    TS_ASSERT_EQUALS((parsedVals[7][0]),67)
+    TS_ASSERT_EQUALS((parsedVals[8][0]),68)
        
   }
 
