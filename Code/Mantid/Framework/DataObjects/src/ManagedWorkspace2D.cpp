@@ -7,7 +7,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <limits>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 namespace Mantid
 {

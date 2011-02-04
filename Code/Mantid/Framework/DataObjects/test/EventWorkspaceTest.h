@@ -9,13 +9,13 @@
 #define EVENTWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include "MantidKernel/Timer.h"
 
 #ifndef _WIN32
