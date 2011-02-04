@@ -77,9 +77,11 @@ namespace Mantid
     {
       retrieveProperties();
 
+      
+
       //Adds the counts from all the bins and puts them in one total bin
       MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
-						     m_rangeLower, m_rangeUpper);
+						     m_rangeLower, m_rangeUpper, true);
       counts = convertToRate(counts); 
       MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
 
