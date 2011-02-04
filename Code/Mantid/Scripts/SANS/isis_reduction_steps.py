@@ -90,11 +90,11 @@ class LoadRun(ReductionStep):
         else:
             #a particular entry was selected just load that one
             if not self._period == self.UNSET_PERIOD:
-                alg = Load(self._data_file, workspace,
+                alg = LoadNexus(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self._period)
             else:
                 #no specific period was requested
-                alg = Load(self._data_file, workspace,
+                alg = LoadNexus(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
 
             SANS2D_log_file = mtd[workspace]
