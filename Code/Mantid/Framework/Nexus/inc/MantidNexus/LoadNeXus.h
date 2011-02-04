@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Property.h"
 #include <climits>
 #include "MantidAPI/WorkspaceGroup.h"
@@ -83,6 +84,9 @@ namespace Mantid
 
       /// The name of the output workspace
       std::string m_workspace;
+
+      /// Pointer to the local workspace
+      DataObjects::Workspace2D_sptr m_localWorkspace;
 
       /// run LoadMuonNexus
       void runLoadMuonNexus();

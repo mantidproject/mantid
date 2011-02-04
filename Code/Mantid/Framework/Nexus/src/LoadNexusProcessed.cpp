@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -138,8 +139,8 @@ void LoadNexusProcessed::exec()
     {
       std::ostringstream os;
       os << p;
-      Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
-      declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(),
+      API::MatrixWorkspace_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
+      declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(prop_name + os.str(), base_name + os.str(),
           Direction::Output));
       wksp_group->add(base_name + os.str());
       setProperty(prop_name + os.str(), local_workspace);
