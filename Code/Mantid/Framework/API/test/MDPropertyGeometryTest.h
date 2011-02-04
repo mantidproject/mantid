@@ -5,8 +5,8 @@
 #include <sstream>
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/scoped_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include "MantidAPI/MDPropertyGeometry.h"
 #include "MantidAPI/WorkspaceFactory.h"
 

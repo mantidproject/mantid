@@ -10,9 +10,9 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Glob.h"
 
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/StringTokenizer.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
 
 #include <cctype>

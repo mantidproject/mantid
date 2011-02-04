@@ -7,8 +7,8 @@
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
 #include <cctype>
 
 namespace Mantid

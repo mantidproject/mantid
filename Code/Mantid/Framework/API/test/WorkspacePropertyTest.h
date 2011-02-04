@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceProperty.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
 
 using Mantid::MantidVec;

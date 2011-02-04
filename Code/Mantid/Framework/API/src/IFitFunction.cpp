@@ -7,7 +7,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 
 #include <sstream>
 #include <iostream> 

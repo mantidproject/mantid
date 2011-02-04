@@ -5,7 +5,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {

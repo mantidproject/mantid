@@ -10,9 +10,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/Mutex.h"
-#include "Poco/ScopedLock.h"
-#include "Poco/Thread.h"
+#include <Poco/Mutex.h>
+#include <Poco/ScopedLock.h>
+#include <Poco/Thread.h>
 
 #include <iostream>
 
