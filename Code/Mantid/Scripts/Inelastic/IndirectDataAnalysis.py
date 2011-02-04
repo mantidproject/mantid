@@ -126,7 +126,7 @@ def confitSeq(inputWS, func, startX, endX, save, plot):
         confitPlotSeq(wsname, plot)
 
 def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
-        grouping='Individual',
+        grouping='Individual', cal='',
         CleanUp=True, Verbose=False, Plot='None', Save=True):
     # Get instrument workspace for gathering parameters and such
     wsInst = mtd['__empty_' + instrument]
@@ -154,17 +154,23 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         mon_ws = ws_mon_l[i]
         # Get Monitor WS
         IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
-        IEC.monitorEfficiency(mon_ws, area, thickness)        
-        # Get Run No
-        runNo = mtd[det_ws].getRun().getLogData("run_number").value
-        savefile = isn + runNo + '_diff'
-        # Normalise to Monitor
+        IEC.monitorEfficiency(mon_ws, area, thickness)
         IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
         # Remove monitor workspace
         DeleteWorkspace(mon_ws)
-        # Convert to dSpacing - need to AlignBins so we can group later
-        ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
-        IEC.groupData(grouping, savefile, detectors=det_ws)
+        # Get Run No
+        runNo = mtd[det_ws].getRun().getLogData("run_number").value
+        savefile = isn + runNo + '_diff'        
+        if ( cal != '' ): # AlignDetectors and Group by .cal file
+            ConvertUnits(det_ws, det_ws, 'TOF')
+            ConvertFromDistribution(det_ws)
+            AlignDetectors(det_ws, det_ws, cal)
+            DiffractionFocussing(det_ws, savefile, cal)
+            DeleteWorkspace(det_ws)
+        else: ## Do it the old fashioned way
+            # Convert to dSpacing - need to AlignBins so we can group later
+            ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
+            IEC.groupData(grouping, savefile, detectors=det_ws)
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
         workspaces.append(savefile)

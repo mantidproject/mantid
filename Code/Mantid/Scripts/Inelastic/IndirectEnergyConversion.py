@@ -315,6 +315,8 @@ def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
     return output, runNos
 
 def createMappingFile(groupFile, ngroup, nspec, first):
+    if ( ngroup == 1 ): return 'All'
+    if ( nspec == 1 ): return 'Individual'
     filename = mtd.getConfigProperty('defaultsave.directory')
     filename += groupFile
     handle = open(filename, 'w')

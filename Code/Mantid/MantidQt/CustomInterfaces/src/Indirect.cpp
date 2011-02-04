@@ -443,7 +443,7 @@ void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification
   }
 }
 /**
-* This function clears the values of the QLineEdit objects used to hold Reflection-specific
+* This function clears the values of the QLineEdit objec  ts used to hold Reflection-specific
 * information.
 */
 void Indirect::clearReflectionInfo()

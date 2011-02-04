@@ -36,6 +36,7 @@ void IndirectDiffractionReduction::demonRun()
       "first = " +m_uiForm.set_leSpecMin->text()+"\n"
       "last = " +m_uiForm.set_leSpecMax->text()+"\n"
       "instrument = '" + m_uiForm.set_cbInst->currentText() + "'\n"
+      "cal = r'" + m_uiForm.dem_calFile->getFirstFilename() + "'\n"
       "grouping = " + grouping() + "\n";
 
     pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
@@ -46,7 +47,7 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
     
-    pyInput += "ws = demon(files, first, last, instrument, Verbose=verbose, Plot=plot, grouping=grouping, Save=save)\n";
+    pyInput += "ws = demon(files, first, last, instrument, grouping=grouping, cal=cal, Verbose=verbose, Plot=plot, Save=save)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -167,6 +168,7 @@ void IndirectDiffractionReduction::loadSettings()
   settings.beginGroup(settingsGroup);
   settings.setValue("last_directory", dataDir);
   m_uiForm.dem_rawFiles->readSettings(settings.group());
+  m_uiForm.dem_calFile->readSettings(settings.group());
   settings.endGroup();
 }
 
