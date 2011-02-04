@@ -4945,7 +4945,8 @@ void ApplicationWindow::readSettings()
       {
         duplicated_custom_menu.append(menu+"/"+keyName);
       }
-      addUserMenuAction(menu, keyName, settings.value(keyName).toString());
+      if ( QFileInfo(settings.value(keyName).toString()).exists() )
+        addUserMenuAction(menu, keyName, settings.value(keyName).toString());
     }
     settings.endGroup();
   }
