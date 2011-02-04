@@ -38,6 +38,13 @@ class InstrumentInterface(object):
         self.widgets.append(widget)
         self.scripter.attach(widget)
 
+    def destroy(self):
+        """
+            Destroys all the widget owner by this interface
+        """
+        for i in range(len(self.widgets)):
+            self.widgets.pop().deleteLater()
+            
     def _warning(self, title, message):
         """
             Pop up a dialog and warn the user
