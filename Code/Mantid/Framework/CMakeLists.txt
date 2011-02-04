@@ -62,17 +62,6 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
 find_package ( GSL REQUIRED )
 
 ###########################################################################
-# Look for OpenMP and set compiler flags if found
-###########################################################################
-
-find_package ( OpenMP )
-if ( OPENMP_FOUND )
-#  add_definitions ( ${OpenMP_CXX_FLAGS} )
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-endif ()
-
-###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
 

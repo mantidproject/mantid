@@ -1,4 +1,5 @@
 #include "MantidMatrix.h"
+#include "MantidKernel/Timer.h"
 #include "MantidUI.h"
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
@@ -40,7 +41,9 @@
 #include <algorithm>
 #include <limits>
 
+using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
@@ -382,50 +385,80 @@ void MantidMatrix::range(double *min, double *max)
   if (!m_are_min_max_set)
   {
     //this is here to fill m_min and m_max with numbers that aren't nan
-    initialMaxMin();
+    m_min = std::numeric_limits<double>::max();
+    m_max = -std::numeric_limits<double>::max();
 
-    int rows = numRows();
-    int cols = numCols();
-    for(int i=0; i<rows; i++){
-      for(int j=0; j<cols; j++){
-        double aux = cell(i, j);
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+    if (this->m_workspace)
+    {
+
+      PARALLEL_FOR1(m_workspace)
+      for (int wi=0; wi < m_workspace->getNumberHistograms(); wi++)
+      {
+        double local_min, local_max;
+        const MantidVec & Y = m_workspace->readY(wi);
+
+        local_min = std::numeric_limits<double>::max();
+        local_max = -std::numeric_limits<double>::max();
+
+        for (size_t i=0; i < Y.size(); i++)
         {
-          continue;
+          double aux = Y[i];
+          if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+            continue;
+          if (aux < local_min)
+            local_min = aux;
+          if (aux > local_max)
+            local_max = aux;
         }
-        if (aux <= m_min)
-          m_min = aux;
 
-        if (aux >= m_max)
-          m_max = aux;
+        // Now merge back the local min max
+        PARALLEL_CRITICAL(MantidMatrix_range_max)
+        {
+          if (local_max > m_max)
+            m_max = local_max;
+        }
+        PARALLEL_CRITICAL(MantidMatrix_range_min)
+        {
+          if (local_min < m_min)
+            m_min = local_min;
+        }
       }
+      m_are_min_max_set = true;
     }
-    m_are_min_max_set = true;
-  }
 
+    // Make up some reasonable values if nothing was found
+    if (m_min == std::numeric_limits<double>::max())
+      m_min = 0;
+    if (m_max == -std::numeric_limits<double>::max())
+      m_max = m_min + 1e6;
+
+//    // ---- VERY SLOW OLD ALGORITHM -----
+//    int rows = numRows();
+//    int cols = numCols();
+//    for(int i=0; i<rows; i++){
+//      for(int j=0; j<cols; j++){
+//        double aux = cell(i, j);
+//        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+//        {
+//          continue;
+//        }
+//        if (aux <= m_min)
+//          m_min = aux;
+//
+//        if (aux >= m_max)
+//          m_max = aux;
+//      }
+//
+//      m_are_min_max_set = true;
+//    }
+
+
+  }
   *min = m_min;
   *max = m_max;
 }
-//these values will be overwritten below, unless the whole matrix contains only infinites and nan
-void MantidMatrix::initialMaxMin()
-{
-  int rows = numRows();
-  int cols = numCols();
-  for(int i=0; i<rows; i++){
-    for(int j=0; j<cols; j++){
-      double aux = cell(i, j);
-      if (isANumber(aux))
-      {
-        m_min = aux;
-        m_max = m_min;
-        return;
-      }
-    }
-  }
-  //all the data is nan, which is really an error. Return a default, largish range
-  m_min = 0;
-  m_max = 1e6;
-}
+
+
 
 /**  Sets new minimum and maximum Y-values which can be displayed in a 2D graph
 */
@@ -942,7 +975,8 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
   range(&minz,&maxz);
   Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
   if( spgrm )
-  {  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+  {
+    spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
     if(project)
     {
@@ -952,18 +986,18 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
       if(!prjData->getGrayScale())spgrm->setGrayScale();
       if(prjData->getContourMode())
       {spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
-        spgrm->showContourLineLabels(true);
+      spgrm->showContourLineLabels(true);
       }
       spgrm->setDefaultContourPen(prjData->getDefaultContourPen());
       spgrm->setColorMapPen(false);
       if(prjData->getColorMapPen())spgrm->setColorMapPen(true);
       ContourLinesEditor* contourEditor=prjData->getContourLinesEditor();
       if(contourEditor) 
-	  {
-      contourEditor->setSpectrogram(spgrm);
-      contourEditor->updateContents();
-      contourEditor->updateContourLevels();
-	  }
+      {
+        contourEditor->setSpectrogram(spgrm);
+        contourEditor->updateContents();
+        contourEditor->updateContourLevels();
+      }
     }
 
   }

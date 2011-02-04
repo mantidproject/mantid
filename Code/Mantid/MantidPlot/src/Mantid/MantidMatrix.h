@@ -212,8 +212,6 @@ public slots:
 
   //! Min and max values in the matrix.
   void range(double *min, double *max);
-  //! initalise m_min and m_max to non-nan values from the matrix or failing that default nan values
-  void initialMaxMin();
   //! Set min and max values in the matrix.
   void setRange(double min, double max);
 

@@ -4918,9 +4918,10 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   }
   else if (type == ColorMap)
-  {	d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
-  d_spectrogram->setDefaultColorMap();
-  d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+  {
+    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->setDefaultColorMap();
+    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   }
   c_keys.resize(++n_curves);
   c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
@@ -4944,8 +4945,7 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
 
   for (int i=0; i < QwtPlot::axisCnt; i++)
-  {updatedaxis.push_back(0);
-  }
+  {updatedaxis.push_back(0);  }
 
   return d_spectrogram;
 }
