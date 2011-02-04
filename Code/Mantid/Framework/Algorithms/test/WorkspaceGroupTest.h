@@ -38,7 +38,7 @@ private:
       TSM_ASSERT( "One or more empty workspace pointers.", 0);
       return;
     }
-    int ws2LoopCount;
+    int ws2LoopCount = 0;
     if (work_in2->size() > 0)
     {
       ws2LoopCount = work_in1->size() / work_in2->size();
