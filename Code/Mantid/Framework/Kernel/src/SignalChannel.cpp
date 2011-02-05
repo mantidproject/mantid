@@ -1,9 +1,9 @@
 
 #include "MantidKernel/SignalChannel.h"
 
-#include "Poco/LoggingRegistry.h"
-#include "Poco/Message.h"
-//#include "boost/bind.hpp"
+#include <Poco/LoggingRegistry.h>
+#include <Poco/Message.h>
+//#include <boost/bind.hpp>
 
 #include <iostream>
 

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DirectoryValidator.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 

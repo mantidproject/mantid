@@ -6,9 +6,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Support.h"
 
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/Text.h"
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
 
 #include <algorithm>
 

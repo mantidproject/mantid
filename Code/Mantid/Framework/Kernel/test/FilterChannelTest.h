@@ -6,11 +6,11 @@
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TestChannel.h"
-#include "Poco/Channel.h"
-#include "Poco/Message.h"
-#include "Poco/LoggingFactory.h"
-#include "Poco/LoggingRegistry.h"
-#include "boost/shared_ptr.hpp"
+#include <Poco/Channel.h>
+#include <Poco/Message.h>
+#include <Poco/LoggingFactory.h>
+#include <Poco/LoggingRegistry.h>
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
 

@@ -1,7 +1,7 @@
 #include "MantidKernel/FileValidator.h"
 #include <algorithm>
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <iostream>
 
 

@@ -5,10 +5,10 @@
 
 #include "MantidKernel/SignalChannel.h"
 #include "MantidKernel/ConfigService.h"
-#include "Poco/Channel.h"
-#include "Poco/Message.h"
-#include "Poco/LoggingFactory.h"
-#include "Poco/LoggingRegistry.h"
+#include <Poco/Channel.h>
+#include <Poco/Message.h>
+#include <Poco/LoggingFactory.h>
+#include <Poco/LoggingRegistry.h>
 #include <string>
 
 using namespace Mantid::Kernel;

@@ -10,19 +10,19 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include "Poco/Util/LoggingConfigurator.h"
-#include "Poco/Util/SystemConfiguration.h"
-#include "Poco/Util/PropertyFileConfiguration.h"
-#include "Poco/LoggingFactory.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/StringTokenizer.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/Notification.h"
-#include "Poco/Environment.h"
+#include <Poco/Util/LoggingConfigurator.h>
+#include <Poco/Util/SystemConfiguration.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
+#include <Poco/LoggingFactory.h>
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <Poco/StringTokenizer.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/Notification.h>
+#include <Poco/Environment.h>
 
 #include <fstream>
 #include <sstream>

@@ -6,8 +6,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/StringTokenizer.h>
 
 #include <algorithm>

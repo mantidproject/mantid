@@ -5,10 +5,10 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "boost/shared_ptr.hpp"
 #include "MantidKernel/TestChannel.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <fstream>
 
