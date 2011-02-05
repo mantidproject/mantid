@@ -7,10 +7,10 @@
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include "boost/scoped_ptr.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "boost/regex.hpp"
+#include <boost/scoped_ptr.hpp>
+#include <boost/regex.hpp>
 
 
 using namespace Mantid::API;

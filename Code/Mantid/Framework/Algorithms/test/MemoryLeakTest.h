@@ -21,8 +21,8 @@
 //#ifndef _WIN32
 //  #include <sys/resource.h>
 //#endif
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
