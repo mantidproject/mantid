@@ -7,9 +7,9 @@
 #include "MantidGeometry/Objects/Object.h"
 #include <vector>
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
