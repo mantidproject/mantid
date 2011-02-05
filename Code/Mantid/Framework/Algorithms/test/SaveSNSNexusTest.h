@@ -13,7 +13,7 @@
 #include "MantidNexus/SaveSNSNexus.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
