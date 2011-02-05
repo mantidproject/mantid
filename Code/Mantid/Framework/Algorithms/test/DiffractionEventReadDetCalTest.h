@@ -18,7 +18,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <fstream>
 #include <cstring>
 #include <vector>
