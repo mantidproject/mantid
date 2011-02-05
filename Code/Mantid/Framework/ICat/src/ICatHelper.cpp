@@ -5,7 +5,7 @@
 #include "MantidICat/ErrorHandling.h" 
 #include <iomanip>
 #include <time.h>
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 namespace Mantid
 {
 	namespace ICat
