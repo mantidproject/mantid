@@ -14,14 +14,13 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/Path.h>
+#include <Poco/File.h>
 
 #include <fstream>
 #include <iomanip>

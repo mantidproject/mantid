@@ -10,7 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <fstream>
 
 using namespace Mantid::Algorithms;

@@ -17,7 +17,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 #include <fstream>
 #include <cstring>
 #include <vector>

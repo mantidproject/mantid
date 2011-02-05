@@ -10,7 +10,7 @@
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;
