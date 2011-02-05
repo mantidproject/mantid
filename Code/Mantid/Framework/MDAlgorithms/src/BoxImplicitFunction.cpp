@@ -1,5 +1,5 @@
-#include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
 #include <cmath>

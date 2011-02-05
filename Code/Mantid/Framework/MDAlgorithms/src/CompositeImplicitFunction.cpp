@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 namespace Mantid
 {

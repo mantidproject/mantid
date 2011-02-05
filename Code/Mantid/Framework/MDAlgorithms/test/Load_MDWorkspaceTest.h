@@ -4,7 +4,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 using namespace Mantid;
 using namespace API;

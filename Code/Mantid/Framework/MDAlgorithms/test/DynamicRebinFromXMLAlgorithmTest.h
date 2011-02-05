@@ -1,12 +1,12 @@
 #ifndef DYNAMIC_REBINNING_FROM_XML_TEST_H_
 #define DYNAMIC_REBINNING_FROM_XML_TEST_H_
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
 
 #include <cxxtest/TestSuite.h>
 #include <boost/shared_ptr.hpp>

@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
-#include "boost/scoped_ptr.hpp"
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::MDAlgorithms;
 

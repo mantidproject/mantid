@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 namespace Mantid{
     namespace MDAlgorithms{
