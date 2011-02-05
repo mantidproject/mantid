@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MD_FileFormatFactory.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
 

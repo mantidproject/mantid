@@ -10,7 +10,7 @@
 #include "MDDataObjects/MDImage.h"
 #include "MantidAPI/FileFinder.h"
 #include "MDDataObjects/MDDataPoints.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>

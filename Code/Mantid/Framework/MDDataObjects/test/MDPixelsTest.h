@@ -9,7 +9,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/FileFinder.h"
 #include "MDDataObjects/MDImageDatatypes.h"
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <boost/shared_ptr.hpp>
