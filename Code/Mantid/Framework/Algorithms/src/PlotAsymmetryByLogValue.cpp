@@ -16,6 +16,8 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -23,6 +25,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using namespace DataObjects;
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
@@ -185,11 +188,13 @@ namespace Mantid
             {
               if (period == red)
               {
-                ws_red = loadNexus->getProperty(wsProp);
+                Workspace_sptr temp = loadNexus->getProperty(wsProp);
+                ws_red = boost::dynamic_pointer_cast<Workspace2D>(temp);
               }
               if (period == green)
               {
-                ws_green = loadNexus->getProperty(wsProp);
+                Workspace_sptr temp = loadNexus->getProperty(wsProp);
+                ws_green = boost::dynamic_pointer_cast<Workspace2D>(temp);
               }
             }
 

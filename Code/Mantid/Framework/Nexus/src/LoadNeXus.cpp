@@ -176,9 +176,9 @@ namespace Mantid
         std::string WSName = m_workspace + "_" + suffix.str();
         try
         {
-          m_localWorkspace=loadMuonNexus->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
-          setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+          Workspace_sptr localWorkspace = loadMuonNexus->getProperty(opWS);
+          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
+          setProperty<Workspace_sptr>(opWS, localWorkspace);
           period++;
         }
         catch (Exception::NotFoundError&)
@@ -195,8 +195,7 @@ namespace Mantid
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
-      std::string outputWorkspace="OutputWorkspace";
-      loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
+      loadNexusPro->setPropertyValue("OutputWorkspace",m_workspace);
 
 	  loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
 	  loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
@@ -227,8 +226,8 @@ namespace Mantid
       loadNexusPro->execute();
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed sub-algorithm");
       // Get pointer to the workspace created
-      Workspace_sptr localworkspace=loadNexusPro->getProperty(outputWorkspace);
-      setProperty<Workspace_sptr>(outputWorkspace,localworkspace); 
+      Workspace_sptr localworkspace=loadNexusPro->getProperty("OutputWorkspace");
+      setProperty<Workspace_sptr>("OutputWorkspace",localworkspace); 
       //
       // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -241,13 +240,13 @@ namespace Mantid
       {
         std::stringstream suffix;
         suffix << (period+1);
-        std::string opWS = outputWorkspace + "_"+ suffix.str();
+        std::string opWS = "OutputWorkspace_"+ suffix.str();
         std::string WSName = m_workspace + "_" + suffix.str();
         try
         {
-          m_localWorkspace=loadNexusPro->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
-          setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+          Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
+          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
+          setProperty<Workspace_sptr>(opWS, localWorkspace);
           period++;
         }
         catch (Exception::NotFoundError&)
@@ -278,19 +277,10 @@ namespace Mantid
       }
       loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      // try
-      // {
       loadNexusPro->execute();
-      //}
-      // catch (std::runtime_error&)
-      // {
-      //   g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
-      //  }
+
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
       // Get pointer to the workspace created
-      //m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      //setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
       Workspace_sptr localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
       setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
       //
@@ -308,9 +298,9 @@ namespace Mantid
         std::string WSName = m_workspace + "_" + suffix.str();
         try
         {
-          m_localWorkspace=loadNexusPro->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
-          setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+          Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
+          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
+          setProperty<Workspace_sptr>(opWS,localWorkspace);
           period++;
         }
         catch (Exception::NotFoundError&)

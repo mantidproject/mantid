@@ -234,22 +234,21 @@ namespace Mantid
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
-        declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + "1", base_name + "1", Direction::Output));
-        wksp_group->add(base_name + "1");
-        setProperty(prop_name + "1", local_workspace);
 
-        for( int p = 2; p <= m_numberOfPeriods; ++p )
+        for( int p = 1; p <= m_numberOfPeriods; ++p )
         {
           local_workspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(local_workspace));
           std::ostringstream os;
           os << p;
           m_progress->report("Loading period " + os.str());
-          loadPeriodData(p, entry, local_workspace);
-
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + os.str(), base_name + os.str(), Direction::Output));
+          if( p > 1 )
+          {
+            loadPeriodData(p, entry, local_workspace);
+          }
+          declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
           wksp_group->add(base_name + os.str());
-          setProperty(prop_name + os.str(), local_workspace);
+          setProperty(prop_name + os.str(), boost::static_pointer_cast<Workspace>(local_workspace));
         }
         // The group is the root property value
         setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(wksp_group));
