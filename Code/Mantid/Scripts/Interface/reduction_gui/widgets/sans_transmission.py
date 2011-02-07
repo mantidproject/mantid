@@ -13,26 +13,16 @@ class DirectBeam(BaseWidget):
         Widget for the direct beam transmission calculation options.
     """
     
-    def __init__(self, parent=None, state=None, settings=None):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(DirectBeam, self).__init__(parent, state, settings, data_type)
         
-        self._layout = QtGui.QHBoxLayout()
-        self._content = QtGui.QGroupBox(self)
-        self._layout.addWidget(self._content)
-
-        self.setLayout(self._layout)
-        
-        # General GUI settings
-        if settings is None:
-            settings = GeneralSettings()
-        self._settings = settings  
-              
         class DirectBeamFrame(QtGui.QGroupBox, ui.ui_trans_direct_beam.Ui_GroupBox): 
             def __init__(self, parent=None):
                 QtGui.QGroupBox.__init__(self, parent)
                 self.setupUi(self)
                 
         self._content = DirectBeamFrame(self)
+        self._layout.addWidget(self._content)
         self.initialize_content()
         
         if state is not None:
@@ -86,26 +76,16 @@ class BeamSpreader(BaseWidget):
         Widget for the beam spreader transmission calculation options.
     """
     
-    def __init__(self, parent=None, state=None, settings=None):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(BeamSpreader, self).__init__(parent, state, settings, data_type) 
         
-        self._layout = QtGui.QHBoxLayout()
-        self._content = QtGui.QGroupBox(self)
-        self._layout.addWidget(self._content)
-
-        self.setLayout(self._layout)
-        
-        # General GUI settings
-        if settings is None:
-            settings = GeneralSettings()
-        self._settings = settings  
-              
         class SpreaderFrame(QtGui.QGroupBox, ui.ui_trans_spreader.Ui_GroupBox): 
             def __init__(self, parent=None):
                 QtGui.QGroupBox.__init__(self, parent)
                 self.setupUi(self)
                 
         self._content = SpreaderFrame(self)
+        self._layout.addWidget(self._content)
         self.initialize_content()
         
         if state is not None:
@@ -182,8 +162,8 @@ class TransmissionWidget(BaseWidget):
     ## Widget name
     name = "Transmission"      
     
-    def __init__(self, parent=None, state=None, settings=None):
-        BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(TransmissionWidget, self).__init__(parent, state, settings, data_type) 
 
         class TransFrame(QtGui.QFrame, ui.ui_hfir_transmission.Ui_Frame): 
             def __init__(self, parent=None):
@@ -191,6 +171,7 @@ class TransmissionWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = TransFrame(self)
+        self._layout.addWidget(self._content)
         self.initialize_content()
         
         if state is not None:
@@ -254,14 +235,14 @@ class TransmissionWidget(BaseWidget):
             state = self._last_direct_state
         if isinstance(self._method_box, BeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
-        self._replace_method(DirectBeam(self, state=state, settings=self._settings))
+        self._replace_method(DirectBeam(self, state=state, settings=self._settings, data_type=self._data_type))
         
     def _beam_spreader(self, state=None):
         if state is None:
             state = self._last_spreader_state
         if isinstance(self._method_box, DirectBeam):
             self._last_direct_state = self._method_box.get_state()
-        self._replace_method(BeamSpreader(self, state=state, settings=self._settings))
+        self._replace_method(BeamSpreader(self, state=state, settings=self._settings, data_type=self._data_type))
         
     def _replace_method(self, widget):
         if self._method_box is not None:

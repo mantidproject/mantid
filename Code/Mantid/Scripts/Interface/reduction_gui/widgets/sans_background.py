@@ -9,8 +9,8 @@ import ui.ui_hfir_background
 
 class BckDirectBeam(DirectBeam):
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(BckDirectBeam, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(BckDirectBeam, self).__init__(parent, state, settings, data_type)
         
         if state is None:
             self.set_state(Background.DirectBeam())      
@@ -26,8 +26,8 @@ class BckDirectBeam(DirectBeam):
         
 class BckBeamSpreader(BeamSpreader):
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(BckBeamSpreader, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(BckBeamSpreader, self).__init__(parent, state, settings, data_type)
         
         if state is None:
             self.set_state(Background.BeamSpreader())      
@@ -51,8 +51,8 @@ class BackgroundWidget(BaseWidget):
     ## Widget name
     name = "Background"      
     
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True):
-        BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None):
+        super(BackgroundWidget, self).__init__(parent, state, settings, data_type) 
 
         class BckFrame(QtGui.QFrame, ui.ui_hfir_background.Ui_Frame): 
             def __init__(self, parent=None):
@@ -60,6 +60,7 @@ class BackgroundWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = BckFrame(self)
+        self._layout.addWidget(self._content)
         
         # Flag to show transmission options or not
         self.show_transmission = show_transmission
@@ -157,7 +158,7 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckBeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings))
+            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings, data_type=self._data_type))
         
     def _beam_spreader(self, state=None):
         if state is None:
@@ -165,7 +166,7 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckDirectBeam):
             self._last_direct_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings))
+            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings, data_type=self._data_type))
         
     def _replace_method(self, widget):
         if self._method_box is not None:

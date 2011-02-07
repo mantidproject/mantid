@@ -29,6 +29,7 @@ class OutputWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = OutputFrame(self)
+        self._layout.addWidget(self._content)
         self.initialize_content()
         
     def initialize_content(self):

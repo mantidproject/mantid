@@ -9,19 +9,28 @@ class BaseWidget(QtGui.QWidget):
     ## Widget name
     name = ""      
     
-    def __init__(self, parent=None, state=None, settings=None):
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, ui_class=None):
         QtGui.QWidget.__init__(self, parent)
         
         self._layout = QtGui.QHBoxLayout()
-        self._content = QtGui.QFrame(self)
-        self._layout.addWidget(self._content)
-
         self.setLayout(self._layout)
-        
+        if ui_class is not None:
+            self._content = ui_class(self)
+            self._layout.addWidget(self._content)
+
+        # Data filter for file dialog
+        self._data_type="Data files (*.xml)"
+        if data_type is not None:
+            self._data_type = data_type
+
         # General GUI settings
         if settings is None:
             settings = GeneralSettings()
         self._settings = settings
+
+        if ui_class is not None:
+            self.setLayout(self._layout)
+            self.initialize_content()
         
     def initialize_content(self):
         """
@@ -43,10 +52,16 @@ class BaseWidget(QtGui.QWidget):
         """
         return NotImplemented
     
-    def data_browse_dialog(self):
+    def data_browse_dialog(self, data_type=None):
+        """
+            Pop up a file dialog box.
+            @param data_type: string used to filter the files
+        """
+        if data_type is None:
+            data_type = self._data_type
         fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
                                                           self._settings.data_path, 
-                                                          "Data files (*.xml)"))
+                                                          data_type))
         if fname:
             # Store the location of the loaded file
             (folder, file_name) = os.path.split(fname)

@@ -241,26 +241,16 @@ class MaskTabWidget(BaseWidget):
     ## Widget name
     name = "Mask"      
     
-    def __init__(self, parent=None, state=None, settings=None):
-        QtGui.QWidget.__init__(self, parent)
-        
-        self._layout = QtGui.QHBoxLayout()
-        self._content = QtGui.QGroupBox(self)
-        self._layout.addWidget(self._content)
-
-        self.setLayout(self._layout)
-        
-        # General GUI settings
-        if settings is None:
-            settings = GeneralSettings()
-        self._settings = settings  
-              
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(MaskTabWidget, self).__init__(parent, state, settings, data_type) 
+             
         class MaskFrame(QtGui.QFrame, ui.ui_mask.Ui_Frame): 
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
                 
         self._content = MaskFrame(self)
+        self._layout.addWidget(self._content)
         self.initialize_content()
         
         if state is not None:

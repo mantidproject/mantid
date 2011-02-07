@@ -20,11 +20,7 @@ class SANSInstrumentWidget(BaseWidget):
     name = "Instrument"      
     
     def __init__(self, parent=None, state=None, settings=None):      
-        QtGui.QWidget.__init__(self, parent)
-        
-        self._layout = QtGui.QHBoxLayout()
-
-        self._summary = QtGui.QFrame(self)
+        super(SANSInstrumentWidget, self).__init__(parent, state, settings) 
 
         class SummaryFrame(QtGui.QFrame, ui.ui_hfir_data_summary.Ui_Frame): 
             def __init__(self, parent=None):
@@ -34,8 +30,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
-
-        self.setLayout(self._layout)
         
         if state is not None:
             self.set_state(state)

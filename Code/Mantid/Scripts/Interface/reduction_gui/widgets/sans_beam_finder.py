@@ -83,24 +83,17 @@ class BeamFinderWidget(BaseWidget):
     ## Widget name
     name = "Beam Center"      
     
-    def __init__(self, parent=None, state=None, settings=None):
-        QtGui.QWidget.__init__(self, parent)
-        self._layout = QtGui.QHBoxLayout()
-        
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(BeamFinderWidget, self).__init__(parent, state, settings, data_type) 
+                
         self._content = BeamFinderFrame(self)
-        self.initialize_content()
         self._layout.addWidget(self._content)
-        self.setLayout(self._layout)
+        self.initialize_content()
         
         if state is not None:
             self._content.set_state(state)
         else:
             self._content.set_state(BeamFinder())
-            
-        # General GUI settings
-        if settings is None:
-            settings = GeneralSettings()
-        self._settings = settings
             
     def get_state(self):
         """

@@ -17,6 +17,7 @@ class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
     """
+    data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
     
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
@@ -25,16 +26,16 @@ class EQSANSInterface(InstrumentInterface):
         self.scripter = EQSANSReductionScripter(name=name)        
 
         # Instrument description
-        self.attach(SNSInstrumentWidget(settings = self._settings))
+        self.attach(SNSInstrumentWidget(settings = self._settings, data_type = self.data_type))
         
         # Beam finder
-        self.attach(BeamFinderWidget(settings = self._settings))
+        self.attach(BeamFinderWidget(settings = self._settings, data_type = self.data_type))
         
         # Mask
         self.attach(MaskTabWidget(settings = self._settings))
         
         # Background
-        self.attach(BackgroundWidget(settings = self._settings, show_transmission = False))
+        self.attach(BackgroundWidget(settings = self._settings, show_transmission = False, data_type = self.data_type))
         
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))

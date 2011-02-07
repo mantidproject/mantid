@@ -15,12 +15,8 @@ class SNSInstrumentWidget(BaseWidget):
     ## Widget name
     name = "Instrument"      
     
-    def __init__(self, parent=None, state=None, settings=None):      
-        QtGui.QWidget.__init__(self, parent)
-        
-        self._layout = QtGui.QHBoxLayout()
-
-        self._summary = QtGui.QFrame(self)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):      
+        super(SNSInstrumentWidget, self).__init__(parent, state, settings, data_type) 
 
         class SummaryFrame(QtGui.QFrame, ui.ui_sns_data_summary.Ui_Frame): 
             def __init__(self, parent=None):
@@ -31,8 +27,6 @@ class SNSInstrumentWidget(BaseWidget):
         self.initialize_content()
         self._layout.addWidget(self._summary)
 
-        self.setLayout(self._layout)
-        
         if state is not None:
             self.set_state(state)
         else:
@@ -45,16 +39,6 @@ class SNSInstrumentWidget(BaseWidget):
 
     def content(self):
         return self._summary
-
-    def data_browse_dialog(self):
-        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
-                                                          self._settings.data_path, 
-                                                          "Data files (*.nxs *.dat)"))
-        if fname:
-            # Store the location of the loaded file
-            (folder, file_name) = os.path.split(fname)
-            self._settings.data_path = folder
-        return fname     
 
     def initialize_content(self):
         # Validators
