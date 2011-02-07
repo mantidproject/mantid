@@ -187,6 +187,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/MantidColorMap.cpp
+                   src/Mantid/InstrumentWidget/ColorMapWidget.cpp
                    src/Mantid/InstrumentWidget/MantidObject.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ObjComponentActor.cpp
@@ -391,6 +392,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/MantidColorMap.h
+                   src/Mantid/InstrumentWidget/ColorMapWidget.h
                    src/Mantid/InstrumentWidget/MantidObject.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ObjComponentActor.h
@@ -610,6 +612,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
                        src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
+                       src/Mantid/InstrumentWidget/ColorMapWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
 )

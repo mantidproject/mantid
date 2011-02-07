@@ -1,6 +1,7 @@
 #include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
 #include "BinDialog.h"
+#include "ColorMapWidget.h"
 #include "MantidKernel/ConfigService.h"
 
 #include "qwt_scale_widget.h"
@@ -22,6 +23,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
 
+  // Render Mode control
   QComboBox* renderMode = new QComboBox(this);
   renderMode->setToolTip("Set render mode");
   QStringList modeList;
@@ -30,19 +32,13 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow->getInstrumentDisplay(),SLOT(setRenderMode(int)));
   connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
 
+  // X selection control
   QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
   connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-
   mBinDialog = new BinDialog(this);
   connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
 
-  mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
-  mColorMapWidget->setColorBarEnabled(true);
-  mColorMapWidget->setColorBarWidth(20);
-  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
-  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
-
-  //Save image control
+  // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
   connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
 
@@ -74,71 +70,22 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   //displaySettingsMenu->addAction(m_lighting); // enable for testing
   displaySettings->setMenu(displaySettingsMenu);
 
-  mMinValueBox = new QLineEdit();
-  mMaxValueBox = new QLineEdit();
-  mMinValueBox->setMinimumWidth(40);
-  mMaxValueBox->setMinimumWidth(40);
-  mMinValueBox->setMaximumWidth(60);
-  mMaxValueBox->setMaximumWidth(60);
-  mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
-  mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
-  //Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
-  mMinValueBox->setText("");
-  mMaxValueBox->setText("");
-
   QFrame * axisViewFrame = setupAxisFrame();
 
-  //Colormap Frame widget
-  QFrame* lColormapFrame = new QFrame();
+  // Colormap widget
+  m_colorMapWidget = new ColorMapWidget(mInstrumentDisplay->getColorMap().getScaleType(),this);
+  connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), this, SLOT(scaleTypeChanged(int)));
+  connect(m_colorMapWidget,SIGNAL(minValueChanged(double)),this, SLOT(minValueChanged(double)));
+  connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),this, SLOT(maxValueChanged(double)));
 
-  QVBoxLayout* lColormapLayout = new QVBoxLayout;
-  lColormapLayout->addWidget(mMaxValueBox);
-  lColormapLayout->addWidget(mColorMapWidget);
-  lColormapLayout->addWidget(mMinValueBox);
-
-  mScaleOptions = new QComboBox;
-  mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
-  mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
-  mScaleOptions->setCurrentIndex(mScaleOptions->findData(
-      mInstrumentDisplay->mutableColorMap().getScaleType()
-    ));
-  connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
-
-  QVBoxLayout* options_layout = new QVBoxLayout;
-  options_layout->addStretch();
-  options_layout->addWidget(mScaleOptions);
-
-  QHBoxLayout *colourmap_layout = new QHBoxLayout;
-  colourmap_layout->addLayout(lColormapLayout);
-  colourmap_layout->addLayout(options_layout);
-  lColormapFrame->setLayout(colourmap_layout);
-
-  //Check box to toggle orientation axes
-  //m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
-  //m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
-  //m3DAxesToggle->setCheckState(Qt::Checked);
-  //connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow->getInstrumentDisplay(), SLOT(set3DAxesState(int)));
-  //connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow, SLOT(updateInteractionInfoText()));
-
-  //Check box to toggle polygon mode
-  //QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
-  //poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
-  //poligonMOdeToggle->setCheckState(Qt::Unchecked);
-  //connect(poligonMOdeToggle, SIGNAL(clicked(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setWireframe(bool)));
-  
+  // layout
   renderControlsLayout->addWidget(renderMode);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
-
   renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSaveImage);
-  renderControlsLayout->addWidget(lColormapFrame);
-  //renderControlsLayout->addWidget(m3DAxesToggle);
-  //renderControlsLayout->addWidget(poligonMOdeToggle);
+  renderControlsLayout->addWidget(m_colorMapWidget);
 
-
-  connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
-  connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 
   loadSettings("Mantid/InstrumentWindow");
 }
@@ -181,7 +128,7 @@ void InstrumentWindowRenderTab::scaleTypeChanged(int index)
 {
   if( m_instrWindow->isVisible() )
   {
-    GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(index).toUInt();
+    GraphOptions::ScaleType type = (GraphOptions::ScaleType)index;
     mInstrumentDisplay->mutableColorMap().changeScaleType(type);
     setupColorBarScaling();
     mInstrumentDisplay->recount();
@@ -193,27 +140,8 @@ void InstrumentWindowRenderTab::scaleTypeChanged(int index)
  */
 void InstrumentWindowRenderTab::setupColorBarScaling()
 {
-  double minValue = mMinValueBox->displayText().toDouble();
-  double maxValue = mMaxValueBox->displayText().toDouble();
 
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
-  if( type == GraphOptions::Linear )
-  {
-    QwtLinearScaleEngine linScaler;
-    mColorMapWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
-    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue),mInstrumentDisplay->getColorMap());
-  }
-  else
- {
-    QwtLog10ScaleEngine logScaler;    
-    double logmin(minValue);
-    if( logmin < 1.0 )
-    {
-      logmin = 1.0;
-    }
-    mColorMapWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
-    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), mInstrumentDisplay->getColorMap());
-  }
+  m_colorMapWidget->setupColorBarScaling(mInstrumentDisplay->getColorMap());
 }
 
 /**
@@ -228,9 +156,9 @@ void InstrumentWindowRenderTab::changeColormap(const QString &filename)
 /**
  *
  */
-void InstrumentWindowRenderTab::minValueChanged()
+void InstrumentWindowRenderTab::minValueChanged(double value)
 {
-  double updated_value = mMinValueBox->displayText().toDouble();
+  double updated_value = value;
   double old_value = mInstrumentDisplay->getDataMinValue();
   // If the new value is the same
   if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
@@ -248,16 +176,18 @@ void InstrumentWindowRenderTab::minValueChanged()
   else
   {
     // Invalid. Reset value.
-    mMinValueBox->setText(QString::number(old_value));
+    m_colorMapWidget->blockSignals(true);
+    m_colorMapWidget->setMinValue(old_value);
+    m_colorMapWidget->blockSignals(false);
   }
 }
 
 /**
  *
  */
-void InstrumentWindowRenderTab::maxValueChanged()
+void InstrumentWindowRenderTab::maxValueChanged(double value)
 {
-  double updated_value = mMaxValueBox->displayText().toDouble();
+  double updated_value = value;
   double old_value = mInstrumentDisplay->getDataMaxValue();
   // If the new value is the same
   if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
@@ -275,7 +205,9 @@ void InstrumentWindowRenderTab::maxValueChanged()
   else
   {
     // Invalid. Reset
-    mMaxValueBox->setText(QString::number(old_value));
+    m_colorMapWidget->blockSignals(true);
+    m_colorMapWidget->setMaxValue(old_value);
+    m_colorMapWidget->blockSignals(false);
   }
 }
 
@@ -309,24 +241,26 @@ void InstrumentWindowRenderTab::saveSettings(const QString& section)
 
 void InstrumentWindowRenderTab::setMinValue(double value, bool apply)
 {
-  mMinValueBox->setText(QString::number(value));
-  if (apply) minValueChanged();
+  if (!apply) m_colorMapWidget->blockSignals(true);
+  m_colorMapWidget->setMinValue(value);
+  if (!apply) m_colorMapWidget->blockSignals(false);
 }
 
 void InstrumentWindowRenderTab::setMaxValue(double value, bool apply)
 {
-  mMaxValueBox->setText(QString::number(value));
-  if (apply) maxValueChanged();
+  if (!apply) m_colorMapWidget->blockSignals(true);
+  m_colorMapWidget->setMaxValue(value);
+  if (!apply) m_colorMapWidget->blockSignals(false);
 }
 
 GraphOptions::ScaleType InstrumentWindowRenderTab::getScaleType()const
 {
-  return (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  return (GraphOptions::ScaleType)m_colorMapWidget->getScaleType();
 }
 
 void InstrumentWindowRenderTab::setScaleType(GraphOptions::ScaleType type)
 {
-  mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
+  m_colorMapWidget->setScaleType(type);
 }
 
 void InstrumentWindowRenderTab::setAxis(const QString& axisNameArg)

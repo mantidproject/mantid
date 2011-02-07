@@ -55,6 +55,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->addWidget(mInstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
 
+  // Load settings is called after mInstrumentDisplay is created but before m_renderTab
+  loadSettings();
+
   //Render Controls
   m_renderTab = new InstrumentWindowRenderTab(this);
   mControlsTab->addTab( m_renderTab, QString("Render"));
@@ -96,9 +99,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
   mMaskDetsAction = new QAction(tr("&Mask"), this);
   connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
-
-  // Load settings
-  loadSettings();
 
   askOnCloseEvent(app->confirmCloseInstrWindow);
 

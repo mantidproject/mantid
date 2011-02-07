@@ -7,7 +7,8 @@
 class InstrumentWindow;
 class Instrument3DWidget;
 class BinDialog;
-class QwtScaleWidget;
+//class QwtScaleWidget;
+class ColorMapWidget;
 
 class QPushButton;
 class QLineEdit;
@@ -36,8 +37,8 @@ public:
 private slots:
   void scaleTypeChanged(int);
   void changeColormap(const QString & filename = "");
-  void minValueChanged();
-  void maxValueChanged();
+  void minValueChanged(double);
+  void maxValueChanged(double);
   void selectBinButtonClicked();
   void showResetView(int);
 private:
@@ -47,11 +48,9 @@ private:
   Instrument3DWidget *mInstrumentDisplay;
   QPushButton *mSaveImage;
   BinDialog *mBinDialog;
-  QwtScaleWidget *mColorMapWidget;
-  QLineEdit *mMinValueBox, *mMaxValueBox;
+  ColorMapWidget* m_colorMapWidget;
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
-  QComboBox *mScaleOptions;
 
   QAction *m_colorMap;
   QAction *m_backgroundColor;
