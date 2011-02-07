@@ -108,7 +108,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_6");
   }
   
-  void xtestHDF4Nexus()
+  void testHDF4Nexus()
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
