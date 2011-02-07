@@ -5,9 +5,9 @@
     process is kept elsewhere (SNSReduction object)
 """
 from interface import InstrumentInterface
-from reduction_gui.widgets.beam_finder import BeamFinderWidget
-from reduction_gui.widgets.sns_instrument import SNSInstrumentWidget
-from reduction_gui.widgets.background import BackgroundWidget
+from reduction_gui.widgets.sans_beam_finder import BeamFinderWidget
+from reduction_gui.widgets.eqsans_instrument import SNSInstrumentWidget
+from reduction_gui.widgets.sans_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.widgets.mask import MaskTabWidget
 from reduction_gui.reduction.eqsans_reduction import EQSANSReductionScripter

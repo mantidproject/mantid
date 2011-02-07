@@ -5,10 +5,10 @@
     process is kept elsewhere (HFIRReduction object)
 """
 from interface import InstrumentInterface
-from reduction_gui.widgets.beam_finder import BeamFinderWidget
-from reduction_gui.widgets.instrument import SANSInstrumentWidget
-from reduction_gui.widgets.transmission import TransmissionWidget
-from reduction_gui.widgets.background import BackgroundWidget
+from reduction_gui.widgets.sans_beam_finder import BeamFinderWidget
+from reduction_gui.widgets.hfir_sans_instrument import SANSInstrumentWidget
+from reduction_gui.widgets.sans_transmission import TransmissionWidget
+from reduction_gui.widgets.sans_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.hfir_reduction import HFIRReductionScripter
 

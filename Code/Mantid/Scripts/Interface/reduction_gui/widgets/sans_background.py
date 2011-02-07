@@ -4,7 +4,7 @@ import os
 from reduction_gui.reduction.hfir_reduction_steps import Background
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
-from transmission import BeamSpreader, DirectBeam
+from sans_transmission import BeamSpreader, DirectBeam
 import ui.ui_hfir_background
 
 class BckDirectBeam(DirectBeam):
