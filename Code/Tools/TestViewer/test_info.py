@@ -13,7 +13,8 @@ import multiprocessing
 from multiprocessing import Pool
 import random
 import subprocess
-
+import sys
+import shlex
 
 #==================================================================================================
 # GLOBAL CONSTANTS
@@ -421,7 +422,7 @@ class TestSuite(object):
        
         
     #----------------------------------------------------------------------------------
-    def run_tests(self):
+    def run_tests(self, stdout_callback_func):
         """ Runs this test suite, then loads the produced XML file
         and interprets its results.
         This method should be written so that it can be run in parallel. """
@@ -442,11 +443,13 @@ class TestSuite(object):
         os.chdir(rundir)
         
         # In order to catch "segmentation fault" message, we call bash and get the output of that! 
-        full_command = "bash -c '%s'" % self.command
+        #full_command = "bash -c '%s'" % self.command
+        full_command = self.command
+        #full_command = "cd /home/8oz/Code/Mantid/Code/Mantid/bin/ ; ./MDEventsTest -v"
         
         # Execute the test command; wait for it to return
-        output = commands.getoutput( full_command )
-        
+        (status, output) = run_command_with_callback(full_command, stdout_callback_func, run_shell=False)       
+
         # Get the output XML filename
         xml_path = os.path.join(rundir, self.xml_file)
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
@@ -661,36 +664,10 @@ class TestProject(object):
         msg = "-------- Making Test %s ---------" % self.name
         if not callback_func is None: callback_func("%s" % msg)
         
-        #(status, output) = commands.getstatusoutput(self.make_command)
-        
-        output = ""
         full_command = self.make_command
         if not callback_func is None: callback_func(full_command)
-            
-        p = subprocess.Popen(full_command, shell=True, bufsize=10000,
-                             cwd=".",
-                             stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
-                             stdout=subprocess.PIPE, close_fds=True)
-        (put, get) = (p.stdin, p.stdout)
-        line=get.readline()
-        while line != "":
-            # Replace annoying character
-            line = line.replace('‘', '\'')
-            line = line.replace('’', '\'')
-            #line = line.replace('\xe2', '\'')
-            line = unicode(line)
-            # Make one long output string
-            output += line
-            #Remove trailing /n
-            if len(line)>1: line = line[:-1]
-            #print line
-            if not callback_func is None: callback_func( line )
-            #Keep reading output.
-            line=get.readline()            
-            
-        # The return code or exit status
-        p.wait()
-        status = p.returncode
+        # This will run while calling the stdout callback.
+        (status, output) = run_command_with_callback(full_command, callback_func)
 
         if (status != 0):
             msg = "-------- BUILD FAILED! ---------" 
@@ -834,18 +811,19 @@ class TestProject(object):
 
 
 #==================================================================================================
-def run_tests_in_suite(multiple_tests, suite ):
+def run_tests_in_suite(multiple_tests, suite, stdout_callback_func ):
     """Run all tests in a given suite. Method called
     by the multiprocessing Pool.apply_async() method.
     
     Parameters:
         multiple_tests :: a MultipleProjects instance calling this method.
         suite :: the suite to run
+        stdout_callback_func :: callback function for each line of stdout
     """
     if not multiple_tests is None: 
         if multiple_tests.abort_run: return "Aborted."
     if not suite is None:
-        suite.run_tests()
+        suite.run_tests(stdout_callback_func)
     # Simply return the object back (for use by the callback function)
     return suite
         
@@ -933,36 +911,36 @@ class MultipleProjects(object):
         lines = output.split('\n')
         for line in lines:
             if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
-                 #Change to file or stuff.
-                 filename = line[8:].strip()
-                 foundit = None
-                 for pj in self.projects:
-                     for suite in pj.suites:
-                         # If the test file and the source file are the same,
-                         if os.path.exists(suite.source_file):  
-                             if os.path.samefile( suite.source_file, filename):
-                                 suite.selected = True
-                                 pj.selected = True
-                                 foundit = suite
-                                 break
+                #Change to file or stuff.
+                filename = line[8:].strip()
+                foundit = None
+                for pj in self.projects:
+                    for suite in pj.suites:
+                        # If the test file and the source file are the same,
+                        if os.path.exists(suite.source_file):  
+                            if os.path.samefile( suite.source_file, filename):
+                                suite.selected = True
+                                pj.selected = True
+                                foundit = suite
+                                break
                 
-                 if foundit is None:
-                     # Ok, not directly a test name. Look for a similar test file
-                     # Get the bare filename, no .h or .cpp
-                     bare_file = os.path.splitext(os.path.basename(filename))[0]
-                     for pj in self.projects:
-                         for suite in pj.suites:
-                             # The words in the source file are inside the Test source file. Might be good.
-                             bare_source = os.path.basename(suite.source_file)
-                             if bare_file in bare_source:
-                                 suite.selected = True
-                                 pj.selected = True
-                                 foundit = suite
-                                 break
-                 if foundit is None:
-                     print "%s: No test found." % (filename)
-                 else:
-                     print "%s: Test found: '%s'" % ( filename, foundit.get_fullname() )
+                if foundit is None:
+                    # Ok, not directly a test name. Look for a similar test file
+                    # Get the bare filename, no .h or .cpp
+                    bare_file = os.path.splitext(os.path.basename(filename))[0]
+                    for pj in self.projects:
+                        for suite in pj.suites:
+                            # The words in the source file are inside the Test source file. Might be good.
+                            bare_source = os.path.basename(suite.source_file)
+                            if bare_file in bare_source:
+                                suite.selected = True
+                                pj.selected = True
+                                foundit = suite
+                                break
+                if foundit is None:
+                    print "%s: No test found." % (filename)
+                else:
+                    print "%s: Test found: '%s'" % ( filename, foundit.get_fullname() )
                  
             
     #--------------------------------------------------------------------------        
@@ -1174,14 +1152,14 @@ class MultipleProjects(object):
             
             # Call the method that will run each suite
             for suite in suites:
-                p.apply_async( run_tests_in_suite, (self, suite, ), callback=callback_func)
+                p.apply_async( run_tests_in_suite, (self, suite, None), callback=callback_func)
             p.close()
             # This will block until completed
             p.join()
             
         else:
             for suite in suites:
-                result = run_tests_in_suite( self, suite )
+                result = run_tests_in_suite( self, suite, callback_func)
                 if not callback_func is None: callback_func(result)
                 
         # Now we compile all the projects' states
@@ -1213,10 +1191,67 @@ def test_run_print_callback(obj):
         pj = obj
         # Replace the project in THIS thread!
         all_tests.replace_project( pj )
-        print "Made project %s" % pj.name                
+        print "Made project %s" % pj.name
+        
+    else:
+        print "-->" + obj     
+        sys.stdout.flush() 
+          
         
 
 
+#==================================================================================================
+#==================================================================================================
+def run_command_with_callback(full_command, callback_func, run_shell=True):
+    """Run a shell command while outputting each line to a callback function.
+    Parameters:
+        full_command :: shell command
+        callback_func :: command
+    Returns:
+        status :: status code
+        output :: accumulated stdoutput
+    """
+    print "run_command_with_callback called for " + full_command
+    print callback_func
+    output = ""
+    
+    if not run_shell:
+        full_command = shlex.split(full_command)
+    
+    p = subprocess.Popen(full_command, shell=run_shell, bufsize=10000,
+                         cwd=".",
+                         stdin=None, stderr=subprocess.STDOUT,
+                         stdout=subprocess.PIPE, close_fds=True,
+                         universal_newlines=True)
+    (put, get) = (p.stdin, p.stdout)
+
+    line=get.readline()
+    while line != "":
+        # Replace annoying character
+        line = line.replace('‘', '\'')
+        line = line.replace('’', '\'')
+        #line = line.replace('\xe2', '\'')
+        line = unicode(line)
+        # Make one long output string
+        output += line
+        #Remove trailing /n
+        if len(line)>1: line = line[:-1]
+        #print line
+        if not callback_func is None: callback_func( line )
+        #Keep reading output.
+        line=get.readline()
+
+        # Do we prematurely abort it?                    
+        if all_tests.abort_run:
+            p.kill()
+            if not callback_func is None: callback_func("Aborted by user.")
+            break
+        
+    # The return code or exit status
+    p.wait()
+    status = p.returncode
+    
+    return (status, output)
 
 
 
@@ -1274,7 +1309,7 @@ if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.select_svn()
     all_tests.select_all(False)
-    suite = all_tests.find_suite("GeometryTest.AcompTest")
+    suite = all_tests.find_suite("MDEventsTest.MDEventTest")
     suite.set_selected(True)
     all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
                           parallel=False, callback_func=test_run_print_callback)

@@ -62,7 +62,7 @@ class TestWorker(QtCore.QThread):
             text = str(obj)                
                     
         self.mainWindow.emit( QtCore.SIGNAL("testRun"), text, obj)
-
+        
     #-----------------------------------------------------------------------------
     def run(self):
         print "Test Run started..."
@@ -329,6 +329,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # Add a new line 
         print "---" + line
         return line + "<br>\n"
+    
+    #-----------------------------------------------------------------------------
+    def test_stdout_callback(self, line):
+        """ Add a line to stdoutput from test running """
+        pass
         
     #-----------------------------------------------------------------------------
     def test_run_callback(self, text, obj):
@@ -360,8 +365,9 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                 # String was returned
                 if obj == test_info.MSG_ALL_BUILDS_SUCCESSFUL:
                     # Special message that all builds were good
-                    # Go back to the test results tab.
-                    self.tabWidgetRight.setCurrentIndex(0)
+                    # Go back to the test results tab; unless you are NOT running in parallel.
+                    if self.checkInParallel.isChecked():
+                        self.tabWidgetRight.setCurrentIndex(0)
                 else:
                     # Accumulated stdout
                     self.stdout +=  self.markup_console( unicode(obj) )
@@ -571,8 +577,8 @@ def start():
             if settings.contains("source_folder"):
                 source_folder = str(settings.value("source_folder", "../../Mantid/Framework").toString())
             else:
-               # Try a relative source folder if not specified
-               source_folder = os.path.join( bin_folder, "/../Framework" )
+                # Try a relative source folder if not specified
+                source_folder = os.path.join( bin_folder, "/../Framework" )
         else:
             # Use whatever was given
             settings.setValue("source_folder", source_folder) 
