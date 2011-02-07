@@ -104,7 +104,7 @@ std::string getComplexXMLInstructions()
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>/home/owen/mantid/Test/VATES/fe_demo_30.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>fe_demo_30.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
