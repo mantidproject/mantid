@@ -443,8 +443,8 @@ class TestSuite(object):
         os.chdir(rundir)
         
         # In order to catch "segmentation fault" message, we call bash and get the output of that! 
-        #full_command = "bash -c '%s'" % self.command
-        full_command = self.command
+        full_command = "bash -c '%s'" % self.command
+        #full_command = self.command
         #full_command = "cd /home/8oz/Code/Mantid/Code/Mantid/bin/ ; ./MDEventsTest -v"
         
         # Execute the test command; wait for it to return
