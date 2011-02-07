@@ -8,6 +8,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "MantidQtCustomInterfaces/SANSDiagnostics.h"
 
 #include <QHash>
 #include <QSettings>
@@ -238,6 +239,8 @@ private:
   Ui::SANSRunWindow m_uiForm;
   /// this object holds the functionality in the Add Files tab
   SANSAddFiles *m_addFilesTab;
+
+  SANSDiagnostics* m_diagnosticsTab;
   /// this points to a saveWorkspaces, which allows users to save any workspace, when one is opened
   MantidWidgets::SaveWorkspaces *m_saveWorkspaces;
   /// The instrument definition directory

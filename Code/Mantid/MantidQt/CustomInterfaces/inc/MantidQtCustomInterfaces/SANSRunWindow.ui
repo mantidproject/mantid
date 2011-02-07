@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>713</width>
-    <height>482</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -30,8 +30,8 @@
   <property name="windowTitle" >
    <string>SANS</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" >
-   <item>
+  <layout class="QGridLayout" name="gridLayout_24" >
+   <item row="0" column="0" >
     <widget class="QTabWidget" name="tabWidget" >
      <property name="enabled" >
       <bool>true</bool>
@@ -61,7 +61,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>0</number>
+      <number>6</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -249,7 +249,7 @@
             </item>
             <item>
              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt" >
-              <property name="techniques" stdset="0" >
+              <property name="techniques" >
                <stringlist>
                 <string>Small Angle Scattering</string>
                </stringlist>
@@ -1943,7 +1943,7 @@ intermediate ranges are there for comparison</string>
            </widget>
           </item>
           <item row="3" column="1" colspan="2" >
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="floodFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -3862,6 +3862,324 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="widget" >
+      <attribute name="title" >
+       <string>Diagnostics</string>
+      </attribute>
+      <widget class="QGroupBox" name="groupBox_Detector1" >
+       <property name="geometry" >
+        <rect>
+         <x>9</x>
+         <y>38</y>
+         <width>634</width>
+         <height>202</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string> Detector1</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_22" >
+        <item row="0" column="0" >
+         <widget class="QPushButton" name="hi_Btn1" >
+          <property name="text" >
+           <string>Horizontal Integral</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_68" >
+          <property name="text" >
+           <string>Range:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="hirange_edit1" />
+        </item>
+        <item row="0" column="3" >
+         <widget class="QCheckBox" name="tcmask1" >
+          <property name="text" >
+           <string>Apply Time Channel Mask</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QPushButton" name="vi_Btn1" >
+          <property name="text" >
+           <string>Vertical Integral</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLabel" name="label_69" >
+          <property name="text" >
+           <string>Range:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QLineEdit" name="virange_edit1" />
+        </item>
+        <item row="1" column="3" >
+         <widget class="QCheckBox" name="tcmask2" >
+          <property name="text" >
+           <string>Apply Time Channel Mask</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" >
+         <widget class="QPushButton" name="ti_Btn1" >
+          <property name="text" >
+           <string>Time Integral</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QLabel" name="label_70" >
+          <property name="text" >
+           <string>Region:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2" >
+         <widget class="QLineEdit" name="tirange_edit1" />
+        </item>
+        <item row="2" column="3" >
+         <widget class="QCheckBox" name="pmask1" >
+          <property name="text" >
+           <string>Apply Pixel Mask</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_Detector2" >
+       <property name="geometry" >
+        <rect>
+         <x>9</x>
+         <y>275</y>
+         <width>641</width>
+         <height>192</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Detector2</string>
+       </property>
+       <widget class="QPushButton" name="hi_Btn2" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>43</y>
+          <width>97</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Horizontal Integral</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_71" >
+        <property name="geometry" >
+         <rect>
+          <x>113</x>
+          <y>43</y>
+          <width>37</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Range:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="hirange_edit2" >
+        <property name="geometry" >
+         <rect>
+          <x>156</x>
+          <y>44</y>
+          <width>353</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="tcmask3" >
+        <property name="geometry" >
+         <rect>
+          <x>515</x>
+          <y>45</y>
+          <width>146</width>
+          <height>18</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Apply Time Channel Mask</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="vi_Btn2" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>91</y>
+          <width>97</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Vertical Integral</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_72" >
+        <property name="geometry" >
+         <rect>
+          <x>113</x>
+          <y>91</y>
+          <width>37</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Range:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="virange_edit2" >
+        <property name="geometry" >
+         <rect>
+          <x>156</x>
+          <y>92</y>
+          <width>353</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="tcmask4" >
+        <property name="geometry" >
+         <rect>
+          <x>515</x>
+          <y>93</y>
+          <width>146</width>
+          <height>18</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Apply Time Channel Mask</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="ti_Btn2" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>139</y>
+          <width>97</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Time Integral</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_73" >
+        <property name="geometry" >
+         <rect>
+          <x>113</x>
+          <y>139</y>
+          <width>37</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Region:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="tirange_edit2" >
+        <property name="geometry" >
+         <rect>
+          <x>156</x>
+          <y>140</y>
+          <width>353</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="pmask2" >
+        <property name="geometry" >
+         <rect>
+          <x>515</x>
+          <y>141</y>
+          <width>146</width>
+          <height>18</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Apply Pixel Mask</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="layoutWidget" >
+       <property name="geometry" >
+        <rect>
+         <x>9</x>
+         <y>9</y>
+         <width>627</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_23" >
+        <item row="0" column="0" >
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" >
+          <property name="maximumSize" >
+           <size>
+            <width>16777215</width>
+            <height>23</height>
+           </size>
+          </property>
+          <property name="label" stdset="0" >
+           <string>File/Run:</string>
+          </property>
+          <property name="multipleFiles" stdset="0" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_period" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt;">Period :&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="period_edit" >
+          <property name="minimumSize" >
+           <size>
+            <width>25</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize" >
+           <size>
+            <width>25</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" >
+         <widget class="QLabel" name="total_perioids" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:12pt;">/n&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>

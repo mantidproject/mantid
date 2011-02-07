@@ -10,6 +10,7 @@ set ( SRC_FILES src/background.cpp
                 src/SANSAddFiles.cpp
                 src/SANSRunWindow.cpp
                 src/SANSUtilityDialogs.cpp
+				src/SANSDiagnostics.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -25,6 +26,7 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
+				inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
@@ -37,6 +39,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
+				inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui

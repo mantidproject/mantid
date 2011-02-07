@@ -68,7 +68,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),m_diagnosticsTab(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -86,6 +86,7 @@ SANSRunWindow::~SANSRunWindow()
       saveSettings();
       delete m_addFilesTab;
     }
+    delete m_diagnosticsTab;
   }
   catch(...)
   {
@@ -186,6 +187,14 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.qx_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.transFit_lb->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
+
+  
+  if(!m_diagnosticsTab)
+  {
+    m_diagnosticsTab = new SANSDiagnostics(this,&m_uiForm);
+  }
+  //Listen for Workspace delete signals
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
   makeValidator(m_uiForm.wavRanVal_lb, m_uiForm.wavRanges, m_uiForm.tab_2,
              "A comma separated list of numbers is required here");
