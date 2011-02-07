@@ -66,6 +66,7 @@ find_package ( GSL REQUIRED )
 ###########################################################################
 
 add_custom_target ( FrameworkTests ) # target for all framework tests
+add_dependencies ( check FrameworkTests )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
