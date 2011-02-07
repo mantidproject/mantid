@@ -127,7 +127,8 @@ namespace MantidQt
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">";
       style+=QString::fromStdString(speriods);
       style+="</span></p></body></html>";
-      m_SANSForm->total_perioids->setText(QApplication::translate("SANSRunWindow",style,0, QApplication::UnicodeUTF8));
+      std::string key=style.toStdString();
+      m_SANSForm->total_perioids->setText(QApplication::translate("SANSRunWindow",key.c_str(),0, QApplication::UnicodeUTF8));
 
     }
 
