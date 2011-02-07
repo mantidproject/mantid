@@ -20,36 +20,36 @@ class MDEventTest :    public CxxTest::TestSuite
 
 public:
 
-
 //
 //  /** Test that shows that OPENMP does not use a thread pool idea to optimally allocate threads */
 //  void testOpenMP()
 //  {
 //    Timer overall;
-//    int num = 32;
-//    PARALLEL_FOR_NO_WSP_CHECK()
+//    int num = 10;
+//    //PARALLEL_FOR_NO_WSP_CHECK()
 //    //PRAGMA_OMP(for ordered)
 //    for (int i=0; i<num; i++)
 //    {
 //      double delay = num - i;
+//      delay = 1;
 //      PARALLEL_CRITICAL(test1)
-//      std::cout << std::setw(5) << i << ": Thread " << PARALLEL_THREAD_NUMBER << " will delay for " << delay << " seconds.\n";
+//      std::cout << std::setw(5) << i << ": Thread " << PARALLEL_THREAD_NUMBER << " will delay for " << delay << " seconds." << std::endl;
 //
 //      // Waste time, but use up the CPU!
 //      Timer time;
-//      while (time.elapsed_no_reset() < delay)
-//      {
-//        double x = 1.1;
-//        for (int j=0; j < 100000; j++)
-//        {
-//          x = x * x;
-//          x = x / 1.1;
-//        }
-//      }
-//      //sleep(delay);
+////      while (time.elapsed_no_reset() < delay)
+////      {
+////        double x = 1.1;
+////        for (int j=0; j < 100000; j++)
+////        {
+////          x = x * x;
+////          x = x / 1.1;
+////        }
+////      }
+//      sleep(delay);
 //
 //      PARALLEL_CRITICAL(test1)
-//      std::cout << std::setw(5) << i << ": is done and took " << time.elapsed() << " secs (was supposed to be " << delay << " sec).\n";
+//      std::cout << std::setw(5) << i << ": is done and took " << time.elapsed() << " secs (was supposed to be " << delay << " sec)." << std::endl;
 //    }
 //    std::cout << overall.elapsed() << " secs total.\n";
 //  }
