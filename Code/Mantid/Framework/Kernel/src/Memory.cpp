@@ -217,25 +217,25 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   //g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 #elif _WIN32
-  MemoryInfo mi;
-
-  GlobalMemoryStatusEx( &memStatus );
-
-  if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
-  {
-    mi.availMemory = static_cast<int>(memStatus.ullAvailPhys/1024);
-    mi.totalMemory = static_cast<int>(memStatus.ullTotalPhys/1024);
-  }
-  else// All virtual memory will be physical, but a process cannot have more than TotalVirtual.
-  {
-    mi.availMemory = static_cast<int>(memStatus.ullAvailVirtual/1024);
-    mi.totalMemory = static_cast<int>(memStatus.ullTotalVirtual/1024);
-  }
-
-  mi.freeRatio = static_cast<int>(100.0*mi.availMemory/mi.totalMemory);
-  //g_log.debug() << "Percentage of memory taken to be available for use: "
-  //    << mi.freeRatio << "%.\n";
-  return mi;
+//  MemoryInfo mi;
+//
+//  GlobalMemoryStatusEx( &memStatus );
+//
+//  if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
+//  {
+//    mi.availMemory = static_cast<int>(memStatus.ullAvailPhys/1024);
+//    mi.totalMemory = static_cast<int>(memStatus.ullTotalPhys/1024);
+//  }
+//  else// All virtual memory will be physical, but a process cannot have more than TotalVirtual.
+//  {
+//    mi.availMemory = static_cast<int>(memStatus.ullAvailVirtual/1024);
+//    mi.totalMemory = static_cast<int>(memStatus.ullTotalVirtual/1024);
+//  }
+//
+//  mi.freeRatio = static_cast<int>(100.0*mi.availMemory/mi.totalMemory);
+//  //g_log.debug() << "Percentage of memory taken to be available for use: "
+//  //    << mi.freeRatio << "%.\n";
+//  return mi;
 #endif
 }
 
