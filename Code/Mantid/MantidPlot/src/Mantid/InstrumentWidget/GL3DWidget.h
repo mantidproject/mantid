@@ -106,7 +106,7 @@ protected:
   GLViewport* _viewport;         ///< Opengl View port [World -> Window]
 
 protected slots:
-  void set3DAxesState(int state);
+  void set3DAxesState(bool);
   void setRenderMode(int);
 
 private:
@@ -125,7 +125,7 @@ private:
   GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
   GLActor* mPickedActor;
   bool isKeyPressed;
-  int m3DAxesShown;              ///< true when the 3D axes are to be shown
+  bool m3DAxesShown;              ///< true when the 3D axes are to be shown
   int m_lightingState;           ///< 0 = light off; 2 = light on
   PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
   bool m_firstFrame;

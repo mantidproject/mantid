@@ -51,7 +51,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   setFocusPolicy(Qt::StrongFocus);
   setAutoFillBackground(false);
   bgColor=QColor(0,0,0,1);
-  m3DAxesShown = 1;
+  m3DAxesShown = true;
   m_polygonMode = SOLID;
   m_lightingState = 0;
   m_firstFrame = true;
@@ -850,7 +850,7 @@ void GL3DWidget::defaultProjection()
  * Sets the flag indicating the visibility of the orientation axes
  *
  */
-void GL3DWidget::set3DAxesState(int state)
+void GL3DWidget::set3DAxesState(bool state)
 {
   m3DAxesShown = state;
   // Update the display

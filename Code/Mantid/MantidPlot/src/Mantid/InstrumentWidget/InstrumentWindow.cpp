@@ -125,6 +125,7 @@ void InstrumentWindow::tabChanged(int i)
   {
     mInstrumentDisplay->setInteractionModeNormal();
   }
+
 }
 
 /**

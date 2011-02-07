@@ -14,21 +14,65 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
+#include <QAction>
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),m_instrWindow(instrWindow)
 {
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
-  mSelectColormap = new QPushButton(tr("Select ColorMap"));
+
+  QComboBox* renderMode = new QComboBox(this);
+  renderMode->setToolTip("Set render mode");
+  QStringList modeList;
+  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
+  renderMode->insertItems(0,modeList);
+  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow->getInstrumentDisplay(),SLOT(setRenderMode(int)));
+  connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
+
   QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
+  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
+
   mBinDialog = new BinDialog(this);
+  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
+
   mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
-  // Lighting is needed for testing
-//  QPushButton* setLight = new QPushButton(tr("Set lighting"));
-//  setLight->setCheckable(true);
-  //Save control
+  mColorMapWidget->setColorBarEnabled(true);
+  mColorMapWidget->setColorBarWidth(20);
+  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
+  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+
+  //Save image control
   mSaveImage = new QPushButton(tr("Save image"));
+  connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
+
+  // Setup Display Setting menu
+  QPushButton* displaySettings = new QPushButton("Display Settings",this);
+  QMenu* displaySettingsMenu = new QMenu(this);
+  m_colorMap = new QAction("Color Map",this);
+  connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColormap()));
+  m_backgroundColor = new QAction("Background Colour",this);
+  connect(m_backgroundColor,SIGNAL(triggered()),m_instrWindow,SLOT(pickBackgroundColor()));
+  m_lighting = new QAction("Lighting",this);
+  m_lighting->setCheckable(true);
+  m_lighting->setChecked(false);
+  connect(m_lighting,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  m_displayAxes = new QAction("Display Axes",this);
+  m_displayAxes->setCheckable(true);
+  m_displayAxes->setChecked(true);
+  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(set3DAxesState(bool)));
+  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(updateInteractionInfoText()));
+  m_wireframe = new QAction("Wireframe",this);
+  m_wireframe->setCheckable(true);
+  m_wireframe->setChecked(false);
+  connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setWireframe(bool)));
+  displaySettingsMenu->addAction(m_colorMap);
+  displaySettingsMenu->addAction(m_backgroundColor);
+  displaySettingsMenu->addSeparator();
+  displaySettingsMenu->addAction(m_displayAxes);
+  displaySettingsMenu->addAction(m_wireframe);
+  //displaySettingsMenu->addAction(m_lighting); // enable for testing
+  displaySettings->setMenu(displaySettingsMenu);
 
   mMinValueBox = new QLineEdit();
   mMaxValueBox = new QLineEdit();
@@ -51,10 +95,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   lColormapLayout->addWidget(mMaxValueBox);
   lColormapLayout->addWidget(mColorMapWidget);
   lColormapLayout->addWidget(mMinValueBox);
-  mColorMapWidget->setColorBarEnabled(true);
-  mColorMapWidget->setColorBarWidth(20);
-  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
-  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 
   mScaleOptions = new QComboBox;
   mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
@@ -73,52 +113,32 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   colourmap_layout->addLayout(options_layout);
   lColormapFrame->setLayout(colourmap_layout);
 
-
-  //Pick background color
-  QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
-
   //Check box to toggle orientation axes
-  m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
-  m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
-  m3DAxesToggle->setCheckState(Qt::Checked);
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow->getInstrumentDisplay(), SLOT(set3DAxesState(int)));
-  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow, SLOT(updateInteractionInfoText()));
+  //m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
+  //m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
+  //m3DAxesToggle->setCheckState(Qt::Checked);
+  //connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow->getInstrumentDisplay(), SLOT(set3DAxesState(int)));
+  //connect(m3DAxesToggle, SIGNAL(stateChanged(int)), m_instrWindow, SLOT(updateInteractionInfoText()));
 
   //Check box to toggle polygon mode
-  QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
-  poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
-  poligonMOdeToggle->setCheckState(Qt::Unchecked);
-  connect(poligonMOdeToggle, SIGNAL(clicked(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setWireframe(bool)));
+  //QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
+  //poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
+  //poligonMOdeToggle->setCheckState(Qt::Unchecked);
+  //connect(poligonMOdeToggle, SIGNAL(clicked(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setWireframe(bool)));
   
-  QComboBox* renderMode = new QComboBox(this);
-  renderMode->setToolTip("Set render mode");
-  QStringList modeList;
-  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
-  renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow->getInstrumentDisplay(),SLOT(setRenderMode(int)));
-
   renderControlsLayout->addWidget(renderMode);
-  renderControlsLayout->addWidget(mSelectBin);
-  renderControlsLayout->addWidget(mSelectColormap);
-  renderControlsLayout->addWidget(mSaveImage);
-//  renderControlsLayout->addWidget(setLight);
   renderControlsLayout->addWidget(axisViewFrame);
-  renderControlsLayout->addWidget(btnBackgroundColor);
+  renderControlsLayout->addWidget(displaySettings);
+
+  renderControlsLayout->addWidget(mSelectBin);
+  renderControlsLayout->addWidget(mSaveImage);
   renderControlsLayout->addWidget(lColormapFrame);
-  renderControlsLayout->addWidget(m3DAxesToggle);
-  renderControlsLayout->addWidget(poligonMOdeToggle);
+  //renderControlsLayout->addWidget(m3DAxesToggle);
+  //renderControlsLayout->addWidget(poligonMOdeToggle);
 
 
-  connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
-  connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
-//  connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
   connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
   connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
-
-  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
-  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),m_instrWindow,SLOT(setViewDirection(const QString&)));
-  connect(btnBackgroundColor,SIGNAL(clicked()),m_instrWindow,SLOT(pickBackgroundColor()));
 
   loadSettings("Mantid/InstrumentWindow");
 }
@@ -134,7 +154,7 @@ InstrumentWindowRenderTab::~InstrumentWindowRenderTab()
 */
 QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 {
-  QFrame* axisViewFrame = new QFrame();
+  m_resetViewFrame = new QFrame();
   QHBoxLayout* axisViewLayout = new QHBoxLayout();
   axisViewLayout->addWidget(new QLabel("Axis View:"));
 
@@ -147,9 +167,11 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
   mAxisCombo->addItem("Y-");
 
   axisViewLayout->addWidget(mAxisCombo);
-  axisViewFrame->setLayout(axisViewLayout);
+  m_resetViewFrame->setLayout(axisViewLayout);
 
-  return axisViewFrame;
+  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),m_instrWindow,SLOT(setViewDirection(const QString&)));
+
+  return m_resetViewFrame;
 }
 
 /**
@@ -272,10 +294,7 @@ void InstrumentWindowRenderTab::loadSettings(const QString& section)
   QSettings settings;
   settings.beginGroup(section);
   int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
-  if (show3daxes)
-    m3DAxesToggle->setCheckState(Qt::Checked);
-  else
-    m3DAxesToggle->setCheckState(Qt::Unchecked);
+  m_displayAxes->setChecked(show3daxes != 0);
   settings.endGroup();
 }
 
@@ -283,7 +302,7 @@ void InstrumentWindowRenderTab::saveSettings(const QString& section)
 {
   QSettings settings;
   settings.beginGroup(section);
-  int val = 0;  if (m3DAxesToggle->isChecked()) val = 1;
+  int val = 0;  if (m_displayAxes->isChecked()) val = 1;
   settings.setValue("3DAxesShown", QVariant(val));
   settings.endGroup();
 }
@@ -320,5 +339,14 @@ void InstrumentWindowRenderTab::setAxis(const QString& axisNameArg)
 
 bool InstrumentWindowRenderTab::areAxesOn()const
 {
-  return m3DAxesToggle->isChecked();
+  return m_displayAxes->isChecked();
+}
+
+/**
+  * Show ResetView combo box only with 3D view
+  * @param iv Index of a render mode in RenderMode combo box. iv == 0 is 3D view
+  */
+void InstrumentWindowRenderTab::showResetView(int iv)
+{
+  m_resetViewFrame->setVisible(iv == 0);
 }

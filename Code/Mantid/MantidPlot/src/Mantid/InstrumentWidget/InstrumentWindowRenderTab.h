@@ -13,6 +13,7 @@ class QPushButton;
 class QLineEdit;
 class QComboBox;
 class QCheckBox;
+class QAction;
 
 /**
   * Implements the Render tab in InstrumentWindow
@@ -38,18 +39,25 @@ private slots:
   void minValueChanged();
   void maxValueChanged();
   void selectBinButtonClicked();
+  void showResetView(int);
 private:
   QFrame * setupAxisFrame();
 
   InstrumentWindow* m_instrWindow;
   Instrument3DWidget *mInstrumentDisplay;
-  QPushButton *mSelectColormap,*mSaveImage;
+  QPushButton *mSaveImage;
   BinDialog *mBinDialog;
   QwtScaleWidget *mColorMapWidget;
   QLineEdit *mMinValueBox, *mMaxValueBox;
+  QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
   QComboBox *mScaleOptions;
-  QCheckBox *m3DAxesToggle;
+
+  QAction *m_colorMap;
+  QAction *m_backgroundColor;
+  QAction *m_displayAxes;
+  QAction *m_wireframe;
+  QAction *m_lighting;
 };
 
 
