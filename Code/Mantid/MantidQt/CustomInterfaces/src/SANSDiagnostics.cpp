@@ -258,15 +258,15 @@ namespace MantidQt
         return;
       }
       //get the name of detectors
-      std::string det1Name,det2Name;
+      QString det1Name,det2Name;
       //first detector name
       det1Name=getDetectorName(0);
-      if(!det1Name.empty())
+      if(!det1Name.isEmpty())
       {
         //enable the detector display controls
         m_SANSForm->groupBox_Detector1->setDisabled(false);
         //set anme
-        m_SANSForm->groupBox_Detector1->setTitle(QString::fromStdString(det1Name));
+        m_SANSForm->groupBox_Detector1->setTitle(det1Name);
         m_SANSForm->groupBox_Detector1->show();
       }
       else
@@ -280,10 +280,10 @@ namespace MantidQt
       }
       //2nd detector
       det2Name=getDetectorName(1);
-      if(!det2Name.empty())
+      if(!det2Name.isEmpty())
       { 
         m_SANSForm->groupBox_Detector2->setDisabled(false);
-        m_SANSForm->groupBox_Detector2->setTitle(QString::fromStdString(det2Name));
+        m_SANSForm->groupBox_Detector2->setTitle(det2Name);
         m_SANSForm->groupBox_Detector2->show();
       }
       else
@@ -297,7 +297,7 @@ namespace MantidQt
     *@param index of the rectangualar detector
     *@return detector name
     */
-    QString SANSDiagnostics::getDetectorName(int index)
+    const QString& SANSDiagnostics::getDetectorName(int index)
     {
       boost::shared_ptr<RectDetectorDetails> rectDet;
       try
@@ -308,11 +308,11 @@ namespace MantidQt
       {       
         g_log.error()<<"Rectangular detector not found"<<std::endl;
       } 
-      if(!rectDet)
+      if(rectDet)
       {  
-        return "";
+        return rectDet->getDetcetorName();
       }
-      return rectDet->getDetcetorName();
+     
     }
 
     /** This method returns a vector of rectanglar detector's name, min & max detector id.
@@ -586,8 +586,10 @@ namespace MantidQt
       if(!isValidSpectra(minSpec,maxSpec))
       {
         return;
-      }
+      } 
+      
       QString detName= getDetectorName(0);
+           
       //give the detectorname_H for workspace
       detName+="_H";
       QString opws(detName);
@@ -642,7 +644,7 @@ namespace MantidQt
 
       QString wsName= getWorkspaceToProcess();
       //execute SumSpectra 
-      sumSpectraScript(wsName);
+      sumSpectraScript();
       plotSpectrum(wsName,0);
     }
 
@@ -678,7 +680,6 @@ namespace MantidQt
       }
       //now execute sumrowcolumn algorithm
       QString ipwsName;
-      int periodno=0;
       if(isMultiPeriod())
       {
         ipwsName=m_memberwsName; 
@@ -802,7 +803,7 @@ namespace MantidQt
       runLoadAlgorithm(m_fileName,minSpec,maxSpec);
       QString wsName= getWorkspaceToProcess();
       //execute SumSpectra 
-      sumSpectraScript(wsName);
+      sumSpectraScript();
       plotSpectrum(wsName,0);
     }
 
@@ -930,7 +931,7 @@ namespace MantidQt
     *@param opwsName - name of the ooutput workspace
     *@returns - sumspectra script string
     */
-    QString SANSDiagnostics::sumSpectraScript(const QString& opwsName)
+    QString SANSDiagnostics::sumSpectraScript()
     {
       QString ipwsName= getWorkspaceToProcess();
 
@@ -968,6 +969,8 @@ namespace MantidQt
       }
       catch(std::out_of_range&)
       {
+        g_log.error("Error when executing SumRowColumn Algorithm" );
+        return false;
       }
       return true;
     }

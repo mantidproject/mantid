@@ -131,7 +131,7 @@ private:
   //get rectangular detector details
   std::vector<boost::shared_ptr<RectDetectorDetails> >  rectangularDetectorDetails(Mantid::API::Workspace_sptr& ws_sptr);
   /// returns sumspectra script
-  QString sumSpectraScript(const QString& opwsName);
+  QString sumSpectraScript();
   /// display total number of periods box
   void displayTotalPeriods();
   /// display rectangualr detectors
@@ -150,7 +150,7 @@ private:
   void minandMaxSpectrumIds(const int detNum,QString& minSpec, QString& maxSpec);
 
   /// get detector name
-  QString getDetectorName(int index);
+ const  QString & getDetectorName(int index);
 
   /// get the user entered period number
   int getPeriodNumber();
