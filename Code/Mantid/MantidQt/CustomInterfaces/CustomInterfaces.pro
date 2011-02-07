@@ -35,7 +35,8 @@ SOURCES = \
   $$SRCDIR/IndirectDataAnalysis.cpp \
   $$SRCDIR/MuonAnalysis.cpp \
   $$SRCDIR/IO_MuonGrouping.cpp \
-  $$SRCDIR/IndirectDiffractionReduction.cpp
+  $$SRCDIR/IndirectDiffractionReduction.cpp \
+  $$SRCDIR/SANSDiagnostics.cpp
 
 
 HEADERS = \
@@ -50,7 +51,8 @@ HEADERS = \
   $$HEADERDIR/IndirectDataAnalysis.h \
   $$HEADERDIR/MuonAnalysis.h \
   $$HEADERDIR/IO_MuonGrouping.h \
-  $$HEADERDIR/IndirectDiffractionReduction.h
+  $$HEADERDIR/IndirectDiffractionReduction.h \
+  $$HEADERDIR/SANSDiagnostics.h
   
 UI_DIR = $$HEADERDIR
 
