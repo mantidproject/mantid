@@ -11,6 +11,9 @@
   #include <sys/sysctl.h>
   #include <mach/mach_host.h>
 #endif
+#ifdef _WIN32
+  #include <windows.h>
+#endif
 
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
@@ -121,6 +124,42 @@ bool read_mem_info(size_t & sys_avail, size_t & sys_total)
 }
 #endif
 
+#ifdef _WIN32
+namespace {  // Anonymous namespace
+
+  MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
+
+  size_t ReservedMem()
+  {
+    MEMORY_BASIC_INFORMATION info; // Windows structure
+
+    char *addr = NULL;
+    size_t unusedReserved = 0; // total reserved space
+    DWORDLONG size = 0;
+    DWORDLONG GB2 = memStatus.ullTotalVirtual; // Maximum memory available to the process
+
+    // Loop over all virtual memory to find out the status of every block.
+    do
+    {
+      VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+
+      // Count up the total size of reserved but unused blocks
+      if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
+
+      addr += info.RegionSize; // Move up to the starting address for the next call
+      size += info.RegionSize;
+    }
+    while(size < GB2);
+
+    // Convert from bytes to KB
+    unusedReserved /= 1024;
+
+    return unusedReserved;
+  }
+
+}
+#endif
+
 void process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
 
@@ -177,8 +216,27 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   const size_t unusedReserved = mstats().bytes_free / 1024;
   //g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
+#elif _WIN32
+  MemoryInfo mi;
+
+  GlobalMemoryStatusEx( &memStatus );
+
+  if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
+  {
+    mi.availMemory = static_cast<int>(memStatus.ullAvailPhys/1024);
+    mi.totalMemory = static_cast<int>(memStatus.ullTotalPhys/1024);
+  }
+  else// All virtual memory will be physical, but a process cannot have more than TotalVirtual.
+  {
+    mi.availMemory = static_cast<int>(memStatus.ullAvailVirtual/1024);
+    mi.totalMemory = static_cast<int>(memStatus.ullTotalVirtual/1024);
+  }
+
+  mi.freeRatio = static_cast<int>(100.0*mi.availMemory/mi.totalMemory);
+  //g_log.debug() << "Percentage of memory taken to be available for use: "
+  //    << mi.freeRatio << "%.\n";
+  return mi;
 #endif
-  // TODO needs windows stuff folded in
 }
 
 // ------------------ The actual class
