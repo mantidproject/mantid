@@ -650,4 +650,12 @@ void QvisRebinningCutterWindow::geometryChangedlistener()
 
 //writeSourceCallback unknown for stringVector (variable dimensionXML)
 
+void QvisRebinningCutterWindow::upYProcessText()
+{
 
+}
+
+void QvisRebinningCutterWindow::upZProcessText()
+{
+
+}
