@@ -87,9 +87,9 @@ namespace Algorithms
     IAlgorithm_sptr alg1 = createSubAlgorithm("MoveInstrumentComponent");
     alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     alg1->setPropertyValue("ComponentName", detname);
-    alg1->setProperty("X", x*0.01);
-    alg1->setProperty("Y", y*0.01);
-    alg1->setProperty("Z", z*0.01);
+    alg1->setProperty("X", x);
+    alg1->setProperty("Y", y);
+    alg1->setProperty("Z", z);
     alg1->setPropertyValue("RelativePosition", "1");
     try
     {
@@ -108,6 +108,7 @@ namespace Algorithms
     algx->setProperty("Y", 0.0);
     algx->setProperty("Z", 0.0);
     algx->setProperty("Angle", rotx);
+    algx->setPropertyValue("RelativeRotation", "1");
     try
     {
       algx->execute();
@@ -125,6 +126,7 @@ namespace Algorithms
     algy->setProperty("Y", 1.0);
     algy->setProperty("Z", 0.0);
     algy->setProperty("Angle", roty);
+    algy->setPropertyValue("RelativeRotation", "1");
     try
     {
       algy->execute();
@@ -142,6 +144,7 @@ namespace Algorithms
     algz->setProperty("Y", 0.0);
     algz->setProperty("Z", 1.0);
     algz->setProperty("Angle", rotz);
+    algz->setPropertyValue("RelativeRotation", "1");
     try
     {
       algz->execute();
@@ -185,7 +188,7 @@ namespace Algorithms
     }
     catch (std::runtime_error&)
     {
-      g_log.information("Unable to successfully run CreateCalFileByNames sub-algorithm");
+      g_log.information()<<"Unable to successfully run CreateCalFileByNames sub-algorithm for "<<instname<< "\n";
       throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
     }
 
@@ -342,7 +345,7 @@ namespace Algorithms
     matrixInWS=algS->getProperty("InputWorkspace");
 
     Progress prog(this,0.0,1.0,detList.size());
-    for (int det=0; det < detList.size(); det++)
+    for (int det=0; det < static_cast<int>(detList.size()); det++)
     {
       std::string par[5];
       par[0]=detList[det]->getName();
