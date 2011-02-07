@@ -94,6 +94,10 @@ public:
 
   unsigned int getTextureID() const;
   void setTextureID(unsigned int textureID);
+  ///minimum detector id
+  int minDetectorID();
+  /// maximum detector id
+  int maxDetectorID();
 
   // This should inherit the getBoundingBox implementation from  CompAssembly but
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
@@ -171,6 +175,10 @@ private:
 
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<Object> mShape;
+  /// minimum detector id
+  int m_minDetId;
+  /// maximum detector id
+  int m_maxDetId;
 
 };
 

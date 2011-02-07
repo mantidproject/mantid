@@ -19,8 +19,10 @@ namespace Geometry
 
 /** Empty constructor
  */
-RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
+RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL),
+m_minDetId(0),m_maxDetId(0)
 {
+
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
@@ -30,8 +32,9 @@ RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
  * @param map: pointer to the ParameterMap
  * */
 RectangularDetector::RectangularDetector(const RectangularDetector* base, const ParameterMap * map)
- : CompAssembly(base,map), IObjComponent(NULL), m_rectBase(base)
+ : CompAssembly(base,map), IObjComponent(NULL), m_rectBase(base),m_minDetId(0),m_maxDetId(0)
 {
+
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
@@ -46,8 +49,9 @@ RectangularDetector::RectangularDetector(const RectangularDetector* base, const 
  *  this is registered as a children of reference.
  */
 RectangularDetector::RectangularDetector(const std::string& n, IComponent* reference) :
-    CompAssembly(n, reference), IObjComponent(NULL)
+    CompAssembly(n, reference), IObjComponent(NULL),m_minDetId(0),m_maxDetId(0)
 {
+
   this->setName(n);
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
@@ -65,7 +69,7 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
  */
 RectangularDetector::~RectangularDetector()
 {
-
+  
 }
 
 /** Clone method
@@ -76,7 +80,6 @@ IComponent* RectangularDetector::clone() const
 {
   return new RectangularDetector(*this);
 }
-
 
 
 //-------------------------------------------------------------------------------------------------
@@ -235,8 +238,10 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
     int idstep
     )
 {
+
   if (m_isParametrized)
     throw std::runtime_error("RectangularDetector::initialize() called for a parametrized RectangularDetector");
+
 
   m_xpixels = xpixels;
   m_ypixels = ypixels;
@@ -247,10 +252,10 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   m_xstep = xstep;
   m_ystep = ystep;
   mShape = shape;
+ 
   //TODO: some safety checks
-
   std::string name = this->getName();
-
+  int minDetId=idstart,maxDetId=idstart;
   //Loop through all the pixels
   int ix, iy;
   for (ix=0; ix<m_xpixels; ix++)
@@ -266,7 +271,17 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
         id = idstart + ix * idstepbyrow + iy * idstep;
       else
         id = idstart + iy * idstepbyrow + ix * idstep;
-
+     
+      //minimum rectangular detector id
+      if(id<minDetId)
+      {
+        minDetId=id;
+      }
+      //maximum rectangular detector id
+      if(id>maxDetId)
+      {
+        maxDetId=id;
+      }
       //Create the detector from the given id & shape and with THIS as the parent.
       Detector* detector = new Detector(oss.str(), id, shape, this);
 
@@ -281,10 +296,33 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       this->add(detector);
 
     }
+    m_minDetId=minDetId;
+    m_maxDetId=maxDetId;
 
+   
 }
 
+//-------------------------------------------------------------------------------------------------
+/** Returns the minimum detector id
+  * @return minimum detector id
+ */
+int RectangularDetector::minDetectorID()
+{
+  if (m_isParametrized)
+    return m_rectBase->m_minDetId;
+  return m_minDetId;
+}
 
+//-------------------------------------------------------------------------------------------------
+/** Returns the maximum detector id
+  * @return maximum detector id
+ */
+int RectangularDetector::maxDetectorID()
+{
+ if (m_isParametrized)
+    return m_rectBase->m_maxDetId;
+  return m_maxDetId;
+}
 
 
 
