@@ -48,7 +48,7 @@ namespace MDEvents
     /** Sample function returning the n-th point in the workspace.
      * This may not be needed.
      *  */
-    Event getPoint(size_t n);
+    //Event getPoint(size_t n);
 
   protected:
 

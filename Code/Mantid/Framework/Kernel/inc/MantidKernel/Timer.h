@@ -49,10 +49,10 @@ public:
   virtual ~Timer();
   
   float elapsed();
+  float elapsed_no_reset() const;
   std::string str() const;
   
 private:
-  float elapsed_no_reset() const;
   void reset();
   // The type of this variable is different depending on the platform
 #ifdef _WIN32
