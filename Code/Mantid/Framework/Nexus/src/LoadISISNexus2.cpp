@@ -237,13 +237,13 @@ namespace Mantid
 
         for( int p = 1; p <= m_numberOfPeriods; ++p )
         {
-          local_workspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-            (WorkspaceFactory::Instance().create(local_workspace));
           std::ostringstream os;
           os << p;
           m_progress->report("Loading period " + os.str());
           if( p > 1 )
           {
+            local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (WorkspaceFactory::Instance().create(local_workspace));
             loadPeriodData(p, entry, local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));

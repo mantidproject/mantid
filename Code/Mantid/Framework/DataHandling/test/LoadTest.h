@@ -123,7 +123,7 @@ public:
     #endif
   }
 
-  void testHDF4NexusGroup()
+  void xtestHDF4NexusGroup()
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
