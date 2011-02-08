@@ -2,6 +2,9 @@
 #define THREADPOOL_H_
 
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Task.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -12,6 +15,9 @@ namespace Kernel
   /** A Thread Pool implementation that keeps a certain number of
    * threads running (normally, equal to the number of hardware cores available)
    * and schedules tasks to them in the most efficient way possible.
+   *
+   * This implementation will be slanted towards performing many more
+   * Task's than there are available cores, so threads will be reused.
 
     @author Janik Zikovsky, SNS
     @date Feb 7, 2011
@@ -36,20 +42,35 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
-  class ThreadPoolImpl
+
+  class DLLExport ThreadPool
   {
   public:
-    void test()
-    {
-    }
+    ThreadPool(size_t numCores = 0);
+
+    void schedule(Task * task);
+
+    void run(bool sort = false);
+
+
+  protected:
+    /// Number of cores used
+    size_t m_numThreads;
+
+    /// List of scheduled tasks
+    std::vector<Task *> m_tasks;
   };
 
-/// Singleton declaration
-#ifdef _WIN32
-    // this breaks new namespace declaraion rules; need to find a better fix
-    template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
-#endif /* _WIN32 */
-    typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl> ThreadPool;
+
+
+
+
+///// Singleton declaration
+//#ifdef _WIN32
+//    // this breaks new namespace declaraion rules; need to find a better fix
+//    template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
+//#endif /* _WIN32 */
+//    typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl> ThreadPool;
 
 
 } // namespace Kernel

@@ -58,7 +58,7 @@ public:
     TS_ASSERT_EQUALS(my_check_value, 34);
   }
 
-  void test_Function_using_bind2()
+  void test_Function_using_bind_complicated()
   {
     FunctionTask mytask( boost::bind(my_complicated_function, 56, 12.0)  );
     TS_ASSERT_DIFFERS(my_check_value, 68);

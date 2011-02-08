@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include <MantidKernel/Timer.h>
+#include <MantidKernel/FunctionTask.h>
 #include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
 
+#include <boost/bind.hpp>
 #include <iostream>
 #include <iomanip>
 
@@ -36,30 +38,25 @@ size_t waste_time(double seconds)
 }
 
 
+int threadpooltest_check = 0;
+
+void threadpooltest_function()
+{
+  threadpooltest_check = 12;
+}
+
+
+std::vector<int> threadpooltest_vec;
+void threadpooltest_adding_stuff(int val)
+{
+  //TODO: Mutex
+  threadpooltest_vec.push_back(val);
+}
 
 
 class ThreadPoolTest : public CxxTest::TestSuite
 {
 public:
-  void setUp()
-  {
-  }
-  
-  void tearDown()
-  {
-  }
-  
-
-  void test_Constructor()
-  {
-    Mantid::Kernel::Timer overall;
-    for (int i=0; i<1000000; i++)
-    {
-      ThreadPool::Instance().test();
-    }
-    //std::cout << std::setw(15) << overall.elapsed() << " secs total" << std::endl;
-  }
-
 
   /** Test that shows that OPENMP does not use a thread pool idea to optimally allocate threads */
   void xtestOpenMP()
@@ -95,6 +92,46 @@ public:
 //    time = overall.elapsed();
 //    std::cout << "Boost: " <<std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
 //  }
+
+
+  void test_Constructor()
+  {
+    ThreadPool p(5);
+  }
+
+  void test_schedule()
+  {
+    ThreadPool p;
+    TS_ASSERT_EQUALS( threadpooltest_check, 0);
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+    TS_ASSERT_EQUALS( threadpooltest_check, 0);
+    TS_ASSERT_THROWS_NOTHING( p.run(false) );
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+  }
+
+  void test_run_with_sort()
+  {
+    // Only use one core, it'll make things simpler
+    ThreadPool p(1);
+
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( boost::bind(threadpooltest_adding_stuff, i), cost ) );
+    }
+
+    TS_ASSERT_THROWS_NOTHING( p.run(true) );
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
+    // And the largest cost one was run first.
+    TS_ASSERT_EQUALS( threadpooltest_vec[0], 9);
+    TS_ASSERT_EQUALS( threadpooltest_vec[1], 8);
+    TS_ASSERT_EQUALS( threadpooltest_vec[2], 7);
+  }
+
+
+
+
 
 };
 
