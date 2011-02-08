@@ -314,9 +314,8 @@ namespace Mantid
       // workspace group added to handle  multi periods
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
       if(m_numberOfPeriods>1)
-      {
-        if(wsGrpSptr)wsGrpSptr->add(localWSName);
-        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      {   
+         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
       // Set the unit on the workspace to TOF
