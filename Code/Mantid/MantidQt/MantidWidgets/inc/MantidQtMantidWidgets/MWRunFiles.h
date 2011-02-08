@@ -83,7 +83,12 @@ namespace MantidQt
       QStringList getFilenames() const;
       QString getFirstFilename() const;
       int getEntryNum() const;
-
+      /// Overridden from base class to retrieve user input through a common interface
+      QVariant getUserInput() const;      
+      /// Sets a value on the widget through a common interface
+      void setUserInput(const QVariant & value);
+      /// flag a problem with the file the user entered, an empty string means no error
+      void setFileProblem(const QString & message);
       /// Read settings from the given group
       void readSettings(const QString & group);
       /// Save settings in the given group
@@ -108,12 +113,10 @@ namespace MantidQt
       QStringList getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName);
       /// Open a file dialog
       QString openFileDia();
-      /// flag a problem with the file the user entered, an empty string means no error
-      void setFileProblem(const QString & message);
       /// flag a problem with the supplied entry number, an empty string means no error
       void setEntryNumProblem(const QString & message);
       /// displays the validator red star if either m_fileProblem or m_entryNumProblem are not empty
-      void refreshvalidator();
+      void refreshValidator();
 
     private slots:
       /// Browse clicked slot

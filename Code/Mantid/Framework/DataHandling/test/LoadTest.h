@@ -8,6 +8,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
@@ -15,6 +17,25 @@ using namespace Mantid::DataHandling;
 class LoadTest : public CxxTest::TestSuite
 {
 public:
+
+  void testViaProxy()
+  {
+    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
+    
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename","IRS38633.raw"));
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+
+    proxy->setPropertyValue("Filename","IRS38633.raw");
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename","LOQ49886.nxs"));   
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), false);
+    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
+  }
 
   void testFindLoader()
   {

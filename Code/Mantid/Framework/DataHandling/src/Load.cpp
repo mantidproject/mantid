@@ -23,7 +23,7 @@ namespace Mantid
     //--------------------------------------------------------------------------
 
     /// Default constructor
-    Load::Load() : IDataFileChecker(), m_loaderProps()
+    Load::Load() : IDataFileChecker(), m_baseProps()
     {
     }
 
@@ -35,11 +35,22 @@ namespace Mantid
     void Load::setPropertyValue(const std::string &name, const std::string &value)
     {
       IDataFileChecker::setPropertyValue(name, value);
+      
+      IAlgorithm_sptr loader;
       if( name == "Filename" )
       {
-  	IAlgorithm_sptr loader = getFileLoader(getPropertyValue(name));
-  	declareLoaderProperties(loader);
+	loader = getFileLoader(getPropertyValue(name));
       }
+      else
+      {
+	const std::string loaderName = getProperty("LoaderName");
+	if( !loaderName.empty() )
+	{
+	  loader = API::AlgorithmManager::Instance().createUnmanaged(loaderName);
+	  loader->initialize();
+	}
+      }
+      if( loader ) declareLoaderProperties(loader);
     }
     
     //--------------------------------------------------------------------------
@@ -124,6 +135,8 @@ namespace Mantid
 
       if( !winningLoader )
       {
+	// Clear what may have been here previously
+	setPropertyValue("LoaderName", "");
         throw std::runtime_error("Cannot find a loader for \"" + filePath + "\"");
       }
       setPropertyValue("LoaderName", winningLoader->name());
@@ -137,17 +150,16 @@ namespace Mantid
      */
     void Load::declareLoaderProperties(const IAlgorithm_sptr loader)
     {
-      if( !m_loaderProps.empty() )
+      const std::vector<Property*> existingProps = this->getProperties();      
+      for( size_t i = 0; i < existingProps.size(); ++i )
       {
-	std::list<std::string>::const_iterator cend = m_loaderProps.end();
-	for( std::list<std::string>::const_iterator citr = m_loaderProps.begin();
-	     citr != cend; ++citr )
+	const std::string name = existingProps[i]->name();
+	if( m_baseProps.find(name) != m_baseProps.end() )
 	{
-	  this->removeProperty(*citr);
+	  continue;
 	}
-	m_loaderProps.clear();
+	this->removeProperty(name);
       }
-
 
       const std::vector<Property*> &loaderProps = loader->getProperties();
       size_t numProps(loaderProps.size());
@@ -163,9 +175,6 @@ namespace Mantid
 	  // Already exists as a static property
 	  continue;
 	}
-	// Save just in case a this function is called again so that we
-	// can remove the dynamically generated properties
-	m_loaderProps.push_back(loadProp->name());
       }
     }
 
@@ -192,7 +201,7 @@ namespace Mantid
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the file to read, including its full or relative\n"
         "path. (N.B. case sensitive if running on Linux).");
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output, true), 
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output), 
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.");
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -204,6 +213,13 @@ namespace Mantid
         "Load a particular entry, if supported by the file format (default: Load all entries)");
       declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
         Direction::Output);
+
+      const std::vector<Property*> & props = this->getProperties();
+      for( size_t i = 0; i < this->propertyCount(); ++i )
+      {
+	m_baseProps.insert(props[i]->name());
+      }
+
     }
 
     /** 
@@ -216,7 +232,6 @@ namespace Mantid
       {
 	throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
       }     
-      
       IAlgorithm_sptr loader = createLoader(loaderName);
       g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
        // Get the list of properties for the Load algorithm
@@ -286,37 +301,25 @@ namespace Mantid
      * Set the output workspace(s) if the load's return workspace has type API::Workspace
      * @param load :: Shared pointer to load algorithm
      */
-    void Load::setOutputWorkspace(API::IAlgorithm_sptr& load)
+    void Load::setOutputWorkspace(const API::IAlgorithm_sptr load)
     {
-      try
+      Workspace_sptr childWS = load->getProperty("OutputWorkspace");
+      if( WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(childWS) )
       {
-        Workspace_sptr ws = load->getProperty("OutputWorkspace"); 
-        WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-        if (wsg)
-        {
-          setProperty("OutputWorkspace",ws);
-          std::vector<std::string> names = wsg->getNames();
-          for(size_t i = 0; i < names.size(); ++i)
-          {
-            std::ostringstream propName;
-            propName << "OutputWorkspace_" << (i+1);
-            DataObjects::Workspace2D_sptr memberwsws1 = load->getProperty(propName.str());
-
-            std::string memberwsName = load->getPropertyValue(propName.str());
-            declareProperty(new WorkspaceProperty<>(propName.str(),memberwsName,Direction::Output));
-            setProperty(propName.str(),boost::dynamic_pointer_cast<MatrixWorkspace>(memberwsws1));
-          }
-        }
-        else
-        { 
-          setProperty("OutputWorkspace",ws);
-        }
+	std::vector<std::string> names = wsGroup->getNames();
+	const size_t numMembers(names.size());
+	const std::string baseName("OutputWorkspace_");
+	for( size_t i = 0; i < numMembers; ++i )
+	{
+	  std::ostringstream propName;
+	  propName << baseName << (i+1);
+	  declareProperty(new WorkspaceProperty<Workspace>(propName.str(), load->getPropertyValue(propName.str()),
+							   Direction::Output));
+	  Workspace_sptr memberWS = load->getProperty(propName.str());
+	  setProperty(propName.str(), memberWS);
+	}
       }
-      catch(std::runtime_error&)
-      {
-        MatrixWorkspace_sptr mws=load->getProperty("OutputWorkspace");
-        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(mws));
-      }
+      setProperty("OutputWorkspace", childWS);
     }
 
   } // namespace DataHandling

@@ -72,11 +72,11 @@ namespace Mantid
       API::IAlgorithm_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
 					const double endProgress=-1.0, const bool logging = true) const;
       /// Set the output workspace(s)
-      void setOutputWorkspace(API::IAlgorithm_sptr&);
+      void setOutputWorkspace(const API::IAlgorithm_sptr loader);
 
     private:
-      /// A list of property names that have been dynamically set
-      std::list<std::string> m_loaderProps;
+      /// The base properties
+      std::set<std::string> m_baseProps;
      };
 
   } // namespace DataHandling

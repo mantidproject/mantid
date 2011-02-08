@@ -1,8 +1,8 @@
 #ifndef MANTIDQTAPI_PYTHONRUNNER_H_
 #define MANTIDQTAPI_PYTHONRUNNER_H_
 
-#include <QObject>
 #include "DllOption.h"
+#include <QObject>
 #include <QString>
 
 /** The ase class from which mantid custom widgets are derived it contains

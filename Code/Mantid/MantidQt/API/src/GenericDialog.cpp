@@ -142,11 +142,8 @@ void GenericDialog::initLayout()
       //For everything else render a text box
       else 
       {
-        
-
         QLineEdit *textBox = new QLineEdit;
         nameLbl->setBuddy(textBox);
-        
         //check this is a masked property
         Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
         if(maskedProp)
@@ -154,8 +151,6 @@ void GenericDialog::initLayout()
           textBox->setEchoMode(QLineEdit::Password);
         }
         m_editBoxes[textBox] = propName;
-
-        
 
         //Add the widgets to the grid
         m_inputGrid->addWidget(nameLbl, row, 0, 0);

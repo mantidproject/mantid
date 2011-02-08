@@ -117,20 +117,37 @@ protected:
   /// Parse out the values entered into the dialog boxes. Use storePropertyValue()
   /// to store the <name, value> pair in the base class so that they can be retrieved later
   virtual void parseInput();
+
+  /// Save the input history of an accepted dialog
+  virtual void saveInput();
   //@}
 
   /** @name Algorithm information */
+  // InterfaceManager needs to be able to reset the algorithm as I can't pass it in use a 
+  // constructor
+  friend class InterfaceManagerImpl;
+  
+  /// Set the algorithm associated with this dialog
+  void setAlgorithm(Mantid::API::IAlgorithm*);
+  
   /// Get the algorithm pointer
   Mantid::API::IAlgorithm* getAlgorithm() const;
 
   /// Get a pointer to the named property 
   Mantid::Kernel::Property* getAlgorithmProperty(const QString & propName) const;
+  /// Return a true if the given property requires user input
+  bool requiresUserInput(const QString & propName) const;
 
+  /// Get an input value from the form, dealing with blank inputs etc
+  QString getInputValue(const QString& propName) const;
   /// Get a property validator label
   QLabel* getValidatorMarker(const QString & propname) const;
   
   /// Adds a property (name,value) pair to the stored map
   void storePropertyValue(const QString & name, const QString & value);
+
+  /// Set the properties that have been parsed from the dialog
+  bool setPropertyValues();
   //@}
 
   /** @name Dialog information */
@@ -151,7 +168,7 @@ protected:
   /** @name Helper functions */
   //@{
   ///Tie a widget to a property
-  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout);
+  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout, bool readHistory = true);
   
   /// Open a file dialog to select a file.
   QString openFileDialog(const QString & propName);
@@ -186,52 +203,29 @@ protected:
   virtual void accept();
 
   /// Help button clicked;
-  void helpClicked();
+  virtual void helpClicked();
 
   /// Replace WS
   void replaceWSClicked(QWidget *outputEdit);
 
 private:
-  // This is so that it can set the algorithm and initialize the layout.
-  // I can't pass the algorithm as an argument to the constructor as I am using
-  // the DynamicFactory
-  friend class InterfaceManagerImpl;
-  
-  /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm*);
 
   /// Parse out the input from the dialog
   void parse();
-
-  /// Set the properties that have been parsed from the dialog
-  bool setPropertyValues();
-
-  /// Save the input history of an accepted dialog
-  void saveInput();
-    
   /// Set a list of suggested values  
   void setPresetValues(const QString & presetValues);
-
   /// Set comma-separated-list of enabled parameter names
   void setEnabledNames(const QString & enabledNames);
-  
   /// Test if the given name's widget should be left enabled
   bool isInEnabledList(const QString& propName) const;
-
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
-
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString & message);
-
-  /// This sets up the labels that are to be used to mark whether a property is valid.
-  void createValidatorLabels();
-  
   /// Retrieve a text value for a property from a widget
   QString getValue(QWidget *widget);
-
   /// Set a value based on any old input that we have
-  void setValue(QWidget *widget, const QString & property);
+  void setPreviousValue(QWidget *widget, const QString & property);
     
 private:
   /** @name Member variables. */
@@ -241,28 +235,20 @@ private:
 
   ///The name of the algorithm
   QString m_algName;
-
-  /// The properties associated with this algorithm
-  QHash<QString, Mantid::Kernel::Property*> m_algProperties;
-
+  /// The properties associated with this dialog
+  QStringList m_algProperties;
   /// A map of property <name, value> pairs that have been taken from the dialog
   QHash<QString, QString> m_propertyValueMap;
-
   /// A list pointers to PropertyWidget objects
   QHash<QString, QWidget*> m_tied_properties;
-  
   /// A boolean indicating whether this is for a script or not
   bool m_forScript;
-
   /// A list of property names that have been passed from Python
   QStringList m_python_arguments;
-
   /// A list of property names that should have their widgets enabled
   QStringList m_enabledNames;
-
   /// The message string to be displayed at the top of the widget; if it exists.
   QString m_strMessage;
-
   /// Is the message string empty or not
   bool m_msgAvailable;
 
@@ -270,7 +256,9 @@ private:
   bool m_isInitialized;
 
   /// A list of labels to use as validation markers
-  QHash<QString, QLabel*> m_validators;
+  mutable QHash<QString, QLabel*> m_validators;
+  /// A list of property names whose widgets handle their own validation
+  QStringList m_noValidation;
 
   /// Store a list of the names of input workspace boxes
   QVector<QWidget*> m_inputws_opts;

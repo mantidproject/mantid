@@ -1,21 +1,21 @@
 #ifndef MANTIDQTAPI_MANTIDWIDGET_H_
 #define MANTIDQTAPI_MANTIDWIDGET_H_
 
+#include "DllOption.h"
 #include "MantidQtAPI/PythonRunner.h"
 #include <QWidget>
-#include "DllOption.h"
-#include <boost/shared_ptr.hpp>
+#include <QVariant>
 
-/** The ase class from which mantid custom widgets are derived it contains
-*  some useful functions
-*/
 namespace MantidQt
 {
   namespace API
   {
     /** 
-    This is the base class all customised user interfaces that do not wish to be tied
-    to a specific Mantid algorithm but rather customised for user's requirements
+    This is the base class all customised widgets that do not wish to be tied
+    to a specific Mantid algorithm but rather customised for user's requirements.
+    
+    The virtual function getUserInput() must be implemented to return what the widget considers
+    as user input.
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 18/03/2009
@@ -45,8 +45,15 @@ namespace MantidQt
     Q_OBJECT
 
     public:
-      /// empty virtual destructor
-      ~MantidWidget(){}
+
+    /// Returns a QVariant containing what the widget classes as user input so that
+    /// input can be returned through a common interface.
+    virtual QVariant getUserInput() const { return QVariant(); }
+    /**
+     * Sets a value on a mantid widget through a common interface
+     * @param :: value The value as a QVariant
+     */
+    virtual void setUserInput(const QVariant & value)  { Q_UNUSED(value); }
 
     signals:
       void runAsPythonScript(const QString& code);
@@ -54,7 +61,8 @@ namespace MantidQt
     protected:
       /// Default constructor
       MantidWidget(QWidget *parent = NULL);
-      /// Run python code that is passed to it and, optionally, return anything it wrote to standard output as a string
+      /// Run python code that is passed to it and, optionally, return 
+      /// anything it wrote to standard output as a string
       QString runPythonCode(const QString & code, bool no_output = false);
 
     private:

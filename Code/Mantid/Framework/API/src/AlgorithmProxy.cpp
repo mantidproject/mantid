@@ -155,12 +155,8 @@ void AlgorithmProxy::setRethrows(const bool rethrow)
 void AlgorithmProxy::setPropertyValue(const std::string &name, const std::string &value)
 {
   createConcreteAlg(true);
-  const size_t numPropsAtStart = m_alg->propertyCount();
   m_alg->setPropertyValue(name, value);
-  if( numPropsAtStart != m_alg->propertyCount() )
-  {
-    copyPropertiesFrom(*m_alg);
-  }
+  copyPropertiesFrom(*m_alg);
   m_alg.reset();
 }
 
@@ -171,7 +167,7 @@ void AlgorithmProxy::setPropertyValue(const std::string &name, const std::string
 
 /** 
  * Creates an unmanaged instance of the actual algorithm and sets its properties
- * @param initOenly If true then the algorithm will only having its init step run, otherwise observers will 
+ * @param initOnly If true then the algorithm will only having its init step run, otherwise observers will 
  * also be added and rethrows will be true
  */
 void AlgorithmProxy::createConcreteAlg(bool initOnly)

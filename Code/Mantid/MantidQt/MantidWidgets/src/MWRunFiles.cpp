@@ -26,10 +26,10 @@ MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
-  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(findFiles()));
-  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
+  connect(this, SIGNAL(fileEditingFinished()), this, SLOT(findFiles()));
   connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this, SLOT(checkEntry()));
   connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
 
@@ -141,7 +141,7 @@ void MWRunFiles::doMultiEntry(const bool multiEntry)
   {
     m_uiForm.entryNum->hide();
   }
-  refreshvalidator();
+  refreshValidator();
 }
 
 /**
@@ -237,6 +237,39 @@ int MWRunFiles::getEntryNum() const
   }
   return NO_ENTRY_NUM;
 }
+
+/**
+ * Retrieve user input from this widget. NOTE: This knows nothing of periods yet
+ * @returns A qvariant
+ */
+QVariant MWRunFiles::getUserInput() const
+{
+  return QVariant(m_uiForm.fileEditor->text());
+}
+
+/**
+ * Sets a value on the widget through a common interface. The 
+ * QVariant is assumed to be text and to contain a file string. Note that this
+ * is primarily here for use within the AlgorithmDialog
+ * @param value A QVariant containing user text
+ */
+void MWRunFiles::setUserInput(const QVariant & value)
+{
+  m_uiForm.fileEditor->setText(value.toString());
+  emit fileEditingFinished();
+}
+
+/**
+ * Flag a problem with the file the user entered, an empty string means no error but
+ * there may be an error with the entry box if enabled. Errors passed here are shown first
+ * @param A message to include or "" for no error
+ */
+void MWRunFiles::setFileProblem(const QString & message)
+{
+  m_fileProblem = message;
+  refreshValidator();
+}
+
 
 /**
 * Save settings to the given group
@@ -484,16 +517,6 @@ QString MWRunFiles::openFileDia()
   return filenames.join(", ");
 }
 
-/**
-* Flag a problem with the file the user entered, an empty string means no error but
-* there may be an error with the entry box if enabled. Errors passed here are shown first
-* @param A message to include or "" for no error
-*/
-void MWRunFiles::setFileProblem(const QString & message)
-{
-  m_fileProblem = message;
-  refreshvalidator();
-}
 
 /** flag a problem with the supplied entry number, an empty string means no error.
 *  file errors take precedence of these errors
@@ -502,13 +525,13 @@ void MWRunFiles::setFileProblem(const QString & message)
 void MWRunFiles::setEntryNumProblem(const QString & message)
 {
   m_entryNumProblem = message;
-  refreshvalidator();
+  refreshValidator();
 }
 
 /** Checks the data m_fileProblem and m_entryNumProblem to see if the validator label
 *  needs to be displayed
 */
-void MWRunFiles::refreshvalidator()
+void MWRunFiles::refreshValidator()
 {
   if ( ! m_fileProblem.isEmpty() )
   {
@@ -548,7 +571,6 @@ void MWRunFiles::browseClicked()
   {
     m_uiForm.fileEditor->setText(uFile);
   }
-  findFiles();
   emit fileEditingFinished();
 }
 /** Currently just checks that entryNum contains an int > 0 and hence might be a

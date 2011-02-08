@@ -1,4 +1,5 @@
 set ( SRC_FILES src/CreateSampleShapeDialog.cpp
+                src/LoadDialog.cpp
                 src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
                 src/LoadRawDialog.cpp
@@ -10,6 +11,7 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
+                inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
@@ -20,6 +22,7 @@ set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
 )
 
 set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
+                inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
@@ -36,6 +39,9 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
 )
 
 include_directories ( inc )
+include_directories ( ../MantidWidgets/inc )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../API )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
