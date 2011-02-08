@@ -11,6 +11,7 @@
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include <math.h>
 
 #include <fstream>
 
