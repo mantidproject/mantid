@@ -3,6 +3,7 @@
 
 #include <string>
 #include "MantidKernel/DllExport.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -24,12 +25,14 @@ public:
   std::size_t totalMem() const;
   std::size_t availMem() const;
   double getFreeRatio() const;
+  void process_mem_system(size_t & sys_avail, size_t & sys_total);
 private:
   MemoryStatsIgnore ignore; ///< What fields to ignore.
   std::size_t vm_usage; ///< Virtual memory usage by process in kiB.
   std::size_t res_usage; ///< Resident memory usage by process in kiB.
   std::size_t total_memory; ///< Total physical memory of system in kiB.
   std::size_t avail_memory; ///< Available memory of system in kiB.
+  Logger& g_log; ///< Reference to the Logger class
   friend DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
 };
 
