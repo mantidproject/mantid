@@ -106,7 +106,7 @@ public:
     {
       ThreadPool::Instance().test();
     }
-    std::cout << std::setw(15) << overall.elapsed() << " secs total" << std::endl;
+    //std::cout << std::setw(15) << overall.elapsed() << " secs total" << std::endl;
   }
 
 
