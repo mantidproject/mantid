@@ -15,9 +15,8 @@ QT += opengl
 #}
 
 # Need to link with the API
-unix:LIBS += -L$$TOPBUILDDIR/lib \
-    -lMantidQtAPI
-win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
+unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
+win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib"
 
 # ------------------------
 # Source fies
