@@ -165,7 +165,7 @@ namespace {  // Anonymous namespace
 }
 #endif
 
-void process_mem_system(size_t & sys_avail, size_t & sys_total)
+void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
 
   sys_avail = 0;
@@ -193,7 +193,7 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
   const int unusedReserved = mallinfo().fordblks/1024;
-  //g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n"; // TODO uncomment
+  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n"; // TODO uncomment
   sys_avail += unusedReserved;
 #elif __APPLE__
   // Get the total RAM of the system
@@ -201,7 +201,7 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   size_t len = sizeof(totalmem);
   // Gives system memory in bytes
   int err = sysctlbyname("hw.memsize",&totalmem,&len,NULL,0);
-  //if (err) g_log.warning("Unable to obtain memory of system");
+  if (err) g_log.warning("Unable to obtain memory of system");
   sys_total = totalmem / 1024;
 
   mach_port_t port = mach_host_self();
@@ -214,12 +214,12 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
   mach_msg_type_number_t count;
   count = sizeof(vm_statistics) / sizeof(natural_t);
   err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
-  //if (err) g_log.warning("Unable to obtain memory statistics");
+  if (err) g_log.warning("Unable to obtain memory statistics");
   sys_avail = pageSize * ( vmStats.free_count + vmStats.inactive_count ) / 1024;
 
   // Now add in reserved but unused memory as reported by malloc
   const size_t unusedReserved = mstats().bytes_free / 1024;
-  //g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+  g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 #elif _WIN32
   GlobalMemoryStatusEx( &memStatus );
@@ -234,16 +234,13 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
     sys_avail = static_cast<size_t>(memStatus.ullAvailVirtual/1024);
     sys_total = static_cast<size_t>(memStatus.ullTotalVirtual/1024);
   }
-
-  //g_log.debug() << "Percentage of memory taken to be available for use: "
-  //    << (100. * sys_avail / sys_total) << "%.\n";
 #endif
 }
 
 // ------------------ The actual class
 
 MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage(0),
-    total_memory(0), avail_memory(0)
+    total_memory(0), avail_memory(0), g_log(Kernel::Logger::get("Memory"))
 {
 #ifdef __linux__
   /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
@@ -271,7 +268,7 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage
   {
     if(!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH)))
     {
-      //g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
+      g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
     }
   }
 #endif
