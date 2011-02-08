@@ -36,7 +36,7 @@ public:
    
   }
 
-  void testMinusSeparatedStrings()
+  void xtestMinusSeparatedStrings()
   {    
     UserStringParser parser;
     std::string str="60-61";
@@ -56,7 +56,7 @@ public:
 
   }
 
-  void testMinusSeparatedRangeofStrings()
+  void xtestMinusSeparatedRangeofStrings()
   {
     /*std::string s;
     std::getline(std::cin,s);*/
@@ -80,7 +80,7 @@ public:
 
   }
 
-   void testPlusSeparatedStrings()
+   void xtestPlusSeparatedStrings()
   {    
     UserStringParser parser;
     std::string str="62+63";
@@ -121,7 +121,7 @@ public:
     
   }
 
-  void testCommaSeparatedComplexStrings1()
+  void xtestCommaSeparatedComplexStrings1()
   {
         
     UserStringParser parser;
@@ -139,7 +139,7 @@ public:
     
   }
 
-  void testCommaSeparatedComplexStrings2()
+  void xtestCommaSeparatedComplexStrings2()
   {
         
     UserStringParser parser;
@@ -162,7 +162,7 @@ public:
    
   }
 
-  void testCommaSeparatedComplexStrings3()
+  void xtestCommaSeparatedComplexStrings3()
   {
         
     UserStringParser parser;
