@@ -17,33 +17,32 @@ namespace Mantid
     {
 
     }
+    
   /**This method parses a given string of numbers and returns a vector of vector of numbers.
     *@param userString - the string to parse
     *@returns  a vector containing vectors of numbers.
    */
     std::vector<std::vector<unsigned int> > UserStringParser::parse(const std::string& userString)
     {
-      std::vector<std::vector<unsigned int> > numbers;
+     std::vector<std::vector<unsigned int> > numbers;
       //first separate commas
       std::vector<std::string> commaseparatedstrings;
       if(userString.find(",")!=std::string::npos)
       {
         commaseparatedstrings=separateComma(userString);
       }
-
       if(!commaseparatedstrings.empty())
       {     
         std::vector<std::string>::const_iterator citr;
         for(citr=commaseparatedstrings.begin();citr!=commaseparatedstrings.end();++citr)
         { 
-          convertToNumbers((*citr),numbers);
+          parse((*citr),numbers);
         }
 
       }
       else
       {
-        convertToNumbers(userString,numbers);
-
+        parse(userString,numbers);
       }
       return numbers;
       
@@ -53,8 +52,8 @@ namespace Mantid
     *@param userString - the input  string to parse
     *@param numbers- a vector containing vectors of numbers.
    */
-    void  UserStringParser::convertToNumbers(const std::string& userString,
-                                                             std::vector<std::vector<unsigned int> >& numbers)
+    void  UserStringParser::parse(const std::string& userString,
+                                              std::vector<std::vector<unsigned int> >& numbers)
     {
 
       //look for  separators
@@ -161,7 +160,6 @@ namespace Mantid
       {
         separatedValues.push_back(num);
       }
-
       return separatedValues;
 
     }
@@ -192,31 +190,84 @@ namespace Mantid
       {
         return ;
       }
+      //validate the separated tokens
+      if(!isValidStepSeparator(input,temp))
+      {
+        throw std::runtime_error("Non supported format found in the input string "+input+ " Step string should be preceded by :");
+      }
+      //convert the parsed string to number
+      convertToNumbers(input,temp,start,end,step);
+  
+    }
+
+    /**This method checks the separator preceded by the step string is valid
+      * colon ':' is valid separator for step string
+      *@param input - input string to validate
+      *@param tokens - vector containing separated values.
+      *@returns true if the input is valid
+      */
+    bool UserStringParser::isValidStepSeparator(const std::string& input,std::vector<std::string>& tokens)
+    {
+      std::string step_separator;
+      if(tokens.size()==3)
+      {
+        std::string step=tokens[2];
+
+        std::string::size_type index=input.rfind(step);
+        if(index!=std::string::npos)
+        {
+          step_separator=input.substr(index-1,1);
+        }
+      }
+      //step values must be preceded by colon ':'
+      return(!step_separator.compare(":")?true:false);
+    }
+
+  /**This method checks the input string is valid format
+    *@param input - input string to validate
+    *@param tokens - vector containing separated values.
+    *@param start  - start number 
+    *@param end    - end number 
+    *@param step   - step used for incrementing
+    */
+    void UserStringParser::convertToNumbers(const std::string& input,const std::vector<std::string>& tokens,
+                                            unsigned int& start, unsigned int& end, unsigned int& step)
+    {
+      if(tokens.empty())
+      {
+        return;
+      }
       try
       {
-        start = toUInt(temp.at(0)); 
-        end= toUInt(temp.at(1)); 
-        if(temp.size()==3)
-        {   
-          //at this point the input string contains a step string like 2010:2020:2
-          step=toUInt(temp.at(2)); 
+        start = toUInt(tokens.at(0)); 
+        end= toUInt(tokens.at(1)); 
+        if(tokens.size()==3)
+        {          
+          step=toUInt(tokens.at(2)); 
         }
-
+        if(end<start)
+        {
+          throw std::runtime_error("Invalid Input String: End number "+ tokens.at(1)+" can not be lower than start number"+ tokens.at(0));
+        }
+        if(start+step>end)
+        {
+          throw std::runtime_error("Invalid Input String: End number "+ tokens.at(1)+ " can not be lower than the sum of start number "+ tokens.at(0) +" and step number" + tokens.at(2));
+        }
       }
-      catch(boost::bad_lexical_cast&)
+      catch(std::runtime_error& e)
       {
-        throw std::runtime_error("Error when parsing the string "+input);
+        throw std::runtime_error(e.what());
       }
       catch(std::out_of_range&)
       {
-        throw std::runtime_error("Error when parsing the string "+input);
+        throw std::runtime_error("Error when parsing the input string "+input);
       }
-    }
-    
+      
 
+    }
   /**This method converts a string to unsigned int
     *@param input - the string to parse
-    *@returns an unsigned number.
+    *@returns an unsigned number equivalent of the input
     */
     unsigned int  UserStringParser::toUInt(const std::string& input)
     {
@@ -226,7 +277,7 @@ namespace Mantid
       }
       catch(boost::bad_lexical_cast&)
       {
-        throw std::runtime_error("Error when parsing the range string"+input);
+        throw std::runtime_error("Error when parsing the input  string "+input);
       }
     }
 
