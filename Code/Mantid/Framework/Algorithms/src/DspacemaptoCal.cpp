@@ -224,7 +224,7 @@ DspacemaptoCal::~DspacemaptoCal()
 void DspacemaptoCal::init()
 {
   this->setOptionalMessage(
-      "Write offset file from dspacing file.\n"
+      "Write offset (.cal) file from dspacing file.\n"
       );
 
   declareProperty(

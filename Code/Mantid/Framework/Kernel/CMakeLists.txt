@@ -182,6 +182,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/SignalChannelTest.h
 		 test/StatisticsTest.h
 		 test/SupportTest.h
+		 test/ThreadPoolTest.h
 		 test/TimerTest.h
 		 test/TimeSeriesPropertyTest.h
 		 test/TimeSplitterTest.h
