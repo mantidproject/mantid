@@ -9,6 +9,8 @@
 #include "google/malloc_extension.h"
 #endif
 
+using std::size_t;
+
 namespace Mantid
 {
 namespace API
@@ -33,9 +35,9 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
 {
   Kernel::MemoryStats mem_stats;
   MemoryInfo info;
-  info.totalMemory = static_cast<unsigned int>(mem_stats.totalMem());
-  info.availMemory = static_cast<unsigned int>(mem_stats.availMem());
-  info.freeRatio = static_cast<unsigned int>(mem_stats.getFreeRatio());
+  info.totalMemory = mem_stats.totalMem();
+  info.availMemory = mem_stats.availMem();
+  info.freeRatio = static_cast<size_t>(mem_stats.getFreeRatio());
 
   return info;
 }

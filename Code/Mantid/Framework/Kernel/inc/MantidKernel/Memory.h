@@ -25,8 +25,8 @@ public:
   std::size_t totalMem() const;
   std::size_t availMem() const;
   double getFreeRatio() const;
-  void process_mem_system(size_t & sys_avail, size_t & sys_total);
 private:
+  void process_mem_system(size_t & sys_avail, size_t & sys_total);
   MemoryStatsIgnore ignore; ///< What fields to ignore.
   std::size_t vm_usage; ///< Virtual memory usage by process in kiB.
   std::size_t res_usage; ///< Resident memory usage by process in kiB.

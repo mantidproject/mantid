@@ -16,9 +16,9 @@ namespace Mantid
     /// Information about the memory 
     struct MemoryInfo
     {
-      unsigned int totalMemory;  ///< total physical memory in KB
-      unsigned int availMemory;  ///< available physical memory in KB
-      unsigned int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
+      std::size_t totalMemory;  ///< total physical memory in KB
+      std::size_t availMemory;  ///< available physical memory in KB
+      std::size_t freeRatio;    ///< percentage of the available memory ( 0 - 100 )
     };
 
     /** @class MemoryManagerImpl MemoryManager.h API/MemoryManager.h
