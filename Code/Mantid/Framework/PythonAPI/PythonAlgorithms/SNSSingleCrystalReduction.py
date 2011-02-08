@@ -205,7 +205,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def PyExec(self):
         # temporary hack for getting python algorithms working
         import mantidsimple
-        reload(mantidsimple)
+        #reload(mantidsimple)
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
