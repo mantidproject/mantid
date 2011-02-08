@@ -171,6 +171,24 @@ namespace Mantid
       NXInt counts = dataGroup.openIntData();
       counts.load();
 
+
+      NXEntry entryTimeZero = root.openEntry("run/instrument/detector_fb");
+      NXInfo infoTimeZero = entryTimeZero.getDataSetInfo("time_zero");
+      if (infoTimeZero.stat != NX_ERROR)
+      {
+        double dum = root.getFloat("run/instrument/detector_fb/time_zero");
+        setProperty("TimeZero", dum);
+      }
+
+      NXEntry entryFGB = root.openEntry("run/instrument/detector_fb");
+      NXInfo infoFGB = entryFGB.getDataSetInfo("first_good_time");
+      if (infoFGB.stat != NX_ERROR)
+      {
+        double dum = root.getFloat("run/instrument/detector_fb/first_good_time");
+        setProperty("FirstGoodData", dum);
+      }
+
+
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {

@@ -47,6 +47,18 @@ public:
     //
     TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
     TS_ASSERT( nxLoad.isExecuted() );    
+
+    //
+    // Test additional output parameters
+    //
+    std::string field = nxLoad.getProperty("MainFieldDirection");
+    TS_ASSERT( field == "Transverse" );
+    double timeZero = nxLoad.getProperty("TimeZero");
+    TS_ASSERT_DELTA( timeZero, 0.224,0.001);
+    double firstgood = nxLoad.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA( firstgood, 0.384,0.001); 
+    //
+
     //
     // Test workspace data (copied from LoadRawTest.h)
     //
