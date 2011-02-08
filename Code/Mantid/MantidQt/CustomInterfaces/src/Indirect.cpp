@@ -135,7 +135,7 @@ void Indirect::initLocalPython()
   QString pyOutput = runPythonCode(pyInput).trimmed();
   if ( pyOutput != "Windows32bit" )
   {
-    m_uiForm.ckFortranUnwrap->setEnabled(false);
+    m_uiForm.cbUnwrapMethod->removeItem(m_uiForm.cbUnwrapMethod->findText("MaxEnt"));
   }
 }
 /**
@@ -282,7 +282,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "clean = True\n";
   }
 
-  if ( m_uiForm.ckFortranUnwrap->isChecked() )
+  if ( m_uiForm.cbUnwrapMethod->currentText() == "MaxEnt" )
   {
     pyInput += "FU = True\n";
   }
