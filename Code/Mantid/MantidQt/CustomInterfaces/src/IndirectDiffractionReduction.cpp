@@ -23,7 +23,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent)
+  UserSubWindow(parent), m_realDiffraction(false)
 {
 }
 
@@ -39,6 +39,17 @@ void IndirectDiffractionReduction::demonRun()
       "cal = r'" + m_uiForm.dem_calFile->getFirstFilename() + "'\n"
       "grouping = " + grouping() + "\n";
 
+    if ( m_uiForm.dem_cbCorrection->currentText() == "Monitor" )
+    {
+      pyInput += "vanadium = ''\n"
+        "monitor = True\n";
+    }
+    else // Divide by Vanadium run
+    {
+      pyInput += "vanadium = r'" + m_uiForm.dem_vanadiumFile->getFirstFilename() + "'\n"
+        "monitor = False\n";
+    }
+
     pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
 
     if ( m_uiForm.dem_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -47,7 +58,9 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
     
-    pyInput += "ws = demon(files, first, last, instrument, grouping=grouping, cal=cal, Verbose=verbose, Plot=plot, Save=save)\n";
+    pyInput += "ws = demon(files, first, last, instrument, grouping=grouping, "
+      "Monitor=monitor, Vanadium=vanadium, cal=cal, Verbose=verbose, Plot=plot, "
+      "Save=save)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -85,13 +98,35 @@ void IndirectDiffractionReduction::instrumentSelected(int)
         for ( int j = 0; j < reflections.count(); j++ )
         {
           m_uiForm.set_cbReflection->addItem(reflections[j]);
-        }        
+        }
+        if ( reflections.count() == 1 )
+        {
+          m_uiForm.set_lbReflection->hide();
+          m_uiForm.set_cbReflection->hide();          
+        }
+        else
+        {
+          m_uiForm.set_lbReflection->show();
+          m_uiForm.set_cbReflection->show();
+        }
       }
     }
 
     reflectionSelected(m_uiForm.set_cbReflection->currentIndex());
 
     m_uiForm.set_cbReflection->blockSignals(false);
+
+    // Set options for "real diffraction"
+    if ( m_uiForm.set_cbInst->currentText() == "OSIRIS" )
+    {
+      m_realDiffraction = true;
+      m_uiForm.dem_swGrouping->setCurrentIndex(0);
+    }
+    else
+    {
+      m_realDiffraction = false;
+      m_uiForm.dem_swGrouping->setCurrentIndex(1);
+    }
   }
 }
 
@@ -118,6 +153,12 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.set_leSpecMax->setText(values[2]);
   }
 }
+
+void IndirectDiffractionReduction::correctionSelected(int index)
+{
+  m_uiForm.dem_vanadiumFile->setEnabled((index==1));
+}
+
 
 void IndirectDiffractionReduction::groupingSelected(const QString & selected)
 {
@@ -149,6 +190,7 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
+  connect(m_uiForm.dem_cbCorrection, SIGNAL(currentIndexChanged(int)), this, SLOT(correctionSelected(int)));
   connect(m_uiForm.dem_cbGrouping, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(groupingSelected(const QString &)));
 
   loadSettings();

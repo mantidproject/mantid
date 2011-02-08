@@ -121,13 +121,15 @@ def confitSeq(inputWS, func, startX, endX, save, plot):
     PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
     wsname = confitParsToWS(outNm, inputWS)
     if save:
-        SaveNexusProcessed(wsname, wsname+'.nxs')
+            SaveNexusProcessed(wsname, wsname+'.nxs')
     if plot != 'None':
         confitPlotSeq(wsname, plot)
 
 def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
-        grouping='Individual', cal='',
-        CleanUp=True, Verbose=False, Plot='None', Save=True):
+        grouping='Individual', cal='', CleanUp=True, Verbose=False, 
+        Plot='None', Save=True, Real=False, Vanadium='', Monitor=True):
+    '''DEMON routine for diffraction reduction on indirect instruments (IRIS /
+    OSIRIS).'''
     # Get instrument workspace for gathering parameters and such
     wsInst = mtd['__empty_' + instrument]
     if wsInst is None:
@@ -135,44 +137,58 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         wsInst = mtd['__empty_' + instrument]
     # short name of instrument for saving etc
     isn = ConfigService().facility().instrument(instrument).shortName().lower()
-    fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
+
     # parameters to do with monitor
-    try:
-        inst = wsInst.getInstrument()
-        area = inst.getNumberParameter('mon-area')[0]
-        thickness = inst.getNumberParameter('mon-thickness')[0]
-    except IndexError, message:
-        print message
-        sys.exit(message)    
+    if Monitor:
+        fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
+        try:
+            inst = wsInst.getInstrument()
+            area = inst.getNumberParameter('mon-area')[0]
+            thickness = inst.getNumberParameter('mon-thickness')[0]
+        except IndexError, message:
+            print message
+            sys.exit(message)
+        ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
+            SpecMin=fmon+1, SpecMax=fmon+1)
+
     ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, 
         SpecMin=first, SpecMax=last)
-    ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
-        SpecMin=fmon+1, SpecMax=fmon+1)
+
     workspaces = []
     for i in range(0, len(ws_det_l)):
         det_ws = ws_det_l[i]
-        mon_ws = ws_mon_l[i]
-        # Get Monitor WS
-        IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
-        IEC.monitorEfficiency(mon_ws, area, thickness)
-        IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
-        # Remove monitor workspace
-        DeleteWorkspace(mon_ws)
         # Get Run No
         runNo = mtd[det_ws].getRun().getLogData("run_number").value
-        savefile = isn + runNo + '_diff'        
+        savefile = isn + runNo + '_diff'
+        if Monitor:
+            mon_ws = ws_mon_l[i]
+            # Get Monitor WS
+            IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
+            IEC.monitorEfficiency(mon_ws, area, thickness)
+            IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
+            # Remove monitor workspace
+            DeleteWorkspace(mon_ws)
+
         if ( cal != '' ): # AlignDetectors and Group by .cal file
-            ConvertUnits(det_ws, det_ws, 'TOF')
-            ConvertFromDistribution(det_ws)
+            if Monitor:
+                ConvertUnits(det_ws, det_ws, 'TOF')
+            if ( mtd[det_ws].isDistribution() ):
+                ConvertFromDistribution(det_ws)
             AlignDetectors(det_ws, det_ws, cal)
             DiffractionFocussing(det_ws, savefile, cal)
             DeleteWorkspace(det_ws)
+            
+            if ( Vanadium != '' ):
+                print "NotImplemented: divide by vanadium."
+
         else: ## Do it the old fashioned way
             # Convert to dSpacing - need to AlignBins so we can group later
             ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
             IEC.groupData(grouping, savefile, detectors=det_ws)
+
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
+
         workspaces.append(savefile)
     if ( Plot != 'None' ):
         for demon in workspaces:
