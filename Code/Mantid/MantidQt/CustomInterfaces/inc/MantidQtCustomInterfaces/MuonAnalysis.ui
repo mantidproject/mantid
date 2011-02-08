@@ -801,7 +801,7 @@
        </widget>
        <widget class="QLineEdit" name="timeAxisStartAtInput" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry" >
          <rect>
@@ -812,7 +812,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>0</string>
+         <string>300</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeAxisFinishAtInput" >
@@ -958,12 +958,12 @@
         </property>
         <item>
          <property name="text" >
-          <string>Start at Time Zero</string>
+          <string>Start at First Good Data</string>
          </property>
         </item>
         <item>
          <property name="text" >
-          <string>Start at First Good Data</string>
+          <string>Start at Time Zero</string>
          </property>
         </item>
        </widget>

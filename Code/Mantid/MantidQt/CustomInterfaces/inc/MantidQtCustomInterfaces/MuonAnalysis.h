@@ -243,6 +243,12 @@ private:
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
 
+  ///
+  void setDummyGrouping(const int numDetectors);
+
+  ///
+  void setGroupingFromIDF(const std::string& mainFieldDirection, Mantid::API::MatrixWorkspace_sptr matrix_workspace);
+
   /// title of run
   std::string m_title;
 

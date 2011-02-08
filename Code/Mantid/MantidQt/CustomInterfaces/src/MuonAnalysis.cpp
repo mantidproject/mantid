@@ -200,13 +200,13 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
 */
 void MuonAnalysis::runTimeComboBox(int index)
 {
-  if ( index == 0 ) // Start at Time Zero
+  if ( index == 1 ) // Start at Time Zero
   {
     m_uiForm.timeAxisStartAtInput->setEnabled(false);
     m_uiForm.timeAxisStartAtInput->setText("0");
   }
 
-  if ( index == 1 ) // Start at First Good Data
+  if ( index == 0 ) // Start at First Good Data
   {
     m_uiForm.timeAxisStartAtInput->setEnabled(true);
     m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
@@ -238,6 +238,12 @@ void MuonAnalysis::runFirstGoodBinFront()
   try 
   {
     double boevs = boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
+    
+    // if this value updated then also update 'Start at" Plot option if "Start at First Good Data" set
+    if (m_uiForm.timeComboBox->currentIndex() == 0 )
+    {
+      m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
+    }
   }
   catch (...)
   {
@@ -343,7 +349,7 @@ void MuonAnalysis::runFrontPlotButton()
 
 
 /**
-* If the instrument selection has changed, calls instrumentSelectChanged (slot)
+* If the instrument selection has changed (slot)
 *
 * @param prefix :: instrument name from QComboBox object
 */
@@ -351,7 +357,8 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
 	if ( prefix != m_curInterfaceSetup )
 	{
-		//instrumentSelectChanged(prefix);
+		runClearGroupingButton();
+    m_curInterfaceSetup = prefix;
 	}
 }
 
@@ -944,7 +951,7 @@ void MuonAnalysis::inputFileChanged()
     return;
   }
 
-  QString pyString =      "from mantidsimple import *\n"
+  QString pyString = "from mantidsimple import *\n"
       "import sys\n"
       "try:\n"
       "  alg = LoadMuonNexus('" + m_previousFilename+"','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
@@ -961,11 +968,16 @@ void MuonAnalysis::inputFileChanged()
 
   nowDataAvailable();
 
-  if ( !isGroupingSet() )
-    setGroupingFromNexus(m_previousFilename);
+  // get hold of output parameters
+  std::stringstream strParam(outputParams.toStdString());
+  std::string mainFieldDirection;
+  double timeZero;
+  double firstGoodData;
+  strParam >> mainFieldDirection >> timeZero >> firstGoodData;
+  timeZero *= 1000.0;      // convert to ns
+  firstGoodData *= 1000.0;
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
-
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
   WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
   MatrixWorkspace_sptr matrix_workspace;
@@ -982,18 +994,22 @@ void MuonAnalysis::inputFileChanged()
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
 
+  // if grouping not set, first see if grouping defined in Nexus
+  if ( !isGroupingSet() )
+    setGroupingFromNexus(m_previousFilename);
+  // if grouping still not set, then take grouping from IDF
+  if ( !isGroupingSet() )
+    setGroupingFromIDF(mainFieldDirection, matrix_workspace);
+  // finally if nothing else works set dummy grouping and display
+  // message to user
+  if ( !isGroupingSet() )
+    setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size()));
+
+
   if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
     return;
 
-  // get hold of output parameters
-  std::stringstream strParam(outputParams.toStdString());
-  std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
-  strParam >> mainFieldDirection >> timeZero >> firstGoodData;
-  
-  timeZero *= 1000.0;      // convert to ns
-  firstGoodData *= 1000.0;
+
 
 
   // Populate instrument fields
@@ -1897,21 +1913,11 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
     }
   }
 
-  // if no grouping in nexus then set dummy grouping and display warning to user
+  // if no grouping in nexus then return
   if ( thereIsGrouping == false )
   {
-    std::stringstream idstr;
-    idstr << "1-" << matrix_workspace->getNumberHistograms();
-    m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
-    m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
-
-    updateFrontAndCombo();
-
-    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping detected in Nexus.");
-
     return;
   }
-
 
   // Add info about grouping from Nexus file to group table
   for (int wsIndex = 0; wsIndex < matrix_workspace->getNumberHistograms(); wsIndex++)
@@ -1970,10 +1976,83 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
         m_uiForm.groupTable->setItem(wsIndex, 1, new QTableWidgetItem(idstr.str().c_str()));
     }
   }  // end loop over wsIndex
+
+
+  // check if exactly two groups added in which case assume these are forward/backward groups
+  // and automatically then create a pair from which, where the first group is assumed to be
+  // the forward group
+
+  updatePairTable();
+  if ( numGroups() == 2 && numPairs() <= 0 )
+  {
+      QTableWidgetItem* it = m_uiForm.pairTable->item(0, 0);
+      if (it)
+        it->setText("pair");
+      else
+      {
+        m_uiForm.pairTable->setItem(0, 0, new QTableWidgetItem("pair"));
+      }    
+      it = m_uiForm.pairTable->item(0, 3);
+      if (it)
+        it->setText("1.0");
+      else
+      {
+        m_uiForm.pairTable->setItem(0, 3, new QTableWidgetItem("1.0"));
+      } 
+  }
   
   updatePairTable();
   updateFrontAndCombo();
 }
+
+
+/**
+ * If nothing else work set dummy grouping and display comment to user
+ */
+void MuonAnalysis::setDummyGrouping(const int numDetectors)
+{
+  // if no grouping in nexus then set dummy grouping and display warning to user
+
+    std::stringstream idstr;
+    idstr << "1-" << numDetectors;
+    m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
+    m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
+
+    updateFrontAndCombo();
+
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("No grouping detected in Nexus file.\n")
+      + "and no default grouping file specified in IDF\n"
+      + "therefore dummy grouping created.");  
+}
+
+
+/**
+ * Try to load default grouping file specified in IDF
+ */
+void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, MatrixWorkspace_sptr matrix_workspace)
+{
+  IInstrument_sptr inst = matrix_workspace->getInstrument();
+
+  std::vector<std::string> groupFile = inst->getStringParameter("Default grouping file");
+
+  // get search directory for XML instrument definition files (IDFs)
+  std::string directoryName = ConfigService::Instance().getInstrumentDirectory();
+
+  if ( groupFile.size() == 1 )
+  {
+    try 
+    {
+      loadGroupingXMLtoTable(m_uiForm, directoryName+groupFile[0]);
+    }
+    catch (...)
+    {
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("Can't load default grouping file in IDF.\n")
+        + "with name: " + groupFile[0].c_str());  
+    }
+  }
+}
+
+
 
 
  /**

@@ -22,6 +22,10 @@
       Data provided by Francis Pratt for the ARGUS instrument
   -->
   
+  <parameter name="Default grouping file" type="string">
+    <value val="Grouping/ARGUS_Detector_Grouping_LF_192.xml"/>
+  </parameter>   
+  
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   
