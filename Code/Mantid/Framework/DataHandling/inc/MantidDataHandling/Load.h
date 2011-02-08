@@ -63,7 +63,7 @@ namespace Mantid
       API::IAlgorithm_sptr getFileLoader(const std::string& filePath);
       /// Declare any additional input properties from the concrete loader
       void declareLoaderProperties(const API::IAlgorithm_sptr loader);
-
+      
       /// Initialize the static base properties
       void init();
       /// Execute
@@ -73,6 +73,9 @@ namespace Mantid
 					const double endProgress=-1.0, const bool logging = true) const;
       /// Set the output workspace(s)
       void setOutputWorkspace(const API::IAlgorithm_sptr loader);
+      /// Retrieve a pointer to the output workspace from the sub algorithm
+      API::Workspace_sptr getOutputWorkspace(const API::IAlgorithm_sptr loader) const;
+      
 
     private:
       /// The base properties

@@ -343,9 +343,9 @@ namespace Mantid
         outputWorkspace = "OutputWorkspace";
       }
       outws = outputWorkspace + "_" + suffix.str();
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> (outws, wsName, Direction::Output));
+      declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
       grpws_sptr->add(wsName);
-      setProperty(outws, boost::dynamic_pointer_cast<DataObjects::Workspace2D>(ws_sptr));
+      setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
     }
 
     /** This method sets the workspace property

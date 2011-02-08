@@ -303,7 +303,7 @@ namespace Mantid
      */
     void Load::setOutputWorkspace(const API::IAlgorithm_sptr load)
     {
-      Workspace_sptr childWS = load->getProperty("OutputWorkspace");
+      Workspace_sptr childWS = getOutputWorkspace(load);
       if( WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(childWS) )
       {
 	std::vector<std::string> names = wsGroup->getNames();
@@ -320,6 +320,31 @@ namespace Mantid
 	}
       }
       setProperty("OutputWorkspace", childWS);
+    }
+
+    /**
+     * Return the top-level workspace property
+     * @returns A pointer to the OutputWorkspace property of the sub algorithm
+     */
+    API::Workspace_sptr Load::getOutputWorkspace(const API::IAlgorithm_sptr loader) const
+    {
+      try
+      {
+	return loader->getProperty("OutputWorkspace");
+      }
+      catch(std::runtime_error&)
+      {
+      }
+      // Try a MatrixWorkspace
+      try
+      {
+	MatrixWorkspace_sptr childWS = loader->getProperty("OutputWorkspace");
+	return childWS;
+      }
+      catch(std::runtime_error&)
+      {
+      }
+      return Workspace_sptr();
     }
 
   } // namespace DataHandling
