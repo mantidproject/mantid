@@ -106,6 +106,6 @@ class Mask(BaseScriptElement):
         self.left = Mask.left
         self.right = Mask.right
         
-        self.shapes = Mask.shapes
+        self.shapes = []
         
     
