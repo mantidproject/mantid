@@ -22,10 +22,10 @@ global MSG_ALL_BUILDS_SUCCESSFUL
 MSG_ALL_BUILDS_SUCCESSFUL = "MSG(all_builds_successful)"
 
 html_escape_table = {
-    "&": "&amp;",
-    '"': "&quot;",
-    "'": "&apos;",
-    ">": "&gt;",
+    #"&": "&amp;",
+    #'"': "&quot;",
+    #"'": "&apos;",
+    #">": "&gt;",
     "<": "&lt;",
     #'‘': "&apos;",
     }

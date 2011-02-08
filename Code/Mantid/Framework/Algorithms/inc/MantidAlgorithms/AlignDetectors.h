@@ -18,11 +18,6 @@ using DataObjects::EventWorkspace_const_sptr;
 namespace Algorithms
 {
 
-//Forward declaration
-DLLExport std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  const std::map<int,double> &offsets);
-
-
 /** Performs a unit change from TOF to dSpacing, correcting the X values to account for small
     errors in the detector positions.
 
@@ -69,6 +64,28 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction";}
 
+  // ----- Useful static functions ------
+
+  static double calcConversion(const double l1, const Geometry::V3D &beamline, const double beamline_norm,
+      const Geometry::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset);
+
+  static double calcConversion(const double l1,
+                        const Geometry::V3D &beamline,
+                        const double beamline_norm,
+                        const Geometry::V3D &samplePos,
+                        const Geometry::IInstrument_const_sptr &instrument,
+                        const std::vector<int> &detectors,
+                        const std::map<int,double> &offsets);
+
+  static void getInstrumentParameters(Geometry::IInstrument_const_sptr instrument,
+      double & l1, Geometry::V3D & beamline,
+      double & beamline_norm, Geometry::V3D & samplePos);
+
+  static std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                    const std::map<int,double> &offsets);
+
+  static bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets, std::map<int,int>& group);
+
 private:
   // Implement abstract Algorithm methods
   void init();
@@ -76,7 +93,6 @@ private:
 
   void execEvent();
 
-  bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
 
   /// Pointer for an event workspace
   EventWorkspace_const_sptr eventW;

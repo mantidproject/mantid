@@ -18,14 +18,6 @@ using DataObjects::EventWorkspace_const_sptr;
 namespace Algorithms
 {
 
-//Forward declaration
-DLLExport std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  const std::map<int,double> &offsets);
-DLLExport std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  const std::string DFileName, const std::string calFileName,
-                                  const std::map<int,double> &offsets, const std::map<int,int> &groups);
-
-
 /** Performs a unit change from TOF to dSpacing, correcting the X values to account for small
     errors in the detector positions.
 
@@ -72,6 +64,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction";}
 
+  static void WriteCalibrationFile(std::string calFileName, const std::map<int, Geometry::IDetector_sptr> & allDetectors ,
+                                    const std::map<int,double> &offsets, const std::map<int,bool> &selects, std::map<int,int> &groups);
+
 private:
   // Implement abstract Algorithm methods
   void init();
@@ -79,13 +74,20 @@ private:
 
   void execEvent();
 
-  bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets, std::map<int,int>& groups);
+  void readVulcanAsciiFile(const std::string& fileName, std::map<int,double> & vulcan);
+  void readVulcanBinaryFile(const std::string& fileName, std::map<int,double> & vulcan);
+
+  void CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                    const std::string DFileName, std::string calFileName,
+                                    std::map<int,double> &offsets, std::map<int,int> &groups);
+
+  void CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                    std::string calFileName, std::map<int, double> & vulcan,
+                                    std::map<int,double> &offsets, std::map<int,int> &groups);
 
   /// Pointer for an event workspace
   EventWorkspace_const_sptr eventW;
 
-  /// Map of conversion factors for TOF to d-Spacing conversion
-  std::map<int, double> * tofToDmap;
 };
 
 

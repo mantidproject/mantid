@@ -30,7 +30,7 @@ using DataObjects::EventWorkspace_const_sptr;
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
 //-----------------------------------------------------------------------
-/** Calculate the conversion factor for a single pixel.
+/** Calculate the conversion factor (tof -> d-spacing) for a single pixel.
  *
  * @param l1 :: Primary flight path.
  * @param beamline: vector = samplePos-sourcePos = a vector pointing from the source to the sample,
@@ -40,7 +40,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants
  * @param det: Geometry object representing the detector (position of the pixel)
  * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
  */
-double calcConversion(const double l1,
+double AlignDetectors::calcConversion(const double l1,
                       const Geometry::V3D &beamline,
                       const double beamline_norm,
                       const Geometry::V3D &samplePos,
@@ -65,11 +65,10 @@ double calcConversion(const double l1,
 
 
 //-----------------------------------------------------------------------
-/**
- * Calculate the conversion factor (tof -> d-spacing)
+/** Calculate the conversion factor (tof -> d-spacing)
  * for a LIST of detectors assigned to a single spectrum.
  */
-double calcConversion(const double l1,
+double AlignDetectors::calcConversion(const double l1,
                       const Geometry::V3D &beamline,
                       const double beamline_norm,
                       const Geometry::V3D &samplePos,
@@ -97,6 +96,41 @@ double calcConversion(const double l1,
 }
 
 
+/** Get several instrument parameters used in tof to D-space conversion
+ *
+ * @param instrument
+ * @param l1
+ * @param beamline
+ * @param beamline_norm
+ * @param samplePos
+ */
+void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
+    double & l1, Geometry::V3D & beamline,
+    double & beamline_norm, Geometry::V3D & samplePos)
+{
+  // Get some positions
+  const Geometry::IObjComponent_sptr sourceObj = instrument->getSource();
+  if (sourceObj == NULL)
+  {
+    throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
+  }
+  const Geometry::V3D sourcePos = sourceObj->getPos();
+  samplePos = instrument->getSample()->getPos();
+  beamline = samplePos-sourcePos;
+  beamline_norm=2.0*beamline.norm();
+
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  try
+  {
+    l1 = instrument->getSource()->getDistance(*sample);
+  }
+  catch (Exception::NotFoundError &e)
+  {
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance ", instrument->getName());
+  }
+}
+
 //-----------------------------------------------------------------------
 /**
  * Make a map of the conversion factors between tof and D-spacing
@@ -105,37 +139,19 @@ double calcConversion(const double l1,
  *    of interest.
  * @params: offsets: map between pixelID and offset (from the calibration file)
  */
-std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::map<int,double> &offsets)
 {
-  std::map<int, double> * myMap = new std::map<int, double>();
-
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = inputWS->getInstrument();
 
-  // Get some positions
-  const Geometry::IObjComponent_sptr sourceObj = instrument->getSource();
-  if (sourceObj == NULL)
-  {
-	  throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
-  }
-  const Geometry::V3D sourcePos = sourceObj->getPos();
-  const Geometry::V3D samplePos = instrument->getSample()->getPos();
-  const Geometry::V3D beamline = samplePos-sourcePos;
-  const double beamline_norm=2.0*beamline.norm();
-
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double l1;
-  try
-  {
-    l1 = instrument->getSource()->getDistance(*sample);
-  }
-  catch (Exception::NotFoundError &e)
-  {
-    delete myMap;
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
-  }
+  Geometry::V3D beamline,samplePos;
+  double beamline_norm;
+
+  getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
+
+  std::map<int, double> * myMap = new std::map<int, double>();
 
   //To get all the detector ID's
   std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
@@ -244,8 +260,9 @@ void AlignDetectors::exec()
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
   std::map<int,double> offsets;
+  std::map<int,int> groups; // will be ignored
   progress(0.0,"Reading calibration file");
-  if ( ! this->readCalFile(calFileName, offsets) )
+  if ( ! this->readCalFile(calFileName, offsets, groups) )
     throw Exception::FileError("Problem reading calibration file", calFileName);
 
   // Ref. to the SpectraDetectorMap
@@ -375,28 +392,35 @@ void AlignDetectors::execEvent()
 }
 
 //-----------------------------------------------------------------------
-/// Reads the calibration file. Returns true for success, false otherwise.
-bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,double>& offsets)
+/** Reads the calibration file. Returns true for success, false otherwise.
+ *
+ * @param calFileName :: .cal file path
+ * @param offsets :: map of udet::offset value
+ * @param groups :: map of udet::group number
+ * @return true if successful.
+ * @throw std::runtime_error if cannot open file
+ */
+bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,double>& offsets, std::map<int,int>& groups)
 {
     std::ifstream grFile(calFileName.c_str());
     if (!grFile)
     {
-        g_log.error() << "Unable to open calibration file " << calFileName << std::endl;
+        throw std::runtime_error("Unable to open calibration file " + calFileName);
         return false;
     }
 
     offsets.clear();
+    groups.clear();
     std::string str;
     while(getline(grFile,str))
     {
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int n,udet;
+      int n,udet,select,group;
       double offset;
-      istr >> n >> udet >> offset;
-      // Check the line wasn't badly formatted - return a failure if it is
-      if ( ! istr.good() ) return false;
+      istr >> n >> udet >> offset >> select >> group;
       offsets.insert(std::make_pair(udet,offset));
+      groups.insert(std::make_pair(udet,group));
     }
     return true;
 }
