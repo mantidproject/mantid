@@ -9,15 +9,6 @@
 #include "google/malloc_extension.h"
 #endif
 
-// Get the 'meat' of this class from the appropriate file for the platform
-#ifdef __linux__
-#include "MemoryManager.cpp_LINUX"
-#elif __APPLE__
-#include "MemoryManager.cpp_MAC"
-#elif _WIN32
-#include "MemoryManager.cpp_WIN32"
-#endif
-
 namespace Mantid
 {
 namespace API
@@ -27,9 +18,6 @@ namespace API
 MemoryManagerImpl::MemoryManagerImpl() :
   g_log(Kernel::Logger::get("MemoryManager"))
 {
-  // Call init function, which will go to appropriate function for platform
-  init();
-
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 
@@ -39,6 +27,17 @@ MemoryManagerImpl::MemoryManagerImpl() :
  */
 MemoryManagerImpl::~MemoryManagerImpl()
 {
+}
+
+MemoryInfo MemoryManagerImpl::getMemoryInfo()
+{
+  Kernel::MemoryStats mem_stats;
+  MemoryInfo info;
+  info.totalMemory = static_cast<unsigned int>(mem_stats.totalMem());
+  info.availMemory = static_cast<unsigned int>(mem_stats.availMem());
+  info.freeRatio = static_cast<unsigned int>(mem_stats.getFreeRatio());
+
+  return info;
 }
 
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions

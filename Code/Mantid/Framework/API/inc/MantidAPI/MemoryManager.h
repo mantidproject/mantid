@@ -59,9 +59,6 @@ namespace Mantid
       void releaseFreeMemory();
 
     private:
-      /// Platform-dependent initialisation method called by constructor
-      void init();
-
       friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;
 
       ///Class cannot be instantiated by normal means

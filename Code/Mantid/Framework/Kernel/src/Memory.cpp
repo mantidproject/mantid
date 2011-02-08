@@ -1,6 +1,11 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+
+#ifdef USE_TCMALLOC
+#include "google/malloc_extension.h"
+#endif
+
 #ifdef __linux__
   #include <unistd.h>
   #include <fstream>
@@ -25,6 +30,10 @@ namespace Mantid
 {
 namespace Kernel
 {
+
+#if _WIN32
+MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
+#endif
 
 /// Utility function to convert memory in kiB into easy to read units.
 template <typename TYPE>
@@ -240,6 +249,37 @@ void process_mem_system(size_t & sys_avail, size_t & sys_total)
 MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage(0),
     total_memory(0), avail_memory(0)
 {
+#ifdef __linux__
+  /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
+   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this
+   * is that, for the current threshold value of 8*4096, storage for workspaces having 4096 or greater
+   * bins per spectrum will be allocated using mmap.
+   * This should have the effect that memory is returned to the kernel as soon as a workspace is deleted,
+   * preventing things going to managed workspaces when they shouldn't. This will also hopefully reduce
+   * memory fragmentation.
+   * Potential downsides to look out for are whether this memory allocation technique makes things
+   * noticeably slower and whether it wastes memory (mmap allocates in blocks of the system page size.
+   */
+  mallopt(M_MMAP_THRESHOLD, 8*4096);
+#elif _WIN32
+  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+
+  // Try to enable the Low Fragmentation Heap for all heaps
+  // Bit of a brute force approach, but don't know which heap workspace data end up on
+  HANDLE hHeaps[1025];
+  // Get the number of heaps
+  const DWORD numHeap = GetProcessHeaps(1024, hHeaps);
+  g_log.debug() << "Number of heaps: " << GetProcessHeaps(0, NULL) << "\n";
+  ULONG ulEnableLFH = 2; // 2 = Low Fragmentation Heap
+  for(DWORD i = 0; i < numHeap; i++)
+  {
+    if(!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH)))
+    {
+      g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
+    }
+  }
+#endif
+
   this->ignoreFields(ignore);
   this->update();
 }
