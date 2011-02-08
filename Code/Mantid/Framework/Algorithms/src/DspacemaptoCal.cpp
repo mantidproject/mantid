@@ -11,8 +11,7 @@
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-#include <math.h>
-
+#include <cmath>
 #include <fstream>
 
 namespace Mantid
@@ -234,7 +233,7 @@ void DspacemaptoCal::CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorksp
     if( vulcan_iter != vulcan.end() )
       vulcan_factor = vulcan_iter->second;
     // The actual factor is 10^(-value_in_the_file)
-    vulcan_factor = exp10(-vulcan_factor);
+    vulcan_factor = exp(-vulcan_factor*log(10.0));
 
     // At this point, tof_corrected = vulcan_factor * tof_input
     // So this is the offset
@@ -342,7 +341,7 @@ void DspacemaptoCal::readVulcanAsciiFile(const std::string& fileName, std::map<i
 /** Structure of the vulcan binary file */
 struct VulcanCorrectionFactor
 {
-  uint64_t pixelID;
+  double pixelID;
   double factor;
 };
 

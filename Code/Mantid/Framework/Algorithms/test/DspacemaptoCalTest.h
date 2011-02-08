@@ -204,7 +204,7 @@ public:
     doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII");
   }
 
-  void xtestVulcan_Binary()
+  void testVulcan_Binary()
   {
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }
