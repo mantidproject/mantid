@@ -196,6 +196,7 @@ namespace Mantid
         if (period == 0)
         {
           // Only run the sub-algorithms once
+          loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
           localWorkspace->mutableSpectraMap().populate(spectrum_index(),spectrum_index(),m_numberOfSpectra);
           loadLogs(localWorkspace, entry, period);
@@ -377,6 +378,26 @@ namespace Mantid
         ret=80;
       }
       return ret;
+    }
+
+    /**  Log the run details from the file
+    * @param localWorkspace :: The workspace details to use
+    */
+    void LoadMuonNexus2::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      API::Run & runDetails = localWorkspace->mutableRun();
+
+      runDetails.addProperty("run_title", localWorkspace->getTitle());
+ 
+      int numSpectra = localWorkspace->getNumberHistograms();
+      runDetails.addProperty("nspectra", numSpectra);
+
+      m_filename = getPropertyValue("Filename");
+      NXRoot root(m_filename);
+      std::string start_time = root.getString("run/start_time");
+      runDetails.addProperty("run_start", start_time);
+      std::string stop_time = root.getString("run/end_time");
+      runDetails.addProperty("run_end", stop_time);
     }
 
   } // namespace DataHandling
