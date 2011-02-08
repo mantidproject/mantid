@@ -22,6 +22,7 @@
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <Poco/StringTokenizer.h>
+#include "MantidKernel/cow_ptr.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -1410,10 +1411,10 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       "l.setTitle(\"" + m_title.c_str() + "\")\n"
       "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
 
+    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     if ( !m_uiForm.yAxisAutoscale->isChecked() )
     {
-      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
-      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
       const Mantid::MantidVec& dataY = matrix_workspace->readY(groupNum);
       double min = 0.0; double max = 0.0;
 
@@ -1446,6 +1447,31 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
+      // Normalise before removing exponential decay
+      const std::vector<double>& x = matrix_workspace->readX(0);
+      const std::vector<double>& y = matrix_workspace->readY(0);
+      double targetTime = boost::lexical_cast<double>(firstGoodBin().toStdString());
+      int indexTime = 0;
+      for (int i = 0; i < static_cast<int>(x.size()); i++)
+      {
+        if (x[i] > targetTime)
+        {
+          indexTime = i;
+          break;
+        }
+
+      }
+      double normalizationFactor = 1.0;
+      if (y[indexTime] < 0)
+        normalizationFactor = -1.0/y[indexTime];
+      else
+        normalizationFactor = 1.0/y[indexTime];
+
+      QString pyStrNormalise = "Scale('" + cropWS + "','" + cropWS + "','"
+        + QString::number(normalizationFactor) + "')";
+
+      runPythonCode( pyStrNormalise ).trimmed();
+
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
         + cropWS + "\"," + gNum + ")\n" + pyS
         + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
