@@ -35,7 +35,7 @@ endif ( stdint )
 # Look for dependencies - bail out if any not found
 ###########################################################################
 
-find_package ( Boost REQUIRED signals date_time regex thread )
+find_package ( Boost REQUIRED signals date_time regex )
 include_directories( ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
