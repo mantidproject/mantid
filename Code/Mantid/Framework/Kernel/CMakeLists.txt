@@ -160,6 +160,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 		 test/EnvironmentHistoryTest.h
 		 test/FacilitiesTest.h
 		 test/FileValidatorTest.h
+		 test/FunctionTaskTest.h
 		 test/FilterChannelTest.h
 		 test/InterpolationTest.h
 		 test/ListValidatorTest.h

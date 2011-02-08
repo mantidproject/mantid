@@ -7,17 +7,12 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
 
-#include "Poco/Thread.h"
-#include "Poco/ThreadPool.h"
-#include "Poco/Runnable.h"
-#include "Poco/RunnableAdapter.h"
 #include <iostream>
 #include <iomanip>
 
-using Poco::Mutex;
 using namespace Mantid::Kernel;
 
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 
 
 
@@ -40,50 +35,6 @@ size_t waste_time(double seconds)
   return num;
 }
 
-
-Mutex stdout_mutex;
-
-class HelloRunnable: public Poco::Runnable
-{
-public:
-  double m_n;
-
-  HelloRunnable(double n) : m_n(n)
-  {
-  }
-
-  void run()
-  {
-    {
-      Mutex::ScopedLock lock(stdout_mutex);
-      std::cout << "Starting " << m_n << " secs. " << std::endl;
-    }
-    size_t num = waste_time(m_n);
-    {
-      Mutex::ScopedLock lock(stdout_mutex);
-      std::cout << "Done! " << m_n << " secs. Ran " <<( num/m_n) << " times/sec." << std::endl;
-    }
-  }
-
-
-};
-
-class DoNothingRunnable: public Poco::Runnable
-{
-public:
-  void run()
-  {
-  }
-};
-
-
-class DoNothingBoost
-{
-public:
-  void operator()()
-  {
-  }
-};
 
 
 
@@ -128,67 +79,22 @@ public:
     std::cout << overall.elapsed() << " secs total.\n";
   }
 
-  void xtest_Poco_pool()
-  {
-    Poco::ThreadPool myPool(2,32);
-
-    Mantid::Kernel::Timer overall;
-    std::cout << std::endl;
-    for (int i=32; i>0; i--)
-    {
-      HelloRunnable * thisOne = new HelloRunnable(i);
-      myPool.start(*thisOne);
-    }
-
-    myPool.joinAll();
-
-    std::cout << overall.elapsed() << " secs total." << std::endl;
-    return;
-  }
-
-
-  void xtest_Poco_single_threads()
-  {
-    std::cout << "\n";
-
-    Mantid::Kernel::Timer overall;
-    double time;
-    size_t num = 10000;
-    for (size_t i=0; i < num; i++)
-    {
-      DoNothingRunnable donothing;
-      Poco::Thread thread;
-      thread.start(donothing);
-      thread.join();
-    }
-    time = overall.elapsed();
-    std::cout << "POCO: " << std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
-
-    for (size_t i=0; i < num; i++)
-    {
-      DoNothingRunnable donothing;
-      donothing.run();
-    }
-    time = overall.elapsed();
-    std::cout << "NO THREADS:" << std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
-  }
-
-
-  void xtest_Boost_single_threads()
-  {
-    Mantid::Kernel::Timer overall;
-    double time;
-    size_t num = 10000;
-
-    for (size_t i=0; i < num; i++)
-    {
-      DoNothingBoost myDoNothing;
-      boost::thread workerThread(myDoNothing);
-      workerThread.join();
-    }
-    time = overall.elapsed();
-    std::cout << "Boost: " <<std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
-  }
+//
+//  void xtest_Boost_single_threads()
+//  {
+//    Mantid::Kernel::Timer overall;
+//    double time;
+//    size_t num = 10000;
+//
+//    for (size_t i=0; i < num; i++)
+//    {
+//      DoNothingBoost myDoNothing;
+//      boost::thread workerThread(myDoNothing);
+//      workerThread.join();
+//    }
+//    time = overall.elapsed();
+//    std::cout << "Boost: " <<std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
+//  }
 
 };
 

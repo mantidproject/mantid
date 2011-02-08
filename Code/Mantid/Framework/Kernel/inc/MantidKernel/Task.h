@@ -25,8 +25,16 @@ namespace Kernel
     /** Default constructor */
     Task() :
       m_cost(1.0)
-    {
-    }
+    { }
+
+    //---------------------------------------------------------------------------------------------
+    /** Constructor with cost
+     *
+     * @param cost :: computational cost
+     */
+    Task(double cost) :
+      m_cost(cost)
+    { }
 
     //---------------------------------------------------------------------------------------------
     /** Main method that performs the work for the task. */
