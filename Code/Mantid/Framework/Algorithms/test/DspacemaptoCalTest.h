@@ -199,12 +199,12 @@ public:
     }
   }
 
-  void testVulcan_ASCII()
+  void xtestVulcan_ASCII()
   {
     doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII");
   }
 
-  void testVulcan_Binary()
+  void xtestVulcan_Binary()
   {
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }
