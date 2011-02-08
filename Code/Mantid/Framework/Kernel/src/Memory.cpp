@@ -31,12 +31,6 @@ namespace Mantid
 namespace Kernel
 {
 
-#if _WIN32
-namespace {
-  MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
-}
-#endif
-
 /// Utility function to convert memory in kiB into easy to read units.
 template <typename TYPE>
 string memToString(const TYPE mem_in_kiB)
