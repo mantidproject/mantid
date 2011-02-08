@@ -26,10 +26,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/DimensionWidget.C
 ${COMMON_SOURCES}
 )
 SET(LIBG_MOC_SOURCES
-${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/QvisRebinningCutterWindow.h
-${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/IntegratedDimensionWidget.h
-${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/GeometryWidget.h
-${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/DimensionWidget.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/RebinningCutterOpeator/QvisRebinningCutterWindow.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/RebinningCutterOpeator/IntegratedDimensionWidget.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/RebinningCutterOpeator/GeometryWidget.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/RebinningCutterOpeator/DimensionWidget.h
 )
 QT_WRAP_CPP(GRebinningCutterOperator LIBG_SOURCES ${LIBG_MOC_SOURCES})
 
@@ -91,7 +91,7 @@ ${QT_QTGUI_INCLUDE_DIR}
 ${VTK_INCLUDE_DIRS} 
 ${PYTHON_INCLUDE_PATH} 
 ${VISIT_INCLUDE_DIR}/visit/visitpy/visitpy 
-${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
+${CMAKE_CURRENT_SOURCE_DIR}/inc/RebinningCutterOpeator
 )
 
 LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${MESA_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${VTK_LIBRARY_DIRS})
