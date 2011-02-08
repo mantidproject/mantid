@@ -218,9 +218,11 @@ namespace Mantid
         {
           step_separator=input.substr(index-1,1);
         }
+        //step values must be preceded by colon ':'
+        return(!step_separator.compare(":")?true:false);
       }
-      //step values must be preceded by colon ':'
-      return(!step_separator.compare(":")?true:false);
+      return true;
+      
     }
 
   /**This method checks the input string is valid format

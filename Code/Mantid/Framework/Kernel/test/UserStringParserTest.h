@@ -14,9 +14,6 @@ public:
 
   void testColonSeparatedStrings()
   {
-    /*std::string s;
-    std::getline(std::cin,s);*/
-
     UserStringParser parser;
     std::string str="2010:2020:2";
     unsigned int startNum=2010;
@@ -36,8 +33,8 @@ public:
    
   }
 
-  void xtestMinusSeparatedStrings()
-  {    
+  void testMinusSeparatedStrings()
+  { 
     UserStringParser parser;
     std::string str="60-61";
     unsigned int startNum=60;
@@ -56,10 +53,8 @@ public:
 
   }
 
-  void xtestMinusSeparatedRangeofStrings()
-  {
-    /*std::string s;
-    std::getline(std::cin,s);*/
+  void testMinusSeparatedRangeofStrings()
+  {   
 
     UserStringParser parser;
     std::string str="60-85";
@@ -80,7 +75,7 @@ public:
 
   }
 
-   void xtestPlusSeparatedStrings()
+   void testPlusSeparatedStrings()
   {    
     UserStringParser parser;
     std::string str="62+63";
@@ -121,7 +116,7 @@ public:
     
   }
 
-  void xtestCommaSeparatedComplexStrings1()
+  void testCommaSeparatedComplexStrings1()
   {
         
     UserStringParser parser;
@@ -139,7 +134,7 @@ public:
     
   }
 
-  void xtestCommaSeparatedComplexStrings2()
+  void testCommaSeparatedComplexStrings2()
   {
         
     UserStringParser parser;
@@ -162,7 +157,7 @@ public:
    
   }
 
-  void xtestCommaSeparatedComplexStrings3()
+  void testCommaSeparatedComplexStrings3()
   {
         
     UserStringParser parser;
