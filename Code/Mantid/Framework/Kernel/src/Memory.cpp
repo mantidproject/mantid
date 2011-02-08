@@ -271,7 +271,7 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage
   {
     if(!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH)))
     {
-      g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
+      //g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
     }
   }
 #endif
