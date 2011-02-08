@@ -222,9 +222,10 @@ namespace NeXus
     if (m_eventWorkspace)
     {
       //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
-      this->execEvent(nexusFile);
+//      this->execEvent(nexusFile);
+      g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
     }
-    else
+//    else
     {
       nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec);
     }
