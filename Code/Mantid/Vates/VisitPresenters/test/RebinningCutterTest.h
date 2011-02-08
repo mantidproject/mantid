@@ -83,7 +83,8 @@ private:
       //Create the composite holder.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
-      MDWorkspace_sptr spRebinnedWs =  presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds, true);
+        presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
+        MDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll);
       vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
       vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
@@ -222,7 +223,7 @@ vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
   vtkCharArray* charArray = vtkCharArray::New();
   charArray->SetName(id.c_str());
   charArray->Allocate(100);
-  for(int i = 0; i < testData.size(); i++)
+  for(unsigned int i = 0; i < testData.size(); i++)
   {
     char cNextVal = testData.at(i);
     if(int(cNextVal) > 1)
@@ -232,6 +233,7 @@ vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
     }
   }
   fieldData->AddArray(charArray);
+  charArray->Delete();
   return fieldData;
 }
 
@@ -241,7 +243,9 @@ vtkDataSet* constructInputDataSet()
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
   std::string id = XMLDefinitions::metaDataId;
-  dataset->SetFieldData(createFieldDataWithCharArray(getComplexXMLInstructions(), id.c_str()));
+  vtkFieldData* fieldData =createFieldDataWithCharArray(getComplexXMLInstructions(), id);
+  dataset->SetFieldData(fieldData);
+  fieldData->Delete();
   return dataset;
 }
 
@@ -260,6 +264,8 @@ void testExecution()
     //NB 125 = 5 * 5 * 5 see pseudo filter execution method's number of bins above.
     TSM_ASSERT_EQUALS("An empty visualisation data set has been generated.", out_ds->GetNumberOfPoints() , 216);
 
+    out_ds->Delete();
+
 }
 
 //A more complex version of the above testExecution. Uses filter chaining as would occur in real pipeline.
@@ -273,6 +279,7 @@ void testExecutionInChainedSchenario()
   PsudoFilter c(std::vector<double>(3,0));
 
   vtkDataSet* out_ds = c.Execute(b.Execute(a.Execute(in_ds)));
+  out_ds->Delete();
 }
 
 void testgetMetaDataID()
@@ -299,6 +306,7 @@ void testMetaDataToFieldData()
 
 
   TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData, convertCharArrayToString(carry));
+  charArray->Delete();
   fieldData->Delete();
 }
 
@@ -341,6 +349,7 @@ void testFindExistingRebinningDefinitions()
   TSM_ASSERT("There was a previous definition of a function that should have been recognised and generated."
       , CompositeImplicitFunction::functionName() == func->getName());
 
+  dataset->Delete();
   delete func;
 }
 
@@ -351,6 +360,7 @@ void testNoExistingRebinningDefinitions()
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
   TSM_ASSERT_THROWS("There were no previous definitions carried through. Should have thrown.", findExistingRebinningDefinitions(dataset, XMLDefinitions::metaDataId.c_str()), std::runtime_error);
+  dataset->Delete();
 }
 
 //
@@ -372,6 +382,7 @@ void testFindWorkspaceName()
   std::string name = findExistingWorkspaceName(dataset, id.c_str());
 
   TSM_ASSERT_EQUALS("The workspace name is different from the xml value.", "Input", name );
+  dataset->Delete();
 }
 
 void testFindWorkspaceLocation()
@@ -383,6 +394,7 @@ void testFindWorkspaceLocation()
   static const boost::regex match(".*(fe_demo_30.sqw)$");
 
   TSM_ASSERT("The workspace location is differrent from the xml value.", regex_match(location, match));
+  dataset->Delete();
 }
 
 void testFindWorkspaceNameThrows()
@@ -392,6 +404,7 @@ void testFindWorkspaceNameThrows()
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceName(dataset, id.c_str()), std::runtime_error);
+  dataset->Delete();
 }
 
 void testFindWorkspaceLocationThrows()
@@ -401,6 +414,7 @@ void testFindWorkspaceLocationThrows()
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocation(dataset, id.c_str()), std::runtime_error);
+  dataset->Delete();
 }
 
 void testGetXDimension()
@@ -411,6 +425,7 @@ void testGetXDimension()
   TSM_ASSERT_EQUALS("Wrong number of x dimension bins", 5, xDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum x obtained", 5, xDimension->getMaximum());
   TSM_ASSERT_EQUALS("Wrong maximum x obtained", -1.5, xDimension->getMinimum());
+  dataSet->Delete();
 }
 
 void testGetYDimension()
@@ -421,6 +436,7 @@ void testGetYDimension()
     TSM_ASSERT_EQUALS("Wrong number of y dimension bins", 5, yDimension->getNBins());
     TSM_ASSERT_EQUALS("Wrong minimum y obtained", 6.6, yDimension->getMaximum());
     TSM_ASSERT_EQUALS("Wrong maximum y obtained", -6.6, yDimension->getMinimum());
+    dataSet->Delete();
 }
 
 void testGetZDimension()
@@ -431,6 +447,7 @@ void testGetZDimension()
   TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, zDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum z obtained", -6.6, zDimension->getMinimum());
   TSM_ASSERT_EQUALS("Wrong maximum z obtained", 6.6, zDimension->getMaximum());
+  dataSet->Delete();
 }
 
 void testGettDimension()
@@ -441,6 +458,7 @@ void testGettDimension()
   TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, tDimension->getNBins());
   TSM_ASSERT_EQUALS("Wrong minimum t obtained", 0, tDimension->getMinimum());
   TSM_ASSERT_EQUALS("Wrong maximum t obtained", 150, tDimension->getMaximum());
+  dataSet->Delete();
 }
 
 void testGetWorkspaceGeometryThrows()

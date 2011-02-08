@@ -130,8 +130,18 @@ private:
     /// Helper method. Selects the dataset factory to use.
     boost::shared_ptr<Mantid::VATES::vtkDataSetFactory> createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
 
+    /// Create a hash based on the attributes.
+    std::string createHash() const;
+
+    /// Optimisation method. Used to determien what strategy to use to create the dataset.
+    Mantid::VATES::RebinningIterationAction decideIterationAction();
+
     /// Executor peforms the logic associated with running rebinning operations.
     Mantid::VATES::RebinningCutterPresenter m_presenter;
+
 };
+
+// Non member helper deletion method for working with VisITs ref_void_ptr types.
+void deleteTimeMarker(void* cachedMarkerVoid);
 
 #endif

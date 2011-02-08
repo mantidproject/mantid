@@ -88,6 +88,28 @@ public:
     TSM_ASSERT_EQUALS("The end rotation matrix should correspond to that of the last plane.", functionB->asRotationMatrixVector() , rotationMatrix);
   }
 
+  void testGetAllPlanes()
+  {
+    CompositeImplicitFunction compositeFunction;
+    NormalParameter normalA(1, 0, 0);
+    NormalParameter normalB(1, 1, 1);
+    OriginParameter origin(0, 0, 0);
+    UpParameter up(0, 0, 0);
+    WidthParameter width(3);
+    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin, up,
+        width));
+    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, up,
+        width));
+    boost::shared_ptr<MockImplicitFunction> functionC(new MockImplicitFunction());
+    compositeFunction.addFunction(functionA); // Is a plane (counted)
+    compositeFunction.addFunction(functionB); // Is a plane (counted)
+    compositeFunction.addFunction(functionC); // Not a plane (not counted)
+    PlaneInterpreter interpreter;
+    planeVector planes = interpreter.getAllPlanes(&compositeFunction);
+
+    TSM_ASSERT_EQUALS("There should have been exactly two planes in the product vector.", 2, planes.size());
+  }
+
 };
 
 

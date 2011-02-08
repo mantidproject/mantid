@@ -95,7 +95,6 @@ private:
 
 /// Check that constructWidget has been called.
 void validateSetup() const;
-
 DimensionWidget* m_xDimensionWidget;
 DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;

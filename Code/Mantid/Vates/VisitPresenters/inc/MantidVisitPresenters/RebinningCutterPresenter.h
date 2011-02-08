@@ -54,9 +54,16 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
+/// Vector of IMDDimension shared pointers.
 typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > DimensionVec;
+/// IMDDimension as shared pointer.
 typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
+/// Flags what should be don on the current iteration.
+enum RebinningIterationAction {
+  RecalculateAll, // Rebin and create 3D visualisation slice from 4D dataset.
+  RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
+  UseCache //There is no delta here. Use a cached vtkDataSet.
+};
 
 /// Forward declarations
 class vtkDataSetFactory;
@@ -89,14 +96,16 @@ public:
 	boost::shared_ptr<const Mantid::API::ImplicitFunction> getFunction() const;
 
   /// Construct reduction knowledge objects
-	Mantid::MDDataObjects::MDWorkspace_sptr constructReductionKnowledge(
+	void constructReductionKnowledge(
       DimensionVec dimensions,
       Dimension_sptr dimensionX,
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont,
       Mantid::MDAlgorithms::CompositeImplicitFunction* compositeFunction,
-      vtkDataSet* inputDataSet, bool regenerate);
+      vtkDataSet* inputDataSet);
+
+	Mantid::MDDataObjects::MDWorkspace_sptr applyRebinningAction(Mantid::VATES::RebinningIterationAction action) const;
 
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(boost::shared_ptr<vtkDataSetFactory> spvtkDataSetFactory);
@@ -121,9 +130,6 @@ public:
 };
 
 //Non-member helper functions.
-
-  /// Rebin
-  Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility, bool regenerate);
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkDataSet * out_ds,

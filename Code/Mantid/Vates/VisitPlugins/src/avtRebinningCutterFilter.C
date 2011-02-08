@@ -55,7 +55,9 @@
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include "MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h"
-
+#include "MantidVisitPresenters/vtkProxyFactory.h"
+#include "boost/functional/hash.hpp"
+#include <sstream>
 using namespace Mantid::VATES;
 
 // ****************************************************************************
@@ -66,7 +68,8 @@ using namespace Mantid::VATES;
 //
 // ****************************************************************************
 
-avtRebinningCutterFilter::avtRebinningCutterFilter(): m_presenter()
+avtRebinningCutterFilter::avtRebinningCutterFilter() :
+  m_presenter()
 {
 }
 
@@ -186,6 +189,25 @@ Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(vtkDataSet
   }
 }
 
+std::string avtRebinningCutterFilter::createHash() const
+{
+  size_t seed;
+  boost::hash_combine(seed, atts.GetOriginX());
+  boost::hash_combine(seed, atts.GetOriginY());
+  boost::hash_combine(seed, atts.GetOriginZ());
+  boost::hash_combine(seed, atts.GetNormalX());
+  boost::hash_combine(seed, atts.GetNormalY());
+  boost::hash_combine(seed, atts.GetNormalZ());
+  boost::hash_combine(seed, atts.GetWidth());
+  boost::hash_combine(seed, atts.GetHeight());
+  boost::hash_combine(seed, atts.GetDepth());
+  boost::hash_combine(seed, atts.GetStructured());
+  boost::hash_combine(seed, atts.GetDimensionXML());
+  std::stringstream sstream;
+  sstream << seed;
+  return sstream.str();
+}
+
 bool avtRebinningCutterFilter::anyPlaneApplied() const
 {
   return ((atts.GetNormalX() != 0) || (atts.GetNormalY() != 0) || (atts.GetNormalZ() != 0));
@@ -195,7 +217,7 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> avtRebinningCutterFilter::const
 {
   using namespace Mantid::MDAlgorithms;
   Mantid::API::ImplicitFunction* appliedFunction;
-  if(atts.GetIsSetUp() && anyPlaneApplied())
+  if (atts.GetIsSetUp() && anyPlaneApplied())
   {
     NormalParameter normal(atts.GetNormalX(), atts.GetNormalY(), atts.GetNormalZ());
     OriginParameter origin(atts.GetOriginX(), atts.GetOriginY(), atts.GetOriginZ());
@@ -244,29 +266,29 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> avtRebinningCutterFilter::const
     DepthParameter depthParam = DepthParameter(depth);
 
     //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
-     boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
-        originParam);
+    boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam, originParam);
   }
   return boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunction);
 }
 
-
-vtkDataSetFactory_sptr avtRebinningCutterFilter::createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+vtkDataSetFactory_sptr avtRebinningCutterFilter::createDataSetFactory(
+    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
 {
-   //Interogate attributes to determine user selection.
-   using Mantid::MDDataObjects::MDImage;
-   vtkDataSetFactory* pvtkDataSetFactory;
-   if(atts.GetStructured())
-   {
-     pvtkDataSetFactory = new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName, m_timestep);
-   }
-   else
-   {
-     pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName, m_timestep);
-   }
-   return vtkDataSetFactory_sptr(pvtkDataSetFactory);
+  //Interogate attributes to determine user selection.
+  using Mantid::MDDataObjects::MDImage;
+  vtkDataSetFactory* pvtkDataSetFactory;
+  if (atts.GetStructured())
+  {
+    pvtkDataSetFactory = new vtkStructuredGridFactory<MDImage> (spRebinnedWs->get_spMDImage(),
+        XMLDefinitions::signalName, m_timestep);
+  }
+  else
+  {
+    pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage> (
+        spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName, m_timestep);
+  }
+  return vtkDataSetFactory_sptr(pvtkDataSetFactory);
 }
-
 
 avtContract_p avtRebinningCutterFilter::ModifyContract(avtContract_p incontract)
 {
@@ -274,12 +296,44 @@ avtContract_p avtRebinningCutterFilter::ModifyContract(avtContract_p incontract)
   return incontract;
 }
 
+RebinningIterationAction avtRebinningCutterFilter::decideIterationAction()
+{
+  vtkDataSet* cachedOutput = static_cast<vtkDataSet*> (FetchArbitraryVTKObject(DATA_DEPENDENCE,
+    this->createHash().c_str(), 0, 1, "VTK_DATASET"));
+
+  void_ref_ptr ptr = FetchArbitraryRefPtr(DATA_DEPENDENCE,"timestep",0, 1, "DOUBLE" );
+
+  RebinningIterationAction action;
+  if(cachedOutput == NULL)
+  {
+    action = RecalculateAll;
+  }
+  else
+  {
+    double* oldtime = (double*)(*ptr);
+    if(*oldtime == m_timestep)
+    {
+      action = UseCache; // Use cache since there has been no change.
+    }
+    else
+    {
+      action = RecalculateVisualDataSetOnly; //Use original MDImage, but determine a new slice.
+    }
+  }
+  return action;
+}
+
+void deleteTimeMarker(void* timeMarkerVoid)
+{
+  double* cachedmarker = (double*)timeMarkerVoid;
+  delete cachedmarker;
+}
 
 void avtRebinningCutterFilter::Execute()
 {
-
   using namespace Mantid::VATES;
   using namespace Mantid::Geometry;
+  using namespace Mantid::MDDataObjects;
   using namespace Mantid::MDAlgorithms;
 
   using Mantid::VATES::DimensionVec;
@@ -295,40 +349,48 @@ void avtRebinningCutterFilter::Execute()
   Dimension_sptr spDimZ = getDimensionZ(in_ds);
   Dimension_sptr spDimt = getDimensiont(in_ds);
 
-  DimensionVec dimensionsVec;
-  dimensionsVec.push_back(spDimX);
-  dimensionsVec.push_back(spDimY);
-  dimensionsVec.push_back(spDimZ);
-  dimensionsVec.push_back(spDimt);
-
-  Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs;
+  DimensionVec dimensionsVec(4);
+  dimensionsVec[0]=spDimX;
+  dimensionsVec[1]=spDimY;
+  dimensionsVec[2]=spDimZ;
+  dimensionsVec[3]=spDimt;
 
   //Create the composite holder.
   CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
+  compFunction->addFunction(constructBox(spDimX, spDimY, spDimZ));
+  compFunction->addFunction(constructPlane());
 
-  //Setup is only relevant once the controls have been setup.
-  if (atts.GetIsSetUp())
-  {
-    compFunction->addFunction(constructBox(spDimX, spDimY, spDimZ));
-    compFunction->addFunction(constructPlane());
+  // Construct reduction knowledge.
+   m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ, spDimt,
+      compFunction, in_ds);
 
-    spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
-        spDimt, compFunction, in_ds, atts.GetIsDirty());
-  }
-  else
-  {
-    compFunction->addFunction(constructBox(spDimX, spDimY, spDimZ));
+    //The action determines the level of caching available for optimisations.
+  RebinningIterationAction action = decideIterationAction();
 
-    // Construct reduction knowledge.
-    spRebinnedWs = m_presenter.constructReductionKnowledge(dimensionsVec, spDimX, spDimY, spDimZ,
-        spDimt, compFunction, in_ds, true);
-  }
+  //Acutally perform rebinning or specified action.
+   MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action);
 
   /// Create the dataset factory from the user selection.
-  vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
+  vtkDataSet *output_ds;
+  if (UseCache == action)
+  {
+    vtkDataSet* cachedOutput = static_cast<vtkDataSet*> (FetchArbitraryVTKObject(DATA_DEPENDENCE,
+        this->createHash().c_str(), 0, 1, "VTK_DATASET"));
+    //Use existing visualisation image.
+    vtkDataSetFactory_sptr spvtkDataSetFactory(new vtkProxyFactory(cachedOutput));
+    output_ds = m_presenter.createVisualDataSet(spvtkDataSetFactory);
+    output_ds->Register(NULL);
+  }
+ else
+ {
+    /// Use the dataset factory to draw an image and to persist metadata.
+    StoreArbitraryRefPtr(DATA_DEPENDENCE, "timestep", 0, 1, "DOUBLE", void_ref_ptr(new double(m_timestep), deleteTimeMarker));
 
-  /// Use the dataset factory to draw an image and to persist metadata.
-  vtkDataSet *output_ds = m_presenter.createVisualDataSet(spvtkDataSetFactory);
+    vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
+    output_ds = m_presenter.createVisualDataSet(spvtkDataSetFactory);
+    StoreArbitraryVTKObject(DATA_DEPENDENCE, this->createHash().c_str(), 0, 1, "VTK_DATASET",
+        output_ds);
+  }
 
   output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName.c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);

@@ -98,6 +98,7 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   //Add metadata to dataset.
   MultiDimensionalDbPresenter::metaDataToFieldData(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
   visualDataSet->SetFieldData(outputFD);
+  outputFD->Delete();
   return visualDataSet;
 }
 
@@ -120,6 +121,7 @@ void MultiDimensionalDbPresenter::metaDataToFieldData(vtkFieldData* fieldData, s
   {
     newArry->InsertNextValue(metaData.at(i));
   }
+  newArry->Delete();
 }
 
 int MultiDimensionalDbPresenter::getNumberOfTimesteps() const

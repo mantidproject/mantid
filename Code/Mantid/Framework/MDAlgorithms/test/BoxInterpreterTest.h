@@ -70,6 +70,30 @@ public:
 
     }
 
+  void testGetAllBoxes()
+  {
+    OriginParameter originOne(0, 0, 0);
+    WidthParameter widthOne(1);
+    HeightParameter heightOne(4);
+    DepthParameter depthOne(5);
+    BoxImplicitFunction* boxOne = new BoxImplicitFunction(widthOne, heightOne, depthOne, originOne);
+
+    OriginParameter originTwo(0, 0, 0);
+    WidthParameter widthTwo(2);
+    HeightParameter heightTwo(3);
+    DepthParameter depthTwo(6);
+    BoxImplicitFunction* boxTwo = new BoxImplicitFunction(widthTwo, heightTwo, depthTwo, originTwo);
+
+    CompositeImplicitFunction compositeFunction;
+    compositeFunction.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
+    compositeFunction.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxTwo));
+
+    BoxInterpreter interpreter;
+    boxVector boxes = interpreter.getAllBoxes(&compositeFunction);
+
+    TSM_ASSERT_EQUALS("Wrong number of boxes returned.", 2, boxes.size());
+  }
+
     
 
 };

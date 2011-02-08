@@ -46,8 +46,6 @@ std::vector<double> PlaneInterpreter::operator()(Mantid::API::ImplicitFunction* 
 
 std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* implicitFunction) const
 {
-  using namespace Mantid::MDAlgorithms;
-
   //A rotation matrix is by default an identity matrix.
   std::vector<double> rotationMatrix = defaultRotationMatrix();
 
@@ -72,6 +70,20 @@ std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* imp
   }
 
   return rotationMatrix;
+}
+
+planeVector PlaneInterpreter::getAllPlanes(Mantid::API::ImplicitFunction* implicitFunction) const
+{
+  CompositeImplicitFunction* compFunction =
+      dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (implicitFunction);
+
+  planeVector flattenedPlanes;
+  if (compFunction != NULL)
+  {
+    //Flatten out box functions
+    flattenedPlanes = walkTree(compFunction);
+  }
+  return flattenedPlanes;
 }
 
 

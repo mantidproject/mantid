@@ -188,7 +188,6 @@ std::vector<double> PlaneImplicitFunction::asRotationMatrixVector() const
 {
   using Mantid::Geometry::V3D;
 
-
   //Normal.
   V3D ax(m_normal.getX(), m_normal.getY(), m_normal.getZ());
 

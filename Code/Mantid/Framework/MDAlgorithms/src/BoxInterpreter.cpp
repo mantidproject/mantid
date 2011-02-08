@@ -80,5 +80,20 @@ std::vector<double> BoxInterpreter::Execute(Mantid::API::ImplicitFunction* impli
   return endBox;
 }
 
+
+boxVector BoxInterpreter::getAllBoxes(Mantid::API::ImplicitFunction* implicitFunction) const
+{
+  Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction =
+      dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (implicitFunction);
+
+  boxVector flattenedboxes;
+  if (compFunction != NULL)
+  {
+    //Flatten out box functions
+    flattenedboxes = walkTree(compFunction);
+  }
+  return flattenedboxes;
+}
+
 }
 }

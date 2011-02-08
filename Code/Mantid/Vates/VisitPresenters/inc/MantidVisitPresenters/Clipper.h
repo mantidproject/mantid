@@ -1,20 +1,20 @@
+#ifndef ABSTRACT_CLIPPER_H
+#define ABSTRACT_CLIPPER_H
 
-
-#ifndef MANTID_VATES_VTKDATASETFACTORY_H_
-#define MANTID_VATES_VTKDATASETFACTORY_H_
-
-#include "boost/shared_ptr.hpp"
-#include <vtkDataSet.h>
+//Forward declarations
+class vtkDataSet;
+class vtkUnstructuredGrid;
+class vtkImplicitFunction;
 
 namespace Mantid
 {
 namespace VATES
 {
 
-/** Abstract type to generate a vtk dataset on demand from a MDWorkspace.
+  /** Abstract clipper type. Allows full separation of vendor specific vtk technology from back end.
 
  @author Owen Arnold, Tessella plc
- @date 24/01/2010
+ @date 07/02/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,26 +37,26 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
-
-class vtkDataSetFactory
+class Clipper
 {
-
 public:
 
-  /// Constructor
-  vtkDataSetFactory();
+  virtual void SetInput(vtkDataSet* in_ds) =0;
 
-  /// Destructor
-  virtual ~vtkDataSetFactory()=0;
+  virtual void SetClipFunction(vtkImplicitFunction* func) =0;
 
-  /// Factory Method.
-  virtual vtkDataSet* create() const=0;
+  virtual void SetInsideOut(bool insideout) =0;
 
+  virtual void SetRemoveWholeCells(bool removeWholeCells) =0;
 
+  virtual void SetOutput(vtkUnstructuredGrid* out_ds) =0;
+
+  virtual void Update() = 0;
+
+  virtual ~Clipper() =0;
+
+  virtual void Delete() = 0;
 };
-
-typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
 
 }
 }

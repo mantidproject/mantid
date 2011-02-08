@@ -67,6 +67,9 @@ public:
 
   /// Explicit call to Functor execution.
   std::vector<double> Execute(Mantid::API::ImplicitFunction* implicitFunction) const;
+
+  /// Extract planes from implicit function into a flattened vector.
+  planeVector getAllPlanes(Mantid::API::ImplicitFunction* implicitFunction) const;
 };
 }
 

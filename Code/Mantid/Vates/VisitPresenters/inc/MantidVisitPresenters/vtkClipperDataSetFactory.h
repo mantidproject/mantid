@@ -1,20 +1,20 @@
+#ifndef MANTID_VATES_VTKCLIPPERDATASETFACTORY_H
+#define MANTID_VATES_VTKCLIPPERDATASETFACTORY_H
 
-
-#ifndef MANTID_VATES_VTKDATASETFACTORY_H_
-#define MANTID_VATES_VTKDATASETFACTORY_H_
-
-#include "boost/shared_ptr.hpp"
-#include <vtkDataSet.h>
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidVisitPresenters/vtkDataSetFactory.h"
+#include "MantidVisitPresenters/Clipper.h"
+#include "boost/scoped_ptr.hpp"
 
 namespace Mantid
 {
 namespace VATES
 {
 
-/** Abstract type to generate a vtk dataset on demand from a MDWorkspace.
+/** Factory method implementation. This is an effective vtkAlgorithm in that it uses clipping functions to slice a vtkDataSet based on a provided implicit function.
 
  @author Owen Arnold, Tessella plc
- @date 24/01/2010
+ @date 07/02/2010
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -38,28 +38,29 @@ namespace VATES
  */
 
 
-
-class vtkDataSetFactory
+class vtkClipperDataSetFactory : public vtkDataSetFactory
 {
-
 public:
-
   /// Constructor
-  vtkDataSetFactory();
+  vtkClipperDataSetFactory(Mantid::API::ImplicitFunction* implicitFunction, vtkDataSet* dataSet, Clipper* clipper);
 
   /// Destructor
-  virtual ~vtkDataSetFactory()=0;
+  virtual ~vtkClipperDataSetFactory();
 
   /// Factory Method.
-  virtual vtkDataSet* create() const=0;
+  virtual vtkDataSet* create() const;
 
+private:
+  /// Function describing clipping.
+  boost::scoped_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;
 
+  /// Dataset on which to apply clipping.
+  vtkDataSet* m_dataset;
+
+  boost::scoped_ptr<Clipper> m_clipper;
 };
 
-typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
-
 }
 }
-
 
 #endif

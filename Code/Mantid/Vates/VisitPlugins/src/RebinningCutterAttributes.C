@@ -408,37 +408,37 @@ RebinningCutterAttributes::CreateCompatible(const std::string &tname) const
   {
     retval = new RebinningCutterAttributes(*this);
   }
-  else if (tname == "PlaneAttributes")
-  {
-    using namespace std;
-    PlaneAttributes *p = new PlaneAttributes;
-    double normal[3];
-    double origin[3];
-    double up[3];
-
-    normal[0] = GetNormalX();
-    normal[1] = GetNormalY();
-    normal[2] = GetNormalZ();
-
-    origin[0] = GetOriginX();
-    origin[1] = GetOriginY();
-    origin[2] = GetOriginZ();
-
-    // Compute up vector
-    double temp[3] = {0, 0, 1};
-    if (normal[0] == 0 && normal[1] == 0)
-        temp[1] = 1;
-    up[0] = normal[1]*temp[2] - normal[2]*temp[1];
-    up[1] = normal[2]*temp[0] - normal[0]*temp[2];
-    up[2] = normal[0]*temp[1] - normal[1]*temp[0];
-
-    p->SetNormal(normal);
-    p->SetOrigin(origin);
-    p->SetUpAxis(up);
-    p->SetThreeSpace(true);
-
-    retval = p;
-  }
+//  else if (tname == "PlaneAttributes")
+//  {
+//    using namespace std;
+//    PlaneAttributes *p = new PlaneAttributes;
+//    double normal[3];
+//    double origin[3];
+//    double up[3];
+//
+//    normal[0] = GetNormalX();
+//    normal[1] = GetNormalY();
+//    normal[2] = GetNormalZ();
+//
+//    origin[0] = GetOriginX();
+//    origin[1] = GetOriginY();
+//    origin[2] = GetOriginZ();
+//
+//    // Compute up vector
+//    double temp[3] = {0, 0, 1};
+//    if (normal[0] == 0 && normal[1] == 0)
+//        temp[1] = 1;
+//    up[0] = normal[1]*temp[2] - normal[2]*temp[1];
+//    up[1] = normal[2]*temp[0] - normal[0]*temp[2];
+//    up[2] = normal[0]*temp[1] - normal[1]*temp[0];
+//
+//    p->SetNormal(normal);
+//    p->SetOrigin(origin);
+//    p->SetUpAxis(up);
+//    p->SetThreeSpace(true);
+//
+//    retval = p;
+//  }
   else if (tname == "BoxExtents")
   {
     BoxExtents *b = new BoxExtents;

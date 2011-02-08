@@ -63,6 +63,9 @@ public:
 
   /// Explicit call to Functor execution.
   std::vector<double> Execute(Mantid::API::ImplicitFunction* implicitFunction) const;
+
+  /// Get all the boxes extractable from the implicit function.
+  boxVector getAllBoxes(Mantid::API::ImplicitFunction* implicitFunction) const;
 };
 }
 

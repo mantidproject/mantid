@@ -6,28 +6,36 @@ include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 project ( VisitPresenters )
 
 set ( SRC_FILES 
+src/Clipper.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningXMLGenerator.cpp
 src/vtkDataSetFactory.cpp
+src/vtkClipperDataSetFactory.cpp
+src/vtkProxyFactory.cpp
 src/vtkRectilinearGridFactory.cpp
 src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
 set ( INC_FILES 
+inc/MantidVisitPresenters/Clipper.h
 inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 
 inc/MantidVisitPresenters/RebinningXMLGenerator.h
 inc/MantidVisitPresenters/vtkDataSetFactory.h
+inc/MantidVisitPresenters/vtkClipperDataSetFactory.h
+inc/MantidVisitPresenters/vtkProxyFactory.h
 inc/MantidVisitPresenters/vtkRectilinearGridFactory.h
 inc/MantidVisitPresenters/vtkStructuredGridFactory.h
 inc/MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h
 )
 
 set (TEST_FILES
+test/vtkClipperDataSetFactoryTest.h
+test/vtkProxyFactoryTest.h
 test/vtkRectilinearGridFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h

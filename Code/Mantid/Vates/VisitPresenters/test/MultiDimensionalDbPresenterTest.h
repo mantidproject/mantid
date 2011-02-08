@@ -25,6 +25,8 @@ void testConstruction()
   TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 125000, data->GetSize());
   TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 132651, visData->GetNumberOfPoints());
   TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 30, mdPresenter.getNumberOfTimesteps());
+  data->Delete();
+  visData->Delete();
 }
 
 void testGetScalarDataThrows()

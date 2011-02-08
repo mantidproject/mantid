@@ -191,8 +191,8 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image>::create() con
         {
           // create a hexahedron topology
           vtkHexahedron* hexahedron = createHexahedron(pointMap, i, j, k);
-
           visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
+          hexahedron->Delete();
         }
       }
     }

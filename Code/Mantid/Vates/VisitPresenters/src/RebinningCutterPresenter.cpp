@@ -73,14 +73,14 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 }
 
 
-Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReductionKnowledge(
+void RebinningCutterPresenter::constructReductionKnowledge(
     DimensionVec dimensions,
     Dimension_sptr dimensionX,
     Dimension_sptr dimensionY,
     Dimension_sptr dimensionZ,
     Dimension_sptr dimensiont,
     Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction,
-    vtkDataSet* inputDataSet, bool regenerate)
+    vtkDataSet* inputDataSet)
 {
   using namespace Mantid::MDAlgorithms;
 
@@ -102,10 +102,47 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::constructReduc
   m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId.c_str()));
 
   this->m_initalized = true;
-
-  //Now actually perform rebinning operation and cache the rebinnned workspace.
-  return rebin(m_serializer, regenerate);
 }
+
+Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(RebinningIterationAction action) const
+{
+     using namespace Mantid::MDDataObjects;
+     using namespace Mantid::API;
+
+     //Verify that constuction has occured properly first/
+     VerifyInitalization();
+
+     const std::string outputWorkspace = "RebinnedWS";
+     if(RecalculateAll == action)
+     {
+       //Get the input workspace location and name.
+       std::string wsLocation = m_serializer.getWorkspaceLocation();
+       std::string wsName = m_serializer.getWorkspaceName();
+
+       MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
+       AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
+
+       Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+       xmlRebinAlg.setRethrows(true);
+       xmlRebinAlg.initialize();
+
+       xmlRebinAlg.setPropertyValue("OutputWorkspace", outputWorkspace);
+
+       //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
+       std::string xmlString = m_serializer.createXMLString();
+       xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+
+       //Run the rebinning algorithm.
+       xmlRebinAlg.execute();
+      }
+
+       //Use the generated workspace to access the underlying image, which may be rendered.
+       MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
+           AnalysisDataService::Instance().retrieve(outputWorkspace));
+
+       return outputWs;
+}
+
 
 vtkDataSet* RebinningCutterPresenter::createVisualDataSet(vtkDataSetFactory_sptr spvtkDataSetFactory)
 {
@@ -405,6 +442,7 @@ void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
   {
     newArry->InsertNextValue(metaData.at(i));
   }
+  newArry->Delete();
 }
 
 std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
@@ -439,6 +477,7 @@ void persistReductionKnowledge(vtkDataSet* out_ds, const
 
   metaDataToFieldData(fd, xmlGenerator.createXMLString().c_str(), id);
   out_ds->SetFieldData(fd);
+  fd->Delete();
 }
 
 
@@ -528,43 +567,6 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
    MDWorkspace_sptr workspace = boost::dynamic_pointer_cast<MDWorkspace>(result);
 
    return workspace;
- }
-
-
- Mantid::MDDataObjects::MDWorkspace_sptr rebin(const RebinningXMLGenerator& serializingUtility, bool regenerate)
- {
-   using namespace Mantid::MDDataObjects;
-   using namespace Mantid::API;
-
-   const std::string outputWorkspace = "RebinnedWS";
-     //if(true == regenerate) //TODO: Experimental Need proper fix from VISIT team.
-     //{
-     //Get the input workspace location and name.
-     std::string wsLocation = serializingUtility.getWorkspaceLocation();
-     std::string wsName = serializingUtility.getWorkspaceName();
-
-     MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
-     AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
-
-     Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
-     xmlRebinAlg.setRethrows(true);
-     xmlRebinAlg.initialize();
-
-     xmlRebinAlg.setPropertyValue("OutputWorkspace", outputWorkspace);
-
-     //Use the serialisation utility to generate well-formed xml expressing the rebinning operation.
-     std::string xmlString = serializingUtility.createXMLString();
-     xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
-
-     //Run the rebinning algorithm.
-     xmlRebinAlg.execute();
-    // }
-
-     //Use the generated workspace to access the underlying image, which may be rendered.
-     MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
-         AnalysisDataService::Instance().retrieve(outputWorkspace));
-
-     return outputWs;
  }
 
 }
