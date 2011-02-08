@@ -89,8 +89,8 @@ void IndirectDataAnalysis::initLayout()
   setupFury();
   setupFuryFit();
   setupConFit();
-
-  abspInit();
+  setupAbsorptionF2Py();
+  setupAbsCor();
     
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
@@ -137,6 +137,8 @@ void IndirectDataAnalysis::loadSettings()
   m_uiForm.confit_resInput->readSettings(settings.group());
   m_uiForm.abs_inputFile->readSettings(settings.group());
   m_uiForm.absp_inputFile->readSettings(settings.group());
+  m_uiForm.abscor_sample->readSettings(settings.group());
+  m_uiForm.abscor_can->readSettings(settings.group());
   settings.endGroup();
 }
 
@@ -441,6 +443,39 @@ void IndirectDataAnalysis::setupConFit()
   m_uiForm.confit_leSpecNo->setValidator(m_valInt);
 }
 
+void IndirectDataAnalysis::setupAbsorptionF2Py()
+{
+  // set signals and slot connections for F2Py Absorption routine
+  connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(absf2pShape(int)));
+  connect(m_uiForm.absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(absf2pUseCanChecked(bool)));
+
+  // apply QValidators to items.
+  m_uiForm.absp_lewidth->setValidator(m_valDbl);
+  m_uiForm.absp_leavar->setValidator(m_valDbl);
+  // sample
+  m_uiForm.absp_lesamden->setValidator(m_valDbl);
+  m_uiForm.absp_lesamsigs->setValidator(m_valDbl);
+  m_uiForm.absp_lesamsiga->setValidator(m_valDbl);
+  // can
+  m_uiForm.absp_lecanden->setValidator(m_valDbl);
+  m_uiForm.absp_lecansigs->setValidator(m_valDbl);
+  m_uiForm.absp_lecansiga->setValidator(m_valDbl);
+  // flat shape
+  m_uiForm.absp_lets->setValidator(m_valDbl);
+  m_uiForm.absp_letc1->setValidator(m_valDbl);
+  m_uiForm.absp_letc2->setValidator(m_valDbl);
+  // cylinder shape
+  m_uiForm.absp_ler1->setValidator(m_valDbl);
+  m_uiForm.absp_ler2->setValidator(m_valDbl);
+  m_uiForm.absp_ler3->setValidator(m_valDbl);
+  m_uiForm.absp_ler4->setValidator(m_valDbl);
+}
+
+void IndirectDataAnalysis::setupAbsCor()
+{
+  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_can, SLOT(setEnabled(bool)));
+}
+
 bool IndirectDataAnalysis::validateElwin()
 {
   bool valid = true;
@@ -620,6 +655,185 @@ bool IndirectDataAnalysis::validateAbsorption()
     else
     {
       m_uiForm.abs_valAnnuli->setText(" ");
+    }
+  }
+
+  return valid;
+}
+
+bool IndirectDataAnalysis::validateAbsorptionF2Py()
+{
+  bool valid = true;
+
+  // Sample input file (handled in MWRunFiles class
+  if ( ! m_uiForm.absp_inputFile->isValid() ) { valid = false; }
+
+  if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
+  {
+    // Flat Geometry
+    if ( m_uiForm.absp_lets->text() != "" )
+    {
+      m_uiForm.absp_valts->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valts->setText("*");
+      valid = false;
+    }
+
+    if ( m_uiForm.absp_letc1->text() != "" )
+    {
+      m_uiForm.absp_valtc1->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valtc1->setText("*");
+      valid = false;
+    }
+
+    if ( m_uiForm.absp_letc2->text() != "" )
+    {
+      m_uiForm.absp_valtc2->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valtc2->setText("*");
+      valid = false;
+    }
+  }
+
+  if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
+  {
+    // Cylinder geometry
+    if ( m_uiForm.absp_ler1->text() != "" )
+    {
+      m_uiForm.absp_valR1->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valR1->setText("*");
+      valid = false;
+    }
+
+    if ( m_uiForm.absp_ler2->text() != "" )
+    {
+      m_uiForm.absp_valR2->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valR2->setText("*");
+      valid = false;
+    }
+    
+    // R3 and R4 only relevant when using can
+    if ( m_uiForm.absp_ckUseCan->isChecked() )
+    {
+      if ( m_uiForm.absp_ler3->text() != "" )
+      {
+        m_uiForm.absp_valR3->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valR3->setText("*");
+        valid = false;
+      }
+
+      if ( m_uiForm.absp_ler4->text() != "" )
+      {
+        m_uiForm.absp_valR4->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valR4->setText("*");
+        valid = false;
+      }
+    }
+  }
+
+  // Can angle to beam || Step size
+  if ( m_uiForm.absp_leavar->text() != "" )
+  {
+    m_uiForm.absp_valAvar->setText(" ");
+  }
+  else
+  {
+    m_uiForm.absp_valAvar->setText("*");
+    valid = false;
+  }
+
+  // Beam Width
+  if ( m_uiForm.absp_lewidth->text() != "" )
+  {
+    m_uiForm.absp_valWidth->setText(" ");
+  }
+  else
+  {
+    m_uiForm.absp_valWidth->setText("*");
+    valid = false;
+  }
+
+  // Sample details
+  if ( m_uiForm.absp_lesamden->text() != "" )
+  {
+    m_uiForm.absp_valSamden->setText(" ");
+  }
+  else
+  {
+    m_uiForm.absp_valSamden->setText("*");
+    valid = false;
+  }
+
+  if ( m_uiForm.absp_lesamsigs->text() != "" )
+  {
+    m_uiForm.absp_valSamsigs->setText(" ");
+  }
+  else
+  {
+    m_uiForm.absp_valSamsigs->setText("*");
+    valid = false;
+  }
+
+  if ( m_uiForm.absp_lesamsiga->text() != "" )
+  {
+    m_uiForm.absp_valSamsiga->setText(" ");
+  }
+  else
+  {
+    m_uiForm.absp_valSamsiga->setText("*");
+    valid = false;
+  }
+
+  // Can details (only test if "Use Can" is checked)
+  if ( m_uiForm.absp_ckUseCan->isChecked() )
+  {
+    if ( m_uiForm.absp_lecanden->text() != "" )
+    {
+      m_uiForm.absp_valCanden->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valCanden->setText("*");
+      valid = false;
+    }
+
+    if ( m_uiForm.absp_lecansigs->text() != "" )
+    {
+      m_uiForm.absp_valCansigs->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valCansigs->setText("*");
+      valid = false;
+    }
+
+    if ( m_uiForm.absp_lecansiga->text() != "" )
+    {
+      m_uiForm.absp_valCansiga->setText(" ");
+    }
+    else
+    {
+      m_uiForm.absp_valCansiga->setText("*");
+      valid = false;
     }
   }
 
@@ -908,7 +1122,8 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "FuryFit" ) { furyfitRun(); }
   else if ( tabName == "ConvFit" ) { confitRun(); }
   else if ( tabName == "Absorption" ) { absorptionRun(); }
-  else if ( tabName == "Abs (F2PY)" ) { abspRun(); }
+  else if ( tabName == "Abs (F2PY)" ) { absf2pRun(); }
+  else if ( tabName == "Apply Corrections" ) { abscorRun(); }
   else { showInformationBox("This tab does not have a 'Run' action."); }
 }
 
@@ -1209,10 +1424,12 @@ void IndirectDataAnalysis::furyMaxChanged(double val)
 {
   m_furDblMng->setValue(m_furProp["EHigh"], val);
 }
+
 void IndirectDataAnalysis::furyMinChanged(double val)
 {
   m_furDblMng->setValue(m_furProp["ELow"], val);
 }
+
 void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
 {
   if ( prop == m_furProp["ELow"] )
@@ -1266,7 +1483,6 @@ void IndirectDataAnalysis::furyfitRun()
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
-  // alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
   alg->setPropertyValue("Function", *function);
   alg->setPropertyValue("Output",output);
   alg->execute();
@@ -2110,14 +2326,13 @@ void IndirectDataAnalysis::help()
   QDesktopServices::openUrl(QUrl(url));
 }
 
-
-void IndirectDataAnalysis::abspInit()
+void IndirectDataAnalysis::absf2pRun()
 {
-  connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(abspShape(int)));
-}
+  if ( ! validateAbsorptionF2Py() )
+  {
+    return;
+  }
 
-void IndirectDataAnalysis::abspRun()
-{
   QString pyInput = "import SpencerAbsCor\n";
   
   QString geom;
@@ -2145,34 +2360,72 @@ void IndirectDataAnalysis::abspRun()
   QString input = m_uiForm.absp_inputFile->getFirstFilename();
   if ( input == "" ) { return; }
 
+  QString ncan = "ncan = ";
+  if ( m_uiForm.absp_ckUseCan->isChecked() ) { ncan += "2\n"; }
+  else { ncan += "1\n"; }
+
   pyInput +=
     "import os.path as op\n"
     "file = r'" + input + "'\n"
     "( dir, filename ) = op.split(file)\n"
     "( name, ext ) = op.splitext(filename)\n"
     "LoadNexusProcessed(file, name)\n"
-    "inputws = name\n";
-
-  pyInput +=
+    "inputws = name\n"
     "geom = '" + geom + "'\n"
     "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
-    "ncan = " + m_uiForm.absp_lencan->text() + "\n"
+    "ncan = " + ncan + "\n"
     "size = " + size + "\n"
     "density = [" + m_uiForm.absp_lesamden->text() + ", " + m_uiForm.absp_lecanden->text() + ", " + m_uiForm.absp_lecanden->text() + "]\n"
     "sigs = [" + m_uiForm.absp_lesamsigs->text() + "," + m_uiForm.absp_lecansigs->text() + "," + m_uiForm.absp_lecansigs->text() + "]\n"
     "siga = [" + m_uiForm.absp_lesamsiga->text() + "," + m_uiForm.absp_lecansiga->text() + "," + m_uiForm.absp_lecansiga->text() + "]\n"
     "avar = " + m_uiForm.absp_leavar->text() + "\n"
-    "SpencerAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar)\n";
+    "plotOpt = '" + m_uiForm.absp_cbPlotOutput->currentText() + "'\n"
+    "SpencerAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt)\n";
 
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-void IndirectDataAnalysis::abspShape(int index)
+void IndirectDataAnalysis::absf2pShape(int index)
 {
   m_uiForm.absp_swShapeDetails->setCurrentIndex(index);
-  if ( index == 0 ) { m_uiForm.absp_leavar->setText("45.0"); }
-  else if ( index == 1 ) { m_uiForm.absp_leavar->setText("0.02"); }
+  // Meaning of the "avar" variable changes depending on shape selection
+  if ( index == 0 ) { m_uiForm.absp_lbAvar->setText("Can Angle to Beam"); }
+  else if ( index == 1 ) { m_uiForm.absp_lbAvar->setText("Step Size"); }
+}
+
+void IndirectDataAnalysis::absf2pUseCanChecked(bool value)
+{
+  m_uiForm.absp_gbCan->setEnabled(value);
+
+  m_uiForm.absp_lbR3->setEnabled(value);
+  m_uiForm.absp_ler3->setEnabled(value);
+  m_uiForm.absp_valR3->setEnabled(value);
+
+  m_uiForm.absp_lbR4->setEnabled(value);
+  m_uiForm.absp_ler4->setEnabled(value);
+  m_uiForm.absp_valR4->setEnabled(value);
+}
+
+void IndirectDataAnalysis::abscorRun()
+{
+  QString geom = m_uiForm.abscor_cbGeometry->currentText();
+  if ( geom == "Flat" )
+  {
+    geom = "flt";
+  }
+  else if ( geom == "Cylinder" )
+  {
+    geom = "cyl";
+  }
+
+  QString pyInput = "import SpencerAbsCor\n"
+    "sampleFile = r'" + m_uiForm.abscor_sample->getFirstFilename() + "'\n"
+    "cannisterFile = r'" + m_uiForm.abscor_can->getFirstFilename() + "'\n"
+    "geom = '" + geom + "'\n"
+    "SpencerAbsCor.correctionsFeeder(sampleFile, cannisterFile,\n"
+    "    geom)\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
 } //namespace CustomInterfaces

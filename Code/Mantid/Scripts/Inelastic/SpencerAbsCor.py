@@ -1,5 +1,5 @@
 # Spencer's F2PY Absorption Corrections Wrapper
-
+# and the application of these corrections
 ###############################################################################
 ## Handle selection of .pyd files for absorption corrections                 ##
 import platform                                                              ##
@@ -17,7 +17,7 @@ from mantidsimple import *
 from mantidplot import *
 
 import math
-import os.path as op
+import os.path
 
 def GetWSangles(inWS):
     tmp = mtd[inWS]
@@ -60,62 +60,28 @@ def WaveRange(inWS,delw):
     DeleteWorkspace(oWS)
     return wave
 
-def Array2List(ncan,n,A1,A2,A3,A4):
-    Y1 = []
-    Y2 = []
-    Y3 = []
-    Y4 = []
-    for m in range(0,n):
-        Y1.append(A1[m])
-        if ncan > 1:
-            Y2.append(A2[m])
-            Y3.append(A3[m])
-            Y4.append(A4[m])
-    return Y1,Y2,Y3,Y4
-
-def SaveWork(inWS,workdir,prefix,run,prog,verbose=True):
-    file = prefix + run + '_' + prog + '.nxs'
-    path = op.join(workdir, file)
-    SaveNexusProcessed(inWS,path)
-    if verbose:
-        print 'Ouput file created : '+path
-
-def PlotAngle(det,workspace,bin):
-    nBin = mtd[workspace].getNumberHistograms()
-    dataX = det
-    dataY = []
-    dataE = []
-    for i in range(0, nBin):
-        dataY.append(mtd[workspace].readY(i)[bin])
-        dataE.append(mtd[workspace].readE(i)[bin])
-    CreateWorkspace('Angle', dataX, dataY, dataE, NSpec=1)
-    graph = plotSpectrum('Angle', 0)
-    l = graph.activeLayer()
-    l.setAxisTitle(Layer.Bottom, "Angle")
-
 ## workdir = defaultsave.directory
 ## prefix = instrument short name in lower case
 ## sam = run number
 def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
-        avar, efixed, verbose=False, samWS='Sam'):
-    det = GetWSangles(samWS)
+        avar, efixed, verbose=False, inputWS='Sam'):
+    det = GetWSangles(inputWS)
     ndet = len(det)
     wavelas = math.sqrt(81.787/efixed) # elastic wavelength
-    waves = WaveRange(samWS,0.0) # get wavelengths
+    waves = WaveRange(inputWS,0.0) # get wavelengths
     nw = len(waves)
     DataX = []
     DataE = []
     for n in range(0,nw):
         DataX.append(waves[n])
         DataE.append(0)
-    assWS = '__Ass'
-    asscWS = '__Assc'
-    acscWS = '__Acsc'
-    accWS = '__Acc'
+    name = prefix + sam + '_' + geom
+    assWS = name + '_ass'
+    asscWS = name + '_assc'
+    acscWS = name + '_acsc'
+    accWS = name + '_acc'
     wrk = workdir + prefix + sam
-    lwrk = len(wrk)
     wrk.ljust(120,' ')
-    lwrk = 0 # value 0 means fltabs/cylabs will not save files
     plot_list = []
     dataY_a1ws = []
     dataY_a2ws = []
@@ -125,23 +91,20 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
         if geom == 'flt':
             angles = [avar, det[n]]
             kill, A1, A2, A3, A4 = fltabs.fltabs(ncan, size, density, sigs,
-                siga, angles, waves, n, wrk, lwrk)
+                siga, angles, waves, n, wrk, 0)
         if geom == 'cyl':
             astep = avar
             angle = det[n]
             kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,
-                density, sigs, siga, angle, wavelas, waves, n, wrk, lwrk)
+                density, sigs, siga, angle, wavelas, waves, n, wrk, 0)
         if kill == 0:
             print 'Detector '+str(n)+' at angle : '+str(det[n])+' * successful'
-            DataY1,DataY2,DataY3,DataY4 = Array2List(ncan,nw,A1,A2,A3,A4)
-            dataY_a1ws += DataY1
+            dataY_a1ws += list(A1)
             if ncan > 1:
-                dataY_a2ws += DataY2
-                dataY_a3ws += DataY3
-                dataY_a4ws += DataY4
+                dataY_a2ws += list(A2)
+                dataY_a3ws += list(A3)
+                dataY_a4ws += list(A4)              
             plot_list.append(n)
-        else:
-            print 'Detector '+str(n)+' at angle : '+str(det[n])+' *** failed : Error code '+str(kill)
     ## Create the workspaces
     nspec = len(plot_list)
     DataX = DataX * nspec
@@ -151,21 +114,21 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
         CreateWorkspace(asscWS, DataX, dataY_a2ws, DataE,nspec,'Wavelength')
         CreateWorkspace(acscWS, DataX, dataY_a3ws, DataE,nspec,'Wavelength')
         CreateWorkspace(accWS, DataX, dataY_a4ws, DataE,nspec,'Wavelength')
-    ## Plotting
-    ass_graph=plotSpectrum(assWS,plot_list)
-    if ncan > 1:
-        all_list = [assWS,asscWS,acscWS,accWS]
-        all_graph = plotSpectrum(all_list,0)
-    if ndet > 1:
-        PlotAngle(det,assWS,0)
     ## Tidy up & Save output
-    SaveWork(assWS,workdir,prefix,sam,geom+'_ass',verbose)
+    SaveNexusProcessed(assWS, assWS+'.nxs')
     if ncan > 1:
-        SaveWork(asscWS,workdir,prefix,sam,geom+'_assc',verbose)
-        SaveWork(acscWS,workdir,prefix,sam,geom+'_acsc',verbose)
-        SaveWork(accWS,workdir,prefix,sam,geom+'_acc',verbose)
+        SaveNexusProcessed(asscWS, asscWS+'.nxs')
+        SaveNexusProcessed(acscWS, acscWS+'.nxs')
+        SaveNexusProcessed(accWS, accWS+'.nxs')
+    if ncan > 1:
+        return [assWS, asscWS, acscWS, accWS]
+    else:
+        return [assWS]
 
-def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar):
+def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar,
+        plotOpt='None'):
+    '''Handles the feeding of input and plotting of output for the F2PY
+    absorption correction routine.'''
     ws = mtd[inputws]
     ## workdir is default save directory
     workdir = mantid.getConfigProperty('defaultsave.directory')
@@ -183,5 +146,100 @@ def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar):
         det = ws.getInstrument().getDetector(ids[0])
         efixed = det.getNumberParameter('Efixed')[0]
     ## Run the routine
-    AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga, 
-        avar, efixed, samWS=inputws)
+    workspaces = AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density,
+        sigs, siga, avar, efixed, inputWS=inputws)
+    if ( plotOpt == 'None' ):
+        return
+    if ( plotOpt == 'Wavelength' or plotOpt == 'Both' ):
+        graph = plotSpectrum(workspaces, 0)
+    if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
+        graph = plotTimeBin(workspaces[0], 0)
+        graph.activeLayer().setAxisTitle(Layer.Bottom, 'Angle')
+
+def CubicFit(inputWS, spec):
+    '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
+    parameter. Returns a list containing the fitted parameter values.'''
+    function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
+    fit = Fit(inputWS, spec, Function=function)
+    return fit.getPropertyValue('Parameters')
+
+def applyCorrections(inputWS, cannisterWS, corrections):
+    '''Through the PolynomialCorrection algorithm, makes corrections to the
+    input workspace based on the supplied correction values.'''
+    # Corrections are applied in Lambda (Wavelength)
+    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect')
+    if cannisterWS != '':
+        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect')
+    nHist = mtd[inputWS].getNumberHistograms()
+    # Check that number of histograms in each corrections workspace matches
+    # that of the input (sample) workspace
+    for ws in corrections:
+        if ( mtd[ws].getNumberHistograms() != nHist ):
+            raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
+    # Workspaces that hold intermediate results
+    CorrectedWorkspace = '__corrected'
+    CorrectedSampleWorkspace = '__csamws'
+    CorrectedCanWorkspace = '__cancorrected'
+    for i in range(0, nHist): # Loop through each spectra in the inputWS
+        ExtractSingleSpectrum(inputWS, CorrectedSampleWorkspace, i)
+        if ( len(corrections) == 1 ):
+            Ass = CubicFit(corrections[0], i)
+            PolynomialCorrection(CorrectedSampleWorkspace, 
+                CorrectedSampleWorkspace, Ass, 'Divide')
+            if ( i == 0 ):
+                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+            else:
+                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
+        else:
+            ExtractSingleSpectrum(cannisterWS, CorrectedCanWorkspace, i)
+            Acc = CubicFit(corrections[3], i)
+            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
+                Acc, 'Divide')
+            Acsc = CubicFit(corrections[2], i)
+            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
+                Acsc, 'Multiply')
+            Minus(CorrectedSampleWorkspace, CorrectedCanWorkspace,
+                CorrectedSampleWorkspace)
+            Assc = CubicFit(corrections[1], i)
+            PolynomialCorrection(CorrectedSampleWorkspace, 
+                CorrectedSampleWorkspace, Assc, 'Divide')
+            if ( i == 0 ):
+                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+            else:
+                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
+    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect')
+                
+def correctionsFeeder(sampleFile, cannisterFile, geom):
+    '''Load up the necessary files and then passes them into the main
+    applyCorrections routine.'''
+    sample = loadNexus(sampleFile)
+    ## Files named: (ins)(runNo)_(geom)_(suffix)
+    ws = mtd[sample]
+    ins = ws.getInstrument().getName()
+    ins = ConfigService().facility().instrument(ins).shortName().lower()
+    run = ws.getRun().getLogData('run_number').value
+    name = ins + run + '_' + geom + '_'
+    corrections = [loadNexus(name+'ass.nxs')]
+    if cannisterFile != '':
+        cannister = loadNexus(cannisterFile)
+        corrections.append(loadNexus(name+'assc.nxs'))
+        corrections.append(loadNexus(name+'acsc.nxs'))
+        corrections.append(loadNexus(name+'acc.nxs'))
+    else: # No can
+        cannister = ''
+
+    # Fire off main routine
+    try:
+        applyCorrections(sample, cannister, corrections)
+    except ValueError:
+        print """Number of histograms in corrections workspaces do not match
+            the sample workspace."""
+        raise
+
+def loadNexus(filename):
+    '''Loads a Nexus file into a workspace with the name based on the
+    filename. Convenience function for not having to play around with paths
+    in every function.'''
+    name = os.path.splitext( os.path.split(filename)[1] )[0]
+    LoadNexus(filename, name)
+    return name

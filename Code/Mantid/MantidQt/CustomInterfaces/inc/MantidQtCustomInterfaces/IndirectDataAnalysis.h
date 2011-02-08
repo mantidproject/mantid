@@ -73,12 +73,15 @@ namespace MantidQt
       void setupFury();
       void setupFuryFit();
       void setupConFit();
+      void setupAbsorptionF2Py();
+      void setupAbsCor();
 
       // Validation of user inputs
       bool validateElwin();
       bool validateMsd();
       bool validateFury();
       bool validateAbsorption();
+      bool validateAbsorptionF2Py();
 
       // Run processes
       void elwinRun();
@@ -155,9 +158,12 @@ namespace MantidQt
       void absorptionShape(int index);
 
       // Absorption (F2PY)
-      void abspInit();
-      void abspRun();
-      void abspShape(int index);
+      void absf2pRun();
+      void absf2pShape(int index);
+      void absf2pUseCanChecked(bool value);
+
+      // abscor (PolynomialCorrection based)
+      void abscorRun();
       
       // Common Elements
       void openDirectoryDialog();
