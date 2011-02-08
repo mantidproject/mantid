@@ -29,6 +29,9 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
+  // Mantid only understands English...
+  setGlobalLocaleToAscii();
+
 #ifdef _WIN32
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -50,8 +53,21 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
-//	std::cerr << "FrameworkManager destroyed." << std::endl;
-//	g_log.debug() << "FrameworkManager destroyed." << std::endl;
+}
+
+/**
+ * Set the global locale for all C++ stream operations to use simple ASCII characters.
+ * If the system supports it UTF-8 encoding will be used, otherwise the 
+ * classic C locale is used
+ */
+void FrameworkManagerImpl::setGlobalLocaleToAscii()
+{
+  // This ensures that all subsequent stream operations interpret everything as simple
+  // ASCII. On systems in the UK and US having this as the system default is not an issue.
+  // However, systems that have their encoding set differently can see unexpected behavour when
+  // translating from string->numeral values. One example is floating-point interpretation in 
+  // German where a comma is used instead of a period.
+  std::locale::global(std::locale::classic());
 }
 
 /** Clears all memory associated with the AlgorithmManager
