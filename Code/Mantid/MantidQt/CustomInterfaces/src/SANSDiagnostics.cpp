@@ -30,7 +30,7 @@ namespace MantidQt
     {
       //loads the last saved settings
       loadSettings();
-
+      setToolTips();
       //disable the rectanglar detctors initially
       disableDetectorGroupBoxes(true);
       //daisable periods controls
@@ -65,10 +65,25 @@ namespace MantidQt
     /// set tool tips
     void SANSDiagnostics::setToolTips()
     {
+      m_SANSForm->label_period->setToolTip("Enter the desired period number if the loaded file contains multi period data");
+      m_SANSForm->hrange_det1->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
+      m_SANSForm->vrange_det1->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
+
+      m_SANSForm->hrange_det2->setToolTip("Enter H/V_Min and H/V_Max values for SumRowColumn algorithm");
+      m_SANSForm->vrange_det2->setToolTip("Enter H/V_Min and H/V_Max values for SumRowColumn algorithm");
+
+      m_SANSForm->hi_Btn1->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the H Plot for the first detectro bank ");
+      m_SANSForm->vi_Btn1->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the V Plot for the first detectro bank");
+      m_SANSForm->hi_Btn2->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the H Plot for the second detectro bank ");
+      m_SANSForm->vi_Btn2->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the V Plot for the second detectro bank ");
+
+      m_SANSForm->ti_Btn1->setToolTip("Executes SumSpectra algorithm and displays the Plot for the first detectro bank ");
+      m_SANSForm->ti_Btn2->setToolTip("Executes SumSpectra algorithm and displays the Plot for the second detectro bank");
+      m_SANSForm->total_perioids->setToolTip("Total number of periods");
 
     }
 
-    /* This method loads the first spectrum
+  /**This method loads the first spectrum
     * and displays periods and rectangular detectors if any.
     */ 
     void SANSDiagnostics::loadFirstSpectrum()
@@ -173,8 +188,7 @@ namespace MantidQt
         }
         catch(std::out_of_range&)
         {
-          g_log.error("Error:The period number entered is wrong,No member workspace\
-                      exists in the group workspace for the corresponding period entered.");
+          g_log.error("The period number entered is wrong.");
         }
       }
       return "";
@@ -201,11 +215,7 @@ namespace MantidQt
 
       //if multi period get the user selected workspace
       int periodNum=getPeriodNumber();
-      /*if(periodNum==m_Period)
-      {
-      return;
-      }*/
-      m_Period=periodNum;
+      
       std::string sPeriods;
       try
       {
@@ -217,11 +227,16 @@ namespace MantidQt
       }
       if(periodNum>m_totalPeriods || periodNum<1)
       {
-        g_log.error("Error:Period number entered is is wrong.Enter a value between 1\
-                    and total number of periods "+ sPeriods );
+        g_log.error("Error:Period number entered is is wrong.Enter a value between 1 and total number of periods "+ sPeriods );
         return;
       }
-
+      //this check is doing bcoz the editfinished signal seems to be emitted twice on my machine.
+      //May be the qt version I use has this problem.
+      if(periodNum==m_Period)
+      {
+      return;
+      }
+      m_Period=periodNum;
       if(m_totalPeriods>1)
       {        
         m_memberwsName= getMemberWorkspace(periodNum);
@@ -229,7 +244,7 @@ namespace MantidQt
 
       displayRectangularDetectors(m_memberwsName);
     }
-    /// This method displays the rectangualr detectors
+    /// This method displays the rectangular detectors
     void SANSDiagnostics::displayRectangularDetectors(const QString& wsName)
     { 
 
@@ -271,13 +286,9 @@ namespace MantidQt
       }
       else
       {
-        m_SANSForm->groupBox_Detector1->hide();
+        m_SANSForm->groupBox_Detector1->setDisabled(true);
       }
-      if(rectDetectors.size()<2)
-      {
-        m_SANSForm->groupBox_Detector2->hide();
-        return;
-      }
+     
       //2nd detector
       det2Name=getDetectorName(1);
       if(!det2Name.isEmpty())
@@ -288,16 +299,17 @@ namespace MantidQt
       }
       else
       {
-        m_SANSForm->groupBox_Detector2->hide();
+        m_SANSForm->groupBox_Detector2->setDisabled(true);
+        
       }
 
     }
 
-    /**This method returns the detector name from list of detctors for a given index
+  /**This method returns the detector name from list of detctors for a given index
     *@param index of the rectangualar detector
     *@return detector name
     */
-    const QString& SANSDiagnostics::getDetectorName(int index)
+    const QString SANSDiagnostics::getDetectorName(int index)
     {
       boost::shared_ptr<RectDetectorDetails> rectDet;
       try
@@ -305,17 +317,16 @@ namespace MantidQt
         rectDet = m_rectDetectors.at(index);
       } 
       catch(std::out_of_range&)
-      {       
-        g_log.error()<<"Rectangular detector not found"<<std::endl;
+      {     
       } 
       if(rectDet)
       {  
         return rectDet->getDetcetorName();
       }
-     
+      return "";
     }
 
-    /** This method returns a vector of rectanglar detector's name, min & max detector id.
+  /** This method returns a vector of rectanglar detector's name, min & max detector id.
     * @param ws_sptr shared pointer to workspace
     * @returns vector of rectangular detectors details
     */
@@ -374,7 +385,7 @@ namespace MantidQt
       return rectDetectors;
     }
 
-    /**This method returns the minimum and maximum spectrum ids
+  /**This method returns the minimum and maximum spectrum ids
     *@param detNum - a number used to identify the detector.
     *@param minSpec - minimum spectrum number
     *@param maxSpec - maximum spectrum number
@@ -565,13 +576,12 @@ namespace MantidQt
       QString wsName= getWorkspaceToProcess();
       if(spec_min<1 )
       {
-        g_log.error()<<"Inavlid spectrum minimum "+specMin.toStdString()+ " found\
-                                                                          in the workspace  "+wsName.toStdString()<<std::endl;
+        g_log.error()<<"Inavlid spectrum minimum "+specMin.toStdString()+ " found in the workspace  "+wsName.toStdString()<<std::endl;
       }
       if(spec_max>=Mantid::EMPTY_INT() )
       {
-        g_log.error()<<"Inavlid spectrum maximum "+specMax.toStdString()+ " found\
-                                                                          in the workspace  "+wsName.toStdString()<<std::endl;
+        g_log.error()<<"Inavlid spectrum maximum "+specMax.toStdString()+ " found in the workspace  "+wsName.toStdString()<<std::endl;
+                                                                          
       }
       return ((spec_min>=1 ||spec_max>=Mantid::EMPTY_INT())?true:false);
     }

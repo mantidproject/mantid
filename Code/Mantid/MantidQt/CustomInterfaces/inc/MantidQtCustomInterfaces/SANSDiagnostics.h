@@ -150,7 +150,7 @@ private:
   void minandMaxSpectrumIds(const int detNum,QString& minSpec, QString& maxSpec);
 
   /// get detector name
- const  QString & getDetectorName(int index);
+ const  QString getDetectorName(int index);
 
   /// get the user entered period number
   int getPeriodNumber();
