@@ -32,7 +32,9 @@ namespace Kernel
 {
 
 #if _WIN32
-MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
+namespace {
+  MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
+}
 #endif
 
 /// Utility function to convert memory in kiB into easy to read units.
