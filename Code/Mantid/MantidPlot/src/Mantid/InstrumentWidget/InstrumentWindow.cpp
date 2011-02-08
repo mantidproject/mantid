@@ -55,6 +55,13 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->addWidget(mInstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
 
+  //Set the mouse/keyboard operation info
+  mInteractionInfo = new QLabel();
+  mainLayout->addWidget(mInteractionInfo);
+  updateInteractionInfoText();  
+  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
+  connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
+
   // Load settings is called after mInstrumentDisplay is created but before m_renderTab
   loadSettings();
 
@@ -75,14 +82,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   //Set the main frame to the window
   frame->setLayout(mainLayout);
   setWidget(frame);
-
-  //Set the mouse/keyboard operation info
-  mInteractionInfo = new QLabel();
-  mainLayout->addWidget(mInteractionInfo);
-  updateInteractionInfoText();  
-  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
-  connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
-
 
   // Init actions
   mInfoAction = new QAction(tr("&Details"), this);
