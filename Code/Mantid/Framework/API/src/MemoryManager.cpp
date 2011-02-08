@@ -40,6 +40,43 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
   return info;
 }
 
+#ifdef _WIN32
+namespace {  // Anonymous namespace
+
+  MEMORYSTATUSEX memStatusWIN; ///< A Windows structure holding information about memory usage
+
+  size_t ReservedMem()
+  {
+    MEMORY_BASIC_INFORMATION info; // Windows structure
+
+    char *addr = NULL;
+    size_t unusedReserved = 0; // total reserved space
+    DWORDLONG size = 0;
+    DWORDLONG GB2 = memStatusWIN.ullTotalVirtual; // Maximum memory available to the process
+
+    // Loop over all virtual memory to find out the status of every block.
+    do
+    {
+      VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+
+      // Count up the total size of reserved but unused blocks
+      if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
+
+      addr += info.RegionSize; // Move up to the starting address for the next call
+      size += info.RegionSize;
+    }
+    while(size < GB2);
+
+    // Convert from bytes to KB
+    unusedReserved /= 1024;
+
+    return unusedReserved;
+  }
+
+}
+#endif
+
+
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
     and workspace parameters NVectors, XLength,and YLength.
     @param NVectors :: the number of vectors
