@@ -103,8 +103,6 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is None or self._beam_center_y is None:
             [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center()
             
-        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]))
-
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
         # Note: the position of the detector in Z is now part of the load
@@ -116,6 +114,9 @@ class BaseBeamFinder(ReductionStep):
                                     X = old_ctr[0]-float(ctr[0]),
                                     Y = old_ctr[1]-float(ctr[1]),
                                     RelativePosition="1")        
+
+        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]))
+        
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
 

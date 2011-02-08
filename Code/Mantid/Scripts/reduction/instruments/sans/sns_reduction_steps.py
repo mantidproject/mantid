@@ -41,6 +41,10 @@ class LoadRun(ReductionStep):
         # Check whether that file was already loaded
         # The file also has to be pristine
         if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
+            # Make sure the sample-detector-distance is saved for data we reduce
+            if workspace in reducer._data_files:
+                reducer.instrument.sample_detector_distance = mtd[workspace].getRun()["detectorZ"].getStatistics().mean
+
             mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
             return "Data %s is already loaded: delete it first if reloading is intended" % (workspace)
 
@@ -81,11 +85,25 @@ class LoadRun(ReductionStep):
         # If self._data_file is set, it means we are dealing with an auxiliary file.
         #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
         # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
-        if self._data_file is None:
+        if workspace in reducer._data_files:
             reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
         
         # Move the detector to its correct position
         MoveInstrumentComponent(workspace+'_evt', "detector1", Z=reducer.instrument.sample_detector_distance/1000.0, RelativePosition=0)
+
+        # Move detector array to correct position
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
+            MoveInstrumentComponent(workspace+'_evt', "detector1", 
+                                    X = default_x-beam_ctr_x,
+                                    Y = default_y-beam_ctr_y,
+                                    RelativePosition="1")
+        else:
+            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
+ 
         Rebin(workspace+'_evt', workspace, "0,10,20000")
         
         # Apply the TOF offset for this run
