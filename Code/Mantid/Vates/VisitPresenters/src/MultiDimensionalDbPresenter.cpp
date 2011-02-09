@@ -2,6 +2,7 @@
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/RebinningXMLGenerator.h"
 #include "MantidVisitPresenters/vtkStructuredGridFactory.h"
+#include "MantidVisitPresenters/MetadataToFieldData.h"
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
@@ -96,33 +97,14 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   std::string xmlString = serializer.createXMLString();
 
   //Add metadata to dataset.
-  MultiDimensionalDbPresenter::metaDataToFieldData(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
+
+  MetadataToFieldData convert;
+  convert(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
   visualDataSet->SetFieldData(outputFD);
   outputFD->Delete();
   return visualDataSet;
 }
 
-void MultiDimensionalDbPresenter::metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
-    const char* id) const
-{
-  //clean out existing.
-  vtkDataArray* arry = fieldData->GetArray(id);
-  if(NULL != arry)
-  {
-    fieldData->RemoveArray(id);
-  }
-  //create new.
-  vtkCharArray* newArry = vtkCharArray::New();
-  newArry->Allocate(metaData.size());
-  newArry->SetName(id);
-  fieldData->AddArray(newArry);
-
-  for(unsigned int i = 0 ; i < metaData.size(); i++)
-  {
-    newArry->InsertNextValue(metaData.at(i));
-  }
-  newArry->Delete();
-}
 
 int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
 {

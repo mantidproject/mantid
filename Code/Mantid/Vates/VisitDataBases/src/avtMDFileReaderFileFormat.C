@@ -68,8 +68,8 @@ using     std::string;
 //
 // ****************************************************************************
 
-avtMDFileReaderFileFormat::avtMDFileReaderFileFormat(const char *filename) : m_executor()
-    , avtMTSDFileFormat(&filename, 1)
+avtMDFileReaderFileFormat::avtMDFileReaderFileFormat(const char *filename) :
+     avtMTSDFileFormat(&filename, 1), m_executor()
 {
   m_executor.execute(std::string(filename));
 }

@@ -49,10 +49,6 @@ private:
   // Rebinned dataset in form of MDWorkspace.
   Mantid::MDDataObjects::MDWorkspace_sptr m_MDWorkspace;
 
-  // Store meta data for current operations.
-  void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
-      const char* id) const;
-
   //Verify that execution has occured otherwise should not be able to access scalar data or mesh.
   void verifyExecution() const;
 
