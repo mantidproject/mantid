@@ -1,17 +1,17 @@
 #ifndef LOADNEXUSPROCESSEDTEST_H_
 #define LOADNEXUSPROCESSEDTEST_H_
 
-#include <iostream>
-#include <cxxtest/TestSuite.h>
-#include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidNexus/SaveNexusProcessed.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidNexus/SaveNexusProcessed.h"
 #include "SaveNexusProcessedTest.h"
+#include <cxxtest/TestSuite.h>
+#include <iostream>
 #include <Poco/File.h>
 
 using namespace Mantid::NeXus;
