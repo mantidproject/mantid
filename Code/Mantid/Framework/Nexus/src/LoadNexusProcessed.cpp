@@ -236,6 +236,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
     throw std::runtime_error("Could not figure out the type of event list!");
 
   // Create all the event lists
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int wi=0; wi < numspec; wi++)
   {
     long index_start = indices[wi];

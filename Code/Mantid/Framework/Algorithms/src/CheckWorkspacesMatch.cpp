@@ -58,6 +58,9 @@ void CheckWorkspacesMatch::doComparison()
   MatrixWorkspace_const_sptr ws1 = getProperty("Workspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("Workspace2");
 
+  int numhist = ws1->getNumberHistograms();
+  prog = new Progress(this, 0.0, 1.0, numhist*5);
+
   // Check that both workspaces are the same type
   EventWorkspace_const_sptr ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
   EventWorkspace_const_sptr ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
@@ -70,22 +73,39 @@ void CheckWorkspacesMatch::doComparison()
   // Check some event-based stuff
   if (ews1 && ews2)
   {
+    // Both will end up sorted anyway
+    ews1->sortAll(TOF_SORT, prog);
+    ews2->sortAll(TOF_SORT, prog);
+
     if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
     {
       result = "Mismatched number of histograms.";
       return;
     }
+    bool mismatchedEvent = false;
+    int mismatchedEventWI = 0;
+    PARALLEL_FOR2(ews1, ews2)
     for (int i=0; i<ews1->getNumberHistograms(); i++)
     {
-      const EventList &el1 = ews1->getEventList(i);
-      const EventList &el2 = ews2->getEventList(i);
-      if (el1 != el2)
+      prog->reportIncrement(1, "EventLists");
+      if (!mismatchedEvent) // This guard will avoid checking unnecessarily
       {
-        std::ostringstream mess;
-        mess << "Mismatched event list at workspace index " << i;
-        result = mess.str();
-        return;
+        const EventList &el1 = ews1->getEventList(i);
+        const EventList &el2 = ews2->getEventList(i);
+        if (el1 != el2)
+        {
+          mismatchedEvent = true;
+          mismatchedEventWI = i;
+        }
       }
+    }
+
+    if ( mismatchedEvent)
+    {
+      std::ostringstream mess;
+      mess << "Mismatched event list at workspace index " << mismatchedEventWI;
+      result = mess.str();
+      return;
     }
   }
 
@@ -94,10 +114,15 @@ void CheckWorkspacesMatch::doComparison()
   if ( ! checkData(ws1,ws2) ) return;
   
   // Now do the other ones if requested. Bail out as soon as we see a failure.
+  prog->reportIncrement(numhist/5, "Axes");
   if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
+  prog->reportIncrement(numhist/5, "SpectraMap");
   if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
+  prog->reportIncrement(numhist/5, "Instrument");
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
+  prog->reportIncrement(numhist/5, "Masking");
   if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
+  prog->reportIncrement(numhist/5, "Sample");
   if ( static_cast<bool>(getProperty("CheckSample")) )
   {
     if( !checkSample(ws1->sample(), ws2->sample()) ) return;
@@ -134,38 +159,45 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   }
   
   const double tolerance = getProperty("Tolerance");
+  bool result = true;
   
   // Now check the data itself
+  PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < numHists; ++i )
   {
-    // Get references to the current spectrum
-    const MantidVec& X1 = ws1->readX(i);
-    const MantidVec& Y1 = ws1->readY(i);
-    const MantidVec& E1 = ws1->readE(i);
-    const MantidVec& X2 = ws2->readX(i);
-    const MantidVec& Y2 = ws2->readY(i);
-    const MantidVec& E2 = ws2->readE(i);
-    
-    for ( int j = 0; j < numBins; ++j )
+    prog->reportIncrement(1, "Histograms");
+    if (result) // Avoid checking unnecessarily
     {
-      if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance ) 
+
+      // Get references to the current spectrum
+      const MantidVec& X1 = ws1->readX(i);
+      const MantidVec& Y1 = ws1->readY(i);
+      const MantidVec& E1 = ws1->readE(i);
+      const MantidVec& X2 = ws2->readX(i);
+      const MantidVec& Y2 = ws2->readY(i);
+      const MantidVec& E2 = ws2->readE(i);
+
+      for ( int j = 0; j < numBins; ++j )
       {
-        g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
-        result = "Data mismatch";
-        return false;
+        if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance )
+        {
+          g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+          result = "Data mismatch";
+          result = false;
+        }
       }
-    }
-    
-    // Extra one for histogram data
-    if ( histogram && std::abs(X1.back()-X2.back()) > tolerance ) 
-    {
-      result = "Data mismatch";
-      return false;
+
+      // Extra one for histogram data
+      if ( histogram && std::abs(X1.back()-X2.back()) > tolerance )
+      {
+        result = "Data mismatch";
+        result = false;
+      }
     }
   }
   
   // If all is well, return true
-  return true;
+  return result;
 }
 
 /// Checks that the axes matches
@@ -391,7 +423,7 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   }
   
   // Now loop over the individual logs
-  for ( std::vector<Kernel::Property*>::size_type i = 0; i < ws1logs.size(); ++i )
+  for ( size_t i = 0; i < ws1logs.size(); ++i )
   {
     // Check the log name
     if ( ws1logs[i]->name() != ws2logs[i]->name() )

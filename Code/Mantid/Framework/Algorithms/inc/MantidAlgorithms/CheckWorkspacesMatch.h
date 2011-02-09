@@ -98,6 +98,8 @@ private:
   bool checkRunProperties(const API::Run& run1, const API::Run& run2);
   
   std::string result; ///< the result string
+
+  API::Progress * prog;
 };
 
 } // namespace Algorithms
