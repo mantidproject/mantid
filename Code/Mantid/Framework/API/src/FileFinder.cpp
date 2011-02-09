@@ -105,6 +105,8 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
     }
     std::string::size_type nChars = std::distance(it, hint.rend());
     instrPart = hint.substr(0, nChars);
+    // Upper case the instrument name as this is more likely to be upper case in a file name
+    std::transform(instrPart.begin(), instrPart.end(), instrPart.begin(), toupper);
     runPart = hint.substr(nChars);
   }
 
@@ -166,11 +168,22 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
  */
 std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
 {
-  if (hint.find(".") != std::string::npos)
+  std::string fName(hint);
+  size_t dot_pos = hint.rfind(".");
+  if( dot_pos != std::string::npos )
   {
-    return getFullPath(hint);
+    fName = getFullPath(hint);
+    if( fName.empty() )
+    {
+      fName = hint.substr(0, dot_pos);
+    }
+    else if(Poco::File(fName).exists())
+    {
+      return fName;
+    }
   }
-  std::string fName = makeFileName(hint);
+  // Try and transform it to a run file
+  fName = makeFileName(fName);
   const std::vector<std::string> facility_extensions =
       Kernel::ConfigService::Instance().Facility().extensions();
   // select allowed extensions

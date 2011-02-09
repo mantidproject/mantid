@@ -39,7 +39,8 @@ public:
   
   ~AxisTest()
   {
-    delete spectraAxis, numericAxis;
+    delete spectraAxis;
+    delete numericAxis;
   }
   
   void testConstructor()
