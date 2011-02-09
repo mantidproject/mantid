@@ -288,55 +288,6 @@ void testgetMetaDataID()
   TSM_ASSERT_EQUALS("The expected id for the slicing metadata was not found", "1", XMLDefinitions::metaDataId);
 }
 
-
-void testMetaDataToFieldData()
-{
-  std::string testData = "<test data/>%s";
-  std::string id = XMLDefinitions::metaDataId;
-
-  vtkFieldData* fieldData = vtkFieldData::New();
-  vtkCharArray* charArray = vtkCharArray::New();
-  charArray->SetName(id.c_str());
-  fieldData->AddArray(charArray);
-
-  metaDataToFieldData(fieldData, testData.c_str() , id.c_str() );
-
-  //convert vtkchararray back into a string.
-  vtkCharArray* carry = dynamic_cast<vtkCharArray*>(fieldData->GetArray(id.c_str()));
-
-
-  TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData, convertCharArrayToString(carry));
-  charArray->Delete();
-  fieldData->Delete();
-}
-
-void testMetaDataToFieldDataWithEmptyFieldData()
-{
-  std::string testData = "<test data/>%s";
-  std::string id = XMLDefinitions::metaDataId;
-
-  vtkFieldData* emptyFieldData = vtkFieldData::New();
-  metaDataToFieldData(emptyFieldData, testData.c_str() , id.c_str() );
-
-  //convert vtkchararray back into a string.
-  vtkCharArray* carry = dynamic_cast<vtkCharArray*>(emptyFieldData->GetArray(id.c_str()));
-
-  TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData, convertCharArrayToString(carry));
-  emptyFieldData->Delete();
-}
-
-void testFieldDataToMetaData()
-{
-  std::string testData = "test data";
-  std::string id = XMLDefinitions::metaDataId;
-
-  vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
-
-  std::string metaData = fieldDataToMetaData(fieldData, id.c_str());
-  TSM_ASSERT_EQUALS("The result does not match the input. Field data not properly converted.", testData, metaData);
-  fieldData->Delete();
-}
-
 void testFindExistingRebinningDefinitions()
 {
   using namespace Mantid::API;

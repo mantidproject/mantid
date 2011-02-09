@@ -20,6 +20,9 @@
 #include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
 #include "MantidVisitPresenters/vtkStructuredGridFactory.h"
 #include "MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVisitPresenters/MetadataToFieldData.h"
+#include "MantidVisitPresenters/FieldDataToMetadata.h"
+
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -423,59 +426,14 @@ std::string constructGeometryXML(
 
 }
 
-void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData,
-    const char* id)
-{
-  //clean out existing.
-  vtkDataArray* arry = fieldData->GetArray(id);
-  if(NULL != arry)
-  {
-    fieldData->RemoveArray(id);
-  }
-  //create new.
-  vtkCharArray* newArry = vtkCharArray::New();
-  newArry->Allocate(metaData.size());
-  newArry->SetName(id);
-  fieldData->AddArray(newArry);
-
-  for(unsigned int i = 0 ; i < metaData.size(); i++)
-  {
-    newArry->InsertNextValue(metaData.at(i));
-  }
-  newArry->Delete();
-}
-
-std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id)
-{
-  std::string sXml;
-  vtkDataArray* arry =  fieldData->GetArray(id);
-  if(arry == NULL)
-  {
-    throw std::runtime_error("The specified vtk array does not exist");
-  }
-  if (vtkCharArray* carry = dynamic_cast<vtkCharArray*> (arry))
-  {
-    carry->Squeeze();
-    for (int i = 0; i < carry->GetSize(); i++)
-    {
-      char c = carry->GetValue(i);
-      if (int(c) > 1)
-      {
-        sXml.push_back(c);
-      }
-    }
-    boost::trim(sXml);
-  }
-  return sXml;
-}
-
-
 void persistReductionKnowledge(vtkDataSet* out_ds, const
     RebinningXMLGenerator& xmlGenerator, const char* id)
 {
   vtkFieldData* fd = vtkFieldData::New();
 
-  metaDataToFieldData(fd, xmlGenerator.createXMLString().c_str(), id);
+  MetadataToFieldData convert;
+  convert(fd, xmlGenerator.createXMLString().c_str(), id);
+
   out_ds->SetFieldData(fd);
   fd->Delete();
 }
@@ -485,7 +443,9 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
     vtkDataSet* inputDataSet, const char* id)
 {
   Mantid::API::ImplicitFunction* function = NULL;
-  std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+
+  FieldDataToMetadata convert;
+  std::string xmlString = convert(inputDataSet->GetFieldData(), id);
   if (false == xmlString.empty())
   {
     Poco::XML::DOMParser pParser;
@@ -503,7 +463,8 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
 //Get the workspace location from the xmlstring.
  std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id)
 {
-  std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+  FieldDataToMetadata convert;
+  std::string xmlString = convert(inputDataSet->GetFieldData(), id);
 
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc = pParser.parseString(xmlString);
@@ -520,7 +481,8 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
  //Get the workspace location from the xmlstring.
  std::string findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id)
  {
-   std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+   FieldDataToMetadata convert;
+   std::string xmlString = convert(inputDataSet->GetFieldData(), id);
 
    Poco::XML::DOMParser pParser;
    Poco::XML::Document* pDoc = pParser.parseString(xmlString);
@@ -535,7 +497,8 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
 
 Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id)
 {
-  std::string xmlString = fieldDataToMetaData(inputDataSet->GetFieldData(), id);
+  FieldDataToMetadata convert;
+  std::string xmlString = convert(inputDataSet->GetFieldData(), id);
 
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc = pParser.parseString(xmlString);

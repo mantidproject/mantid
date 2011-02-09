@@ -135,9 +135,6 @@ public:
   void persistReductionKnowledge(vtkDataSet * out_ds,
       const RebinningXMLGenerator& xmlGenerator, const char* id);
 
-  /// Convert field data to xml string meta data.
-  std::string fieldDataToMetaData(vtkFieldData* fieldData, const char* id);
-
   /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
   Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
@@ -149,9 +146,6 @@ public:
 
   //Get the workspace geometry from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
   Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id);
-
-  /// Converts field data into metadata xml/string.
-  void metaDataToFieldData(vtkFieldData* fieldData, std::string metaData, const char* id);
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
   Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);

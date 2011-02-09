@@ -7,6 +7,8 @@ project ( VisitPresenters )
 
 set ( SRC_FILES 
 src/Clipper.cpp
+src/FieldDataToMetadata.cpp
+src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
@@ -21,6 +23,8 @@ src/vtkThresholdingUnstructuredGridFactory.cpp
 
 set ( INC_FILES 
 inc/MantidVisitPresenters/Clipper.h
+inc/MantidVisitPresenters/FieldDataToMetadata.h
+inc/MantidVisitPresenters/MetadataToFieldData.h
 inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 
@@ -39,7 +43,9 @@ test/vtkProxyFactoryTest.h
 test/vtkRectilinearGridFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
+test/FieldDataToMetadataTest.h
 test/MultiDimensionalDbPresenterTest.h
+test/MetadataToFieldDataTest.h
 test/RebinningCutterTest.h
 test/RebinningXMLGeneratorTest.h
 )
