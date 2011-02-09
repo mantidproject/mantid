@@ -60,7 +60,7 @@ class QvisLineWidthWidget;
 class QvisVariableButton;
 class QComboBox;
 class GeometryWidget;
-
+enum Visibility{Hide, Show};
 // ****************************************************************************
 // Class: QvisRebinningCutterWindow
 //
@@ -112,10 +112,10 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
   private:
     /// If possible create the geometry widget from pipeline information.
     void createGeometryWidget();
-    /// check wheter the current geometry information is consistent with that in the upper pipeline.
-    bool isInputConsistent(const std::string& inputGeometryXML);
     /// helper method to determine wheter plot information is present. Returns Null if not present.
     PlotInfoAttributes* findRebinningInfo() const;
+    /// Enable hiding/showing of selected controls
+    void setControlsVisibility(Visibility vis) const;
 
     QLineEdit *originX;
     QLineEdit *originY;
@@ -148,10 +148,12 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     QLabel *upYLabel;
     QLabel *upZLabel;
 
-    std::string m_cacheGeometryXML;
     RebinningCutterAttributes *atts;
     GeometryWidget* m_geomWidget;
     QGridLayout* mainLayout;
+    QLabel* m_setupMessageLabel;
+    QLabel* normalXYZLabel;
+    QLabel* originXYZLabel;
 };
 
 

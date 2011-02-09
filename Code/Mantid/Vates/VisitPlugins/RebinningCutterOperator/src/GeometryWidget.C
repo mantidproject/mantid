@@ -38,6 +38,13 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
   delete layout();
 
   QGridLayout* layout = new QGridLayout;
+  if(true == m_isConstructed) //Essentially assignment operation.
+  {
+    delete m_xDimensionWidget;
+    delete m_yDimensionWidget;
+    delete m_zDimensionWidget;
+    delete m_tDimensionWidget;
+  }
 
   //Create widget to display/control the aligned x-dimension
   m_xDimensionWidget = new DimensionWidget(this, "x Dimension", 0, nonIntegratedVector);

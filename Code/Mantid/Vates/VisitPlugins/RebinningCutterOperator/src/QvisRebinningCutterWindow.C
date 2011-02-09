@@ -138,8 +138,12 @@ void QvisRebinningCutterWindow::CreateWindowContents()
   mainLayout = new QGridLayout();
   topLayout->addLayout(mainLayout);
 
+  m_setupMessageLabel = new QLabel();
+  m_setupMessageLabel->setText("Properties for this operator cannot be displayed until it is first executed.\nClick apply after executing to view properties.");
+  mainLayout->addWidget(m_setupMessageLabel, 0, 0, 1, 3);
+
   QGridLayout* originLayout = new QGridLayout();
-  QLabel* originXYZLabel = new QLabel(tr("Origin xyz"), central);
+  originXYZLabel = new QLabel(tr("Origin xyz"), central);
   originLayout->addWidget(originXYZLabel, 0, 0, 1, 3);
   originX = new QLineEdit(central);
   connect(originX, SIGNAL(returnPressed()), this, SLOT(originXProcessText()));
@@ -150,10 +154,10 @@ void QvisRebinningCutterWindow::CreateWindowContents()
   originZ = new QLineEdit(central);
   connect(originZ, SIGNAL(returnPressed()), this, SLOT(originZProcessText()));
   originLayout->addWidget(originZ, 1, 3);
-  mainLayout->addLayout(originLayout, 0, 0, 1, 2, Qt::AlignLeft);
+  mainLayout->addLayout(originLayout, 1, 0, 1, 2, Qt::AlignLeft);
 
   QGridLayout* normalLayout = new QGridLayout();
-  QLabel* normalXYZLabel = new QLabel(tr("Normal xyz"), central);
+  normalXYZLabel = new QLabel(tr("Normal xyz"), central);
   normalLayout->addWidget(normalXYZLabel, 0, 0, 1, 3);
   normalX = new QLineEdit(central);
   connect(normalX, SIGNAL(returnPressed()), this, SLOT(normalXProcessText()));
@@ -164,39 +168,34 @@ void QvisRebinningCutterWindow::CreateWindowContents()
   normalZ = new QLineEdit(central);
   connect(normalZ, SIGNAL(returnPressed()), this, SLOT(normalZProcessText()));
   normalLayout->addWidget(normalZ, 1, 3);
-  mainLayout->addLayout(normalLayout, 1, 0, 1, 2, Qt::AlignLeft);
+  mainLayout->addLayout(normalLayout, 2, 0, 1, 2, Qt::AlignLeft);
 
   widthLabel = new QLabel(tr("Width"), central);
-  mainLayout->addWidget(widthLabel, 2, 0);
+  mainLayout->addWidget(widthLabel, 3, 0);
   width = new QLineEdit(central);
   connect(width, SIGNAL(returnPressed()), this, SLOT(widthProcessText()));
-  mainLayout->addWidget(width, 2, 1);
+  mainLayout->addWidget(width, 3, 1);
 
   heightLabel = new QLabel(tr("Height"), central);
-  mainLayout->addWidget(heightLabel, 3, 0);
+  mainLayout->addWidget(heightLabel, 4, 0);
   height = new QLineEdit(central);
   connect(height, SIGNAL(returnPressed()), this, SLOT(heightProcessText()));
-  mainLayout->addWidget(height, 3, 1);
+  mainLayout->addWidget(height, 4, 1);
 
   depthLabel = new QLabel(tr("Depth"), central);
-  mainLayout->addWidget(depthLabel, 4, 0);
+  mainLayout->addWidget(depthLabel, 5, 0);
   depth = new QLineEdit(central);
   connect(depth, SIGNAL(returnPressed()), this, SLOT(depthProcessText()));
-  mainLayout->addWidget(depth, 4, 1);
+  mainLayout->addWidget(depth, 5, 1);
 
   structured = new QCheckBox(tr("Structured Grid"), central);
   connect(structured, SIGNAL(toggled(bool)), this, SLOT(structuredChanged(bool)));
-  mainLayout->addWidget(structured, 5, 0);
+  mainLayout->addWidget(structured, 6, 0);
 
   m_geomWidget = new GeometryWidget();
   connect(m_geomWidget, SIGNAL(valueChanged()), this, SLOT(geometryChangedlistener()));
-  mainLayout->addWidget(m_geomWidget, 6, 0, 1, 2, Qt::AlignLeft);
+  mainLayout->addWidget(m_geomWidget, 7, 0, 1, 2, Qt::AlignLeft);
 
-}
-
-bool QvisRebinningCutterWindow::isInputConsistent(const std::string& inputGeometryXML)
-{
-  return inputGeometryXML.compare(m_cacheGeometryXML) == 0;
 }
 
 PlotInfoAttributes* QvisRebinningCutterWindow::findRebinningInfo() const
@@ -221,10 +220,35 @@ PlotInfoAttributes* QvisRebinningCutterWindow::findRebinningInfo() const
   return info;
 }
 
+void QvisRebinningCutterWindow::setControlsVisibility(Visibility vis) const
+{
+  bool visible = (Show == vis) ? true : false;
+  normalXYZLabel->setVisible(visible);
+  normalX->setVisible(visible);
+  normalY->setVisible(visible);
+  normalZ->setVisible(visible);
+  originXYZLabel->setVisible(visible);
+  originX->setVisible(visible);
+  originY->setVisible(visible);
+  originZ->setVisible(visible);
+  widthLabel->setVisible(visible);
+  heightLabel->setVisible(visible);
+  depthLabel->setVisible(visible);
+  width->setVisible(visible);
+  height->setVisible(visible);
+  depth->setVisible(visible);
+  structured->setVisible(visible);
+  m_geomWidget->setVisible(visible);
+  m_setupMessageLabel->setVisible(!visible);
+}
+
+
 void QvisRebinningCutterWindow::createGeometryWidget()
 {
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > dimensions;
   PlotInfoAttributes *info = findRebinningInfo();
+
+  bool infopresent =  info != NULL;
 
   if(info!= NULL && !atts->GetIsSetUp())
   {
@@ -269,8 +293,8 @@ void QvisRebinningCutterWindow::createGeometryWidget()
 
     //Now all attributes are known to be setup from inputs.
     atts->SetIsSetUp(true);
-  }
 
+  }
 }
 
 // ****************************************************************************
@@ -293,7 +317,15 @@ QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 {
   createGeometryWidget();
 
-atts->SetIsDirty(false);
+  //After seeing to geometry widget, determine whether the controls can be shown.
+  if(atts->GetIsSetUp())
+  {
+    setControlsVisibility(Show);
+  }
+  else
+  {
+    setControlsVisibility(Hide);
+  }
 
     for(int i = 0; i < atts->NumAttributes(); ++i)
     {
