@@ -272,6 +272,7 @@ class Background(BaseScriptElement):
     background_corr = False
     background_file = ''
         
+    bck_transmission_enabled = True
     bck_transmission = 1.0
     bck_transmission_spread = 0.0
     calculate_transmission = False 
@@ -280,7 +281,6 @@ class Background(BaseScriptElement):
     def to_script(self):
         """
             Generate reduction script
-            @param execute: if true, the script will be executed
         """
         script = ""
         
@@ -297,10 +297,11 @@ class Background(BaseScriptElement):
             script += "Background(\"%s\")\n" % self.background_file
             
             # Background transmission
-            if not self.calculate_transmission:
-                script += "SetBckTransmission(%g, %g)\n" % (self.bck_transmission, self.bck_transmission_spread)
-            else:
-                script += str(self.trans_calculation_method)
+            if self.bck_transmission_enabled:
+                if not self.calculate_transmission:
+                    script += "SetBckTransmission(%g, %g)\n" % (self.bck_transmission, self.bck_transmission_spread)
+                else:
+                    script += str(self.trans_calculation_method)
             
         return script           
     
@@ -326,6 +327,7 @@ class Background(BaseScriptElement):
         xml += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
         if self.background_corr:
             xml += "  <background_file>%s</background_file>\n" % self.background_file
+            xml += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
             xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
             xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
             xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
@@ -352,6 +354,9 @@ class Background(BaseScriptElement):
                                                                       default = Background.background_corr)
             self.background_file = BaseScriptElement.getStringElement(instrument_dom, "background_file")
                
+            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",
+                                                                           default = Background.bck_transmission_enabled)
+
             self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",
                                                                   default=Background.bck_transmission)      
             self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",
@@ -375,6 +380,7 @@ class Background(BaseScriptElement):
         self.dark_current_file = ''
         self.background_corr = Background.background_corr
         self.background_file = ''
+        self.bck_transmission_enabled = Background.bck_transmission_enabled      
         self.bck_transmission = Background.bck_transmission      
         self.bck_transmission_spread = Background.bck_transmission_spread  
         self.calculate_transmission = Background.calculate_transmission

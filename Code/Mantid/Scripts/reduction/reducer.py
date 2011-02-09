@@ -227,6 +227,7 @@ class Reducer(object):
             @param data_file: name of the file to be processed
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
+            TODO: this needs to be an ordered list
         """
         # Check that the file exists
         self._full_file_path(data_file)

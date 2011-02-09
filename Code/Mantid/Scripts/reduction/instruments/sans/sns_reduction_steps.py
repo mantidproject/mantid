@@ -16,9 +16,10 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    def __init__(self, datafile=None):
+    def __init__(self, datafile=None, update_instr=True):
         super(LoadRun, self).__init__()
         self._data_file = datafile
+        self._update_instr = update_instr
                 
     def execute(self, reducer, workspace, force=False):      
         # If we don't have a data file, look up the workspace handle
@@ -42,7 +43,7 @@ class LoadRun(ReductionStep):
         # The file also has to be pristine
         if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
             # Make sure the sample-detector-distance is saved for data we reduce
-            if workspace in reducer._data_files:
+            if self._update_instr and not workspace in reducer._extra_files:
                 reducer.instrument.sample_detector_distance = mtd[workspace].getRun()["detectorZ"].getStatistics().mean
 
             mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
@@ -85,7 +86,7 @@ class LoadRun(ReductionStep):
         # If self._data_file is set, it means we are dealing with an auxiliary file.
         #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
         # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
-        if workspace in reducer._data_files:
+        if self._update_instr and not workspace in reducer._extra_files:
             reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
         
         # Move the detector to its correct position
@@ -153,6 +154,7 @@ class Transmission(BaseTransmission):
         super(Transmission, self).__init__()
         self._normalize = normalize_to_unity
         self._theta_dependent = theta_dependent
+        self._transmission_ws = None
     
     def execute(self, reducer, workspace):
         # The transmission calculation only works on the original un-normalized counts
@@ -161,9 +163,12 @@ class Transmission(BaseTransmission):
         
         beam_center = reducer.get_beam_center()
 
+        if self._transmission_ws is None:
+            self._transmission_ws = "transmission_"+workspace
+
         # Calculate the transmission as a function of wavelength
         EQSANSTransmission(InputWorkspace=workspace,
-                           OutputWorkspace="transmission",
+                           OutputWorkspace=self._transmission_ws,
                            XCenter=beam_center[0],
                            YCenter=beam_center[1],
                            NormalizeToUnity = self._normalize)
@@ -176,9 +181,9 @@ class Transmission(BaseTransmission):
             # To apply the transmission correction using the theta-dependent algorithm
             # we should get the beam spectrum out of the measured transmission
             # We should then re-apply it when performing normalization
-            ApplyTransmissionCorrection(workspace, workspace, "transmission")
+            ApplyTransmissionCorrection(workspace, workspace, self._transmission_ws)
         else:
-            Divide(workspace, "transmission", workspace)
+            Divide(workspace, self._transmission_ws, workspace)
         ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         return "Transmission correction applied"
@@ -212,7 +217,7 @@ class SubtractDarkCurrent(ReductionStep):
         if self._dark_current_ws is None:
             filepath = reducer._full_file_path(self._dark_current_file)
             self._dark_current_ws = extract_workspace_name(filepath)
-            reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
+            reducer._data_loader.__class__(datafile=filepath, update_instr=False).execute(reducer, self._dark_current_ws)
             
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration

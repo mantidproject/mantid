@@ -62,12 +62,21 @@ class BaseBeamFinder(ReductionStep):
         filepath = reducer._full_file_path(self._datafile)
         
         # Check whether that file was already meant to be processed
-        workspace = "beam_center"
-        if filepath in reducer._data_files.values():
-            for k in reducer._data_files.iterkeys():
-                if reducer._data_files[k]==filepath:
-                    workspace = k
+        workspace = "beam_center_"+extract_workspace_name(filepath)
+        #if filepath in reducer._data_files.values():
+        #    for k in reducer._data_files.iterkeys():
+        #        if reducer._data_files[k]==filepath:
+        #            workspace = k                    
                     
+        # Only update the instrument if we are going to use the file
+        # WARNING: The instrument may have the wrong SDD if _another_ data file is loaded
+        # before the current data file is reduced. Only update the instrument if the file
+        # is the first in the queue. For now always ask for a reload
+        # TODO: _data_files needs to be an ordered list
+        #_update = workspace in reducer._data_files.keys()
+        
+        #TODO: mtd[].getInstrument().addProperty_dbl
+
         reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
 
         # Integrate over all wavelength bins so that we process a single detector image
@@ -205,7 +214,7 @@ class BeamSpreaderTransmission(BaseTransmission):
         """
         if self._transmission_ws is None:
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
-            self._transmission_ws = "transmission_fit"
+            self._transmission_ws = "transmission_fit_"+workspace
             
             sample_spreader_ws = "_trans_sample_spreader"
             filepath = reducer._full_file_path(self._sample_spreader)
@@ -280,7 +289,7 @@ class DirectBeamTransmission(BaseTransmission):
         """
         if self._transmission_ws is None:
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
-            self._transmission_ws = "transmission_fit"
+            self._transmission_ws = "transmission_fit_"+workspace
 
             sample_ws = "_transmission_sample"
             filepath = reducer._full_file_path(self._sample_file)
@@ -371,7 +380,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
             filepath = reducer._full_file_path(self._dark_current_file)
-            self._dark_current_ws = extract_workspace_name(filepath)
+            self._dark_current_ws = "dark_"+extract_workspace_name(filepath)
             Load(filepath, self._dark_current_ws)
             
             # Normalize the dark current data to counting time
@@ -411,11 +420,12 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0):
+    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, update_instr=True):
         super(LoadRun, self).__init__()
         self._data_file = datafile
         self.set_sample_detector_distance(sample_det_dist)
         self.set_sample_detector_offset(sample_det_offset)
+        self._update_instr = update_instr
         
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
@@ -477,15 +487,14 @@ class LoadRun(ReductionStep):
         # If self._data_file is set, it means we are dealing with an auxiliary file.
         #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
         # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
-        if self._data_file is None:
-            reducer.instrument.sample_detector_distance = sdd
-        
         if sdd == reducer.instrument.sample_detector_distance:
             mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %\
                                   (workspace, reducer.instrument.sample_detector_distance))
         else:
-            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [NOT EQUAL TO SAMPLE FILE SDD: %g" %\
+            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [NOT EQUAL TO SAMPLE FILE SDD: %g m]" %\
                                   (workspace, sdd, reducer.instrument.sample_detector_distance))
+        if self._update_instr and not workspace in reducer._extra_files:
+            reducer.instrument.sample_detector_distance = sdd        
     
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
@@ -639,9 +648,10 @@ class SensitivityCorrection(ReductionStep):
         if self._efficiency_ws is None:
             # Load the flood data
             filepath = reducer._full_file_path(self._flood_data)
-            flood_ws = extract_workspace_name(filepath)
+            flood_ws = "flood_"+extract_workspace_name(filepath)
             
-            reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
+            # Make sure we don't overwrite the parameters kept in the instrument object
+            reducer._data_loader.__class__(datafile=filepath, update_instr=False).execute(reducer, flood_ws)
 
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
@@ -958,7 +968,7 @@ class SubtractBackground(ReductionStep):
         log_text = ''
         if self._background_ws is None:
             # Apply the reduction steps that we normally apply to the data
-            self._background_ws = extract_workspace_name(self._background_file)
+            self._background_ws = "bck_"+extract_workspace_name(self._background_file)
             reducer._extra_files[self._background_ws] = self._background_file
             for item in reducer._2D_steps():
                 output = item.execute(reducer, self._background_ws)

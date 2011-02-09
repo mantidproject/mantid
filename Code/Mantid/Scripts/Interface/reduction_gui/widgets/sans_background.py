@@ -110,9 +110,6 @@ class BackgroundWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.transmission_edit.setText(QtCore.QString(str(state.bck_transmission)))
-        self._content.dtransmission_edit.setText(QtCore.QString(str(state.bck_transmission_spread)))
-        
         self._content.dark_current_chk.setChecked(state.dark_current_corr)
         self._content.dark_current_edit.setText(QtCore.QString(state.dark_current_file))
         self._dark_current_clicked(state.dark_current_corr)
@@ -120,16 +117,20 @@ class BackgroundWidget(BaseWidget):
         self._content.background_chk.setChecked(state.background_corr)
         self._content.background_edit.setText(QtCore.QString(state.background_file))
         self._background_clicked(state.background_corr)
-        
-        if isinstance(state.trans_calculation_method, state.DirectBeam):
-            self._content.trans_direct_chk.setChecked(True)
-            self._direct_beam(state=state.trans_calculation_method)
-        else:
-            self._content.trans_spreader_chk.setChecked(True)
-            self._beam_spreader(state=state.trans_calculation_method)
 
-        self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
-        self._calculate_clicked(state.calculate_transmission)
+        if self.show_transmission:
+            self._content.transmission_edit.setText(QtCore.QString(str(state.bck_transmission)))
+            self._content.dtransmission_edit.setText(QtCore.QString(str(state.bck_transmission_spread)))
+                    
+            if isinstance(state.trans_calculation_method, state.DirectBeam):
+                self._content.trans_direct_chk.setChecked(True)
+                self._direct_beam(state=state.trans_calculation_method)
+            else:
+                self._content.trans_spreader_chk.setChecked(True)
+                self._beam_spreader(state=state.trans_calculation_method)
+    
+            self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
+            self._calculate_clicked(state.calculate_transmission)
         
         
     def get_state(self):
@@ -144,12 +145,14 @@ class BackgroundWidget(BaseWidget):
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = unicode(self._content.background_edit.text())
         
-        m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
-        m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
-        m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
+        m.bck_transmission_enabled = self.show_transmission
+        if self.show_transmission:
+            m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
+            m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
+            m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
         
-        if self._method_box is not None:
-            m.trans_calculation_method=self._method_box.get_state()   
+            if self._method_box is not None:
+                m.trans_calculation_method=self._method_box.get_state()   
         return m
         
     def _direct_beam(self, state=None):
