@@ -169,10 +169,10 @@ namespace Mantid
 	  }
 	  previousLine = file.tellg();
 	}
-
 	// Seek the file pointer to the correct position to start reading data
 	file.seekg(dataStart);
-	numToSkip = row;
+	// We've read the header plus the number of rowsToMatch
+	numToSkip = row - rowsToMatch;
       }
       else
       {
