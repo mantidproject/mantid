@@ -251,7 +251,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testEventFileWithNoExecute()
+  void xtestEventFileWithNoExecute()
   {
     Load loader;
     loader.initialize();
