@@ -259,7 +259,7 @@ void testExecOnMuonXml()
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "./SaveNexusProcessedTest_testExecOnMuonXml.xml";
+    outputFile = "SaveNexusProcessedTest_testExecOnMuonXml.xml";
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";

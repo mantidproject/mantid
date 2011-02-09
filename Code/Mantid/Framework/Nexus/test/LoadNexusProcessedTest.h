@@ -10,10 +10,12 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "SaveNexusProcessedTest.h"
 #include <Poco/File.h>
 
 using namespace Mantid::NeXus;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
@@ -400,7 +402,23 @@ public:
      // Do the comparison algo to check that they really are the same
      origWS->sortAll(TOF_SORT, NULL);
      ws->sortAll(TOF_SORT, NULL);
-     TS_ASSERT( equals(origWS, ws, 1e-4) );
+
+     IAlgorithm_sptr alg2 = AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+     alg2->initialize();
+     alg2->setProperty<MatrixWorkspace_sptr>("Workspace1",origWS);
+     alg2->setProperty<MatrixWorkspace_sptr>("Workspace2",ws);
+     alg2->setProperty<double>("Tolerance", 1e-5);
+     alg2->setProperty<bool>("CheckAxes", false);
+     alg2->execute();
+     if (alg2->isExecuted())
+     {
+       TS_ASSERT (alg2->getPropertyValue("Result") == "Success!");
+     }
+     else
+     {
+       TS_ASSERT ( false );
+     }
+     //TS_ASSERT( equals(origWS, ws, 1e-4) );
    }
 
    void test_LoadEventNexus_TOF()
