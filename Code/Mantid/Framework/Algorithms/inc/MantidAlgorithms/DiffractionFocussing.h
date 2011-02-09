@@ -63,7 +63,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      DiffractionFocussing() : API::Algorithm(),m_childProgressObserver(*this, &DiffractionFocussing::handleChildProgressNotification) {};
+      DiffractionFocussing() : API::Algorithm() {};
       /// Destructor
       virtual ~DiffractionFocussing() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -82,11 +82,6 @@ namespace Mantid
       void calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step);
       bool readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups);
 
-      /// Captures childs progress notifications.
-      Poco::NObserver<DiffractionFocussing, ProgressNotification> m_childProgressObserver;
-      void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
-    
-      
     };
 
   } // namespace Algorithm

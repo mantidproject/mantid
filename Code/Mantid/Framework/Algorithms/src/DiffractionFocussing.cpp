@@ -167,10 +167,9 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
 
   g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 
-  API::IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
+  API::IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target",CONVERSION_UNIT);
-  childAlg->addObserver(m_childProgressObserver);
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -182,7 +181,6 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
     g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
     throw;
   }
-  childAlg->removeObserver(m_childProgressObserver);
 
   if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
@@ -209,7 +207,6 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
   API::IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("Params",paramArray);
-  childAlg->addObserver(m_childProgressObserver);
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -221,7 +218,6 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
     g_log.error("Unable to successfully run Rebinning sub-algorithm");
     throw;
   }
-  childAlg->removeObserver(m_childProgressObserver);
 
   if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
   else
@@ -293,13 +289,6 @@ bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::m
 		}
   }
   return true;
-}
-
-/// Captures progress notifications from child algorithms and sends the overall progress.
-void DiffractionFocussing::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
-{
-  if (pNf->algorithm()->name() == "ConvertUnits") progress(pNf->progress/3);
-  else if (pNf->algorithm()->name() == "Rebin") progress(0.34+pNf->progress/3);
 }
 
 } // namespace Algorithm
