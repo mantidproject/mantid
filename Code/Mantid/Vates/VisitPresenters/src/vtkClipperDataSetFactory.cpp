@@ -18,7 +18,6 @@ vtkClipperDataSetFactory::vtkClipperDataSetFactory(
 
 vtkClipperDataSetFactory::~vtkClipperDataSetFactory()
 {
-  m_dataset->Delete();
 }
 
 vtkDataSet* vtkClipperDataSetFactory::create() const
@@ -30,6 +29,7 @@ vtkDataSet* vtkClipperDataSetFactory::create() const
   vtkUnstructuredGrid* output = vtkUnstructuredGrid::New();
 
   boxVector::const_iterator it = boxFunctions.begin();
+
   for (it; it != boxFunctions.end(); ++it)
   {
     boost::shared_ptr<BoxImplicitFunction> boxFunction = *it;

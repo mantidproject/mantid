@@ -72,11 +72,13 @@ public:
     vtkMockRectilinearGrid* mockGrid = vtkMockRectilinearGrid::New();
     MockClipper* mockClipper = new MockClipper;
     EXPECT_CALL(*mockFunction, die()).Times(1);
-    EXPECT_CALL(*mockGrid, die()).Times(1);
+    EXPECT_CALL(*mockGrid, die()).Times(0); //VisIT framework expects that input datasets are not destroyed.
     EXPECT_CALL(*mockClipper, die()).Times(1);
     {
       vtkClipperDataSetFactory factory(boost::shared_ptr<ImplicitFunction>(mockFunction), mockGrid, mockClipper);
     }
+
+    mockGrid->Delete(); //Clean up in test scenario
 
     TSM_ASSERT("RAII not correct on accepted implicit function", testing::Mock::VerifyAndClearExpectations(mockFunction));
     TSM_ASSERT("RAII not correct on accepted vtkDataSet", testing::Mock::VerifyAndClearExpectations(mockGrid));
