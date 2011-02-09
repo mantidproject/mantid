@@ -597,13 +597,13 @@ namespace DataObjects
   void EventWorkspace::makeAxis0()
   {
     const MantidVec & X = this->readX(0);
-    //We create a spectra-type axis that holds the spectrum # at each workspace index.
-    //  It is a simple 1-1 map (workspace index = spectrum #)
-    delete m_axes[0];
-    API::NumericAxis * ax0 = new API::NumericAxis(X.size());
-    for (size_t i=0; i < X.size(); i++)
-      ax0->setValue(i, X[i]);
-    m_axes[0] = ax0;
+//    //We create a spectra-type axis that holds the spectrum # at each workspace index.
+//    //  It is a simple 1-1 map (workspace index = spectrum #)
+//    delete m_axes[0];
+//    API::NumericAxis * ax0 = new API::NumericAxis(X.size());
+//    for (size_t i=0; i < X.size(); i++)
+//      ax0->setValue(i, X[i]);
+//    m_axes[0] = ax0;
   }
 
 
@@ -618,7 +618,6 @@ namespace DataObjects
   {
     //Make the wi to spectra map
     this->makeAxis1();
-    this->makeAxis0();
 
     //Now, make the spectra map (index -> detector ID)
     this->makeSpectraMap();

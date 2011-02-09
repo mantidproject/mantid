@@ -217,8 +217,6 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
     // Use Axis's equality operator to check length and values
     if ( ! ax1->operator==(*ax2) )
     {
-      std::cout << ax1->length() << std::endl;
-      std::cout << ax2->length() << std::endl;
       result = axis_name + " values mismatch";
       return false;
     }
