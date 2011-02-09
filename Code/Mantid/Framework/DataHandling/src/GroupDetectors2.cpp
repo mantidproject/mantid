@@ -557,7 +557,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
       }
       else
       {// the spectra was already included in a group
-        g_log.warning() << "Duplicate spectra number " << *specN << " ignored in input file\n";
+        output.push_back( ind->second );
       }
     }
   }

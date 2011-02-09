@@ -323,7 +323,6 @@ public:
 
   void testReadingFromXML()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -360,7 +359,46 @@ public:
 
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("boevs");
-#endif
+  }
+
+  void testReadingFromXMLCheckDublicateIndex()
+  {
+    LoadMuonNexus2 nxLoad;
+    nxLoad.initialize();
+
+    // Now set required filename and output workspace name
+    std::string inputFile = "MUSR00015190.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+
+    std::string outputSpace="outer";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
+
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    groupAlg.setPropertyValue("InputWorkspace", outputSpace+"_1");
+    groupAlg.setPropertyValue("OutputWorkspace", "boevs");
+    groupAlg.setPropertyValue("MapFile", "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate.xml");
+    TS_ASSERT_THROWS_NOTHING(groupAlg.execute());    
+    TS_ASSERT( groupAlg.isExecuted() );
+
+    MatrixWorkspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 2);
+
+    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove("boevs");
   }
 
   void testAverageBehaviour()
