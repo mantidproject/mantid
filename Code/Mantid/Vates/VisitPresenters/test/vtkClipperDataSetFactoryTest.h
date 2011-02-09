@@ -66,6 +66,7 @@ public:
   void testCleansUp()
   {
     using Mantid::VATES::vtkClipperDataSetFactory;
+    using namespace Mantid::API;
 
     MockImplicitFunction* mockFunction = new MockImplicitFunction;
     vtkMockRectilinearGrid* mockGrid = vtkMockRectilinearGrid::New();
@@ -74,7 +75,7 @@ public:
     EXPECT_CALL(*mockGrid, die()).Times(1);
     EXPECT_CALL(*mockClipper, die()).Times(1);
     {
-      vtkClipperDataSetFactory factory(mockFunction, mockGrid, mockClipper);
+      vtkClipperDataSetFactory factory(boost::shared_ptr<ImplicitFunction>(mockFunction), mockGrid, mockClipper);
     }
 
     TSM_ASSERT("RAII not correct on accepted implicit function", testing::Mock::VerifyAndClearExpectations(mockFunction));
@@ -85,6 +86,8 @@ public:
   void testAppliesCuts()
   {
     using namespace Mantid::MDAlgorithms;
+    using namespace Mantid::API;
+
     OriginParameter originOne(0, 0, 0);
     WidthParameter widthOne(1);
     HeightParameter heightOne(4);
@@ -98,8 +101,8 @@ public:
     BoxImplicitFunction* boxTwo = new BoxImplicitFunction(widthTwo, heightTwo, depthTwo, originTwo);
 
     CompositeImplicitFunction* compositeFunction = new CompositeImplicitFunction;
-    compositeFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
-    compositeFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxTwo));
+    compositeFunction->addFunction(boost::shared_ptr<ImplicitFunction>(boxOne));
+    compositeFunction->addFunction(boost::shared_ptr<ImplicitFunction>(boxTwo));
 
 
     MockClipper* mockClipper = new MockClipper;
@@ -112,7 +115,7 @@ public:
     EXPECT_CALL(*mockClipper, die()).Times(1);
 
     {
-    Mantid::VATES::vtkClipperDataSetFactory factory(compositeFunction, vtkRectilinearGrid::New(), mockClipper);
+    Mantid::VATES::vtkClipperDataSetFactory factory(boost::shared_ptr<ImplicitFunction>(compositeFunction), vtkRectilinearGrid::New(), mockClipper);
     factory.create();
     }
 

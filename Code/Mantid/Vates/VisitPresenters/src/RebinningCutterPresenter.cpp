@@ -157,7 +157,7 @@ vtkDataSet* RebinningCutterPresenter::createVisualDataSet(vtkDataSetFactory_sptr
   return visualImageData;
 }
 
-boost::shared_ptr<const Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFunction() const
+boost::shared_ptr<Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFunction() const
 {
   VerifyInitalization();
   return m_function;

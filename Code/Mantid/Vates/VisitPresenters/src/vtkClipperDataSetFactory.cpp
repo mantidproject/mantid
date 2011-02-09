@@ -10,7 +10,7 @@ namespace VATES
 {
 /// Constructor
 vtkClipperDataSetFactory::vtkClipperDataSetFactory(
-    Mantid::API::ImplicitFunction* implicitFunction,
+    boost::shared_ptr<Mantid::API::ImplicitFunction> implicitFunction,
     vtkDataSet* dataset, Clipper* clipper) :
   m_implicitFunction(implicitFunction), m_dataset(dataset), m_clipper(clipper)
 {

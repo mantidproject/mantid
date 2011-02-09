@@ -5,6 +5,7 @@
 #include "MantidVisitPresenters/vtkDataSetFactory.h"
 #include "MantidVisitPresenters/Clipper.h"
 #include "boost/scoped_ptr.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
@@ -42,7 +43,7 @@ class vtkClipperDataSetFactory : public vtkDataSetFactory
 {
 public:
   /// Constructor
-  vtkClipperDataSetFactory(Mantid::API::ImplicitFunction* implicitFunction, vtkDataSet* dataSet, Clipper* clipper);
+  vtkClipperDataSetFactory(boost::shared_ptr<Mantid::API::ImplicitFunction> implicitFunction, vtkDataSet* dataSet, Clipper* clipper);
 
   /// Destructor
   virtual ~vtkClipperDataSetFactory();
@@ -52,7 +53,7 @@ public:
 
 private:
   /// Function describing clipping.
-  boost::scoped_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;
+  boost::shared_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;
 
   /// Dataset on which to apply clipping.
   vtkDataSet* m_dataset;

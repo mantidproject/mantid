@@ -93,7 +93,7 @@ public:
 	~RebinningCutterPresenter();
 
 	/// Get the generated function.
-	boost::shared_ptr<const Mantid::API::ImplicitFunction> getFunction() const;
+	boost::shared_ptr<Mantid::API::ImplicitFunction> getFunction() const;
 
   /// Construct reduction knowledge objects
 	void constructReductionKnowledge(
