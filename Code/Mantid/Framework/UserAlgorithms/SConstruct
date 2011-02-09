@@ -24,14 +24,17 @@ env = Environment(ENV=os.environ,
                            'MantidCurveFitting'
                          ], 
                   LINKFLAGS = link_flags,
-                  CCFLAGS = ['/nologo','/Ox', '/Ot','/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP','/wd4251', '/wd4275', '/wd4996'],
+                  CCFLAGS = ['/nologo','/Ox', '/Ot','/GL', '/W3','/EHsc', '/MD', '/TP','/wd4251', '/wd4275', '/wd4996'],
                   CPPDEFINES = ['NDEBUG', '_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE',\
                                 '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE', ('MS_VISUAL_STUDIO','1'),\
                                 ('WINVER','0x0500'), 'BOOST_ALL_DYN_LINK', 'BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG',\
                                 'NOMINMAX','_USE_MATH_DEFINES', 'WNT','WIN32','_WINDOWS', 'POCO_DLL', 'GSL_DLL']
                   )
-                  
-
+# Check whether we should include the OpenMP flag
+conf = Configure(env)
+if conf.CheckLib('vcomp'):
+    env.Append(CCFLAGS=['/openmp'])
+			
 # The output library name will be the same as the directory that the build is run from
 cwd = os.getcwd()
 lib_name = os.path.basename(os.getcwd()) 
