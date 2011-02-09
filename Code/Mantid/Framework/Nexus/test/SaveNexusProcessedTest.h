@@ -40,15 +40,12 @@ class SaveNexusProcessedTest : public CxxTest::TestSuite
 {
 public:
 
-  SaveNexusProcessedTest()
+  void setUp()
   {
-
     // clearfiles - make true for SVN as dont want to leave on build server.
     // Unless the file "KEEP_NXS_FILES" exists, then clear up nxs files
     Poco::File file("KEEP_NXS_FILES");
     clearfiles = !file.exists();
-    //clearfiles=true;
-    //
 
     // create dummy 2D-workspace
     Workspace2D_sptr localWorkspace2D = boost::dynamic_pointer_cast<Workspace2D>
@@ -62,12 +59,18 @@ public:
       localWorkspace2D->dataE(0)[i] = d;      
     }
 
-    AnalysisDataService::Instance().add("testSpace", localWorkspace2D);
-}
+    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
+  }
+
+  void tearDown()
+  {
+    AnalysisDataService::Instance().remove("testSpace");
+  }
 
 
   void testInit()
   {
+    SaveNexusProcessed algToBeTested;
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT( algToBeTested.isInitialized() );
   }
@@ -76,6 +79,7 @@ public:
   void testExec()
   {
 
+    SaveNexusProcessed algToBeTested;
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
 
     // Should fail because mandatory parameter has not been set
@@ -85,7 +89,7 @@ public:
     // Now set it...
     // specify name of file to save workspace to
     algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
-    outputFile = "testOfSaveNexusProcessed.nxs";
+    outputFile = "SaveNexusProcessedTest_testExec.nxs";
     //entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
@@ -112,6 +116,7 @@ public:
 
 void testExecOnMuon()
   {
+  SaveNexusProcessed algToBeTested;
 
 //This test does not compile on Windows64 as is does not support HDF4 files
 #ifndef _WIN64
@@ -141,7 +146,7 @@ void testExecOnMuon()
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "testOfSaveNexusProcessed2.nxs";
+    outputFile = "SaveNexusProcessedTest_testExecOnMuon.nxs";
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
@@ -174,6 +179,7 @@ void testExecOnMuon()
 
 void testExecOnLoadraw()
 {
+  SaveNexusProcessed algToBeTested;
     std::string inputFile = "HET15869.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
@@ -196,7 +202,7 @@ void testExecOnLoadraw()
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "testSaveFromLoadraw.nxs";
+    outputFile = "SaveNexusProcessedTest_testExecOnLoadraw.nxs";
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
@@ -222,6 +228,7 @@ void testExecOnLoadraw()
 
 void testExecOnMuonXml()
   {
+  SaveNexusProcessed algToBeTested;
   
 //This test does not compile on Windows64 as is does not support HDF4 files
 #ifndef _WIN64
@@ -252,7 +259,7 @@ void testExecOnMuonXml()
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "./testOfSaveNexusProcessed2.xml";
+    outputFile = "./SaveNexusProcessedTest_testExecOnMuonXml.xml";
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
@@ -285,7 +292,8 @@ void testExecOnMuonXml()
 
 
 
-void do_testExec_EventWorkspaces(EventType type, bool makeDifferentTypes=false)
+static EventWorkspace_sptr do_testExec_EventWorkspaces(std::string filename_root, EventType type,
+    bool makeDifferentTypes=false, bool clearfiles=false)
 {
   std::vector< std::vector<int> > groups(5);
   groups[0].push_back(10);
@@ -293,7 +301,8 @@ void do_testExec_EventWorkspaces(EventType type, bool makeDifferentTypes=false)
   groups[0].push_back(12);
   groups[1].push_back(20);
   groups[2].push_back(30);
-  groups[2].push_back(31);
+  groups[2].push_back(31);  // Switch the event type
+
   groups[3].push_back(40);
   groups[4].push_back(50);
 
@@ -321,17 +330,17 @@ void do_testExec_EventWorkspaces(EventType type, bool makeDifferentTypes=false)
 
   // specify name of file to save workspace to
   std::ostringstream mess;
-  mess << "SaveNexusProcessed_ExecEvent_" << static_cast<int>(type) << ".nxs";
-  outputFile = mess.str();
-  dataName = "spectra";
-  title = "A simple workspace saved in Processed Nexus format";
+  mess << filename_root << static_cast<int>(type) << ".nxs";
+  std::string outputFile = mess.str();
+  std::string dataName = "spectra";
+  std::string title = "A simple workspace saved in Processed Nexus format";
 
   alg.setPropertyValue("Filename", outputFile);
   outputFile = alg.getPropertyValue("Filename");
   alg.setPropertyValue("Title", title);
+
   // Clear the existing file, if any
   if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-
   alg.execute();
   TS_ASSERT( alg.isExecuted() );
 
@@ -339,32 +348,32 @@ void do_testExec_EventWorkspaces(EventType type, bool makeDifferentTypes=false)
 
   if(clearfiles) Poco::File(outputFile).remove();
 
+  return WS;
 }
-
 
 
 void testExec_EventWorkspace_TofEvent()
 {
-  do_testExec_EventWorkspaces(TOF);
+  do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, false, clearfiles);
 }
 
 void testExec_EventWorkspace_WeightedEvent()
 {
-  do_testExec_EventWorkspaces(WEIGHTED);
+  do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, false, clearfiles);
 }
 
 void testExec_EventWorkspace_WeightedEventNoTime()
 {
-  do_testExec_EventWorkspaces(WEIGHTED_NOTIME);
+  do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME, false, clearfiles);
 }
 
 void testExec_EventWorkspace_DifferentTypes()
 {
-  do_testExec_EventWorkspaces(WEIGHTED_NOTIME, true);
+  do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, true, clearfiles);
 }
 
 
-void xtestExec_LoadedEventWorkspace()
+void testExec_LoadedEventWorkspace()
 {
 
   //----- Now we re-load with precounting and compare memory use ----
@@ -398,7 +407,6 @@ void xtestExec_LoadedEventWorkspace()
 
 
 private:
-  SaveNexusProcessed algToBeTested;
   std::string outputFile;
   std::string entryName;
   std::string dataName;

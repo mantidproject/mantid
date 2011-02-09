@@ -185,18 +185,22 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   
   for ( int i = 0; i < numAxes; ++i )
   {
+    std::ostringstream axis_name_ss;
+    axis_name_ss << "Axis " << i;
+    std::string axis_name = axis_name_ss.str();
+
     const Axis * const ax1 = ws1->getAxis(i);
     const Axis * const ax2 = ws2->getAxis(i);
     
     if ( ax1->isSpectra() != ax2->isSpectra() )
     {
-      result = "Axis type mismatch";
+      result = axis_name + " type mismatch";
       return false;
     }
 
     if ( ax1->title() != ax2->title() )
     {
-      result = "Axis title mismatch";
+      result = axis_name + " title mismatch";
       return false;
     }
     
@@ -206,14 +210,16 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
     if ( (ax1_unit == NULL && ax2_unit != NULL) || (ax1_unit != NULL && ax2_unit == NULL) 
          || ( ax1_unit && ax1_unit->unitID() != ax2_unit->unitID() ) )
     {
-      result = "Axis unit mismatch";
+      result = axis_name + " unit mismatch";
       return false;
     }
     
     // Use Axis's equality operator to check length and values
     if ( ! ax1->operator==(*ax2) )
     {
-      result = "Axis values mismatch";
+      std::cout << ax1->length() << std::endl;
+      std::cout << ax2->length() << std::endl;
+      result = axis_name + " values mismatch";
       return false;
     }
   }

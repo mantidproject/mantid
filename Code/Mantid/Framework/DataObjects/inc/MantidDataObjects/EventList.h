@@ -149,6 +149,8 @@ public:
 
   void addEventQuickly(const WeightedEvent &event);
 
+  void addEventQuickly(const WeightedEventNoTime &event);
+
   Mantid::API::EventType getEventType() const;
 
   void switchTo(Mantid::API::EventType newType);

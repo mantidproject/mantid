@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "SaveNexusProcessedTest.h"
 #include <Poco/File.h>
 
 using namespace Mantid::NeXus;
@@ -330,7 +331,6 @@ public:
      save.setPropertyValue("Filename",filename);
      filename = save.getPropertyValue("Filename");
      save.execute();
-
      LoadNexusProcessed load;
      load.initialize();
      load.setPropertyValue("Filename",filename);
@@ -356,39 +356,67 @@ public:
 
 
 
-//   void test_LoadAnEventFile()
-//  {
-//    LoadNexusProcessed alg;
-//
-//    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-//    TS_ASSERT( alg.isInitialized() );
-//    testFile="SaveNexusProcessed_ExecEvent_0.nxs";
-//    alg.setPropertyValue("Filename", testFile);
-//    alg.setPropertyValue("OutputWorkspace", output_ws);
-//
-//    TS_ASSERT_THROWS_NOTHING(alg.execute());
-//
-//    //Test some aspects of the file
-//    Workspace_sptr workspace;
-//    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-//    TS_ASSERT( workspace.get() );
-//
-//    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-//    TS_ASSERT( ws );
-//    if (!ws) return;
-//
-//    //Testing the number of histograms
-//    TS_ASSERT_EQUALS(ws->getNumberHistograms(),4);
-//
-//    for (size_t wi=0; wi < 4; wi++)
-//    {
-//      const EventList & el = ws->getEventList(wi);
-//      TS_ASSERT_EQUALS( el.getEventType(), 0 );
-//    }
-//
-//
-//   }
+   void dotest_LoadAnEventFile(EventType type)
+   {
+     std::string filename_root = "LoadNexusProcessed_ExecEvent_";
 
+     // Call a function that writes out the file
+     EventWorkspace_sptr origWS = SaveNexusProcessedTest::do_testExec_EventWorkspaces(filename_root, type, false, false);
+
+     LoadNexusProcessed alg;
+     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+     TS_ASSERT( alg.isInitialized() );
+     std::ostringstream filename;
+     filename << filename_root << static_cast<int>(type) << ".nxs";
+     testFile= filename.str();
+     alg.setPropertyValue("Filename", testFile);
+     alg.setPropertyValue("OutputWorkspace", output_ws);
+
+     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+     //Test some aspects of the file
+     Workspace_sptr workspace;
+     TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+     TS_ASSERT( workspace.get() );
+
+     EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+     TS_ASSERT( ws );
+     if (!ws) return;
+
+     //Testing the number of histograms
+     TS_ASSERT_EQUALS(ws->getNumberHistograms(),5);
+
+     for (size_t wi=0; wi < 5; wi++)
+     {
+       const EventList & el = ws->getEventList(wi);
+       TS_ASSERT_EQUALS( el.getEventType(), type );
+     }
+     TS_ASSERT_EQUALS( ws->getEventList(0).getNumberEvents(), 300 );
+     TS_ASSERT_EQUALS( ws->getEventList(1).getNumberEvents(), 100 );
+     TS_ASSERT_EQUALS( ws->getEventList(2).getNumberEvents(), 200 );
+     TS_ASSERT_EQUALS( ws->getEventList(3).getNumberEvents(), 0 );
+     TS_ASSERT_EQUALS( ws->getEventList(4).getNumberEvents(), 100 );
+
+     // Do the comparison algo to check that they really are the same
+     origWS->sortAll(TOF_SORT, NULL);
+     ws->sortAll(TOF_SORT, NULL);
+     TS_ASSERT( equals(origWS, ws, 1e-4) );
+   }
+
+   void test_LoadEventNexus_TOF()
+   {
+     dotest_LoadAnEventFile(TOF);
+   }
+
+   void test_LoadEventNexus_WEIGHTED()
+   {
+     dotest_LoadAnEventFile(WEIGHTED);
+   }
+
+   void test_LoadEventNexus_WEIGHTED_NOTIME()
+   {
+     dotest_LoadAnEventFile(WEIGHTED_NOTIME);
+   }
 
 
 private:

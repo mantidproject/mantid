@@ -171,8 +171,7 @@ namespace NeXus
 
     const int numberOfHist = m_inputWorkspace->getNumberHistograms();
     // check if all X() are in fact the same array
-    bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
-    std::vector<int> spec;
+    uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
     if( m_interval )
     {
       m_spec_min = getProperty("WorkspaceIndexMin");
@@ -222,12 +221,12 @@ namespace NeXus
     if (m_eventWorkspace)
     {
       //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
-//      this->execEvent(nexusFile);
-      g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
+      this->execEvent(nexusFile);
+      //g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
     }
-//    else
+    else
     {
-      nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec);
+      nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec, "workspace", true);
     }
 
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
@@ -283,7 +282,8 @@ namespace NeXus
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Execute the saving of event data
+  /** Execute the saving of event data.
+   * This will make one long event list for all events contained.
    * */
   void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile)
   {
@@ -377,6 +377,10 @@ namespace NeXus
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+
+
+    // Start by writing out the axes and crap
+    nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
 
     // Write out to the NXS file
     nexusFile->writeNexusProcessedDataEventCompressed(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes);

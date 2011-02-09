@@ -96,6 +96,9 @@ namespace Mantid
       /// The value of the spectrum_max property
       int m_spec_max;
 
+      bool uniformSpectra;
+      std::vector<int> spec;
+
       /// Progress bar
       API::Progress * prog;
 

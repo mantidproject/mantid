@@ -107,7 +107,7 @@ namespace OperatorOverloads
  *  @param rhs :: right hand side workspace shared pointer
  *  @return bool, true if workspaces match
  */
-bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, double tolerance)
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
   alg->setChild(true);
@@ -115,6 +115,8 @@ bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
   alg->initialize();
   alg->setProperty<MatrixWorkspace_sptr>("Workspace1",lhs);
   alg->setProperty<MatrixWorkspace_sptr>("Workspace2",rhs);
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace2",rhs);
+  alg->setProperty<double>("Tolerance", tolerance);
   // Rest: use default
 
   alg->execute();

@@ -467,6 +467,14 @@ namespace DataObjects
     this->weightedEvents.push_back(event);
   }
 
+  // --------------------------------------------------------------------------
+  /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * @param event :: WeightedEventNoTime to add at the end of the list.
+   * */
+  void EventList::addEventQuickly(const WeightedEventNoTime &event)
+  {
+    this->weightedEventsNoTime.push_back(event);
+  }
 
 
 

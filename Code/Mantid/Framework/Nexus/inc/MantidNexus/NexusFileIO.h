@@ -64,7 +64,8 @@ namespace Mantid
 				     const Mantid::API::Run& runProperties) const;
       /// write the workspace data
       int writeNexusProcessedData2D( const API::MatrixWorkspace_const_sptr& localworkspace,
-				   const bool& uniformSpectra, const std::vector<int>& spec) const;
+				   const bool& uniformSpectra, const std::vector<int>& spec,
+			      const char * group_name, bool write2Ddata) const;
 
       int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace);
 

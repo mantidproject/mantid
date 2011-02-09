@@ -162,6 +162,9 @@ using namespace DataObjects;
       return(3);
     return(0);
   }
+
+
+  //-----------------------------------------------------------------------------------------------
   bool NexusFileIO::writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
       const std::string& version) const
   {
@@ -185,6 +188,9 @@ using namespace DataObjects;
     return(true);
   }
 
+
+
+  //-----------------------------------------------------------------------------------------------
   bool NexusFileIO::writeNexusInstrument(const Geometry::IInstrument_const_sptr& instrument) const
   {
     NXstatus status;
@@ -204,6 +210,8 @@ using namespace DataObjects;
 
     return(true);
   }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns true if the given property is a time series property
    * @param prop :: The property to test
    * @returns True if it is a time series, false otherwise
@@ -222,6 +230,9 @@ using namespace DataObjects;
       return false;
     }
   }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Write a time series log entry.
    * @param prop :: The time series property containing the data. This must be a time series or it will fail.
    * @returns A boolean indicating success or failure
@@ -251,6 +262,8 @@ using namespace DataObjects;
     }
     return success;
   }
+
+  //-----------------------------------------------------------------------------------------------
   /** Write a single-valued log entry
    * @param prop :: The property containing the data.
    * @returns A boolean indicating success or failure
@@ -309,6 +322,7 @@ using namespace DataObjects;
     return success;
   }
 
+  //-----------------------------------------------------------------------------------------------
   //
   // write an NXdata entry with Float array values
   //
@@ -327,6 +341,9 @@ using namespace DataObjects;
     status=NXclosedata(fileID);
     return(true);
   }
+
+
+  //-----------------------------------------------------------------------------------------------
   //
   // write an NXdata entry with String array values
   //
@@ -518,15 +535,16 @@ using namespace DataObjects;
    * Use writeNexusProcessedDataEvent if writing an EventWorkspace.
    */
   int NexusFileIO::writeNexusProcessedData2D( const API::MatrixWorkspace_const_sptr& localworkspace,
-      const bool& uniformSpectra, const std::vector<int>& spec) const
+      const bool& uniformSpectra, const std::vector<int>& spec,
+      const char * group_name, bool write2Ddata) const
   {
     NXstatus status;
 
     //write data entry
-    status=NXmakegroup(fileID,"workspace","NXdata");
+    status=NXmakegroup(fileID,group_name,"NXdata");
     if(status==NX_ERROR)
       return(2);
-    status=NXopengroup(fileID,"workspace","NXdata");
+    status=NXopengroup(fileID,group_name,"NXdata");
     // write workspace data
     const int nHist=localworkspace->getNumberHistograms();
     if(nHist<1)
@@ -534,18 +552,8 @@ using namespace DataObjects;
     const int nSpectBins=localworkspace->readY(0).size();
     const int nSpect=int(spec.size());
     int dims_array[2] = { nSpect,nSpectBins };
-    std::string name="values";
-    int start[2]={0,0},asize[2]={1,dims_array[1]};
-    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
-    status=NXopendata(fileID, name.c_str());
-    for(int i=0;i<nSpect;i++)
-    {
-      int s = spec[i];
-      status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
-      start[0]++;
-    }
-    int signal=1;
-    status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
+
+
     // Set the axis labels and values
     Mantid::API::Axis *xAxis=localworkspace->getAxis(0);
     Mantid::API::Axis *sAxis=localworkspace->getAxis(1);
@@ -571,25 +579,46 @@ using namespace DataObjects;
       for (int i=0;i<sAxis->length();i++)
         axis2.push_back((*sAxis)(i));
 
-    const std::string axesNames="axis1,axis2";
-    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
-    std::string yUnits=localworkspace->YUnit();
-    std::string yUnitLabel=localworkspace->YUnitLabel();
-    status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
-    status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
-    status=NXclosedata(fileID);
-    // error
-    name="errors";
-    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
-    status=NXopendata(fileID, name.c_str());
-    start[0]=0;
-    for(int i=0;i<nSpect;i++)
+    int start[2]={0,0},asize[2]={1,dims_array[1]};
+
+
+    // -------------- Actually write the 2D data ----------------------------
+    if (write2Ddata)
     {
-      int s = spec[i];
-      status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
-      start[0]++;
+      std::string name="values";
+      status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
+      status=NXopendata(fileID, name.c_str());
+      for(int i=0;i<nSpect;i++)
+      {
+        int s = spec[i];
+        status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
+        start[0]++;
+      }
+      int signal=1;
+      status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
+      // More properties
+      const std::string axesNames="axis1,axis2";
+      status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
+      std::string yUnits=localworkspace->YUnit();
+      std::string yUnitLabel=localworkspace->YUnitLabel();
+      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
+      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
+      status=NXclosedata(fileID);
+
+      // error
+      name="errors";
+      status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
+      status=NXopendata(fileID, name.c_str());
+      start[0]=0;
+      for(int i=0;i<nSpect;i++)
+      {
+        int s = spec[i];
+        status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
+        start[0]++;
+      }
+      status=NXclosedata(fileID);
     }
-    status=NXclosedata(fileID);
+
     // write X data, as single array or all values if "ragged"
     if(uniformSpectra)
     {
@@ -688,16 +717,24 @@ using namespace DataObjects;
     NXstatus status;
 
     //write data entry
-    status=NXmakegroup(fileID,"event_workspace_compressed","NXdata");
-    if(status==NX_ERROR) return(2);
-    status=NXopengroup(fileID,"event_workspace_compressed","NXdata");
+    //status=NXmakegroup(fileID,"event_workspace","NXdata");
+    //if(status==NX_ERROR) return(2);
+
+    status=NXopengroup(fileID,"event_workspace","NXdata");
 
     // The array of indices for each event list #
     int dims_array[1];
     int64_t * indices_array = iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
     if (indices.size() > 0)
     {
-      NXwritedata("indices", NX_INT64, 1, dims_array, (void*)(indices_array), true );
+      status=NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array, m_nexuscompression, dims_array);
+      status=NXopendata(fileID, "indices");
+      status=NXputdata(fileID, (void*)(indices_array) );
+      std::string yUnits=ws->YUnit();
+      std::string yUnitLabel=ws->YUnitLabel();
+      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
+      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
+      status=NXclosedata(fileID);
       delete [] indices_array;
     }
 

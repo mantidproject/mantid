@@ -213,7 +213,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() )
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis type mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 1 type mismatch" );
 
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ws1, ws2)) );
@@ -230,7 +230,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis title mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 0 title mismatch" );
 
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ws1, ws2)) );
@@ -247,7 +247,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis unit mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 0 unit mismatch" );
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ws1, ws2)) );
   }
@@ -263,7 +263,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() )
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis values mismatch" ) ;
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 1 values mismatch" ) ;
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ws1, ws2)) );
   }

@@ -84,6 +84,10 @@ namespace Mantid
       /// Load a single entry
       API::MatrixWorkspace_sptr loadEntry(NXRoot & root, const std::string & entry_name,
                                               const double& progressStart, const double& progressRange);
+
+      API::MatrixWorkspace_sptr loadEventEntry(NXData & wksp_cls,NXDouble & xbins,
+          const double& progressStart, const double& progressRange);
+
       /// Read the data from the sample group
       void readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
       /// Add a property to the sample object
@@ -128,7 +132,6 @@ namespace Mantid
       MantidVecPtr m_xbins;
       /// Numeric values for the second axis, if applicable
       MantidVec m_axis1vals;
-
 
       /// Flag set if list of spectra to save is specifed
       bool m_list;

@@ -1,25 +1,26 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
-#include <Poco/Path.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/StringTokenizer.h>
-#include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <Poco/DateTimeParser.h>
+#include <Poco/Path.h>
+#include <Poco/StringTokenizer.h>
 
 #ifdef _WIN32
 #	include <winsock.h>
@@ -36,6 +37,7 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadNexusProcessed)
 DECLARE_LOADALGORITHM(LoadNexusProcessed)
 
+using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 using Geometry::IInstrument_sptr;
@@ -92,6 +94,8 @@ void LoadNexusProcessed::init()
       "The particular entry number to read (default: read all entries)" );
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  *
@@ -152,6 +156,139 @@ void LoadNexusProcessed::exec()
 
   m_axis1vals.clear();
 }
+
+
+
+//-------------------------------------------------------------------------------------------------
+/** Load the event_workspace field
+ *
+ * @param wksp_cls
+ * @param progressStart
+ * @param progressRange
+ * @return
+ */
+API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, NXDouble & xbins,
+    const double& progressStart, const double& progressRange)
+{
+  NXDataSetTyped<long> indices_data = wksp_cls.openNXDataSet<long>("indices");
+  indices_data.load();
+  boost::shared_array<long> indices = indices_data.sharedBuffer();
+  int numspec = indices_data.dim0()-1;
+
+  int num_xbins = xbins.dim1();
+  if (num_xbins < 2) num_xbins = 2;
+  EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>
+  (WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins, num_xbins-1));
+
+  // Set the YUnit label
+  ws->setYUnit(indices_data.attributes("units"));
+  std::string unitLabel = indices_data.attributes("unit_label");
+  if (unitLabel.empty()) unitLabel = indices_data.attributes("units");
+  ws->setYUnitLabel(unitLabel);
+
+  //Handle optional fields.
+  // TODO: Handle inconsistent sizes
+  boost::shared_array<long> pulsetimes;
+  if (wksp_cls.isValid("pulsetime"))
+  {
+    NXDataSetTyped<long> pulsetime = wksp_cls.openNXDataSet<long>("pulsetime");
+    pulsetime.load();
+    pulsetimes = pulsetime.sharedBuffer();
+  }
+
+//  std::vector<NXInfo>& grps = wksp_cls.datasets();
+//  for (std::vector<NXInfo>::iterator it = grps.begin(); it != grps.end(); it++)
+//    std::cout << it->nxname << "\n";
+
+  boost::shared_array<double> tofs;
+  if (wksp_cls.isValid("tof"))
+  {
+    NXDouble tof = wksp_cls.openNXDouble("tof");
+    tof.load();
+    tofs = tof.sharedBuffer();
+  }
+
+  boost::shared_array<float> error_squareds;
+  if (wksp_cls.isValid("error_squared"))
+  {
+    NXFloat error_squared = wksp_cls.openNXFloat("error_squared");
+    error_squared.load();
+    error_squareds = error_squared.sharedBuffer();
+  }
+
+  boost::shared_array<float> weights;
+  if (wksp_cls.isValid("weight"))
+  {
+    NXFloat weight = wksp_cls.openNXFloat("weight");
+    weight.load();
+    weights = weight.sharedBuffer();
+  }
+
+  // What type of event lists?
+  EventType type = TOF;
+  if (tofs && pulsetimes && weights && error_squareds)
+    type = WEIGHTED;
+  else if ((tofs && weights && error_squareds))
+    type = WEIGHTED_NOTIME;
+  else if (pulsetimes && tofs)
+    type = TOF;
+  else
+    throw std::runtime_error("Could not figure out the type of event list!");
+
+  // Create all the event lists
+  for (int wi=0; wi < numspec; wi++)
+  {
+    long index_start = indices[wi];
+    long index_end = indices[wi+1];
+    //std::cout << wi << ":" << index_start << " to " << index_end << std::endl;
+
+    if (index_end >= index_start)
+    {
+      EventList & el = ws->getEventList(wi);
+      el.switchTo(type);
+
+      // Allocate all the required memory
+      el.reserve(index_end - index_start);
+
+      for (long i=index_start; i<index_end; i++)
+      switch (type)
+      {
+      case TOF:
+        el.addEventQuickly( TofEvent( tofs[i], DateAndTime(pulsetimes[i])) );
+        break;
+      case WEIGHTED:
+        el.addEventQuickly( WeightedEvent( tofs[i], DateAndTime(pulsetimes[i]), weights[i], error_squareds[i]) );
+        break;
+      case WEIGHTED_NOTIME:
+        el.addEventQuickly( WeightedEventNoTime( tofs[i], weights[i], error_squareds[i]) );
+        break;
+      }
+
+      // Set the X axis
+      if (this->m_shared_bins)
+        el.setX(this->m_xbins);
+      else
+      {
+        MantidVec x;
+        x.resize(xbins.dim1());
+        for (int i=0; i < xbins.dim1(); i++)
+          x[i] = xbins(wi, i);
+        el.setX(x);
+      }
+    }
+
+    progress(progressStart + progressRange*(1.0/numspec));
+  }
+
+  // Clean up some stuff
+  ws->doneAddingEventLists();
+
+  return ws;
+}
+
+
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Load a single entry into a workspace
  * @param root :: The opened root node
@@ -166,12 +303,22 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   progress(progressStart,"Opening entry " + entry_name + "...");
 
   NXEntry mtd_entry = root.openEntry(entry_name);
+
+  bool isEvent = false;
+  std::string group_name = "workspace";
+  if (mtd_entry.containsGroup("event_workspace"))
+  {
+    isEvent = true;
+    group_name = "event_workspace";
+  }
+
   // Get workspace characteristics
-  NXData wksp_cls = mtd_entry.openNXData("workspace");
+  NXData wksp_cls = mtd_entry.openNXData(group_name);
 
   // Axis information
   // "X" axis
   NXDouble xbins = wksp_cls.openNXDouble("axis1");
+  xbins.load();
   std::string unit1 = xbins.attributes("units");
   // Non-uniform x bins get saved as a 2D 'axis1' dataset
   int xlength(-1);
@@ -196,27 +343,176 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   NXDouble axis2 = wksp_cls.openNXDouble("axis2");
   std::string unit2 = axis2.attributes("units");
 
-  NXDataSetTyped<double> data = wksp_cls.openDoubleData();
-  int nspectra = data.dim0();
-  int nchannels = data.dim1();
+  // The workspace being worked on
+  API::MatrixWorkspace_sptr local_workspace;
+  int nspectra;
+  int nchannels;
 
-  //// validate the optional spectrum parameters, if set
-  checkOptionalProperties(nspectra);
-
-  //size of the workspace
-  int total_specs=calculateWorkspacesize(nspectra);
-
-  //// Create the 2D workspace for the output
-  API::MatrixWorkspace_sptr local_workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>
-  (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));
-  try
+  // -------- Process as event ? --------------------
+  if (isEvent)
   {
-    local_workspace->setTitle(mtd_entry.getString("title"));
+    local_workspace = loadEventEntry(wksp_cls, xbins, progressStart, progressRange);
+    nspectra = local_workspace->getNumberHistograms();
+    nchannels = local_workspace->blocksize();
   }
-  catch (std::runtime_error&)
+  else
   {
-    g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
-  }
+    NXDataSetTyped<double> data = wksp_cls.openDoubleData();
+    nspectra = data.dim0();
+    nchannels = data.dim1();
+    //// validate the optional spectrum parameters, if set
+    checkOptionalProperties(nspectra);
+    // Actual number of spectra in output workspace (if only a range was going to be loaded)
+    int total_specs=calculateWorkspacesize(nspectra);
+
+    //// Create the 2D workspace for the output
+    local_workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>
+    (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));
+    try
+    {
+      local_workspace->setTitle(mtd_entry.getString("title"));
+    }
+    catch (std::runtime_error&)
+    {
+      g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
+    }
+
+    // Set the YUnit label
+    local_workspace->setYUnit(data.attributes("units"));
+    std::string unitLabel = data.attributes("unit_label");
+    if (unitLabel.empty()) unitLabel = data.attributes("units");
+    local_workspace->setYUnitLabel(unitLabel);
+    
+    readBinMasking(wksp_cls, local_workspace);
+    NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
+
+    int blocksize(8);
+    //const int fullblocks = nspectra / blocksize;
+    //size of the workspace
+    int fullblocks = total_specs / blocksize;
+    int read_stop = (fullblocks * blocksize);
+    const double progressBegin = progressStart+0.25*progressRange;
+    const double progressScaler = 0.75*progressRange;
+    int hist_index = 0;
+    int wsIndex=0;
+    if( m_shared_bins )
+    {
+      //if spectrum min,max,list properties are set
+      if(m_interval||m_list)
+      {
+        //if spectrum max,min properties are set read the data as a block(multiple of 8) and
+        //then read the remaining data as finalblock
+        if(m_interval)
+        {
+          //specs at the min-max interval
+          int interval_specs=m_spec_max-m_spec_min;
+          fullblocks=(interval_specs)/blocksize;
+          read_stop = (fullblocks * blocksize)+m_spec_min-1;
+
+          if(interval_specs<blocksize)
+          {
+            blocksize=total_specs;
+            read_stop=m_spec_max-1;
+          }
+          hist_index=m_spec_min-1;
+
+          for( ; hist_index < read_stop; )
+          {
+            progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+            loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
+          }
+          int finalblock = m_spec_max-1 - read_stop;
+          if( finalblock > 0 )
+          {
+            loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
+          }
+        }
+        // if spectrum list property is set read each spectrum separately by setting blocksize=1
+        if(m_list)
+        {
+          std::vector<int>::iterator itr=m_spec_list.begin();
+          for(;itr!=m_spec_list.end();++itr)
+          {
+            int specIndex=(*itr)-1;
+            progress(progressBegin+progressScaler*specIndex/m_spec_list.size(),"Reading workspace data...");
+            loadBlock(data, errors, 1, nchannels, specIndex,wsIndex, local_workspace);
+          }
+
+        }
+      }
+      else
+      {
+        for( ; hist_index < read_stop; )
+        {
+          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+          loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
+        }
+        int finalblock = total_specs - read_stop;
+        if( finalblock > 0 )
+        {
+          loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
+        }
+      }
+
+    }
+    else
+    {
+      if(m_interval||m_list)
+      {
+        if(m_interval)
+        {
+          int interval_specs=m_spec_max-m_spec_min;
+          fullblocks=(interval_specs)/blocksize;
+          read_stop = (fullblocks * blocksize)+m_spec_min-1;
+
+          if(interval_specs<blocksize)
+          {
+            blocksize=interval_specs;
+            read_stop=m_spec_max-1;
+          }
+          hist_index=m_spec_min-1;
+
+          for( ; hist_index < read_stop; )
+          {
+            progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+            loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
+          }
+          int finalblock = m_spec_max-1 - read_stop;
+          if( finalblock > 0 )
+          {
+            loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
+          }
+        }
+        //
+        if(m_list)
+        {
+          std::vector<int>::iterator itr=m_spec_list.begin();
+          for(;itr!=m_spec_list.end();++itr)
+          {
+            int specIndex=(*itr)-1;
+            progress(progressBegin+progressScaler*specIndex/read_stop,"Reading workspace data...");
+            loadBlock(data, errors, xbins, 1, nchannels, specIndex,wsIndex,local_workspace);
+          }
+
+        }
+      }
+      else
+      {
+        for( ; hist_index < read_stop; )
+        {
+          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+          loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
+        }
+        int finalblock = total_specs - read_stop;
+        if( finalblock > 0 )
+        {
+          loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
+        }
+      }
+    }
+  } //end of NOT an event -------------------------------
+
+
 
   //Units
   try
@@ -230,7 +526,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   {
     g_log.information() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
   }
-    
+
   // Setting a unit onto a SpectraAxis makes no sense.
   if ( unit2 == "TextAxis" )
   {
@@ -243,7 +539,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     {
       Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
-      newAxis->unit() = UnitFactory::Instance().create(unit2);      
+      newAxis->unit() = UnitFactory::Instance().create(unit2);
     }
     catch( std::runtime_error & )
     {
@@ -251,11 +547,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     }
   }
 
-  // Set the YUnit label
-  local_workspace->setYUnit(data.attributes("units")); 
-  std::string unitLabel = data.attributes("unit_label"); 
-  if (unitLabel.empty()) unitLabel = data.attributes("units"); 
-  local_workspace->setYUnitLabel(unitLabel);
 
   //Are we a distribution
   std::string dist = xbins.attributes("distribution");
@@ -276,6 +567,20 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     loadNonSpectraAxis(local_workspace, wksp_cls);
   }
 
+  // Handle the detectors back from the spectra map for event workspaces
+  if (isEvent)
+  {
+    //TODO: This could be a method in EventWorkspace
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
+    for (int wi=0; wi<local_workspace->getNumberHistograms(); wi++)
+    {
+      std::vector<int> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
+      EventList & el = ew->getEventList(wi);
+      for (size_t i=0; i < dets.size(); i++)
+        el.addDetectorID(dets[i]);
+    }
+  }
+
   progress(progressStart+0.1*progressRange,"Reading the sample details...");
   readSampleGroup(mtd_entry, local_workspace);
 
@@ -292,136 +597,12 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   progress(progressStart+0.2*progressRange,"Reading the workspace history...");
   readParameterMap(mtd_entry, local_workspace);
 
-  readBinMasking(wksp_cls, local_workspace);
-  NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
-
-  int blocksize(8);
-  //const int fullblocks = nspectra / blocksize;
-  int fullblocks = total_specs / blocksize;
-  int read_stop = (fullblocks * blocksize);
-  const double progressBegin = progressStart+0.25*progressRange;
-  const double progressScaler = 0.75*progressRange;
-  int hist_index = 0;
-  int wsIndex=0;
-  if( m_shared_bins )
-  {
-    //if spectrum min,max,list properties are set
-    if(m_interval||m_list)
-    {
-      //if spectrum max,min properties are set read the data as a block(multiple of 8) and
-      //then read the remaining data as finalblock
-      if(m_interval)
-      {
-        //specs at the min-max interval
-        int interval_specs=m_spec_max-m_spec_min;
-        fullblocks=(interval_specs)/blocksize;
-        read_stop = (fullblocks * blocksize)+m_spec_min-1;
-
-        if(interval_specs<blocksize)
-        {
-          blocksize=total_specs;
-          read_stop=m_spec_max-1;
-        }
-        hist_index=m_spec_min-1;
-
-        for( ; hist_index < read_stop; )
-        {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-          loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
-        }
-        int finalblock = m_spec_max-1 - read_stop;
-        if( finalblock > 0 )
-        {
-          loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
-        }
-      }
-      // if spectrum list property is set read each spectrum separately by setting blocksize=1
-      if(m_list)
-      {
-        std::vector<int>::iterator itr=m_spec_list.begin();
-        for(;itr!=m_spec_list.end();++itr)
-        {
-          int specIndex=(*itr)-1;
-          progress(progressBegin+progressScaler*specIndex/m_spec_list.size(),"Reading workspace data...");
-          loadBlock(data, errors, 1, nchannels, specIndex,wsIndex, local_workspace);
-        }
-
-      }
-    }
-    else
-    {
-      for( ; hist_index < read_stop; )
-      {
-        progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-        loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
-      }
-      int finalblock = total_specs - read_stop;
-      if( finalblock > 0 )
-      {
-        loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
-      }
-    }
-
-  }
-  else
-  {
-    if(m_interval||m_list)
-    {
-      if(m_interval)
-      {
-        int interval_specs=m_spec_max-m_spec_min;
-        fullblocks=(interval_specs)/blocksize;
-        read_stop = (fullblocks * blocksize)+m_spec_min-1;
-
-        if(interval_specs<blocksize)
-        {
-          blocksize=interval_specs;
-          read_stop=m_spec_max-1;
-        }
-        hist_index=m_spec_min-1;
-
-        for( ; hist_index < read_stop; )
-        {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-          loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
-        }
-        int finalblock = m_spec_max-1 - read_stop;
-        if( finalblock > 0 )
-        {
-          loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
-        }
-      }
-      //
-      if(m_list)
-      {
-        std::vector<int>::iterator itr=m_spec_list.begin();
-        for(;itr!=m_spec_list.end();++itr)
-        {
-          int specIndex=(*itr)-1;
-          progress(progressBegin+progressScaler*specIndex/read_stop,"Reading workspace data...");
-          loadBlock(data, errors, xbins, 1, nchannels, specIndex,wsIndex,local_workspace);
-        }
-
-      }
-    }
-    else
-    {
-      for( ; hist_index < read_stop; )
-      {
-        progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-        loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
-      }
-      int finalblock = total_specs - read_stop;
-      if( finalblock > 0 )
-      {
-        loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
-      }
-    }
-  }
-
   return local_workspace;
 }
 
+
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Read the instrument group
  * @param mtd_entry :: The node for the current workspace
@@ -534,6 +715,9 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   delete[] spectra_list;
 }
 
+
+
+//-------------------------------------------------------------------------------------------------
 /**
 * Loads the information contained in non-Spectra (ie, Text or Numeric) axis in the Nexus
 * file into the workspace.
@@ -573,10 +757,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
   }
 }
 
+
+
+//-------------------------------------------------------------------------------------------------
 /**
- * Read the instrument group
+ * Read the sample group
  * @param mtd_entry :: The node for the current workspace
- * @param local_workspace :: The workspace to attach the instrument
+ * @param local_workspace :: The workspace to attach the sample
  */
 void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
@@ -756,6 +943,8 @@ bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
     return false;
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Read the algorithm history from the "mantid_workspace_i/process" group
  * @param mtd_entry :: The node for the current workspace
@@ -851,6 +1040,9 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
   }
 
 }
+
+
+//-------------------------------------------------------------------------------------------------
 /** If the first string contains exactly three words separated by spaces
  *  these words will be copied into each of the following strings that were passed
  *  @param[in] words3 a string with 3 words separated by spaces
@@ -873,6 +1065,9 @@ void LoadNexusProcessed::getWordsInString(const std::string & words3, std::strin
   w3 = data[2];
 }
 
+
+
+//-------------------------------------------------------------------------------------------------
 /** If the first string contains exactly four words separated by spaces
  *  these words will be copied into each of the following strings that were passed
  *  @param[in] words4 a string with 4 words separated by spaces
@@ -897,6 +1092,8 @@ void LoadNexusProcessed::getWordsInString(const std::string & words4, std::strin
   w4 = data[3];
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Read the parameter map from the mantid_workspace_i/instrument_parameter_map group.
  * @param mtd_entry :: The entry object that points to the root node
@@ -950,6 +1147,8 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
   }
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Read the bin masking information from the mantid_workspace_i/workspace group.
  * @param wksp_cls :: The data group
@@ -982,6 +1181,8 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_
 }
 
 
+
+//-------------------------------------------------------------------------------------------------
 /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
