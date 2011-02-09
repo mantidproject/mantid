@@ -832,7 +832,6 @@ public:
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->note(*a0, true);
 %End
-  Note* newNote(const QString& = QString::null);
   MultiLayer *multilayerPlot(Table*, SIP_PYTUPLE, int=1) /PyName=plot/;
 %MethodCode
   QStringList l;
@@ -1665,7 +1664,6 @@ public:
   Table *table(const QString &name, bool recursive=false);
   Matrix *matrix(const QString &name, bool recursive=false);
   MultiLayer *graph(const QString &name, bool recursive=false);
-  Note *note(const QString &name, bool recursive=false);
 
   Folder* rootFolder();
 

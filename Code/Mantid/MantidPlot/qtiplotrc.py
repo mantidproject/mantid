@@ -51,9 +51,7 @@ from qti import *
 appImports = (
     "table", "newTable",
     "matrix", "newMatrix",
-    "graph", "newGraph",
-    "note", "newNote",
-    "newPlot3D",
+    "graph", "newGraph", "newPlot3D",
     "tableToMatrix", "matrixToTable",
     "openTemplate", "saveAsTemplate",
     "clone", "setWindowName",
