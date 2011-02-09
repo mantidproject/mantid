@@ -76,6 +76,8 @@ namespace MantidQt
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
       QStringList getFileExtensions() const;
+      bool isEmpty() const;
+      QString getText() const;
       void setFileExtensions(const QStringList & extensions);
 
       // Standard setters/getters

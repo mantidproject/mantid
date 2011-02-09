@@ -170,9 +170,6 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.q_dq_opt->setItemData(0, "LIN");
   m_uiForm.q_dq_opt->setItemData(1, "LOG");
   m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
-  m_uiForm.trans_opt->setItemData(0,"Log");
-  m_uiForm.trans_opt->setItemData(1,"Linear");
-  m_uiForm.trans_opt->setItemData(2,"Off");
 //remove the following two lines once the beamfinder is in the new framework
   m_uiForm.wav_dw_opt->setItemData(0, "LIN");
   m_uiForm.wav_dw_opt->setItemData(1, "LOG");
@@ -658,7 +655,7 @@ bool SANSRunWindow::oldLoadUserFile()
   m_uiForm.trans_min->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV1'),"));
   m_uiForm.trans_max->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV2'),"));
   text = runReduceScriptFunction("SANSReduction.printParameter('TRANS_FIT')");
-  int index = m_uiForm.trans_opt->findData(text, Qt::UserRole, Qt::MatchFixedString);
+  int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
   if( index >= 0 )
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
@@ -850,7 +847,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
       "print i.ReductionSingleton().get_trans_lambdamax()"));
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fit_method").trimmed();
-  int index = m_uiForm.trans_opt->findData(text, Qt::UserRole, Qt::MatchFixedString);
+  int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
   if( index >= 0 )
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
@@ -900,7 +897,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
 
   //Gravity switch
   QString param = runReduceScriptFunction(
-    "print i.ReductionSingleton().to_Q.gravity").trimmed();
+    "print i.ReductionSingleton().to_Q.get_gravity()").trimmed();
   if( param == "True" )
   {
     m_uiForm.gravity_check->setChecked(true);
@@ -2154,7 +2151,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += "i.SetDetectorFloodFile('"+floodFile+"')\n";
 
   //Transmission behaviour
-  exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "','" +
+  exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
     m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
 
   //Centre values
@@ -2247,7 +2244,12 @@ QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
   exec_reduce += "SANSReduction.SetDetectorFloodFile('"+floodFile+"')\n";
 
   //Transmission behaviour
-  exec_reduce += "SANSReduction.TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "'," +
+  QString fitType = m_uiForm.trans_opt->currentText().trimmed().toUpper();
+  if (fitType == "LOGARITHMIC")
+  {
+    fitType = "LOG";
+  }
+  exec_reduce += "SANSReduction.TransFit('" + fitType + "'," +
     m_uiForm.trans_min->text() + "," + m_uiForm.trans_max->text() + ")\n";
 
   //Centre values

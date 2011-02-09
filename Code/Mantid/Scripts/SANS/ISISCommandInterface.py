@@ -103,7 +103,8 @@ def Gravity(flag):
     ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
-    message = str(mode)
+    mode = str(mode).strip().upper()
+    message = mode
     if lambdamin: message += str(lambdamin)
     if lambdamax: message += str(lambdamax)
     _printMessage("TransFit(\"" + message + "\")")

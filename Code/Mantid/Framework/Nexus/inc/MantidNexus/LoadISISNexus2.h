@@ -141,8 +141,6 @@ namespace Mantid
       boost::shared_ptr<MantidVec> m_tof_data;
       /// Proton charge
       double m_proton_charge;
-      /// Title of workspace is read by loadPeriodData()
-      std::string m_wTitle;
       /// Spectra numbers
       boost::shared_array<int> m_spec;
       /// Pointer to one-past-the-end of spectrum number array (m_spec)

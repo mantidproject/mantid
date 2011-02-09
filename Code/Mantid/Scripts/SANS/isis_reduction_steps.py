@@ -897,7 +897,8 @@ class ConvertToQ(ReductionStep):
         self._Q_alg = None
         self.set_output_type(type)
         #if true gravity is taken into account in the Q1D calculation
-        self._use_gravity = None
+        self._use_gravity = self._DEFAULT_GRAV
+        self._grav_set = False
         
         self.error_est_1D = None
     
@@ -914,19 +915,15 @@ class ConvertToQ(ReductionStep):
         return self._use_gravity
 
     def set_gravity(self, flag, override=True):
-        if isinstance(flag, bool) or isinstance(flag, int):
-            if (self._use_gravity is None) or override:
+        if override:
+            self._grav_set = True
+            
+        if (not self._grav_set) or override:
                 self._use_gravity = bool(flag)
         else:
-            _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
-
-    gravity = property(get_gravity, set_gravity, None, None)
-
-    def set_defaults(self):
-        self.set_gravity(self._DEFAULT_GRAV, override=False)
+            _issueWarning("User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)) 
 
     def execute(self, reducer, workspace):
-        self.set_defaults()
         if self._Q_alg == 'Q1D':
             if self.error_est_1D is None:
                 raise RuntimeError('Could not find the workspace containing error estimates')
@@ -1012,6 +1009,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         'STRAIGHT' : 'Linear',
         'CLEAR' : 'Off',
         # Add Mantid ones as well
+        'LOGARITHMIC' : 'Log',
         'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
@@ -1028,8 +1026,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
         self._lambda_min = None
+        self._min_set = False
         self._lambda_max = None
+        self._max_set = False
         self.fit_method = None
+        self._method_set = False
         self._use_full_range = None
         self.loader = loader
 
@@ -1055,20 +1056,24 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if min: min = float(min)
         if max: max = float(max)
         if not min is None:
-            if (self._lambda_min is None) or override:
+            if (not self._min_set) or override:
                 self._lambda_min = min
+                self._min_set = override
         if not max is None:
-            if (self._lambda_max is None) or override:
+            if (not self._max_set) or override:
                 self._lambda_max = max
+                self._max_set = override
 
         if not fit_method is None:
-            if (self.fit_method is None) or override:
+            if (not self._method_set) or override:
                 fit_method = fit_method.upper()
                 if fit_method in self.TRANS_FIT_OPTIONS.keys():
                     self.fit_method = self.TRANS_FIT_OPTIONS[fit_method]
+                    override 
                 else:
                     self.fit_method = self.DEFAULT_FIT
-                    mantid.sendLogMessage('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
+                    _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
+                self._method_set = override
 
     def set_full_wav(self, is_full):
         self._use_full_range = is_full
@@ -1226,6 +1231,7 @@ class UserFile(ReductionStep):
         """
         super(UserFile, self).__init__()
         self.filename = file
+        self._incid_monitor_lckd = False
 
     def execute(self, reducer, workspace=None):
         if self.filename is None:
@@ -1289,14 +1295,14 @@ class UserFile(ReductionStep):
                 reducer.instrument.setDetector(det_specif)
         
         elif upper_line.startswith('GRAVITY'):
-            flag = upper_line[8:]
-            if flag == 'ON':
+            flag = upper_line[8:].strip()
+            if flag == 'ON' or flag == 'TRUE':
                 reducer.to_Q.set_gravity(True, override=False)
-            elif flag == 'OFF':
+            elif flag == 'OFF' or flag == 'FALSE':
                 reducer.to_Q.set_gravity(False, override=False)
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
-                reducer.to_Q.set_gravity(False)
+                reducer.to_Q.set_gravity(False, override=False)
         
         elif upper_line.startswith('BACK/MON/TIMES'):
             tokens = upper_line.split()
@@ -1322,6 +1328,9 @@ class UserFile(ReductionStep):
                     max=lambdamax, fit_method=fit_type, override=False)
             else:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
+
+        elif upper_line == 'SANS2D' or upper_line == 'LOQ':
+            self._check_instrument(upper_line, reducer)  
 
         elif upper_line.startswith('PRINT '):
             _issueInfo(upper_line[6:])
@@ -1419,17 +1428,20 @@ class UserFile(ReductionStep):
         #MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
         interpolate = False
         interPlace = details.upper().find('/INTERPOLATE')
-        if interPlace != -1 :
+        if interPlace != -1:
             interpolate = True
             details = details[0:interPlace]
     
-        if details.upper().startswith('LENGTH'):
-            reducer.suggest_monitor_spectrum(
-                int(details.split()[1]), interpolate)
-        
-        elif details.upper().startswith('SPECTRUM'):
+        if details.upper().startswith('SPECTRUM'):
             reducer.set_monitor_spectrum(
                 int(details.split('=')[1]), interpolate, override=False)
+            self._incid_monitor_lckd = True
+        
+        elif details.upper().startswith('LENGTH'):
+            #the settings here are overriden by MON/SPECTRUM
+            if not self._incid_monitor_lckd:
+                reducer.set_monitor_spectrum(
+                    int(details.split()[1]), interpolate, override=False)
         
         elif details.upper().startswith('TRANS'):
             parts = details.split('=')
@@ -1500,6 +1512,11 @@ class UserFile(ReductionStep):
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
+    def _check_instrument(self, inst_name, reducer):
+        if reducer.instrument is None:
+            raise RuntimeError('Use SANS2D() or LOQ() to set the instrument before Maskfile()')
+        if not inst_name == reducer.instrument.name():
+            raise RuntimeError('User settings file not compatible with the selected instrument '+reducer.instrument.name())
 
     def _restore_defaults(self, reducer):
         reducer.mask.parse_instruction('MASK/CLEAR')

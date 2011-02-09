@@ -216,6 +216,23 @@ QString MWRunFiles::getFirstFilename() const
     return m_foundFiles[0];
 }
 
+
+/** Check if any text, valid or not, has been entered into the line edit
+*  @return true if no text has been entered
+*/
+bool MWRunFiles::isEmpty() const
+{
+  return m_uiForm.fileEditor->text().isEmpty();
+}
+
+/** The verbatum, unexpanded text, that was entered into the box
+*  @return the contents shown in the Line Edit
+*/
+QString MWRunFiles::getText() const
+{
+  return m_uiForm.fileEditor->text();
+}
+
 /** The number the user entered into the entryNum lineEdit
 * or NO_ENTRY_NUM on error. Checking if isValid is true should
 * eliminate the possiblity of getting NO_ENTRY_NUM

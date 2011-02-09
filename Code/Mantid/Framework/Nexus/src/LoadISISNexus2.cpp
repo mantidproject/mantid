@@ -229,7 +229,7 @@ namespace Mantid
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
-        wksp_group->setTitle(m_wTitle);
+        wksp_group->setTitle(local_workspace->getTitle());
 
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
@@ -473,13 +473,15 @@ namespace Mantid
       
       try
       {
-        m_wTitle = entry.getString("title");
+        const std::string title = entry.getString("title");
+        local_workspace->setTitle(title);
+        // write the title into the log file (run object)
+        local_workspace->mutableRun().addProperty("run_title", title);
       }
       catch (std::runtime_error &)
       {
         g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
       }
-      local_workspace->setTitle(m_wTitle);
     }
 
 
@@ -576,8 +578,6 @@ namespace Mantid
       NXChar char_data = vms_compat.openNXChar("HDR");
       char_data.load();
       runDetails.addProperty("run_header", std::string(char_data(),80));
-      // Run title
-      runDetails.addProperty("run_title", local_workspace->getTitle());
       
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(m_numberOfSpectraInFile));

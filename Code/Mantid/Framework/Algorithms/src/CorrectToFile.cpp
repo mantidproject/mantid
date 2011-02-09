@@ -76,7 +76,7 @@ void CorrectToFile::exec()
 
     const int nOutSpec = outputWS->getNumberHistograms();
     // Set the progress bar
-    Progress prg(this,LOAD_TIME,1.0, nOutSpec);
+    Progress prg(this,0/*LOAD_TIME*/,1.0, nOutSpec);
     
     MatrixWorkspace::iterator outIt(*outputWS);
     for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
@@ -153,7 +153,7 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string & corrFile)
 {  
   g_log.information() << "Loading file " << corrFile << std::endl;
   progress(0, "Loading file");
-  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH", 0, LOAD_TIME);
+  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH", 0, 1.0/*LOAD_TIME*/);
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
