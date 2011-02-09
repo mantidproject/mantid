@@ -9,6 +9,7 @@
 #include <vector>
 #include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -31,6 +32,7 @@ namespace DataHandling
 {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventPreNeXus)
+DECLARE_LOADALGORITHM(LoadEventPreNeXus)
 
 using namespace Kernel;
 using namespace API;
@@ -74,7 +76,7 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
+LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::IDataFileChecker()
 {
   this->eventfile = NULL;
   this->max_events = 0;
@@ -85,6 +87,50 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
   if (this->eventfile)
     delete this->eventfile;
 }
+
+/**
+ * Returns the name of the property to be considered as the Filename for Load
+ * @returns A character string containing the file property's name
+ */
+const char * LoadEventPreNeXus::filePropertyName() const
+{
+  return EVENT_PARAM.c_str();
+}
+
+/**
+ * Do a quick file type check by looking at the first 100 bytes of the file 
+ *  @param filePath :: path of the file including name.
+ *  @param nread :: no.of bytes read
+ *  @param header :: The first 100 bytes of the file as a union
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadEventPreNeXus::quickFileCheck(const std::string& filePath,size_t,const file_header&)
+{
+  std::string ext = extension(filePath);
+  return (ext.rfind("dat") != std::string::npos);
+}
+
+/**
+ * Checks the file by opening it and reading few lines 
+ *  @param filePath :: name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+int LoadEventPreNeXus::fileCheck(const std::string& filePath)
+{
+  int confidence(0);
+  try
+  {
+    // If this looks like a binary file where the exact file length is a multiple
+    // of the DasEvent struct then we're probably okay
+    BinaryFile<DasEvent> event_file = BinaryFile<DasEvent>(filePath);
+    confidence = 80;
+  }
+  catch(std::runtime_error &)
+  {
+  }
+  return confidence;
+}
+
 
 //-----------------------------------------------------------------------------
 /** Initialize the algorithm */

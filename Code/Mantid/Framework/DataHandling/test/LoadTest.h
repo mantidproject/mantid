@@ -7,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
@@ -251,6 +250,15 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
+
+  void testEventFileWithNoExecute()
+  {
+    Load loader;
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
+    TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
+  }
+
 };
 
 #endif /*LOADTEST_H_*/

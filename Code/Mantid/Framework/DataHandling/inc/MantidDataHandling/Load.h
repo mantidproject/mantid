@@ -60,21 +60,21 @@ namespace Mantid
       virtual int fileCheck(const std::string& filePath);
       /// This method returns shared pointer to a load algorithm which got 
       /// the highest preference after file check. 
-      API::IAlgorithm_sptr getFileLoader(const std::string& filePath);
+      API::IDataFileChecker_sptr getFileLoader(const std::string& filePath);
       /// Declare any additional input properties from the concrete loader
-      void declareLoaderProperties(const API::IAlgorithm_sptr loader);
+      void declareLoaderProperties(const API::IDataFileChecker_sptr loader);
       
       /// Initialize the static base properties
       void init();
       /// Execute
       void exec();
       /// Create the concrete instance use for the actual loading.
-      API::IAlgorithm_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
-					const double endProgress=-1.0, const bool logging = true) const;
+      API::IDataFileChecker_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
+					      const double endProgress=-1.0, const bool logging = true) const;
       /// Set the output workspace(s)
-      void setOutputWorkspace(const API::IAlgorithm_sptr loader);
+      void setOutputWorkspace(const API::IDataFileChecker_sptr loader);
       /// Retrieve a pointer to the output workspace from the sub algorithm
-      API::Workspace_sptr getOutputWorkspace(const API::IAlgorithm_sptr loader) const;
+      API::Workspace_sptr getOutputWorkspace(const API::IDataFileChecker_sptr loader) const;
       
 
     private:

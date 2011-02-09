@@ -71,6 +71,13 @@ namespace MantidQt
       /// Default constructor
       LoadDialog(QWidget *parent = NULL);
 
+    private slots:
+      /// Create the widgets and layouts that are dynamic, i.e they depend on 
+      /// the specific load algorithm
+      void createDynamicWidgets();
+      /// Override the help button clicked method
+      void helpClicked();
+
     private:
       /// Initialize the layout
       void initLayout();
@@ -83,16 +90,11 @@ namespace MantidQt
       void tieStaticWidgets(const bool readHistory);
       /// Clears all of the widgets from the old layout
       void setupDynamicLayout();
+      /// Create
+      void createDynamicLayout();
       /// Create the widgets for a given property
       QBoxLayout* createWidgetsForProperty(const Mantid::Kernel::Property* prop, 
 					   QGridLayout *loaderGrid);
-
-    private slots:
-      /// Create the widgets and layouts that are dynamic, i.e they depend on 
-      /// the specific load algorithm
-      void createDynamicWidgets();
-      /// Override the help button clicked method
-      void helpClicked();
 
     private:
       /// A widget for the filename text input
@@ -105,6 +107,8 @@ namespace MantidQt
       QVBoxLayout *m_dialogLayout;
       /// The dynamic layout
       QGridLayout *m_loaderLayout;
+      /// The current file
+      QString m_currentFile;
     };
 
   }

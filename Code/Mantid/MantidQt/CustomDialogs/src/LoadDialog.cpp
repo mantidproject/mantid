@@ -29,12 +29,35 @@ namespace MantidQt
     /// Default constructor
     LoadDialog:: LoadDialog(QWidget *parent) 
       : API::AlgorithmDialog(parent), m_fileWidget(NULL), m_wkspaceWidget(NULL), 
-	m_wkspaceLayout(NULL), m_dialogLayout(NULL), m_loaderLayout(NULL)
-					       
+	m_wkspaceLayout(NULL), m_dialogLayout(NULL), m_loaderLayout(NULL), 
+	m_currentFile()					       
     {
       QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
       setSizePolicy(sizePolicy);
     }
+
+    //--------------------------------------------------------------------------
+    // Private methods (slot)
+    //---------------------------------------------------------------------------
+
+    /**
+     * Activated when the file has been changed
+     */
+    void LoadDialog::createDynamicWidgets()
+    {
+      m_fileWidget->blockSignals(true);
+      createDynamicLayout();
+      m_fileWidget->blockSignals(false);
+    }
+
+    /// Override the help button clicked method
+    void LoadDialog::helpClicked()
+    {
+      const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
+      QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
+      QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+    }
+
 
     //--------------------------------------------------------------------------
     // Private methods (non-slot)
@@ -92,6 +115,7 @@ namespace MantidQt
       m_fileWidget->allowMultipleFiles(false);
       m_fileWidget->isOptional(false);
       m_fileWidget->doMultiEntry(false);
+      m_fileWidget->setAlgorithmProperty("Load"); // Slight hack to get only the all-files option in browse
       m_fileWidget->readSettings("Mantid/Algorithms/Load");
       QHBoxLayout *propLine = new QHBoxLayout;
       propLine->addWidget(m_fileWidget);
@@ -149,6 +173,52 @@ namespace MantidQt
       } 
     }
     
+    /**
+     * Create the dynamic widgets for the concrete loader
+     */
+    void LoadDialog::createDynamicLayout()
+    {
+      using namespace Mantid::API;
+      using namespace Mantid::Kernel;
+
+      if( !m_fileWidget->isValid() ) return;
+      // First step is the get the specific loader that is reponsible
+      IAlgorithm *loadAlg = getAlgorithm();
+      const QString filename = m_fileWidget->getFirstFilename();
+      if( filename == m_currentFile ) return;
+      m_currentFile = filename;
+      if( m_currentFile.isEmpty() ) return;
+      try
+      {
+	loadAlg->setPropertyValue("Filename", filename.toStdString());
+      }
+      catch(std::exception & exc)
+      {
+	m_fileWidget->setFileProblem(QString::fromStdString(exc.what()));
+	return;
+      }
+      // Reset the algorithm pointer so that the base class re-reads the properties and drops links from
+      // old widgets meaning they are safe to remove
+      this->setAlgorithm(loadAlg);
+
+      setupDynamicLayout();
+      tieStaticWidgets(false);
+      const std::vector<Property*> & inputProps = loadAlg->getProperties();
+      for( size_t i = 0; i < inputProps.size(); ++i )
+      {
+	const Property* prop = inputProps[i];
+	const QString propName = QString::fromStdString(prop->name());
+	if( propName == "OutputWorkspace" || propName == "Filename" ) continue;
+	if( requiresUserInput(propName) )
+	{
+	  createWidgetsForProperty(prop, m_loaderLayout);
+	}
+      }
+
+      // Attempt to set any values that may have been retrieved
+      setPropertyValues();
+    }
+
     /**
      * Return a layout containing suitable widgets for the given property
      * @param prop A pointer to the algorithm property
@@ -224,61 +294,6 @@ namespace MantidQt
       return NULL;
     }
 
-    //--------------------------------------------------------------------------
-    // Private methods (slot)
-    //---------------------------------------------------------------------------
-
-    /**
-     * Create the widgets and layouts that are dynamic
-     */
-    void LoadDialog::createDynamicWidgets()
-    {
-      using namespace Mantid::API;
-      using namespace Mantid::Kernel;
-
-      if( !m_fileWidget->isValid() ) return;
-      // First step is the get the specific loader that is reponsible
-      IAlgorithm *loadAlg = getAlgorithm();
-      const std::string filename = m_fileWidget->getFirstFilename().toStdString();
-      if( filename.empty() ) return;
-      try
-      {
-	loadAlg->setPropertyValue("Filename", filename);
-      }
-      catch(std::exception & exc)
-      {
-	m_fileWidget->setFileProblem(QString::fromStdString(exc.what()));
-	return;
-      }
-      // Reset the algorithm pointer so that the base class re-reads the properties and drops links from
-      // old widgets meaning they are safe to remove
-      this->setAlgorithm(loadAlg);
-
-      setupDynamicLayout();
-      tieStaticWidgets(false);
-      const std::vector<Property*> & inputProps = loadAlg->getProperties();
-      for( size_t i = 0; i < inputProps.size(); ++i )
-      {
-	const Property* prop = inputProps[i];
-	const QString propName = QString::fromStdString(prop->name());
-	if( propName == "OutputWorkspace" || propName == "Filename" ) continue;
-	if( requiresUserInput(propName) )
-	{
-	  createWidgetsForProperty(prop, m_loaderLayout);
-	}
-      }
-
-      // Attempt to set any values that may have been retrieved
-      setPropertyValues();
-    }
-
-    /// Override the help button clicked method
-    void LoadDialog::helpClicked()
-    {
-      const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
-      QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-      QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
-    }
       
   }
 }

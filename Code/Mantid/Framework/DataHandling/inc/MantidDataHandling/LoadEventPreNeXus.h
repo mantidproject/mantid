@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -98,7 +98,7 @@ struct Pulse
 #pragma pack(pop)
 
 
-class DLLExport LoadEventPreNeXus : public Mantid::API::Algorithm
+class DLLExport LoadEventPreNeXus : public API::IDataFileChecker
 {
 public:
   /// Constructor
@@ -111,14 +111,21 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
-
+  /// Returns the name of the property to be considered as the Filename for Load
+  virtual const char * filePropertyName() const;
+  /// do a quick check that this file can be loaded 
+  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+  int fileCheck(const std::string& filePath);
+  
   /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
   std::vector<PixelType> pixelmap;
 
   void setMaxEventsToLoad(std::size_t max_events_to_load);
 
-
 private:
+  
+
   /// Initialisation code
   void init();
   ///Execution code

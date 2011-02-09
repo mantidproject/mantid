@@ -45,6 +45,8 @@ namespace Mantid
       IDataFileChecker();
       /// virtual destructor
       virtual ~IDataFileChecker();
+      /// Returns the name of the property to be considered as the Filename for Load
+      virtual const char * filePropertyName() const { return "Filename"; }
 
       /// Magic signature identifying a HDF5 file.
       static const unsigned char g_hdf5_signature[8];

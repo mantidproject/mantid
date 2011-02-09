@@ -408,7 +408,7 @@ QString MWRunFiles::createFileFilter()
     {
       fileExts = m_fileExtensions;
     }
-    else
+    else if( isForRunFiles() )
     {
       std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
       for( std::vector<std::string>::iterator ex= exts.begin(); ex != exts.end(); ++ex )
@@ -416,6 +416,7 @@ QString MWRunFiles::createFileFilter()
         fileExts.append(QString::fromStdString(*ex));
       }
     }
+    else {}
   }
   else
   {
@@ -427,23 +428,23 @@ QString MWRunFiles::createFileFilter()
   }
 
   QString fileFilter;
-  QStringListIterator itr(fileExts);
-  if (itr.hasNext())
+  if( !fileExts.isEmpty() )
   {
+    QStringListIterator itr(fileExts);
     fileFilter += "Files (";
     while( itr.hasNext() )
     {
       QString ext = itr.next();
-      fileFilter += "*" + ext.toLower() + " ";
-      fileFilter += "*" + ext.toUpper();
+      fileFilter += "*" + ext;
       if( itr.hasNext() )
       {
-        fileFilter += " ";
+	fileFilter += " ";
       }
     }
     fileFilter += ")";
+    fileFilter += ";;";
   }
-  fileFilter += ";;All Files (*.*)";
+  fileFilter += "All Files (*.*)";
   return fileFilter;
 }
 
