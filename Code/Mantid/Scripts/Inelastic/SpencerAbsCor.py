@@ -209,7 +209,7 @@ def applyCorrections(inputWS, cannisterWS, corrections, efixed):
                 CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
             else:
                 ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
-    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace+"en", 'DeltaE', 'Indirect',
+    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect',
         EFixed=efixed)
     if cannisterWS != '':
         ConvertUnits(CorrectedCanWorkspace, CorrectedCanWorkspace, 'DeltaE',
