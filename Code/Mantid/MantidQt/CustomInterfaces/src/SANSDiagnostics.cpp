@@ -34,10 +34,8 @@ namespace MantidQt
       //disable the rectanglar detctors initially
       disableDetectorGroupBoxes(true);
       //daisable periods controls
-      m_SANSForm->period_edit->setDisabled(true);
-      m_SANSForm->total_perioids->setDisabled(true);
-      m_SANSForm->label_period->setDisabled(true);
-
+      disblePeriodsControls();
+    
       //disable the check boxes for Time channel and Pixel masks
       m_SANSForm->tcmask1->setDisabled(true);
       m_SANSForm->tcmask2->setDisabled(true);
@@ -83,12 +81,12 @@ namespace MantidQt
 
     }
 
-  /**This method loads the first spectrum
+  /** This method loads the first spectrum
     * and displays periods and rectangular detectors if any.
     */ 
     void SANSDiagnostics::loadFirstSpectrum()
     {
-      disableDetectorGroupBoxes(true);
+      
       //get the file names using the filefinder plugin
       QString filename =getFileName();
       if(filename.isEmpty())
@@ -98,15 +96,19 @@ namespace MantidQt
       //get first string from the filename  list.
       std::string fileName=filename.toStdString();
       std::replace(fileName.begin(),fileName.end(),'\\','/');
-      //if teh file name same as the last entered file name don't load the file agin
-      //if(!m_fileName.compare(QString::fromStdString(fileName))) return;
+      //if the file name same as the last entered file name don't run the load algorithm again 
+      if(!m_fileName.compare(QString::fromStdString(fileName))) return;
       m_fileName=QString::fromStdString(fileName);
       //load the first spectrum
-      runLoadAlgorithm(m_fileName,"1","1");
+      if(!runLoadAlgorithm(m_fileName,"1","1"))
+      {
+        return;
+      }
       //total periods
       m_totalPeriods=getTotalNumberofPeriods();
       if(m_totalPeriods==1)
-      {       
+      {
+        disblePeriodsControls();
         displayRectangularDetectors(m_outws_load);
       }
       else
@@ -146,6 +148,14 @@ namespace MantidQt
       m_SANSForm->total_perioids->setText(QApplication::translate("SANSRunWindow",key.c_str(),0, QApplication::UnicodeUTF8));
 
     }
+    /// This method disables the total periods controls
+    void SANSDiagnostics::disblePeriodsControls()
+    {
+       //daisable periods controls
+      m_SANSForm->period_edit->setDisabled(true);
+      m_SANSForm->total_perioids->setDisabled(true);
+      m_SANSForm->label_period->setDisabled(true);
+    }
 
     /// get the period number entered in the Periods box
     int SANSDiagnostics::getPeriodNumber()
@@ -164,8 +174,8 @@ namespace MantidQt
       return periodNum;
     }
     /**This method returns the member workspace name for the period
-    *@param period - period number
-    *@returns name of the member workspace.
+    *  @param period - period number
+    *  @returns name of the member workspace.
     */
     QString SANSDiagnostics::getMemberWorkspace(int period)
     {   
@@ -177,6 +187,7 @@ namespace MantidQt
       }
       catch(Exception::NotFoundError&)
       {
+        g_log.error()<<"Error when accessing the Workspace "+m_outws_load.toStdString()<<std::endl;
         return "";
       }
       if(Mantid::API::WorkspaceGroup_sptr wsgrp_sptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr))
@@ -256,7 +267,7 @@ namespace MantidQt
       }
       catch(Exception::NotFoundError&)
       {
-        g_log.error()<<"Workspace "+wsName.toStdString()+" not loaded"<<std::endl;
+        g_log.error()<<"Error when accessing the Workspace "+wsName.toStdString()<<std::endl;
       }
       if(!ws_sptr)
       {
@@ -305,9 +316,9 @@ namespace MantidQt
 
     }
 
-  /**This method returns the detector name from list of detctors for a given index
-    *@param index of the rectangualar detector
-    *@return detector name
+  /** This method returns the detector name from list of detctors for a given index
+    * @param index of the rectangualar detector
+    * @return detector name
     */
     const QString SANSDiagnostics::getDetectorName(int index)
     {
@@ -385,10 +396,10 @@ namespace MantidQt
       return rectDetectors;
     }
 
-  /**This method returns the minimum and maximum spectrum ids
-    *@param detNum - a number used to identify the detector.
-    *@param minSpec - minimum spectrum number
-    *@param maxSpec - maximum spectrum number
+  /** This method returns the minimum and maximum spectrum ids
+    * @param detNum - a number used to identify the detector.
+    * @param minSpec - minimum spectrum number
+    * @param maxSpec - maximum spectrum number
     */
     void SANSDiagnostics::minandMaxSpectrumIds(const int detNum,QString& minSpec, QString& maxSpec)
     {
@@ -399,10 +410,19 @@ namespace MantidQt
       }
       catch(std::out_of_range& )
       {
-        g_log.error()<<"Error : No Rectangualar detector found"<<std::endl;
+        if(detNum==1)
+        {
+            g_log.error()<<"Error : No Rectangualar detector found in the instrument loaded"<<std::endl;
+        }
+        else if(detNum==2)
+        {
+            g_log.error()<<"Error  when accessing the details of second rectangular detector"<<std::endl;
+        }
+        return;
       }
       if(!rectDet)
       {
+        g_log.error()<<"Error  when accessing the details of rectangular detector"<<std::endl;
         return;
 
       }
@@ -428,7 +448,9 @@ namespace MantidQt
       }
       catch(Exception::NotFoundError&)
       {
-        g_log.error()<<"Workspace "+wsName.toStdString()+" not loaded"<<std::endl;
+        g_log.error()<<"Error when accessing the Workspace "+wsName.toStdString()<<std::endl;
+        return;
+        
       }
       Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
       if(!mws_sptr)
@@ -495,32 +517,9 @@ namespace MantidQt
       return filename;
     }
 
-    /**This method executes load algorithm with filename,specmin,specmax
-    *@param fileName - name of the file
-    *@param specMin  - spectrum minimum
-    *@param specMax  - spectrum maximum
-    */
-    void SANSDiagnostics::runLoadAlgorithm(const QString& fileName,const QString& specMin,const QString& specMax)
-    {
-
-      if(fileName.isEmpty()) return;
-      //output workspace for load algorithm 
-      m_outws_load=getWorkspaceName(fileName);
-      QString load="Load('";
-      load+=fileName;
-      load+="','";
-      load+=m_outws_load;
-      load+="',";
-      load+=specMin;
-      load+=",";
-      load+=specMax;
-      load+=")";
-      runPythonCode(load.trimmed());
-    }
-
-    /**This method returns workspace name from the load file name 
-    *@param fileName name of the file
-    *@returns workspace name
+  /**This method returns workspace name from the load file name 
+    * @param fileName name of the file
+    * @returns workspace name
     */
     QString SANSDiagnostics::getWorkspaceName(const QString& fileName)
     {
@@ -555,10 +554,12 @@ namespace MantidQt
       }
       return wsName;
     }
+
+
     /**This method checks the spec min and are in valid range
-    *@param specMin - minimum spectrum number
-    *@param specMax - maximum spectrum number
-    *@returns true if the spectra is in valid range.
+    * @param specMin - minimum spectrum number
+    * @param specMax - maximum spectrum number
+    * @returns true if the spectra is in valid range.
     */
     bool SANSDiagnostics::isValidSpectra(const QString& specMin,const QString& specMax)
     {
@@ -571,20 +572,22 @@ namespace MantidQt
       }
       catch(boost::bad_lexical_cast&)
       {
-
+        g_log.error()<<"Inavlid spectrum number found in  the selected detector bank "<<std::endl;
+        return false;
       }
-      QString wsName= getWorkspaceToProcess();
       if(spec_min<1 )
       {
-        g_log.error()<<"Inavlid spectrum minimum "+specMin.toStdString()+ " found in the workspace  "+wsName.toStdString()<<std::endl;
+        g_log.error()<<"Inavlid spectrum minimum "+specMin.toStdString()+ " found in  the selected detector bank "<<std::endl;
       }
-      if(spec_max>=Mantid::EMPTY_INT() )
+      if(spec_max>Mantid::EMPTY_INT() )
       {
-        g_log.error()<<"Inavlid spectrum maximum "+specMax.toStdString()+ " found in the workspace  "+wsName.toStdString()<<std::endl;
+        g_log.error()<<"Inavlid spectrum maximum "+specMax.toStdString()+ " found in  the selected detector bank  "<<std::endl;
                                                                           
       }
-      return ((spec_min>=1 ||spec_max>=Mantid::EMPTY_INT())?true:false);
+      return ((spec_min>=1 ||spec_max<=Mantid::EMPTY_INT())?true:false);
     }
+
+
     /// Handler for first detector horizontal integral button
     void SANSDiagnostics::firstDetectorHorizontalIntegralClicked()
     {           
@@ -595,6 +598,7 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector1->setDisabled(true);
         return;
       } 
       
@@ -623,6 +627,7 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector1->setDisabled(true);
         return;
       }
       QString detName= getDetectorName(0);
@@ -638,6 +643,8 @@ namespace MantidQt
       IntegralClicked(viRange,orientation,minSpec,maxSpec,opws);
 
     }
+
+
     /// Handler for first detector time integral button
     void SANSDiagnostics::firstDetectorTimeIntegralClicked()
     {
@@ -647,30 +654,47 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector1->setDisabled(true);
         return;
       }
       /// now run the load algorithm with the spec_min and spec_max
-      runLoadAlgorithm(m_fileName,minSpec,maxSpec);
+      if(!runLoadAlgorithm(m_fileName,minSpec,maxSpec))
+      {
+        return;
+      }
 
-      QString wsName= getWorkspaceToProcess();
+     // QString wsName= getWorkspaceToProcess();
+      QString detName= getDetectorName(0);
+      //give the detectorname_V for workspace
+      detName+="_T";
+      QString opws(detName);
       //execute SumSpectra 
-      sumSpectraScript();
-      plotSpectrum(wsName,0);
+      if(!runsumSpectra(opws))
+      {
+        return;
+      }
+        
+      plotSpectrum(opws,0);
     }
 
-    /**This method gets called from the handler of Vertical/Horizontal Integral button click.
-    *executes LoadRaw and SumRowColumn algorithm.
-    *@param range string entered by user
-    *@param orientation orientation
-    *@param specMin- minimum spectrum index
-    *@param specMax - maximum spectrum index
-    *@param opws - output workspace.
+
+
+   /**This method gets called from the handler of Vertical/Horizontal Integral button click.
+    * executes LoadRaw and SumRowColumn algorithm.
+    * @param range string entered by user
+    * @param orientation orientation
+    * @param specMin- minimum spectrum index
+    * @param specMax - maximum spectrum index
+    * @param opws - output workspace.
     */
     void SANSDiagnostics::IntegralClicked(const QString& range,const QString& orientation,
       const QString& specMin,const QString& specMax,const QString& opws)
     {
       /// now run the load algorithm with the spec_min and spec_max
-      runLoadAlgorithm(m_fileName,specMin,specMax);
+      if(!runLoadAlgorithm(m_fileName,specMin,specMax))
+      {
+        return;
+      }
       int count=0;
       UserStringParser parser;
       std::vector<std::vector<unsigned int> > parsedVals;
@@ -708,7 +732,10 @@ namespace MantidQt
         std::stringstream num;
         num<<count;
         QString outputwsname=opws+QString::fromStdString(num.str());
-        executeSumRowColumn(*parsedValcitr,ipwsName,outputwsname,orientation);
+        if(!executeSumRowColumn(*parsedValcitr,ipwsName,outputwsname,orientation))
+        {
+          return;
+        }
 
         wsPlotString+="\"";
         wsPlotString+=outputwsname;
@@ -731,9 +758,11 @@ namespace MantidQt
       runPythonCode(plotspec);
 
     }
-    /**This method plots spectrum for the given workspace
-    *@param wsName - name of the workspace
-    *specNum - spectrum number
+
+
+  /**This method plots spectrum for the given workspace
+    * @param wsName - name of the workspace
+    * @param specNum - spectrum number
     */ 
     void SANSDiagnostics::plotSpectrum(const QString& wsName,int specNum)
     {      
@@ -742,9 +771,7 @@ namespace MantidQt
       plotspec+="\",";
       plotspec+=QString::number(specNum);
       plotspec+=")";
-      //g_log.error()<<"plot spectrum for time integral is "<<plotspec.toStdString()<<std::endl;
       runPythonCode(plotspec);
-
     }
 
     /// Handler for second detector horizontal integral button
@@ -757,6 +784,7 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector2->setDisabled(true);
         return;
       }
       QString detName= getDetectorName(detNum);
@@ -782,11 +810,12 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector2->setDisabled(true);
         return;
       }
       QString detName= getDetectorName(detNum);
       //give the detectorname_H for workspace
-      detName+="_H";
+      detName+="_V";
       QString opws(detName);
 
       ///horizontal integral range string
@@ -807,14 +836,27 @@ namespace MantidQt
       minandMaxSpectrumIds(detNum,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
+        m_SANSForm->groupBox_Detector2->setDisabled(true);
         return;
       }
       /// now run the load algorithm with the spec_min and spec_max
-      runLoadAlgorithm(m_fileName,minSpec,maxSpec);
-      QString wsName= getWorkspaceToProcess();
+      if(!runLoadAlgorithm(m_fileName,minSpec,maxSpec))
+      {
+        return;
+      }
+   
+
+      QString detName= getDetectorName(1);
+      //give the detectorname_V for workspace
+      detName+="_T";
+      QString opws(detName);
       //execute SumSpectra 
-      sumSpectraScript();
-      plotSpectrum(wsName,0);
+     if(!runsumSpectra(opws))
+     {
+       return;
+     }
+      
+      plotSpectrum(opws,0);
     }
 
     /// This method loads values from registry
@@ -840,6 +882,7 @@ namespace MantidQt
       }
       catch(Exception::NotFoundError&)
       {
+        g_log.error()<<"Error: when accessing the workspace "<<m_outws_load.toStdString()<<std::endl;
         return 0;
       }
       if(Mantid::API::WorkspaceGroup_sptr wsgrp_sptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr))
@@ -864,18 +907,18 @@ namespace MantidQt
     }
 
     /**Execute sumrowcolumn algorithm 
-    *@param values a vector containing the values for hvmin,hvmax
-    *@param periodNum - number of the  period to load
-    *@param ipws - name of the i/p workspace
-    *@param opws - name of the o/p workspace
-    *@param orientation - orientation of the detector
+    * @param values a vector containing the values for hvmin,hvmax
+    * @param periodNum - number of the  period to load
+    * @param ipws - name of the i/p workspace
+    * @param opws - name of the o/p workspace
+    * @param orientation - orientation of the detector
     */
-    void SANSDiagnostics::executeSumRowColumn(const std::vector<unsigned int>& values,
+    bool SANSDiagnostics::executeSumRowColumn(const std::vector<unsigned int>& values,
       const QString ipws,const QString& opws,const QString& orientation)
     {      
       if(values.empty())
       {
-        return ;
+        return false ;
       }
 
       QString HVMin;
@@ -884,7 +927,7 @@ namespace MantidQt
       if(!isSequentialValues(values))
       {
         g_log.error("Values between HVMin and HVMax in the Range string  are not sequential ");
-        return;
+        return false;
       }
       try
       {
@@ -908,21 +951,44 @@ namespace MantidQt
       {
       }
       //now execute sumrowcolumn with hvmin and havmax from the first and last vales from the vector
-      QString code=sumRowColumnScript(ipws,opws,orientation,HVMin,HVMax);
-      runPythonCode(code.trimmed());
+      if(!runsumRowColumn(ipws,opws,orientation,HVMin,HVMax))
+      {
+        return false;
+      }
+      return true;
     }
 
-    /**Execute sumrowcolumn algorithm with the vales
-    *@param ipwsName name of the input workspace
-    *@param opwsName name of the output workspace
-    *@param orientation indicates row or columns to sum
-    *@param hvMin 
-    *@param hvMax
+  /**Execute sumrowcolumn algorithm with the vales
+    * @param ipwsName name of the input workspace
+    * @param opwsName name of the output workspace
+    * @param orientation indicates row or columns to sum
+    * @param hvMin minimum value of
+    * @param hvMax
     */
-    QString SANSDiagnostics::sumRowColumnScript(const QString ipwsName,const QString& opwsName,
+    bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,const QString& opwsName,
       const QString& orientation,const QString& hvMin,const QString& hvMax)
     {
-      QString code="SumRowColumn('";
+
+       Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when  trying to access the workspace "<<ipwsName.toStdString()<<" which is not loaded"<<std::endl;
+        return false;
+      }
+      if(opwsName.isEmpty())
+      {
+         g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
+         return false;
+      }
+
+      QString code=
+        "try:\n"
+        "  SumRowColumn('";
       code+=ipwsName;
       code+="', '";
       code+=opwsName;
@@ -934,28 +1000,106 @@ namespace MantidQt
       code+=",";
       code+="HVMax=";
       code+=hvMax;
-      code+=")";
-      return code;
+      code+=")\n";
+      code+="except:\n";
+      code+="  print 'Failure'";
+      
+      QString ret= runPythonCode(code.trimmed());
+      if(!ret.isEmpty())
+      {
+        g_log.error()<<"Error when executing the SumRowColumn algorithm "<<ret.toStdString()<<std::endl;
+        return false;
+      }
+      return true;
     }
-    /**This method creates script string for sumspectra algorithm
-    *@param opwsName - name of the ooutput workspace
-    *@returns - sumspectra script string
+
+  /** This method creates script string for sumspectra algorithm
+    * @param opwsName - name of the ooutput workspace
+    * @returns - sumspectra script string
     */
-    QString SANSDiagnostics::sumSpectraScript()
+    bool  SANSDiagnostics::runsumSpectra(const QString& opwsName)
     {
       QString ipwsName= getWorkspaceToProcess();
 
-      QString code="SumSpectra(";
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when  trying to access the workspace "<<ipwsName.toStdString()<<" which is not loaded"<<std::endl;
+        return false;
+      }
+      if(opwsName.isEmpty())
+      {
+         g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
+         return false;
+      }
+
+      QString code=
+        "try:\n"
+        "  SumSpectra(\"";
       code+=ipwsName;
       code+="\",\"";
-      code+=ipwsName;
-      code+="\"";
-      return code;
+      code+=opwsName;
+      code+="\")\n";
+      code+="except:\n";
+      code+="  print 'Failure'"; 
+      //return code;
+
+      QString ret= runPythonCode(code.trimmed());
+      if(!ret.isEmpty())
+      {
+        g_log.error()<<"Error when executing the SumSpectra algorithm "<<ret.toStdString()<<std::endl;
+        return false;
+      }
+      return true;
     }
 
+
+  /**This method executes load algorithm with filename,specmin,specmax
+    * @param fileName - name of the file
+    * @param specMin  - spectrum minimum
+    * @param specMax  - spectrum maximum
+    */
+    bool SANSDiagnostics::runLoadAlgorithm(const QString& fileName,const QString& specMin,const QString& specMax)
+    {
+
+      if(fileName.isEmpty()) return false;
+      //output workspace for load algorithm 
+      m_outws_load=getWorkspaceName(fileName);
+      if(m_outws_load.isEmpty())
+      {
+         g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
+         return false;
+      }
+        
+      QString load=
+        "try:\n"
+        "  Load('";
+      load+=fileName;
+      load+="','";
+      load+=m_outws_load;
+      load+="',";
+      load+=specMin;
+      load+=",";
+      load+=specMax;
+      load+=")\n";
+      load+="except:\n";
+      load+="  print 'Failure'"; 
+      QString ret= runPythonCode(load.trimmed());
+      if(!ret.isEmpty())
+      {
+        g_log.error()<<"Error when executing the Load algorithm "<<ret.toStdString()<<std::endl;
+        return false;
+      }
+      return true;
+    }
     /**Checks the values in the given vector is sequential
-    *@param values  vector containing numbers
-    *@returns true if the vector is sequential
+    * @param values  vector containing numbers
+    * @returns true if the vector is sequential
     */
     bool SANSDiagnostics::isSequentialValues(const std::vector<unsigned int>& values)
     {

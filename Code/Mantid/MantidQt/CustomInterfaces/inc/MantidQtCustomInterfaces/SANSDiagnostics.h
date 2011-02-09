@@ -108,7 +108,7 @@ private:
   ///set tool tips
   void setToolTips();
   ///execute sumrowcolumn algorithm
-  void executeSumRowColumn(const std::vector<unsigned int>& values,
+  bool executeSumRowColumn(const std::vector<unsigned int>& values,
                            const QString ipws,const QString& op,const QString& orientation);
   /// load the settings from the registry
   void loadSettings();
@@ -124,14 +124,14 @@ private:
   /// returns the filename
   QString getFileName();
   /// run loadraw algorithm
-  void runLoadAlgorithm(const QString& fileName,const QString& specMin,const QString& specMax);
+  bool runLoadAlgorithm(const QString& fileName,const QString& specMin,const QString& specMax);
   /// returns sumrowcolumn script
-  QString sumRowColumnScript(const QString ipwsName,const QString& opwsName,const QString& orientation,
+  bool runsumRowColumn(const QString ipwsName,const QString& opwsName,const QString& orientation,
                              const QString& hvMin,const QString& hvMax);
   //get rectangular detector details
   std::vector<boost::shared_ptr<RectDetectorDetails> >  rectangularDetectorDetails(Mantid::API::Workspace_sptr& ws_sptr);
   /// returns sumspectra script
-  QString sumSpectraScript();
+  bool  runsumSpectra(const QString& opwsName);
   /// display total number of periods box
   void displayTotalPeriods();
   /// display rectangualr detectors
@@ -165,6 +165,8 @@ private:
 
   ///returns true if the spec min and max are in the valid range
   bool isValidSpectra(const QString& specMin,const QString& specMax);
+  //disable total periods boxes and labels
+  void disblePeriodsControls();
 
 private:
   QString m_dataDir; ///< default data search directory
