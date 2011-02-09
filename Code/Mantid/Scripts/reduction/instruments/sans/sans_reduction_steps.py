@@ -63,20 +63,11 @@ class BaseBeamFinder(ReductionStep):
         
         # Check whether that file was already meant to be processed
         workspace = "beam_center_"+extract_workspace_name(filepath)
-        #if filepath in reducer._data_files.values():
-        #    for k in reducer._data_files.iterkeys():
-        #        if reducer._data_files[k]==filepath:
-        #            workspace = k                    
-                    
-        # Only update the instrument if we are going to use the file
-        # WARNING: The instrument may have the wrong SDD if _another_ data file is loaded
-        # before the current data file is reduced. Only update the instrument if the file
-        # is the first in the queue. For now always ask for a reload
-        # TODO: _data_files needs to be an ordered list
-        #_update = workspace in reducer._data_files.keys()
-        
-        #TODO: mtd[].getInstrument().addProperty_dbl
-
+        if filepath in reducer._data_files.values():
+            for k in reducer._data_files.iterkeys():
+                if reducer._data_files[k]==filepath:
+                    workspace = k                    
+                   
         reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
 
         # Integrate over all wavelength bins so that we process a single detector image
@@ -445,6 +436,13 @@ class LoadRun(ReductionStep):
         self._sample_det_offset = offset
         
     def execute(self, reducer, inputworkspace, outputworkspace=None):
+        """
+            Loads a data file.
+            Note: Files are ALWAYS reloaded when this method is called.
+            We do this because speed is not an issue and we ensure that the data
+            is always pristine. We could only load files that are not already loaded
+            by using the 'dirty' flag and checking for the existence of the workspace.
+        """
         if outputworkspace is not None:
             workspace = outputworkspace 
         else:
