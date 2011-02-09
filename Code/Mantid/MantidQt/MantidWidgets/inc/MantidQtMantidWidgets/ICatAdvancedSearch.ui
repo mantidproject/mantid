@@ -5,15 +5,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>833</width>
-    <height>550</height>
+    <width>719</width>
+    <height>521</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Catalog Advanced Search</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" >
-   <item>
+  <layout class="QGridLayout" name="gridLayout_3" >
+   <item row="0" column="0" >
     <widget class="QLabel" name="advsearchtitleLabel" >
      <property name="maximumSize" >
       <size>
@@ -39,13 +39,13 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0" >
     <widget class="QFrame" name="advframeWidget" >
-     <property name="maximumSize" >
-      <size>
-       <width>16777215</width>
-       <height>207</height>
-      </size>
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="styleSheet" >
       <string notr="true" >background-image: url(:/BackGroundImage/ICatSearchBackGround.png);</string>
@@ -56,8 +56,8 @@ p, li { white-space: pre-wrap; }
      <property name="frameShadow" >
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" >
-      <item>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <item row="0" column="0" >
        <layout class="QGridLayout" name="gridLayout" >
         <item row="0" column="0" >
          <widget class="QLabel" name="invstNameLabel" >
@@ -73,12 +73,6 @@ p, li { white-space: pre-wrap; }
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
           </property>
          </widget>
         </item>
@@ -107,12 +101,6 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
          </widget>
         </item>
         <item row="0" column="5" >
@@ -132,19 +120,13 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="8" colspan="2" >
+        <item row="0" column="8" >
          <widget class="QLineEdit" name="EndRun" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
           </property>
          </widget>
         </item>
@@ -173,12 +155,6 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
          </widget>
         </item>
         <item row="1" column="2" >
@@ -205,12 +181,6 @@ p, li { white-space: pre-wrap; }
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
           </property>
           <property name="toolTip" >
            <string>Date in DD/MM/YYY format</string>
@@ -253,7 +223,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="8" colspan="2" >
+        <item row="1" column="8" >
          <widget class="QLineEdit" name="EndDate" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
@@ -263,7 +233,7 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="minimumSize" >
            <size>
-            <width>130</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -316,12 +286,6 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
           <property name="text" >
            <string/>
           </property>
@@ -352,17 +316,14 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
           <property name="toolTip" >
            <string>Instrument Box</string>
           </property>
           <property name="styleSheet" >
            <string notr="true" >QComboBox#Instrument QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#Instrument QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
+          <property name="sizeAdjustPolicy" >
+           <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
           </property>
          </widget>
         </item>
@@ -383,7 +344,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="8" colspan="2" >
+        <item row="2" column="8" >
          <widget class="QComboBox" name="InvestigationType" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
@@ -391,14 +352,11 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
           <property name="styleSheet" >
            <string notr="true" >QComboBox#InvestigationType QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#InvestigationType QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
+          <property name="sizeAdjustPolicy" >
+           <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
           </property>
          </widget>
         </item>
@@ -427,12 +385,6 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
          </widget>
         </item>
         <item row="3" column="2" >
@@ -460,12 +412,6 @@ p, li { white-space: pre-wrap; }
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
          </widget>
         </item>
         <item row="3" column="5" >
@@ -485,19 +431,13 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="3" column="8" colspan="2" >
+        <item row="3" column="8" >
          <widget class="QLineEdit" name="Keywords" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize" >
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
           </property>
          </widget>
         </item>
@@ -530,7 +470,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </item>
-      <item>
+      <item row="1" column="0" >
        <layout class="QHBoxLayout" name="horizontalLayout_2" >
         <item>
          <spacer name="horizontalSpacer_2" >
@@ -560,7 +500,7 @@ p, li { white-space: pre-wrap; }
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="2" column="0" >
     <widget class="QLabel" name="advsearchLabel" >
      <property name="frameShape" >
       <enum>QFrame::StyledPanel</enum>
@@ -573,7 +513,7 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item>
+   <item row="3" column="0" >
     <widget class="QTableWidget" name="advSearchtableWidget" >
      <property name="styleSheet" >
       <string notr="true" >background-color: rgb(216, 225, 255);</string>
@@ -589,7 +529,7 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item>
+   <item row="4" column="0" >
     <layout class="QHBoxLayout" name="horizontalLayout" >
      <item>
       <widget class="QPushButton" name="helpButton" >
@@ -625,8 +565,6 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>advSearchtableWidget</tabstop>
  </tabstops>
- <resources>
-  <include location="ICatSearchBackGround.qrc" />
- </resources>
+ <resources/>
  <connections/>
 </ui>
