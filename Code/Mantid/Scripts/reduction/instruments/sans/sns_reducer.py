@@ -33,7 +33,7 @@ class EqSansReducer(SANSReducer):
     def __init__(self):
         super(EqSansReducer, self).__init__()
         ## Default beam finder
-        self._beam_finder = sans_reduction_steps.BaseBeamFinder(96.3, 125.95)
+        self._beam_finder = sans_reduction_steps.BaseBeamFinder(96.29, 126.15)
         ## Default data loader
         self._data_loader = sns_reduction_steps.LoadRun()
         ## Normalization
