@@ -1,7 +1,7 @@
 set ( SRC_FILES 
 		src/CompressEvents.cpp
 		src/CreateSampleShape.cpp
-        src/DefineGaugeVolume.cpp
+                src/DefineGaugeVolume.cpp
 		src/FindDetectorsInShape.cpp
 		src/GetMaskedDetectors.cpp
 		src/GroupDetectors2.cpp
@@ -71,7 +71,7 @@ set ( SRC_FILES
 set ( INC_FILES 
 		inc/MantidDataHandling/CompressEvents.h
 		inc/MantidDataHandling/CreateSampleShape.h
-        inc/MantidDataHandling/DefineGaugeVolume.h
+                inc/MantidDataHandling/DefineGaugeVolume.h
 		inc/MantidDataHandling/FindDetectorsInShape.h
 		inc/MantidDataHandling/GetMaskedDetectors.h
 		inc/MantidDataHandling/GroupDetectors2.h
@@ -127,12 +127,13 @@ set ( INC_FILES
 set ( TEST_FILES 
 		 test/CompressEventsTest.h
 		 test/CreateSampleShapeTest.h
-         test/DefineGaugeVolumeTest.h
+                 test/DefineGaugeVolumeTest.h
 		 test/FindDetectorsInShapeTest.h
 		 test/GetMaskedDetectorsTest.h
 		 test/GroupDetectors2Test.h
 		 test/GroupDetectorsTest.h
 		 #test/ISISDataArchiveTest.h # TODO no tests are defined
+		 test/LoadAsciiTest.h
 		 test/LoadCanSAS1dTest.h
 		 test/LoadDAETest.h
 		 test/LoadDetectorInfoTest.h

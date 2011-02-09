@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <Poco/Path.h>
+#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <fstream>
@@ -256,7 +257,7 @@ public:
 
   ~LoadDetectorInfoTest()
   {
-    remove(m_DatFile.c_str());
+    Poco::File(m_DatFile).remove();
   }
 
   // Set up a small workspace for testing

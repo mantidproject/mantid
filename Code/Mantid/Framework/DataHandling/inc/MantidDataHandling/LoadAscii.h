@@ -48,26 +48,46 @@ namespace Mantid
     class DLLExport LoadAscii :public API::IDataFileChecker 
     {
     public:
+      /// Default constructor
       LoadAscii();
-      ~LoadAscii() {}
+      /// The name of the algorithm
       virtual const std::string name() const { return "LoadAscii"; }
+      /// The version number
       virtual int version() const { return 1; }
+      /// The category
       virtual const std::string category() const { return "DataHandling"; }
-
-      /// do a quick check that this file can be loaded 
+      /// Do a quick check that this file can be loaded 
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      /// check the structure of the file and  return a value between 
+      /// 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
 
+    protected:
+      /// Process the header information within the file.
+      virtual void processHeader(std::ifstream & file) const;
+      /// Read the data from the file
+      virtual API::Workspace_sptr readData(std::ifstream & file) const;
+
+      /// Peek at a line without extracting it from the stream
+      void peekLine(std::ifstream & is, std::string & str) const;
+      /// Return true if the line is to be skipped
+      bool skipLine(const std::string & line) const;
+      /// Split the data into columns.
+      int splitIntoColumns(std::list<std::string> & columns, const std::string & str) const;
+      /// Fill the given vector with the data values
+      void fillInputValues(std::vector<double> &values, const std::list<std::string>& columns) const;
+
+      /// The column separator
+      std::string m_columnSep;
 
     private:
+      /// Declare properties
       void init();
+      /// Execute the algorithm
       void exec();
 
-      /// Allowed values for the cache property
-      std::vector<std::string> m_seperator_options;
-      std::map<std::string,const char*> m_separatormap; ///<a map of seperators
-      typedef std::pair<std::string,const char*> separator_pair; ///<serparator pair type def
+      /// Map the separator options to their string equivalents
+      std::map<std::string,std::string> m_separatorIndex;
     };
 
   } // namespace DataHandling
