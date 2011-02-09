@@ -769,7 +769,8 @@ namespace Mantid
             {
               //Make default facing for the pixel
               Geometry::IComponent* comp = (Geometry::IComponent*) detector.get();
-              makeXYplaneFaceComponent(comp, m_defaultFacing);
+              if (m_haveDefaultFacing)
+                makeXYplaneFaceComponent(comp, m_defaultFacing);
               //Mark it as a detector (add to the instrument cache)
               m_instrument->markAsDetector(detector.get());
             }

@@ -769,7 +769,7 @@ void testSANS2D()
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "SANS2D_Definition.xml");
+    loader.setPropertyValue("Filename", "SANS2D_Definition_mod.xml");
     wsName = "LoadEmptyInstrumentParaSans2dTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
 
@@ -806,6 +806,14 @@ void testSANS2D()
         TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 23.281, 0.0000001);
       }
     }
+
+    // check for solid angle also
+    const V3D samplePos = i->getSample()->getPos();
+    boost::shared_ptr<IDetector> det = i->getDetector(1000000);
+    const double solidAngle = det->solidAngle(samplePos);
+    std::cout << "solid " << solidAngle << std::endl;
+    TS_ASSERT_DELTA( 10E5*solidAngle, 6.23454, 0.00001);
+
     AnalysisDataService::Instance().remove(wsName);
 }
 
