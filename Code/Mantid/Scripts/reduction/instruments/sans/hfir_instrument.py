@@ -18,8 +18,6 @@ class HFIRSANS(Instrument):
         ## Pixel size in mm
         self.pixel_size_x = self.definition.getNumberParameter("x-pixel-size")[0]
         self.pixel_size_y = self.definition.getNumberParameter("y-pixel-size")[0]
-        ## Sample-to-detector distance in mm (read from each data file)
-        self.sample_detector_distance = 0
         ## Detector name
         self.detector_ID = self.definition.getStringParameter("detector-name")[0]
         ## Wavelength value to be used instead of value read from data file

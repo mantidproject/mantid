@@ -123,7 +123,8 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorDistance(2500.0)
         Reduce1D()
         
-        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 2500.0)
+        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        self.assertEqual(sdd, 2500.0)
         
     def test_set_detector_offset(self):
         HFIRSANS()
@@ -132,7 +133,8 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorOffset(500.0)
         Reduce1D()
         
-        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 6500.0)
+        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        self.assertEqual(sdd, 6500.0)
         
     def test_set_distandce_and_detector_offset(self):
         """
@@ -145,7 +147,8 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorOffset(500.0)
         Reduce1D()
         
-        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 2500.0)
+        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        self.assertEqual(sdd, 2500.0)
         
     def test_set_wavelength(self):
         HFIRSANS()
@@ -200,7 +203,8 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
         
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
-        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 6000.0)    
+        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        self.assertEqual(sdd, 6000.0)    
         
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt", tolerance=1e-4))
     

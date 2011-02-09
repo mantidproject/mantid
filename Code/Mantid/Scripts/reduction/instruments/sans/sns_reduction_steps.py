@@ -16,10 +16,9 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    def __init__(self, datafile=None, update_instr=True):
+    def __init__(self, datafile=None):
         super(LoadRun, self).__init__()
         self._data_file = datafile
-        self._update_instr = update_instr
                 
     def execute(self, reducer, workspace, force=False):      
         # If we don't have a data file, look up the workspace handle
@@ -42,10 +41,6 @@ class LoadRun(ReductionStep):
         # Check whether that file was already loaded
         # The file also has to be pristine
         if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
-            # Make sure the sample-detector-distance is saved for data we reduce
-            if self._update_instr and not workspace in reducer._extra_files:
-                reducer.instrument.sample_detector_distance = mtd[workspace].getRun()["detectorZ"].getStatistics().mean
-
             mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
             return "Data %s is already loaded: delete it first if reloading is intended" % (workspace)
 
@@ -82,15 +77,12 @@ class LoadRun(ReductionStep):
             LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
             LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
         
-        # Store the sample-detector distance if this is the data file we are currently reducing.
-        # If self._data_file is set, it means we are dealing with an auxiliary file.
-        #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
-        # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
-        if self._update_instr and not workspace in reducer._extra_files:
-            reducer.instrument.sample_detector_distance = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
+        # Store the sample-detector distance.
+        sdd = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
+        mtd[workspace+'_evt'].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
         
         # Move the detector to its correct position
-        MoveInstrumentComponent(workspace+'_evt', "detector1", Z=reducer.instrument.sample_detector_distance/1000.0, RelativePosition=0)
+        MoveInstrumentComponent(workspace+'_evt', "detector1", Z=sdd/1000.0, RelativePosition=0)
 
         # Move detector array to correct position
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
@@ -120,7 +112,7 @@ class LoadRun(ReductionStep):
         max_lambda = max(mtd[workspace].readX(0))
         Rebin(workspace, workspace, "%4.1f,%4.1f,%4.1f" % (min_lambda, 0.1, max_lambda))
         
-        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
+        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, sdd))
         
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
@@ -217,7 +209,7 @@ class SubtractDarkCurrent(ReductionStep):
         if self._dark_current_ws is None:
             filepath = reducer._full_file_path(self._dark_current_file)
             self._dark_current_ws = extract_workspace_name(filepath)
-            reducer._data_loader.__class__(datafile=filepath, update_instr=False).execute(reducer, self._dark_current_ws)
+            reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
             
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration

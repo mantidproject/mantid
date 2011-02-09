@@ -420,12 +420,11 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, update_instr=True):
+    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0):
         super(LoadRun, self).__init__()
         self._data_file = datafile
         self.set_sample_detector_distance(sample_det_dist)
         self.set_sample_detector_offset(sample_det_offset)
-        self._update_instr = update_instr
         
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
@@ -483,18 +482,8 @@ class LoadRun(ReductionStep):
                                     RelativePosition="1")
             sdd += self._sample_det_offset
 
-        # Store the sample-detector distance if this is the data file we are currently reducing.
-        # If self._data_file is set, it means we are dealing with an auxiliary file.
-        #TODO: Should this just be a flag? The ReductionStep calling Load would have to set it and
-        # decide whether the file is loaded as a data file to be reduced or as an auxiliary file.
-        if sdd == reducer.instrument.sample_detector_distance:
-            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %\
-                                  (workspace, reducer.instrument.sample_detector_distance))
-        else:
-            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [NOT EQUAL TO SAMPLE FILE SDD: %g m]" %\
-                                  (workspace, sdd, reducer.instrument.sample_detector_distance))
-        if self._update_instr and not workspace in reducer._extra_files:
-            reducer.instrument.sample_detector_distance = sdd        
+        # Store the sample-detector distance.
+        mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
     
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
@@ -573,13 +562,14 @@ class WeightedAzimuthalAverage(ReductionStep):
             wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
             wavelength_min = (x[0]+x[1])/2.0
                     
+            sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
             # Q min is one pixel from the center
             mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
-            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/reducer.instrument.sample_detector_distance))
+            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
             dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
             dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
             maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/reducer.instrument.sample_detector_distance))
+            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
             qstep = (qmax-qmin)/self._nbins
             
             f_step = (qmax-qmin)/qstep
@@ -650,8 +640,7 @@ class SensitivityCorrection(ReductionStep):
             filepath = reducer._full_file_path(self._flood_data)
             flood_ws = "flood_"+extract_workspace_name(filepath)
             
-            # Make sure we don't overwrite the parameters kept in the instrument object
-            reducer._data_loader.__class__(datafile=filepath, update_instr=False).execute(reducer, flood_ws)
+            reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
 
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
